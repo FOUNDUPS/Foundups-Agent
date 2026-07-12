@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.52';
+const EXTENSION_VERSION = '0.3.53';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -31,12 +31,14 @@ const BRIDGE_MAX_PROMPT_CHARS = 12000;
 const WRE_OPERATIONAL_SPINE_DRYRUN_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1';
 const WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_PHASE1';
 const REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE = 'REDDOG_EXTENSION_OPERATOR_WARDROBE_SELECTION_RUNTIME_BRIDGE_PHASE1';
+const REDDOG_GITHUB_PERMISSION_PROBE_RUNTIME_SLICE = 'REDDOG_EXTENSION_GITHUB_PERMISSION_PROBE_RUNTIME_BRIDGE_PHASE1';
 const WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE = 'REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1';
 const WRE_WORK_ORDER_AUTHORITY_BINDING_SLICE = 'REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1';
 const WRE_OPERATIONAL_SPINE_TARGET = 'reddog_wre_operational_spine';
 const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine';
 const WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT = 'scripts/reddog_extension_wre_spine_invoke_once.py';
 const REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT = 'scripts/reddog_operator_wardrobe_selection_once.py';
+const REDDOG_GITHUB_PERMISSION_PROBE_SCRIPT = 'scripts/reddog_github_permission_probe_once.py';
 const WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES = 262144;
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
 const TRUSTED_PERMISSION_SNAPSHOT_SOURCES = new Set(['gh_cli', 'github_api', 'mock']);
@@ -1706,6 +1708,7 @@ function normalizePermissionSnapshotBinding(input, fallbackSnapshot, nowIso) {
   const permissionLevel = String(raw.permission_level || raw.permission || 'unknown').trim().toLowerCase();
   const capturedAt = toIsoTimestampOrNow(raw.captured_at || raw.checked_at || nowIso);
   const source = String(raw.source || 'unknown').trim().toLowerCase();
+  const probePerformed = raw.probe_performed === true || raw.extension_probe_performed === true;
   const expiresAt = raw.expires_at || raw.expiresAt ? toIsoTimestampOrNow(raw.expires_at || raw.expiresAt) : null;
   const digest = String(raw.digest || raw.evidence_digest || canonicalWorkOrderDigest({
     permission_level: permissionLevel,
@@ -1726,7 +1729,7 @@ function normalizePermissionSnapshotBinding(input, fallbackSnapshot, nowIso) {
       source: source,
       digest: digest
     },
-    probe_performed: TRUSTED_PERMISSION_SNAPSHOT_SOURCES.has(source),
+    probe_performed: probePerformed,
     observed: observed,
     fresh: fresh,
     expires_at: expiresAt,
@@ -1895,7 +1898,7 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
       permission_snapshot_digest: permissionBinding.digest || '',
       permission_snapshot_source: permissionBinding.source || 'unknown',
       permission_snapshot_expires_at: permissionBinding.expires_at || null,
-      no_live_probe_performed_by_extension: true
+      no_live_probe_performed_by_extension: permissionBinding.probe_performed !== true
     },
     signed_authority_binding: {
       provided: signatureBinding.provided === true,
@@ -1908,7 +1911,7 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
       no_signature_verification_performed_by_extension: true
     },
     raw_work_focus_stored: false,
-    github_permission_probe_performed: false,
+    github_permission_probe_performed: permissionBinding.probe_performed === true,
     signed_authority_verified: signatureBinding.verified === true,
     explicit_valve_requested: opts.explicitValveRequested === true,
     ready_for_wre_invocation: readyForInvocation,
@@ -2211,6 +2214,102 @@ function buildOperatorWardrobeSelectionSection(selectionResult) {
   ].join('\n');
 }
 
+function buildGithubPermissionProbePayload(options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const payload = {
+    repo_full_name: String(opts.repoFullName || 'FOUNDUPS/Foundups-Agent'),
+    principal_provider: String(opts.principalProvider || 'github'),
+    ttl_seconds: Number(opts.ttlSeconds || 300)
+  };
+  if (opts.principalLogin) {
+    payload.principal_login = String(opts.principalLogin);
+  }
+  if (opts.allowMockBackend === true) {
+    payload.allow_mock_backend = true;
+    payload.mock_backend = opts.mockBackend || {};
+  }
+  return payload;
+}
+
+function runGithubPermissionProbeBridge(context, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const payload = buildGithubPermissionProbePayload(opts);
+  if (typeof opts.permissionProbeRunner === 'function') {
+    const runnerResult = opts.permissionProbeRunner(payload);
+    return Object.assign({
+      slice_name: REDDOG_GITHUB_PERMISSION_PROBE_RUNTIME_SLICE,
+      python_invocation_performed: false,
+      no_repo_mutation_performed: true,
+      no_execution_performed: true,
+      no_enqueue_performed: true
+    }, typeof runnerResult === 'string' ? JSON.parse(runnerResult) : (runnerResult || {}));
+  }
+  const root = workspaceRoot();
+  const script = path.join(root, REDDOG_GITHUB_PERMISSION_PROBE_SCRIPT);
+  const config = vscode.workspace.getConfiguration('foundupsFusion');
+  const configuredPython = config.get('pythonPath') || 'python';
+  const interpreter = resolvePythonInterpreter(root, configuredPython);
+  try {
+    const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
+      cwd: root,
+      input: JSON.stringify(payload),
+      encoding: 'utf8',
+      env: buildBridgePythonEnv(process.env),
+      windowsHide: true,
+      maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
+    });
+    return Object.assign({
+      slice_name: REDDOG_GITHUB_PERMISSION_PROBE_RUNTIME_SLICE,
+      python_invocation_performed: true,
+      python_interpreter_source: interpreter.source,
+      no_repo_mutation_performed: true,
+      no_execution_performed: true,
+      no_enqueue_performed: true
+    }, JSON.parse(stdout));
+  } catch (err) {
+    return {
+      slice_name: REDDOG_GITHUB_PERMISSION_PROBE_RUNTIME_SLICE,
+      decision: 'GITHUB_PERMISSION_PROBE_FAIL_CLOSED',
+      repo_permission_snapshot: null,
+      probe_performed: false,
+      permission_observed: false,
+      python_invocation_performed: true,
+      no_repo_mutation_performed: true,
+      no_execution_performed: true,
+      no_enqueue_performed: true,
+      rejection_reasons: ['github_permission_probe_bridge_failed'],
+      bridge_error_class: err && err.code ? String(err.code) : (err && err.name ? String(err.name) : 'Error')
+    };
+  }
+}
+
+function buildGithubPermissionProbeSection(probeResult) {
+  const r = probeResult && typeof probeResult === 'object' ? probeResult : {};
+  const snapshot = r.repo_permission_snapshot && typeof r.repo_permission_snapshot === 'object' ? r.repo_permission_snapshot : {};
+  return [
+    '## RedDog GitHub Permission Probe',
+    '- slice_name: ' + (r.slice_name || REDDOG_GITHUB_PERMISSION_PROBE_RUNTIME_SLICE) + ' [OBSERVED]',
+    '- decision: ' + (r.decision || 'unknown') + ' [OBSERVED]',
+    '- repo_full_name: ' + (r.repo_full_name || snapshot.repo_full_name || 'unknown') + ' [OBSERVED]',
+    '- principal_provider: ' + (r.principal_provider || snapshot.principal_provider || 'unknown') + ' [OBSERVED]',
+    '- principal_login_present: ' + (r.principal_login || snapshot.principal_login ? 'true' : 'false') + ' [OBSERVED]',
+    '- permission: ' + (r.permission || snapshot.permission_level || 'unknown') + ' [OBSERVED]',
+    '- can_read: ' + (r.can_read === true || snapshot.can_read === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- can_write: ' + (r.can_write === true || snapshot.can_write === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- can_admin: ' + (r.can_admin === true || snapshot.can_admin === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- snapshot_source: ' + (snapshot.source || r.source || 'unknown') + ' [OBSERVED]',
+    '- snapshot_digest: ' + (snapshot.digest || r.evidence_digest || 'unknown') + ' [OBSERVED]',
+    '- snapshot_expires_at: ' + (snapshot.expires_at || r.expires_at || 'unknown') + ' [OBSERVED]',
+    '- raw_secret_included: ' + (r.raw_secret_included === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- token_scopes_count: ' + Number(r.token_scopes_count || 0) + ' [OBSERVED]',
+    '- rejection_reasons: ' + JSON.stringify(r.rejection_reasons || []) + ' [OBSERVED]',
+    '- no_repo_mutation_performed: ' + (r.no_repo_mutation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_execution_performed: ' + (r.no_execution_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_enqueue_performed: ' + (r.no_enqueue_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- python_invocation_performed: ' + (r.python_invocation_performed === true ? 'true' : 'false') + ' [OBSERVED]'
+  ].join('\n');
+}
+
 function _safeJsonClone(value) {
   if (!value || typeof value !== 'object') {
     return null;
@@ -2418,6 +2517,10 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
     const wardrobeSelection = ctx.operatorWardrobeSelectionResult || packet.operator_wardrobe_selection_result;
     if (wardrobeSelection) {
       sections.push(buildOperatorWardrobeSelectionSection(wardrobeSelection));
+    }
+    const permissionProbe = ctx.githubPermissionProbeResult || packet.github_permission_probe_result;
+    if (permissionProbe) {
+      sections.push(buildGithubPermissionProbeSection(permissionProbe));
     }
     const spinePreview = ctx.wreSpineDryRunPreview || packet.wre_operational_spine_dryrun_preview;
     if (spinePreview) {
@@ -3604,11 +3707,15 @@ function wireFusionWebview(context, webview, worker, state) {
     const operatorWardrobeSelectionResult = substantiveTask && result.reason !== 'redaction_blocked'
       ? runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, {})
       : null;
+    const githubPermissionProbeResult = substantiveTask && result.reason !== 'redaction_blocked'
+      ? runGithubPermissionProbeBridge(context, {})
+      : null;
     const wreSpineDryRunPreview = substantiveTask && result.reason !== 'redaction_blocked'
       ? buildWreOperationalSpineDryRunPreview(workFocus, classification, handoffRecommendation, {
         promptConstruction: promptConstruction,
         contextMode: contextMode,
-        holoScorecard: holoScorecard
+        holoScorecard: holoScorecard,
+        repoPermissionSnapshot: githubPermissionProbeResult && githubPermissionProbeResult.repo_permission_snapshot
       })
       : null;
     const wreSpineInvokeResult = wreSpineDryRunPreview
@@ -3633,6 +3740,10 @@ function wireFusionWebview(context, webview, worker, state) {
     if (operatorWardrobeSelectionResult) {
       result.operator_wardrobe_selection_result = operatorWardrobeSelectionResult;
       result.review_packet.operator_wardrobe_selection_result = operatorWardrobeSelectionResult;
+    }
+    if (githubPermissionProbeResult) {
+      result.github_permission_probe_result = githubPermissionProbeResult;
+      result.review_packet.github_permission_probe_result = githubPermissionProbeResult;
     }
     if (wreSpineDryRunPreview) {
       result.wre_operational_spine_dryrun_preview = wreSpineDryRunPreview;
@@ -3694,6 +3805,7 @@ function wireFusionWebview(context, webview, worker, state) {
       substantive: substantiveTask,
       handoffRecommendation: handoffRecommendation,
       operatorWardrobeSelectionResult: operatorWardrobeSelectionResult,
+      githubPermissionProbeResult: githubPermissionProbeResult,
       wreSpineDryRunPreview: wreSpineDryRunPreview,
       wreSpineInvokeResult: wreSpineInvokeResult,
       continuationEnabled: continuationEnabled,
@@ -5610,6 +5722,9 @@ module.exports = {
   buildWardrobeSelectionPayload,
   runOperatorWardrobeSelectionBridge,
   buildOperatorWardrobeSelectionSection,
+  buildGithubPermissionProbePayload,
+  runGithubPermissionProbeBridge,
+  buildGithubPermissionProbeSection,
   buildWreOperationalSpineInvokePayload,
   invokeWreOperationalSpineExplicitValveBridge,
   buildWreOperationalSpineInvokeSection,

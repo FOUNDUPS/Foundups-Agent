@@ -2,6 +2,14 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_EXTENSION_GITHUB_PERMISSION_PROBE_RUNTIME_BRIDGE_PHASE1 (read-only permission snapshot, 0.3.53)
+
+- Added `runGithubPermissionProbeBridge()` and `scripts/reddog_github_permission_probe_once.py` to emit a fresh read-only GitHub `repo_permission_snapshot` from the live extension path.
+- Threaded the snapshot into the governed work-order candidate so `permission_binding.probe_performed=true` and `permission_truth_label=OBSERVED` only when the probe yields a fresh trusted permission level.
+- Added Copy MD/review packet section `## RedDog GitHub Permission Probe`; no token scopes or raw secrets are emitted.
+- Boundary unchanged: no signing, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR, merge, reward settlement, or HoloIndex mutation.
+- Version 0.3.52 -> 0.3.53 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_EXTENSION_OPERATOR_WARDROBE_SELECTION_RUNTIME_BRIDGE_PHASE1 (wardrobe receipt bridge, 0.3.52)
 
 - Added `runOperatorWardrobeSelectionBridge()` and `scripts/reddog_operator_wardrobe_selection_once.py` to emit a deterministic WSP_97/WSP_95 operator wardrobe-selection receipt from the live extension path.
