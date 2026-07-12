@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_PROMPT_AUTHORING_DELIVERABLE_CONTRACT_PHASE1 (worker prompt artifact gate, 0.3.60)
+
+- Added prompt-authoring detection so requests to create/evaluate/provide worker prompts receive bounded RedDog prompt/judgment context even when no explicit repo paths are named.
+- `constructWspTaskPrompt()` now requires a `## Worker Prompt` section with one fenced executable prompt for prompt-authoring asks; missing definitions must be represented as `DEFINITION_GAP` inside the prompt artifact.
+- `validateRedDogOutput()` now fails prompt-authoring outputs that omit the executable worker prompt, causing the existing repair path and runtime-consumption gate to fail closed instead of treating advisory prose as complete.
+- Version 0.3.59 -> 0.3.60 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_DETERMINE_BLOCK_TARGET_DERIVATION_GUARD_PHASE1 (Determine question target false-positive guard, 0.3.59)
 
 - Fixed the 0.3.58 host block where `Determine:` numbered questions were parsed as markdown/path bullets and conceptual slash phrases such as `ledger/runtime` became false `repo_file_targets`.
