@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.60
+Version: 0.3.61
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -59,6 +59,7 @@ The extension is a bounded 0102 advisory surface:
 - Flowing-prose read-capture tokenization + tiered strictness (v0.3.45): a `Read first:` prompt that names files in flowing PROSE (e.g. `Read first: a.md, b.json, and c.py. Determine ... the breadcrumb/handoff layer`) is now tokenized with the bounded path-token regex, so a path followed by prose (`c.py. Determine ...`) and an embedded-slash English fragment (`breadcrumb/handoff`) no longer corrupt the derived targets. Confidence tiers: FLOWING-PROSE-derived tokens (Read-first prose, inline prose, backtick prose) become required targets ONLY if they have a lowercase file extension (a file shape); a prose token with a slash but no extension is dropped from the required list and reported in the new `work_focus_targets_dropped_low_confidence` telemetry field, so it can never flip `target_recall_ok` to false. The explicit `Required direct-read targets:` header, M2M `READ:` / `CTX.FILES`, and CLEAN BULLETS keep the broader slash-OR-extension behavior (a named directory path is still accepted) -- only flowing prose is stricter. Trailing prose punctuation (`.` `,` `;` `:` `)` `]` `}`) is trimmed from derived paths. The governed direct-read gate (`bundle_json.py`) is unchanged; derived paths still flow through it.
 - Determine-block target derivation guard (v0.3.59): `Determine:` numbered questions are treated as answer/output obligations, not repo-file target intent. Slash-bearing conceptual phrases inside questions (for example `ledger/runtime`) no longer become `repo_file_targets` or block typed grounding. Explicit `Read first:` / required-target sections still drive direct read normally.
 - Prompt-authoring deliverable contract (v0.3.60): when 012 asks RedDog to create/evaluate/provide a worker prompt, RedDog receives bounded direct-read context for its prompt/judgment surfaces and must return a `## Worker Prompt` section with one fenced executable prompt. Missing definitions become a `DEFINITION_GAP` inside that prompt rather than a reason to omit the prompt artifact.
+- Simple identity fast path (v0.3.61): short identity/status questions such as "are you RedDog?" are answered locally with audited Run Trace telemetry. The fast path skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; substantive RedDog audit/work prompts still route through the governed path.
 
 The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
 
