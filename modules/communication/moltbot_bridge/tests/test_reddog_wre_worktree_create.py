@@ -55,6 +55,12 @@ class FakeRunner:
         return {"ok": True}
 
 
+def _is_inside(child: Path, parent: Path) -> bool:
+    child_r = child.resolve()
+    parent_r = parent.resolve()
+    return child_r == parent_r or parent_r in child_r.parents
+
+
 def _future_expiry(hours: int = 2) -> str:
     return (datetime.now(timezone.utc) + timedelta(hours=hours)).replace(microsecond=0).isoformat()
 
@@ -207,6 +213,8 @@ class TestWorktreeCreateAccept:
         assert runner.calls[0][0] == "create_worktree"
         assert Path(runner.calls[0][1]).resolve() == Path(result.worktree_path).resolve()
         assert runner.calls[0][2:] == ("feat/reddog-worktree-create-test", "main")
+        assert not _is_inside(Path(result.worktree_path), repo_root)
+        assert _is_inside(Path(result.worktree_path), repo_root.parent / ".reddog" / "worktrees" / "repo")
         phases = [receipt.phase for receipt in result.phase_receipts]
         assert phases == [
             PHASE_WORKTREE_PREFLIGHT,
@@ -291,6 +299,26 @@ class TestWorktreeCreateReject:
         assert "worktree_path_not_under_reddog_root" in result.rejection_reasons
         assert runner.calls == []
 
+    def test_legacy_in_repo_reddog_worktree_rejects_before_runner(self, tmp_path: Path):
+        order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
+        payload = executor.to_dict()
+        payload["plan"]["proposed_worktree_path"] = str(
+            repo_root / ".reddog" / "worktrees" / order["work_order_id"] / "nonce"
+        )
+        runner = FakeRunner()
+        result = create_reddog_wre_worktree(
+            order,
+            payload,
+            valve.to_dict(),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+        )
+        assert result.decision == WORKTREE_CREATE_REJECT
+        assert "worktree_path_inside_repo_root" in result.rejection_reasons
+        assert any(reason.startswith("cwd_guard_failed:") for reason in result.rejection_reasons)
+        assert runner.calls == []
+
     def test_create_failure_attempts_cleanup(self, tmp_path: Path):
         order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
         runner = FakeRunner(ok=False)
@@ -337,8 +365,33 @@ class TestWorktreeCreateBoundaries:
             Path(__file__).resolve().parents[1] / "src" / "reddog_wre_worktree_runner.py"
         )
         source = module_path.read_text(encoding="utf-8")
+        assert "validate_wre_worker_operation_cwd" in source
         assert "shell=True" not in source
         assert '"gh"' not in source and "'gh'" not in source
         assert '"commit"' not in source and "'commit'" not in source
         assert '"push"' not in source and "'push'" not in source
         assert '"worktree"' in source and '"add"' in source
+
+    def test_real_runner_rejects_in_repo_worktree_before_subprocess(self, tmp_path: Path, monkeypatch):
+        import modules.communication.moltbot_bridge.src.reddog_wre_worktree_runner as runner_module
+
+        repo_root = tmp_path / "repo"
+        repo_root.mkdir()
+        blocked_path = repo_root / ".reddog" / "worktrees" / "wo" / "nonce"
+        called = {"subprocess": False}
+
+        def fake_run(*args, **kwargs):
+            called["subprocess"] = True
+            raise AssertionError("subprocess must not run for in-repo worktree path")
+
+        monkeypatch.setattr(runner_module.subprocess, "run", fake_run)
+        runner = runner_module.RealRedDogWorktreeRunner(repo_root)
+        result = runner.create_worktree(
+            worktree_path=blocked_path,
+            branch_name="feat/blocked",
+            base_ref="main",
+        )
+
+        assert result["ok"] is False
+        assert "FAIL_WORKTREE_INSIDE_REPO_ROOT" in result["stderr"]
+        assert called["subprocess"] is False

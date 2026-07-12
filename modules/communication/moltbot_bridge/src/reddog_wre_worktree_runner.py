@@ -12,6 +12,10 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, Protocol, runtime_checkable
 
+from modules.communication.moltbot_bridge.src.reddog_wre_cwd_guard import (
+    validate_wre_worker_operation_cwd,
+)
+
 
 @runtime_checkable
 class RedDogWorktreeRunner(Protocol):
@@ -39,6 +43,21 @@ class RealRedDogWorktreeRunner:
     def __init__(self, repo_root: Path, *, timeout_s: int = 120) -> None:
         self.repo_root = Path(repo_root)
         self.timeout_s = int(timeout_s)
+
+    def _guard_worktree(self, worktree_path: Path) -> Dict[str, Any] | None:
+        guard = validate_wre_worker_operation_cwd(
+            repo_root=self.repo_root,
+            worktree_path=worktree_path,
+            operation_cwd=worktree_path,
+        )
+        if guard.ok:
+            return None
+        return {
+            "ok": False,
+            "returncode": -1,
+            "stdout": "",
+            "stderr": f"{guard.code}: {guard.reason}",
+        }
 
     def _run(self, argv: list[str]) -> Dict[str, Any]:
         proc = subprocess.run(
@@ -69,6 +88,9 @@ class RealRedDogWorktreeRunner:
                 "stdout": "",
                 "stderr": "worktree_path must be absolute",
             }
+        guard = self._guard_worktree(Path(worktree_path))
+        if guard is not None:
+            return guard
         return self._run(
             [
                 "git",
@@ -82,6 +104,9 @@ class RealRedDogWorktreeRunner:
         )
 
     def cleanup_worktree(self, *, worktree_path: Path) -> Dict[str, Any]:
+        guard = self._guard_worktree(Path(worktree_path))
+        if guard is not None:
+            return guard
         return self._run(["git", "worktree", "remove", str(worktree_path), "--force"])
 
 
