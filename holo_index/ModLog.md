@@ -8290,3 +8290,11 @@ The complete DAE Memory System has been implemented:
 - Fixed the `AgentDB` schema/runtime mismatch that was breaking adaptive-learning startup on older databases (`agents_autonomous_tasks` missing `status`).
 - Fixed coordination-event ID collisions in `holo_index/adaptive_learning/breadcrumb_tracer.py` by replacing second-resolution IDs with UUID-backed runtime IDs.
 - Verified live HoloIndex searches no longer emit database errors on repeated generic queries such as `AionUI`.
+## 2026-07-12: HOLOINDEX_READONLY_QUERY_GUARD_PHASE1
+
+- Added a read-only query posture for HoloIndex runtime calls used by RedDog (`HOLOINDEX_QUERY_READONLY=1`).
+- Query/search mode now disables search-time auto-refresh by default; auto-refresh requires explicit `--allow-auto-refresh` and is never enabled under the read-only posture.
+- Guarded collection reset with `HOLOINDEX_READONLY_QUERY_GUARD` so a read-only query context cannot mutate the semantic store even if a write path is accidentally reached.
+- Updated Foundups(R)Agent RedDog HoloIndex invocations to pass `HOLOINDEX_QUERY_READONLY=1` for both bundle-json and offline fallback calls.
+- Read-only post-edit probe for `HOLOINDEX_READONLY_QUERY_GUARD_PHASE1 RedDog query read-only auto refresh guard` did not surface the new guard module/test as a canonical hit; recorded `HOLOINDEX_READONLY_QUERY_GUARD_INDEX_GAP_PHASE1`. No runtime re-index performed.
+- Tests: `holo_index/tests/test_holoindex_readonly_query_guard.py`.

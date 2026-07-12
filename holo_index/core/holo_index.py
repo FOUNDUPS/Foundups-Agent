@@ -463,6 +463,10 @@ class HoloIndex:
             return self.client.create_collection(name)
 
     def _reset_collection(self, name: str):
+        if os.getenv("HOLOINDEX_QUERY_READONLY", "").strip().lower() in {"1", "true", "yes", "y", "on"}:
+            raise RuntimeError(
+                "HOLOINDEX_READONLY_QUERY_GUARD: refusing collection reset in read-only query context"
+            )
         try:
             self.client.delete_collection(name)
         except Exception:

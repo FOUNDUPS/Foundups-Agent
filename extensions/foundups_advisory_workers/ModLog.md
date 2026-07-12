@@ -8,6 +8,13 @@
 - Contract remains docs/static-test only: no extension runtime call, no OpenClaw enqueue, no AgentDB write, no Hermes/WRE dispatch.
 - Future live enqueue requires `VALVE_OPEN_LIVE_ENQUEUE`, accepted signed work authority, and signed receipt-chain verification.
 
+## 2026-07-12 - HOLOINDEX_READONLY_QUERY_GUARD_PHASE1 (RedDog HoloIndex query posture, 0.3.48)
+
+- RedDog HoloIndex calls now pass `HOLOINDEX_QUERY_READONLY=1` for bundle-json and offline fallback paths.
+- HoloIndex CLI now defaults plain query/search mode to read-only and gates search-time auto-refresh behind explicit `--allow-auto-refresh`.
+- HoloIndex collection reset refuses to run when `HOLOINDEX_QUERY_READONLY=1`, so a RedDog query process cannot mutate the semantic store even if a write path is accidentally reached.
+- Version 0.3.47 -> 0.3.48 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-11 - REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1 (Determine verifier wiring, 0.3.47)
 
 - Wire the landed Determine contract plus adversarial verifier panel into the live RedDog extension path.
