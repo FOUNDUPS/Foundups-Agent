@@ -212,6 +212,87 @@ def _format_panel(lead_model: str, lead_text: str, panel_results: dict[str, str]
     return "\n\n".join(parts)
 
 
+def _none_like_model_text(value: object) -> bool:
+    text = str(value or "").strip()
+    lowered = text.lower()
+    return not text or lowered in {"none", "null", "n/a", "na"} or lowered.startswith("[blocked:")
+
+
+def _missing_required_evidence(required_paths: object, evidence_context: object) -> list[str]:
+    if not isinstance(required_paths, list) or not required_paths:
+        return []
+    context = str(evidence_context or "").replace("\\", "/")
+    missing: list[str] = []
+    for item in required_paths:
+        if not isinstance(item, str):
+            continue
+        path = item.strip().replace("\\", "/")
+        if path and path not in context:
+            missing.append(path)
+    return missing
+
+
+def _critic_challenges_framing_and_priority(text: object) -> bool:
+    lowered = str(text or "").lower()
+    if _none_like_model_text(lowered):
+        return False
+    challenge_terms = (
+        "challenge",
+        "disagree",
+        "unsupported",
+        "missing",
+        "overclaim",
+        "risk",
+        "wrong",
+        "blocker",
+        "major",
+        "fail",
+        "needs_verification",
+    )
+    framing_terms = ("framing", "frame", "assumption", "scope", "premise", "question")
+    priority_terms = ("priority", "wsp_15", "p0", "p1", "p2", "next safest", "sequence", "order")
+    return (
+        any(term in lowered for term in challenge_terms)
+        and any(term in lowered for term in framing_terms)
+        and any(term in lowered for term in priority_terms)
+    )
+
+
+def _fusion_quorum_packet(
+    *,
+    ok: bool,
+    reason: str,
+    lead_model: str,
+    panel_models: list[str],
+    panel_models_truncated: bool,
+    missing_required_evidence: list[str] | None = None,
+    challenging_critics: list[str] | None = None,
+) -> dict[str, Any]:
+    quorum = {
+        "applied": True,
+        "passed": ok,
+        "reason": reason,
+        "missing_required_evidence": list(missing_required_evidence or []),
+        "challenging_critics": list(challenging_critics or []),
+        "lead_required": True,
+        "synthesis_requires_quorum": True,
+    }
+    return {
+        "ok": ok,
+        "reason": reason,
+        "mode": "foundups_fusion",
+        "lead_model": lead_model,
+        "panel_models": panel_models,
+        "review_packet": {
+            "mode": "foundups_fusion",
+            "lead_model": lead_model,
+            "panel_models": panel_models,
+            "panel_models_truncated": panel_models_truncated,
+            "fusion_panel_quorum": quorum,
+        },
+    }
+
+
 def _openrouter_fusion_alias(
     api_key: str,
     redacted_prompt: str,
@@ -283,6 +364,19 @@ def _run_foundups_fusion(
     lead_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
     panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
     base_system = _system_prompt(payload)
+    missing_evidence = _missing_required_evidence(
+        payload.get("required_target_paths"),
+        payload.get("_redacted_evidence_context"),
+    )
+    if missing_evidence:
+        return _fusion_quorum_packet(
+            ok=False,
+            reason="fusion_quorum_missing_required_evidence",
+            lead_model=lead_model,
+            panel_models=panel_models,
+            panel_models_truncated=panel_models_truncated,
+            missing_required_evidence=missing_evidence,
+        )
 
     lead_system = (
         base_system
@@ -309,6 +403,14 @@ def _run_foundups_fusion(
         return {"ok": False, "reason": "timeout", "lead_model": lead_model}
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return {"ok": False, "reason": "lead_malformed_response", "lead_model": lead_model}
+    if _none_like_model_text(lead_text):
+        return _fusion_quorum_packet(
+            ok=False,
+            reason="fusion_quorum_lead_missing",
+            lead_model=lead_model,
+            panel_models=panel_models,
+            panel_models_truncated=panel_models_truncated,
+        )
 
     _progress("lead_done", "Lead response received: " + lead_model)
     critic_system = (
@@ -350,6 +452,19 @@ def _run_foundups_fusion(
                 panel_results[model] = "[blocked: malformed_response]"
                 _progress("panel_blocked", "Panel malformed response: " + model)
 
+    challenging_critics = [
+        model for model, text in panel_results.items() if _critic_challenges_framing_and_priority(text)
+    ]
+    if not challenging_critics:
+        return _fusion_quorum_packet(
+            ok=False,
+            reason="fusion_quorum_challenging_critic_missing",
+            lead_model=lead_model,
+            panel_models=panel_models,
+            panel_models_truncated=panel_models_truncated,
+            challenging_critics=[],
+        )
+
     synthesis_system = (
         base_system
         + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return the best actionable WSP-compliant recommendation. The final section must be WSP_15 Priority followed by Next safest step."
@@ -380,7 +495,14 @@ def _run_foundups_fusion(
             timeout=timeout,
         )
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError, json.JSONDecodeError):
-        synthesis = "Synthesis unavailable. Use the lead answer and panel critiques above."
+        return _fusion_quorum_packet(
+            ok=False,
+            reason="fusion_quorum_synthesis_unavailable",
+            lead_model=lead_model,
+            panel_models=panel_models,
+            panel_models_truncated=panel_models_truncated,
+            challenging_critics=challenging_critics,
+        )
 
     _progress("synthesis_done", "Synthesis complete.")
     content = _format_panel(lead_model, lead_text, panel_results, synthesis)
@@ -405,6 +527,15 @@ def _run_foundups_fusion(
             "lead_excerpt": lead_text[:4000],
             "panel_excerpts": {model: text[:3000] for model, text in panel_results.items()},
             "synthesis_excerpt": synthesis[:4000],
+            "fusion_panel_quorum": {
+                "applied": True,
+                "passed": True,
+                "reason": "fusion_quorum_passed",
+                "missing_required_evidence": [],
+                "challenging_critics": challenging_critics,
+                "lead_required": True,
+                "synthesis_requires_quorum": True,
+            },
             "retry_count": lead_retry.get("retry_count", 0),
             "final_retry_reason": lead_retry.get("final_retry_reason"),
         },
@@ -520,6 +651,8 @@ def main() -> int:
     redacted_user_message = gate.redacted_prompt
     if gate.redacted_context:
         redacted_user_message = gate.redacted_prompt + "\n\n" + gate.redacted_context
+    model_payload = dict(payload)
+    model_payload["_redacted_evidence_context"] = gate.redacted_context or ""
 
     history = _clean_history(payload.get("history"))
     messages = [{"role": "system", "content": system_prompt}]
@@ -527,7 +660,7 @@ def main() -> int:
     messages.append({"role": "user", "content": redacted_user_message})
 
     if payload.get("mode") == "openrouter_fusion_alias":
-        result = _openrouter_fusion_alias(api_key, redacted_user_message, history, payload)
+        result = _openrouter_fusion_alias(api_key, redacted_user_message, history, model_payload)
         if bridge_meta:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
@@ -535,7 +668,7 @@ def main() -> int:
         return _json_result(**{**result, **audit_telemetry, **redaction_telemetry})
 
     if payload.get("mode") == "foundups_fusion":
-        result = _run_foundups_fusion(api_key, redacted_user_message, history, payload)
+        result = _run_foundups_fusion(api_key, redacted_user_message, history, model_payload)
         if bridge_meta:
             packet = result.get("review_packet")
             if isinstance(packet, dict):

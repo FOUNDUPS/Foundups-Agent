@@ -223,6 +223,137 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(packet.get("python_interpreter_source"), "system")
         self.assertLessEqual(len(packet.get("panel_models") or []), bridge.MAX_PANEL_MODELS)
 
+    def test_fusion_quorum_blocks_missing_required_evidence_before_network(self) -> None:
+        chat_mock = mock.Mock()
+        with mock.patch.object(bridge, "_chat_completion", chat_mock):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt that names docs/missing.md but has no evidence context",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/missing.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        chat_mock.assert_not_called()
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["reason"], "fusion_quorum_missing_required_evidence")
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["missing_required_evidence"], ["docs/missing.md"])
+
+    def test_fusion_quorum_blocks_none_lead_before_panel(self) -> None:
+        calls: list[str] = []
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            calls.append(str(messages[0]["content"]))
+            return "None", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["reason"], "fusion_quorum_lead_missing")
+        self.assertEqual(len(calls), 1)
+
+    def test_fusion_quorum_requires_critic_challenge_to_framing_and_priority(self) -> None:
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return "Looks generally reasonable.", {"retry_count": 0}
+            return "Synthesis should not run", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a", "critic-b"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["reason"], "fusion_quorum_challenging_critic_missing")
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], [])
+
+    def test_fusion_quorum_passes_with_challenge_and_blocks_synthesis_failure(self) -> None:
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return (
+                    "I challenge the framing and the WSP_15 priority order because the "
+                    "scope may overclaim evidence.",
+                    {"retry_count": 0},
+                )
+            raise TimeoutError("synthesis unavailable")
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["reason"], "fusion_quorum_synthesis_unavailable")
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], ["critic-a"])
+
+    def test_fusion_quorum_success_records_challenging_critic(self) -> None:
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return (
+                    "I challenge the framing and WSP_15 priority because the sequence "
+                    "could hide a missing gate.",
+                    {"retry_count": 0},
+                )
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1\n\n## Next safest step\nVerify.", {
+                "retry_count": 0
+            }
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertTrue(result["ok"])
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertTrue(quorum["passed"])
+        self.assertEqual(quorum["challenging_critics"], ["critic-a"])
+
     def test_read_stdin_json_em_dash(self) -> None:
         payload = {"prompt": "safe", "context": "PR #718 \u2014 `WSP_109_FOUNDUP_ONBOARDI"}
         stdin_buffer = io.BytesIO(json.dumps(payload, ensure_ascii=False).encode("utf-8"))

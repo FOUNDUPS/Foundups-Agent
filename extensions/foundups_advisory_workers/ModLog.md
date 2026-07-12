@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_FUSION_PANEL_QUORUM_PHASE1 (fail-closed Fusion synthesis quorum, 0.3.57)
+
+- Added deterministic Fusion panel quorum checks in `scripts/advisory_model_once.py`: required evidence must be present in packed evidence context, lead output cannot be empty/`None`, at least one critic must challenge framing and priority, and synthesis failure fails closed.
+- Removed the previous synthesis fallback that could convert missing synthesis into a usable answer.
+- Added bridge hardening tests for missing evidence, missing lead, missing critic challenge, synthesis failure, and successful quorum.
+- Version 0.3.56 -> 0.3.57 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_GROUNDING_TO_WARDROBE_SELECTION_RECEIPT_PHASE1 (grounded action-plane selection, 0.3.56)
 
 - Threaded typed grounding preflight into the RedDog operator wardrobe-selection payload and receipt.
