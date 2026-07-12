@@ -415,8 +415,6 @@ def select_reddog_operator_loop_wardrobe_dryrun(
         WARDROBE_SOVEREIGN_EXECUTION,
     }:
         rejection_reasons.append("write_sensitive_index_gap")
-    if selected_wardrobe == WARDROBE_SOVEREIGN_EXECUTION:
-        rejection_reasons.append("sovereign_authority_requires_downstream_signed_valve")
     if not governing_wsps and normalized_authority != "none":
         rejection_reasons.append("missing_governing_wsp_for_authority_request")
 

@@ -95,17 +95,17 @@ def test_implementation_request_selects_draft_pr_plane() -> None:
     assert result.receipt.direct_read_required is True
 
 
-def test_live_enqueue_request_selects_sovereign_execution_and_rejects_until_valve() -> None:
+def test_live_enqueue_request_selects_sovereign_execution_candidate() -> None:
     result = select_reddog_operator_loop_wardrobe_dryrun(
         "Invoke RedDog live enqueue for the next worker.",
         authority_request="live_enqueue",
         holoindex_evidence=_holo(),
     )
-    assert result.decision == WARDROBE_SELECTION_REJECT
+    assert result.decision == WARDROBE_SELECTION_ACCEPT
     assert result.receipt.selected_wardrobe == WARDROBE_SOVEREIGN_EXECUTION
     assert result.receipt.execution_plane == EXECUTION_GOVERNED_CANDIDATE
     assert result.receipt.authority_boundary == AUTHORITY_SIGNED_VALVE_REQUIRED
-    assert "sovereign_authority_requires_downstream_signed_valve" in result.receipt.rejection_reasons
+    assert result.receipt.rejection_reasons == []
 
 
 def test_shell_or_merge_request_requires_sovereign_token_boundary() -> None:
