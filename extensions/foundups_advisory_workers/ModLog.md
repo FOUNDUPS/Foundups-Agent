@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_PHASE1 (guarded invoke seam, 0.3.51)
+
+- Added `invokeWreOperationalSpineExplicitValveBridge()` and `scripts/reddog_extension_wre_spine_invoke_once.py` as the extension-side runtime seam to the landed Python explicit-valve guard.
+- Default RedDog runs remain fail-closed: the runtime wire emits `EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_SKIPPED` unless a ready governed work-order candidate, explicit WRE invocation request, sovereign wardrobe selection receipt, valve environment, permission snapshot, and signed-authority verifier result are all supplied.
+- The bridge passes authority metadata through stdin, never argv, and Copy MD surfaces the invoke decision without raw token/signature material.
+- Version 0.3.50 -> 0.3.51 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1 (authority binding, 0.3.50)
 
 - `buildRedDogGovernedWorkOrderCandidate()` now binds supplied repo permission snapshots and signed-authority verifier results into `permission_binding` and `signed_authority_binding` metadata.
