@@ -22,6 +22,7 @@ Current implementation:
 - REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1 (v0.3.47): Determine prompts now request canonical `## Determine Answers` JSON and run a local deterministic verifier against already-fetched direct-read evidence; Run Trace/Copy MD expose verifier verdicts and advisory INDEX_GAP metadata. No re-index, WRE enqueue, shell, repo mutation, or network authority is added.
 - HOLOINDEX_READONLY_QUERY_GUARD_PHASE1 (v0.3.48): RedDog launches HoloIndex with `HOLOINDEX_QUERY_READONLY=1`; HoloIndex search/query mode is read-only by default, search-time auto-refresh requires explicit `--allow-auto-refresh`, and collection reset refuses read-only query contexts.
 - REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1 (v0.3.49): WRE preview embeds a full `RedDogGovernedWorkOrder` candidate with digest, derived path scope, HoloIndex evidence posture, nonce, expiry, and fail-closed authority readiness flags. It still does not invoke Python, create a worktree, run tasks, enqueue, push, merge, or settle rewards.
+- REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1 (v0.3.50): WRE preview candidate now binds supplied permission-snapshot and signed-authority verifier metadata. It can mark a candidate ready only when the permission snapshot is fresh/trusted, the signed-authority result is accepted for the same work order, path scope exists, and the explicit worktree valve is requested. No GitHub probe, crypto verification, WRE invocation, worktree, enqueue, PR, merge, or reward settlement is performed by the extension.
 
 ## Architecture Direction
 
@@ -480,7 +481,8 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - **Status:** **IMPLEMENTED (extension dry-run preview only, v0.3.46)** -- `buildWreOperationalSpineDryRunPreview()` emits a typed candidate envelope into Copy MD and `review_packet.wre_operational_spine_dryrun_preview`.
 - **Boundary:** no `cp.execFileSync` call to `reddog_wre_operational_spine.py`, no worktree create, no task execution, no file edit, no PR, no OpenClaw enqueue, no Hermes dispatch, no push, no merge. Blocked-local packets skip the preview.
 - **Runtime emission:** **IMPLEMENTED (candidate only, v0.3.49)** -- `governed_work_order_runtime_emission` embeds a full `RedDogGovernedWorkOrder` candidate with digest and not-ready reasons. It is not executable authority.
-- **Next gate:** `REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1` -- attach fresh permission snapshot + signed work authority before invoking `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1`.
+- **Authority binding:** **IMPLEMENTED (metadata only, v0.3.50)** -- `permission_binding` and `signed_authority_binding` can make a candidate invocation-ready only when trusted/fresh and matching; the extension itself still does not run the GitHub probe or signature verifier.
+- **Next gate:** `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1` runtime wire -- only after a caller supplies the accepted binding metadata plus `VALVE_OPEN_WORKTREE_CREATE` / sovereign wardrobe selection.
 - **Discoverability:** `HOLOINDEX_REDDOG_EXTENSION_GOVERNED_WORK_ORDER_EMISSION_INDEX_GAP_PHASE1` -- query-only preflight finds adjacent RedDog work-order modules/contracts but not the extension runtime-emission surface; WRE/CI re-index remains the maintenance owner.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
