@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_WRE_GOVERNED_SHELL_RUNNER_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 11, 15, 50, 53, 71, 95, 97
+
+- Added `src/reddog_wre_governed_shell_runner_dryrun.py`: pure dry-run validator for the governed shell runner contract. It validates argv-only command profiles, allowed/denied args, shell metacharacter rejection, WSP_71 secret boundaries, sovereign wardrobe selection, signed work authority, signed receipt-chain verification, `VALVE_OPEN_WORKTREE_CREATE`, generic writer dry-run receipt binding, HoloIndex freshness/INDEX_GAP, and WRE cwd guard.
+- Added `tests/test_reddog_wre_governed_shell_runner_dryrun.py`: acceptance, fail-closed, cwd isolation, HoloIndex freshness, no-execution receipt, JSON serialization, and AST no-subprocess/no-file-write coverage.
+- Boundary: no command execution, no subprocess/git/gh, no file writes, no worktree creation, no PR/merge/release/deploy/publish, no reward settlement, no extension runtime wiring, and no HoloIndex re-index. This emits a dry-run receipt only.
+- HoloIndex read-only probe for `RedDog WRE governed shell runner dryrun argv cwd receipt valve` did not surface a canonical dry-run runner. Recorded as `HOLOINDEX_REDDOG_WRE_GOVERNED_SHELL_RUNNER_DRYRUN_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_WRE_GOVERNED_SHELL_RUNNER_CONTRACT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 11, 15, 50, 53, 71, 95, 97
