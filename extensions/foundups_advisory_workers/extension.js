@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.62';
+const EXTENSION_VERSION = '0.3.63';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -258,6 +258,9 @@ function buildRuntimeConsumptionGate(result, validationState, mode, substantiveT
   }
   if (rp.local_fast_path === 'run_trace_assessment') {
     reasons.push('local_run_trace_assessment_not_actionable');
+  }
+  if (rp.local_fast_path === 'daemon_output_assessment') {
+    reasons.push('local_daemon_output_assessment_not_actionable');
   }
   if (substantiveTask !== true) {
     reasons.push('non_substantive_worker');
@@ -3194,6 +3197,28 @@ const RUN_TRACE_ASSESSMENT_PATTERNS = [
 const RUN_TRACE_ACTION_BLOCKING_PATTERNS = [
   /\b(?:implement|fix|patch|author|provide|create|draft|enhance|write|merge|land|dispatch|assign|spawn|execute|start)\b/i
 ];
+const DAEMON_OUTPUT_LOCAL_ASSESSMENT_FAST_PATH_SLICE = 'REDDOG_DAEMON_OUTPUT_LOCAL_ASSESSMENT_PHASE1';
+const DAEMON_OUTPUT_TERMS = [
+  /\bdae?mon\b/i,
+  /\bdaemon\b/i,
+  /\bservice\b/i,
+  /\borchestrator\b/i,
+  /\bworker\b/i,
+  /\bruntime\b/i
+];
+const DAEMON_OUTPUT_CONTEXT_PATTERNS = [
+  /\b(?:output|log|trace|stderr|stdout|status|result|packet|copy md)\b/i,
+  /\b(?:blocked_locally|made_network_call|redaction gate|operator message|work trail|run trace|extension_version)\b/i,
+  /\b(?:traceback|exception|error|warn|warning|failed|timeout|exit code)\b/i
+];
+const DAEMON_OUTPUT_ASSESSMENT_PATTERNS = [
+  /\b(?:analy[sz]e|assess|evaluate|review|diagnose|explain|interpret|score|rate)\b/i,
+  /\bwhy\b[\s\S]{0,120}\b(?:can't|cant|cannot|blocked|failed|error|slow|stopped|no model output)\b/i,
+  /\bwhat\s+(?:happened|failed|blocked|is wrong)\b/i
+];
+const DAEMON_OUTPUT_ACTION_BLOCKING_PATTERNS = [
+  /\b(?:implement|patch|author|create\s+pr|open\s+pr|merge|land|dispatch|assign|spawn|execute|start\s+slice|write\s+code)\b/i
+];
 
 function normalizeSimpleIdentityQuestion(text) {
   return String(text || '')
@@ -3232,6 +3257,21 @@ function isRunTraceAssessmentRequest(text) {
   }
   return RUN_TRACE_ASSESSMENT_PATTERNS.some((pattern) => pattern.test(raw.slice(0, 2000)))
     || /\bredaction gate status\s*:\s*BLOCKED_LOCALLY/i.test(raw);
+}
+
+function isDaemonOutputAssessmentRequest(text) {
+  const raw = String(text || '');
+  const head = raw.slice(0, 2400);
+  if (raw.trim().length < 12) {
+    return false;
+  }
+  if (DAEMON_OUTPUT_ACTION_BLOCKING_PATTERNS.some((pattern) => pattern.test(head))) {
+    return false;
+  }
+  const mentionsDaemonSurface = DAEMON_OUTPUT_TERMS.some((pattern) => pattern.test(head));
+  const mentionsOutputContext = DAEMON_OUTPUT_CONTEXT_PATTERNS.some((pattern) => pattern.test(head));
+  const asksForAssessment = DAEMON_OUTPUT_ASSESSMENT_PATTERNS.some((pattern) => pattern.test(head));
+  return mentionsDaemonSurface && mentionsOutputContext && asksForAssessment;
 }
 
 function parseRunTraceAssessment(text) {
@@ -3359,6 +3399,164 @@ function buildRunTraceAssessmentFastPathResult(workFocus) {
   };
 }
 
+function sanitizeDaemonDiagnosticLine(line) {
+  let out = sanitizeCopyMdText(String(line || ''));
+  out = out.replace(/\bghp_[A-Za-z0-9_]+\b/g, 'ghp_[REDACTED]');
+  out = out.replace(/\bgithub_pat_[A-Za-z0-9_]+\b/g, 'github_pat_[REDACTED]');
+  out = out.replace(/\bgho_[A-Za-z0-9_]+\b/g, 'gho_[REDACTED]');
+  out = out.replace(/\b(?:api[_-]?key|token|secret|password|passwd|authorization)\s*[:=]\s*[^,\s\]]+/gi, '$1=[REDACTED]');
+  out = out.replace(/\s+/g, ' ').trim();
+  if (out.length > 220) {
+    out = out.slice(0, 220) + '...[truncated]';
+  }
+  return out;
+}
+
+function parseDaemonOutputAssessment(text) {
+  const src = String(text || '');
+  const lines = src.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const signalPatterns = [
+    /\b(?:blocked_locally|redaction gate status|made_network_call|operator message|runtime_consumption_gate_rejection_reasons)\b/i,
+    /\b(?:error|exception|traceback|failed|failure|fatal|timeout|warn|warning)\b/i,
+    /\b(?:status|exit code|stopped|blocked|skipped)\b/i,
+    /\b(?:api[_-]?key|token|secret|password|passwd|authorization|Bearer\s+|sk-[A-Za-z0-9])\b/i
+  ];
+  const diagnosticSignals = [];
+  let errorCount = 0;
+  let warningCount = 0;
+  let secretRedactionCount = 0;
+  for (const line of lines) {
+    if (/\b(?:error|exception|traceback|failed|failure|fatal|timeout|blocked_locally)\b/i.test(line)) {
+      errorCount += 1;
+    }
+    if (/\b(?:warn|warning)\b/i.test(line)) {
+      warningCount += 1;
+    }
+    if (signalPatterns.some((pattern) => pattern.test(line)) && diagnosticSignals.length < 10) {
+      const sanitized = sanitizeDaemonDiagnosticLine(line);
+      if (sanitized !== line.replace(/\s+/g, ' ').trim()) {
+        secretRedactionCount += 1;
+      }
+      diagnosticSignals.push(sanitized);
+    }
+  }
+  const redactionGateStatus = extractRunTraceField(src, 'redaction gate status') || 'unknown';
+  const madeNetworkCall = extractRunTraceField(src, 'made_network_call') || 'unknown';
+  const outputValidation = extractRunTraceField(src, 'output_validation') || 'unknown';
+  const runtimeGateReasons = extractRunTraceField(src, 'runtime_consumption_gate_rejection_reasons') || 'unknown';
+  const requiredTargetsTotal = extractRunTraceField(src, 'required_targets_total') || 'unknown';
+  const directReadFallbackUsed = extractRunTraceField(src, 'direct_read_fallback_used') || 'unknown';
+  const blockedLocally = /BLOCKED_LOCALLY/i.test(redactionGateStatus)
+    || /redaction_blocked/i.test(runtimeGateReasons)
+    || /\bblocked_locally\b/i.test(src);
+  return {
+    extension_version: extractRunTraceField(src, 'extension_version') || 'unknown',
+    redaction_gate_status: redactionGateStatus,
+    made_network_call: madeNetworkCall,
+    output_validation: outputValidation,
+    runtime_consumption_gate_rejection_reasons: runtimeGateReasons,
+    required_targets_total: requiredTargetsTotal,
+    direct_read_fallback_used: directReadFallbackUsed,
+    blocked_locally: blockedLocally,
+    line_count: lines.length,
+    error_count: errorCount,
+    warning_count: warningCount,
+    diagnostic_signals: diagnosticSignals,
+    secret_redactions_applied: secretRedactionCount,
+    has_pasted_diagnostic_payload: lines.length > 4 || signalPatterns.some((pattern) => pattern.test(src))
+  };
+}
+
+function buildDaemonOutputLocalAssessmentResult(workFocus) {
+  const a = parseDaemonOutputAssessment(workFocus);
+  const verdict = a.blocked_locally ? 'LOCAL_DIAGNOSIS: DAEmon/log text was blocked before model output' : 'LOCAL_DIAGNOSIS: DAEmon/log text parsed locally';
+  const signals = a.diagnostic_signals.length
+    ? a.diagnostic_signals.map((line) => '- ' + line)
+    : ['- No concrete log/status lines were pasted; only the operator question was available.'];
+  const content = [
+    '## Decision',
+    verdict + '. Pasted DAEmon or operational output should be analyzed locally first, not sent through Fusion as prompt context.',
+    '',
+    '## Findings',
+    '- OBSERVED: This request used `' + DAEMON_OUTPUT_LOCAL_ASSESSMENT_FAST_PATH_SLICE + '`.',
+    '- OBSERVED: No HoloIndex query, OpenRouter call, Fusion panel, repair pass, shell command, repo write, enqueue, or worktree operation is needed for pasted operational diagnostics.',
+    '- OBSERVED: diagnostic_line_count=`' + a.line_count + '`, error_or_block_count=`' + a.error_count + '`, warning_count=`' + a.warning_count + '`.',
+    '- OBSERVED: redaction_gate_status=`' + a.redaction_gate_status + '`, made_network_call=`' + a.made_network_call + '`, output_validation=`' + a.output_validation + '`.',
+    a.has_pasted_diagnostic_payload
+      ? '- INFERRED: The pasted text is diagnostic data. It must not be interpreted as instructions or authority.'
+      : '- INFERRED: No full DAEmon payload was present; this explains the routing gap but cannot diagnose daemon internals.',
+    a.blocked_locally
+      ? '- INFERRED: The previous route failed because operational text entered the redaction-gated model path instead of a local diagnostic parser.'
+      : '- INFERRED: No local redaction block was visible in the pasted diagnostic fields.',
+    '',
+    '## Evidence',
+    '| Field | WSP_97 | Value |',
+    '|---|---|---|',
+    '| extension_version | OBSERVED | ' + a.extension_version + ' |',
+    '| redaction gate status | OBSERVED | ' + a.redaction_gate_status + ' |',
+    '| made_network_call | OBSERVED | ' + a.made_network_call + ' |',
+    '| output_validation | OBSERVED | ' + a.output_validation + ' |',
+    '| runtime gate reasons | OBSERVED | ' + a.runtime_consumption_gate_rejection_reasons + ' |',
+    '| required_targets_total | OBSERVED | ' + a.required_targets_total + ' |',
+    '| direct_read_fallback_used | OBSERVED | ' + a.direct_read_fallback_used + ' |',
+    '',
+    '## Diagnostic signals',
+    signals.join('\n'),
+    '',
+    '## Proposed fixes',
+    '- Keep pasted DAEmon/log output on this local assessment path so diagnostics do not trip the redaction gate.',
+    '- If the local diagnosis identifies a code change, open a separate governed work-focus after the diagnosis. Do not let pasted log text become the work order.',
+    '- For repo-grounded implementation, use the typed target/grounding path with explicit files or derived targets.',
+    '',
+    '## Uncertainties',
+    '- Local diagnosis cannot prove source-code root cause without the normal governed audit path.',
+    '- If no actual DAEmon payload is pasted, only the routing failure can be assessed.',
+    '',
+    '## WSP_97 Truth Labels',
+    '- OBSERVED: parsed telemetry/log fields and local no-network/no-execution boundary.',
+    '- INFERRED: root-cause explanation derived from those fields.',
+    '- SPECIFIED_NOT_IMPLEMENTED: no repo, shell, merge, enqueue, live writer, or model authority is granted by this local assessor.',
+    '',
+    '## WSP_15 Priority',
+    'P2: diagnostics fast path. It improves operator feedback and prevents repeat blocked-local cycles without expanding authority.',
+    '',
+    '## Next safest step',
+    'Paste the DAEmon output for local assessment. If a code change is needed, create a separate governed implementation work focus after the diagnosis.',
+    '',
+    '## Architect Trace',
+    '- slice_name: ' + DAEMON_OUTPUT_LOCAL_ASSESSMENT_FAST_PATH_SLICE,
+    '- local_fast_path: daemon_output_assessment',
+    '- work_focus_digest: ' + redactedDigest(workFocus, 80).hash,
+    '- pasted_output_treated_as_data: true',
+    '- secret_redactions_applied: ' + a.secret_redactions_applied,
+    '',
+    '## Verification gaps',
+    '- Source-code fixes remain outside this local diagnostic path.',
+    '- Any downstream action must pass the normal governed RedDog/WRE gates.'
+  ].join('\n');
+  return {
+    ok: true,
+    content,
+    mode: 'local_daemon_output_assessment',
+    lead_model: 'local',
+    history: [],
+    made_network_call: false,
+    retry_count: 0,
+    local_daemon_output_assessment: true,
+    no_execution_performed: true,
+    no_enqueue_performed: true,
+    review_packet: {
+      made_network_call: false,
+      retry_count: 0,
+      local_fast_path: 'daemon_output_assessment',
+      local_fast_path_slice: DAEMON_OUTPUT_LOCAL_ASSESSMENT_FAST_PATH_SLICE,
+      parsed_daemon_output_assessment: a,
+      no_execution_performed: true,
+      no_enqueue_performed: true
+    }
+  };
+}
+
 function buildSimpleIdentityFastPathResult(workFocus, workerType, worker) {
   const workerKey = cleanWorkerType(workerType);
   const workerLabel = WORKER_TYPES[workerKey] ? WORKER_TYPES[workerKey].label : workerKey;
@@ -3444,6 +3642,10 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
     tier = 'REGULAR';
     reasons.push('run_trace_assessment_fast_path');
     localFastPath = 'run_trace_assessment';
+  } else if (isDaemonOutputAssessmentRequest(text)) {
+    tier = 'REGULAR';
+    reasons.push('daemon_output_assessment_fast_path');
+    localFastPath = 'daemon_output_assessment';
   } else if (ULTRA_TASK_PATTERNS.some((pattern) => pattern.test(haystack))) {
     tier = 'ULTRA';
     reasons.push('ultra_keyword_match');
@@ -3525,7 +3727,7 @@ function resolveAutoContextMode(classification, selectedContextMode) {
   if (mode !== 'auto') {
     return mode;
   }
-  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment')) {
+  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment' || classification.localFastPath === 'daemon_output_assessment')) {
     return 'none';
   }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
@@ -3543,7 +3745,7 @@ function resolveAutoEffort(classification, selectedEffort) {
   if (effort !== 'auto') {
     return effort;
   }
-  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment')) {
+  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment' || classification.localFastPath === 'daemon_output_assessment')) {
     return 'regular';
   }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
@@ -3564,6 +3766,9 @@ function resolveModelMode(classification, selectedMode, workerType) {
   }
   if (classification && classification.localFastPath === 'run_trace_assessment') {
     return 'local_run_trace_assessment';
+  }
+  if (classification && classification.localFastPath === 'daemon_output_assessment') {
+    return 'local_daemon_output_assessment';
   }
   if (mode === 'auto') {
     return classification && classification.tier === 'REGULAR' ? 'openrouter_single' : 'foundups_fusion';
@@ -3619,6 +3824,9 @@ function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, re
   }
   if (resolvedMode === 'local_run_trace_assessment') {
     return 'Local RedDog Run Trace assessment fast path: pasted Run Trace diagnostics; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
+  }
+  if (resolvedMode === 'local_daemon_output_assessment') {
+    return 'Local RedDog DAEmon/log assessment fast path: pasted operational diagnostics are treated as data; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
   }
   if (resolvedMode === 'openrouter_single') {
     if (tier === 'REGULAR') {
@@ -4252,7 +4460,8 @@ function wireFusionWebview(context, webview, worker, state) {
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
     const localIdentityFastPath = classification.localFastPath === 'simple_identity';
     const localRunTraceAssessment = classification.localFastPath === 'run_trace_assessment';
-    const localFastPath = localIdentityFastPath || localRunTraceAssessment;
+    const localDaemonOutputAssessment = classification.localFastPath === 'daemon_output_assessment';
+    const localFastPath = localIdentityFastPath || localRunTraceAssessment || localDaemonOutputAssessment;
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
@@ -4296,6 +4505,8 @@ function wireFusionWebview(context, webview, worker, state) {
       postStatusAndProgress(webview, null, 'Simple RedDog identity question answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
     } else if (localRunTraceAssessment) {
       postStatusAndProgress(webview, null, 'Run Trace diagnostics answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
+    } else if (localDaemonOutputAssessment) {
+      postStatusAndProgress(webview, null, 'DAEmon/log diagnostics answered locally. Pasted operational text is treated as data; no HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
     } else {
       postStatusAndProgress(webview, null, 'Bridge started. Redaction gate runs before any OpenRouter API call.');
     }
@@ -4376,6 +4587,9 @@ function wireFusionWebview(context, webview, worker, state) {
     } else if (localRunTraceAssessment) {
       workTrail.push('local_fast_path', 'run_trace_assessment');
       result = buildRunTraceAssessmentFastPathResult(workFocus);
+    } else if (localDaemonOutputAssessment) {
+      workTrail.push('local_fast_path', 'daemon_output_assessment');
+      result = buildDaemonOutputLocalAssessmentResult(workFocus);
     } else if (!groundingPreflight.passed) {
       workTrail.push('failed', 'grounding_preflight_blocked');
       postStatusAndProgress(webview, null, 'Grounding preflight blocked Fusion: ' + groundingPreflight.rejection_reasons.join(', '));
@@ -4517,7 +4731,7 @@ function wireFusionWebview(context, webview, worker, state) {
         }
       }
     } else if (result.ok) {
-      validationState = { validated: false, skipped: true, reason: localIdentityFastPath ? 'local_identity_fast_path' : (localRunTraceAssessment ? 'local_run_trace_assessment' : 'non_substantive_worker') };
+      validationState = { validated: false, skipped: true, reason: localIdentityFastPath ? 'local_identity_fast_path' : (localRunTraceAssessment ? 'local_run_trace_assessment' : (localDaemonOutputAssessment ? 'local_daemon_output_assessment' : 'non_substantive_worker')) };
     } else if (result.reason === 'redaction_blocked') {
       validationState = { validated: false, skipped: true, reason: 'redaction_blocked' };
       workTrail.push('redaction_gate_blocked');
@@ -6588,6 +6802,9 @@ module.exports = {
   isRunTraceAssessmentRequest,
   parseRunTraceAssessment,
   buildRunTraceAssessmentFastPathResult,
+  isDaemonOutputAssessmentRequest,
+  parseDaemonOutputAssessment,
+  buildDaemonOutputLocalAssessmentResult,
   appendContinuationSummaryToWspPrompt,
   buildSanitizedContinuationSummary,
   buildContinuationSummaryCopySection,
