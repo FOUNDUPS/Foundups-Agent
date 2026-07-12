@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.49', 'package version must be 0.3.49');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.49'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.50', 'package version must be 0.3.50');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.50'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.49', 'README version mismatch');
+includes(readme, 'Version: 0.3.50', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -713,6 +713,8 @@ includes(extensionJs, 'function buildRedactionGateReport', 'buildRedactionGateRe
 includes(extensionJs, 'function buildGovernedHandoffRecommendation', 'buildGovernedHandoffRecommendation missing');
 includes(extensionJs, 'function buildRedDogGovernedWorkOrderCandidate', 'governed work-order candidate builder missing');
 includes(extensionJs, 'function buildRedDogGovernedWorkOrderCandidateSection', 'governed work-order candidate section builder missing');
+includes(extensionJs, 'function normalizePermissionSnapshotBinding', 'permission snapshot binding helper missing');
+includes(extensionJs, 'function normalizeSignedAuthorityBinding', 'signed authority binding helper missing');
 includes(extensionJs, 'function buildWreOperationalSpineDryRunPreview', 'WRE spine dry-run preview builder missing');
 includes(extensionJs, 'function buildWreOperationalSpineDryRunPreviewSection', 'WRE spine dry-run preview section builder missing');
 includes(extensionJs, 'function detectMojibake', 'detectMojibake missing');
@@ -768,7 +770,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.49', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.50', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -776,6 +778,9 @@ assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths,
   'modules/communication/moltbot_bridge/tests/**'
 ], 'candidate should derive allowed paths from authoritative target paths');
 assert.strictEqual(spinePreview.governed_work_order_runtime_emission.runtime_emission_performed, true, 'candidate emission flag');
+assert.strictEqual(spinePreview.governed_work_order_runtime_emission.authority_binding_performed, true, 'authority binding metadata must be emitted');
+assert.strictEqual(spinePreview.governed_work_order_runtime_emission.permission_binding.permission_truth_label, 'NEEDS_VERIFICATION', 'missing permission snapshot remains unverified');
+assert.strictEqual(spinePreview.governed_work_order_runtime_emission.signed_authority_binding.signed_authority_verified, false, 'missing signed authority remains unverified');
 assert.strictEqual(spinePreview.governed_work_order_runtime_emission.ready_for_wre_invocation, false, 'candidate must not be invocation-ready without authority');
 assert(spinePreview.governed_work_order_runtime_emission.not_ready_reasons.includes('fresh_github_permission_probe_missing'), 'candidate must require fresh permission probe');
 assert(spinePreview.governed_work_order_runtime_emission.not_ready_reasons.includes('signed_work_authority_not_verified'), 'candidate must require signed authority');
@@ -795,6 +800,7 @@ assert(!spinePreview.command_redacted_summary.includes('OPENROUTER_API_KEY'), 'W
 includes(spinePreview.command_redacted_summary, 'key_env_present: true', 'WRE preview summary should carry safe key-presence fact');
 const spinePreviewSection = orchestrator.buildWreOperationalSpineDryRunPreviewSection(spinePreview);
 includes(spinePreviewSection, '## WRE Operational Spine Dry-Run Preview', 'WRE preview section header');
+includes(spinePreviewSection, 'governed_work_order_authority_binding_performed: true [OBSERVED]', 'WRE preview section must show authority binding metadata');
 includes(spinePreviewSection, 'governed_work_order_ready_for_invocation: false [OBSERVED]', 'WRE preview section must show candidate is not invocation-ready');
 includes(spinePreviewSection, 'python_invocation_performed: false [OBSERVED]', 'WRE preview section must show no Python invocation');
 includes(spinePreviewSection, 'worktree_create_performed: false [OBSERVED]', 'WRE preview section must show no worktree creation');
@@ -827,8 +833,93 @@ includes(wrePreviewCopy, 'raw_work_focus_stored: false [OBSERVED]', 'WRE preview
 
 const candidateSection = orchestrator.buildRedDogGovernedWorkOrderCandidateSection(spinePreview.governed_work_order_runtime_emission);
 includes(candidateSection, 'permission_snapshot_source: extension_runtime_candidate [OBSERVED]', 'candidate section must show unverified permission source');
+includes(candidateSection, 'permission_truth_label: NEEDS_VERIFICATION [OBSERVED]', 'candidate section must show permission truth label');
+includes(candidateSection, 'no_live_probe_performed_by_extension: true [OBSERVED]', 'candidate section must state extension did not probe GitHub');
+includes(candidateSection, 'no_signature_verification_performed_by_extension: true [OBSERVED]', 'candidate section must state extension did not verify crypto');
 includes(candidateSection, 'ready_for_wre_invocation: false [OBSERVED]', 'candidate section must show not ready');
 assert(!wrePreviewCopy.includes('OPENROUTER_API_KEY'), 'WRE preview Copy MD must not leak env key name');
+
+const fixedAuthorityCreatedAt = '2026-07-12T12:00:00Z';
+const freshPermissionSnapshot = {
+  permission: 'write',
+  checked_at: fixedAuthorityCreatedAt,
+  expires_at: '2026-07-12T12:05:00Z',
+  source: 'gh_cli',
+  evidence_digest: 'sha256:' + 'a'.repeat(64)
+};
+const authoritySeed = orchestrator.buildRedDogGovernedWorkOrderCandidate(
+  'Fix a narrow RedDog slice',
+  {},
+  handoffRec,
+  {
+    createdAt: fixedAuthorityCreatedAt,
+    repoPermissionSnapshot: freshPermissionSnapshot,
+    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+  }
+);
+const authorityBound = orchestrator.buildRedDogGovernedWorkOrderCandidate(
+  'Fix a narrow RedDog slice',
+  {},
+  handoffRec,
+  {
+    createdAt: fixedAuthorityCreatedAt,
+    repoPermissionSnapshot: freshPermissionSnapshot,
+    signatureVerificationResult: {
+      accepted: true,
+      reason_codes: [],
+      work_order_id: authoritySeed.work_order.work_order_id,
+      signature: 'must-not-leak'
+    },
+    explicitValveRequested: true,
+    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+  }
+);
+assert.strictEqual(authorityBound.permission_binding.permission_truth_label, 'OBSERVED', 'fresh trusted permission snapshot should be observed');
+assert.strictEqual(authorityBound.signed_authority_binding.signed_authority_verified, true, 'accepted matching signature result should bind');
+assert.strictEqual(authorityBound.ready_for_wre_invocation, true, 'candidate should become ready only after permission, signature, scope, and explicit valve');
+assert.strictEqual(authorityBound.not_ready_reasons.length, 0, 'ready candidate must have no not-ready reasons');
+const authorityBoundSection = orchestrator.buildRedDogGovernedWorkOrderCandidateSection(authorityBound);
+assert(!authorityBoundSection.includes('must-not-leak'), 'candidate section must not leak raw signature material');
+
+const signatureMismatch = orchestrator.buildRedDogGovernedWorkOrderCandidate(
+  'Fix a narrow RedDog slice',
+  {},
+  handoffRec,
+  {
+    createdAt: fixedAuthorityCreatedAt,
+    repoPermissionSnapshot: freshPermissionSnapshot,
+    signatureVerificationResult: { accepted: true, reason_codes: [], work_order_id: 'rdog-wo-deadbeefdeadbeef' },
+    explicitValveRequested: true,
+    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+  }
+);
+assert.strictEqual(signatureMismatch.ready_for_wre_invocation, false, 'signature work_order_id mismatch must block readiness');
+assert(signatureMismatch.not_ready_reasons.includes('signed_work_authority_work_order_mismatch'), 'signature mismatch reason must be explicit');
+
+const expiredPermission = orchestrator.buildRedDogGovernedWorkOrderCandidate(
+  'Fix a narrow RedDog slice',
+  {},
+  handoffRec,
+  {
+    createdAt: fixedAuthorityCreatedAt,
+    repoPermissionSnapshot: {
+      permission: 'write',
+      checked_at: fixedAuthorityCreatedAt,
+      expires_at: '2026-07-12T11:59:59Z',
+      source: 'gh_cli',
+      evidence_digest: 'sha256:' + 'b'.repeat(64)
+    },
+    signatureVerificationResult: {
+      accepted: true,
+      reason_codes: [],
+      work_order_id: authoritySeed.work_order.work_order_id
+    },
+    explicitValveRequested: true,
+    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+  }
+);
+assert.strictEqual(expiredPermission.permission_binding.permission_snapshot_fresh, false, 'expired permission snapshot must not be fresh');
+assert(expiredPermission.not_ready_reasons.includes('permission_snapshot_stale_or_missing'), 'expired permission must block readiness');
 
 const timestampHardenedCandidate = orchestrator.buildRedDogGovernedWorkOrderCandidate(
   'Fix a narrow RedDog slice',
@@ -1676,7 +1767,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.49'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.50'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1690,7 +1781,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.49'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.50'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1702,7 +1793,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.49'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.50'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

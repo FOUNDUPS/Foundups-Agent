@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.49';
+const EXTENSION_VERSION = '0.3.50';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -30,9 +30,11 @@ const BRIDGE_MAX_CONTEXT_CHARS = 48000;
 const BRIDGE_MAX_PROMPT_CHARS = 12000;
 const WRE_OPERATIONAL_SPINE_DRYRUN_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1';
 const WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE = 'REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1';
+const WRE_WORK_ORDER_AUTHORITY_BINDING_SLICE = 'REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1';
 const WRE_OPERATIONAL_SPINE_TARGET = 'reddog_wre_operational_spine';
 const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine';
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
+const TRUSTED_PERMISSION_SNAPSHOT_SOURCES = new Set(['gh_cli', 'github_api', 'mock']);
 const MOJIBAKE_MARKERS = ['\u7aa6', '\u7aaa'];
 const WORK_TRAIL_MAX_EVENTS = 50;
 const VALIDATION_FAILED_FOOTER = [
@@ -1681,6 +1683,86 @@ function deriveAllowedPathsFromTargets(targets) {
   return uniqueStrings(scopes).slice(0, 12);
 }
 
+function normalizePermissionSnapshotBinding(input, fallbackSnapshot, nowIso) {
+  const fallback = fallbackSnapshot && typeof fallbackSnapshot === 'object' ? fallbackSnapshot : {};
+  const raw = input && typeof input === 'object' ? input : null;
+  if (!raw) {
+    return {
+      snapshot: fallback,
+      probe_performed: false,
+      observed: false,
+      fresh: false,
+      expires_at: null,
+      digest: fallback.digest || '',
+      source: fallback.source || 'extension_runtime_candidate',
+      reason: 'permission_snapshot_missing'
+    };
+  }
+  const permissionLevel = String(raw.permission_level || raw.permission || 'unknown').trim().toLowerCase();
+  const capturedAt = toIsoTimestampOrNow(raw.captured_at || raw.checked_at || nowIso);
+  const source = String(raw.source || 'unknown').trim().toLowerCase();
+  const expiresAt = raw.expires_at || raw.expiresAt ? toIsoTimestampOrNow(raw.expires_at || raw.expiresAt) : null;
+  const digest = String(raw.digest || raw.evidence_digest || canonicalWorkOrderDigest({
+    permission_level: permissionLevel,
+    captured_at: capturedAt,
+    source: source,
+    repo_full_name: raw.repo_full_name || raw.repoFullName || 'FOUNDUPS/Foundups-Agent'
+  }));
+  const expiresMs = expiresAt ? Date.parse(expiresAt) : NaN;
+  const nowMs = Date.parse(nowIso);
+  const fresh = Boolean(expiresAt && Number.isFinite(expiresMs) && Number.isFinite(nowMs) && expiresMs >= nowMs);
+  const observed = TRUSTED_PERMISSION_SNAPSHOT_SOURCES.has(source)
+    && fresh
+    && !['unknown', 'none', ''].includes(permissionLevel);
+  return {
+    snapshot: {
+      permission_level: permissionLevel,
+      captured_at: capturedAt,
+      source: source,
+      digest: digest
+    },
+    probe_performed: TRUSTED_PERMISSION_SNAPSHOT_SOURCES.has(source),
+    observed: observed,
+    fresh: fresh,
+    expires_at: expiresAt,
+    digest: digest,
+    source: source,
+    reason: observed ? 'permission_snapshot_observed' : 'permission_snapshot_not_observed'
+  };
+}
+
+function normalizeSignedAuthorityBinding(input, workOrderId) {
+  const raw = input && typeof input === 'object' ? input : null;
+  if (!raw) {
+    return {
+      provided: false,
+      accepted: false,
+      work_order_id_matches: false,
+      verified: false,
+      digest: '',
+      reason_codes: ['signed_work_authority_missing'],
+      work_order_id: ''
+    };
+  }
+  const reasonCodes = uniqueStrings(raw.reason_codes || raw.reasonCodes || []);
+  const signedWorkOrderId = String(raw.work_order_id || raw.workOrderId || '');
+  const accepted = raw.accepted === true;
+  const matches = signedWorkOrderId === String(workOrderId || '');
+  return {
+    provided: true,
+    accepted: accepted,
+    work_order_id_matches: matches,
+    verified: accepted && matches,
+    digest: canonicalWorkOrderDigest({
+      accepted: accepted,
+      reason_codes: reasonCodes,
+      work_order_id: signedWorkOrderId
+    }),
+    reason_codes: reasonCodes,
+    work_order_id: signedWorkOrderId
+  };
+}
+
 function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handoffRecommendation, options) {
   const opts = options && typeof options === 'object' ? options : {};
   const rec = handoffRecommendation && typeof handoffRecommendation === 'object' ? handoffRecommendation : {};
@@ -1708,7 +1790,7 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
   }).slice('sha256:'.length, 'sha256:'.length + 16);
   const permissionLevel = String(opts.permissionLevel || 'needs_verification');
   const permissionSource = String(opts.permissionSource || 'extension_runtime_candidate');
-  const permissionSnapshot = {
+  const fallbackPermissionSnapshot = {
     permission_level: permissionLevel,
     captured_at: String(opts.permissionCapturedAt || createdAt),
     source: permissionSource,
@@ -1720,6 +1802,16 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
       captured_at: opts.permissionCapturedAt || createdAt
     })
   };
+  const permissionBinding = normalizePermissionSnapshotBinding(
+    opts.repoPermissionSnapshot || opts.permissionSnapshot || opts.repoPermissionProbeSnapshot,
+    fallbackPermissionSnapshot,
+    createdAt
+  );
+  const permissionSnapshot = permissionBinding.snapshot;
+  const signatureBinding = normalizeSignedAuthorityBinding(
+    opts.signatureVerificationResult || opts.signedAuthorityVerificationResult,
+    workOrderId
+  );
   const commandDigest = canonicalWorkOrderDigest({ work_focus: rawFocus });
   const holoScorecard = opts.holoScorecard && typeof opts.holoScorecard === 'object' ? opts.holoScorecard : {};
   const holoindexEvidence = opts.holoindexEvidence || {
@@ -1778,27 +1870,50 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
     holoindex_evidence: holoindexEvidence
   };
   const readyForInvocation = (
-    permissionLevel !== 'needs_verification'
-    && permissionSource !== 'extension_runtime_candidate'
+    permissionBinding.observed === true
+    && permissionBinding.fresh === true
     && allowedPaths.length > 0
-    && opts.signedAuthorityVerified === true
+    && signatureBinding.verified === true
     && opts.explicitValveRequested === true
   );
   return {
     slice_name: WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE,
+    authority_binding_slice: WRE_WORK_ORDER_AUTHORITY_BINDING_SLICE,
     work_order: workOrder,
     work_order_digest: canonicalWorkOrderDigest(workOrder),
     runtime_emission_performed: true,
+    authority_binding_performed: true,
+    permission_binding: {
+      probe_performed: permissionBinding.probe_performed === true,
+      permission_snapshot_fresh: permissionBinding.fresh === true,
+      permission_truth_label: permissionBinding.observed === true ? 'OBSERVED' : 'NEEDS_VERIFICATION',
+      permission_snapshot_digest: permissionBinding.digest || '',
+      permission_snapshot_source: permissionBinding.source || 'unknown',
+      permission_snapshot_expires_at: permissionBinding.expires_at || null,
+      no_live_probe_performed_by_extension: true
+    },
+    signed_authority_binding: {
+      provided: signatureBinding.provided === true,
+      accepted: signatureBinding.accepted === true,
+      work_order_id_matches: signatureBinding.work_order_id_matches === true,
+      signed_authority_verified: signatureBinding.verified === true,
+      signed_authority_digest: signatureBinding.digest || '',
+      signed_authority_work_order_id: signatureBinding.work_order_id || '',
+      reason_codes: signatureBinding.reason_codes,
+      no_signature_verification_performed_by_extension: true
+    },
     raw_work_focus_stored: false,
     github_permission_probe_performed: false,
-    signed_authority_verified: opts.signedAuthorityVerified === true,
+    signed_authority_verified: signatureBinding.verified === true,
     explicit_valve_requested: opts.explicitValveRequested === true,
     ready_for_wre_invocation: readyForInvocation,
     not_ready_reasons: readyForInvocation ? [] : uniqueStrings([
-      permissionLevel === 'needs_verification' ? 'permission_snapshot_needs_verification' : '',
-      permissionSource === 'extension_runtime_candidate' ? 'fresh_github_permission_probe_missing' : '',
+      permissionBinding.observed === true ? '' : 'permission_snapshot_needs_verification',
+      permissionBinding.fresh === true ? '' : 'permission_snapshot_stale_or_missing',
+      permissionBinding.probe_performed === true ? '' : 'fresh_github_permission_probe_missing',
       allowedPaths.length === 0 ? 'allowed_paths_missing_or_unverified' : '',
-      opts.signedAuthorityVerified === true ? '' : 'signed_work_authority_not_verified',
+      signatureBinding.verified === true ? '' : 'signed_work_authority_not_verified',
+      signatureBinding.provided === true && signatureBinding.work_order_id_matches !== true ? 'signed_work_authority_work_order_mismatch' : '',
       opts.explicitValveRequested === true ? '' : 'explicit_worktree_valve_not_requested'
     ]),
     no_python_invocation_performed: true,
@@ -1816,9 +1931,12 @@ function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handof
 function buildRedDogGovernedWorkOrderCandidateSection(candidate) {
   const c = candidate && typeof candidate === 'object' ? candidate : {};
   const order = c.work_order && typeof c.work_order === 'object' ? c.work_order : {};
+  const permissionBinding = c.permission_binding && typeof c.permission_binding === 'object' ? c.permission_binding : {};
+  const signedBinding = c.signed_authority_binding && typeof c.signed_authority_binding === 'object' ? c.signed_authority_binding : {};
   return [
     '## RedDog Governed Work Order Candidate',
     '- slice_name: ' + (c.slice_name || WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE) + ' [OBSERVED]',
+    '- authority_binding_slice: ' + (c.authority_binding_slice || WRE_WORK_ORDER_AUTHORITY_BINDING_SLICE) + ' [OBSERVED]',
     '- work_order_id: ' + (order.work_order_id || 'unknown') + ' [OBSERVED]',
     '- work_order_digest: ' + (c.work_order_digest || 'unknown') + ' [OBSERVED]',
     '- requested_operation: ' + (order.requested_operation || 'unknown') + ' [OBSERVED]',
@@ -1826,8 +1944,15 @@ function buildRedDogGovernedWorkOrderCandidateSection(candidate) {
     '- allowed_paths: ' + JSON.stringify(order.allowed_paths || []) + ' [OBSERVED]',
     '- denied_paths: ' + JSON.stringify(order.denied_paths || []) + ' [OBSERVED]',
     '- permission_snapshot_source: ' + ((order.repo_permission_snapshot && order.repo_permission_snapshot.source) || 'unknown') + ' [OBSERVED]',
+    '- permission_snapshot_fresh: ' + (permissionBinding.permission_snapshot_fresh === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- permission_truth_label: ' + (permissionBinding.permission_truth_label || 'NEEDS_VERIFICATION') + ' [OBSERVED]',
+    '- permission_snapshot_digest: ' + (permissionBinding.permission_snapshot_digest || 'unknown') + ' [OBSERVED]',
     '- github_permission_probe_performed: ' + (c.github_permission_probe_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_live_probe_performed_by_extension: ' + (permissionBinding.no_live_probe_performed_by_extension === true ? 'true' : 'false') + ' [OBSERVED]',
     '- signed_authority_verified: ' + (c.signed_authority_verified === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- signed_authority_digest: ' + (signedBinding.signed_authority_digest || 'unknown') + ' [OBSERVED]',
+    '- signed_authority_work_order_id: ' + (signedBinding.signed_authority_work_order_id || 'unknown') + ' [OBSERVED]',
+    '- no_signature_verification_performed_by_extension: ' + (signedBinding.no_signature_verification_performed_by_extension === true ? 'true' : 'false') + ' [OBSERVED]',
     '- ready_for_wre_invocation: ' + (c.ready_for_wre_invocation === true ? 'true' : 'false') + ' [OBSERVED]',
     '- not_ready_reasons: ' + JSON.stringify(c.not_ready_reasons || []) + ' [OBSERVED]',
     '- raw_work_focus_stored: ' + (c.raw_work_focus_stored === false ? 'false' : 'unknown') + ' [OBSERVED]',
@@ -1888,6 +2013,11 @@ function buildWreOperationalSpineDryRunPreview(workFocus, classification, handof
     governed_work_order_candidate: workOrderCandidate.work_order,
     governed_work_order_candidate_digest: workOrderCandidate.work_order_digest,
     governed_work_order_runtime_emission: workOrderCandidate,
+    governed_work_order_authority_binding: {
+      permission_binding: workOrderCandidate.permission_binding,
+      signed_authority_binding: workOrderCandidate.signed_authority_binding,
+      authority_binding_performed: workOrderCandidate.authority_binding_performed === true
+    },
     command_digest: commandDigest,
     command_redacted_summary: sanitizeContinuationField(rawFocus, 180),
     raw_work_focus_stored: false,
@@ -1927,6 +2057,7 @@ function buildWreOperationalSpineDryRunPreviewSection(preview) {
     '- candidate_work_order_emitted: ' + (p.candidate_work_order_emitted === true ? 'true' : 'false') + ' [OBSERVED]',
     '- work_order_type: ' + (p.work_order_type || 'unknown') + ' [OBSERVED]',
     '- governed_work_order_candidate_digest: ' + (p.governed_work_order_candidate_digest || 'unknown') + ' [OBSERVED]',
+    '- governed_work_order_authority_binding_performed: ' + ((p.governed_work_order_authority_binding && p.governed_work_order_authority_binding.authority_binding_performed) === true ? 'true' : 'false') + ' [OBSERVED]',
     '- governed_work_order_ready_for_invocation: ' + (p.governed_work_order_ready_for_invocation === true ? 'true' : 'false') + ' [OBSERVED]',
     '- governed_work_order_not_ready_reasons: ' + JSON.stringify(p.governed_work_order_not_ready_reasons || []) + ' [OBSERVED]',
     '- command_digest: ' + (p.command_digest || 'unknown') + ' [OBSERVED]',
@@ -5133,6 +5264,8 @@ module.exports = {
   buildRedDogGovernedWorkOrderCandidate,
   buildRedDogGovernedWorkOrderCandidateSection,
   deriveAllowedPathsFromTargets,
+  normalizePermissionSnapshotBinding,
+  normalizeSignedAuthorityBinding,
   buildWreOperationalSpineDryRunPreview,
   buildWreOperationalSpineDryRunPreviewSection,
   compositePayloadDigest,

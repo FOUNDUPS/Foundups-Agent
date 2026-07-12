@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1 (authority binding, 0.3.50)
+
+- `buildRedDogGovernedWorkOrderCandidate()` now binds supplied repo permission snapshots and signed-authority verifier results into `permission_binding` and `signed_authority_binding` metadata.
+- Readiness is fail-closed: a caller-supplied boolean is not authority; `ready_for_wre_invocation=true` requires a fresh trusted permission snapshot, matching accepted signed-authority result, derived path scope, and explicit worktree valve request.
+- The extension does not run the GitHub permission probe, verify signatures, sign payloads, invoke Python/WRE, create worktrees, enqueue OpenClaw, dispatch Hermes, create PRs, merge, or settle rewards in this slice.
+- Version 0.3.49 -> 0.3.50 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1 (governed work-order candidate, 0.3.49)
 
 - `buildWreOperationalSpineDryRunPreview()` now embeds a full `RedDogGovernedWorkOrder` candidate under `governed_work_order_runtime_emission`.
