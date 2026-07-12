@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_OPERATOR_LOOP_WARDROBE_SELECTION_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 45, 50, 95, 97, 99
+
+- Added `src/reddog_operator_loop_wardrobe_selection.py`: pure dry-run selector that converts a normalized 012 work focus plus observed HoloIndex/direct-read state into a deterministic `RedDogOperatorLoopWardrobeSelectionReceipt`.
+- Implements the four canonical WSP_95/WSP_97 profiles from the contract: `wsp97_solo_retrieval`, `wsp97_architect_audit`, `wsp97_implementation_slice`, and `wsp97_sovereign_execution`. Draft PR work stays on the implementation plane; live enqueue/shell/worktree/merge/reward requests select the sovereign execution candidate plane and fail closed until downstream signed valve authority exists.
+- Boundary: no extension runtime wiring, no HoloIndex re-index, no OpenClaw enqueue, no WRE shell/worktree write, no git/PR/merge action, and no command execution. The selector emits receipts only.
+- HoloIndex read-only probe for `RedDog operator loop wardrobe selection dryrun receipt` surfaced adjacent receipt and wardrobe surfaces, but not the new dry-run module. Recorded as `HOLOINDEX_REDDOG_OPERATOR_LOOP_WARDROBE_SELECTION_DRYRUN_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_OPERATOR_LOOP_WARDROBE_SELECTION_CONTRACT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 45, 50, 95, 97, 99
