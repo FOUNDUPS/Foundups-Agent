@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_RUN_TRACE_LOCAL_ASSESSMENT_PHASE1 (local pasted-trace diagnostics, 0.3.62)
+
+- Added a local Run Trace assessment fast path for pasted `## Run Trace` diagnostics so RedDog can explain blocked/slow traces without sending raw trace text through HoloIndex/Fusion/OpenRouter.
+- The assessor parses telemetry fields such as `extension_version`, `mode`, `redaction gate status`, `made_network_call`, target recall counts, output validation, and runtime gate reasons, then returns a WSP_97-labeled diagnostic response.
+- Runtime consumption remains blocked with `local_run_trace_assessment_not_actionable`; no downstream action planning, repo reads, shell, HoloIndex mutation, or model call is performed.
+- Version 0.3.61 -> 0.3.62 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-13 - REDDOG_SIMPLE_IDENTITY_FAST_PATH_PHASE1 (local identity/status answer, 0.3.61)
 
 - Added a narrow local fast path for short identity/status questions such as `are you RedDog?` so they do not escalate through HIGH-tier Fusion routing merely because the prompt contains `RedDog`.
