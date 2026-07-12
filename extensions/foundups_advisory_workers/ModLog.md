@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_DETERMINE_BLOCK_TARGET_DERIVATION_GUARD_PHASE1 (Determine question target false-positive guard, 0.3.59)
+
+- Fixed the 0.3.58 host block where `Determine:` numbered questions were parsed as markdown/path bullets and conceptual slash phrases such as `ledger/runtime` became false `repo_file_targets`.
+- `deriveWorkFocusTargets()` now treats a `Determine:` block as answer/output requirements, not repository read intent, while preserving explicit `Read first:` / required-target capture.
+- Added WFTD-021 regression coverage for collection, typed target extraction, target recall, and typed grounding preflight: the multi-lane orchestration-brain prompt now requires exactly the three real repo files and passes grounding when all three are recalled.
+- Version 0.3.58 -> 0.3.59 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_EXTENSION_OPERATOR_LOOP_RUNTIME_CONSUMPTION_PHASE1 (validated recommendation gate, 0.3.58)
 
 - Added `buildRuntimeConsumptionGate()` so wardrobe selection, permission probing, WRE dry-run preview, and explicit WRE invocation are only planned after model result OK, output validation pass, Determine verifier pass when applied, and Fusion quorum pass.

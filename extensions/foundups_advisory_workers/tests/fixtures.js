@@ -186,6 +186,23 @@ const WORK_FOCUS_PROSE_READ_FIRST_PROMPT = [
   'Produce required RedDog architect output sections per contract.'
 ].join('\n');
 
+// REDDOG_DETERMINE_BLOCK_TARGET_DERIVATION_GUARD_PHASE1: the exact 0.3.58 host failure shape.
+// The three real repo files are named in prose, then a Determine numbered list asks questions
+// containing slash-bearing conceptual phrases like "ledger/runtime". Those question lines are
+// answer obligations, not repo-file read intent, and must not enter repo_file_targets.
+const WORK_FOCUS_DETERMINE_FALSE_POSITIVE_PROMPT = [
+  'Audit whether a multi-lane orchestration brain should be a WRE module or a RedDog extension feature, and what already exists. Read first: the active slice ledger at '
+    + WORK_FOCUS_ORCH_PATHS[0] + ', the typed schema ' + WORK_FOCUS_ORCH_PATHS[1]
+    + ', and the breadcrumb/handoff layer ' + WORK_FOCUS_ORCH_PATHS[2] + '.',
+  '',
+  'Determine:',
+  '1. What lane-state sources currently exist.',
+  '2. Which source should be authoritative.',
+  '3. Whether duplicate-work prevention already exists.',
+  '4. Whether stale ledger/runtime reconciliation is the real gap.',
+  '5. Whether WRE, not the RedDog extension, should own recursive multi-lane orchestration.'
+].join('\n');
+
 // Option-3 REGRESSION guard: the SAME three files, one path per line as a BULLETED "Read first:"
 // list, must still derive all three cleanly (must not regress when the prose branch was tightened).
 const WORK_FOCUS_PROSE_READ_FIRST_BULLET_PROMPT = WORK_FOCUS_READ_FIRST_PROMPT;
@@ -222,6 +239,7 @@ module.exports = {
   WORK_FOCUS_SCOPE_OUT_PROMPT,
   WORK_FOCUS_DENIED_MIX_PROMPT,
   WORK_FOCUS_PROSE_READ_FIRST_PROMPT,
+  WORK_FOCUS_DETERMINE_FALSE_POSITIVE_PROMPT,
   WORK_FOCUS_PROSE_READ_FIRST_BULLET_PROMPT,
   WORK_FOCUS_DIR_PATH_M2M_PROMPT
 };

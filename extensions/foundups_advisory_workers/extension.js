@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.58';
+const EXTENSION_VERSION = '0.3.59';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -875,6 +875,7 @@ function deriveWorkFocusTargets(taskText) {
   let fenceStartIdx = -1;
   let readCapture = false;
   let scopeOut = false;
+  let determineCapture = false;
 
   const fenceLines = [];
 
@@ -918,21 +919,40 @@ function deriveWorkFocusTargets(taskText) {
     if (WORK_FOCUS_SCOPE_OUT_PATTERNS.some((p) => p.test(stripped))) {
       scopeOut = true;
       readCapture = false;
+      determineCapture = false;
       continue;
     }
     if (WORK_FOCUS_READ_HEADER_PATTERNS.some((p) => p.test(stripped))) {
       readCapture = true;
       scopeOut = false;
+      determineCapture = false;
       const colonIdx = stripped.indexOf(':');
       if (colonIdx !== -1 && colonIdx < stripped.length - 1) {
         addProse(stripped.slice(colonIdx + 1), 'read_first');
       }
       continue;
     }
+    if (/^determine\s*:/i.test(stripped)) {
+      // Determine questions are output obligations, not repository read intent. In v0.3.58 the
+      // numbered Determine list was treated as markdown bullets, so phrases like
+      // "Whether stale ledger/runtime reconciliation..." became false repo_file_targets and
+      // blocked the grounding preflight. Keep the Determine block out of target derivation while
+      // still allowing a later explicit Read-first / Required-target section to restart capture.
+      determineCapture = true;
+      readCapture = false;
+      scopeOut = false;
+      continue;
+    }
     if (!stripped) {
       // Blank line ends any capture/scope window.
       readCapture = false;
       scopeOut = false;
+      determineCapture = false;
+      continue;
+    }
+    if (determineCapture) {
+      // Skip flat numbered/lettered Determine items and follow-on prose in the Determine section.
+      // A new explicit target section is handled above before this guard.
       continue;
     }
     if (scopeOut) {
