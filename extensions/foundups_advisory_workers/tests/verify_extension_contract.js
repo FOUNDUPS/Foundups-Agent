@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.59', 'package version must be 0.3.59');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.59'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.60', 'package version must be 0.3.60');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.60'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.59', 'README version mismatch');
+includes(readme, 'Version: 0.3.60', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -490,6 +490,91 @@ const badOutput = 'Decision\nFindings\nEvidence';
 const validation = orchestrator.validateRedDogOutput(badOutput);
 assert.strictEqual(validation.valid, false, 'validator must detect missing sections');
 assert(validation.missingSections.includes('Proposed fixes'), 'validator must list missing Proposed fixes');
+
+// REDDOG_PROMPT_AUTHORING_DELIVERABLE_CONTRACT_PHASE1: when 012 asks for a worker prompt,
+// advisory prose is not enough. RedDog must produce the actual executable prompt artifact.
+includes(extensionJs, 'function isPromptAuthoringRequest', 'PAD-001: prompt-authoring detector missing');
+includes(extensionJs, 'function hasExecutableWorkerPromptBlock', 'PAD-001: worker prompt artifact validator missing');
+const promptAuthoringFocus = 'Evaluate and provide the prompt for REDDOG_FUSION_QUORUM_AND_DETERMINE_GATE_RECONCILIATION_PHASE1.';
+assert.strictEqual(orchestrator.isPromptAuthoringRequest(promptAuthoringFocus), true, 'PAD-001: prompt-authoring focus must be detected');
+const promptAuthoringWsp = orchestrator.constructWspTaskPrompt(
+  promptAuthoringFocus,
+  { tier: 'HIGH', reasons: ['architecture'] },
+  'HoloIndex weak',
+  'reddog_architect'
+);
+includes(promptAuthoringWsp, 'Prompt authoring deliverable contract', 'PAD-002: prompt construction must inject prompt deliverable contract');
+includes(promptAuthoringWsp, '## Worker Prompt', 'PAD-002: prompt construction must require Worker Prompt section');
+includes(promptAuthoringWsp, 'DEFINITION_GAP', 'PAD-002: missing definitions must route inside the prompt artifact');
+const promptAuthoringTargets = orchestrator.collectRequiredTargets(promptAuthoringFocus);
+assert(promptAuthoringTargets.derivation_sources.includes('prompt_authoring_context'), 'PAD-003: prompt-authoring context source must be recorded');
+for (const p of [
+  'extensions/foundups_advisory_workers/INTERFACE.md',
+  'extensions/foundups_advisory_workers/ROADMAP.md',
+  'extensions/foundups_advisory_workers/ModLog.md',
+  'modules/communication/moltbot_bridge/src/reddog_determine_answer_contract.py',
+  'modules/communication/moltbot_bridge/src/reddog_adversarial_verifier_panel.py',
+  'modules/communication/moltbot_bridge/src/reddog_repair_evidence_guard.py',
+  'scripts/reddog_judgment_verifier_once.py'
+]) {
+  assert(promptAuthoringTargets.targets.includes(p), 'PAD-003: prompt-authoring direct-read target missing: ' + p);
+}
+const promptAuthoringProseOnly = [
+  '## Decision',
+  'I can draft a scaffold prompt but need clarification.',
+  '## Findings',
+  'F1',
+  '## Evidence',
+  'E1',
+  '## Proposed fixes',
+  'Ask 012.',
+  '## Uncertainties',
+  'Terms undefined.',
+  '## Architect Trace',
+  'Retrieved context.',
+  '## WSP_97 Truth Labels',
+  'NEEDS_VERIFICATION.',
+  '## WSP_15 Priority',
+  'P1.',
+  '## Verification gaps',
+  'No prompt artifact.',
+  '## Next safest step',
+  'Clarify.'
+].join('\n\n');
+const promptAuthoringMissing = orchestrator.validateRedDogOutput(promptAuthoringProseOnly, {
+  substantiveArchitect: true,
+  mode: 'openrouter_single',
+  promptAuthoringRequired: true
+});
+assert.strictEqual(promptAuthoringMissing.valid, false, 'PAD-004: prompt-authoring output without artifact must fail validation');
+assert(promptAuthoringMissing.missingSections.includes('Worker Prompt'), 'PAD-004: missing Worker Prompt must be reported');
+const validWorkerPromptBlock = [
+  '## Worker Prompt',
+  '',
+  '```text',
+  'MISSION:',
+  '  OBJ: Audit and repair the prompt-authoring gate.',
+  'READ_FIRST:',
+  '  - extensions/foundups_advisory_workers/INTERFACE.md',
+  'FAIL:',
+  '  - Stop on missing grounding.',
+  'VALIDATION:',
+  '  - Run contract tests.',
+  'RETURN:',
+  '  - VERIFIED_READY draft PR.',
+  '```'
+].join('\n');
+assert.strictEqual(orchestrator.hasExecutableWorkerPromptBlock(validWorkerPromptBlock), true, 'PAD-005: valid fenced worker prompt must be recognized');
+const promptAuthoringComplete = promptAuthoringProseOnly + '\n\n' + validWorkerPromptBlock;
+const promptAuthoringValid = orchestrator.validateRedDogOutput(promptAuthoringComplete, {
+  substantiveArchitect: true,
+  mode: 'openrouter_single',
+  promptAuthoringRequired: true
+});
+assert.strictEqual(promptAuthoringValid.valid, true, 'PAD-006: prompt-authoring output with executable artifact must validate');
+const promptRepair = orchestrator.buildRepairPrompt(promptAuthoringWsp, promptAuthoringProseOnly, ['Worker Prompt']);
+includes(promptRepair, 'Worker Prompt repair requirement', 'PAD-007: repair prompt must explain worker prompt artifact requirements');
+includes(promptRepair, 'DEFINITION_GAP block inside the fenced prompt', 'PAD-007: repair prompt must keep definition gaps inside artifact');
 
 const repairPrompt = orchestrator.buildRepairPrompt('task', badOutput, validation.missingSections);
 includes(repairPrompt, 'Do not invent evidence', 'repair prompt must forbid invented evidence');
@@ -818,7 +903,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.59', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.60', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2156,7 +2241,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.59'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.60'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2170,7 +2255,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.59'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.60'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2182,7 +2267,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.59'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.60'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

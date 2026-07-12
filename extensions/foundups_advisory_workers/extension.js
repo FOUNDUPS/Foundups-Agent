@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.59';
+const EXTENSION_VERSION = '0.3.60';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -1057,6 +1057,17 @@ function deriveWorkFocusTargets(taskText) {
   }
   for (const token of extractM2mArrayTargets(text, [/\bCTX\.FILES\s*:/i, /\bCTX\s*:\s*FILES\s*:/i])) {
     add(token, 'ctx_files');
+  }
+
+  // REDDOG_PROMPT_AUTHORING_DELIVERABLE_CONTRACT_PHASE1: a request to author/evaluate a RedDog
+  // worker prompt needs the prompt-generation and judgment surfaces even when the 012 work focus
+  // does not spell out repo paths. HoloIndex alone missed these in the 0.3.59 prompt-authoring
+  // run, so add bounded, non-self repo targets and let the existing governed direct-read gate
+  // fetch/deny them. This is retrieval only: no re-index, shell, WRE enqueue, or authority change.
+  if (isPromptAuthoringRequest(text)) {
+    for (const token of PROMPT_AUTHORING_CONTEXT_TARGETS) {
+      add(token, 'prompt_authoring_context');
+    }
   }
 
   // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): a fragment that was dropped
@@ -3088,6 +3099,16 @@ const REDDOG_REQUIRED_OUTPUT_SECTIONS = [
   'Next safest step'
 ];
 
+const PROMPT_AUTHORING_CONTEXT_TARGETS = [
+  'extensions/foundups_advisory_workers/INTERFACE.md',
+  'extensions/foundups_advisory_workers/ROADMAP.md',
+  'extensions/foundups_advisory_workers/ModLog.md',
+  'modules/communication/moltbot_bridge/src/reddog_determine_answer_contract.py',
+  'modules/communication/moltbot_bridge/src/reddog_adversarial_verifier_panel.py',
+  'modules/communication/moltbot_bridge/src/reddog_repair_evidence_guard.py',
+  'scripts/reddog_judgment_verifier_once.py'
+];
+
 const ARCHITECT_TRACE_SECTIONS = [
   'Architect Trace',
   'Verification gaps'
@@ -3182,6 +3203,53 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
   };
 }
 
+function isPromptAuthoringRequest(text) {
+  const src = String(text || '').toLowerCase();
+  if (!src.includes('prompt')) {
+    return false;
+  }
+  return /\b(?:provide|create|draft|author|write|generate|improve|enhance|audit|evaluate)\b[\s\S]{0,120}\bprompt\b/.test(src)
+    || /\bprompt\b[\s\S]{0,120}\b(?:for|to|worker|slice|phase1|phase_1|author|implement|audit|execute)\b/.test(src)
+    || /\b(?:m2m|worker|reddog)\s+prompt\b/.test(src);
+}
+
+function hasExecutableWorkerPromptBlock(markdown) {
+  const lines = String(markdown || '').split(/\r?\n/);
+  let inWorkerPrompt = false;
+  let inFence = false;
+  let body = '';
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!inWorkerPrompt) {
+      if (/^#{1,3}[ \t]+Worker[ \t]+Prompt\b/i.test(trimmed)) {
+        inWorkerPrompt = true;
+      }
+      continue;
+    }
+    if (!inFence) {
+      if (/^```(?:text|md|markdown|yaml|yml)?[ \t]*$/i.test(trimmed)) {
+        inFence = true;
+        body = '';
+      } else if (/^#{1,3}[ \t]+\S/.test(trimmed)) {
+        return false;
+      }
+      continue;
+    }
+    if (trimmed === '```') {
+      const required = [
+        /\b(?:MISSION|OBJ|PURPOSE)\b/i,
+        /\b(?:READ_FIRST|READ|REQUIRED direct-read targets)\b/i,
+        /\b(?:FAIL|STOP|REJECT)\b/i,
+        /\b(?:VALIDATION|TESTS|CHECK)\b/i,
+        /\bRETURN\b/i
+      ];
+      return required.every((pattern) => pattern.test(body));
+    }
+    body += line + '\n';
+  }
+  return false;
+}
+
 function resolveAutoContextMode(classification, selectedContextMode) {
   const mode = cleanContextMode(selectedContextMode);
   if (mode !== 'auto') {
@@ -3252,6 +3320,9 @@ function validateRedDogOutput(markdown, options) {
   if (opts.mode === 'foundups_fusion' && !fusionPanelOk) {
     missingSections.push('Fusion panel structure (Lead + Synthesis)');
   }
+  if (opts.promptAuthoringRequired === true && !hasExecutableWorkerPromptBlock(text)) {
+    missingSections.push('Worker Prompt');
+  }
   return {
     valid: missingSections.length === 0,
     missingSections,
@@ -3306,6 +3377,12 @@ function constructWspTaskPrompt(workFocus, classification, contextQuality, worke
     lines.push(
       '',
       'Determine answer contract: the 012 work focus contains a Determine numbered list. Include a section exactly named `## Determine Answers` with a fenced `json` array. Each object must have `index`, `question_text`, `answer`, `wsp97_label`, and `evidence_refs`. Use one object per Determine item, in order. Evidence-bearing answers require repo `path:line` refs. If evidence is absent, use answer `needs_verification`, label `NEEDS_VERIFICATION`, and an empty `evidence_refs` list.'
+    );
+  }
+  if (isPromptAuthoringRequest(focus)) {
+    lines.push(
+      '',
+      'Prompt authoring deliverable contract: the 012 work focus asks for a prompt. You MUST include a section exactly named `## Worker Prompt` containing one fenced `text` block with an executable worker prompt. The fenced prompt must include MISSION/OBJ, READ_FIRST or READ, FAIL/REJECT conditions, VALIDATION/TESTS/CHECK, and RETURN. If definitions are missing, put a `DEFINITION_GAP` block INSIDE the fenced prompt and still provide the bounded prompt; do not replace the deliverable with a request for clarification.'
     );
   }
   lines.push('', 'Produce required RedDog architect output sections per contract.');
@@ -3557,6 +3634,15 @@ function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
   const sections = Array.isArray(missingSections) ? missingSections : [];
   const sanitizedDraft = sanitizeTargetSnippetForRedaction(String(badOutput || '').slice(0, 12000));
   const requiredHeaders = sections.map((section) => '## ' + section).join('\n');
+  const workerPromptInstruction = sections.includes('Worker Prompt')
+    ? [
+      '',
+      'Worker Prompt repair requirement:',
+      'Under `## Worker Prompt`, include exactly one fenced `text` block containing the executable worker prompt.',
+      'The fenced prompt must include MISSION/OBJ, READ_FIRST or READ, FAIL/REJECT, VALIDATION/TESTS/CHECK, and RETURN.',
+      'If definitions are missing, include a DEFINITION_GAP block inside the fenced prompt; do not omit the prompt artifact.'
+    ].join('\n')
+    : '';
   return [
     'Repair pass: add ONLY the missing required schema sections listed below.',
     'Preserve factual content from the draft answer. Do not invent evidence, repo paths, test results, or authority.',
@@ -3567,6 +3653,7 @@ function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
     'Required output format -- include EVERY missing section using exactly these markdown headers (one section each):',
     requiredHeaders || '(none listed)',
     'Do not omit any listed section. Each section must contain at least one substantive line.',
+    workerPromptInstruction,
     '',
     'Original WSP task prompt (bounded excerpt):',
     String(originalPrompt || '').slice(0, 2000),
@@ -4021,7 +4108,12 @@ function wireFusionWebview(context, webview, worker, state) {
     const substantiveTask = isSubstantiveRedDogWorker(workerType);
     if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
-      const validation = validateRedDogOutput(result.content || '', { substantiveArchitect: true, mode: mode });
+      const outputValidationOptions = {
+        substantiveArchitect: true,
+        mode: mode,
+        promptAuthoringRequired: isPromptAuthoringRequest(workFocus)
+      };
+      const validation = validateRedDogOutput(result.content || '', outputValidationOptions);
       validationState = {
         validated: validation.valid,
         missing_sections: validation.missingSections,
@@ -4095,7 +4187,7 @@ function wireFusionWebview(context, webview, worker, state) {
             workTrail.push('repair_blocked', 'repair_dropped_determine_evidence');
             result.content = appendValidationFailureContent(result.content, validationState);
           } else {
-            const repairValidation = validateRedDogOutput(mergeResult.text, { substantiveArchitect: true, mode: mode });
+            const repairValidation = validateRedDogOutput(mergeResult.text, outputValidationOptions);
             validationState.repair_ok = repairValidation.valid;
             validationState.missing_sections_after_repair = repairValidation.missingSections.length
               ? repairValidation.missingSections
@@ -6220,6 +6312,8 @@ module.exports = {
   REDDOG_REQUIRED_OUTPUT_SECTIONS,
   formatElapsed,
   matchReddogProgress,
+  isPromptAuthoringRequest,
+  hasExecutableWorkerPromptBlock,
   REDDOG_STAGE_ACTIONS,
   REDDOG_PROGRESS_ACTIONS,
   REDDOG_TERMINAL_HOLD_MS,
