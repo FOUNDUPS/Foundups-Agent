@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.48';
+const EXTENSION_VERSION = '0.3.49';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -29,6 +29,7 @@ const BRIDGE_MAX_STDERR_BYTES = 65536;
 const BRIDGE_MAX_CONTEXT_CHARS = 48000;
 const BRIDGE_MAX_PROMPT_CHARS = 12000;
 const WRE_OPERATIONAL_SPINE_DRYRUN_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1';
+const WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE = 'REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1';
 const WRE_OPERATIONAL_SPINE_TARGET = 'reddog_wre_operational_spine';
 const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine';
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
@@ -1625,6 +1626,223 @@ function buildGovernedHandoffSection(recommendation) {
   return lines.join('\n');
 }
 
+function uniqueStrings(values) {
+  const seen = new Set();
+  const out = [];
+  for (const value of Array.isArray(values) ? values : []) {
+    const text = String(value || '').trim();
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    out.push(text);
+  }
+  return out;
+}
+
+function canonicalWorkOrderDigest(payload) {
+  const normalize = (value) => {
+    if (Array.isArray(value)) {
+      return value.map(normalize);
+    }
+    if (value && typeof value === 'object') {
+      const out = {};
+      for (const key of Object.keys(value).sort()) {
+        out[key] = normalize(value[key]);
+      }
+      return out;
+    }
+    return value;
+  };
+  return 'sha256:' + crypto.createHash('sha256')
+    .update(JSON.stringify(normalize(payload)), 'utf8')
+    .digest('hex');
+}
+
+function toIsoTimestampOrNow(value) {
+  const parsed = Date.parse(String(value || ''));
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : new Date().toISOString();
+}
+
+function addHoursIsoTimestamp(value, hours) {
+  const parsed = Date.parse(String(value || ''));
+  const base = Number.isFinite(parsed) ? parsed : Date.now();
+  return new Date(base + hours * 60 * 60 * 1000).toISOString();
+}
+
+function deriveAllowedPathsFromTargets(targets) {
+  const scopes = [];
+  for (const target of Array.isArray(targets) ? targets : []) {
+    const normalized = stripSymbolSuffix(normalizeTargetPath(target));
+    if (!normalized || normalized.toLowerCase().startsWith('symbol:')) continue;
+    if (isTargetReadPathDenied(normalized)) continue;
+    const slash = normalized.lastIndexOf('/');
+    if (slash <= 0) continue;
+    scopes.push(normalized.slice(0, slash + 1) + '**');
+  }
+  return uniqueStrings(scopes).slice(0, 12);
+}
+
+function buildRedDogGovernedWorkOrderCandidate(workFocus, classification, handoffRecommendation, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const rec = handoffRecommendation && typeof handoffRecommendation === 'object' ? handoffRecommendation : {};
+  const construction = opts.promptConstruction && typeof opts.promptConstruction === 'object' ? opts.promptConstruction : {};
+  const rawFocus = String(workFocus || '');
+  const createdAt = toIsoTimestampOrNow(opts.createdAt);
+  const expiresAt = opts.expiresAt ? toIsoTimestampOrNow(opts.expiresAt) : addHoursIsoTimestamp(createdAt, 1);
+  const requiredTargets = Array.isArray(opts.requiredTargets)
+    ? opts.requiredTargets.slice()
+    : (Array.isArray(construction.required_targets_authoritative_paths)
+      ? construction.required_targets_authoritative_paths.slice()
+      : []);
+  const allowedPaths = uniqueStrings(opts.allowedPaths || deriveAllowedPathsFromTargets(requiredTargets));
+  const deniedPaths = uniqueStrings(opts.deniedPaths || ['.env', '.env.*', '**/.env', '**/.git/**']);
+  const workFocusDigest = construction.work_focus_digest && construction.work_focus_digest.hash
+    ? construction.work_focus_digest.hash
+    : (opts.workFocusDigest || canonicalWorkOrderDigest({ work_focus: rawFocus }));
+  const wspPromptDigest = construction.wsp_prompt_digest && construction.wsp_prompt_digest.hash
+    ? construction.wsp_prompt_digest.hash
+    : (opts.wspPromptDigest || 'unknown');
+  const workOrderId = 'rdog-wo-' + canonicalWorkOrderDigest({
+    work_focus_digest: workFocusDigest,
+    created_at: createdAt,
+    slice: WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE
+  }).slice('sha256:'.length, 'sha256:'.length + 16);
+  const permissionLevel = String(opts.permissionLevel || 'needs_verification');
+  const permissionSource = String(opts.permissionSource || 'extension_runtime_candidate');
+  const permissionSnapshot = {
+    permission_level: permissionLevel,
+    captured_at: String(opts.permissionCapturedAt || createdAt),
+    source: permissionSource,
+    digest: canonicalWorkOrderDigest({
+      principal: opts.authenticatedPrincipal || 'external_principal:012',
+      repo: opts.repoFullName || 'FOUNDUPS/Foundups-Agent',
+      permission_level: permissionLevel,
+      source: permissionSource,
+      captured_at: opts.permissionCapturedAt || createdAt
+    })
+  };
+  const commandDigest = canonicalWorkOrderDigest({ work_focus: rawFocus });
+  const holoScorecard = opts.holoScorecard && typeof opts.holoScorecard === 'object' ? opts.holoScorecard : {};
+  const holoindexEvidence = opts.holoindexEvidence || {
+    holoindex_query: String(opts.holoindexQuery || 'RedDog governed work order runtime emission'),
+    holoindex_status: String(holoScorecard.holoindex_status || 'unknown'),
+    code_hits: [],
+    wsp_hits: [],
+    skillz_hits: [],
+    direct_read_fallback_used: holoScorecard.direct_read_fallback_used === true,
+    index_gap_detected: holoScorecard.index_gap_detected === true,
+    applicable_wsps: uniqueStrings(opts.wspApplicability || ['WSP_00', 'WSP_15', 'WSP_46', 'WSP_50', 'WSP_97']),
+    evidence_refs: uniqueStrings(opts.evidenceRefs || []),
+    retrieval_quality: holoScorecard.index_gap_detected === true ? 'INDEX_GAP' : 'LOW',
+    skillz_gap_detected: false
+  };
+  const workOrder = {
+    work_order_id: workOrderId,
+    created_at: createdAt,
+    red_dog_instance_id: 'foundups-agent-' + EXTENSION_VERSION,
+    authenticated_principal: String(opts.authenticatedPrincipal || 'external_principal:012'),
+    principal_provider: String(opts.principalProvider || 'extension'),
+    repo_full_name: String(opts.repoFullName || 'FOUNDUPS/Foundups-Agent'),
+    repo_permission_snapshot: permissionSnapshot,
+    requested_operation: String(opts.requestedOperation || 'feature_slice'),
+    authority_tier: String(opts.authorityTier || 'source'),
+    allowed_paths: allowedPaths,
+    denied_paths: deniedPaths,
+    branch_name: String(opts.branchName || ('feat/reddog-' + workOrderId.slice('rdog-wo-'.length))),
+    base_ref: String(opts.baseRef || 'main'),
+    task_summary: sanitizeContinuationField(rawFocus, 240),
+    wsp_applicability: uniqueStrings(opts.wspApplicability || ['WSP_00', 'WSP_15', 'WSP_46', 'WSP_50', 'WSP_97']),
+    holoindex_evidence_refs: uniqueStrings(opts.holoindexEvidenceRefs || opts.evidenceRefs || []),
+    skillz_candidates: uniqueStrings(opts.skillzCandidates || []),
+    required_tests: uniqueStrings(opts.requiredTests || []),
+    required_policy_gates: uniqueStrings(opts.requiredPolicyGates || [
+      'reddog_work_order_signature_gate',
+      'reddog_wre_execution_valve',
+      'reddog_wre_cwd_guard'
+    ]),
+    required_reviewers: uniqueStrings(opts.requiredReviewers || []),
+    sentinel_checks: uniqueStrings(opts.sentinelChecks || ['wsp97_truth_boundary', 'no_secret_leakage']),
+    rollback_plan: String(opts.rollbackPlan || 'Remove isolated worktree and delete branch on abort.'),
+    expiry: expiresAt,
+    nonce: String(opts.nonce || ('nonce-' + workOrderId.slice('rdog-wo-'.length))),
+    evidence_digest: canonicalWorkOrderDigest({
+      command_digest: commandDigest,
+      work_focus_digest: workFocusDigest,
+      wsp_prompt_digest: wspPromptDigest,
+      handoff_target: rec.target || 'none'
+    }),
+    advisory_only_source_packet: {
+      work_focus_digest: workFocusDigest,
+      wsp_prompt_digest: wspPromptDigest,
+      copy_md_run_trace_digest: String(opts.copyMdRunTraceDigest || 'unknown')
+    },
+    holoindex_evidence: holoindexEvidence
+  };
+  const readyForInvocation = (
+    permissionLevel !== 'needs_verification'
+    && permissionSource !== 'extension_runtime_candidate'
+    && allowedPaths.length > 0
+    && opts.signedAuthorityVerified === true
+    && opts.explicitValveRequested === true
+  );
+  return {
+    slice_name: WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE,
+    work_order: workOrder,
+    work_order_digest: canonicalWorkOrderDigest(workOrder),
+    runtime_emission_performed: true,
+    raw_work_focus_stored: false,
+    github_permission_probe_performed: false,
+    signed_authority_verified: opts.signedAuthorityVerified === true,
+    explicit_valve_requested: opts.explicitValveRequested === true,
+    ready_for_wre_invocation: readyForInvocation,
+    not_ready_reasons: readyForInvocation ? [] : uniqueStrings([
+      permissionLevel === 'needs_verification' ? 'permission_snapshot_needs_verification' : '',
+      permissionSource === 'extension_runtime_candidate' ? 'fresh_github_permission_probe_missing' : '',
+      allowedPaths.length === 0 ? 'allowed_paths_missing_or_unverified' : '',
+      opts.signedAuthorityVerified === true ? '' : 'signed_work_authority_not_verified',
+      opts.explicitValveRequested === true ? '' : 'explicit_worktree_valve_not_requested'
+    ]),
+    no_python_invocation_performed: true,
+    no_worktree_create_performed: true,
+    no_task_execution_performed: true,
+    no_file_edit_performed: true,
+    no_pr_created: true,
+    no_openclaw_enqueue_performed: true,
+    no_hermes_dispatch_performed: true,
+    no_merge_performed: true,
+    no_reward_settlement_performed: true
+  };
+}
+
+function buildRedDogGovernedWorkOrderCandidateSection(candidate) {
+  const c = candidate && typeof candidate === 'object' ? candidate : {};
+  const order = c.work_order && typeof c.work_order === 'object' ? c.work_order : {};
+  return [
+    '## RedDog Governed Work Order Candidate',
+    '- slice_name: ' + (c.slice_name || WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE) + ' [OBSERVED]',
+    '- work_order_id: ' + (order.work_order_id || 'unknown') + ' [OBSERVED]',
+    '- work_order_digest: ' + (c.work_order_digest || 'unknown') + ' [OBSERVED]',
+    '- requested_operation: ' + (order.requested_operation || 'unknown') + ' [OBSERVED]',
+    '- branch_name: ' + (order.branch_name || 'unknown') + ' [OBSERVED]',
+    '- allowed_paths: ' + JSON.stringify(order.allowed_paths || []) + ' [OBSERVED]',
+    '- denied_paths: ' + JSON.stringify(order.denied_paths || []) + ' [OBSERVED]',
+    '- permission_snapshot_source: ' + ((order.repo_permission_snapshot && order.repo_permission_snapshot.source) || 'unknown') + ' [OBSERVED]',
+    '- github_permission_probe_performed: ' + (c.github_permission_probe_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- signed_authority_verified: ' + (c.signed_authority_verified === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- ready_for_wre_invocation: ' + (c.ready_for_wre_invocation === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- not_ready_reasons: ' + JSON.stringify(c.not_ready_reasons || []) + ' [OBSERVED]',
+    '- raw_work_focus_stored: ' + (c.raw_work_focus_stored === false ? 'false' : 'unknown') + ' [OBSERVED]',
+    '- no_python_invocation_performed: ' + (c.no_python_invocation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_worktree_create_performed: ' + (c.no_worktree_create_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_task_execution_performed: ' + (c.no_task_execution_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_file_edit_performed: ' + (c.no_file_edit_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_pr_created: ' + (c.no_pr_created === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_openclaw_enqueue_performed: ' + (c.no_openclaw_enqueue_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_hermes_dispatch_performed: ' + (c.no_hermes_dispatch_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_merge_performed: ' + (c.no_merge_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_reward_settlement_performed: ' + (c.no_reward_settlement_performed === true ? 'true' : 'false') + ' [OBSERVED]'
+  ].join('\n');
+}
+
 function buildWreOperationalSpineDryRunPreview(workFocus, classification, handoffRecommendation, options) {
   const opts = options && typeof options === 'object' ? options : {};
   const rec = handoffRecommendation && typeof handoffRecommendation === 'object' ? handoffRecommendation : {};
@@ -1651,6 +1869,15 @@ function buildWreOperationalSpineDryRunPreview(workFocus, classification, handof
   if (rec.target) {
     evidenceRefs.push('handoff_target:' + String(rec.target));
   }
+  const workOrderCandidate = buildRedDogGovernedWorkOrderCandidate(
+    rawFocus,
+    classification,
+    rec,
+    Object.assign({}, opts, {
+      evidenceRefs: evidenceRefs,
+      requiredTargets: construction.required_targets_authoritative_paths || []
+    })
+  );
   return {
     preview_kind: 'RedDogWREOperationalSpineDryRunPreview',
     slice_name: WRE_OPERATIONAL_SPINE_DRYRUN_SLICE,
@@ -1658,6 +1885,9 @@ function buildWreOperationalSpineDryRunPreview(workFocus, classification, handof
     dry_run_only: true,
     candidate_work_order_emitted: true,
     work_order_type: 'RedDogGovernedWorkOrder',
+    governed_work_order_candidate: workOrderCandidate.work_order,
+    governed_work_order_candidate_digest: workOrderCandidate.work_order_digest,
+    governed_work_order_runtime_emission: workOrderCandidate,
     command_digest: commandDigest,
     command_redacted_summary: sanitizeContinuationField(rawFocus, 180),
     raw_work_focus_stored: false,
@@ -1670,6 +1900,8 @@ function buildWreOperationalSpineDryRunPreview(workFocus, classification, handof
     would_call: WRE_OPERATIONAL_SPINE_CALL,
     python_invocation_performed: false,
     wre_spine_invoked: false,
+    governed_work_order_ready_for_invocation: workOrderCandidate.ready_for_wre_invocation === true,
+    governed_work_order_not_ready_reasons: workOrderCandidate.not_ready_reasons,
     worktree_create_performed: false,
     task_execution_performed: false,
     file_edit_performed: false,
@@ -1694,6 +1926,9 @@ function buildWreOperationalSpineDryRunPreviewSection(preview) {
     '- dry_run_only: ' + (p.dry_run_only === true ? 'true' : 'false') + ' [OBSERVED]',
     '- candidate_work_order_emitted: ' + (p.candidate_work_order_emitted === true ? 'true' : 'false') + ' [OBSERVED]',
     '- work_order_type: ' + (p.work_order_type || 'unknown') + ' [OBSERVED]',
+    '- governed_work_order_candidate_digest: ' + (p.governed_work_order_candidate_digest || 'unknown') + ' [OBSERVED]',
+    '- governed_work_order_ready_for_invocation: ' + (p.governed_work_order_ready_for_invocation === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- governed_work_order_not_ready_reasons: ' + JSON.stringify(p.governed_work_order_not_ready_reasons || []) + ' [OBSERVED]',
     '- command_digest: ' + (p.command_digest || 'unknown') + ' [OBSERVED]',
     '- command_redacted_summary: ' + (p.command_redacted_summary || '(empty)') + ' [OBSERVED]',
     '- raw_work_focus_stored: ' + (p.raw_work_focus_stored === false ? 'false' : 'unknown') + ' [OBSERVED]',
@@ -1739,6 +1974,9 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
     sections.push(buildGovernedHandoffSection(ctx.handoffRecommendation || packet.governed_handoff_recommendation));
     const spinePreview = ctx.wreSpineDryRunPreview || packet.wre_operational_spine_dryrun_preview;
     if (spinePreview) {
+      if (spinePreview.governed_work_order_runtime_emission) {
+        sections.push(buildRedDogGovernedWorkOrderCandidateSection(spinePreview.governed_work_order_runtime_emission));
+      }
       sections.push(buildWreOperationalSpineDryRunPreviewSection(spinePreview));
     }
   }
@@ -2915,7 +3153,8 @@ function wireFusionWebview(context, webview, worker, state) {
     const wreSpineDryRunPreview = substantiveTask && result.reason !== 'redaction_blocked'
       ? buildWreOperationalSpineDryRunPreview(workFocus, classification, handoffRecommendation, {
         promptConstruction: promptConstruction,
-        contextMode: contextMode
+        contextMode: contextMode,
+        holoScorecard: holoScorecard
       })
       : null;
     result.review_packet = attachOrchestratorMetadata(
@@ -4891,6 +5130,9 @@ module.exports = {
   buildRedactionGateReportSection,
   buildGovernedHandoffRecommendation,
   buildGovernedHandoffSection,
+  buildRedDogGovernedWorkOrderCandidate,
+  buildRedDogGovernedWorkOrderCandidateSection,
+  deriveAllowedPathsFromTargets,
   buildWreOperationalSpineDryRunPreview,
   buildWreOperationalSpineDryRunPreviewSection,
   compositePayloadDigest,

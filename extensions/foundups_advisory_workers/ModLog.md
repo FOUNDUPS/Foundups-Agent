@@ -2,6 +2,14 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1 (governed work-order candidate, 0.3.49)
+
+- `buildWreOperationalSpineDryRunPreview()` now embeds a full `RedDogGovernedWorkOrder` candidate under `governed_work_order_runtime_emission`.
+- The candidate binds extension version, work-focus digest, WSP prompt digest, HoloIndex evidence posture, derived path scope, rollback plan, nonce, expiry, and safe advisory source digests without storing raw work focus.
+- Fail-closed boundary: the candidate uses `repo_permission_snapshot.source=extension_runtime_candidate`, `permission_level=needs_verification`, `signed_authority_verified=false`, and `explicit_valve_requested=false`, so it is not WRE-invocation-ready until later authority gates land.
+- HoloIndex query-only preflight found the existing RedDog work-order spine and contracts, but not the new extension runtime-emission surface itself; recorded follow-up `HOLOINDEX_REDDOG_EXTENSION_GOVERNED_WORK_ORDER_EMISSION_INDEX_GAP_PHASE1`.
+- Version 0.3.48 -> 0.3.49 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-11 - REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1 (refreshed contract pointer)
 
 - Refresh stale #905 contract on current main after signed authority (#950) and signed receipt chain (#951).
