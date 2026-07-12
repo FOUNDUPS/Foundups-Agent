@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_TYPED_GROUNDING_PREFLIGHT_PHASE1 (fail-closed grounding coverage gate, 0.3.55)
+
+- Added `buildTypedGroundingPreflight()` to block Fusion before any model call when typed grounding coverage is incomplete.
+- Repo-file targets require successful direct-read recall; semantic targets require HoloIndex coverage; external research targets fail closed until approved research retrieval exists; quoted blocks are treated as context-only.
+- Added local `grounding_preflight_blocked` result with `made_network_call=false` plus Run Trace grounding preflight telemetry.
+- Version 0.3.54 -> 0.3.55 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_TYPED_TARGET_EXTRACTION_PHASE1 (typed grounding input channels, 0.3.54)
 
 - Added `extractTypedTargets()` to split preprocessing into `repo_file_targets`, `semantic_targets`, `external_research_targets`, and `quoted_reference_blocks`.
