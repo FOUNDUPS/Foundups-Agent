@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_EXTENSION_TO_LIVE_ENQUEUE_EXPLICIT_VALVE_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 95, 97
+
+- Added `src/reddog_extension_live_enqueue_invoke.py`: extension-facing explicit invoke guard that validates a `RedDogOperatorLoopWardrobeSelectionReceipt` before delegating to the existing live enqueue seam.
+- Corrected the operator-loop selector boundary: `wsp97_sovereign_execution` is an accepted governed-execution candidate when downstream signed valve authority is required; actual live enqueue acceptance remains enforced by this guard plus `perform_reddog_openclaw_live_enqueue`.
+- Boundary: no `extension.js` runtime wiring, no concrete writer construction, no HoloIndex re-index, no shell/worktree/merge/reward action, and no task execution. The guard reaches an injected writer only after explicit request, sovereign selection receipt, `VALVE_OPEN_LIVE_ENQUEUE`, accepted signature gate, and accepted signed receipt chain.
+- HoloIndex read-only probe for `RedDog extension live enqueue explicit valve invoke selector receipt` missed the new invoke guard and surfaced adjacent receipt/valve docs instead. Recorded as `HOLOINDEX_REDDOG_EXTENSION_LIVE_ENQUEUE_INVOKE_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_OPERATOR_LOOP_WARDROBE_SELECTION_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 45, 50, 95, 97, 99
