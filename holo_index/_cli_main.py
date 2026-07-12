@@ -41,6 +41,11 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import asdict
+from holo_index.freshness_receipt import (
+    build_freshness_receipt,
+    freshness_receipt_path,
+    write_freshness_receipt,
+)
 from holo_index.utils.helpers import safe_print
 # WSP 97: Lazy import codeindex_reporter (4s+ startup cost) - only needed for --code-index-report
 CodeIndexReporter = None  # Lazy loaded
@@ -996,6 +1001,13 @@ def main():
         try:
             state_path = Path(args.ssd) / "indexes" / "index_state.json"
             state_path.parent.mkdir(parents=True, exist_ok=True)
+            receipt_path = freshness_receipt_path(Path(args.ssd))
+            receipt = build_freshness_receipt(
+                holo,
+                ssd_path=Path(args.ssd),
+                repo_root=project_root,
+                source=source,
+            )
             state = {
                 "last_indexed_at": datetime.now(timezone.utc).isoformat(),
                 "ssd_path": str(Path(args.ssd)),
@@ -1004,8 +1016,10 @@ def main():
                 "wsp_count": holo.get_wsp_entry_count(),
                 "test_count": _safe_count(getattr(holo, "test_collection", None)),
                 "skillz_count": _safe_count(getattr(holo, "skill_collection", None)),
+                "freshness_receipt_path": str(receipt_path),
             }
             state_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
+            write_freshness_receipt(receipt, receipt_path)
         except Exception as e:
             if verbose:
                 safe_print(f"[WARN] Failed to write index state: {e}")
