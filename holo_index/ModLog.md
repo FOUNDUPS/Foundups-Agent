@@ -1,5 +1,15 @@
 # HoloIndex Package ModLog
 
+## [2026-07-12] HOLOINDEX_INCREMENTAL_PER_FOUNDUP_INDEX_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97 | **Base**: `c22792312`
+
+- ADD `holo_index/incremental_foundup_index.py`: stable non-positional ID helper, strict FoundUp scope validator, foundup-scoped delete filter, and non-mutating incremental plan for changed/removed FoundUp paths.
+- Boundary: this phase creates the deterministic planning primitive only. It does not modify live ChromaDB IDs, run HoloIndex indexing, delete collections, remove symbol caps, or perform segment garbage collection.
+- TEST `tests/test_holoindex_incremental_foundup_index.py`: foundup_id validation, path containment, stable IDs, collection mapping, upsert/delete-id planning, traversal/absolute/out-of-scope rejection, no-indexable-changes, and AST guards against live index/subprocess imports.
+- HoloIndex read-only probe for `HOLOINDEX_INCREMENTAL_PER_FOUNDUP_INDEX_PHASE1 stable ids delete by foundup_id symbol caps segment gc` did not surface a canonical incremental FoundUp index primitive before re-index. Recorded as `HOLOINDEX_INCREMENTAL_PER_FOUNDUP_INDEX_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## [2026-07-12] HOLOINDEX_CI_FRESHNESS_GATE_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
