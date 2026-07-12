@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.52', 'package version must be 0.3.52');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.52'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.53', 'package version must be 0.3.53');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.53'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.52', 'README version mismatch');
+includes(readme, 'Version: 0.3.53', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -770,7 +770,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.52', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.53', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -808,6 +808,7 @@ includes(spinePreviewSection, 'required_future_valve: VALVE_OPEN_WORKTREE_CREATE
 assert(!/execFileSync\([^;]*reddog_wre_operational_spine\.py/s.test(extensionJs), 'extension must not execFileSync the WRE operational spine directly');
 includes(extensionJs, "scripts/reddog_extension_wre_spine_invoke_once.py", 'runtime wire must use one-shot explicit invoke bridge');
 includes(extensionJs, "scripts/reddog_operator_wardrobe_selection_once.py", 'operator wardrobe bridge must use one-shot selection script');
+includes(extensionJs, "scripts/reddog_github_permission_probe_once.py", 'GitHub permission bridge must use one-shot permission probe script');
 includes(extensionJs, "result.reason !== 'redaction_blocked'", 'blocked-local packets must not receive WRE dry-run preview');
 
 // REDDOG_EXTENSION_OPERATOR_WARDROBE_SELECTION_RUNTIME_BRIDGE_PHASE1:
@@ -900,6 +901,102 @@ assert.strictEqual(realWardrobeSelection.receipt.selected_wardrobe, 'wsp97_sover
 assert.strictEqual(realWardrobeSelection.receipt.authority_boundary, 'sovereign_token_required', 'one-shot wardrobe bridge preserves sovereign boundary');
 assert.strictEqual(realWardrobeSelection.receipt.wre_required, true, 'one-shot wardrobe bridge marks WRE required for worktree authority');
 
+// REDDOG_EXTENSION_GITHUB_PERMISSION_PROBE_RUNTIME_BRIDGE_PHASE1:
+// extension obtains a read-only GitHub permission snapshot and feeds it to the work-order candidate.
+const permissionProbePayload = orchestrator.buildGithubPermissionProbePayload({
+  repoFullName: 'FOUNDUPS/Foundups-Agent',
+  principalLogin: 'operator-012',
+  allowMockBackend: true,
+  mockBackend: {
+    authenticated: true,
+    login: 'operator-012',
+    permission: 'write',
+    default_branch: 'main',
+    scopes: ['repo'],
+    branch_protection_observed: 'true',
+    source: 'mock'
+  }
+});
+assert.strictEqual(permissionProbePayload.repo_full_name, 'FOUNDUPS/Foundups-Agent', 'permission probe payload carries repo');
+assert.strictEqual(permissionProbePayload.principal_login, 'operator-012', 'permission probe payload carries principal for mock test');
+assert.strictEqual(permissionProbePayload.allow_mock_backend, true, 'permission probe test payload can use injected mock backend');
+const fakePermissionProbe = orchestrator.runGithubPermissionProbeBridge(null, {
+  permissionProbeRunner: (payload) => {
+    assert.strictEqual(payload.repo_full_name, 'FOUNDUPS/Foundups-Agent', 'fake permission runner receives repo');
+    return {
+      decision: 'GITHUB_PERMISSION_PROBE_OBSERVED',
+      repo_permission_snapshot: {
+        permission_level: 'write',
+        captured_at: '2026-07-12T12:00:00Z',
+        expires_at: '2026-07-12T12:05:00Z',
+        source: 'mock',
+        digest: 'sha256:' + 'c'.repeat(64),
+        repo_full_name: 'FOUNDUPS/Foundups-Agent',
+        principal_login: 'operator-012',
+        principal_provider: 'github',
+        can_read: true,
+        can_write: true,
+        can_admin: false,
+        extension_probe_performed: true
+      },
+      probe_performed: true,
+      permission_observed: true,
+      permission: 'write',
+      can_read: true,
+      can_write: true,
+      can_admin: false,
+      source: 'mock',
+      raw_secret_included: false,
+      token_scopes_count: 1,
+      rejection_reasons: []
+    };
+  }
+});
+assert.strictEqual(fakePermissionProbe.decision, 'GITHUB_PERMISSION_PROBE_OBSERVED', 'fake permission bridge observes write permission');
+assert.strictEqual(fakePermissionProbe.python_invocation_performed, false, 'fake permission bridge does not invoke Python');
+assert.strictEqual(fakePermissionProbe.no_repo_mutation_performed, true, 'fake permission bridge performs no repo mutation');
+assert.strictEqual(fakePermissionProbe.no_execution_performed, true, 'fake permission bridge performs no execution');
+assert.strictEqual(fakePermissionProbe.no_enqueue_performed, true, 'fake permission bridge performs no enqueue');
+const fakePermissionSection = orchestrator.buildGithubPermissionProbeSection(fakePermissionProbe);
+includes(fakePermissionSection, '## RedDog GitHub Permission Probe', 'permission probe section header');
+includes(fakePermissionSection, 'permission: write [OBSERVED]', 'permission probe section shows permission');
+includes(fakePermissionSection, 'no_repo_mutation_performed: true [OBSERVED]', 'permission probe section shows no repo mutation');
+assert(!fakePermissionSection.includes('repo,read:org'), 'permission probe section must not print raw token scopes');
+
+const realPermissionProbe = JSON.parse(cp.execFileSync('python', ['-B', path.join(root, 'scripts', 'reddog_github_permission_probe_once.py')], {
+  cwd: root,
+  input: JSON.stringify(permissionProbePayload),
+  encoding: 'utf8',
+  env: Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }),
+  maxBuffer: 262144
+}));
+assert.strictEqual(realPermissionProbe.decision, 'GITHUB_PERMISSION_PROBE_OBSERVED', 'one-shot permission bridge accepts mock read-only probe');
+assert.strictEqual(realPermissionProbe.no_repo_mutation_performed, true, 'one-shot permission bridge performs no repo mutation');
+assert.strictEqual(realPermissionProbe.no_execution_performed, true, 'one-shot permission bridge performs no execution');
+assert.strictEqual(realPermissionProbe.repo_permission_snapshot.permission_level, 'write', 'one-shot permission bridge maps permission level');
+assert.strictEqual(realPermissionProbe.repo_permission_snapshot.source, 'mock', 'one-shot permission bridge maps trusted source');
+assert(realPermissionProbe.repo_permission_snapshot.expires_at, 'one-shot permission bridge must include expires_at for freshness binding');
+assert.strictEqual(realPermissionProbe.repo_permission_snapshot.extension_probe_performed, true, 'one-shot permission bridge marks extension probe provenance');
+assert(!JSON.stringify(realPermissionProbe).includes('ghp_'), 'one-shot permission bridge output must not leak token-looking strings');
+
+const permissionObservedPreview = orchestrator.buildWreOperationalSpineDryRunPreview(
+  'Fix a narrow RedDog slice',
+  { tier: 'ULTRA' },
+  handoffRec,
+  {
+    createdAt: '2026-07-12T12:00:00Z',
+    repoPermissionSnapshot: fakePermissionProbe.repo_permission_snapshot,
+    promptConstruction: {
+      required_targets_authoritative_paths: ['extensions/foundups_advisory_workers/extension.js']
+    }
+  }
+);
+assert.strictEqual(permissionObservedPreview.governed_work_order_runtime_emission.permission_binding.permission_truth_label, 'OBSERVED', 'fresh probed permission should be observed');
+assert.strictEqual(permissionObservedPreview.governed_work_order_runtime_emission.permission_binding.probe_performed, true, 'permission bridge marks probe performed');
+assert.strictEqual(permissionObservedPreview.governed_work_order_runtime_emission.permission_binding.no_live_probe_performed_by_extension, false, 'permission bridge clears no-live-probe flag');
+assert.strictEqual(permissionObservedPreview.governed_work_order_runtime_emission.ready_for_wre_invocation, false, 'permission alone cannot make candidate ready');
+assert(permissionObservedPreview.governed_work_order_runtime_emission.not_ready_reasons.includes('signed_work_authority_not_verified'), 'permission bridge leaves signed-authority gate closed');
+
 const wrePreviewCopy = orchestrator.buildCopyMarkdown(
   {
     ok: true,
@@ -916,11 +1013,13 @@ const wrePreviewCopy = orchestrator.buildCopyMarkdown(
     substantive: true,
     handoffRecommendation: handoffRec,
     operatorWardrobeSelectionResult: fakeWardrobeSelection,
+    githubPermissionProbeResult: fakePermissionProbe,
     wreSpineDryRunPreview: spinePreview
   }
 );
 includes(wrePreviewCopy, '## Governed Handoff Recommendation', 'WRE preview Copy MD keeps governed handoff section');
 includes(wrePreviewCopy, '## RedDog Operator Wardrobe Selection', 'WRE preview Copy MD must include wardrobe selection section');
+includes(wrePreviewCopy, '## RedDog GitHub Permission Probe', 'WRE preview Copy MD must include permission probe section');
 includes(wrePreviewCopy, '## RedDog Governed Work Order Candidate', 'WRE preview Copy MD must include candidate section');
 includes(wrePreviewCopy, '## WRE Operational Spine Dry-Run Preview', 'WRE preview Copy MD must include preview section');
 includes(wrePreviewCopy, 'raw_work_focus_stored: false [OBSERVED]', 'WRE preview Copy MD must state raw focus is not stored');
@@ -1956,7 +2055,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.52'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.53'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1970,7 +2069,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.52'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.53'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1982,7 +2081,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.52'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.53'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
