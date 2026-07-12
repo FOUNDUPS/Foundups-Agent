@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_MERGE_AUTHORITY_CONTRACT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 96, 97, 100
+
+- Added `docs/audits/architecture/REDDOG_MERGE_AUTHORITY_CONTRACT_PHASE1.md`: decision-only contract for a future RedDog merge authority gate.
+- Defined `RedDogMergeAuthorityRequest`, `RedDogMergeAuthorityDecision`, future `RedDogMergeAuthorityReceipt`, non-self promotion, exact-head CI/check-run binding, machine-derived diff/scope summary, signed work authority, signed receipt-chain, reviewer/consensus inputs, F0/external FoundUp policy tiers, protected-surface escalation, and HoloIndex freshness boundaries.
+- Boundary: docs/static tests only. No runtime merge authority, no `gh pr ready`, no `gh pr merge`, no GitHub API call, no branch/protected-ref mutation, no shell runner change, no extension runtime wiring, no reward settlement, and no HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog merge authority contract signed receipt chain sovereign token merge PR authority` surfaced identity/delegation, signing-key isolation, governed work-order, recursive self-governance, and receipt/redaction surfaces but no canonical merge authority contract. Recorded as `HOLOINDEX_REDDOG_MERGE_AUTHORITY_CONTRACT_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_WRE_GOVERNED_SHELL_RUNNER_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 11, 15, 50, 53, 71, 95, 97
