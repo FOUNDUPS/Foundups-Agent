@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_TYPED_TARGET_EXTRACTION_PHASE1 (typed grounding input channels, 0.3.54)
+
+- Added `extractTypedTargets()` to split preprocessing into `repo_file_targets`, `semantic_targets`, `external_research_targets`, and `quoted_reference_blocks`.
+- Direct-read recall/packing now consumes only `repo_file_targets`; URLs, conceptual research phrases, and quoted/reference blocks are not sent to the governed file reader.
+- Run Trace scorecard now reports typed target counts without emitting raw external research snippets.
+- Version 0.3.53 -> 0.3.54 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_EXTENSION_GITHUB_PERMISSION_PROBE_RUNTIME_BRIDGE_PHASE1 (read-only permission snapshot, 0.3.53)
 
 - Added `runGithubPermissionProbeBridge()` and `scripts/reddog_github_permission_probe_once.py` to emit a fresh read-only GitHub `repo_permission_snapshot` from the live extension path.
