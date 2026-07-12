@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_OPERATOR_LOOP_WARDROBE_SELECTION_CONTRACT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 45, 50, 95, 97, 99
+
+- Added `docs/audits/architecture/REDDOG_OPERATOR_LOOP_WARDROBE_SELECTION_CONTRACT_PHASE1.md`: decision-only contract that binds RedDog self-deterministic mode selection to WSP_97 operator loop plus WSP_95 wardrobe selection. It treats "behavior skillz" as non-canonical shorthand, not a new protocol name.
+- Defined the future `RedDogOperatorLoopWardrobeSelectionReceipt`, canonical wardrobe profiles, HoloIndex freshness boundary, and the prerequisite relationship to `REDDOG_EXTENSION_TO_LIVE_ENQUEUE_EXPLICIT_VALVE_INVOKE_PHASE1`.
+- Boundary: docs/static tests only. No runtime selector, no extension change, no OpenClaw live enqueue, no WRE shell/worktree write, no merge authority, and no HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog operator loop wardrobe selection contract` surfaced WSP_95 and prior operator-loop/security docs, but not the new contract. Recorded as `HOLOINDEX_REDDOG_OPERATOR_LOOP_WARDROBE_SELECTION_CONTRACT_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_WRITER_ADAPTER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
