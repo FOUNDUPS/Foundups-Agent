@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-13: REDDOG_WORK_LEDGER_REFRESH_PLAN_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 70, 97
+
+- Added `src/reddog_work_ledger_refresh_plan_dryrun.py`: read-only refresh planner that consumes `LaneReconciliationReport`, names stale/conflicted work-ledger sources, lists the governed refresh steps, and carries the next claim candidate forward for a later mutating refresh slice.
+- Added `tests/test_reddog_work_ledger_refresh_plan_dryrun.py`: stale-source ready plan, conflict-blocked plan, no-refresh-needed detection, deterministic digest, JSON serialization, invalid-input rejection, and AST no-mutation/no-execution coverage.
+- Boundary: no ledger mutation, no AgentDB write, no HoloIndex re-index, no worker assignment, no shell/subprocess/git/GitHub call, no extension runtime wiring, and no execution. This slice emits a dry-run refresh plan only.
+
 ## 2026-07-13: REDDOG_WORKER_CLAIM_GATE_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 70, 97
