@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.54';
+const EXTENSION_VERSION = '0.3.55';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -1303,6 +1303,91 @@ function extractTypedTargets(taskText) {
   };
 }
 
+function numberFromScorecard(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
+  const typedTargets = extractTypedTargets(taskText);
+  const scorecard = (contextPacket && contextPacket.holoindex_scorecard)
+    || extractHoloIndexScorecard(contextMode, contextPacket && contextPacket.holoindex_meta);
+  const rejectionReasons = [];
+  const repoFiles = typedTargets.repo_file_targets;
+  const semantic = typedTargets.semantic_targets;
+  const external = typedTargets.external_research_targets;
+  const quoted = typedTargets.quoted_reference_blocks;
+
+  if (repoFiles.length) {
+    if (!scorecard || scorecard.target_recall_ok !== true) {
+      rejectionReasons.push('repo_file_grounding_incomplete');
+    }
+    if (scorecard && Array.isArray(scorecard.required_targets_missing) && scorecard.required_targets_missing.length) {
+      rejectionReasons.push('repo_file_targets_missing');
+    }
+  }
+
+  if (semantic.length) {
+    const hasHolo = !!(contextMode && String(contextMode).includes('holo'));
+    const hits = numberFromScorecard(scorecard && scorecard.code_hits_count) + numberFromScorecard(scorecard && scorecard.wsp_hits);
+    if (!hasHolo || hits <= 0) {
+      rejectionReasons.push('semantic_grounding_missing_holoindex_hits');
+    }
+  }
+
+  if (external.length) {
+    rejectionReasons.push('external_research_retrieval_not_implemented');
+  }
+
+  return {
+    applied: true,
+    passed: rejectionReasons.length === 0,
+    rejection_reasons: Array.from(new Set(rejectionReasons)),
+    repo_file_targets_count: repoFiles.length,
+    semantic_targets_count: semantic.length,
+    external_research_targets_count: external.length,
+    quoted_reference_blocks_count: quoted.length,
+    direct_read_required: repoFiles.length > 0,
+    semantic_grounding_required: semantic.length > 0,
+    external_research_required: external.length > 0,
+    quoted_blocks_context_only: quoted.length > 0,
+    no_model_call_when_failed: rejectionReasons.length > 0,
+    typed_targets: typedTargets
+  };
+}
+
+function buildGroundingPreflightBlockedResult(preflight) {
+  const p = preflight && typeof preflight === 'object' ? preflight : {};
+  return {
+    ok: false,
+    reason: 'grounding_preflight_blocked',
+    detail: (Array.isArray(p.rejection_reasons) && p.rejection_reasons.length)
+      ? p.rejection_reasons.join(',')
+      : 'grounding_preflight_failed',
+    made_network_call: false,
+    retry_count: 0,
+    grounding_preflight: p,
+    content: [
+      '## Decision',
+      'DEFER',
+      '',
+      '## Evidence Table',
+      '| Check | WSP_97 | Result |',
+      '|---|---|---|',
+      '| Typed grounding preflight | OBSERVED | FAILED |',
+      '| Model call | OBSERVED | skipped before Fusion |',
+      '',
+      '## Residuals',
+      (Array.isArray(p.rejection_reasons) && p.rejection_reasons.length)
+        ? p.rejection_reasons.map((r) => '- ' + r).join('\n')
+        : '- grounding_preflight_failed',
+      '',
+      '## Land Recommendation',
+      'DEFER -- resolve grounding coverage before Fusion synthesis.'
+    ].join('\n')
+  };
+}
+
 function isSelfFileLocation(location) {
   const loc = String(location || '').replace(/\\/g, '/').toLowerCase();
   if (!loc) {
@@ -1512,6 +1597,9 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     semantic_targets_count: meta.semantic_targets_count !== undefined ? meta.semantic_targets_count : 'unknown',
     external_research_targets_count: meta.external_research_targets_count !== undefined ? meta.external_research_targets_count : 'unknown',
     quoted_reference_blocks_count: meta.quoted_reference_blocks_count !== undefined ? meta.quoted_reference_blocks_count : 'unknown',
+    grounding_preflight_applied: meta.grounding_preflight_applied !== undefined ? meta.grounding_preflight_applied : 'unknown',
+    grounding_preflight_passed: meta.grounding_preflight_passed !== undefined ? meta.grounding_preflight_passed : 'unknown',
+    grounding_preflight_rejection_reasons: Array.isArray(meta.grounding_preflight_rejection_reasons) ? meta.grounding_preflight_rejection_reasons : 'unknown',
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: final-context proof.
     // required_targets_recalled (above) = fetched/available from the bundle; the fields
     // below = actually visible to the model AFTER the 42K cut. Different layers; must
@@ -1577,6 +1665,9 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- semantic_targets_count: ' + scorecard.semantic_targets_count,
     '- external_research_targets_count: ' + scorecard.external_research_targets_count,
     '- quoted_reference_blocks_count: ' + scorecard.quoted_reference_blocks_count,
+    '- grounding_preflight_applied: ' + scorecard.grounding_preflight_applied,
+    '- grounding_preflight_passed: ' + scorecard.grounding_preflight_passed,
+    '- grounding_preflight_rejection_reasons: ' + (Array.isArray(scorecard.grounding_preflight_rejection_reasons) ? (scorecard.grounding_preflight_rejection_reasons.length ? scorecard.grounding_preflight_rejection_reasons.join(', ') : '(none)') : scorecard.grounding_preflight_rejection_reasons),
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B (6): render BOTH the
     // fetched/available layer (required_targets_recalled) and the actually-model-visible
     // layer (required_targets_in_model_context). They are different guarantees.
@@ -3722,6 +3813,18 @@ function wireFusionWebview(context, webview, worker, state) {
         required_targets_redaction_blocked_reasons: 'unknown'
       }
     );
+    const groundingPreflight = buildTypedGroundingPreflight(workFocus, contextMode, contextPacket);
+    if (holoScorecard) {
+      holoScorecard.grounding_preflight_applied = groundingPreflight.applied === true;
+      holoScorecard.grounding_preflight_passed = groundingPreflight.passed === true;
+      holoScorecard.grounding_preflight_rejection_reasons = Array.isArray(groundingPreflight.rejection_reasons)
+        ? groundingPreflight.rejection_reasons.slice()
+        : [];
+      holoScorecard.repo_file_targets_count = groundingPreflight.repo_file_targets_count;
+      holoScorecard.semantic_targets_count = groundingPreflight.semantic_targets_count;
+      holoScorecard.external_research_targets_count = groundingPreflight.external_research_targets_count;
+      holoScorecard.quoted_reference_blocks_count = groundingPreflight.quoted_reference_blocks_count;
+    }
     const workTrail = createWorkTrail();
     workTrail.push('orchestrator_started');
     if (contextPacket.summary) {
@@ -3761,7 +3864,14 @@ function wireFusionWebview(context, webview, worker, state) {
         workTrail.push(normalized.event, normalized.detail);
       }
     };
-    let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
+    let result;
+    if (!groundingPreflight.passed) {
+      workTrail.push('failed', 'grounding_preflight_blocked');
+      postStatusAndProgress(webview, null, 'Grounding preflight blocked Fusion: ' + groundingPreflight.rejection_reasons.join(', '));
+      result = buildGroundingPreflightBlockedResult(groundingPreflight);
+    } else {
+      result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
+    }
     if (holoScorecard) {
       holoScorecard.audit_context_applied = result && result.audit_context_applied === true;
       if (result && result.audit_context_requested !== undefined) {
@@ -6030,6 +6140,8 @@ module.exports = {
   deriveWorkFocusTargets,
   collectRequiredTargets,
   extractTypedTargets,
+  buildTypedGroundingPreflight,
+  buildGroundingPreflightBlockedResult,
   extractInlinePathTokens,
   extractProsePathTokens,
   extractM2mArrayTargets,

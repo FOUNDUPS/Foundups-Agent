@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.54', 'package version must be 0.3.54');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.54'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.55', 'package version must be 0.3.55');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.55'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.54', 'README version mismatch');
+includes(readme, 'Version: 0.3.55', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -770,7 +770,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.54', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.55', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2055,7 +2055,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.54'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.55'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2069,7 +2069,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.54'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.55'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2081,7 +2081,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.54'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.55'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -2753,5 +2753,48 @@ assert.strictEqual(typedRecall.required_targets_total, 2, 'TTX-008: external/sem
 assert.strictEqual(typedRecall.external_research_targets_count, 1, 'TTX-009: external research count is surfaced');
 assert.strictEqual(typedRecall.semantic_targets_count >= 1, true, 'TTX-010: semantic target count is surfaced');
 assert.strictEqual(typedRecall.quoted_reference_blocks_count, 2, 'TTX-011: quoted block count is surfaced');
+
+// REDDOG_TYPED_GROUNDING_PREFLIGHT_PHASE1 (TGP-001..005): Fusion is blocked until typed
+// grounding coverage passes. External research is deliberately blocked until approved retrieval exists.
+includes(extensionJs, 'function buildTypedGroundingPreflight', 'TGP-001: grounding preflight missing');
+const repoOnlyPrompt = [
+  'Read first: modules/communication/moltbot_bridge/src/foundup_job_contract.py',
+  'Determine whether the contract is present.'
+].join('\n');
+const repoOnlyPreflight = orchestrator.buildTypedGroundingPreflight(repoOnlyPrompt, 'wsp_holo', {
+  holoindex_scorecard: {
+    target_recall_ok: true,
+    required_targets_missing: [],
+    code_hits_count: 1,
+    wsp_hits: 0
+  }
+});
+assert.strictEqual(repoOnlyPreflight.passed, true, 'TGP-002: repo-only prompt passes when direct-read recall is green');
+assert.strictEqual(repoOnlyPreflight.direct_read_required, true, 'TGP-002: repo-only prompt requires direct read');
+
+const missingRepoPreflight = orchestrator.buildTypedGroundingPreflight(repoOnlyPrompt, 'wsp_holo', {
+  holoindex_scorecard: {
+    target_recall_ok: false,
+    required_targets_missing: ['modules/communication/moltbot_bridge/src/foundup_job_contract.py'],
+    code_hits_count: 0,
+    wsp_hits: 0
+  }
+});
+assert.strictEqual(missingRepoPreflight.passed, false, 'TGP-003: missing repo file blocks Fusion');
+assert(missingRepoPreflight.rejection_reasons.includes('repo_file_grounding_incomplete'), 'TGP-003: missing repo grounding reason present');
+
+const externalPreflight = orchestrator.buildTypedGroundingPreflight(typedPrompt, 'wsp_holo', {
+  holoindex_scorecard: {
+    target_recall_ok: true,
+    required_targets_missing: [],
+    code_hits_count: 2,
+    wsp_hits: 1
+  }
+});
+assert.strictEqual(externalPreflight.passed, false, 'TGP-004: external research target blocks until approved retrieval exists');
+assert(externalPreflight.rejection_reasons.includes('external_research_retrieval_not_implemented'), 'TGP-004: external retrieval missing reason present');
+const blockedResult = orchestrator.buildGroundingPreflightBlockedResult(externalPreflight);
+assert.strictEqual(blockedResult.made_network_call, false, 'TGP-005: blocked preflight does not call model/network');
+assert.strictEqual(blockedResult.reason, 'grounding_preflight_blocked', 'TGP-005: blocked reason stable');
 
 console.log('Foundups\u00aeAgent extension contract checks passed.');
