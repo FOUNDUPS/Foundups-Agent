@@ -1,5 +1,15 @@
 # HoloIndex Package ModLog
 
+## [2026-07-12] HOLOINDEX_CI_FRESHNESS_GATE_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97 | **Base**: `d80ec0582`
+
+- ADD `holo_index/ci_freshness_gate.py`: deterministic CI checker that compares caller-supplied changed paths against `holoindex_freshness_receipt.json` and fails closed on missing/stale/malformed freshness evidence when configured.
+- Boundary: the checker does not discover git diffs, execute commands, invoke HoloIndex, run re-index, enqueue WRE work, or mutate any semantic store. CI/WRE must supply the receipt path, changed paths, and expected repo SHA.
+- TEST `tests/test_holoindex_ci_freshness_gate.py`: fresh/stale/missing receipt paths, `NOT_CONFIGURED` reporting mode, no-relevant-changes pass, changed-path file input, CLI exit codes, JSON output, and AST guards against git/reindex/execution imports.
+- HoloIndex read-only probe for `HOLOINDEX_CI_FRESHNESS_GATE_PHASE1 CI freshness receipt changed paths post merge targeted reindex` did not surface a canonical CI freshness gate before re-index. Recorded as `HOLOINDEX_CI_FRESHNESS_GATE_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## [2026-07-12] HOLOINDEX_INDEX_GAP_TO_WRE_WORKITEM_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
