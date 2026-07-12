@@ -96,6 +96,8 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 
 **WRE operational spine dry-run preview (extension v0.3.46):** `buildWreOperationalSpineDryRunPreview()` emits `review_packet.wre_operational_spine_dryrun_preview` and Copy MD section `## WRE Operational Spine Dry-Run Preview`. It references `modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine` as a future call target only. The extension does **not** invoke Python for this preview and records `python_invocation_performed=false`, `wre_spine_invoked=false`, `worktree_create_performed=false`, `task_execution_performed=false`, `openclaw_enqueue_performed=false`, `hermes_dispatch_performed=false`, `pr_created=false`, and `merge_performed=false`. Future live use requires `VALVE_OPEN_WORKTREE_CREATE` and `012_sovereign`.
 
+**Governed work-order candidate emission (extension v0.3.49):** `buildRedDogGovernedWorkOrderCandidate()` emits a full `RedDogGovernedWorkOrder` candidate inside the WRE dry-run preview and Copy MD section `## RedDog Governed Work Order Candidate`. It binds extension version, work-focus digest, WSP prompt digest, HoloIndex evidence posture, derived path scope, nonce, expiry, rollback plan, and safe advisory source digests. The candidate is explicitly not invocation-ready unless a later slice supplies a fresh permission snapshot, signed work authority, and explicit worktree valve request. No Python invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR, push, merge, or reward settlement is performed by this emission slice.
+
 **Judgment generation verifier wiring (extension v0.3.47):** when a work focus contains a top-level `Determine:` numbered list, `constructWspTaskPrompt()` instructs RedDog to emit a canonical `## Determine Answers` fenced JSON block. After any schema repair, `runJudgmentVerifier()` invokes `scripts/reddog_judgment_verifier_once.py`, which reuses `reddog_adversarial_verifier_panel.verify_answer_set()` against already-fetched direct-read hit bodies and the HoloIndex scorecard. The verifier is deterministic/local only: no HoloIndex re-index, WRE enqueue, shell, repo mutation, OpenClaw/Hermes dispatch, or network call. Run Trace / Copy MD expose `judgment_verifier_applied`, `judgment_verifier_verified`, verified/refuted/NEEDS_VERIFICATION counts, support-note counts, and advisory `index_gap_event` metadata.
 
 **Specified flow (not implemented in extension v0.3.27):**
@@ -382,7 +384,7 @@ Formal contract:
 | OpenClaw FoundUpJob adapter | SPECIFIED_NOT_IMPLEMENTED (contract doc only) |
 | AssignmentDispatcher as worker launcher | FORBIDDEN (simulated scaffold only) |
 | Governed repo work order dry-run validator | OBSERVED (OpenClaw bridge module) |
-| Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (runtime emission from extension) |
+| Governed repo work order (`RedDogGovernedWorkOrder`) | OBSERVED (candidate runtime emission from extension; authority binding still required) |
 | WRE operational spine dry-run preview | OBSERVED (extension v0.3.46); metadata only, no invocation |
 | Extension invokes `reddog_wre_operational_spine.py` | SPECIFIED_NOT_IMPLEMENTED |
 | GitHub permission snapshot per work order | SPECIFIED_NOT_IMPLEMENTED |
