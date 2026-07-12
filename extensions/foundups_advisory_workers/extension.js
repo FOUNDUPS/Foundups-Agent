@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.50';
+const EXTENSION_VERSION = '0.3.51';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -29,10 +29,13 @@ const BRIDGE_MAX_STDERR_BYTES = 65536;
 const BRIDGE_MAX_CONTEXT_CHARS = 48000;
 const BRIDGE_MAX_PROMPT_CHARS = 12000;
 const WRE_OPERATIONAL_SPINE_DRYRUN_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1';
+const WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_PHASE1';
 const WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE = 'REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1';
 const WRE_WORK_ORDER_AUTHORITY_BINDING_SLICE = 'REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1';
 const WRE_OPERATIONAL_SPINE_TARGET = 'reddog_wre_operational_spine';
 const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine';
+const WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT = 'scripts/reddog_extension_wre_spine_invoke_once.py';
+const WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES = 262144;
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
 const TRUSTED_PERMISSION_SNAPSHOT_SOURCES = new Set(['gh_cli', 'github_api', 'mock']);
 const MOJIBAKE_MARKERS = ['\u7aa6', '\u7aaa'];
@@ -2083,6 +2086,190 @@ function buildWreOperationalSpineDryRunPreviewSection(preview) {
   return lines.join('\n');
 }
 
+function _safeJsonClone(value) {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
+function _normalizedSignatureResultFromPreview(preview) {
+  const p = preview && typeof preview === 'object' ? preview : {};
+  const runtime = p.governed_work_order_runtime_emission && typeof p.governed_work_order_runtime_emission === 'object'
+    ? p.governed_work_order_runtime_emission
+    : {};
+  const binding = runtime.signed_authority_binding && typeof runtime.signed_authority_binding === 'object'
+    ? runtime.signed_authority_binding
+    : ((p.governed_work_order_authority_binding && p.governed_work_order_authority_binding.signed_authority_binding) || {});
+  if (binding.signed_authority_verified !== true) {
+    return null;
+  }
+  return {
+    accepted: binding.accepted === true,
+    reason_codes: Array.isArray(binding.reason_codes) ? binding.reason_codes.slice() : [],
+    work_order_id: String(binding.signed_authority_work_order_id || '')
+  };
+}
+
+function _normalizeSignatureResultForInvoke(value) {
+  const result = value && typeof value === 'object' ? value : {};
+  return {
+    accepted: result.accepted === true,
+    reason_codes: Array.isArray(result.reason_codes) ? result.reason_codes.map((item) => String(item)) : [],
+    work_order_id: String(result.work_order_id || '')
+  };
+}
+
+function buildWreOperationalSpineInvokePayload(preview, options) {
+  const p = preview && typeof preview === 'object' ? preview : {};
+  const opts = options && typeof options === 'object' ? options : {};
+  const workOrder = p.governed_work_order_candidate && typeof p.governed_work_order_candidate === 'object'
+    ? p.governed_work_order_candidate
+    : null;
+  const rejectionReasons = [];
+  if (opts.explicitWreOperationalSpineRequested !== true) {
+    rejectionReasons.push('explicit_wre_operational_spine_request_missing');
+  }
+  if (!workOrder) {
+    rejectionReasons.push('governed_work_order_candidate_missing');
+  }
+  if (p.governed_work_order_ready_for_invocation !== true) {
+    rejectionReasons.push('governed_work_order_not_ready_for_invocation');
+  }
+  const selectionReceipt = opts.selectionReceipt || opts.wardrobeSelectionReceipt || null;
+  if (!selectionReceipt || typeof selectionReceipt !== 'object') {
+    rejectionReasons.push('selection_receipt_missing');
+  }
+  const valveEnvironment = opts.valveEnvironment || opts.executionValveEnvironment || null;
+  if (!valveEnvironment || typeof valveEnvironment !== 'object') {
+    rejectionReasons.push('valve_environment_missing');
+  }
+  const signatureResult = opts.signatureVerificationResult || _normalizedSignatureResultFromPreview(p);
+  if (!signatureResult || typeof signatureResult !== 'object') {
+    rejectionReasons.push('signature_verification_result_missing');
+  }
+  const permissionSnapshot = (workOrder && workOrder.repo_permission_snapshot && typeof workOrder.repo_permission_snapshot === 'object')
+    ? workOrder.repo_permission_snapshot
+    : null;
+  if (!permissionSnapshot) {
+    rejectionReasons.push('permission_snapshot_missing');
+  }
+  if (rejectionReasons.length) {
+    return {
+      ok: false,
+      rejection_reasons: uniqueStrings(rejectionReasons),
+      payload: null
+    };
+  }
+  return {
+    ok: true,
+    rejection_reasons: [],
+    payload: {
+      work_order: _safeJsonClone(workOrder),
+      explicit_wre_operational_spine_requested: true,
+      selection_receipt: _safeJsonClone(selectionReceipt),
+      permission_snapshot: _safeJsonClone(permissionSnapshot),
+      valve_environment: _safeJsonClone(valveEnvironment),
+      signature_verification_result: _normalizeSignatureResultForInvoke(signatureResult),
+      require_signed_authority: opts.requireSignedAuthority !== false,
+      repo_root: opts.repoRoot ? String(opts.repoRoot) : undefined,
+      permission_expires_at: opts.permissionExpiresAt || null
+    }
+  };
+}
+
+function buildWreOperationalSpineInvokeResult(decision, fields) {
+  const payload = fields && typeof fields === 'object' ? fields : {};
+  return Object.assign({
+    slice_name: WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_SLICE,
+    target: WRE_OPERATIONAL_SPINE_TARGET,
+    decision: decision,
+    python_invocation_performed: false,
+    wre_spine_invoked: false,
+    worktree_create_performed: false,
+    task_execution_performed: false,
+    file_edit_performed: false,
+    pr_created: false,
+    openclaw_enqueue_performed: false,
+    hermes_dispatch_performed: false,
+    merge_performed: false,
+    reward_settlement_performed: false,
+    main_checkout_untouched: true,
+    required_valve: WRE_OPERATIONAL_SPINE_REQUIRED_VALVE,
+    script: WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT,
+    rejection_reasons: []
+  }, payload);
+}
+
+function invokeWreOperationalSpineExplicitValveBridge(context, preview, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const payloadResult = buildWreOperationalSpineInvokePayload(preview, opts);
+  if (!payloadResult.ok) {
+    return buildWreOperationalSpineInvokeResult('EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_SKIPPED', {
+      rejection_reasons: payloadResult.rejection_reasons,
+      not_invoked_reason: payloadResult.rejection_reasons[0] || 'missing_required_authority_metadata'
+    });
+  }
+  if (typeof opts.invokeRunner === 'function') {
+    const runnerResult = opts.invokeRunner(payloadResult.payload);
+    if (typeof runnerResult === 'string') {
+      return buildWreOperationalSpineInvokeResult('EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_BRIDGE_RESULT', JSON.parse(runnerResult));
+    }
+    return buildWreOperationalSpineInvokeResult('EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_BRIDGE_RESULT', runnerResult || {});
+  }
+  const root = workspaceRoot();
+  const script = path.join(root, WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT);
+  const config = vscode.workspace.getConfiguration('foundupsFusion');
+  const configuredPython = config.get('pythonPath') || 'python';
+  const interpreter = resolvePythonInterpreter(root, configuredPython);
+  try {
+    const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
+      cwd: root,
+      input: JSON.stringify(payloadResult.payload),
+      encoding: 'utf8',
+      env: buildBridgePythonEnv(process.env),
+      windowsHide: true,
+      maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
+    });
+    const parsed = JSON.parse(stdout);
+    return buildWreOperationalSpineInvokeResult(parsed.decision || 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_BRIDGE_RESULT', Object.assign({}, parsed, {
+      python_invocation_performed: true,
+      python_interpreter_source: interpreter.source
+    }));
+  } catch (err) {
+    return buildWreOperationalSpineInvokeResult('EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_REJECT', {
+      python_invocation_performed: true,
+      wre_spine_invoked: false,
+      rejection_reasons: ['bridge_invocation_failed'],
+      bridge_error_class: err && err.code ? String(err.code) : (err && err.name ? String(err.name) : 'Error')
+    });
+  }
+}
+
+function buildWreOperationalSpineInvokeSection(invokeResult) {
+  const r = invokeResult && typeof invokeResult === 'object' ? invokeResult : {};
+  return [
+    '## WRE Operational Spine Runtime Wire',
+    '- slice_name: ' + (r.slice_name || WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_SLICE) + ' [OBSERVED]',
+    '- target: ' + (r.target || WRE_OPERATIONAL_SPINE_TARGET) + ' [OBSERVED]',
+    '- decision: ' + (r.decision || 'unknown') + ' [OBSERVED]',
+    '- python_invocation_performed: ' + (r.python_invocation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- wre_spine_invoked: ' + (r.wre_spine_invoked === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- worktree_create_performed: ' + (r.worktree_create_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- task_execution_performed: ' + (r.task_execution_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- file_edit_performed: ' + (r.file_edit_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- pr_created: ' + (r.pr_created === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- openclaw_enqueue_performed: ' + (r.openclaw_enqueue_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- hermes_dispatch_performed: ' + (r.hermes_dispatch_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- merge_performed: ' + (r.merge_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- reward_settlement_performed: ' + (r.reward_settlement_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- main_checkout_untouched: ' + (r.main_checkout_untouched === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- required_valve: ' + (r.required_valve || WRE_OPERATIONAL_SPINE_REQUIRED_VALVE) + ' [OBSERVED]',
+    '- rejection_reasons: ' + JSON.stringify(r.rejection_reasons || []) + ' [OBSERVED]',
+    '- not_invoked_reason: ' + (r.not_invoked_reason || 'none') + ' [OBSERVED]'
+  ].join('\n');
+}
+
 function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoScorecard, resolvedEffort, copyContext) {
   const packet = result && typeof result === 'object' ? result : {};
   const ctx = copyContext && typeof copyContext === 'object' ? copyContext : {};
@@ -2109,6 +2296,10 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
         sections.push(buildRedDogGovernedWorkOrderCandidateSection(spinePreview.governed_work_order_runtime_emission));
       }
       sections.push(buildWreOperationalSpineDryRunPreviewSection(spinePreview));
+      const invokeResult = ctx.wreSpineInvokeResult || packet.wre_operational_spine_invoke_result;
+      if (invokeResult) {
+        sections.push(buildWreOperationalSpineInvokeSection(invokeResult));
+      }
     }
   }
   sections.push(buildContinuationTelemetrySection(ctx.continuationTelemetry || packet.continuation_telemetry));
@@ -3288,6 +3479,9 @@ function wireFusionWebview(context, webview, worker, state) {
         holoScorecard: holoScorecard
       })
       : null;
+    const wreSpineInvokeResult = wreSpineDryRunPreview
+      ? invokeWreOperationalSpineExplicitValveBridge(context, wreSpineDryRunPreview, {})
+      : null;
     result.review_packet = attachOrchestratorMetadata(
       result.review_packet || {},
       classification,
@@ -3305,6 +3499,10 @@ function wireFusionWebview(context, webview, worker, state) {
     if (wreSpineDryRunPreview) {
       result.wre_operational_spine_dryrun_preview = wreSpineDryRunPreview;
       result.review_packet.wre_operational_spine_dryrun_preview = wreSpineDryRunPreview;
+    }
+    if (wreSpineInvokeResult) {
+      result.wre_operational_spine_invoke_result = wreSpineInvokeResult;
+      result.review_packet.wre_operational_spine_invoke_result = wreSpineInvokeResult;
     }
     if (result.reason === 'redaction_blocked') {
       result.redaction_gate_report = buildRedactionGateReport(result, promptConstruction, contextMode);
@@ -3358,6 +3556,7 @@ function wireFusionWebview(context, webview, worker, state) {
       substantive: substantiveTask,
       handoffRecommendation: handoffRecommendation,
       wreSpineDryRunPreview: wreSpineDryRunPreview,
+      wreSpineInvokeResult: wreSpineInvokeResult,
       continuationEnabled: continuationEnabled,
       continuationTelemetry: continuationTelemetry,
       // Only pass the summary for Copy MD inclusion when appended this run (fail-closed).
@@ -5268,6 +5467,9 @@ module.exports = {
   normalizeSignedAuthorityBinding,
   buildWreOperationalSpineDryRunPreview,
   buildWreOperationalSpineDryRunPreviewSection,
+  buildWreOperationalSpineInvokePayload,
+  invokeWreOperationalSpineExplicitValveBridge,
+  buildWreOperationalSpineInvokeSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,
   formatHoloIndexScorecardLines,

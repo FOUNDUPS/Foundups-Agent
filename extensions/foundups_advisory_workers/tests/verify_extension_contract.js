@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.50', 'package version must be 0.3.50');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.50'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.51', 'package version must be 0.3.51');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.51'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.50', 'README version mismatch');
+includes(readme, 'Version: 0.3.51', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -770,7 +770,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.50', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.51', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -805,7 +805,8 @@ includes(spinePreviewSection, 'governed_work_order_ready_for_invocation: false [
 includes(spinePreviewSection, 'python_invocation_performed: false [OBSERVED]', 'WRE preview section must show no Python invocation');
 includes(spinePreviewSection, 'worktree_create_performed: false [OBSERVED]', 'WRE preview section must show no worktree creation');
 includes(spinePreviewSection, 'required_future_valve: VALVE_OPEN_WORKTREE_CREATE [OBSERVED]', 'WRE preview section must show valve');
-assert(!/execFileSync\([^;]*reddog_wre_operational_spine\.py/s.test(extensionJs), 'extension must not execFileSync the WRE operational spine in dry-run wire slice');
+assert(!/execFileSync\([^;]*reddog_wre_operational_spine\.py/s.test(extensionJs), 'extension must not execFileSync the WRE operational spine directly');
+includes(extensionJs, "scripts/reddog_extension_wre_spine_invoke_once.py", 'runtime wire must use one-shot explicit invoke bridge');
 includes(extensionJs, "result.reason !== 'redaction_blocked'", 'blocked-local packets must not receive WRE dry-run preview');
 
 const wrePreviewCopy = orchestrator.buildCopyMarkdown(
@@ -880,6 +881,101 @@ assert.strictEqual(authorityBound.ready_for_wre_invocation, true, 'candidate sho
 assert.strictEqual(authorityBound.not_ready_reasons.length, 0, 'ready candidate must have no not-ready reasons');
 const authorityBoundSection = orchestrator.buildRedDogGovernedWorkOrderCandidateSection(authorityBound);
 assert(!authorityBoundSection.includes('must-not-leak'), 'candidate section must not leak raw signature material');
+
+const skippedInvoke = orchestrator.invokeWreOperationalSpineExplicitValveBridge(null, spinePreview, {});
+assert.strictEqual(skippedInvoke.decision, 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_SKIPPED', 'runtime wire must skip without explicit invoke metadata');
+assert.strictEqual(skippedInvoke.python_invocation_performed, false, 'skipped runtime wire must not invoke Python');
+assert(skippedInvoke.rejection_reasons.includes('explicit_wre_operational_spine_request_missing'), 'skipped runtime wire must cite missing explicit request');
+const skippedInvokeSection = orchestrator.buildWreOperationalSpineInvokeSection(skippedInvoke);
+includes(skippedInvokeSection, '## WRE Operational Spine Runtime Wire', 'runtime wire section header');
+includes(skippedInvokeSection, 'python_invocation_performed: false [OBSERVED]', 'runtime wire skipped section must show no Python invocation');
+
+const readyPreview = Object.assign({}, spinePreview, {
+  governed_work_order_candidate: authorityBound.work_order,
+  governed_work_order_candidate_digest: authorityBound.work_order_digest,
+  governed_work_order_runtime_emission: authorityBound,
+  governed_work_order_authority_binding: {
+    permission_binding: authorityBound.permission_binding,
+    signed_authority_binding: authorityBound.signed_authority_binding,
+    authority_binding_performed: true
+  },
+  governed_work_order_ready_for_invocation: true,
+  governed_work_order_not_ready_reasons: []
+});
+const sovereignSelectionReceipt = {
+  selected_wardrobe: 'wsp97_sovereign_execution',
+  execution_plane: 'governed_execution_candidate',
+  authority_boundary: 'sovereign_token_required',
+  rejection_reasons: [],
+  no_execution_performed: true,
+  no_enqueue_performed: true
+};
+const readyInvokePayload = orchestrator.buildWreOperationalSpineInvokePayload(readyPreview, {
+  explicitWreOperationalSpineRequested: true,
+  selectionReceipt: sovereignSelectionReceipt,
+  valveEnvironment: {
+    valve_worktree_create_enabled: true,
+    sovereign_worktree_token: 'must-not-leak-token'
+  },
+  signatureVerificationResult: {
+    accepted: true,
+    reason_codes: [],
+    work_order_id: authorityBound.work_order.work_order_id,
+    signature: 'must-not-leak-signature'
+  }
+});
+assert.strictEqual(readyInvokePayload.ok, true, 'ready runtime wire payload should be buildable from supplied authority metadata');
+assert.strictEqual(readyInvokePayload.payload.work_order.work_order_id, authorityBound.work_order.work_order_id, 'runtime wire payload must bind work_order_id');
+assert.strictEqual(readyInvokePayload.payload.explicit_wre_operational_spine_requested, true, 'runtime wire payload must carry explicit invoke request');
+assert.strictEqual(readyInvokePayload.payload.selection_receipt.selected_wardrobe, 'wsp97_sovereign_execution', 'runtime wire payload must carry sovereign wardrobe selection');
+assert(!JSON.stringify(readyInvokePayload.payload.signature_verification_result).includes('must-not-leak-signature'), 'runtime wire payload must strip raw signature material');
+
+const fakeInvoke = orchestrator.invokeWreOperationalSpineExplicitValveBridge(null, readyPreview, {
+  explicitWreOperationalSpineRequested: true,
+  selectionReceipt: sovereignSelectionReceipt,
+  valveEnvironment: {
+    valve_worktree_create_enabled: true,
+    sovereign_worktree_token: 'must-not-leak-token'
+  },
+  signatureVerificationResult: {
+    accepted: true,
+    reason_codes: [],
+    work_order_id: authorityBound.work_order.work_order_id,
+    signature: 'must-not-leak-signature'
+  },
+  invokeRunner: (payload) => {
+    assert.strictEqual(payload.work_order.work_order_id, authorityBound.work_order.work_order_id, 'fake runner receives bound work order');
+    return {
+      decision: 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT',
+      python_invocation_performed: true,
+      wre_spine_invoked: true,
+      worktree_create_performed: true,
+      task_execution_performed: false,
+      file_edit_performed: false,
+      pr_created: false,
+      openclaw_enqueue_performed: false,
+      hermes_dispatch_performed: false,
+      merge_performed: false,
+      reward_settlement_performed: false,
+      main_checkout_untouched: true,
+      rejection_reasons: []
+    };
+  }
+});
+assert.strictEqual(fakeInvoke.decision, 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT', 'runtime wire should accept fake bridge result');
+assert.strictEqual(fakeInvoke.wre_spine_invoked, true, 'runtime wire fake bridge should mark spine invoked');
+const fakeInvokeSection = orchestrator.buildWreOperationalSpineInvokeSection(fakeInvoke);
+assert(!fakeInvokeSection.includes('must-not-leak'), 'runtime wire section must not leak sovereign token or signature');
+
+const bridgeReject = JSON.parse(cp.execFileSync('python', ['-B', path.join(root, 'scripts', 'reddog_extension_wre_spine_invoke_once.py')], {
+  cwd: root,
+  input: '{}',
+  encoding: 'utf8',
+  env: Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }),
+  maxBuffer: 262144
+}));
+assert.strictEqual(bridgeReject.decision, 'EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_REJECT', 'one-shot bridge must reject empty payload');
+assert.strictEqual(bridgeReject.python_invocation_performed, true, 'one-shot bridge must report Python invocation');
 
 const signatureMismatch = orchestrator.buildRedDogGovernedWorkOrderCandidate(
   'Fix a narrow RedDog slice',
@@ -1767,7 +1863,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.50'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.51'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1781,7 +1877,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.50'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.51'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1793,7 +1889,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.50'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.51'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
