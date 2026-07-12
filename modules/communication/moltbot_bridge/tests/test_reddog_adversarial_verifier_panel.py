@@ -178,15 +178,22 @@ def test_malformed_scorecard_fields_do_not_crash(bad):
 # --- INDEX_GAP: advisory, non-mutating --------------------------------------
 def test_index_gap_event_emitted_advisory_non_mutating():
     ev = build_index_gap_event({"index_gap_detected": True,
+                                "direct_read_fallback_used": True,
                                 "direct_read_paths": ["modules/x/f1.py", "modules/x/f2.py"]})
     assert ev is not None
     assert ev["event"] == "INDEX_GAP" and ev["severity"] == "advisory"
     assert ev["stale_targets"] == ["modules/x/f1.py", "modules/x/f2.py"]
     assert "not performed here" in ev["recommendation"].lower()
     assert "no live wre enqueue" in ev["boundary"].lower()
-    # the event carries NO enqueue/mutation directive -- it is a pure advisory record
+    assert ev["wre_work_item"]["decision"] == "WORKITEM_PLANNED"
+    item = ev["wre_work_item"]["work_item"]
+    assert item["recommended_action"] == "targeted_reindex"
+    assert item["live_wre_enqueue_performed"] is False
+    assert item["no_reindex_performed"] is True
+    assert item["no_agentdb_mutation_performed"] is True
+    # the event carries NO live enqueue/mutation directive -- it is a pure advisory record
     assert set(ev.keys()) == {"event", "severity", "index_gap_detected", "stale_targets",
-                              "recommendation", "boundary"}
+                              "recommendation", "boundary", "wre_work_item"}
 
 
 def test_no_index_gap_no_event():
