@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_MERGE_AUTHORITY_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 96, 97, 100
+
+- Added `src/reddog_merge_authority_dryrun.py`: pure dry-run validator for the merge authority contract. It validates non-self promotion, exact-head CI/check-run status, machine-derived diff/scope summary, signed work authority, signed receipt-chain, worktree/shell receipts, independent review opinions, WSP_96 consensus when required, HoloIndex freshness, protected-surface escalation, expiry/nonce, and secret-free evidence packets.
+- Added `tests/test_reddog_merge_authority_dryrun.py`: acceptance, fail-closed, self-promotion, CI, review, consensus, HoloIndex, protected-surface, serialization, ASCII, and AST no-GitHub/no-merge/no-subprocess coverage.
+- Boundary: no GitHub API call, no `gh pr ready`, no `gh pr merge`, no protected-ref mutation, no shell/subprocess, no file mutation, no extension runtime wiring, no reward settlement, and no HoloIndex re-index. This emits a dry-run decision only.
+- HoloIndex read-only probe for `RedDog merge authority dryrun exact head CI reviewer consensus non self promotion` did not surface a canonical dry-run module. Recorded as `HOLOINDEX_REDDOG_MERGE_AUTHORITY_DRYRUN_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_MERGE_AUTHORITY_CONTRACT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 96, 97, 100
