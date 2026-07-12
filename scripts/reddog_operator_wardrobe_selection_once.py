@@ -63,6 +63,7 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
         target_recall_ok=(
             payload.get("target_recall_ok") if isinstance(payload.get("target_recall_ok"), bool) else None
         ),
+        grounding_preflight=_mapping(payload.get("grounding_preflight")),
         wsp_refs=_list(payload.get("wsp_refs")),
         lane_refs=_list(payload.get("lane_refs")),
         continuation_packet_digest=(

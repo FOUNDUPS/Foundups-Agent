@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_GROUNDING_TO_WARDROBE_SELECTION_RECEIPT_PHASE1 (grounded action-plane selection, 0.3.56)
+
+- Threaded typed grounding preflight into the RedDog operator wardrobe-selection payload and receipt.
+- Failed grounding now blocks action-plane selection before Python bridge invocation, preventing wardrobe/live-authority planning from ungrounded inputs.
+- Direct Python bridge calls also fail closed on failed grounding with `no_action_plane_selected` / `grounding_blocked`.
+- Version 0.3.55 -> 0.3.56 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_TYPED_GROUNDING_PREFLIGHT_PHASE1 (fail-closed grounding coverage gate, 0.3.55)
 
 - Added `buildTypedGroundingPreflight()` to block Fusion before any model call when typed grounding coverage is incomplete.
