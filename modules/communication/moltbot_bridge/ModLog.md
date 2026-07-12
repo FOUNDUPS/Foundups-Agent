@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_WRE_GOVERNED_SHELL_RUNNER_CONTRACT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 11, 15, 50, 53, 71, 95, 97
+
+- Added `docs/audits/architecture/REDDOG_WRE_GOVERNED_SHELL_RUNNER_CONTRACT_PHASE1.md`: decision-only contract for a future WRE-owned governed shell runner.
+- Defined `GovernedShellCommandProfile`, `GovernedShellRunRequest`, future `GovernedShellRunReceipt`, argv-only command policy, WSP_71 secret boundary, WRE cwd guard requirements, full execution-valve binding, signed authority/receipt inputs, output redaction/caps, and HoloIndex no-reindex boundary.
+- Boundary: docs/static tests only. No shell runner implementation, no subprocess invocation, no file mutation, no worktree creation, no PR/merge/release/deploy/publish, no reward settlement, no extension runtime wiring, and no HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog WRE governed shell runner contract command execution cwd guard signed authority` surfaced WSP_11/WSP_53/WSP_71, RedDog policy/receipt surfaces, and legacy subprocess call sites. Recorded as `HOLOINDEX_REDDOG_WRE_GOVERNED_SHELL_RUNNER_CONTRACT_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_GENERIC_AGENT_WORKTREE_WRITER_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 95, 97
