@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.55';
+const EXTENSION_VERSION = '0.3.56';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -2486,6 +2486,40 @@ function inferWardrobeAuthorityRequest(workFocus, handoffRecommendation) {
   return 'none';
 }
 
+function buildWardrobeGroundingPreflightReceipt(holoScorecard, options) {
+  const scorecard = holoScorecard && typeof holoScorecard === 'object' ? holoScorecard : {};
+  const opts = options && typeof options === 'object' ? options : {};
+  const explicit = opts.groundingPreflight && typeof opts.groundingPreflight === 'object'
+    ? opts.groundingPreflight
+    : null;
+  const source = explicit || scorecard;
+  const rawReasons = Array.isArray(source.grounding_preflight_rejection_reasons)
+    ? source.grounding_preflight_rejection_reasons
+    : (Array.isArray(source.rejection_reasons) ? source.rejection_reasons : []);
+  const reasons = uniqueStrings(
+    rawReasons
+  );
+  const applied = explicit
+    ? source.applied === true
+    : source.grounding_preflight_applied === true;
+  const passed = explicit
+    ? source.passed === true
+    : source.grounding_preflight_passed === true;
+  return {
+    applied: applied,
+    passed: applied ? passed : true,
+    rejection_reasons: reasons,
+    repo_file_targets_count: numberFromScorecard(source.repo_file_targets_count),
+    semantic_targets_count: numberFromScorecard(source.semantic_targets_count),
+    external_research_targets_count: numberFromScorecard(source.external_research_targets_count),
+    quoted_reference_blocks_count: numberFromScorecard(source.quoted_reference_blocks_count),
+    direct_read_required: source.direct_read_required === true || numberFromScorecard(source.repo_file_targets_count) > 0,
+    semantic_grounding_required: source.semantic_grounding_required === true || numberFromScorecard(source.semantic_targets_count) > 0,
+    external_research_required: source.external_research_required === true || numberFromScorecard(source.external_research_targets_count) > 0,
+    quoted_blocks_context_only: source.quoted_blocks_context_only === true || numberFromScorecard(source.quoted_reference_blocks_count) > 0
+  };
+}
+
 function buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruction, handoffRecommendation, options) {
   const opts = options && typeof options === 'object' ? options : {};
   const construction = promptConstruction && typeof promptConstruction === 'object' ? promptConstruction : {};
@@ -2508,6 +2542,7 @@ function buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruct
       ? construction.required_targets_authoritative_paths.slice()
       : [],
     target_recall_ok: scorecard.target_recall_ok === true,
+    grounding_preflight: buildWardrobeGroundingPreflightReceipt(scorecard, opts),
     wsp_refs: Array.isArray(opts.wspRefs) ? opts.wspRefs.slice() : ['WSP_00', 'WSP_15', 'WSP_46', 'WSP_95', 'WSP_97'],
     lane_refs: Array.isArray(opts.laneRefs) ? opts.laneRefs.slice() : [],
     continuation_packet_digest: opts.continuationPacketDigest || ''
@@ -2517,6 +2552,23 @@ function buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruct
 function runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, options) {
   const opts = options && typeof options === 'object' ? options : {};
   const payload = buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruction, handoffRecommendation, opts);
+  if (
+    payload.grounding_preflight
+    && payload.grounding_preflight.applied === true
+    && payload.grounding_preflight.passed !== true
+  ) {
+    return {
+      slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
+      decision: 'WARDROBE_SELECTION_REJECT',
+      receipt: null,
+      grounding_preflight_passed: false,
+      grounding_preflight_rejection_reasons: uniqueStrings(payload.grounding_preflight.rejection_reasons),
+      python_invocation_performed: false,
+      no_execution_performed: true,
+      no_enqueue_performed: true,
+      rejection_reasons: ['grounding_preflight_not_passed']
+    };
+  }
   if (typeof opts.selectionRunner === 'function') {
     const runnerResult = opts.selectionRunner(payload);
     return Object.assign({
@@ -2576,6 +2628,8 @@ function buildOperatorWardrobeSelectionSection(selectionResult) {
     '- selected_model_mode: ' + (receipt.selected_model_mode || 'unknown') + ' [OBSERVED]',
     '- selected_effort: ' + (receipt.selected_effort || 'unknown') + ' [OBSERVED]',
     '- wre_required: ' + (receipt.wre_required === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- grounding_preflight_applied: ' + (receipt.grounding_preflight_applied === true ? 'true' : (r.grounding_preflight_passed === false ? 'true' : 'false')) + ' [OBSERVED]',
+    '- grounding_preflight_passed: ' + (receipt.grounding_preflight_passed === true || r.grounding_preflight_passed === true ? 'true' : 'false') + ' [OBSERVED]',
     '- index_gap_detected: ' + (receipt.index_gap_detected === true ? 'true' : 'false') + ' [OBSERVED]',
     '- direct_read_required: ' + (receipt.direct_read_required === true ? 'true' : 'false') + ' [OBSERVED]',
     '- rejection_reasons: ' + JSON.stringify(receipt.rejection_reasons || r.rejection_reasons || []) + ' [OBSERVED]',
@@ -4094,13 +4148,18 @@ function wireFusionWebview(context, webview, worker, state) {
       workFocusDigest: promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash,
       wspPromptDigest: promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash
     });
-    const operatorWardrobeSelectionResult = substantiveTask && result.reason !== 'redaction_blocked'
-      ? runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, {})
+    const actionPlanningAllowed = substantiveTask
+      && result.reason !== 'redaction_blocked'
+      && result.reason !== 'grounding_preflight_blocked';
+    const operatorWardrobeSelectionResult = actionPlanningAllowed
+      ? runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, {
+        groundingPreflight: groundingPreflight
+      })
       : null;
-    const githubPermissionProbeResult = substantiveTask && result.reason !== 'redaction_blocked'
+    const githubPermissionProbeResult = actionPlanningAllowed
       ? runGithubPermissionProbeBridge(context, {})
       : null;
-    const wreSpineDryRunPreview = substantiveTask && result.reason !== 'redaction_blocked'
+    const wreSpineDryRunPreview = actionPlanningAllowed
       ? buildWreOperationalSpineDryRunPreview(workFocus, classification, handoffRecommendation, {
         promptConstruction: promptConstruction,
         contextMode: contextMode,

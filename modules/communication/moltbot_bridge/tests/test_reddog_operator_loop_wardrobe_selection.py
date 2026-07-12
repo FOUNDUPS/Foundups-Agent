@@ -13,6 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_sele
     AUTHORITY_SOVEREIGN_TOKEN_REQUIRED,
     EXECUTION_ADVISORY_ONLY,
     EXECUTION_AUDIT_ONLY,
+    EXECUTION_GROUNDING_BLOCKED,
     EXECUTION_GOVERNED_CANDIDATE,
     EXECUTION_WORKER_DRAFT_PR,
     FRESHNESS_FRESH,
@@ -20,6 +21,7 @@ from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_sele
     IMPLEMENTATION_STATUS_SPECIFIED_NOT_IMPLEMENTED,
     WARDROBE_ARCHITECT_AUDIT,
     WARDROBE_IMPLEMENTATION_SLICE,
+    WARDROBE_NO_ACTION_PLANE,
     WARDROBE_SELECTION_ACCEPT,
     WARDROBE_SELECTION_REJECT,
     WARDROBE_SOLO_RETRIEVAL,
@@ -93,6 +95,62 @@ def test_implementation_request_selects_draft_pr_plane() -> None:
     assert result.receipt.authority_boundary == AUTHORITY_DRAFT_PR_ONLY
     assert result.receipt.wre_required is True
     assert result.receipt.direct_read_required is True
+    assert result.receipt.grounding_preflight_applied is False
+    assert result.receipt.grounding_preflight_passed is True
+
+
+def test_passed_grounding_preflight_is_bound_into_receipt() -> None:
+    result = select_reddog_operator_loop_wardrobe_dryrun(
+        "Implement a scoped fix and open a draft PR.",
+        authority_request="draft_pr",
+        holoindex_evidence=_holo(),
+        required_targets=["modules/communication/moltbot_bridge/src/foo.py"],
+        target_recall_ok=True,
+        grounding_preflight={
+            "applied": True,
+            "passed": True,
+            "rejection_reasons": [],
+            "repo_file_targets_count": 1,
+            "semantic_targets_count": 0,
+            "external_research_targets_count": 0,
+            "quoted_reference_blocks_count": 0,
+        },
+    )
+    assert result.decision == WARDROBE_SELECTION_ACCEPT
+    assert result.receipt.selected_wardrobe == WARDROBE_IMPLEMENTATION_SLICE
+    assert result.receipt.grounding_preflight_applied is True
+    assert result.receipt.grounding_preflight_passed is True
+    assert len(result.receipt.grounding_preflight_digest) == 64
+    assert result.receipt.grounding_preflight_rejection_reasons == []
+
+
+def test_failed_grounding_preflight_blocks_action_plane_selection() -> None:
+    result = select_reddog_operator_loop_wardrobe_dryrun(
+        "Implement a slice using an ungrounded external paper.",
+        authority_request="draft_pr",
+        holoindex_evidence=_holo(),
+        grounding_preflight={
+            "applied": True,
+            "passed": False,
+            "rejection_reasons": ["external_research_retrieval_not_implemented"],
+            "repo_file_targets_count": 0,
+            "semantic_targets_count": 0,
+            "external_research_targets_count": 1,
+            "quoted_reference_blocks_count": 0,
+        },
+    )
+    assert result.decision == WARDROBE_SELECTION_REJECT
+    assert result.receipt.selected_wardrobe == WARDROBE_NO_ACTION_PLANE
+    assert result.receipt.execution_plane == EXECUTION_GROUNDING_BLOCKED
+    assert result.receipt.wre_required is False
+    assert result.receipt.authority_boundary == AUTHORITY_NONE
+    assert result.receipt.grounding_preflight_applied is True
+    assert result.receipt.grounding_preflight_passed is False
+    assert result.receipt.grounding_preflight_rejection_reasons == [
+        "external_research_retrieval_not_implemented"
+    ]
+    assert "grounding_preflight_not_passed" in result.receipt.rejection_reasons
+    assert "grounding:external_research_retrieval_not_implemented" in result.receipt.rejection_reasons
 
 
 def test_live_enqueue_request_selects_sovereign_execution_candidate() -> None:

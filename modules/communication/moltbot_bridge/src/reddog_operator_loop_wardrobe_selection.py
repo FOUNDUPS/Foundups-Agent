@@ -20,11 +20,13 @@ WARDROBE_SOLO_RETRIEVAL = "wsp97_solo_retrieval"
 WARDROBE_ARCHITECT_AUDIT = "wsp97_architect_audit"
 WARDROBE_IMPLEMENTATION_SLICE = "wsp97_implementation_slice"
 WARDROBE_SOVEREIGN_EXECUTION = "wsp97_sovereign_execution"
+WARDROBE_NO_ACTION_PLANE = "no_action_plane_selected"
 
 EXECUTION_ADVISORY_ONLY = "advisory_only"
 EXECUTION_AUDIT_ONLY = "audit_only"
 EXECUTION_WORKER_DRAFT_PR = "worker_draft_pr"
 EXECUTION_GOVERNED_CANDIDATE = "governed_execution_candidate"
+EXECUTION_GROUNDING_BLOCKED = "grounding_blocked"
 
 AUTHORITY_NONE = "no_authority"
 AUTHORITY_DRAFT_PR_ONLY = "draft_pr_only"
@@ -138,6 +140,10 @@ class RedDogOperatorLoopWardrobeSelectionReceipt:
     holoindex_freshness_label: str
     index_gap_detected: bool
     direct_read_required: bool
+    grounding_preflight_applied: bool
+    grounding_preflight_passed: bool
+    grounding_preflight_digest: str
+    grounding_preflight_rejection_reasons: List[str]
     skillz_candidates: List[str]
     lane_refs: List[str]
     rejection_reasons: List[str]
@@ -370,6 +376,34 @@ def _repo_sensitive_work(work_focus: str, authority_request: str, required_targe
     return bool(required_targets) or authority_request != "none" or _contains_any(work_focus, _REPO_TERMS)
 
 
+def _safe_int(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _grounding_preflight_state(value: Optional[Mapping[str, Any]]) -> Tuple[bool, bool, str, List[str]]:
+    if not isinstance(value, Mapping):
+        return (False, True, _canonical_digest({"grounding_preflight": "not_applied"}), [])
+    raw_reasons = value.get("rejection_reasons") or []
+    if isinstance(raw_reasons, (str, bytes)):
+        raw_reasons = [raw_reasons]
+    reasons = _dedupe(raw_reasons)
+    applied = value.get("applied") is True or "passed" in value or bool(reasons)
+    passed = value.get("passed") is True if applied else True
+    digest_payload = {
+        "applied": applied,
+        "passed": passed,
+        "rejection_reasons": reasons,
+        "repo_file_targets_count": _safe_int(value.get("repo_file_targets_count")),
+        "semantic_targets_count": _safe_int(value.get("semantic_targets_count")),
+        "external_research_targets_count": _safe_int(value.get("external_research_targets_count")),
+        "quoted_reference_blocks_count": _safe_int(value.get("quoted_reference_blocks_count")),
+    }
+    return (applied, passed, _canonical_digest(digest_payload), reasons)
+
+
 def select_reddog_operator_loop_wardrobe_dryrun(
     work_focus: str,
     *,
@@ -381,6 +415,7 @@ def select_reddog_operator_loop_wardrobe_dryrun(
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
     required_targets: Optional[Sequence[str]] = None,
     target_recall_ok: Optional[bool] = None,
+    grounding_preflight: Optional[Mapping[str, Any]] = None,
     wsp_refs: Optional[Sequence[str]] = None,
     lane_refs: Optional[Sequence[str]] = None,
     continuation_packet_digest: Optional[str] = None,
@@ -404,8 +439,17 @@ def select_reddog_operator_loop_wardrobe_dryrun(
     index_gap = _index_gap_detected(holo)
     freshness = _holoindex_freshness_label(holo)
     repo_sensitive = _repo_sensitive_work(normalized_focus, normalized_authority, targets)
+    (
+        grounding_applied,
+        grounding_passed,
+        grounding_digest,
+        grounding_reasons,
+    ) = _grounding_preflight_state(grounding_preflight)
 
     rejection_reasons: List[str] = []
+    if grounding_applied and not grounding_passed:
+        rejection_reasons.append("grounding_preflight_not_passed")
+        rejection_reasons.extend(f"grounding:{reason}" for reason in grounding_reasons)
     if repo_sensitive and not holo:
         rejection_reasons.append("holoindex_evidence_missing_for_repo_work")
     if targets and target_recall_ok is False:
@@ -423,6 +467,16 @@ def select_reddog_operator_loop_wardrobe_dryrun(
     query_digest = _holoindex_query_digest(holo)
     candidates = _skillz_candidates(normalized_focus, holo)
 
+    if grounding_applied and not grounding_passed:
+        selected_wardrobe = WARDROBE_NO_ACTION_PLANE
+        wsp97_depth = "grounding_blocked"
+        execution_plane = EXECUTION_GROUNDING_BLOCKED
+        wre_required = False
+        context_mode = "none"
+        model_mode = "none"
+        effort = "none"
+        boundary = AUTHORITY_NONE
+
     receipt_payload: Dict[str, Any] = {
         "work_focus_digest": work_focus_digest,
         "principal_ref": str(principal_ref or "unknown"),
@@ -439,6 +493,10 @@ def select_reddog_operator_loop_wardrobe_dryrun(
         "holoindex_freshness_label": freshness,
         "index_gap_detected": index_gap,
         "direct_read_required": direct_read_required,
+        "grounding_preflight_applied": grounding_applied,
+        "grounding_preflight_passed": grounding_passed,
+        "grounding_preflight_digest": grounding_digest,
+        "grounding_preflight_rejection_reasons": grounding_reasons,
         "skillz_candidates": candidates,
         "lane_refs": lanes,
         "wsp_refs": governing_wsps,
@@ -465,6 +523,10 @@ def select_reddog_operator_loop_wardrobe_dryrun(
         holoindex_freshness_label=freshness,
         index_gap_detected=index_gap,
         direct_read_required=direct_read_required,
+        grounding_preflight_applied=grounding_applied,
+        grounding_preflight_passed=grounding_passed,
+        grounding_preflight_digest=grounding_digest,
+        grounding_preflight_rejection_reasons=grounding_reasons,
         skillz_candidates=candidates,
         lane_refs=lanes,
         rejection_reasons=_dedupe(rejection_reasons),
