@@ -1,5 +1,15 @@
 # HoloIndex Package ModLog
 
+## [2026-07-12] HOLOINDEX_INDEX_GAP_TO_WRE_WORKITEM_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97 | **Base**: `af86b77b`
+
+- ADD `holo_index/index_gap_workitem.py`: deterministic, non-mutating planner that classifies INDEX_GAP into the four recorded taxonomy classes and emits a WRE-owned work-item envelope. Only `HOLOINDEX_STALE_INDEX` plans `targeted_reindex`; `HOLOINDEX_LOW_SIGNAL` routes to retrieval-quality work, runtime failures route to runtime repair, and tool-classifier failures route to classifier repair.
+- UPDATE `reddog_adversarial_verifier_panel.build_index_gap_event`: the advisory INDEX_GAP event now carries a planned `wre_work_item` payload while preserving `live_wre_enqueue_performed=false`, `no_reindex_performed=true`, and `no_agentdb_mutation_performed=true`.
+- TEST `tests/test_holoindex_index_gap_workitem.py` and verifier panel regression: deterministic IDs, changed-path collection mapping, taxonomy routing, receipt digesting, no AgentDB/subprocess/OpenClaw imports, and non-mutating advisory event boundaries.
+- HoloIndex read-only probe for `HOLOINDEX_INDEX_GAP_TO_WRE_WORKITEM_PHASE1 INDEX_GAP WRE work item freshness receipt RedDog verifier` did not surface a canonical work-item planner before re-index. Recorded as `HOLOINDEX_INDEX_GAP_TO_WRE_WORKITEM_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## [2026-07-12] HOLOINDEX_FRESHNESS_RECEIPT_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice

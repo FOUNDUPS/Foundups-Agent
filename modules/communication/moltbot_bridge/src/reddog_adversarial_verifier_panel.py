@@ -39,6 +39,7 @@ from modules.communication.moltbot_bridge.src.reddog_determine_answer_contract i
     _is_file_line,
     normalize_evidence_ref,
 )
+from holo_index.index_gap_workitem import plan_index_gap_work_item
 
 
 # Per-claim verdicts. OBSERVED_VERIFIED / INFERRED are the answer's own WSP_97 label AFTER the
@@ -280,6 +281,8 @@ def build_index_gap_event(scorecard: Mapping[str, Any]) -> Optional[dict]:
     if not gap:
         return None
     stale = [p for p in _as_list(scorecard.get("direct_read_paths")) if isinstance(p, str)]
+    work_item_result = plan_index_gap_work_item(scorecard)
+    work_item_payload = work_item_result.to_dict()
     return {
         "event": "INDEX_GAP",
         "severity": "advisory",
@@ -289,6 +292,7 @@ def build_index_gap_event(scorecard: Mapping[str, Any]) -> Optional[dict]:
                           "governed WRE/CI maintenance action -- NOT performed here.",
         "boundary": "advisory-only; no live WRE enqueue / CI mutation / re-index in this slice; "
                     "direct-read success is not HoloIndex freshness success",
+        "wre_work_item": work_item_payload,
     }
 
 
