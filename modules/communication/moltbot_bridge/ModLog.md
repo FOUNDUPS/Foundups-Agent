@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_GENERIC_AGENT_WORKTREE_WRITER_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 95, 97
+
+- Added `src/reddog_generic_agent_worktree_writer_dryrun.py`: pure dry-run validator for the generic agent worktree-write spine defined by the landed contract. It re-derives canonical roots from a domain profile and domain id, validates planned artifacts, pin-independent denylist, signed authority, signed receipt chain, full `VALVE_OPEN_WORKTREE_CREATE` decision, consensus receipt when required, and WRE cwd guard.
+- Added `tests/test_reddog_generic_agent_worktree_writer_dryrun.py`: acceptance, fail-closed, HoloIndex INDEX_GAP, cwd isolation, protected-branch, JSON serialization, and AST no-execution/no-file-write tests.
+- Boundary: no file writes, no worktree creation, no subprocess/git/gh, no shell runner, no PR/merge, no reward settlement, no extension runtime wiring, and no HoloIndex re-index. This emits a dry-run receipt only.
+- HoloIndex read-only probe for `RedDog generic agent worktree writer dryrun domain profile materialize canonical root cwd guard` surfaced adjacent executor/governed-work-order surfaces plus the prior generic spine audit, but not the new module. Recorded as `HOLOINDEX_REDDOG_GENERIC_AGENT_WORKTREE_WRITER_DRYRUN_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_GENERIC_AGENT_WORKTREE_WRITE_SPINE_CONTRACT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 95, 97
