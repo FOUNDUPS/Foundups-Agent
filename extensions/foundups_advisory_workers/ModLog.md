@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_EXTENSION_OPERATOR_WARDROBE_SELECTION_RUNTIME_BRIDGE_PHASE1 (wardrobe receipt bridge, 0.3.52)
+
+- Added `runOperatorWardrobeSelectionBridge()` and `scripts/reddog_operator_wardrobe_selection_once.py` to emit a deterministic WSP_97/WSP_95 operator wardrobe-selection receipt from the live extension path.
+- Copy MD / review packet now include `## RedDog Operator Wardrobe Selection` with selected wardrobe, execution plane, authority boundary, mode/effort, WRE requirement, index-gap posture, and no-execution/no-enqueue flags.
+- The WRE runtime wire now receives this locally generated selection receipt as an input, but still skips invocation by default until signed authority, permission, explicit invoke, and valve metadata are present.
+- Version 0.3.51 -> 0.3.52 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_PHASE1 (guarded invoke seam, 0.3.51)
 
 - Added `invokeWreOperationalSpineExplicitValveBridge()` and `scripts/reddog_extension_wre_spine_invoke_once.py` as the extension-side runtime seam to the landed Python explicit-valve guard.

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.51';
+const EXTENSION_VERSION = '0.3.52';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -30,11 +30,13 @@ const BRIDGE_MAX_CONTEXT_CHARS = 48000;
 const BRIDGE_MAX_PROMPT_CHARS = 12000;
 const WRE_OPERATIONAL_SPINE_DRYRUN_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1';
 const WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_RUNTIME_WIRE_PHASE1';
+const REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE = 'REDDOG_EXTENSION_OPERATOR_WARDROBE_SELECTION_RUNTIME_BRIDGE_PHASE1';
 const WRE_GOVERNED_WORK_ORDER_EMISSION_SLICE = 'REDDOG_EXTENSION_GOVERNED_WORK_ORDER_RUNTIME_EMISSION_PHASE1';
 const WRE_WORK_ORDER_AUTHORITY_BINDING_SLICE = 'REDDOG_EXTENSION_WORK_ORDER_PERMISSION_AND_SIGNATURE_BINDING_PHASE1';
 const WRE_OPERATIONAL_SPINE_TARGET = 'reddog_wre_operational_spine';
 const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine';
 const WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT = 'scripts/reddog_extension_wre_spine_invoke_once.py';
+const REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT = 'scripts/reddog_operator_wardrobe_selection_once.py';
 const WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES = 262144;
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
 const TRUSTED_PERMISSION_SNAPSHOT_SOURCES = new Set(['gh_cli', 'github_api', 'mock']);
@@ -2086,6 +2088,129 @@ function buildWreOperationalSpineDryRunPreviewSection(preview) {
   return lines.join('\n');
 }
 
+function inferWardrobeAuthorityRequest(workFocus, handoffRecommendation) {
+  const focus = String(workFocus || '').toLowerCase();
+  const handoff = handoffRecommendation && typeof handoffRecommendation === 'object' ? handoffRecommendation : {};
+  if (/\b(?:merge|merge pr|merge pull request)\b/.test(focus)) {
+    return 'merge';
+  }
+  if (/\b(?:shell|run command|pytest|npm|git worktree|worktree)\b/.test(focus)) {
+    return 'worktree_write';
+  }
+  if (/\b(?:live enqueue|enqueue)\b/.test(focus)) {
+    return 'live_enqueue';
+  }
+  if (/\b(?:reward|wallet|payout)\b/.test(focus)) {
+    return 'reward';
+  }
+  if (/\b(?:spawn workers|recursive worker|worker orchestration)\b/.test(focus)) {
+    return 'worker_orchestration';
+  }
+  if (handoff.target === 'WRE' && /\b(?:implement|fix|add|edit|build|slice|draft pr|pull request)\b/.test(focus)) {
+    return 'draft_pr';
+  }
+  return 'none';
+}
+
+function buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruction, handoffRecommendation, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const construction = promptConstruction && typeof promptConstruction === 'object' ? promptConstruction : {};
+  const scorecard = holoScorecard && typeof holoScorecard === 'object' ? holoScorecard : {};
+  return {
+    work_focus: String(workFocus || ''),
+    principal_ref: String(opts.principalRef || '012'),
+    authority_request: opts.authorityRequest || inferWardrobeAuthorityRequest(workFocus, handoffRecommendation),
+    holoindex_evidence: {
+      holoindex_query: String(scorecard.holoindex_query || scorecard.query || 'extension_runtime_context'),
+      holoindex_status: String(scorecard.holoindex_status || 'unknown'),
+      index_gap_detected: scorecard.index_gap_detected === true,
+      retrieval_quality: scorecard.index_gap_detected === true ? 'INDEX_GAP' : 'LOW',
+      code_hits: Number(scorecard.code_hits_count || scorecard.code_hits || 0),
+      wsp_hits: Number(scorecard.wsp_hits || 0),
+      skill_hits: Number(scorecard.skill_hits || 0),
+      direct_read_fallback_used: scorecard.direct_read_fallback_used === true
+    },
+    required_targets: Array.isArray(construction.required_targets_authoritative_paths)
+      ? construction.required_targets_authoritative_paths.slice()
+      : [],
+    target_recall_ok: scorecard.target_recall_ok === true,
+    wsp_refs: Array.isArray(opts.wspRefs) ? opts.wspRefs.slice() : ['WSP_00', 'WSP_15', 'WSP_46', 'WSP_95', 'WSP_97'],
+    lane_refs: Array.isArray(opts.laneRefs) ? opts.laneRefs.slice() : [],
+    continuation_packet_digest: opts.continuationPacketDigest || ''
+  };
+}
+
+function runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const payload = buildWardrobeSelectionPayload(workFocus, holoScorecard, promptConstruction, handoffRecommendation, opts);
+  if (typeof opts.selectionRunner === 'function') {
+    const runnerResult = opts.selectionRunner(payload);
+    return Object.assign({
+      slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
+      python_invocation_performed: false,
+      no_execution_performed: true,
+      no_enqueue_performed: true
+    }, typeof runnerResult === 'string' ? JSON.parse(runnerResult) : (runnerResult || {}));
+  }
+  const root = workspaceRoot();
+  const script = path.join(root, REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT);
+  const config = vscode.workspace.getConfiguration('foundupsFusion');
+  const configuredPython = config.get('pythonPath') || 'python';
+  const interpreter = resolvePythonInterpreter(root, configuredPython);
+  try {
+    const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
+      cwd: root,
+      input: JSON.stringify(payload),
+      encoding: 'utf8',
+      env: buildBridgePythonEnv(process.env),
+      windowsHide: true,
+      maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
+    });
+    return Object.assign({
+      slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
+      python_invocation_performed: true,
+      python_interpreter_source: interpreter.source,
+      no_execution_performed: true,
+      no_enqueue_performed: true
+    }, JSON.parse(stdout));
+  } catch (err) {
+    return {
+      slice_name: REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE,
+      decision: 'WARDROBE_SELECTION_REJECT',
+      receipt: null,
+      python_invocation_performed: true,
+      no_execution_performed: true,
+      no_enqueue_performed: true,
+      rejection_reasons: ['wardrobe_selection_bridge_failed'],
+      bridge_error_class: err && err.code ? String(err.code) : (err && err.name ? String(err.name) : 'Error')
+    };
+  }
+}
+
+function buildOperatorWardrobeSelectionSection(selectionResult) {
+  const r = selectionResult && typeof selectionResult === 'object' ? selectionResult : {};
+  const receipt = r.receipt && typeof r.receipt === 'object' ? r.receipt : {};
+  return [
+    '## RedDog Operator Wardrobe Selection',
+    '- slice_name: ' + (r.slice_name || REDDOG_OPERATOR_WARDROBE_SELECTION_RUNTIME_SLICE) + ' [OBSERVED]',
+    '- decision: ' + (r.decision || 'unknown') + ' [OBSERVED]',
+    '- selection_id: ' + (receipt.selection_id || 'unknown') + ' [OBSERVED]',
+    '- selected_wardrobe: ' + (receipt.selected_wardrobe || 'unknown') + ' [OBSERVED]',
+    '- execution_plane: ' + (receipt.execution_plane || 'unknown') + ' [OBSERVED]',
+    '- authority_boundary: ' + (receipt.authority_boundary || 'unknown') + ' [OBSERVED]',
+    '- selected_context_mode: ' + (receipt.selected_context_mode || 'unknown') + ' [OBSERVED]',
+    '- selected_model_mode: ' + (receipt.selected_model_mode || 'unknown') + ' [OBSERVED]',
+    '- selected_effort: ' + (receipt.selected_effort || 'unknown') + ' [OBSERVED]',
+    '- wre_required: ' + (receipt.wre_required === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- index_gap_detected: ' + (receipt.index_gap_detected === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- direct_read_required: ' + (receipt.direct_read_required === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- rejection_reasons: ' + JSON.stringify(receipt.rejection_reasons || r.rejection_reasons || []) + ' [OBSERVED]',
+    '- no_execution_performed: ' + (receipt.no_execution_performed === true || r.no_execution_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- no_enqueue_performed: ' + (receipt.no_enqueue_performed === true || r.no_enqueue_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- python_invocation_performed: ' + (r.python_invocation_performed === true ? 'true' : 'false') + ' [OBSERVED]'
+  ].join('\n');
+}
+
 function _safeJsonClone(value) {
   if (!value || typeof value !== 'object') {
     return null;
@@ -2290,6 +2415,10 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
   }
   if (ctx.substantive) {
     sections.push(buildGovernedHandoffSection(ctx.handoffRecommendation || packet.governed_handoff_recommendation));
+    const wardrobeSelection = ctx.operatorWardrobeSelectionResult || packet.operator_wardrobe_selection_result;
+    if (wardrobeSelection) {
+      sections.push(buildOperatorWardrobeSelectionSection(wardrobeSelection));
+    }
     const spinePreview = ctx.wreSpineDryRunPreview || packet.wre_operational_spine_dryrun_preview;
     if (spinePreview) {
       if (spinePreview.governed_work_order_runtime_emission) {
@@ -3472,6 +3601,9 @@ function wireFusionWebview(context, webview, worker, state) {
       workFocusDigest: promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash,
       wspPromptDigest: promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash
     });
+    const operatorWardrobeSelectionResult = substantiveTask && result.reason !== 'redaction_blocked'
+      ? runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, {})
+      : null;
     const wreSpineDryRunPreview = substantiveTask && result.reason !== 'redaction_blocked'
       ? buildWreOperationalSpineDryRunPreview(workFocus, classification, handoffRecommendation, {
         promptConstruction: promptConstruction,
@@ -3480,7 +3612,9 @@ function wireFusionWebview(context, webview, worker, state) {
       })
       : null;
     const wreSpineInvokeResult = wreSpineDryRunPreview
-      ? invokeWreOperationalSpineExplicitValveBridge(context, wreSpineDryRunPreview, {})
+      ? invokeWreOperationalSpineExplicitValveBridge(context, wreSpineDryRunPreview, {
+        selectionReceipt: operatorWardrobeSelectionResult && operatorWardrobeSelectionResult.receipt
+      })
       : null;
     result.review_packet = attachOrchestratorMetadata(
       result.review_packet || {},
@@ -3496,6 +3630,10 @@ function wireFusionWebview(context, webview, worker, state) {
       unicodeMeta
     );
     result.governed_handoff_recommendation = handoffRecommendation;
+    if (operatorWardrobeSelectionResult) {
+      result.operator_wardrobe_selection_result = operatorWardrobeSelectionResult;
+      result.review_packet.operator_wardrobe_selection_result = operatorWardrobeSelectionResult;
+    }
     if (wreSpineDryRunPreview) {
       result.wre_operational_spine_dryrun_preview = wreSpineDryRunPreview;
       result.review_packet.wre_operational_spine_dryrun_preview = wreSpineDryRunPreview;
@@ -3555,6 +3693,7 @@ function wireFusionWebview(context, webview, worker, state) {
       contextMode: contextMode,
       substantive: substantiveTask,
       handoffRecommendation: handoffRecommendation,
+      operatorWardrobeSelectionResult: operatorWardrobeSelectionResult,
       wreSpineDryRunPreview: wreSpineDryRunPreview,
       wreSpineInvokeResult: wreSpineInvokeResult,
       continuationEnabled: continuationEnabled,
@@ -5467,6 +5606,10 @@ module.exports = {
   normalizeSignedAuthorityBinding,
   buildWreOperationalSpineDryRunPreview,
   buildWreOperationalSpineDryRunPreviewSection,
+  inferWardrobeAuthorityRequest,
+  buildWardrobeSelectionPayload,
+  runOperatorWardrobeSelectionBridge,
+  buildOperatorWardrobeSelectionSection,
   buildWreOperationalSpineInvokePayload,
   invokeWreOperationalSpineExplicitValveBridge,
   buildWreOperationalSpineInvokeSection,
