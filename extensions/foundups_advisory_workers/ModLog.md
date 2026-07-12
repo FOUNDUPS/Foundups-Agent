@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-12 - REDDOG_EXTENSION_OPERATOR_LOOP_RUNTIME_CONSUMPTION_PHASE1 (validated recommendation gate, 0.3.58)
+
+- Added `buildRuntimeConsumptionGate()` so wardrobe selection, permission probing, WRE dry-run preview, and explicit WRE invocation are only planned after model result OK, output validation pass, Determine verifier pass when applied, and Fusion quorum pass.
+- Runtime action planning now stops on redaction, grounding, schema validation, judgment-verifier, or Fusion quorum failure.
+- Run Trace now emits `runtime_consumption_gate_passed` and gate rejection reasons.
+- Version 0.3.57 -> 0.3.58 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-12 - REDDOG_FUSION_PANEL_QUORUM_PHASE1 (fail-closed Fusion synthesis quorum, 0.3.57)
 
 - Added deterministic Fusion panel quorum checks in `scripts/advisory_model_once.py`: required evidence must be present in packed evidence context, lead output cannot be empty/`None`, at least one critic must challenge framing and priority, and synthesis failure fails closed.

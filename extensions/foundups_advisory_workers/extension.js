@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.57';
+const EXTENSION_VERSION = '0.3.58';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -238,6 +238,49 @@ function formatOutputValidationStatus(validationState) {
     return 'skipped';
   }
   return 'unknown';
+}
+
+function buildRuntimeConsumptionGate(result, validationState, mode, substantiveTask) {
+  const reasons = [];
+  const rp = result && result.review_packet && typeof result.review_packet === 'object'
+    ? result.review_packet
+    : {};
+  const validation = validationState && typeof validationState === 'object' ? validationState : {};
+  const judgment = validation.judgment_verification && typeof validation.judgment_verification === 'object'
+    ? validation.judgment_verification
+    : null;
+  const quorum = rp.fusion_panel_quorum && typeof rp.fusion_panel_quorum === 'object'
+    ? rp.fusion_panel_quorum
+    : null;
+
+  if (substantiveTask !== true) {
+    reasons.push('non_substantive_worker');
+  }
+  if (!result || result.ok !== true) {
+    reasons.push('model_result_not_ok');
+  }
+  if (result && (result.reason === 'redaction_blocked' || result.reason === 'grounding_preflight_blocked')) {
+    reasons.push(String(result.reason));
+  }
+  if (validation.output_validation_failed === true || validation.validated !== true) {
+    reasons.push('output_validation_not_passed');
+  }
+  if (judgment && judgment.applied === true && judgment.verified !== true) {
+    reasons.push('judgment_verification_not_passed');
+  }
+  if (mode === 'foundups_fusion' && (!quorum || quorum.passed !== true)) {
+    reasons.push('fusion_panel_quorum_not_passed');
+  }
+
+  return {
+    applied: true,
+    passed: reasons.length === 0,
+    rejection_reasons: uniqueStrings(reasons),
+    no_runtime_authority_when_failed: reasons.length > 0,
+    requires_output_validation: true,
+    requires_judgment_verification: judgment && judgment.applied === true,
+    requires_fusion_quorum: mode === 'foundups_fusion'
+  };
 }
 
 function formatJudgmentVerificationLines(validationState) {
@@ -1835,6 +1878,10 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
   lines.push.apply(lines, formatContinuationTelemetryLines(rp.continuation_telemetry || (result && result.continuation_telemetry)));
   lines.push('- output_validation: ' + formatOutputValidationStatus(rp.output_validation));
   lines.push.apply(lines, formatJudgmentVerificationLines(rp.output_validation));
+  if (rp.runtime_consumption_gate && typeof rp.runtime_consumption_gate === 'object') {
+    lines.push('- runtime_consumption_gate_passed: ' + (rp.runtime_consumption_gate.passed === true ? 'true' : 'false'));
+    lines.push('- runtime_consumption_gate_rejection_reasons: ' + (Array.isArray(rp.runtime_consumption_gate.rejection_reasons) && rp.runtime_consumption_gate.rejection_reasons.length ? rp.runtime_consumption_gate.rejection_reasons.join(', ') : '(none)'));
+  }
   if (rp.output_validation && rp.output_validation.repair_attempted) {
     lines.push('- repair_context_mode: ' + (rp.output_validation.repair_context_mode || 'unknown'));
     lines.push('- repair_mode: ' + (rp.output_validation.repair_mode || 'unknown'));
@@ -4148,9 +4195,8 @@ function wireFusionWebview(context, webview, worker, state) {
       workFocusDigest: promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash,
       wspPromptDigest: promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash
     });
-    const actionPlanningAllowed = substantiveTask
-      && result.reason !== 'redaction_blocked'
-      && result.reason !== 'grounding_preflight_blocked';
+    const runtimeConsumptionGate = buildRuntimeConsumptionGate(result, validationState, mode, substantiveTask);
+    const actionPlanningAllowed = runtimeConsumptionGate.passed === true;
     const operatorWardrobeSelectionResult = actionPlanningAllowed
       ? runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, {
         groundingPreflight: groundingPreflight
@@ -4185,6 +4231,8 @@ function wireFusionWebview(context, webview, worker, state) {
       workTrail,
       unicodeMeta
     );
+    result.runtime_consumption_gate = runtimeConsumptionGate;
+    result.review_packet.runtime_consumption_gate = runtimeConsumptionGate;
     result.governed_handoff_recommendation = handoffRecommendation;
     if (operatorWardrobeSelectionResult) {
       result.operator_wardrobe_selection_result = operatorWardrobeSelectionResult;
@@ -6170,6 +6218,7 @@ module.exports = {
   createWorkTrail,
   buildRedactionGateReport,
   buildRedactionGateReportSection,
+  buildRuntimeConsumptionGate,
   buildGovernedHandoffRecommendation,
   buildGovernedHandoffSection,
   buildRedDogGovernedWorkOrderCandidate,
