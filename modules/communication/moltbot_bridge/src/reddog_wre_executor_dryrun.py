@@ -29,6 +29,7 @@ import json
 import re
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, MutableSet, Optional, Sequence, Union
 
 from modules.communication.moltbot_bridge.src.reddog_governed_work_order_dryrun import (
@@ -156,6 +157,16 @@ def _nonce_suffix(nonce: str) -> str:
     return cleaned or "nonce"
 
 
+def _repo_slug(repo_root: Path) -> str:
+    cleaned = _NONCE_SUFFIX_RE.sub("-", repo_root.name.strip())[:48].strip("-")
+    return cleaned or "repo"
+
+
+def _external_worktree_root(repo_root: str) -> Path:
+    root = Path(repo_root or ".").resolve()
+    return root.parent / ".reddog" / "worktrees" / _repo_slug(root)
+
+
 def _invocation_from_any(
     invocation_result: Union[WorkOrderDryRunInvocationResult, Mapping[str, Any]],
 ) -> WorkOrderDryRunInvocationResult:
@@ -180,9 +191,9 @@ def _build_cleanup_plan(work_order: Mapping[str, Any]) -> Dict[str, Any]:
 
 
 def _proposed_worktree_path(repo_root: str, work_order_id: str, nonce: str) -> str:
-    root = _normalize_posix(repo_root) or "."
     suffix = _nonce_suffix(nonce)
-    return f"{root}/.reddog/worktrees/{work_order_id}/{suffix}/"
+    root = _external_worktree_root(repo_root)
+    return f"{_normalize_posix(str(root))}/{work_order_id}/{suffix}/"
 
 
 def _phase_receipt(
@@ -276,7 +287,7 @@ def _validate_contract_rules(
         reasons.append("cleanup_plan_missing")
 
     worktree_path = _proposed_worktree_path(repo_root, work_order_id, nonce or "missing")
-    expected_prefix = f"{_normalize_posix(repo_root) or '.'}/.reddog/worktrees/{work_order_id}/"
+    expected_prefix = f"{_normalize_posix(str(_external_worktree_root(repo_root)))}/{work_order_id}/"
     if not worktree_path.startswith(expected_prefix):
         reasons.append("worktree_path_not_confined")
 

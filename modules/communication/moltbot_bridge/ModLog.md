@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_WRE_WORKTREE_CREATE_CWD_GUARD_ALIGNMENT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 53, 85, 97
+
+- Updated `src/reddog_wre_executor_dryrun.py`: proposed worktree paths now live under a sibling external root (`<repo-parent>/.reddog/worktrees/<repo-slug>/...`) instead of inside the shared repo checkout.
+- Updated `src/reddog_wre_worktree_create.py`: worktree-create validation rejects legacy in-repo `.reddog/worktrees/...` paths, requires the external root, and runs the shared WRE cwd guard before any runner call.
+- Updated `src/reddog_wre_worktree_runner.py`: the approved `git worktree` subprocess helper now applies `validate_wre_worker_operation_cwd()` before create/remove operations, so direct runner use also refuses shared-main or nested-main paths.
+- Updated worktree-create, operational-spine, and executor dry-run tests to lock the external-root invariant and prove in-repo worktree paths reject before subprocess.
+- Boundary: no task execution, no file edits, no commit, no PR, no merge, no OpenClaw/Hermes dispatch, no extension runtime wiring, and no HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog WRE operational spine worktree create cwd guard external worktree root` surfaced the executor dry-run and CWD guard surfaces. No runtime re-index performed.
+
 ## 2026-07-12: REDDOG_MERGE_AUTHORITY_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 96, 97, 100

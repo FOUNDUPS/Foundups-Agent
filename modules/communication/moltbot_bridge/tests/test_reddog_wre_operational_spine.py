@@ -35,6 +35,12 @@ class FakeRunner:
         return {"ok": True}
 
 
+def _is_inside(child: Path, parent: Path) -> bool:
+    child_r = child.resolve()
+    parent_r = parent.resolve()
+    return child_r == parent_r or parent_r in child_r.parents
+
+
 def _future_expiry(now: datetime, hours: int = 2) -> str:
     return (now + timedelta(hours=hours)).replace(microsecond=0).isoformat()
 
@@ -145,6 +151,8 @@ class TestOperationalSpineAccept:
         assert result.merge_performed is False
         assert result.main_checkout_untouched is True
         assert [call[0] for call in runner.calls] == ["create_worktree"]
+        assert not _is_inside(Path(runner.calls[0][1]), repo_root)
+        assert _is_inside(Path(runner.calls[0][1]), repo_root.parent / ".reddog" / "worktrees" / "repo")
         assert locks == {order["work_order_id"]}
 
     def test_digest_stable_and_sovereign_token_not_emitted(self, tmp_path: Path):

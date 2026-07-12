@@ -29,6 +29,9 @@ from typing import Any, Dict, List, Mapping, MutableSet, Optional
 from modules.communication.moltbot_bridge.src.reddog_governed_work_order_dryrun import (
     PROTECTED_BASE_REFS,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_cwd_guard import (
+    validate_wre_worker_operation_cwd,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
 )
@@ -132,6 +135,16 @@ def _is_inside(child: Path, parent: Path) -> bool:
     child_r = child.resolve()
     parent_r = parent.resolve()
     return child_r == parent_r or parent_r in child_r.parents
+
+
+def _repo_slug(repo_root: Path) -> str:
+    text = "".join(ch if ch.isalnum() or ch in ("-", "_") else "-" for ch in repo_root.name.strip())
+    return text[:48].strip("-_") or "repo"
+
+
+def _external_worktree_root(repo_root: Path) -> Path:
+    root = repo_root.resolve()
+    return root.parent / ".reddog" / "worktrees" / _repo_slug(root)
 
 
 def _reject(
@@ -252,11 +265,20 @@ def _validate_worktree_path(
             reasons.append("worktree_path_device_prefix_forbidden")
             return reasons
 
-    expected_root = (repo_root / ".reddog" / "worktrees" / work_order_id).resolve()
+    if _is_inside(worktree_path, repo_root):
+        reasons.append("worktree_path_inside_repo_root")
+    expected_root = (_external_worktree_root(repo_root) / work_order_id).resolve()
     if not _is_inside(worktree_path, expected_root):
         reasons.append("worktree_path_not_under_reddog_root")
     if worktree_path.resolve() == repo_root.resolve():
         reasons.append("worktree_equals_repo_root")
+    guard = validate_wre_worker_operation_cwd(
+        repo_root=repo_root,
+        worktree_path=worktree_path,
+        operation_cwd=worktree_path,
+    )
+    if not guard.ok:
+        reasons.append(f"cwd_guard_failed:{guard.code}")
     return reasons
 
 

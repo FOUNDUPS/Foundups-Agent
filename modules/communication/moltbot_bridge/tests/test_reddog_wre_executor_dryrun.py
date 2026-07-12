@@ -121,7 +121,9 @@ class TestExecutorDryRunAccept:
         assert result.no_mutation_performed is True
         assert result.plan.no_mutation_performed is True
         assert result.plan.proposed_branch_name == "docs/executor-dryrun-test"
-        assert ".reddog/worktrees/wo-exec-dryrun-001/" in result.plan.proposed_worktree_path
+        assert "/.reddog/worktrees/" in result.plan.proposed_worktree_path
+        assert "/wo-exec-dryrun-001/" in result.plan.proposed_worktree_path
+        assert "/Foundups-Agent/.reddog/worktrees/" not in result.plan.proposed_worktree_path
         assert result.plan.lock_key == "wo-exec-dryrun-001"
         assert len(result.phase_receipts) == 3
         phases = [r.phase for r in result.phase_receipts]
