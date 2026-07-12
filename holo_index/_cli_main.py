@@ -107,6 +107,52 @@ if "--fast-search" in sys.argv:
 def _env_truthy(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "y", "on")
 
+READONLY_QUERY_ENV = "HOLOINDEX_QUERY_READONLY"
+READONLY_GUARD_CODE = "HOLOINDEX_READONLY_QUERY_GUARD"
+_INDEX_FLAG_ATTRS = (
+    "index",
+    "index_all",
+    "index_code",
+    "index_wsp",
+    "index_symbols",
+    "index_skills",
+    "index_cli",
+    "index_work_ledger",
+    "index_docs",
+    "index_knowledge",
+)
+
+
+def _indexing_flags_requested(args) -> bool:
+    return any(bool(getattr(args, attr, False)) for attr in _INDEX_FLAG_ATTRS)
+
+
+def _query_only_requested(args) -> bool:
+    return bool(getattr(args, "bundle_json", False) or getattr(args, "search", None) or getattr(args, "offline", False) or getattr(args, "fast_search", False))
+
+
+def _readonly_query_env_enabled() -> bool:
+    return _env_truthy(READONLY_QUERY_ENV, "false")
+
+
+def _activate_readonly_query_posture(args) -> None:
+    if _query_only_requested(args) and not _indexing_flags_requested(args):
+        os.environ.setdefault(READONLY_QUERY_ENV, "1")
+
+
+def _reject_readonly_indexing(args) -> bool:
+    if _readonly_query_env_enabled() and _indexing_flags_requested(args):
+        safe_print(
+            f"[{READONLY_GUARD_CODE}] Refusing HoloIndex write/index flags in read-only query context. "
+            "Run indexing from WRE/CI/operator maintenance without HOLOINDEX_QUERY_READONLY=1."
+        )
+        return True
+    return False
+
+
+def _auto_refresh_allowed(args) -> bool:
+    return bool(getattr(args, "allow_auto_refresh", False)) and not _readonly_query_env_enabled()
+
 # 0102 speed knob: allow bundle-json/offline/fast-search fastpath without importing Chroma/model stack.
 _skip_heavy_imports = (
     ("--bundle-json" in sys.argv and _env_truthy("HOLO_SKIP_MODEL", "false")) or
@@ -680,6 +726,7 @@ def main():
     parser.add_argument('--ssd', type=str, default='E:/HoloIndex', help='SSD base path (default: E:/HoloIndex)')
     parser.add_argument('--offline', action='store_true', help='Disable model downloads and pip installs; use offline lexical search if needed')
     parser.add_argument('--fast-search', action='store_true', help='Fast retrieval-only mode (skips heavy advisory/orchestration steps)')
+    parser.add_argument('--allow-auto-refresh', action='store_true', help='Explicitly allow search-time index auto-refresh; never used by RedDog query/runtime paths')
 
     parser.add_argument('--llm-advisor', action='store_true', help='Force enable Qwen advisor guidance')
     parser.add_argument('--init-dae', type=str, nargs='?', const='auto', help='Initialize DAE context (auto-detect or specify DAE focus)')
@@ -740,6 +787,9 @@ def main():
     parser.add_argument('--collection-health-json', action='store_true', help='Output collection health as JSON')
 
     args = parser.parse_args()
+    _activate_readonly_query_posture(args)
+    if _reject_readonly_indexing(args):
+        raise SystemExit(2)
 
     # --- Bundle JSON (extracted to holo_index/cli/commands/bundle_json.py) ---
     from holo_index.cli.commands.bundle_json import handle_bundle_json
@@ -1134,7 +1184,7 @@ def main():
     # Check if indexes need automatic refresh (only if not explicitly indexing)
     auto_refreshed = False
     # WSP 97: Skip auto-refresh when holo is None (offline/fast mode)
-    if holo is not None and not (index_code or index_wsp or indexing_awarded):
+    if holo is not None and _auto_refresh_allowed(args) and not (index_code or index_wsp or indexing_awarded):
         try:
             from modules.infrastructure.database.src.agent_db import AgentDB
             db = AgentDB()

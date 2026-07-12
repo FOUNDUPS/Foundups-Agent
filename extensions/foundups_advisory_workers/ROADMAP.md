@@ -20,6 +20,7 @@ Current implementation:
 - REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (v0.3.45): flowing-prose `Read first:` lines are tokenized with the bounded path-token regex (not the comma-splitter), so a path followed by prose and an embedded-slash English fragment (`breadcrumb/handoff`) no longer corrupt derived targets; tiered strictness (flowing prose requires a file extension, explicit/M2M/bullet tiers keep slash-OR-extension); slash-only prose fragments reported in `work_focus_targets_dropped_low_confidence` and never flip `target_recall_ok`; `}` added to trailing-punctuation trim.
 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (v0.3.46): Copy MD/review packet emits typed WRE operational spine dry-run preview; no Python spine invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR, push, merge, or repo mutation.
 - REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1 (v0.3.47): Determine prompts now request canonical `## Determine Answers` JSON and run a local deterministic verifier against already-fetched direct-read evidence; Run Trace/Copy MD expose verifier verdicts and advisory INDEX_GAP metadata. No re-index, WRE enqueue, shell, repo mutation, or network authority is added.
+- HOLOINDEX_READONLY_QUERY_GUARD_PHASE1 (v0.3.48): RedDog launches HoloIndex with `HOLOINDEX_QUERY_READONLY=1`; HoloIndex search/query mode is read-only by default, search-time auto-refresh requires explicit `--allow-auto-refresh`, and collection reset refuses read-only query contexts.
 
 ## Architecture Direction
 

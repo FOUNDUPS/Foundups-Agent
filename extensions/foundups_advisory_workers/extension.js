@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.47';
+const EXTENSION_VERSION = '0.3.48';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -4229,7 +4229,7 @@ function holoIndexOutput(root, taskText, maxChars) {
   const query = String(taskText || '').replace(/\s+/g, ' ').trim().slice(0, 500) || 'FoundUps RedDog WSP_00 WSP_97 WSP_15 current task';
   const moduleHint = moduleHintFromActive(root);
   try {
-    const env = Object.assign({}, process.env, { HOLO_SKIP_MODEL: '1' });
+    const env = Object.assign({}, process.env, { HOLO_SKIP_MODEL: '1', HOLOINDEX_QUERY_READONLY: '1' });
     const baseArgs = ['-B', 'holo_index.py', '--bundle-json', '--search', query, '--bundle-module-hint', moduleHint, '--limit', '5', '--quiet-root-alerts'];
     let output = cp.execFileSync('python', baseArgs, {
       cwd: root,
@@ -4305,6 +4305,7 @@ function holoIndexOutput(root, taskText, maxChars) {
     try {
       const output = cp.execFileSync('python', ['-B', 'holo_index.py', '--offline', '--search', query, '--limit', '5'], {
         cwd: root,
+        env,
         encoding: 'utf8',
         timeout: 20000,
         maxBuffer: Math.max(maxChars * 4, 65536),
