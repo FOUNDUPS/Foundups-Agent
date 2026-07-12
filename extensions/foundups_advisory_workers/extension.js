@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.53';
+const EXTENSION_VERSION = '0.3.54';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -880,6 +880,10 @@ function deriveWorkFocusTargets(taskText) {
     if (WORK_FOCUS_READ_HEADER_PATTERNS.some((p) => p.test(stripped))) {
       readCapture = true;
       scopeOut = false;
+      const colonIdx = stripped.indexOf(':');
+      if (colonIdx !== -1 && colonIdx < stripped.length - 1) {
+        addProse(stripped.slice(colonIdx + 1), 'read_first');
+      }
       continue;
     }
     if (!stripped) {
@@ -1049,6 +1053,256 @@ function collectRequiredTargets(taskText) {
   };
 }
 
+// REDDOG_TYPED_TARGET_EXTRACTION_PHASE1: pre-grounding classification. The direct-file reader
+// must receive only repo-file targets; URLs, paper/research descriptors, semantic concepts, and
+// quoted reference material are routed to their own typed channels for later grounding slices.
+function extractExternalResearchTargets(taskText) {
+  const text = String(taskText || '');
+  const targets = [];
+  const seen = new Set();
+  const add = (raw) => {
+    const value = normalizeTargetPath(raw);
+    if (!value) {
+      return;
+    }
+    const norm = value.toLowerCase();
+    if (!seen.has(norm)) {
+      seen.add(norm);
+      targets.push(value);
+    }
+  };
+  for (const rawPart of splitWhitespaceWords(text)) {
+    const part = normalizeTargetPath(rawPart);
+    if (/^https?:\/\//i.test(part)) {
+      add(part);
+    }
+  }
+  const lines = text.split(/\r?\n/);
+  for (const line of lines) {
+    const stripped = line.trim();
+    if (!stripped || stripped.length > 280) {
+      continue;
+    }
+    if (lineHasAnyLowerPhrase(stripped, ['arxiv', 'doi', 'paper', 'repository', 'github repo', 'github repository', 'external source', 'web source'])
+        && !extractInlinePathTokens(stripped).length) {
+      add(stripped);
+    }
+  }
+  return targets;
+}
+
+function splitWhitespaceWords(text) {
+  const words = [];
+  const s = String(text || '');
+  let current = '';
+  for (let i = 0; i < s.length; i++) {
+    const ch = s.charAt(i);
+    if (/\s/.test(ch)) {
+      if (current) {
+        words.push(current);
+        current = '';
+      }
+    } else {
+      current += ch;
+    }
+  }
+  if (current) {
+    words.push(current);
+  }
+  return words;
+}
+
+function collapseAsciiWhitespace(text) {
+  const s = String(text || '');
+  let out = '';
+  let pendingSpace = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s.charAt(i);
+    if (/\s/.test(ch)) {
+      pendingSpace = true;
+      continue;
+    }
+    if (pendingSpace && out) {
+      out += ' ';
+    }
+    out += ch;
+    pendingSpace = false;
+  }
+  return out.trim();
+}
+
+function lineHasAnyLowerPhrase(line, phrases) {
+  const lower = String(line || '').toLowerCase();
+  for (const phrase of phrases) {
+    if (lower.includes(phrase)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function splitSemanticParts(text) {
+  const parts = [];
+  const s = String(text || '');
+  let current = '';
+  for (let i = 0; i < s.length; i++) {
+    const ch = s.charAt(i);
+    if (ch === ',' || ch === ';') {
+      if (current.trim()) {
+        parts.push(current.trim());
+      }
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) {
+    parts.push(current.trim());
+  }
+  return parts;
+}
+
+function semanticHeaderBody(line) {
+  const s = String(line || '');
+  const colon = s.indexOf(':');
+  if (colon === -1) {
+    return null;
+  }
+  const key = collapseAsciiWhitespace(s.slice(0, colon)).toLowerCase();
+  if (['semantic target', 'semantic targets', 'concept', 'concepts', 'research topic', 'topic', 'question'].indexOf(key) === -1) {
+    return null;
+  }
+  return s.slice(colon + 1);
+}
+
+function extractQuotedReferenceBlocks(taskText) {
+  const text = String(taskText || '');
+  const blocks = [];
+  let inFence = false;
+  let current = [];
+  const lines = text.split(/\r?\n/);
+  const flush = (kind) => {
+    const body = current.join('\n').trim();
+    current = [];
+    if (!body) {
+      return;
+    }
+    blocks.push({
+      kind: kind,
+      chars: body.length,
+      digest: crypto.createHash('sha256').update(body, 'utf8').digest('hex').slice(0, 16),
+      instructional: false
+    });
+  };
+  for (const line of lines) {
+    const stripped = line.trim();
+    if (stripped.startsWith('```')) {
+      if (inFence) {
+        flush('fenced_block');
+        inFence = false;
+      } else {
+        inFence = true;
+        current = [];
+      }
+      continue;
+    }
+    if (inFence) {
+      current.push(line);
+      continue;
+    }
+    if (stripped.startsWith('>')) {
+      current.push(stripped.replace(/^>\s?/, ''));
+      continue;
+    }
+    if (current.length) {
+      flush('blockquote');
+    }
+  }
+  if (inFence || current.length) {
+    flush(inFence ? 'fenced_block' : 'blockquote');
+  }
+  return blocks;
+}
+
+function removeQuotedReferenceBlocks(taskText) {
+  const lines = String(taskText || '').split(/\r?\n/);
+  const kept = [];
+  let inFence = false;
+  for (const line of lines) {
+    const stripped = line.trim();
+    if (stripped.startsWith('```')) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence || stripped.startsWith('>')) {
+      continue;
+    }
+    kept.push(line);
+  }
+  return kept.join('\n');
+}
+
+function extractSemanticTargets(taskText, repoTargets, externalTargets) {
+  const text = removeQuotedReferenceBlocks(taskText);
+  const repoSet = new Set((repoTargets || []).map((t) => String(t || '').toLowerCase()));
+  const externalSet = new Set((externalTargets || []).map((t) => String(t || '').toLowerCase()));
+  const targets = [];
+  const seen = new Set();
+  const add = (raw) => {
+    let value = String(raw || '').trim();
+    if (!value || value.length < 4 || value.length > 180) {
+      return;
+    }
+    value = collapseAsciiWhitespace(value);
+    const norm = value.toLowerCase();
+    if (repoSet.has(norm) || externalSet.has(norm) || seen.has(norm)) {
+      return;
+    }
+    seen.add(norm);
+    targets.push(value);
+  };
+  const lines = text.split(/\r?\n/);
+  for (const line of lines) {
+    const stripped = line.trim();
+    if (!stripped || stripped.startsWith('- ') || stripped.startsWith('* ')) {
+      continue;
+    }
+    if (/^https?:\/\//i.test(stripped) || extractInlinePathTokens(stripped).length) {
+      continue;
+    }
+    const conceptBody = semanticHeaderBody(stripped);
+    if (conceptBody !== null) {
+      for (const part of splitSemanticParts(conceptBody)) {
+        add(part);
+      }
+      continue;
+    }
+    if (lineHasAnyLowerPhrase(stripped, ['audit', 'evaluate', 'assess', 'compare', 'research', 'investigate'])
+        && lineHasAnyLowerPhrase(stripped, ['architecture', 'workflow', 'orchestration', 'grounding', 'authority', 'selection', 'pipeline', 'concept', 'paper', 'repo'])) {
+      add(stripped);
+    }
+  }
+  return targets;
+}
+
+function extractTypedTargets(taskText) {
+  const textWithoutQuotes = removeQuotedReferenceBlocks(taskText);
+  const collected = collectRequiredTargets(textWithoutQuotes);
+  const repoTargets = collected.targets.slice();
+  const externalTargets = extractExternalResearchTargets(taskText);
+  const quotedBlocks = extractQuotedReferenceBlocks(taskText);
+  const semanticTargets = extractSemanticTargets(taskText, repoTargets, externalTargets);
+  return {
+    repo_file_targets: repoTargets,
+    semantic_targets: semanticTargets,
+    external_research_targets: externalTargets,
+    quoted_reference_blocks: quotedBlocks,
+    repo_file_derivation_sources: Array.isArray(collected.derivation_sources) ? collected.derivation_sources.slice() : [],
+    repo_file_targets_derived: collected.derived === true,
+    dropped_low_confidence: Array.isArray(collected.dropped_low_confidence) ? collected.dropped_low_confidence.slice() : []
+  };
+}
+
 function isSelfFileLocation(location) {
   const loc = String(location || '').replace(/\\/g, '/').toLowerCase();
   if (!loc) {
@@ -1119,14 +1373,14 @@ function evaluateTargetRecall(taskText, bundleData) {
   // non-empty, so required_targets_total > 0 and the governed direct-read fetch fires regardless of
   // HoloIndex semantic recall. Compare each required path against content-bearing locations,
   // excluding self-file hits (extension.js / module-under-audit shell).
-  const collected = collectRequiredTargets(taskText);
-  const required = collected.targets;
-  const workFocusDerived = collected.derived;
-  const workFocusSources = collected.derivation_sources;
+  const typedTargets = extractTypedTargets(taskText);
+  const required = typedTargets.repo_file_targets;
+  const workFocusDerived = typedTargets.repo_file_targets_derived;
+  const workFocusSources = typedTargets.repo_file_derivation_sources;
   // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): low-confidence prose
   // fragments dropped from the required list. These are excluded from required_targets_total /
   // _missing (so they CANNOT flip target_recall_ok) and reported here for honest telemetry.
-  const workFocusDropped = Array.isArray(collected.dropped_low_confidence) ? collected.dropped_low_confidence : [];
+  const workFocusDropped = Array.isArray(typedTargets.dropped_low_confidence) ? typedTargets.dropped_low_confidence : [];
   if (required.length) {
     const contentLocations = locations.filter((loc) => !isSelfFileLocation(loc));
     const missing = [];
@@ -1166,7 +1420,12 @@ function evaluateTargetRecall(taskText, bundleData) {
       work_focus_target_derivation_sources: Array.isArray(workFocusSources) ? workFocusSources : [],
       // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: dropped low-confidence prose
       // fragments (NOT counted in required_targets_total; cannot flip target_recall_ok).
-      work_focus_targets_dropped_low_confidence: workFocusDropped
+      work_focus_targets_dropped_low_confidence: workFocusDropped,
+      typed_target_extraction_applied: true,
+      repo_file_targets_count: required.length,
+      semantic_targets_count: typedTargets.semantic_targets.length,
+      external_research_targets_count: typedTargets.external_research_targets.length,
+      quoted_reference_blocks_count: typedTargets.quoted_reference_blocks.length
     };
   }
 
@@ -1183,7 +1442,12 @@ function evaluateTargetRecall(taskText, bundleData) {
       required_targets_missing: [],
       work_focus_targets_derived: false,
       work_focus_target_derivation_sources: [],
-      work_focus_targets_dropped_low_confidence: workFocusDropped
+      work_focus_targets_dropped_low_confidence: workFocusDropped,
+      typed_target_extraction_applied: true,
+      repo_file_targets_count: 0,
+      semantic_targets_count: typedTargets.semantic_targets.length,
+      external_research_targets_count: typedTargets.external_research_targets.length,
+      quoted_reference_blocks_count: typedTargets.quoted_reference_blocks.length
     };
   }
   let allFound = true;
@@ -1210,7 +1474,12 @@ function evaluateTargetRecall(taskText, bundleData) {
     required_targets_missing: [],
     work_focus_targets_derived: false,
     work_focus_target_derivation_sources: [],
-    work_focus_targets_dropped_low_confidence: workFocusDropped
+    work_focus_targets_dropped_low_confidence: workFocusDropped,
+    typed_target_extraction_applied: true,
+    repo_file_targets_count: 0,
+    semantic_targets_count: typedTargets.semantic_targets.length,
+    external_research_targets_count: typedTargets.external_research_targets.length,
+    quoted_reference_blocks_count: typedTargets.quoted_reference_blocks.length
   };
 }
 
@@ -1237,6 +1506,12 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: low-confidence prose fragments
     // dropped from the required list (do NOT affect target_recall_ok).
     work_focus_targets_dropped_low_confidence: Array.isArray(meta.work_focus_targets_dropped_low_confidence) ? meta.work_focus_targets_dropped_low_confidence : 'unknown',
+    // REDDOG_TYPED_TARGET_EXTRACTION_PHASE1: channel counts; only repo_file targets feed direct-read.
+    typed_target_extraction_applied: meta.typed_target_extraction_applied !== undefined ? meta.typed_target_extraction_applied : 'unknown',
+    repo_file_targets_count: meta.repo_file_targets_count !== undefined ? meta.repo_file_targets_count : 'unknown',
+    semantic_targets_count: meta.semantic_targets_count !== undefined ? meta.semantic_targets_count : 'unknown',
+    external_research_targets_count: meta.external_research_targets_count !== undefined ? meta.external_research_targets_count : 'unknown',
+    quoted_reference_blocks_count: meta.quoted_reference_blocks_count !== undefined ? meta.quoted_reference_blocks_count : 'unknown',
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: final-context proof.
     // required_targets_recalled (above) = fetched/available from the bundle; the fields
     // below = actually visible to the model AFTER the 42K cut. Different layers; must
@@ -1297,6 +1572,11 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- work_focus_target_derivation_sources: ' + (Array.isArray(scorecard.work_focus_target_derivation_sources) ? (scorecard.work_focus_target_derivation_sources.length ? scorecard.work_focus_target_derivation_sources.join(', ') : '(none)') : scorecard.work_focus_target_derivation_sources),
     // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: dropped low-confidence prose fragments.
     '- work_focus_targets_dropped_low_confidence: ' + (Array.isArray(scorecard.work_focus_targets_dropped_low_confidence) ? (scorecard.work_focus_targets_dropped_low_confidence.length ? scorecard.work_focus_targets_dropped_low_confidence.join(', ') : '(none)') : scorecard.work_focus_targets_dropped_low_confidence),
+    '- typed_target_extraction_applied: ' + scorecard.typed_target_extraction_applied,
+    '- repo_file_targets_count: ' + scorecard.repo_file_targets_count,
+    '- semantic_targets_count: ' + scorecard.semantic_targets_count,
+    '- external_research_targets_count: ' + scorecard.external_research_targets_count,
+    '- quoted_reference_blocks_count: ' + scorecard.quoted_reference_blocks_count,
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B (6): render BOTH the
     // fetched/available layer (required_targets_recalled) and the actually-model-visible
     // layer (required_targets_in_model_context). They are different guarantees.
@@ -4327,7 +4607,8 @@ function buildBoundedRepoContext(mode, taskText) {
   // required set the recall/direct-read layer uses -- the explicit header list MERGED with
   // work-focus-derived paths. Using the merged collector (not the header-only parser) ensures a
   // derived target that was direct-read is also packed into the protected block and proven present.
-  const requiredTargets = collectRequiredTargets(taskText).targets;
+  const typedTargetsForContext = extractTypedTargets(taskText);
+  const requiredTargets = typedTargetsForContext.repo_file_targets;
   let directReadSection = null;
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
@@ -4934,6 +5215,12 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     work_focus_target_derivation_sources: [],
     // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: default (no dropped fragments).
     work_focus_targets_dropped_low_confidence: [],
+    // REDDOG_TYPED_TARGET_EXTRACTION_PHASE1: typed preprocessing defaults.
+    typed_target_extraction_applied: false,
+    repo_file_targets_count: 0,
+    semantic_targets_count: 0,
+    external_research_targets_count: 0,
+    quoted_reference_blocks_count: 0,
     direct_read_paths: [],
     direct_read_rejected: [],
     direct_read_bytes: 0,
@@ -4969,6 +5256,11 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     meta.work_focus_targets_dropped_low_confidence = Array.isArray(recall.work_focus_targets_dropped_low_confidence)
       ? recall.work_focus_targets_dropped_low_confidence
       : [];
+    meta.typed_target_extraction_applied = recall.typed_target_extraction_applied === true;
+    meta.repo_file_targets_count = Number(recall.repo_file_targets_count || 0);
+    meta.semantic_targets_count = Number(recall.semantic_targets_count || 0);
+    meta.external_research_targets_count = Number(recall.external_research_targets_count || 0);
+    meta.quoted_reference_blocks_count = Number(recall.quoted_reference_blocks_count || 0);
     // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the Python-side
     // governed direct-read telemetry when the bundle carried a fetch.
     const dr = data.direct_read && typeof data.direct_read === 'object' ? data.direct_read : null;
@@ -5737,6 +6029,7 @@ module.exports = {
   stripListMarker,
   deriveWorkFocusTargets,
   collectRequiredTargets,
+  extractTypedTargets,
   extractInlinePathTokens,
   extractProsePathTokens,
   extractM2mArrayTargets,

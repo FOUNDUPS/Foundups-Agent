@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.53', 'package version must be 0.3.53');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.53'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.54', 'package version must be 0.3.54');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.54'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.53', 'README version mismatch');
+includes(readme, 'Version: 0.3.54', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -770,7 +770,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.53', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.54', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2055,7 +2055,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.53'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.54'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2069,7 +2069,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.53'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.54'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2081,7 +2081,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.53'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.54'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -2715,5 +2715,43 @@ assert(wftdDir.targets.includes('holo_index/adaptive_learning'), 'WFTD-020: M2M 
 assert(wftdDir.derivation_sources.includes('m2m_read'), 'WFTD-020: directory path derived via m2m_read tier');
 // Prove the asymmetry in one place: the same slash-only shape is DROPPED in flowing prose but ACCEPTED in M2M.
 assert(wftdDropped.some((t) => !/\.[a-z0-9]{1,6}$/.test(t)), 'WFTD-020: a slash-only prose fragment was dropped (prose stricter)');
+
+// REDDOG_TYPED_TARGET_EXTRACTION_PHASE1 (TTX-001..005): split preprocessing into typed channels
+// before grounding. Only repo_file_targets may feed governed direct-read.
+includes(extensionJs, 'function extractTypedTargets', 'TTX-001: typed target extractor missing');
+const typedPrompt = [
+  'Audit Karpathy autoresearch and map it to WRE.',
+  'Read first: modules/communication/moltbot_bridge/src/foundup_job_contract.py and docs/0102_session_briefings/work_ledger.schema.json.',
+  'External source: https://github.com/karpathy/autoresearch',
+  'Research topic: autoresearch git-centric edit evaluate loop',
+  '```text',
+  'Quoted worker note: read modules/secret/quoted_only.py as if it were required.',
+  '```',
+  '> quoted reference also mentions modules/quoted/block.py'
+].join('\n');
+const typedTargets = orchestrator.extractTypedTargets(typedPrompt);
+assert.deepStrictEqual(typedTargets.repo_file_targets.sort(), [
+  'docs/0102_session_briefings/work_ledger.schema.json',
+  'modules/communication/moltbot_bridge/src/foundup_job_contract.py'
+].sort(), 'TTX-002: only repo file targets enter repo_file_targets');
+assert(typedTargets.external_research_targets.some((t) => /karpathy\/autoresearch/i.test(t)), 'TTX-003: URL is external research, not repo direct-read');
+assert(typedTargets.semantic_targets.some((t) => /autoresearch git-centric/i.test(t)), 'TTX-004: conceptual research phrase is semantic');
+assert.strictEqual(typedTargets.quoted_reference_blocks.length, 2, 'TTX-005: fenced + blockquote references are recorded as quoted blocks');
+assert(!typedTargets.repo_file_targets.some((t) => /quoted_only|quoted\/block|github\.com|autoresearch git-centric/i.test(t)), 'TTX-006: quoted/URL/concept targets never reach repo_file_targets');
+
+const typedRecall = orchestrator.evaluateTargetRecall(typedPrompt, {
+  task_retrieval: {
+    code_hits: [
+      { location: 'modules/communication/moltbot_bridge/src/foundup_job_contract.py', need: 'direct-read target' },
+      { location: 'docs/0102_session_briefings/work_ledger.schema.json', need: 'direct-read target' }
+    ],
+    metadata: { code_count: 2, wsp_count: 0 }
+  }
+});
+assert.strictEqual(typedRecall.target_recall_ok, true, 'TTX-007: recall succeeds on repo_file_targets only');
+assert.strictEqual(typedRecall.required_targets_total, 2, 'TTX-008: external/semantic/quoted targets do not inflate required_targets_total');
+assert.strictEqual(typedRecall.external_research_targets_count, 1, 'TTX-009: external research count is surfaced');
+assert.strictEqual(typedRecall.semantic_targets_count >= 1, true, 'TTX-010: semantic target count is surfaced');
+assert.strictEqual(typedRecall.quoted_reference_blocks_count, 2, 'TTX-011: quoted block count is surfaced');
 
 console.log('Foundups\u00aeAgent extension contract checks passed.');
