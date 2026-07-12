@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_GENERIC_AGENT_WORKTREE_WRITE_SPINE_CONTRACT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 95, 97
+
+- Added `docs/audits/architecture/REDDOG_GENERIC_AGENT_WORKTREE_WRITE_SPINE_CONTRACT_PHASE1.md`: decision-only contract that extracts the reusable generic worktree write spine without loosening the FoundUp-specific live writer.
+- Defined `GenericAgentWorktreeDomainProfile`, re-derived root invariants, pin-independent governance/CI denylist, full execution-valve binding, WRE cwd guard requirements, signed authority inputs, consensus receipt requirements, and the future `GenericAgentWorktreeWriteReceipt`.
+- Boundary: docs/static tests only. No generic writer implementation, no live write, no shell runner, no merge authority, no extension runtime wiring, and no HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog generic agent worktree write spine contract re-derived root full valve cwd guard` surfaced the prior audit, WRE valve, executor dry-run, and cwd guard surfaces. Recorded the new contract follow-up as `HOLOINDEX_REDDOG_GENERIC_AGENT_WORKTREE_WRITE_SPINE_CONTRACT_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-12: REDDOG_EXTENSION_TO_LIVE_ENQUEUE_EXPLICIT_VALVE_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 95, 97
