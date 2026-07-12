@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.60';
+const EXTENSION_VERSION = '0.3.61';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -253,6 +253,9 @@ function buildRuntimeConsumptionGate(result, validationState, mode, substantiveT
     ? rp.fusion_panel_quorum
     : null;
 
+  if (rp.local_fast_path === 'simple_identity') {
+    reasons.push('local_identity_fast_path_not_actionable');
+  }
   if (substantiveTask !== true) {
     reasons.push('non_substantive_worker');
   }
@@ -3167,6 +3170,107 @@ const REGULAR_TASK_PATTERNS = [
   /\bregular mode works\b/i
 ];
 
+const SIMPLE_IDENTITY_FAST_PATH_SLICE = 'REDDOG_SIMPLE_IDENTITY_FAST_PATH_PHASE1';
+const SIMPLE_IDENTITY_BLOCKING_PATTERNS = [
+  /\b(?:audit|review|evaluate|fix|implement|author|provide|create|draft|enhance|investigate|compare|test|run|merge|land|dispatch|assign|spawn|execute|work|slice|phase1|phase_1|wsp[_\s-]?\d+|holoindex|openclaw|hermes|wre|authority|permission|valve|pr|pull request)\b/i,
+  /\n/
+];
+const SIMPLE_IDENTITY_PATTERNS = [
+  /^(?:are|r)\s+you\s+(?:the\s+)?(?:0102\s+)?(?:reddog|red dog)(?:\s+architect)?$/,
+  /^(?:is\s+this|is\s+that)\s+(?:the\s+)?(?:0102\s+)?(?:reddog|red dog)(?:\s+architect)?$/,
+  /^(?:who|what)\s+are\s+you$/,
+  /^(?:what\s+is\s+your\s+role|what\s+role\s+are\s+you|who\s+am\s+i\s+talking\s+to)$/,
+  /^(?:what\s+version\s+are\s+you|what\s+build\s+are\s+you|version|build)$/
+];
+
+function normalizeSimpleIdentityQuestion(text) {
+  return String(text || '')
+    .trim()
+    .replace(/[?!.]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+}
+
+function isSimpleIdentityQuestion(text) {
+  const raw = String(text || '').trim();
+  if (!raw || raw.length > 180) {
+    return false;
+  }
+  if (SIMPLE_IDENTITY_BLOCKING_PATTERNS.some((pattern) => pattern.test(raw))) {
+    return false;
+  }
+  const normalized = normalizeSimpleIdentityQuestion(raw);
+  return SIMPLE_IDENTITY_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+function buildSimpleIdentityFastPathResult(workFocus, workerType, worker) {
+  const workerKey = cleanWorkerType(workerType);
+  const workerLabel = WORKER_TYPES[workerKey] ? WORKER_TYPES[workerKey].label : workerKey;
+  const content = [
+    '## Decision',
+    'Yes. I am RedDog, the 0102 RedDog Architect advisory surface inside Foundups Agent.',
+    '',
+    '## Findings',
+    '- OBSERVED: This was a simple identity/status question and used `' + SIMPLE_IDENTITY_FAST_PATH_SLICE + '`.',
+    '- OBSERVED: No HoloIndex query, OpenRouter call, Fusion panel, repo read, shell command, or downstream action-planning bridge was invoked.',
+    '- OBSERVED: Installed extension version is `' + EXTENSION_VERSION + '`.',
+    '',
+    '## Evidence',
+    '| Check | WSP_97 | Result |',
+    '|---|---|---|',
+    '| 0102 role | OBSERVED | ' + workerLabel + ' |',
+    '| local fast path | OBSERVED | simple_identity |',
+    '| extension_version | OBSERVED | ' + EXTENSION_VERSION + ' |',
+    '| made_network_call | OBSERVED | false |',
+    '| no_execution_performed | OBSERVED | true |',
+    '',
+    '## Proposed fixes',
+    'No fix is needed for this identity question. For audits or implementation work, provide the work focus and RedDog will use the governed retrieval path.',
+    '',
+    '## Uncertainties',
+    'None for local identity fields. Capability and authority claims beyond this local surface require a normal governed audit.',
+    '',
+    '## WSP_97 Truth Labels',
+    '- OBSERVED: extension version, worker role, local fast-path selection, and no network/execution.',
+    '- SPECIFIED_NOT_IMPLEMENTED: This fast path does not grant repo, shell, merge, enqueue, or worktree authority.',
+    '',
+    '## WSP_15 Priority',
+    'P3: identity/status response only.',
+    '',
+    '## Next safest step',
+    'Ask the actual work focus when you want RedDog to audit, plan, or route work.',
+    '',
+    '## Architect Trace',
+    '- slice_name: ' + SIMPLE_IDENTITY_FAST_PATH_SLICE,
+    '- local_fast_path: simple_identity',
+    '- work_focus_digest: ' + redactedDigest(workFocus, 80).hash,
+    '',
+    '## Verification gaps',
+    '- None for the local identity response.',
+    '- Repo-level capability claims were intentionally not made.'
+  ].join('\n');
+  return {
+    ok: true,
+    content,
+    mode: 'local_identity_fast_path',
+    lead_model: 'local',
+    history: [],
+    made_network_call: false,
+    retry_count: 0,
+    local_identity_fast_path: true,
+    no_execution_performed: true,
+    no_enqueue_performed: true,
+    review_packet: {
+      made_network_call: false,
+      retry_count: 0,
+      local_fast_path: 'simple_identity',
+      local_fast_path_slice: SIMPLE_IDENTITY_FAST_PATH_SLICE,
+      no_execution_performed: true,
+      no_enqueue_performed: true
+    }
+  };
+}
+
 function classifyTaskForRedDog(prompt, contextMode, workerType) {
   const text = String(prompt || '');
   const worker = cleanWorkerType(workerType);
@@ -3174,8 +3278,13 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
   const haystack = text + ' ' + mode + ' ' + worker;
   let tier = 'HIGH';
   let reasons = [];
+  let localFastPath = null;
 
-  if (ULTRA_TASK_PATTERNS.some((pattern) => pattern.test(haystack))) {
+  if (isSimpleIdentityQuestion(text)) {
+    tier = 'REGULAR';
+    reasons.push('simple_identity_fast_path');
+    localFastPath = 'simple_identity';
+  } else if (ULTRA_TASK_PATTERNS.some((pattern) => pattern.test(haystack))) {
     tier = 'ULTRA';
     reasons.push('ultra_keyword_match');
   } else if (REGULAR_TASK_PATTERNS.some((pattern) => pattern.test(haystack)) && worker === 'smoke_tester') {
@@ -3192,12 +3301,13 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
     reasons.push('uncertain_default_high');
   }
 
-  const preferManualPanel = tier !== 'REGULAR' || worker !== 'smoke_tester';
+  const preferManualPanel = localFastPath ? false : (tier !== 'REGULAR' || worker !== 'smoke_tester');
   return {
     tier,
     reasons,
     worker,
     contextMode: mode,
+    localFastPath,
     preferManualPanel,
     prefersAuditablePanel: preferManualPanel && worker !== 'smoke_tester'
   };
@@ -3255,6 +3365,9 @@ function resolveAutoContextMode(classification, selectedContextMode) {
   if (mode !== 'auto') {
     return mode;
   }
+  if (classification && classification.localFastPath === 'simple_identity') {
+    return 'none';
+  }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
   if (tier === 'REGULAR') {
     return 'wsp_holo';
@@ -3270,6 +3383,9 @@ function resolveAutoEffort(classification, selectedEffort) {
   if (effort !== 'auto') {
     return effort;
   }
+  if (classification && classification.localFastPath === 'simple_identity') {
+    return 'regular';
+  }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
   if (tier === 'ULTRA') {
     return 'ultra';
@@ -3283,6 +3399,9 @@ function resolveAutoEffort(classification, selectedEffort) {
 function resolveModelMode(classification, selectedMode, workerType) {
   const mode = cleanMode(selectedMode);
   const worker = cleanWorkerType(workerType);
+  if (classification && classification.localFastPath === 'simple_identity') {
+    return 'local_identity_fast_path';
+  }
   if (mode === 'auto') {
     return classification && classification.tier === 'REGULAR' ? 'openrouter_single' : 'foundups_fusion';
   }
@@ -3332,6 +3451,9 @@ function validateRedDogOutput(markdown, options) {
 
 function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode) {
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
+  if (resolvedMode === 'local_identity_fast_path') {
+    return 'Local RedDog identity fast path: short identity/status question; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
+  }
   if (resolvedMode === 'openrouter_single') {
     if (tier === 'REGULAR') {
       return 'Single-model GLM principal: REGULAR-tier work; HoloIndex-grounded wsp_holo (no Fusion panel, Skillz, or git); context=' + resolvedContextMode + '.';
@@ -3962,6 +4084,7 @@ function wireFusionWebview(context, webview, worker, state) {
     // Missing/stale useLastPacket => OFF (do not carry a stale packet into redaction/acceptance scoring).
     const continuationEnabled = message.useLastPacket === true;
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
+    const localIdentityFastPath = classification.localFastPath === 'simple_identity';
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
@@ -4001,7 +4124,11 @@ function wireFusionWebview(context, webview, worker, state) {
     const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
 
     postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + ' panel=' + worker.panel.join(' + ') + ' (' + classification.reasons.join(', ') + ')');
-    postStatusAndProgress(webview, null, 'Bridge started. Redaction gate runs before any OpenRouter API call.');
+    if (localIdentityFastPath) {
+      postStatusAndProgress(webview, null, 'Simple RedDog identity question answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
+    } else {
+      postStatusAndProgress(webview, null, 'Bridge started. Redaction gate runs before any OpenRouter API call.');
+    }
     if (contextPacket.summary) {
       postStatusAndProgress(webview, null, contextPacket.summary);
     }
@@ -4073,7 +4200,10 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     };
     let result;
-    if (!groundingPreflight.passed) {
+    if (localIdentityFastPath) {
+      workTrail.push('local_fast_path', 'simple_identity');
+      result = buildSimpleIdentityFastPathResult(workFocus, workerType, worker);
+    } else if (!groundingPreflight.passed) {
       workTrail.push('failed', 'grounding_preflight_blocked');
       postStatusAndProgress(webview, null, 'Grounding preflight blocked Fusion: ' + groundingPreflight.rejection_reasons.join(', '));
       result = buildGroundingPreflightBlockedResult(groundingPreflight);
@@ -4105,7 +4235,7 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     }
     absorbUnicodeMeta(result);
-    const substantiveTask = isSubstantiveRedDogWorker(workerType);
+    const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localIdentityFastPath;
     if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
       const outputValidationOptions = {
@@ -4214,7 +4344,7 @@ function wireFusionWebview(context, webview, worker, state) {
         }
       }
     } else if (result.ok) {
-      validationState = { validated: false, skipped: true, reason: 'non_substantive_worker' };
+      validationState = { validated: false, skipped: true, reason: localIdentityFastPath ? 'local_identity_fast_path' : 'non_substantive_worker' };
     } else if (result.reason === 'redaction_blocked') {
       validationState = { validated: false, skipped: true, reason: 'redaction_blocked' };
       workTrail.push('redaction_gate_blocked');
@@ -6280,6 +6410,8 @@ module.exports = {
   normalizeRepairBridgeStageToWorkTrail,
   BRIDGE_REPAIR_STAGE_WORK_TRAIL,
   constructWspTaskPrompt,
+  isSimpleIdentityQuestion,
+  buildSimpleIdentityFastPathResult,
   appendContinuationSummaryToWspPrompt,
   buildSanitizedContinuationSummary,
   buildContinuationSummaryCopySection,

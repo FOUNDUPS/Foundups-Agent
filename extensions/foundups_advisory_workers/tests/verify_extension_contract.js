@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.60', 'package version must be 0.3.60');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.60'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.61', 'package version must be 0.3.61');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.61'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.60', 'README version mismatch');
+includes(readme, 'Version: 0.3.61', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -446,6 +446,36 @@ assert(wsp.tier === 'HIGH' || wsp.tier === 'ULTRA', 'WSP/architecture prompts mu
 
 const regular = orchestrator.classifyTaskForRedDog('Reply with exactly: regular mode works', 'auto', 'smoke_tester');
 assert.strictEqual(regular.tier, 'REGULAR', 'simple smoke prompts must classify REGULAR');
+
+// REDDOG_SIMPLE_IDENTITY_FAST_PATH_PHASE1: "are you RedDog?" is not architecture work.
+// It must answer locally instead of paying the HIGH-tier Fusion/HoloIndex/repair path just
+// because the short question contains the token "RedDog".
+includes(extensionJs, 'function isSimpleIdentityQuestion', 'SIFP-001: simple identity detector missing');
+includes(extensionJs, 'function buildSimpleIdentityFastPathResult', 'SIFP-001: simple identity result builder missing');
+const identityClass = orchestrator.classifyTaskForRedDog('are you reddog?', 'auto', 'reddog_architect');
+assert.strictEqual(orchestrator.isSimpleIdentityQuestion('are you reddog?'), true, 'SIFP-001: exact user prompt must be detected');
+assert.strictEqual(identityClass.tier, 'REGULAR', 'SIFP-001: simple identity prompt must not classify HIGH');
+assert.strictEqual(identityClass.localFastPath, 'simple_identity', 'SIFP-001: local fast-path marker missing');
+assert.strictEqual(orchestrator.resolveModelMode(identityClass, 'auto', 'reddog_architect'), 'local_identity_fast_path', 'SIFP-001: identity prompt must not call OpenRouter/Fusion');
+assert.strictEqual(orchestrator.resolveAutoContextMode(identityClass, 'auto'), 'none', 'SIFP-001: identity prompt must skip HoloIndex context');
+assert.strictEqual(orchestrator.resolveAutoEffort(identityClass, 'auto'), 'regular', 'SIFP-001: identity prompt must stay low effort');
+const identityResult = orchestrator.buildSimpleIdentityFastPathResult('are you reddog?', 'reddog_architect', { lead: 'local', panel: [] });
+assert.strictEqual(identityResult.ok, true, 'SIFP-001: identity result must be OK');
+assert.strictEqual(identityResult.review_packet.made_network_call, false, 'SIFP-001: identity result must prove no network call');
+assert.strictEqual(identityResult.review_packet.local_fast_path, 'simple_identity', 'SIFP-001: identity review packet must carry local marker');
+includes(identityResult.content, 'Yes. I am RedDog', 'SIFP-001: identity answer must be direct');
+const identityGate = orchestrator.buildRuntimeConsumptionGate(
+  { ok: true, review_packet: identityResult.review_packet },
+  { validated: false, skipped: true, reason: 'local_identity_fast_path' },
+  'local_identity_fast_path',
+  false
+);
+assert.strictEqual(identityGate.passed, false, 'SIFP-001: identity fast path must not enable runtime consumption');
+assert(identityGate.rejection_reasons.includes('local_identity_fast_path_not_actionable'), 'SIFP-001: runtime gate must name local fast path rejection');
+assert.strictEqual(orchestrator.isSimpleIdentityQuestion('audit RedDog architecture and HoloIndex routing'), false, 'SIFP-002: substantive RedDog audit must not use identity fast path');
+const reddogAuditClass = orchestrator.classifyTaskForRedDog('audit RedDog architecture and HoloIndex routing', 'auto', 'reddog_architect');
+assert.strictEqual(reddogAuditClass.localFastPath, null, 'SIFP-002: substantive audit must not carry local fast path');
+assert(reddogAuditClass.tier === 'HIGH' || reddogAuditClass.tier === 'ULTRA', 'SIFP-002: substantive RedDog audit must stay governed HIGH/ULTRA');
 
 assert.strictEqual(
   orchestrator.resolveModelMode(wsp, 'auto', 'reddog_architect'),
@@ -903,7 +933,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.60', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.61', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2241,7 +2271,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.60'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.61'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2255,7 +2285,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.60'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.61'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2267,7 +2297,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.60'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.61'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

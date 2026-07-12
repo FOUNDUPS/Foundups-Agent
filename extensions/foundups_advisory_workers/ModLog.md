@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_SIMPLE_IDENTITY_FAST_PATH_PHASE1 (local identity/status answer, 0.3.61)
+
+- Added a narrow local fast path for short identity/status questions such as `are you RedDog?` so they do not escalate through HIGH-tier Fusion routing merely because the prompt contains `RedDog`.
+- The fast path answers locally, sets `made_network_call=false`, uses context `none`, skips HoloIndex/OpenRouter/Fusion/repair/judgment verifier, and blocks downstream runtime consumption as non-actionable.
+- Added contract coverage proving substantive RedDog audit prompts still classify HIGH and stay on the governed path.
+- Version 0.3.60 -> 0.3.61 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-13 - REDDOG_PROMPT_AUTHORING_DELIVERABLE_CONTRACT_PHASE1 (worker prompt artifact gate, 0.3.60)
 
 - Added prompt-authoring detection so requests to create/evaluate/provide worker prompts receive bounded RedDog prompt/judgment context even when no explicit repo paths are named.
