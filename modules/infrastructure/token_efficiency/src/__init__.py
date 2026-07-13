@@ -79,6 +79,15 @@ from .rtk_evaluation_dryrun import (
     evaluate_rtk_candidate_dry_run,
 )
 
+from .rtk_openclaw_hermes_adapter_dryrun import (
+    RtkAdapterDryRunDecision,
+    RtkAdapterDryRunRejection,
+    RtkAdapterOutputMode,
+    RtkAdapterSurface,
+    RtkOpenClawHermesAdapterDryRunResult,
+    plan_rtk_openclaw_hermes_adapter_dry_run,
+)
+
 __all__ = [
     # Bypass classifier (P1)
     "BypassClass",
@@ -139,4 +148,11 @@ __all__ = [
     "RtkDryRunRejection",
     "RtkEvaluationDryRunResult",
     "evaluate_rtk_candidate_dry_run",
+    # OpenClaw/Hermes RTK adapter dry-run (P6)
+    "RtkAdapterDryRunDecision",
+    "RtkAdapterDryRunRejection",
+    "RtkAdapterOutputMode",
+    "RtkAdapterSurface",
+    "RtkOpenClawHermesAdapterDryRunResult",
+    "plan_rtk_openclaw_hermes_adapter_dry_run",
 ]

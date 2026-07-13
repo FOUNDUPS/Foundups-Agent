@@ -205,35 +205,39 @@ the result is consumed by the caller. Candidate locations:
 | WRE gateway response handler | Centralized | Far from execution |
 
 Contract decision: RTK seam at `execute_command()` result handler level. This allows:
-- Bypass classifier to run before compression
-- Raw result preserved if bypass triggers
+- Bypass classifier to run before any future compression
+- Raw result to remain recoverable and preserved
 - Single integration point for all command types
+
+Current implementation status: P6 is a dry-run seam planner only. It does not
+call RTK, install an RTK binary, rewrite command output, or wire into
+OpenClaw/Hermes/WRE/extension runtime.
 
 ### 4c. Seam interface [SPECIFIED_NOT_IMPLEMENTED]
 
 ```python
-def maybe_compress_command_output(
+def plan_rtk_openclaw_hermes_adapter_dry_run(
     command: str,
-    result: str,
-    bypass_classifier: BypassClassifier,
-    telemetry: TokenTelemetry | None,
-) -> CompressedOutput:
+    command_output: str,
+    candidate_output: str,
+    raw_ref: str,
+) -> RtkOpenClawHermesAdapterDryRunResult:
     """
-    RTK compression seam contract.
+    RTK dry-run seam contract.
     
     Args:
         command: The executed command string
-        result: Raw stdout/stderr from execution
-        bypass_classifier: Determines if result should bypass compression
-        telemetry: Optional telemetry recorder (None = no recording)
+        command_output: Raw stdout/stderr from execution
+        candidate_output: Caller-supplied candidate output
+        raw_ref: Reference to recover original raw output
     
     Returns:
-        CompressedOutput with:
-            - compressed: The (possibly) compressed result
-            - raw_ref: Reference to recover original if needed
-            - bypassed: True if compression was skipped
-            - bypass_reason: Why compression was skipped (if bypassed)
-            - savings_tokens: Estimated token savings (if compressed)
+        RtkOpenClawHermesAdapterDryRunResult with:
+            - dry_run_only: True
+            - output_rewritten: False
+            - raw_output_preserved: True
+            - rtk_invoked: False
+            - telemetry_event_id: in-memory measurement event id, if evaluated
     
     Invariants:
         - If bypass_classifier.should_bypass(result) -> return raw, bypassed=True
@@ -405,9 +409,9 @@ Per 012 adjustment, bypass/security gate comes BEFORE telemetry:
 | P1 | BYPASS_CLASSIFIER_SECURITY_GATE_PHASE1 | BypassClassifier, patterns, tests | This contract |
 | P2 | WSP99_COMPILER_FIDELITY_GATE_PHASE1 | assert_m2m_fidelity(), roundtrip tests | P1 |
 | P3 | TOKEN_EFFICIENCY_TELEMETRY_SERVICE_PHASE1 | TokenTelemetry, schema, storage | P1, P2 |
-| P4 | RTK_EVALUATION_DRY_RUN_PHASE1 | RTK subprocess eval, benchmark | P1, P2, P3 |
-| P5 | RTK_OPENCLAW_HERMES_ADAPTER_DRYRUN_PHASE1 | Seam integration, dry-run | P4 |
-| P6 | REDDOG_COMPUTE_GOVERNOR_PHASE1 | RedDogComputeDecision, routing | P5 |
+| P4 | REDDOG_COMPUTE_GOVERNOR_PHASE1 | RedDogComputeDecision, routing | P1, P2, P3 |
+| P5 | RTK_EVALUATION_DRY_RUN_PHASE1 | Caller-supplied candidate evaluation, dry-run | P4 |
+| P6 | RTK_OPENCLAW_HERMES_ADAPTER_DRYRUN_PHASE1 | Seam planner, dry-run, no rewrite | P5 |
 
 Rationale: Telemetry might record compressed output. If bypass classifier is broken,
 telemetry could record secrets. Therefore bypass MUST be proven before telemetry starts.
@@ -424,15 +428,17 @@ modules/
         __init__.py
         bypass_classifier.py      # P1: Bypass class detection
         m2m_fidelity_gate.py      # P2: Round-trip validation
-        telemetry_recorder.py     # P3: Token savings measurement
-        rtk_adapter.py            # P4: RTK subprocess wrapper
-        compression_seam.py       # P5: OpenClaw/Hermes integration
+        telemetry_service.py      # P3: Token savings measurement
+        compute_governor.py       # P4: Routing decisions
+        rtk_evaluation_dryrun.py  # P5: Caller-supplied candidate evaluation
+        rtk_openclaw_hermes_adapter_dryrun.py # P6: Seam planner, no rewrite
       tests/
         test_bypass_classifier.py
         test_m2m_fidelity.py
-        test_telemetry.py
-        test_rtk_adapter.py       # Dry-run only
-        test_compression_seam.py  # Integration tests
+        test_telemetry_service.py
+        test_compute_governor.py
+        test_rtk_evaluation_dryrun.py
+        test_rtk_openclaw_hermes_adapter_dryrun.py # Seam dry-run tests
       config/
         bypass_patterns.yaml      # Bypass class definitions
       README.md
@@ -454,8 +460,8 @@ These rules are FROZEN by this contract. Violation is a contract breach.
 | ORCH_COMPILES | ORCH (not RedDog, not Worker) compiles M2M | Code review |
 | RTK_OUTPUT_ONLY | RTK only touches post-execution output | Static test |
 | BYPASS_DEFAULT | Security/auth/provenance/signing/permission/receipt bypass by default | Unit tests |
-| NO_RUNTIME_RTK_YET | No RTK runtime integration until P5 | CI gate |
-| NO_COMMAND_REWRITE_YET | No OpenClaw/Hermes command rewrite until P5 | CI gate |
+| NO_RUNTIME_RTK_YET | No RTK runtime integration in P6 | CI gate |
+| NO_COMMAND_REWRITE_YET | No OpenClaw/Hermes command rewrite in P6 | CI gate |
 | NO_DEP_INSTALL | No new dependencies in P1-P3 | requirements.txt diff |
 | NO_EXTERNAL_EXEC | No external command execution except read-only checks | Code review |
 | NO_LIVE_TELEMETRY_YET | No telemetry store until P3 | CI gate |
@@ -492,9 +498,9 @@ def test_wsp99_schema_unchanged():
     assert required_fields.issubset(actual_fields)
 
 def test_no_rtk_binary_present():
-    """RTK binary must not be present until P4."""
+    """RTK binary must not be required by P6 dry-run planning."""
     import shutil
-    assert shutil.which("rtk") is None, "RTK binary found but not allowed until P4"
+    assert shutil.which("rtk") is None, "RTK binary found but P6 does not use it"
 
 def test_no_rtk_dependency():
     """No RTK-related dependencies in requirements."""
@@ -519,8 +525,8 @@ Items defined by this contract but not implemented:
 | M2M round-trip tests | Section 7a | WSP99_COMPILER_FIDELITY_GATE_PHASE1 |
 | TokenCompressionEvent | Section 8a | TOKEN_EFFICIENCY_TELEMETRY_SERVICE_PHASE1 |
 | TokenTelemetry class | Section 8 | TOKEN_EFFICIENCY_TELEMETRY_SERVICE_PHASE1 |
-| RTK subprocess wrapper | Section 4 | RTK_EVALUATION_DRY_RUN_PHASE1 |
-| maybe_compress_command_output() | Section 4c | RTK_OPENCLAW_HERMES_ADAPTER_DRYRUN_PHASE1 |
+| Caller-supplied RTK candidate evaluation | Section 4 | RTK_EVALUATION_DRY_RUN_PHASE1 |
+| plan_rtk_openclaw_hermes_adapter_dry_run() | Section 4c | RTK_OPENCLAW_HERMES_ADAPTER_DRYRUN_PHASE1 |
 | RedDogComputeDecision | Section 2b | REDDOG_COMPUTE_GOVERNOR_PHASE1 |
 | RawRef schema | Section 5c | WSP99_COMPILER_FIDELITY_GATE_PHASE1 |
 
