@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_PROMPT_LIBRARY_AND_M2M_REGISTRY_AUDIT_PHASE1 (decision-only)
+
+- Audited the prompt/M2M surfaces needed for RedDog to stop relying on 012 copy/paste orchestration.
+- Finding: prompt templates, WSP_99 M2M, prompt fixtures, typed grounding, Fusion quorum, and runtime gates exist, but no canonical executed-prompt library / PromptReceipt / PromptRun / PromptOutcome registry exists.
+- Recorded HoloIndex query-only evidence and `HOLOINDEX_REDDOG_PROMPT_LIBRARY_M2M_REGISTRY_INDEX_GAP_PHASE1`; RedDog runtime remains query-only and WRE/CI owns future prompt-library indexing.
+- Defined the WSP_15 sequence for prompt library contract, examples fixture library, M2M compilation gate, relevance/quorum gate, dry-run storage/retrieval/dispatch, outcome memory, HoloIndex freshness, and runtime consumption.
+
 ## 2026-07-13 - REDDOG_DAEMON_PROMPT_AUTHORING_OVERRIDE_PHASE1 (prompt requests override log fast path, 0.3.65)
 
 - Fixed prompt-authoring requests that include DAEmon/log output so they no longer route to the instant local diagnostic fast path.
