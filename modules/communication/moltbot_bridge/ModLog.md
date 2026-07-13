@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_CONTEXT_SNAPSHOT_FUSION_AND_ASSIGNMENT_GATE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_context_snapshot_fusion_assignment_gate.py`: pure
+  fail-closed gate that consumes an operational snapshot, context view,
+  evidence bundle, current repo/work-state markers, and requested operation
+  before allowing Fusion or worker assignment.
+- Added `tests/test_reddog_context_snapshot_fusion_assignment_gate.py`:
+  exact-binding acceptance, missing snapshot/view/bundle rejection, mismatched
+  context/evidence rejection, repo/work-state/breadcrumb stale rejection, empty
+  evidence-bundle rejection, expiry rejection, deterministic determination
+  binding, and AST no-runtime-wiring coverage.
+- Boundary: no model call, no worker spawn, no queue mutation, no OpenClaw or
+  Hermes dispatch, no extension runtime wiring, and no execution. This slice
+  emits a `determination_id` binding that downstream model output/work orders
+  must carry; it does not consume model output.
+- HoloIndex read-only probe for `RedDog context snapshot Fusion assignment
+  gate determination binding evidence bundle` surfaced adjacent context bundle,
+  Fusion redaction, bootstrap-context, and operator-loop surfaces but not the
+  new gate module. Recorded
+  `HOLOINDEX_REDDOG_CONTEXT_SNAPSHOT_FUSION_ASSIGNMENT_GATE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_OPERATIONAL_CONTEXT_SNAPSHOT_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
