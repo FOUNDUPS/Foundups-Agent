@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_BOUNDED_WORKTREE_WORKER_EXECUTION_PILOT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_bounded_worktree_worker_execution_pilot.py`: bounded worker execution pilot that consumes accepted WRE worktree spine, generic writer dry-run, governed shell dry-run, CWD guard, and HoloIndex evidence before materializing exact planned text artifacts inside an already-created isolated worktree.
+- Added `tests/test_reddog_bounded_worktree_worker_execution_pilot.py`: happy path, fail-closed receipt/spine checks, shared-main CWD rejection, artifact mismatch, denied path, governed-shell rejection, HoloIndex gap rejection, secret-content rejection, and AST no-shell/no-git/no-queue/no-runtime-authority coverage.
+- Boundary: no subprocess/shell command execution, no git/gh operation, no PR creation, no merge, no OpenClaw enqueue, no Hermes dispatch, no reward settlement, no HoloIndex runtime mutation/re-index, and no extension runtime wiring. This slice proves one bounded text-artifact materialization path in an isolated worktree only.
+- HoloIndex read-only probes surfaced adjacent worktree, generic writer, governed shell, and contract surfaces, but not the new pilot module. Recorded `HOLOINDEX_REDDOG_BOUNDED_WORKTREE_WORKER_EXECUTION_PILOT_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_SIGNER_AND_DELEGATED_AUTHORITY_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 96, 97, 100
