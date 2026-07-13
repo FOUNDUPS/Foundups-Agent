@@ -1,6 +1,6 @@
 # Token Efficiency Module
 
-**Status**: P4 (Compute Governor) ACTIVE
+**Status**: P5 (RTK Evaluation Dry-Run) ACTIVE
 **Contract**: `docs/contracts/REDDOG_WSP99_RTK_TOKEN_EFFICIENCY_CONTRACT_PHASE1.md`
 **WSP**: WSP_97, WSP_99
 
@@ -10,6 +10,8 @@ Provides token efficiency services for the RedDog/WRE stack:
 - Bypass classification (which outputs must remain raw)
 - M2M fidelity validation (round-trip preservation)
 - Token savings telemetry (measurement, not claims)
+- Compute governor routing decisions before tool execution
+- RTK evaluation dry-runs over caller-supplied candidate output
 - RTK integration seam (when ready)
 
 ## Current State (P1)
@@ -74,8 +76,8 @@ The classifier always fails closed:
 | P1 | BYPASS_CLASSIFIER_SECURITY_GATE_PHASE1 | LANDED (#940) |
 | P2 | WSP99_COMPILER_FIDELITY_GATE_PHASE1 | LANDED (#943) |
 | P3 | TOKEN_EFFICIENCY_TELEMETRY_SERVICE_PHASE1 | LANDED (#944) |
-| P4 | REDDOG_COMPUTE_GOVERNOR_PHASE1 | ACTIVE |
-| P5 | RTK_EVALUATION_DRY_RUN_PHASE1 | Planned |
+| P4 | REDDOG_COMPUTE_GOVERNOR_PHASE1 | LANDED (#946) |
+| P5 | RTK_EVALUATION_DRY_RUN_PHASE1 | ACTIVE |
 | P6 | RTK_OPENCLAW_HERMES_ADAPTER_DRYRUN_PHASE1 | Planned |
 
 ## Files
@@ -88,12 +90,14 @@ modules/infrastructure/token_efficiency/
     m2m_fidelity_gate.py      # P2: Round-trip validation
     telemetry_service.py      # P3: Token savings measurement
     compute_governor.py       # P4: Routing decisions (not compression authority)
+    rtk_evaluation_dryrun.py  # P5: Candidate evaluation, no RTK invocation
   tests/
     test_bypass_classifier.py # Unit + adversarial tests
     test_m2m_fidelity.py      # Fidelity + CTX.HOLO tests
     test_m2m_compiler_compat.py # Compiler backward-compat
     test_telemetry_service.py # Telemetry service tests
     test_compute_governor.py  # Routing + invariant tests
+    test_rtk_evaluation_dryrun.py # Dry-run candidate evaluation tests
   config/
     bypass_patterns.yaml      # Pattern definitions
   README.md                   # This file
@@ -102,8 +106,12 @@ modules/infrastructure/token_efficiency/
 
 ## No Runtime RTK Yet
 
-This module does NOT include RTK integration. RTK is planned for P5/P6 after:
+This module does NOT include RTK integration. P5 only evaluates caller-supplied
+candidate output and records in-memory telemetry; it does not invoke an RTK
+binary, execute commands, or perform runtime compression. RTK adapter integration
+is planned for P6 after:
 - Bypass classifier proven (P1)
 - M2M fidelity proven (P2)
 - Telemetry operational (P3)
 - Compute governor wired (P4)
+- RTK evaluation dry-run accepted (P5)
