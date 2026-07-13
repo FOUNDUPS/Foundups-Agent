@@ -2,6 +2,45 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - REDDOG_VERIFIED_OUTCOME_RATCHET_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
+WSP 50 (Pre-Action), WSP 97 (Truth Boundary), WSP 22 (ModLog)
+
+**Type**: Runtime outcome ratchet. Verifier-gated persistence and optional
+PatternMemory admission through injected sinks only.
+
+**Deliverable**:
+- Added `src/reddog_verified_outcome_ratchet.py`: persists request, execution,
+  verification, cost, latency, acceptance, and failure receipts. It records
+  rejected/failure outcomes for audit, blocks secret-bearing receipts before
+  persistence, and only allows PatternMemory admission when the independent
+  autonomous-slice verifier accepted the work and the verified draft PR publish
+  receipt accepted the draft-only publication.
+- Added `tests/test_reddog_verified_outcome_ratchet.py`: accepted outcome,
+  optional PatternMemory write, rejected-verification recording, missing publish
+  receipt, failed outcome recording, missing receipt set, bad cost/latency,
+  HoloIndex gap/freshness rejection, secret non-persistence, store/sink failure,
+  JSONL append, deterministic receipt, JSON serialization, and AST boundary
+  coverage.
+
+**Boundary**: This slice does not execute commands, publish PRs, merge, settle
+rewards, call GitHub, write PatternMemory directly, or re-index HoloIndex. Both
+the ratchet store and PatternMemory sink are injected interfaces.
+
+**HoloIndex**: Read-only probes surfaced adjacent receipt/verifier surfaces but
+not the new ratchet module. Recorded
+`HOLOINDEX_REDDOG_VERIFIED_OUTCOME_RATCHET_INDEX_GAP_PHASE1`; no runtime
+re-index performed.
+
+**Verification**: ratchet + draft publish + autonomous verifier tests 39 passed;
+py_compile passed; git diff --check clean; new files line-length, ASCII, and
+NUL clean. A broader WRE suite run still has pre-existing environment-sensitive
+failures around missing `vendor/hermes-agent`, worktree repo-name assumptions,
+and cwd-sensitive older AST tests; none are introduced by this slice.
+
+---
+
 ### [2026-07-14] - REDDOG_VERIFIED_DRAFT_PR_PUBLISH_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
