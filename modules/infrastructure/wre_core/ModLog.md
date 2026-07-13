@@ -2,6 +2,41 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - REDDOG_VERIFIED_DRAFT_PR_PUBLISH_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
+WSP 50 (Pre-Action), WSP 97 (Truth Boundary), WSP 22 (ModLog)
+
+**Type**: Runtime draft-PR publisher. Exact-head verifier-gated. Draft only.
+
+**Deliverable**:
+- Added `src/reddog_verified_draft_pr_publish.py`: consumes an accepted
+  autonomous-slice verifier result and publishes only when the caller's
+  pre-publish branch head equals the verified head. It validates branch policy,
+  draft-only flags, PR metadata, secret-free PR text, and then delegates only
+  `push_branch` + `create_draft_pr` to an injected runner compatible with the
+  existing `worktree_pr_runner.py` draft-PR helper.
+- Added `tests/test_reddog_verified_draft_pr_publish.py`: happy path, rejected
+  verifier result, head mismatch, branch/base policy, non-draft/ready/merge
+  request, missing metadata, secret metadata, push failure, draft-PR exception,
+  invalid PR URL, deterministic receipt, JSON serialization, and AST
+  no-direct-git/no-ready/no-merge/no-PatternMemory coverage.
+
+**Boundary**: This slice does not author code, run tests, compute diffs, call
+GitHub directly, mark PRs ready, merge, write PatternMemory, settle rewards, or
+re-index HoloIndex. It is a narrow bridge from verifier `ACCEPT` to draft PR
+creation through an injected runner.
+
+**HoloIndex**: Read-only probes surfaced adjacent verifier, draft PR, and
+workflow concepts but not the new publish seam. Recorded
+`HOLOINDEX_REDDOG_VERIFIED_DRAFT_PR_PUBLISH_INDEX_GAP_PHASE1`; no runtime
+re-index performed.
+
+**Verification**: publish + verifier tests 25 passed; py_compile passed; git
+diff --check clean; new files ASCII/NUL clean.
+
+---
+
 ### [2026-07-14] - WRE_AUTONOMOUS_SLICE_VERIFIER_RUNTIME_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
