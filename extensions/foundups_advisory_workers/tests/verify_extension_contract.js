@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.62', 'package version must be 0.3.62');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.62'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.63', 'package version must be 0.3.63');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.63'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.62', 'README version mismatch');
+includes(readme, 'Version: 0.3.63', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -526,6 +526,51 @@ assert.strictEqual(traceGate.passed, false, 'RTLA-001: trace assessment must not
 assert(traceGate.rejection_reasons.includes('local_run_trace_assessment_not_actionable'), 'RTLA-001: runtime gate must name trace assessment rejection');
 const actionTracePrompt = blockedTracePrompt + '\n\nImplement the fix.';
 assert.strictEqual(orchestrator.isRunTraceAssessmentRequest(actionTracePrompt), false, 'RTLA-002: action-oriented trace prompt must use governed path');
+
+// REDDOG_DAEMON_OUTPUT_LOCAL_ASSESSMENT_PHASE1: pasted DAEmon/log diagnostics
+// are data, not instructions. They must be assessed locally instead of being sent
+// through Fusion/redaction, which caused 0.3.62 blocked-local loops for DAEmon output.
+includes(extensionJs, 'function isDaemonOutputAssessmentRequest', 'DOLA-001: daemon output detector missing');
+includes(extensionJs, 'function buildDaemonOutputLocalAssessmentResult', 'DOLA-001: daemon output local builder missing');
+const daemonOutputPrompt = [
+  "012 should be able to post DAEmon output and you should be able to analyze it. Why can't you?",
+  '',
+  'DAEmon output:',
+  '2026-07-13T10:22:01Z ERROR redaction gate status: BLOCKED_LOCALLY',
+  'made_network_call: false',
+  'operator message: Stopped before OpenRouter. Nothing left the machine.',
+  'runtime_consumption_gate_rejection_reasons: model_result_not_ok, redaction_blocked',
+  'api_key=sk-testsecret123'
+].join('\n');
+assert.strictEqual(orchestrator.isDaemonOutputAssessmentRequest(daemonOutputPrompt), true, 'DOLA-001: pasted DAEmon output assessment must be detected');
+const daemonClass = orchestrator.classifyTaskForRedDog(daemonOutputPrompt, 'auto', 'reddog_architect');
+assert.strictEqual(daemonClass.tier, 'REGULAR', 'DOLA-001: DAEmon diagnostics must not classify HIGH');
+assert.strictEqual(daemonClass.localFastPath, 'daemon_output_assessment', 'DOLA-001: local daemon fast-path marker missing');
+assert.strictEqual(orchestrator.resolveModelMode(daemonClass, 'auto', 'reddog_architect'), 'local_daemon_output_assessment', 'DOLA-001: DAEmon diagnostics must not call OpenRouter/Fusion');
+assert.strictEqual(orchestrator.resolveAutoContextMode(daemonClass, 'auto'), 'none', 'DOLA-001: DAEmon diagnostics must skip HoloIndex context');
+assert.strictEqual(orchestrator.resolveAutoEffort(daemonClass, 'auto'), 'regular', 'DOLA-001: DAEmon diagnostics must stay low effort');
+const daemonParsed = orchestrator.parseDaemonOutputAssessment(daemonOutputPrompt);
+assert.strictEqual(daemonParsed.blocked_locally, true, 'DOLA-001: local parser must identify blocked-local daemon output');
+assert(daemonParsed.error_count >= 1, 'DOLA-001: local parser must count error/block signals');
+const daemonResult = orchestrator.buildDaemonOutputLocalAssessmentResult(daemonOutputPrompt);
+assert.strictEqual(daemonResult.review_packet.made_network_call, false, 'DOLA-001: local daemon result must prove no network call');
+assert.strictEqual(daemonResult.review_packet.local_fast_path, 'daemon_output_assessment', 'DOLA-001: daemon review packet marker missing');
+includes(daemonResult.content, 'pasted text is diagnostic data', 'DOLA-001: daemon answer must preserve data-not-instruction boundary');
+includes(daemonResult.content, '[REDACTED]', 'DOLA-002: daemon local output must redact API-key shaped secrets');
+assert(!daemonResult.content.includes('sk-testsecret123'), 'DOLA-002: daemon local output must not leak raw secret');
+const daemonGate = orchestrator.buildRuntimeConsumptionGate(
+  { ok: true, review_packet: daemonResult.review_packet },
+  { validated: false, skipped: true, reason: 'local_daemon_output_assessment' },
+  'local_daemon_output_assessment',
+  false
+);
+assert.strictEqual(daemonGate.passed, false, 'DOLA-001: daemon diagnostics must not enable runtime consumption');
+assert(daemonGate.rejection_reasons.includes('local_daemon_output_assessment_not_actionable'), 'DOLA-001: runtime gate must name daemon assessment rejection');
+assert.strictEqual(
+  orchestrator.isDaemonOutputAssessmentRequest('Implement daemon output parsing in extension.js and add tests.'),
+  false,
+  'DOLA-003: implementation requests must use governed path, not local diagnostic fast path'
+);
 
 assert.strictEqual(
   orchestrator.resolveModelMode(wsp, 'auto', 'reddog_architect'),
@@ -983,7 +1028,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.62', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.63', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2321,7 +2366,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.62'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.63'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2335,7 +2380,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.62'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.63'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2347,7 +2392,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.62'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.63'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

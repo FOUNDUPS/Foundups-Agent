@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_DAEMON_OUTPUT_LOCAL_ASSESSMENT_PHASE1 (local DAEmon/log diagnostics, 0.3.63)
+
+- Added a local DAEmon/log output assessment fast path for pasted operational diagnostics.
+- Treats pasted output as data, redacts secret-shaped values, and skips HoloIndex, OpenRouter, Fusion, repair, repo/shell work, enqueue, and worktree action.
+- Runtime consumption remains blocked with `local_daemon_output_assessment_not_actionable`; logs cannot become instructions or authority.
+- Version 0.3.62 -> 0.3.63 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-13 - REDDOG_RUN_TRACE_LOCAL_ASSESSMENT_PHASE1 (local pasted-trace diagnostics, 0.3.62)
 
 - Added a local Run Trace assessment fast path for pasted `## Run Trace` diagnostics so RedDog can explain blocked/slow traces without sending raw trace text through HoloIndex/Fusion/OpenRouter.
