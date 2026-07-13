@@ -53,6 +53,25 @@ from .telemetry_service import (
     reset_telemetry_store,
 )
 
+from .compute_governor import (
+    ComputeGovernor,
+    RedDogComputeDecision,
+    ComputeGovernorError,
+    Phase,
+    Routing,
+    CommandType,
+    compute_command_digest,
+    redact_command,
+    extract_command_type,
+    is_bypass_command,
+    is_safe_command,
+    generate_decision_id,
+    record_decision_telemetry,
+    validate_decision,
+    get_compute_governor,
+    reset_compute_governor,
+)
+
 __all__ = [
     # Bypass classifier (P1)
     "BypassClass",
@@ -91,4 +110,21 @@ __all__ = [
     "summarize_token_events",
     "get_telemetry_store",
     "reset_telemetry_store",
+    # Compute governor (P4)
+    "ComputeGovernor",
+    "RedDogComputeDecision",
+    "ComputeGovernorError",
+    "Phase",
+    "Routing",
+    "CommandType",
+    "compute_command_digest",
+    "redact_command",
+    "extract_command_type",
+    "is_bypass_command",
+    "is_safe_command",
+    "generate_decision_id",
+    "record_decision_telemetry",
+    "validate_decision",
+    "get_compute_governor",
+    "reset_compute_governor",
 ]

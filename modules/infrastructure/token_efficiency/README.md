@@ -1,6 +1,6 @@
 # Token Efficiency Module
 
-**Status**: P3 (Telemetry Service) ACTIVE
+**Status**: P4 (Compute Governor) ACTIVE
 **Contract**: `docs/contracts/REDDOG_WSP99_RTK_TOKEN_EFFICIENCY_CONTRACT_PHASE1.md`
 **WSP**: WSP_97, WSP_99
 
@@ -73,8 +73,8 @@ The classifier always fails closed:
 |-------|-------|--------|
 | P1 | BYPASS_CLASSIFIER_SECURITY_GATE_PHASE1 | LANDED (#940) |
 | P2 | WSP99_COMPILER_FIDELITY_GATE_PHASE1 | LANDED (#943) |
-| P3 | TOKEN_EFFICIENCY_TELEMETRY_SERVICE_PHASE1 | ACTIVE |
-| P4 | REDDOG_COMPUTE_GOVERNOR_PHASE1 | Planned |
+| P3 | TOKEN_EFFICIENCY_TELEMETRY_SERVICE_PHASE1 | LANDED (#944) |
+| P4 | REDDOG_COMPUTE_GOVERNOR_PHASE1 | ACTIVE |
 | P5 | RTK_EVALUATION_DRY_RUN_PHASE1 | Planned |
 | P6 | RTK_OPENCLAW_HERMES_ADAPTER_DRYRUN_PHASE1 | Planned |
 
@@ -87,11 +87,13 @@ modules/infrastructure/token_efficiency/
     bypass_classifier.py      # P1: Bypass classification
     m2m_fidelity_gate.py      # P2: Round-trip validation
     telemetry_service.py      # P3: Token savings measurement
+    compute_governor.py       # P4: Routing decisions (not compression authority)
   tests/
     test_bypass_classifier.py # Unit + adversarial tests
     test_m2m_fidelity.py      # Fidelity + CTX.HOLO tests
     test_m2m_compiler_compat.py # Compiler backward-compat
     test_telemetry_service.py # Telemetry service tests
+    test_compute_governor.py  # Routing + invariant tests
   config/
     bypass_patterns.yaml      # Pattern definitions
   README.md                   # This file
