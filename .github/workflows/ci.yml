@@ -73,6 +73,54 @@ jobs:
         run: |
           ! git ls-files | grep "^\.env$" || (echo "ERROR: .env is tracked!" && exit 1)
 
+  holoindex_freshness:
+    runs-on: ubuntu-latest
+    env:
+      HOLOINDEX_CI_FRESHNESS_ENFORCED: ${{ vars.HOLOINDEX_CI_FRESHNESS_ENFORCED }}
+      HOLOINDEX_FRESHNESS_RECEIPT: ${{ vars.HOLOINDEX_FRESHNESS_RECEIPT }}
+      HOLOINDEX_SSD_PATH: ${{ vars.HOLOINDEX_SSD_PATH }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine changed paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --name-only --diff-filter=ACMRT \
+              "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" \
+              > .holoindex_changed_paths
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only --diff-filter=ACMRT \
+              "${{ github.event.before }}" "${{ github.sha }}" \
+              > .holoindex_changed_paths
+          else
+            git diff-tree --no-commit-id --name-only -r "${{ github.sha }}" \
+              > .holoindex_changed_paths
+          fi
+          cat .holoindex_changed_paths
+
+      - name: Check HoloIndex freshness receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          enforce_flag=""
+          if [ "${HOLOINDEX_CI_FRESHNESS_ENFORCED:-0}" = "1" ]; then
+            enforce_flag="--enforce-configured"
+          fi
+          python -m holo_index.ci_main_freshness_gate \
+            --changed-paths-file .holoindex_changed_paths \
+            --head-sha "${{ github.sha }}" \
+            --pretty \
+            ${enforce_flag}
+
   redteam_observation:
     # FOUNDUPS_AGENT_REDTEAM_CI_OBSERVATION_PHASE1
     #

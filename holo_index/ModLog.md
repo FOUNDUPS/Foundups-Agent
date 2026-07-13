@@ -1,5 +1,32 @@
 # HoloIndex Package ModLog
 
+## [2026-07-14] HOLOINDEX_CI_MAIN_FRESHNESS_GATE_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97
+
+- ADD `holo_index/ci_main_freshness_gate.py`: thin CI/main wrapper that
+  discovers changed paths with read-only `git diff --name-only` and delegates
+  freshness evaluation to the existing `ci_freshness_gate.check_ci_freshness`.
+- UPDATE `.github/workflows/ci.yml`: adds `holoindex_freshness` job. The job
+  reports HoloIndex freshness on PR/push and becomes fail-closed when
+  `HOLOINDEX_CI_FRESHNESS_ENFORCED=1` is configured with a mounted freshness
+  receipt.
+- TEST `tests/test_holoindex_ci_main_freshness_gate.py`: configured fresh pass,
+  missing receipt nonblocking/default mode, missing receipt enforced failure,
+  stale receipt failure, read-only diff discovery, SHA validation, CLI JSON, and
+  AST guards against re-index/store mutation.
+- TEST `tests/test_holoindex_ci_freshness_gate.py`: fixed an existing
+  env-dependent test so a local `E:/HoloIndex` receipt cannot alter the expected
+  not-configured result.
+- Boundary: no indexer invocation, no HoloIndex mutation, no WRE enqueue, no
+  RedDog runtime re-index, and no store writes. The gate consumes receipts only.
+- Read-only post-edit probe for
+  `HOLOINDEX_CI_MAIN_FRESHNESS_GATE_PHASE1 CI main freshness receipt changed paths GitHub workflow`
+  surfaced adjacent governance modules, not the new wrapper; recorded
+  `HOLOINDEX_CI_MAIN_FRESHNESS_GATE_INDEX_GAP_PHASE1`. No runtime re-index
+  performed.
+
 ## [2026-07-12] HOLOINDEX_INCREMENTAL_PER_FOUNDUP_INDEX_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice

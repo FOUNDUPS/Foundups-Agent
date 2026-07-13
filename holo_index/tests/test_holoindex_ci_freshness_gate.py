@@ -106,9 +106,11 @@ def test_ci_gate_fails_closed_when_receipt_path_missing() -> None:
     assert result.reasons == ["missing_freshness_receipt_path"]
 
 
-def test_ci_gate_can_report_not_configured_without_claiming_freshness() -> None:
+def test_ci_gate_can_report_not_configured_without_claiming_freshness(tmp_path: Path) -> None:
+    missing_receipt = tmp_path / "missing" / "holoindex_freshness_receipt.json"
+
     result = check_ci_freshness(
-        receipt_path="E:/HoloIndex/indexes/holoindex_freshness_receipt.json",
+        receipt_path=missing_receipt,
         changed_paths=["modules/foundups/agent/src/create_foundup_dryrun.py"],
         expected_repo_head_sha="abc123",
         allow_not_configured=True,
