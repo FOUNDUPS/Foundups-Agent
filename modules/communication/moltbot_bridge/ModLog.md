@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_HOLOINDEX_FIRST_EXTERNAL_RESEARCH_GROUNDING_ADAPTER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 77, 97
+
+- Added `src/reddog_holoindex_first_external_research_grounding_adapter.py`:
+  pure RedDog research grounding adapter that queries injected HoloIndex memory
+  first, then uses an injected approved external retriever only for unresolved
+  or freshness-sensitive external targets.
+- Added `tests/test_reddog_holoindex_first_external_research_grounding_adapter.py`:
+  HoloIndex-first acceptance, semantic internal-memory grounding, index-gap
+  fail-closed behavior, missing retriever, disallowed domains, invalid/stale
+  snapshots, prompt-injection-as-data handling, negative-result indexability,
+  deterministic receipts, empty-target rejection, and AST no-network/no-command
+  no-index/no-persistence coverage.
+- Boundary: no direct network I/O, no HoloIndex re-index/promotion, no
+  PatternMemory write, no AgentDB task write, no subprocess/shell, no model
+  instruction authority from external content, and no extension runtime wiring.
+  External evidence is treated as untrusted data with hashes, provenance, and
+  freshness receipts.
+- HoloIndex read-only probe surfaced adjacent adapter and contract surfaces but
+  not the new adapter. Recorded
+  `HOLOINDEX_REDDOG_HOLOINDEX_FIRST_EXTERNAL_RESEARCH_GROUNDING_ADAPTER_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_BOUNDED_WORKTREE_WORKER_EXECUTION_PILOT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
