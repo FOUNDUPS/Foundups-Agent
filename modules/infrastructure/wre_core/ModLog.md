@@ -2,6 +2,46 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - WRE_AUTONOMOUS_SLICE_VERIFIER_RUNTIME_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
+WSP 50 (Pre-Action), WSP 97 (Truth Boundary), WSP 22 (ModLog)
+
+**Type**: Runtime verifier. Independent author-output acceptance gate. No command
+execution, no GitHub call, no PR publish, no merge, no PatternMemory write, no
+reward settlement, and no HoloIndex runtime mutation.
+
+**Deliverable**:
+- Added `src/wre_autonomous_slice_verifier_runtime.py`: verifies one autonomous
+  coding-slice evidence packet using exact-head machine diff evidence, scoped
+  changed paths, protected-surface escalation, secret-diff checks, required test
+  evidence, signed authority, signed receipt-chain terminal hash, worktree
+  receipt, bounded worker pilot receipt, and HoloIndex freshness evidence.
+- Added `tests/test_wre_autonomous_slice_verifier_runtime.py`: acceptance,
+  missing identity, self-verification, invalid head/base SHA, prose/stale diff
+  evidence, scope mismatch, protected-surface escalation, secret diff content,
+  missing/failing/stale tests, unsigned authority, rejected receipt-chain,
+  worktree/pilot receipt rejection, HoloIndex gap/freshness rejection,
+  PatternMemory/PR/merge pre-publication rejection, deterministic receipt, JSON
+  serialization, and AST no-execution/no-publish/no-memory-write coverage.
+
+**Boundary**: This verifier only accepts or rejects supplied evidence. It does
+not run git, tests, shell commands, OpenClaw, Hermes, pAVS, PR publication,
+merge, reward, or PatternMemory persistence. `ACCEPT` is a downstream input for
+future `REDDOG_VERIFIED_DRAFT_PR_PUBLISH_PHASE1`, not a publish action.
+
+**HoloIndex**: Read-only probes surfaced adjacent WRE/OpenClaw/CABR surfaces but
+not the new verifier. One probe also hit the existing HoloIndex output bug
+(`duplicate column name: status` / missing `need`). Recorded
+`HOLOINDEX_WRE_AUTONOMOUS_SLICE_VERIFIER_RUNTIME_INDEX_GAP_PHASE1`; no runtime
+re-index performed.
+
+**Verification**: new verifier tests 14 passed; adjacent receipt/merge/bounded
+worker tests 58 passed; py_compile passed; git diff --check clean; new files
+ASCII/NUL clean.
+
+---
+
 ### [2026-06-12] - OPERATIONAL_WRE_MONOREPO_POC_VERTICAL_PROOF_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 77 (Agent
