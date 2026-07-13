@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_SIGNER_AND_DELEGATED_AUTHORITY_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 96, 97, 100
+
+- Added `src/reddog_signer_delegated_authority_runtime.py`: runtime authority producer that validates a token-verified principal record, fresh permission snapshot, scoped FoundUp paths, nonce uniqueness, revocation state, and high-authority co-sign evidence before requesting principal + RedDog signatures from an injected isolated signer client.
+- Added `tests/test_reddog_signer_delegated_authority_runtime.py`: verifier-compatible happy path, default signer fail-closed, unknown principal, high-authority co-sign requirement, low-authority autonomous issuance, stale/insufficient snapshot rejection, scope/path rejection, nonce replay, revocation, signer-boundary attestation, JSON durability, no-signing-material evidence, and AST no-execution/no-crypto/no-runtime-wiring coverage.
+- Boundary: no key generation, no crypto/signing library, no vault access, no shell/subprocess/network, no extension runtime wiring, no OpenClaw/Hermes enqueue, no worker spawn, no HoloIndex mutation/re-index, and no execution. Production defaults fail closed unless an isolated signer and verified principal resolver are injected.
+
 ## 2026-07-14: REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 70, 97
