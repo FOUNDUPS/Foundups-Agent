@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.66
+Version: 0.3.67
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -65,6 +65,7 @@ The extension is a bounded 0102 advisory surface:
 - Operational-output target guard (v0.3.64): browser/DAEmon diagnostic payloads with URLs, timing values, screenshot filenames, and status ratios are routed to local assessment and suppressed from repo/external target extraction so log fragments cannot block typed grounding.
 - Prompt-authoring override (v0.3.65): requests for worker/slice/M2M prompts override the DAEmon/log local diagnostic fast path, so pasted logs can be used as context for governed prompt generation instead of being answered instantly as non-actionable diagnostics.
 - Semantic grounding per-target proof (v0.3.66): semantic targets now require independent content-bearing HoloIndex evidence refs before Fusion or wardrobe selection may proceed. Aggregate `code_hits` / `wsp_hits` no longer satisfy unrelated semantic targets; missing, errored, or ref-less semantic evidence fails closed and is surfaced through `semantic_targets_required`, `semantic_targets_grounded`, `semantic_targets_missing`, and `semantic_target_coverage_digest` telemetry.
+- OpenClaw live-enqueue runtime binding (v0.3.67): after grounding, fusion quorum, output validation, wardrobe selection, and runtime-consumption gates pass, the extension may call the one-shot explicit live-enqueue invoke bridge for `live_enqueue` authority requests. This slice keeps `enableConcreteWriter=false`, so the editor subprocess can prove the guarded path is reachable but cannot perform a durable OpenClaw queue write.
 
 The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
 

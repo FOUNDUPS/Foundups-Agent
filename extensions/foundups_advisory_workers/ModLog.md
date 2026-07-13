@@ -2,6 +2,14 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-14 - REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1 (guarded live-enqueue binding, 0.3.67)
+
+- Added a guarded extension runtime binding for `live_enqueue` wardrobe-selection receipts after grounding, fusion quorum, output validation, and runtime-consumption gates pass.
+- Added the `scripts/reddog_extension_live_enqueue_invoke_once.py` one-shot bridge, which delegates to the existing explicit live-enqueue invoke guard but keeps the concrete writer disabled in this slice.
+- Copy MD now reports the OpenClaw live-enqueue runtime binding result with no worktree, shell, Hermes dispatch, file edit, PR, merge, or reward settlement authority.
+- HoloIndex query-only preflight surfaced the existing live-enqueue seam and contract, but the new one-shot script is not indexed yet; no runtime reindex performed.
+- Version 0.3.66 -> 0.3.67 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-13 - REDDOG_SEMANTIC_GROUNDING_PER_TARGET_PROOF_PHASE1 (semantic coverage proof, 0.3.66)
 
 - Replaced aggregate semantic grounding (`code_hits + wsp_hits > 0`) with per-target `SemanticTargetCoverage` records.
