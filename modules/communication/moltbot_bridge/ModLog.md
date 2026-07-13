@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_OPERATIONAL_CONTEXT_SNAPSHOT_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_operational_context_snapshot.py`: read-only runtime
+  snapshot builder for repo HEAD, authoritative work state, HoloIndex freshness
+  receipts, scoped breadcrumbs, Brain artifact metadata, and workspace memory
+  metadata.
+- Added `tests/test_reddog_operational_context_snapshot.py`: source receipt
+  schema checks, HoloIndex stale/missing fail-closed behavior, optional Brain
+  absence handling, bootstrap/Brain conflict recording without override,
+  context-view redaction, evidence-bundle derivation, assignment invalidation,
+  existing work-state file loading, repo observation, and AST no-mutation
+  coverage.
+- Boundary: no repo mutation, no HoloIndex mutation or re-index, no queue
+  mutation, no worker spawn, no OpenClaw/Hermes execution, and no extension
+  runtime wiring. The snapshot binds `snapshot_receipt_id`,
+  `snapshot_content_digest`, `context_view_id`, and derived evidence bundles
+  before downstream assignment.
+- HoloIndex read-only probe for `RedDog operational context snapshot HoloIndex
+  freshness Brain breadcrumbs authoritative work state` surfaced adjacent
+  policy-gate, wardrobe-selection, continuity-context, and freshness-governance
+  surfaces but not the new snapshot runtime. Recorded
+  `HOLOINDEX_REDDOG_OPERATIONAL_CONTEXT_SNAPSHOT_INDEX_GAP_PHASE1`; no runtime
+  re-index performed.
+
 ## 2026-07-14: REDDOG_RESEARCH_HOLOINDEX_PROMOTION_GATE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 77, 97

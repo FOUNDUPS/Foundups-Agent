@@ -118,6 +118,7 @@ if sys.platform.startswith('win'):
 
 # Initialize logger at module level for all functions to use
 # CRITICAL: Log to logs/foundups_agent.log for AI_overseer heartbeat monitoring
+Path("logs").mkdir(exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -898,7 +899,7 @@ def run_connect_wre(repo_root: Path) -> dict:
         in_watch = monitor.is_in_watch_period()
 
         manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
-        auto_enforce = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE", "1") != "0"
+        auto_enforce = _wre_dashboard_auto_enforce_enabled()
         auto_enforced_now = bool(auto_enforce and not in_watch and not insufficient_data)
 
         alerts = health.get("alerts", []) if isinstance(health.get("alerts"), list) else []
@@ -932,12 +933,25 @@ def run_connect_wre(repo_root: Path) -> dict:
     return result
 
 
+def _wre_dashboard_auto_enforce_enabled() -> bool:
+    """Default dashboard auto-enforcement to autonomous runtimes, not menu startup."""
+
+    default = "1" if os.getenv("OPENCLAW_24X7", "0") != "0" else "0"
+    return os.getenv("WRE_DASHBOARD_AUTO_ENFORCE", default) != "0"
+
+
 def run_wre_dashboard_preflight(repo_root: Path) -> bool:
     """
     Run WRE dashboard preflight at startup.
 
     This mirrors DAE-level enforcement logic so `python main.py` has the same
     health gate semantics as individual DAE launchers.
+
+    Env controls:
+      WRE_DASHBOARD_PREFLIGHT=1             Enable startup warning checks
+      WRE_DASHBOARD_PREFLIGHT_ENFORCED=0    Manual override to block startup
+      WRE_DASHBOARD_AUTO_ENFORCE            Default follows OPENCLAW_24X7
+      OPENCLAW_24X7=1                       Autonomous runtime defaults to enforced
     """
     enabled = os.getenv("WRE_DASHBOARD_PREFLIGHT", "1") != "0"
     if not enabled:
@@ -945,7 +959,7 @@ def run_wre_dashboard_preflight(repo_root: Path) -> bool:
         return True
 
     manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
-    auto_enforce = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE", "1") != "0"
+    auto_enforce = _wre_dashboard_auto_enforce_enabled()
 
     try:
         from modules.infrastructure.wre_core.src.dashboard_alerts import (
