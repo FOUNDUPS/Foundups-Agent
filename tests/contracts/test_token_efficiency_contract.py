@@ -250,7 +250,7 @@ class TestContractAsciiClean:
         content = contract_path.read_text(encoding="utf-8")
         # Check for problematic non-ASCII that shouldn't be in technical specs
         # Allow common ones like em-dash in prose but flag encoding errors
-        forbidden = ["�", "\x00"]  # Replacement char, null
+        forbidden = ["\ufffd", "\x00"]  # Replacement char, null
         for char in forbidden:
             assert char not in content, f"Forbidden character {repr(char)} in contract"
 
@@ -261,22 +261,38 @@ class TestContractAsciiClean:
 class TestModulePlacement:
     """Verify module placement follows contract (Section 10)."""
 
-    def test_token_efficiency_module_not_premature(self):
-        """token_efficiency module must not exist until P1 implementation."""
+    def test_token_efficiency_module_boundary(self):
+        """Implemented token_efficiency modules must not cross runtime boundaries."""
         module_path = Path("modules/infrastructure/token_efficiency")
-        # Module should NOT exist yet - this is contract phase
-        # When P1 starts, this test will be updated
-        if module_path.exists():
-            # If it exists, verify it's just stubs
-            src_path = module_path / "src"
-            if src_path.exists():
-                py_files = list(src_path.glob("*.py"))
-                for py_file in py_files:
-                    if py_file.name != "__init__.py":
-                        content = py_file.read_text(encoding="utf-8")
-                        assert "SPECIFIED_NOT_IMPLEMENTED" in content or "pass" in content, (
-                            f"Premature implementation in {py_file}"
-                        )
+        src_path = module_path / "src"
+        assert src_path.exists(), "token_efficiency src directory missing after P1-P6"
+
+        forbidden_import_text = [
+            "import subprocess",
+            "from subprocess",
+            "import requests",
+            "import httpx",
+            "import socket",
+            "import rtk",
+            "from rtk",
+            "import holo_index",
+            "from holo_index",
+        ]
+        forbidden_runtime_text = [
+            "Popen(",
+            "os.system(",
+            "os.popen(",
+            "--index-all",
+            "--index-code",
+            "--index-docs",
+            "create_autonomous_task(",
+        ]
+        for py_file in src_path.glob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            for forbidden in forbidden_import_text + forbidden_runtime_text:
+                assert forbidden not in content, (
+                    f"Token-efficiency boundary violation in {py_file}: {forbidden}"
+                )
 
 
 if __name__ == "__main__":
