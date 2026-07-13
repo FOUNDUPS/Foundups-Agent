@@ -2,6 +2,45 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - REDDOG_HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
+WSP 48 (Recursive Self-Improvement), WSP 50 (Pre-Action), WSP 97 (Truth
+Boundary), WSP 22 (ModLog)
+
+**Type**: Runtime retention gate for recursive RedDog/WRE improvement. Held-out
+regression proof before PatternMemory admission.
+
+**Deliverable**:
+- Added `src/reddog_held_out_recursive_improvement_regression_gate.py`: consumes
+  a dry-run/PENDING `ImprovementJob`, accepted autonomous-slice verifier result,
+  accepted outcome-ratchet result, independent held-out regression evidence, and
+  HoloIndex freshness evidence. It emits a deterministic gate receipt and allows
+  later PatternMemory admission only when every receipt passes.
+- Added `tests/test_reddog_held_out_recursive_improvement_regression_gate.py`:
+  acceptance, pattern-memory request handling, dry-run/PENDING enforcement,
+  verifier/ratchet rejection, independent held-out suite requirements,
+  author-generated evidence rejection, failed/malformed regression rejection,
+  digest/head binding, HoloIndex freshness, secret-bearing evidence rejection,
+  deterministic JSON serialization, and AST boundary coverage.
+
+**Boundary**: This slice does not run tests, execute commands, publish PRs,
+merge, write PatternMemory, settle rewards, or re-index HoloIndex. It is a pure
+receipt gate for the held-out regression layer required before recursive
+improvement outcomes can be retained.
+
+**HoloIndex**: Read-only probe for "held out recursive improvement regression
+gate" surfaced adjacent recursive-improvement and WSP-48 concepts but not the
+new module. Recorded
+`HOLOINDEX_REDDOG_HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_INDEX_GAP_PHASE1`;
+no runtime re-index performed.
+
+**Verification**: held-out gate + outcome ratchet + autonomous verifier tests
+42 passed; py_compile, git diff --check, line-length, ASCII, and NUL checks
+passed.
+
+---
+
 ### [2026-07-14] - REDDOG_VERIFIED_OUTCOME_RATCHET_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
