@@ -214,7 +214,7 @@ async def execute_command(dae: Any, intent: Any) -> str:
 def _build_wre_command_context(dae: Any, intent: Any) -> Dict[str, Any]:
     """Normalize OpenClaw COMMAND context for WRE entry points.
 
-    Includes parent continuity context for cross-surface tracking (OpenClaw → WRE).
+    Includes parent continuity context for cross-surface tracking (OpenClaw -> WRE).
     """
     ctx: Dict[str, Any] = {
         "type": "orchestration",
@@ -915,11 +915,15 @@ def _start_training_batch() -> str:
 def execute_improvement(dae: Any, intent: Any) -> str:
     """Route IMPROVEMENT intent (codebase self-improvement requests).
 
-    WSP 97 Truth Boundary:
+    WSP 97 Truth Boundary (WAE-L1):
       - Classifies the improvement request
-      - Returns advisory acknowledgment
+      - OBSERVE -> PROPOSE: emits an ImprovementJob(PENDING, dry_run=True) via
+        the RedDog director (emits a proposal ONLY; executes nothing)
+      - DIRECT: RedDog assigns one direction (recommendation/priority/routing)
+      - Returns advisory acknowledgment with the proposal + RedDog direction
       - Does NOT execute autonomous repairs (not implemented)
       - Does NOT claim repair capability exists
+      - The execution seam (advance_to_execution) fails closed (NOT_READY)
 
     Supported improvement types (classification only):
       - WSP violations (fix violation, fix wsp, wsp violation)
@@ -951,16 +955,74 @@ def execute_improvement(dae: Any, intent: Any) -> str:
         intent.sender,
     )
 
+    # WAE-L1: OBSERVE -> PROPOSE -> DIRECT (dry-run only; executes nothing).
+    # The intent is the observed finding; emit exactly one ImprovementJob
+    # (PENDING, dry_run=True) and let RedDog assign one direction.
+    direction_summary = _emit_and_direct_improvement_proposal(
+        intent, improvement_type
+    )
+
     # WSP 97: Truthful advisory response - no repair execution claims
     return (
         f"**Improvement Intent Recognized**\n\n"
         f"- **Type**: `{improvement_type}`\n"
         f"- **Request**: {intent.extracted_task or intent.raw_message}\n\n"
-        f"**Status**: Classified but not executed.\n\n"
-        f"Autonomous codebase repair is not yet implemented. "
-        f"This intent was recognized and logged for future FMAS integration.\n\n"
+        f"{direction_summary}\n\n"
+        f"**Status**: Proposal emitted (PENDING, dry_run=True). Not executed.\n\n"
+        f"Autonomous codebase repair is not yet implemented. RedDog DIRECTS "
+        f"dry-run proposals; execution requires a hard verifier (L2) and "
+        f"012/DAO approval.\n\n"
         f"_WSP 97: AI surfaces improvement needs. Humans decide execution._"
     )
+
+
+def _emit_and_direct_improvement_proposal(
+    intent: Any,
+    improvement_type: str,
+) -> str:
+    """Emit one PENDING/dry_run ImprovementJob and apply RedDog direction.
+
+    WAE-L1 emission point. Builds a synthetic finding from the intent, runs it
+    through the RedDog director (observe -> propose -> direct), and returns a
+    human-readable summary of the proposal + assigned direction.
+
+    Executes, mutates, dispatches, and merges NOTHING. On any failure it
+    degrades to a truthful advisory note (no overclaim).
+    """
+    try:
+        from modules.infrastructure.wre_core.src.reddog_direction import (
+            RedDogDirector,
+        )
+
+        finding = {
+            "type": improvement_type,
+            "severity": "medium",
+            "message": (intent.extracted_task or intent.raw_message or "")[:200],
+            "source": "openclaw_improvement_intent",
+        }
+        director = RedDogDirector(requested_by="openclaw_improvement_intent")
+        proposals = director.observe_propose_direct([finding])
+        if not proposals:
+            return "**Proposal**: none emitted (finding not parseable)."
+
+        proposal = proposals[0]
+        job = proposal.job
+        return (
+            f"**Proposal** (RedDog WAE-L1):\n"
+            f"- **Job**: `{job.job_id}` "
+            f"(status=`{job.status.value}`, dry_run=`{job.dry_run}`)\n"
+            f"- **Risk**: `{job.risk_level.value}` | "
+            f"low-fruit=`{job.wsp15_priority.low_lying_fruit}`\n"
+            f"- **RedDog direction**: `{proposal.direction.value}` "
+            f"(ready_to_advance=`{proposal.ready_to_advance}`)\n"
+            f"- _{proposal.note}_"
+        )
+    except Exception as exc:  # pragma: no cover - defensive advisory degradation
+        logger.warning(
+            "[OPENCLAW-DAE] [IMPROVEMENT] RedDog proposal emission failed: %s",
+            exc,
+        )
+        return "**Proposal**: classified only (RedDog director unavailable)."
 
 
 def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
