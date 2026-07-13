@@ -72,6 +72,13 @@ from .compute_governor import (
     reset_compute_governor,
 )
 
+from .rtk_evaluation_dryrun import (
+    RtkDryRunDecision,
+    RtkDryRunRejection,
+    RtkEvaluationDryRunResult,
+    evaluate_rtk_candidate_dry_run,
+)
+
 __all__ = [
     # Bypass classifier (P1)
     "BypassClass",
@@ -127,4 +134,9 @@ __all__ = [
     "validate_decision",
     "get_compute_governor",
     "reset_compute_governor",
+    # RTK evaluation dry-run (P5)
+    "RtkDryRunDecision",
+    "RtkDryRunRejection",
+    "RtkEvaluationDryRunResult",
+    "evaluate_rtk_candidate_dry_run",
 ]

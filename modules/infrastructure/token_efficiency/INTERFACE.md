@@ -167,10 +167,57 @@ Aggregate metrics from event list.
 - `ContentType`: M2M_PROMPT, TOOL_OUTPUT, RAW_REF, UNKNOWN
 - `CompressionStatus`: COMPRESSED, BYPASSED, UNCHANGED, ERROR, NOT_APPLICABLE
 
+## Public API (P5: RTK Evaluation Dry-Run)
+
+P5 evaluates caller-supplied candidate output. It does not invoke RTK, execute a
+command, or authorize runtime compression.
+
+### Classes
+
+#### `RtkEvaluationDryRunResult`
+
+```python
+@dataclass
+class RtkEvaluationDryRunResult:
+    evaluation_id: str
+    decision: RtkDryRunDecision
+    command_digest: str
+    raw_output_digest: str
+    candidate_output_digest: str
+    raw_ref_digest: str
+    telemetry_event_id: str | None
+    input_bytes: int
+    candidate_bytes: int
+    bytes_saved: int
+    tokens_saved: int
+    savings_ratio: float
+    bypass_class: str | None
+    rejection_reasons: list[str]
+    dry_run_only: bool            # Always True
+    rtk_invoked: bool             # Always False
+    command_executed: bool        # Always False
+    compression_performed: bool   # Always False
+    raw_content_persisted: bool   # Always False
+    runtime_reindex_allowed: bool # Always False
+```
+
+### Functions
+
+#### `evaluate_rtk_candidate_dry_run(...) -> RtkEvaluationDryRunResult`
+
+Evaluates a candidate compressed output using:
+
+- a P4 compute decision whose routing is `ALLOW_EVALUATION_DRY_RUN`
+- content-level bypass classification over both raw and candidate output
+- a mandatory `raw_ref` recovery path
+- in-memory `RTK_EVALUATION` telemetry
+
+Acceptance means the candidate is measurable and safe for dry-run evaluation.
+It is not permission to wire RTK into OpenClaw, Hermes, WRE, or extension runtime.
+
 ## Not Implemented (Future Phases)
 
 | Component | Phase | Status |
 |-----------|-------|--------|
-| Compute governor | P4 | SPECIFIED_NOT_IMPLEMENTED |
-| RTK adapter | P5 | SPECIFIED_NOT_IMPLEMENTED |
+| RTK adapter | P6 | SPECIFIED_NOT_IMPLEMENTED |
 | Compression seam | P6 | SPECIFIED_NOT_IMPLEMENTED |
