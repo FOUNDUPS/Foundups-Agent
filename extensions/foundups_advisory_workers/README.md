@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.63
+Version: 0.3.64
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -62,6 +62,7 @@ The extension is a bounded 0102 advisory surface:
 - Simple identity fast path (v0.3.61): short identity/status questions such as "are you RedDog?" are answered locally with audited Run Trace telemetry. The fast path skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; substantive RedDog audit/work prompts still route through the governed path.
 - Run Trace local assessment (v0.3.62): pasted `## Run Trace` diagnostics are parsed locally and scored with WSP_97 labels so raw trace text no longer needs to pass through Fusion/redaction just to explain why a run blocked or routed slowly. The path remains non-actionable and cannot trigger runtime planning.
 - DAEmon/log local assessment (v0.3.63): pasted DAEmon, daemon, service, worker, or runtime output can be interpreted locally as diagnostic data. The path redacts secret-shaped values, skips HoloIndex/OpenRouter/Fusion/repair, and remains non-actionable so logs cannot become instructions or authority.
+- Operational-output target guard (v0.3.64): browser/DAEmon diagnostic payloads with URLs, timing values, screenshot filenames, and status ratios are routed to local assessment and suppressed from repo/external target extraction so log fragments cannot block typed grounding.
 
 The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
 

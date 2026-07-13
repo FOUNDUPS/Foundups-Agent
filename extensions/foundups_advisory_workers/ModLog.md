@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_OPERATIONAL_OUTPUT_TARGET_DERIVATION_GUARD_PHASE1 (browser/DAEmon log target guard, 0.3.64)
+
+- Added an operational-output shape detector for browser/DAEmon diagnostics with URLs, timing values, screenshot filenames, ratios, and status/error tokens.
+- Suppresses operational diagnostic payloads from repo-file and external-research target extraction unless an explicit required-target block is present.
+- Tightened slashless extension detection so timing values such as `11.7s` and `100.0` cannot become repo-file targets.
+- Version 0.3.63 -> 0.3.64 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-13 - REDDOG_DAEMON_OUTPUT_LOCAL_ASSESSMENT_PHASE1 (local DAEmon/log diagnostics, 0.3.63)
 
 - Added a local DAEmon/log output assessment fast path for pasted operational diagnostics.
