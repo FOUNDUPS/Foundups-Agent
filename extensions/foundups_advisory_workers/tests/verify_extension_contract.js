@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.66', 'package version must be 0.3.66');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.66'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.67', 'package version must be 0.3.67');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.67'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.66', 'README version mismatch');
+includes(readme, 'Version: 0.3.67', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1080,7 +1080,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.66', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.67', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -1263,6 +1263,160 @@ assert.strictEqual(realWardrobeSelection.no_enqueue_performed, true, 'one-shot w
 assert.strictEqual(realWardrobeSelection.receipt.selected_wardrobe, 'wsp97_sovereign_execution', 'one-shot wardrobe bridge selects sovereign wardrobe');
 assert.strictEqual(realWardrobeSelection.receipt.authority_boundary, 'sovereign_token_required', 'one-shot wardrobe bridge preserves sovereign boundary');
 assert.strictEqual(realWardrobeSelection.receipt.wre_required, true, 'one-shot wardrobe bridge marks WRE required for worktree authority');
+
+// REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1:
+// extension may reach the explicit live-enqueue invoke guard only after runtime gating,
+// with structured artifacts and the concrete writer disabled in this slice.
+includes(extensionJs, "scripts/reddog_extension_live_enqueue_invoke_once.py", 'live enqueue runtime binding must use one-shot invoke bridge');
+includes(extensionJs, "operatorWardrobeSelectionResult.authority_request === 'live_enqueue'", 'live enqueue binding must require live_enqueue authority request');
+includes(extensionJs, 'enableConcreteWriter: false', 'live enqueue binding must disable concrete writer from extension runtime');
+includes(extensionJs, 'openclaw_live_enqueue_runtime_binding_result', 'live enqueue binding result must be attached to review packet');
+const liveBindingFunctionStart = extensionJs.indexOf('function buildOpenClawLiveEnqueueRuntimeBindingPayload');
+const liveBindingFunctionEnd = extensionJs.indexOf('function buildOpenClawLiveEnqueueRuntimeBindingResult');
+assert(liveBindingFunctionStart > 0 && liveBindingFunctionEnd > liveBindingFunctionStart, 'live enqueue payload builder must exist');
+const liveBindingPayloadBuilder = extensionJs.slice(liveBindingFunctionStart, liveBindingFunctionEnd);
+assert(!liveBindingPayloadBuilder.includes('result.content'), 'live enqueue binding must not mine model output prose for runtime artifacts');
+
+const liveSelectionReceipt = {
+  selected_wardrobe: 'wsp97_sovereign_execution',
+  execution_plane: 'governed_execution_candidate',
+  authority_boundary: 'signed_valve_required',
+  rejection_reasons: [],
+  no_execution_performed: true,
+  no_enqueue_performed: true
+};
+const liveSelectionResult = {
+  authority_request: 'live_enqueue',
+  receipt: liveSelectionReceipt
+};
+const liveAdapterResult = {
+  decision: 'ADAPTER_DRYRUN_ACCEPT',
+  work_order_id: 'wo-live-extension-001',
+  proposed_intake: {
+    target_type: 'foundup_job',
+    proposed_job_id: 'reddog-fj-live-extension-001',
+    proposed_task_id: null,
+    work_order_id: 'wo-live-extension-001',
+    operation: 'feature_slice',
+    requested_action: 'validate_foundup',
+    repo_scope: 'FOUNDUPS/Foundups-Agent',
+    allowed_paths: ['modules/communication/moltbot_bridge/**'],
+    denied_paths: ['.env'],
+    required_tests: ['modules/communication/moltbot_bridge/tests/test_reddog_openclaw_live_enqueue.py'],
+    evidence_refs: ['policy_gate:sha256:policy-live'],
+    no_enqueue_performed: true,
+    no_execution_performed: true
+  },
+  adapter_receipt: {
+    adapter_receipt_digest: 'sha256:adapter-live',
+    target_type: 'foundup_job',
+    work_order_id: 'wo-live-extension-001',
+    rejection_reasons: []
+  },
+  no_enqueue_performed: true,
+  no_execution_performed: true
+};
+const livePolicyReceipt = {
+  decision: 'POLICY_ACCEPT',
+  receipt_digest: 'sha256:policy-live',
+  signature_gate_status: 'SIGNATURE_GATE_ACCEPTED',
+  signature_gate_digest: 'sha256:signed-live',
+  no_execution_performed: true
+};
+const liveSignedReceiptChain = {
+  decision: 'SIGNED_RECEIPT_CHAIN_ACCEPT',
+  accepted: true,
+  terminal_receipt_hash: 'sha256:terminal-live',
+  no_execution_performed: true,
+  no_reward_settlement_performed: true
+};
+const liveValveDecision = {
+  valve_state: 'VALVE_OPEN_LIVE_ENQUEUE',
+  decision_digest: 'sha256:valve-live',
+  no_execution_performed: true,
+  rejection_reasons: []
+};
+const liveRuntimeGate = { passed: true, rejection_reasons: [] };
+const blockedLivePayload = orchestrator.buildOpenClawLiveEnqueueRuntimeBindingPayload(
+  {},
+  liveSelectionResult,
+  { passed: false, rejection_reasons: ['fusion_panel_quorum_not_passed'] },
+  {}
+);
+assert.strictEqual(blockedLivePayload.ok, false, 'failed runtime consumption gate blocks live enqueue payload');
+assert(blockedLivePayload.rejection_reasons.includes('runtime_consumption_gate_not_passed'), 'live enqueue payload carries runtime gate rejection');
+const missingLiveArtifacts = orchestrator.buildOpenClawLiveEnqueueRuntimeBindingPayload(
+  {},
+  liveSelectionResult,
+  liveRuntimeGate,
+  {}
+);
+assert.strictEqual(missingLiveArtifacts.ok, false, 'live enqueue payload requires structured artifacts');
+assert(missingLiveArtifacts.rejection_reasons.includes('adapter_result_missing'), 'live enqueue payload requires adapter result');
+assert(missingLiveArtifacts.rejection_reasons.includes('signed_receipt_chain_result_missing'), 'live enqueue payload requires signed receipt chain');
+const livePayload = orchestrator.buildOpenClawLiveEnqueueRuntimeBindingPayload(
+  {
+    openclaw_adapter_result: liveAdapterResult,
+    policy_gate_receipt: livePolicyReceipt,
+    signed_receipt_chain_result: liveSignedReceiptChain,
+    live_enqueue_valve_decision: liveValveDecision
+  },
+  liveSelectionResult,
+  liveRuntimeGate,
+  { enableConcreteWriter: false, seenLiveEnqueueKeys: new Set(['existing:key']) }
+);
+assert.strictEqual(livePayload.ok, true, 'valid live enqueue metadata builds bridge payload');
+assert.strictEqual(livePayload.payload.enable_concrete_writer, false, 'bridge payload disables concrete writer');
+assert.deepStrictEqual(livePayload.payload.seen_live_enqueue_keys, ['existing:key'], 'bridge payload carries idempotency keys');
+const fakeLiveInvoke = orchestrator.invokeOpenClawLiveEnqueueRuntimeBindingBridge(
+  null,
+  {
+    openclaw_adapter_result: liveAdapterResult,
+    policy_gate_receipt: livePolicyReceipt,
+    signed_receipt_chain_result: liveSignedReceiptChain,
+    live_enqueue_valve_decision: liveValveDecision
+  },
+  liveSelectionResult,
+  liveRuntimeGate,
+  {
+    enableConcreteWriter: false,
+    invokeRunner: (payload) => {
+      assert.strictEqual(payload.enable_concrete_writer, false, 'fake live enqueue runner sees disabled writer');
+      return {
+        decision: 'EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT',
+        rejection_reasons: ['REJECT_LIVE_ENQUEUE_WRITER_MISSING'],
+        concrete_writer_enabled: false,
+        openclaw_enqueue_performed: false,
+        hermes_dispatch_performed: false,
+        worktree_create_performed: false,
+        task_execution_performed: false,
+        file_edit_performed: false,
+        pr_created: false,
+        merge_performed: false,
+        reward_settlement_performed: false
+      };
+    }
+  }
+);
+assert.strictEqual(fakeLiveInvoke.decision, 'EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT', 'fake live enqueue bridge preserves guard rejection');
+assert.strictEqual(fakeLiveInvoke.openclaw_enqueue_performed, false, 'fake live enqueue bridge performs no enqueue');
+assert.strictEqual(fakeLiveInvoke.concrete_writer_enabled, false, 'fake live enqueue bridge keeps writer disabled');
+const fakeLiveInvokeSection = orchestrator.buildOpenClawLiveEnqueueRuntimeBindingSection(fakeLiveInvoke);
+includes(fakeLiveInvokeSection, '## OpenClaw Live Enqueue Runtime Binding', 'live enqueue section header');
+includes(fakeLiveInvokeSection, 'concrete_writer_enabled: false [OBSERVED]', 'live enqueue section shows disabled writer');
+includes(fakeLiveInvokeSection, 'openclaw_enqueue_performed: false [OBSERVED]', 'live enqueue section shows no enqueue');
+const realLiveInvoke = JSON.parse(cp.execFileSync('python', ['-B', path.join(root, 'scripts', 'reddog_extension_live_enqueue_invoke_once.py')], {
+  cwd: root,
+  input: JSON.stringify(livePayload.payload),
+  encoding: 'utf8',
+  env: Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' }),
+  maxBuffer: 262144
+}));
+assert.strictEqual(realLiveInvoke.decision, 'EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT', 'one-shot live enqueue bridge rejects without concrete writer');
+assert.strictEqual(realLiveInvoke.python_invocation_performed, true, 'one-shot live enqueue bridge marks Python invocation');
+assert.strictEqual(realLiveInvoke.concrete_writer_enabled, false, 'one-shot live enqueue bridge keeps writer disabled');
+assert.strictEqual(realLiveInvoke.openclaw_enqueue_performed, false, 'one-shot live enqueue bridge performs no enqueue');
+assert(realLiveInvoke.rejection_reasons.includes('REJECT_LIVE_ENQUEUE_WRITER_MISSING'), 'one-shot live enqueue bridge preserves writer-missing rejection');
 
 // REDDOG_EXTENSION_GITHUB_PERMISSION_PROBE_RUNTIME_BRIDGE_PHASE1:
 // extension obtains a read-only GitHub permission snapshot and feeds it to the work-order candidate.
@@ -2418,7 +2572,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.66'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.67'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2432,7 +2586,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.66'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.67'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2444,7 +2598,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.66'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.67'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

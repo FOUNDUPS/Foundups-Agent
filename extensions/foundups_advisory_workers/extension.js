@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.66';
+const EXTENSION_VERSION = '0.3.67';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -37,10 +37,13 @@ const WRE_WORK_ORDER_AUTHORITY_BINDING_SLICE = 'REDDOG_EXTENSION_WORK_ORDER_PERM
 const WRE_OPERATIONAL_SPINE_TARGET = 'reddog_wre_operational_spine';
 const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine';
 const WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT = 'scripts/reddog_extension_wre_spine_invoke_once.py';
+const REDDOG_EXTENSION_LIVE_ENQUEUE_INVOKE_SCRIPT = 'scripts/reddog_extension_live_enqueue_invoke_once.py';
 const REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT = 'scripts/reddog_operator_wardrobe_selection_once.py';
 const REDDOG_GITHUB_PERMISSION_PROBE_SCRIPT = 'scripts/reddog_github_permission_probe_once.py';
 const WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES = 262144;
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
+const REDDOG_EXTENSION_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_SLICE = 'REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1';
+const REDDOG_OPENCLAW_LIVE_ENQUEUE_TARGET = 'reddog_openclaw_live_enqueue';
 const TRUSTED_PERMISSION_SNAPSHOT_SOURCES = new Set(['gh_cli', 'github_api', 'mock']);
 const MOJIBAKE_MARKERS = ['\u7aa6', '\u7aaa'];
 const WORK_TRAIL_MAX_EVENTS = 50;
@@ -3368,6 +3371,189 @@ function buildWreOperationalSpineInvokeSection(invokeResult) {
   ].join('\n');
 }
 
+function _firstRuntimeArtifact(packet, options, keys) {
+  const pkt = packet && typeof packet === 'object' ? packet : {};
+  const opts = options && typeof options === 'object' ? options : {};
+  const review = pkt.review_packet && typeof pkt.review_packet === 'object' ? pkt.review_packet : {};
+  for (const key of keys) {
+    if (opts[key] && typeof opts[key] === 'object') {
+      return opts[key];
+    }
+    if (pkt[key] && typeof pkt[key] === 'object') {
+      return pkt[key];
+    }
+    if (review[key] && typeof review[key] === 'object') {
+      return review[key];
+    }
+  }
+  return null;
+}
+
+function buildOpenClawLiveEnqueueRuntimeBindingPayload(packet, selectionResult, runtimeGate, options) {
+  const pkt = packet && typeof packet === 'object' ? packet : {};
+  const selection = selectionResult && typeof selectionResult === 'object' ? selectionResult : {};
+  const gate = runtimeGate && typeof runtimeGate === 'object' ? runtimeGate : {};
+  const opts = options && typeof options === 'object' ? options : {};
+  const receipt = selection.receipt && typeof selection.receipt === 'object' ? selection.receipt : null;
+  const reasons = [];
+
+  if (gate.passed !== true) {
+    reasons.push('runtime_consumption_gate_not_passed');
+  }
+  if (selection.authority_request !== 'live_enqueue') {
+    reasons.push('authority_request_not_live_enqueue');
+  }
+  if (!receipt) {
+    reasons.push('selection_receipt_missing');
+  }
+
+  const adapterResult = _firstRuntimeArtifact(pkt, opts, ['adapterResult', 'openclaw_adapter_result', 'adapter_result']);
+  const policyGateReceipt = _firstRuntimeArtifact(pkt, opts, ['policyGateReceipt', 'policy_gate_receipt']);
+  const signedReceiptChainResult = _firstRuntimeArtifact(
+    pkt,
+    opts,
+    ['signedReceiptChainResult', 'signed_receipt_chain_result']
+  );
+  const valveDecision = _firstRuntimeArtifact(
+    pkt,
+    opts,
+    ['valveDecision', 'live_enqueue_valve_decision', 'valve_decision']
+  );
+  if (!adapterResult) {
+    reasons.push('adapter_result_missing');
+  }
+  if (!policyGateReceipt) {
+    reasons.push('policy_gate_receipt_missing');
+  }
+  if (!signedReceiptChainResult) {
+    reasons.push('signed_receipt_chain_result_missing');
+  }
+  if (!valveDecision) {
+    reasons.push('valve_decision_missing');
+  }
+
+  if (reasons.length) {
+    return {
+      ok: false,
+      rejection_reasons: uniqueStrings(reasons),
+      payload: null
+    };
+  }
+
+  return {
+    ok: true,
+    rejection_reasons: [],
+    payload: {
+      explicit_live_enqueue_requested: true,
+      selection_receipt: _safeJsonClone(receipt),
+      adapter_result: _safeJsonClone(adapterResult),
+      policy_gate_receipt: _safeJsonClone(policyGateReceipt),
+      signed_receipt_chain_result: _safeJsonClone(signedReceiptChainResult),
+      valve_decision: _safeJsonClone(valveDecision),
+      enable_concrete_writer: opts.enableConcreteWriter === true,
+      seen_live_enqueue_keys: opts.seenLiveEnqueueKeys instanceof Set
+        ? Array.from(opts.seenLiveEnqueueKeys)
+        : []
+    }
+  };
+}
+
+function buildOpenClawLiveEnqueueRuntimeBindingResult(decision, fields) {
+  const payload = fields && typeof fields === 'object' ? fields : {};
+  return Object.assign({
+    slice_name: REDDOG_EXTENSION_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_SLICE,
+    target: REDDOG_OPENCLAW_LIVE_ENQUEUE_TARGET,
+    decision: decision,
+    python_invocation_performed: false,
+    openclaw_enqueue_performed: false,
+    hermes_dispatch_performed: false,
+    worktree_create_performed: false,
+    task_execution_performed: false,
+    file_edit_performed: false,
+    pr_created: false,
+    merge_performed: false,
+    reward_settlement_performed: false,
+    concrete_writer_enabled: false,
+    script: REDDOG_EXTENSION_LIVE_ENQUEUE_INVOKE_SCRIPT,
+    rejection_reasons: []
+  }, payload);
+}
+
+function invokeOpenClawLiveEnqueueRuntimeBindingBridge(context, packet, selectionResult, runtimeGate, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const payloadResult = buildOpenClawLiveEnqueueRuntimeBindingPayload(
+    packet,
+    selectionResult,
+    runtimeGate,
+    opts
+  );
+  if (!payloadResult.ok) {
+    return buildOpenClawLiveEnqueueRuntimeBindingResult('EXTENSION_OPENCLAW_LIVE_ENQUEUE_SKIPPED', {
+      rejection_reasons: payloadResult.rejection_reasons,
+      not_invoked_reason: payloadResult.rejection_reasons[0] || 'missing_required_live_enqueue_metadata'
+    });
+  }
+  if (typeof opts.invokeRunner === 'function') {
+    const runnerResult = opts.invokeRunner(payloadResult.payload);
+    const parsed = typeof runnerResult === 'string' ? JSON.parse(runnerResult) : (runnerResult || {});
+    return buildOpenClawLiveEnqueueRuntimeBindingResult(
+      parsed.decision || 'EXTENSION_OPENCLAW_LIVE_ENQUEUE_BRIDGE_RESULT',
+      parsed
+    );
+  }
+  const root = workspaceRoot();
+  const script = path.join(root, REDDOG_EXTENSION_LIVE_ENQUEUE_INVOKE_SCRIPT);
+  const config = vscode.workspace.getConfiguration('foundupsFusion');
+  const configuredPython = config.get('pythonPath') || 'python';
+  const interpreter = resolvePythonInterpreter(root, configuredPython);
+  try {
+    const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
+      cwd: root,
+      input: JSON.stringify(payloadResult.payload),
+      encoding: 'utf8',
+      env: buildBridgePythonEnv(process.env),
+      windowsHide: true,
+      maxBuffer: WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES
+    });
+    const parsed = JSON.parse(stdout);
+    return buildOpenClawLiveEnqueueRuntimeBindingResult(
+      parsed.decision || 'EXTENSION_OPENCLAW_LIVE_ENQUEUE_BRIDGE_RESULT',
+      Object.assign({}, parsed, {
+        python_invocation_performed: true,
+        python_interpreter_source: interpreter.source
+      })
+    );
+  } catch (err) {
+    return buildOpenClawLiveEnqueueRuntimeBindingResult('EXTENSION_OPENCLAW_LIVE_ENQUEUE_REJECT', {
+      python_invocation_performed: true,
+      rejection_reasons: ['live_enqueue_bridge_invocation_failed'],
+      bridge_error_class: err && err.code ? String(err.code) : (err && err.name ? String(err.name) : 'Error')
+    });
+  }
+}
+
+function buildOpenClawLiveEnqueueRuntimeBindingSection(invokeResult) {
+  const r = invokeResult && typeof invokeResult === 'object' ? invokeResult : {};
+  return [
+    '## OpenClaw Live Enqueue Runtime Binding',
+    '- slice_name: ' + (r.slice_name || REDDOG_EXTENSION_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_SLICE) + ' [OBSERVED]',
+    '- target: ' + (r.target || REDDOG_OPENCLAW_LIVE_ENQUEUE_TARGET) + ' [OBSERVED]',
+    '- decision: ' + (r.decision || 'unknown') + ' [OBSERVED]',
+    '- python_invocation_performed: ' + (r.python_invocation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- concrete_writer_enabled: ' + (r.concrete_writer_enabled === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- openclaw_enqueue_performed: ' + (r.openclaw_enqueue_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- hermes_dispatch_performed: ' + (r.hermes_dispatch_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- worktree_create_performed: ' + (r.worktree_create_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- task_execution_performed: ' + (r.task_execution_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- file_edit_performed: ' + (r.file_edit_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- pr_created: ' + (r.pr_created === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- merge_performed: ' + (r.merge_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- reward_settlement_performed: ' + (r.reward_settlement_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- rejection_reasons: ' + JSON.stringify(r.rejection_reasons || []) + ' [OBSERVED]',
+    '- not_invoked_reason: ' + (r.not_invoked_reason || 'none') + ' [OBSERVED]'
+  ].join('\n');
+}
+
 function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoScorecard, resolvedEffort, copyContext) {
   const packet = result && typeof result === 'object' ? result : {};
   const ctx = copyContext && typeof copyContext === 'object' ? copyContext : {};
@@ -3406,6 +3592,13 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
       if (invokeResult) {
         sections.push(buildWreOperationalSpineInvokeSection(invokeResult));
       }
+    }
+    const liveEnqueueInvoke = (
+      ctx.openClawLiveEnqueueInvokeResult
+      || packet.openclaw_live_enqueue_runtime_binding_result
+    );
+    if (liveEnqueueInvoke) {
+      sections.push(buildOpenClawLiveEnqueueRuntimeBindingSection(liveEnqueueInvoke));
     }
   }
   sections.push(buildContinuationTelemetrySection(ctx.continuationTelemetry || packet.continuation_telemetry));
@@ -4768,7 +4961,14 @@ function openFusionEditor(context) {
     }
   );
   const logoUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'icon.png'));
-  const state = { history: [], lastReviewPacket: null, lastContinuationSummary: null, bridgeChild: null, disposed: false };
+  const state = {
+    history: [],
+    lastReviewPacket: null,
+    lastContinuationSummary: null,
+    bridgeChild: null,
+    disposed: false,
+    liveEnqueueKeys: new Set()
+  };
   wireFusionWebview(context, panel.webview, worker, state);
   panel.onDidDispose(() => {
     killBridgeChild(state);
@@ -5231,6 +5431,23 @@ function wireFusionWebview(context, webview, worker, state) {
         selectionReceipt: operatorWardrobeSelectionResult && operatorWardrobeSelectionResult.receipt
       })
       : null;
+    const openClawLiveEnqueueInvokeResult = (
+      actionPlanningAllowed
+      && operatorWardrobeSelectionResult
+      && operatorWardrobeSelectionResult.authority_request === 'live_enqueue'
+    )
+      ? invokeOpenClawLiveEnqueueRuntimeBindingBridge(context, result, operatorWardrobeSelectionResult, runtimeConsumptionGate, {
+        seenLiveEnqueueKeys: state.liveEnqueueKeys,
+        enableConcreteWriter: false
+      })
+      : null;
+    if (
+      openClawLiveEnqueueInvokeResult
+      && openClawLiveEnqueueInvokeResult.openclaw_enqueue_performed === true
+      && openClawLiveEnqueueInvokeResult.live_enqueue_key
+    ) {
+      state.liveEnqueueKeys.add(String(openClawLiveEnqueueInvokeResult.live_enqueue_key));
+    }
     result.review_packet = attachOrchestratorMetadata(
       result.review_packet || {},
       classification,
@@ -5262,6 +5479,10 @@ function wireFusionWebview(context, webview, worker, state) {
     if (wreSpineInvokeResult) {
       result.wre_operational_spine_invoke_result = wreSpineInvokeResult;
       result.review_packet.wre_operational_spine_invoke_result = wreSpineInvokeResult;
+    }
+    if (openClawLiveEnqueueInvokeResult) {
+      result.openclaw_live_enqueue_runtime_binding_result = openClawLiveEnqueueInvokeResult;
+      result.review_packet.openclaw_live_enqueue_runtime_binding_result = openClawLiveEnqueueInvokeResult;
     }
     if (result.reason === 'redaction_blocked') {
       result.redaction_gate_report = buildRedactionGateReport(result, promptConstruction, contextMode);
@@ -5318,6 +5539,7 @@ function wireFusionWebview(context, webview, worker, state) {
       githubPermissionProbeResult: githubPermissionProbeResult,
       wreSpineDryRunPreview: wreSpineDryRunPreview,
       wreSpineInvokeResult: wreSpineInvokeResult,
+      openClawLiveEnqueueInvokeResult: openClawLiveEnqueueInvokeResult,
       continuationEnabled: continuationEnabled,
       continuationTelemetry: continuationTelemetry,
       // Only pass the summary for Copy MD inclusion when appended this run (fail-closed).
@@ -7270,6 +7492,9 @@ module.exports = {
   buildWreOperationalSpineInvokePayload,
   invokeWreOperationalSpineExplicitValveBridge,
   buildWreOperationalSpineInvokeSection,
+  buildOpenClawLiveEnqueueRuntimeBindingPayload,
+  invokeOpenClawLiveEnqueueRuntimeBindingBridge,
+  buildOpenClawLiveEnqueueRuntimeBindingSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,
   formatHoloIndexScorecardLines,
