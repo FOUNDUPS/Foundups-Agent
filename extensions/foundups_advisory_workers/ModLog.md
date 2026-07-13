@@ -9,6 +9,13 @@
 - Recorded HoloIndex query-only evidence and `HOLOINDEX_REDDOG_PROMPT_LIBRARY_M2M_REGISTRY_INDEX_GAP_PHASE1`; RedDog runtime remains query-only and WRE/CI owns future prompt-library indexing.
 - Defined the WSP_15 sequence for prompt library contract, examples fixture library, M2M compilation gate, relevance/quorum gate, dry-run storage/retrieval/dispatch, outcome memory, HoloIndex freshness, and runtime consumption.
 
+## 2026-07-13 - REDDOG_PROMPT_LIBRARY_CONTRACT_PHASE1 (decision-only)
+
+- Defined the canonical prompt-library schemas: PromptTemplate, PromptReceipt, PromptRun, PromptOutcome, PromptPatternPromotion, and PromptLibraryFreshnessReceipt.
+- Bound dispatch eligibility to PromptReceipt approval: prompt relevance, Fusion quorum where required, typed grounding, HoloIndex freshness or fail-closed INDEX_GAP, M2M/raw_ref recovery, and no-action attestations.
+- Preserved WSP_99 as the agent-to-agent prompt layer and WSP_109 as a FoundUp domain profile, not a separate prompt registry.
+- Explicitly forbids worktree, shell, OpenClaw, Hermes, PR merge, HoloIndex re-index, and reward-settlement behavior in this contract slice.
+
 ## 2026-07-13 - REDDOG_DAEMON_PROMPT_AUTHORING_OVERRIDE_PHASE1 (prompt requests override log fast path, 0.3.65)
 
 - Fixed prompt-authoring requests that include DAEmon/log output so they no longer route to the instant local diagnostic fast path.
