@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_SEMANTIC_GROUNDING_PER_TARGET_PROOF_PHASE1 (semantic coverage proof, 0.3.66)
+
+- Replaced aggregate semantic grounding (`code_hits + wsp_hits > 0`) with per-target `SemanticTargetCoverage` records.
+- Each semantic target now requires independent content-bearing HoloIndex evidence refs; unrelated global hits, backend errors, and ref-less hits fail closed.
+- Run Trace and wardrobe grounding receipts now carry semantic required/grounded/missing counts plus a coverage digest.
+- Version 0.3.65 -> 0.3.66 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-13 - REDDOG_DAEMON_PROMPT_AUTHORING_OVERRIDE_PHASE1 (prompt requests override log fast path, 0.3.65)
 
 - Fixed prompt-authoring requests that include DAEmon/log output so they no longer route to the instant local diagnostic fast path.

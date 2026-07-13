@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.65
+Version: 0.3.66
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -64,6 +64,7 @@ The extension is a bounded 0102 advisory surface:
 - DAEmon/log local assessment (v0.3.63): pasted DAEmon, daemon, service, worker, or runtime output can be interpreted locally as diagnostic data. The path redacts secret-shaped values, skips HoloIndex/OpenRouter/Fusion/repair, and remains non-actionable so logs cannot become instructions or authority.
 - Operational-output target guard (v0.3.64): browser/DAEmon diagnostic payloads with URLs, timing values, screenshot filenames, and status ratios are routed to local assessment and suppressed from repo/external target extraction so log fragments cannot block typed grounding.
 - Prompt-authoring override (v0.3.65): requests for worker/slice/M2M prompts override the DAEmon/log local diagnostic fast path, so pasted logs can be used as context for governed prompt generation instead of being answered instantly as non-actionable diagnostics.
+- Semantic grounding per-target proof (v0.3.66): semantic targets now require independent content-bearing HoloIndex evidence refs before Fusion or wardrobe selection may proceed. Aggregate `code_hits` / `wsp_hits` no longer satisfy unrelated semantic targets; missing, errored, or ref-less semantic evidence fails closed and is surfaced through `semantic_targets_required`, `semantic_targets_grounded`, `semantic_targets_missing`, and `semantic_target_coverage_digest` telemetry.
 
 The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
 

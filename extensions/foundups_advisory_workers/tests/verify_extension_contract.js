@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.65', 'package version must be 0.3.65');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.65'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.66', 'package version must be 0.3.66');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.66'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.65', 'README version mismatch');
+includes(readme, 'Version: 0.3.66', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1080,7 +1080,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.65', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.66', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2418,7 +2418,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.65'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.66'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2432,7 +2432,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.65'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.66'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2444,7 +2444,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.65'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.66'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -3162,6 +3162,7 @@ const repoOnlyPreflight = orchestrator.buildTypedGroundingPreflight(repoOnlyProm
 });
 assert.strictEqual(repoOnlyPreflight.passed, true, 'TGP-002: repo-only prompt passes when direct-read recall is green');
 assert.strictEqual(repoOnlyPreflight.direct_read_required, true, 'TGP-002: repo-only prompt requires direct read');
+assert.strictEqual(repoOnlyPreflight.semantic_targets_required, 0, 'TGP-002: repo-only prompt has zero semantic targets required');
 
 const missingRepoPreflight = orchestrator.buildTypedGroundingPreflight(repoOnlyPrompt, 'wsp_holo', {
   holoindex_scorecard: {
@@ -3187,5 +3188,130 @@ assert(externalPreflight.rejection_reasons.includes('external_research_retrieval
 const blockedResult = orchestrator.buildGroundingPreflightBlockedResult(externalPreflight);
 assert.strictEqual(blockedResult.made_network_call, false, 'TGP-005: blocked preflight does not call model/network');
 assert.strictEqual(blockedResult.reason, 'grounding_preflight_blocked', 'TGP-005: blocked reason stable');
+
+// REDDOG_SEMANTIC_GROUNDING_PER_TARGET_PROOF_PHASE1 (SGP-001..012): every semantic target
+// needs its own content-bearing HoloIndex evidence. Aggregate code_hits/wsp_hits cannot ground
+// unrelated semantic targets.
+includes(extensionJs, 'function buildSemanticTargetCoverage', 'SGP-001: per-target semantic coverage builder missing');
+const semanticPrompt = [
+  'Research topic: alpha lane ledger reconciliation; beta prompt library governance',
+  'Determine whether both concepts are grounded.'
+].join('\n');
+const alphaSemanticHit = {
+  location: 'docs/audits/alpha_lane_ledger_reconciliation.md',
+  need: 'alpha lane ledger reconciliation evidence',
+  title: 'Alpha lane ledger reconciliation'
+};
+const betaSemanticHit = {
+  location: 'docs/contracts/beta_prompt_library_governance.md',
+  need: 'beta prompt library governance evidence',
+  title: 'Beta prompt library governance'
+};
+const semanticPartial = orchestrator.buildTypedGroundingPreflight(semanticPrompt, 'wsp_holo', {
+  semantic_evidence_hits: [alphaSemanticHit]
+});
+assert.strictEqual(semanticPartial.passed, false, 'SGP-002: evidence for one of two semantic targets must fail');
+assert.strictEqual(semanticPartial.semantic_targets_required, 2, 'SGP-002: both semantic targets are required');
+assert.strictEqual(semanticPartial.semantic_targets_grounded, 1, 'SGP-002: only one semantic target is grounded');
+assert.deepStrictEqual(semanticPartial.semantic_targets_missing, ['beta prompt library governance'], 'SGP-002: missing semantic target is named');
+assert(semanticPartial.rejection_reasons.includes('semantic_target_grounding_incomplete'), 'SGP-002: semantic incomplete reason present');
+assert.strictEqual(semanticPartial.semantic_target_coverage[0].verdict, 'SUFFICIENT', 'SGP-002: first target has sufficient coverage');
+assert.strictEqual(semanticPartial.semantic_target_coverage[1].verdict, 'UNSAFE_TO_ACT', 'SGP-002: second target fails closed');
+assert(semanticPartial.semantic_target_coverage_digest.startsWith('sha256:'), 'SGP-002: coverage digest is bound');
+
+const semanticUnrelated = orchestrator.buildTypedGroundingPreflight(semanticPrompt, 'wsp_holo', {
+  holoindex_scorecard: {
+    code_hits_count: 1,
+    wsp_hits: 4,
+    semantic_evidence_hits: [
+      { location: 'docs/global_architecture.md', need: 'global architecture overview unrelated to requested targets' }
+    ]
+  }
+});
+assert.strictEqual(semanticUnrelated.passed, false, 'SGP-003: unrelated global hits cannot satisfy semantic targets');
+assert.strictEqual(semanticUnrelated.semantic_targets_grounded, 0, 'SGP-003: unrelated hit grounds zero targets');
+
+const semanticPass = orchestrator.buildTypedGroundingPreflight(semanticPrompt, 'wsp_holo', {
+  semantic_evidence_hits: [alphaSemanticHit, betaSemanticHit]
+});
+assert.strictEqual(semanticPass.passed, true, 'SGP-004: each semantic target with independent evidence passes');
+assert.strictEqual(semanticPass.semantic_targets_grounded, 2, 'SGP-004: both targets are grounded');
+assert.deepStrictEqual(semanticPass.semantic_targets_missing, [], 'SGP-004: no missing semantic targets');
+assert(semanticPass.semantic_target_coverage.every((record) => record.evidence_refs.length === 1), 'SGP-004: each target carries evidence refs');
+
+const semanticBackendError = orchestrator.buildTypedGroundingPreflight(semanticPrompt, 'wsp_holo', {
+  semantic_evidence_hits: [alphaSemanticHit, betaSemanticHit],
+  semantic_target_errors: {
+    'beta prompt library governance': 'backend_error'
+  }
+});
+assert.strictEqual(semanticBackendError.passed, false, 'SGP-005: backend error for one semantic target fails closed');
+assert(semanticBackendError.rejection_reasons.includes('semantic_grounding_backend_error'), 'SGP-005: backend error reason present');
+assert.deepStrictEqual(semanticBackendError.semantic_targets_missing, ['beta prompt library governance'], 'SGP-005: errored semantic target is missing');
+
+const semanticEmptyRef = orchestrator.buildTypedGroundingPreflight(semanticPrompt, 'wsp_holo', {
+  semantic_evidence_hits: [
+    { need: 'alpha lane ledger reconciliation beta prompt library governance evidence without location' }
+  ]
+});
+assert.strictEqual(semanticEmptyRef.passed, false, 'SGP-006: empty evidence_refs cannot pass');
+assert.strictEqual(semanticEmptyRef.semantic_targets_grounded, 0, 'SGP-006: evidence without refs grounds zero targets');
+
+const semanticBundleOutput = JSON.stringify({
+  task_retrieval: {
+    code_hits: [alphaSemanticHit, betaSemanticHit],
+    metadata: { code_count: 2, wsp_count: 0, skill_count: 0 }
+  }
+});
+const semanticBundleMeta = orchestrator.holoIndexMetaFromBundle(semanticBundleOutput, false, semanticPrompt);
+assert.strictEqual(Array.isArray(semanticBundleMeta.semantic_evidence_hits), true, 'SGP-007: bundle meta projects semantic evidence hits');
+assert.strictEqual(semanticBundleMeta.semantic_evidence_hits.length, 2, 'SGP-007: projected semantic evidence hit count');
+const semanticBundlePreflight = orchestrator.buildTypedGroundingPreflight(semanticPrompt, 'wsp_holo', {
+  holoindex_meta: semanticBundleMeta
+});
+assert.strictEqual(semanticBundlePreflight.passed, true, 'SGP-007: projected bundle evidence grounds semantic targets');
+
+const semanticNoHolo = orchestrator.buildTypedGroundingPreflight(semanticPrompt, 'plain_context', {
+  semantic_evidence_hits: [alphaSemanticHit, betaSemanticHit]
+});
+assert.strictEqual(semanticNoHolo.passed, false, 'SGP-008: semantic targets require a HoloIndex context');
+assert(semanticNoHolo.rejection_reasons.includes('semantic_grounding_holoindex_required'), 'SGP-008: HoloIndex required reason present');
+
+const semanticWardrobePayload = orchestrator.buildWardrobeSelectionPayload(semanticPrompt, {}, {}, {}, {
+  groundingPreflight: semanticPartial
+});
+assert.strictEqual(semanticWardrobePayload.grounding_preflight.passed, false, 'SGP-009: wardrobe receipt preserves failed grounding');
+assert.strictEqual(semanticWardrobePayload.grounding_preflight.semantic_targets_required, 2, 'SGP-009: wardrobe receipt carries semantic required count');
+assert.strictEqual(semanticWardrobePayload.grounding_preflight.semantic_targets_grounded, 1, 'SGP-009: wardrobe receipt carries semantic grounded count');
+assert.deepStrictEqual(semanticWardrobePayload.grounding_preflight.semantic_targets_missing, ['beta prompt library governance'], 'SGP-009: wardrobe receipt carries semantic missing list');
+assert.strictEqual(semanticWardrobePayload.grounding_preflight.semantic_target_coverage_digest, semanticPartial.semantic_target_coverage_digest, 'SGP-009: wardrobe receipt binds semantic coverage digest');
+let semanticSelectionRunnerCalled = false;
+const semanticSelectionBlocked = orchestrator.runOperatorWardrobeSelectionBridge(null, semanticPrompt, {}, {}, {}, {
+  groundingPreflight: semanticPartial,
+  selectionRunner: () => {
+    semanticSelectionRunnerCalled = true;
+    return { decision: 'SHOULD_NOT_RUN' };
+  }
+});
+assert.strictEqual(semanticSelectionRunnerCalled, false, 'SGP-010: wardrobe selection runner is not invoked after grounding failure');
+assert.strictEqual(semanticSelectionBlocked.decision, 'WARDROBE_SELECTION_REJECT', 'SGP-010: wardrobe selection blocks on failed semantic grounding');
+const semanticBlockedResult = orchestrator.buildGroundingPreflightBlockedResult(semanticPartial);
+const semanticRuntimeGate = orchestrator.buildRuntimeConsumptionGate(semanticBlockedResult, { validated: false }, 'foundups_fusion', true);
+assert.strictEqual(semanticRuntimeGate.passed, false, 'SGP-011: runtime gate blocks after grounding failure result');
+assert(semanticRuntimeGate.rejection_reasons.includes('grounding_preflight_blocked'), 'SGP-011: runtime gate carries grounding failure reason');
+
+const semanticExternalStillBlocked = orchestrator.buildTypedGroundingPreflight(typedPrompt, 'wsp_holo', {
+  semantic_evidence_hits: [
+    { location: 'docs/research/autoresearch_git_loop.md', need: 'autoresearch git-centric edit evaluate loop' }
+  ],
+  holoindex_scorecard: {
+    target_recall_ok: true,
+    required_targets_missing: [],
+    code_hits_count: 2,
+    wsp_hits: 1
+  }
+});
+assert.strictEqual(semanticExternalStillBlocked.passed, false, 'SGP-012: external research remains fail-closed even when semantic evidence exists');
+assert(semanticExternalStillBlocked.rejection_reasons.includes('external_research_retrieval_not_implemented'), 'SGP-012: external research fail-closed reason preserved');
 
 console.log('Foundups\u00aeAgent extension contract checks passed.');
