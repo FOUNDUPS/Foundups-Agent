@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.63';
+const EXTENSION_VERSION = '0.3.64';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -714,6 +714,74 @@ const WORK_FOCUS_COMMAND_FENCE_LANGS = ['powershell', 'bash', 'sh', 'shell', 'ps
 // carries no language tag (```...``` with `git diff --check` inside, etc.).
 const WORK_FOCUS_COMMAND_SHAPE_RE = /(?:^|\s)(?:git|node|python|py|pytest|rg|grep|npm|npx|node\s+--check|python\s+holo_index\.py)\b/i;
 
+const OPERATIONAL_OUTPUT_CONTEXT_TERMS = [
+  /\bdaemons?\b/i,
+  /\bdaemons?\s+output\b/i,
+  /\bdae(?:mon)?\b/i,
+  /\bdaemon\b/i,
+  /\bbrowser\b/i,
+  /\bpage\b/i,
+  /\bservice\b/i,
+  /\bworker\b/i,
+  /\bruntime\b/i,
+  /\byoutube\b/i,
+  /\bstudio\.youtube\.com\b/i
+];
+const OPERATIONAL_OUTPUT_SIGNAL_PATTERNS = [
+  /\bdiag_[A-Za-z0-9_.-]+\.png\b/i,
+  /\b(?:timeout|failed|blocked|error|warning|warn|stopped|loaded|content_timeout|page_load_failed)\b/i,
+  /\b\d+(?:\.\d+)?s\b/i,
+  /\b\d+\/\d+\b/i,
+  /\b(?:ops\/min|avg\/video|pass\/fail)\b/i,
+  /^[-\s]*(?:status|stdout|stderr|result|output|trace|run trace|operator message)\s*:/i
+];
+
+function countPatternMatches(text, pattern, limit) {
+  const src = String(text || '');
+  const max = limit || 200;
+  let count = 0;
+  const re = new RegExp(pattern.source, pattern.flags.indexOf('g') === -1 ? pattern.flags + 'g' : pattern.flags);
+  while (re.exec(src) !== null) {
+    count += 1;
+    if (count >= max) {
+      return count;
+    }
+  }
+  return count;
+}
+
+function analyzeOperationalDiagnosticShape(text) {
+  const src = String(text || '');
+  const head = src.slice(0, 6000);
+  const lineCount = src.split(/\r?\n/).filter((line) => line.trim()).length;
+  const contextTermCount = OPERATIONAL_OUTPUT_CONTEXT_TERMS.reduce((n, pattern) => n + (pattern.test(head) ? 1 : 0), 0);
+  const signalCount = OPERATIONAL_OUTPUT_SIGNAL_PATTERNS.reduce((n, pattern) => n + countPatternMatches(head, pattern, 40), 0);
+  const timingCount = countPatternMatches(head, /\b\d+(?:\.\d+)?s\b/i, 80);
+  const urlCount = countPatternMatches(head, /https?:\/\/|(?:^|\s)(?:www\.|studio\.youtube\.com|youtube\.com)\S*/i, 80);
+  const screenshotCount = countPatternMatches(head, /\bdiag_[A-Za-z0-9_.-]+\.png\b/i, 80);
+  const ratioCount = countPatternMatches(head, /\b\d+\/\d+\b/i, 80);
+  const payload = (
+    (contextTermCount > 0 && signalCount >= 2)
+    || (timingCount >= 5 && (urlCount > 0 || screenshotCount > 0 || ratioCount >= 2))
+    || (screenshotCount >= 2)
+    || (lineCount >= 8 && signalCount >= 5)
+  );
+  return {
+    context_term_count: contextTermCount,
+    signal_count: signalCount,
+    timing_count: timingCount,
+    url_count: urlCount,
+    screenshot_count: screenshotCount,
+    ratio_count: ratioCount,
+    line_count: lineCount,
+    operational_diagnostic_payload: payload
+  };
+}
+
+function isOperationalDiagnosticPayload(text) {
+  return analyzeOperationalDiagnosticShape(text).operational_diagnostic_payload === true;
+}
+
 function looksLikeCommandFence(lang, body) {
   const l = String(lang || '').trim().toLowerCase();
   if (WORK_FOCUS_COMMAND_FENCE_LANGS.indexOf(l) !== -1) {
@@ -749,7 +817,7 @@ function extractInlinePathTokens(line) {
     // Tokens that DO contain a '/' keep the case-insensitive rule (path segments may be mixed
     // case). This is stricter than extractTargetTokensFromLine on purpose: prose is untrusted.
     const hasSlash = /[\/]/.test(pathPortion);
-    const hasLowerExt = /\.[a-z0-9]{1,6}$/.test(pathPortion);
+    const hasLowerExt = /\.[a-z][a-z0-9]{0,5}$/.test(pathPortion);
     if (!(hasSlash || hasLowerExt)) {
       continue;
     }
@@ -1092,6 +1160,14 @@ function deriveWorkFocusTargets(taskText) {
 // { targets, derived, derivation_sources } so callers can both drive recall AND emit telemetry.
 function collectRequiredTargets(taskText) {
   const explicit = parseRequiredTargetPaths(taskText);
+  if (!explicit.length && isOperationalDiagnosticPayload(taskText)) {
+    return {
+      targets: [],
+      derived: false,
+      derivation_sources: [],
+      dropped_low_confidence: []
+    };
+  }
   const derivedInfo = deriveWorkFocusTargets(taskText);
   const targets = [];
   const seen = new Set();
@@ -1370,6 +1446,18 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
 
 function extractTypedTargets(taskText) {
   const textWithoutQuotes = removeQuotedReferenceBlocks(taskText);
+  if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes)) {
+    return {
+      repo_file_targets: [],
+      semantic_targets: [],
+      external_research_targets: [],
+      quoted_reference_blocks: extractQuotedReferenceBlocks(taskText),
+      repo_file_derivation_sources: [],
+      repo_file_targets_derived: false,
+      dropped_low_confidence: [],
+      operational_diagnostic_payload: true
+    };
+  }
   const collected = collectRequiredTargets(textWithoutQuotes);
   const repoTargets = collected.targets.slice();
   const externalTargets = extractExternalResearchTargets(taskText);
@@ -3201,6 +3289,11 @@ const DAEMON_OUTPUT_LOCAL_ASSESSMENT_FAST_PATH_SLICE = 'REDDOG_DAEMON_OUTPUT_LOC
 const DAEMON_OUTPUT_TERMS = [
   /\bdae?mon\b/i,
   /\bdaemon\b/i,
+  /\bdae\b/i,
+  /\bbrowser\b/i,
+  /\bpage\b/i,
+  /\byoutube\b/i,
+  /\bstudio\.youtube\.com\b/i,
   /\bservice\b/i,
   /\borchestrator\b/i,
   /\bworker\b/i,
@@ -3271,7 +3364,9 @@ function isDaemonOutputAssessmentRequest(text) {
   const mentionsDaemonSurface = DAEMON_OUTPUT_TERMS.some((pattern) => pattern.test(head));
   const mentionsOutputContext = DAEMON_OUTPUT_CONTEXT_PATTERNS.some((pattern) => pattern.test(head));
   const asksForAssessment = DAEMON_OUTPUT_ASSESSMENT_PATTERNS.some((pattern) => pattern.test(head));
-  return mentionsDaemonSurface && mentionsOutputContext && asksForAssessment;
+  const operationalShape = analyzeOperationalDiagnosticShape(raw);
+  return (mentionsDaemonSurface && mentionsOutputContext && asksForAssessment)
+    || (operationalShape.operational_diagnostic_payload === true && (asksForAssessment || mentionsOutputContext || mentionsDaemonSurface));
 }
 
 function parseRunTraceAssessment(text) {
@@ -3414,6 +3509,7 @@ function sanitizeDaemonDiagnosticLine(line) {
 
 function parseDaemonOutputAssessment(text) {
   const src = String(text || '');
+  const operationalShape = analyzeOperationalDiagnosticShape(src);
   const lines = src.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   const signalPatterns = [
     /\b(?:blocked_locally|redaction gate status|made_network_call|operator message|runtime_consumption_gate_rejection_reasons)\b/i,
@@ -3463,7 +3559,8 @@ function parseDaemonOutputAssessment(text) {
     warning_count: warningCount,
     diagnostic_signals: diagnosticSignals,
     secret_redactions_applied: secretRedactionCount,
-    has_pasted_diagnostic_payload: lines.length > 4 || signalPatterns.some((pattern) => pattern.test(src))
+    operational_shape: operationalShape,
+    has_pasted_diagnostic_payload: lines.length > 4 || signalPatterns.some((pattern) => pattern.test(src)) || operationalShape.operational_diagnostic_payload === true
   };
 }
 
@@ -6799,6 +6896,8 @@ module.exports = {
   constructWspTaskPrompt,
   isSimpleIdentityQuestion,
   buildSimpleIdentityFastPathResult,
+  analyzeOperationalDiagnosticShape,
+  isOperationalDiagnosticPayload,
   isRunTraceAssessmentRequest,
   parseRunTraceAssessment,
   buildRunTraceAssessmentFastPathResult,

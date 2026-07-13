@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.63', 'package version must be 0.3.63');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.63'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.64', 'package version must be 0.3.64');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.64'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.63', 'README version mismatch');
+includes(readme, 'Version: 0.3.64', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -571,6 +571,33 @@ assert.strictEqual(
   false,
   'DOLA-003: implementation requests must use governed path, not local diagnostic fast path'
 );
+// REDDOG_OPERATIONAL_OUTPUT_TARGET_DERIVATION_GUARD_PHASE1: the 0.3.63 host run
+// still blocked because browser/DAEmon output was converted into 57 repo targets
+// (`11.7s`, `www.youtube.com`, screenshots, `SKILL.md`, etc.). Operational output
+// must route locally and must not enter repo/external grounding as targets.
+includes(extensionJs, 'function analyzeOperationalDiagnosticShape', 'OOTG-001: operational diagnostic shape detector missing');
+const noisyOperationalOutputPrompt = [
+  'Please analyze this browser DAEmon output.',
+  'antifaFM/live 1/3 2/3 3/3 UnDaoDu/live FoundUps/live MOVE2JAPAN/live',
+  'www.youtube.com studio.youtube.com/channel/UCSNTUXjAgpd4sgWYP0xoJgw/videos/short',
+  '11.7s 17.0s 17.4s 84.6s 94.1s 519.7s 824.0s 100.0 0.7',
+  'diag_page_content_timeout_20260713_171947.png',
+  'diag_page_content_timeout_20260713_172004.png',
+  'diag_page_load_failed_20260713_172112.png',
+  'SKILLz.md SKILL.md Avg/video 8/pass ops/min',
+  'operator message: page content timeout and browser status failed'
+].join('\n');
+assert.strictEqual(orchestrator.isDaemonOutputAssessmentRequest(noisyOperationalOutputPrompt), true, 'OOTG-001: noisy browser/DAEmon output must use local diagnostic route');
+const noisyClass = orchestrator.classifyTaskForRedDog(noisyOperationalOutputPrompt, 'auto', 'reddog_architect');
+assert.strictEqual(noisyClass.localFastPath, 'daemon_output_assessment', 'OOTG-001: noisy operational output local fast-path marker missing');
+assert.strictEqual(orchestrator.resolveAutoContextMode(noisyClass, 'auto'), 'none', 'OOTG-001: noisy operational output must skip HoloIndex');
+const noisyCollected = orchestrator.collectRequiredTargets(noisyOperationalOutputPrompt);
+assert.strictEqual(noisyCollected.targets.length, 0, 'OOTG-002: operational timings/URLs/screenshots must not become required repo targets');
+const noisyTyped = orchestrator.extractTypedTargets(noisyOperationalOutputPrompt);
+assert.strictEqual(noisyTyped.repo_file_targets.length, 0, 'OOTG-002: operational output must produce zero repo_file_targets');
+assert.strictEqual(noisyTyped.external_research_targets.length, 0, 'OOTG-002: operational output URLs are log data, not external research targets');
+assert.strictEqual(noisyTyped.operational_diagnostic_payload, true, 'OOTG-002: typed extraction must mark operational diagnostic payload');
+assert.deepStrictEqual(orchestrator.extractInlinePathTokens('11.7s 100.0 0.7'), [], 'OOTG-003: numeric timings/decimals must not be slashless file targets');
 
 assert.strictEqual(
   orchestrator.resolveModelMode(wsp, 'auto', 'reddog_architect'),
@@ -1028,7 +1055,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.63', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.64', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2366,7 +2393,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.63'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.64'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2380,7 +2407,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.63'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.64'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2392,7 +2419,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.63'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.64'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
