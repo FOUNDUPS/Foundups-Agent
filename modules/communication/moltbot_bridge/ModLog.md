@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESEARCH_HOLOINDEX_PROMOTION_GATE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 77, 97
+
+- Added `src/reddog_research_holoindex_promotion_gate.py`: pure gate that
+  consumes a HoloIndex-first research grounding result, an independent
+  verification receipt, and HoloIndex freshness evidence before emitting a
+  deterministic promotion envelope for a future governed indexer.
+- Added `tests/test_reddog_research_holoindex_promotion_gate.py`: positive
+  research finding acceptance, negative/null result acceptance when explicitly
+  indexable, grounding/verification/freshness rejection, internal-memory-only
+  no-op rejection, source hash/provenance checks, prompt-injection boundary,
+  secret evidence rejection, deterministic JSON, and AST no-mutation coverage.
+- Boundary: no HoloIndex write, no re-index, no external fetch, no command
+  execution, no PatternMemory write, no AgentDB mutation, and no extension
+  runtime wiring. The output is a promotion plan only; a later WRE/CI governed
+  indexer owns actual indexing.
+- HoloIndex read-only probe for `research HoloIndex promotion gate verified
+  research receipt negative result` surfaced adjacent CABR/portfolio and
+  HoloIndex docs but not a canonical research promotion gate. Recorded
+  `HOLOINDEX_REDDOG_RESEARCH_HOLOINDEX_PROMOTION_GATE_INDEX_GAP_PHASE1`; no
+  runtime re-index performed.
+
 ## 2026-07-14: REDDOG_HOLOINDEX_FIRST_EXTERNAL_RESEARCH_GROUNDING_ADAPTER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 77, 97
