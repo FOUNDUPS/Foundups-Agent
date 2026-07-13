@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-13 - REDDOG_DAEMON_PROMPT_AUTHORING_OVERRIDE_PHASE1 (prompt requests override log fast path, 0.3.65)
+
+- Fixed prompt-authoring requests that include DAEmon/log output so they no longer route to the instant local diagnostic fast path.
+- Requests for worker/slice/M2M prompts now stay on the governed prompt-authoring path and retain bounded prompt-authoring context.
+- Operational diagnostic payload suppression still applies to pure log assessment requests.
+- Version 0.3.64 -> 0.3.65 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-13 - REDDOG_OPERATIONAL_OUTPUT_TARGET_DERIVATION_GUARD_PHASE1 (browser/DAEmon log target guard, 0.3.64)
 
 - Added an operational-output shape detector for browser/DAEmon diagnostics with URLs, timing values, screenshot filenames, ratios, and status/error tokens.

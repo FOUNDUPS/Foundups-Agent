@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.64';
+const EXTENSION_VERSION = '0.3.65';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -1160,6 +1160,14 @@ function deriveWorkFocusTargets(taskText) {
 // { targets, derived, derivation_sources } so callers can both drive recall AND emit telemetry.
 function collectRequiredTargets(taskText) {
   const explicit = parseRequiredTargetPaths(taskText);
+  if (!explicit.length && isOperationalDiagnosticPayload(taskText) && isPromptAuthoringRequest(taskText)) {
+    return {
+      targets: PROMPT_AUTHORING_CONTEXT_TARGETS.slice(),
+      derived: true,
+      derivation_sources: ['prompt_authoring_context'],
+      dropped_low_confidence: []
+    };
+  }
   if (!explicit.length && isOperationalDiagnosticPayload(taskText)) {
     return {
       targets: [],
@@ -1446,6 +1454,18 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
 
 function extractTypedTargets(taskText) {
   const textWithoutQuotes = removeQuotedReferenceBlocks(taskText);
+  if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes) && isPromptAuthoringRequest(taskText)) {
+    return {
+      repo_file_targets: PROMPT_AUTHORING_CONTEXT_TARGETS.slice(),
+      semantic_targets: [],
+      external_research_targets: [],
+      quoted_reference_blocks: extractQuotedReferenceBlocks(taskText),
+      repo_file_derivation_sources: ['prompt_authoring_context'],
+      repo_file_targets_derived: true,
+      dropped_low_confidence: [],
+      operational_diagnostic_payload: true
+    };
+  }
   if (!parseRequiredTargetPaths(textWithoutQuotes).length && isOperationalDiagnosticPayload(textWithoutQuotes)) {
     return {
       repo_file_targets: [],
@@ -3310,7 +3330,8 @@ const DAEMON_OUTPUT_ASSESSMENT_PATTERNS = [
   /\bwhat\s+(?:happened|failed|blocked|is wrong)\b/i
 ];
 const DAEMON_OUTPUT_ACTION_BLOCKING_PATTERNS = [
-  /\b(?:implement|patch|author|create\s+pr|open\s+pr|merge|land|dispatch|assign|spawn|execute|start\s+slice|write\s+code)\b/i
+  /\b(?:implement|patch|author|create\s+pr|open\s+pr|merge|land|dispatch|assign|spawn|execute|start\s+slice|write\s+code)\b/i,
+  /\b(?:prompt|worker\s+prompt|slice\s+prompt|next\s+prompt|m2m\s+prompt)\b/i
 ];
 
 function normalizeSimpleIdentityQuestion(text) {
@@ -3356,6 +3377,9 @@ function isDaemonOutputAssessmentRequest(text) {
   const raw = String(text || '');
   const head = raw.slice(0, 2400);
   if (raw.trim().length < 12) {
+    return false;
+  }
+  if (isPromptAuthoringRequest(raw)) {
     return false;
   }
   if (DAEMON_OUTPUT_ACTION_BLOCKING_PATTERNS.some((pattern) => pattern.test(head))) {
