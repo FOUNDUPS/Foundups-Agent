@@ -2,6 +2,41 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - REDDOG_DAEMON_SELF_AUDIT_DRYRUN_PROPOSAL_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
+WSP 48 (Recursive Self-Improvement), WSP 50 (Pre-Action), WSP 97 (Truth
+Boundary), WSP 22 (ModLog)
+
+**Type**: Daemon self-audit L1b. Observe -> propose only by default.
+
+**Deliverable**:
+- Updated `src/daemon_self_audit_loop.py`: daemon self-audit findings now emit
+  PENDING/dry-run `ImprovementJob` proposals plus RedDog direction receipts to
+  `daemon_self_audit_improvement_jobs.jsonl` by default.
+- Legacy auto-fix dispatch now requires both `OPENCLAW_SELF_AUDIT_AUTO_FIX=1`
+  and `OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX=1`.
+- Legacy escalation command dispatch now requires
+  `OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_ESCALATION_DISPATCH=1`.
+- Updated `tests/test_daemon_self_audit_loop.py`: default proposal-only path,
+  dual-opt-in legacy dispatch, escalation dispatch guard, and existing
+  diagnostic coverage.
+
+**Boundary**: The default daemon self-audit path does not run subprocesses,
+start daemons, verify SQLite stores, write diagnostic reports as fixes, mutate
+queues, write PatternMemory, or execute repairs. It records dry-run proposals
+for the RedDog/WRE improvement lane.
+
+**HoloIndex**: Read-only probe for `daemon self audit dryrun improvement
+proposal RedDog direction` surfaced adjacent RedDog execution surfaces but not
+the updated daemon self-audit proposal path. Recorded
+`HOLOINDEX_REDDOG_DAEMON_SELF_AUDIT_DRYRUN_PROPOSAL_INDEX_GAP_PHASE1`; no
+runtime re-index performed.
+
+**Verification**: daemon self-audit + RedDog direction tests 19 passed.
+
+---
+
 ### [2026-07-14] - REDDOG_HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),

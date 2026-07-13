@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -13,9 +14,18 @@ import sqlite3
 import subprocess
 import threading
 import time
+from dataclasses import asdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+from modules.infrastructure.wre_core.src.improvement_job_contract import (
+    ImprovementRiskLevel,
+    ImprovementScope,
+    ImprovementType,
+    create_improvement_job,
+)
+from modules.infrastructure.wre_core.src.reddog_direction import RedDogDirector
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +39,8 @@ class SelfAuditEvent:
     recommended_fix: str
     auto_fix_attempted: bool
     auto_fix_result: str
+    improvement_job_id: str = ""
+    improvement_direction: str = ""
 
 
 @dataclass
@@ -44,7 +56,7 @@ class SelfAuditEscalation:
 
 
 class DaemonSelfAuditLoop:
-    """Tails daemon logs, opens fix tasks, and executes safe fixes under policy."""
+    """Tails daemon logs and proposes RedDog-directed dry-run improvement jobs."""
 
     ERROR_PATTERNS = [
         re.compile(r"\[ERROR\]", re.IGNORECASE),
@@ -57,7 +69,7 @@ class DaemonSelfAuditLoop:
         re.compile(r"unique constraint failed", re.IGNORECASE),
     ]
 
-    # Noise signatures to ignore — these match ERROR_PATTERNS but are not actionable
+    # Noise signatures to ignore -- these match ERROR_PATTERNS but are not actionable
     NOISE_SIGNATURES = [
         "traceback (most recent call last):",  # generic traceback header
         "raise exception_class(message, screen, stacktrace)",  # Selenium generic raise
@@ -70,7 +82,13 @@ class DaemonSelfAuditLoop:
         self.interval_sec = float(os.getenv("OPENCLAW_SELF_AUDIT_INTERVAL_SEC", "5"))
         self.max_read_bytes = int(os.getenv("OPENCLAW_SELF_AUDIT_MAX_READ_BYTES", "65536"))
         self.dedupe_window_sec = int(os.getenv("OPENCLAW_SELF_AUDIT_DEDUPE_WINDOW_SEC", "120"))
-        self.auto_fix_enabled = os.getenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1") == "1"
+        self.improvement_proposals_enabled = (
+            os.getenv("OPENCLAW_SELF_AUDIT_IMPROVEMENT_PROPOSALS", "1").strip() == "1"
+        )
+        self.auto_fix_enabled = (
+            os.getenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0").strip() == "1"
+            and os.getenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "0").strip() == "1"
+        )
         self.allowed_fixes = {
             part.strip().lower()
             for part in os.getenv(
@@ -98,6 +116,10 @@ class DaemonSelfAuditLoop:
             os.getenv("OPENCLAW_SELF_AUDIT_ESCALATION_COOLDOWN_SEC", "600")
         )
         self.escalation_cmd = os.getenv("OPENCLAW_SELF_AUDIT_ESCALATE_CMD", "").strip()
+        self.escalation_dispatch_enabled = (
+            os.getenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_ESCALATION_DISPATCH", "0").strip()
+            == "1"
+        )
         self.escalation_allow_shell = (
             os.getenv("OPENCLAW_SELF_AUDIT_ESCALATE_ALLOW_SHELL_CMD", "0").strip() == "1"
         )
@@ -105,6 +127,10 @@ class DaemonSelfAuditLoop:
         self.task_log_path = (
             self.repo_root
             / "modules/infrastructure/wre_core/reports/daemon_self_audit_tasks.jsonl"
+        )
+        self.improvement_job_log_path = (
+            self.repo_root
+            / "modules/infrastructure/wre_core/reports/daemon_self_audit_improvement_jobs.jsonl"
         )
         self.escalation_log_path = (
             self.repo_root
@@ -232,7 +258,10 @@ class DaemonSelfAuditLoop:
             or "connectionerror" in signature
         ):
             candidates = ["start_ironclaw_gateway"]
-        elif "paerrorcode -9984" in signature or "incompatible host api specific stream info" in signature:
+        elif (
+            "paerrorcode -9984" in signature
+            or "incompatible host api specific stream info" in signature
+        ):
             candidates = ["diagnose_microphone_device"]
         elif "unique constraint failed" in signature and "dae_events.sequence_id" in signature:
             candidates = ["verify_dae_event_store"]
@@ -259,6 +288,17 @@ class DaemonSelfAuditLoop:
         recommended = self._recommend_fix(signature)
         attempted = False
         result = "not_attempted"
+        improvement_job_id = ""
+        improvement_direction = ""
+        if self.improvement_proposals_enabled:
+            improvement_job_id, improvement_direction = self._emit_improvement_proposal(
+                source_file=source_file,
+                signature=signature,
+                line=line,
+                recommended_fix=recommended,
+            )
+            if improvement_job_id:
+                result = f"improvement_job_proposed:{improvement_job_id}"
         if self.auto_fix_enabled and recommended in self.allowed_fixes:
             self._increment_counter("self_audit_auto_fix_attempts")
             attempted, result = self._apply_policy_fix(recommended)
@@ -275,7 +315,68 @@ class DaemonSelfAuditLoop:
             recommended_fix=recommended,
             auto_fix_attempted=attempted,
             auto_fix_result=result,
+            improvement_job_id=improvement_job_id,
+            improvement_direction=improvement_direction,
         )
+
+    def _emit_improvement_proposal(
+        self,
+        *,
+        source_file: Path,
+        signature: str,
+        line: str,
+        recommended_fix: str,
+    ) -> Tuple[str, str]:
+        rel_source = self._relative_source_path(source_file)
+        improvement_type = self._improvement_type_for_fix(recommended_fix)
+        scope = ImprovementScope(
+            module_path="modules/infrastructure/wre_core",
+            file_paths=[rel_source],
+            wsp_refs=["WSP 15", "WSP 48", "WSP 50", "WSP 97"],
+        )
+        finding_digest = hashlib.sha256(signature.encode("utf-8")).hexdigest()[:16]
+        job = create_improvement_job(
+            finding_id=f"daemon_self_audit:{finding_digest}",
+            improvement_type=improvement_type,
+            scope=scope,
+            risk_level=ImprovementRiskLevel.LOW,
+            requested_by="daemon_self_audit_loop",
+            payload={
+                "source_file": rel_source,
+                "signature": signature,
+                "line": line[:600],
+                "recommended_fix": recommended_fix,
+                "legacy_auto_fix_attempted": False,
+            },
+        )
+        directed = RedDogDirector(requested_by="daemon_self_audit_loop").direct([job])[0]
+        row = {
+            "timestamp": time.time(),
+            "job": job.to_dict(),
+            "direction": directed.to_dict(),
+            "no_execution_performed": True,
+            "no_subprocess_performed": True,
+            "no_queue_mutation_performed": True,
+            "no_pattern_memory_write_performed": True,
+        }
+        self.improvement_job_log_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.improvement_job_log_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(row, ensure_ascii=True, default=str) + "\n")
+        return job.job_id, directed.direction.value
+
+    def _relative_source_path(self, source_file: Path) -> str:
+        try:
+            return str(source_file.resolve().relative_to(self.repo_root)).replace("\\", "/")
+        except ValueError:
+            return str(source_file.resolve()).replace("\\", "/")
+
+    @staticmethod
+    def _improvement_type_for_fix(recommended_fix: str) -> ImprovementType:
+        if recommended_fix == "verify_dae_event_store":
+            return ImprovementType.DRIFT_CORRECTION
+        if recommended_fix == "diagnose_microphone_device":
+            return ImprovementType.FMAS_SCAN
+        return ImprovementType.MODULE_REPAIR
 
     def _record_signature_event(self, event: SelfAuditEvent) -> None:
         now = event.timestamp
@@ -317,13 +418,16 @@ class DaemonSelfAuditLoop:
         dispatch_attempted = False
         dispatch_result = "not_configured"
         if self.escalation_cmd:
-            dispatch_attempted, dispatch_result = self._dispatch_escalation_command(
-                self.escalation_cmd
-            )
-            if dispatch_attempted and dispatch_result.startswith("dispatched"):
-                self._increment_counter("self_audit_escalation_dispatch_success")
-            elif dispatch_attempted:
-                self._increment_counter("self_audit_escalation_dispatch_fail")
+            if self.escalation_dispatch_enabled:
+                dispatch_attempted, dispatch_result = self._dispatch_escalation_command(
+                    self.escalation_cmd
+                )
+                if dispatch_attempted and dispatch_result.startswith("dispatched"):
+                    self._increment_counter("self_audit_escalation_dispatch_success")
+                elif dispatch_attempted:
+                    self._increment_counter("self_audit_escalation_dispatch_fail")
+            else:
+                dispatch_result = "legacy_escalation_dispatch_disabled"
 
         escalation = SelfAuditEscalation(
             timestamp=now,
@@ -443,7 +547,7 @@ class DaemonSelfAuditLoop:
         if not dispatched:
             return False, f"dispatch_failed:{detail}"
 
-        # Dispatch succeeded → fix was attempted. Health polling annotates
+        # Dispatch succeeded -> fix was attempted. Health polling annotates
         # the result string but does not flip the "attempted" flag.
         if self.ironclaw_start_retry_count <= 0:
             return True, detail
@@ -590,17 +694,9 @@ class DaemonSelfAuditLoop:
 
     def _persist_event(self, event: SelfAuditEvent) -> None:
         self.task_log_path.parent.mkdir(parents=True, exist_ok=True)
-        row = {
-            "timestamp": event.timestamp,
-            "source_file": event.source_file,
-            "signature": event.signature,
-            "line": event.line,
-            "recommended_fix": event.recommended_fix,
-            "auto_fix_attempted": event.auto_fix_attempted,
-            "auto_fix_result": event.auto_fix_result,
-        }
+        row = asdict(event)
         with self.task_log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+            handle.write(json.dumps(row, ensure_ascii=True) + "\n")
 
     def _persist_escalation(self, escalation: SelfAuditEscalation) -> None:
         self.escalation_log_path.parent.mkdir(parents=True, exist_ok=True)
