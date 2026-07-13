@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 70, 97
+
+- Added `src/reddog_authoritative_work_state_refresh_runtime.py`: mutating successor to the work-ledger refresh dry-run planner. It consumes already-observed GitHub/W10/ledger source bundles, emits a freshness receipt, rejects conflicts/stale inputs, commits an authoritative work-state snapshot through an injected atomic store, writes a durable worker claim, and synchronizes a WRE queue item bound to that claim.
+- Added `tests/test_reddog_authoritative_work_state_refresh_runtime.py`: happy-path atomic commit, deterministic receipt/revision, stale-source rejection, closed/open conflict rejection, duplicate active-claim rejection, commit-failure fail-closed behavior, JSON-store atomic write, malformed record handling, and AST no-network/no-shell/no-HoloIndex/no-execution coverage.
+- Boundary: no GitHub fetch, no W10 fetch, no AgentDB write, no OpenClaw/Hermes live enqueue, no worker spawn, no shell/subprocess, no HoloIndex runtime mutation/re-index, and no execution. This slice is the authoritative state refresh + claim/queue-sync runtime only.
+
 ## 2026-07-13: REDDOG_WORK_LEDGER_REFRESH_PLAN_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 70, 97
