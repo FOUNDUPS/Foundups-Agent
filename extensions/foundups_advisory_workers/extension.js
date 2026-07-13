@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.65';
+const EXTENSION_VERSION = '0.3.66';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -1499,6 +1499,236 @@ function numberFromScorecard(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
+const SEMANTIC_GROUNDING_STOPWORDS = new Set([
+  'about', 'after', 'against', 'agent', 'audit', 'based', 'before', 'build', 'code',
+  'compare', 'concept', 'current', 'does', 'evaluate', 'foundups', 'from', 'governance',
+  'grounding', 'implementation', 'into', 'mapping', 'module', 'need', 'needs', 'paper',
+  'pipeline', 'question', 'read', 'repo', 'research', 'review', 'selection', 'should',
+  'system', 'that', 'the', 'this', 'through', 'topic', 'using', 'whether', 'with',
+  'workflow', 'wsp'
+]);
+
+function normalizeSemanticQuery(value) {
+  return collapseAsciiWhitespace(String(value || '')
+    .toLowerCase()
+    .replace(/[`"'()[\]{}<>]/g, ' ')
+    .replace(/[_./\\:-]+/g, ' '));
+}
+
+function tokenizeSemanticQuery(value) {
+  const normalized = normalizeSemanticQuery(value);
+  const tokens = normalized.match(/[a-z0-9]+/g) || [];
+  return uniqueStrings(tokens.filter((token) => token.length >= 3 && !SEMANTIC_GROUNDING_STOPWORDS.has(token)));
+}
+
+function semanticEvidenceRef(hit) {
+  const h = hit && typeof hit === 'object' ? hit : {};
+  const raw = h.evidence_ref || h.ref || h.location || h.path || h.file || h.uri || h.id;
+  return String(raw || '').trim();
+}
+
+function semanticHitText(hit) {
+  if (!hit || typeof hit !== 'object') {
+    return String(hit || '');
+  }
+  const fields = [
+    hit.need,
+    hit.title,
+    hit.summary,
+    hit.preview,
+    hit.snippet,
+    hit.content,
+    hit.text,
+    hit.location,
+    hit.path,
+    hit.file,
+    hit.module,
+    hit.kind,
+    hit.type
+  ];
+  return fields.map((field) => String(field || '')).join(' ');
+}
+
+function normalizeSemanticEvidenceHit(hit, index, bucket) {
+  if (!hit || typeof hit !== 'object') {
+    return null;
+  }
+  const evidenceRef = semanticEvidenceRef(hit, index);
+  const text = collapseAsciiWhitespace(semanticHitText(hit)).slice(0, 4000);
+  if (!evidenceRef || !text) {
+    return null;
+  }
+  return {
+    evidence_ref: evidenceRef,
+    bucket: String(bucket || hit.bucket || hit.type || 'holoindex'),
+    text: text
+  };
+}
+
+function appendSemanticEvidenceHits(out, hits, bucket) {
+  if (!Array.isArray(hits)) {
+    return;
+  }
+  for (let i = 0; i < hits.length; i++) {
+    const normalized = normalizeSemanticEvidenceHit(hits[i], out.length, bucket);
+    if (normalized) {
+      out.push(normalized);
+    }
+  }
+}
+
+function semanticEvidenceHitsFromBundleData(data) {
+  const out = [];
+  const task = data && data.task_retrieval && typeof data.task_retrieval === 'object'
+    ? data.task_retrieval
+    : {};
+  appendSemanticEvidenceHits(out, task.code_hits, 'code');
+  appendSemanticEvidenceHits(out, task.wsp_hits, 'wsp');
+  appendSemanticEvidenceHits(out, task.doc_hits, 'docs');
+  appendSemanticEvidenceHits(out, task.docs_hits, 'docs');
+  appendSemanticEvidenceHits(out, task.skill_hits, 'skill');
+  appendSemanticEvidenceHits(out, data && data.code_hits, 'code');
+  appendSemanticEvidenceHits(out, data && data.wsp_hits, 'wsp');
+  appendSemanticEvidenceHits(out, data && data.docs_hits, 'docs');
+  appendSemanticEvidenceHits(out, data && data.skill_hits, 'skill');
+  return out;
+}
+
+function collectSemanticEvidenceHits(contextPacket, scorecard) {
+  const out = [];
+  const packet = contextPacket && typeof contextPacket === 'object' ? contextPacket : {};
+  const meta = packet.holoindex_meta && typeof packet.holoindex_meta === 'object' ? packet.holoindex_meta : {};
+  const directScorecard = packet.holoindex_scorecard && typeof packet.holoindex_scorecard === 'object'
+    ? packet.holoindex_scorecard
+    : {};
+  appendSemanticEvidenceHits(out, packet.semantic_evidence_hits, 'semantic');
+  appendSemanticEvidenceHits(out, meta.semantic_evidence_hits, 'semantic');
+  appendSemanticEvidenceHits(out, directScorecard.semantic_evidence_hits, 'semantic');
+  appendSemanticEvidenceHits(out, scorecard && scorecard.semantic_evidence_hits, 'semantic');
+  const seen = new Set();
+  return out.filter((hit) => {
+    const key = hit.evidence_ref + '\n' + hit.text;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
+function semanticBackendErrorForTarget(target, contextPacket, scorecard) {
+  const normalized = normalizeSemanticQuery(target);
+  const candidates = [
+    contextPacket && contextPacket.semantic_target_errors,
+    contextPacket && contextPacket.semantic_grounding_errors,
+    scorecard && scorecard.semantic_target_errors,
+    scorecard && scorecard.semantic_grounding_errors
+  ];
+  for (const item of candidates) {
+    if (!item) {
+      continue;
+    }
+    if (Array.isArray(item)) {
+      if (item.some((value) => normalizeSemanticQuery(value) === normalized)) {
+        return true;
+      }
+      continue;
+    }
+    if (typeof item === 'object') {
+      for (const key of Object.keys(item)) {
+        if (normalizeSemanticQuery(key) === normalized && item[key]) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function semanticHitSupportsTarget(hit, targetTokens, normalizedQuery) {
+  const normalizedText = normalizeSemanticQuery(hit && hit.text);
+  if (!normalizedText) {
+    return null;
+  }
+  if (normalizedQuery && normalizedText.includes(normalizedQuery)) {
+    return {
+      matched_tokens: targetTokens.slice(),
+      exact_phrase: true
+    };
+  }
+  const matched = targetTokens.filter((token) => normalizedText.includes(token));
+  const required = targetTokens.length <= 2
+    ? targetTokens.length
+    : Math.max(2, Math.ceil(targetTokens.length * 0.6));
+  const hasAnchor = matched.some((token) => token.length >= 6) || targetTokens.every((token) => token.length < 6);
+  if (targetTokens.length && matched.length >= required && hasAnchor) {
+    return {
+      matched_tokens: matched,
+      exact_phrase: false
+    };
+  }
+  return null;
+}
+
+function buildSemanticTargetCoverage(targets, contextMode, contextPacket, scorecard) {
+  const semanticTargets = Array.isArray(targets) ? targets : [];
+  const hasHolo = !!(contextMode && String(contextMode).includes('holo'));
+  const evidenceHits = collectSemanticEvidenceHits(contextPacket, scorecard);
+  return semanticTargets.map((target) => {
+    const normalizedQuery = normalizeSemanticQuery(target);
+    const tokens = tokenizeSemanticQuery(target);
+    const rejectionReasons = [];
+    const contentBearingHits = [];
+    const evidenceRefs = [];
+    if (!hasHolo) {
+      rejectionReasons.push('semantic_grounding_holoindex_required');
+    }
+    if (semanticBackendErrorForTarget(target, contextPacket, scorecard)) {
+      rejectionReasons.push('semantic_grounding_backend_error');
+    }
+    if (!tokens.length) {
+      rejectionReasons.push('semantic_target_unparseable');
+    }
+    if (!evidenceHits.length) {
+      rejectionReasons.push('semantic_grounding_no_evidence_hits');
+    }
+    if (hasHolo && tokens.length && evidenceHits.length) {
+      for (const hit of evidenceHits) {
+        const support = semanticHitSupportsTarget(hit, tokens, normalizedQuery);
+        if (!support) {
+          continue;
+        }
+        evidenceRefs.push(hit.evidence_ref);
+        contentBearingHits.push({
+          evidence_ref: hit.evidence_ref,
+          bucket: hit.bucket,
+          matched_tokens: support.matched_tokens,
+          exact_phrase: support.exact_phrase === true
+        });
+      }
+    }
+    if (!evidenceRefs.length) {
+      rejectionReasons.push('semantic_target_evidence_missing');
+    }
+    const uniqueEvidenceRefs = uniqueStrings(evidenceRefs);
+    return {
+      target: String(target || ''),
+      normalized_query: normalizedQuery,
+      verdict: rejectionReasons.length === 0 ? 'SUFFICIENT' : 'UNSAFE_TO_ACT',
+      evidence_refs: uniqueEvidenceRefs,
+      content_bearing_hits: contentBearingHits.filter((hit, index) => uniqueEvidenceRefs.indexOf(hit.evidence_ref) !== -1
+        && contentBearingHits.findIndex((other) => other.evidence_ref === hit.evidence_ref) === index),
+      rejection_reasons: uniqueStrings(rejectionReasons)
+    };
+  });
+}
+
+function semanticTargetCoverageDigest(coverage) {
+  return canonicalWorkOrderDigest({
+    semantic_target_coverage: Array.isArray(coverage) ? coverage : []
+  });
+}
+
 function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   const typedTargets = extractTypedTargets(taskText);
   const scorecard = (contextPacket && contextPacket.holoindex_scorecard)
@@ -1518,11 +1748,16 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     }
   }
 
-  if (semantic.length) {
-    const hasHolo = !!(contextMode && String(contextMode).includes('holo'));
-    const hits = numberFromScorecard(scorecard && scorecard.code_hits_count) + numberFromScorecard(scorecard && scorecard.wsp_hits);
-    if (!hasHolo || hits <= 0) {
-      rejectionReasons.push('semantic_grounding_missing_holoindex_hits');
+  const semanticCoverage = buildSemanticTargetCoverage(semantic, contextMode, contextPacket, scorecard);
+  const semanticMissing = semanticCoverage
+    .filter((record) => record.verdict !== 'SUFFICIENT')
+    .map((record) => record.target);
+  if (semantic.length && semanticMissing.length) {
+    rejectionReasons.push('semantic_target_grounding_incomplete');
+    for (const record of semanticCoverage) {
+      if (record.verdict !== 'SUFFICIENT') {
+        rejectionReasons.push.apply(rejectionReasons, record.rejection_reasons);
+      }
     }
   }
 
@@ -1536,6 +1771,11 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     rejection_reasons: Array.from(new Set(rejectionReasons)),
     repo_file_targets_count: repoFiles.length,
     semantic_targets_count: semantic.length,
+    semantic_targets_required: semantic.length,
+    semantic_targets_grounded: semanticCoverage.filter((record) => record.verdict === 'SUFFICIENT').length,
+    semantic_targets_missing: semanticMissing,
+    semantic_target_coverage: semanticCoverage,
+    semantic_target_coverage_digest: semanticTargetCoverageDigest(semanticCoverage),
     external_research_targets_count: external.length,
     quoted_reference_blocks_count: quoted.length,
     direct_read_required: repoFiles.length > 0,
@@ -1786,6 +2026,12 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     typed_target_extraction_applied: meta.typed_target_extraction_applied !== undefined ? meta.typed_target_extraction_applied : 'unknown',
     repo_file_targets_count: meta.repo_file_targets_count !== undefined ? meta.repo_file_targets_count : 'unknown',
     semantic_targets_count: meta.semantic_targets_count !== undefined ? meta.semantic_targets_count : 'unknown',
+    semantic_targets_required: meta.semantic_targets_required !== undefined ? meta.semantic_targets_required : 'unknown',
+    semantic_targets_grounded: meta.semantic_targets_grounded !== undefined ? meta.semantic_targets_grounded : 'unknown',
+    semantic_targets_missing: Array.isArray(meta.semantic_targets_missing) ? meta.semantic_targets_missing : 'unknown',
+    semantic_target_coverage: Array.isArray(meta.semantic_target_coverage) ? meta.semantic_target_coverage : 'unknown',
+    semantic_target_coverage_digest: meta.semantic_target_coverage_digest !== undefined ? meta.semantic_target_coverage_digest : 'unknown',
+    semantic_evidence_hits: Array.isArray(meta.semantic_evidence_hits) ? meta.semantic_evidence_hits : [],
     external_research_targets_count: meta.external_research_targets_count !== undefined ? meta.external_research_targets_count : 'unknown',
     quoted_reference_blocks_count: meta.quoted_reference_blocks_count !== undefined ? meta.quoted_reference_blocks_count : 'unknown',
     grounding_preflight_applied: meta.grounding_preflight_applied !== undefined ? meta.grounding_preflight_applied : 'unknown',
@@ -1854,6 +2100,10 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- typed_target_extraction_applied: ' + scorecard.typed_target_extraction_applied,
     '- repo_file_targets_count: ' + scorecard.repo_file_targets_count,
     '- semantic_targets_count: ' + scorecard.semantic_targets_count,
+    '- semantic_targets_required: ' + scorecard.semantic_targets_required,
+    '- semantic_targets_grounded: ' + scorecard.semantic_targets_grounded,
+    '- semantic_targets_missing: ' + (Array.isArray(scorecard.semantic_targets_missing) ? (scorecard.semantic_targets_missing.length ? scorecard.semantic_targets_missing.join(', ') : '(none)') : scorecard.semantic_targets_missing),
+    '- semantic_target_coverage_digest: ' + scorecard.semantic_target_coverage_digest,
     '- external_research_targets_count: ' + scorecard.external_research_targets_count,
     '- quoted_reference_blocks_count: ' + scorecard.quoted_reference_blocks_count,
     '- grounding_preflight_applied: ' + scorecard.grounding_preflight_applied,
@@ -2706,6 +2956,10 @@ function buildWardrobeGroundingPreflightReceipt(holoScorecard, options) {
     rejection_reasons: reasons,
     repo_file_targets_count: numberFromScorecard(source.repo_file_targets_count),
     semantic_targets_count: numberFromScorecard(source.semantic_targets_count),
+    semantic_targets_required: numberFromScorecard(source.semantic_targets_required),
+    semantic_targets_grounded: numberFromScorecard(source.semantic_targets_grounded),
+    semantic_targets_missing: Array.isArray(source.semantic_targets_missing) ? source.semantic_targets_missing.slice() : [],
+    semantic_target_coverage_digest: source.semantic_target_coverage_digest || '',
     external_research_targets_count: numberFromScorecard(source.external_research_targets_count),
     quoted_reference_blocks_count: numberFromScorecard(source.quoted_reference_blocks_count),
     direct_read_required: source.direct_read_required === true || numberFromScorecard(source.repo_file_targets_count) > 0,
@@ -4659,6 +4913,15 @@ function wireFusionWebview(context, webview, worker, state) {
         : [];
       holoScorecard.repo_file_targets_count = groundingPreflight.repo_file_targets_count;
       holoScorecard.semantic_targets_count = groundingPreflight.semantic_targets_count;
+      holoScorecard.semantic_targets_required = groundingPreflight.semantic_targets_required;
+      holoScorecard.semantic_targets_grounded = groundingPreflight.semantic_targets_grounded;
+      holoScorecard.semantic_targets_missing = Array.isArray(groundingPreflight.semantic_targets_missing)
+        ? groundingPreflight.semantic_targets_missing.slice()
+        : [];
+      holoScorecard.semantic_target_coverage = Array.isArray(groundingPreflight.semantic_target_coverage)
+        ? groundingPreflight.semantic_target_coverage.slice()
+        : [];
+      holoScorecard.semantic_target_coverage_digest = groundingPreflight.semantic_target_coverage_digest;
       holoScorecard.external_research_targets_count = groundingPreflight.external_research_targets_count;
       holoScorecard.quoted_reference_blocks_count = groundingPreflight.quoted_reference_blocks_count;
     }
@@ -6186,6 +6449,12 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     typed_target_extraction_applied: false,
     repo_file_targets_count: 0,
     semantic_targets_count: 0,
+    semantic_targets_required: 0,
+    semantic_targets_grounded: 0,
+    semantic_targets_missing: [],
+    semantic_target_coverage: [],
+    semantic_target_coverage_digest: semanticTargetCoverageDigest([]),
+    semantic_evidence_hits: [],
     external_research_targets_count: 0,
     quoted_reference_blocks_count: 0,
     direct_read_paths: [],
@@ -6226,6 +6495,7 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     meta.typed_target_extraction_applied = recall.typed_target_extraction_applied === true;
     meta.repo_file_targets_count = Number(recall.repo_file_targets_count || 0);
     meta.semantic_targets_count = Number(recall.semantic_targets_count || 0);
+    meta.semantic_evidence_hits = semanticEvidenceHitsFromBundleData(data);
     meta.external_research_targets_count = Number(recall.external_research_targets_count || 0);
     meta.quoted_reference_blocks_count = Number(recall.quoted_reference_blocks_count || 0);
     // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the Python-side
