@@ -13,6 +13,7 @@ import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
@@ -22,6 +23,7 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
     SOURCE_HOLOINDEX,
     SOURCE_REPO,
     SOURCE_WORK_STATE,
+    SNAPSHOT_SCHEMA_VERSION,
     OperationalContextSnapshot,
 )
 
@@ -92,6 +94,7 @@ def assemble_foundup_brain_current_state(
     identity: Mapping[str, Any],
     roadmap_state: Mapping[str, Any] | None = None,
     verified_outcomes: Sequence[Mapping[str, Any]] = (),
+    now_iso: str | None = None,
 ) -> FoundUpBrainAssemblyResult:
     """Assemble one FoundUp's current cognition from existing receipts.
 
@@ -105,10 +108,14 @@ def assemble_foundup_brain_current_state(
     if not normalized_foundup_id:
         reasons.append("missing_foundup_id")
 
+    if snapshot.schema_version != SNAPSHOT_SCHEMA_VERSION:
+        reasons.append("unsupported_snapshot_schema")
     if snapshot.rejection_reasons:
         reasons.append("snapshot_not_accepted")
     if not snapshot.snapshot_receipt_id or not snapshot.snapshot_content_digest:
         reasons.append("missing_snapshot_binding")
+    if now_iso and _snapshot_expired(snapshot.valid_until, now_iso):
+        reasons.append("snapshot_expired")
 
     receipts = {receipt.source: receipt.to_dict() for receipt in snapshot.source_receipts}
     for source in _REQUIRED_SNAPSHOT_SOURCES:
@@ -132,11 +139,25 @@ def assemble_foundup_brain_current_state(
         _normalize_verified_outcome(outcome, normalized_foundup_id, reasons)
         for outcome in verified_outcomes
     )
+    active_work = _scope_work_records(
+        snapshot.work_state.get("worker_claims", ()),
+        normalized_foundup_id,
+        "worker_claim",
+        reasons,
+    )
+    queued_work = _scope_work_records(
+        snapshot.work_state.get("wre_queue_items", ()),
+        normalized_foundup_id,
+        "queue_item",
+        reasons,
+    )
 
     candidate_payload = {
         "identity": identity_clean,
         "roadmap_state": roadmap_clean,
         "verified_outcomes": outcomes_clean,
+        "active_work": active_work,
+        "queued_work": queued_work,
     }
     if _contains_secret(candidate_payload):
         reasons.append("secret_bearing_input_rejected")
@@ -153,8 +174,9 @@ def assemble_foundup_brain_current_state(
         "repo_head_sha": str(snapshot.repo_state.get("head_sha", "")),
         "work_state_revision": str(snapshot.work_state.get("revision", "")),
         "selected_slice": str(snapshot.work_state.get("selected_slice", "")),
-        "active_work": tuple(snapshot.work_state.get("worker_claims", ())),
-        "queued_work": tuple(snapshot.work_state.get("wre_queue_items", ())),
+        "active_work": active_work,
+        "queued_work": queued_work,
+        "breadcrumb_scope": str(snapshot.breadcrumbs_state.get("scope", "")),
         "breadcrumb_high_watermark": str(snapshot.breadcrumbs_state.get("high_watermark", "")),
         "breadcrumb_record_count": int(snapshot.breadcrumbs_state.get("record_count", 0)),
         "brain_signature_digest": str(snapshot.brain_state.get("signature_digest", "")),
@@ -219,13 +241,22 @@ def _normalize_roadmap_state(
     scoped_id = str(data.get("foundup_id", foundup_id)).strip()
     if scoped_id and scoped_id != foundup_id:
         reasons.append("roadmap_foundup_id_mismatch")
+    roadmap_id = str(data.get("roadmap_id", "")).strip()
+    version = str(data.get("version", "")).strip()
+    content_digest = str(data.get("content_digest", "")).strip()
+    if not roadmap_id:
+        reasons.append("missing_roadmap_id")
+    if not version:
+        reasons.append("missing_roadmap_version")
+    if not content_digest:
+        reasons.append("missing_roadmap_content_digest")
     return {
         "foundup_id": foundup_id,
-        "roadmap_id": str(data.get("roadmap_id", "")).strip(),
-        "version": str(data.get("version", "")).strip(),
-        "content_digest": str(data.get("content_digest", "")).strip(),
-        "active_item_ids": tuple(str(value) for value in data.get("active_item_ids", ())),
-        "blocked_item_ids": tuple(str(value) for value in data.get("blocked_item_ids", ())),
+        "roadmap_id": roadmap_id,
+        "version": version,
+        "content_digest": content_digest,
+        "active_item_ids": tuple(sorted(str(value) for value in data.get("active_item_ids", ()))),
+        "blocked_item_ids": tuple(sorted(str(value) for value in data.get("blocked_item_ids", ()))),
     }
 
 
@@ -241,16 +272,47 @@ def _normalize_verified_outcome(
     held_out_passed = bool(outcome.get("held_out_passed", False))
     if not accepted or not held_out_passed:
         reasons.append("unverified_outcome_rejected")
-    return {
-        "foundup_id": foundup_id,
+    required_ids = {
         "outcome_id": str(outcome.get("outcome_id", "")).strip(),
         "verification_receipt_id": str(outcome.get("verification_receipt_id", "")).strip(),
         "held_out_receipt_id": str(outcome.get("held_out_receipt_id", "")).strip(),
         "head_sha": str(outcome.get("head_sha", "")).strip(),
-        "accepted": accepted,
-        "held_out_passed": held_out_passed,
         "content_digest": str(outcome.get("content_digest", "")).strip(),
     }
+    for field, value in required_ids.items():
+        if not value:
+            reasons.append(f"missing_verified_outcome_field:{field}")
+    return {
+        "foundup_id": foundup_id,
+        **required_ids,
+        "accepted": accepted,
+        "held_out_passed": held_out_passed,
+    }
+
+
+def _scope_work_records(
+    records: Sequence[Mapping[str, Any]],
+    foundup_id: str,
+    record_kind: str,
+    reasons: list[str],
+) -> tuple[dict[str, Any], ...]:
+    scoped: list[dict[str, Any]] = []
+    for record in records:
+        data = dict(record)
+        record_foundup_id = str(data.get("foundup_id", "")).strip()
+        if record_foundup_id and record_foundup_id != foundup_id:
+            reasons.append(f"cross_foundup_{record_kind}_rejected")
+            continue
+        if record_foundup_id == foundup_id or not record_foundup_id:
+            scoped.append(data)
+    return tuple(sorted(scoped, key=lambda item: json.dumps(item, sort_keys=True, default=str)))
+
+
+def _snapshot_expired(valid_until: str, now_iso: str) -> bool:
+    try:
+        return datetime.fromisoformat(now_iso) > datetime.fromisoformat(valid_until)
+    except (TypeError, ValueError):
+        return True
 
 
 def _contains_secret(value: Any) -> bool:
