@@ -1346,6 +1346,60 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
     return True
 
 
+def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
+    """
+    Dry-run consume the authoritative WRE queue item produced by work-state refresh.
+
+    Env:
+        REDDOG_WRE_QUEUE_CONSUMER_DRYRUN=1          Enable check (default ON)
+        REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_ENFORCED=0 Block startup if not ready
+        REDDOG_AUTHORITATIVE_WORK_STATE_PATH         Existing work-state snapshot
+        REDDOG_WRE_QUEUE_ITEM_ID                     Optional exact queue item id
+    """
+
+    if os.getenv("REDDOG_WRE_QUEUE_CONSUMER_DRYRUN", "1") == "0":
+        logger.info("[REDDOG-WRE-QUEUE] Startup queue consumer dry-run disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_ENFORCED", "0") != "0"
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_main_wre_queue_consumer_bootstrap import (
+            run_reddog_main_wre_queue_consumer_bootstrap,
+        )
+
+        result = run_reddog_main_wre_queue_consumer_bootstrap(
+            repo_root=repo_root,
+            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-WRE-QUEUE] Startup queue consumer failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-WRE-QUEUE] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-WRE-QUEUE] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    status = "PASS" if result.ready else "WARN"
+    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    print(
+        f"[REDDOG-WRE-QUEUE] preflight={status} status={result.status} "
+        f"queue_item={result.queue_item_id or '(none)'} "
+        f"selected_slice={result.selected_slice or '(none)'} "
+        f"next_gate={result.next_required_gate or '(none)'} "
+        f"execution_ready={result.execution_ready} reasons={reasons}"
+    )
+    if result.ready:
+        print(f"[REDDOG-WRE-QUEUE] receipt={result.receipt_id}")
+        return True
+
+    if enforced:
+        print("[REDDOG-WRE-QUEUE] Startup blocked by REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_ENFORCED=1")
+        return False
+    return True
+
+
 def bootstrap_runtime_dae_launches() -> None:
     """Register broker-managed DAE entrypoints for an already running system."""
     daemon = get_central_daemon()
@@ -1519,6 +1573,8 @@ def main():
     if not run_git_main_merge_sentinel_preflight(repo_root):
         return
     if not run_reddog_authoritative_work_state_refresh_preflight(repo_root):
+        return
+    if not run_reddog_wre_queue_consumer_preflight(repo_root):
         return
     if not run_reddog_readonly_operational_bootstrap_preflight(repo_root):
         return

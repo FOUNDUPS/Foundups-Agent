@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_consumer_dryrun.py`: a fail-closed WRE queue
+  consumer dry-run that validates one authoritative work-state queue item
+  against its durable worker claim, freshness receipt, status, expiry, and
+  evidence refs.
+- Added `src/reddog_main_wre_queue_consumer_bootstrap.py` and `main.py`
+  telemetry. Startup now reports whether the queued slice is ready for the
+  next gate, while keeping `execution_ready=false` until signed authority and
+  downstream execution receipts exist.
+- Boundary: no queue mutation, worker spawn, worktree creation, shell command,
+  OpenClaw enqueue, Hermes dispatch, repo mutation, PR creation, reward
+  settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog WRE queue consumer dryrun` did not
+  surface the new module in top results before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_INDEX_GAP_PHASE1`; no runtime
+  re-index performed.
+
 ## 2026-07-14: REDDOG_PERSISTED_DECISION_TO_WORK_STATE_REFRESH_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
