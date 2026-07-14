@@ -2,6 +2,37 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - WRE_WORKER_GIT_CWD_GUARD_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15
+(Priority), WSP 34 (Git Operations), WSP 50 (Pre-Action), WSP 97 (Truth
+Boundary), WSP 22 (ModLog)
+
+**Type**: Worker git cwd pollution guard. Pure preflight evaluator.
+
+**Deliverable**:
+- Added `src/wre_worker_git_cwd_guard.py`: validates proposed worker git
+  argv/cwd combinations before a worker can run a mutating git command.
+- Added `tests/test_wre_worker_git_cwd_guard.py`: regression coverage for the
+  repeated failure mode where `git add`/`commit` runs from the shared checkout,
+  plus read-only git allowance, `git -C` bypass rejection, in-repo worktree
+  rejection, unknown-git fail-closed behavior, and AST denylist coverage.
+
+**Boundary**: This guard does not execute git, inspect live git state, create
+worktrees, spawn workers, enqueue OpenClaw, dispatch Hermes, mutate repository
+files, write PatternMemory, or re-index HoloIndex. It is intended as a reusable
+preflight for future OpenClaw/Hermes/WRE worker launchers and for RedDog
+resident-loop execution stages.
+
+**HoloIndex**: Not re-indexed in this slice. Existing stale branch
+`feat/wre-worktree-cwd-hazard-guard-phase1` was observed as unsafe/stale and
+left untouched; this slice is based on current `main`.
+
+**Verification**: Focused guard tests and WRE safety-adjacent tests to be run
+before promotion.
+
+---
+
 ### [2026-07-14] - WRE_GIT_MAIN_MERGE_SENTINEL_OPT_IN_GUARD_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
