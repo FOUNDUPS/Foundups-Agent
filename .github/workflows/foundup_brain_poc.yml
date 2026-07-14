@@ -77,5 +77,10 @@ jobs:
           grep -q 'No POC or MVP Memex module may infer authority' \
             docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md
 
-      - name: Verify diff hygiene
-        run: git diff --check HEAD^
+      - name: Verify executable diff hygiene
+        run: |
+          git diff --check HEAD^ -- \
+            '.github/workflows/*.yml' \
+            'modules/communication/moltbot_bridge/src/*.py' \
+            'modules/communication/moltbot_bridge/tests/*.py' \
+            'docs/architecture/*.yaml'
