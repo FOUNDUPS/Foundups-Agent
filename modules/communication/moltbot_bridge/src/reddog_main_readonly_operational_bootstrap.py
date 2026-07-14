@@ -2,9 +2,10 @@
 
 This module composes the already-built RedDog context snapshot, Fusion
 assignment gate, and OpenClaw read-only audit swarm planner into a startup
-check for ``main.py``. It plans only; it does not call models, spawn workers,
-enqueue OpenClaw, dispatch Hermes, mutate queues, write files, or re-index
-HoloIndex.
+check for ``main.py``. By default it plans only; when explicitly enabled by
+the host it publishes the accepted read-only audit plan as pending AgentDB
+tasks. It does not call models, spawn workers, dispatch Hermes, write repo
+files, create worktrees, or re-index HoloIndex.
 """
 
 from __future__ import annotations
@@ -24,6 +25,12 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     DEFAULT_AUDIT_LANES,
     ReadOnlyAuditSwarmPlan,
     plan_reddog_openclaw_readonly_audit_swarm,
+)
+from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
+    AgentDbReadOnlyAuditTaskWriter,
+    ReadOnlyAuditSwarmEnqueueResult,
+    ReadOnlyAuditTaskWriter,
+    enqueue_reddog_readonly_audit_swarm,
 )
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     EvidenceBundle,
@@ -67,6 +74,11 @@ class RedDogMainReadonlyBootstrapResult:
     rejection_reasons: tuple[str, ...]
     changed_paths: tuple[str, ...]
     allowed_read_targets: tuple[str, ...]
+    enqueue_attempted: bool = False
+    enqueue_decision: Optional[str] = None
+    enqueue_receipt_id: Optional[str] = None
+    enqueue_task_count: int = 0
+    enqueue_rejection_reasons: tuple[str, ...] = ()
     no_model_call_performed: bool = True
     no_worker_spawn_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -94,6 +106,9 @@ def run_reddog_main_readonly_operational_bootstrap(
     work_state_snapshot_override: Mapping[str, Any] | None = None,
     holoindex_receipt_override: HoloIndexFreshnessReceipt | Mapping[str, Any] | None = None,
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
+    enqueue_readonly_audit_tasks: bool = False,
+    enqueue_writer: ReadOnlyAuditTaskWriter | None = None,
+    seen_assignment_ids: Optional[set[str]] = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
 
@@ -198,6 +213,26 @@ def run_reddog_main_readonly_operational_bootstrap(
             swarm_plan=plan,
         )
 
+    enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None
+    if enqueue_readonly_audit_tasks:
+        writer = enqueue_writer if enqueue_writer is not None else AgentDbReadOnlyAuditTaskWriter()
+        enqueue_result = enqueue_reddog_readonly_audit_swarm(
+            plan=plan,
+            writer=writer,
+            seen_assignment_ids=seen_assignment_ids,
+        )
+        if not enqueue_result.accepted:
+            return _not_ready(
+                reasons=("readonly_audit_enqueue_rejected", *enqueue_result.rejection_reasons),
+                changed_paths=paths,
+                allowed_read_targets=targets,
+                snapshot=snapshot,
+                evidence_bundle=evidence_bundle,
+                gate=gate,
+                swarm_plan=plan,
+                enqueue_result=enqueue_result,
+            )
+
     return RedDogMainReadonlyBootstrapResult(
         ready=True,
         status=REDDOG_MAIN_BOOTSTRAP_READY,
@@ -210,6 +245,13 @@ def run_reddog_main_readonly_operational_bootstrap(
         rejection_reasons=(),
         changed_paths=paths,
         allowed_read_targets=targets,
+        enqueue_attempted=enqueue_readonly_audit_tasks,
+        enqueue_decision=enqueue_result.decision if enqueue_result else None,
+        enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
+        enqueue_task_count=len(enqueue_result.tasks) if enqueue_result else 0,
+        enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
+        no_openclaw_enqueue_performed=not bool(enqueue_result and enqueue_result.accepted),
+        no_queue_mutation_performed=not bool(enqueue_result and enqueue_result.accepted),
     )
 
 
@@ -253,6 +295,7 @@ def _not_ready(
     evidence_bundle: EvidenceBundle | None = None,
     gate: FusionAssignmentGateDecision | None = None,
     swarm_plan: ReadOnlyAuditSwarmPlan | None = None,
+    enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     determination_id = None
     if gate and gate.determination_binding:
@@ -269,6 +312,11 @@ def _not_ready(
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason).strip())),
         changed_paths=tuple(changed_paths),
         allowed_read_targets=tuple(allowed_read_targets),
+        enqueue_attempted=enqueue_result is not None,
+        enqueue_decision=enqueue_result.decision if enqueue_result else None,
+        enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
+        enqueue_task_count=len(enqueue_result.tasks) if enqueue_result and enqueue_result.accepted else 0,
+        enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
     )
 
 
