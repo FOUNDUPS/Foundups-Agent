@@ -1,0 +1,119 @@
+# WSP 60 Addendum: FoundUp Memex Composition
+
+**Parent protocol:** `WSP_framework/src/WSP_60_Module_Memory_Architecture.md`
+**Status:** Active POC addendum
+**Date:** 2026-07-14
+**Authority:** WSP_60 remains the controlling protocol. This addendum does not create a new WSP.
+
+## Purpose
+
+Define the FoundUp-level composition layer above module-owned memory without changing WSP_60 ownership, isolation, HoloIndex, or persistence boundaries.
+
+The canonical term is **FoundUp Memex**.
+
+```text
+FoundUp Memex
+= complete evolving cognition system of one FoundUp DAE
+
+Brain
+= durable-consolidation component inside the Memex
+
+Breadcrumbs
+= episodic continuity component
+
+RedDog
+= orchestrator that launches, builds, runs, audits, and improves FoundUps
+```
+
+## WSP_60 relationship
+
+WSP_60 already defines:
+
+- module-owned persistent memory;
+- semantic, episodic, procedural, and working memory;
+- Breadcrumb coordination;
+- HoloIndex retrieval and pattern memory;
+- FoundUp DAE memory isolation;
+- verified operational outcome writeback.
+
+The FoundUp Memex composes those existing surfaces for one `foundup_id`. It does not replace them and does not introduce a parallel general-purpose memory database.
+
+## Required Memex sources
+
+A current-state Memex view must preserve separate receipts for:
+
+1. canonical repository state;
+2. authoritative work state;
+3. HoloIndex freshness and retrieval state;
+4. existing Brain metadata;
+5. scoped Breadcrumb continuity;
+6. bound roadmap state;
+7. independently verified outcomes;
+8. governed external research receipts when required.
+
+Every view and derived proposal must bind to the exact `snapshot_id` used to produce it.
+
+## Authority and truth boundaries
+
+- HoloIndex remains canonical for repository retrieval facts, subject to freshness receipts.
+- Current repository and authoritative work state override stale historical interpretation.
+- Brain and Breadcrumbs remain distinct sources with distinct receipts.
+- Raw source evidence is not replaced by summaries.
+- RedDog may assemble and reason over a Memex view but may not silently rewrite durable memory.
+- Agents submit evidence-backed learning candidates; a later governed consolidation gate owns durable Brain mutation.
+- Roadmaps change only through governed delta proposals and acceptance gates.
+- Cross-FoundUp records must fail closed when `foundup_id` does not match.
+
+## POC boundary
+
+The first POC is `foundups-agent` with one RedDog and one FoundUp Memex.
+
+Implemented slice:
+
+```text
+FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1
+```
+
+The POC is read-only. It performs no Brain write, Breadcrumb write, roadmap mutation, HoloIndex mutation, queue mutation, worker spawn, repository mutation, CABR authority, stakeholder authority, delegate authority, or voting authority.
+
+## Deferred prototype concerns
+
+The following remain specified but not implemented:
+
+- multi-RedDog collaboration;
+- multi-FoundUp durable isolation;
+- CABR-weighted contribution credibility;
+- stakeholder and revocable delegate authority;
+- governance thresholds and Sybil resistance;
+- personal 012/0102 Memex application.
+
+These require separate WSP_97 analysis and tested contracts before runtime authority is granted.
+
+## Related WSPs
+
+- **WSP_60:** controlling memory ownership and architecture protocol.
+- **WSP_80:** DAE orchestration and FoundUp-level coordination.
+- **WSP_84:** verify existing code and memory surfaces before adding or replacing implementations.
+- **WSP_82:** maintain citations and cross-references between WSP, architecture, ADR, roadmap, ModLog, and tests.
+- **WSP_83:** attach Memex documentation to the canonical documentation tree.
+- **WSP_22:** record implementation evolution in ModLog and TestModLog.
+- **WSP_87:** retrieve code and documentation through HoloIndex before direct reconstruction.
+- **WSP_97:** preserve OBSERVED, INFERRED, SPECIFIED_NOT_IMPLEMENTED, and UNKNOWN truth boundaries.
+
+## Canonical implementation references
+
+- `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md`
+- `docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md`
+- `docs/architecture/architecture_registry.yaml`
+- `modules/communication/moltbot_bridge/src/foundup_memex_current_state.py`
+- `modules/communication/moltbot_bridge/ROADMAP.md`
+
+## Framework and knowledge synchronization
+
+`WSP_framework` is authoritative for edits. After validation, this addendum must be mirrored byte-for-byte to:
+
+```text
+WSP_knowledge/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md
+```
+
+The knowledge copy is a backup/reference mirror and must not diverge from the framework copy.
