@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_ORCHESTRATION_PLAN_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added
+  `src/reddog_main_resident_queue_orchestration_plan_bootstrap.py`: a guarded
+  `main.py` adapter for the resident queue orchestration planner.
+- Wired `main.py` to print the next queue-chain bridge after authoritative
+  work-state refresh and WRE queue-consumer dry-run, warning-only by default
+  unless `REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_ENFORCED=1`.
+- The adapter reads existing work-state and optional chain-results JSON only
+  from outside the repository checkout, then calls the pure planner from
+  `REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_PHASE1`.
+- Boundary: startup reporting only; no bridge invocation, authority issuance,
+  signature verification, worker spawn, worktree creation, file edit, shell
+  command, PR publishing, PatternMemory write, OpenClaw enqueue, Hermes
+  dispatch, reward settlement, or HoloIndex re-index.
+- HoloIndex discoverability is covered by the prior planner INDEX_GAP
+  (`HOLOINDEX_REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_INDEX_GAP_PHASE1`);
+  this bootstrap slice performs no runtime re-index.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
