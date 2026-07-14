@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authorized_held_out_regression_gate_invoke.py`:
+  an explicit bridge from an accepted queue-authorized verified outcome
+  ratchet result to the existing WRE held-out recursive-improvement regression
+  gate.
+- The guard binds the authoritative ratchet receipt to the verifier receipt and
+  work-order ID before evaluating held-out regression evidence.
+- Boundary: deterministic held-out gate evaluation only; no test execution,
+  PatternMemory write, PR publish, mark-ready, merge, reward settlement,
+  OpenClaw enqueue, Hermes dispatch, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog queue authorized held out regression
+  gate invoke` surfaced adjacent policy, runtime-invocation, receipt, WSP, and
+  recursive self-governance documents, but did not surface this new held-out
+  bridge before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed. The probe also reported a pre-existing
+  `WSP-GUARDIAN` suspicious-Unicode warning unrelated to the new ASCII-clean
+  files.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
