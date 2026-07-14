@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authorized_worktree_create_invoke.py`: an
+  explicit bridge from accepted queue-authorized executor-plan and
+  execution-valve results to the existing isolated worktree-create
+  orchestrator.
+- The guard requires an injected worktree runner, preserves worktree-create
+  rejection reasons, and performs no task execution, file edits, shell command,
+  OpenClaw enqueue, Hermes dispatch, PR creation, reward settlement, or
+  HoloIndex re-index.
+- Boundary: this may create an isolated worktree only through the injected
+  runner after the queue-authorized valve opens; it does not execute work inside
+  that worktree.
+- HoloIndex read-only probe for `RedDog queue authorized worktree create invoke`
+  surfaced the existing worktree-create and runner modules, but did not surface
+  this new bridge before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
