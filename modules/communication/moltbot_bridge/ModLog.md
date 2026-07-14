@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authorized_execution_valve_invoke.py`: an
+  explicit bridge that evaluates the existing RedDog execution valve from a
+  queue-authorized work-order invocation receipt and queue-authorized executor
+  dry-run plan.
+- The guard reconstructs the existing valve request shape, preserves
+  receipt-chain rejection reasons, and only accepts when the valve state matches
+  the expected explicit state, defaulting to `VALVE_OPEN_WORKTREE_CREATE`.
+- Boundary: no worker spawn, worktree creation, shell command, OpenClaw enqueue,
+  Hermes dispatch, repo mutation, PR creation, reward settlement, or HoloIndex
+  re-index.
+- HoloIndex read-only probe for `RedDog queue authorized execution valve invoke`
+  surfaced the existing valve and live-enqueue invoke modules, but did not
+  surface this new bridge before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
