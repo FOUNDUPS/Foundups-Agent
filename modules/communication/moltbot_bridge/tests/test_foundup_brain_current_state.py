@@ -32,12 +32,7 @@ REVISION = "sha256:foundup-brain-work-state"
 FOUNDUP_ID = "foundups-agent"
 
 
-def _snapshot(
-    *,
-    brain_available: bool = True,
-    worker_claims=None,
-    queue_items=None,
-):
+def _snapshot(*, brain_available: bool = True, worker_claims=None, queue_items=None):
     holo_receipt = HoloIndexFreshnessReceipt(
         schema_version="holoindex_freshness_receipt.v1",
         generated_at=NOW,
@@ -163,7 +158,6 @@ def test_assembles_deterministic_read_only_foundup_brain_view() -> None:
     snapshot = _snapshot()
     first = _assemble(snapshot=snapshot)
     second = _assemble(snapshot=snapshot)
-
     assert first.accepted is True
     assert first.status == FOUNDUP_BRAIN_VIEW_ACCEPTED
     assert first.view is not None and second.view is not None
@@ -183,7 +177,6 @@ def test_assembles_deterministic_read_only_foundup_brain_view() -> None:
 
 def test_missing_brain_receipt_fails_closed_for_foundup_brain_poc() -> None:
     result = _assemble(snapshot=_snapshot(brain_available=False), verified_outcomes=[])
-
     assert result.accepted is False
     assert result.status == FOUNDUP_BRAIN_VIEW_REJECTED
     assert result.view is None
@@ -196,7 +189,6 @@ def test_cross_foundup_identity_roadmap_and_outcome_are_rejected() -> None:
         roadmap_state=_roadmap("other-foundup"),
         verified_outcomes=[_verified_outcome("other-foundup")],
     )
-
     assert result.accepted is False
     assert "identity_foundup_id_mismatch" in result.rejection_reasons
     assert "roadmap_foundup_id_mismatch" in result.rejection_reasons
@@ -209,16 +201,14 @@ def test_cross_foundup_work_claim_and_queue_item_are_rejected() -> None:
         queue_items=[{"queue_item_id": "foreign-queue", "foundup_id": "other-foundup"}],
     )
     result = _assemble(snapshot=snapshot, verified_outcomes=[])
-
     assert result.accepted is False
-    assert "cross_foundup_worker_claim_rejected" in result.rejection_reasons
-    assert "cross_foundup_queue_item_rejected" in result.rejection_reasons
+    assert "worker_claim_foundup_id_mismatch" in result.rejection_reasons
+    assert "queue_item_foundup_id_mismatch" in result.rejection_reasons
 
 
 def test_legacy_unscoped_work_record_is_visible_only_in_single_foundup_poc() -> None:
     snapshot = _snapshot(worker_claims=[{"claim_id": "legacy-claim", "status": "ACTIVE"}])
     result = _assemble(snapshot=snapshot, verified_outcomes=[])
-
     assert result.accepted is True
     assert result.view is not None
     assert result.view.current_state["active_work"][0]["claim_id"] == "legacy-claim"
@@ -226,7 +216,6 @@ def test_legacy_unscoped_work_record_is_visible_only_in_single_foundup_poc() -> 
 
 def test_missing_roadmap_binding_fails_closed() -> None:
     result = _assemble(roadmap_state={"foundup_id": FOUNDUP_ID}, verified_outcomes=[])
-
     assert result.accepted is False
     assert "missing_roadmap_id" in result.rejection_reasons
     assert "missing_roadmap_version" in result.rejection_reasons
@@ -235,7 +224,6 @@ def test_missing_roadmap_binding_fails_closed() -> None:
 
 def test_expired_snapshot_fails_closed() -> None:
     result = _assemble(now_iso=EXPIRED_NOW, verified_outcomes=[])
-
     assert result.accepted is False
     assert "snapshot_expired" in result.rejection_reasons
 
@@ -245,7 +233,6 @@ def test_unverified_or_incomplete_outcome_cannot_enter_current_brain_view() -> N
     outcome["held_out_passed"] = False
     outcome["verification_receipt_id"] = ""
     result = _assemble(verified_outcomes=[outcome])
-
     assert result.accepted is False
     assert "unverified_outcome_rejected" in result.rejection_reasons
     assert "missing_verified_outcome_field:verification_receipt_id" in result.rejection_reasons
@@ -255,7 +242,6 @@ def test_secret_bearing_identity_metadata_is_rejected() -> None:
     identity = _identity()
     identity["purpose"] = "Use sk-example-secret in runtime"
     result = _assemble(identity=identity, verified_outcomes=[])
-
     assert result.accepted is False
     assert "secret_bearing_input_rejected" in result.rejection_reasons
     assert result.no_brain_write_performed is True
