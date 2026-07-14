@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_READONLY_AUDIT_DECISION_PERSISTENCE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_readonly_audit_decision_persistence.py`: an AgentDB-backed
+  durable store for accepted RedDog read-only audit next-action receipts.
+- Wired `src/reddog_main_readonly_operational_bootstrap.py` and `main.py` with an
+  opt-in decision persistence bridge. `OPENCLAW_AUTO_TASKS_ENABLED=1` enables it
+  by default, and `REDDOG_READONLY_AUDIT_DECISION_PERSIST_ENABLED=0/1` overrides
+  that default.
+- Added tests for accepted receipt persistence, idempotent duplicate writes,
+  same-swarm conflict rejection, rejected/side-effect receipt refusal, bootstrap
+  persistence wiring, and main preflight environment routing.
+- Boundary: this persists accepted decision receipts only. It does not execute
+  the decision, enqueue new work from the decision, call models, run shell/git,
+  dispatch Hermes/WRE, create worktrees, mutate repo files, or re-index HoloIndex.
+- HoloIndex read-only probe for `RedDog read-only audit decision persistence`
+  did not surface the new module in top results before indexing. Recorded as
+  `HOLOINDEX_REDDOG_READONLY_AUDIT_DECISION_PERSISTENCE_INDEX_GAP_PHASE1`; no
+  runtime re-index performed.
+
 ## 2026-07-14: REDDOG_MAIN_READONLY_AUDIT_DECISION_TELEMETRY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

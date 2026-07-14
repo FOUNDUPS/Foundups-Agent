@@ -27,6 +27,11 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
     READONLY_AUDIT_REPORT_COLLECTION_ACCEPT,
     READONLY_AUDIT_REPORT_COLLECTION_REJECT,
 )
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_persistence import (
+    READONLY_AUDIT_DECISION_PERSIST_ACCEPT,
+    READONLY_AUDIT_DECISION_PERSIST_REJECT,
+    ReadOnlyAuditDecisionPersistReason,
+)
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_runtime import (
     ACTION_FIX,
     ACTION_RESEARCH_MORE,
@@ -121,6 +126,24 @@ class _FakeReportStore:
 
     def store_readonly_audit_report(self, record):
         return {"ok": False, "reason": "not_used"}
+
+
+class _FakeDecisionStore:
+    def __init__(self, *, ok: bool = True) -> None:
+        self.ok = ok
+        self.records: list[object] = []
+
+    def store_readonly_audit_decision(self, record):
+        self.records.append(record)
+        if not self.ok:
+            return {"ok": False, "reason": "writer_rejected"}
+        return {"ok": True, "stored": True, "idempotent": False}
+
+    def load_latest_readonly_audit_decision(self):
+        return None
+
+    def load_readonly_audit_decision(self, decision_id: str):
+        return None
 
 
 def _reports_for_bootstrap_result(
@@ -260,6 +283,69 @@ def test_bootstrap_collects_semantic_findings_into_next_action_decision() -> Non
     assert result.readonly_audit_decision_action == ACTION_FIX
     assert result.readonly_audit_decision_next_slice == "REDDOG_RUNTIME_RECONCILER_PHASE1"
     assert result.readonly_audit_decision_id and result.readonly_audit_decision_id.startswith("sha256:")
+
+
+def test_bootstrap_persists_accepted_next_action_decision_when_enabled() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+    decision_store = _FakeDecisionStore()
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=report_store,
+        persist_readonly_audit_decision=True,
+        decision_store=decision_store,
+    )
+
+    assert result.ready is True
+    assert result.readonly_audit_decision_action == ACTION_FIX
+    assert result.readonly_audit_decision_persist_attempted is True
+    assert result.readonly_audit_decision_persist_status == READONLY_AUDIT_DECISION_PERSIST_ACCEPT
+    assert result.readonly_audit_decision_persist_stored is True
+    assert result.readonly_audit_decision_persist_rejection_reasons == ()
+    assert len(decision_store.records) == 1
+    assert decision_store.records[0].action == ACTION_FIX
+
+
+def test_bootstrap_fails_closed_when_decision_persistence_rejects() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+    decision_store = _FakeDecisionStore(ok=False)
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=report_store,
+        persist_readonly_audit_decision=True,
+        decision_store=decision_store,
+    )
+
+    assert result.ready is False
+    assert result.readonly_audit_decision_persist_attempted is True
+    assert result.readonly_audit_decision_persist_status == READONLY_AUDIT_DECISION_PERSIST_REJECT
+    assert ReadOnlyAuditDecisionPersistReason.STORE_REJECTED in result.readonly_audit_decision_persist_rejection_reasons
+    assert "readonly_audit_decision_persist_rejected" in result.rejection_reasons
 
 
 def test_bootstrap_missing_reports_enqueue_when_enabled() -> None:
@@ -511,6 +597,7 @@ def test_main_preflight_reports_ready_without_blocking_menu(capsys) -> None:
     assert "decision_attempted=True" in output
     assert "decision_action=FIX" in output
     assert "decision_next_slice=REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1" in output
+    assert "decision_persist_attempted=False" in output
 
 
 def test_main_preflight_enables_enqueue_when_openclaw_auto_tasks_enabled() -> None:
@@ -545,6 +632,7 @@ def test_main_preflight_enables_enqueue_when_openclaw_auto_tasks_enabled() -> No
 
     assert mocked.call_args.kwargs["enqueue_readonly_audit_tasks"] is True
     assert mocked.call_args.kwargs["collect_readonly_audit_reports"] is True
+    assert mocked.call_args.kwargs["persist_readonly_audit_decision"] is True
 
 
 def test_main_preflight_explicit_enqueue_disable_overrides_openclaw_auto_tasks() -> None:
@@ -580,6 +668,7 @@ def test_main_preflight_explicit_enqueue_disable_overrides_openclaw_auto_tasks()
 
     assert mocked.call_args.kwargs["enqueue_readonly_audit_tasks"] is False
     assert mocked.call_args.kwargs["collect_readonly_audit_reports"] is True
+    assert mocked.call_args.kwargs["persist_readonly_audit_decision"] is True
 
 
 def test_main_preflight_explicit_collection_disable_overrides_openclaw_auto_tasks() -> None:
@@ -615,6 +704,43 @@ def test_main_preflight_explicit_collection_disable_overrides_openclaw_auto_task
 
     assert mocked.call_args.kwargs["collect_readonly_audit_reports"] is False
     assert mocked.call_args.kwargs["enqueue_readonly_audit_tasks"] is True
+    assert mocked.call_args.kwargs["persist_readonly_audit_decision"] is True
+
+
+def test_main_preflight_explicit_decision_persist_disable_overrides_openclaw_auto_tasks() -> None:
+    import main
+
+    ready_result = RedDogMainReadonlyBootstrapResult(
+        ready=True,
+        status=REDDOG_MAIN_BOOTSTRAP_READY,
+        snapshot_receipt_id="sha256:snapshot",
+        context_view_id="sha256:view",
+        evidence_bundle_id="sha256:evidence",
+        determination_id="sha256:determination",
+        swarm_id="sha256:swarm",
+        assignment_count=5,
+        rejection_reasons=(),
+        changed_paths=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+        allowed_read_targets=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+    )
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap.run_reddog_main_readonly_operational_bootstrap",
+        return_value=ready_result,
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
+                "OPENCLAW_AUTO_TASKS_ENABLED": "1",
+                "REDDOG_READONLY_AUDIT_DECISION_PERSIST_ENABLED": "0",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["collect_readonly_audit_reports"] is True
+    assert mocked.call_args.kwargs["enqueue_readonly_audit_tasks"] is True
+    assert mocked.call_args.kwargs["persist_readonly_audit_decision"] is False
 
 
 def test_bootstrap_module_has_no_runtime_mutation_or_execution_imports() -> None:
