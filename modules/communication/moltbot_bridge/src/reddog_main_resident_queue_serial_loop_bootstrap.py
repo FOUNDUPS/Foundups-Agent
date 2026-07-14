@@ -114,6 +114,9 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     signer_socket_connector: Optional[SignerSocketConnector] = None,
     signature_verifier_backend: str | None = None,
+    worktree_runner: Any = None,
+    worktree_runner_mode: str | None = None,
+    worktree_runner_timeout_s: int = 120,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
@@ -169,6 +172,15 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if valve_reasons:
         return _not_ready(valve_reasons, chain_results_path=None)
 
+    resolved_worktree_runner, runner_reasons = _build_worktree_runner(
+        root,
+        injected_runner=worktree_runner,
+        mode=worktree_runner_mode,
+        timeout_s=worktree_runner_timeout_s,
+    )
+    if runner_reasons:
+        return _not_ready(runner_reasons, chain_results_path=None)
+
     dependency_bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=root,
         authority_state_path=authority_state_path,
@@ -210,6 +222,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         ),
         repo_root=root,
         valve_environment=valve_environment,
+        worktree_runner=resolved_worktree_runner,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))
@@ -305,6 +318,29 @@ def _load_work_orders(
     return work_orders, ()
 
 
+def _build_worktree_runner(
+    repo_root: Path,
+    *,
+    injected_runner: Any,
+    mode: str | None,
+    timeout_s: int,
+) -> tuple[Any, tuple[str, ...]]:
+    if injected_runner is not None:
+        return injected_runner, ()
+    normalized = str(mode or "").strip().lower()
+    if not normalized:
+        return None, ()
+    if normalized not in {"real", "git_worktree"}:
+        return None, ("unsupported_worktree_runner_mode",)
+    if int(timeout_s) <= 0:
+        return None, ("invalid_worktree_runner_timeout",)
+    from modules.communication.moltbot_bridge.src.reddog_wre_worktree_runner import (
+        RealRedDogWorktreeRunner,
+    )
+
+    return RealRedDogWorktreeRunner(repo_root, timeout_s=int(timeout_s)), ()
+
+
 def _resolve_output_outside_repo(
     repo_root: Path,
     value: Path | str | None,
@@ -392,6 +428,8 @@ def _from_loop(
         runtime_dependency_bundle_requested=runtime_dependency_bundle_requested,
         rejection_reasons=tuple(loop.rejection_reasons),
         no_signature_verification_performed="authority_verification" not in loop.dispatched_stages,
+        no_worktree_created="worktree_create" not in loop.dispatched_stages,
+        no_repo_mutation_performed="worktree_create" not in loop.dispatched_stages,
     )
 
 

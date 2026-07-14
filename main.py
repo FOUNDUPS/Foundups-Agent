@@ -1539,6 +1539,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
+        REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE           Optional `real` runner mode
+        REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S      Optional runner timeout
     """
 
     if os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "0") == "0":
@@ -1565,6 +1567,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         signer_socket_max_response_bytes = int(signer_socket_max_value) if signer_socket_max_value else 16384
     except ValueError:
         signer_socket_max_response_bytes = 0
+    try:
+        worktree_runner_timeout_value = os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S", "")
+        worktree_runner_timeout_s = int(worktree_runner_timeout_value) if worktree_runner_timeout_value else 120
+    except ValueError:
+        worktree_runner_timeout_s = 0
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
@@ -1585,6 +1592,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signer_socket_timeout_s=signer_socket_timeout_s,
             signer_socket_max_response_bytes=signer_socket_max_response_bytes,
             signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
+            worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
+            worktree_runner_timeout_s=worktree_runner_timeout_s,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
             max_steps=max_steps,

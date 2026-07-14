@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_WORKTREE_CREATE_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can inject a worktree runner and
+  advance one more stage from `execution_valve` to `worktree_create`.
+- Added `main.py` env wiring for
+  `REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE=real` and
+  `REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S`; no runner is constructed
+  by default.
+- Added tests proving explicit fake-runner worktree creation, fail-closed
+  behavior without a runner, unsupported runner-mode rejection, token
+  non-leakage, and preserved no-worker/no-task/no-OpenClaw/no-Hermes/no-PR
+  boundaries.
+- Boundary: worktree creation only when the resident serial loop is explicitly
+  enabled, authority is signed and verified, the execution valve is open, and a
+  runner is explicitly injected/configured. No task execution, no file edits,
+  no OpenClaw enqueue, no Hermes dispatch, no PR, no reward settlement, no
+  PatternMemory client, and no HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog resident queue worktree create bootstrap
+  real runner main serial loop` ranked the existing worktree runner but did not
+  rank the bootstrap seam; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_WORKTREE_CREATE_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_PLAN_VALVE_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
