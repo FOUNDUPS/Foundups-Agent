@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_ISOLATED_SIGNER_SOCKET_CLIENT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added `src/reddog_isolated_signer_socket_client.py`: a fail-closed client
+  for an already-running isolated signer service. It sends existing
+  `SigningRequest` payloads over a validated local socket and converts signer
+  JSON responses into existing `SigningResponse` records.
+- Added tests proving missing/relative/inside-repo/device socket paths reject,
+  request JSON is deterministic and bounded, accepted attested responses
+  round-trip, malformed/oversized/connector failures reject, signer rejections
+  preserve no-secret-material guarantees, and AST denial of shell/env/HoloIndex
+  /OpenClaw/Hermes/vault/key-loading imports.
+- Boundary: client side only. No signer daemon is spawned, no private key or
+  vault secret is loaded, no command is executed, no repository file is mutated,
+  and no signature is treated as execution authority by this slice.
+- HoloIndex read-only probe for `RedDog isolated signer socket client
+  SigningRequest SigningResponse` surfaced signed-receipt/signature-verifier
+  code and the E0 contract, but not this new client before indexing. Recorded
+  as `HOLOINDEX_REDDOG_ISOLATED_SIGNER_SOCKET_CLIENT_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_RUNTIME_DEPENDENCY_BUNDLE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
