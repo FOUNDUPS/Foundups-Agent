@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_VERIFIED_OUTCOME_RATCHET_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_verified_outcome_ratchet_handler.py`: a
+  concrete injected handler for the resident queue `verified_outcome_ratchet`
+  stage.
+- The handler reads the already-recorded `verified_draft_pr_publish` result
+  from the chain-results store and invokes the existing queue-authorized
+  verified outcome ratchet with an injected request and store.
+- Boundary: verified outcome receipt recording only; no shell command, PR
+  publish, mark-ready, merge, OpenClaw enqueue, Hermes dispatch, reward
+  settlement, or HoloIndex re-index. PatternMemory remains disabled unless a
+  caller supplies the separate explicit flag and injected sink.
+- HoloIndex read-only probe for `RedDog resident queue verified outcome ratchet
+  handler` surfaced adjacent operational-spine/generic-spine results, but not
+  this new handler before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_VERIFIED_OUTCOME_RATCHET_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
