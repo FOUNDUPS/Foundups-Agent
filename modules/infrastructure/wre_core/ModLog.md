@@ -2,6 +2,47 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - WRE_AUTORESEARCH_GIT_RUNNER_CONTRACT_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
+WSP 48 (Recursive Self-Improvement), WSP 50 (Pre-Action), WSP 97 (Truth
+Boundary), WSP 22 (ModLog)
+
+**Type**: AutoResearcher contract/dry-run loop. Sandbox-only edit/evaluate
+proposal path; no live repository mutation.
+
+**Deliverable**:
+- Added `src/wre_auto_researcher.py`: a WSP-48 AutoResearcher loop with an
+  injected `IGitRunner`, default `DryRunGitRunner`, sandboxed `results.tsv`,
+  planned restore/commit/diff receipts, and fail-closed non-dry-run mode.
+- Added `src/wre_research_evaluator.py`: read-only ROC evaluator for literal
+  target configuration. Target files are parsed with AST/literal evaluation and
+  are never imported or executed.
+- Added `src/wre_research_target.py` and `src/wre_research_program.md`: bounded
+  optimization target and instructions for literal dictionary proposals.
+- Added `tests/test_wre_auto_researcher.py`: dry-run isolation, source
+  non-mutation, repo-root write rejection, sandboxed TSV path, fail-closed
+  commit mode, AST denylist, and target-code non-execution coverage.
+
+**Boundary**: This slice does not execute git, run subprocesses, mutate source
+files, commit, restore, enqueue OpenClaw/Hermes work, write PatternMemory, or
+perform live WRE self-improvement. Future live runners remain
+`SPECIFIED_NOT_IMPLEMENTED` pending signed authority, fresh permission,
+`VALVE_OPEN_WORKTREE_CREATE`, isolated worktree, scoped paths, receipt chain,
+and independent verifier acceptance.
+
+**HoloIndex**: Read-only/fast probes for "WRE AutoResearcher git runner
+contract", "wre auto researcher dry run git runner", and "recursive improvement
+autoresearch WRE" surfaced adjacent WRE/Skillz concepts but not this restored
+contract path. Recorded
+`HOLOINDEX_WRE_AUTORESEARCH_GIT_RUNNER_CONTRACT_INDEX_GAP_PHASE1`; no runtime
+re-index performed.
+
+**Verification**: AutoResearcher tests 7 passed; py_compile passed; git diff
+--check clean; new files ASCII and NUL clean.
+
+---
+
 ### [2026-07-14] - REDDOG_DAEMON_SELF_AUDIT_DRYRUN_PROPOSAL_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
