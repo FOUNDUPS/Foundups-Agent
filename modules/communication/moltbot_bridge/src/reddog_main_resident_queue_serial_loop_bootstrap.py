@@ -23,6 +23,10 @@ from typing import Any, Mapping, Optional
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
+    REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED,
+    load_reddog_main_resident_queue_runtime_dependency_bundle,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop import (
     ResidentQueueSerialLoopResult,
     run_reddog_resident_queue_serial_loop,
@@ -50,6 +54,8 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     chain_results_path: Optional[str]
     store_revision: Optional[str]
     rejection_reasons: tuple[str, ...]
+    runtime_dependency_bundle_status: str = REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED
+    runtime_dependency_bundle_requested: bool = False
     no_signing_performed: bool = True
     no_signature_verification_performed: bool = True
     no_worker_spawn_performed: bool = True
@@ -73,8 +79,12 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     work_state_path: Path | str | None,
     chain_results_path: Path | str | None,
     authority_profile_path: Path | str | None,
+    authority_state_path: Path | str | None = None,
+    permission_snapshots_path: Path | str | None = None,
+    principal_authority_records_path: Path | str | None = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
+    now_epoch: int | None = None,
     max_steps: int = 1,
 ) -> RedDogMainResidentQueueSerialLoopBootstrapResult:
     """Load runtime inputs and run the bounded resident queue serial loop."""
@@ -112,12 +122,32 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
 
+    dependency_bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=root,
+        authority_state_path=authority_state_path,
+        permission_snapshots_path=permission_snapshots_path,
+        principal_authority_records_path=principal_authority_records_path,
+        now_epoch=now_epoch,
+    )
+    if dependency_bundle.accepted is not True:
+        return _not_ready(
+            dependency_bundle.rejection_reasons,
+            chain_results_path=None,
+            runtime_dependency_bundle_status=dependency_bundle.status,
+            runtime_dependency_bundle_requested=dependency_bundle.requested,
+        )
+
     store = AtomicJsonResidentQueueChainResultsStore(chain_path)
     registry = build_reddog_resident_queue_stage_handler_registry(
         work_state_snapshot=snapshot,
         chain_results_store=store,
         authority_profile=profile,
         now_iso=now_iso or "",
+        authority_store=dependency_bundle.authority_store,
+        signer=dependency_bundle.signer,
+        principal_resolver=dependency_bundle.principal_resolver,
+        snapshot_resolver=dependency_bundle.snapshot_resolver,
+        now_epoch=dependency_bundle.now_epoch,
     )
     loop = run_reddog_resident_queue_serial_loop(
         explicit_resident_queue_serial_loop_requested=True,
@@ -134,6 +164,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             accepted=False,
             status=REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
             chain_results_path=chain_path,
+            runtime_dependency_bundle_status=dependency_bundle.status,
+            runtime_dependency_bundle_requested=dependency_bundle.requested,
         )
 
     return _from_loop(
@@ -141,6 +173,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         accepted=True,
         status=REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
         chain_results_path=chain_path,
+        runtime_dependency_bundle_status=dependency_bundle.status,
+        runtime_dependency_bundle_requested=dependency_bundle.requested,
     )
 
 
@@ -201,6 +235,8 @@ def _not_ready(
     reasons: tuple[str, ...],
     *,
     chain_results_path: Path | None,
+    runtime_dependency_bundle_status: str = REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED,
+    runtime_dependency_bundle_requested: bool = False,
 ) -> RedDogMainResidentQueueSerialLoopBootstrapResult:
     return RedDogMainResidentQueueSerialLoopBootstrapResult(
         accepted=False,
@@ -212,6 +248,8 @@ def _not_ready(
         next_action=None,
         chain_results_path=str(chain_results_path) if chain_results_path else None,
         store_revision=None,
+        runtime_dependency_bundle_status=runtime_dependency_bundle_status,
+        runtime_dependency_bundle_requested=runtime_dependency_bundle_requested,
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason).strip())),
     )
 
@@ -222,6 +260,8 @@ def _from_loop(
     accepted: bool,
     status: str,
     chain_results_path: Path,
+    runtime_dependency_bundle_status: str = REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED,
+    runtime_dependency_bundle_requested: bool = False,
 ) -> RedDogMainResidentQueueSerialLoopBootstrapResult:
     final_plan = loop.final_plan
     last_dispatch = loop.dispatch_results[-1] if loop.dispatch_results else None
@@ -237,6 +277,8 @@ def _from_loop(
         next_action=loop.next_action,
         chain_results_path=str(chain_results_path),
         store_revision=receipt.store_revision if receipt else None,
+        runtime_dependency_bundle_status=runtime_dependency_bundle_status,
+        runtime_dependency_bundle_requested=runtime_dependency_bundle_requested,
         rejection_reasons=tuple(loop.rejection_reasons),
     )
 

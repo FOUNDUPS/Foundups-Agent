@@ -1,5 +1,34 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_RUNTIME_DEPENDENCY_BUNDLE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_main_resident_queue_runtime_dependency_bundle.py`: a
+  main-startup dependency bundle for the resident queue serial loop. It builds
+  only outside-repo authority-state storage, JSON-backed principal/permission
+  resolvers, and a fail-closed signer client.
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` and
+  `main.py` env plumbing so `REDDOG_AUTHORITY_RUNTIME_STATE_PATH`,
+  `REDDOG_PERMISSION_SNAPSHOTS_PATH`,
+  `REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH`, and
+  `REDDOG_RESIDENT_QUEUE_NOW_EPOCH` can register the existing
+  `authority_runtime` stage without constructing live execution dependencies.
+- Added tests proving default no-op behavior, partial/inside-repo rejection,
+  outside-repo resolver loading, fail-closed signer rejection, serial-loop
+  progression into `authority_runtime`, updated `main.py` env forwarding, and
+  AST denial of shell/network/HoloIndex/live runner imports.
+- Boundary: no private key, real signer, signature verification, worktree,
+  shell command, OpenClaw enqueue, Hermes dispatch, PR publish, reward
+  settlement, repo mutation, or HoloIndex runtime re-index is created by this
+  slice. The signer remains fail-closed until a later isolated signer runtime
+  authorization slice provides a real boundary.
+- HoloIndex read-only probe for `RedDog resident queue runtime dependency
+  bundle authority runtime main bootstrap` surfaced adjacent live-enqueue and
+  governed work-order docs, but not this new bundle before indexing. Recorded
+  as `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_RUNTIME_DEPENDENCY_BUNDLE_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
