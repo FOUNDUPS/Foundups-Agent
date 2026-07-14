@@ -1,0 +1,210 @@
+"""Resident RedDog bounded-worker-pilot stage handler.
+
+Slice: REDDOG_RESIDENT_QUEUE_BOUNDED_WORKER_PILOT_HANDLER_PHASE1
+
+This module adapts the existing queue-authorized bounded worker pilot explicit
+invoke guard to the resident queue next-stage dispatcher. It reads the recorded
+`worktree_create` stage result from the chain-results store, resolves the bound
+work order through an injected resolver, and invokes the existing pilot guard
+with injected generic-writer and governed-shell dry-run results plus declared
+artifact contents.
+
+It may materialize only declared artifacts inside the already-created isolated
+worktree through the existing pilot guard. It does not run shell commands,
+enqueue OpenClaw, dispatch Hermes, create PRs, merge, settle rewards, or
+re-index HoloIndex.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Mapping, Optional, Protocol
+
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
+    ResidentQueueChainResultsStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
+    ResidentQueueStageDispatchRequest,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
+    NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
+    QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_REJECT,
+    invoke_reddog_wre_queue_authorized_bounded_worker_pilot,
+)
+
+
+BOUNDED_WORKER_PILOT_STAGE_KEY = "bounded_worker_pilot"
+WORKTREE_CREATE_STAGE_KEY = "worktree_create"
+
+FAIL_DISPATCH_STAGE_MISMATCH = "FAIL_DISPATCH_STAGE_MISMATCH"
+FAIL_DISPATCH_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_NEXT_ACTION_MISMATCH"
+FAIL_WORKTREE_CREATE_STAGE_MISSING = "FAIL_WORKTREE_CREATE_STAGE_MISSING"
+FAIL_WORK_ORDER_ID_MISSING = "FAIL_WORK_ORDER_ID_MISSING"
+FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
+FAIL_GENERIC_WRITER_DRYRUN_MISSING = "FAIL_GENERIC_WRITER_DRYRUN_MISSING"
+FAIL_GOVERNED_SHELL_DRYRUN_MISSING = "FAIL_GOVERNED_SHELL_DRYRUN_MISSING"
+FAIL_ARTIFACT_CONTENTS_MISSING = "FAIL_ARTIFACT_CONTENTS_MISSING"
+
+
+class ResidentQueueBoundedWorkerWorkOrderResolver(Protocol):
+    """Injected resolver for the work order bound to worktree creation."""
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: Optional[str],
+        selected_slice: Optional[str],
+    ) -> Mapping[str, Any]:
+        """Return the work order mapping for an accepted worktree result."""
+
+
+def _mapping(value: Any) -> Mapping[str, Any]:
+    if hasattr(value, "to_dict"):
+        candidate = value.to_dict()
+        return candidate if isinstance(candidate, Mapping) else {}
+    if isinstance(value, Mapping):
+        return value
+    return {}
+
+
+def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
+    raw = state.get("stage_results") if state.get("schema_version") == "reddog_resident_queue_chain_results.v1" else state
+    if not isinstance(raw, Mapping):
+        return {}
+    return {str(key): value for key, value in raw.items() if isinstance(value, Mapping)}
+
+
+def _work_order_id_from_worktree_create(worktree_create_stage: Mapping[str, Any]) -> str:
+    worktree = _mapping(worktree_create_stage.get("worktree_create_result"))
+    return str(worktree.get("work_order_id") or "").strip()
+
+
+def _reject(*reasons: str) -> dict[str, Any]:
+    return {
+        "decision": QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_REJECT,
+        "rejection_reasons": list(dict.fromkeys(reason for reason in reasons if reason)),
+        "pilot_result": None,
+        "explicit_queue_authorized_bounded_worker_pilot_requested": False,
+        "bounded_task_execution_performed": False,
+        "bounded_file_edit_performed": False,
+        "shell_command_executed": False,
+        "draft_pr_created": False,
+        "merge_performed": False,
+        "openclaw_enqueue_performed": False,
+        "hermes_dispatch_performed": False,
+        "reward_settlement_performed": False,
+        "holoindex_reindex_performed": False,
+    }
+
+
+@dataclass(frozen=True)
+class ResidentQueueBoundedWorkerPilotStageHandler:
+    """Callable handler for the resident queue `bounded_worker_pilot` stage."""
+
+    chain_results_store: ResidentQueueChainResultsStore
+    work_order_resolver: ResidentQueueBoundedWorkerWorkOrderResolver
+    generic_writer_dryrun_result: Mapping[str, Any]
+    governed_shell_dryrun_result: Mapping[str, Any]
+    artifact_contents: Mapping[str, Any]
+    repo_root: Path
+    operation_cwd: Optional[Path] = None
+    holoindex_evidence: Optional[Mapping[str, Any]] = None
+
+    def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
+        if request.stage_key != BOUNDED_WORKER_PILOT_STAGE_KEY:
+            return _reject(
+                FAIL_DISPATCH_STAGE_MISMATCH,
+                f"expected:{BOUNDED_WORKER_PILOT_STAGE_KEY}",
+                f"actual:{request.stage_key}",
+            )
+        if request.next_action != NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE:
+            return _reject(
+                FAIL_DISPATCH_NEXT_ACTION_MISMATCH,
+                f"expected:{NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE}",
+                f"actual:{request.next_action}",
+            )
+
+        stage_results = _stage_results(_mapping(self.chain_results_store.load()))
+        worktree_create = _mapping(stage_results.get(WORKTREE_CREATE_STAGE_KEY))
+        if not worktree_create:
+            return _reject(FAIL_WORKTREE_CREATE_STAGE_MISSING)
+
+        work_order_id = _work_order_id_from_worktree_create(worktree_create)
+        if not work_order_id:
+            return _reject(FAIL_WORK_ORDER_ID_MISSING)
+        work_order = _mapping(
+            self.work_order_resolver.resolve(
+                work_order_id=work_order_id,
+                queue_item_id=request.queue_item_id,
+                selected_slice=request.selected_slice,
+            )
+        )
+        if not work_order:
+            return _reject(FAIL_WORK_ORDER_MISSING, f"work_order_id:{work_order_id}")
+
+        generic_writer = _mapping(self.generic_writer_dryrun_result)
+        if not generic_writer:
+            return _reject(FAIL_GENERIC_WRITER_DRYRUN_MISSING)
+        governed_shell = _mapping(self.governed_shell_dryrun_result)
+        if not governed_shell:
+            return _reject(FAIL_GOVERNED_SHELL_DRYRUN_MISSING)
+        if not isinstance(self.artifact_contents, Mapping) or not self.artifact_contents:
+            return _reject(FAIL_ARTIFACT_CONTENTS_MISSING)
+
+        return invoke_reddog_wre_queue_authorized_bounded_worker_pilot(
+            explicit_queue_authorized_bounded_worker_pilot_requested=True,
+            queue_worktree_create_result=worktree_create,
+            generic_writer_dryrun_result=generic_writer,
+            governed_shell_dryrun_result=governed_shell,
+            artifact_contents=self.artifact_contents,
+            work_order=work_order,
+            repo_root=self.repo_root,
+            operation_cwd=self.operation_cwd,
+            holoindex_evidence=self.holoindex_evidence,
+        ).to_dict()
+
+
+def build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
+    *,
+    chain_results_store: ResidentQueueChainResultsStore,
+    work_order_resolver: ResidentQueueBoundedWorkerWorkOrderResolver,
+    generic_writer_dryrun_result: Mapping[str, Any],
+    governed_shell_dryrun_result: Mapping[str, Any],
+    artifact_contents: Mapping[str, Any],
+    repo_root: Path,
+    operation_cwd: Optional[Path] = None,
+    holoindex_evidence: Optional[Mapping[str, Any]] = None,
+) -> ResidentQueueBoundedWorkerPilotStageHandler:
+    """Build the injected bounded-worker-pilot handler for the dispatcher."""
+
+    return ResidentQueueBoundedWorkerPilotStageHandler(
+        chain_results_store=chain_results_store,
+        work_order_resolver=work_order_resolver,
+        generic_writer_dryrun_result=generic_writer_dryrun_result,
+        governed_shell_dryrun_result=governed_shell_dryrun_result,
+        artifact_contents=artifact_contents,
+        repo_root=repo_root,
+        operation_cwd=operation_cwd,
+        holoindex_evidence=holoindex_evidence,
+    )
+
+
+__all__ = [
+    "BOUNDED_WORKER_PILOT_STAGE_KEY",
+    "FAIL_ARTIFACT_CONTENTS_MISSING",
+    "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
+    "FAIL_DISPATCH_STAGE_MISMATCH",
+    "FAIL_GENERIC_WRITER_DRYRUN_MISSING",
+    "FAIL_GOVERNED_SHELL_DRYRUN_MISSING",
+    "FAIL_WORK_ORDER_ID_MISSING",
+    "FAIL_WORK_ORDER_MISSING",
+    "FAIL_WORKTREE_CREATE_STAGE_MISSING",
+    "ResidentQueueBoundedWorkerPilotStageHandler",
+    "ResidentQueueBoundedWorkerWorkOrderResolver",
+    "WORKTREE_CREATE_STAGE_KEY",
+    "build_reddog_resident_queue_bounded_worker_pilot_stage_handler",
+]
