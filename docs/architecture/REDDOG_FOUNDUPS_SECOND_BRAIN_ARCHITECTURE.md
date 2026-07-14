@@ -4,6 +4,8 @@
 **Status:** Vision with active POC
 **Owner:** 0102 / RedDog
 **POC entity:** `foundups-agent`
+**Controlling protocol:** WSP_60 Module Memory Architecture
+**WSP addendum:** `WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md`
 
 ## Canonical terminology
 
@@ -22,6 +24,23 @@ RedDog
 ```
 
 "Second Brain" and personal digital-twin language describe possible later applications. They are not the implementation center of the current lane.
+
+## WSP alignment
+
+This architecture is an application of WSP_60, not a new memory protocol. The FoundUp Memex composes WSP_60 module-owned memory, semantic/episodic/procedural/working memory, Breadcrumbs, HoloIndex retrieval, and FoundUp DAE isolation into one snapshot-bound cognition view.
+
+Related protocol responsibilities:
+
+- WSP_60 controls memory ownership, isolation, persistence, and retrieval boundaries.
+- WSP_80 controls FoundUp DAE orchestration.
+- WSP_84 requires verification of existing code and memory surfaces before replacement.
+- WSP_82 controls citation and cross-reference integrity.
+- WSP_83 attaches this architecture to the canonical documentation tree.
+- WSP_22 records implementation evolution through ModLog and TestModLog.
+- WSP_87 requires HoloIndex-first discovery.
+- WSP_97 preserves truth-state labels and prevents inferred authority from becoming implemented fact.
+
+The framework addendum is authoritative. Its `WSP_knowledge` copy is a byte-for-byte backup/reference mirror.
 
 ## Vision
 
