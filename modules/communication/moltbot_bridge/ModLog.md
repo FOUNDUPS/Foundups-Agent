@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_verified_draft_pr_publish_handler.py`: a
+  concrete injected handler for the resident queue `verified_draft_pr_publish`
+  stage.
+- The handler reads the already-recorded `slice_verifier` result from the
+  chain-results store and invokes the existing queue-authorized verified
+  draft-PR publish guard with an injected publish request and runner.
+- Boundary: draft PR publish gate only through the injected runner; no mark
+  ready, merge, shell command, PatternMemory write, OpenClaw enqueue, Hermes
+  dispatch, reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue verified draft PR
+  publish handler` surfaced unrelated/adjacent governance results, but not
+  this new handler before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
