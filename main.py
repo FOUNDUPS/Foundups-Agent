@@ -1519,6 +1519,74 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
     return True
 
 
+def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
+    """
+    Optionally run the bounded resident queue serial loop through injected handlers.
+
+    Env:
+        REDDOG_RESIDENT_QUEUE_SERIAL_LOOP=0                  Enable loop (default OFF)
+        REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED=0         Block startup if not applied
+        REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS=1        Bounded loop steps
+        REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
+        REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH             Outside-repo chain-results JSON
+        REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo authority profile JSON
+        REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
+    """
+
+    if os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "0") == "0":
+        logger.info("[REDDOG-QUEUE-LOOP] Startup serial loop disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "0") != "0"
+    try:
+        max_steps = int(os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "1"))
+    except ValueError:
+        max_steps = 0
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
+            run_reddog_main_resident_queue_serial_loop_bootstrap,
+        )
+
+        result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+            repo_root=repo_root,
+            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
+            authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
+            requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
+            max_steps=max_steps,
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-QUEUE-LOOP] Startup serial loop failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-QUEUE-LOOP] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-QUEUE-LOOP] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    status = "PASS" if result.accepted else "WARN"
+    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    print(
+        f"[REDDOG-QUEUE-LOOP] preflight={status} status={result.status} "
+        f"queue_item={result.queue_item_id or '(none)'} "
+        f"selected_slice={result.selected_slice or '(none)'} "
+        f"steps_run={result.steps_run} "
+        f"dispatched_stages={','.join(result.dispatched_stages) or '(none)'} "
+        f"next_action={result.next_action or '(none)'} reasons={reasons}"
+    )
+    if result.accepted:
+        print(
+            f"[REDDOG-QUEUE-LOOP] chain_results={result.chain_results_path or '(none)'} "
+            f"revision={result.store_revision or '(none)'}"
+        )
+        return True
+
+    if enforced:
+        print("[REDDOG-QUEUE-LOOP] Startup blocked by REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED=1")
+        return False
+    return True
+
+
 def bootstrap_runtime_dae_launches() -> None:
     """Register broker-managed DAE entrypoints for an already running system."""
     daemon = get_central_daemon()
@@ -1698,6 +1766,8 @@ def main():
     if not run_reddog_resident_queue_orchestration_plan_preflight(repo_root):
         return
     if not run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root):
+        return
+    if not run_reddog_resident_queue_serial_loop_preflight(repo_root):
         return
     if not run_reddog_readonly_operational_bootstrap_preflight(repo_root):
         return
