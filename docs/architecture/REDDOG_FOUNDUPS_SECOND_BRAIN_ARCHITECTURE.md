@@ -1,8 +1,8 @@
 # FoundUps Memex Vision
 
-**Date:** 2026-07-14  
-**Status:** Vision with active POC  
-**Owner:** 0102 / RedDog  
+**Date:** 2026-07-14
+**Status:** Vision with active POC
+**Owner:** 0102 / RedDog
 **POC entity:** `foundups-agent`
 
 ## Canonical terminology
