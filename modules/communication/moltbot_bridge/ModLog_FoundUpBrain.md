@@ -2,8 +2,8 @@
 
 ## 2026-07-14: FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1
 
-**WSP Protocol**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 84, WSP 97  
-**Phase**: Initial Creation / POC  
+**WSP Protocol**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 84, WSP 97
+**Phase**: Initial Creation / POC
 **Agent**: 0102 (Codex) | Commander: 012
 
 ### Changes
