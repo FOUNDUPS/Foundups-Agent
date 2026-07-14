@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORITY_VERIFICATION_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authority_verification_invoke.py`: an explicit
+  invoke guard that verifies signed authority emitted by the queue-authority
+  runtime through the existing work-order signature verifier.
+- The guard requires accepted queue-authority runtime output, preserves verifier
+  rejection codes, consumes the work-authority nonce only through the existing
+  verifier, and emits no execution authority beyond the verifier result.
+- Boundary: no signing, authority issuance, worker spawn, worktree creation,
+  shell command, OpenClaw enqueue, Hermes dispatch, repo mutation, PR creation,
+  reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog WRE queue authority verification invoke`
+  surfaced the underlying signature verifier but did not surface this new
+  bridge in top results before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORITY_VERIFICATION_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORITY_RUNTIME_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
