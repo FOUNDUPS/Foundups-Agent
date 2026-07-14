@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_BOUNDED_WORKER_PILOT_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_bounded_worker_pilot_handler.py`: a
+  concrete injected handler for the resident queue `bounded_worker_pilot`
+  stage.
+- The handler reads the already-recorded `worktree_create` result from the
+  chain-results store, resolves the bound work order through an injected
+  resolver, and invokes the existing queue-authorized bounded-worker-pilot
+  guard with injected generic-writer/governed-shell dry-run evidence and
+  declared artifact contents.
+- Boundary: bounded pilot only; declared artifact materialization inside the
+  isolated worktree only; no shell command, PR publishing, PatternMemory write,
+  OpenClaw enqueue, Hermes dispatch, reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue bounded worker pilot
+  handler` surfaced adjacent queue/WSP/docs results, but not this new handler
+  before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_BOUNDED_WORKER_PILOT_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_WORKTREE_CREATE_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
