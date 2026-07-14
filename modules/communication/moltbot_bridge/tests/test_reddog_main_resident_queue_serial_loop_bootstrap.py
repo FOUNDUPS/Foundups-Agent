@@ -17,6 +17,7 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     RuntimeRejectCode,
+    public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
@@ -128,6 +129,33 @@ def _write_runtime_json(tmp_path: Path, name: str, payload: object) -> Path:
     return path
 
 
+def _accepted_socket_signer(
+    socket_path: Path,
+    request_bytes: bytes,
+    timeout_s: float,
+    max_response_bytes: int,
+) -> bytes:
+    assert socket_path.is_absolute()
+    assert timeout_s > 0
+    assert max_response_bytes >= 1024
+    decoded = json.loads(request_bytes.decode("utf-8").strip())
+    request = decoded["request"]
+    public_key = str(request["signer_public_key"])
+    response = {
+        "accepted": True,
+        "signature": "sig:" + str(request["nonce"]),
+        "signer_public_key": public_key,
+        "key_fingerprint": public_key_fingerprint(public_key),
+        "key_epoch": str(request["key_epoch"]),
+        "audit_mac": "audit:" + str(request["payload_digest"]),
+        "boundary_attested": True,
+        "requester_identity_attested": True,
+        "signer_loads_no_untrusted_code": True,
+        "no_secret_material_returned": True,
+    }
+    return json.dumps(response, sort_keys=True).encode("utf-8")
+
+
 def _repo(tmp_path: Path) -> Path:
     path = tmp_path / "repo"
     path.mkdir()
@@ -228,6 +256,50 @@ def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_
     assert stored["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
 
 
+def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=_accepted_socket_signer,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert result.runtime_dependency_bundle_requested is True
+    assert result.steps_run == 2
+    assert result.dispatched_stages == ("authority_request", "authority_runtime")
+    assert result.next_action == "RUN_QUEUE_AUTHORITY_VERIFICATION_INVOKE"
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    assert stored["stage_results"]["authority_runtime"]["decision"] == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    authority = json.loads(authority_state.read_text(encoding="utf-8"))
+    issued = authority["issued_authorities"]
+    assert len(issued) == 1
+    assert next(iter(issued.values()))["status"] == "DELEGATED_AUTHORITY_ISSUED"
+
+
 def test_bootstrap_rejects_missing_authority_profile(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
@@ -301,6 +373,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(tmp_path / "authority_state.json"),
                 "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
                 "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(tmp_path / "principals.json"),
+                "REDDOG_SIGNER_SOCKET_PATH": str(tmp_path / "signer.sock"),
+                "REDDOG_SIGNER_SOCKET_TIMEOUT_S": "2.5",
+                "REDDOG_SIGNER_SOCKET_MAX_RESPONSE_BYTES": "8192",
                 "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
                 "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
             },
@@ -314,6 +389,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["authority_state_path"] == str(tmp_path / "authority_state.json")
     assert mocked.call_args.kwargs["permission_snapshots_path"] == str(tmp_path / "snapshots.json")
     assert mocked.call_args.kwargs["principal_authority_records_path"] == str(tmp_path / "principals.json")
+    assert mocked.call_args.kwargs["signer_socket_path"] == str(tmp_path / "signer.sock")
+    assert mocked.call_args.kwargs["signer_socket_timeout_s"] == 2.5
+    assert mocked.call_args.kwargs["signer_socket_max_response_bytes"] == 8192
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
     assert mocked.call_args.kwargs["now_epoch"] == 1000
     assert mocked.call_args.kwargs["max_steps"] == 1

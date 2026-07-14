@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_SIGNER_SOCKET_CLIENT_BUNDLE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Extended the resident queue runtime dependency bundle so an explicit
+  outside-repo `REDDOG_SIGNER_SOCKET_PATH` can provide the already-built
+  isolated signer socket client to the `authority_runtime` stage.
+- Updated the serial-loop bootstrap and `main.py` env plumbing with signer
+  socket path, timeout, and response-size settings. Default behavior remains
+  fail-closed through `FailClosedSignerClient` when the socket path is absent.
+- Added tests proving invalid signer socket paths reject without fallback,
+  a connector-backed isolated signer can issue delegated authority through the
+  existing resident loop, `main.py` forwards the new env settings, and the
+  boundary still performs no private-key loading, signer spawning, shell work,
+  repo mutation, OpenClaw enqueue, Hermes dispatch, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog main resident queue signer socket
+  runtime dependency bundle` surfaced adjacent live-enqueue/worktree docs and
+  WSP entries, but not this new wiring before indexing. Recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_SIGNER_SOCKET_CLIENT_BUNDLE_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_ISOLATED_SIGNER_SOCKET_CLIENT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97

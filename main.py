@@ -1535,6 +1535,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH             Outside-repo chain-results JSON
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo authority profile JSON
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
+        REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
     """
 
     if os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "0") == "0":
@@ -1551,6 +1552,16 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         now_epoch = int(now_epoch_value) if now_epoch_value else None
     except ValueError:
         now_epoch = None
+    try:
+        signer_socket_timeout_value = os.getenv("REDDOG_SIGNER_SOCKET_TIMEOUT_S", "")
+        signer_socket_timeout_s = float(signer_socket_timeout_value) if signer_socket_timeout_value else 5.0
+    except ValueError:
+        signer_socket_timeout_s = 0.0
+    try:
+        signer_socket_max_value = os.getenv("REDDOG_SIGNER_SOCKET_MAX_RESPONSE_BYTES", "")
+        signer_socket_max_response_bytes = int(signer_socket_max_value) if signer_socket_max_value else 16384
+    except ValueError:
+        signer_socket_max_response_bytes = 0
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
@@ -1565,6 +1576,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             authority_state_path=os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", "") or None,
             permission_snapshots_path=os.getenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", "") or None,
             principal_authority_records_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", "") or None,
+            signer_socket_path=os.getenv("REDDOG_SIGNER_SOCKET_PATH", "") or None,
+            signer_socket_timeout_s=signer_socket_timeout_s,
+            signer_socket_max_response_bytes=signer_socket_max_response_bytes,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
             max_steps=max_steps,
