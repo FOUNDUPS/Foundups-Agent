@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_READONLY_AUDIT_REPORT_COLLECTION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_readonly_audit_report_collection.py`: AgentDB-backed
+  persistence and collection for accepted RedDog read-only audit task reports.
+  The collector feeds persisted reports into the existing read-only audit swarm
+  report validator.
+- Updated `scripts/run_task.py`: exact `reddog:readonly_audit` tasks now must
+  persist their structured report before the AgentDB task is marked completed;
+  persistence failure fails the task closed.
+- Added `tests/test_reddog_readonly_audit_report_collection.py`: accepted
+  persistence, missing-report rejection, binding/mutation rejection,
+  conflicting duplicate rejection, real `run_task.py` persistence before task
+  completion, and AST no-execution/no-repo-mutation coverage.
+- Boundary: no model call, no shell/subprocess, no repo mutation, no OpenClaw
+  enqueue, no Hermes/WRE dispatch, no worktree operation, no HoloIndex
+  mutation/re-index, and no report file write. Runtime write scope is limited
+  to the RedDog read-only audit report table in AgentDB.
+- HoloIndex read-only probe for
+  `REDDOG_READONLY_AUDIT_REPORT_COLLECTION_PHASE1 AgentDB read-only audit report collection`
+  surfaced this ModLog pointer and adjacent audit assets, not the new
+  collector module. Recorded
+  `HOLOINDEX_REDDOG_READONLY_AUDIT_REPORT_COLLECTION_INDEX_GAP_PHASE1`; no
+  runtime re-index performed.
+
 ## 2026-07-14: REDDOG_MAIN_READONLY_AUDIT_SWARM_ENQUEUE_WIRE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

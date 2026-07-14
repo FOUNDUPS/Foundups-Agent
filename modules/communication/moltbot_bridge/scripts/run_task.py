@@ -109,6 +109,12 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
     # ── Finalize in AgentDB ──
     elapsed_ms = int((time.monotonic() - start) * 1000)
     result["execution_time_ms"] = elapsed_ms
+    if result["ok"] and result.get("executor") == "reddog:readonly_audit":
+        persist_result = _try_reddog_readonly_audit_report_persist(task_id, context, result)
+        result["readonly_audit_report_persist"] = persist_result
+        if not persist_result.get("accepted", False):
+            result["ok"] = False
+            result["detail"] = json.dumps(persist_result, default=str)[:1000]
 
     if result["ok"]:
         db.complete_autonomous_task(task_id)
@@ -172,6 +178,39 @@ def _try_reddog_readonly_audit_dispatch(
             "ok": False,
             "detail": f"reddog_readonly_audit_error: {e}",
             "executor": "reddog:readonly_audit",
+        }
+
+
+def _try_reddog_readonly_audit_report_persist(
+    task_id: str,
+    context: dict,
+    result: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Persist exact RedDog read-only audit task reports before completion."""
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
+            persist_reddog_readonly_audit_task_report,
+        )
+    except ImportError as e:
+        logger.warning("[RUN_TASK] RedDog read-only audit report store unavailable: %s", e)
+        return {
+            "accepted": False,
+            "status": "READONLY_AUDIT_REPORT_PERSIST_REJECT",
+            "rejection_reasons": ["report_store_unavailable"],
+        }
+
+    try:
+        return persist_reddog_readonly_audit_task_report(
+            task_id=task_id,
+            task_context=context,
+            task_result=result,
+        ).to_dict()
+    except Exception as e:
+        logger.warning("[RUN_TASK] RedDog read-only audit report persist error: %s", e)
+        return {
+            "accepted": False,
+            "status": "READONLY_AUDIT_REPORT_PERSIST_REJECT",
+            "rejection_reasons": ["report_store_error"],
         }
 
 
