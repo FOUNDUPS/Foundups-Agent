@@ -1,9 +1,14 @@
-"""Read-only FoundUp Brain current-state assembly.
+"""Read-only FoundUp Brain component for FoundUp Memex current-state assembly.
+
+Canonical public terminology is FoundUp Memex. Brain remains the durable
+consolidation component inside the complete Memex. This module is retained as
+the proven compatibility implementation behind `foundup_memex_current_state`.
 
 WSP_00 / WSP_97 boundary:
 - OBSERVED inputs only: an accepted RedDog operational snapshot plus scoped
   FoundUp identity, roadmap metadata, and verified-outcome metadata.
-- No Brain, Breadcrumb, roadmap, HoloIndex, queue, worker, or repository write.
+- No Brain, Breadcrumb, roadmap, HoloIndex, queue, worker, repository, CABR,
+  stakeholder, delegate, or governance write/authority.
 - Historical Brain/Breadcrumb evidence cannot override current repo/work state.
 """
 
@@ -67,7 +72,7 @@ class FoundUpBrainView:
 
 @dataclass(frozen=True)
 class FoundUpBrainAssemblyResult:
-    """Fail-closed result for FoundUp Brain view assembly."""
+    """Fail-closed result for FoundUp Brain component assembly."""
 
     accepted: bool
     status: str
@@ -96,12 +101,7 @@ def assemble_foundup_brain_current_state(
     verified_outcomes: Sequence[Mapping[str, Any]] = (),
     now_iso: str | None = None,
 ) -> FoundUpBrainAssemblyResult:
-    """Assemble one FoundUp's current cognition from existing receipts.
-
-    The function is pure. It accepts only an already-built operational snapshot
-    and caller-supplied metadata. Raw Brain/Breadcrumb bodies are neither
-    required nor admitted.
-    """
+    """Assemble one FoundUp's current cognition from existing receipts."""
 
     reasons: list[str] = []
     normalized_foundup_id = str(foundup_id).strip()
@@ -255,8 +255,8 @@ def _normalize_roadmap_state(
         "roadmap_id": roadmap_id,
         "version": version,
         "content_digest": content_digest,
-        "active_item_ids": tuple(sorted(str(value) for value in data.get("active_item_ids", ()))),
-        "blocked_item_ids": tuple(sorted(str(value) for value in data.get("blocked_item_ids", ()))),
+        "active_item_ids": tuple(str(value) for value in data.get("active_item_ids", ())),
+        "blocked_item_ids": tuple(str(value) for value in data.get("blocked_item_ids", ())),
     }
 
 
@@ -279,9 +279,9 @@ def _normalize_verified_outcome(
         "head_sha": str(outcome.get("head_sha", "")).strip(),
         "content_digest": str(outcome.get("content_digest", "")).strip(),
     }
-    for field, value in required_ids.items():
+    for key, value in required_ids.items():
         if not value:
-            reasons.append(f"missing_verified_outcome_field:{field}")
+            reasons.append(f"missing_verified_outcome_field:{key}")
     return {
         "foundup_id": foundup_id,
         **required_ids,
@@ -301,11 +301,13 @@ def _scope_work_records(
         data = dict(record)
         record_foundup_id = str(data.get("foundup_id", "")).strip()
         if record_foundup_id and record_foundup_id != foundup_id:
-            reasons.append(f"cross_foundup_{record_kind}_rejected")
+            reasons.append(f"{record_kind}_foundup_id_mismatch")
             continue
-        if record_foundup_id == foundup_id or not record_foundup_id:
-            scoped.append(data)
-    return tuple(sorted(scoped, key=lambda item: json.dumps(item, sort_keys=True, default=str)))
+        if not record_foundup_id:
+            data["foundup_id"] = foundup_id
+            data["scope_origin"] = "legacy_single_foundup_poc"
+        scoped.append(data)
+    return tuple(scoped)
 
 
 def _snapshot_expired(valid_until: str, now_iso: str) -> bool:
