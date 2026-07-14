@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_PLAN_VALVE_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can load outside-repo work-order and
+  execution-valve environment snapshots, then reuse the existing
+  `work_order_invocation`, `executor_plan`, and `execution_valve` stage
+  handlers.
+- Added tests proving the startup loop can advance through signed authority,
+  verified work-order invocation, executor dry-run planning, and execution
+  valve evaluation, then stop before `worktree_create`.
+- Added fail-closed coverage for missing/malformed work-order inputs and
+  inside-repo valve environment paths, plus `main.py` env wiring for
+  `REDDOG_WORK_ORDERS_PATH` and `REDDOG_EXECUTION_VALVE_ENV_PATH`.
+- Boundary: no worker spawn, no worktree creation, no shell command, no
+  OpenClaw enqueue, no Hermes dispatch, no PR, no repository mutation, no
+  PatternMemory client, and no HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog resident queue plan valve bootstrap work
+  order invocation execution valve` did not rank the bootstrap module; recorded
+  as `HOLOINDEX_REDDOG_RESIDENT_QUEUE_PLAN_VALVE_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_ISOLATED_SIGNER_PROCESS_ENTRYPOINT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97

@@ -1534,6 +1534,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
         REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH             Outside-repo chain-results JSON
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo authority profile JSON
+        REDDOG_WORK_ORDERS_PATH                              Outside-repo work-order JSON snapshot
+        REDDOG_EXECUTION_VALVE_ENV_PATH                      Outside-repo valve environment JSON
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -1574,6 +1576,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
             chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
             authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
+            work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
+            valve_environment_path=os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH", "") or None,
             authority_state_path=os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", "") or None,
             permission_snapshots_path=os.getenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", "") or None,
             principal_authority_records_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", "") or None,
