@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authorized_verified_outcome_ratchet_invoke.py`:
+  an explicit bridge from an accepted queue-authorized verified draft PR
+  publish result to the existing WRE verified outcome ratchet.
+- The guard requires an injected outcome ratchet store, binds the publish
+  receipt to the verifier receipt and work-order ID, and uses the accepted
+  queue publish result as authoritative publish evidence.
+- PatternMemory writes are blocked unless the request asks for them, a
+  separate explicit PatternMemory flag is true, and an injected sink is present.
+- Boundary: outcome receipt recording only; no command execution, PR publish,
+  mark-ready, merge, reward settlement, OpenClaw enqueue, Hermes dispatch, or
+  HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog queue authorized verified outcome
+  ratchet invoke` surfaced adjacent policy, runtime-invocation, signature, and
+  governance files, but did not surface this new ratchet bridge before
+  indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed. The probe also reported a pre-existing
+  `WSP-GUARDIAN` suspicious-Unicode warning unrelated to the new ASCII-clean
+  files.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
