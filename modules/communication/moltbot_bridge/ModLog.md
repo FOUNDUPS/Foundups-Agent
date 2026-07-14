@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORITY_RUNTIME_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authority_runtime_invoke.py`: an explicit invoke
+  guard that calls the existing delegated-authority signer runtime only from an
+  accepted queue-authority request dry-run and only through injected signer,
+  principal resolver, permission snapshot resolver, and authority store
+  boundaries.
+- The guard preserves default fail-closed signer behavior, returns runtime
+  rejection reasons unchanged, and performs no worker spawn, worktree creation,
+  shell command, OpenClaw enqueue, Hermes dispatch, repo mutation, PR creation,
+  reward settlement, or HoloIndex re-index.
+- Boundary: this may issue signed authority records when an injected signer
+  accepts, but it still does not execute the authorized work.
+- HoloIndex read-only probe for `RedDog WRE queue authority runtime invoke`
+  did not surface the new module in top results before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORITY_RUNTIME_INVOKE_INDEX_GAP_PHASE1`; no
+  runtime re-index performed.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORITY_REQUEST_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
