@@ -1400,6 +1400,64 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
     return True
 
 
+def run_reddog_resident_queue_orchestration_plan_preflight(repo_root: Path) -> bool:
+    """
+    Plan the next resident RedDog queue bridge from the authoritative snapshot.
+
+    Env:
+        REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN=1          Enable check (default ON)
+        REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_ENFORCED=0 Block startup if not ready
+        REDDOG_AUTHORITATIVE_WORK_STATE_PATH                Existing work-state snapshot
+        REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH            Optional existing chain-results JSON
+        REDDOG_WRE_QUEUE_ITEM_ID                            Optional exact queue item id
+    """
+
+    if os.getenv("REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN", "1") == "0":
+        logger.info("[REDDOG-QUEUE-PLAN] Startup queue plan disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_ENFORCED", "0") != "0"
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_orchestration_plan_bootstrap import (
+            run_reddog_main_resident_queue_orchestration_plan_bootstrap,
+        )
+
+        result = run_reddog_main_resident_queue_orchestration_plan_bootstrap(
+            repo_root=repo_root,
+            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
+            requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-QUEUE-PLAN] Startup queue plan failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-QUEUE-PLAN] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-QUEUE-PLAN] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    status = "PASS" if result.ready else "WARN"
+    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    print(
+        f"[REDDOG-QUEUE-PLAN] preflight={status} status={result.status} "
+        f"queue_item={result.queue_item_id or '(none)'} "
+        f"selected_slice={result.selected_slice or '(none)'} "
+        f"current_stage={result.current_stage or '(none)'} "
+        f"next_action={result.next_action or '(none)'} "
+        f"accepted_stages={result.accepted_stage_count} "
+        f"chain_complete={result.chain_complete} reasons={reasons}"
+    )
+    if result.ready:
+        print(f"[REDDOG-QUEUE-PLAN] plan={result.plan_id}")
+        return True
+
+    if enforced:
+        print("[REDDOG-QUEUE-PLAN] Startup blocked by REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_ENFORCED=1")
+        return False
+    return True
+
+
 def bootstrap_runtime_dae_launches() -> None:
     """Register broker-managed DAE entrypoints for an already running system."""
     daemon = get_central_daemon()
@@ -1575,6 +1633,8 @@ def main():
     if not run_reddog_authoritative_work_state_refresh_preflight(repo_root):
         return
     if not run_reddog_wre_queue_consumer_preflight(repo_root):
+        return
+    if not run_reddog_resident_queue_orchestration_plan_preflight(repo_root):
         return
     if not run_reddog_readonly_operational_bootstrap_preflight(repo_root):
         return
