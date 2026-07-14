@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_ISOLATED_SIGNER_PROCESS_ENTRYPOINT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97
+
+- Added `src/reddog_isolated_signer_process_entrypoint.py`: a one-shot
+  composition function that wires the test-only signer key-provider dry-run,
+  kernel peer-credential attestor, and existing one-request signer socket
+  service through injected dependencies.
+- Added tests proving successful composition, key-provider rejection before
+  service invocation, peer-policy rejection before key-provider/service use,
+  invalid config rejection, service rejection/exception preservation, service
+  return-type validation, receipt non-leakage, and AST denial of env, shell,
+  file, repo, OpenClaw, Hermes, and HoloIndex runtime mutation surfaces.
+- Boundary: injectable process entrypoint only. No environment parsing, no
+  process spawn, no direct socket bind in this module, no file secret loading,
+  no repository mutation, no OpenClaw enqueue, no Hermes dispatch, no WRE queue
+  write, no reward settlement, and no HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog isolated signer process entrypoint key
+  provider peer credential service` is recorded as
+  `HOLOINDEX_REDDOG_ISOLATED_SIGNER_PROCESS_ENTRYPOINT_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_SIGNER_SOCKET_PEER_CREDENTIAL_ATTESTOR_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97
