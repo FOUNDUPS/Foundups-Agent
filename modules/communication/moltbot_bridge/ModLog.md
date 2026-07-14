@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_ED25519_SIGNATURE_VERIFIER_BACKEND_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added `src/reddog_ed25519_signature_verifier_backend.py`: an optional
+  injected `SignatureVerifier` backend for RedDog work-order authority records.
+  It verifies self-describing `ed25519-pub-v1:` public keys and
+  `ed25519-sig-v1:` signatures using public material only.
+- Added tests proving valid Ed25519 verification, tamper/key/signature
+  rejection, malformed/non-ASCII rejection, strict encode/decode helpers,
+  oversized signing-input rejection, and AST denial of signer/keygen/shell/env/
+  network/HoloIndex/runtime mutation imports.
+- Boundary: verifier backend only. No signing, key generation, private-key
+  loading, vault access, signer daemon startup, command execution, repository
+  mutation, OpenClaw enqueue, Hermes dispatch, or HoloIndex runtime re-index.
+  The backend fails closed if `cryptography` is unavailable or verification
+  raises.
+- HoloIndex read-only probe for `RedDog work order signature verifier
+  cryptographic backend Ed25519` surfaced the core verifier and contracts, but
+  not this backend before indexing. Recorded as
+  `HOLOINDEX_REDDOG_ED25519_SIGNATURE_VERIFIER_BACKEND_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_ISOLATED_SIGNER_SOCKET_PROTOCOL_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
