@@ -251,6 +251,22 @@ class _AuditMacBuilder:
         return "audit:" + request.payload_digest
 
 
+class _FakeWorktreeRunner:
+    def __init__(self, *, ok: bool = True) -> None:
+        self.ok = ok
+        self.calls: list[tuple[str, str, str | None, str | None]] = []
+
+    def create_worktree(self, *, worktree_path: Path, branch_name: str, base_ref: str):
+        self.calls.append(("create_worktree", str(worktree_path), branch_name, base_ref))
+        if self.ok:
+            Path(worktree_path).mkdir(parents=True, exist_ok=True)
+        return {"ok": self.ok, "returncode": 0 if self.ok else 1, "stdout": "", "stderr": ""}
+
+    def cleanup_worktree(self, *, worktree_path: Path):
+        self.calls.append(("cleanup_worktree", str(worktree_path), None, None))
+        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
+
+
 def _ed25519_signing_material():
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -571,6 +587,152 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
     assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
 
 
+def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=7,
+    )
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert result.steps_run == 7
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+        "worktree_create",
+    )
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE"
+    assert result.no_worktree_created is False
+    assert result.no_repo_mutation_performed is False
+    assert result.no_worker_spawn_performed is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_pr_created is True
+    assert [call[0] for call in runner.calls] == ["create_worktree"]
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["worktree_create"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"
+    assert stage["worktree_create_result"]["decision"] == "WORKTREE_CREATE_ACCEPT"
+    assert stage["worktree_create_result"]["no_task_execution_performed"] is True
+    assert stage["worktree_create_result"]["no_file_edit_performed"] is True
+    assert stage["no_openclaw_enqueue_performed"] is True
+    assert stage["no_hermes_dispatch_performed"] is True
+    assert Path(stage["worktree_create_result"]["worktree_path"]).exists()
+    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+
+
+def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=7,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 6
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+    )
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:worktree_create" in result.rejection_reasons
+    assert result.no_worktree_created is True
+
+
+def test_bootstrap_rejects_unsupported_worktree_runner_mode(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        worktree_runner_mode="shell",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "unsupported_worktree_runner_mode" in result.rejection_reasons
+
+
 def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
     tmp_path: Path,
 ) -> None:
@@ -739,6 +901,8 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_SIGNER_SOCKET_TIMEOUT_S": "2.5",
                 "REDDOG_SIGNER_SOCKET_MAX_RESPONSE_BYTES": "8192",
                 "REDDOG_SIGNATURE_VERIFIER_BACKEND": REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+                "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE": "real",
+                "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S": "77",
                 "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
                 "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
             },
@@ -758,6 +922,8 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["signer_socket_timeout_s"] == 2.5
     assert mocked.call_args.kwargs["signer_socket_max_response_bytes"] == 8192
     assert mocked.call_args.kwargs["signature_verifier_backend"] == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["worktree_runner_timeout_s"] == 77
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
     assert mocked.call_args.kwargs["now_epoch"] == 1000
     assert mocked.call_args.kwargs["max_steps"] == 1
@@ -796,7 +962,7 @@ def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
             assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
 
 
-def test_module_has_no_shell_network_holoindex_or_later_stage_imports() -> None:
+def test_module_has_no_shell_network_holoindex_or_worker_stage_imports() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     banned_import_roots = {
         "subprocess",
@@ -816,7 +982,6 @@ def test_module_has_no_shell_network_holoindex_or_later_stage_imports() -> None:
         "reddog_wre_queue_authority_verification_invoke",
         "reddog_wre_queue_authorized",
         "reddog_wre_queue_verified_authority_work_order_invoke",
-        "reddog_wre_worktree_runner",
         "worktree_pr_runner",
         "pattern_memory",
         "openclaw_supervisor",
