@@ -6,8 +6,8 @@
 - `test_foundup_memex_current_state.py` (NEW - 3 tests)
 - `test_foundup_brain_current_state.py` (NEW - 9 tests)
 
-**Canonical slice**: `FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1`  
-**Compatibility slice**: `FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1`  
+**Canonical slice**: `FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1`
+**Compatibility slice**: `FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1`
 **Predecessors**: PRs #1008, #1009, #1001, #1003
 
 ### Memex adapter coverage
