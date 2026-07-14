@@ -1234,6 +1234,72 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
     return True
 
 
+def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bool:
+    """
+    Refresh RedDog authoritative work state from already-observed source files.
+
+    This is the producer for the read-only RedDog bootstrap. It performs no
+    GitHub/W10 fetch itself; callers must provide existing source-record files.
+    The output JSON is required to live outside the repo checkout.
+
+    Env:
+        REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH=1          Enable check (default ON)
+        REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_ENFORCED=0 Block startup if not ready
+        REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Output/read path for snapshot JSON
+        REDDOG_ACTIVE_SLICE_LEDGER_PATH                    Optional active ledger source
+        REDDOG_WORK_LEDGER_JSON_PATH                       Optional work ledger source
+        REDDOG_GITHUB_PR_RECORDS_PATH                      Required existing PR records JSON
+        REDDOG_W10_REPORT_RECORDS_PATH                     Required existing W10 records JSON
+    """
+
+    if os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH", "1") == "0":
+        logger.info("[REDDOG-WORK-STATE] Startup refresh disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_ENFORCED", "0") != "0"
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_main_authoritative_work_state_refresh_bootstrap import (
+            run_reddog_main_authoritative_work_state_refresh_bootstrap,
+        )
+
+        result = run_reddog_main_authoritative_work_state_refresh_bootstrap(
+            repo_root=repo_root,
+            active_slice_ledger_path=os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", ""),
+            work_ledger_json_path=os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", ""),
+            github_pr_records_path=os.getenv("REDDOG_GITHUB_PR_RECORDS_PATH", ""),
+            w10_report_records_path=os.getenv("REDDOG_W10_REPORT_RECORDS_PATH", ""),
+            work_state_output_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            worker_id=os.getenv("REDDOG_WORK_STATE_REFRESH_WORKER_ID", "reddog-main-bootstrap"),
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-WORK-STATE] Startup refresh failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-WORK-STATE] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-WORK-STATE] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    status = "PASS" if result.accepted else "WARN"
+    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    print(
+        f"[REDDOG-WORK-STATE] preflight={status} status={result.status} "
+        f"queue_items={result.queue_item_count} reasons={reasons}"
+    )
+    if result.accepted and result.work_state_path:
+        os.environ["REDDOG_AUTHORITATIVE_WORK_STATE_PATH"] = result.work_state_path
+        print(
+            f"[REDDOG-WORK-STATE] refresh={result.refresh_id} "
+            f"revision={result.committed_revision}"
+        )
+        return True
+
+    if enforced:
+        print("[REDDOG-WORK-STATE] Startup blocked by REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_ENFORCED=1")
+        return False
+    return True
+
+
 def bootstrap_runtime_dae_launches() -> None:
     """Register broker-managed DAE entrypoints for an already running system."""
     daemon = get_central_daemon()
@@ -1405,6 +1471,8 @@ def main():
     if not run_wsp_framework_preflight(repo_root, overseer=overseer):
         return
     if not run_git_main_merge_sentinel_preflight(repo_root):
+        return
+    if not run_reddog_authoritative_work_state_refresh_preflight(repo_root):
         return
     if not run_reddog_readonly_operational_bootstrap_preflight(repo_root):
         return
