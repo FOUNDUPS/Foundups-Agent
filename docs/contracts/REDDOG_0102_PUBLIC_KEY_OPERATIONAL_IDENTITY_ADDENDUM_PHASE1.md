@@ -21,6 +21,7 @@ RedDog
 = the operational state assumed by 0102 inside the FoundUps ecosystem
 ```
 
+RedDog is an operational state of 0102, not an independent authority source.
 RedDog is not a separate person, account, or independent digital twin. Thousands of 0102s may operate as RedDogs for their respective 012 principals. The durable cryptographic identity belongs to the 0102 keypair; RedDog describes the current operational role/state.
 
 ## Identifier correction
