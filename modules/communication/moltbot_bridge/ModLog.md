@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97
+
+- Added `docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md`:
+  a decision-only contract freezing the signer-domain key-provider boundary
+  before any implementation handles private key or audit-MAC material.
+- Added a static contract test proving WSP 71 permission-validated retrieval,
+  mock-vault non-production status, runtime non-possession of secret references
+  and values, distinct signing/audit keys, public-only fingerprints, TTL at use
+  time, HoloIndex query-only behavior, and the required dry-run-before-runtime
+  sequence.
+- Boundary: docs/static tests only. No key generation, key loading, vault
+  configuration, signer launch, socket binding, shell command, repository
+  mutation, OpenClaw enqueue, Hermes dispatch, WRE queue write, reward
+  settlement, or HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog signer key provider WSP71 vault op
+  reference Ed25519` is recorded as
+  `HOLOINDEX_REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_INDEX_GAP_PHASE1`; no runtime
+  re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_ISOLATED_SIGNER_SOCKET_SERVICE_ONCE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
