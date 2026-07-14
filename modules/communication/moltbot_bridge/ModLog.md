@@ -1,5 +1,34 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_AUTHORITATIVE_WORK_STATE_REFRESH_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_main_authoritative_work_state_refresh_bootstrap.py`: a
+  controlled `main.py` adapter around the existing authoritative work-state
+  refresh runtime. It reads existing local ledger, GitHub PR record, and W10
+  report artifacts, rejects stale embedded ledger state before commit, and
+  writes the authoritative work-state JSON only to an external runtime path.
+- Wired `main.py` with
+  `run_reddog_authoritative_work_state_refresh_preflight()` before the
+  read-only RedDog operational bootstrap. Accepted refreshes set
+  `REDDOG_AUTHORITATIVE_WORK_STATE_PATH` in-process so the next bootstrap step
+  can consume the exact committed snapshot.
+- Added `tests/test_reddog_main_authoritative_work_state_refresh_bootstrap.py`:
+  accepted external-path commit, missing GitHub/W10 source rejection, stale
+  ledger rejection, in-repo output rejection, main preflight nonblocking and
+  enforced modes, accepted path propagation, and AST no-fetch/no-execution
+  coverage.
+- Boundary: no GitHub fetch, no W10 fetch, no worker spawn, no OpenClaw
+  enqueue, no Hermes dispatch, no HoloIndex mutation/re-index, no execution,
+  and no repo mutation. Runtime writes are limited to an operator-configured
+  work-state JSON outside the repository checkout.
+- HoloIndex read-only probe for `REDDOG_MAIN_AUTHORITATIVE_WORK_STATE_REFRESH_BOOTSTRAP_PHASE1
+  main.py authoritative work state refresh bootstrap GitHub W10 records`
+  returned unknown locations and WSP 56, not the new adapter. Recorded
+  `HOLOINDEX_REDDOG_MAIN_AUTHORITATIVE_WORK_STATE_REFRESH_BOOTSTRAP_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_MAIN_READONLY_OPERATIONAL_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
