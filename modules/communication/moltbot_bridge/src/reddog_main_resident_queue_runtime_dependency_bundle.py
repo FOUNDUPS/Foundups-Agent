@@ -2,12 +2,12 @@
 
 Slice: REDDOG_MAIN_RESIDENT_QUEUE_RUNTIME_DEPENDENCY_BUNDLE_PHASE1
 
-This module constructs only the authority-runtime dependencies that ``main.py``
-may safely own today: outside-repo JSON stores/resolvers and an optional client
-for an already-running isolated signer. It does not load private keys, spawn a
-signer, verify signatures, create worktrees, run shell commands, enqueue
-OpenClaw, dispatch Hermes, publish PRs, mutate repository files, or re-index
-HoloIndex.
+This module constructs only the queue dependencies that ``main.py`` may safely
+own today: outside-repo JSON stores/resolvers, an optional client for an
+already-running isolated signer, and an optional public-key signature verifier.
+It does not load private keys, spawn a signer, create worktrees, run shell
+commands, enqueue OpenClaw, dispatch Hermes, publish PRs, mutate repository
+files, or re-index HoloIndex.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from typing import Any, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AtomicJsonAuthorityRuntimeStore,
+    AuthorityRuntimeStore,
     FailClosedPrincipalAuthorityResolver,
     FailClosedSignerClient,
     PrincipalAuthorityRecord,
@@ -34,6 +35,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 )
 
 
+REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519 = "ed25519"
 REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY = "REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY"
 REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED = "REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED"
 REDDOG_RUNTIME_DEPENDENCY_BUNDLE_REJECT = "REDDOG_RUNTIME_DEPENDENCY_BUNDLE_REJECT"
@@ -49,6 +51,17 @@ class JsonPrincipalAuthorityResolver:
         return self._records.get(_principal_key(principal_id, principal_provider))
 
 
+class JsonPrincipalKeyResolver:
+    """Resolve token-verified principal public keys for signature verification."""
+
+    def __init__(self, records: Mapping[str, PrincipalAuthorityRecord]) -> None:
+        self._records = dict(records)
+
+    def resolve(self, principal_id: str, principal_provider: str) -> Optional[str]:
+        record = self._records.get(_principal_key(principal_id, principal_provider))
+        return record.principal_public_key if record is not None else None
+
+
 class JsonPermissionSnapshotResolver:
     """Resolve permission snapshots from a caller-owned JSON snapshot."""
 
@@ -57,6 +70,48 @@ class JsonPermissionSnapshotResolver:
 
     def resolve(self, digest: str) -> Optional[PermissionSnapshot]:
         return self._snapshots.get(str(digest))
+
+
+class AuthorityRuntimeWorkAuthorityNonceStore:
+    """Durably consume work-authority nonces in the outside-repo authority state."""
+
+    def __init__(self, store: AuthorityRuntimeStore) -> None:
+        self._store = store
+
+    def consume(self, nonce: str) -> bool:
+        if not isinstance(nonce, str) or not nonce.strip():
+            return False
+        state = self._store.load()
+        seen = state.get("verified_work_authority_nonces", [])
+        if not isinstance(seen, list):
+            return False
+        if nonce in set(map(str, seen)):
+            return False
+        updated = dict(state)
+        updated["verified_work_authority_nonces"] = [*seen, nonce]
+        self._store.commit(updated, expected_revision=state.get("revision"))
+        return True
+
+
+class AuthorityRuntimeRevocationOracle:
+    """Read revocation lists from the outside-repo authority runtime state."""
+
+    def __init__(self, store: AuthorityRuntimeStore) -> None:
+        self._store = store
+
+    def is_revoked(
+        self, *, reddog_id: str, fingerprint: str, principal_id: str, key_epoch: str
+    ) -> bool:
+        state = self._store.load()
+        revocations = state.get("revocations", {})
+        if not isinstance(revocations, Mapping):
+            return True
+        return (
+            principal_id in set(map(str, revocations.get("principal_ids", [])))
+            or reddog_id in set(map(str, revocations.get("reddog_ids", [])))
+            or fingerprint in set(map(str, revocations.get("reddog_fingerprints", [])))
+            or key_epoch in set(map(str, revocations.get("key_epochs", [])))
+        )
 
 
 @dataclass(frozen=True)
@@ -71,12 +126,18 @@ class RedDogMainResidentQueueRuntimeDependencyBundle:
     signer: Any = None
     principal_resolver: Any = None
     snapshot_resolver: Any = None
+    signature_verifier: Any = None
+    principal_key_resolver: Any = None
+    nonce_store: Any = None
+    revocation_oracle: Any = None
     now_epoch: Optional[int] = None
     authority_state_path: Optional[str] = None
     signer_socket_path: Optional[str] = None
+    signature_verifier_backend: str = "none"
     permission_snapshots_loaded: int = 0
     principal_records_loaded: int = 0
     signer_mode: str = "none"
+    signature_verifier_mode: str = "none"
     no_real_signer_configured: bool = True
     no_private_key_loaded: bool = True
     no_signature_verification_performed: bool = True
@@ -101,6 +162,7 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
     signer_socket_timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
     signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     signer_socket_connector: Optional[SignerSocketConnector] = None,
+    signature_verifier_backend: str | None = None,
     now_epoch: int | None = None,
 ) -> RedDogMainResidentQueueRuntimeDependencyBundle:
     """Load safe queue-loop dependencies from outside-repo runtime artifacts."""
@@ -111,6 +173,7 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
             permission_snapshots_path
             or principal_authority_records_path
             or signer_socket_path
+            or signature_verifier_backend
             or now_epoch is not None
         ):
             return _reject("runtime_dependency_bundle_partial_configuration")
@@ -140,6 +203,7 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
     if principal_reasons:
         return _reject(*principal_reasons)
 
+    authority_store = AtomicJsonAuthorityRuntimeStore(authority_path)
     signer = FailClosedSignerClient()
     signer_mode = "fail_closed"
     signer_socket_resolved: Optional[str] = None
@@ -159,12 +223,28 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
         signer_socket_resolved = signer_result.socket_path
         no_real_signer_configured = False
 
+    (
+        signature_verifier,
+        principal_key_resolver,
+        nonce_store,
+        revocation_oracle,
+        verifier_mode,
+        verifier_backend,
+        verifier_reasons,
+    ) = _build_signature_verification_dependencies(
+        backend=signature_verifier_backend,
+        authority_store=authority_store,
+        principals=principals,
+    )
+    if verifier_reasons:
+        return _reject(*verifier_reasons)
+
     return RedDogMainResidentQueueRuntimeDependencyBundle(
         accepted=True,
         status=REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
         requested=True,
         rejection_reasons=(),
-        authority_store=AtomicJsonAuthorityRuntimeStore(authority_path),
+        authority_store=authority_store,
         signer=signer,
         principal_resolver=(
             JsonPrincipalAuthorityResolver(principals)
@@ -172,12 +252,18 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
             else FailClosedPrincipalAuthorityResolver()
         ),
         snapshot_resolver=JsonPermissionSnapshotResolver(snapshots),
+        signature_verifier=signature_verifier,
+        principal_key_resolver=principal_key_resolver,
+        nonce_store=nonce_store,
+        revocation_oracle=revocation_oracle,
         now_epoch=now_epoch,
         authority_state_path=str(authority_path),
         signer_socket_path=signer_socket_resolved,
+        signature_verifier_backend=verifier_backend,
         permission_snapshots_loaded=len(snapshots),
         principal_records_loaded=len(principals),
         signer_mode=signer_mode,
+        signature_verifier_mode=verifier_mode,
         no_real_signer_configured=no_real_signer_configured,
     )
 
@@ -323,6 +409,36 @@ def _load_principal_records(
     return records, ()
 
 
+def _build_signature_verification_dependencies(
+    *,
+    backend: str | None,
+    authority_store: AuthorityRuntimeStore,
+    principals: Mapping[str, PrincipalAuthorityRecord],
+) -> tuple[Any, Any, Any, Any, str, str, tuple[str, ...]]:
+    requested = str(backend or "").strip().lower()
+    if not requested or requested in {"none", "fail_closed"}:
+        return None, None, None, None, "none", "none", ()
+    if requested != REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519:
+        return None, None, None, None, "none", requested, ("unsupported_signature_verifier_backend",)
+    if not principals:
+        return None, None, None, None, "none", requested, (
+            "missing_principal_authority_records_for_signature_verification",
+        )
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+        Ed25519SignatureVerifier,
+    )
+
+    return (
+        Ed25519SignatureVerifier(),
+        JsonPrincipalKeyResolver(principals),
+        AuthorityRuntimeWorkAuthorityNonceStore(authority_store),
+        AuthorityRuntimeRevocationOracle(authority_store),
+        REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        (),
+    )
+
+
 def _principal_key(principal_id: str, principal_provider: str) -> str:
     return f"{principal_provider}|{principal_id}"
 
@@ -334,11 +450,15 @@ def _is_inside(child: Path, parent: Path) -> bool:
 
 
 __all__ = [
+    "AuthorityRuntimeRevocationOracle",
+    "AuthorityRuntimeWorkAuthorityNonceStore",
     "JsonPermissionSnapshotResolver",
     "JsonPrincipalAuthorityResolver",
+    "JsonPrincipalKeyResolver",
     "REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED",
     "REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY",
     "REDDOG_RUNTIME_DEPENDENCY_BUNDLE_REJECT",
+    "REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519",
     "RedDogMainResidentQueueRuntimeDependencyBundle",
     "load_reddog_main_resident_queue_runtime_dependency_bundle",
 ]
