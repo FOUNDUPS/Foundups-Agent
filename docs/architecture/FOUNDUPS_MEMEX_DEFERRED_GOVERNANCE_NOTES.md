@@ -1,7 +1,7 @@
 # FoundUps Memex Deferred Governance Notes
 
-**Status:** Deferred research; no runtime authority  
-**Date:** 2026-07-14  
+**Status:** Deferred research; no runtime authority
+**Date:** 2026-07-14
 **Owner:** 012 / 0102
 
 ## Why this exists
