@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
@@ -15,13 +16,28 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+MODULE_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "src"
+    / "foundup_brain_current_state.py"
+)
 NOW = "2026-07-14T00:00:00+00:00"
+VALID_NOW = "2026-07-14T00:01:00+00:00"
+EXPIRED_NOW = "2026-07-14T00:11:00+00:00"
 HEAD = "52e98c6652b3c8eb0818d2ec6718c005c7e55c79"
 REVISION = "sha256:foundup-brain-work-state"
 FOUNDUP_ID = "foundups-agent"
 
 
-def _snapshot(*, brain_available: bool = True):
+def _snapshot(
+    *,
+    brain_available: bool = True,
+    worker_claims=None,
+    queue_items=None,
+):
     holo_receipt = HoloIndexFreshnessReceipt(
         schema_version="holoindex_freshness_receipt.v1",
         generated_at=NOW,
@@ -59,8 +75,12 @@ def _snapshot(*, brain_available: bool = True):
             "schema_version": "reddog_authoritative_work_state.v1",
             "revision": REVISION,
             "selected_slice": "FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1",
-            "worker_claims": [{"claim_id": "claim-1", "status": "ACTIVE"}],
-            "wre_queue_items": [],
+            "worker_claims": (
+                worker_claims
+                if worker_claims is not None
+                else [{"claim_id": "claim-1", "foundup_id": FOUNDUP_ID, "status": "ACTIVE"}]
+            ),
+            "wre_queue_items": queue_items if queue_items is not None else [],
         },
         holoindex_receipt=holo_receipt,
         changed_paths=["modules/communication/moltbot_bridge/src/foundup_brain_current_state.py"],
@@ -126,23 +146,23 @@ def _verified_outcome(foundup_id: str = FOUNDUP_ID):
     }
 
 
+def _assemble(**overrides):
+    kwargs = {
+        "foundup_id": FOUNDUP_ID,
+        "snapshot": _snapshot(),
+        "identity": _identity(),
+        "roadmap_state": _roadmap(),
+        "verified_outcomes": [_verified_outcome()],
+        "now_iso": VALID_NOW,
+    }
+    kwargs.update(overrides)
+    return assemble_foundup_brain_current_state(**kwargs)
+
+
 def test_assembles_deterministic_read_only_foundup_brain_view() -> None:
     snapshot = _snapshot()
-
-    first = assemble_foundup_brain_current_state(
-        foundup_id=FOUNDUP_ID,
-        snapshot=snapshot,
-        identity=_identity(),
-        roadmap_state=_roadmap(),
-        verified_outcomes=[_verified_outcome()],
-    )
-    second = assemble_foundup_brain_current_state(
-        foundup_id=FOUNDUP_ID,
-        snapshot=snapshot,
-        identity=_identity(),
-        roadmap_state=_roadmap(),
-        verified_outcomes=[_verified_outcome()],
-    )
+    first = _assemble(snapshot=snapshot)
+    second = _assemble(snapshot=snapshot)
 
     assert first.accepted is True
     assert first.status == FOUNDUP_BRAIN_VIEW_ACCEPTED
@@ -153,19 +173,16 @@ def test_assembles_deterministic_read_only_foundup_brain_view() -> None:
     assert first.view.current_state["repo_head_sha"] == HEAD
     assert first.view.current_state["work_state_revision"] == REVISION
     assert first.view.current_state["breadcrumb_record_count"] == 1
+    assert first.view.current_state["breadcrumb_scope"] == FOUNDUP_ID
     assert first.view.current_state["brain_signature_digest"] == "sha256:foundup-brain"
+    assert first.view.current_state["active_work"][0]["foundup_id"] == FOUNDUP_ID
     assert first.view.learning_candidates == ()
     assert first.view.roadmap_signals == ()
     assert all(first.view.invariants.values())
 
 
 def test_missing_brain_receipt_fails_closed_for_foundup_brain_poc() -> None:
-    result = assemble_foundup_brain_current_state(
-        foundup_id=FOUNDUP_ID,
-        snapshot=_snapshot(brain_available=False),
-        identity=_identity(),
-        roadmap_state=_roadmap(),
-    )
+    result = _assemble(snapshot=_snapshot(brain_available=False), verified_outcomes=[])
 
     assert result.accepted is False
     assert result.status == FOUNDUP_BRAIN_VIEW_REJECTED
@@ -174,9 +191,7 @@ def test_missing_brain_receipt_fails_closed_for_foundup_brain_poc() -> None:
 
 
 def test_cross_foundup_identity_roadmap_and_outcome_are_rejected() -> None:
-    result = assemble_foundup_brain_current_state(
-        foundup_id=FOUNDUP_ID,
-        snapshot=_snapshot(),
+    result = _assemble(
         identity=_identity("other-foundup"),
         roadmap_state=_roadmap("other-foundup"),
         verified_outcomes=[_verified_outcome("other-foundup")],
@@ -188,35 +203,72 @@ def test_cross_foundup_identity_roadmap_and_outcome_are_rejected() -> None:
     assert "verified_outcome_foundup_id_mismatch" in result.rejection_reasons
 
 
-def test_unverified_outcome_cannot_enter_current_brain_view() -> None:
+def test_cross_foundup_work_claim_and_queue_item_are_rejected() -> None:
+    snapshot = _snapshot(
+        worker_claims=[{"claim_id": "foreign-claim", "foundup_id": "other-foundup"}],
+        queue_items=[{"queue_item_id": "foreign-queue", "foundup_id": "other-foundup"}],
+    )
+    result = _assemble(snapshot=snapshot, verified_outcomes=[])
+
+    assert result.accepted is False
+    assert "cross_foundup_worker_claim_rejected" in result.rejection_reasons
+    assert "cross_foundup_queue_item_rejected" in result.rejection_reasons
+
+
+def test_legacy_unscoped_work_record_is_visible_only_in_single_foundup_poc() -> None:
+    snapshot = _snapshot(worker_claims=[{"claim_id": "legacy-claim", "status": "ACTIVE"}])
+    result = _assemble(snapshot=snapshot, verified_outcomes=[])
+
+    assert result.accepted is True
+    assert result.view is not None
+    assert result.view.current_state["active_work"][0]["claim_id"] == "legacy-claim"
+
+
+def test_missing_roadmap_binding_fails_closed() -> None:
+    result = _assemble(roadmap_state={"foundup_id": FOUNDUP_ID}, verified_outcomes=[])
+
+    assert result.accepted is False
+    assert "missing_roadmap_id" in result.rejection_reasons
+    assert "missing_roadmap_version" in result.rejection_reasons
+    assert "missing_roadmap_content_digest" in result.rejection_reasons
+
+
+def test_expired_snapshot_fails_closed() -> None:
+    result = _assemble(now_iso=EXPIRED_NOW, verified_outcomes=[])
+
+    assert result.accepted is False
+    assert "snapshot_expired" in result.rejection_reasons
+
+
+def test_unverified_or_incomplete_outcome_cannot_enter_current_brain_view() -> None:
     outcome = _verified_outcome()
     outcome["held_out_passed"] = False
-
-    result = assemble_foundup_brain_current_state(
-        foundup_id=FOUNDUP_ID,
-        snapshot=_snapshot(),
-        identity=_identity(),
-        roadmap_state=_roadmap(),
-        verified_outcomes=[outcome],
-    )
+    outcome["verification_receipt_id"] = ""
+    result = _assemble(verified_outcomes=[outcome])
 
     assert result.accepted is False
     assert "unverified_outcome_rejected" in result.rejection_reasons
+    assert "missing_verified_outcome_field:verification_receipt_id" in result.rejection_reasons
 
 
 def test_secret_bearing_identity_metadata_is_rejected() -> None:
     identity = _identity()
     identity["purpose"] = "Use sk-example-secret in runtime"
-
-    result = assemble_foundup_brain_current_state(
-        foundup_id=FOUNDUP_ID,
-        snapshot=_snapshot(),
-        identity=identity,
-        roadmap_state=_roadmap(),
-    )
+    result = _assemble(identity=identity, verified_outcomes=[])
 
     assert result.accepted is False
     assert "secret_bearing_input_rejected" in result.rejection_reasons
     assert result.no_brain_write_performed is True
     assert result.no_holoindex_mutation_performed is True
     assert result.no_repo_mutation_performed is True
+
+
+def test_source_ast_contains_no_execution_or_mutation_imports() -> None:
+    tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
+    imports = {
+        alias.name.split(".")[0]
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+        for alias in node.names
+    }
+    assert imports.isdisjoint({"subprocess", "socket", "requests", "sqlite3", "git", "openai"})
