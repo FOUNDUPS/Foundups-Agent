@@ -1,0 +1,238 @@
+"""Tests for REDDOG_WRE_QUEUE_AUTHORITY_REQUEST_DRYRUN_PHASE1."""
+
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+
+from modules.communication.moltbot_bridge.src import (
+    reddog_wre_queue_authority_request_dryrun as planner,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    VALVE_OPEN_WORKTREE_CREATE,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
+    NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
+    WRE_QUEUE_CONSUMER_DRYRUN_READY,
+)
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+MODULE_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "src"
+    / "reddog_wre_queue_authority_request_dryrun.py"
+)
+
+
+def _queue_result(**overrides):
+    receipt = {
+        "receipt_id": "wre_queue_consumer_1234",
+        "queue_item_id": "queue-1",
+        "slice_id": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "claim_id": "claim-1",
+        "worker_id": "reddog-main-bootstrap",
+        "freshness_receipt_id": "fresh-1",
+        "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
+        "execution_ready": False,
+        "no_queue_mutation_performed": True,
+    }
+    result = {
+        "accepted": True,
+        "status": WRE_QUEUE_CONSUMER_DRYRUN_READY,
+        "rejection_reasons": [],
+        "receipt": receipt,
+        "selected_queue_item_id": "queue-1",
+        "selected_slice": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
+        "execution_ready": False,
+    }
+    result.update(overrides)
+    return result
+
+
+def _profile(**overrides):
+    profile = {
+        "principal_id": "github:mjtrout",
+        "principal_provider": "github",
+        "principal_public_key": "pub:principal",
+        "reddog_id": "reddog:abc123",
+        "reddog_public_key": "pub:reddog",
+        "repo_full_name": "FOUNDUPS/Foundups-Agent",
+        "foundup_id": "paccess_001",
+        "allowed_paths": ["modules/foundups/paccess_001/**"],
+        "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
+        "requested_operation": "create_foundup",
+        "permission_snapshot_digest": "sha256:snap-1",
+        "identity_nonce": "identity-nonce-0001",
+        "work_authority_nonce": "workauth-nonce-0001",
+        "issued_at": 1000,
+        "identity_expires_at": 4600,
+        "work_authority_expires_at": 1300,
+        "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
+        "key_epoch": "epoch-1",
+        "consensus_receipt_digest": "sha256:consensus",
+        "sovereign_authorization_digest": "sha256:012-token",
+    }
+    profile.update(overrides)
+    return profile
+
+
+def test_builds_delegated_authority_runtime_request_without_signing() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(),
+    )
+
+    assert result.accepted is True
+    assert result.status == planner.QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT
+    assert result.execution_ready is False
+    assert result.signer_invoked is False
+    assert result.no_signing_performed is True
+    assert result.no_signer_state_mutation_performed is True
+    assert result.no_worker_spawn_performed is True
+    assert result.no_worktree_created is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_repo_mutation_performed is True
+    assert result.no_holoindex_reindex_performed is True
+    assert result.no_pr_created is True
+    assert result.no_reward_settlement_performed is True
+    assert result.receipt is not None
+    request = result.delegated_authority_request
+    assert request is not None
+    assert request["work_order_id"].startswith("wre-queue-")
+    assert request["foundup_id"] == "paccess_001"
+    assert request["allowed_paths"] == ("modules/foundups/paccess_001/**",)
+    assert request["requested_operation"] == "create_foundup"
+    assert request["valve_state_required"] == VALVE_OPEN_WORKTREE_CREATE
+    assert result.receipt.delegated_authority_request_digest.startswith("sha256:")
+
+
+def test_rejects_unaccepted_queue_consumer_result() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(accepted=False),
+        authority_profile=_profile(),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_QUEUE_CONSUMER_NOT_READY in result.rejection_reasons
+    assert result.delegated_authority_request is None
+
+
+def test_rejects_missing_profile() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=None,
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_PROFILE_MISSING in result.rejection_reasons
+
+
+def test_rejects_missing_required_profile_field() -> None:
+    profile = _profile()
+    del profile["principal_public_key"]
+
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=profile,
+    )
+
+    assert result.accepted is False
+    assert f"{planner.FAIL_REQUIRED_FIELD}:principal_public_key" in result.rejection_reasons
+
+
+def test_rejects_non_ascii_profile() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(principal_id="github:mjtrout-\u03c0"),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_PROFILE_NON_ASCII in result.rejection_reasons
+
+
+def test_rejects_allowed_path_outside_foundup_scope() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(allowed_paths=["modules/communication/moltbot_bridge/src/main.py"]),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_ALLOWED_PATH_SCOPE in result.rejection_reasons
+
+
+def test_rejects_denied_path_outside_foundup_scope() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(denied_paths=[".github/workflows/**"]),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_DENIED_PATH_SCOPE in result.rejection_reasons
+
+
+def test_rejects_repo_wide_authority_until_generic_contract_exists() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(foundup_id="repo", allowed_paths=["modules/foundups/repo/**"]),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY in result.rejection_reasons
+
+
+def test_rejects_high_authority_without_consensus_and_sovereign_digest() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(consensus_receipt_digest=None, sovereign_authorization_digest=None),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_HIGH_AUTHORITY_COSIGN in result.rejection_reasons
+
+
+def test_low_authority_does_not_require_cosign() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(
+            requested_operation="inspect_repo",
+            consensus_receipt_digest=None,
+            sovereign_authorization_digest=None,
+        ),
+    )
+
+    assert result.accepted is True
+    assert result.delegated_authority_request is not None
+    assert result.delegated_authority_request["requested_operation"] == "inspect_repo"
+
+
+def test_module_has_no_shell_network_signing_state_or_runtime_invocation_imports() -> None:
+    tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
+    banned_import_roots = {
+        "subprocess",
+        "requests",
+        "urllib",
+        "http",
+        "socket",
+        "sqlite3",
+        "holo_index",
+        "git",
+        "hmac",
+        "secrets",
+    }
+    banned_calls = {"eval", "exec", "compile", "__import__"}
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert alias.name.split(".", 1)[0] not in banned_import_roots
+        if isinstance(node, ast.ImportFrom) and node.module:
+            assert node.module.split(".", 1)[0] not in banned_import_roots
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            assert node.func.id not in banned_calls
