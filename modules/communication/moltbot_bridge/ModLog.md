@@ -1,5 +1,32 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_stage_handler_registry.py`: a centralized
+  dependency-injected registry for all already-built resident queue stage
+  handlers, from `authority_request` through `pattern_memory_admission`.
+- Updated the `main.py` next-stage dispatch bootstrap to construct its handler
+  map through the registry while injecting only the dependencies it already
+  owns. Default startup behavior remains unchanged: dispatch is still
+  off-by-default, and later stages remain unavailable until a dedicated runtime
+  dependency slice supplies explicit dependencies.
+- Added tests proving default bootstrap dependency scope registers only
+  `authority_request`, full injected dependencies register all 13 queue stages,
+  callable handlers are omitted from telemetry payloads, empty mapping
+  dependencies fail closed, and the registry has no shell/network/HoloIndex or
+  default client construction surface.
+- Boundary: registry composition only; no signer, runner, worktree, shell,
+  OpenClaw enqueue, Hermes dispatch, PR publish, PatternMemory client,
+  reward settlement, repo mutation, or HoloIndex runtime re-index is created by
+  this slice.
+- HoloIndex read-only probe for `RedDog resident queue stage handler registry
+  bootstrap` surfaced adjacent queue/live-enqueue/WSP/docs results, but not
+  this new registry before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_PATTERN_MEMORY_ADMISSION_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
