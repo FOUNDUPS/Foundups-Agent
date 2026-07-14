@@ -30,6 +30,13 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
     collect_reddog_readonly_audit_report_bundle,
     persist_reddog_readonly_audit_task_report,
 )
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_runtime import (
+    ACTION_FIX,
+    decide_reddog_readonly_audit_next_action,
+)
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
+    READONLY_AUDIT_LANE_ANALYZER_SLICE,
+)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -233,13 +240,21 @@ def test_run_task_persists_report_before_marking_complete(tmp_path: Path, monkey
     assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
 
     result = execute_task(task_id, repo_root=root)
-    collected = collect_reddog_readonly_audit_report_bundle(plan=plan)
+    store = AgentDbReadOnlyAuditReportStore()
+    collected = collect_reddog_readonly_audit_report_bundle(plan=plan, store=store)
+    decision = decide_reddog_readonly_audit_next_action(
+        collection_result=collected,
+        reports=store.load_readonly_audit_reports(plan.receipt.swarm_id),
+    )
 
     assert result["ok"] is True
     assert result["readonly_audit_report_persist"]["accepted"] is True
     assert db.get_autonomous_task_by_id(task_id)["status"] == "completed"
     assert collected.accepted is True
     assert collected.report_count == 1
+    assert decision.accepted is True
+    assert decision.action == ACTION_FIX
+    assert decision.next_slice_name == READONLY_AUDIT_LANE_ANALYZER_SLICE
 
 
 def test_report_collection_module_ast_has_no_execution_or_repo_mutation() -> None:

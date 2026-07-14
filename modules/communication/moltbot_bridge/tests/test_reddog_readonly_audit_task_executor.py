@@ -13,6 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     READONLY_AUDIT_TASK_SOURCE,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
+    READONLY_AUDIT_LANE_ANALYZER_SLICE,
     READONLY_AUDIT_TASK_REPORT_ACCEPT,
     READONLY_AUDIT_TASK_REPORT_REJECT,
     ReadOnlyAuditTaskRejectReason,
@@ -95,6 +96,13 @@ def test_readonly_audit_executor_reads_only_allowlisted_targets(tmp_path: Path) 
     assert result.report["openclaw_enqueue_performed"] is False
     assert len(result.report["evidence_refs"]) == 2
     assert all(ref.startswith("file:") for ref in result.report["evidence_refs"])
+    assert len(result.report["findings"]) == 1
+    finding = result.report["findings"][0]
+    assert finding["finding_id"] == "repo_code_audit:lane_analyzer_missing"
+    assert finding["wsp97_label"] == "SPECIFIED_NOT_IMPLEMENTED"
+    assert finding["recommended_action"] == "FIX"
+    assert finding["next_slice_name"] == READONLY_AUDIT_LANE_ANALYZER_SLICE
+    assert set(finding["evidence_refs"]) == set(result.report["evidence_refs"])
 
 
 def test_readonly_audit_executor_rejects_wrong_source_or_missing_assignment(tmp_path: Path) -> None:

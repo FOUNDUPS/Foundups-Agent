@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_READONLY_AUDIT_SEMANTIC_FINDINGS_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Extended `src/reddog_readonly_audit_task_executor.py` so accepted
+  read-only audit reports include a WSP_97-labeled semantic finding when the
+  lane-specific analyzer is still missing. The finding is evidence-bound to
+  the report refs and routes to `REDDOG_READONLY_AUDIT_LANE_ANALYZER_PHASE1`
+  instead of silently presenting evidence collection as finished audit work.
+- Extended the read-only report bundle digest payload in
+  `src/reddog_openclaw_readonly_audit_swarm_runtime.py` so report findings
+  affect the validated bundle identity.
+- Added executor test coverage proving the missing-analyzer finding is present,
+  `SPECIFIED_NOT_IMPLEMENTED`, evidence-bound, and routes to the next lane
+  analyzer slice.
+- Boundary: no model call, no shell/subprocess, no repo mutation, no worktree
+  operation, no OpenClaw enqueue, no Hermes/WRE dispatch, no HoloIndex
+  mutation/re-index, and no live action-plane wiring. This adds report
+  semantics only.
+
 ## 2026-07-14: REDDOG_READONLY_AUDIT_DECISION_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
