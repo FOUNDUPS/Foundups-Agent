@@ -1182,13 +1182,16 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
     Run RedDog's read-only operational bootstrap before DAE autostart.
 
     This binds current work-state and HoloIndex freshness receipts to a
-    read-only OpenClaw audit-swarm plan. It never spawns workers or enqueues
-    OpenClaw. Missing receipts are warning-only by default so the menu still
-    loads while the authoritative runtime wiring is incomplete.
+    read-only OpenClaw audit-swarm plan. It never spawns workers. It publishes
+    read-only audit tasks to AgentDB only when the host explicitly enables
+    the queue bridge. Missing receipts are warning-only by default so the menu
+    still loads while the authoritative runtime wiring is incomplete.
 
     Env:
         REDDOG_READONLY_OPERATIONAL_BOOTSTRAP=1           Enable check (default ON)
         REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=0  Block startup if not ready
+        REDDOG_READONLY_AUDIT_SWARM_ENQUEUE_ENABLED       Override audit task enqueue bridge
+        OPENCLAW_AUTO_TASKS_ENABLED                       Enables audit task enqueue if no override
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH              Existing work-state JSON
         HOLOINDEX_FRESHNESS_RECEIPT                       Existing HoloIndex receipt
         HOLOINDEX_SSD_PATH                                Derive receipt path if set
@@ -1199,6 +1202,11 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         return True
 
     enforced = os.getenv("REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED", "0") != "0"
+    enqueue_override = os.getenv("REDDOG_READONLY_AUDIT_SWARM_ENQUEUE_ENABLED")
+    if enqueue_override is None:
+        enqueue_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
+    else:
+        enqueue_requested = enqueue_override != "0"
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
@@ -1210,6 +1218,7 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
             work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
             holoindex_receipt_path=os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", ""),
             holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
+            enqueue_readonly_audit_tasks=enqueue_requested,
         )
     except Exception as exc:
         logger.error(f"[REDDOG-BOOTSTRAP] Startup preflight failed: {exc}")
@@ -1223,7 +1232,9 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
     reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
     print(
         f"[REDDOG-BOOTSTRAP] preflight={status} status={result.status} "
-        f"assignments={result.assignment_count} reasons={reasons}"
+        f"assignments={result.assignment_count} enqueue_attempted={result.enqueue_attempted} "
+        f"enqueue_decision={result.enqueue_decision or '(none)'} "
+        f"enqueue_tasks={result.enqueue_task_count} reasons={reasons}"
     )
     if result.ready:
         print(
