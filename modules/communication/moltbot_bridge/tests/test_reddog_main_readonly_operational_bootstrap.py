@@ -482,7 +482,7 @@ def test_main_preflight_blocks_only_when_enforced_and_not_ready() -> None:
         assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is False
 
 
-def test_main_preflight_reports_ready_without_blocking_menu() -> None:
+def test_main_preflight_reports_ready_without_blocking_menu(capsys) -> None:
     import main
 
     ready_result = RedDogMainReadonlyBootstrapResult(
@@ -497,6 +497,9 @@ def test_main_preflight_reports_ready_without_blocking_menu() -> None:
         rejection_reasons=(),
         changed_paths=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
         allowed_read_targets=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+        readonly_audit_decision_attempted=True,
+        readonly_audit_decision_action=ACTION_FIX,
+        readonly_audit_decision_next_slice="REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
     )
     with patch(
         "modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap.run_reddog_main_readonly_operational_bootstrap",
@@ -504,6 +507,10 @@ def test_main_preflight_reports_ready_without_blocking_menu() -> None:
     ):
         with patch.dict("os.environ", {"REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1"}, clear=False):
             assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
+    output = capsys.readouterr().out
+    assert "decision_attempted=True" in output
+    assert "decision_action=FIX" in output
+    assert "decision_next_slice=REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1" in output
 
 
 def test_main_preflight_enables_enqueue_when_openclaw_auto_tasks_enabled() -> None:

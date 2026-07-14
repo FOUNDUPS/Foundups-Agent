@@ -1241,7 +1241,11 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         f"[REDDOG-BOOTSTRAP] preflight={status} status={result.status} "
         f"assignments={result.assignment_count} report_collection_attempted={result.report_collection_attempted} "
         f"report_collection_status={result.report_collection_status or '(none)'} "
-        f"reports={result.report_collection_report_count} enqueue_attempted={result.enqueue_attempted} "
+        f"reports={result.report_collection_report_count} "
+        f"decision_attempted={result.readonly_audit_decision_attempted} "
+        f"decision_action={result.readonly_audit_decision_action or '(none)'} "
+        f"decision_next_slice={result.readonly_audit_decision_next_slice or '(none)'} "
+        f"enqueue_attempted={result.enqueue_attempted} "
         f"enqueue_decision={result.enqueue_decision or '(none)'} "
         f"enqueue_tasks={result.enqueue_task_count} reasons={reasons}"
     )
