@@ -13,10 +13,13 @@ on:
       - 'modules/communication/moltbot_bridge/tests/TestModLog_FoundUpBrain.md'
       - 'docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md'
       - 'docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md'
+      - 'docs/contracts/REDDOG_0102_PUBLIC_KEY_OPERATIONAL_IDENTITY_ADDENDUM_PHASE1.md'
       - 'docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md'
       - 'docs/architecture/architecture_registry.yaml'
       - 'WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md'
       - 'WSP_knowledge/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md'
+      - 'WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md'
+      - 'WSP_knowledge/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md'
       - '.github/workflows/foundup_brain_poc.yml'
   push:
     branches: [main]
@@ -30,10 +33,13 @@ on:
       - 'modules/communication/moltbot_bridge/tests/TestModLog_FoundUpBrain.md'
       - 'docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md'
       - 'docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md'
+      - 'docs/contracts/REDDOG_0102_PUBLIC_KEY_OPERATIONAL_IDENTITY_ADDENDUM_PHASE1.md'
       - 'docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md'
       - 'docs/architecture/architecture_registry.yaml'
       - 'WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md'
       - 'WSP_knowledge/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md'
+      - 'WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md'
+      - 'WSP_knowledge/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md'
       - '.github/workflows/foundup_brain_poc.yml'
 
 jobs:
@@ -69,7 +75,7 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_operational_context_snapshot.py \
             -q --tb=short
 
-      - name: Verify WSP 22 and WSP 60 registration
+      - name: Verify WSP 22, WSP 29, and WSP 60 registration
         run: |
           grep -q 'FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1' \
             modules/communication/moltbot_bridge/tests/TestModLog_FoundUpBrain.md
@@ -79,14 +85,30 @@ jobs:
             docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md
           grep -q 'controlling_wsp: WSP_60' \
             docs/architecture/architecture_registry.yaml
+          grep -q 'cabr_wsp: WSP_29' \
+            docs/architecture/architecture_registry.yaml
 
-      - name: Verify WSP framework and knowledge mirror
+      - name: Verify WSP framework and knowledge mirrors
         run: |
           cmp --silent \
             WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md \
             WSP_knowledge/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md
+          cmp --silent \
+            WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md \
+            WSP_knowledge/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md
           grep -q 'This addendum does not create a new WSP' \
             WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md
+          grep -q 'CABR remains the.*Consensus-Driven Autonomous Benefit Rate' \
+            WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md
+
+      - name: Verify 0102 public-key identity correction
+        run: |
+          grep -q 'RedDog is an operational state' \
+            docs/contracts/REDDOG_0102_PUBLIC_KEY_OPERATIONAL_IDENTITY_ADDENDUM_PHASE1.md
+          grep -q 'durable_identity_resolves_to_0102_public_key' \
+            docs/architecture/architecture_registry.yaml
+          grep -q 'CABR alone must not grant Memex access' \
+            WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md
 
       - name: Verify deferred governance remains non-runtime
         run: |
