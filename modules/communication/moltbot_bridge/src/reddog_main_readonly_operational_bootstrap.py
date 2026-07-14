@@ -42,6 +42,12 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_run
     ReadOnlyAuditDecisionReceipt,
     decide_reddog_readonly_audit_next_action,
 )
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_persistence import (
+    AgentDbReadOnlyAuditDecisionStore,
+    ReadOnlyAuditDecisionPersistResult,
+    ReadOnlyAuditDecisionStore,
+    persist_reddog_readonly_audit_decision,
+)
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     EvidenceBundle,
     OperationalContextSnapshot,
@@ -96,6 +102,10 @@ class RedDogMainReadonlyBootstrapResult:
     readonly_audit_decision_id: Optional[str] = None
     readonly_audit_decision_next_slice: Optional[str] = None
     readonly_audit_decision_rejection_reasons: tuple[str, ...] = ()
+    readonly_audit_decision_persist_attempted: bool = False
+    readonly_audit_decision_persist_status: Optional[str] = None
+    readonly_audit_decision_persist_stored: bool = False
+    readonly_audit_decision_persist_rejection_reasons: tuple[str, ...] = ()
     enqueue_attempted: bool = False
     enqueue_decision: Optional[str] = None
     enqueue_receipt_id: Optional[str] = None
@@ -133,6 +143,8 @@ def run_reddog_main_readonly_operational_bootstrap(
     seen_assignment_ids: Optional[set[str]] = None,
     collect_readonly_audit_reports: bool = False,
     report_store: ReadOnlyAuditReportStore | None = None,
+    persist_readonly_audit_decision: bool = False,
+    decision_store: ReadOnlyAuditDecisionStore | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
 
@@ -239,6 +251,7 @@ def run_reddog_main_readonly_operational_bootstrap(
 
     collection_result: ReadOnlyAuditReportCollectionResult | None = None
     decision_result: ReadOnlyAuditDecisionReceipt | None = None
+    decision_persist_result: ReadOnlyAuditDecisionPersistResult | None = None
     if collect_readonly_audit_reports:
         reader = report_store if report_store is not None else AgentDbReadOnlyAuditReportStore()
         collection_result = collect_reddog_readonly_audit_report_bundle(
@@ -274,7 +287,30 @@ def run_reddog_main_readonly_operational_bootstrap(
                     swarm_plan=plan,
                     collection_result=collection_result,
                     decision_result=decision_result,
+                    decision_persist_result=decision_persist_result,
                 )
+            if persist_readonly_audit_decision:
+                decision_writer = decision_store if decision_store is not None else AgentDbReadOnlyAuditDecisionStore()
+                decision_persist_result = persist_reddog_readonly_audit_decision(
+                    decision=decision_result,
+                    store=decision_writer,
+                )
+                if not decision_persist_result.accepted:
+                    return _not_ready(
+                        reasons=(
+                            "readonly_audit_decision_persist_rejected",
+                            *decision_persist_result.rejection_reasons,
+                        ),
+                        changed_paths=paths,
+                        allowed_read_targets=targets,
+                        snapshot=snapshot,
+                        evidence_bundle=evidence_bundle,
+                        gate=gate,
+                        swarm_plan=plan,
+                        collection_result=collection_result,
+                        decision_result=decision_result,
+                        decision_persist_result=decision_persist_result,
+                    )
             return _ready(
                 snapshot=snapshot,
                 context_view=context_view,
@@ -285,6 +321,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 allowed_read_targets=targets,
                 collection_result=collection_result,
                 decision_result=decision_result,
+                decision_persist_result=decision_persist_result,
                 enqueue_result=None,
                 enqueue_attempted=False,
             )
@@ -299,6 +336,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 swarm_plan=plan,
                 collection_result=collection_result,
                 decision_result=decision_result,
+                decision_persist_result=decision_persist_result,
             )
 
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None
@@ -320,6 +358,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 swarm_plan=plan,
                 collection_result=collection_result,
                 decision_result=decision_result,
+                decision_persist_result=decision_persist_result,
                 enqueue_result=enqueue_result,
             )
 
@@ -333,6 +372,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         allowed_read_targets=targets,
         collection_result=collection_result,
         decision_result=decision_result,
+        decision_persist_result=decision_persist_result,
         enqueue_result=enqueue_result,
         enqueue_attempted=enqueue_readonly_audit_tasks,
     )
@@ -349,6 +389,7 @@ def _ready(
     allowed_read_targets: Sequence[str],
     collection_result: ReadOnlyAuditReportCollectionResult | None,
     decision_result: ReadOnlyAuditDecisionReceipt | None,
+    decision_persist_result: ReadOnlyAuditDecisionPersistResult | None,
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None,
     enqueue_attempted: bool,
 ) -> RedDogMainReadonlyBootstrapResult:
@@ -378,6 +419,12 @@ def _ready(
         readonly_audit_decision_id=decision_result.decision_id if decision_result else None,
         readonly_audit_decision_next_slice=decision_result.next_slice_name if decision_result else None,
         readonly_audit_decision_rejection_reasons=decision_result.rejection_reasons if decision_result else (),
+        readonly_audit_decision_persist_attempted=decision_persist_result is not None,
+        readonly_audit_decision_persist_status=decision_persist_result.status if decision_persist_result else None,
+        readonly_audit_decision_persist_stored=decision_persist_result.stored if decision_persist_result else False,
+        readonly_audit_decision_persist_rejection_reasons=(
+            decision_persist_result.rejection_reasons if decision_persist_result else ()
+        ),
         enqueue_attempted=enqueue_attempted,
         enqueue_decision=enqueue_result.decision if enqueue_result else None,
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
@@ -430,6 +477,7 @@ def _not_ready(
     swarm_plan: ReadOnlyAuditSwarmPlan | None = None,
     collection_result: ReadOnlyAuditReportCollectionResult | None = None,
     decision_result: ReadOnlyAuditDecisionReceipt | None = None,
+    decision_persist_result: ReadOnlyAuditDecisionPersistResult | None = None,
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     determination_id = None
@@ -463,6 +511,12 @@ def _not_ready(
         readonly_audit_decision_id=decision_result.decision_id if decision_result else None,
         readonly_audit_decision_next_slice=decision_result.next_slice_name if decision_result else None,
         readonly_audit_decision_rejection_reasons=decision_result.rejection_reasons if decision_result else (),
+        readonly_audit_decision_persist_attempted=decision_persist_result is not None,
+        readonly_audit_decision_persist_status=decision_persist_result.status if decision_persist_result else None,
+        readonly_audit_decision_persist_stored=decision_persist_result.stored if decision_persist_result else False,
+        readonly_audit_decision_persist_rejection_reasons=(
+            decision_persist_result.rejection_reasons if decision_persist_result else ()
+        ),
         enqueue_attempted=enqueue_result is not None,
         enqueue_decision=enqueue_result.decision if enqueue_result else None,
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,

@@ -1191,6 +1191,7 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         REDDOG_READONLY_OPERATIONAL_BOOTSTRAP=1           Enable check (default ON)
         REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=0  Block startup if not ready
         REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED   Override audit report collection bridge
+        REDDOG_READONLY_AUDIT_DECISION_PERSIST_ENABLED    Override audit decision persistence bridge
         REDDOG_READONLY_AUDIT_SWARM_ENQUEUE_ENABLED       Override audit task enqueue bridge
         OPENCLAW_AUTO_TASKS_ENABLED                       Enables audit task enqueue if no override
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH              Existing work-state JSON
@@ -1213,6 +1214,11 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         collection_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
     else:
         collection_requested = collection_override != "0"
+    decision_persist_override = os.getenv("REDDOG_READONLY_AUDIT_DECISION_PERSIST_ENABLED")
+    if decision_persist_override is None:
+        decision_persist_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
+    else:
+        decision_persist_requested = decision_persist_override != "0"
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
@@ -1226,6 +1232,7 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
             holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
             collect_readonly_audit_reports=collection_requested,
             enqueue_readonly_audit_tasks=enqueue_requested,
+            persist_readonly_audit_decision=decision_persist_requested,
         )
     except Exception as exc:
         logger.error(f"[REDDOG-BOOTSTRAP] Startup preflight failed: {exc}")
@@ -1245,6 +1252,8 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         f"decision_attempted={result.readonly_audit_decision_attempted} "
         f"decision_action={result.readonly_audit_decision_action or '(none)'} "
         f"decision_next_slice={result.readonly_audit_decision_next_slice or '(none)'} "
+        f"decision_persist_attempted={result.readonly_audit_decision_persist_attempted} "
+        f"decision_persist_status={result.readonly_audit_decision_persist_status or '(none)'} "
         f"enqueue_attempted={result.enqueue_attempted} "
         f"enqueue_decision={result.enqueue_decision or '(none)'} "
         f"enqueue_tasks={result.enqueue_task_count} reasons={reasons}"
