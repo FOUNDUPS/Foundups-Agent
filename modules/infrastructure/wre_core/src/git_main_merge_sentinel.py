@@ -13,16 +13,17 @@ Purpose:
 
 Flow:
     1. If on main -> skip (nothing to do)
-    2. git fetch --all --quiet
-    3. Push current branch to both remotes (ensure nothing lost)
-    4. Try fast-forward: git push origin HEAD:main
-    5. If fails (diverged) -> create PR via gh, merge via gh pr merge
-    6. Update local main: git branch -f main origin/main
-    7. Checkout main
-    8. Delete old feature branch (local + both remotes)
+    2. Refuse if main is checked out in another worktree
+    3. git fetch --all --quiet
+    4. Push current branch to both remotes (ensure nothing lost)
+    5. Try fast-forward: git push origin HEAD:main
+    6. If fails (diverged) -> create PR via gh, merge via gh pr merge
+    7. Update local main: git branch -f main origin/main
+    8. Checkout main
+    9. Delete old feature branch (local + both remotes)
 
 Environment:
-    GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default ON)
+    GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
     GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
     GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
 """
@@ -98,6 +99,34 @@ def _gh(args: list[str], repo_root: Path, timeout: int = 60) -> tuple[bool, str]
         return False, str(e)
 
 
+def _branch_checkout_paths(repo_root: Path, branch: str) -> list[Path]:
+    """Return other worktree paths where the branch is checked out."""
+
+    ok, output = _git(["worktree", "list", "--porcelain"], repo_root, timeout=15)
+    if not ok:
+        return []
+
+    root = repo_root.resolve()
+    branch_ref = f"refs/heads/{branch}"
+    current_path: Path | None = None
+    matches: list[Path] = []
+    for raw in output.splitlines():
+        line = raw.strip()
+        if line.startswith("worktree "):
+            current_path = Path(line.split(" ", 1)[1])
+            continue
+        if line.startswith("branch ") and current_path is not None:
+            if line.split(" ", 1)[1] == branch_ref:
+                try:
+                    resolved = current_path.resolve()
+                except OSError:
+                    resolved = current_path
+                if resolved != root:
+                    matches.append(resolved)
+            current_path = None
+    return matches
+
+
 def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, Any]:
     """
     Run git main-merge sentinel: merge current branch to main if needed.
@@ -123,7 +152,7 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
     }
 
     # Check if enabled
-    if not force and not _env_bool("GIT_MAIN_MERGE_SENTINEL", default=True):
+    if not force and not _env_bool("GIT_MAIN_MERGE_SENTINEL", default=False):
         result["actions"].append("skip (disabled)")
         return result
 
@@ -141,6 +170,14 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
 
     result["branch"] = current_branch
     logger.info(f"[GIT-MERGE-SENTINEL] Merging {current_branch} -> main")
+
+    main_paths = _branch_checkout_paths(repo_root, "main")
+    if main_paths:
+        result["actions"].append("blocked: main checked out in another worktree")
+        result["error"] = "main_checked_out_in_another_worktree"
+        result["main_worktree_paths"] = [str(path) for path in main_paths]
+        result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+        return result
 
     # Fetch from all remotes
     ok, output = _git(["fetch", "--all", "--quiet"], repo_root, timeout=15)

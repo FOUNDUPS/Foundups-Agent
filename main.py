@@ -1123,14 +1123,14 @@ def run_git_main_merge_sentinel_preflight(repo_root: Path) -> bool:
     """
     Run git main-merge sentinel at startup.
 
-    Auto-merges feature branches to main to prevent drift.
+    Optionally auto-merges feature branches to main to prevent drift.
 
     Env:
-        GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default ON)
+        GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
         GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
         GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
     """
-    if os.getenv("GIT_MAIN_MERGE_SENTINEL", "1") == "0":
+    if os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") != "1":
         logger.info("[GIT-MERGE-SENTINEL] Startup preflight disabled")
         return True
 
