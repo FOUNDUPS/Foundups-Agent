@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_HELD_OUT_REGRESSION_GATE_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_held_out_regression_gate_handler.py`: a
+  concrete injected handler for the resident queue `held_out_regression_gate`
+  stage.
+- The handler reads the already-recorded `verified_outcome_ratchet` result
+  from the chain-results store and invokes the existing queue-authorized
+  held-out regression gate with injected gate evidence.
+- Boundary: deterministic held-out gate result only; no test execution, shell
+  command, PR publish, merge, PatternMemory write, OpenClaw enqueue, Hermes
+  dispatch, reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue held out regression gate
+  handler` surfaced adjacent policy/operational-spine/WSP/docs results, but
+  not this new handler before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_HELD_OUT_REGRESSION_GATE_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_VERIFIED_OUTCOME_RATCHET_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
