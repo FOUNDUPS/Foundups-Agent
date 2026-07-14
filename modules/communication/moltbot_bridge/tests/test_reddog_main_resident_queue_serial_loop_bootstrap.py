@@ -13,9 +13,20 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
     run_reddog_main_resident_queue_serial_loop_bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
+    REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
 )
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    Ed25519SignerBackend,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
+    SignerPeerAttestation,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    SigningRequest,
     RuntimeRejectCode,
     public_key_fingerprint,
 )
@@ -105,13 +116,13 @@ def _snapshots() -> dict[str, object]:
     }
 
 
-def _principals() -> dict[str, object]:
+def _principals(principal_public_key: str = "pub:principal") -> dict[str, object]:
     return {
         "principals": {
             "github:mjtrout": {
                 "principal_id": "github:mjtrout",
                 "principal_provider": "github",
-                "principal_public_key": "pub:principal",
+                "principal_public_key": principal_public_key,
                 "repo_scope": ["FOUNDUPS/Foundups-Agent"],
                 "foundup_scope": ["paccess_001"],
                 "verified_subject_digest": "sha256:verified-subject",
@@ -154,6 +165,62 @@ def _accepted_socket_signer(
         "no_secret_material_returned": True,
     }
     return json.dumps(response, sort_keys=True).encode("utf-8")
+
+
+class _AuditMacBuilder:
+    def build(self, request: SigningRequest, signature: str, peer: SignerPeerAttestation) -> str:
+        return "audit:" + request.payload_digest
+
+
+def _ed25519_signing_material():
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    principal_key = Ed25519PrivateKey.generate()
+    reddog_key = Ed25519PrivateKey.generate()
+    principal_public = encode_ed25519_public_key(
+        principal_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    reddog_public = encode_ed25519_public_key(
+        reddog_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    peer = SignerPeerAttestation(
+        peer_principal_id="github:mjtrout",
+        transport="test_connector",
+        credential_source="test_peer_attestation",
+        boundary_attested=True,
+    )
+    backends = {
+        principal_public: Ed25519SignerBackend(
+            private_key=principal_key,
+            public_key=principal_public,
+            key_epoch="epoch-1",
+            audit_mac_builder=_AuditMacBuilder(),
+        ),
+        reddog_public: Ed25519SignerBackend(
+            private_key=reddog_key,
+            public_key=reddog_public,
+            key_epoch="epoch-1",
+            audit_mac_builder=_AuditMacBuilder(),
+        ),
+    }
+
+    def connector(socket_path: Path, request_bytes: bytes, timeout_s: float, max_response_bytes: int) -> bytes:
+        assert socket_path.is_absolute()
+        assert timeout_s > 0
+        assert max_response_bytes >= 1024
+        decoded = json.loads(request_bytes.decode("utf-8").strip())
+        request = SigningRequest(**decoded["request"])
+        response = backends[request.signer_public_key].sign(request, peer)
+        return json.dumps(response.to_dict(), sort_keys=True).encode("utf-8")
+
+    return principal_public, reddog_public, connector
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -300,6 +367,61 @@ def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path
     assert next(iter(issued.values()))["status"] == "DELEGATED_AUTHORITY_ISSUED"
 
 
+def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=3,
+    )
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert result.steps_run == 3
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+    )
+    assert result.next_action == "RUN_QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE"
+    assert result.no_signature_verification_performed is False
+    assert result.no_worktree_created is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    verification = stored["stage_results"]["authority_verification"]
+    assert verification["decision"] == "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
+    assert verification["verification_result"]["accepted"] is True
+    authority = json.loads(authority_state.read_text(encoding="utf-8"))
+    assert authority["verified_work_authority_nonces"] == ["workauth-nonce-0001"]
+
+
 def test_bootstrap_rejects_missing_authority_profile(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
@@ -376,6 +498,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_SIGNER_SOCKET_PATH": str(tmp_path / "signer.sock"),
                 "REDDOG_SIGNER_SOCKET_TIMEOUT_S": "2.5",
                 "REDDOG_SIGNER_SOCKET_MAX_RESPONSE_BYTES": "8192",
+                "REDDOG_SIGNATURE_VERIFIER_BACKEND": REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
                 "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
                 "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
             },
@@ -392,6 +515,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["signer_socket_path"] == str(tmp_path / "signer.sock")
     assert mocked.call_args.kwargs["signer_socket_timeout_s"] == 2.5
     assert mocked.call_args.kwargs["signer_socket_max_response_bytes"] == 8192
+    assert mocked.call_args.kwargs["signature_verifier_backend"] == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
     assert mocked.call_args.kwargs["now_epoch"] == 1000
     assert mocked.call_args.kwargs["max_steps"] == 1

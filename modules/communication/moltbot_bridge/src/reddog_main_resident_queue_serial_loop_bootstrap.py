@@ -8,8 +8,9 @@ outside the repository checkout, builds the injected handler registry with the
 dependencies this bootstrap owns today, and advances through the serial loop up
 to a bounded max step count.
 
-This slice does not introduce production signer, verifier, runner, PR,
-PatternMemory, OpenClaw, Hermes, or HoloIndex dependencies. Missing later-stage
+This slice does not introduce a production signer, runner, PR, PatternMemory,
+OpenClaw, Hermes, or HoloIndex dependency. Public signature verification can be
+enabled only through the explicit runtime dependency bundle. Missing later-stage
 dependencies fail closed through the registry and dispatcher.
 """
 
@@ -91,6 +92,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     signer_socket_timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
     signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     signer_socket_connector: Optional[SignerSocketConnector] = None,
+    signature_verifier_backend: str | None = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
@@ -140,6 +142,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         signer_socket_timeout_s=signer_socket_timeout_s,
         signer_socket_max_response_bytes=signer_socket_max_response_bytes,
         signer_socket_connector=signer_socket_connector,
+        signature_verifier_backend=signature_verifier_backend,
         now_epoch=now_epoch,
     )
     if dependency_bundle.accepted is not True:
@@ -161,6 +164,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         principal_resolver=dependency_bundle.principal_resolver,
         snapshot_resolver=dependency_bundle.snapshot_resolver,
         now_epoch=dependency_bundle.now_epoch,
+        signature_verifier=dependency_bundle.signature_verifier,
+        principal_key_resolver=dependency_bundle.principal_key_resolver,
+        nonce_store=dependency_bundle.nonce_store,
+        revocation_oracle=dependency_bundle.revocation_oracle,
     )
     loop = run_reddog_resident_queue_serial_loop(
         explicit_resident_queue_serial_loop_requested=True,
@@ -293,6 +300,7 @@ def _from_loop(
         runtime_dependency_bundle_status=runtime_dependency_bundle_status,
         runtime_dependency_bundle_requested=runtime_dependency_bundle_requested,
         rejection_reasons=tuple(loop.rejection_reasons),
+        no_signature_verification_performed="authority_verification" not in loop.dispatched_stages,
     )
 
 

@@ -1536,6 +1536,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo authority profile JSON
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
+        REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
     """
 
     if os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "0") == "0":
@@ -1579,6 +1580,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signer_socket_path=os.getenv("REDDOG_SIGNER_SOCKET_PATH", "") or None,
             signer_socket_timeout_s=signer_socket_timeout_s,
             signer_socket_max_response_bytes=signer_socket_max_response_bytes,
+            signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
             max_steps=max_steps,

@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_ED25519_VERIFICATION_BUNDLE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Extended the `main.py` resident serial-loop dependency bundle so an explicit
+  `REDDOG_SIGNATURE_VERIFIER_BACKEND=ed25519` setting wires the public
+  `Ed25519SignatureVerifier`, token-verified principal key resolver, durable
+  outside-repo work-authority nonce consumption, and authority-state revocation
+  oracle into the `authority_verification` stage.
+- Added tests proving default verification remains unregistered, explicit
+  Ed25519 verification advances the serial loop through
+  `authority_verification`, work-authority nonce replay is durably rejected,
+  revocations are read from the authority runtime state, unsupported verifier
+  backends reject, and `main.py` passes the verifier backend setting through.
+- Boundary: public verification wiring only. No private key loading, no key
+  generation, no signer spawn, no shell command, no worktree, no OpenClaw
+  enqueue, no Hermes dispatch, no PR publication, no repository mutation, and
+  no HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog resident queue Ed25519 verification
+  backend bundle signature verifier` surfaced the core verifier and adjacent
+  docs, but not this new bundle wiring before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_ED25519_VERIFICATION_BUNDLE_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_ED25519_SIGNER_BACKEND_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97

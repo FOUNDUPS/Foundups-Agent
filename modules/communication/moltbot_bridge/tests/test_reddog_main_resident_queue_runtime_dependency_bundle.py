@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
+    JsonPrincipalKeyResolver,
+    REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     JsonPermissionSnapshotResolver,
     JsonPrincipalAuthorityResolver,
     REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED,
@@ -63,13 +65,13 @@ def _snapshots() -> dict[str, object]:
     }
 
 
-def _principals() -> dict[str, object]:
+def _principals(principal_public_key: str = "pub:principal") -> dict[str, object]:
     return {
         "principals": {
             "github:mjtrout": {
                 "principal_id": "github:mjtrout",
                 "principal_provider": "github",
-                "principal_public_key": "pub:principal",
+                "principal_public_key": principal_public_key,
                 "repo_scope": [REPO],
                 "foundup_scope": [FID],
                 "verified_subject_digest": "sha256:verified-subject",
@@ -255,6 +257,103 @@ def test_bundle_uses_isolated_socket_signer_when_explicitly_configured(tmp_path:
     assert authority_state.exists()
     stored = json.loads(authority_state.read_text(encoding="utf-8"))
     assert stored["issued_authorities"]["wre-queue-1"]["status"] == "DELEGATED_AUTHORITY_ISSUED"
+
+
+def test_bundle_configures_ed25519_verification_dependencies_when_explicit(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    authority_state = tmp_path / "runtime" / "authority-state.json"
+    snapshot_path = _write_json(tmp_path, "snapshots.json", _snapshots())
+    principal_path = _write_json(tmp_path, "principals.json", _principals())
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshot_path,
+        principal_authority_records_path=principal_path,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is True
+    assert bundle.signature_verifier_backend == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    assert bundle.signature_verifier_mode == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    assert bundle.signature_verifier is not None
+    assert isinstance(bundle.principal_key_resolver, JsonPrincipalKeyResolver)
+    assert bundle.principal_key_resolver.resolve("github:mjtrout", "github") == "pub:principal"
+    assert bundle.nonce_store.consume("workauth-nonce-1") is True
+    assert bundle.nonce_store.consume("workauth-nonce-1") is False
+    stored = json.loads(authority_state.read_text(encoding="utf-8"))
+    assert stored["verified_work_authority_nonces"] == ["workauth-nonce-1"]
+
+
+def test_bundle_ed25519_revocation_oracle_reads_authority_state(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    authority_state = _write_json(
+        tmp_path,
+        "authority-state.json",
+        {"revocations": {"key_epochs": ["epoch-1"]}},
+    )
+    snapshot_path = _write_json(tmp_path, "snapshots.json", _snapshots())
+    principal_path = _write_json(tmp_path, "principals.json", _principals())
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshot_path,
+        principal_authority_records_path=principal_path,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is True
+    assert bundle.revocation_oracle.is_revoked(
+        reddog_id="reddog:abc123",
+        fingerprint="sha256:abc",
+        principal_id="github:mjtrout",
+        key_epoch="epoch-1",
+    ) is True
+    assert bundle.revocation_oracle.is_revoked(
+        reddog_id="reddog:abc123",
+        fingerprint="sha256:abc",
+        principal_id="github:mjtrout",
+        key_epoch="epoch-2",
+    ) is False
+
+
+def test_bundle_rejects_unsupported_signature_verifier_backend(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    authority_state = tmp_path / "runtime" / "authority-state.json"
+    snapshot_path = _write_json(tmp_path, "snapshots.json", _snapshots())
+    principal_path = _write_json(tmp_path, "principals.json", _principals())
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshot_path,
+        principal_authority_records_path=principal_path,
+        signature_verifier_backend="hmac",
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is False
+    assert "unsupported_signature_verifier_backend" in bundle.rejection_reasons
+
+
+def test_bundle_rejects_ed25519_verification_without_principal_records(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    authority_state = tmp_path / "runtime" / "authority-state.json"
+    snapshot_path = _write_json(tmp_path, "snapshots.json", _snapshots())
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshot_path,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is False
+    assert "missing_principal_authority_records_for_signature_verification" in bundle.rejection_reasons
 
 
 def test_bundle_rejects_invalid_signer_socket_without_falling_back(tmp_path: Path) -> None:
