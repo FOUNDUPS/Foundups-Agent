@@ -471,6 +471,7 @@ def _report_digest_payload(report: Mapping[str, Any]) -> dict[str, Any]:
         "lane_id": str(report.get("lane_id") or ""),
         "snapshot_receipt_id": str(report.get("snapshot_receipt_id") or ""),
         "evidence_refs": tuple(str(ref) for ref in (report.get("evidence_refs") or ())),
+        "findings_digest": _digest(report.get("findings") or ()),
         "summary_digest": _digest(str(report.get("summary") or "")),
     }
 

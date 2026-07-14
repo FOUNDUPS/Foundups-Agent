@@ -27,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
 
 READONLY_AUDIT_TASK_REPORT_ACCEPT = "READONLY_AUDIT_TASK_REPORT_ACCEPT"
 READONLY_AUDIT_TASK_REPORT_REJECT = "READONLY_AUDIT_TASK_REPORT_REJECT"
+READONLY_AUDIT_LANE_ANALYZER_SLICE = "REDDOG_READONLY_AUDIT_LANE_ANALYZER_PHASE1"
 
 MAX_READ_TARGETS = 32
 MAX_READ_BYTES_PER_TARGET = 12_000
@@ -182,6 +183,7 @@ def _build_report(
         f"file:{item.path}:{item.digest}:lines:{item.line_count}"
         for item in evidence
     )
+    findings = _build_semantic_findings(lane_id=lane_id, evidence_refs=evidence_refs)
     return {
         "assignment_id": assignment_id,
         "lane_id": lane_id,
@@ -196,14 +198,40 @@ def _build_report(
         "openclaw_enqueue_performed": False,
         "readonly_audit_performed": True,
         "target_evidence": [item.to_dict() for item in evidence],
+        "findings": findings,
         "report_digest": "sha256:" + _digest(
             {
                 "assignment_id": assignment_id,
                 "lane_id": lane_id,
                 "evidence_refs": evidence_refs,
+                "findings": findings,
             }
         ),
     }
+
+
+def _build_semantic_findings(
+    *,
+    lane_id: str,
+    evidence_refs: Sequence[str],
+) -> list[Mapping[str, Any]]:
+    if not lane_id or not evidence_refs:
+        return []
+    return [
+        {
+            "finding_id": f"{lane_id}:lane_analyzer_missing",
+            "claim": (
+                f"{lane_id} collected read-only evidence, but the lane-specific "
+                "semantic analyzer is not implemented in the deterministic executor."
+            ),
+            "wsp97_label": "SPECIFIED_NOT_IMPLEMENTED",
+            "recommended_action": "FIX",
+            "wsp15_priority": "P1",
+            "severity": "MAJOR",
+            "evidence_refs": list(evidence_refs),
+            "next_slice_name": READONLY_AUDIT_LANE_ANALYZER_SLICE,
+        }
+    ]
 
 
 def _reject(reasons: Sequence[str]) -> ReadOnlyAuditTaskExecutionResult:
@@ -224,6 +252,7 @@ def _digest(value: Any) -> str:
 __all__ = [
     "READONLY_AUDIT_TASK_REPORT_ACCEPT",
     "READONLY_AUDIT_TASK_REPORT_REJECT",
+    "READONLY_AUDIT_LANE_ANALYZER_SLICE",
     "ReadOnlyAuditTaskExecutionResult",
     "ReadOnlyAuditTaskRejectReason",
     "ReadOnlyTargetEvidence",
