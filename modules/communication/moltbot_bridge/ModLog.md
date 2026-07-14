@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_EXECUTOR_PLAN_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_executor_plan_handler.py`: a concrete
+  injected handler for the resident queue `executor_plan` stage.
+- The handler reads the already-recorded `work_order_invocation` result from
+  the chain-results store, resolves the bound work order through an injected
+  resolver, and invokes the existing queue-authorized executor-plan dry-run
+  bridge.
+- Boundary: executor-plan dry-run only; no execution-valve opening, worker
+  spawn, worktree creation, file edit, shell command, PR publishing,
+  PatternMemory write, OpenClaw enqueue, Hermes dispatch, reward settlement,
+  or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue executor plan handler`
+  surfaced adjacent queue/enqueue/executor modules and docs, but not this new
+  handler before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_EXECUTOR_PLAN_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_WORK_ORDER_INVOCATION_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
