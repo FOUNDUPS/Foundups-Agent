@@ -1287,6 +1287,7 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
         REDDOG_WORK_LEDGER_JSON_PATH                       Optional work ledger source
         REDDOG_GITHUB_PR_RECORDS_PATH                      Required existing PR records JSON
         REDDOG_W10_REPORT_RECORDS_PATH                     Required existing W10 records JSON
+        REDDOG_WORK_STATE_USE_LATEST_READONLY_AUDIT_DECISION  Use persisted RedDog decision as requested slice
     """
 
     if os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH", "1") == "0":
@@ -1294,6 +1295,11 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
         return True
 
     enforced = os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_ENFORCED", "0") != "0"
+    use_decision_override = os.getenv("REDDOG_WORK_STATE_USE_LATEST_READONLY_AUDIT_DECISION")
+    if use_decision_override is None:
+        use_latest_decision = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
+    else:
+        use_latest_decision = use_decision_override != "0"
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_authoritative_work_state_refresh_bootstrap import (
@@ -1308,6 +1314,7 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
             w10_report_records_path=os.getenv("REDDOG_W10_REPORT_RECORDS_PATH", ""),
             work_state_output_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
             worker_id=os.getenv("REDDOG_WORK_STATE_REFRESH_WORKER_ID", "reddog-main-bootstrap"),
+            use_latest_readonly_audit_decision=use_latest_decision,
         )
     except Exception as exc:
         logger.error(f"[REDDOG-WORK-STATE] Startup refresh failed: {exc}")
@@ -1321,6 +1328,8 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
     reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
     print(
         f"[REDDOG-WORK-STATE] preflight={status} status={result.status} "
+        f"latest_decision_attempted={result.latest_decision_attempted} "
+        f"latest_decision_next_slice={result.latest_decision_next_slice or '(none)'} "
         f"queue_items={result.queue_item_count} reasons={reasons}"
     )
     if result.accepted and result.work_state_path:

@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_PERSISTED_DECISION_TO_WORK_STATE_REFRESH_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Wired `src/reddog_main_authoritative_work_state_refresh_bootstrap.py` to
+  optionally load the latest persisted RedDog read-only audit decision and use
+  its `next_slice_name` as the requested slice for the existing authoritative
+  work-state refresh runtime.
+- The bridge validates the persisted decision through the existing
+  `evaluate_reddog_worker_claim_dryrun()` gate before the refresh runtime can
+  commit a durable claim or synchronized WRE queue item.
+- Added `main.py` telemetry and env control:
+  `REDDOG_WORK_STATE_USE_LATEST_READONLY_AUDIT_DECISION=0/1`; default follows
+  `OPENCLAW_AUTO_TASKS_ENABLED`.
+- Boundary: no model call, no shell/subprocess, no GitHub/W10 fetch, no
+  HoloIndex re-index, no OpenClaw enqueue, no Hermes/WRE execution, and no repo
+  mutation. This only selects the requested slice for the already-gated
+  authoritative work-state refresh.
+
 ## 2026-07-14: REDDOG_READONLY_AUDIT_DECISION_PERSISTENCE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

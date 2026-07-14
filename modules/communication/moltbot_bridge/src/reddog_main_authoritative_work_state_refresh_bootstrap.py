@@ -25,6 +25,13 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_re
 from modules.communication.moltbot_bridge.src.reddog_lane_state_reconciler import (
     reconcile_active_and_json_ledgers,
 )
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_persistence import (
+    AgentDbReadOnlyAuditDecisionStore,
+    ReadOnlyAuditDecisionStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_claim_gate_dryrun import (
+    evaluate_reddog_worker_claim_dryrun,
+)
 
 
 REDDOG_WORK_STATE_BOOTSTRAP_APPLIED = "REDDOG_WORK_STATE_BOOTSTRAP_APPLIED"
@@ -48,6 +55,12 @@ class RedDogMainWorkStateRefreshBootstrapResult:
     selected_slice: Optional[str]
     queue_item_count: int
     rejection_reasons: tuple[str, ...]
+    latest_decision_attempted: bool = False
+    latest_decision_id: Optional[str] = None
+    latest_decision_action: Optional[str] = None
+    latest_decision_next_slice: Optional[str] = None
+    latest_decision_claim_gate_decision: Optional[str] = None
+    latest_decision_rejection_reasons: tuple[str, ...] = ()
     no_github_fetch_performed: bool = True
     no_w10_fetch_performed: bool = True
     no_worker_spawn_performed: bool = True
@@ -72,6 +85,8 @@ def run_reddog_main_authoritative_work_state_refresh_bootstrap(
     worker_id: str = "reddog-main-bootstrap",
     now_iso: str | None = None,
     requested_slice: str | None = None,
+    use_latest_readonly_audit_decision: bool = False,
+    decision_store: ReadOnlyAuditDecisionStore | None = None,
     max_source_age_seconds: int = 3600,
     stale_after_days: int = 30,
 ) -> RedDogMainWorkStateRefreshBootstrapResult:
@@ -95,6 +110,9 @@ def run_reddog_main_authoritative_work_state_refresh_bootstrap(
     ledger_text = _read_required_text(ledger_path, "missing_work_ledger_json", reasons)
     github_records = _read_required_records(github_path, "missing_github_pr_records", reasons)
     w10_records = _read_required_records(w10_path, "missing_w10_report_records", reasons)
+    latest_decision: Mapping[str, Any] | None = None
+    latest_decision_claim_gate_decision: Optional[str] = None
+    effective_requested_slice = requested_slice
 
     if active_text and ledger_text:
         ledger_report = reconcile_active_and_json_ledgers(
@@ -107,9 +125,29 @@ def run_reddog_main_authoritative_work_state_refresh_bootstrap(
             reasons.extend(f"stale_ledger_source:{source}" for source in ledger_report.stale_sources)
         if ledger_report.conflicts:
             reasons.extend(f"ledger_conflict:{conflict.slice_id}" for conflict in ledger_report.conflicts)
+        if use_latest_readonly_audit_decision and requested_slice is None:
+            latest_decision, decision_reasons = _load_latest_decision(decision_store)
+            reasons.extend(decision_reasons)
+            if latest_decision and not decision_reasons and not ledger_report.stale_sources and not ledger_report.conflicts:
+                effective_requested_slice = str(latest_decision.get("next_slice_name") or "").strip().upper()
+                claim_gate = evaluate_reddog_worker_claim_dryrun(
+                    ledger_report,
+                    requested_slice=effective_requested_slice,
+                    worker_id=worker_id,
+                )
+                latest_decision_claim_gate_decision = claim_gate.receipt.decision
+                if not claim_gate.accepted:
+                    reasons.append("persisted_decision_claim_gate_rejected")
+                    reasons.extend(f"persisted_decision_claim_gate:{reason}" for reason in claim_gate.receipt.rejection_reasons)
 
     if reasons:
-        return _not_ready(reasons=reasons, output_path=output_path)
+        return _not_ready(
+            reasons=reasons,
+            output_path=output_path,
+            latest_decision=latest_decision,
+            latest_decision_attempted=use_latest_readonly_audit_decision and requested_slice is None,
+            latest_decision_claim_gate_decision=latest_decision_claim_gate_decision,
+        )
 
     assert output_path is not None
     assert active_text is not None and ledger_text is not None
@@ -122,7 +160,7 @@ def run_reddog_main_authoritative_work_state_refresh_bootstrap(
         store=store,
         worker_id=worker_id,
         now_iso=now,
-        requested_slice=requested_slice,
+        requested_slice=effective_requested_slice,
         max_source_age_seconds=max_source_age_seconds,
     )
     if not result.accepted or result.receipt.status != AUTHORITATIVE_REFRESH_APPLIED:
@@ -130,6 +168,9 @@ def run_reddog_main_authoritative_work_state_refresh_bootstrap(
             reasons=result.receipt.rejection_reasons or ("authoritative_refresh_rejected",),
             output_path=output_path,
             runtime_result=result,
+            latest_decision=latest_decision,
+            latest_decision_attempted=use_latest_readonly_audit_decision and requested_slice is None,
+            latest_decision_claim_gate_decision=latest_decision_claim_gate_decision,
         )
 
     queue_count = 0
@@ -145,6 +186,12 @@ def run_reddog_main_authoritative_work_state_refresh_bootstrap(
         selected_slice=result.receipt.selected_slice,
         queue_item_count=queue_count,
         rejection_reasons=(),
+        latest_decision_attempted=use_latest_readonly_audit_decision and requested_slice is None,
+        latest_decision_id=_decision_text(latest_decision, "decision_id"),
+        latest_decision_action=_decision_text(latest_decision, "action"),
+        latest_decision_next_slice=_decision_text(latest_decision, "next_slice_name"),
+        latest_decision_claim_gate_decision=latest_decision_claim_gate_decision,
+        latest_decision_rejection_reasons=(),
     )
 
 
@@ -219,6 +266,36 @@ def _read_required_records(
     return records
 
 
+def _load_latest_decision(
+    store: ReadOnlyAuditDecisionStore | None,
+) -> tuple[Mapping[str, Any] | None, tuple[str, ...]]:
+    reader = store if store is not None else AgentDbReadOnlyAuditDecisionStore()
+    try:
+        decision = reader.load_latest_readonly_audit_decision()
+    except Exception:
+        return None, ("latest_readonly_audit_decision_load_failed",)
+    if decision is None:
+        return None, ("latest_readonly_audit_decision_missing",)
+    reasons: list[str] = []
+    if decision.get("accepted") is not True:
+        reasons.append("latest_readonly_audit_decision_not_accepted")
+    action = str(decision.get("action") or "").strip().upper()
+    if action not in {"FIX", "REVISE", "RESEARCH_MORE"}:
+        reasons.append("latest_readonly_audit_decision_action_not_work")
+    if not str(decision.get("decision_id") or "").strip():
+        reasons.append("latest_readonly_audit_decision_missing_id")
+    if not str(decision.get("next_slice_name") or "").strip():
+        reasons.append("latest_readonly_audit_decision_missing_next_slice")
+    return decision, tuple(reasons)
+
+
+def _decision_text(decision: Mapping[str, Any] | None, key: str) -> Optional[str]:
+    if not decision:
+        return None
+    value = str(decision.get(key) or "").strip()
+    return value or None
+
+
 def _is_inside(path: Path, root: Path) -> bool:
     try:
         path.relative_to(root)
@@ -232,7 +309,16 @@ def _not_ready(
     reasons: Sequence[str],
     output_path: Path | None,
     runtime_result: AuthoritativeWorkStateRefreshResult | None = None,
+    latest_decision: Mapping[str, Any] | None = None,
+    latest_decision_attempted: bool = False,
+    latest_decision_claim_gate_decision: Optional[str] = None,
 ) -> RedDogMainWorkStateRefreshBootstrapResult:
+    latest_reasons = tuple(
+        reason
+        for reason in reasons
+        if str(reason).startswith("latest_readonly_audit_decision")
+        or str(reason).startswith("persisted_decision_claim_gate")
+    )
     return RedDogMainWorkStateRefreshBootstrapResult(
         accepted=False,
         status=REDDOG_WORK_STATE_BOOTSTRAP_NOT_READY,
@@ -242,6 +328,12 @@ def _not_ready(
         selected_slice=runtime_result.receipt.selected_slice if runtime_result else None,
         queue_item_count=0,
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason).strip())),
+        latest_decision_attempted=latest_decision_attempted,
+        latest_decision_id=_decision_text(latest_decision, "decision_id"),
+        latest_decision_action=_decision_text(latest_decision, "action"),
+        latest_decision_next_slice=_decision_text(latest_decision, "next_slice_name"),
+        latest_decision_claim_gate_decision=latest_decision_claim_gate_decision,
+        latest_decision_rejection_reasons=latest_reasons,
     )
 
 
