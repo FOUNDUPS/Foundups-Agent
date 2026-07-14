@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_READONLY_OPERATIONAL_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_main_readonly_operational_bootstrap.py`: read-only
+  startup composition layer for RedDog's operational context snapshot,
+  Fusion/assignment gate, and OpenClaw read-only audit swarm planner.
+- Wired `main.py` with
+  `run_reddog_readonly_operational_bootstrap_preflight()` before runtime DAE
+  autostart. The hook is enabled by default but warning-only; it blocks startup
+  only when `REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=1`.
+- Added `tests/test_reddog_main_readonly_operational_bootstrap.py`: fresh
+  context acceptance, missing work-state/HoloIndex receipt warning behavior,
+  stale HoloIndex rejection, file-based receipt loading, read-target
+  normalization, main preflight nonblocking/enforced behavior, ready-result
+  reporting, and AST no-runtime-mutation coverage.
+- Boundary: no model call, no worker spawn, no OpenClaw enqueue, no Hermes
+  dispatch, no repo mutation, no queue mutation, and no HoloIndex re-index.
+  This slice plans read-only audit assignments only; it does not execute them.
+- HoloIndex read-only probe for `REDDOG_MAIN_READONLY_OPERATIONAL_BOOTSTRAP_PHASE1
+  main.py read-only RedDog operational bootstrap audit swarm` surfaced
+  unrelated web assets and unknown locations, not the new bootstrap module.
+  Recorded `HOLOINDEX_REDDOG_MAIN_READONLY_OPERATIONAL_BOOTSTRAP_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

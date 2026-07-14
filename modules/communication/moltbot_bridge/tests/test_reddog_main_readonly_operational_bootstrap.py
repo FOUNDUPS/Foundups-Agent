@@ -1,0 +1,289 @@
+"""Tests for REDDOG_MAIN_READONLY_OPERATIONAL_BOOTSTRAP_PHASE1."""
+
+from __future__ import annotations
+
+import ast
+import json
+from pathlib import Path
+from unittest.mock import patch
+
+from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
+    DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+    REDDOG_MAIN_BOOTSTRAP_NOT_READY,
+    REDDOG_MAIN_BOOTSTRAP_READY,
+    RedDogMainReadonlyBootstrapResult,
+    run_reddog_main_readonly_operational_bootstrap,
+)
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+MODULE_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "src"
+    / "reddog_main_readonly_operational_bootstrap.py"
+)
+NOW = "2026-07-14T00:00:00+00:00"
+HEAD = "bd1fe7f6ccb0964107b58d1fb93148f9f6ef7223"
+REVISION = "sha256:work-state-bootstrap"
+
+
+def _repo_state() -> dict[str, object]:
+    return {
+        "head_sha": HEAD,
+        "dirty_paths": (),
+        "dirty_digest": "sha256:clean",
+        "worktree_digest": "sha256:worktrees",
+    }
+
+
+def _work_state() -> dict[str, object]:
+    return {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "revision": REVISION,
+        "selected_slice": "REDDOG_MAIN_READONLY_OPERATIONAL_BOOTSTRAP_PHASE1",
+        "refresh_receipt_id": "sha256:refresh",
+        "worker_claims": [{"claim_id": "claim-1", "slice_id": "REDDOG_MAIN_READONLY_OPERATIONAL_BOOTSTRAP_PHASE1"}],
+        "wre_queue_items": [{"queue_item_id": "queue-1", "claim_id": "claim-1"}],
+    }
+
+
+def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
+    return HoloIndexFreshnessReceipt(
+        schema_version="holoindex_freshness_receipt.v1",
+        generated_at=NOW,
+        repo_root=str(REPO_ROOT),
+        repo_head_sha=HEAD,
+        ssd_path="E:/HoloIndex",
+        source="ci_targeted_reindex",
+        collections=[
+            CollectionFreshness(
+                name="navigation_work_ledger",
+                count=4,
+                status="indexed",
+                source="ci_targeted_reindex",
+                repo_head_sha=HEAD,
+                last_indexed_at=NOW,
+            ),
+            CollectionFreshness(
+                name="navigation_symbols",
+                count=9,
+                status="indexed",
+                source="ci_targeted_reindex",
+                repo_head_sha=HEAD,
+                last_indexed_at=NOW,
+            ),
+        ],
+    )
+
+
+def test_bootstrap_plans_default_readonly_audit_swarm_from_fresh_context() -> None:
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+
+    assert result.ready is True
+    assert result.status == REDDOG_MAIN_BOOTSTRAP_READY
+    assert result.snapshot_receipt_id and result.snapshot_receipt_id.startswith("sha256:")
+    assert result.evidence_bundle_id and result.evidence_bundle_id.startswith("sha256:")
+    assert result.determination_id and result.determination_id.startswith("sha256:")
+    assert result.swarm_id and result.swarm_id.startswith("sha256:")
+    assert result.assignment_count == 5
+    assert result.rejection_reasons == ()
+    assert result.no_model_call_performed is True
+    assert result.no_worker_spawn_performed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_repo_mutation_performed is True
+    assert result.no_holoindex_reindex_performed is True
+    assert result.no_queue_mutation_performed is True
+
+
+def test_bootstrap_not_ready_without_authoritative_work_state_or_holoindex_receipt() -> None:
+    result = run_reddog_main_readonly_operational_bootstrap(repo_root=REPO_ROOT)
+
+    assert result.ready is False
+    assert result.status == REDDOG_MAIN_BOOTSTRAP_NOT_READY
+    assert "missing_authoritative_work_state_path" in result.rejection_reasons
+    assert "missing_holoindex_freshness_receipt_path" in result.rejection_reasons
+    assert result.assignment_count == 0
+    assert result.no_repo_mutation_performed is True
+    assert result.no_holoindex_reindex_performed is True
+
+
+def test_bootstrap_rejects_stale_holoindex_receipt() -> None:
+    stale = HoloIndexFreshnessReceipt(
+        schema_version="holoindex_freshness_receipt.v1",
+        generated_at=NOW,
+        repo_root=str(REPO_ROOT),
+        repo_head_sha="old-head",
+        ssd_path="E:/HoloIndex",
+        source="ci_targeted_reindex",
+        collections=[
+            CollectionFreshness(
+                name="navigation_work_ledger",
+                count=4,
+                status="indexed",
+                source="ci_targeted_reindex",
+                repo_head_sha="old-head",
+                last_indexed_at=NOW,
+            ),
+            CollectionFreshness(
+                name="navigation_symbols",
+                count=9,
+                status="indexed",
+                source="ci_targeted_reindex",
+                repo_head_sha="old-head",
+                last_indexed_at=NOW,
+            ),
+        ],
+    )
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=stale,
+        now_iso=NOW,
+    )
+
+    assert result.ready is False
+    assert "mandatory_source_not_fresh:holoindex" in result.rejection_reasons
+    assert "holoindex:stale_repo_head_sha" in result.rejection_reasons
+
+
+def test_bootstrap_loads_existing_work_state_and_holoindex_receipt_files(tmp_path: Path) -> None:
+    work_state_path = tmp_path / "authoritative_work_state.json"
+    work_state_path.write_text(json.dumps(_work_state(), sort_keys=True), encoding="utf-8")
+    receipt_path = tmp_path / "holoindex_freshness_receipt.json"
+    receipt_path.write_text(_fresh_holo_receipt().to_json(), encoding="utf-8")
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_path=work_state_path,
+        holoindex_receipt_path=receipt_path,
+        now_iso=NOW,
+    )
+
+    assert result.ready is True
+    assert result.assignment_count == 5
+
+
+def test_bootstrap_normalizes_and_drops_unsafe_read_targets() -> None:
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        allowed_read_targets=[
+            "./docs/0102_session_briefings/work_ledger.schema.json",
+            "../escape.txt",
+            "/absolute/path.txt",
+            "docs/0102_session_briefings/work_ledger.schema.json",
+        ],
+        now_iso=NOW,
+    )
+
+    assert result.ready is True
+    assert result.allowed_read_targets == ("docs/0102_session_briefings/work_ledger.schema.json",)
+
+
+def test_main_preflight_is_nonblocking_by_default_when_bootstrap_not_ready() -> None:
+    import main
+
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
+            "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED": "0",
+            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "",
+            "HOLOINDEX_FRESHNESS_RECEIPT": "",
+            "HOLOINDEX_SSD_PATH": "",
+        },
+        clear=False,
+    ):
+        assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
+
+
+def test_main_preflight_blocks_only_when_enforced_and_not_ready() -> None:
+    import main
+
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
+            "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED": "1",
+            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "",
+            "HOLOINDEX_FRESHNESS_RECEIPT": "",
+            "HOLOINDEX_SSD_PATH": "",
+        },
+        clear=False,
+    ):
+        assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is False
+
+
+def test_main_preflight_reports_ready_without_blocking_menu() -> None:
+    import main
+
+    ready_result = RedDogMainReadonlyBootstrapResult(
+        ready=True,
+        status=REDDOG_MAIN_BOOTSTRAP_READY,
+        snapshot_receipt_id="sha256:snapshot",
+        context_view_id="sha256:view",
+        evidence_bundle_id="sha256:evidence",
+        determination_id="sha256:determination",
+        swarm_id="sha256:swarm",
+        assignment_count=5,
+        rejection_reasons=(),
+        changed_paths=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+        allowed_read_targets=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+    )
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap.run_reddog_main_readonly_operational_bootstrap",
+        return_value=ready_result,
+    ):
+        with patch.dict("os.environ", {"REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1"}, clear=False):
+            assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
+
+
+def test_bootstrap_module_has_no_runtime_mutation_or_execution_imports() -> None:
+    tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
+    forbidden_import_roots = {
+        "subprocess",
+        "requests",
+        "httpx",
+        "openclaw_supervisor",
+        "hermes_job_executor",
+    }
+    forbidden_calls = {
+        "write_text",
+        "open",
+        "mkdir",
+        "unlink",
+        "rmdir",
+        "remove",
+        "system",
+        "popen",
+        "run",
+        "call",
+        "check_call",
+        "check_output",
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert alias.name.split(".")[0] not in forbidden_import_roots
+        if isinstance(node, ast.ImportFrom):
+            assert (node.module or "").split(".")[0] not in forbidden_import_roots
+        if isinstance(node, ast.Call):
+            func = node.func
+            name = func.attr if isinstance(func, ast.Attribute) else func.id if isinstance(func, ast.Name) else ""
+            assert name not in forbidden_calls

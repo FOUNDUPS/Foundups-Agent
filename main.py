@@ -1173,6 +1173,67 @@ def run_git_main_merge_sentinel_preflight(repo_root: Path) -> bool:
         return True
 
 
+def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool:
+    """
+    Run RedDog's read-only operational bootstrap before DAE autostart.
+
+    This binds current work-state and HoloIndex freshness receipts to a
+    read-only OpenClaw audit-swarm plan. It never spawns workers or enqueues
+    OpenClaw. Missing receipts are warning-only by default so the menu still
+    loads while the authoritative runtime wiring is incomplete.
+
+    Env:
+        REDDOG_READONLY_OPERATIONAL_BOOTSTRAP=1           Enable check (default ON)
+        REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=0  Block startup if not ready
+        REDDOG_AUTHORITATIVE_WORK_STATE_PATH              Existing work-state JSON
+        HOLOINDEX_FRESHNESS_RECEIPT                       Existing HoloIndex receipt
+        HOLOINDEX_SSD_PATH                                Derive receipt path if set
+    """
+
+    if os.getenv("REDDOG_READONLY_OPERATIONAL_BOOTSTRAP", "1") == "0":
+        logger.info("[REDDOG-BOOTSTRAP] Startup preflight disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED", "0") != "0"
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
+            run_reddog_main_readonly_operational_bootstrap,
+        )
+
+        result = run_reddog_main_readonly_operational_bootstrap(
+            repo_root=repo_root,
+            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            holoindex_receipt_path=os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", ""),
+            holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-BOOTSTRAP] Startup preflight failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-BOOTSTRAP] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-BOOTSTRAP] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    status = "PASS" if result.ready else "WARN"
+    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    print(
+        f"[REDDOG-BOOTSTRAP] preflight={status} status={result.status} "
+        f"assignments={result.assignment_count} reasons={reasons}"
+    )
+    if result.ready:
+        print(
+            f"[REDDOG-BOOTSTRAP] snapshot={result.snapshot_receipt_id} "
+            f"swarm={result.swarm_id}"
+        )
+        return True
+
+    if enforced:
+        print("[REDDOG-BOOTSTRAP] Startup blocked by REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=1")
+        return False
+    return True
+
+
 def bootstrap_runtime_dae_launches() -> None:
     """Register broker-managed DAE entrypoints for an already running system."""
     daemon = get_central_daemon()
@@ -1344,6 +1405,8 @@ def main():
     if not run_wsp_framework_preflight(repo_root, overseer=overseer):
         return
     if not run_git_main_merge_sentinel_preflight(repo_root):
+        return
+    if not run_reddog_readonly_operational_bootstrap_preflight(repo_root):
         return
 
     bootstrap_runtime_dae_launches()
