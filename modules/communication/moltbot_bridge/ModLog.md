@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_ISOLATED_SIGNER_SOCKET_SERVICE_ONCE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added `src/reddog_isolated_signer_socket_service.py`: a one-request local
+  socket service boundary for an isolated RedDog signer. It binds only an
+  absolute outside-repo socket path, serves one bounded request through the
+  existing signer protocol, and removes the socket path after closing.
+- Added tests for guarded path validation, invalid limit rejection, default
+  peer-attestor fail-closed behavior, default backend fail-closed behavior, and
+  a real client-to-service Ed25519 round-trip when AF_UNIX sockets are
+  available. Windows Python builds without AF_UNIX skip only the live socket
+  round-trip tests.
+- Boundary: socket service only. No private key loading, no vault secret
+  resolution, no signer spawn, no shell command, no repository mutation, no
+  OpenClaw enqueue, no Hermes dispatch, no PR creation, no reward settlement,
+  and no HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog isolated signer socket service serve
+  once peer attestor` surfaced signer-isolation contracts and adjacent tests,
+  but not this new service module before indexing. Recorded as
+  `HOLOINDEX_REDDOG_ISOLATED_SIGNER_SOCKET_SERVICE_ONCE_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_ED25519_VERIFICATION_BUNDLE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
