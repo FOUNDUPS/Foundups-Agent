@@ -2,6 +2,40 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - WRE_GIT_MAIN_MERGE_SENTINEL_OPT_IN_GUARD_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
+WSP 34 (Git Operations), WSP 50 (Pre-Action), WSP 97 (Truth Boundary),
+WSP 22 (ModLog)
+
+**Type**: Worktree/cwd pollution guard. Startup sentinel hardening.
+
+**Deliverable**:
+- Updated `src/git_main_merge_sentinel.py`: startup merge sentinel is now
+  explicit opt-in (`GIT_MAIN_MERGE_SENTINEL=1`) instead of ambient default-on.
+- Added a multi-worktree guard that refuses to auto-merge before any
+  fetch/push/PR/merge when `main` is checked out in another worktree.
+- Updated `main.py`: sentinel preflight remains available, but disabled unless
+  explicitly requested.
+- Added `tests/test_git_main_merge_sentinel.py`: default-disabled no-git path,
+  main-branch skip, multi-worktree block, and enforced failure coverage.
+
+**Boundary**: This slice reduces ambient git authority. It does not remove the
+sentinel, create workers, run OpenClaw/Hermes, mutate queues, or grant merge
+authority to RedDog. Explicit opt-in remains available for controlled operator
+use.
+
+**HoloIndex**: Read-only/fast probes for "git main merge sentinel worktree
+cwd hazard" and "WRE worktree cwd guard main checkout pollution" surfaced
+adjacent sentinel/WRE concepts but not the load-bearing sentinel or cwd guard
+files. Recorded
+`HOLOINDEX_WRE_GIT_MAIN_MERGE_SENTINEL_OPT_IN_GUARD_INDEX_GAP_PHASE1`; no
+runtime re-index performed.
+
+**Verification**: focused sentinel tests pending at author time.
+
+---
+
 ### [2026-07-14] - WRE_AUTORESEARCH_GIT_RUNNER_CONTRACT_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15 (Priority),
