@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_RUNNER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_serial_loop.py`: a bounded serial loop
+  runner that repeatedly invokes the existing resident queue next-stage
+  dispatcher with caller-injected handlers until the queue chain completes,
+  rejects, or reaches the configured step bound.
+- Added tests proving full 13-stage completion with fake injected handlers,
+  explicit-loop gating, max-step rejection, bounded progress reporting,
+  missing-handler fail-close after progress, already-complete no-op behavior,
+  handler-exception rejection, serializable nested result output, and AST
+  denial of shell/network/HoloIndex/concrete stage imports.
+- Boundary: loop orchestration only; no default handler, signer, runner,
+  worktree, shell, OpenClaw enqueue, Hermes dispatch, PR publish,
+  PatternMemory client, reward settlement, repo mutation, or HoloIndex runtime
+  re-index is created by this slice.
+- HoloIndex read-only probe for `RedDog resident queue serial loop runner
+  dispatcher` surfaced adjacent swarm/WSP/session-continuity results, but not
+  this new runner before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_RUNNER_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
