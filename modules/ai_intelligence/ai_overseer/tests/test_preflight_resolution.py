@@ -295,8 +295,8 @@ def test_main_py_wre_dashboard_critical_alert_warns_by_default_for_menu_startup(
     assert "Startup blocked" not in printed
 
 
-def test_main_py_wre_dashboard_critical_alert_blocks_for_24x7_runtime():
-    """Autonomous 24x7 runtime preserves the fail-closed dashboard gate."""
+def test_main_py_wre_dashboard_critical_alert_warns_for_menu_even_with_ambient_24x7():
+    """Ambient 24x7 env must not prevent the interactive menu from loading."""
     import main
 
     fake_health = {
@@ -324,6 +324,78 @@ def test_main_py_wre_dashboard_critical_alert_blocks_for_24x7_runtime():
                     clear=True,
                 ):
                     result = main.run_wre_dashboard_preflight(Path("."))
+
+    assert result is True
+    printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
+    assert "preflight=FAIL (STABLE)" in printed
+    assert "Startup blocked" not in printed
+
+
+def test_main_py_wre_dashboard_critical_alert_blocks_for_explicit_menu_enforcement():
+    """Explicit dashboard enforcement remains available for interactive startup."""
+    import main
+
+    fake_health = {
+        "insufficient_data": False,
+        "total_executions": 36,
+        "min_samples": 25,
+        "healthy": False,
+        "alerts": [{"severity": "critical", "message": "critical sample"}],
+    }
+    with patch(
+        "modules.infrastructure.wre_core.src.dashboard_alerts.check_dashboard_health",
+        return_value=fake_health,
+    ):
+        with patch(
+            "modules.infrastructure.wre_core.src.dashboard_alerts.DashboardAlertMonitor"
+        ) as mock_monitor:
+            mock_monitor.return_value.is_in_watch_period.return_value = False
+            with patch("builtins.print") as mock_print:
+                with patch.dict(
+                    "os.environ",
+                    {
+                        "WRE_DASHBOARD_PREFLIGHT": "1",
+                        "WRE_DASHBOARD_AUTO_ENFORCE": "1",
+                    },
+                    clear=True,
+                ):
+                    result = main.run_wre_dashboard_preflight(Path("."))
+
+    assert result is False
+    printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
+    assert "preflight=FAIL (STABLE, ENFORCED)" in printed
+    assert "Startup blocked by AUTO enforcement" in printed
+
+
+def test_main_py_wre_dashboard_critical_alert_blocks_for_autonomous_24x7_runtime():
+    """Autonomous 24x7 runtime preserves the fail-closed dashboard gate."""
+    import main
+
+    fake_health = {
+        "insufficient_data": False,
+        "total_executions": 36,
+        "min_samples": 25,
+        "healthy": False,
+        "alerts": [{"severity": "critical", "message": "critical sample"}],
+    }
+    with patch(
+        "modules.infrastructure.wre_core.src.dashboard_alerts.check_dashboard_health",
+        return_value=fake_health,
+    ):
+        with patch(
+            "modules.infrastructure.wre_core.src.dashboard_alerts.DashboardAlertMonitor"
+        ) as mock_monitor:
+            mock_monitor.return_value.is_in_watch_period.return_value = False
+            with patch("builtins.print") as mock_print:
+                with patch.dict(
+                    "os.environ",
+                    {
+                        "WRE_DASHBOARD_PREFLIGHT": "1",
+                        "OPENCLAW_24X7": "1",
+                    },
+                    clear=True,
+                ):
+                    result = main.run_wre_dashboard_preflight(Path("."), interactive_menu=False)
 
     assert result is False
     printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
