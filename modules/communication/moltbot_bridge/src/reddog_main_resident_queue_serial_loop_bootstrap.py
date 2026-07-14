@@ -9,15 +9,17 @@ dependencies this bootstrap owns today, and advances through the serial loop up
 to a bounded max step count.
 
 This slice does not introduce a production signer, runner, PR, PatternMemory,
-OpenClaw, Hermes, or HoloIndex dependency. Public signature verification can be
-enabled only through the explicit runtime dependency bundle. Missing later-stage
-dependencies fail closed through the registry and dispatcher.
+OpenClaw, Hermes, or HoloIndex dependency. Work-order and valve artifacts are
+loaded only from outside-repo JSON snapshots. Public signature verification can
+be enabled only through the explicit runtime dependency bundle. Missing
+later-stage dependencies fail closed through the registry and dispatcher.
 """
 
 from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
@@ -79,12 +81,31 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
         return asdict(self)
 
 
+class JsonResidentQueueWorkOrderResolver:
+    """Resolve queue-bound work orders from an outside-repo JSON snapshot."""
+
+    def __init__(self, work_orders: Mapping[str, Mapping[str, Any]]) -> None:
+        self._work_orders = {str(key): dict(value) for key, value in work_orders.items()}
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: Optional[str],
+        selected_slice: Optional[str],
+    ) -> Mapping[str, Any]:
+        _ = (queue_item_id, selected_slice)
+        return self._work_orders.get(str(work_order_id), {})
+
+
 def run_reddog_main_resident_queue_serial_loop_bootstrap(
     *,
     repo_root: Path | str,
     work_state_path: Path | str | None,
     chain_results_path: Path | str | None,
     authority_profile_path: Path | str | None,
+    work_orders_path: Path | str | None = None,
+    valve_environment_path: Path | str | None = None,
     authority_state_path: Path | str | None = None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
@@ -133,6 +154,21 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
 
+    work_orders, work_order_reasons = _load_work_orders(root, work_orders_path)
+    if work_order_reasons:
+        return _not_ready(work_order_reasons, chain_results_path=None)
+
+    valve_environment, valve_reasons = _read_json_outside_repo(
+        root,
+        valve_environment_path,
+        missing_reason="missing_valve_environment_path",
+        inside_reason="valve_environment_path_inside_repo",
+        unreadable_reason="malformed_valve_environment",
+        required=False,
+    )
+    if valve_reasons:
+        return _not_ready(valve_reasons, chain_results_path=None)
+
     dependency_bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=root,
         authority_state_path=authority_state_path,
@@ -154,6 +190,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         )
 
     store = AtomicJsonResidentQueueChainResultsStore(chain_path)
+    run_now = _parse_datetime(now_iso) if now_iso else None
     registry = build_reddog_resident_queue_stage_handler_registry(
         work_state_snapshot=snapshot,
         chain_results_store=store,
@@ -168,6 +205,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         principal_key_resolver=dependency_bundle.principal_key_resolver,
         nonce_store=dependency_bundle.nonce_store,
         revocation_oracle=dependency_bundle.revocation_oracle,
+        work_order_resolver=(
+            JsonResidentQueueWorkOrderResolver(work_orders) if work_orders is not None else None
+        ),
+        repo_root=root,
+        valve_environment=valve_environment,
+        now_datetime=run_now,
+        permission_expires_at=(
+            str(valve_environment.get("permission_expires_at"))
+            if isinstance(valve_environment, Mapping) and valve_environment.get("permission_expires_at")
+            else None
+        ),
     )
     loop = run_reddog_resident_queue_serial_loop(
         explicit_resident_queue_serial_loop_requested=True,
@@ -205,9 +253,10 @@ def _read_json_outside_repo(
     missing_reason: str,
     inside_reason: str,
     unreadable_reason: str,
+    required: bool = True,
 ) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
     if not value:
-        return None, (missing_reason,)
+        return None, (missing_reason,) if required else ()
     path = Path(value)
     if not path.is_absolute():
         path = (repo_root / path).resolve()
@@ -224,6 +273,36 @@ def _read_json_outside_repo(
     if not isinstance(payload, Mapping):
         return None, (unreadable_reason,)
     return payload, ()
+
+
+def _load_work_orders(
+    repo_root: Path,
+    value: Path | str | None,
+) -> tuple[Optional[Mapping[str, Mapping[str, Any]]], tuple[str, ...]]:
+    payload, reasons = _read_json_outside_repo(
+        repo_root,
+        value,
+        missing_reason="missing_work_orders_path",
+        inside_reason="work_orders_path_inside_repo",
+        unreadable_reason="malformed_work_orders",
+        required=False,
+    )
+    if reasons:
+        return None, reasons
+    if payload is None:
+        return None, ()
+    raw = payload.get("work_orders")
+    if not isinstance(raw, Mapping):
+        return None, ("malformed_work_orders",)
+    work_orders: dict[str, Mapping[str, Any]] = {}
+    for key, item in raw.items():
+        if not isinstance(item, Mapping):
+            return None, ("malformed_work_orders",)
+        work_order_id = str(item.get("work_order_id") or "").strip()
+        if not work_order_id or str(key) != work_order_id:
+            return None, ("malformed_work_orders",)
+        work_orders[work_order_id] = dict(item)
+    return work_orders, ()
 
 
 def _resolve_output_outside_repo(
@@ -249,6 +328,18 @@ def _is_inside(child: Path, parent: Path) -> bool:
     child_r = child.resolve()
     parent_r = parent.resolve()
     return child_r == parent_r or parent_r in child_r.parents
+
+
+def _parse_datetime(value: str) -> Optional[datetime]:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
 
 
 def _not_ready(
@@ -305,6 +396,7 @@ def _from_loop(
 
 
 __all__ = [
+    "JsonResidentQueueWorkOrderResolver",
     "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED",
     "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY",
     "RedDogMainResidentQueueSerialLoopBootstrapResult",
