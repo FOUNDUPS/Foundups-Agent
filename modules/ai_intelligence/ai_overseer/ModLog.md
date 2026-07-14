@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-07-14 - MAIN_MENU_WRE_DASHBOARD_PREFLIGHT_CONTEXT_GUARD_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 50, 97
+
+- Hardened the `main.py` WRE dashboard startup preflight so ambient
+  `OPENCLAW_24X7=1` no longer blocks the interactive menu by default.
+- Preserved fail-closed behavior for autonomous/headless context via
+  `interactive_menu=False` and for explicit menu enforcement via
+  `WRE_DASHBOARD_AUTO_ENFORCE=1` or `WRE_DASHBOARD_PREFLIGHT_ENFORCED=1`.
+- Added regression coverage for menu warning behavior under ambient 24x7,
+  explicit menu enforcement, and autonomous 24x7 enforcement.
+
+---
+
 ## 2026-07-04 - WSP 109 intake packet builder (dry-run): chat idea -> genesis envelope -> gate (WSP109_INTAKE_PACKET_BUILDER_PHASE1)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)

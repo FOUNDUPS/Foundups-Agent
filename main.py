@@ -933,14 +933,18 @@ def run_connect_wre(repo_root: Path) -> dict:
     return result
 
 
-def _wre_dashboard_auto_enforce_enabled() -> bool:
+def _wre_dashboard_auto_enforce_enabled(*, interactive_menu: bool = False) -> bool:
     """Default dashboard auto-enforcement to autonomous runtimes, not menu startup."""
 
-    default = "1" if os.getenv("OPENCLAW_24X7", "0") != "0" else "0"
-    return os.getenv("WRE_DASHBOARD_AUTO_ENFORCE", default) != "0"
+    explicit = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE")
+    if explicit is not None:
+        return explicit != "0"
+    if interactive_menu:
+        return False
+    return os.getenv("OPENCLAW_24X7", "0") != "0"
 
 
-def run_wre_dashboard_preflight(repo_root: Path) -> bool:
+def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = True) -> bool:
     """
     Run WRE dashboard preflight at startup.
 
@@ -950,8 +954,8 @@ def run_wre_dashboard_preflight(repo_root: Path) -> bool:
     Env controls:
       WRE_DASHBOARD_PREFLIGHT=1             Enable startup warning checks
       WRE_DASHBOARD_PREFLIGHT_ENFORCED=0    Manual override to block startup
-      WRE_DASHBOARD_AUTO_ENFORCE            Default follows OPENCLAW_24X7
-      OPENCLAW_24X7=1                       Autonomous runtime defaults to enforced
+      WRE_DASHBOARD_AUTO_ENFORCE            Explicit override to auto-block on criticals
+      OPENCLAW_24X7=1                       Autonomous runtime defaults to enforced outside menu startup
     """
     enabled = os.getenv("WRE_DASHBOARD_PREFLIGHT", "1") != "0"
     if not enabled:
@@ -959,7 +963,7 @@ def run_wre_dashboard_preflight(repo_root: Path) -> bool:
         return True
 
     manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
-    auto_enforce = _wre_dashboard_auto_enforce_enabled()
+    auto_enforce = _wre_dashboard_auto_enforce_enabled(interactive_menu=interactive_menu)
 
     try:
         from modules.infrastructure.wre_core.src.dashboard_alerts import (
