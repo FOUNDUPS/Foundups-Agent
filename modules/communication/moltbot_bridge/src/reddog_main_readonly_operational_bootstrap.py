@@ -32,6 +32,12 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     ReadOnlyAuditTaskWriter,
     enqueue_reddog_readonly_audit_swarm,
 )
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
+    AgentDbReadOnlyAuditReportStore,
+    ReadOnlyAuditReportCollectionResult,
+    ReadOnlyAuditReportStore,
+    collect_reddog_readonly_audit_report_bundle,
+)
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     EvidenceBundle,
     OperationalContextSnapshot,
@@ -74,6 +80,12 @@ class RedDogMainReadonlyBootstrapResult:
     rejection_reasons: tuple[str, ...]
     changed_paths: tuple[str, ...]
     allowed_read_targets: tuple[str, ...]
+    assignment_ids: tuple[str, ...] = ()
+    report_collection_attempted: bool = False
+    report_collection_status: Optional[str] = None
+    report_collection_report_count: int = 0
+    report_bundle_id: Optional[str] = None
+    report_collection_rejection_reasons: tuple[str, ...] = ()
     enqueue_attempted: bool = False
     enqueue_decision: Optional[str] = None
     enqueue_receipt_id: Optional[str] = None
@@ -109,6 +121,8 @@ def run_reddog_main_readonly_operational_bootstrap(
     enqueue_readonly_audit_tasks: bool = False,
     enqueue_writer: ReadOnlyAuditTaskWriter | None = None,
     seen_assignment_ids: Optional[set[str]] = None,
+    collect_readonly_audit_reports: bool = False,
+    report_store: ReadOnlyAuditReportStore | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
 
@@ -213,6 +227,38 @@ def run_reddog_main_readonly_operational_bootstrap(
             swarm_plan=plan,
         )
 
+    collection_result: ReadOnlyAuditReportCollectionResult | None = None
+    if collect_readonly_audit_reports:
+        reader = report_store if report_store is not None else AgentDbReadOnlyAuditReportStore()
+        collection_result = collect_reddog_readonly_audit_report_bundle(
+            plan=plan,
+            store=reader,
+        )
+        if collection_result.accepted:
+            return _ready(
+                snapshot=snapshot,
+                context_view=context_view,
+                evidence_bundle=evidence_bundle,
+                gate=gate,
+                plan=plan,
+                changed_paths=paths,
+                allowed_read_targets=targets,
+                collection_result=collection_result,
+                enqueue_result=None,
+                enqueue_attempted=False,
+            )
+        if not enqueue_readonly_audit_tasks:
+            return _not_ready(
+                reasons=("readonly_audit_report_collection_rejected", *collection_result.rejection_reasons),
+                changed_paths=paths,
+                allowed_read_targets=targets,
+                snapshot=snapshot,
+                evidence_bundle=evidence_bundle,
+                gate=gate,
+                swarm_plan=plan,
+                collection_result=collection_result,
+            )
+
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None
     if enqueue_readonly_audit_tasks:
         writer = enqueue_writer if enqueue_writer is not None else AgentDbReadOnlyAuditTaskWriter()
@@ -230,9 +276,39 @@ def run_reddog_main_readonly_operational_bootstrap(
                 evidence_bundle=evidence_bundle,
                 gate=gate,
                 swarm_plan=plan,
+                collection_result=collection_result,
                 enqueue_result=enqueue_result,
             )
 
+    return _ready(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        gate=gate,
+        plan=plan,
+        changed_paths=paths,
+        allowed_read_targets=targets,
+        collection_result=collection_result,
+        enqueue_result=enqueue_result,
+        enqueue_attempted=enqueue_readonly_audit_tasks,
+    )
+
+
+def _ready(
+    *,
+    snapshot: OperationalContextSnapshot,
+    context_view: Any,
+    evidence_bundle: EvidenceBundle,
+    gate: FusionAssignmentGateDecision,
+    plan: ReadOnlyAuditSwarmPlan,
+    changed_paths: Sequence[str],
+    allowed_read_targets: Sequence[str],
+    collection_result: ReadOnlyAuditReportCollectionResult | None,
+    enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None,
+    enqueue_attempted: bool,
+) -> RedDogMainReadonlyBootstrapResult:
+    assert gate.determination_binding is not None
+    bundle = collection_result.validation.bundle if collection_result and collection_result.validation else None
     return RedDogMainReadonlyBootstrapResult(
         ready=True,
         status=REDDOG_MAIN_BOOTSTRAP_READY,
@@ -242,10 +318,16 @@ def run_reddog_main_readonly_operational_bootstrap(
         determination_id=gate.determination_binding.determination_id,
         swarm_id=plan.receipt.swarm_id,
         assignment_count=len(plan.assignments),
+        assignment_ids=tuple(assignment.assignment_id for assignment in plan.assignments),
         rejection_reasons=(),
-        changed_paths=paths,
-        allowed_read_targets=targets,
-        enqueue_attempted=enqueue_readonly_audit_tasks,
+        changed_paths=tuple(changed_paths),
+        allowed_read_targets=tuple(allowed_read_targets),
+        report_collection_attempted=collection_result is not None,
+        report_collection_status=collection_result.status if collection_result else None,
+        report_collection_report_count=collection_result.report_count if collection_result else 0,
+        report_bundle_id=bundle.bundle_id if bundle else None,
+        report_collection_rejection_reasons=collection_result.rejection_reasons if collection_result else (),
+        enqueue_attempted=enqueue_attempted,
         enqueue_decision=enqueue_result.decision if enqueue_result else None,
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
         enqueue_task_count=len(enqueue_result.tasks) if enqueue_result else 0,
@@ -295,6 +377,7 @@ def _not_ready(
     evidence_bundle: EvidenceBundle | None = None,
     gate: FusionAssignmentGateDecision | None = None,
     swarm_plan: ReadOnlyAuditSwarmPlan | None = None,
+    collection_result: ReadOnlyAuditReportCollectionResult | None = None,
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     determination_id = None
@@ -309,9 +392,19 @@ def _not_ready(
         determination_id=determination_id,
         swarm_id=swarm_plan.receipt.swarm_id if swarm_plan else None,
         assignment_count=len(swarm_plan.assignments) if swarm_plan else 0,
+        assignment_ids=tuple(assignment.assignment_id for assignment in swarm_plan.assignments) if swarm_plan else (),
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason).strip())),
         changed_paths=tuple(changed_paths),
         allowed_read_targets=tuple(allowed_read_targets),
+        report_collection_attempted=collection_result is not None,
+        report_collection_status=collection_result.status if collection_result else None,
+        report_collection_report_count=collection_result.report_count if collection_result else 0,
+        report_bundle_id=(
+            collection_result.validation.bundle.bundle_id
+            if collection_result and collection_result.validation.bundle
+            else None
+        ),
+        report_collection_rejection_reasons=collection_result.rejection_reasons if collection_result else (),
         enqueue_attempted=enqueue_result is not None,
         enqueue_decision=enqueue_result.decision if enqueue_result else None,
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
