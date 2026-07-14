@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_orchestration_plan.py`: a deterministic,
+  non-mutating planner for the resident RedDog queue loop.
+- The planner consumes the authoritative work-state snapshot plus already
+  emitted queue-authorized bridge receipts, validates stage order, and names
+  the next required bridge instead of relying on 012 to remember the chain.
+- It auto-validates only the existing WRE queue-consumer dry-run, then fails
+  closed on missing, rejected, or out-of-order later-stage receipts.
+- Boundary: planning only; no authority issuance, signature verification,
+  valve opening, worktree creation, file edits, shell commands, PR publishing,
+  PatternMemory writes, OpenClaw enqueue, Hermes dispatch, reward settlement,
+  or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue orchestration plan WRE
+  queue bridge next action` surfaced adjacent worktree, extension live-enqueue,
+  WRE, and queue docs, but did not surface this new planner before indexing.
+  Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
