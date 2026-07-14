@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authorized_bounded_worker_pilot_invoke.py`:
+  an explicit bridge from accepted queue-authorized worktree-create, generic
+  writer dry-run, and governed shell dry-run receipts into the existing
+  bounded worktree worker execution pilot.
+- The bridge binds work-order IDs across the worktree-create result, writer
+  receipt, shell receipt, and work order before allowing the pilot to
+  materialize declared text artifacts inside the already-created isolated
+  worktree.
+- Boundary: this may perform the bounded pilot file materialization inside the
+  isolated worktree only. It does not execute shell commands, enqueue
+  OpenClaw, dispatch Hermes, create PRs, merge, settle rewards, or mutate
+  HoloIndex.
+- HoloIndex read-only probe for `RedDog queue authorized bounded worker pilot
+  invoke` surfaced worker-queue/runtime-invocation adjacent files and WSP docs,
+  but did not surface this new bridge before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
