@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_AGENTDB_ENQUEUE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_openclaw_readonly_audit_swarm_enqueue.py`: a
+  governed bridge from an accepted read-only audit swarm plan to durable
+  AgentDB autonomous-task assignments for OpenClaw pickup.
+- Added `tests/test_reddog_openclaw_readonly_audit_swarm_enqueue.py`:
+  accepted publication, plan/writer/unsafe-assignment/replay rejection,
+  isolated AgentDB publication, duplicate rejection without second-batch
+  pollution, deterministic JSON, and AST no-execution/no-runtime-wiring
+  coverage.
+- The concrete writer uses a single AgentDB transaction and writes pending
+  tasks with `required_skills=["reddog_readonly_audit"]`, source
+  `reddog_openclaw_readonly_audit_swarm`, and the original assignment and
+  swarm receipt in task context.
+- Boundary: no model call, no task execution, no OpenClaw supervisor call, no
+  Hermes/WRE dispatch, no shell/subprocess, no worktree operation, no repo
+  mutation, no HoloIndex runtime mutation/re-index, and no live FoundUp queue
+  write. The report executor/collector is a later slice.
+- HoloIndex read-only probe for `RedDog read-only audit swarm AgentDB enqueue`
+  surfaced adjacent tests/docs but not the new enqueue module. Recorded
+  `HOLOINDEX_REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_AGENTDB_ENQUEUE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_MAIN_AUTHORITATIVE_WORK_STATE_REFRESH_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
