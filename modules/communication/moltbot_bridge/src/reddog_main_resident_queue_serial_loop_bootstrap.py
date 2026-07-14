@@ -68,6 +68,8 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_signature_verification_performed: bool = True
     no_worker_spawn_performed: bool = True
     no_worktree_created: bool = True
+    no_bounded_task_execution_performed: bool = True
+    no_bounded_file_edit_performed: bool = True
     no_shell_command_executed: bool = True
     no_openclaw_enqueue_performed: bool = True
     no_hermes_dispatch_performed: bool = True
@@ -106,6 +108,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     authority_profile_path: Path | str | None,
     work_orders_path: Path | str | None = None,
     valve_environment_path: Path | str | None = None,
+    generic_writer_dryrun_result_path: Path | str | None = None,
+    governed_shell_dryrun_result_path: Path | str | None = None,
+    artifact_contents_path: Path | str | None = None,
+    holoindex_evidence_path: Path | str | None = None,
     authority_state_path: Path | str | None = None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
@@ -172,6 +178,50 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if valve_reasons:
         return _not_ready(valve_reasons, chain_results_path=None)
 
+    generic_writer_dryrun_result, generic_writer_reasons = _read_json_outside_repo(
+        root,
+        generic_writer_dryrun_result_path,
+        missing_reason="missing_generic_writer_dryrun_result_path",
+        inside_reason="generic_writer_dryrun_result_path_inside_repo",
+        unreadable_reason="malformed_generic_writer_dryrun_result",
+        required=False,
+    )
+    if generic_writer_reasons:
+        return _not_ready(generic_writer_reasons, chain_results_path=None)
+
+    governed_shell_dryrun_result, governed_shell_reasons = _read_json_outside_repo(
+        root,
+        governed_shell_dryrun_result_path,
+        missing_reason="missing_governed_shell_dryrun_result_path",
+        inside_reason="governed_shell_dryrun_result_path_inside_repo",
+        unreadable_reason="malformed_governed_shell_dryrun_result",
+        required=False,
+    )
+    if governed_shell_reasons:
+        return _not_ready(governed_shell_reasons, chain_results_path=None)
+
+    artifact_contents, artifact_contents_reasons = _read_json_outside_repo(
+        root,
+        artifact_contents_path,
+        missing_reason="missing_artifact_contents_path",
+        inside_reason="artifact_contents_path_inside_repo",
+        unreadable_reason="malformed_artifact_contents",
+        required=False,
+    )
+    if artifact_contents_reasons:
+        return _not_ready(artifact_contents_reasons, chain_results_path=None)
+
+    holoindex_evidence, holoindex_reasons = _read_json_outside_repo(
+        root,
+        holoindex_evidence_path,
+        missing_reason="missing_holoindex_evidence_path",
+        inside_reason="holoindex_evidence_path_inside_repo",
+        unreadable_reason="malformed_holoindex_evidence",
+        required=False,
+    )
+    if holoindex_reasons:
+        return _not_ready(holoindex_reasons, chain_results_path=None)
+
     resolved_worktree_runner, runner_reasons = _build_worktree_runner(
         root,
         injected_runner=worktree_runner,
@@ -223,6 +273,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=root,
         valve_environment=valve_environment,
         worktree_runner=resolved_worktree_runner,
+        generic_writer_dryrun_result=generic_writer_dryrun_result,
+        governed_shell_dryrun_result=governed_shell_dryrun_result,
+        artifact_contents=artifact_contents,
+        holoindex_evidence=holoindex_evidence,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))
@@ -429,7 +483,11 @@ def _from_loop(
         rejection_reasons=tuple(loop.rejection_reasons),
         no_signature_verification_performed="authority_verification" not in loop.dispatched_stages,
         no_worktree_created="worktree_create" not in loop.dispatched_stages,
-        no_repo_mutation_performed="worktree_create" not in loop.dispatched_stages,
+        no_bounded_task_execution_performed="bounded_worker_pilot" not in loop.dispatched_stages,
+        no_bounded_file_edit_performed="bounded_worker_pilot" not in loop.dispatched_stages,
+        no_repo_mutation_performed=not any(
+            stage in loop.dispatched_stages for stage in ("worktree_create", "bounded_worker_pilot")
+        ),
     )
 
 

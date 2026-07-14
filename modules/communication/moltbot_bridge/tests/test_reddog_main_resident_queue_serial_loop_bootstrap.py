@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+from typing import Mapping
 from unittest.mock import patch
 
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
@@ -15,6 +16,18 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
+)
+from modules.communication.moltbot_bridge.src.reddog_generic_agent_worktree_writer_dryrun import (
+    GENERIC_WRITER_DRYRUN_ACCEPT,
+    GenericAgentWorktreeDomainProfile,
+    plan_generic_agent_worktree_writer_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
+    _proposed_worktree_path,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_governed_shell_runner_dryrun import (
+    GOVERNED_SHELL_DRYRUN_ACCEPT,
+    plan_governed_shell_runner_dry_run,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_public_key,
@@ -33,6 +46,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
+    _receipt_chain as _pilot_receipt_chain,
+    _selection_receipt as _pilot_selection_receipt,
+    _shell_profile as _pilot_shell_profile,
+    _signed_authority as _pilot_signed_authority,
+    _valve as _pilot_valve,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -48,6 +68,9 @@ NOW = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
 WORK_ORDER_ID = "resident-queue-work-order-001"
 FOUNDUP_ID = "paccess_001"
+PILOT_OPERATION = "queue_bounded_pilot_docs_patch"
+PILOT_DOMAIN_ID = FOUNDUP_ID
+PILOT_ARTIFACT = f"modules/foundups/{PILOT_DOMAIN_ID}/README.md"
 
 
 def _snapshot() -> dict[str, object]:
@@ -180,6 +203,131 @@ def _valve_environment(**overrides: object) -> dict[str, object]:
     }
     env.update(overrides)
     return env
+
+
+def _pilot_allowed_paths() -> list[str]:
+    return [f"modules/foundups/{PILOT_DOMAIN_ID}/**"]
+
+
+def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
+    return GenericAgentWorktreeDomainProfile(
+        profile_id="resident_queue_paccess_docs_patch",
+        operation=PILOT_OPERATION,
+        artifact_contract_type="text_patch",
+        domain_id_pattern=r"[a-z][a-z0-9_]{2,49}",
+        canonical_root_template="modules/foundups/{domain_id}",
+        allowed_path_patterns=["modules/foundups/{domain_id}/**"],
+        denied_path_patterns=["**/.env", "**/secrets/**"],
+        required_tests=[
+            "python -m pytest "
+            "modules/communication/moltbot_bridge/tests/"
+            "test_reddog_main_resident_queue_serial_loop_bootstrap.py -q"
+        ],
+        branch_prefix="feat/",
+        draft_pr_only=True,
+        consensus_required=False,
+    )
+
+
+def _pilot_path_overrides() -> dict[str, object]:
+    return {
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": _pilot_allowed_paths(),
+        "denied_paths": [f"modules/foundups/{PILOT_DOMAIN_ID}/secrets/**"],
+        "required_tests": [
+            "python -m pytest "
+            "modules/communication/moltbot_bridge/tests/"
+            "test_reddog_main_resident_queue_serial_loop_bootstrap.py -q"
+        ],
+        "task_summary": "Resident queue startup materializes one declared fixture in an isolated worktree.",
+        "rollback_plan": "Remove isolated worktree and branch; no repo checkout write is permitted.",
+    }
+
+
+def _pilot_worktree_path(repo: Path, work_order: Mapping[str, object]) -> Path:
+    return Path(
+        _proposed_worktree_path(
+            str(repo),
+            str(work_order["work_order_id"]),
+            str(work_order["nonce"]),
+        )
+    )
+
+
+def _pilot_signed_authority_for_bootstrap() -> dict[str, object]:
+    authority = dict(_pilot_signed_authority(WORK_ORDER_ID))
+    authority["permission_snapshot_digest"] = "sha256:snap-1"
+    return authority
+
+
+def _pilot_payloads(repo: Path, worktree: Path, work_order: Mapping[str, object]) -> dict[str, object]:
+    writer = plan_generic_agent_worktree_writer_dry_run(
+        {
+            "work_order_id": WORK_ORDER_ID,
+            "operation": PILOT_OPERATION,
+            "domain_id": PILOT_DOMAIN_ID,
+            "domain_profile": _pilot_domain_profile(),
+            "planned_artifacts": [PILOT_ARTIFACT],
+            "requested_allowed_paths": _pilot_allowed_paths(),
+            "target_branch": str(work_order["branch_name"]),
+            "repo_root": str(repo),
+            "worktree_path": str(worktree),
+            "operation_cwd": str(worktree),
+            "selection_receipt": _pilot_selection_receipt(),
+            "signed_authority": _pilot_signed_authority_for_bootstrap(),
+            "signed_receipt_chain": _pilot_receipt_chain(),
+            "execution_valve_decision": _pilot_valve(),
+            "permission_snapshot_digest": "sha256:snap-1",
+            "holoindex_evidence": {"index_gap_detected": False},
+        }
+    )
+    assert writer.decision == GENERIC_WRITER_DRYRUN_ACCEPT
+
+    shell = plan_governed_shell_runner_dry_run(
+        {
+            "work_order_id": WORK_ORDER_ID,
+            "profile": _pilot_shell_profile(),
+            "argv": [
+                "python",
+                "-m",
+                "pytest",
+                "modules/communication/moltbot_bridge/tests/"
+                "test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+                "-q",
+            ],
+            "operation_cwd": str(worktree),
+            "worktree_path": str(worktree),
+            "repo_root": str(repo),
+            "selection_receipt": _pilot_selection_receipt(),
+            "signed_authority": _pilot_signed_authority_for_bootstrap(),
+            "signed_receipt_chain": _pilot_receipt_chain(),
+            "execution_valve_decision": _pilot_valve(),
+            "generic_writer_dryrun_receipt": writer.receipt.to_dict(),
+            "permission_snapshot_digest": "sha256:snap-1",
+            "stdin_policy": "none",
+            "env_policy": {"scrubbed": True},
+            "holoindex_evidence": {
+                "index_gap_detected": False,
+                "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
+            },
+        }
+    )
+    assert shell.decision == GOVERNED_SHELL_DRYRUN_ACCEPT
+    return {
+        "generic_writer_dryrun_result": writer.to_dict(),
+        "governed_shell_dryrun_result": shell.to_dict(),
+        "artifact_contents": {
+            PILOT_ARTIFACT: (
+                "# Resident Queue Pilot\n\n"
+                "This artifact is materialized only inside the isolated worktree.\n"
+            )
+        },
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
+        },
+    }
 
 
 def _snapshots() -> dict[str, object]:
@@ -661,6 +809,172 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
     assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
 
 
+def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifacts(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=8,
+    )
+
+    assert result.accepted is True
+    assert result.steps_run == 8
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+        "worktree_create",
+        "bounded_worker_pilot",
+    )
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE"
+    assert result.no_worktree_created is False
+    assert result.no_bounded_task_execution_performed is False
+    assert result.no_bounded_file_edit_performed is False
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_pr_created is True
+    assert result.no_holoindex_reindex_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["bounded_worker_pilot"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
+    assert stage["bounded_task_execution_performed"] is True
+    assert stage["bounded_file_edit_performed"] is True
+    assert stage["shell_command_executed"] is False
+    assert stage["openclaw_enqueue_performed"] is False
+    assert stage["hermes_dispatch_performed"] is False
+    assert stage["holoindex_reindex_performed"] is False
+    assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith(
+        "# Resident Queue Pilot"
+    )
+    assert not (repo / PILOT_ARTIFACT).exists()
+    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+
+
+def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_artifacts(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=8,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 7
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:bounded_worker_pilot" in result.rejection_reasons
+    assert result.no_worktree_created is False
+    assert result.no_bounded_task_execution_performed is True
+    assert result.no_bounded_file_edit_performed is True
+
+
 def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
     tmp_path: Path,
 ) -> None:
@@ -894,6 +1208,10 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
                 "REDDOG_WORK_ORDERS_PATH": str(tmp_path / "work_orders.json"),
                 "REDDOG_EXECUTION_VALVE_ENV_PATH": str(tmp_path / "valve_env.json"),
+                "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH": str(tmp_path / "generic_writer.json"),
+                "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH": str(tmp_path / "governed_shell.json"),
+                "REDDOG_ARTIFACT_CONTENTS_PATH": str(tmp_path / "artifact_contents.json"),
+                "REDDOG_HOLOINDEX_EVIDENCE_PATH": str(tmp_path / "holoindex_evidence.json"),
                 "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(tmp_path / "authority_state.json"),
                 "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
                 "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(tmp_path / "principals.json"),
@@ -915,6 +1233,18 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["authority_profile_path"] == str(tmp_path / "profile.json")
     assert mocked.call_args.kwargs["work_orders_path"] == str(tmp_path / "work_orders.json")
     assert mocked.call_args.kwargs["valve_environment_path"] == str(tmp_path / "valve_env.json")
+    assert mocked.call_args.kwargs["generic_writer_dryrun_result_path"] == str(
+        tmp_path / "generic_writer.json"
+    )
+    assert mocked.call_args.kwargs["governed_shell_dryrun_result_path"] == str(
+        tmp_path / "governed_shell.json"
+    )
+    assert mocked.call_args.kwargs["artifact_contents_path"] == str(
+        tmp_path / "artifact_contents.json"
+    )
+    assert mocked.call_args.kwargs["holoindex_evidence_path"] == str(
+        tmp_path / "holoindex_evidence.json"
+    )
     assert mocked.call_args.kwargs["authority_state_path"] == str(tmp_path / "authority_state.json")
     assert mocked.call_args.kwargs["permission_snapshots_path"] == str(tmp_path / "snapshots.json")
     assert mocked.call_args.kwargs["principal_authority_records_path"] == str(tmp_path / "principals.json")
