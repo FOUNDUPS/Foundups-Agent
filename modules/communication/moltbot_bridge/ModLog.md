@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_slice_verifier_handler.py`: a concrete
+  injected handler for the resident queue `slice_verifier` stage.
+- The handler reads the already-recorded `bounded_worker_pilot` result from the
+  chain-results store and invokes the existing queue-authorized autonomous
+  slice verifier with injected machine-derived verifier evidence.
+- Boundary: verification only; no shell command, GitHub call, PR publishing,
+  merge, PatternMemory write, OpenClaw enqueue, Hermes dispatch, reward
+  settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue slice verifier handler`
+  surfaced adjacent live-enqueue/queue/WSP/docs results, but not this new
+  handler before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_BOUNDED_WORKER_PILOT_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
