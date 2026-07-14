@@ -14,6 +14,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocati
     INVOCATION_ACCEPT,
     INVOCATION_REJECT,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    AUTHORITY_ISSUED,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
 )
@@ -106,7 +109,7 @@ def _work_authority(**overrides):
     return payload
 
 
-def _runtime_result(*, accepted: bool = True, status: str = "AUTHORITY_ISSUED", **authority_overrides):
+def _runtime_result(*, accepted: bool = True, status: str = AUTHORITY_ISSUED, **authority_overrides):
     return {
         "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
         "rejection_reasons": [],
