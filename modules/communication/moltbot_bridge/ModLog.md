@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_READONLY_AUDIT_DECISION_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_readonly_audit_decision_runtime.py`: deterministic
+  post-collection decision receipt for RedDog read-only audit bundles. The
+  gate accepts only WSP_97-labeled semantic findings whose evidence refs are
+  bound to the validated report; `NEEDS_VERIFICATION` findings can only route
+  to `RESEARCH_MORE`.
+- Wired the main read-only bootstrap telemetry to emit the decision receipt
+  after accepted report collection. Reports with no semantic findings are
+  routed to `RESEARCH_MORE` with
+  `REDDOG_READONLY_AUDIT_SEMANTIC_FINDINGS_PHASE1`, preventing RedDog from
+  treating evidence collection as a completed audit.
+- Added tests for no-finding overclaim prevention, evidence-bound `FIX`
+  selection, rejected collection handling, count mismatch, unbound evidence,
+  `NEEDS_VERIFICATION` guardrails, bootstrap decision telemetry, and AST
+  no-execution/no-mutation coverage.
+- Boundary: no model call, no shell/subprocess, no repo mutation, no worktree
+  operation, no OpenClaw enqueue, no Hermes/WRE dispatch, no HoloIndex
+  mutation/re-index, and no live action-plane wiring. This emits a decision
+  receipt only.
+- HoloIndex read-only probe for
+  `REDDOG_READONLY_AUDIT_DECISION_RUNTIME_PHASE1 semantic findings next action decision`
+  is expected to require post-merge indexing; no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_MAIN_READONLY_AUDIT_REPORT_COLLECTION_WIRE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
