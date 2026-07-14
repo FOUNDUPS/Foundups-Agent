@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_AUTHORITY_REQUEST_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_authority_request_handler.py`: a concrete
+  injected handler for the resident queue `authority_request` stage.
+- The handler recomputes the WRE queue-consumer dry-run for the dispatched
+  queue item, verifies it matches the dispatch request, and adapts the existing
+  queue authority-request dry-run planner into the dispatcher protocol.
+- Boundary: first-stage dry-run handler only; no signing, signature
+  verification, valve opening, worker spawn, worktree creation, file edit,
+  shell command, PR publishing, PatternMemory write, OpenClaw enqueue, Hermes
+  dispatch, reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue authority request
+  handler` surfaced adjacent live-enqueue, merge-authority, work-order,
+  WSP, and RedDog governance docs, but not this new handler before indexing.
+  Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_AUTHORITY_REQUEST_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
