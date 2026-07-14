@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_SIGNER_SOCKET_PEER_CREDENTIAL_ATTESTOR_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97
+
+- Added `src/reddog_signer_socket_peer_credential_attestor.py`: a
+  fail-closed local-socket peer credential attestor for the isolated signer
+  service. It maps kernel UID/GID evidence from `SO_PEERCRED` or `getpeereid`
+  through an injected signer-owned policy into the existing
+  `SignerPeerAttestation` record.
+- Added tests proving successful UID/GID mapping, `getpeereid` fallback,
+  unsupported-platform fail-closed behavior, malformed/exception credential
+  rejection, UID/GID allowlist rejection, policy validation, no request-body
+  identity parameter, and AST denial of shell, file, repo, OpenClaw, Hermes,
+  and HoloIndex runtime mutation surfaces.
+- Boundary: peer attestation only. No request payload identity is trusted, no
+  OS user lookup, no file read, no signer launch, no socket binding, no shell
+  command, no repository mutation, no OpenClaw enqueue, no Hermes dispatch, no
+  WRE queue write, no reward settlement, and no HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog signer socket peer credential attestor
+  SO_PEERCRED getpeereid` is recorded as
+  `HOLOINDEX_REDDOG_SIGNER_SOCKET_PEER_CREDENTIAL_ATTESTOR_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_SIGNER_KEY_PROVIDER_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97
