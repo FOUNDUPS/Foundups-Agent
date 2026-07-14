@@ -1,0 +1,114 @@
+architectures:
+  - architecture_id: FOUNDUPS_MEMEX
+    title: FoundUps Memex Vision and POC Architecture
+    canonical_path: docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md
+    adr_path: docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md
+    deferred_governance_path: docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md
+    identity_addendum_path: docs/contracts/REDDOG_0102_PUBLIC_KEY_OPERATIONAL_IDENTITY_ADDENDUM_PHASE1.md
+    controlling_wsp: WSP_60
+    framework_wsp_path: WSP_framework/src/WSP_60_Module_Memory_Architecture.md
+    framework_addendum_path: WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md
+    knowledge_mirror_path: WSP_knowledge/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md
+    cabr_wsp: WSP_29
+    cabr_framework_path: WSP_framework/src/WSP_29_CABR_Engine.md
+    cabr_memex_addendum_path: WSP_framework/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md
+    cabr_knowledge_mirror_path: WSP_knowledge/src/WSP_29_CABR_MEMEX_AUTHORITY_ADDENDUM.md
+    related_wsps:
+      - WSP_22
+      - WSP_29
+      - WSP_60
+      - WSP_80
+      - WSP_82
+      - WSP_83
+      - WSP_84
+      - WSP_87
+      - WSP_97
+      - WSP_100
+    status: poc
+    owner: 0102_operating_as_reddog
+    primary_poc_entity: foundups_agent
+    primary_runtime_slice: FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1
+    compatibility_runtime_slice: FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1
+    deferred_application: REDDOG_012_PERSONAL_MEMEX_PHASE1
+    domains:
+      - foundup_dae
+      - memex
+      - organizational_cognition
+      - orchestration
+      - adaptive_roadmap
+      - context_assembly
+      - cabr_policy
+      - public_key_identity
+    components:
+      - existing_brain
+      - continuity_breadcrumbs
+      - reddog_operational_context_snapshot
+      - authoritative_work_state
+      - holoindex
+      - roadmap_state
+      - verified_outcomes
+      - research_receipts
+      - 0102_public_key_identity
+      - reddog_operational_state
+    invariants:
+      - foundup_first_implementation
+      - brain_is_a_memex_component
+      - reddog_is_0102_operational_state
+      - durable_identity_resolves_to_0102_public_key
+      - extend_existing_brain_and_breadcrumb_systems
+      - wsp60_controls_memory_ownership_and_isolation
+      - wsp29_controls_cabr_meaning_and_proof_of_benefit
+      - framework_wsp_is_authoritative
+      - knowledge_wsp_copy_is_mirrored_backup
+      - repo_truth_remains_canonical_for_repository_facts
+      - brain_and_breadcrumbs_remain_separately_receipted
+      - downstream_artifacts_bind_to_snapshot_id
+      - foundup_scope_binds_to_foundup_id
+      - agents_submit_learning_candidates_instead_of_direct_brain_writes
+      - roadmaps_change_only_through_governed_deltas
+      - verified_outcomes_only_for_durable_learning
+      - runtime_reddog_does_not_reindex_holoindex
+      - cabr_influences_policy_but_does_not_directly_grant_access
+      - foundup_cabr_and_0102_contribution_profile_are_not_conflated
+      - cabr_and_delegate_runtime_authority_remain_deferred
+    related_adrs:
+      - docs/adr/ADR_OPENCLAW_MEMORY_HOLOINDEX_BOUNDARY.md
+      - docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md
+    roadmap:
+      - FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1
+      - FOUNDUP_MEMEX_LEARNING_CANDIDATE_GATE_PHASE1
+      - FOUNDUP_MEMEX_GOVERNED_BRAIN_CONSOLIDATION_PHASE1
+      - FOUNDUP_ADAPTIVE_ROADMAP_DELTA_PROPOSAL_PHASE1
+      - FOUNDUP_ADAPTIVE_ROADMAP_GOVERNANCE_GATE_PHASE1
+      - FOUNDUP_MEMEX_MULTI_ENTITY_ISOLATION_PHASE1
+      - FOUNDUP_MEMEX_MULTI_REDDOG_COLLABORATION_PROTOTYPE_PHASE1
+      - REDDOG_PRINCIPAL_IDENTITY_AND_DELEGATION_CONTRACT_PHASE2
+      - FOUNDUP_MEMEX_CABR_CAPABILITY_POLICY_CONTRACT_PHASE1
+      - CABR_0102_CONTRIBUTION_PROFILE_CONTRACT_PHASE1
+      - FOUNDUPS_COLLECTIVE_MEMEX_EXCHANGE_PHASE1
+      - REDDOG_012_PERSONAL_MEMEX_PHASE1
+    search_terms:
+      - FoundUps Memex
+      - FoundUp Memex
+      - WSP 60 FoundUp Memex
+      - WSP 29 CABR Memex authority
+      - Consensus-Driven Autonomous Benefit Rate
+      - Collective Autonomous Benefit Rate
+      - 0102 public key identity
+      - RedDog operational state
+      - RedDog equals 0102 operational state
+      - RedDog FoundUp orchestration
+      - Foundups Agent Memex POC
+      - decentralized autonomous entity
+      - Brain artifact
+      - Breadcrumb continuity
+      - foundup_id
+      - foundup_memex_view_id
+      - foundup_brain_view_id
+      - snapshot_id
+      - CABR RedDog authority
+      - CABR token bonus compute pool
+      - stakeholder delegate
+      - adaptive roadmap delta
+      - verified outcome
+      - HoloIndex canonical repo truth
