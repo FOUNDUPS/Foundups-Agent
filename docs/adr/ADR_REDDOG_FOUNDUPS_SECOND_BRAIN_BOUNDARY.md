@@ -1,8 +1,8 @@
 # ADR: RedDog and FoundUp Memex Boundary
 
-**Date:** 2026-07-14  
-**Status:** Proposed and exercised by POC  
-**Author:** 0102  
+**Date:** 2026-07-14
+**Status:** Proposed and exercised by POC
+**Author:** 0102
 **Scope:** FoundUp cognition, orchestration, and future multi-RedDog collaboration
 
 ## Context
