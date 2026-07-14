@@ -2,6 +2,34 @@
 
 ## Chronological Change Log
 
+### [2026-07-14] - WRE_CODEACT_GIT_CWD_GUARD_INTEGRATION_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15
+(Priority), WSP 34 (Git Operations), WSP 50 (Pre-Action), WSP 97 (Truth
+Boundary), WSP 22 (ModLog)
+
+**Type**: Worker execution-surface hardening. CodeAct git cwd guard wiring.
+
+**Deliverable**:
+- Updated `src/codeact_executor.py`: shell actions now pass parsed argv through
+  `validate_worker_git_operation_cwd` before subprocess execution. Read-only
+  git inspection remains allowed from the repository root. Mutating or unknown
+  git commands are blocked unless the executor was constructed with an isolated
+  `worker_worktree_path`, in which case the command cwd is that worktree.
+- Updated `tests/test_codeact_executor_hardening.py`: verifies read-only git
+  compatibility, shared-root `git add` rejection before subprocess, and
+  isolated-worktree `git add` execution cwd.
+
+**Boundary**: This slice grants no new command authority. CodeAct still requires
+existing allowlist/safety-gate checks before the cwd guard. It does not create a
+worktree, spawn workers, enqueue OpenClaw, dispatch Hermes, publish PRs, mutate
+HoloIndex, or merge code.
+
+**Verification**: Focused CodeAct and WRE git-cwd guard tests to be run before
+promotion.
+
+---
+
 ### [2026-07-14] - WRE_WORKER_GIT_CWD_GUARD_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15

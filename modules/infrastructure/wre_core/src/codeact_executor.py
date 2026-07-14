@@ -41,6 +41,10 @@ from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from modules.infrastructure.wre_core.src.wre_worker_git_cwd_guard import (
+    validate_worker_git_operation_cwd,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -137,7 +141,8 @@ class CodeActExecutor:
         self,
         repo_root: Path,
         llm_callback: Optional[Callable[[str], str]] = None,
-        confirmation_callback: Optional[Callable[[str], bool]] = None
+        confirmation_callback: Optional[Callable[[str], bool]] = None,
+        worker_worktree_path: Optional[Path] = None,
     ):
         """
         Initialize CodeAct executor.
@@ -147,9 +152,10 @@ class CodeActExecutor:
             llm_callback: Function(prompt) -> str for LLM generation
             confirmation_callback: Function(command) -> bool for confirmations
         """
-        self.repo_root = Path(repo_root)
+        self.repo_root = Path(repo_root).resolve()
         self.llm_callback = llm_callback
         self.confirmation_callback = confirmation_callback
+        self.worker_worktree_path = Path(worker_worktree_path).resolve() if worker_worktree_path else None
         self.strict_mode = os.getenv("WRE_CODEACT_STRICT", "1").strip() == "1"
 
     def execute(
@@ -378,13 +384,27 @@ class CodeActExecutor:
             if not cmd_parts:
                 return {"error": "Command parse failed: empty command"}
 
+            command_cwd = self.worker_worktree_path or self.repo_root
+            git_guard = validate_worker_git_operation_cwd(
+                repo_root=self.repo_root,
+                operation_cwd=command_cwd,
+                claimed_worktree_path=self.worker_worktree_path,
+                argv=cmd_parts,
+            )
+            if git_guard.ok is not True:
+                return {
+                    "error": f"Command blocked by worker git cwd guard: {git_guard.code}",
+                    "gate_triggered": f"git_cwd_guard:{git_guard.code}",
+                    "git_cwd_guard": git_guard.to_dict(),
+                }
+
             result = subprocess.run(
                 cmd_parts,
                 shell=False,
                 capture_output=True,
                 text=True,
                 timeout=gates.max_execution_time_ms / 1000,
-                cwd=str(self.repo_root)
+                cwd=str(command_cwd)
             )
 
             output = result.stdout
