@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORITY_REQUEST_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authority_request_dryrun.py`: a dry-run bridge
+  from an accepted WRE queue-consumer receipt to the existing
+  `DelegatedAuthorityRuntimeRequest` signer-runtime schema.
+- The bridge requires an explicit FoundUp-scoped authority profile, rejects
+  repo-wide authority, rejects paths outside `modules/foundups/{foundup_id}/`,
+  and requires consensus plus sovereign authorization digests for high-authority
+  operations.
+- Boundary: no signing, signature verification, signer-store mutation, worker
+  spawn, worktree creation, shell command, OpenClaw enqueue, Hermes dispatch,
+  repo mutation, PR creation, reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog WRE queue delegated authority request
+  dryrun` did not surface the new module in top results before indexing.
+  Recorded as `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORITY_REQUEST_DRYRUN_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
