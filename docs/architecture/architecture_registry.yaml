@@ -1,52 +1,63 @@
 architectures:
-  - architecture_id: REDDOG_FOUNDUPS_SECOND_BRAIN
-    title: RedDog and FoundUps Second Brain Architecture
+  - architecture_id: FOUNDUP_BRAIN
+    title: FoundUp Brain Architecture
     canonical_path: docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md
     adr_path: docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md
     status: proposed
     owner: 0102_reddog
+    primary_poc_entity: foundups_agent
+    primary_runtime_slice: FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1
+    deferred_application: REDDOG_012_DIGITAL_TWIN_APPLICATION_PHASE1
     domains:
+      - foundup_dae
+      - organizational_cognition
       - memory
-      - digital_twin
-      - agent_runtime
       - adaptive_roadmap
       - context_assembly
+      - agent_runtime
     components:
-      - 012_brain
-      - foundup_brain
-      - reddog_operational_brain
-      - holoindex
+      - existing_brain
       - continuity_breadcrumbs
-      - work_state
+      - reddog_operational_context_snapshot
+      - authoritative_work_state
+      - holoindex
+      - roadmap_state
+      - verified_outcomes
+      - research_receipts
     invariants:
+      - foundup_first_implementation
+      - extend_existing_brain_and_breadcrumb_systems
       - repo_truth_remains_canonical_for_repository_facts
-      - personal_and_foundup_memory_remain_separately_scoped
-      - raw_sources_are_preserved
+      - brain_and_breadcrumbs_remain_separately_receipted
       - downstream_artifacts_bind_to_snapshot_id
-      - agents_submit_memory_mutations_instead_of_direct_writes
-      - roadmaps_are_versioned_hypotheses
+      - foundup_scope_binds_to_foundup_id
+      - agents_submit_learning_candidates_instead_of_direct_brain_writes
+      - roadmaps_change_only_through_governed_deltas
+      - verified_outcomes_only_for_durable_learning
+      - runtime_reddog_does_not_reindex_holoindex
     related_adrs:
       - docs/adr/ADR_OPENCLAW_MEMORY_HOLOINDEX_BOUNDARY.md
       - docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md
     roadmap:
-      - REDDOG_SECOND_BRAIN_MEMORY_CONTRACT_PHASE1
-      - REDDOG_SOURCE_PROVENANCE_AND_TEMPORAL_MEMORY_PHASE1
-      - REDDOG_012_DIGITAL_TWIN_EPISTEMIC_GRAPH_PHASE1
-      - FOUNDUP_BRAIN_RUNTIME_AND_MEMORY_ISOLATION_PHASE1
-      - FOUNDUP_ADAPTIVE_ROADMAP_ENGINE_PHASE1
-      - REDDOG_CROSS_BRAIN_CONTEXT_ROUTER_PHASE1
-      - REDDOG_MEMORY_CONSOLIDATION_CONTRADICTION_AND_FORGETTING_PHASE1
-      - REDDOG_MEMORY_EVALUATION_AND_REGRESSION_HARNESS_PHASE1
+      - FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1
+      - FOUNDUP_BRAIN_LEARNING_CANDIDATE_GATE_PHASE1
+      - FOUNDUP_BRAIN_GOVERNED_CONSOLIDATION_PHASE1
+      - FOUNDUP_ADAPTIVE_ROADMAP_DELTA_PROPOSAL_PHASE1
+      - FOUNDUP_ADAPTIVE_ROADMAP_GOVERNANCE_GATE_PHASE1
+      - FOUNDUP_BRAIN_MULTI_ENTITY_ISOLATION_PHASE1
       - FOUNDUPS_COLLECTIVE_MEMORY_EXCHANGE_PHASE1
+      - REDDOG_012_DIGITAL_TWIN_APPLICATION_PHASE1
     search_terms:
-      - second brain
-      - 012 brain
-      - digital twin
-      - FoundUp brain
-      - sovereign memory
-      - adaptive roadmap
-      - memory mutation
+      - FoundUp Brain
+      - Foundups Agent Brain POC
+      - decentralized autonomous entity
+      - DAE cognition
+      - Brain artifact
+      - Breadcrumb continuity
+      - foundup_id
+      - foundup_brain_view_id
       - snapshot_id
-      - temporal memory
-      - prospective memory
-      - cross-brain context router
+      - learning candidate
+      - adaptive roadmap delta
+      - verified outcome
+      - HoloIndex canonical repo truth
