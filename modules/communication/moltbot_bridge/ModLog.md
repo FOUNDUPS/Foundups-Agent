@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_openclaw_readonly_audit_swarm_runtime.py`: deterministic
+  read-only audit swarm planner that consumes an accepted context snapshot
+  Fusion/assignment gate decision and emits five audit assignment packets
+  (`repo_code_audit`, `external_research_audit`, `runtime_freshness_audit`,
+  `skill_gap_audit`, and `security_governance_audit`).
+- Added `tests/test_reddog_openclaw_readonly_audit_swarm_runtime.py`:
+  accepted plan from exact snapshot/gate binding, rejected gate handling,
+  binding mismatch rejection, required-lane rejection, complete report bundle
+  acceptance, missing-report rejection, mutation/execution report rejection,
+  missing-evidence rejection, and AST no-runtime-wiring coverage.
+- Boundary: no model call, no worker spawn, no OpenClaw enqueue, no Hermes
+  dispatch, no shell command, no queue mutation, no repo mutation, no
+  HoloIndex re-index, and no extension runtime wiring. This slice creates
+  assignment packets and validates returned report metadata only.
+- HoloIndex read-only probe for
+  `REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_RUNTIME_PHASE1 read-only audit swarm snapshot Fusion assignment gate`
+  surfaced adjacent fusion redaction, work-order policy, and capability-audit
+  surfaces but not the new runtime module. Recorded
+  `HOLOINDEX_REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_RUNTIME_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_CONTEXT_SNAPSHOT_FUSION_AND_ASSIGNMENT_GATE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
