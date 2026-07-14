@@ -1,359 +1,363 @@
-# RedDog and FoundUps Second Brain Architecture
+# FoundUp Brain Architecture
 
 **Date:** 2026-07-14  
 **Status:** Proposed architecture baseline  
 **Owner:** 0102 / RedDog  
-**Scope:** Personal digital twin memory, FoundUp organizational memory, adaptive roadmap cognition, and cross-brain context assembly
+**Primary implementation target:** Foundups Agent as the first FoundUp Brain POC  
+**Deferred application:** 012 / 0102 personal digital-twin memory
 
 ## Purpose
 
-RedDog currently retrieves repository knowledge, continuity, work state, and execution evidence from several independent sources. Those sources are necessary but do not by themselves form a second brain.
+A FoundUp is not only a repository or application. It is a developing decentralized autonomous entity (DAE) with purpose, identity, agents, active work, decisions, outcomes, governance, economic state, and an evolving roadmap.
 
-A second brain is the governed lifecycle that captures evidence, forms durable knowledge, connects it over time, retrieves it for a bounded task, learns from outcomes, and revises beliefs or plans without rewriting history.
+The repository already contains the first parts of this cognition:
 
-The architecture establishes three distinct roles:
+- Brain artifacts for durable consolidated understanding;
+- Breadcrumbs for chronological continuity;
+- HoloIndex for canonical repository retrieval;
+- authoritative work-state receipts;
+- operational context snapshots and assignment gates;
+- verified outcome and held-out regression gates;
+- research grounding and promotion gates.
+
+This architecture does not create a parallel memory platform. It defines how those existing systems compose into the brain of one FoundUp.
 
 ```text
-012 Brain
-= sovereign personal digital-twin memory
-
 FoundUp Brain
-= sovereign organizational memory for one FoundUp
-
-RedDog
-= cognitive operating system that assembles snapshot-bound context,
-  dispatches agents, records outcomes, and proposes controlled memory evolution
+= existing Brain
++ Breadcrumbs
++ authoritative work state
++ HoloIndex-grounded repository knowledge
++ verified outcomes
++ roadmap state
++ governed external signals
 ```
 
-RedDog is not the owner of every memory. It is the router and operational executive across separately scoped brains.
+```text
+RedDog
+= operator and orchestrator acting through the brain
+  of the FoundUp currently in scope
+```
 
-## Relationship to Existing Memory Systems
+RedDog does not receive a separate new durable brain in this POC.
 
-This architecture extends, and does not replace, the accepted boundary in:
+## POC Boundary
+
+The first proof of concept is **Foundups Agent itself**.
+
+```text
+POC entity: Foundups Agent
+POC scope: one FoundUp identity, one Brain, one Breadcrumb stream,
+           one roadmap, one operational snapshot, and governed
+           learning / roadmap proposals
+```
+
+The implementation sequence is:
+
+```text
+Foundups Agent Brain POC
+-> FoundUp Brain MVP
+-> independently scoped brains for all FoundUps
+-> ecosystem cognition
+-> optional 012 / 0102 personal Second Brain
+```
+
+Personal digital-twin memory is a later application of the proven FoundUp Brain contracts. It is not the current architectural driver.
+
+## Relationship to Existing Systems
+
+This architecture extends, and does not replace:
 
 - `docs/adr/ADR_OPENCLAW_MEMORY_HOLOINDEX_BOUNDARY.md`
+- the landed RedDog operational context snapshot runtime;
+- the landed snapshot-bound Fusion and assignment gate;
+- authoritative work-state refresh and read-only bootstrap;
+- verified outcome, held-out regression, and research-promotion gates.
 
-The existing roles remain intact:
-
-| Source | Role | Authority |
+| Existing source | FoundUp Brain role | Authority |
 |---|---|---|
+| Brain | Durable consolidated mission, decisions, architecture understanding, lessons, and strategic state | Governed FoundUp memory |
+| Breadcrumbs | Chronological record of changes, attempts, unresolved work, and handoff continuity | Episodic continuity |
 | HoloIndex | Repository, code, WSP, contract, and architecture retrieval | Canonical repo truth |
-| OpenClaw / continuity memory | Session notes, preferences, recent decisions, and daily continuity | Non-canonical context |
-| AI Overseer / execution memory | Automation patterns, outcomes, and execution state | Operational evidence |
-| Work state | Current task, branch, issue, PR, and active execution state | Current-state evidence |
-| Breadcrumbs | Recent continuity trail | Non-canonical continuity |
-| 012 Brain | Versioned model of 012 knowledge, beliefs, decisions, and preferences | Sovereign personal memory |
-| FoundUp Brain | Mission, roadmap, decisions, experiments, and institutional knowledge | Sovereign organizational memory |
+| Work state | Active slices, PRs, blockers, dependencies, ownership, and verification state | Current-state evidence |
+| Roadmap | Current hypotheses, milestones, dependencies, and planned capabilities | Governed strategic state |
+| Verified outcomes | Independently verified execution results eligible to become learning candidates | Learning evidence |
+| Research receipts | HoloIndex-first, independently verified external change signals | Untrusted until governed |
+| Workspace / OpenClaw memory | Operator and session continuity | Non-canonical context |
 
-These sources must remain separately receipted. They must not be collapsed into one freshness flag, one authority flag, or one undifferentiated vector index.
+These sources remain separately receipted. They must not be collapsed into one freshness flag, one authority flag, or one undifferentiated index.
+
+## Brain and Breadcrumb Semantics
+
+### Brain
+
+The existing Brain becomes the FoundUp's durable consolidated understanding:
+
+```text
+mission and identity
+outcome / solution / pain
+current thesis
+approved decisions and rationale
+architecture understanding
+validated patterns and lessons
+current strategic state
+```
+
+The Brain is not a raw event log. It changes only through governed consolidation.
+
+### Breadcrumbs
+
+Breadcrumbs remain the chronological continuity trail:
+
+```text
+what happened
+what changed
+what was attempted
+what failed or succeeded
+what remains unresolved
+what the next actor needs to know
+```
+
+Breadcrumbs are episodic source evidence. They may generate learning candidates, but they do not directly rewrite the Brain.
 
 ## Core Invariants
 
-1. **Repo truth remains canonical for repository facts.**
-2. **Personal memory and FoundUp memory remain separately owned and scoped.**
-3. **Raw source evidence is preserved; summaries never replace sources.**
-4. **All operational answers and actions bind to `snapshot_id`.**
-5. **Agents do not directly rewrite durable memory.**
-6. **Agents submit evidence-backed memory mutations.**
-7. **Roadmaps are versioned hypotheses, not static documents.**
-8. **Contradictions, supersession, confidence, and temporal validity are explicit.**
-9. **Private continuity is not silently indexed into canonical repository retrieval.**
-10. **Memory retrieval must expose source, authority, freshness, and provenance.**
+1. **FoundUp-first:** implementation begins with the Foundups Agent DAE, not a personal digital twin.
+2. **Extend existing systems:** Brain, Breadcrumbs, snapshots, work state, HoloIndex, and verified outcomes are composed, not replaced.
+3. **Repo truth remains canonical for repository facts.**
+4. **Brain and Breadcrumbs remain distinct sources with distinct authority.**
+5. **Raw evidence remains available; summaries never replace sources.**
+6. **All FoundUp brain views and downstream proposals bind to `snapshot_id`.**
+7. **Agents do not directly rewrite Brain or roadmap state.**
+8. **Agents submit evidence-backed learning candidates and roadmap deltas.**
+9. **Only independently verified outcomes may become durable learned patterns.**
+10. **External content is untrusted data until independently verified and admitted through a gate.**
+11. **Runtime RedDog does not mutate HoloIndex or silently re-index.**
+12. **Each future FoundUp receives isolated brain scope identified by `foundup_id`.**
 
-## Brain Topology
+## Current Landed Spine
+
+The POC grows directly from the current RedDog implementation sequence:
 
 ```text
-FoundUps Ecosystem Brain
-|
-+-- 012 Brain
-|   +-- identity and terminology
-|   +-- beliefs and evolving positions
-|   +-- decisions and rationale
-|   +-- preferences and operating constraints
-|   +-- experiences and creative history
-|   +-- predictions and outcomes
-|
-+-- RedDog Operational Brain
-|   +-- current snapshot
-|   +-- task and branch state
-|   +-- source routing
-|   +-- agent assignments
-|   +-- execution receipts
-|   +-- short-lived working memory
-|
-+-- FoundUp Brains
-    +-- mission and outcome
-    +-- pain and solution model
-    +-- roadmap and dependencies
-    +-- architecture and modules
-    +-- decisions and rejected alternatives
-    +-- experiments and measured outcomes
-    +-- external technology and market signals
+operational context snapshot
+-> snapshot-bound Fusion / assignment gate
+-> read-only audit swarm plan
+-> main.py read-only operational bootstrap
+-> authoritative work-state refresh
 ```
 
-## Memory Classes
+The snapshot already consumes separate receipts for repository state, work state, HoloIndex freshness, Brain metadata, Breadcrumbs, and workspace memory. The next slice should create a FoundUp-specific view over those accepted receipts rather than inventing another store.
 
-Every brain implementation must support six memory classes.
+## FoundUp Brain Current-State View
 
-### 1. Source memory
-
-Immutable or minimally transformed evidence:
-
-- conversations
-- transcripts
-- videos
-- documents
-- commits and diffs
-- research papers
-- web captures
-- tool receipts
-- agent outputs
-
-### 2. Semantic memory
-
-Extracted knowledge and propositions. Every semantic record must point to source receipts.
-
-### 3. Episodic memory
-
-Events and outcomes: what was attempted, accepted, rejected, failed, changed, or learned.
-
-### 4. Procedural memory
-
-How work is performed: WSP procedures, validation sequences, security gates, coding conventions, and operating playbooks.
-
-### 5. Working memory
-
-The bounded context for the current task. Working memory is snapshot-scoped and disposable.
-
-### 6. Prospective memory
-
-Future review triggers and conditional obligations: revisit an assumption, monitor a dependency, re-run an evaluation, or reconsider a roadmap item when a condition changes.
-
-## Snapshot-Bound Context
-
-Before answering or acting, RedDog assembles an operational context snapshot.
-
-Required source receipts:
+The first runtime artifact is read-only:
 
 ```text
-repo_state
-work_state
-continuity_or_breadcrumbs
-012_brain
-relevant_foundup_brain
-workspace_memory
-holoindex
-external_research_when_needed
+FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1
 ```
 
-Every downstream artifact must bind to:
+### Inputs
 
 ```text
+foundup_id
 snapshot_id
+Brain artifact metadata
+Breadcrumb high-watermark
+authoritative work-state revision
+repo HEAD
+HoloIndex freshness receipt
+roadmap artifact metadata
+verified outcome receipts
 ```
 
-Examples:
-
-```text
-RedDog answer -> snapshot_id
-Audit report -> snapshot_id
-Agent assignment -> snapshot_id
-Roadmap proposal -> snapshot_id
-Memory mutation -> snapshot_id
-```
-
-A snapshot must preserve source-specific authority, freshness, and retrieval status. A failed or stale source must be reported explicitly rather than silently omitted.
-
-## Memory Mutation Contract
-
-Agents may propose memory changes but cannot directly mutate durable memory.
-
-Required mutation operations:
-
-```text
-create
-reinforce
-amend
-supersede
-contradict
-archive
-forget
-```
-
-Minimum mutation envelope:
+### Output contract
 
 ```yaml
-memory_mutation_id:
-target_brain:
-operation:
-subject:
-proposed_content:
-source_receipts: []
-confidence:
-valid_from:
-valid_until:
-reason:
-agent_id:
+foundup_brain_view_id:
+foundup_id:
 snapshot_id:
-approval_policy:
+
+identity:
+  name:
+  stage:
+  purpose:
+  outcome:
+  solution:
+  pain:
+
+current_state:
+  active_work: []
+  blockers: []
+  recent_changes: []
+  current_roadmap: []
+  architecture_state: []
+
+source_receipts:
+  brain:
+  breadcrumbs:
+  work_state:
+  repo_state:
+  holoindex:
+  roadmap:
+  verified_outcomes:
+
+learning_candidates: []
+roadmap_signals: []
+
+invariants:
+  read_only: true
+  no_brain_write: true
+  no_breadcrumb_write: true
+  no_roadmap_mutation: true
+  no_holoindex_mutation: true
+  no_worker_spawn: true
 ```
 
-Mutation evaluation must check:
+The view must fail closed when mandatory current-state receipts are stale or mismatched. Historical Brain or Breadcrumb information cannot override current repository or authoritative work state.
 
-- provenance
-- target-brain ownership
-- authority conflicts
-- temporal validity
-- privacy classification
-- prompt-injection risk
-- contradiction and supersession relationships
-- approval requirements
+## Learning Lifecycle
 
-## Adaptive Roadmap Engine
+The FoundUp learns through the existing evidence and verification spine:
 
-A FoundUp roadmap is a versioned reasoning system:
+```text
+Breadcrumb / research / execution signal
+-> source receipt
+-> independent verification where required
+-> learning candidate
+-> governance gate
+-> Brain consolidation proposal
+-> accepted / rejected / deferred
+-> rationale and supersession record
+```
+
+A learning candidate is not yet memory authority.
+
+Minimum candidate envelope:
+
+```yaml
+learning_candidate_id:
+foundup_id:
+snapshot_id:
+source_receipts: []
+claim:
+proposed_brain_effect:
+confidence:
+contradicts: []
+supersedes: []
+approval_policy:
+status: proposed
+```
+
+## Adaptive Roadmap
+
+The roadmap is part of the FoundUp Brain because a DAE must change when evidence, technology, constraints, or execution outcomes change.
 
 ```text
 mission
 -> desired outcomes
 -> required capabilities
 -> current gaps
--> candidate initiatives
--> dependencies and risks
--> evidence
--> priority
+-> initiatives
 -> execution
--> measured result
--> revised roadmap
+-> verified result
+-> learning candidate
+-> roadmap delta proposal
+-> governance decision
 ```
 
-Minimum roadmap item:
+Agents may propose that a roadmap item be added, amended, deferred, or retired. They may not silently change the FoundUp's mission or accepted strategy.
+
+Minimum roadmap delta:
 
 ```yaml
-roadmap_item_id:
+roadmap_delta_id:
 foundup_id:
-objective:
-hypothesis:
-expected_benefit:
-evidence: []
-dependencies: []
-cost:
+snapshot_id:
+operation: add | amend | defer | retire
+roadmap_item_id:
+reason:
+evidence_receipts: []
+expected_effect:
 risk:
 confidence:
-status:
-owner_agent:
-last_reviewed:
-review_trigger:
-supersedes:
-snapshot_id:
+approval_policy:
+status: proposed
 ```
 
-Agents may propose roadmap deltas after detecting new technology, changed evidence, failed assumptions, legal constraints, or execution outcomes. They may not silently alter mission or accepted strategy.
+## FoundUp Isolation
 
-Required flow:
+After the POC is proven, every FoundUp receives its own scope:
 
 ```text
-signal detected
--> relevance assessment
--> evidence collection
--> impact analysis
--> roadmap delta proposal
--> governance gate
--> accepted / rejected / deferred
--> recorded rationale
+foundup_id
+Brain namespace
+Breadcrumb stream
+roadmap state
+work-state view
+verified outcome history
+learning candidates
+roadmap deltas
+access policy
 ```
 
-## Retrieval and Authority Rules
-
-1. Retrieve canonical repository truth through HoloIndex first when the task concerns code, WSPs, contracts, or repo architecture.
-2. Retrieve relevant 012 or FoundUp memory only within the task's authorization scope.
-3. Label all injected context by source class.
-4. Prefer current authoritative state over old summaries.
-5. Preserve contradictory historical records rather than deleting them unless an explicit forgetting policy applies.
-6. Report inference as inference; do not present inferred digital-twin behavior as a direct statement by 012.
-
-Required distinction for 012 Brain output:
-
-```text
-direct statement by 012
-approved operating rule
-historical pattern
-RedDog inference
-autonomous decision
-```
-
-## Security and Privacy
-
-The second brain expands the prompt-injection and privacy attack surface.
-
-Required controls:
-
-- source classification before persistence
-- private-by-default continuity handling
-- evidence-backed mutation gate
-- no direct write from imported documents or web content
-- redaction before cross-layer logging or indexing
-- scoped agent access
-- audit trail for reads and mutations
-- explicit deletion, archival, and retention policies
-- separation of personal, FoundUp, and ecosystem memory
+No FoundUp may inherit another FoundUp's durable memory merely because both are indexed by the same repository tooling.
 
 ## HoloIndex Boundary
-
-HoloIndex remains specialized repository and architecture cognition.
 
 ```text
 HoloIndex
 = canonical semantic retrieval over repository truth
 
-Second Brain
-= governed memory lifecycle across personal, organizational,
-  episodic, procedural, prospective, and working memory
+FoundUp Brain
+= governed cognition of one DAE assembled from existing sources
 
 RedDog
-= context router and operational executive
+= operator and orchestrator using a snapshot-bound FoundUp brain view
 ```
 
-HoloIndex is one source within snapshot assembly. It is not the entire second brain.
+HoloIndex is a critical source, but it is not the whole FoundUp Brain.
 
 ## Implementation Roadmap
 
 ```text
-1. REDDOG_SECOND_BRAIN_MEMORY_CONTRACT_PHASE1
-2. REDDOG_SOURCE_PROVENANCE_AND_TEMPORAL_MEMORY_PHASE1
-3. REDDOG_012_DIGITAL_TWIN_EPISTEMIC_GRAPH_PHASE1
-4. FOUNDUP_BRAIN_RUNTIME_AND_MEMORY_ISOLATION_PHASE1
-5. FOUNDUP_ADAPTIVE_ROADMAP_ENGINE_PHASE1
-6. REDDOG_CROSS_BRAIN_CONTEXT_ROUTER_PHASE1
-7. REDDOG_MEMORY_CONSOLIDATION_CONTRADICTION_AND_FORGETTING_PHASE1
-8. REDDOG_MEMORY_EVALUATION_AND_REGRESSION_HARNESS_PHASE1
-9. FOUNDUPS_COLLECTIVE_MEMORY_EXCHANGE_PHASE1
+1. FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1
+2. FOUNDUP_BRAIN_LEARNING_CANDIDATE_GATE_PHASE1
+3. FOUNDUP_BRAIN_GOVERNED_CONSOLIDATION_PHASE1
+4. FOUNDUP_ADAPTIVE_ROADMAP_DELTA_PROPOSAL_PHASE1
+5. FOUNDUP_ADAPTIVE_ROADMAP_GOVERNANCE_GATE_PHASE1
+6. FOUNDUP_BRAIN_MULTI_ENTITY_ISOLATION_PHASE1
+7. FOUNDUPS_COLLECTIVE_MEMORY_EXCHANGE_PHASE1
+8. REDDOG_012_DIGITAL_TWIN_APPLICATION_PHASE1 (deferred)
 ```
 
-## Phase-1 Acceptance
+## POC-to-MVP Acceptance
 
-The architecture baseline is discoverable when:
+The Foundups Agent Brain POC is complete when:
 
-1. this document is indexed by HoloIndex;
-2. the companion ADR is present and linked;
-3. the architecture registry entry resolves to this canonical path;
-4. implementation prompts reference these invariants;
-5. future memory and roadmap changes cite `snapshot_id` and source receipts;
-6. no duplicate document claims to be the canonical Second Brain architecture.
+1. a deterministic read-only brain view is assembled from existing accepted receipts;
+2. the view identifies the FoundUp through `foundup_id` and binds to `snapshot_id`;
+3. Brain and Breadcrumbs remain distinct and separately receipted;
+4. current repo and authoritative work state outrank historical memory;
+5. verified outcomes can produce learning candidates without writing Brain state;
+6. roadmap signals can produce non-mutating delta proposals;
+7. tests prove stale, mismatched, cross-FoundUp, and secret-bearing inputs fail closed;
+8. no new general-purpose memory database is required for the POC.
 
 ## Canonical Search Terms
 
 ```text
-second brain
-012 brain
-digital twin
-FoundUp brain
-sovereign memory
-adaptive roadmap
-memory mutation
+FoundUp Brain
+Foundups Agent Brain POC
+decentralized autonomous entity
+DAE cognition
+Brain artifact
+Breadcrumb continuity
+foundup_id
+foundup_brain_view_id
 snapshot_id
-temporal memory
-prospective memory
-cross-brain context router
-source receipts
+learning candidate
+adaptive roadmap delta
+verified outcome
+HoloIndex canonical repo truth
 ```
