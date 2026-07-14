@@ -27,6 +27,11 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime
     REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED,
     load_reddog_main_resident_queue_runtime_dependency_bundle,
 )
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
+    DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
+    DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
+    SignerSocketConnector,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop import (
     ResidentQueueSerialLoopResult,
     run_reddog_resident_queue_serial_loop,
@@ -82,6 +87,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     authority_state_path: Path | str | None = None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
+    signer_socket_path: Path | str | None = None,
+    signer_socket_timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
+    signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
+    signer_socket_connector: Optional[SignerSocketConnector] = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
@@ -127,6 +136,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         authority_state_path=authority_state_path,
         permission_snapshots_path=permission_snapshots_path,
         principal_authority_records_path=principal_authority_records_path,
+        signer_socket_path=signer_socket_path,
+        signer_socket_timeout_s=signer_socket_timeout_s,
+        signer_socket_max_response_bytes=signer_socket_max_response_bytes,
+        signer_socket_connector=signer_socket_connector,
         now_epoch=now_epoch,
     )
     if dependency_bundle.accepted is not True:

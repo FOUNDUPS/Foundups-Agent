@@ -16,6 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     RuntimeRejectCode,
+    public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     invoke_reddog_wre_queue_authority_runtime,
@@ -109,6 +110,33 @@ def _authority_request_result() -> dict[str, object]:
     }
 
 
+def _accepted_socket_signer(
+    socket_path: Path,
+    request_bytes: bytes,
+    timeout_s: float,
+    max_response_bytes: int,
+) -> bytes:
+    assert socket_path.is_absolute()
+    assert timeout_s > 0
+    assert max_response_bytes >= 1024
+    decoded = json.loads(request_bytes.decode("utf-8").strip())
+    request = decoded["request"]
+    public_key = str(request["signer_public_key"])
+    response = {
+        "accepted": True,
+        "signature": "sig:" + str(request["nonce"]),
+        "signer_public_key": public_key,
+        "key_fingerprint": public_key_fingerprint(public_key),
+        "key_epoch": str(request["key_epoch"]),
+        "audit_mac": "audit:" + str(request["payload_digest"]),
+        "boundary_attested": True,
+        "requester_identity_attested": True,
+        "signer_loads_no_untrusted_code": True,
+        "no_secret_material_returned": True,
+    }
+    return json.dumps(response, sort_keys=True).encode("utf-8")
+
+
 def test_bundle_not_requested_does_not_create_runtime_dependencies(tmp_path: Path) -> None:
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=_repo(tmp_path),
@@ -184,6 +212,70 @@ def test_bundle_loads_outside_repo_resolvers_and_fail_closed_signer(tmp_path: Pa
     assert result.decision == "QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT"
     assert RuntimeRejectCode.SIGNER_NOT_CONFIGURED in result.rejection_reasons
     assert result.no_repo_mutation_performed is True
+
+
+def test_bundle_uses_isolated_socket_signer_when_explicitly_configured(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    authority_state = tmp_path / "runtime" / "authority-state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    snapshot_path = _write_json(tmp_path, "snapshots.json", _snapshots())
+    principal_path = _write_json(tmp_path, "principals.json", _principals())
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshot_path,
+        principal_authority_records_path=principal_path,
+        signer_socket_path=socket_path,
+        signer_socket_connector=_accepted_socket_signer,
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is True
+    assert bundle.status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert bundle.signer_mode == "isolated_socket"
+    assert bundle.signer_socket_path == str(socket_path.resolve())
+    assert bundle.no_real_signer_configured is False
+    assert bundle.no_private_key_loaded is True
+    assert bundle.no_worker_spawn_performed is True
+
+    result = invoke_reddog_wre_queue_authority_runtime(
+        explicit_queue_authority_runtime_requested=True,
+        queue_authority_request_dryrun=_authority_request_result(),
+        store=bundle.authority_store,
+        signer=bundle.signer,
+        principal_resolver=bundle.principal_resolver,
+        snapshot_resolver=bundle.snapshot_resolver,
+        now=NOW,
+    )
+    assert result.decision == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    assert result.authority_result is not None
+    assert result.authority_result.accepted is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert authority_state.exists()
+    stored = json.loads(authority_state.read_text(encoding="utf-8"))
+    assert stored["issued_authorities"]["wre-queue-1"]["status"] == "DELEGATED_AUTHORITY_ISSUED"
+
+
+def test_bundle_rejects_invalid_signer_socket_without_falling_back(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    authority_state = tmp_path / "runtime" / "authority-state.json"
+    snapshot_path = _write_json(tmp_path, "snapshots.json", _snapshots())
+    principal_path = _write_json(tmp_path, "principals.json", _principals())
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshot_path,
+        principal_authority_records_path=principal_path,
+        signer_socket_path=repo / "signer.sock",
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is False
+    assert bundle.status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_REJECT
+    assert "FAIL_SIGNER_SOCKET_PATH_INSIDE_REPO" in bundle.rejection_reasons
+    assert bundle.signer is None
 
 
 def test_bundle_has_no_shell_network_holoindex_private_key_or_live_runner_imports() -> None:

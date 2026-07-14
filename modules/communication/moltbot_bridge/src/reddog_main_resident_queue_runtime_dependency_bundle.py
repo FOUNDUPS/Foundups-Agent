@@ -3,10 +3,11 @@
 Slice: REDDOG_MAIN_RESIDENT_QUEUE_RUNTIME_DEPENDENCY_BUNDLE_PHASE1
 
 This module constructs only the authority-runtime dependencies that ``main.py``
-may safely own today: outside-repo JSON stores/resolvers and fail-closed signer
-boundaries. It does not load private keys, configure a real signer, verify
-signatures, create worktrees, run shell commands, enqueue OpenClaw, dispatch
-Hermes, publish PRs, mutate repository files, or re-index HoloIndex.
+may safely own today: outside-repo JSON stores/resolvers and an optional client
+for an already-running isolated signer. It does not load private keys, spawn a
+signer, verify signatures, create worktrees, run shell commands, enqueue
+OpenClaw, dispatch Hermes, publish PRs, mutate repository files, or re-index
+HoloIndex.
 """
 
 from __future__ import annotations
@@ -21,6 +22,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     FailClosedPrincipalAuthorityResolver,
     FailClosedSignerClient,
     PrincipalAuthorityRecord,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
+    DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
+    DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
+    SignerSocketConnector,
+    build_reddog_isolated_signer_socket_client,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
@@ -66,6 +73,7 @@ class RedDogMainResidentQueueRuntimeDependencyBundle:
     snapshot_resolver: Any = None
     now_epoch: Optional[int] = None
     authority_state_path: Optional[str] = None
+    signer_socket_path: Optional[str] = None
     permission_snapshots_loaded: int = 0
     principal_records_loaded: int = 0
     signer_mode: str = "none"
@@ -89,13 +97,22 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
     authority_state_path: Path | str | None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
+    signer_socket_path: Path | str | None = None,
+    signer_socket_timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
+    signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
+    signer_socket_connector: Optional[SignerSocketConnector] = None,
     now_epoch: int | None = None,
 ) -> RedDogMainResidentQueueRuntimeDependencyBundle:
     """Load safe queue-loop dependencies from outside-repo runtime artifacts."""
 
     root = Path(repo_root).resolve()
     if not authority_state_path:
-        if permission_snapshots_path or principal_authority_records_path or now_epoch is not None:
+        if (
+            permission_snapshots_path
+            or principal_authority_records_path
+            or signer_socket_path
+            or now_epoch is not None
+        ):
             return _reject("runtime_dependency_bundle_partial_configuration")
         return RedDogMainResidentQueueRuntimeDependencyBundle(
             accepted=True,
@@ -123,13 +140,32 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
     if principal_reasons:
         return _reject(*principal_reasons)
 
+    signer = FailClosedSignerClient()
+    signer_mode = "fail_closed"
+    signer_socket_resolved: Optional[str] = None
+    no_real_signer_configured = True
+    if signer_socket_path:
+        signer_result = build_reddog_isolated_signer_socket_client(
+            repo_root=root,
+            socket_path=signer_socket_path,
+            timeout_s=signer_socket_timeout_s,
+            max_response_bytes=signer_socket_max_response_bytes,
+            connector=signer_socket_connector,
+        )
+        if signer_result.accepted is not True or signer_result.client is None:
+            return _reject(*signer_result.rejection_reasons)
+        signer = signer_result.client
+        signer_mode = "isolated_socket"
+        signer_socket_resolved = signer_result.socket_path
+        no_real_signer_configured = False
+
     return RedDogMainResidentQueueRuntimeDependencyBundle(
         accepted=True,
         status=REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
         requested=True,
         rejection_reasons=(),
         authority_store=AtomicJsonAuthorityRuntimeStore(authority_path),
-        signer=FailClosedSignerClient(),
+        signer=signer,
         principal_resolver=(
             JsonPrincipalAuthorityResolver(principals)
             if principals
@@ -138,9 +174,11 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
         snapshot_resolver=JsonPermissionSnapshotResolver(snapshots),
         now_epoch=now_epoch,
         authority_state_path=str(authority_path),
+        signer_socket_path=signer_socket_resolved,
         permission_snapshots_loaded=len(snapshots),
         principal_records_loaded=len(principals),
-        signer_mode="fail_closed",
+        signer_mode=signer_mode,
+        no_real_signer_configured=no_real_signer_configured,
     )
 
 
