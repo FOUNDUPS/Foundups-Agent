@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_PATTERN_MEMORY_ADMISSION_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_pattern_memory_admission_handler.py`: a
+  concrete injected handler for the resident queue `pattern_memory_admission`
+  stage.
+- The handler reads the already-recorded `held_out_regression_gate` result
+  from the chain-results store and invokes the existing queue-authorized
+  PatternMemory admission guard with an injected request and sink.
+- Boundary: PatternMemory admission only through the injected sink after
+  held-out acceptance; no direct PatternMemory instantiation, shell command, PR
+  publish, merge, OpenClaw enqueue, Hermes dispatch, reward settlement, or
+  HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue PatternMemory admission
+  handler` surfaced adjacent queue/knowledge/WSP results, but not this new
+  handler before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_PATTERN_MEMORY_ADMISSION_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_HELD_OUT_REGRESSION_GATE_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
