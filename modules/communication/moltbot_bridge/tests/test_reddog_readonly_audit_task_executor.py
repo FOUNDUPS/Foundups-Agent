@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     READONLY_AUDIT_TASK_SOURCE,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
+    AUTHORITATIVE_WORK_STATE_REFRESH_SLICE,
     READONLY_AUDIT_LANE_ANALYZER_SLICE,
     READONLY_AUDIT_TASK_REPORT_ACCEPT,
     READONLY_AUDIT_TASK_REPORT_REJECT,
@@ -53,6 +55,45 @@ def _repo(tmp_path: Path) -> Path:
     return root
 
 
+def _repo_with_ledgers(tmp_path: Path) -> Path:
+    root = tmp_path / "repo-ledgers"
+    active = root / "docs" / "0102_session_briefings" / "ACTIVE_SLICE_LEDGER.md"
+    active.parent.mkdir(parents=True)
+    active.write_text(
+        """# Active Slice Ledger
+
+**Updated**: 2026-07-14
+
+## Open Slices
+
+| Slice | Priority | Blocked By | Notes |
+|-------|----------|------------|-------|
+| `REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1` | P0 | - | next |
+""",
+        encoding="utf-8",
+    )
+    ledger = root / "docs" / "0102_session_briefings" / "work_ledger.schema.json"
+    ledger.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "last_updated": "2026-07-14T00:00:00Z",
+                "slices": [
+                    {
+                        "slice_id": "REDDOG_JSON_SECONDARY_PHASE1",
+                        "status": "PROPOSED",
+                        "priority": "P1",
+                        "wsp15_score": {"total": 16},
+                    }
+                ],
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    return root
+
+
 def _context() -> dict:
     return {
         "source": READONLY_AUDIT_TASK_SOURCE,
@@ -80,6 +121,16 @@ def _context() -> dict:
     }
 
 
+def _ledger_context() -> dict:
+    context = _context()
+    context["assignment"] = dict(context["assignment"])
+    context["assignment"]["allowed_read_targets"] = [
+        "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+        "docs/0102_session_briefings/work_ledger.schema.json",
+    ]
+    return context
+
+
 def test_readonly_audit_executor_reads_only_allowlisted_targets(tmp_path: Path) -> None:
     root = _repo(tmp_path)
 
@@ -103,6 +154,64 @@ def test_readonly_audit_executor_reads_only_allowlisted_targets(tmp_path: Path) 
     assert finding["recommended_action"] == "FIX"
     assert finding["next_slice_name"] == READONLY_AUDIT_LANE_ANALYZER_SLICE
     assert set(finding["evidence_refs"]) == set(result.report["evidence_refs"])
+
+
+def test_readonly_audit_executor_uses_lane_reconciler_when_ledgers_are_available(tmp_path: Path) -> None:
+    root = _repo_with_ledgers(tmp_path)
+
+    result = execute_reddog_readonly_audit_task(task_context=_ledger_context(), repo_root=root)
+
+    assert result.accepted is True
+    assert result.report is not None
+    assert len(result.report["findings"]) == 1
+    finding = result.report["findings"][0]
+    assert finding["wsp97_label"] == "OBSERVED"
+    assert finding["recommended_action"] == "FIX"
+    assert finding["next_slice_name"] == "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+    assert finding["reconciliation_report_id"]
+    assert finding["next_wsp15_queue"][0] == "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+    assert set(finding["evidence_refs"]) == set(result.report["evidence_refs"])
+
+
+def test_readonly_audit_executor_routes_conflicted_ledgers_to_refresh_runtime(tmp_path: Path) -> None:
+    root = _repo_with_ledgers(tmp_path)
+    active = root / "docs" / "0102_session_briefings" / "ACTIVE_SLICE_LEDGER.md"
+    active.write_text(
+        """# Active Slice Ledger
+
+**Updated**: 2026-07-14
+
+## Closed Slices
+
+| Slice | Commit | Evidence |
+|-------|--------|----------|
+| `REDDOG_DONE_PHASE1` | `abc1234` | done |
+""",
+        encoding="utf-8",
+    )
+    ledger = root / "docs" / "0102_session_briefings" / "work_ledger.schema.json"
+    ledger.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "last_updated": "2026-07-14T00:00:00Z",
+                "slices": [{"slice_id": "REDDOG_DONE_PHASE1", "status": "IN_PROGRESS"}],
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    result = execute_reddog_readonly_audit_task(task_context=_ledger_context(), repo_root=root)
+
+    assert result.accepted is True
+    assert result.report is not None
+    finding = result.report["findings"][0]
+    assert finding["recommended_action"] == "REVISE"
+    assert finding["wsp15_priority"] == "P0"
+    assert finding["severity"] == "BLOCKER"
+    assert finding["next_slice_name"] == AUTHORITATIVE_WORK_STATE_REFRESH_SLICE
+    assert finding["conflict_count"] == 1
 
 
 def test_readonly_audit_executor_rejects_wrong_source_or_missing_assignment(tmp_path: Path) -> None:

@@ -20,6 +20,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_lane_state_reconciler import (
+    reconcile_active_and_json_ledgers,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SOURCE,
 )
@@ -28,11 +31,15 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
 READONLY_AUDIT_TASK_REPORT_ACCEPT = "READONLY_AUDIT_TASK_REPORT_ACCEPT"
 READONLY_AUDIT_TASK_REPORT_REJECT = "READONLY_AUDIT_TASK_REPORT_REJECT"
 READONLY_AUDIT_LANE_ANALYZER_SLICE = "REDDOG_READONLY_AUDIT_LANE_ANALYZER_PHASE1"
+AUTHORITATIVE_WORK_STATE_REFRESH_SLICE = "REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_RUNTIME_PHASE1"
 
 MAX_READ_TARGETS = 32
 MAX_READ_BYTES_PER_TARGET = 12_000
 DENIED_BASENAMES = frozenset({".env", ".env.local", ".env.production", "id_rsa", "id_dsa"})
 DENIED_SEGMENTS = frozenset({".git", ".ssh", ".aws", ".azure", ".gcp", "__pycache__"})
+ACTIVE_SLICE_LEDGER_TARGET = "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md"
+WORK_LEDGER_TARGET = "docs/0102_session_briefings/work_ledger.schema.json"
+LANE_RECONCILER_AUDIT_LANES = frozenset({"repo_code_audit", "runtime_freshness_audit"})
 
 
 class ReadOnlyAuditTaskRejectReason:
@@ -54,6 +61,12 @@ class ReadOnlyTargetEvidence:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class _ReadOnlyTargetSnapshot:
+    evidence: ReadOnlyTargetEvidence
+    text: str
 
 
 @dataclass(frozen=True)
@@ -110,22 +123,23 @@ def execute_reddog_readonly_audit_task(
         return _reject([ReadOnlyAuditTaskRejectReason.TOO_MANY_TARGETS])
 
     root = Path(repo_root).resolve()
-    evidence: list[ReadOnlyTargetEvidence] = []
+    snapshots: list[_ReadOnlyTargetSnapshot] = []
     for target in targets:
         safe_path = _resolve_safe_target(root, target)
         if safe_path is None:
             return _reject([ReadOnlyAuditTaskRejectReason.UNSAFE_TARGET])
         try:
-            evidence.append(_read_target_evidence(root, safe_path))
+            snapshots.append(_read_target_snapshot(root, safe_path))
         except Exception:
             return _reject([ReadOnlyAuditTaskRejectReason.TARGET_READ_FAILED])
 
-    report = _build_report(assignment=assignment, evidence=evidence)
+    evidence = tuple(item.evidence for item in snapshots)
+    report = _build_report(assignment=assignment, snapshots=snapshots)
     return ReadOnlyAuditTaskExecutionResult(
         accepted=True,
         decision=READONLY_AUDIT_TASK_REPORT_ACCEPT,
         report=report,
-        evidence=tuple(evidence),
+        evidence=evidence,
         rejection_reasons=(),
     )
 
@@ -153,7 +167,7 @@ def _resolve_safe_target(root: Path, target: str) -> Optional[Path]:
     return candidate
 
 
-def _read_target_evidence(root: Path, path: Path) -> ReadOnlyTargetEvidence:
+def _read_target_snapshot(root: Path, path: Path) -> _ReadOnlyTargetSnapshot:
     raw = path.read_bytes()
     truncated = len(raw) > MAX_READ_BYTES_PER_TARGET
     payload = raw[:MAX_READ_BYTES_PER_TARGET]
@@ -163,27 +177,31 @@ def _read_target_evidence(root: Path, path: Path) -> ReadOnlyTargetEvidence:
     except UnicodeDecodeError:
         text = payload.decode("utf-8", errors="replace")
     relative = path.relative_to(root).as_posix()
-    return ReadOnlyTargetEvidence(
-        path=relative,
-        digest=digest,
-        bytes_read=len(payload),
-        line_count=text.count("\n") + (1 if text else 0),
-        truncated=truncated,
+    return _ReadOnlyTargetSnapshot(
+        evidence=ReadOnlyTargetEvidence(
+            path=relative,
+            digest=digest,
+            bytes_read=len(payload),
+            line_count=text.count("\n") + (1 if text else 0),
+            truncated=truncated,
+        ),
+        text=text,
     )
 
 
 def _build_report(
     *,
     assignment: Mapping[str, Any],
-    evidence: Sequence[ReadOnlyTargetEvidence],
+    snapshots: Sequence[_ReadOnlyTargetSnapshot],
 ) -> Mapping[str, Any]:
     lane_id = str(assignment.get("lane_id") or "")
     assignment_id = str(assignment.get("assignment_id") or "")
+    evidence = tuple(item.evidence for item in snapshots)
     evidence_refs = tuple(
         f"file:{item.path}:{item.digest}:lines:{item.line_count}"
         for item in evidence
     )
-    findings = _build_semantic_findings(lane_id=lane_id, evidence_refs=evidence_refs)
+    findings = _build_semantic_findings(lane_id=lane_id, snapshots=snapshots)
     return {
         "assignment_id": assignment_id,
         "lane_id": lane_id,
@@ -213,10 +231,14 @@ def _build_report(
 def _build_semantic_findings(
     *,
     lane_id: str,
-    evidence_refs: Sequence[str],
+    snapshots: Sequence[_ReadOnlyTargetSnapshot],
 ) -> list[Mapping[str, Any]]:
+    evidence_refs = tuple(_evidence_ref(item.evidence) for item in snapshots)
     if not lane_id or not evidence_refs:
         return []
+    reconciler_finding = _build_lane_reconciler_finding(lane_id=lane_id, snapshots=snapshots)
+    if reconciler_finding is not None:
+        return [reconciler_finding]
     return [
         {
             "finding_id": f"{lane_id}:lane_analyzer_missing",
@@ -232,6 +254,72 @@ def _build_semantic_findings(
             "next_slice_name": READONLY_AUDIT_LANE_ANALYZER_SLICE,
         }
     ]
+
+
+def _build_lane_reconciler_finding(
+    *,
+    lane_id: str,
+    snapshots: Sequence[_ReadOnlyTargetSnapshot],
+) -> Optional[Mapping[str, Any]]:
+    if lane_id not in LANE_RECONCILER_AUDIT_LANES:
+        return None
+    by_path = {item.evidence.path: item for item in snapshots}
+    active = by_path.get(ACTIVE_SLICE_LEDGER_TARGET)
+    ledger = by_path.get(WORK_LEDGER_TARGET)
+    if active is None or ledger is None:
+        return None
+
+    report = reconcile_active_and_json_ledgers(
+        active.text,
+        ledger.text,
+        now_iso="2026-07-14T00:00:00+00:00",
+        stale_after_days=30,
+    )
+    evidence_refs = [_evidence_ref(active.evidence), _evidence_ref(ledger.evidence)]
+    selected = report.prework_packet.chosen_slice
+    if report.recommended_action == "NO_OPEN_WORK":
+        action = "STOP"
+        priority = "P4"
+        severity = "INFO"
+        next_slice = None
+        claim = "Lane-state reconciliation found no open work in the provided ledgers."
+    elif report.recommended_action == "CLAIM_NEXT_SLICE" and selected:
+        action = "FIX"
+        priority = "P1"
+        severity = "MAJOR"
+        next_slice = selected
+        claim = f"Lane-state reconciliation selected next slice {selected}."
+    elif report.recommended_action == "RECONCILE_LEDGER_BEFORE_WORK":
+        action = "REVISE"
+        priority = "P0"
+        severity = "BLOCKER"
+        next_slice = AUTHORITATIVE_WORK_STATE_REFRESH_SLICE
+        claim = "Lane-state reconciliation found ledger conflicts that block worker assignment."
+    else:
+        action = "REVISE"
+        priority = "P1"
+        severity = "MAJOR"
+        next_slice = AUTHORITATIVE_WORK_STATE_REFRESH_SLICE
+        claim = f"Lane-state reconciliation returned {report.recommended_action} before work can continue."
+
+    return {
+        "finding_id": f"{lane_id}:lane_state_reconciliation:{report.recommended_action.lower()}",
+        "claim": claim,
+        "wsp97_label": "OBSERVED",
+        "recommended_action": action,
+        "wsp15_priority": priority,
+        "severity": severity,
+        "evidence_refs": evidence_refs,
+        "next_slice_name": next_slice,
+        "reconciliation_report_id": report.report_id,
+        "next_wsp15_queue": list(report.next_wsp15_queue),
+        "stale_sources": list(report.stale_sources),
+        "conflict_count": len(report.conflicts),
+    }
+
+
+def _evidence_ref(item: ReadOnlyTargetEvidence) -> str:
+    return f"file:{item.path}:{item.digest}:lines:{item.line_count}"
 
 
 def _reject(reasons: Sequence[str]) -> ReadOnlyAuditTaskExecutionResult:
@@ -253,6 +341,7 @@ __all__ = [
     "READONLY_AUDIT_TASK_REPORT_ACCEPT",
     "READONLY_AUDIT_TASK_REPORT_REJECT",
     "READONLY_AUDIT_LANE_ANALYZER_SLICE",
+    "AUTHORITATIVE_WORK_STATE_REFRESH_SLICE",
     "ReadOnlyAuditTaskExecutionResult",
     "ReadOnlyAuditTaskRejectReason",
     "ReadOnlyTargetEvidence",
