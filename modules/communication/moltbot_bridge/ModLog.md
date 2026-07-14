@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_SIGNER_KEY_PROVIDER_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97
+
+- Added `src/reddog_signer_key_provider_dryrun.py`: a test-only signer
+  key-provider adapter that validates the #1072 contract with injected
+  resolver results and can construct the existing `Ed25519SignerBackend` only
+  under explicit `TEST_ONLY_DRYRUN` mode with a fresh permission snapshot.
+- Added tests proving default fail-closed behavior, test-only acceptance,
+  signer backend interoperability, stale permission rejection, same-reference
+  rejection, invalid reference rejection, resolver failure rejection, TTL
+  rejection, key/audit format rejection, public-key/fingerprint mismatch
+  rejection, non-ASCII/incomplete profile rejection, receipt non-leakage, and
+  an AST denylist for shell, sockets, repo mutation, OpenClaw, Hermes, and
+  HoloIndex runtime mutation surfaces.
+- Boundary: dry-run/test-only provider. No production vault resolution, no
+  environment or argv secret path, no file key loading, no socket binding, no
+  signer process launch, no shell command, no repository mutation, no OpenClaw
+  enqueue, no Hermes dispatch, no WRE queue write, no reward settlement, and
+  no HoloIndex runtime re-index.
+- HoloIndex read-only probe for `RedDog signer key provider dryrun WSP71
+  Ed25519 audit mac` is recorded as
+  `HOLOINDEX_REDDOG_SIGNER_KEY_PROVIDER_DRYRUN_INDEX_GAP_PHASE1`; no runtime
+  re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 95, 97
