@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_ISOLATED_SIGNER_SOCKET_PROTOCOL_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added `src/reddog_isolated_signer_socket_protocol.py`: a fail-closed
+  signer-side protocol core for the isolated signer socket client. It parses a
+  bounded client request, binds requester identity to an out-of-band peer
+  attestation, invokes an injected signing backend, and serializes an existing
+  `SigningResponse`.
+- Added tests proving accepted backend responses, default fail-closed backend,
+  malformed/schema/oversized request rejection, peer-spoof rejection before
+  backend invocation, peer-attestation rejection, non-ASCII rejection, backend
+  exception rejection, invalid accepted-response rejection, and AST denial of
+  socket/subprocess/env/HoloIndex/crypto/vault/key-loading imports.
+- Boundary: protocol core only. No socket is bound, no signer process is
+  spawned, no kernel peer credential is discovered, no private key or vault
+  secret is loaded, no shell command is executed, no repository file is
+  mutated, and no HoloIndex runtime re-index is performed.
+- HoloIndex read-only probe for `RedDog isolated signer service runtime socket
+  signing backend` surfaced signature-verifier/signed-receipt code and the E0
+  contract, but no signer-side protocol module before indexing. Recorded as
+  `HOLOINDEX_REDDOG_ISOLATED_SIGNER_SOCKET_PROTOCOL_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_SIGNER_SOCKET_CLIENT_BUNDLE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
