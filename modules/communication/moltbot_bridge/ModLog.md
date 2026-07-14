@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_main_resident_queue_next_stage_dispatch_bootstrap.py`:
+  an opt-in `main.py` adapter that invokes the resident queue dispatcher with
+  only the `authority_request` handler registered.
+- Wired `main.py` behind `REDDOG_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH=1`
+  (default OFF) to write the first-stage dry-run result into the outside-repo
+  resident queue chain-results store.
+- Boundary: external runtime state only; no signing, signature verification,
+  valve opening, worker spawn, worktree creation, file edit, shell command,
+  PR publishing, PatternMemory write, OpenClaw enqueue, Hermes dispatch,
+  reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog main resident queue next stage
+  dispatch bootstrap` surfaced adjacent swarm/build-plan, WSP, RedDog
+  bootstrap/governance docs, and knowledge papers, but not this new bootstrap
+  before indexing. Recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_BOOTSTRAP_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_AUTHORITY_REQUEST_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
