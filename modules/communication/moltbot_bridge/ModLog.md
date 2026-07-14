@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authorized_slice_verifier_invoke.py`: an
+  explicit bridge from an accepted queue-authorized bounded worker pilot result
+  to the existing WRE autonomous slice verifier runtime.
+- The guard binds the verifier's machine-derived changed paths to the bounded
+  pilot receipt's written artifacts, injects the pilot receipt as verifier
+  worktree evidence, and preserves verifier rejection reasons.
+- Boundary: no command execution, GitHub call, draft PR publish, merge,
+  PatternMemory write, reward settlement, OpenClaw enqueue, Hermes dispatch, or
+  HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog queue authorized slice verifier
+  invoke` surfaced adjacent live-enqueue files and integration docs, but did
+  not surface this new verifier bridge before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed. The probe also reported a pre-existing
+  `WSP-GUARDIAN` suspicious-Unicode warning unrelated to the new ASCII-clean
+  files.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
