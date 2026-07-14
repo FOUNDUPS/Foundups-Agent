@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wre_queue_authorized_pattern_memory_admission_invoke.py`:
+  an explicit bridge from an accepted queue-authorized held-out regression gate
+  result to an injected PatternMemory admission sink.
+- The guard requires held-out admission allowed, a matching work-order ID, a
+  clean deterministic record, and an injected sink before writing.
+- Boundary: verified outcome admission only through injection; no concrete
+  PatternMemory construction, command execution, PR publish, mark-ready, merge,
+  reward settlement, OpenClaw enqueue, Hermes dispatch, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog queue authorized PatternMemory
+  admission invoke` surfaced adjacent live-enqueue, runtime-invocation,
+  receipt, WSP, and recursive self-governance files, but did not surface this
+  new admission bridge before indexing. Recorded as
+  `HOLOINDEX_REDDOG_WRE_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_WRE_QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
