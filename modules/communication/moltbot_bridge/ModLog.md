@@ -1,5 +1,32 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_main_resident_queue_serial_loop_bootstrap.py`: an
+  off-by-default `main.py` adapter for the bounded resident queue serial loop.
+  It reads only outside-repo work-state, chain-results, and authority-profile
+  JSON, builds the handler registry with existing bootstrap-owned dependencies,
+  and advances up to `REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS`.
+- Updated `main.py` with `run_reddog_resident_queue_serial_loop_preflight`,
+  gated by `REDDOG_RESIDENT_QUEUE_SERIAL_LOOP=1` and nonblocking unless
+  `REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED=1`. Normal menu startup remains
+  unchanged when the flag is absent.
+- Added tests proving one-stage serial-loop application, fail-closed rejection
+  when later dependencies are missing, outside-repo input enforcement, disabled
+  default behavior, enforced blocking, and AST denial of shell/network/HoloIndex
+  and later-stage runtime imports.
+- Boundary: startup adapter only; no production signer, verifier, runner,
+  worktree, shell, OpenClaw enqueue, Hermes dispatch, PR publish,
+  PatternMemory client, reward settlement, repo mutation, or HoloIndex runtime
+  re-index is created by this slice.
+- HoloIndex read-only probe for `RedDog main resident queue serial loop
+  bootstrap preflight` surfaced adjacent preflight/WSP/live-enqueue docs, but
+  not this new bootstrap before indexing. Recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_RUNNER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
