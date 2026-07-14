@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_ED25519_SIGNER_BACKEND_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added `src/reddog_ed25519_signer_backend.py`: a signer-side backend that
+  signs `SigningRequest` records with an already-held Ed25519 key object and
+  an injected audit-MAC builder for use inside the future isolated signer
+  process.
+- Added tests proving public-verifier acceptance of produced signatures,
+  signer-socket protocol round-trip, public-key mismatch rejection, key-epoch
+  mismatch rejection, key-object/public-key mismatch rejection, audit-MAC
+  fail-closed behavior, and AST denial of key-loading, repo, shell, socket,
+  environment, OpenClaw/Hermes, and HoloIndex runtime surfaces.
+- Boundary: signer backend only. No key generation, key loading, vault access,
+  socket binding, process spawn, command execution, repository mutation,
+  OpenClaw enqueue, Hermes dispatch, reward settlement, or HoloIndex runtime
+  re-index. The backend requires the isolated signer process to inject the key
+  object and audit-MAC boundary.
+- HoloIndex read-only probe for `RedDog Ed25519 signer backend isolated signer
+  SigningResponse audit_mac` surfaced signing-key contract and signed-receipt
+  modules, but not this backend before indexing. Recorded as
+  `HOLOINDEX_REDDOG_ED25519_SIGNER_BACKEND_INDEX_GAP_PHASE1`; no runtime
+  re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_ED25519_SIGNATURE_VERIFIER_BACKEND_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 71, 97
