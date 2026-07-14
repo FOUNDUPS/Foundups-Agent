@@ -1,27 +1,33 @@
-name: FoundUp Brain POC
+name: FoundUp Memex POC
 
 on:
   pull_request:
     branches: [main]
     paths:
+      - 'modules/communication/moltbot_bridge/src/foundup_memex_current_state.py'
       - 'modules/communication/moltbot_bridge/src/foundup_brain_current_state.py'
       - 'modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py'
+      - 'modules/communication/moltbot_bridge/tests/test_foundup_memex_current_state.py'
       - 'modules/communication/moltbot_bridge/tests/test_foundup_brain_current_state.py'
       - 'modules/communication/moltbot_bridge/tests/test_reddog_operational_context_snapshot.py'
       - 'modules/communication/moltbot_bridge/tests/TestModLog_FoundUpBrain.md'
       - 'docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md'
+      - 'docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md'
       - 'docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md'
       - 'docs/architecture/architecture_registry.yaml'
       - '.github/workflows/foundup_brain_poc.yml'
   push:
     branches: [main]
     paths:
+      - 'modules/communication/moltbot_bridge/src/foundup_memex_current_state.py'
       - 'modules/communication/moltbot_bridge/src/foundup_brain_current_state.py'
       - 'modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py'
+      - 'modules/communication/moltbot_bridge/tests/test_foundup_memex_current_state.py'
       - 'modules/communication/moltbot_bridge/tests/test_foundup_brain_current_state.py'
       - 'modules/communication/moltbot_bridge/tests/test_reddog_operational_context_snapshot.py'
       - 'modules/communication/moltbot_bridge/tests/TestModLog_FoundUpBrain.md'
       - 'docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md'
+      - 'docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md'
       - 'docs/adr/ADR_REDDOG_FOUNDUPS_SECOND_BRAIN_BOUNDARY.md'
       - 'docs/architecture/architecture_registry.yaml'
       - '.github/workflows/foundup_brain_poc.yml'
@@ -43,23 +49,33 @@ jobs:
           pip install pytest
           pip install -r requirements.txt
 
-      - name: Compile FoundUp Brain contract
+      - name: Compile FoundUp Memex contract
         run: |
           python -m py_compile \
+            modules/communication/moltbot_bridge/src/foundup_memex_current_state.py \
             modules/communication/moltbot_bridge/src/foundup_brain_current_state.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_memex_current_state.py \
             modules/communication/moltbot_bridge/tests/test_foundup_brain_current_state.py
 
-      - name: Run FoundUp Brain and snapshot tests
+      - name: Run FoundUp Memex, Brain component, and snapshot tests
         run: |
           python -m pytest \
+            modules/communication/moltbot_bridge/tests/test_foundup_memex_current_state.py \
             modules/communication/moltbot_bridge/tests/test_foundup_brain_current_state.py \
             modules/communication/moltbot_bridge/tests/test_reddog_operational_context_snapshot.py \
             -q --tb=short
 
-      - name: Verify WSP 22 supplemental TestModLog registration
+      - name: Verify WSP 22 supplemental registration
         run: |
           grep -q 'FOUNDUP_BRAIN_CURRENT_STATE_ASSEMBLY_PHASE1' \
             modules/communication/moltbot_bridge/tests/TestModLog_FoundUpBrain.md
+          grep -q 'FOUNDUP_MEMEX_CURRENT_STATE_ASSEMBLY_PHASE1' \
+            docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md
+
+      - name: Verify deferred governance remains non-runtime
+        run: |
+          grep -q 'No POC or MVP Memex module may infer authority' \
+            docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md
 
       - name: Verify diff hygiene
         run: git diff --check HEAD^
