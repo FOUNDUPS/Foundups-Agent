@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_READONLY_AUDIT_DECISION_TELEMETRY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Updated `main.py` RedDog bootstrap output to print read-only audit decision
+  telemetry: whether decision generation ran, the selected action, and the
+  selected next slice.
+- Added stdout regression coverage proving the main menu/preflight surface
+  exposes `decision_action` and `decision_next_slice` without blocking startup.
+- Boundary: telemetry only. No model call, no shell/subprocess, no repo
+  mutation, no worktree operation, no OpenClaw enqueue, no Hermes/WRE dispatch,
+  no HoloIndex mutation/re-index, and no live action-plane wiring.
+
 ## 2026-07-14: REDDOG_READONLY_AUDIT_LANE_ANALYZER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
