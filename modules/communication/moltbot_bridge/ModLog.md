@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_next_stage_dispatch.py`: an explicit
+  injected-handler dispatcher for exactly one resident queue-chain stage.
+- The dispatcher reads the chain-results store, plans the current stage, calls
+  only the handler supplied for that stage, and records the handler result
+  through the governed chain-results store.
+- Boundary: no default handlers and no concrete queue bridge imports; no
+  authority issuance, signature verification, worker spawn, worktree creation,
+  file edit, shell command, PR publishing, PatternMemory write, OpenClaw
+  enqueue, Hermes dispatch, reward settlement, or HoloIndex re-index by the
+  dispatcher.
+- HoloIndex read-only probe for `RedDog resident queue next stage dispatch
+  injected handler` surfaced adjacent extension live-enqueue, swarm-dispatch,
+  WSP, and RedDog work-order docs, but not this new dispatcher before indexing.
+  Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_STORE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
