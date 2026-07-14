@@ -27,6 +27,11 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
     READONLY_AUDIT_REPORT_COLLECTION_ACCEPT,
     READONLY_AUDIT_REPORT_COLLECTION_REJECT,
 )
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_runtime import (
+    ACTION_FIX,
+    ACTION_RESEARCH_MORE,
+    DEFAULT_SEMANTIC_FINDINGS_SLICE,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -118,22 +123,42 @@ class _FakeReportStore:
         return {"ok": False, "reason": "not_used"}
 
 
-def _reports_for_bootstrap_result(result: RedDogMainReadonlyBootstrapResult) -> tuple[dict[str, object], ...]:
+def _reports_for_bootstrap_result(
+    result: RedDogMainReadonlyBootstrapResult,
+    *,
+    include_findings: bool = False,
+) -> tuple[dict[str, object], ...]:
     reports: list[dict[str, object]] = []
     assert result.snapshot_receipt_id is not None
     for assignment_id, lane_id in zip(result.assignment_ids, DEFAULT_AUDIT_LANES):
+        evidence_ref = f"file:docs/{lane_id}.md:sha256:{lane_id}:lines:1"
+        findings = []
+        if include_findings and lane_id == "repo_code_audit":
+            findings.append(
+                {
+                    "finding_id": "repo-code-finding-1",
+                    "claim": "Runtime reconciliation needs a follow-up slice.",
+                    "wsp97_label": "OBSERVED",
+                    "recommended_action": ACTION_FIX,
+                    "wsp15_priority": "P0",
+                    "severity": "BLOCKER",
+                    "evidence_refs": [evidence_ref],
+                    "next_slice_name": "REDDOG_RUNTIME_RECONCILER_PHASE1",
+                }
+            )
         reports.append(
             {
                 "assignment_id": assignment_id,
                 "lane_id": lane_id,
                 "snapshot_receipt_id": result.snapshot_receipt_id,
                 "summary": f"{lane_id} read-only audit evidence collected from 1 target.",
-                "evidence_refs": [f"file:docs/{lane_id}.md:sha256:{lane_id}:lines:1"],
+                "evidence_refs": [evidence_ref],
                 "repo_mutation_performed": False,
                 "execution_performed": False,
                 "openclaw_enqueue_performed": False,
                 "readonly_audit_performed": True,
                 "report_digest": f"sha256:{lane_id}",
+                "findings": findings,
             }
         )
     return tuple(reports)
@@ -200,9 +225,41 @@ def test_bootstrap_collects_existing_reports_and_skips_enqueue() -> None:
     assert result.report_collection_status == READONLY_AUDIT_REPORT_COLLECTION_ACCEPT
     assert result.report_collection_report_count == result.assignment_count == 5
     assert result.report_bundle_id and result.report_bundle_id.startswith("sha256:")
+    assert result.readonly_audit_decision_attempted is True
+    assert result.readonly_audit_decision_action == ACTION_RESEARCH_MORE
+    assert result.readonly_audit_decision_next_slice == DEFAULT_SEMANTIC_FINDINGS_SLICE
+    assert result.readonly_audit_decision_rejection_reasons == ()
     assert result.enqueue_attempted is False
     assert writer.calls == []
-    assert store.load_calls == [result.swarm_id]
+    assert store.load_calls == [result.swarm_id, result.swarm_id]
+
+
+def test_bootstrap_collects_semantic_findings_into_next_action_decision() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=store,
+    )
+
+    assert result.ready is True
+    assert result.report_collection_status == READONLY_AUDIT_REPORT_COLLECTION_ACCEPT
+    assert result.readonly_audit_decision_attempted is True
+    assert result.readonly_audit_decision_action == ACTION_FIX
+    assert result.readonly_audit_decision_next_slice == "REDDOG_RUNTIME_RECONCILER_PHASE1"
+    assert result.readonly_audit_decision_id and result.readonly_audit_decision_id.startswith("sha256:")
 
 
 def test_bootstrap_missing_reports_enqueue_when_enabled() -> None:
