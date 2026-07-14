@@ -1,5 +1,34 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_READONLY_AUDIT_TASK_REPORT_EXECUTOR_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_readonly_audit_task_executor.py`: deterministic local
+  executor for AgentDB tasks emitted by the read-only audit swarm enqueue
+  seam. It reads only allowlisted repository file targets, computes evidence
+  digests, and emits a report shape compatible with the existing read-only
+  audit report validator.
+- Updated `scripts/run_task.py`: exact
+  `source=reddog_openclaw_readonly_audit_swarm` and
+  `required_skills=["reddog_readonly_audit"]` tasks now dispatch to the
+  RedDog read-only audit executor before WRE skill dispatch, so a registered
+  WRE skill cannot widen these audit tasks.
+- Added `tests/test_reddog_readonly_audit_task_executor.py`: allowlisted read
+  evidence collection, wrong-source/missing-assignment rejection,
+  traversal/secret/missing-target rejection, AgentDB assigned-task execution
+  through `run_task.py`, and AST no-mutation/no-network/no-runtime-wiring
+  coverage.
+- Boundary: no model call, no shell/subprocess, no repo write, no OpenClaw
+  enqueue, no Hermes/WRE dispatch, no worktree operation, no HoloIndex
+  mutation/re-index, and no report artifact write. It completes only the
+  assigned AgentDB task and returns structured report data.
+- HoloIndex read-only probe for `RedDog readonly audit task report executor
+  AgentDB run_task` surfaced `run_task.py` and adjacent audit surfaces but not
+  the new executor module. Recorded
+  `HOLOINDEX_REDDOG_READONLY_AUDIT_TASK_REPORT_EXECUTOR_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_AGENTDB_ENQUEUE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
