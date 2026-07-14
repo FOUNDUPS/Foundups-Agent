@@ -92,6 +92,11 @@ def run_reddog_main_resident_queue_orchestration_plan_bootstrap(
         raw_chain = chain_result[0]
         if not isinstance(raw_chain, Mapping):
             return _not_ready(("chain_results_not_mapping",))
+        if raw_chain.get("schema_version") == "reddog_resident_queue_chain_results.v1":
+            stage_results = raw_chain.get("stage_results")
+            if not isinstance(stage_results, Mapping):
+                return _not_ready(("chain_results_stage_results_not_mapping",))
+            raw_chain = stage_results
         chain_results = {
             str(key): value
             for key, value in raw_chain.items()
