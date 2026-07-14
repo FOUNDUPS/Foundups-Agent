@@ -74,11 +74,18 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
 
     result: Dict[str, Any] = {"ok": False, "detail": "no_executor_matched", "executor": "none"}
 
-    # ── Dispatch path 1: WRE skill execution ──
+    # Dispatch path 1: exact RedDog read-only audit report execution.
+    if "reddog_readonly_audit" in required_skills and source == "reddog_openclaw_readonly_audit_swarm":
+        readonly_result = _try_reddog_readonly_audit_dispatch(repo_root, task_id, context)
+        if readonly_result is not None:
+            result = readonly_result
+
+    # Dispatch path 2: WRE skill execution.
     if required_skills:
-        wre_result = _try_wre_dispatch(repo_root, task_id, required_skills, context, description)
-        if wre_result is not None:
-            result = wre_result
+        if not result["ok"] and result["detail"] == "no_executor_matched":
+            wre_result = _try_wre_dispatch(repo_root, task_id, required_skills, context, description)
+            if wre_result is not None:
+                result = wre_result
 
     # ── Dispatch path 2: Self-audit policy fix ──
     if not result["ok"] and result["detail"] == "no_executor_matched" and source == "self_audit":
@@ -131,6 +138,41 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
                 pass
 
     return result
+
+
+def _try_reddog_readonly_audit_dispatch(
+    repo_root: Path,
+    task_id: str,
+    context: dict,
+) -> Dict[str, Any] | None:
+    """Execute an exact RedDog read-only audit task. Returns result or None."""
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
+            execute_reddog_readonly_audit_task,
+        )
+    except ImportError as e:
+        logger.debug("[RUN_TASK] RedDog read-only audit executor unavailable: %s", e)
+        return None
+
+    try:
+        audit_result = execute_reddog_readonly_audit_task(
+            task_context=context,
+            repo_root=repo_root,
+        )
+        payload = audit_result.to_dict()
+        return {
+            "ok": bool(audit_result.accepted),
+            "detail": json.dumps(payload, default=str)[:1000],
+            "executor": "reddog:readonly_audit",
+            "structured_result": payload,
+        }
+    except Exception as e:
+        logger.warning("[RUN_TASK] RedDog read-only audit dispatch error: %s", e)
+        return {
+            "ok": False,
+            "detail": f"reddog_readonly_audit_error: {e}",
+            "executor": "reddog:readonly_audit",
+        }
 
 
 def _try_wre_dispatch(
