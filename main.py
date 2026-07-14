@@ -1468,6 +1468,10 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
         REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH             Outside-repo chain-results JSON
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo authority profile JSON
+        REDDOG_AUTHORITY_RUNTIME_STATE_PATH                  Outside-repo authority-runtime JSON
+        REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission snapshot JSON
+        REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal authority JSON
+        REDDOG_RESIDENT_QUEUE_NOW_EPOCH                      Optional runtime epoch for authority checks
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
     """
 
@@ -1542,6 +1546,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         max_steps = int(os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "1"))
     except ValueError:
         max_steps = 0
+    try:
+        now_epoch_value = os.getenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "")
+        now_epoch = int(now_epoch_value) if now_epoch_value else None
+    except ValueError:
+        now_epoch = None
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
@@ -1553,7 +1562,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
             chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
             authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
+            authority_state_path=os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", "") or None,
+            permission_snapshots_path=os.getenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", "") or None,
+            principal_authority_records_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", "") or None,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
+            now_epoch=now_epoch,
             max_steps=max_steps,
         )
     except Exception as exc:

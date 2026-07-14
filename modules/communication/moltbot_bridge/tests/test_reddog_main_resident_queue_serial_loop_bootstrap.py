@@ -12,6 +12,12 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
 )
+from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
+    REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    RuntimeRejectCode,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
 )
@@ -85,6 +91,36 @@ def _profile(**overrides: object) -> dict[str, object]:
     return profile
 
 
+def _snapshots() -> dict[str, object]:
+    return {
+        "snapshots": {
+            "sha256:snap-1": {
+                "evidence_digest": "sha256:snap-1",
+                "expires_at": 1600,
+                "can_write": True,
+                "repo_full_name": "FOUNDUPS/Foundups-Agent",
+            }
+        }
+    }
+
+
+def _principals() -> dict[str, object]:
+    return {
+        "principals": {
+            "github:mjtrout": {
+                "principal_id": "github:mjtrout",
+                "principal_provider": "github",
+                "principal_public_key": "pub:principal",
+                "repo_scope": ["FOUNDUPS/Foundups-Agent"],
+                "foundup_scope": ["paccess_001"],
+                "verified_subject_digest": "sha256:verified-subject",
+                "reward_account": "reward:012",
+                "owner_dae": "dae:012",
+            }
+        }
+    }
+
+
 def _write_runtime_json(tmp_path: Path, name: str, payload: object) -> Path:
     path = tmp_path / "runtime" / name
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -151,6 +187,45 @@ def test_bootstrap_serial_loop_fails_closed_when_later_dependency_missing(tmp_pa
     assert "FAIL_DISPATCH_REJECTED" in result.rejection_reasons
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:authority_runtime" in result.rejection_reasons
+
+
+def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert result.runtime_dependency_bundle_requested is True
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("authority_request",)
+    assert "FAIL_DISPATCH_REJECTED" in result.rejection_reasons
+    assert "FAIL_RECORD_REJECTED" in result.rejection_reasons
+    assert "FAIL_STAGE_REJECTED:authority_runtime" in result.rejection_reasons
+    assert "REJECT_DELEGATED_AUTHORITY_RUNTIME_REJECTED" in result.rejection_reasons
+    assert RuntimeRejectCode.SIGNER_NOT_CONFIGURED in result.rejection_reasons
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    assert "authority_runtime" not in stored["stage_results"]
+    assert stored["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
 
 
 def test_bootstrap_rejects_missing_authority_profile(tmp_path: Path) -> None:
@@ -223,6 +298,10 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
                 "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
                 "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+                "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(tmp_path / "authority_state.json"),
+                "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
+                "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(tmp_path / "principals.json"),
+                "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
                 "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
             },
             clear=True,
@@ -232,7 +311,11 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["work_state_path"] == str(tmp_path / "state.json")
     assert mocked.call_args.kwargs["chain_results_path"] == str(tmp_path / "chain.json")
     assert mocked.call_args.kwargs["authority_profile_path"] == str(tmp_path / "profile.json")
+    assert mocked.call_args.kwargs["authority_state_path"] == str(tmp_path / "authority_state.json")
+    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(tmp_path / "snapshots.json")
+    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(tmp_path / "principals.json")
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
+    assert mocked.call_args.kwargs["now_epoch"] == 1000
     assert mocked.call_args.kwargs["max_steps"] == 1
 
 
