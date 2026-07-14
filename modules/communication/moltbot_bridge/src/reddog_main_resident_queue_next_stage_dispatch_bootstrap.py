@@ -3,9 +3,11 @@
 Slice: REDDOG_MAIN_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_BOOTSTRAP_PHASE1
 
 This adapter lets ``main.py`` invoke exactly one already-built resident queue
-stage handler behind an explicit environment flag. In this slice the only
-registered handler is `authority_request`, which emits a dry-run delegated
-authority request and records it to the outside-repo chain-results store.
+stage handler behind an explicit environment flag. Runtime handler selection is
+assembled through the resident queue handler registry, but this bootstrap only
+injects the dependencies it already owns. Later stages therefore fail closed as
+missing-dependency registry entries until a dedicated runtime dependency slice
+binds them.
 
 It does not sign, verify signatures, open valves, spawn workers, create
 worktrees, execute shell commands, enqueue OpenClaw, dispatch Hermes, publish
@@ -19,16 +21,15 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
-from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_request_handler import (
-    AUTHORITY_REQUEST_STAGE_KEY,
-    build_reddog_resident_queue_authority_request_stage_handler,
-)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
     invoke_reddog_resident_queue_next_stage_dispatch,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handler_registry import (
+    build_reddog_resident_queue_stage_handler_registry,
 )
 
 
@@ -110,17 +111,18 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
 
-    handler = build_reddog_resident_queue_authority_request_stage_handler(
+    store = AtomicJsonResidentQueueChainResultsStore(chain_path)
+    registry = build_reddog_resident_queue_stage_handler_registry(
         work_state_snapshot=snapshot,
+        chain_results_store=store,
         authority_profile=profile,
         now_iso=now_iso or "",
     )
-    store = AtomicJsonResidentQueueChainResultsStore(chain_path)
     result = invoke_reddog_resident_queue_next_stage_dispatch(
         explicit_resident_queue_stage_dispatch_requested=True,
         work_state_snapshot=snapshot,
         store=store,
-        handlers={AUTHORITY_REQUEST_STAGE_KEY: handler},
+        handlers=registry.handlers,
         now_iso=now_iso or "",
         requested_queue_item_id=requested_queue_item_id,
     )
