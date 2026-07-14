@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_STORE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_chain_results_store.py`: an atomic
+  outside-repo store for already-produced resident queue-chain stage results.
+- The store replays the current queue orchestration plan, records only the
+  exact current missing stage, replays the proposed plan, and commits only if
+  the chain advances cleanly.
+- Updated the resident queue plan bootstrap to read the governed
+  `reddog_resident_queue_chain_results.v1` schema in addition to raw stage
+  mappings.
+- Boundary: chain-result persistence only; no bridge invocation, authority
+  issuance, signature verification, worker spawn, worktree creation, file edit,
+  shell command, PR publishing, PatternMemory write, OpenClaw enqueue, Hermes
+  dispatch, reward settlement, or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue chain results store
+  atomic stage result` surfaced adjacent worker-queue, PQN orchestrator,
+  consensus, WSP, and live-enqueue docs, but not this new store before
+  indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_STORE_INDEX_GAP_PHASE1`; no
+  runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_ORCHESTRATION_PLAN_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
