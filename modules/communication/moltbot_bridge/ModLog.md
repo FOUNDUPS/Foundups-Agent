@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_AUTHORITY_RUNTIME_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_authority_runtime_handler.py`: a concrete
+  injected handler for the resident queue `authority_runtime` stage.
+- The handler reads the already-recorded `authority_request` result from the
+  chain-results store and invokes the existing queue authority-runtime guard
+  with injected signer, resolver, snapshot, and authority-store boundaries.
+- Boundary: signed authority issuance may occur only through injected
+  boundaries; no signature verification for execution, valve opening, worker
+  spawn, worktree creation, file edit, shell command, PR publishing,
+  PatternMemory write, OpenClaw enqueue, Hermes dispatch, reward settlement,
+  or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue authority runtime
+  handler` surfaced adjacent live-enqueue, queue-observability, AI overseer,
+  WSP, and governance docs, but not this new handler before indexing.
+  Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_AUTHORITY_RUNTIME_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
