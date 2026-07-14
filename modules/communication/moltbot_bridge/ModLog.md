@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_READONLY_AUDIT_REPORT_COLLECTION_WIRE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Extended `src/reddog_main_readonly_operational_bootstrap.py` with optional
+  read-only audit report collection against the persisted AgentDB report table.
+  Accepted report bundles skip task re-enqueue; missing/rejected bundles enqueue
+  only when the existing audit-task enqueue bridge is also authorized.
+- Wired `main.py` to pass `collect_readonly_audit_reports=True` when
+  `REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED=1`, or when
+  `OPENCLAW_AUTO_TASKS_ENABLED=1` and no RedDog collection override is set.
+- Added bootstrap tests for accepted report collection, missing-report
+  fail-closed behavior without enqueue authority, missing-report enqueue when
+  enqueue authority is present, and main preflight env override behavior.
+- Boundary: no model call, no worker spawn from the bootstrap, no shell/subprocess,
+  no repo mutation, no worktree operation, no Hermes/WRE dispatch, no HoloIndex
+  mutation/re-index, and no live FoundUp queue write. Collection reads the
+  RedDog read-only audit report store; enqueue remains limited to pending
+  read-only AgentDB audit tasks when explicitly enabled.
+- HoloIndex read-only probe for
+  `REDDOG_MAIN_READONLY_AUDIT_REPORT_COLLECTION_WIRE_PHASE1 main.py read-only audit report collection`
+  surfaced this ModLog pointer and unknown locations, not the runtime path.
+  Recorded
+  `HOLOINDEX_REDDOG_MAIN_READONLY_AUDIT_REPORT_COLLECTION_WIRE_INDEX_GAP_PHASE1`;
+  no runtime re-index performed.
+
 ## 2026-07-14: REDDOG_READONLY_AUDIT_REPORT_COLLECTION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

@@ -1190,6 +1190,7 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
     Env:
         REDDOG_READONLY_OPERATIONAL_BOOTSTRAP=1           Enable check (default ON)
         REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=0  Block startup if not ready
+        REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED   Override audit report collection bridge
         REDDOG_READONLY_AUDIT_SWARM_ENQUEUE_ENABLED       Override audit task enqueue bridge
         OPENCLAW_AUTO_TASKS_ENABLED                       Enables audit task enqueue if no override
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH              Existing work-state JSON
@@ -1207,6 +1208,11 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         enqueue_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
     else:
         enqueue_requested = enqueue_override != "0"
+    collection_override = os.getenv("REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED")
+    if collection_override is None:
+        collection_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
+    else:
+        collection_requested = collection_override != "0"
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
@@ -1218,6 +1224,7 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
             work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
             holoindex_receipt_path=os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", ""),
             holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
+            collect_readonly_audit_reports=collection_requested,
             enqueue_readonly_audit_tasks=enqueue_requested,
         )
     except Exception as exc:
@@ -1232,7 +1239,9 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
     reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
     print(
         f"[REDDOG-BOOTSTRAP] preflight={status} status={result.status} "
-        f"assignments={result.assignment_count} enqueue_attempted={result.enqueue_attempted} "
+        f"assignments={result.assignment_count} report_collection_attempted={result.report_collection_attempted} "
+        f"report_collection_status={result.report_collection_status or '(none)'} "
+        f"reports={result.report_collection_report_count} enqueue_attempted={result.enqueue_attempted} "
         f"enqueue_decision={result.enqueue_decision or '(none)'} "
         f"enqueue_tasks={result.enqueue_task_count} reasons={reasons}"
     )

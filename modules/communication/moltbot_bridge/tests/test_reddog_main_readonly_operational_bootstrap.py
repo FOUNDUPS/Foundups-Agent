@@ -20,6 +20,13 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     READONLY_AUDIT_SWARM_ENQUEUE_REJECT,
     ReadOnlyAuditEnqueueReason,
 )
+from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_runtime import (
+    DEFAULT_AUDIT_LANES,
+)
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
+    READONLY_AUDIT_REPORT_COLLECTION_ACCEPT,
+    READONLY_AUDIT_REPORT_COLLECTION_REJECT,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -98,6 +105,40 @@ class _FakeEnqueueWriter:
         return {"ok": True, "created_task_ids": [task.task_id for task in copied]}
 
 
+class _FakeReportStore:
+    def __init__(self, reports=()) -> None:
+        self.reports = tuple(reports)
+        self.load_calls: list[str] = []
+
+    def load_readonly_audit_reports(self, swarm_id: str):
+        self.load_calls.append(swarm_id)
+        return self.reports
+
+    def store_readonly_audit_report(self, record):
+        return {"ok": False, "reason": "not_used"}
+
+
+def _reports_for_bootstrap_result(result: RedDogMainReadonlyBootstrapResult) -> tuple[dict[str, object], ...]:
+    reports: list[dict[str, object]] = []
+    assert result.snapshot_receipt_id is not None
+    for assignment_id, lane_id in zip(result.assignment_ids, DEFAULT_AUDIT_LANES):
+        reports.append(
+            {
+                "assignment_id": assignment_id,
+                "lane_id": lane_id,
+                "snapshot_receipt_id": result.snapshot_receipt_id,
+                "summary": f"{lane_id} read-only audit evidence collected from 1 target.",
+                "evidence_refs": [f"file:docs/{lane_id}.md:sha256:{lane_id}:lines:1"],
+                "repo_mutation_performed": False,
+                "execution_performed": False,
+                "openclaw_enqueue_performed": False,
+                "readonly_audit_performed": True,
+                "report_digest": f"sha256:{lane_id}",
+            }
+        )
+    return tuple(reports)
+
+
 def test_bootstrap_plans_default_readonly_audit_swarm_from_fresh_context() -> None:
     result = run_reddog_main_readonly_operational_bootstrap(
         repo_root=REPO_ROOT,
@@ -122,9 +163,90 @@ def test_bootstrap_plans_default_readonly_audit_swarm_from_fresh_context() -> No
     assert result.no_repo_mutation_performed is True
     assert result.no_holoindex_reindex_performed is True
     assert result.no_queue_mutation_performed is True
+    assert result.assignment_ids
+    assert result.report_collection_attempted is False
+    assert result.report_collection_status is None
+    assert result.report_collection_report_count == 0
     assert result.enqueue_attempted is False
     assert result.enqueue_decision is None
     assert result.enqueue_task_count == 0
+
+
+def test_bootstrap_collects_existing_reports_and_skips_enqueue() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    writer = _FakeEnqueueWriter()
+    store = _FakeReportStore(_reports_for_bootstrap_result(baseline))
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=store,
+        enqueue_readonly_audit_tasks=True,
+        enqueue_writer=writer,
+    )
+
+    assert result.ready is True
+    assert result.report_collection_attempted is True
+    assert result.report_collection_status == READONLY_AUDIT_REPORT_COLLECTION_ACCEPT
+    assert result.report_collection_report_count == result.assignment_count == 5
+    assert result.report_bundle_id and result.report_bundle_id.startswith("sha256:")
+    assert result.enqueue_attempted is False
+    assert writer.calls == []
+    assert store.load_calls == [result.swarm_id]
+
+
+def test_bootstrap_missing_reports_enqueue_when_enabled() -> None:
+    writer = _FakeEnqueueWriter()
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=_FakeReportStore(()),
+        enqueue_readonly_audit_tasks=True,
+        enqueue_writer=writer,
+    )
+
+    assert result.ready is True
+    assert result.report_collection_attempted is True
+    assert result.report_collection_status == READONLY_AUDIT_REPORT_COLLECTION_REJECT
+    assert result.report_collection_report_count == 0
+    assert result.report_collection_rejection_reasons
+    assert result.enqueue_attempted is True
+    assert result.enqueue_decision == READONLY_AUDIT_SWARM_ENQUEUE_ACCEPT
+    assert len(writer.calls) == 1
+
+
+def test_bootstrap_missing_reports_not_ready_without_enqueue_authority() -> None:
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=_FakeReportStore(()),
+    )
+
+    assert result.ready is False
+    assert result.status == REDDOG_MAIN_BOOTSTRAP_NOT_READY
+    assert "readonly_audit_report_collection_rejected" in result.rejection_reasons
+    assert result.report_collection_attempted is True
+    assert result.report_collection_status == READONLY_AUDIT_REPORT_COLLECTION_REJECT
+    assert result.enqueue_attempted is False
 
 
 def test_bootstrap_enqueue_opt_in_publishes_readonly_audit_tasks() -> None:
@@ -358,6 +480,7 @@ def test_main_preflight_enables_enqueue_when_openclaw_auto_tasks_enabled() -> No
             assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
 
     assert mocked.call_args.kwargs["enqueue_readonly_audit_tasks"] is True
+    assert mocked.call_args.kwargs["collect_readonly_audit_reports"] is True
 
 
 def test_main_preflight_explicit_enqueue_disable_overrides_openclaw_auto_tasks() -> None:
@@ -392,6 +515,42 @@ def test_main_preflight_explicit_enqueue_disable_overrides_openclaw_auto_tasks()
             assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
 
     assert mocked.call_args.kwargs["enqueue_readonly_audit_tasks"] is False
+    assert mocked.call_args.kwargs["collect_readonly_audit_reports"] is True
+
+
+def test_main_preflight_explicit_collection_disable_overrides_openclaw_auto_tasks() -> None:
+    import main
+
+    ready_result = RedDogMainReadonlyBootstrapResult(
+        ready=True,
+        status=REDDOG_MAIN_BOOTSTRAP_READY,
+        snapshot_receipt_id="sha256:snapshot",
+        context_view_id="sha256:view",
+        evidence_bundle_id="sha256:evidence",
+        determination_id="sha256:determination",
+        swarm_id="sha256:swarm",
+        assignment_count=5,
+        rejection_reasons=(),
+        changed_paths=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+        allowed_read_targets=DEFAULT_BOOTSTRAP_CHANGED_PATHS,
+    )
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap.run_reddog_main_readonly_operational_bootstrap",
+        return_value=ready_result,
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
+                "OPENCLAW_AUTO_TASKS_ENABLED": "1",
+                "REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED": "0",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["collect_readonly_audit_reports"] is False
+    assert mocked.call_args.kwargs["enqueue_readonly_audit_tasks"] is True
 
 
 def test_bootstrap_module_has_no_runtime_mutation_or_execution_imports() -> None:
