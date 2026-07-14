@@ -1,0 +1,381 @@
+"""Test-only RedDog signer key provider dry-run boundary.
+
+Slice: REDDOG_SIGNER_KEY_PROVIDER_DRYRUN_PHASE1
+
+This module validates the signer key-provider contract with injected test-only
+resolver output. It can construct an ``Ed25519SignerBackend`` only when the
+caller explicitly enables the test-only dry-run mode and supplies a fresh
+permission snapshot. It does not connect to a real vault, read environment
+variables, load files, bind sockets, spawn processes, mutate repository state,
+enqueue OpenClaw, dispatch Hermes, or re-index HoloIndex.
+"""
+
+from __future__ import annotations
+
+import base64
+import binascii
+import hashlib
+import hmac
+from dataclasses import asdict, dataclass, field
+from typing import Any, Optional, Protocol
+
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    Ed25519SignerBackend,
+    SignerAuditMacBuilder,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
+    SignerPeerAttestation,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    SigningRequest,
+    public_key_fingerprint,
+)
+from modules.infrastructure.secrets_mcp.src.vault_resolver import (
+    ResolveResult,
+    hash_reference,
+    parse_op_reference,
+)
+
+
+PROVIDER_MODE_TEST_ONLY_DRYRUN = "TEST_ONLY_DRYRUN"
+
+FAIL_PROVIDER_PROFILE_INVALID = "FAIL_PROVIDER_PROFILE_INVALID"
+FAIL_PROVIDER_PERMISSION_DENIED = "FAIL_PROVIDER_PERMISSION_DENIED"
+FAIL_PROVIDER_RESOLVER_UNAVAILABLE = "FAIL_PROVIDER_RESOLVER_UNAVAILABLE"
+FAIL_PROVIDER_REFERENCE_INVALID = "FAIL_PROVIDER_REFERENCE_INVALID"
+FAIL_PROVIDER_REFERENCE_FORBIDDEN = "FAIL_PROVIDER_REFERENCE_FORBIDDEN"
+FAIL_PROVIDER_TTL_EXPIRED = "FAIL_PROVIDER_TTL_EXPIRED"
+FAIL_PROVIDER_KEY_FORMAT = "FAIL_PROVIDER_KEY_FORMAT"
+FAIL_PROVIDER_PUBLIC_KEY_MISMATCH = "FAIL_PROVIDER_PUBLIC_KEY_MISMATCH"
+FAIL_PROVIDER_FINGERPRINT_MISMATCH = "FAIL_PROVIDER_FINGERPRINT_MISMATCH"
+FAIL_PROVIDER_AUDIT_KEY_MISSING = "FAIL_PROVIDER_AUDIT_KEY_MISSING"
+FAIL_PROVIDER_MOCK_IN_PRODUCTION = "FAIL_PROVIDER_MOCK_IN_PRODUCTION"
+
+SIGNING_KEY_PREFIX = "ed25519-private-raw-b64-v1:"
+AUDIT_KEY_PREFIX = "audit-mac-test-key-b64-v1:"
+ED25519_PRIVATE_KEY_BYTES = 32
+MIN_AUDIT_KEY_BYTES = 16
+
+
+class SignerKeyResolver(Protocol):
+    """Injected WSP 71-like resolver boundary."""
+
+    def resolve(self, reference: str, requester_id: Optional[str] = None) -> ResolveResult:
+        """Resolve an op:// reference or return a fail-closed result."""
+
+
+@dataclass(frozen=True)
+class SignerKeyProviderProfile:
+    """Signer-owned key-provider profile for the dry-run provider."""
+
+    signer_profile_id: str
+    signer_agent_id: str
+    signing_key_ref: str
+    audit_mac_key_ref: str
+    expected_public_key: str
+    expected_key_fingerprint: str
+    expected_key_epoch: str
+    permission_snapshot_digest: str
+    ttl_seconds: int
+
+
+@dataclass(frozen=True)
+class SignerKeyProviderDryRunResult:
+    """Dry-run provider result. ``backend`` is intentionally non-serializable."""
+
+    ok: bool
+    rejection_code: Optional[str]
+    signer_profile_id: str
+    key_epoch: Optional[str]
+    public_key: Optional[str]
+    key_fingerprint: Optional[str]
+    signing_key_ref_hash: Optional[str]
+    audit_mac_key_ref_hash: Optional[str]
+    ttl_remaining_seconds: Optional[int]
+    secret_values_returned: bool
+    backend: Optional[Ed25519SignerBackend] = field(default=None, repr=False, compare=False)
+
+    def to_receipt(self) -> dict[str, Any]:
+        """Return an audit-safe receipt with no backend or secret values."""
+
+        return {
+            "ok": self.ok,
+            "rejection_code": self.rejection_code,
+            "signer_profile_id": self.signer_profile_id,
+            "key_epoch": self.key_epoch,
+            "public_key": self.public_key,
+            "key_fingerprint": self.key_fingerprint,
+            "reference_hashes": {
+                "signing_key_ref_hash": self.signing_key_ref_hash,
+                "audit_mac_key_ref_hash": self.audit_mac_key_ref_hash,
+            },
+            "ttl_remaining_seconds": self.ttl_remaining_seconds,
+            "secret_values_returned": False,
+        }
+
+
+@dataclass(frozen=True)
+class _HmacAuditMacBuilder(SignerAuditMacBuilder):
+    _audit_key: bytes = field(repr=False)
+
+    def build(self, request: SigningRequest, signature: str, peer: SignerPeerAttestation) -> str:
+        message = "|".join(
+            [
+                request.payload_digest,
+                request.nonce,
+                request.requested_operation,
+                peer.peer_principal_id,
+                signature,
+            ]
+        ).encode("utf-8")
+        digest = hmac.new(self._audit_key, message, hashlib.sha256).hexdigest()
+        return "audit-mac-v1:" + digest
+
+
+def build_test_only_signer_backend_from_provider(
+    profile: SignerKeyProviderProfile,
+    resolver: SignerKeyResolver,
+    *,
+    provider_mode: str = "",
+    allow_test_only_key_material: bool = False,
+    permission_snapshot_fresh: bool = False,
+) -> SignerKeyProviderDryRunResult:
+    """Validate a signer profile and build a test-only Ed25519 signer backend.
+
+    The default path rejects. A caller must explicitly opt into
+    ``TEST_ONLY_DRYRUN`` and provide a fresh permission snapshot. This prevents
+    accidental production use while allowing contract-driven tests to prove the
+    existing signer backend can be supplied from an injected resolver boundary.
+    """
+
+    if not isinstance(profile, SignerKeyProviderProfile):
+        return _reject(FAIL_PROVIDER_PROFILE_INVALID)
+    if provider_mode != PROVIDER_MODE_TEST_ONLY_DRYRUN or not allow_test_only_key_material:
+        return _reject(FAIL_PROVIDER_MOCK_IN_PRODUCTION, profile=profile)
+    if not _profile_ascii_and_complete(profile):
+        return _reject(FAIL_PROVIDER_PROFILE_INVALID, profile=profile)
+    if not permission_snapshot_fresh:
+        return _reject(FAIL_PROVIDER_PERMISSION_DENIED, profile=profile)
+    if profile.signing_key_ref == profile.audit_mac_key_ref:
+        return _reject(FAIL_PROVIDER_REFERENCE_FORBIDDEN, profile=profile)
+    if not parse_op_reference(profile.signing_key_ref) or not parse_op_reference(profile.audit_mac_key_ref):
+        return _reject(FAIL_PROVIDER_REFERENCE_INVALID, profile=profile)
+    if profile.ttl_seconds <= 0:
+        return _reject(FAIL_PROVIDER_TTL_EXPIRED, profile=profile)
+
+    signing_result = _resolve(profile.signing_key_ref, profile.signer_agent_id, resolver)
+    if not signing_result.success:
+        return _reject(_resolve_rejection(signing_result), profile=profile, signing=signing_result)
+    audit_result = _resolve(profile.audit_mac_key_ref, profile.signer_agent_id, resolver)
+    if not audit_result.success:
+        return _reject(_resolve_rejection(audit_result), profile=profile, signing=signing_result, audit=audit_result)
+    if not _ttl_valid(signing_result, profile.ttl_seconds) or not _ttl_valid(audit_result, profile.ttl_seconds):
+        return _reject(FAIL_PROVIDER_TTL_EXPIRED, profile=profile, signing=signing_result, audit=audit_result)
+
+    signing_secret = signing_result.get_value()
+    audit_secret = audit_result.get_value()
+    private_key = _decode_ed25519_private_key(signing_secret)
+    if private_key is None:
+        return _reject(FAIL_PROVIDER_KEY_FORMAT, profile=profile, signing=signing_result, audit=audit_result)
+    audit_key = _decode_audit_key(audit_secret)
+    if audit_key is None:
+        return _reject(FAIL_PROVIDER_AUDIT_KEY_MISSING, profile=profile, signing=signing_result, audit=audit_result)
+
+    public_key = _public_key_text(private_key)
+    if public_key != profile.expected_public_key:
+        return _reject(FAIL_PROVIDER_PUBLIC_KEY_MISMATCH, profile=profile, signing=signing_result, audit=audit_result)
+    fingerprint = public_key_fingerprint(public_key)
+    if fingerprint != profile.expected_key_fingerprint:
+        return _reject(FAIL_PROVIDER_FINGERPRINT_MISMATCH, profile=profile, signing=signing_result, audit=audit_result)
+
+    return SignerKeyProviderDryRunResult(
+        ok=True,
+        rejection_code=None,
+        signer_profile_id=profile.signer_profile_id,
+        key_epoch=profile.expected_key_epoch,
+        public_key=public_key,
+        key_fingerprint=fingerprint,
+        signing_key_ref_hash=signing_result.reference_hash,
+        audit_mac_key_ref_hash=audit_result.reference_hash,
+        ttl_remaining_seconds=min(int(signing_result.ttl_remaining or 0), int(audit_result.ttl_remaining or 0)),
+        secret_values_returned=False,
+        backend=Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch=profile.expected_key_epoch,
+            audit_mac_builder=_HmacAuditMacBuilder(audit_key),
+        ),
+    )
+
+
+def _resolve(reference: str, requester_id: str, resolver: SignerKeyResolver) -> ResolveResult:
+    try:
+        result = resolver.resolve(reference, requester_id=requester_id)
+    except Exception:
+        return ResolveResult(
+            success=False,
+            reference=reference,
+            reference_hash=hash_reference(reference),
+            error_message="resolver unavailable",
+        )
+    if not isinstance(result, ResolveResult):
+        return ResolveResult(
+            success=False,
+            reference=reference,
+            reference_hash=hash_reference(reference),
+            error_message="resolver unavailable",
+        )
+    return result
+
+
+def _resolve_rejection(result: ResolveResult) -> str:
+    value = result.error_code.value if result.error_code else ""
+    if value in {"RESOLVER_UNAVAILABLE", "SESSION_INVALID"}:
+        return FAIL_PROVIDER_RESOLVER_UNAVAILABLE
+    if value == "TTL_EXPIRED":
+        return FAIL_PROVIDER_TTL_EXPIRED
+    if value in {"INVALID_REFERENCE", "UNKNOWN_REFERENCE"}:
+        return FAIL_PROVIDER_REFERENCE_INVALID
+    return FAIL_PROVIDER_RESOLVER_UNAVAILABLE
+
+
+def _ttl_valid(result: ResolveResult, profile_ttl: int) -> bool:
+    if result.ttl_remaining is None:
+        return False
+    try:
+        ttl = int(result.ttl_remaining)
+    except Exception:
+        return False
+    return 0 < ttl <= profile_ttl
+
+
+def _decode_ed25519_private_key(secret: object) -> Any | None:
+    if not isinstance(secret, str) or not secret.startswith(SIGNING_KEY_PREFIX):
+        return None
+    try:
+        raw = base64.b64decode(secret[len(SIGNING_KEY_PREFIX):], validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    if len(raw) != ED25519_PRIVATE_KEY_BYTES:
+        return None
+    try:
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+        return Ed25519PrivateKey.from_private_bytes(raw)
+    except Exception:
+        return None
+
+
+def _decode_audit_key(secret: object) -> bytes | None:
+    if not isinstance(secret, str) or not secret.startswith(AUDIT_KEY_PREFIX):
+        return None
+    try:
+        raw = base64.b64decode(secret[len(AUDIT_KEY_PREFIX):], validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    if len(raw) < MIN_AUDIT_KEY_BYTES:
+        return None
+    return raw
+
+
+def _public_key_text(private_key: Any) -> str:
+    from cryptography.hazmat.primitives import serialization
+
+    return encode_ed25519_public_key(
+        private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+
+
+def _reject(
+    code: str,
+    *,
+    profile: Optional[SignerKeyProviderProfile] = None,
+    signing: Optional[ResolveResult] = None,
+    audit: Optional[ResolveResult] = None,
+) -> SignerKeyProviderDryRunResult:
+    return SignerKeyProviderDryRunResult(
+        ok=False,
+        rejection_code=str(code),
+        signer_profile_id=profile.signer_profile_id if isinstance(profile, SignerKeyProviderProfile) else "",
+        key_epoch=None,
+        public_key=None,
+        key_fingerprint=None,
+        signing_key_ref_hash=(
+            signing.reference_hash
+            if isinstance(signing, ResolveResult)
+            else hash_reference(profile.signing_key_ref)
+            if isinstance(profile, SignerKeyProviderProfile)
+            else None
+        ),
+        audit_mac_key_ref_hash=(
+            audit.reference_hash
+            if isinstance(audit, ResolveResult)
+            else hash_reference(profile.audit_mac_key_ref)
+            if isinstance(profile, SignerKeyProviderProfile)
+            else None
+        ),
+        ttl_remaining_seconds=None,
+        secret_values_returned=False,
+        backend=None,
+    )
+
+
+def _profile_ascii_and_complete(profile: SignerKeyProviderProfile) -> bool:
+    payload = asdict(profile)
+    required = (
+        "signer_profile_id",
+        "signer_agent_id",
+        "signing_key_ref",
+        "audit_mac_key_ref",
+        "expected_public_key",
+        "expected_key_fingerprint",
+        "expected_key_epoch",
+        "permission_snapshot_digest",
+    )
+    if not all(isinstance(payload.get(key), str) and payload[key] for key in required):
+        return False
+    if not isinstance(profile.ttl_seconds, int):
+        return False
+    return _assert_ascii_deep(payload)
+
+
+def _assert_ascii_deep(value: object) -> bool:
+    if isinstance(value, str):
+        return all(ord(char) < 128 for char in value)
+    if isinstance(value, dict):
+        return all(
+            isinstance(key, str) and _assert_ascii_deep(key) and _assert_ascii_deep(item)
+            for key, item in value.items()
+        )
+    if isinstance(value, (list, tuple)):
+        return all(_assert_ascii_deep(item) for item in value)
+    if value is None or isinstance(value, (bool, int, float)):
+        return True
+    return False
+
+
+__all__ = [
+    "AUDIT_KEY_PREFIX",
+    "FAIL_PROVIDER_AUDIT_KEY_MISSING",
+    "FAIL_PROVIDER_FINGERPRINT_MISMATCH",
+    "FAIL_PROVIDER_KEY_FORMAT",
+    "FAIL_PROVIDER_MOCK_IN_PRODUCTION",
+    "FAIL_PROVIDER_PERMISSION_DENIED",
+    "FAIL_PROVIDER_PROFILE_INVALID",
+    "FAIL_PROVIDER_PUBLIC_KEY_MISMATCH",
+    "FAIL_PROVIDER_REFERENCE_FORBIDDEN",
+    "FAIL_PROVIDER_REFERENCE_INVALID",
+    "FAIL_PROVIDER_RESOLVER_UNAVAILABLE",
+    "FAIL_PROVIDER_TTL_EXPIRED",
+    "PROVIDER_MODE_TEST_ONLY_DRYRUN",
+    "SIGNING_KEY_PREFIX",
+    "SignerKeyProviderDryRunResult",
+    "SignerKeyProviderProfile",
+    "build_test_only_signer_backend_from_provider",
+]
