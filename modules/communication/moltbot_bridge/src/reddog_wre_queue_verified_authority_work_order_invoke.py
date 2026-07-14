@@ -26,6 +26,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocati
     WorkOrderDryRunInvocationResult,
     invoke_reddog_work_order_dryrun,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    AUTHORITY_ISSUED,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
 )
@@ -34,7 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verific
 )
 
 
-AUTHORITY_ISSUED_STATUS = "AUTHORITY_ISSUED"
+AUTHORITY_ISSUED_STATUS = AUTHORITY_ISSUED
 
 QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT = (
     "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"

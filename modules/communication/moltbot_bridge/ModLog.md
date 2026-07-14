@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_RESIDENT_QUEUE_WORK_ORDER_INVOCATION_HANDLER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_resident_queue_work_order_invocation_handler.py`: a
+  concrete injected handler for the resident queue `work_order_invocation`
+  stage.
+- The handler reads the already-recorded `authority_runtime` and
+  `authority_verification` results from the chain-results store, resolves the
+  bound work order through an injected resolver, and invokes the existing
+  verified-authority work-order dry-run guard.
+- Aligned `src/reddog_wre_queue_verified_authority_work_order_invoke.py` with
+  the current signer runtime receipt status constant
+  `DELEGATED_AUTHORITY_ISSUED` instead of a legacy literal.
+- Boundary: work-order invocation dry-run only; no signing, valve opening,
+  worker spawn, worktree creation, file edit, shell command, PR publishing,
+  PatternMemory write, OpenClaw enqueue, Hermes dispatch, reward settlement,
+  or HoloIndex re-index.
+- HoloIndex read-only probe for `RedDog resident queue work order invocation
+  handler` surfaced adjacent work-order modules and WSP/docs, but not this new
+  handler before indexing. Recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_WORK_ORDER_INVOCATION_HANDLER_INDEX_GAP_PHASE1`;
+  no runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_RESIDENT_QUEUE_AUTHORITY_VERIFICATION_HANDLER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
