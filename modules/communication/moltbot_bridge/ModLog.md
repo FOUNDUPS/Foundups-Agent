@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `reddog_backend_architect_determination_runtime.py`, a real backend
+  architect determination runtime that consumes an accepted operational
+  snapshot, collected read-only audit reports, the Fusion assignment gate, and
+  a canonical WSP_15 allocation receipt.
+- The runtime calls an explicit RedDog/Fusion model runner, validates a strict
+  `FIX | RESEARCH_MORE | REVISE | STOP` JSON determination, requires Fusion
+  quorum and matching WSP_15 allocation receipt id, persists the determination,
+  and emits at most one candidate queue item for `FIX`.
+- Added an explicit opt-in path in `reddog_main_readonly_operational_bootstrap`
+  so main startup behavior remains unchanged unless backend architect
+  determination is requested.
+- No coding worker spawn, shell command, worktree operation, repo mutation,
+  OpenClaw enqueue, Hermes dispatch, PR creation, PatternMemory promotion, or
+  HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog backend architect determination
+  runtime` is treated as
+  `HOLOINDEX_REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_INDEX_GAP_PHASE1`
+  until the new runtime is indexed by the governed WRE/CI indexer.
+
 ## 2026-07-15: REDDOG_RESIDENT_QUEUE_WORKER_DISPATCH_DRYRUN_STAGE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
