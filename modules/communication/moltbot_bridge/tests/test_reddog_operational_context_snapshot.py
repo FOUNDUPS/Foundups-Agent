@@ -82,6 +82,9 @@ def _fresh_holo_receipt(head: str = HEAD):
         repo_head_sha=head,
         ssd_path="E:/HoloIndex",
         source="ci_targeted_reindex",
+        generation_id=(
+            "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ),
         collections=[
             CollectionFreshness(
                 name="navigation_work_ledger",
@@ -90,6 +93,17 @@ def _fresh_holo_receipt(head: str = HEAD):
                 source="ci_targeted_reindex",
                 repo_head_sha=head,
                 last_indexed_at=NOW,
+                source_manifest_digest=(
+                    "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                ),
+                indexed_paths_digest=(
+                    "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+                ),
+                removed_paths_digest=(
+                    "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+                ),
+                embedding_backend="test-embedding",
+                verification="PASS",
             ),
             CollectionFreshness(
                 name="navigation_symbols",
@@ -98,6 +112,17 @@ def _fresh_holo_receipt(head: str = HEAD):
                 source="ci_targeted_reindex",
                 repo_head_sha=head,
                 last_indexed_at=NOW,
+                source_manifest_digest=(
+                    "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+                ),
+                indexed_paths_digest=(
+                    "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                ),
+                removed_paths_digest=(
+                    "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+                ),
+                embedding_backend="test-embedding",
+                verification="PASS",
             ),
         ],
     )

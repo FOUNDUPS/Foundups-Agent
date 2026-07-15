@@ -1,5 +1,26 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_MEMEX_GOVERNED_PROJECTION_ADAPTER_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 60, 97
+
+- ADD `holo_index/memex_projection_adapter.py`: deterministic, read-only
+  projection from an accepted FoundUp Memex/Brain current-state view into
+  shadow HoloIndex records with `source_class=memex`, snapshot binding,
+  access-policy digest, content digests, and an immutable projection receipt.
+- ADD sensitivity filtering: secret-bearing Memex sections are rejected before
+  record creation while safe sibling sections survive with honest
+  `records_rejected` telemetry.
+- TEST `tests/test_holoindex_memex_projection_adapter.py`: scoped projection,
+  deterministic receipts, cross-FoundUp rejection, snapshot/source-policy
+  fail-closed behavior, secret filtering, and AST guards against execution,
+  database, HoloIndex collection, or filesystem write paths.
+- Boundary: no HoloIndex write, no Memex write, no Brain/Breadcrumb write, no
+  PatternMemory promotion, no queue/worker authority, no external retrieval,
+  and no runtime re-index. A later governed indexer may promote the shadow
+  records after verification; this adapter only prepares the projection.
+
 ## [2026-07-16] HOLOINDEX_QUERY_RECEIPT_AND_GENERATION_BINDING_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
