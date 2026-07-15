@@ -495,6 +495,16 @@ def _held_out_gate_request(
     }
 
 
+def _pattern_memory_admission_request() -> dict[str, object]:
+    return {
+        "work_order_id": WORK_ORDER_ID,
+        "admission_metadata": {
+            "source": "resident_queue_bootstrap",
+            "retention_policy": "verified_recursive_improvement_only",
+        },
+    }
+
+
 def _snapshots() -> dict[str, object]:
     return {
         "snapshots": {
@@ -578,6 +588,15 @@ class _FakeWorktreeRunner:
     def cleanup_worktree(self, *, worktree_path: Path):
         self.calls.append(("cleanup_worktree", str(worktree_path), None, None))
         return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
+
+
+class _FakePatternMemoryAdmissionSink:
+    def __init__(self) -> None:
+        self.records: list[dict[str, object]] = []
+
+    def store_verified_outcome(self, record: Mapping[str, object]) -> str:
+        self.records.append(dict(record))
+        return "pattern-memory-record-1"
 
 
 def _ed25519_signing_material():
@@ -774,6 +793,32 @@ def _run_bootstrap_to_verified_outcome_ratchet(tmp_path: Path) -> dict[str, obje
         "chain": chain,
         "verifier_stage": verifier_stage,
     }
+
+
+def _run_bootstrap_to_held_out_regression_gate(tmp_path: Path) -> dict[str, object]:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path)
+    verifier_stage = ctx["verifier_stage"]
+    held_out_request = _write_runtime_json(
+        tmp_path,
+        "held_out_gate_request.json",
+        _held_out_gate_request(verifier_stage["verifier_result"]),
+    )
+    gate_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        held_out_gate_request_path=held_out_request,
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=1,
+    )
+    assert gate_run.accepted is True
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    assert stored["stage_results"]["held_out_regression_gate"]["decision"] == (
+        "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    )
+    return ctx
 
 
 def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(tmp_path: Path) -> None:
@@ -1722,6 +1767,86 @@ def test_bootstrap_serial_loop_fails_closed_at_held_out_without_gate_request(
     assert result.no_pattern_memory_client_created is True
 
 
+def test_bootstrap_serial_loop_reaches_pattern_memory_admission_with_injected_sink(
+    tmp_path: Path,
+) -> None:
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path)
+    admission_request = _write_runtime_json(
+        tmp_path,
+        "pattern_memory_admission_request.json",
+        _pattern_memory_admission_request(),
+    )
+    sink = _FakePatternMemoryAdmissionSink()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        admission_request_path=admission_request,
+        pattern_memory_admission_sink=sink,
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=1,
+    )
+
+    assert result.accepted is True
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("pattern_memory_admission",)
+    assert result.next_action == "STOP_QUEUE_CHAIN_COMPLETE"
+    assert result.no_pattern_memory_admission_performed is False
+    assert result.no_pattern_memory_write_performed is False
+    assert result.no_pattern_memory_client_created is True
+    assert result.no_reward_settlement_performed is True
+    assert result.no_holoindex_reindex_performed is True
+
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["pattern_memory_admission"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
+    assert stage["pattern_memory_write_performed"] is True
+    assert stage["receipt"]["pattern_memory_record_id"] == "pattern-memory-record-1"
+    assert stage["no_command_execution_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+    assert len(sink.records) == 1
+    assert sink.records[0]["record_type"] == "reddog_verified_recursive_improvement_outcome"
+    assert sink.records[0]["work_order_id"] == WORK_ORDER_ID
+
+
+def test_bootstrap_serial_loop_fails_closed_at_pattern_memory_without_injected_sink(
+    tmp_path: Path,
+) -> None:
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path)
+    admission_request = _write_runtime_json(
+        tmp_path,
+        "pattern_memory_admission_request.json",
+        _pattern_memory_admission_request(),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        admission_request_path=admission_request,
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=1,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 0
+    assert result.dispatched_stages == ()
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:pattern_memory_admission" in result.rejection_reasons
+    assert result.no_pattern_memory_admission_performed is True
+    assert result.no_pattern_memory_write_performed is True
+    assert result.no_pattern_memory_client_created is True
+
+
 def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_artifacts(
     tmp_path: Path,
 ) -> None:
@@ -2337,6 +2462,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
                 "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(tmp_path / "held_out_gate_request.json"),
+                "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(
+                    tmp_path / "pattern_memory_admission_request.json"
+                ),
                 "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(tmp_path / "authority_state.json"),
                 "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
                 "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(tmp_path / "principals.json"),
@@ -2384,6 +2512,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     )
     assert mocked.call_args.kwargs["held_out_gate_request_path"] == str(
         tmp_path / "held_out_gate_request.json"
+    )
+    assert mocked.call_args.kwargs["admission_request_path"] == str(
+        tmp_path / "pattern_memory_admission_request.json"
     )
     assert mocked.call_args.kwargs["authority_state_path"] == str(tmp_path / "authority_state.json")
     assert mocked.call_args.kwargs["permission_snapshots_path"] == str(tmp_path / "snapshots.json")

@@ -1,5 +1,32 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_ADMISSION_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can load an outside-repo
+  `admission_request` JSON artifact and, only with an explicitly injected
+  PatternMemory admission sink, advance from `held_out_regression_gate` to
+  `pattern_memory_admission`.
+- Added `main.py` env wiring for `REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH`.
+  This slice does not construct a PatternMemory sink from `main.py`; installed
+  runtime still fails closed at this stage unless a future explicit sink bridge
+  is added.
+- Added `no_pattern_memory_admission_performed` and
+  `no_pattern_memory_write_performed` result attestations.
+- Added tests proving the stage-13 happy path writes exactly through an
+  injected fake sink, completes the resident queue chain, and preserves
+  no-command, no-PR-publish, no-merge, no-reward, and no-HoloIndex-reindex
+  invariants.
+- Added fail-closed coverage proving an admission request without an injected
+  sink stops the loop at `stage:pattern_memory_admission`.
+- HoloIndex read-only probe for `RedDog main resident queue PatternMemory
+  admission bootstrap admission request injected sink` returned adjacent
+  live-enqueue, WSP, and audit assets, but not this bootstrap seam; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_ADMISSION_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_HELD_OUT_REGRESSION_GATE_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
