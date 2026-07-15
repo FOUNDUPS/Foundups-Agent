@@ -57,6 +57,9 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
     load_existing_holoindex_receipt,
     observe_repo_state,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 
 
 REDDOG_MAIN_BOOTSTRAP_READY = "REDDOG_MAIN_BOOTSTRAP_READY"
@@ -90,6 +93,7 @@ class RedDogMainReadonlyBootstrapResult:
     rejection_reasons: tuple[str, ...]
     changed_paths: tuple[str, ...]
     allowed_read_targets: tuple[str, ...]
+    wsp15_allocation_receipt: Optional[Mapping[str, Any]] = None
     assignment_ids: tuple[str, ...] = ()
     report_collection_attempted: bool = False
     report_collection_status: Optional[str] = None
@@ -150,6 +154,12 @@ def run_reddog_main_readonly_operational_bootstrap(
 
     paths = _normalize_paths(changed_paths)
     targets = _normalize_paths(allowed_read_targets)
+    wsp15_allocation_receipt = allocate_reddog_wsp15_receipt(
+        requested_operation=requested_operation,
+        prompt_text=prompt_text,
+        changed_paths=paths,
+        allowed_read_targets=targets,
+    ).to_dict()
     reasons: list[str] = []
 
     work_state_snapshot = work_state_snapshot_override
@@ -187,6 +197,7 @@ def run_reddog_main_readonly_operational_bootstrap(
             reasons=reasons,
             changed_paths=paths,
             allowed_read_targets=targets,
+            wsp15_allocation_receipt=wsp15_allocation_receipt,
         )
 
     assert work_state_snapshot is not None
@@ -204,6 +215,7 @@ def run_reddog_main_readonly_operational_bootstrap(
             reasons=snapshot_result.rejection_reasons or ("snapshot_rejected",),
             changed_paths=paths,
             allowed_read_targets=targets,
+            wsp15_allocation_receipt=wsp15_allocation_receipt,
         )
 
     snapshot = snapshot_result.snapshot
@@ -225,6 +237,7 @@ def run_reddog_main_readonly_operational_bootstrap(
             reasons=gate.rejection_reasons or ("fusion_assignment_gate_rejected",),
             changed_paths=paths,
             allowed_read_targets=targets,
+            wsp15_allocation_receipt=wsp15_allocation_receipt,
             snapshot=snapshot,
             evidence_bundle=evidence_bundle,
             gate=gate,
@@ -243,6 +256,7 @@ def run_reddog_main_readonly_operational_bootstrap(
             reasons=plan.rejection_reasons or ("readonly_audit_swarm_rejected",),
             changed_paths=paths,
             allowed_read_targets=targets,
+            wsp15_allocation_receipt=wsp15_allocation_receipt,
             snapshot=snapshot,
             evidence_bundle=evidence_bundle,
             gate=gate,
@@ -266,6 +280,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                     reasons=("readonly_audit_decision_report_load_failed",),
                     changed_paths=paths,
                     allowed_read_targets=targets,
+                    wsp15_allocation_receipt=wsp15_allocation_receipt,
                     snapshot=snapshot,
                     evidence_bundle=evidence_bundle,
                     gate=gate,
@@ -281,6 +296,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                     reasons=("readonly_audit_decision_rejected", *decision_result.rejection_reasons),
                     changed_paths=paths,
                     allowed_read_targets=targets,
+                    wsp15_allocation_receipt=wsp15_allocation_receipt,
                     snapshot=snapshot,
                     evidence_bundle=evidence_bundle,
                     gate=gate,
@@ -303,6 +319,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                         ),
                         changed_paths=paths,
                         allowed_read_targets=targets,
+                        wsp15_allocation_receipt=wsp15_allocation_receipt,
                         snapshot=snapshot,
                         evidence_bundle=evidence_bundle,
                         gate=gate,
@@ -319,6 +336,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 plan=plan,
                 changed_paths=paths,
                 allowed_read_targets=targets,
+                wsp15_allocation_receipt=wsp15_allocation_receipt,
                 collection_result=collection_result,
                 decision_result=decision_result,
                 decision_persist_result=decision_persist_result,
@@ -330,6 +348,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 reasons=("readonly_audit_report_collection_rejected", *collection_result.rejection_reasons),
                 changed_paths=paths,
                 allowed_read_targets=targets,
+                wsp15_allocation_receipt=wsp15_allocation_receipt,
                 snapshot=snapshot,
                 evidence_bundle=evidence_bundle,
                 gate=gate,
@@ -352,6 +371,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 reasons=("readonly_audit_enqueue_rejected", *enqueue_result.rejection_reasons),
                 changed_paths=paths,
                 allowed_read_targets=targets,
+                wsp15_allocation_receipt=wsp15_allocation_receipt,
                 snapshot=snapshot,
                 evidence_bundle=evidence_bundle,
                 gate=gate,
@@ -370,6 +390,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         plan=plan,
         changed_paths=paths,
         allowed_read_targets=targets,
+        wsp15_allocation_receipt=wsp15_allocation_receipt,
         collection_result=collection_result,
         decision_result=decision_result,
         decision_persist_result=decision_persist_result,
@@ -387,6 +408,7 @@ def _ready(
     plan: ReadOnlyAuditSwarmPlan,
     changed_paths: Sequence[str],
     allowed_read_targets: Sequence[str],
+    wsp15_allocation_receipt: Mapping[str, Any],
     collection_result: ReadOnlyAuditReportCollectionResult | None,
     decision_result: ReadOnlyAuditDecisionReceipt | None,
     decision_persist_result: ReadOnlyAuditDecisionPersistResult | None,
@@ -401,6 +423,7 @@ def _ready(
         snapshot_receipt_id=snapshot.snapshot_receipt_id,
         context_view_id=context_view.context_view_id,
         evidence_bundle_id=evidence_bundle.evidence_bundle_id,
+        wsp15_allocation_receipt=wsp15_allocation_receipt,
         determination_id=gate.determination_binding.determination_id,
         swarm_id=plan.receipt.swarm_id,
         assignment_count=len(plan.assignments),
@@ -471,6 +494,7 @@ def _not_ready(
     reasons: Sequence[str],
     changed_paths: Sequence[str],
     allowed_read_targets: Sequence[str],
+    wsp15_allocation_receipt: Mapping[str, Any] | None = None,
     snapshot: OperationalContextSnapshot | None = None,
     evidence_bundle: EvidenceBundle | None = None,
     gate: FusionAssignmentGateDecision | None = None,
@@ -489,6 +513,7 @@ def _not_ready(
         snapshot_receipt_id=snapshot.snapshot_receipt_id if snapshot else None,
         context_view_id=gate.determination_binding.context_view_id if gate and gate.determination_binding else None,
         evidence_bundle_id=evidence_bundle.evidence_bundle_id if evidence_bundle else None,
+        wsp15_allocation_receipt=wsp15_allocation_receipt,
         determination_id=determination_id,
         swarm_id=swarm_plan.receipt.swarm_id if swarm_plan else None,
         assignment_count=len(swarm_plan.assignments) if swarm_plan else 0,
