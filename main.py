@@ -1546,6 +1546,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
         REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE           Optional `real` runner mode
         REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S      Optional runner timeout
+        REDDOG_DRAFT_PR_RUNNER_MODE                          Optional `real` draft-PR runner mode
+        REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S                     Optional draft-PR runner timeout
     """
 
     if os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "0") == "0":
@@ -1577,6 +1579,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         worktree_runner_timeout_s = int(worktree_runner_timeout_value) if worktree_runner_timeout_value else 120
     except ValueError:
         worktree_runner_timeout_s = 0
+    try:
+        draft_pr_runner_timeout_value = os.getenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "")
+        draft_pr_runner_timeout_s = int(draft_pr_runner_timeout_value) if draft_pr_runner_timeout_value else 120
+    except ValueError:
+        draft_pr_runner_timeout_s = 0
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
@@ -1590,6 +1597,19 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             repo_root=repo_root,
             db_path=os.getenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", "") or None,
         )
+        draft_pr_runner = None
+        draft_pr_runner_mode = os.getenv("REDDOG_DRAFT_PR_RUNNER_MODE", "").strip().lower()
+        if draft_pr_runner_mode:
+            if draft_pr_runner_mode != "real":
+                raise ValueError("unsupported_draft_pr_runner_mode")
+            if draft_pr_runner_timeout_s <= 0:
+                raise ValueError("invalid_draft_pr_runner_timeout")
+            from modules.foundups.agent.src.worktree_pr_runner import RealWorktreeRunner
+
+            draft_pr_runner = RealWorktreeRunner(
+                repo_root=repo_root,
+                timeout_s=draft_pr_runner_timeout_s,
+            )
 
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
@@ -1623,6 +1643,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
             worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
             worktree_runner_timeout_s=worktree_runner_timeout_s,
+            draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,

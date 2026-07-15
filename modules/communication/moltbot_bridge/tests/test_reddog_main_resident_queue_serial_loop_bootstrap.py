@@ -2477,6 +2477,8 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_SIGNATURE_VERIFIER_BACKEND": REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
                 "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE": "real",
                 "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S": "77",
+                "REDDOG_DRAFT_PR_RUNNER_MODE": "real",
+                "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "88",
                 "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
                 "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
             },
@@ -2532,6 +2534,8 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["signature_verifier_backend"] == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["worktree_runner_timeout_s"] == 77
+    assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
+    assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 88
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
     assert mocked.call_args.kwargs["now_epoch"] == 1000
     assert mocked.call_args.kwargs["max_steps"] == 1
@@ -2564,6 +2568,25 @@ def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
             {
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
+
+
+def test_main_serial_loop_preflight_rejects_unsupported_draft_pr_runner_mode_when_enforced() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        side_effect=AssertionError("bootstrap must not run for unsupported draft PR runner mode"),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+                "REDDOG_DRAFT_PR_RUNNER_MODE": "unsafe",
             },
             clear=True,
         ):

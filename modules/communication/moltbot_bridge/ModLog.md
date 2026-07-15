@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_DRAFT_PR_RUNNER_BRIDGE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added explicit `main.py` env wiring for `REDDOG_DRAFT_PR_RUNNER_MODE=real`
+  and `REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S`.
+- The bridge constructs the existing approved
+  `modules.foundups.agent.src.worktree_pr_runner.RealWorktreeRunner` only when
+  explicitly requested, then injects it into the resident serial queue
+  `verified_draft_pr_publish` stage.
+- Default behavior remains fail-closed: no draft-PR runner is constructed and
+  the existing stage rejects with `FAIL_DRAFT_PR_RUNNER_MISSING`.
+- Unsupported runner modes or invalid timeouts reject before the resident queue
+  bootstrap runs when startup enforcement is enabled.
+- No PR is created by this bridge alone. The existing publish guard still
+  requires accepted slice-verifier evidence, exact-head metadata, branch policy,
+  and draft-only request fields before the injected runner can push or create a
+  draft PR. No ready, merge, reward settlement, PatternMemory write, Hermes
+  dispatch, OpenClaw enqueue, or HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog main resident queue draft PR runner
+  bridge verified draft PR publish RealWorktreeRunner` surfaced adjacent
+  worktree runner and governed work-order assets, but not this new bridge seam;
+  recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_DRAFT_PR_RUNNER_BRIDGE_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_SINK_BRIDGE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
