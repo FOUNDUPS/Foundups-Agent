@@ -76,6 +76,7 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_slice_verification_performed: bool = True
     no_verified_draft_pr_publish_performed: bool = True
     no_verified_outcome_ratchet_performed: bool = True
+    no_held_out_regression_gate_performed: bool = True
     no_shell_command_executed: bool = True
     no_openclaw_enqueue_performed: bool = True
     no_hermes_dispatch_performed: bool = True
@@ -122,6 +123,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     publish_request_path: Path | str | None = None,
     ratchet_request_path: Path | str | None = None,
     outcome_ratchet_store_path: Path | str | None = None,
+    held_out_gate_request_path: Path | str | None = None,
     authority_state_path: Path | str | None = None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
@@ -269,6 +271,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if ratchet_request_reasons:
         return _not_ready(ratchet_request_reasons, chain_results_path=None)
 
+    held_out_gate_request, held_out_gate_request_reasons = _read_json_outside_repo(
+        root,
+        held_out_gate_request_path,
+        missing_reason="missing_held_out_gate_request_path",
+        inside_reason="held_out_gate_request_path_inside_repo",
+        unreadable_reason="malformed_held_out_gate_request",
+        required=False,
+    )
+    if held_out_gate_request_reasons:
+        return _not_ready(held_out_gate_request_reasons, chain_results_path=None)
+
     resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
         root,
         injected_store=outcome_ratchet_store,
@@ -337,6 +350,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         draft_pr_runner=draft_pr_runner,
         ratchet_request=ratchet_request,
         outcome_ratchet_store=resolved_outcome_ratchet_store,
+        held_out_gate_request=held_out_gate_request,
         explicit_pattern_memory_write_requested=explicit_pattern_memory_write_requested,
         ratchet_pattern_memory_sink=ratchet_pattern_memory_sink,
         now_datetime=run_now,
@@ -575,6 +589,9 @@ def _from_loop(
         ),
         no_verified_outcome_ratchet_performed=(
             "verified_outcome_ratchet" not in loop.dispatched_stages
+        ),
+        no_held_out_regression_gate_performed=(
+            "held_out_regression_gate" not in loop.dispatched_stages
         ),
         no_repo_mutation_performed=not any(
             stage in loop.dispatched_stages for stage in ("worktree_create", "bounded_worker_pilot")
