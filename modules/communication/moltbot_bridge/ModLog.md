@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_WORK_ORDER_MATERIALIZER_QUEUE_WSP15_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Updated the resident queue work-order materializer to source WSP_15
+  allocation from the selected authoritative queue item. Authority-profile and
+  snapshot copies are consistency checks only and fail closed on conflict.
+- This keeps queue-bound WSP_15 evidence authoritative through queue consumer,
+  authority-request dry-run, and materialized work-order context binding.
+- Missing operational context receipts still fail closed; this slice removes
+  the need to duplicate WSP_15 allocation in the external authority profile
+  when the queue item already carries it, without allowing profile or snapshot
+  allocation to override the selected queue item.
+- No signing, worker spawn, OpenClaw enqueue, Hermes dispatch, worktree
+  creation, shell command, repo mutation, reward settlement, PatternMemory
+  write, or HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog work order materializer queue WSP15
+  allocation binding` returned adjacent queue/WSP assets but not this binding
+  seam; recorded as
+  `HOLOINDEX_REDDOG_WORK_ORDER_MATERIALIZER_QUEUE_WSP15_BINDING_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-15: REDDOG_AUTHORITY_REQUEST_WSP15_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

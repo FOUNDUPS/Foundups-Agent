@@ -546,6 +546,8 @@ def _materialize_work_orders_from_authority_profile(
         return None, ("work_order_materializer_missing_work_order_id",)
 
     queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
+    queue_item = _queue_item(snapshot=snapshot, queue_item_id=str(queue_receipt.get("queue_item_id") or ""))
+    queue_wsp15_allocation = _nested_mapping(queue_item, "wsp15_allocation_receipt")
     slice_id = str(queue_receipt.get("slice_id") or "")
     created_at = str(now_iso or _snapshot_timestamp(snapshot) or "1970-01-01T00:00:00+00:00")
     expiry = str(_claim_expiry(snapshot, queue_receipt) or authority_profile.get("expiry") or "")
@@ -555,6 +557,8 @@ def _materialize_work_orders_from_authority_profile(
     context_binding, binding_reasons = _operational_context_binding(
         authority_profile=authority_profile,
         snapshot=snapshot,
+        queue_wsp15_allocation=queue_wsp15_allocation,
+        queue_wsp15_allocation_receipt_id=str(queue_receipt.get("wsp15_allocation_receipt_id") or ""),
     )
     if binding_reasons:
         return None, binding_reasons
@@ -655,6 +659,16 @@ def _claim_expiry(snapshot: Mapping[str, Any], queue_receipt: Mapping[str, Any])
     return ""
 
 
+def _queue_item(*, snapshot: Mapping[str, Any], queue_item_id: str) -> Mapping[str, Any]:
+    items = snapshot.get("wre_queue_items")
+    if not isinstance(items, list):
+        return {}
+    for item in items:
+        if isinstance(item, Mapping) and str(item.get("queue_item_id") or "") == queue_item_id:
+            return item
+    return {}
+
+
 def _slug(value: str) -> str:
     chars: list[str] = []
     for char in value.lower():
@@ -723,10 +737,49 @@ def _lookup_mapping(
     return {}
 
 
+def _lookup_mapping_sources(
+    *,
+    authority_profile: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    names: tuple[str, ...],
+) -> list[tuple[str, Mapping[str, Any]]]:
+    sources = (
+        ("authority_profile", authority_profile),
+        ("authority_profile.operational_context_binding", _nested_mapping(authority_profile, "operational_context_binding")),
+        ("snapshot", snapshot),
+        ("snapshot.operational_context_binding", _nested_mapping(snapshot, "operational_context_binding")),
+    )
+    found: list[tuple[str, Mapping[str, Any]]] = []
+    for label, source in sources:
+        for name in names:
+            value = source.get(name)
+            if isinstance(value, Mapping):
+                found.append((f"{label}.{name}", value))
+    return found
+
+
+def _wsp15_priority_for_total(total: int) -> str:
+    if total >= 16:
+        return "P0"
+    if total >= 13:
+        return "P1"
+    if total >= 10:
+        return "P2"
+    if total >= 7:
+        return "P3"
+    return "P4"
+
+
+def _valid_mps_score(value: Any) -> bool:
+    return type(value) is int and 1 <= value <= 5
+
+
 def _operational_context_binding(
     *,
     authority_profile: Mapping[str, Any],
     snapshot: Mapping[str, Any],
+    queue_wsp15_allocation: Mapping[str, Any],
+    queue_wsp15_allocation_receipt_id: str,
 ) -> tuple[Mapping[str, Any], tuple[str, ...]]:
     snapshot_receipt_id = _lookup_text(
         authority_profile=authority_profile,
@@ -748,11 +801,13 @@ def _operational_context_binding(
         snapshot=snapshot,
         names=("readonly_audit_decision_id", "decision_id", "determination_id", "latest_decision_id"),
     )
-    allocation = _lookup_mapping(
+    allocation_names = ("wsp15_allocation_receipt", "wsp_15_allocation_receipt", "wsp_15_allocation")
+    duplicate_allocations = _lookup_mapping_sources(
         authority_profile=authority_profile,
         snapshot=snapshot,
-        names=("wsp15_allocation_receipt", "wsp_15_allocation_receipt", "wsp_15_allocation"),
+        names=allocation_names,
     )
+    allocation = queue_wsp15_allocation
     reasons: list[str] = []
     required = {
         "snapshot_receipt_id": snapshot_receipt_id,
@@ -765,10 +820,38 @@ def _operational_context_binding(
             reasons.append(f"work_order_materializer_missing_context_binding:{name}")
     if not allocation:
         reasons.append("work_order_materializer_missing_wsp15_allocation_receipt")
-    else:
-        for field in ("mps_total", "priority", "reasoning_tier", "worker_plan"):
+    if not queue_wsp15_allocation_receipt_id:
+        reasons.append("work_order_materializer_missing_queue_wsp15_allocation_receipt_id")
+    if allocation:
+        for label, duplicate in duplicate_allocations:
+            if dict(duplicate) != dict(allocation):
+                reasons.append(f"work_order_materializer_conflicting_wsp15_allocation_receipt:{label}")
+        receipt_id = str(allocation.get("receipt_id") or "")
+        if queue_wsp15_allocation_receipt_id and receipt_id != queue_wsp15_allocation_receipt_id:
+            reasons.append("work_order_materializer_wsp15_allocation_receipt_id_mismatch")
+        for field in (
+            "receipt_id",
+            "complexity",
+            "importance",
+            "deferability",
+            "impact",
+            "mps_total",
+            "priority",
+            "reasoning_tier",
+            "worker_plan",
+        ):
             if field not in allocation or allocation.get(field) in (None, "", (), {}):
                 reasons.append(f"work_order_materializer_malformed_wsp15_allocation_receipt:{field}")
+        score_fields = ("complexity", "importance", "deferability", "impact")
+        if all(field in allocation for field in score_fields + ("mps_total",)):
+            scores = [allocation.get(field) for field in score_fields]
+            total = allocation.get("mps_total")
+            if not all(_valid_mps_score(score) for score in scores):
+                reasons.append("work_order_materializer_malformed_wsp15_allocation_receipt:mps_scores")
+            elif type(total) is not int or total != sum(scores):
+                reasons.append("work_order_materializer_malformed_wsp15_allocation_receipt:mps_total")
+            elif str(allocation.get("priority") or "") != _wsp15_priority_for_total(total):
+                reasons.append("work_order_materializer_malformed_wsp15_allocation_receipt:priority")
     if reasons:
         return {}, tuple(reasons)
     return {
