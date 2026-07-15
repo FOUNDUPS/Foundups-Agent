@@ -287,6 +287,8 @@ def _path_within_foundup(path: str, foundup_id: str) -> bool:
 _REQUIRED_WORKAUTH_FIELDS = (
     "work_order_id", "principal_id", "reddog_id", "repo_full_name", "foundup_id",
     "allowed_paths", "denied_paths", "requested_operation", "permission_snapshot_digest",
+    "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
+    "wsp15_mps_total", "wsp15_reasoning_tier",
     "nonce", "issued_at", "expires_at", "valve_state_required", "key_epoch", "signature",
 )
 _REQUIRED_IDENTITY_FIELDS = (
@@ -336,6 +338,14 @@ def verify_delegated_work_authority(
         return reject(ReasonCode.NON_ASCII)
     if str(identity.get("principal_provider")) not in ALLOWED_PRINCIPAL_PROVIDERS:
         return reject(ReasonCode.IDENTITY_PROVIDER_INVALID)
+    if (
+        not str(work_authority.get("wsp15_allocation_receipt_id") or "").startswith("sha256:")
+        or not str(work_authority.get("wsp15_allocation_digest") or "").startswith("sha256:")
+        or str(work_authority.get("wsp15_priority") or "") not in {"P0", "P1", "P2", "P3", "P4"}
+        or type(work_authority.get("wsp15_mps_total")) is not int
+        or str(work_authority.get("wsp15_reasoning_tier") or "") not in {"REGULAR", "HIGH", "ULTRA"}
+    ):
+        return reject(ReasonCode.MALFORMED_PAYLOAD)
 
     principal_id = str(identity["principal_id"])
     reddog_id = str(identity["reddog_id"])

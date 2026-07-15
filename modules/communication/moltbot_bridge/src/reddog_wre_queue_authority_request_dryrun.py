@@ -73,6 +73,7 @@ class QueueAuthorityRequestDryRunReceipt:
     allowed_paths: Tuple[str, ...]
     denied_paths: Tuple[str, ...]
     wsp15_allocation_receipt_id: str
+    wsp15_allocation_digest: str
     wsp15_priority: str
     wsp15_mps_total: int
     reasoning_tier: str
@@ -167,10 +168,17 @@ def _string_tuple(value: Any) -> Tuple[str, ...]:
 
 def _valid_queue_wsp15_binding(queue_receipt: Mapping[str, Any], profile: Mapping[str, Any]) -> bool:
     receipt_id = str(queue_receipt.get("wsp15_allocation_receipt_id") or "")
+    allocation_digest = str(queue_receipt.get("wsp15_allocation_digest") or "")
     priority = str(queue_receipt.get("wsp15_priority") or "")
     tier = str(queue_receipt.get("reasoning_tier") or "")
     mps_total = queue_receipt.get("wsp15_mps_total")
-    if not receipt_id.startswith("sha256:") or not priority or not tier or not isinstance(mps_total, int):
+    if (
+        not receipt_id.startswith("sha256:")
+        or not allocation_digest.startswith("sha256:")
+        or not priority
+        or not tier
+        or not isinstance(mps_total, int)
+    ):
         return False
     profile_receipt = _mapping(profile.get("wsp15_allocation_receipt"))
     if not profile_receipt:
@@ -283,6 +291,11 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         denied_paths=denied_paths,
         requested_operation=operation,
         permission_snapshot_digest=str(profile["permission_snapshot_digest"]),
+        wsp15_allocation_receipt_id=str(queue_receipt.get("wsp15_allocation_receipt_id") or ""),
+        wsp15_allocation_digest=str(queue_receipt.get("wsp15_allocation_digest") or ""),
+        wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
+        wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
+        wsp15_reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
         identity_nonce=str(profile["identity_nonce"]),
         work_authority_nonce=str(profile["work_authority_nonce"]),
         issued_at=int(profile["issued_at"]),
@@ -315,6 +328,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         allowed_paths=request.allowed_paths,
         denied_paths=request.denied_paths,
         wsp15_allocation_receipt_id=str(queue_receipt.get("wsp15_allocation_receipt_id") or ""),
+        wsp15_allocation_digest=str(queue_receipt.get("wsp15_allocation_digest") or ""),
         wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
         wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
         reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),

@@ -23,6 +23,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     InMemoryNonceStore,
     PermissionSnapshot,
     PrincipalKeyResolver,
+    ReasonCode,
     RevocationOracle,
     SignatureVerifier,
     verify_delegated_work_authority,
@@ -150,6 +151,11 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "denied_paths": (),
         "requested_operation": "create_foundup",
         "permission_snapshot_digest": "sha256:snap-1",
+        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
+        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
+        "wsp15_priority": "P0",
+        "wsp15_mps_total": 20,
+        "wsp15_reasoning_tier": "ULTRA",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
         "issued_at": _NOW - 5,
@@ -201,6 +207,8 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
     assert result.receipt.no_openclaw_enqueue_performed is True
     assert signer.requests[0].signer_role == "principal"
     assert signer.requests[1].signer_role == "reddog"
+    assert result.work_authority["wsp15_allocation_receipt_id"] == "sha256:wsp15-allocation"
+    assert result.work_authority["wsp15_allocation_digest"] == "sha256:wsp15-allocation-digest"
 
     verified = verify_delegated_work_authority(
         work_authority=result.work_authority,
@@ -214,6 +222,29 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
         required_valve_state=_VALVE,
     )
     assert verified.accepted is True, verified.reason_codes
+
+
+def test_changed_signed_wsp15_allocation_digest_rejects() -> None:
+    result, signer, _, snapshot_resolver = _issue()
+
+    assert result.accepted is True
+    assert result.identity and result.work_authority
+    result.work_authority["wsp15_allocation_digest"] = "sha256:changed-after-signing"
+
+    verified = verify_delegated_work_authority(
+        work_authority=result.work_authority,
+        identity=result.identity,
+        signature_verifier=signer,
+        principal_key_resolver=_PrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=_NoRevocation(),
+        now=_NOW,
+        required_valve_state=_VALVE,
+    )
+
+    assert verified.accepted is False
+    assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
 
 
 def test_default_signer_fails_closed() -> None:

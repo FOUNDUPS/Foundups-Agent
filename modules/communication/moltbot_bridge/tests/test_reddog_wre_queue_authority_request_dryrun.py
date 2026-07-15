@@ -37,6 +37,7 @@ def _queue_result(**overrides):
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
         "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
+        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
         "wsp15_priority": "P0",
         "wsp15_mps_total": 18,
         "reasoning_tier": "ULTRA",
@@ -121,7 +122,13 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["allowed_paths"] == ("modules/foundups/paccess_001/**",)
     assert request["requested_operation"] == "create_foundup"
     assert request["valve_state_required"] == VALVE_OPEN_WORKTREE_CREATE
+    assert request["wsp15_allocation_receipt_id"] == "sha256:wsp15-allocation"
+    assert request["wsp15_allocation_digest"] == "sha256:wsp15-allocation-digest"
+    assert request["wsp15_priority"] == "P0"
+    assert request["wsp15_mps_total"] == 18
+    assert request["wsp15_reasoning_tier"] == "ULTRA"
     assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
+    assert result.receipt.wsp15_allocation_digest == "sha256:wsp15-allocation-digest"
     assert result.receipt.wsp15_priority == "P0"
     assert result.receipt.wsp15_mps_total == 18
     assert result.receipt.reasoning_tier == "ULTRA"

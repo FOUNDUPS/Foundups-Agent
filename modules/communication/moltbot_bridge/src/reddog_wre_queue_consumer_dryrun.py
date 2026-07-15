@@ -50,6 +50,7 @@ class WREQueueConsumerDryRunReceipt:
     worker_id: str
     freshness_receipt_id: str
     wsp15_allocation_receipt_id: str
+    wsp15_allocation_digest: str
     wsp15_priority: str
     wsp15_mps_total: int
     reasoning_tier: str
@@ -241,8 +242,10 @@ def plan_reddog_wre_queue_consumer_dry_run(
     allocation_tier = str(wsp15_allocation.get("reasoning_tier") or "")
     allocation_total = wsp15_allocation.get("mps_total")
     allocation_worker_plan = _mapping(wsp15_allocation.get("worker_plan"))
+    allocation_digest = _digest(wsp15_allocation) if wsp15_allocation else ""
     if (
         not allocation_receipt_id.startswith("sha256:")
+        or not allocation_digest.startswith("sha256:")
         or not allocation_priority
         or not allocation_tier
         or not isinstance(allocation_total, int)
@@ -277,6 +280,7 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "worker_id": worker_id,
         "freshness_receipt_id": freshness_receipt_id,
         "wsp15_allocation_receipt_id": allocation_receipt_id,
+        "wsp15_allocation_digest": allocation_digest,
         "wsp15_priority": allocation_priority,
         "wsp15_mps_total": allocation_total,
         "reasoning_tier": allocation_tier,
@@ -290,6 +294,7 @@ def plan_reddog_wre_queue_consumer_dry_run(
         worker_id=worker_id,
         freshness_receipt_id=freshness_receipt_id,
         wsp15_allocation_receipt_id=allocation_receipt_id,
+        wsp15_allocation_digest=allocation_digest,
         wsp15_priority=allocation_priority,
         wsp15_mps_total=allocation_total,
         reasoning_tier=allocation_tier,

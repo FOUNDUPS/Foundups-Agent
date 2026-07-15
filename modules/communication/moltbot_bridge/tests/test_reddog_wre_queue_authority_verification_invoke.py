@@ -138,6 +138,11 @@ def _queue_result():
         "claim_id": "claim-1",
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
+        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
+        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
+        "wsp15_priority": "P0",
+        "wsp15_mps_total": 20,
+        "reasoning_tier": "ULTRA",
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }
