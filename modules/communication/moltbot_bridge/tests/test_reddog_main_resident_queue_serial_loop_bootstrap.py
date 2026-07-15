@@ -11,6 +11,7 @@ from unittest.mock import patch
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
+    _operational_context_binding,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
@@ -85,14 +86,24 @@ def _queue_wsp15_allocation_receipt() -> dict[str, object]:
     return {
         "schema_version": "reddog_wsp15_allocation_receipt.v1",
         "receipt_id": "sha256:wsp15-allocation-queue",
+        "complexity": 5,
+        "importance": 5,
+        "deferability": 5,
+        "impact": 5,
         "mps_total": 20,
         "priority": "P0",
         "reasoning_tier": "ULTRA",
         "worker_plan": {
+            "schema_version": "reddog_wsp15_worker_plan.v1",
             "fusion_required": True,
+            "reasoning_tier": "ULTRA",
+            "critic_count": 2,
+            "coding_worker_count": 2,
             "independent_verifier_required": True,
+            "openclaw_candidate": True,
             "queue_mutation_allowed": False,
             "hermes_execution_allowed": False,
+            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
         },
     }
 
@@ -158,20 +169,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "context_view_id": "sha256:context-view-1",
         "evidence_bundle_id": "sha256:evidence-bundle-1",
         "readonly_audit_decision_id": "sha256:decision-1",
-        "wsp15_allocation_receipt": {
-            "complexity": 5,
-            "importance": 5,
-            "deferability": 5,
-            "impact": 5,
-            "mps_total": 20,
-            "priority": "P0",
-            "reasoning_tier": "ULTRA",
-            "worker_plan": {
-                "fusion_required": True,
-                "coding_workers": 1,
-                "independent_verifier": True,
-            },
-        },
+        "wsp15_allocation_receipt": _queue_wsp15_allocation_receipt(),
         "holoindex_evidence": {
             "holoindex_query": "RedDog resident queue materialized work order",
             "holoindex_status": "bundle_json_ok",
@@ -2567,7 +2565,144 @@ def test_bootstrap_rejects_work_order_materializer_without_context_binding(
 
     assert result.accepted is False
     assert "work_order_materializer_missing_context_binding:snapshot_receipt_id" in result.rejection_reasons
-    assert "work_order_materializer_missing_wsp15_allocation_receipt" in result.rejection_reasons
+
+
+def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_it(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile_payload = _profile()
+    profile_payload.pop("wsp15_allocation_receipt")
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    profile_payload["principal_public_key"] = principal_public
+    profile_payload["reddog_public_key"] = reddog_public
+    profile = _write_runtime_json(tmp_path, "profile.json", profile_payload)
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=6,
+    )
+
+    assert result.accepted is True
+
+
+def test_materializer_context_binding_uses_queue_wsp15_allocation_as_authority() -> None:
+    profile = _profile()
+    profile.pop("wsp15_allocation_receipt")
+    allocation = _queue_wsp15_allocation_receipt()
+
+    binding, reasons = _operational_context_binding(
+        authority_profile=profile,
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert reasons == ()
+    assert binding["wsp15_allocation_receipt"] == allocation
+
+
+def test_materializer_context_binding_rejects_conflicting_profile_wsp15_allocation() -> None:
+    allocation = _queue_wsp15_allocation_receipt()
+    conflicting = dict(allocation)
+    conflicting["priority"] = "P4"
+
+    _, reasons = _operational_context_binding(
+        authority_profile=_profile(wsp15_allocation_receipt=conflicting),
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert (
+        "work_order_materializer_conflicting_wsp15_allocation_receipt:"
+        "authority_profile.wsp15_allocation_receipt"
+    ) in reasons
+
+
+def test_materializer_context_binding_rejects_conflicting_snapshot_wsp15_allocation() -> None:
+    allocation = _queue_wsp15_allocation_receipt()
+    conflicting = dict(allocation)
+    conflicting["mps_total"] = 19
+
+    _, reasons = _operational_context_binding(
+        authority_profile=_profile(),
+        snapshot={"wsp15_allocation_receipt": conflicting},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert (
+        "work_order_materializer_conflicting_wsp15_allocation_receipt:"
+        "snapshot.wsp15_allocation_receipt"
+    ) in reasons
+
+
+def test_materializer_context_binding_rejects_queue_receipt_id_mismatch() -> None:
+    allocation = _queue_wsp15_allocation_receipt()
+
+    _, reasons = _operational_context_binding(
+        authority_profile=_profile(),
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id="sha256:other-allocation",
+    )
+
+    assert "work_order_materializer_wsp15_allocation_receipt_id_mismatch" in reasons
+
+
+def test_materializer_context_binding_rejects_missing_queue_allocation_receipt_id() -> None:
+    profile = _profile()
+    profile.pop("wsp15_allocation_receipt")
+    allocation = _queue_wsp15_allocation_receipt()
+    allocation.pop("receipt_id")
+
+    _, reasons = _operational_context_binding(
+        authority_profile=profile,
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id="",
+    )
+
+    assert "work_order_materializer_missing_queue_wsp15_allocation_receipt_id" in reasons
+    assert "work_order_materializer_malformed_wsp15_allocation_receipt:receipt_id" in reasons
+
+
+def test_materializer_context_binding_rejects_malformed_mps_priority_relationship() -> None:
+    profile = _profile()
+    profile.pop("wsp15_allocation_receipt")
+    allocation = _queue_wsp15_allocation_receipt()
+    allocation["priority"] = "P4"
+
+    _, reasons = _operational_context_binding(
+        authority_profile=profile,
+        snapshot={},
+        queue_wsp15_allocation=allocation,
+        queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
+    )
+
+    assert "work_order_materializer_malformed_wsp15_allocation_receipt:priority" in reasons
 
 
 def test_bootstrap_rejects_valve_environment_inside_repo(tmp_path: Path) -> None:
