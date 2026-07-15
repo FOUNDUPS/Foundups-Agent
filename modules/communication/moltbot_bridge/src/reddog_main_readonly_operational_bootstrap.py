@@ -268,6 +268,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         gate_decision=gate,
         audit_lanes=audit_lanes,
         allowed_read_targets=targets,
+        wsp15_allocation_receipt=wsp15_allocation_receipt,
     )
     if not plan.accepted:
         return _not_ready(

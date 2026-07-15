@@ -164,6 +164,7 @@ def _try_reddog_readonly_audit_dispatch(
         audit_result = execute_reddog_readonly_audit_task(
             task_context=context,
             repo_root=repo_root,
+            task_id=task_id,
         )
         payload = audit_result.to_dict()
         return {

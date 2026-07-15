@@ -103,6 +103,17 @@ class RedDogWSP15AllocationReceipt:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class RedDogWSP15AllocationValidationResult:
+    """Canonical validation result for downstream WSP 15 allocation bindings."""
+
+    accepted: bool
+    rejection_reasons: tuple[str, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
 def allocate_reddog_wsp15_receipt(
     *,
     requested_operation: str,
@@ -174,6 +185,124 @@ def allocate_reddog_wsp15_receipt(
         worker_plan=worker_plan,
         scoring_rationale=scoring_rationale,
     )
+
+
+def validate_reddog_wsp15_allocation_receipt(
+    allocation: Mapping[str, Any] | None,
+) -> RedDogWSP15AllocationValidationResult:
+    """Validate a RedDog WSP 15 allocation receipt and its deterministic ids.
+
+    Python ``bool`` is a subclass of ``int``; this validator intentionally uses
+    exact ``type(value) is int`` checks so boolean values cannot satisfy MPS
+    numeric fields. Downstream queue, architect, and worker bindings must use
+    this single validator instead of local partial checks.
+    """
+
+    reasons: list[str] = []
+    if not isinstance(allocation, Mapping) or not allocation:
+        return RedDogWSP15AllocationValidationResult(
+            accepted=False,
+            rejection_reasons=("missing_wsp15_allocation",),
+        )
+
+    required = (
+        "schema_version",
+        "receipt_id",
+        "input_digest",
+        "requested_operation",
+        "prompt_digest",
+        "changed_paths",
+        "allowed_read_targets",
+        "complexity",
+        "importance",
+        "deferability",
+        "impact",
+        "mps_total",
+        "priority",
+        "reasoning_tier",
+        "worker_plan",
+        "scoring_method",
+    )
+    for key in required:
+        if key not in allocation or allocation.get(key) in (None, ""):
+            reasons.append(f"missing_field:{key}")
+
+    schema_version = str(allocation.get("schema_version") or "")
+    if schema_version != SCHEMA_VERSION:
+        reasons.append("schema_version_mismatch")
+
+    receipt_id = str(allocation.get("receipt_id") or "")
+    if not receipt_id.startswith("sha256:"):
+        reasons.append("malformed_receipt_id")
+
+    input_digest = str(allocation.get("input_digest") or "")
+    if not input_digest.startswith("sha256:"):
+        reasons.append("malformed_input_digest")
+
+    score_keys = ("complexity", "importance", "deferability", "impact")
+    scores = tuple(allocation.get(key) for key in score_keys)
+    for key, value in zip(score_keys, scores):
+        if type(value) is not int or not 1 <= value <= 5:
+            reasons.append(f"malformed_score:{key}")
+
+    total = allocation.get("mps_total")
+    if type(total) is not int:
+        reasons.append("malformed_mps_total")
+    elif all(type(value) is int for value in scores) and total != sum(scores):
+        reasons.append("mps_total_mismatch")
+
+    priority = str(allocation.get("priority") or "")
+    if priority not in {PRIORITY_P0, PRIORITY_P1, PRIORITY_P2, PRIORITY_P3, PRIORITY_P4}:
+        reasons.append("malformed_priority")
+    elif type(total) is int and priority != _priority_for_total(total):
+        reasons.append("priority_mps_total_mismatch")
+
+    reasoning_tier = str(allocation.get("reasoning_tier") or "")
+    if reasoning_tier not in {REASONING_REGULAR, REASONING_HIGH, REASONING_ULTRA}:
+        reasons.append("malformed_reasoning_tier")
+
+    worker_plan = allocation.get("worker_plan")
+    if not isinstance(worker_plan, Mapping):
+        reasons.append("malformed_worker_plan")
+    else:
+        expected_fusion = reasoning_tier in {REASONING_HIGH, REASONING_ULTRA}
+        if worker_plan.get("reasoning_tier") != reasoning_tier:
+            reasons.append("worker_plan_reasoning_tier_mismatch")
+        if worker_plan.get("fusion_required") is not expected_fusion:
+            reasons.append("worker_plan_fusion_required_mismatch")
+        if worker_plan.get("hermes_execution_allowed") is not False:
+            reasons.append("worker_plan_hermes_must_be_false")
+        if worker_plan.get("queue_mutation_allowed") is not False:
+            reasons.append("worker_plan_queue_mutation_must_be_false")
+
+    if not isinstance(allocation.get("changed_paths"), Sequence) or isinstance(
+        allocation.get("changed_paths"), (str, bytes)
+    ):
+        reasons.append("malformed_changed_paths")
+    if not isinstance(allocation.get("allowed_read_targets"), Sequence) or isinstance(
+        allocation.get("allowed_read_targets"), (str, bytes)
+    ):
+        reasons.append("malformed_allowed_read_targets")
+
+    if "malformed_worker_plan" not in reasons:
+        expected_input_digest = _digest(_allocation_input_payload(allocation))
+        if input_digest and input_digest != expected_input_digest:
+            reasons.append("input_digest_mismatch")
+        expected_receipt_id = _digest({"receipt": input_digest, "type": SCHEMA_VERSION})
+        if receipt_id and input_digest and receipt_id != expected_receipt_id:
+            reasons.append("receipt_id_mismatch")
+
+    deduped = tuple(dict.fromkeys(reasons))
+    return RedDogWSP15AllocationValidationResult(
+        accepted=not deduped,
+        rejection_reasons=deduped,
+    )
+
+
+def canonical_reddog_wsp15_allocation_digest(allocation: Mapping[str, Any]) -> str:
+    """Return the canonical digest downstream bindings must compare."""
+
+    return _digest(dict(allocation))
 
 
 def _score_complexity(*, path_count: int, corpus: str, ultra_hit: bool) -> int:
@@ -251,6 +380,25 @@ def _worker_plan(*, priority: str, reasoning_tier: str, ultra_hit: bool) -> Mapp
         "hermes_execution_allowed": False,
         "queue_mutation_allowed": False,
         "mode_selection_source": SCHEMA_VERSION,
+    }
+
+
+def _allocation_input_payload(allocation: Mapping[str, Any]) -> Mapping[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "requested_operation": str(allocation.get("requested_operation") or ""),
+        "prompt_digest": str(allocation.get("prompt_digest") or ""),
+        "changed_paths": tuple(allocation.get("changed_paths") or ()),
+        "allowed_read_targets": tuple(allocation.get("allowed_read_targets") or ()),
+        "complexity": allocation.get("complexity"),
+        "importance": allocation.get("importance"),
+        "deferability": allocation.get("deferability"),
+        "impact": allocation.get("impact"),
+        "mps_total": allocation.get("mps_total"),
+        "priority": str(allocation.get("priority") or ""),
+        "reasoning_tier": str(allocation.get("reasoning_tier") or ""),
+        "worker_plan": allocation.get("worker_plan"),
+        "scoring_method": str(allocation.get("scoring_method") or ""),
     }
 
 
@@ -334,5 +482,8 @@ __all__ = [
     "REASONING_REGULAR",
     "REASONING_ULTRA",
     "RedDogWSP15AllocationReceipt",
+    "RedDogWSP15AllocationValidationResult",
     "allocate_reddog_wsp15_receipt",
+    "canonical_reddog_wsp15_allocation_digest",
+    "validate_reddog_wsp15_allocation_receipt",
 ]

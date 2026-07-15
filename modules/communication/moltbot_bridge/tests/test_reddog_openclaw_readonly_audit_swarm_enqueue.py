@@ -31,6 +31,9 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
     build_evidence_bundle,
     build_operational_context_snapshot,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -102,7 +105,7 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
     )
 
 
-def _valid_plan():
+def _valid_plan(wsp15_allocation_receipt=None):
     snapshot_result = build_operational_context_snapshot(
         repo_state={
             "head_sha": HEAD,
@@ -162,6 +165,7 @@ def _valid_plan():
             "docs/0102_session_briefings/work_ledger.schema.json",
             "modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py",
         ],
+        wsp15_allocation_receipt=wsp15_allocation_receipt,
     )
     assert plan.accepted is True
     return plan
@@ -187,6 +191,24 @@ def test_enqueue_accepts_plan_and_builds_pending_readonly_tasks() -> None:
     assert all(task.required_skills == (READONLY_AUDIT_TASK_SKILL,) for task in result.tasks)
     assert all(task.context["source"] == READONLY_AUDIT_TASK_SOURCE for task in result.tasks)
     assert writer.calls and len(writer.calls[0][0]) == 5
+
+
+def test_enqueue_carries_wsp15_allocation_into_repo_code_task_context() -> None:
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="readonly_audit_swarm",
+        prompt_text="audit current RedDog operational loop",
+        allowed_read_targets=["docs/0102_session_briefings/work_ledger.schema.json"],
+    ).to_dict()
+    plan = _valid_plan(wsp15_allocation_receipt=allocation)
+
+    result = enqueue_reddog_readonly_audit_swarm(plan=plan, writer=_FakeWriter())
+
+    assert result.accepted is True
+    repo_task = next(task for task in result.tasks if task.context["assignment"]["lane_id"] == "repo_code_audit")
+    assert repo_task.context["worker_mode"] == "model_backed_0102"
+    assert repo_task.context["wsp15_allocation_receipt"]["receipt_id"] == allocation["receipt_id"]
+    assert repo_task.context["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
+    assert repo_task.context["wsp15_allocation_digest"]
 
 
 def test_rejects_rejected_plan_and_missing_writer_before_publication() -> None:

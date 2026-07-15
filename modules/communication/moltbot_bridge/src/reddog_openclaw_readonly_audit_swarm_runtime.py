@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Mapping, Optional, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
@@ -76,6 +76,8 @@ class ReadOnlyAuditAssignment:
     determination_id: str
     required_source: str
     allowed_read_targets: tuple[str, ...]
+    wsp15_allocation_receipt_id: str = ""
+    wsp15_allocation_digest: str = ""
     forbidden_actions: tuple[str, ...] = FORBIDDEN_ACTIONS
     no_worker_spawn_performed: bool = True
     no_execution_performed: bool = True
@@ -101,6 +103,9 @@ class ReadOnlyAuditSwarmReceipt:
     assignment_ids: tuple[str, ...]
     lanes: tuple[str, ...]
     rejection_reasons: tuple[str, ...]
+    wsp15_allocation_receipt_id: str = ""
+    wsp15_allocation_digest: str = ""
+    wsp15_allocation_receipt: Mapping[str, Any] = field(default_factory=dict)
     no_model_call_performed: bool = True
     no_worker_spawn_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -177,6 +182,7 @@ def plan_reddog_openclaw_readonly_audit_swarm(
     gate_decision: FusionAssignmentGateDecision | None,
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     allowed_read_targets: Sequence[str] = (),
+    wsp15_allocation_receipt: Mapping[str, Any] | None = None,
 ) -> ReadOnlyAuditSwarmPlan:
     """Plan read-only audit assignments from an already accepted context gate."""
 
@@ -208,6 +214,11 @@ def plan_reddog_openclaw_readonly_audit_swarm(
     targets = _normalize_targets(allowed_read_targets)
     if len(targets) > MAX_ASSIGNMENT_TARGETS:
         reasons.append("too_many_allowed_read_targets")
+    allocation_id = ""
+    allocation_digest = ""
+    if wsp15_allocation_receipt:
+        allocation_id = str(wsp15_allocation_receipt.get("receipt_id") or "").strip()
+        allocation_digest = _digest(wsp15_allocation_receipt)
 
     if not reasons and snapshot and context_view and evidence_bundle and binding:
         _validate_binding(
@@ -250,6 +261,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
             evidence_bundle=evidence_bundle,
             binding=binding,
             allowed_read_targets=targets,
+            wsp15_allocation_receipt_id=allocation_id,
+            wsp15_allocation_digest=allocation_digest,
         )
         for lane in normalized_lanes
     )
@@ -259,6 +272,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
             "context_view_id": context_view.context_view_id,
             "evidence_bundle_id": evidence_bundle.evidence_bundle_id,
             "determination_id": binding.determination_id,
+            "wsp15_allocation_receipt_id": allocation_id,
+            "wsp15_allocation_digest": allocation_digest,
             "assignment_ids": [assignment.assignment_id for assignment in assignments],
         }
     )
@@ -271,6 +286,9 @@ def plan_reddog_openclaw_readonly_audit_swarm(
         evidence_bundle_id=evidence_bundle.evidence_bundle_id,
         determination_id=binding.determination_id,
         requested_operation=binding.requested_operation,
+        wsp15_allocation_receipt_id=allocation_id,
+        wsp15_allocation_digest=allocation_digest,
+        wsp15_allocation_receipt=dict(wsp15_allocation_receipt or {}),
         assignment_ids=tuple(assignment.assignment_id for assignment in assignments),
         lanes=tuple(assignment.lane_id for assignment in assignments),
         rejection_reasons=(),
@@ -354,6 +372,8 @@ def _build_assignment(
     evidence_bundle: EvidenceBundle,
     binding: DeterminationContextBinding,
     allowed_read_targets: tuple[str, ...],
+    wsp15_allocation_receipt_id: str,
+    wsp15_allocation_digest: str,
 ) -> ReadOnlyAuditAssignment:
     payload = {
         "lane_id": lane_id,
@@ -362,6 +382,8 @@ def _build_assignment(
         "context_view_id": context_view.context_view_id,
         "evidence_bundle_id": evidence_bundle.evidence_bundle_id,
         "determination_id": binding.determination_id,
+        "wsp15_allocation_receipt_id": wsp15_allocation_receipt_id,
+        "wsp15_allocation_digest": wsp15_allocation_digest,
         "required_source": LANE_REQUIRED_SOURCE[lane_id],
         "allowed_read_targets": allowed_read_targets,
     }
@@ -374,6 +396,8 @@ def _build_assignment(
         context_view_id=context_view.context_view_id,
         evidence_bundle_id=evidence_bundle.evidence_bundle_id,
         determination_id=binding.determination_id,
+        wsp15_allocation_receipt_id=wsp15_allocation_receipt_id,
+        wsp15_allocation_digest=wsp15_allocation_digest,
         required_source=LANE_REQUIRED_SOURCE[lane_id],
         allowed_read_targets=allowed_read_targets,
     )
@@ -407,6 +431,9 @@ def _rejected_plan(
         evidence_bundle_id=evidence_bundle.evidence_bundle_id if evidence_bundle else "",
         determination_id=binding.determination_id if binding else "",
         requested_operation=binding.requested_operation if binding else "",
+        wsp15_allocation_receipt_id="",
+        wsp15_allocation_digest="",
+        wsp15_allocation_receipt={},
         assignment_ids=(),
         lanes=tuple(lanes),
         rejection_reasons=tuple(reasons),

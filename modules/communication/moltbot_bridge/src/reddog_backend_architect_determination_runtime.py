@@ -33,6 +33,9 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
     ReadOnlyAuditReportCollectionResult,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    validate_reddog_wsp15_allocation_receipt,
+)
 
 
 ARCHITECT_DETERMINATION_ACCEPT = "ARCHITECT_DETERMINATION_ACCEPT"
@@ -75,6 +78,7 @@ class ArchitectDeterminationReason:
     INVALID_MODEL_OUTPUT = "REJECT_ARCHITECT_DETERMINATION_INVALID_MODEL_OUTPUT"
     WSP15_RECEIPT_MISMATCH = "REJECT_ARCHITECT_DETERMINATION_WSP15_RECEIPT_MISMATCH"
     STORE_REJECTED = "REJECT_ARCHITECT_DETERMINATION_STORE_REJECTED"
+    PROMPT_BUDGET_EXCEEDED = "REJECT_ARCHITECT_DETERMINATION_PROMPT_BUDGET_EXCEEDED"
 
 
 @dataclass(frozen=True)
@@ -519,17 +523,38 @@ def run_reddog_backend_architect_determination_runtime(
     assert report_collection is not None
     assert cycle_id is not None
     runner = model_runner if model_runner is not None else FoundupsFusionArchitectModelRunner()
-    prompt = _build_architect_prompt(
-        snapshot=snapshot,
-        report_collection=report_collection,
-        reports=reports,
-        wsp15_allocation_receipt=wsp15_allocation_receipt,
-    )
-    context = _build_architect_context(
-        context_view=context_view,
-        evidence_bundle=evidence_bundle,
-        reports=reports,
-    )
+    try:
+        prompt = _build_architect_prompt(
+            snapshot=snapshot,
+            report_collection=report_collection,
+            reports=reports,
+            wsp15_allocation_receipt=wsp15_allocation_receipt,
+        )
+        context = _build_architect_context(
+            context_view=context_view,
+            evidence_bundle=evidence_bundle,
+            reports=reports,
+        )
+    except ValueError:
+        receipt = _receipt(
+            accepted=False,
+            action=ACTION_STOP,
+            next_slice_name=None,
+            summary="Backend architect prompt/context exceeded deterministic budget.",
+            snapshot=snapshot,
+            context_view=context_view,
+            evidence_bundle=evidence_bundle,
+            report_bundle_id=report_bundle_id,
+            report_count=_report_count(report_collection),
+            report_digests=report_digests,
+            model_result=None,
+            allocation_receipt_id=allocation_receipt_id,
+            allocation_digest=allocation_digest,
+            cycle_id=cycle_id,
+            decision_reasons=(),
+            rejection_reasons=(ArchitectDeterminationReason.PROMPT_BUDGET_EXCEEDED,),
+        )
+        return _result(receipt=receipt, persist_result=_persist_rejected(receipt))
     binding = fusion_gate.determination_binding.to_dict() if fusion_gate.determination_binding else {}
     try:
         model_result = runner.run_architect_determination(
@@ -729,36 +754,12 @@ def _validate_static_inputs(
 
 
 def _validate_wsp15_allocation(allocation: Mapping[str, Any], reasons: list[str]) -> None:
-    if not isinstance(allocation, Mapping) or not allocation:
+    validation = validate_reddog_wsp15_allocation_receipt(allocation)
+    if validation.accepted:
+        return
+    if validation.rejection_reasons == ("missing_wsp15_allocation",):
         reasons.append(ArchitectDeterminationReason.MISSING_WSP15_ALLOCATION)
-        return
-    required = (
-        "receipt_id",
-        "complexity",
-        "importance",
-        "deferability",
-        "impact",
-        "mps_total",
-        "priority",
-        "reasoning_tier",
-        "worker_plan",
-    )
-    missing = [key for key in required if key not in allocation or allocation.get(key) in (None, "")]
-    if missing:
-        reasons.append(ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION)
-        return
-    if not str(allocation.get("receipt_id") or "").startswith("sha256:"):
-        reasons.append(ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION)
-    scores = [allocation.get(key) for key in ("complexity", "importance", "deferability", "impact")]
-    if not all(isinstance(value, int) and 1 <= value <= 5 for value in scores):
-        reasons.append(ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION)
-    total = allocation.get("mps_total")
-    if not isinstance(total, int) or total != sum(scores):
-        reasons.append(ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION)
-    priority = str(allocation.get("priority") or "")
-    if priority not in {"P0", "P1", "P2", "P3", "P4"}:
-        reasons.append(ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION)
-    if not isinstance(allocation.get("worker_plan"), Mapping):
+    else:
         reasons.append(ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION)
 
 
@@ -862,8 +863,7 @@ def _build_architect_prompt(
         "wsp15_allocation_receipt_id": wsp15_allocation_receipt.get("receipt_id"),
         "reports": [_report_prompt_view(report) for report in reports],
     }
-    text = _canonical_json(payload)
-    return text[:DEFAULT_MAX_PROMPT_CHARS]
+    return _budgeted_canonical_json(payload, max_chars=DEFAULT_MAX_PROMPT_CHARS)
 
 
 def _build_architect_context(
@@ -876,20 +876,20 @@ def _build_architect_context(
         "context_view_id": context_view.context_view_id,
         "snapshot_receipt_id": context_view.snapshot_receipt_id,
         "evidence_bundle_id": evidence_bundle.evidence_bundle_id,
-        "context_view_text": context_view.text[:6000],
+        "context_view_text": _bound_text(context_view.text, 6000),
         "audit_reports": [_report_prompt_view(report) for report in reports],
     }
-    return _canonical_json(payload)[:DEFAULT_MAX_PROMPT_CHARS]
+    return _budgeted_canonical_json(payload, max_chars=DEFAULT_MAX_PROMPT_CHARS)
 
 
 def _report_prompt_view(report: Mapping[str, Any]) -> Mapping[str, Any]:
     return {
         "assignment_id": report.get("assignment_id"),
         "lane_id": report.get("lane_id"),
-        "summary": str(report.get("summary") or "")[:1000],
+        "summary": _bound_text(report.get("summary"), 1000),
         "report_digest": report.get("report_digest"),
-        "evidence_refs": list(_normalize_text_list(report.get("evidence_refs"))),
-        "findings": report.get("findings") if isinstance(report.get("findings"), list) else [],
+        "evidence_refs": list(_normalize_text_list(report.get("evidence_refs")))[:32],
+        "findings": _bounded_findings(report.get("findings")),
     }
 
 
@@ -1156,6 +1156,42 @@ def _snapshot_expired(valid_until: str, now_iso: str) -> bool:
 
 def _canonical_json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+
+
+def _budgeted_canonical_json(value: Mapping[str, Any], *, max_chars: int) -> str:
+    encoded = _canonical_json(value)
+    if len(encoded) > max_chars:
+        raise ValueError("canonical_json_budget_exceeded")
+    return encoded
+
+
+def _bound_text(value: Any, max_chars: int) -> str:
+    text = str(value or "")
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars]
+
+
+def _bounded_findings(value: Any) -> list[Mapping[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    bounded: list[Mapping[str, Any]] = []
+    for item in value[:12]:
+        if not isinstance(item, Mapping):
+            continue
+        bounded.append(
+            {
+                "finding_id": _bound_text(item.get("finding_id"), 160),
+                "claim": _bound_text(item.get("claim"), 800),
+                "wsp97_label": _bound_text(item.get("wsp97_label"), 64),
+                "recommended_action": _bound_text(item.get("recommended_action"), 64),
+                "wsp15_priority": _bound_text(item.get("wsp15_priority"), 16),
+                "severity": _bound_text(item.get("severity"), 32),
+                "next_slice_name": _bound_text(item.get("next_slice_name"), 160),
+                "evidence_refs": list(_normalize_text_list(item.get("evidence_refs")))[:16],
+            }
+        )
+    return bounded
 
 
 def _digest(value: Any) -> str:

@@ -49,6 +49,19 @@ class ReadOnlyAuditTaskRejectReason:
     TOO_MANY_TARGETS = "REJECT_TOO_MANY_TARGETS"
     UNSAFE_TARGET = "REJECT_UNSAFE_TARGET"
     TARGET_READ_FAILED = "REJECT_TARGET_READ_FAILED"
+    MISSING_WSP15_ALLOCATION = "REJECT_MISSING_WSP15_ALLOCATION"
+    MALFORMED_WSP15_ALLOCATION = "REJECT_MALFORMED_WSP15_ALLOCATION"
+    WSP15_BINDING_MISMATCH = "REJECT_WSP15_BINDING_MISMATCH"
+    WSP15_FUSION_REQUIRED = "REJECT_WSP15_FUSION_REQUIRED"
+    INDEX_QUERY_FAILED = "REJECT_INDEX_QUERY_FAILED"
+    INDEX_QUERY_STALE = "REJECT_INDEX_QUERY_STALE"
+    INDEX_QUERY_NO_CANDIDATES = "REJECT_INDEX_QUERY_NO_CANDIDATES"
+    MODEL_FAILURE = "REJECT_MODEL_FAILURE"
+    MODEL_TIMEOUT = "REJECT_MODEL_TIMEOUT"
+    MODEL_SCHEMA_FAILURE = "REJECT_MODEL_SCHEMA_FAILURE"
+    UNKNOWN_EVIDENCE_REF = "REJECT_UNKNOWN_EVIDENCE_REF"
+    REPORT_MISSING_EVIDENCE = "REJECT_REPORT_MISSING_EVIDENCE"
+    PROMPT_BUDGET_EXCEEDED = "REJECT_PROMPT_BUDGET_EXCEEDED"
 
 
 @dataclass(frozen=True)
@@ -105,8 +118,19 @@ def execute_reddog_readonly_audit_task(
     *,
     task_context: Mapping[str, Any],
     repo_root: str | Path,
+    task_id: str | None = None,
+    model_runner: Any | None = None,
+    holoindex_adapter: Any | None = None,
+    codeindex_adapter: Any | None = None,
+    timeout_seconds: int = 60,
 ) -> ReadOnlyAuditTaskExecutionResult:
-    """Execute a RedDog read-only audit task using local file evidence only."""
+    """Execute a RedDog read-only audit task.
+
+    The default path remains deterministic for existing task contexts. Tasks
+    explicitly marked ``model_backed_0102`` and assigned to ``repo_code_audit``
+    use the model-backed worker path and fail closed on retrieval/model/schema
+    errors.
+    """
 
     if not isinstance(task_context, Mapping):
         return _reject([ReadOnlyAuditTaskRejectReason.INVALID_CONTEXT])
@@ -123,6 +147,24 @@ def execute_reddog_readonly_audit_task(
         return _reject([ReadOnlyAuditTaskRejectReason.TOO_MANY_TARGETS])
 
     root = Path(repo_root).resolve()
+    lane_id = str(assignment.get("lane_id") or "")
+    if lane_id == "repo_code_audit" and task_context.get("worker_mode") == "model_backed_0102":
+        from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
+            execute_model_backed_repo_code_audit,
+        )
+
+        return execute_model_backed_repo_code_audit(
+            task_context=task_context,
+            assignment=assignment,
+            seed_targets=targets,
+            task_id=task_id,
+            repo_root=root,
+            model_runner=model_runner,
+            holoindex_adapter=holoindex_adapter,
+            codeindex_adapter=codeindex_adapter,
+            timeout_seconds=timeout_seconds,
+        )
+
     snapshots: list[_ReadOnlyTargetSnapshot] = []
     for target in targets:
         safe_path = _resolve_safe_target(root, target)
