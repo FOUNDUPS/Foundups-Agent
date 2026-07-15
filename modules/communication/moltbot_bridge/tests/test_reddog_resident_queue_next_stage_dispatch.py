@@ -23,6 +23,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_AUTHORITY_RUNTIME_INVOKE,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    with_queue_wsp15_allocation,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -53,7 +56,7 @@ def _snapshot() -> dict[str, object]:
             }
         ],
         "wre_queue_items": [
-            {
+            with_queue_wsp15_allocation({
                 "queue_item_id": "queue-1",
                 "slice_id": "REDDOG_TEST_SLICE_PHASE1",
                 "claim_id": "claim-1",
@@ -61,7 +64,7 @@ def _snapshot() -> dict[str, object]:
                 "status": "QUEUED",
                 "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
                 "no_execution_performed": True,
-            }
+            })
         ],
     }
 

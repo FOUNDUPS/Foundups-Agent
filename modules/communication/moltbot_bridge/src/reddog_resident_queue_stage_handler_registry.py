@@ -70,6 +70,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_work_order_i
     WORK_ORDER_INVOCATION_STAGE_KEY,
     build_reddog_resident_queue_work_order_invocation_stage_handler,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_dryrun_handler import (
+    WORKER_DISPATCH_DRYRUN_STAGE_KEY,
+    build_reddog_resident_queue_worker_dispatch_dryrun_stage_handler,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worktree_create_handler import (
     WORKTREE_CREATE_STAGE_KEY,
     build_reddog_resident_queue_worktree_create_stage_handler,
@@ -266,6 +270,16 @@ def build_reddog_resident_queue_stage_handler_registry(
             forbidden_operations=forbidden_operations,
             revoked_key_epochs=revoked_key_epochs,
             leeway_s=leeway_s,
+        ),
+    )
+    _add_if_ready(
+        handlers,
+        missing,
+        WORKER_DISPATCH_DRYRUN_STAGE_KEY,
+        (),
+        lambda: build_reddog_resident_queue_worker_dispatch_dryrun_stage_handler(
+            work_state_snapshot=work_state_snapshot,
+            chain_results_store=chain_results_store,
         ),
     )
     _add_if_ready(

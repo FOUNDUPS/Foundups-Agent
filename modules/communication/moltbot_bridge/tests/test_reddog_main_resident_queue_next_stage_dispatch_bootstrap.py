@@ -21,6 +21,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    with_queue_wsp15_allocation,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -37,6 +40,18 @@ EXPIRES = "2026-07-14T01:00:00+00:00"
 
 
 def _snapshot() -> dict[str, object]:
+    queue_item = with_queue_wsp15_allocation(
+        {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+            "no_execution_performed": True,
+        },
+        prompt_text="RedDog main resident queue next stage dispatch bootstrap worktree authority",
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -50,17 +65,7 @@ def _snapshot() -> dict[str, object]:
                 "freshness_receipt_id": "fresh-1",
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 

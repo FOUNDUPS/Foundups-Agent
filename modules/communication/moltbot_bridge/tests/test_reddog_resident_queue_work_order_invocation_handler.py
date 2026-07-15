@@ -33,6 +33,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     NEXT_QUEUE_EXECUTOR_PLAN_DRYRUN,
     NEXT_QUEUE_WORK_ORDER_INVOCATION,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_dryrun_handler import (
+    WORKER_DISPATCH_DRYRUN_STAGE_KEY,
+    build_reddog_resident_queue_worker_dispatch_dryrun_stage_handler,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_work_order_invocation_handler import (
     FAIL_AUTHORITY_RUNTIME_STAGE_MISSING,
     FAIL_AUTHORITY_VERIFICATION_STAGE_MISSING,
@@ -61,6 +65,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authorit
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_REJECT,
     QueueVerifiedAuthorityWorkOrderInvokeReason,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -82,6 +89,15 @@ FID = "paccess_001"
 ALLOWED = [f"modules/foundups/{FID}/**"]
 DENIED: list[str] = []
 OPERATION = "create_foundup"
+
+
+def _queue_wsp15_allocation_receipt() -> dict[str, object]:
+    return allocate_reddog_wsp15_receipt(
+        requested_operation=OPERATION,
+        prompt_text="RedDog resident queue work order invocation worktree authority",
+        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_work_order_invocation_handler.py",),
+        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_work_order_invocation_handler.py",),
+    ).to_dict()
 
 
 class _MockSignerVerifier:
@@ -186,6 +202,7 @@ def _fresh_captured() -> str:
 
 
 def _snapshot() -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt()
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -206,7 +223,12 @@ def _snapshot() -> dict[str, object]:
                 "claim_id": "claim-1",
                 "worker_id": "reddog-0102",
                 "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+                "evidence_refs": [
+                    "claim:claim-1",
+                    "freshness:fresh-1",
+                    f"wsp15_allocation:{allocation['receipt_id']}",
+                ],
+                "wsp15_allocation_receipt": allocation,
                 "no_execution_performed": True,
             }
         ],
@@ -350,6 +372,19 @@ def _seed_verified_authority(chain_store: InMemoryResidentQueueChainResultsStore
         now_iso=NOW_ISO,
     )
     assert verification_result.accepted is True
+
+    dispatch_handler = build_reddog_resident_queue_worker_dispatch_dryrun_stage_handler(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=chain_store,
+    )
+    dispatch_result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={WORKER_DISPATCH_DRYRUN_STAGE_KEY: dispatch_handler},
+        now_iso=NOW_ISO,
+    )
+    assert dispatch_result.accepted is True
 
 
 def _handler(

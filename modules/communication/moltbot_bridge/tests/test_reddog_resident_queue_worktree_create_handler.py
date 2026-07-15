@@ -57,6 +57,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authorit
 from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import (
     WORKTREE_CREATE_ACCEPT,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
+    with_queue_wsp15_allocation,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -129,6 +133,18 @@ def _worktree_path(repo_root: Path) -> str:
 
 
 def _snapshot() -> dict[str, object]:
+    queue_item = with_queue_wsp15_allocation(
+        {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+            "no_execution_performed": True,
+        },
+        prompt_text="RedDog resident queue worktree create worktree authority",
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -142,17 +158,7 @@ def _snapshot() -> dict[str, object]:
                 "freshness_receipt_id": "fresh-1",
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -293,6 +299,7 @@ def _seeded_store(repo_root: Path, **stage_overrides: object) -> InMemoryResiden
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
         "authority_runtime": {"decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT},
         "authority_verification": {"decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT},
+        "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
         "work_order_invocation": _work_order_invocation_result(),
         EXECUTOR_PLAN_STAGE_KEY: _executor_plan_result(repo_root),
         EXECUTION_VALVE_STAGE_KEY: _execution_valve_result(),
