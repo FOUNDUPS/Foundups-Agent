@@ -42,6 +42,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handler_registry import (
     build_reddog_resident_queue_stage_handler_registry,
 )
+from modules.infrastructure.wre_core.src.reddog_verified_outcome_ratchet import (
+    JsonlOutcomeRatchetStore,
+)
 
 
 REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED = "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED"
@@ -72,6 +75,7 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_bounded_file_edit_performed: bool = True
     no_slice_verification_performed: bool = True
     no_verified_draft_pr_publish_performed: bool = True
+    no_verified_outcome_ratchet_performed: bool = True
     no_shell_command_executed: bool = True
     no_openclaw_enqueue_performed: bool = True
     no_hermes_dispatch_performed: bool = True
@@ -116,6 +120,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     holoindex_evidence_path: Path | str | None = None,
     verifier_request_path: Path | str | None = None,
     publish_request_path: Path | str | None = None,
+    ratchet_request_path: Path | str | None = None,
+    outcome_ratchet_store_path: Path | str | None = None,
     authority_state_path: Path | str | None = None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
@@ -128,6 +134,9 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     worktree_runner_mode: str | None = None,
     worktree_runner_timeout_s: int = 120,
     draft_pr_runner: Any = None,
+    outcome_ratchet_store: Any = None,
+    explicit_pattern_memory_write_requested: bool = False,
+    ratchet_pattern_memory_sink: Any = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
@@ -249,6 +258,25 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if publish_request_reasons:
         return _not_ready(publish_request_reasons, chain_results_path=None)
 
+    ratchet_request, ratchet_request_reasons = _read_json_outside_repo(
+        root,
+        ratchet_request_path,
+        missing_reason="missing_ratchet_request_path",
+        inside_reason="ratchet_request_path_inside_repo",
+        unreadable_reason="malformed_ratchet_request",
+        required=False,
+    )
+    if ratchet_request_reasons:
+        return _not_ready(ratchet_request_reasons, chain_results_path=None)
+
+    resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
+        root,
+        injected_store=outcome_ratchet_store,
+        store_path=outcome_ratchet_store_path,
+    )
+    if ratchet_store_reasons:
+        return _not_ready(ratchet_store_reasons, chain_results_path=None)
+
     resolved_worktree_runner, runner_reasons = _build_worktree_runner(
         root,
         injected_runner=worktree_runner,
@@ -307,6 +335,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         verifier_request=verifier_request,
         publish_request=publish_request,
         draft_pr_runner=draft_pr_runner,
+        ratchet_request=ratchet_request,
+        outcome_ratchet_store=resolved_outcome_ratchet_store,
+        explicit_pattern_memory_write_requested=explicit_pattern_memory_write_requested,
+        ratchet_pattern_memory_sink=ratchet_pattern_memory_sink,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))
@@ -425,6 +457,28 @@ def _build_worktree_runner(
     return RealRedDogWorktreeRunner(repo_root, timeout_s=int(timeout_s)), ()
 
 
+def _build_outcome_ratchet_store(
+    repo_root: Path,
+    *,
+    injected_store: Any,
+    store_path: Path | str | None,
+) -> tuple[Any, tuple[str, ...]]:
+    if injected_store is not None:
+        return injected_store, ()
+    if not store_path:
+        return None, ()
+    path, reasons = _resolve_output_outside_repo(
+        repo_root,
+        store_path,
+        missing_reason="missing_outcome_ratchet_store_path",
+        inside_reason="outcome_ratchet_store_path_inside_repo",
+    )
+    if reasons:
+        return None, reasons
+    assert path is not None
+    return JsonlOutcomeRatchetStore(path), ()
+
+
 def _resolve_output_outside_repo(
     repo_root: Path,
     value: Path | str | None,
@@ -518,6 +572,9 @@ def _from_loop(
         no_slice_verification_performed="slice_verifier" not in loop.dispatched_stages,
         no_verified_draft_pr_publish_performed=(
             "verified_draft_pr_publish" not in loop.dispatched_stages
+        ),
+        no_verified_outcome_ratchet_performed=(
+            "verified_outcome_ratchet" not in loop.dispatched_stages
         ),
         no_repo_mutation_performed=not any(
             stage in loop.dispatched_stages for stage in ("worktree_create", "bounded_worker_pilot")
