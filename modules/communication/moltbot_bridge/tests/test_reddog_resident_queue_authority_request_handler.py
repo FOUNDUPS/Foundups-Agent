@@ -31,6 +31,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
     QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    with_queue_wsp15_allocation,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -57,6 +60,7 @@ def _snapshot(**queue_overrides: object) -> dict[str, object]:
         "no_execution_performed": True,
     }
     queue_item.update(queue_overrides)
+    queue_item = with_queue_wsp15_allocation(queue_item)
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],

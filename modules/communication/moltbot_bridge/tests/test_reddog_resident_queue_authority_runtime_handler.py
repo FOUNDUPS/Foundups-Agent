@@ -49,6 +49,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
     QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
     QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -66,6 +69,15 @@ EXPIRES = "2026-07-14T01:00:00+00:00"
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
 _DEFAULT_SIGNER = object()
+
+
+def _queue_wsp15_allocation_receipt() -> dict[str, object]:
+    return allocate_reddog_wsp15_receipt(
+        requested_operation="create_foundup",
+        prompt_text="RedDog resident queue authority runtime worktree authority",
+        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_authority_runtime_handler.py",),
+        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_authority_runtime_handler.py",),
+    ).to_dict()
 
 
 class _MockSigner:
@@ -129,6 +141,7 @@ class _SnapshotResolver:
 
 
 def _snapshot() -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt()
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -149,7 +162,12 @@ def _snapshot() -> dict[str, object]:
                 "claim_id": "claim-1",
                 "worker_id": "reddog-0102",
                 "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+                "evidence_refs": [
+                    "claim:claim-1",
+                    "freshness:fresh-1",
+                    f"wsp15_allocation:{allocation['receipt_id']}",
+                ],
+                "wsp15_allocation_receipt": allocation,
                 "no_execution_performed": True,
             }
         ],

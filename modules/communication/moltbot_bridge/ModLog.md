@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_RESIDENT_QUEUE_WORKER_DISPATCH_DRYRUN_STAGE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Inserted `worker_dispatch_dryrun` into the resident queue serial chain after
+  authority verification and before verified work-order invocation.
+- Added a resident queue stage handler that consumes the accepted signed
+  authority runtime and verification receipts plus the selected queue item's
+  authoritative WSP_15 allocation receipt, then emits the existing signed
+  authority worker-dispatch dry-run plan.
+- The stage advances to work-order invocation only after a dispatch dry-run
+  accept receipt; missing runtime, verification, selected queue item, or
+  WSP_15 allocation fails closed.
+- No worker spawn, queue mutation, worktree creation, shell command, OpenClaw
+  enqueue, Hermes dispatch, repo mutation, PR creation, reward settlement,
+  PatternMemory write, or HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog resident queue worker dispatch dryrun
+  stage` returned adjacent governance assets but not this new stage seam;
+  recorded as
+  `HOLOINDEX_REDDOG_RESIDENT_QUEUE_WORKER_DISPATCH_DRYRUN_STAGE_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-15: REDDOG_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

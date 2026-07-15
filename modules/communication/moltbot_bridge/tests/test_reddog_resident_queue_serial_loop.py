@@ -33,6 +33,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
+    SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
     QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT,
 )
@@ -63,6 +66,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_worktr
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authority_work_order_invoke import (
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -80,6 +86,7 @@ STAGE_ACCEPT_VALUES = {
     "authority_request": ("status", QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT),
     "authority_runtime": ("decision", QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT),
     "authority_verification": ("decision", QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT),
+    "worker_dispatch_dryrun": ("decision", SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT),
     "work_order_invocation": ("decision", QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT),
     "executor_plan": ("decision", QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT),
     "execution_valve": ("decision", QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT),
@@ -94,6 +101,12 @@ STAGE_ACCEPT_VALUES = {
 
 
 def _snapshot() -> dict[str, object]:
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="create_foundup",
+        prompt_text="RedDog resident queue serial loop runtime authority worktree execution",
+        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_serial_loop.py",),
+        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_serial_loop.py",),
+    ).to_dict()
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -114,7 +127,12 @@ def _snapshot() -> dict[str, object]:
                 "claim_id": "claim-1",
                 "worker_id": "reddog-0102",
                 "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+                "evidence_refs": [
+                    "claim:claim-1",
+                    "freshness:fresh-1",
+                    f"wsp15_allocation:{allocation['receipt_id']}",
+                ],
+                "wsp15_allocation_receipt": allocation,
                 "no_execution_performed": True,
             }
         ],

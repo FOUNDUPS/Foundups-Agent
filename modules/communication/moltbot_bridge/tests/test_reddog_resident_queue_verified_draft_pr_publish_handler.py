@@ -69,6 +69,10 @@ from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized
     _publish_request,
     _queue_verifier_result,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
+    with_queue_wsp15_allocation,
+)
 from modules.infrastructure.wre_core.src.reddog_verified_draft_pr_publish import (
     VERIFIED_DRAFT_PR_PUBLISH_ACCEPT,
 )
@@ -88,6 +92,18 @@ EXPIRES = "2026-07-14T01:00:00+00:00"
 
 
 def _snapshot() -> dict[str, object]:
+    queue_item = with_queue_wsp15_allocation(
+        {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+            "no_execution_performed": True,
+        },
+        prompt_text="RedDog resident queue verified draft PR publish worktree authority",
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -101,17 +117,7 @@ def _snapshot() -> dict[str, object]:
                 "freshness_receipt_id": "fresh-1",
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -120,6 +126,7 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
         "authority_runtime": {"decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT},
         "authority_verification": {"decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT},
+        "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
         "work_order_invocation": {"decision": QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT},
         "executor_plan": {"decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT},
         "execution_valve": {"decision": QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT},

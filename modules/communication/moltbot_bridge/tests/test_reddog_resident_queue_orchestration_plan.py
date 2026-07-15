@@ -6,6 +6,9 @@ import ast
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src import reddog_resident_queue_orchestration_plan as planner
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -21,7 +24,17 @@ NOW = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
 
 
+def _queue_wsp15_allocation_receipt() -> dict[str, object]:
+    return allocate_reddog_wsp15_receipt(
+        requested_operation="create_foundup",
+        prompt_text="RedDog resident queue runtime authority worktree execution",
+        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
+        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
+    ).to_dict()
+
+
 def _snapshot() -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt()
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [
@@ -47,7 +60,12 @@ def _snapshot() -> dict[str, object]:
                 "claim_id": "claim-1",
                 "worker_id": "reddog-0102",
                 "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+                "evidence_refs": [
+                    "claim:claim-1",
+                    "freshness:fresh-1",
+                    f"wsp15_allocation:{allocation['receipt_id']}",
+                ],
+                "wsp15_allocation_receipt": allocation,
                 "no_execution_performed": True,
             }
         ],
@@ -64,6 +82,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         },
         "authority_verification": {
             "decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT",
+        },
+        "worker_dispatch_dryrun": {
+            "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT",
         },
         "work_order_invocation": {
             "decision": "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT",

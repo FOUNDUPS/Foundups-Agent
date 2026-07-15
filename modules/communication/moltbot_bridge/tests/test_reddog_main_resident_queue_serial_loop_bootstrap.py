@@ -798,7 +798,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(tmp_path: Path) -> dict[str, obje
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
     assert verifier_run.accepted is True
     verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
@@ -1056,7 +1056,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         "authority_runtime",
         "authority_verification",
     )
-    assert result.next_action == "RUN_QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE"
+    assert result.next_action == "RUN_QUEUE_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN"
     assert result.no_signature_verification_performed is False
     assert result.no_worktree_created is True
     assert result.no_shell_command_executed is True
@@ -1105,16 +1105,17 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=6,
+        max_steps=7,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.steps_run == 6
+    assert result.steps_run == 7
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
         "work_order_invocation",
         "executor_plan",
         "execution_valve",
@@ -1178,16 +1179,17 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=6,
+        max_steps=7,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.steps_run == 6
+    assert result.steps_run == 7
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
         "work_order_invocation",
         "executor_plan",
         "execution_valve",
@@ -1244,16 +1246,17 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=7,
+        max_steps=8,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.steps_run == 7
+    assert result.steps_run == 8
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
         "work_order_invocation",
         "executor_plan",
         "execution_valve",
@@ -1356,15 +1359,16 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=8,
+        max_steps=9,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 8
+    assert result.steps_run == 9
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
         "work_order_invocation",
         "executor_plan",
         "execution_valve",
@@ -1478,15 +1482,16 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 9
+    assert result.steps_run == 10
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
         "work_order_invocation",
         "executor_plan",
         "execution_valve",
@@ -1608,15 +1613,16 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 10
+    assert result.steps_run == 11
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
         "work_order_invocation",
         "executor_plan",
         "execution_valve",
@@ -1738,7 +1744,7 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
     assert verifier_run.accepted is True
     verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
@@ -2007,12 +2013,12 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=8,
+        max_steps=9,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 7
+    assert result.steps_run == 8
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:bounded_worker_pilot" in result.rejection_reasons
     assert result.no_worktree_created is False
@@ -2095,12 +2101,12 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 8
+    assert result.steps_run == 9
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:slice_verifier" in result.rejection_reasons
     assert result.no_slice_verification_performed is True
@@ -2194,12 +2200,12 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 9
+    assert result.steps_run == 10
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:verified_draft_pr_publish" in result.rejection_reasons
     assert result.no_slice_verification_performed is False
@@ -2294,7 +2300,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
     assert verifier_run.accepted is True
     verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
@@ -2378,16 +2384,17 @@ def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=7,
+        max_steps=8,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 6
+    assert result.steps_run == 7
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
         "work_order_invocation",
         "executor_plan",
         "execution_valve",
@@ -2448,16 +2455,17 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=4,
+        max_steps=5,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 3
+    assert result.steps_run == 4
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
+        "worker_dispatch_dryrun",
     )
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:work_order_invocation" in result.rejection_reasons

@@ -108,6 +108,11 @@ def _authority_request_result() -> dict[str, object]:
             "key_epoch": "epoch-1",
             "consensus_receipt_digest": "sha256:consensus",
             "sovereign_authorization_digest": "sha256:012-token",
+            "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
+            "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
+            "wsp15_priority": "P1",
+            "wsp15_mps_total": 10,
+            "wsp15_reasoning_tier": "HIGH",
         },
     }
 
