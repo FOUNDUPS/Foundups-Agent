@@ -1,5 +1,29 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_QUERY_RECEIPT_AND_GENERATION_BINDING_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97
+
+- ADD `holo_index/query_receipt.py`: deterministic, read-only query receipts
+  that bind query hits to a HoloIndex freshness generation, freshness receipt
+  digest/path, repo head, source class, stale reasons, and a no-reindex
+  attestation.
+- UPDATE RedDog read-only 0102 audit worker HoloIndex adapter: production
+  queries now load the configured freshness receipt, use `HOLOINDEX_SSD_PATH`
+  or the standard HoloIndex SSD, and return generation-bound metadata without
+  mutating HoloIndex.
+- UPDATE query normalization: HoloIndex results that claim `FRESH` or `CURRENT`
+  without a generation ID or freshness receipt digest are downgraded to stale
+  evidence before any model call.
+- TEST `tests/test_holoindex_query_receipt.py` and
+  `modules/communication/moltbot_bridge/tests/test_reddog_readonly_audit_task_executor.py`:
+  generation binding, stale missing-generation rejection, receipt propagation,
+  and read-only/no-reindex invariants.
+- Boundary: no HoloIndex re-index, no collection mutation, no RedDog action
+  authority, no shell command, and no Memex/Brain write path. This slice makes
+  query evidence truthier; it does not maintain the index.
+
 ## [2026-07-16] HOLOINDEX_EVENT_DRIVEN_INCREMENTAL_INDEX_EXECUTOR_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice

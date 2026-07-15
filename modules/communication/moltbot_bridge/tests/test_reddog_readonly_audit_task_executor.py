@@ -66,10 +66,20 @@ def isolated_agent_db(tmp_path, monkeypatch):
 
 
 class _FakeQueryAdapter:
-    def __init__(self, *, ok: bool = True, error: str = "", freshness: str = "FRESH") -> None:
+    def __init__(
+        self,
+        *,
+        ok: bool = True,
+        error: str = "",
+        freshness: str = "FRESH",
+        generation_id: str = "sha256:generation",
+        freshness_digest: str = "sha256:freshness",
+    ) -> None:
         self.ok = ok
         self.error = error
         self.freshness = freshness
+        self.generation_id = generation_id
+        self.freshness_digest = freshness_digest
         self.calls = []
 
     def query(self, *, query: str, allowed_paths, limit: int):
@@ -91,6 +101,10 @@ class _FakeQueryAdapter:
             if self.ok
             else [],
             "error": self.error,
+            "freshness_generation_id": self.generation_id,
+            "freshness_receipt_digest": self.freshness_digest,
+            "freshness_receipt_path": "E:/HoloIndex/indexes/holoindex_freshness_receipt.json",
+            "repo_head_sha": "abc123",
         }
 
 
@@ -388,6 +402,46 @@ def test_model_backed_rejects_holoindex_error_before_model_call(tmp_path: Path) 
     assert result.accepted is False
     assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
     assert not runner.calls
+
+
+def test_model_backed_rejects_fresh_holoindex_without_generation_before_model_call(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(generation_id=""),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_STALE in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_binds_holoindex_generation_into_worker_receipt(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=_EchoEvidenceModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(generation_id="sha256:generation-123"),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert result.report is not None
+    receipt = result.report["worker_receipt"]["holoindex_query_receipt"]
+    assert receipt["schema_version"] == "holoindex_query_receipt.v1"
+    assert receipt["source_class"] == "holoindex"
+    assert receipt["freshness_generation_id"] == "sha256:generation-123"
+    assert receipt["freshness_receipt_digest"] == "sha256:freshness"
+    assert receipt["no_holoindex_reindex_performed"] is True
 
 
 def test_model_backed_rejects_wsp15_binding_digest_mismatch(tmp_path: Path) -> None:
