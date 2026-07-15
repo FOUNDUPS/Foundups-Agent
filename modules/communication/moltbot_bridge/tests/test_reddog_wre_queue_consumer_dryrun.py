@@ -36,9 +36,26 @@ BOOTSTRAP_PATH = (
 NOW = "2026-07-14T00:00:00+00:00"
 
 
+def _allocation_receipt():
+    return {
+        "schema_version": "reddog_wsp15_allocation_receipt.v1",
+        "receipt_id": "sha256:wsp15-allocation",
+        "mps_total": 18,
+        "priority": "P0",
+        "reasoning_tier": "ULTRA",
+        "worker_plan": {
+            "fusion_required": True,
+            "independent_verifier_required": True,
+            "queue_mutation_allowed": False,
+            "hermes_execution_allowed": False,
+        },
+    }
+
+
 def _snapshot(**overrides):
     claim_id = "claim-1"
     freshness_id = "fresh-1"
+    allocation = _allocation_receipt()
     base = {
         "schema_version": "reddog_authoritative_work_state.v1",
         "revision": "sha256:revision",
@@ -66,7 +83,12 @@ def _snapshot(**overrides):
                 "worker_id": "reddog-main-bootstrap",
                 "status": "QUEUED",
                 "enqueued_at": NOW,
-                "evidence_refs": [f"claim:{claim_id}", f"freshness:{freshness_id}"],
+                "evidence_refs": [
+                    f"claim:{claim_id}",
+                    f"freshness:{freshness_id}",
+                    f"wsp15_allocation:{allocation['receipt_id']}",
+                ],
+                "wsp15_allocation_receipt": allocation,
                 "no_execution_performed": True,
             }
         ],
@@ -88,6 +110,10 @@ def test_accepts_one_fresh_queued_item_without_execution() -> None:
     assert result.next_required_gate == consumer.NEXT_GATE_SIGNED_AUTHORITY_REQUIRED
     assert result.execution_ready is False
     assert result.receipt is not None
+    assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
+    assert result.receipt.wsp15_priority == "P0"
+    assert result.receipt.wsp15_mps_total == 18
+    assert result.receipt.reasoning_tier == "ULTRA"
     assert result.receipt.no_queue_mutation_performed is True
     assert result.receipt.no_worker_spawn_performed is True
     assert result.receipt.no_worktree_created is True
@@ -192,6 +218,16 @@ def test_rejects_missing_queue_evidence_refs() -> None:
 
     assert result.accepted is False
     assert consumer.FAIL_QUEUE_EVIDENCE_REFS in result.rejection_reasons
+
+
+def test_rejects_missing_wsp15_allocation_receipt() -> None:
+    snapshot = _snapshot()
+    snapshot["wre_queue_items"][0].pop("wsp15_allocation_receipt")
+
+    result = consumer.plan_reddog_wre_queue_consumer_dry_run(snapshot, now_iso=NOW)
+
+    assert result.accepted is False
+    assert consumer.FAIL_WSP15_ALLOCATION_RECEIPT in result.rejection_reasons
 
 
 def test_bootstrap_loads_work_state_outside_repo(tmp_path: Path) -> None:

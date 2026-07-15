@@ -33,6 +33,7 @@ FAIL_CLAIM_STATUS = "FAIL_CLAIM_STATUS"
 FAIL_CLAIM_EXPIRED = "FAIL_CLAIM_EXPIRED"
 FAIL_FRESHNESS_RECEIPT = "FAIL_FRESHNESS_RECEIPT"
 FAIL_QUEUE_EVIDENCE_REFS = "FAIL_QUEUE_EVIDENCE_REFS"
+FAIL_WSP15_ALLOCATION_RECEIPT = "FAIL_WSP15_ALLOCATION_RECEIPT"
 FAIL_REQUESTED_QUEUE_NOT_FOUND = "FAIL_REQUESTED_QUEUE_NOT_FOUND"
 
 WORK_STATE_SCHEMA_VERSION = "reddog_authoritative_work_state.v1"
@@ -48,6 +49,10 @@ class WREQueueConsumerDryRunReceipt:
     claim_id: str
     worker_id: str
     freshness_receipt_id: str
+    wsp15_allocation_receipt_id: str
+    wsp15_priority: str
+    wsp15_mps_total: int
+    reasoning_tier: str
     next_required_gate: str
     execution_ready: bool = False
     no_queue_mutation_performed: bool = True
@@ -230,7 +235,26 @@ def plan_reddog_wre_queue_consumer_dry_run(
     if not freshness or freshness.get("fresh") is not True:
         reasons.append(FAIL_FRESHNESS_RECEIPT)
 
-    expected_refs = {f"claim:{claim_id}", f"freshness:{freshness_receipt_id}"}
+    wsp15_allocation = _mapping(selected.get("wsp15_allocation_receipt"))
+    allocation_receipt_id = str(wsp15_allocation.get("receipt_id") or "")
+    allocation_priority = str(wsp15_allocation.get("priority") or "")
+    allocation_tier = str(wsp15_allocation.get("reasoning_tier") or "")
+    allocation_total = wsp15_allocation.get("mps_total")
+    allocation_worker_plan = _mapping(wsp15_allocation.get("worker_plan"))
+    if (
+        not allocation_receipt_id.startswith("sha256:")
+        or not allocation_priority
+        or not allocation_tier
+        or not isinstance(allocation_total, int)
+        or not allocation_worker_plan
+    ):
+        reasons.append(FAIL_WSP15_ALLOCATION_RECEIPT)
+
+    expected_refs = {
+        f"claim:{claim_id}",
+        f"freshness:{freshness_receipt_id}",
+        f"wsp15_allocation:{allocation_receipt_id}",
+    }
     if not expected_refs.issubset(set(evidence_refs)):
         reasons.append(FAIL_QUEUE_EVIDENCE_REFS)
 
@@ -252,6 +276,10 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "claim_id": claim_id,
         "worker_id": worker_id,
         "freshness_receipt_id": freshness_receipt_id,
+        "wsp15_allocation_receipt_id": allocation_receipt_id,
+        "wsp15_priority": allocation_priority,
+        "wsp15_mps_total": allocation_total,
+        "reasoning_tier": allocation_tier,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     }
     receipt = WREQueueConsumerDryRunReceipt(
@@ -261,6 +289,10 @@ def plan_reddog_wre_queue_consumer_dry_run(
         claim_id=claim_id,
         worker_id=worker_id,
         freshness_receipt_id=freshness_receipt_id,
+        wsp15_allocation_receipt_id=allocation_receipt_id,
+        wsp15_priority=allocation_priority,
+        wsp15_mps_total=allocation_total,
+        reasoning_tier=allocation_tier,
         next_required_gate=NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     )
     return WREQueueConsumerDryRunResult(

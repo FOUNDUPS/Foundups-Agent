@@ -136,6 +136,13 @@ def test_runtime_refresh_commits_authoritative_snapshot_claim_and_wre_queue_item
     assert snapshot["worker_claims"][0]["worker_id"] == "reddog-0102"
     assert snapshot["wre_queue_items"][0]["claim_id"] == snapshot["worker_claims"][0]["claim_id"]
     assert snapshot["wre_queue_items"][0]["no_execution_performed"] is True
+    allocation = snapshot["wre_queue_items"][0]["wsp15_allocation_receipt"]
+    assert allocation["schema_version"] == "reddog_wsp15_allocation_receipt.v1"
+    assert allocation["receipt_id"].startswith("sha256:")
+    assert allocation["mps_total"] >= 16
+    assert allocation["priority"] == "P0"
+    assert allocation["reasoning_tier"] == "ULTRA"
+    assert f"wsp15_allocation:{allocation['receipt_id']}" in snapshot["wre_queue_items"][0]["evidence_refs"]
     assert snapshot["no_holoindex_mutation_performed"] is True
     assert snapshot["no_worker_spawn_performed"] is True
     assert snapshot["no_execution_performed"] is True

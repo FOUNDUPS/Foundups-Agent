@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_AUTHORITATIVE_WORK_STATE_WSP15_QUEUE_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Bound the deterministic WSP_15 allocation receipt into the authoritative
+  work-state runtime WRE queue item for the selected slice.
+- Queue items now include `wsp15_allocation_receipt` and an evidence ref of
+  `wsp15_allocation:<receipt_id>` alongside claim and freshness refs.
+- Updated the WRE queue consumer dry-run to fail closed when the WSP_15
+  allocation receipt is missing or not referenced, and to surface priority,
+  MPS total, and reasoning tier in the consumer receipt.
+- No queue mutation beyond the existing authoritative work-state atomic commit,
+  worker spawn, OpenClaw enqueue, Hermes dispatch, worktree creation, shell
+  command, repo mutation, reward settlement, PatternMemory write, or HoloIndex
+  runtime re-index is added.
+- HoloIndex read-only probe for `RedDog authoritative work state WSP15 queue
+  binding allocation receipt` returned adjacent RedDog/WSP assets but not this
+  binding seam; recorded as
+  `HOLOINDEX_REDDOG_AUTHORITATIVE_WORK_STATE_WSP15_QUEUE_BINDING_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-15: REDDOG_WSP15_ALLOCATION_RECEIPT_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

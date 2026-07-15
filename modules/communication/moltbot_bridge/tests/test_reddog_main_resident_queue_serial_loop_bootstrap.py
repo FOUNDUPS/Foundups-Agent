@@ -81,7 +81,24 @@ PILOT_DOMAIN_ID = FOUNDUP_ID
 PILOT_ARTIFACT = f"modules/foundups/{PILOT_DOMAIN_ID}/README.md"
 
 
+def _queue_wsp15_allocation_receipt() -> dict[str, object]:
+    return {
+        "schema_version": "reddog_wsp15_allocation_receipt.v1",
+        "receipt_id": "sha256:wsp15-allocation-queue",
+        "mps_total": 20,
+        "priority": "P0",
+        "reasoning_tier": "ULTRA",
+        "worker_plan": {
+            "fusion_required": True,
+            "independent_verifier_required": True,
+            "queue_mutation_allowed": False,
+            "hermes_execution_allowed": False,
+        },
+    }
+
+
 def _snapshot() -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt()
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -102,7 +119,12 @@ def _snapshot() -> dict[str, object]:
                 "claim_id": "claim-1",
                 "worker_id": "reddog-0102",
                 "status": "QUEUED",
-                "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+                "evidence_refs": [
+                    "claim:claim-1",
+                    "freshness:fresh-1",
+                    f"wsp15_allocation:{allocation['receipt_id']}",
+                ],
+                "wsp15_allocation_receipt": allocation,
                 "no_execution_performed": True,
             }
         ],
