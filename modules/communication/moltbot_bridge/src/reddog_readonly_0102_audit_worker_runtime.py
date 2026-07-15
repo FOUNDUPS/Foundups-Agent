@@ -309,9 +309,7 @@ class FoundupsFusionRepoAuditModelRunner:
             "bridge_meta": {"readonly_repo_audit_binding": dict(binding)},
         }
         try:
-            from modules.communication.moltbot_bridge.scripts.advisory_model_once import (
-                _run_foundups_fusion,
-            )
+            from scripts.advisory_model_once import _run_foundups_fusion
 
             result = _run_foundups_fusion(api_key, user_payload, [], bridge_payload)
         except TimeoutError:
@@ -344,7 +342,7 @@ class FoundupsFusionRepoAuditModelRunner:
             )
         if not isinstance(result, Mapping) or result.get("ok") is not True:
             reason = (
-                str(result.get("error") or "fusion_result_not_ok")
+                str(result.get("reason") or result.get("error") or "fusion_result_not_ok")
                 if isinstance(result, Mapping)
                 else "fusion_result_not_mapping"
             )
