@@ -38,6 +38,12 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
+from holo_index.query_receipt import (
+    SOURCE_CLASS_CODEINDEX,
+    SOURCE_CLASS_HOLOINDEX,
+    build_query_receipt,
+    load_generation_binding,
+)
 
 
 READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA = "readonly_0102_audit_worker_receipt.v1"
@@ -126,18 +132,22 @@ class HoloIndexReadOnlyQueryAdapter:
     """Read-only HoloIndex discovery adapter for repo audit workers."""
 
     repo_root: Path
+    ssd_path: Path | str | None = None
+    freshness_receipt_path: Path | str | None = None
 
     def query(self, *, query: str, allowed_paths: Sequence[str], limit: int) -> Mapping[str, Any]:
         started = time.monotonic()
         previous_readonly = os.environ.get("HOLOINDEX_QUERY_READONLY")
         os.environ["HOLOINDEX_QUERY_READONLY"] = "1"
+        ssd_path = Path(self.ssd_path or os.getenv("HOLOINDEX_SSD_PATH") or "E:/HoloIndex")
+        binding = load_generation_binding(ssd_path=ssd_path, receipt_path=self.freshness_receipt_path)
         try:
             from holo_index.core.holo_index import HoloIndex
 
             original_logger = getattr(HoloIndex, "_log_agent_action", None)
             try:
                 setattr(HoloIndex, "_log_agent_action", lambda *args, **kwargs: None)
-                index = HoloIndex(str(self.repo_root), quiet=True)
+                index = HoloIndex(ssd_path=str(ssd_path), quiet=True)
                 result = index.search(str(query or ""), limit=max(1, min(int(limit or 8), 20)))
             finally:
                 if original_logger is not None:
@@ -152,6 +162,7 @@ class HoloIndexReadOnlyQueryAdapter:
                 "error": f"holoindex_query_failed:{type(exc).__name__}",
                 "latency_ms": int((time.monotonic() - started) * 1000),
                 "no_holoindex_reindex_performed": True,
+                **binding,
             }
         finally:
             if previous_readonly is None:
@@ -168,6 +179,7 @@ class HoloIndexReadOnlyQueryAdapter:
             "error": "",
             "latency_ms": int((time.monotonic() - started) * 1000),
             "no_holoindex_reindex_performed": True,
+            **binding,
         }
 
 
@@ -550,16 +562,14 @@ def _query_index(
         result = {"ok": False, "source": source, "query": query, "hits": [], "error": "query_exception"}
     if not isinstance(result, Mapping):
         result = {"ok": False, "source": source, "query": query, "hits": [], "error": "query_not_mapping"}
-    receipt = {
-        "source": source,
-        "ok": result.get("ok") is True,
-        "query": str(result.get("query") or query),
-        "freshness": str(result.get("freshness") or "UNKNOWN"),
-        "hits": _bounded_index_hits(result.get("hits")),
-        "error": str(result.get("error") or ""),
-        "no_holoindex_reindex_performed": True,
-    }
-    return {**receipt, "receipt_id": "sha256:" + _digest(receipt)}
+    source_class = SOURCE_CLASS_HOLOINDEX if source == "holoindex" else SOURCE_CLASS_CODEINDEX
+    return build_query_receipt(
+        source=source,
+        source_class=source_class,
+        query=query,
+        result=result,
+        require_generation=source == "holoindex",
+    )
 
 
 def _query_rejection_reason(receipt: Mapping[str, Any]) -> str:
