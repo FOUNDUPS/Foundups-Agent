@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_SLICE_VERIFIER_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can load an outside-repo
+  `verifier_request` JSON artifact and advance from `bounded_worker_pilot` to
+  `slice_verifier`.
+- Added `main.py` env wiring for `REDDOG_SLICE_VERIFIER_REQUEST_PATH`.
+- Added the `no_slice_verification_performed` result attestation. The verifier
+  stage performs evidence verification only; it still performs no command
+  execution, GitHub call, PR publish, merge, PatternMemory write, reward
+  settlement, OpenClaw enqueue, Hermes dispatch, or HoloIndex re-index.
+- Added tests proving the stage-9 happy path verifies machine-derived evidence
+  for the `modules/foundups/paccess_001/README.md` bounded pilot artifact and
+  advances to `RUN_QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE`.
+- Added fail-closed coverage proving missing verifier request input stops the
+  loop at `stage:slice_verifier`.
+- Validation: `test_reddog_main_resident_queue_serial_loop_bootstrap.py` (22
+  passed) and adjacent resident/verifier/pilot/serial suites (81 passed).
+- HoloIndex read-only probe for `RedDog main resident queue slice verifier
+  bootstrap verifier request autonomous slice verifier` returned adjacent queue
+  and docs assets, but not this bootstrap seam; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_SLICE_VERIFIER_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_BOUNDED_WORKER_PILOT_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97

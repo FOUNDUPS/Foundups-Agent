@@ -70,6 +70,7 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_worktree_created: bool = True
     no_bounded_task_execution_performed: bool = True
     no_bounded_file_edit_performed: bool = True
+    no_slice_verification_performed: bool = True
     no_shell_command_executed: bool = True
     no_openclaw_enqueue_performed: bool = True
     no_hermes_dispatch_performed: bool = True
@@ -112,6 +113,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     governed_shell_dryrun_result_path: Path | str | None = None,
     artifact_contents_path: Path | str | None = None,
     holoindex_evidence_path: Path | str | None = None,
+    verifier_request_path: Path | str | None = None,
     authority_state_path: Path | str | None = None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
@@ -222,6 +224,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if holoindex_reasons:
         return _not_ready(holoindex_reasons, chain_results_path=None)
 
+    verifier_request, verifier_request_reasons = _read_json_outside_repo(
+        root,
+        verifier_request_path,
+        missing_reason="missing_verifier_request_path",
+        inside_reason="verifier_request_path_inside_repo",
+        unreadable_reason="malformed_verifier_request",
+        required=False,
+    )
+    if verifier_request_reasons:
+        return _not_ready(verifier_request_reasons, chain_results_path=None)
+
     resolved_worktree_runner, runner_reasons = _build_worktree_runner(
         root,
         injected_runner=worktree_runner,
@@ -277,6 +290,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         governed_shell_dryrun_result=governed_shell_dryrun_result,
         artifact_contents=artifact_contents,
         holoindex_evidence=holoindex_evidence,
+        verifier_request=verifier_request,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))
@@ -485,6 +499,7 @@ def _from_loop(
         no_worktree_created="worktree_create" not in loop.dispatched_stages,
         no_bounded_task_execution_performed="bounded_worker_pilot" not in loop.dispatched_stages,
         no_bounded_file_edit_performed="bounded_worker_pilot" not in loop.dispatched_stages,
+        no_slice_verification_performed="slice_verifier" not in loop.dispatched_stages,
         no_repo_mutation_performed=not any(
             stage in loop.dispatched_stages for stage in ("worktree_create", "bounded_worker_pilot")
         ),
