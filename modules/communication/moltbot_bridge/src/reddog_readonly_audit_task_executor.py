@@ -51,7 +51,11 @@ class ReadOnlyAuditTaskRejectReason:
     TARGET_READ_FAILED = "REJECT_TARGET_READ_FAILED"
     MISSING_WSP15_ALLOCATION = "REJECT_MISSING_WSP15_ALLOCATION"
     MALFORMED_WSP15_ALLOCATION = "REJECT_MALFORMED_WSP15_ALLOCATION"
+    WSP15_BINDING_MISMATCH = "REJECT_WSP15_BINDING_MISMATCH"
+    WSP15_FUSION_REQUIRED = "REJECT_WSP15_FUSION_REQUIRED"
     INDEX_QUERY_FAILED = "REJECT_INDEX_QUERY_FAILED"
+    INDEX_QUERY_STALE = "REJECT_INDEX_QUERY_STALE"
+    INDEX_QUERY_NO_CANDIDATES = "REJECT_INDEX_QUERY_NO_CANDIDATES"
     MODEL_FAILURE = "REJECT_MODEL_FAILURE"
     MODEL_TIMEOUT = "REJECT_MODEL_TIMEOUT"
     MODEL_SCHEMA_FAILURE = "REJECT_MODEL_SCHEMA_FAILURE"
@@ -143,16 +147,6 @@ def execute_reddog_readonly_audit_task(
         return _reject([ReadOnlyAuditTaskRejectReason.TOO_MANY_TARGETS])
 
     root = Path(repo_root).resolve()
-    snapshots: list[_ReadOnlyTargetSnapshot] = []
-    for target in targets:
-        safe_path = _resolve_safe_target(root, target)
-        if safe_path is None:
-            return _reject([ReadOnlyAuditTaskRejectReason.UNSAFE_TARGET])
-        try:
-            snapshots.append(_read_target_snapshot(root, safe_path))
-        except Exception:
-            return _reject([ReadOnlyAuditTaskRejectReason.TARGET_READ_FAILED])
-
     lane_id = str(assignment.get("lane_id") or "")
     if lane_id == "repo_code_audit" and task_context.get("worker_mode") == "model_backed_0102":
         from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
@@ -162,7 +156,7 @@ def execute_reddog_readonly_audit_task(
         return execute_model_backed_repo_code_audit(
             task_context=task_context,
             assignment=assignment,
-            snapshots=snapshots,
+            seed_targets=targets,
             task_id=task_id,
             repo_root=root,
             model_runner=model_runner,
@@ -170,6 +164,16 @@ def execute_reddog_readonly_audit_task(
             codeindex_adapter=codeindex_adapter,
             timeout_seconds=timeout_seconds,
         )
+
+    snapshots: list[_ReadOnlyTargetSnapshot] = []
+    for target in targets:
+        safe_path = _resolve_safe_target(root, target)
+        if safe_path is None:
+            return _reject([ReadOnlyAuditTaskRejectReason.UNSAFE_TARGET])
+        try:
+            snapshots.append(_read_target_snapshot(root, safe_path))
+        except Exception:
+            return _reject([ReadOnlyAuditTaskRejectReason.TARGET_READ_FAILED])
 
     evidence = tuple(item.evidence for item in snapshots)
     report = _build_report(assignment=assignment, snapshots=snapshots)

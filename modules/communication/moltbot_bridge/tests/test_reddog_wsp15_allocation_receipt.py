@@ -12,6 +12,7 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     REASONING_REGULAR,
     REASONING_ULTRA,
     allocate_reddog_wsp15_receipt,
+    canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
 
@@ -84,6 +85,7 @@ def test_allocation_receipt_is_deterministic_and_json_serializable() -> None:
     assert first.receipt_id == second.receipt_id
     encoded = json.dumps(first.to_dict(), sort_keys=True)
     assert "reddog_wsp15_allocation_receipt.v1" in encoded
+    assert canonical_reddog_wsp15_allocation_digest(first.to_dict()).startswith("sha256:")
 
 
 def test_allocation_scores_stay_within_wsp15_ranges() -> None:
@@ -130,6 +132,25 @@ def test_validator_rejects_worker_plan_mismatches() -> None:
 
     assert result.accepted is False
     assert "worker_plan_queue_mutation_must_be_false" in result.rejection_reasons
+
+
+def test_validator_recomputes_input_digest_and_receipt_id() -> None:
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="audit RedDog",
+        prompt_text="Audit RedDog runtime.",
+    ).to_dict()
+    tampered_score = dict(allocation)
+    tampered_score["impact"] = allocation["impact"] + 1 if allocation["impact"] < 5 else allocation["impact"] - 1
+    tampered_receipt = dict(allocation)
+    tampered_receipt["receipt_id"] = "sha256:" + "0" * 64
+
+    score_result = validate_reddog_wsp15_allocation_receipt(tampered_score)
+    receipt_result = validate_reddog_wsp15_allocation_receipt(tampered_receipt)
+
+    assert score_result.accepted is False
+    assert "input_digest_mismatch" in score_result.rejection_reasons
+    assert receipt_result.accepted is False
+    assert "receipt_id_mismatch" in receipt_result.rejection_reasons
 
 
 def test_allocation_module_has_no_execution_or_indexing_imports() -> None:

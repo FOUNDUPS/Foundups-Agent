@@ -190,7 +190,7 @@ def allocate_reddog_wsp15_receipt(
 def validate_reddog_wsp15_allocation_receipt(
     allocation: Mapping[str, Any] | None,
 ) -> RedDogWSP15AllocationValidationResult:
-    """Validate a RedDog WSP 15 allocation receipt without recomputing its id.
+    """Validate a RedDog WSP 15 allocation receipt and its deterministic ids.
 
     Python ``bool`` is a subclass of ``int``; this validator intentionally uses
     exact ``type(value) is int`` checks so boolean values cannot satisfy MPS
@@ -206,7 +206,13 @@ def validate_reddog_wsp15_allocation_receipt(
         )
 
     required = (
+        "schema_version",
         "receipt_id",
+        "input_digest",
+        "requested_operation",
+        "prompt_digest",
+        "changed_paths",
+        "allowed_read_targets",
         "complexity",
         "importance",
         "deferability",
@@ -215,14 +221,23 @@ def validate_reddog_wsp15_allocation_receipt(
         "priority",
         "reasoning_tier",
         "worker_plan",
+        "scoring_method",
     )
     for key in required:
         if key not in allocation or allocation.get(key) in (None, ""):
             reasons.append(f"missing_field:{key}")
 
+    schema_version = str(allocation.get("schema_version") or "")
+    if schema_version != SCHEMA_VERSION:
+        reasons.append("schema_version_mismatch")
+
     receipt_id = str(allocation.get("receipt_id") or "")
     if not receipt_id.startswith("sha256:"):
         reasons.append("malformed_receipt_id")
+
+    input_digest = str(allocation.get("input_digest") or "")
+    if not input_digest.startswith("sha256:"):
+        reasons.append("malformed_input_digest")
 
     score_keys = ("complexity", "importance", "deferability", "impact")
     scores = tuple(allocation.get(key) for key in score_keys)
@@ -260,11 +275,34 @@ def validate_reddog_wsp15_allocation_receipt(
         if worker_plan.get("queue_mutation_allowed") is not False:
             reasons.append("worker_plan_queue_mutation_must_be_false")
 
+    if not isinstance(allocation.get("changed_paths"), Sequence) or isinstance(
+        allocation.get("changed_paths"), (str, bytes)
+    ):
+        reasons.append("malformed_changed_paths")
+    if not isinstance(allocation.get("allowed_read_targets"), Sequence) or isinstance(
+        allocation.get("allowed_read_targets"), (str, bytes)
+    ):
+        reasons.append("malformed_allowed_read_targets")
+
+    if "malformed_worker_plan" not in reasons:
+        expected_input_digest = _digest(_allocation_input_payload(allocation))
+        if input_digest and input_digest != expected_input_digest:
+            reasons.append("input_digest_mismatch")
+        expected_receipt_id = _digest({"receipt": input_digest, "type": SCHEMA_VERSION})
+        if receipt_id and input_digest and receipt_id != expected_receipt_id:
+            reasons.append("receipt_id_mismatch")
+
     deduped = tuple(dict.fromkeys(reasons))
     return RedDogWSP15AllocationValidationResult(
         accepted=not deduped,
         rejection_reasons=deduped,
     )
+
+
+def canonical_reddog_wsp15_allocation_digest(allocation: Mapping[str, Any]) -> str:
+    """Return the canonical digest downstream bindings must compare."""
+
+    return _digest(dict(allocation))
 
 
 def _score_complexity(*, path_count: int, corpus: str, ultra_hit: bool) -> int:
@@ -342,6 +380,25 @@ def _worker_plan(*, priority: str, reasoning_tier: str, ultra_hit: bool) -> Mapp
         "hermes_execution_allowed": False,
         "queue_mutation_allowed": False,
         "mode_selection_source": SCHEMA_VERSION,
+    }
+
+
+def _allocation_input_payload(allocation: Mapping[str, Any]) -> Mapping[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "requested_operation": str(allocation.get("requested_operation") or ""),
+        "prompt_digest": str(allocation.get("prompt_digest") or ""),
+        "changed_paths": tuple(allocation.get("changed_paths") or ()),
+        "allowed_read_targets": tuple(allocation.get("allowed_read_targets") or ()),
+        "complexity": allocation.get("complexity"),
+        "importance": allocation.get("importance"),
+        "deferability": allocation.get("deferability"),
+        "impact": allocation.get("impact"),
+        "mps_total": allocation.get("mps_total"),
+        "priority": str(allocation.get("priority") or ""),
+        "reasoning_tier": str(allocation.get("reasoning_tier") or ""),
+        "worker_plan": allocation.get("worker_plan"),
+        "scoring_method": str(allocation.get("scoring_method") or ""),
     }
 
 
@@ -427,5 +484,6 @@ __all__ = [
     "RedDogWSP15AllocationReceipt",
     "RedDogWSP15AllocationValidationResult",
     "allocate_reddog_wsp15_receipt",
+    "canonical_reddog_wsp15_allocation_digest",
     "validate_reddog_wsp15_allocation_receipt",
 ]

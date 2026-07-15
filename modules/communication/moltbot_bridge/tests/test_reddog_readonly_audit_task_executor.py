@@ -17,6 +17,8 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
     MODEL_WORKER_MODE,
     REPO_CODE_AUDIT_LANE,
     FoundupsFusionRepoAuditModelRunner,
+    CodeIndexReadOnlyQueryAdapter,
+    HoloIndexReadOnlyQueryAdapter,
     RepoAuditModelResult,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
@@ -29,6 +31,7 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
+    canonical_reddog_wsp15_allocation_digest,
 )
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
@@ -62,30 +65,43 @@ def isolated_agent_db(tmp_path, monkeypatch):
 
 
 class _FakeQueryAdapter:
-    def __init__(self, *, ok: bool = True, error: str = "") -> None:
+    def __init__(self, *, ok: bool = True, error: str = "", freshness: str = "FRESH") -> None:
         self.ok = ok
         self.error = error
+        self.freshness = freshness
         self.calls = []
 
     def query(self, *, query: str, allowed_paths, limit: int):
         self.calls.append({"query": query, "allowed_paths": tuple(allowed_paths), "limit": limit})
+        path = allowed_paths[0] if allowed_paths else "modules/communication/moltbot_bridge/src/sample.py"
         return {
             "ok": self.ok,
             "source": "fake",
             "query": query,
-            "freshness": "FRESH" if self.ok else "STALE",
+            "freshness": self.freshness,
             "hits": [
                 {
-                    "path": allowed_paths[0] if allowed_paths else "",
+                    "path": path,
                     "title": "fake hit",
                     "score": 0.99,
                     "digest": "sha256:index-hit",
                 }
             ]
-            if self.ok and allowed_paths
+            if self.ok
             else [],
             "error": self.error,
         }
+
+
+def _patch_default_query_adapters(monkeypatch) -> None:
+    def fake_holo_query(self, *, query: str, allowed_paths, limit: int):
+        return _FakeQueryAdapter().query(query=query, allowed_paths=allowed_paths, limit=limit)
+
+    def fake_code_query(self, *, query: str, allowed_paths, limit: int):
+        return _FakeQueryAdapter().query(query=query, allowed_paths=allowed_paths, limit=limit)
+
+    monkeypatch.setattr(HoloIndexReadOnlyQueryAdapter, "query", fake_holo_query)
+    monkeypatch.setattr(CodeIndexReadOnlyQueryAdapter, "query", fake_code_query)
 
 
 class _EchoEvidenceModelRunner:
@@ -202,17 +218,25 @@ def _context() -> dict:
     }
 
 
-def _model_context() -> dict:
+def _model_context(
+    *,
+    allowed_read_targets: tuple[str, ...] | None = None,
+    requested_operation: str = "repo_code_audit",
+    prompt_text: str = "Run model-backed RedDog repo code audit.",
+) -> dict:
     context = _context()
+    if allowed_read_targets is not None:
+        context["assignment"] = dict(context["assignment"])
+        context["assignment"]["allowed_read_targets"] = list(allowed_read_targets)
     allocation = allocate_reddog_wsp15_receipt(
-        requested_operation="repo_code_audit",
-        prompt_text="Run model-backed RedDog repo code audit.",
+        requested_operation=requested_operation,
+        prompt_text=prompt_text,
         allowed_read_targets=context["assignment"]["allowed_read_targets"],
     ).to_dict()
     context["worker_mode"] = MODEL_WORKER_MODE
     context["wsp15_allocation_receipt"] = allocation
     context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
-    context["wsp15_allocation_digest"] = "sha256:test-allocation-digest"
+    context["wsp15_allocation_digest"] = canonical_reddog_wsp15_allocation_digest(allocation)
     context["assignment"] = dict(context["assignment"])
     context["assignment"]["lane_id"] = REPO_CODE_AUDIT_LANE
     context["assignment"]["snapshot_content_digest"] = "sha256:snapshot-content"
@@ -285,7 +309,32 @@ def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_p
     assert result.report["model_backed_0102_worker_performed"] is True
     assert result.report["worker_receipt"]["schema_version"] == "readonly_0102_audit_worker_receipt.v1"
     assert result.report["worker_receipt"]["model_receipt_id"] == "model-receipt-1"
+    assert result.report["worker_receipt"]["model_route_receipt_id"].startswith("sha256:")
     assert result.report["findings"][0]["evidence_refs"][0] in result.report["evidence_refs"]
+
+
+def test_model_backed_discovers_index_candidate_before_direct_read(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context(allowed_read_targets=("docs/work_ledger.schema.json",))
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert result.report is not None
+    evidence_paths = {item["path"] for item in result.report["target_evidence"]}
+    assert "docs/work_ledger.schema.json" in evidence_paths
+    assert "modules/communication/moltbot_bridge/src/sample.py" in evidence_paths
+    assert runner.calls
+    context_payload = json.loads(runner.calls[0]["context"])
+    assert len(context_payload["untrusted_repository_evidence"]) == 2
 
 
 def test_model_backed_repo_code_audit_rejects_unknown_evidence_ref(tmp_path: Path) -> None:
@@ -304,25 +353,157 @@ def test_model_backed_repo_code_audit_rejects_unknown_evidence_ref(tmp_path: Pat
     assert any(ReadOnlyAuditTaskRejectReason.UNKNOWN_EVIDENCE_REF in reason for reason in result.rejection_reasons)
 
 
-def test_model_backed_records_holoindex_error_without_using_it_as_evidence(tmp_path: Path) -> None:
+def test_model_backed_rejects_stale_holoindex_receipt_before_model_call(tmp_path: Path) -> None:
     root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
 
     result = execute_reddog_readonly_audit_task(
         task_context=_model_context(),
         repo_root=root,
         task_id="task-1",
-        model_runner=_EchoEvidenceModelRunner(),
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(freshness="STALE"),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_STALE in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_rejects_holoindex_error_before_model_call(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
         holoindex_adapter=_FakeQueryAdapter(ok=False, error="holoindex_unavailable"),
         codeindex_adapter=_FakeQueryAdapter(),
     )
 
-    assert result.accepted is True
-    assert result.report is not None
-    receipt = result.report["worker_receipt"]
-    assert receipt["holoindex_query_receipt"]["ok"] is False
-    assert receipt["holoindex_query_receipt"]["error"] == "holoindex_unavailable"
-    assert "holoindex_unavailable" in receipt["index_query_errors"]
-    assert all(ref.startswith("file:") for ref in result.report["evidence_refs"])
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_rejects_wsp15_binding_digest_mismatch(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    context = _model_context()
+    context["assignment"] = dict(context["assignment"])
+    context["assignment"]["wsp15_allocation_digest"] = "sha256:tampered"
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=_EchoEvidenceModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH in result.rejection_reasons
+
+
+def test_model_backed_rejects_regular_allocation_without_fusion_requirement(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    context = _model_context()
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="answer_simple_question",
+        prompt_text="Say hello.",
+    ).to_dict()
+    context["wsp15_allocation_receipt"] = allocation
+    context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
+    context["wsp15_allocation_digest"] = canonical_reddog_wsp15_allocation_digest(allocation)
+    context["assignment"] = dict(context["assignment"])
+    context["assignment"]["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
+    context["assignment"]["wsp15_allocation_digest"] = context["wsp15_allocation_digest"]
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=_EchoEvidenceModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED in result.rejection_reasons
+
+
+def test_model_backed_rejects_invalid_recommended_action_enum(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+
+    class BadActionRunner(_EchoEvidenceModelRunner):
+        def run_repo_code_audit(self, *, prompt: str, context: str, binding, timeout_seconds: int):
+            result = super().run_repo_code_audit(
+                prompt=prompt,
+                context=context,
+                binding=binding,
+                timeout_seconds=timeout_seconds,
+            )
+            payload = json.loads(result.content)
+            payload["findings"][0]["recommended_action"] = "DO_ANYTHING"
+            return RepoAuditModelResult(
+                ok=True,
+                status="MODEL_OK",
+                content=json.dumps(payload, sort_keys=True),
+                model_receipt_id="model-receipt-1",
+                model_result_digest="sha256:model-result-1",
+                made_network_call=True,
+            )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=BadActionRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert any("recommended_action" in reason for reason in result.rejection_reasons)
+
+
+def test_model_backed_rejects_stop_with_next_slice(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+
+    class StopWithSliceRunner(_EchoEvidenceModelRunner):
+        def run_repo_code_audit(self, *, prompt: str, context: str, binding, timeout_seconds: int):
+            result = super().run_repo_code_audit(
+                prompt=prompt,
+                context=context,
+                binding=binding,
+                timeout_seconds=timeout_seconds,
+            )
+            payload = json.loads(result.content)
+            payload["findings"][0]["recommended_action"] = "STOP"
+            payload["findings"][0]["next_slice_name"] = "SHOULD_NOT_EXIST_PHASE1"
+            return RepoAuditModelResult(
+                ok=True,
+                status="MODEL_OK",
+                content=json.dumps(payload, sort_keys=True),
+                model_receipt_id="model-receipt-1",
+                model_result_digest="sha256:model-result-1",
+                made_network_call=True,
+            )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=StopWithSliceRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert any("stop_next_slice" in reason for reason in result.rejection_reasons)
 
 
 def test_model_backed_requires_valid_wsp15_receipt(tmp_path: Path) -> None:
@@ -472,6 +653,7 @@ def test_run_task_model_backed_task_fails_closed_without_runtime_mode(tmp_path: 
     monkeypatch.setenv("WRE_MOCK_SKILLS", READONLY_AUDIT_TASK_SKILL)
     monkeypatch.delenv("REDDOG_READONLY_AUDIT_RUNTIME_MODE", raising=False)
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    _patch_default_query_adapters(monkeypatch)
     db = AgentDB()
     task_id = "readonly-audit-model-task-1"
     assert db.create_autonomous_task(
@@ -497,6 +679,7 @@ def test_run_task_model_backed_task_fails_closed_without_runtime_mode(tmp_path: 
 def test_agentdb_openclaw_claim_run_task_model_worker_persists_report(tmp_path: Path, monkeypatch) -> None:
     root = _repo(tmp_path)
     monkeypatch.setenv("WRE_MOCK_SKILLS", READONLY_AUDIT_TASK_SKILL)
+    _patch_default_query_adapters(monkeypatch)
 
     def fake_run(self, *, prompt: str, context: str, binding, timeout_seconds: int):
         parsed = json.loads(context)

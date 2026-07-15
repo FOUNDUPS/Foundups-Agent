@@ -11,9 +11,16 @@
   canonical WSP_15 allocation receipt id/digest, with canonical validation
   rejecting boolean MPS values, malformed scores, mismatched priority totals,
   and unsafe worker-plan claims.
-- Added query-only HoloIndex/CodeIndex receipt capture and governed direct-read
-  evidence binding; index failures are recorded as errors and cannot be cited
-  as content-bearing evidence.
+- Added production query-only HoloIndex discovery and CodeIndex advisory
+  adapters. HoloIndex freshness/discovery now runs before governed direct-read
+  evidence is finalized, and stale/unavailable discovery fails closed instead
+  of letting the worker reason from caller-listed files alone.
+- Hardened the WSP_15 binding so task context and assignment must match the
+  recomputed allocation receipt id and canonical allocation digest; non-Fusion
+  allocations cannot enter the model-backed worker path.
+- Added digest-bound model route receipts plus stricter strict-JSON validation
+  for WSP_97 labels, recommended actions, WSP_15 priority, severity, unknown
+  fields, and `FIX`/`STOP` next-slice consistency.
 - Replaced backend architect raw serialized-JSON slicing with deterministic
   field-level budgeting and fail-closed `PROMPT_BUDGET_EXCEEDED` behavior.
 - Added tests for model-backed worker success, unknown evidence rejection,

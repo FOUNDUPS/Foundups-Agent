@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
 
@@ -28,9 +29,12 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
     _ReadOnlyTargetSnapshot,
     _digest,
     _evidence_ref,
+    _read_target_snapshot,
     _reject,
+    _resolve_safe_target,
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
 
@@ -43,6 +47,26 @@ RUNTIME_MODE_FOUNDUPS_FUSION = "foundups_fusion"
 
 MAX_MODEL_PROMPT_CHARS = 24_000
 MAX_MODEL_CONTEXT_CHARS = 36_000
+MAX_DISCOVERED_TARGETS = 16
+FRESH_INDEX_STATES = frozenset({"CURRENT", "FRESH"})
+
+MODEL_RECOMMENDED_ACTIONS = frozenset({"FIX", "RESEARCH_MORE", "REVISE", "STOP"})
+MODEL_WSP97_LABELS = frozenset({"OBSERVED", "INFERRED", "SPECIFIED_NOT_IMPLEMENTED", "NEEDS_VERIFICATION"})
+MODEL_PRIORITIES = frozenset({"P0", "P1", "P2", "P3", "P4"})
+MODEL_SEVERITIES = frozenset({"INFO", "MINOR", "MAJOR", "BLOCKER", "CRITICAL"})
+MODEL_TOP_LEVEL_KEYS = frozenset({"summary", "findings", "evidence_refs"})
+MODEL_FINDING_KEYS = frozenset(
+    {
+        "finding_id",
+        "claim",
+        "wsp97_label",
+        "recommended_action",
+        "wsp15_priority",
+        "severity",
+        "evidence_refs",
+        "next_slice_name",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -54,6 +78,7 @@ class RepoAuditModelResult:
     model_result_digest: str
     made_network_call: bool
     rejection_reasons: tuple[str, ...] = ()
+    route_receipt: Mapping[str, Any] = field(default_factory=dict)
 
 
 class RepoAuditModelRunner(Protocol):
@@ -96,6 +121,118 @@ class UnavailableReadOnlyQueryAdapter:
 
 
 @dataclass(frozen=True)
+class HoloIndexReadOnlyQueryAdapter:
+    """Read-only HoloIndex discovery adapter for repo audit workers."""
+
+    repo_root: Path
+
+    def query(self, *, query: str, allowed_paths: Sequence[str], limit: int) -> Mapping[str, Any]:
+        started = time.monotonic()
+        previous_readonly = os.environ.get("HOLOINDEX_QUERY_READONLY")
+        os.environ["HOLOINDEX_QUERY_READONLY"] = "1"
+        try:
+            from holo_index.core.holo_index import HoloIndex
+
+            original_logger = getattr(HoloIndex, "_log_agent_action", None)
+            try:
+                setattr(HoloIndex, "_log_agent_action", lambda *args, **kwargs: None)
+                index = HoloIndex(str(self.repo_root), quiet=True)
+                result = index.search(str(query or ""), limit=max(1, min(int(limit or 8), 20)))
+            finally:
+                if original_logger is not None:
+                    setattr(HoloIndex, "_log_agent_action", original_logger)
+        except Exception as exc:
+            return {
+                "ok": False,
+                "source": "holoindex",
+                "query": str(query or ""),
+                "freshness": "UNKNOWN",
+                "hits": [],
+                "error": f"holoindex_query_failed:{type(exc).__name__}",
+                "latency_ms": int((time.monotonic() - started) * 1000),
+                "no_holoindex_reindex_performed": True,
+            }
+        finally:
+            if previous_readonly is None:
+                os.environ.pop("HOLOINDEX_QUERY_READONLY", None)
+            else:
+                os.environ["HOLOINDEX_QUERY_READONLY"] = previous_readonly
+        hits = _holoindex_hits(result)
+        return {
+            "ok": True,
+            "source": "holoindex",
+            "query": str(query or ""),
+            "freshness": "CURRENT",
+            "hits": hits[: max(1, min(int(limit or 8), 20))],
+            "error": "",
+            "latency_ms": int((time.monotonic() - started) * 1000),
+            "no_holoindex_reindex_performed": True,
+        }
+
+
+@dataclass(frozen=True)
+class CodeIndexReadOnlyQueryAdapter:
+    """Read-only CodeIndex advisory adapter over discovered module targets."""
+
+    repo_root: Path
+
+    def query(self, *, query: str, allowed_paths: Sequence[str], limit: int) -> Mapping[str, Any]:
+        started = time.monotonic()
+        module_roots = _module_roots_from_paths(allowed_paths)
+        if not module_roots:
+            return {
+                "ok": True,
+                "source": "codeindex",
+                "query": str(query or ""),
+                "freshness": "CURRENT",
+                "hits": [],
+                "error": "",
+                "latency_ms": int((time.monotonic() - started) * 1000),
+                "no_holoindex_reindex_performed": True,
+            }
+        try:
+            from holo_index.qwen_advisor.qwen_health_monitor.circulation_engine import (
+                CodeIndexCirculationEngine,
+            )
+
+            engine = CodeIndexCirculationEngine(project_root=self.repo_root)
+            reports = engine.evaluate_modules(module_roots[: max(1, min(int(limit or 8), 20))])
+        except Exception as exc:
+            return {
+                "ok": False,
+                "source": "codeindex",
+                "query": str(query or ""),
+                "freshness": "UNKNOWN",
+                "hits": [],
+                "error": f"codeindex_query_failed:{type(exc).__name__}",
+                "latency_ms": int((time.monotonic() - started) * 1000),
+                "no_holoindex_reindex_performed": True,
+            }
+        hits: list[Mapping[str, Any]] = []
+        for report in reports[: max(1, min(int(limit or 8), 20))]:
+            data = report if isinstance(report, Mapping) else getattr(report, "__dict__", {})
+            hits.append(
+                {
+                    "path": str(data.get("module_path") or data.get("path") or "")[:240],
+                    "title": str(data.get("status") or data.get("priority") or "codeindex_report")[:160],
+                    "score": data.get("priority_score") or data.get("health_score"),
+                    "digest": _digest(data),
+                    "evidence_ref": "",
+                }
+            )
+        return {
+            "ok": True,
+            "source": "codeindex",
+            "query": str(query or ""),
+            "freshness": "CURRENT",
+            "hits": hits,
+            "error": "",
+            "latency_ms": int((time.monotonic() - started) * 1000),
+            "no_holoindex_reindex_performed": True,
+        }
+
+
+@dataclass(frozen=True)
 class FoundupsFusionRepoAuditModelRunner:
     """Production model runner for explicit RedDog read-only repo audits."""
 
@@ -112,15 +249,52 @@ class FoundupsFusionRepoAuditModelRunner:
         binding: Mapping[str, Any],
         timeout_seconds: int,
     ) -> RepoAuditModelResult:
+        started = time.monotonic()
         if os.getenv(ENV_READONLY_AUDIT_RUNTIME_MODE, "").strip() != RUNTIME_MODE_FOUNDUPS_FUSION:
-            return _model_reject("runtime_mode_not_enabled")
+            return _model_reject(
+                "runtime_mode_not_enabled",
+                route_receipt=_model_route_receipt(
+                    binding=binding,
+                    lead_model=self.lead_model,
+                    panel_models=self.panel_models,
+                    timeout_seconds=timeout_seconds,
+                    max_tokens=self.max_tokens,
+                    made_network_call=False,
+                    status="runtime_mode_not_enabled",
+                    started=started,
+                ),
+            )
         api_key = os.getenv("OPENROUTER_API_KEY")
         if not api_key:
-            return _model_reject("fusion_bridge_unavailable")
+            return _model_reject(
+                "fusion_bridge_unavailable",
+                route_receipt=_model_route_receipt(
+                    binding=binding,
+                    lead_model=self.lead_model,
+                    panel_models=self.panel_models,
+                    timeout_seconds=timeout_seconds,
+                    max_tokens=self.max_tokens,
+                    made_network_call=False,
+                    status="fusion_bridge_unavailable",
+                    started=started,
+                ),
+            )
 
         gate = evaluate_redaction_gate(prompt, context, audit_mode=True)
         if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
-            return _model_reject("redaction_blocked")
+            return _model_reject(
+                "redaction_blocked",
+                route_receipt=_model_route_receipt(
+                    binding=binding,
+                    lead_model=self.lead_model,
+                    panel_models=self.panel_models,
+                    timeout_seconds=timeout_seconds,
+                    max_tokens=self.max_tokens,
+                    made_network_call=False,
+                    status="redaction_blocked",
+                    started=started,
+                ),
+            )
         user_payload = gate.redacted_prompt
         if gate.redacted_context:
             user_payload = gate.redacted_prompt + "\n\n" + gate.redacted_context
@@ -141,16 +315,52 @@ class FoundupsFusionRepoAuditModelRunner:
 
             result = _run_foundups_fusion(api_key, user_payload, [], bridge_payload)
         except TimeoutError:
-            return _model_reject(ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT)
+            return _model_reject(
+                ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT,
+                route_receipt=_model_route_receipt(
+                    binding=binding,
+                    lead_model=self.lead_model,
+                    panel_models=self.panel_models,
+                    timeout_seconds=timeout_seconds,
+                    max_tokens=self.max_tokens,
+                    made_network_call=False,
+                    status=ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT,
+                    started=started,
+                ),
+            )
         except Exception:
-            return _model_reject("fusion_bridge_call_failed")
+            return _model_reject(
+                "fusion_bridge_call_failed",
+                route_receipt=_model_route_receipt(
+                    binding=binding,
+                    lead_model=self.lead_model,
+                    panel_models=self.panel_models,
+                    timeout_seconds=timeout_seconds,
+                    max_tokens=self.max_tokens,
+                    made_network_call=False,
+                    status="fusion_bridge_call_failed",
+                    started=started,
+                ),
+            )
         if not isinstance(result, Mapping) or result.get("ok") is not True:
             reason = (
                 str(result.get("error") or "fusion_result_not_ok")
                 if isinstance(result, Mapping)
                 else "fusion_result_not_mapping"
             )
-            return _model_reject(reason)
+            return _model_reject(
+                reason,
+                route_receipt=_model_route_receipt(
+                    binding=binding,
+                    lead_model=self.lead_model,
+                    panel_models=self.panel_models,
+                    timeout_seconds=timeout_seconds,
+                    max_tokens=self.max_tokens,
+                    made_network_call=True,
+                    status=reason,
+                    started=started,
+                ),
+            )
         content = str(result.get("content") or result.get("text") or "").strip()
         if not content:
             review_packet = result.get("review_packet") if isinstance(result.get("review_packet"), Mapping) else {}
@@ -166,6 +376,16 @@ class FoundupsFusionRepoAuditModelRunner:
             model_result_digest=_digest({"content": content, "receipt_id": receipt_id}),
             made_network_call=True,
             rejection_reasons=(),
+            route_receipt=_model_route_receipt(
+                binding=binding,
+                lead_model=self.lead_model,
+                panel_models=self.panel_models,
+                timeout_seconds=timeout_seconds,
+                max_tokens=self.max_tokens,
+                made_network_call=True,
+                status="MODEL_OK",
+                started=started,
+            ),
         )
 
 
@@ -173,7 +393,7 @@ def execute_model_backed_repo_code_audit(
     *,
     task_context: Mapping[str, Any],
     assignment: Mapping[str, Any],
-    snapshots: Sequence[_ReadOnlyTargetSnapshot],
+    seed_targets: Sequence[str],
     task_id: str | None,
     repo_root: Path,
     model_runner: RepoAuditModelRunner | None,
@@ -187,35 +407,62 @@ def execute_model_backed_repo_code_audit(
         return _reject([ReadOnlyAuditTaskRejectReason.MISSING_WSP15_ALLOCATION])
     if not validation.accepted:
         return _reject([ReadOnlyAuditTaskRejectReason.MALFORMED_WSP15_ALLOCATION])
-    allocation_digest = str(
-        task_context.get("wsp15_allocation_digest")
-        or assignment.get("wsp15_allocation_digest")
-        or ("sha256:" + _digest(allocation))
+    assert isinstance(allocation, Mapping)
+    allocation_digest = canonical_reddog_wsp15_allocation_digest(allocation)
+    binding_reasons = _validate_wsp15_binding(
+        task_context=task_context,
+        assignment=assignment,
+        allocation=allocation,
+        allocation_digest=allocation_digest,
     )
+    if binding_reasons:
+        return _reject(binding_reasons)
+    worker_plan = allocation.get("worker_plan") if isinstance(allocation.get("worker_plan"), Mapping) else {}
+    if worker_plan.get("fusion_required") is not True:
+        return _reject([ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED])
 
-    query = _repo_audit_query(assignment=assignment)
-    allowed_paths = tuple(str(item.evidence.path) for item in snapshots)
+    query = _repo_audit_query(assignment=assignment, seed_targets=seed_targets)
     holo_receipt = _query_index(
-        adapter=holoindex_adapter or UnavailableReadOnlyQueryAdapter("holoindex"),
+        adapter=holoindex_adapter or HoloIndexReadOnlyQueryAdapter(repo_root),
         source="holoindex",
         query=query,
-        allowed_paths=allowed_paths,
+        allowed_paths=(),
     )
+    holo_reject = _query_rejection_reason(holo_receipt)
+    if holo_reject:
+        return _reject([holo_reject])
+
+    candidate_paths = _candidate_paths(
+        seed_targets=seed_targets,
+        discovered_paths=_paths_from_query_receipt(holo_receipt),
+    )
+    if not candidate_paths:
+        return _reject([ReadOnlyAuditTaskRejectReason.INDEX_QUERY_NO_CANDIDATES])
+    snapshots, read_reject = _read_candidate_snapshots(
+        repo_root=repo_root,
+        seed_targets=seed_targets,
+        candidate_paths=candidate_paths,
+    )
+    if read_reject:
+        return _reject([read_reject])
+    evidence_refs = tuple(_evidence_ref(item.evidence) for item in snapshots)
+    if not evidence_refs:
+        return _reject([ReadOnlyAuditTaskRejectReason.REPORT_MISSING_EVIDENCE])
+    allowed_paths = tuple(str(item.evidence.path) for item in snapshots)
     code_receipt = _query_index(
-        adapter=codeindex_adapter or UnavailableReadOnlyQueryAdapter("codeindex"),
+        adapter=codeindex_adapter or CodeIndexReadOnlyQueryAdapter(repo_root),
         source="codeindex",
         query=query,
         allowed_paths=allowed_paths,
     )
+    code_reject = _query_rejection_reason(code_receipt)
+    if code_reject:
+        return _reject([code_reject])
     index_query_errors = tuple(
         str(receipt.get("error") or "")
         for receipt in (holo_receipt, code_receipt)
         if receipt.get("ok") is not True and str(receipt.get("error") or "").strip()
     )
-
-    evidence_refs = tuple(_evidence_ref(item.evidence) for item in snapshots)
-    if not evidence_refs:
-        return _reject([ReadOnlyAuditTaskRejectReason.REPORT_MISSING_EVIDENCE])
 
     binding = _model_binding(
         task_context=task_context,
@@ -314,6 +561,14 @@ def _query_index(
     return {**receipt, "receipt_id": "sha256:" + _digest(receipt)}
 
 
+def _query_rejection_reason(receipt: Mapping[str, Any]) -> str:
+    if receipt.get("ok") is not True:
+        return ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED
+    if str(receipt.get("freshness") or "").upper() not in FRESH_INDEX_STATES:
+        return ReadOnlyAuditTaskRejectReason.INDEX_QUERY_STALE
+    return ""
+
+
 def _bounded_index_hits(value: Any) -> list[Mapping[str, Any]]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
         return []
@@ -336,9 +591,137 @@ def _bounded_index_hits(value: Any) -> list[Mapping[str, Any]]:
     return hits
 
 
-def _repo_audit_query(*, assignment: Mapping[str, Any]) -> str:
-    targets = " ".join(str(value) for value in assignment.get("allowed_read_targets", ()))
-    return f"RedDog repo_code_audit {targets}".strip()
+def _holoindex_hits(result: Any) -> list[Mapping[str, Any]]:
+    if not isinstance(result, Mapping):
+        return []
+    hits: list[Mapping[str, Any]] = []
+    for key in (
+        "code_hits",
+        "docs_hits",
+        "test_hits",
+        "skill_hits",
+        "work_ledger_hits",
+        "symbol_hits",
+        "code",
+        "docs",
+        "tests",
+        "skills",
+        "work_ledger",
+    ):
+        value = result.get(key)
+        if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+            continue
+        for item in value:
+            if not isinstance(item, Mapping):
+                continue
+            path = str(item.get("path") or item.get("file") or item.get("location") or "").replace("\\", "/")
+            if ":" in path:
+                maybe_path = path.split(":", 1)[0]
+                if "/" in maybe_path or "." in maybe_path:
+                    path = maybe_path
+            if not path:
+                continue
+            hits.append(
+                {
+                    "path": path,
+                    "title": str(item.get("title") or item.get("name") or key),
+                    "score": item.get("score") or item.get("final_score") or item.get("distance"),
+                    "digest": str(item.get("digest") or item.get("content_digest") or ""),
+                    "evidence_ref": str(item.get("evidence_ref") or ""),
+                }
+            )
+    seen: set[str] = set()
+    deduped: list[Mapping[str, Any]] = []
+    for hit in hits:
+        path = str(hit.get("path") or "").replace("\\", "/").strip()
+        if not path or path in seen:
+            continue
+        seen.add(path)
+        deduped.append(hit)
+    return deduped
+
+
+def _paths_from_query_receipt(receipt: Mapping[str, Any]) -> tuple[str, ...]:
+    paths: list[str] = []
+    for item in receipt.get("hits") or ():
+        if not isinstance(item, Mapping):
+            continue
+        path = str(item.get("path") or "").replace("\\", "/").strip()
+        if path:
+            paths.append(path)
+    return tuple(dict.fromkeys(paths))
+
+
+def _candidate_paths(*, seed_targets: Sequence[str], discovered_paths: Sequence[str]) -> tuple[str, ...]:
+    paths: list[str] = []
+    for value in (*tuple(seed_targets), *tuple(discovered_paths)):
+        path = str(value or "").replace("\\", "/").strip()
+        while path.startswith("./"):
+            path = path[2:]
+        if path and path not in paths:
+            paths.append(path)
+        if len(paths) >= MAX_DISCOVERED_TARGETS:
+            break
+    return tuple(paths)
+
+
+def _read_candidate_snapshots(
+    *,
+    repo_root: Path,
+    seed_targets: Sequence[str],
+    candidate_paths: Sequence[str],
+) -> tuple[tuple[_ReadOnlyTargetSnapshot, ...], str]:
+    seed_set = {str(item).replace("\\", "/").strip() for item in seed_targets}
+    snapshots: list[_ReadOnlyTargetSnapshot] = []
+    for path in candidate_paths:
+        safe_path = _resolve_safe_target(repo_root, path)
+        if safe_path is None:
+            if path in seed_set:
+                return (), ReadOnlyAuditTaskRejectReason.UNSAFE_TARGET
+            continue
+        try:
+            snapshots.append(_read_target_snapshot(repo_root, safe_path))
+        except Exception:
+            if path in seed_set:
+                return (), ReadOnlyAuditTaskRejectReason.TARGET_READ_FAILED
+            continue
+    return tuple(snapshots), ""
+
+
+def _module_roots_from_paths(paths: Sequence[str]) -> list[str]:
+    roots: list[str] = []
+    for item in paths:
+        parts = str(item or "").replace("\\", "/").split("/")
+        if len(parts) >= 3 and parts[0] == "modules":
+            root = "/".join(parts[:3])
+            if root not in roots:
+                roots.append(root)
+    return roots
+
+
+def _repo_audit_query(*, assignment: Mapping[str, Any], seed_targets: Sequence[str]) -> str:
+    targets = " ".join(str(value).replace("/", " ") for value in (*tuple(seed_targets), *tuple(assignment.get("allowed_read_targets", ()))))
+    return f"RedDog repo code audit readonly evidence {targets}".strip()
+
+
+def _validate_wsp15_binding(
+    *,
+    task_context: Mapping[str, Any],
+    assignment: Mapping[str, Any],
+    allocation: Mapping[str, Any],
+    allocation_digest: str,
+) -> tuple[str, ...]:
+    receipt_id = str(allocation.get("receipt_id") or "")
+    reasons: list[str] = []
+    context_receipt_id = str(task_context.get("wsp15_allocation_receipt_id") or "")
+    assignment_receipt_id = str(assignment.get("wsp15_allocation_receipt_id") or "")
+    context_digest = str(task_context.get("wsp15_allocation_digest") or "")
+    assignment_digest = str(assignment.get("wsp15_allocation_digest") or "")
+    if context_receipt_id != receipt_id or assignment_receipt_id != receipt_id:
+        reasons.append(ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH)
+    if context_digest != allocation_digest or assignment_digest != allocation_digest:
+        reasons.append(ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH)
+    return tuple(dict.fromkeys(reasons))
 
 
 def _model_binding(
@@ -365,6 +748,9 @@ def _model_binding(
         "determination_id": str(assignment.get("determination_id") or ""),
         "wsp15_allocation_receipt_id": str(allocation.get("receipt_id") or ""),
         "wsp15_allocation_digest": allocation_digest,
+        "wsp15_reasoning_tier": str(allocation.get("reasoning_tier") or ""),
+        "wsp15_priority": str(allocation.get("priority") or ""),
+        "wsp15_worker_plan": dict(allocation.get("worker_plan") or {}),
         "repo_head": _observe_repo_head(repo_root),
         "evidence_refs": [_evidence_ref(item.evidence) for item in snapshots],
         "holoindex_query_receipt_id": holo_receipt.get("receipt_id"),
@@ -468,6 +854,9 @@ def _validate_repo_audit_model_output(
     reasons: list[str] = []
     if not output:
         return (ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE,)
+    unknown_top = set(output.keys()) - MODEL_TOP_LEVEL_KEYS
+    if unknown_top:
+        reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:unknown_top_level")
     summary = str(output.get("summary") or "").strip()
     evidence_refs = _normalize_text_list(output.get("evidence_refs"))
     findings = output.get("findings")
@@ -480,10 +869,30 @@ def _validate_repo_audit_model_output(
         if not isinstance(finding, Mapping):
             reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:{index}")
             continue
+        unknown_finding = set(finding.keys()) - MODEL_FINDING_KEYS
+        if unknown_finding:
+            reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:unknown_finding:{index}")
         refs = _normalize_text_list(finding.get("evidence_refs"))
         required = ("finding_id", "claim", "wsp97_label", "recommended_action", "wsp15_priority", "severity")
         if any(not str(finding.get(key) or "").strip() for key in required) or not refs:
             reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:{index}")
+        wsp97_label = str(finding.get("wsp97_label") or "").strip()
+        action = str(finding.get("recommended_action") or "").strip()
+        priority = str(finding.get("wsp15_priority") or "").strip()
+        severity = str(finding.get("severity") or "").strip()
+        next_slice = str(finding.get("next_slice_name") or "").strip()
+        if wsp97_label and wsp97_label not in MODEL_WSP97_LABELS:
+            reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:wsp97_label:{index}")
+        if action and action not in MODEL_RECOMMENDED_ACTIONS:
+            reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:recommended_action:{index}")
+        if priority and priority not in MODEL_PRIORITIES:
+            reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:wsp15_priority:{index}")
+        if severity and severity not in MODEL_SEVERITIES:
+            reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:severity:{index}")
+        if action == "FIX" and not next_slice:
+            reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:missing_next_slice:{index}")
+        if action == "STOP" and next_slice:
+            reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:stop_next_slice:{index}")
         if refs and not set(refs).issubset(allowed):
             reasons.append(f"{ReadOnlyAuditTaskRejectReason.UNKNOWN_EVIDENCE_REF}:{index}")
     return tuple(dict.fromkeys(reasons))
@@ -506,6 +915,11 @@ def _build_model_report(
     evidence = tuple(item.evidence for item in snapshots)
     evidence_refs = tuple(_evidence_ref(item) for item in evidence)
     findings = _bounded_findings(parsed.get("findings"))
+    route_receipt = _normalized_model_route_receipt(
+        route_receipt=model_result.route_receipt,
+        allocation=allocation,
+        model_result=model_result,
+    )
     receipt_payload = {
         "schema_version": READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA,
         "task_id": str(task_id or ""),
@@ -521,6 +935,8 @@ def _build_model_report(
         "wsp15_allocation_digest": allocation_digest,
         "model_receipt_id": model_result.model_receipt_id,
         "model_result_digest": model_result.model_result_digest,
+        "model_route_receipt": route_receipt,
+        "model_route_receipt_id": route_receipt.get("receipt_id"),
         "holoindex_query_receipt": dict(holo_receipt),
         "codeindex_query_receipt": dict(code_receipt),
         "direct_read_evidence_refs": list(evidence_refs),
@@ -621,7 +1037,65 @@ def _observe_repo_head(repo_root: Path) -> str:
         return "unknown"
 
 
-def _model_reject(reason: str) -> RepoAuditModelResult:
+def _model_route_receipt(
+    *,
+    binding: Mapping[str, Any],
+    lead_model: str,
+    panel_models: Sequence[str],
+    timeout_seconds: int,
+    max_tokens: int,
+    made_network_call: bool,
+    status: str,
+    started: float,
+) -> Mapping[str, Any]:
+    payload = {
+        "schema_version": "reddog_readonly_repo_audit_model_route_receipt.v1",
+        "mode": "foundups_fusion",
+        "lead_model": str(lead_model or ""),
+        "panel_models": [str(item) for item in panel_models],
+        "reasoning_tier": str(binding.get("wsp15_reasoning_tier") or ""),
+        "wsp15_priority": str(binding.get("wsp15_priority") or ""),
+        "timeout_seconds": int(timeout_seconds or 0),
+        "max_tokens": int(max_tokens or 0),
+        "made_network_call": made_network_call is True,
+        "status": str(status or ""),
+        "latency_ms": int((time.monotonic() - started) * 1000),
+        "binding_digest": "sha256:" + _digest(binding),
+    }
+    return {**payload, "receipt_id": "sha256:" + _digest(payload)}
+
+
+def _normalized_model_route_receipt(
+    *,
+    route_receipt: Mapping[str, Any],
+    allocation: Mapping[str, Any],
+    model_result: RepoAuditModelResult,
+) -> Mapping[str, Any]:
+    if isinstance(route_receipt, Mapping) and str(route_receipt.get("receipt_id") or "").startswith("sha256:"):
+        return dict(route_receipt)
+    payload = {
+        "schema_version": "reddog_readonly_repo_audit_model_route_receipt.v1",
+        "mode": "injected_test_runner",
+        "lead_model": "injected",
+        "panel_models": [],
+        "reasoning_tier": str(allocation.get("reasoning_tier") or ""),
+        "wsp15_priority": str(allocation.get("priority") or ""),
+        "timeout_seconds": 0,
+        "max_tokens": 0,
+        "made_network_call": model_result.made_network_call is True,
+        "status": str(model_result.status or ""),
+        "latency_ms": 0,
+        "binding_digest": "sha256:" + _digest(
+            {
+                "allocation_receipt_id": allocation.get("receipt_id"),
+                "model_result_digest": model_result.model_result_digest,
+            }
+        ),
+    }
+    return {**payload, "receipt_id": "sha256:" + _digest(payload)}
+
+
+def _model_reject(reason: str, *, route_receipt: Mapping[str, Any] | None = None) -> RepoAuditModelResult:
     normalized = str(reason or ReadOnlyAuditTaskRejectReason.MODEL_FAILURE)
     return RepoAuditModelResult(
         ok=False,
@@ -631,12 +1105,15 @@ def _model_reject(reason: str) -> RepoAuditModelResult:
         model_result_digest="sha256:" + _digest({"ok": False, "reason": normalized}),
         made_network_call=False,
         rejection_reasons=(normalized,),
+        route_receipt=dict(route_receipt or {}),
     )
 
 
 __all__ = [
     "ENV_READONLY_AUDIT_RUNTIME_MODE",
+    "CodeIndexReadOnlyQueryAdapter",
     "FoundupsFusionRepoAuditModelRunner",
+    "HoloIndexReadOnlyQueryAdapter",
     "MODEL_WORKER_MODE",
     "READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA",
     "REPO_CODE_AUDIT_LANE",
