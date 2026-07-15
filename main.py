@@ -1582,6 +1582,14 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
             run_reddog_main_resident_queue_serial_loop_bootstrap,
         )
+        from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+            build_reddog_verified_pattern_memory_sink,
+        )
+
+        pattern_memory_admission_sink = build_reddog_verified_pattern_memory_sink(
+            repo_root=repo_root,
+            db_path=os.getenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", "") or None,
+        )
 
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
@@ -1615,6 +1623,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
             worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
             worktree_runner_timeout_s=worktree_runner_timeout_s,
+            pattern_memory_admission_sink=pattern_memory_admission_sink,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
             max_steps=max_steps,

@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_SINK_BRIDGE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Added `src/reddog_verified_pattern_memory_sink.py`, an explicit outside-repo
+  PatternMemory sink adapter for already-verified resident queue outcomes.
+- Added `main.py` env wiring for `REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH`.
+  The sink is constructed only when this path is set and it is outside the
+  repository checkout.
+- The sink maps a verified recursive improvement outcome into a WRE
+  `SkillOutcome`, stores it through the existing `PatternMemory` API, rejects
+  secret-bearing records, and returns a deterministic record id.
+- Added tests proving outside-repo storage, inside-repo path rejection,
+  idempotent repeated store, secret rejection, AST denylist invariants, and
+  `main.py` pass-through into the resident queue bootstrap.
+- No OpenClaw enqueue, Hermes dispatch, shell command, PR publish, merge,
+  reward settlement, or HoloIndex re-index is performed by this bridge.
+- HoloIndex read-only probe for `RedDog verified PatternMemory sink bridge
+  resident queue outside repo database` returned adjacent guard, verifier, WSP,
+  and audit assets, but not this sink bridge; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_SINK_BRIDGE_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_PATTERN_MEMORY_ADMISSION_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97

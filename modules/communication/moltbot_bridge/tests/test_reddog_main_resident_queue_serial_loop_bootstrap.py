@@ -2465,6 +2465,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(
                     tmp_path / "pattern_memory_admission_request.json"
                 ),
+                "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(
+                    tmp_path / "pattern_memory.db"
+                ),
                 "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(tmp_path / "authority_state.json"),
                 "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
                 "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(tmp_path / "principals.json"),
@@ -2515,6 +2518,10 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     )
     assert mocked.call_args.kwargs["admission_request_path"] == str(
         tmp_path / "pattern_memory_admission_request.json"
+    )
+    assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is not None
+    assert str(mocked.call_args.kwargs["pattern_memory_admission_sink"].db_path) == str(
+        tmp_path / "pattern_memory.db"
     )
     assert mocked.call_args.kwargs["authority_state_path"] == str(tmp_path / "authority_state.json")
     assert mocked.call_args.kwargs["permission_snapshots_path"] == str(tmp_path / "snapshots.json")
