@@ -103,6 +103,17 @@ class RedDogWSP15AllocationReceipt:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class RedDogWSP15AllocationValidationResult:
+    """Canonical validation result for downstream WSP 15 allocation bindings."""
+
+    accepted: bool
+    rejection_reasons: tuple[str, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
 def allocate_reddog_wsp15_receipt(
     *,
     requested_operation: str,
@@ -173,6 +184,86 @@ def allocate_reddog_wsp15_receipt(
         reasoning_tier=reasoning_tier,
         worker_plan=worker_plan,
         scoring_rationale=scoring_rationale,
+    )
+
+
+def validate_reddog_wsp15_allocation_receipt(
+    allocation: Mapping[str, Any] | None,
+) -> RedDogWSP15AllocationValidationResult:
+    """Validate a RedDog WSP 15 allocation receipt without recomputing its id.
+
+    Python ``bool`` is a subclass of ``int``; this validator intentionally uses
+    exact ``type(value) is int`` checks so boolean values cannot satisfy MPS
+    numeric fields. Downstream queue, architect, and worker bindings must use
+    this single validator instead of local partial checks.
+    """
+
+    reasons: list[str] = []
+    if not isinstance(allocation, Mapping) or not allocation:
+        return RedDogWSP15AllocationValidationResult(
+            accepted=False,
+            rejection_reasons=("missing_wsp15_allocation",),
+        )
+
+    required = (
+        "receipt_id",
+        "complexity",
+        "importance",
+        "deferability",
+        "impact",
+        "mps_total",
+        "priority",
+        "reasoning_tier",
+        "worker_plan",
+    )
+    for key in required:
+        if key not in allocation or allocation.get(key) in (None, ""):
+            reasons.append(f"missing_field:{key}")
+
+    receipt_id = str(allocation.get("receipt_id") or "")
+    if not receipt_id.startswith("sha256:"):
+        reasons.append("malformed_receipt_id")
+
+    score_keys = ("complexity", "importance", "deferability", "impact")
+    scores = tuple(allocation.get(key) for key in score_keys)
+    for key, value in zip(score_keys, scores):
+        if type(value) is not int or not 1 <= value <= 5:
+            reasons.append(f"malformed_score:{key}")
+
+    total = allocation.get("mps_total")
+    if type(total) is not int:
+        reasons.append("malformed_mps_total")
+    elif all(type(value) is int for value in scores) and total != sum(scores):
+        reasons.append("mps_total_mismatch")
+
+    priority = str(allocation.get("priority") or "")
+    if priority not in {PRIORITY_P0, PRIORITY_P1, PRIORITY_P2, PRIORITY_P3, PRIORITY_P4}:
+        reasons.append("malformed_priority")
+    elif type(total) is int and priority != _priority_for_total(total):
+        reasons.append("priority_mps_total_mismatch")
+
+    reasoning_tier = str(allocation.get("reasoning_tier") or "")
+    if reasoning_tier not in {REASONING_REGULAR, REASONING_HIGH, REASONING_ULTRA}:
+        reasons.append("malformed_reasoning_tier")
+
+    worker_plan = allocation.get("worker_plan")
+    if not isinstance(worker_plan, Mapping):
+        reasons.append("malformed_worker_plan")
+    else:
+        expected_fusion = reasoning_tier in {REASONING_HIGH, REASONING_ULTRA}
+        if worker_plan.get("reasoning_tier") != reasoning_tier:
+            reasons.append("worker_plan_reasoning_tier_mismatch")
+        if worker_plan.get("fusion_required") is not expected_fusion:
+            reasons.append("worker_plan_fusion_required_mismatch")
+        if worker_plan.get("hermes_execution_allowed") is not False:
+            reasons.append("worker_plan_hermes_must_be_false")
+        if worker_plan.get("queue_mutation_allowed") is not False:
+            reasons.append("worker_plan_queue_mutation_must_be_false")
+
+    deduped = tuple(dict.fromkeys(reasons))
+    return RedDogWSP15AllocationValidationResult(
+        accepted=not deduped,
+        rejection_reasons=deduped,
     )
 
 
@@ -334,5 +425,7 @@ __all__ = [
     "REASONING_REGULAR",
     "REASONING_ULTRA",
     "RedDogWSP15AllocationReceipt",
+    "RedDogWSP15AllocationValidationResult",
     "allocate_reddog_wsp15_receipt",
+    "validate_reddog_wsp15_allocation_receipt",
 ]

@@ -290,6 +290,10 @@ def _assignment_safe(assignment: ReadOnlyAuditAssignment, plan: ReadOnlyAuditSwa
         return False
     if assignment.determination_id != plan.receipt.determination_id:
         return False
+    if assignment.wsp15_allocation_receipt_id != plan.receipt.wsp15_allocation_receipt_id:
+        return False
+    if assignment.wsp15_allocation_digest != plan.receipt.wsp15_allocation_digest:
+        return False
     if assignment.no_worker_spawn_performed is not True:
         return False
     if assignment.no_execution_performed is not True:
@@ -312,6 +316,10 @@ def _build_task_spec(plan: ReadOnlyAuditSwarmPlan, assignment: ReadOnlyAuditAssi
     context = {
         "source": READONLY_AUDIT_TASK_SOURCE,
         "slice_name": "REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_AGENTDB_ENQUEUE_PHASE1",
+        "worker_mode": "model_backed_0102" if assignment.lane_id == "repo_code_audit" else "deterministic_readonly",
+        "wsp15_allocation_receipt_id": assignment.wsp15_allocation_receipt_id,
+        "wsp15_allocation_digest": assignment.wsp15_allocation_digest,
+        "wsp15_allocation_receipt": dict(plan.receipt.wsp15_allocation_receipt),
         "swarm_receipt": plan.receipt.to_dict(),
         "assignment": assignment.to_dict(),
         "forbidden_actions": list(FORBIDDEN_ACTIONS),

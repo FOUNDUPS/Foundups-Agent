@@ -12,6 +12,7 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     REASONING_REGULAR,
     REASONING_ULTRA,
     allocate_reddog_wsp15_receipt,
+    validate_reddog_wsp15_allocation_receipt,
 )
 
 
@@ -96,6 +97,39 @@ def test_allocation_scores_stay_within_wsp15_ranges() -> None:
     assert all(1 <= score <= 5 for score in scores)
     assert receipt.mps_total == sum(scores)
     assert 4 <= receipt.mps_total <= 20
+
+
+def test_validator_rejects_bool_scores_and_priority_total_mismatch() -> None:
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="audit RedDog",
+        prompt_text="Audit RedDog runtime.",
+    ).to_dict()
+    bool_score = dict(allocation)
+    bool_score["complexity"] = True
+    priority_mismatch = dict(allocation)
+    priority_mismatch["priority"] = "P4"
+
+    bool_result = validate_reddog_wsp15_allocation_receipt(bool_score)
+    priority_result = validate_reddog_wsp15_allocation_receipt(priority_mismatch)
+
+    assert bool_result.accepted is False
+    assert "malformed_score:complexity" in bool_result.rejection_reasons
+    assert priority_result.accepted is False
+    assert "priority_mps_total_mismatch" in priority_result.rejection_reasons
+
+
+def test_validator_rejects_worker_plan_mismatches() -> None:
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="audit RedDog",
+        prompt_text="Audit RedDog runtime.",
+    ).to_dict()
+    allocation["worker_plan"] = dict(allocation["worker_plan"])
+    allocation["worker_plan"]["queue_mutation_allowed"] = True
+
+    result = validate_reddog_wsp15_allocation_receipt(allocation)
+
+    assert result.accepted is False
+    assert "worker_plan_queue_mutation_must_be_false" in result.rejection_reasons
 
 
 def test_allocation_module_has_no_execution_or_indexing_imports() -> None:

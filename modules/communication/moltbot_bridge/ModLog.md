@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_OPENCLAW_READONLY_0102_AUDIT_WORKER_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Upgraded the existing `reddog_readonly_audit` `run_task` seam so
+  `repo_code_audit` assignments marked `model_backed_0102` invoke a
+  redaction-gated, strict-JSON read-only 0102 model worker.
+- Bound every read-only audit assignment and AgentDB task context to the
+  canonical WSP_15 allocation receipt id/digest, with canonical validation
+  rejecting boolean MPS values, malformed scores, mismatched priority totals,
+  and unsafe worker-plan claims.
+- Added query-only HoloIndex/CodeIndex receipt capture and governed direct-read
+  evidence binding; index failures are recorded as errors and cannot be cited
+  as content-bearing evidence.
+- Replaced backend architect raw serialized-JSON slicing with deterministic
+  field-level budgeting and fail-closed `PROMPT_BUDGET_EXCEEDED` behavior.
+- Added tests for model-backed worker success, unknown evidence rejection,
+  explicit runtime-mode failure, AgentDB/OpenClaw claim to `run_task` report
+  persistence, WSP_15 validation hardening, and prompt-budget fail-closed.
+- No source mutation, shell command, worktree operation, additional OpenClaw
+  enqueue, Hermes dispatch, PR creation, PatternMemory promotion, or HoloIndex
+  runtime re-index is added.
+
 ## 2026-07-15: REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

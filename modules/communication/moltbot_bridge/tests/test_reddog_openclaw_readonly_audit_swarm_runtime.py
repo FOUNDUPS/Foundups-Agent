@@ -20,6 +20,9 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     plan_reddog_openclaw_readonly_audit_swarm,
     validate_reddog_openclaw_readonly_audit_reports,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     build_evidence_bundle,
     build_operational_context_snapshot,
@@ -173,6 +176,33 @@ def test_plans_default_readonly_audit_swarm_from_accepted_context_gate() -> None
         assert assignment.no_worker_spawn_performed is True
         assert assignment.no_execution_performed is True
         assert assignment.snapshot_receipt_id == plan.receipt.snapshot_receipt_id
+
+
+def test_plan_binds_wsp15_allocation_to_every_assignment() -> None:
+    snapshot, context_view, evidence_bundle, gate = _accepted_gate_bundle()
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="readonly_audit_swarm",
+        prompt_text="audit current RedDog operational loop",
+        allowed_read_targets=["docs/0102_session_briefings/work_ledger.schema.json"],
+    ).to_dict()
+
+    plan = plan_reddog_openclaw_readonly_audit_swarm(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        gate_decision=gate,
+        allowed_read_targets=["docs/0102_session_briefings/work_ledger.schema.json"],
+        wsp15_allocation_receipt=allocation,
+    )
+
+    assert plan.accepted is True
+    assert plan.receipt.wsp15_allocation_receipt_id == allocation["receipt_id"]
+    assert plan.receipt.wsp15_allocation_receipt == allocation
+    assert all(
+        assignment.wsp15_allocation_receipt_id == allocation["receipt_id"]
+        for assignment in plan.assignments
+    )
+    assert all(assignment.wsp15_allocation_digest for assignment in plan.assignments)
 
 
 def test_rejects_when_fusion_assignment_gate_rejected() -> None:

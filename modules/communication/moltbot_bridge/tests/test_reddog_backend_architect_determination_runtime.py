@@ -19,6 +19,7 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     InMemoryArchitectDeterminationStore,
     run_reddog_backend_architect_determination_runtime,
 )
+from modules.communication.moltbot_bridge.src import reddog_backend_architect_determination_runtime as backend_runtime
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
     evaluate_context_snapshot_fusion_assignment_gate,
 )
@@ -389,6 +390,62 @@ def test_wsp15_receipt_mismatch_rejects() -> None:
 
     assert result.accepted is False
     assert ArchitectDeterminationReason.WSP15_RECEIPT_MISMATCH in result.rejection_reasons
+
+
+def test_malformed_wsp15_bool_score_rejects_before_model_call() -> None:
+    inputs = _build_inputs()
+    allocation = dict(inputs["allocation"])
+    allocation["importance"] = True
+    runner = FakeArchitectRunner({})
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=allocation,
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION in result.rejection_reasons
+    assert runner.calls == []
+
+
+def test_priority_mps_total_mismatch_rejects_before_model_call() -> None:
+    inputs = _build_inputs()
+    allocation = dict(inputs["allocation"])
+    allocation["priority"] = "P4"
+    runner = FakeArchitectRunner({})
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=allocation,
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION in result.rejection_reasons
+    assert runner.calls == []
+
+
+def test_prompt_budget_exceeded_rejects_without_malformed_json(monkeypatch) -> None:
+    inputs = _build_inputs()
+    runner = FakeArchitectRunner({})
+    monkeypatch.setattr(backend_runtime, "DEFAULT_MAX_PROMPT_CHARS", 40)
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.PROMPT_BUDGET_EXCEEDED in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_duplicate_cycle_fails_closed_before_model_call() -> None:
