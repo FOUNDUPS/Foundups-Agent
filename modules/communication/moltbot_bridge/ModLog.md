@@ -1,5 +1,30 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_VERIFIED_OUTCOME_RATCHET_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can load an outside-repo
+  `ratchet_request` JSON artifact and an outside-repo JSONL outcome-ratchet
+  store, then advance from `verified_draft_pr_publish` to
+  `verified_outcome_ratchet`.
+- Added `main.py` env wiring for `REDDOG_OUTCOME_RATCHET_REQUEST_PATH` and
+  `REDDOG_OUTCOME_RATCHET_STORE_PATH`.
+- Added the `no_verified_outcome_ratchet_performed` result attestation.
+- Added tests proving the stage-11 happy path records a verified outcome to an
+  outside-repo JSONL store, advances to
+  `RUN_QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE`, and preserves
+  no-command, no-PR-publish, no-ready, no-merge, no-reward, no-PatternMemory,
+  and no-HoloIndex-reindex invariants.
+- Added fail-closed coverage proving a ratchet request without an injected or
+  outside-repo outcome store stops the loop at `stage:verified_outcome_ratchet`.
+- HoloIndex read-only probe for `RedDog main resident queue verified outcome
+  ratchet bootstrap ratchet request JSONL store` returned adjacent wardrobe,
+  receipt, and contract assets, but not this bootstrap seam; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_VERIFIED_OUTCOME_RATCHET_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
