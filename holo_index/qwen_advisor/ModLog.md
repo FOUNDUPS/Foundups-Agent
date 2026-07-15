@@ -4,6 +4,28 @@
 This ModLog tracks all changes to the `holo_index/qwen_advisor/` module.
 Each entry must include WSP protocol references and impact analysis.
 
+## [2026-07-16] - HOLOINDEX_RESIDENT_DAE_RUNTIME_CONSOLIDATION_PHASE1
+**Agent**: 0102 (Codex)
+**Type**: Runtime consolidation repair
+**WSP Compliance**: WSP 00, WSP 15, WSP 50, WSP 80, WSP 97
+
+### Changes Implemented
+- Fixed `HoloDAECoordinator` initialization order so `_scan_for_gates()` cannot
+  log before `self.logger` and telemetry are initialized.
+- Added compatibility accessors for `monitoring_active`,
+  `last_monitoring_result`, and `run_monitoring_cycle()` while keeping the
+  monitoring loop as the state owner.
+- Updated request work-context derivation so HoloIndex returned files drive the
+  current work context before Qwen internal analysis files.
+- Synchronized coordinator, formatter, and monitoring-loop work context after
+  request handling and manual monitoring cycles.
+
+### Boundary
+- No re-index, no automatic HoloDAE launch, no semantic-store writes, no WRE
+  enqueue, and no RedDog runtime authority change.
+
+---
+
 ## [2025-11-30] - MAJOR: WSP 62 Coordinator Refactoring (Sprints H1-H6)
 **Agent**: 0102
 **Type**: Major Refactoring & WRE Integration

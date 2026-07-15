@@ -1728,6 +1728,12 @@ def bootstrap_runtime_dae_launches() -> None:
             start_callable=run_holodae,
             stop_callable=stop_holodae,
             description="Code intelligence and search runtime.",
+            metadata={
+                "resident_owner": "dae_launch_broker",
+                "runtime_autostart": False,
+                "runtime_reindex_allowed": False,
+                "query_runtime": True,
+            },
         ),
         DAELaunchSpec(
             dae_id="git_push_dae",

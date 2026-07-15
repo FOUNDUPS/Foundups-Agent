@@ -73,6 +73,10 @@ def test_bootstrap_runtime_dae_launches_registers_holodae_stop_hook(monkeypatch)
     holodae_specs = [spec for spec in specs if spec.dae_id == "holodae"]
     assert len(holodae_specs) == 1
     assert holodae_specs[0].stop_callable is main.stop_holodae
+    assert holodae_specs[0].metadata["resident_owner"] == "dae_launch_broker"
+    assert holodae_specs[0].metadata["runtime_autostart"] is False
+    assert holodae_specs[0].metadata["runtime_reindex_allowed"] is False
+    broker.start_dae.assert_not_called()
 
 
 def test_bootstrap_runtime_dae_launches_registers_git_push_and_social_stop_hooks(monkeypatch):
