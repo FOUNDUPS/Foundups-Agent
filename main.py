@@ -1604,6 +1604,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             publish_request_path=os.getenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", "") or None,
             ratchet_request_path=os.getenv("REDDOG_OUTCOME_RATCHET_REQUEST_PATH", "") or None,
             outcome_ratchet_store_path=os.getenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", "") or None,
+            held_out_gate_request_path=os.getenv("REDDOG_HELD_OUT_GATE_REQUEST_PATH", "") or None,
             authority_state_path=os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", "") or None,
             permission_snapshots_path=os.getenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", "") or None,
             principal_authority_records_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", "") or None,

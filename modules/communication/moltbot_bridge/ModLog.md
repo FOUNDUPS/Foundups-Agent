@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_HELD_OUT_REGRESSION_GATE_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can load an outside-repo
+  `held_out_gate_request` JSON artifact and advance from
+  `verified_outcome_ratchet` to `held_out_regression_gate`.
+- Added `main.py` env wiring for `REDDOG_HELD_OUT_GATE_REQUEST_PATH`.
+- Added the `no_held_out_regression_gate_performed` result attestation.
+- Added tests proving the stage-12 happy path evaluates held-out regression
+  evidence, advances to `RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE`,
+  and preserves no-command, no-test, no-PR-publish, no-merge, no-PatternMemory,
+  no-reward, and no-HoloIndex-reindex invariants.
+- Added fail-closed coverage proving a missing held-out gate request stops the
+  loop at `stage:held_out_regression_gate`.
+- HoloIndex read-only probe for `RedDog main resident queue held out regression
+  gate bootstrap held out gate request` returned adjacent operational-spine,
+  WSP, and audit assets, but not this bootstrap seam; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_HELD_OUT_REGRESSION_GATE_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_VERIFIED_OUTCOME_RATCHET_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97

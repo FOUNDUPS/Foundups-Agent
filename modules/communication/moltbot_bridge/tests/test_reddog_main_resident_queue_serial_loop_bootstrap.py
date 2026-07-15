@@ -453,6 +453,48 @@ def _outcome_ratchet_request(
     }
 
 
+def _held_out_gate_request(
+    verification_result: Mapping[str, object] | None = None,
+) -> dict[str, object]:
+    verifier_result = dict(
+        verification_result or verify_autonomous_slice_runtime(_slice_verifier_request()).to_dict()
+    )
+    verifier_receipt = verifier_result["receipt"]
+    head_sha = str(verifier_receipt["head_sha"])
+    return {
+        "work_order_id": WORK_ORDER_ID,
+        "slice_name": verifier_receipt["slice_name"],
+        "worker_id": verifier_receipt["worker_id"],
+        "enable_pattern_memory_admission": True,
+        "improvement_job": {
+            "job_id": "imp_resident_queue_heldout_1234",
+            "finding_id": "resident-heldout-1",
+            "improvement_type": "resident_queue_bootstrap",
+            "status": "pending",
+            "dry_run": True,
+        },
+        "verification_result": verifier_result,
+        "held_out_regression": {
+            "suite_id": "heldout-resident-queue-001",
+            "is_held_out": True,
+            "independent": True,
+            "generated_by_author": False,
+            "evidence_author_id": verifier_receipt["verifier_id"],
+            "passed": True,
+            "test_count": 12,
+            "failure_count": 0,
+            "suite_digest": _digest("1"),
+            "baseline_digest": _digest("2"),
+            "candidate_digest": _digest("3"),
+            "candidate_head_sha": head_sha,
+        },
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "holoindex_freshness_receipt_digest": _digest("4"),
+        },
+    }
+
+
 def _snapshots() -> dict[str, object]:
     return {
         "snapshots": {
@@ -593,6 +635,145 @@ def _repo(tmp_path: Path) -> Path:
     path = tmp_path / "repo"
     path.mkdir()
     return path
+
+
+def _run_bootstrap_to_verified_outcome_ratchet(tmp_path: Path) -> dict[str, object]:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+    publish_request = _write_runtime_json(
+        tmp_path,
+        "publish_request.json",
+        _draft_pr_publish_request(worktree),
+    )
+    outcome_store = tmp_path / "runtime" / "outcomes" / "ratchet.jsonl"
+    draft_pr_runner = FakeDraftPrRunner()
+
+    verifier_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=worktree_runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=9,
+    )
+    assert verifier_run.accepted is True
+    verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
+    ratchet_request = _write_runtime_json(
+        tmp_path,
+        "ratchet_request.json",
+        _outcome_ratchet_request(verifier_stage["verifier_result"]),
+    )
+
+    ratchet_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        publish_request_path=publish_request,
+        ratchet_request_path=ratchet_request,
+        outcome_ratchet_store_path=outcome_store,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=worktree_runner,
+        draft_pr_runner=draft_pr_runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=2,
+    )
+    assert ratchet_run.accepted is True
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    assert stored["stage_results"]["verified_outcome_ratchet"]["decision"] == (
+        "QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT"
+    )
+
+    return {
+        "repo": repo,
+        "state": state,
+        "profile": profile,
+        "chain": chain,
+        "verifier_stage": verifier_stage,
+    }
 
 
 def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(tmp_path: Path) -> None:
@@ -1467,6 +1648,80 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
     assert not (repo / "runtime" / "outcomes" / "ratchet.jsonl").exists()
 
 
+def test_bootstrap_serial_loop_reaches_held_out_regression_gate_with_request(
+    tmp_path: Path,
+) -> None:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path)
+    verifier_stage = ctx["verifier_stage"]
+    held_out_request = _write_runtime_json(
+        tmp_path,
+        "held_out_gate_request.json",
+        _held_out_gate_request(verifier_stage["verifier_result"]),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        held_out_gate_request_path=held_out_request,
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=1,
+    )
+
+    assert result.accepted is True
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("held_out_regression_gate",)
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE"
+    assert result.no_held_out_regression_gate_performed is False
+    assert result.no_verified_outcome_ratchet_performed is True
+    assert result.no_pattern_memory_client_created is True
+    assert result.no_reward_settlement_performed is True
+    assert result.no_holoindex_reindex_performed is True
+
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["held_out_regression_gate"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    assert (
+        stage["gate_result"]["decision"]
+        == "HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT"
+    )
+    assert stage["gate_result"]["receipt"]["no_pattern_memory_write_performed"] is True
+    assert stage["no_command_execution_performed"] is True
+    assert stage["no_test_execution_performed"] is True
+    assert stage["no_pattern_memory_write_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+
+
+def test_bootstrap_serial_loop_fails_closed_at_held_out_without_gate_request(
+    tmp_path: Path,
+) -> None:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path)
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=ctx["repo"],
+        work_state_path=ctx["state"],
+        chain_results_path=ctx["chain"],
+        authority_profile_path=ctx["profile"],
+        now_iso=NOW,
+        requested_queue_item_id="queue-1",
+        max_steps=1,
+    )
+
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.steps_run == 0
+    assert result.dispatched_stages == ()
+    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
+    assert "stage:held_out_regression_gate" in result.rejection_reasons
+    assert result.no_held_out_regression_gate_performed is True
+    assert result.no_pattern_memory_client_created is True
+
+
 def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_artifacts(
     tmp_path: Path,
 ) -> None:
@@ -2081,6 +2336,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(tmp_path / "publish_request.json"),
                 "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
+                "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(tmp_path / "held_out_gate_request.json"),
                 "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(tmp_path / "authority_state.json"),
                 "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
                 "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(tmp_path / "principals.json"),
@@ -2125,6 +2381,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     )
     assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
         tmp_path / "ratchet.jsonl"
+    )
+    assert mocked.call_args.kwargs["held_out_gate_request_path"] == str(
+        tmp_path / "held_out_gate_request.json"
     )
     assert mocked.call_args.kwargs["authority_state_path"] == str(tmp_path / "authority_state.json")
     assert mocked.call_args.kwargs["permission_snapshots_path"] == str(tmp_path / "snapshots.json")
