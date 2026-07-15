@@ -283,6 +283,11 @@ class DelegatedAuthorityRuntimeRequest:
     denied_paths: Tuple[str, ...]
     requested_operation: str
     permission_snapshot_digest: str
+    wsp15_allocation_receipt_id: str
+    wsp15_allocation_digest: str
+    wsp15_priority: str
+    wsp15_mps_total: int
+    wsp15_reasoning_tier: str
     identity_nonce: str
     work_authority_nonce: str
     issued_at: int
@@ -464,6 +469,8 @@ def _commit_issued_authority(
         "reddog_id": request.reddog_id,
         "foundup_id": request.foundup_id,
         "repo_full_name": request.repo_full_name,
+        "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
+        "wsp15_allocation_digest": request.wsp15_allocation_digest,
         "status": AUTHORITY_ISSUED,
     }
     next_state["issued_authorities"] = issued_next
@@ -524,6 +531,14 @@ def issue_delegated_authority_runtime(
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_DIGEST_MISMATCH])
     if not snapshot.grants(request.requested_operation, request.repo_full_name):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_INSUFFICIENT])
+    if (
+        not request.wsp15_allocation_receipt_id.startswith("sha256:")
+        or not request.wsp15_allocation_digest.startswith("sha256:")
+        or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
+        or type(request.wsp15_mps_total) is not int
+        or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
+    ):
+        return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
 
     effective_paths = set(request.allowed_paths) - set(request.denied_paths)
     if not effective_paths or not all(_path_within_foundup(path, request.foundup_id) for path in effective_paths):
@@ -615,6 +630,11 @@ def issue_delegated_authority_runtime(
         "denied_paths": list(request.denied_paths),
         "requested_operation": request.requested_operation,
         "permission_snapshot_digest": request.permission_snapshot_digest,
+        "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
+        "wsp15_allocation_digest": request.wsp15_allocation_digest,
+        "wsp15_priority": request.wsp15_priority,
+        "wsp15_mps_total": request.wsp15_mps_total,
+        "wsp15_reasoning_tier": request.wsp15_reasoning_tier,
         "nonce": request.work_authority_nonce,
         "issued_at": request.issued_at,
         "expires_at": request.work_authority_expires_at,

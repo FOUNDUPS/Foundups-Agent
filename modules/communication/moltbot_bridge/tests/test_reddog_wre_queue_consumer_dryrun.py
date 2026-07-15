@@ -111,6 +111,7 @@ def test_accepts_one_fresh_queued_item_without_execution() -> None:
     assert result.execution_ready is False
     assert result.receipt is not None
     assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
+    assert result.receipt.wsp15_allocation_digest.startswith("sha256:")
     assert result.receipt.wsp15_priority == "P0"
     assert result.receipt.wsp15_mps_total == 18
     assert result.receipt.reasoning_tier == "ULTRA"

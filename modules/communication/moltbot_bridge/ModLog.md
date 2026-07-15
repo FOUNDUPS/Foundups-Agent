@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_SIGNED_AUTHORITY_WSP15_ALLOCATION_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Extended the WRE queue consumer receipt to emit the digest of the selected
+  queue item's full WSP_15 allocation receipt.
+- Threaded `wsp15_allocation_receipt_id`, `wsp15_allocation_digest`,
+  `wsp15_priority`, `wsp15_mps_total`, and `wsp15_reasoning_tier` into the
+  delegated-authority runtime request and signed work-authority payload.
+- Updated the work-order signature verifier to require those WSP_15 allocation
+  binding fields; post-signing allocation digest tampering now rejects as an
+  invalid work-authority signature.
+- No signing key material, worker spawn, OpenClaw enqueue, Hermes dispatch,
+  worktree creation, shell command, repo mutation, reward settlement,
+  PatternMemory write, or HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog signed authority WSP15 allocation
+  digest binding` returned adjacent authority/governance assets but not this
+  seam; recorded as
+  `HOLOINDEX_REDDOG_SIGNED_AUTHORITY_WSP15_ALLOCATION_BINDING_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-15: REDDOG_WORK_ORDER_MATERIALIZER_QUEUE_WSP15_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
