@@ -34,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_lane_state_reconciler impor
     parse_work_ledger_json,
     reconcile_lane_sources,
 )
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 
 
 AUTHORITATIVE_REFRESH_APPLIED = "AUTHORITATIVE_REFRESH_APPLIED"
@@ -122,6 +125,7 @@ class WREQueueItem:
     status: str
     enqueued_at: str
     evidence_refs: Tuple[str, ...]
+    wsp15_allocation_receipt: Mapping[str, Any]
     no_execution_performed: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
@@ -452,12 +456,49 @@ def _build_claim(
     )
 
 
-def _build_queue_item(claim: DurableWorkerClaim, *, now_iso: str) -> WREQueueItem:
+def _selected_record(report: LaneReconciliationReport, selected_slice: str) -> Optional[LaneSliceRecord]:
+    for record in _authoritative_records(report):
+        if record.slice_id == selected_slice:
+            return record
+    return None
+
+
+def _allocation_receipt_for_selected_slice(
+    *,
+    selected_slice: str,
+    record: Optional[LaneSliceRecord],
+) -> Mapping[str, Any]:
+    evidence_targets: tuple[str, ...] = ()
+    if record and record.evidence:
+        evidence_targets = tuple(ref.strip() for ref in record.evidence.split(";") if ref.strip())
+    prompt_parts = [selected_slice]
+    if record and record.priority:
+        prompt_parts.append(f"priority={record.priority}")
+    if record and record.wsp15_total is not None:
+        prompt_parts.append(f"source_wsp15_total={record.wsp15_total}")
+    if record and record.status:
+        prompt_parts.append(f"status={record.status}")
+    return allocate_reddog_wsp15_receipt(
+        requested_operation=f"authoritative_work_state_queue:{selected_slice}",
+        prompt_text=" ".join(prompt_parts),
+        changed_paths=evidence_targets,
+        allowed_read_targets=evidence_targets,
+    ).to_dict()
+
+
+def _build_queue_item(
+    claim: DurableWorkerClaim,
+    *,
+    now_iso: str,
+    wsp15_allocation_receipt: Mapping[str, Any],
+) -> WREQueueItem:
+    allocation_receipt_id = str(wsp15_allocation_receipt.get("receipt_id") or "")
     payload = {
         "slice_id": claim.slice_id,
         "claim_id": claim.claim_id,
         "worker_id": claim.worker_id,
         "enqueued_at": now_iso,
+        "wsp15_allocation_receipt_id": allocation_receipt_id,
     }
     return WREQueueItem(
         queue_item_id=_canonical_digest(payload),
@@ -466,7 +507,12 @@ def _build_queue_item(claim: DurableWorkerClaim, *, now_iso: str) -> WREQueueIte
         worker_id=claim.worker_id,
         status="QUEUED",
         enqueued_at=now_iso,
-        evidence_refs=(f"claim:{claim.claim_id}", f"freshness:{claim.freshness_receipt_id}"),
+        evidence_refs=(
+            f"claim:{claim.claim_id}",
+            f"freshness:{claim.freshness_receipt_id}",
+            f"wsp15_allocation:{allocation_receipt_id}",
+        ),
+        wsp15_allocation_receipt=dict(wsp15_allocation_receipt),
     )
 
 
@@ -622,7 +668,15 @@ def refresh_authoritative_work_state_runtime(
             report=report,
             freshness=freshness,
         )
-        queue_item = _build_queue_item(durable_claim, now_iso=now_iso)
+        allocation_receipt = _allocation_receipt_for_selected_slice(
+            selected_slice=selected,
+            record=_selected_record(report, selected),
+        )
+        queue_item = _build_queue_item(
+            durable_claim,
+            now_iso=now_iso,
+            wsp15_allocation_receipt=allocation_receipt,
+        )
         queue_items = (queue_item,)
         queue_sync = WREQueueSyncReceipt(
             sync_id=_canonical_digest(
