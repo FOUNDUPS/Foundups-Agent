@@ -1,0 +1,505 @@
+"""Tests for REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1."""
+
+from __future__ import annotations
+
+import ast
+import json
+from pathlib import Path
+from typing import Any, Mapping
+
+from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
+    ACTION_FIX,
+    ACTION_RESEARCH_MORE,
+    ARCHITECT_DETERMINATION_ACCEPT,
+    ARCHITECT_DETERMINATION_REJECT,
+    ArchitectDeterminationReason,
+    ArchitectModelResult,
+    FoundupsFusionArchitectModelRunner,
+    InMemoryArchitectDeterminationStore,
+    run_reddog_backend_architect_determination_runtime,
+)
+from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
+    evaluate_context_snapshot_fusion_assignment_gate,
+)
+from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_runtime import (
+    DEFAULT_AUDIT_LANES,
+    READONLY_AUDIT_REPORTS_ACCEPTED,
+    validate_reddog_openclaw_readonly_audit_reports,
+    plan_reddog_openclaw_readonly_audit_swarm,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
+    build_evidence_bundle,
+    build_operational_context_snapshot,
+)
+from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
+    READONLY_AUDIT_REPORT_COLLECTION_ACCEPT,
+    ReadOnlyAuditReportCollectionResult,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+MODULE_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "src"
+    / "reddog_backend_architect_determination_runtime.py"
+)
+NOW = "2026-07-15T00:00:00+00:00"
+HEAD = "283d07ae4c7ed7bd1c8d9f9c7a112fd75ef00aaa"
+REVISION = "sha256:authoritative-work-state"
+
+
+class FakeArchitectRunner:
+    def __init__(
+        self,
+        output: Mapping[str, Any] | str,
+        *,
+        ok: bool = True,
+        quorum: bool = True,
+        raise_timeout: bool = False,
+    ) -> None:
+        self.output = output
+        self.ok = ok
+        self.quorum = quorum
+        self.raise_timeout = raise_timeout
+        self.calls: list[dict[str, Any]] = []
+
+    def run_architect_determination(self, *, prompt: str, context: str, binding: Mapping[str, Any], timeout_seconds: int):
+        self.calls.append(
+            {
+                "prompt": prompt,
+                "context": context,
+                "binding": dict(binding),
+                "timeout_seconds": timeout_seconds,
+            }
+        )
+        if self.raise_timeout:
+            raise TimeoutError("model timeout")
+        content = self.output if isinstance(self.output, str) else json.dumps(self.output, sort_keys=True)
+        return ArchitectModelResult(
+            ok=self.ok,
+            status="MODEL_OK" if self.ok else "MODEL_REJECT",
+            content=content,
+            model_receipt_id="model-receipt-1",
+            model_result_digest="sha256:model-result",
+            review_packet={"fusion_panel_quorum": {"passed": self.quorum}},
+            made_network_call=True,
+            rejection_reasons=() if self.ok else ("model_failed",),
+        )
+
+
+def _repo_state() -> dict[str, object]:
+    return {
+        "head_sha": HEAD,
+        "dirty_paths": (),
+        "dirty_digest": "sha256:clean",
+        "worktree_digest": "sha256:worktrees",
+    }
+
+
+def _work_state() -> dict[str, object]:
+    return {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "revision": REVISION,
+        "selected_slice": "REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1",
+        "refresh_receipt_id": "sha256:refresh",
+        "worker_claims": [
+            {"claim_id": "claim-1", "slice_id": "REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1"}
+        ],
+        "wre_queue_items": [{"queue_item_id": "queue-1", "claim_id": "claim-1"}],
+    }
+
+
+def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
+    return HoloIndexFreshnessReceipt(
+        schema_version="holoindex_freshness_receipt.v1",
+        generated_at=NOW,
+        repo_root=str(REPO_ROOT),
+        repo_head_sha=HEAD,
+        ssd_path="E:/HoloIndex",
+        source="ci_targeted_reindex",
+        collections=[
+            CollectionFreshness(
+                name="navigation_work_ledger",
+                count=4,
+                status="indexed",
+                source="ci_targeted_reindex",
+                repo_head_sha=HEAD,
+                last_indexed_at=NOW,
+            ),
+            CollectionFreshness(
+                name="navigation_symbols",
+                count=9,
+                status="indexed",
+                source="ci_targeted_reindex",
+                repo_head_sha=HEAD,
+                last_indexed_at=NOW,
+            ),
+        ],
+    )
+
+
+def _build_inputs(*, include_reports: bool = True):
+    snapshot_result = build_operational_context_snapshot(
+        repo_state=_repo_state(),
+        work_state_snapshot=_work_state(),
+        holoindex_receipt=_fresh_holo_receipt(),
+        changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+        now_iso=NOW,
+        breadcrumb_scope="REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1",
+    )
+    assert snapshot_result.accepted is True
+    snapshot = snapshot_result.snapshot
+    context_view = snapshot_result.context_view
+    assert snapshot is not None and context_view is not None
+    evidence_bundle = build_evidence_bundle(
+        snapshot=snapshot,
+        context_view=context_view,
+        report_digests=("sha256:source-receipts",),
+    )
+    fusion_gate = evaluate_context_snapshot_fusion_assignment_gate(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        current_repo_head_sha=HEAD,
+        current_work_state_revision=REVISION,
+        requested_operation="backend_architect_determination",
+        prompt_text="Produce backend architect determination",
+        now_iso=NOW,
+    )
+    assert fusion_gate.accepted is True
+    plan = plan_reddog_openclaw_readonly_audit_swarm(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        gate_decision=fusion_gate,
+        audit_lanes=DEFAULT_AUDIT_LANES,
+        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+    )
+    assert plan.accepted is True
+    reports = _reports(plan) if include_reports else ()
+    validation = validate_reddog_openclaw_readonly_audit_reports(plan=plan, reports=reports)
+    collection = ReadOnlyAuditReportCollectionResult(
+        accepted=validation.accepted,
+        status=READONLY_AUDIT_REPORT_COLLECTION_ACCEPT if validation.accepted else "REJECT",
+        swarm_id=plan.receipt.swarm_id,
+        report_count=len(reports),
+        validation=validation,
+        rejection_reasons=validation.rejection_reasons,
+    )
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="backend_architect_determination",
+        prompt_text="RedDog backend architect determination runtime",
+        changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+    ).to_dict()
+    return {
+        "snapshot": snapshot,
+        "context_view": context_view,
+        "evidence_bundle": evidence_bundle,
+        "fusion_gate": fusion_gate,
+        "report_collection": collection,
+        "reports": reports,
+        "allocation": allocation,
+    }
+
+
+def _reports(plan) -> tuple[dict[str, Any], ...]:
+    reports: list[dict[str, Any]] = []
+    for assignment in plan.assignments:
+        evidence_ref = f"file:docs/{assignment.lane_id}.md:sha256:{assignment.lane_id}:lines:1"
+        reports.append(
+            {
+                "assignment_id": assignment.assignment_id,
+                "lane_id": assignment.lane_id,
+                "snapshot_receipt_id": assignment.snapshot_receipt_id,
+                "summary": f"{assignment.lane_id} report supports backend architect determination.",
+                "evidence_refs": [evidence_ref],
+                "repo_mutation_performed": False,
+                "execution_performed": False,
+                "openclaw_enqueue_performed": False,
+                "readonly_audit_performed": True,
+                "report_digest": f"sha256:{assignment.lane_id}",
+                "findings": [
+                    {
+                        "finding_id": f"{assignment.lane_id}-finding",
+                        "claim": "Backend architect runtime needs one next implementation slice.",
+                        "wsp97_label": "OBSERVED",
+                        "recommended_action": "FIX",
+                        "wsp15_priority": "P0",
+                        "severity": "MAJOR",
+                        "evidence_refs": [evidence_ref],
+                        "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1",
+                    }
+                ],
+            }
+        )
+    return tuple(reports)
+
+
+def _model_output(allocation: Mapping[str, Any], evidence_ref: str, *, action: str = ACTION_FIX) -> dict[str, Any]:
+    return {
+        "action": action,
+        "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1" if action != "STOP" else None,
+        "summary": "Verified reports support one next backend runtime slice.",
+        "decision_reasons": ["selected verified P0 runtime gap"],
+        "evidence_refs": [evidence_ref],
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+    }
+
+
+def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "snapshot": inputs["snapshot"],
+        "context_view": inputs["context_view"],
+        "evidence_bundle": inputs["evidence_bundle"],
+        "fusion_gate": inputs["fusion_gate"],
+        "report_collection": inputs["report_collection"],
+        "reports": inputs["reports"],
+    }
+
+
+def test_backend_architect_runtime_accepts_fix_persists_and_emits_one_queue_candidate() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    store = InMemoryArchitectDeterminationStore()
+    runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref))
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=store,
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.status == ARCHITECT_DETERMINATION_ACCEPT
+    assert result.receipt.action == ACTION_FIX
+    assert result.receipt.fusion_quorum_passed is True
+    assert result.receipt.wsp15_allocation_receipt_id == inputs["allocation"]["receipt_id"]
+    assert result.receipt.queue_candidate is not None
+    assert result.queue_candidate_count == 1
+    assert result.receipt.queue_candidate.slice_id == "REDDOG_NEXT_RUNTIME_SLICE_PHASE1"
+    assert result.receipt.queue_candidate.status == "CANDIDATE"
+    assert result.persist_result.accepted is True
+    assert result.persist_result.stored is True
+    assert len(store.records) == 1
+    assert len(runner.calls) == 1
+    assert result.no_repo_mutation_performed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_holoindex_reindex_performed is True
+
+
+def test_research_more_persists_without_queue_candidate() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref, action=ACTION_RESEARCH_MORE)
+    runner = FakeArchitectRunner(output)
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.receipt.action == ACTION_RESEARCH_MORE
+    assert result.receipt.queue_candidate is None
+    assert result.queue_candidate_count == 0
+
+
+def test_missing_reports_fail_before_model_call() -> None:
+    inputs = _build_inputs(include_reports=False)
+    runner = FakeArchitectRunner({})
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert result.status == ARCHITECT_DETERMINATION_REJECT
+    assert ArchitectDeterminationReason.REPORT_COLLECTION_NOT_ACCEPTED in result.rejection_reasons
+    assert ArchitectDeterminationReason.MISSING_AUDIT_REPORTS in result.rejection_reasons
+    assert runner.calls == []
+
+
+def test_failed_fusion_quorum_rejects_after_model_call() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref), quorum=False)
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.FUSION_QUORUM_NOT_PASSED in result.rejection_reasons
+    assert result.persist_result.stored is False
+
+
+def test_invented_evidence_ref_rejects_invalid_output() -> None:
+    inputs = _build_inputs()
+    output = _model_output(inputs["allocation"], "file:not-in-report.md:1")
+    runner = FakeArchitectRunner(output)
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.INVALID_MODEL_OUTPUT in result.rejection_reasons
+
+
+def test_wsp15_receipt_mismatch_rejects() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    output["wsp15_allocation_receipt_id"] = "sha256:not-the-allocation"
+    runner = FakeArchitectRunner(output)
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.WSP15_RECEIPT_MISMATCH in result.rejection_reasons
+
+
+def test_duplicate_cycle_fails_closed_before_model_call() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    store = InMemoryArchitectDeterminationStore()
+
+    first = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=store,
+        model_runner=FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref)),
+        now_iso=NOW,
+    )
+    assert first.accepted is True
+    second_runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref))
+    second = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=store,
+        model_runner=second_runner,
+        now_iso=NOW,
+    )
+
+    assert second.accepted is False
+    assert ArchitectDeterminationReason.DUPLICATE_CYCLE in second.rejection_reasons
+    assert second_runner.calls == []
+
+
+def test_expired_snapshot_fails_closed_before_model_call() -> None:
+    inputs = _build_inputs()
+    runner = FakeArchitectRunner({})
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso="2026-07-15T01:00:00+00:00",
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.SNAPSHOT_EXPIRED in result.rejection_reasons
+    assert runner.calls == []
+
+
+def test_model_timeout_rejects_without_persistence() -> None:
+    inputs = _build_inputs()
+    runner = FakeArchitectRunner({}, raise_timeout=True)
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MODEL_TIMEOUT in result.rejection_reasons
+    assert result.persist_result.stored is False
+
+
+def test_model_failure_rejects_without_persistence() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref), ok=False)
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MODEL_FAILURE in result.rejection_reasons
+    assert result.persist_result.stored is False
+
+
+def test_production_runner_is_explicit_mode_only_without_network(monkeypatch) -> None:
+    monkeypatch.delenv("REDDOG_BACKEND_ARCHITECT_RUNTIME_MODE", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+
+    result = FoundupsFusionArchitectModelRunner().run_architect_determination(
+        prompt="Return JSON.",
+        context="{}",
+        binding={"binding": "test"},
+        timeout_seconds=1,
+    )
+
+    assert result.ok is False
+    assert result.made_network_call is False
+    assert result.rejection_reasons == ("runtime_mode_not_enabled",)
+
+
+def test_module_ast_denies_execution_and_mutation_surfaces() -> None:
+    tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
+    banned_imports = {"subprocess", "shutil"}
+    banned_attrs = {
+        ("os", "system"),
+        ("os", "popen"),
+        ("os", "spawn"),
+        ("os", "replace"),
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                assert alias.name not in banned_imports
+        if isinstance(node, ast.ImportFrom):
+            assert (node.module or "").split(".")[0] not in banned_imports
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+            assert (node.value.id, node.attr) not in banned_attrs

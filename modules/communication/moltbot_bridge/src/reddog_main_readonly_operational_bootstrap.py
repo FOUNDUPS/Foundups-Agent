@@ -48,6 +48,13 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_per
     ReadOnlyAuditDecisionStore,
     persist_reddog_readonly_audit_decision,
 )
+from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
+    AgentDbArchitectDeterminationStore,
+    ArchitectDeterminationStore,
+    ArchitectModelRunner,
+    BackendArchitectDeterminationResult,
+    run_reddog_backend_architect_determination_runtime,
+)
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     EvidenceBundle,
     OperationalContextSnapshot,
@@ -110,6 +117,14 @@ class RedDogMainReadonlyBootstrapResult:
     readonly_audit_decision_persist_status: Optional[str] = None
     readonly_audit_decision_persist_stored: bool = False
     readonly_audit_decision_persist_rejection_reasons: tuple[str, ...] = ()
+    backend_architect_determination_attempted: bool = False
+    backend_architect_determination_status: Optional[str] = None
+    backend_architect_determination_action: Optional[str] = None
+    backend_architect_determination_id: Optional[str] = None
+    backend_architect_determination_next_slice: Optional[str] = None
+    backend_architect_determination_queue_candidate_count: int = 0
+    backend_architect_determination_persist_stored: bool = False
+    backend_architect_determination_rejection_reasons: tuple[str, ...] = ()
     enqueue_attempted: bool = False
     enqueue_decision: Optional[str] = None
     enqueue_receipt_id: Optional[str] = None
@@ -149,6 +164,9 @@ def run_reddog_main_readonly_operational_bootstrap(
     report_store: ReadOnlyAuditReportStore | None = None,
     persist_readonly_audit_decision: bool = False,
     decision_store: ReadOnlyAuditDecisionStore | None = None,
+    run_backend_architect_determination: bool = False,
+    architect_model_runner: ArchitectModelRunner | None = None,
+    architect_determination_store: ArchitectDeterminationStore | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
 
@@ -266,6 +284,7 @@ def run_reddog_main_readonly_operational_bootstrap(
     collection_result: ReadOnlyAuditReportCollectionResult | None = None
     decision_result: ReadOnlyAuditDecisionReceipt | None = None
     decision_persist_result: ReadOnlyAuditDecisionPersistResult | None = None
+    architect_result: BackendArchitectDeterminationResult | None = None
     if collect_readonly_audit_reports:
         reader = report_store if report_store is not None else AgentDbReadOnlyAuditReportStore()
         collection_result = collect_reddog_readonly_audit_report_bundle(
@@ -327,6 +346,43 @@ def run_reddog_main_readonly_operational_bootstrap(
                         collection_result=collection_result,
                         decision_result=decision_result,
                         decision_persist_result=decision_persist_result,
+                        architect_result=architect_result,
+                    )
+            if run_backend_architect_determination:
+                architect_store = (
+                    architect_determination_store
+                    if architect_determination_store is not None
+                    else AgentDbArchitectDeterminationStore()
+                )
+                architect_result = run_reddog_backend_architect_determination_runtime(
+                    snapshot=snapshot,
+                    context_view=context_view,
+                    evidence_bundle=evidence_bundle,
+                    fusion_gate=gate,
+                    report_collection=collection_result,
+                    reports=decision_reports,
+                    wsp15_allocation_receipt=wsp15_allocation_receipt,
+                    store=architect_store,
+                    model_runner=architect_model_runner,
+                    now_iso=now_iso,
+                )
+                if not architect_result.accepted:
+                    return _not_ready(
+                        reasons=(
+                            "backend_architect_determination_rejected",
+                            *architect_result.rejection_reasons,
+                        ),
+                        changed_paths=paths,
+                        allowed_read_targets=targets,
+                        wsp15_allocation_receipt=wsp15_allocation_receipt,
+                        snapshot=snapshot,
+                        evidence_bundle=evidence_bundle,
+                        gate=gate,
+                        swarm_plan=plan,
+                        collection_result=collection_result,
+                        decision_result=decision_result,
+                        decision_persist_result=decision_persist_result,
+                        architect_result=architect_result,
                     )
             return _ready(
                 snapshot=snapshot,
@@ -340,6 +396,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 collection_result=collection_result,
                 decision_result=decision_result,
                 decision_persist_result=decision_persist_result,
+                architect_result=architect_result,
                 enqueue_result=None,
                 enqueue_attempted=False,
             )
@@ -356,6 +413,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 collection_result=collection_result,
                 decision_result=decision_result,
                 decision_persist_result=decision_persist_result,
+                architect_result=architect_result,
             )
 
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None
@@ -379,6 +437,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 collection_result=collection_result,
                 decision_result=decision_result,
                 decision_persist_result=decision_persist_result,
+                architect_result=architect_result,
                 enqueue_result=enqueue_result,
             )
 
@@ -394,6 +453,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         collection_result=collection_result,
         decision_result=decision_result,
         decision_persist_result=decision_persist_result,
+        architect_result=architect_result,
         enqueue_result=enqueue_result,
         enqueue_attempted=enqueue_readonly_audit_tasks,
     )
@@ -412,6 +472,7 @@ def _ready(
     collection_result: ReadOnlyAuditReportCollectionResult | None,
     decision_result: ReadOnlyAuditDecisionReceipt | None,
     decision_persist_result: ReadOnlyAuditDecisionPersistResult | None,
+    architect_result: BackendArchitectDeterminationResult | None,
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None,
     enqueue_attempted: bool,
 ) -> RedDogMainReadonlyBootstrapResult:
@@ -448,6 +509,24 @@ def _ready(
         readonly_audit_decision_persist_rejection_reasons=(
             decision_persist_result.rejection_reasons if decision_persist_result else ()
         ),
+        backend_architect_determination_attempted=architect_result is not None,
+        backend_architect_determination_status=architect_result.status if architect_result else None,
+        backend_architect_determination_action=architect_result.receipt.action if architect_result else None,
+        backend_architect_determination_id=(
+            architect_result.receipt.determination_receipt_id if architect_result else None
+        ),
+        backend_architect_determination_next_slice=(
+            architect_result.receipt.next_slice_name if architect_result else None
+        ),
+        backend_architect_determination_queue_candidate_count=(
+            architect_result.queue_candidate_count if architect_result else 0
+        ),
+        backend_architect_determination_persist_stored=(
+            architect_result.persist_result.stored if architect_result else False
+        ),
+        backend_architect_determination_rejection_reasons=(
+            architect_result.rejection_reasons if architect_result else ()
+        ),
         enqueue_attempted=enqueue_attempted,
         enqueue_decision=enqueue_result.decision if enqueue_result else None,
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
@@ -455,6 +534,9 @@ def _ready(
         enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
         no_openclaw_enqueue_performed=not bool(enqueue_result and enqueue_result.accepted),
         no_queue_mutation_performed=not bool(enqueue_result and enqueue_result.accepted),
+        no_model_call_performed=not bool(
+            architect_result and architect_result.receipt.model_result_digest
+        ),
     )
 
 
@@ -502,6 +584,7 @@ def _not_ready(
     collection_result: ReadOnlyAuditReportCollectionResult | None = None,
     decision_result: ReadOnlyAuditDecisionReceipt | None = None,
     decision_persist_result: ReadOnlyAuditDecisionPersistResult | None = None,
+    architect_result: BackendArchitectDeterminationResult | None = None,
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     determination_id = None
@@ -542,11 +625,32 @@ def _not_ready(
         readonly_audit_decision_persist_rejection_reasons=(
             decision_persist_result.rejection_reasons if decision_persist_result else ()
         ),
+        backend_architect_determination_attempted=architect_result is not None,
+        backend_architect_determination_status=architect_result.status if architect_result else None,
+        backend_architect_determination_action=architect_result.receipt.action if architect_result else None,
+        backend_architect_determination_id=(
+            architect_result.receipt.determination_receipt_id if architect_result else None
+        ),
+        backend_architect_determination_next_slice=(
+            architect_result.receipt.next_slice_name if architect_result else None
+        ),
+        backend_architect_determination_queue_candidate_count=(
+            architect_result.queue_candidate_count if architect_result else 0
+        ),
+        backend_architect_determination_persist_stored=(
+            architect_result.persist_result.stored if architect_result else False
+        ),
+        backend_architect_determination_rejection_reasons=(
+            architect_result.rejection_reasons if architect_result else ()
+        ),
         enqueue_attempted=enqueue_result is not None,
         enqueue_decision=enqueue_result.decision if enqueue_result else None,
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
         enqueue_task_count=len(enqueue_result.tasks) if enqueue_result and enqueue_result.accepted else 0,
         enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
+        no_model_call_performed=not bool(
+            architect_result and architect_result.receipt.model_result_digest
+        ),
     )
 
 

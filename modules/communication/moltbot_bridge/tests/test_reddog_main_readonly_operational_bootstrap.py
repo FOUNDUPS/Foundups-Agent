@@ -37,6 +37,11 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_run
     ACTION_RESEARCH_MORE,
     DEFAULT_SEMANTIC_FINDINGS_SLICE,
 )
+from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
+    ARCHITECT_DETERMINATION_ACCEPT,
+    ArchitectModelResult,
+    InMemoryArchitectDeterminationStore,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -144,6 +149,41 @@ class _FakeDecisionStore:
 
     def load_readonly_audit_decision(self, decision_id: str):
         return None
+
+
+class _FakeArchitectRunner:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def run_architect_determination(self, *, prompt: str, context: str, binding, timeout_seconds: int):
+        self.calls.append(
+            {
+                "prompt": prompt,
+                "context": context,
+                "binding": dict(binding),
+                "timeout_seconds": timeout_seconds,
+            }
+        )
+        prompt_payload = json.loads(prompt)
+        evidence_ref = prompt_payload["reports"][0]["evidence_refs"][0]
+        content = {
+            "action": ACTION_FIX,
+            "next_slice_name": "REDDOG_RUNTIME_RECONCILER_PHASE1",
+            "summary": "Collected read-only reports support one backend runtime fix.",
+            "decision_reasons": ["selected verified runtime reconciler gap"],
+            "evidence_refs": [evidence_ref],
+            "wsp15_allocation_receipt_id": prompt_payload["wsp15_allocation_receipt_id"],
+        }
+        return ArchitectModelResult(
+            ok=True,
+            status="MODEL_OK",
+            content=json.dumps(content, sort_keys=True),
+            model_receipt_id="model-receipt-bootstrap",
+            model_result_digest="sha256:model-result-bootstrap",
+            review_packet={"fusion_panel_quorum": {"passed": True}},
+            made_network_call=True,
+            rejection_reasons=(),
+        )
 
 
 def _reports_for_bootstrap_result(
@@ -323,6 +363,47 @@ def test_bootstrap_persists_accepted_next_action_decision_when_enabled() -> None
     assert result.readonly_audit_decision_persist_rejection_reasons == ()
     assert len(decision_store.records) == 1
     assert decision_store.records[0].action == ACTION_FIX
+
+
+def test_bootstrap_runs_backend_architect_determination_when_enabled() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+    architect_store = InMemoryArchitectDeterminationStore()
+    architect_runner = _FakeArchitectRunner()
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=report_store,
+        run_backend_architect_determination=True,
+        architect_model_runner=architect_runner,
+        architect_determination_store=architect_store,
+    )
+
+    assert result.ready is True
+    assert result.backend_architect_determination_attempted is True
+    assert result.backend_architect_determination_status == ARCHITECT_DETERMINATION_ACCEPT
+    assert result.backend_architect_determination_action == ACTION_FIX
+    assert result.backend_architect_determination_next_slice == "REDDOG_RUNTIME_RECONCILER_PHASE1"
+    assert result.backend_architect_determination_id
+    assert result.backend_architect_determination_queue_candidate_count == 1
+    assert result.backend_architect_determination_persist_stored is True
+    assert result.backend_architect_determination_rejection_reasons == ()
+    assert result.no_model_call_performed is False
+    assert len(architect_runner.calls) == 1
+    assert len(architect_store.records) == 1
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_queue_mutation_performed is True
 
 
 def test_bootstrap_fails_closed_when_decision_persistence_rejects() -> None:
