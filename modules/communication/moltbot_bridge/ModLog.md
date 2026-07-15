@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_AUTHORITY_REQUEST_WSP15_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Bound the WRE queue consumer's WSP_15 allocation receipt into the delegated
+  authority request dry-run receipt before any signer invocation can occur.
+- The authority-request planner now rejects queue consumer receipts missing
+  `wsp15_allocation_receipt_id`, `wsp15_priority`, `wsp15_mps_total`, or
+  `reasoning_tier`, and rejects an authority profile that contradicts the
+  queue allocation receipt.
+- The signed authority runtime request schema is not expanded in this slice;
+  the WSP_15 allocation remains pre-signing evidence in the queue-authority
+  dry-run receipt.
+- No signing, signature verification, worker spawn, OpenClaw enqueue, Hermes
+  dispatch, worktree creation, shell command, repo mutation, reward settlement,
+  PatternMemory write, or HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog authority request WSP15 allocation
+  binding queue consumer receipt` returned adjacent RedDog/WSP assets but not
+  this authority-request binding seam; recorded as
+  `HOLOINDEX_REDDOG_AUTHORITY_REQUEST_WSP15_BINDING_INDEX_GAP_PHASE1`. No
+  runtime re-index is performed in this slice.
+
 ## 2026-07-15: REDDOG_AUTHORITATIVE_WORK_STATE_WSP15_QUEUE_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
