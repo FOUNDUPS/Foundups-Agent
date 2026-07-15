@@ -1,5 +1,29 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_COLLECTION_FRESHNESS_TRUTH_REPAIR_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97
+
+- UPDATE `holo_index/freshness_receipt.py`: freshness receipts now carry
+  generation-bound per-collection manifest proof instead of treating nonzero
+  collection counts as authoritative freshness. Each collection records source
+  manifest digest, indexed-path digest, removed-path digest, embedding backend,
+  and verification status.
+- UPDATE `evaluate_freshness_for_paths`: write-sensitive freshness checks now
+  reject legacy/count-only receipts, missing generation IDs, missing collection
+  manifests, missing indexed-path digests, and non-PASS collection verification.
+- TEST `tests/test_holoindex_freshness_receipt.py`: regression coverage for
+  count-only overclaim rejection, legacy receipt rejection, generation ID
+  changes when collection manifests change, and code-only refreshes that cannot
+  mark Skillz fresh without a Skillz manifest.
+- TEST `tests/test_holoindex_ci_freshness_gate.py` and
+  `tests/test_holoindex_ci_main_freshness_gate.py`: CI fixtures upgraded to the
+  new receipt proof contract while preserving read-only/no-reindex guarantees.
+- Boundary: no HoloIndex re-index, no semantic-store mutation, no RedDog runtime
+  write path, no WRE enqueue. This repair changes receipt truth and validation
+  only.
+
 ## [2026-07-14] HOLOINDEX_CI_MAIN_FRESHNESS_GATE_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice

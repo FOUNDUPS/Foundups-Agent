@@ -6,6 +6,7 @@ collection entries fail closed for write-sensitive RedDog/WRE gates.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -41,6 +42,12 @@ class CollectionFreshness:
     source: str
     repo_head_sha: str
     last_indexed_at: str
+    source_manifest_digest: str = ""
+    indexed_paths_digest: str = ""
+    removed_paths_digest: str = ""
+    schema_version: str = "holoindex_collection_freshness.v1"
+    embedding_backend: str = ""
+    verification: str = "UNKNOWN"
 
 
 @dataclass(frozen=True)
@@ -53,6 +60,8 @@ class HoloIndexFreshnessReceipt:
     repo_head_sha: str
     ssd_path: str
     source: str
+    generation_id: str = ""
+    base_generation_id: str = ""
     collections: list[CollectionFreshness] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -98,6 +107,93 @@ def _collection_status(collection: Any, count: int) -> str:
     if count <= 0:
         return "empty"
     return "indexed"
+
+
+def _digest(value: Any) -> str:
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _metadata_path(metadata: Any) -> str:
+    if not isinstance(metadata, Mapping):
+        return ""
+    for key in ("path", "file_path", "filepath", "source_path", "source"):
+        value = metadata.get(key)
+        if isinstance(value, str) and value.strip():
+            return _norm_path(value)
+    return ""
+
+
+def _collection_snapshot_manifest(
+    collection: Any,
+    *,
+    name: str,
+    count: int,
+) -> dict[str, str]:
+    """Return deterministic per-collection proof fields.
+
+    A count-only collection handle is not enough evidence that a collection was
+    refreshed. Consumers that depend on freshness require this manifest proof.
+    """
+
+    if collection is None:
+        return {
+            "source_manifest_digest": "",
+            "indexed_paths_digest": "",
+            "removed_paths_digest": _digest([]),
+            "embedding_backend": "",
+            "verification": "MISSING",
+        }
+    if count <= 0:
+        return {
+            "source_manifest_digest": _digest({"collection": name, "ids": [], "paths": []}),
+            "indexed_paths_digest": _digest([]),
+            "removed_paths_digest": _digest([]),
+            "embedding_backend": "",
+            "verification": "EMPTY",
+        }
+
+    try:
+        snapshot = collection.get(include=["metadatas"])
+    except Exception:
+        return {
+            "source_manifest_digest": "",
+            "indexed_paths_digest": "",
+            "removed_paths_digest": _digest([]),
+            "embedding_backend": "",
+            "verification": "UNVERIFIED",
+        }
+
+    ids = snapshot.get("ids", []) if isinstance(snapshot, Mapping) else []
+    metadatas = snapshot.get("metadatas", []) if isinstance(snapshot, Mapping) else []
+    if not isinstance(ids, list):
+        ids = []
+    if not isinstance(metadatas, list):
+        metadatas = []
+
+    indexed_paths = sorted(
+        path for path in (_metadata_path(metadata) for metadata in metadatas) if path
+    )
+    source_manifest = {
+        "collection": name,
+        "count": count,
+        "ids": sorted(str(item) for item in ids),
+        "paths": indexed_paths,
+    }
+    metadata = getattr(collection, "metadata", None)
+    embedding_backend = ""
+    if isinstance(metadata, Mapping):
+        raw_backend = metadata.get("embedding_backend") or metadata.get("embedding_model")
+        if isinstance(raw_backend, str):
+            embedding_backend = raw_backend
+
+    return {
+        "source_manifest_digest": _digest(source_manifest),
+        "indexed_paths_digest": _digest(indexed_paths),
+        "removed_paths_digest": _digest([]),
+        "embedding_backend": embedding_backend,
+        "verification": "PASS" if ids else "UNVERIFIED",
+    }
 
 
 def _resolve_git_dir(repo_root: Path) -> Path | None:
@@ -179,6 +275,7 @@ def build_freshness_receipt(
                 except Exception:
                     collection = None
         count = _safe_count(collection)
+        manifest = _collection_snapshot_manifest(collection, name=name, count=count)
         collections.append(
             CollectionFreshness(
                 name=name,
@@ -187,8 +284,32 @@ def build_freshness_receipt(
                 source=source,
                 repo_head_sha=head_sha,
                 last_indexed_at=generated,
+                source_manifest_digest=manifest["source_manifest_digest"],
+                indexed_paths_digest=manifest["indexed_paths_digest"],
+                removed_paths_digest=manifest["removed_paths_digest"],
+                embedding_backend=manifest["embedding_backend"],
+                verification=manifest["verification"],
             )
         )
+
+    generation_id = _digest(
+        {
+            "schema_version": SCHEMA_VERSION,
+            "repo_head_sha": head_sha,
+            "collections": [
+                {
+                    "name": entry.name,
+                    "count": entry.count,
+                    "status": entry.status,
+                    "source_manifest_digest": entry.source_manifest_digest,
+                    "indexed_paths_digest": entry.indexed_paths_digest,
+                    "removed_paths_digest": entry.removed_paths_digest,
+                    "verification": entry.verification,
+                }
+                for entry in collections
+            ],
+        }
+    )
 
     return HoloIndexFreshnessReceipt(
         schema_version=SCHEMA_VERSION,
@@ -197,6 +318,8 @@ def build_freshness_receipt(
         repo_head_sha=head_sha,
         ssd_path=str(Path(ssd_path)),
         source=source,
+        generation_id=generation_id,
+        base_generation_id="",
         collections=collections,
     )
 
@@ -217,6 +340,8 @@ def load_freshness_receipt(path: Path | str) -> HoloIndexFreshnessReceipt:
         repo_head_sha=data.get("repo_head_sha", ""),
         ssd_path=data.get("ssd_path", ""),
         source=data.get("source", ""),
+        generation_id=data.get("generation_id", ""),
+        base_generation_id=data.get("base_generation_id", ""),
         collections=collections,
     )
 
@@ -290,6 +415,8 @@ def evaluate_freshness_for_paths(
                 repo_head_sha=str(receipt.get("repo_head_sha", "")),
                 ssd_path=str(receipt.get("ssd_path", "")),
                 source=str(receipt.get("source", "")),
+                generation_id=str(receipt.get("generation_id", "")),
+                base_generation_id=str(receipt.get("base_generation_id", "")),
                 collections=[
                     CollectionFreshness(**entry)
                     for entry in receipt.get("collections", [])
@@ -303,6 +430,9 @@ def evaluate_freshness_for_paths(
     stale: set[str] = set()
     if receipt.schema_version != SCHEMA_VERSION:
         reasons.append("unsupported_freshness_receipt_schema")
+        stale.update(required)
+    if required and not receipt.generation_id:
+        reasons.append("missing_holoindex_generation_id")
         stale.update(required)
     if expected_repo_head_sha and receipt.repo_head_sha != expected_repo_head_sha:
         reasons.append("stale_repo_head_sha")
@@ -318,6 +448,15 @@ def evaluate_freshness_for_paths(
         if entry.status != "indexed" or entry.count <= 0:
             stale.add(name)
             reasons.append(f"collection_not_indexed:{name}")
+        if entry.verification != "PASS":
+            stale.add(name)
+            reasons.append(f"collection_verification_not_pass:{name}")
+        if not entry.source_manifest_digest:
+            stale.add(name)
+            reasons.append(f"collection_manifest_missing:{name}")
+        if not entry.indexed_paths_digest:
+            stale.add(name)
+            reasons.append(f"collection_indexed_paths_missing:{name}")
         if expected_repo_head_sha and entry.repo_head_sha != expected_repo_head_sha:
             stale.add(name)
             reasons.append(f"stale_collection_sha:{name}")
