@@ -38,6 +38,7 @@ FAIL_ALLOWED_PATH_SCOPE = "FAIL_ALLOWED_PATH_SCOPE"
 FAIL_DENIED_PATH_SCOPE = "FAIL_DENIED_PATH_SCOPE"
 FAIL_HIGH_AUTHORITY_COSIGN = "FAIL_HIGH_AUTHORITY_COSIGN"
 FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY = "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY"
+FAIL_WSP15_ALLOCATION_BINDING = "FAIL_WSP15_ALLOCATION_BINDING"
 
 _REQUIRED_PROFILE_FIELDS = (
     "principal_id",
@@ -71,6 +72,10 @@ class QueueAuthorityRequestDryRunReceipt:
     foundup_id: str
     allowed_paths: Tuple[str, ...]
     denied_paths: Tuple[str, ...]
+    wsp15_allocation_receipt_id: str
+    wsp15_priority: str
+    wsp15_mps_total: int
+    reasoning_tier: str
     delegated_authority_request_digest: str
     signer_invoked: bool = False
     signature_verified: bool = False
@@ -160,6 +165,31 @@ def _string_tuple(value: Any) -> Tuple[str, ...]:
     return ()
 
 
+def _valid_queue_wsp15_binding(queue_receipt: Mapping[str, Any], profile: Mapping[str, Any]) -> bool:
+    receipt_id = str(queue_receipt.get("wsp15_allocation_receipt_id") or "")
+    priority = str(queue_receipt.get("wsp15_priority") or "")
+    tier = str(queue_receipt.get("reasoning_tier") or "")
+    mps_total = queue_receipt.get("wsp15_mps_total")
+    if not receipt_id.startswith("sha256:") or not priority or not tier or not isinstance(mps_total, int):
+        return False
+    profile_receipt = _mapping(profile.get("wsp15_allocation_receipt"))
+    if not profile_receipt:
+        return True
+    profile_receipt_id = str(profile_receipt.get("receipt_id") or "")
+    if profile_receipt_id and profile_receipt_id != receipt_id:
+        return False
+    profile_priority = str(profile_receipt.get("priority") or "")
+    if profile_priority and profile_priority != priority:
+        return False
+    profile_tier = str(profile_receipt.get("reasoning_tier") or "")
+    if profile_tier and profile_tier != tier:
+        return False
+    profile_total = profile_receipt.get("mps_total")
+    if isinstance(profile_total, int) and profile_total != mps_total:
+        return False
+    return True
+
+
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
     if not path or "\\" in path or ":" in path or path.startswith("/") or "\x00" in path:
         return False
@@ -211,6 +241,9 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         reasons.append(FAIL_PROFILE_MISSING)
     elif not _is_ascii_deep(profile):
         reasons.append(FAIL_PROFILE_NON_ASCII)
+
+    if queue_receipt and profile and not _valid_queue_wsp15_binding(queue_receipt, profile):
+        reasons.append(FAIL_WSP15_ALLOCATION_BINDING)
 
     missing = [field for field in _REQUIRED_PROFILE_FIELDS if field not in profile or profile.get(field) in (None, "", ())]
     if missing:
@@ -281,6 +314,10 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         foundup_id=request.foundup_id,
         allowed_paths=request.allowed_paths,
         denied_paths=request.denied_paths,
+        wsp15_allocation_receipt_id=str(queue_receipt.get("wsp15_allocation_receipt_id") or ""),
+        wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
+        wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
+        reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
         delegated_authority_request_digest=request_digest,
     )
     return QueueAuthorityRequestDryRunResult(
@@ -302,6 +339,7 @@ __all__ = [
     "FAIL_QUEUE_CONSUMER_NOT_READY",
     "FAIL_REQUIRED_FIELD",
     "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY",
+    "FAIL_WSP15_ALLOCATION_BINDING",
     "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT",
     "QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT",
     "QueueAuthorityRequestDryRunReceipt",

@@ -36,6 +36,10 @@ def _queue_result(**overrides):
         "claim_id": "claim-1",
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
+        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
+        "wsp15_priority": "P0",
+        "wsp15_mps_total": 18,
+        "reasoning_tier": "ULTRA",
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
         "no_queue_mutation_performed": True,
@@ -76,6 +80,13 @@ def _profile(**overrides):
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "wsp15_allocation_receipt": {
+            "receipt_id": "sha256:wsp15-allocation",
+            "priority": "P0",
+            "mps_total": 18,
+            "reasoning_tier": "ULTRA",
+            "worker_plan": {"fusion_required": True},
+        },
     }
     profile.update(overrides)
     return profile
@@ -110,6 +121,10 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["allowed_paths"] == ("modules/foundups/paccess_001/**",)
     assert request["requested_operation"] == "create_foundup"
     assert request["valve_state_required"] == VALVE_OPEN_WORKTREE_CREATE
+    assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
+    assert result.receipt.wsp15_priority == "P0"
+    assert result.receipt.wsp15_mps_total == 18
+    assert result.receipt.reasoning_tier == "ULTRA"
     assert result.receipt.delegated_authority_request_digest.startswith("sha256:")
 
 
@@ -132,6 +147,36 @@ def test_rejects_missing_profile() -> None:
 
     assert result.accepted is False
     assert planner.FAIL_PROFILE_MISSING in result.rejection_reasons
+
+
+def test_rejects_queue_consumer_without_wsp15_allocation_binding() -> None:
+    queue = _queue_result()
+    queue["receipt"].pop("wsp15_allocation_receipt_id")
+
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=queue,
+        authority_profile=_profile(),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_WSP15_ALLOCATION_BINDING in result.rejection_reasons
+
+
+def test_rejects_profile_wsp15_binding_that_conflicts_with_queue() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(
+            wsp15_allocation_receipt={
+                "receipt_id": "sha256:other",
+                "priority": "P0",
+                "mps_total": 18,
+                "reasoning_tier": "ULTRA",
+            }
+        ),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_WSP15_ALLOCATION_BINDING in result.rejection_reasons
 
 
 def test_rejects_missing_required_profile_field() -> None:
