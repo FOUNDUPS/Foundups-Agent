@@ -1,5 +1,31 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added a signed-authority worker-dispatch dry-run planner that consumes an
+  accepted queue authority verification result, the signed authority runtime
+  payload, and the authoritative WSP_15 allocation receipt.
+- The planner verifies that the signed work-authority allocation receipt id,
+  digest, priority, MPS total, and reasoning tier match the supplied WSP_15
+  allocation before emitting deterministic worker-dispatch intents.
+- WSP_15 worker-plan fields now produce dry-run intents for fusion lead,
+  critics, coding workers, independent verifier, and OpenClaw candidate review
+  without registering workers, mutating queues, spawning processes, or invoking
+  Hermes/OpenClaw.
+- The slice rejects post-signing allocation tamper, queue-mutation permission,
+  Hermes execution permission, malformed MPS/priority relationships, missing
+  explicit invoke, and unaccepted authority inputs.
+- No worker spawn, queue mutation, worktree creation, shell command, OpenClaw
+  enqueue, Hermes dispatch, repo mutation, PR creation, reward settlement,
+  PatternMemory write, or HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog signed authority worker dispatch
+  dryrun WSP15` returned adjacent RedDog governance assets but not this new
+  seam; recorded as
+  `HOLOINDEX_REDDOG_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-15: REDDOG_SIGNED_AUTHORITY_WSP15_ALLOCATION_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
