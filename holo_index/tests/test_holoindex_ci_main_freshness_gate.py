@@ -27,6 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE = REPO_ROOT / "holo_index" / "ci_main_freshness_gate.py"
 HEAD = "9c31512a8b4d6e1f0a2b3c4d5e6f708192a3b4c5"
 BASE = "7994990bcf1e2d3c4b5a69788776655443322110"
+DIGEST = "sha256:" + "0" * 64
 
 
 def _write_receipt(tmp_path: Path, *, head: str = HEAD) -> Path:
@@ -37,6 +38,7 @@ def _write_receipt(tmp_path: Path, *, head: str = HEAD) -> Path:
         repo_head_sha=head,
         ssd_path=str(tmp_path),
         source="ci_targeted_reindex",
+        generation_id=DIGEST,
         collections=[
             CollectionFreshness(
                 name="navigation_work_ledger",
@@ -45,6 +47,11 @@ def _write_receipt(tmp_path: Path, *, head: str = HEAD) -> Path:
                 source="ci_targeted_reindex",
                 repo_head_sha=head,
                 last_indexed_at="2026-07-14T00:00:00+00:00",
+                source_manifest_digest=DIGEST,
+                indexed_paths_digest=DIGEST,
+                removed_paths_digest=DIGEST,
+                embedding_backend="ci-test",
+                verification="PASS",
             )
         ],
     )

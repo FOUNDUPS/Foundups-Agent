@@ -38,6 +38,25 @@ class CountCollection:
         return self._count
 
 
+class SnapshotCollection:
+    def __init__(self, name: str, count: int = 3):
+        self.name = name
+        self._count = count
+        self.metadata = {"embedding_backend": "ci-test"}
+
+    def count(self) -> int:
+        return self._count
+
+    def get(self, include=None):
+        return {
+            "ids": [f"{self.name}:{index}" for index in range(self._count)],
+            "metadatas": [
+                {"path": f"{self.name}/item_{index}.txt"}
+                for index in range(self._count)
+            ],
+        }
+
+
 def _holo(**counts: int):
     attr_map = {
         "navigation_code": "code_collection",
@@ -52,7 +71,7 @@ def _holo(**counts: int):
     }
     values = {}
     for collection_name, attr_name in attr_map.items():
-        values[attr_name] = CountCollection(counts.get(collection_name, 3))
+        values[attr_name] = SnapshotCollection(collection_name, counts.get(collection_name, 3))
     return SimpleNamespace(**values)
 
 
