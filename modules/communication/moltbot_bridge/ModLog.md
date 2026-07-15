@@ -1,5 +1,29 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-15: REDDOG_WSP15_ALLOCATION_RECEIPT_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_wsp15_allocation_receipt.py`, a deterministic WSP_15
+  MPS allocation receipt for RedDog work-focus planning.
+- The receipt records complexity, importance, deferability, impact, total MPS,
+  P0-P4 priority, reasoning tier, and a worker-plan recommendation without
+  calling models, spawning workers, mutating queues, or re-indexing HoloIndex.
+- Threaded the allocation receipt into
+  `reddog_main_readonly_operational_bootstrap` ready and not-ready results so
+  downstream authority-profile materialization can bind to a real receipt
+  instead of hand-written WSP_15 fields.
+- Added tests for P0/ULTRA authority-sensitive RedDog runtime work, regular
+  low-priority prompts, deterministic JSON serialization, score bounds, static
+  execution/indexing import denial, and bootstrap result propagation.
+- No OpenClaw enqueue, Hermes dispatch, worktree creation, shell command,
+  draft PR, merge, reward settlement, PatternMemory write, or HoloIndex runtime
+  re-index is added.
+- HoloIndex read-only probe for `RedDog WSP15 allocation receipt MPS worker
+  plan` returned adjacent RedDog/WSP assets but not the new allocation module;
+  recorded as `HOLOINDEX_REDDOG_WSP15_ALLOCATION_RECEIPT_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_WORK_ORDER_MATERIALIZER_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97

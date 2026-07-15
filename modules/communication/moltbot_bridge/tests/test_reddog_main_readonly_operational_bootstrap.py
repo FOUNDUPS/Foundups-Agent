@@ -200,6 +200,13 @@ def test_bootstrap_plans_default_readonly_audit_swarm_from_fresh_context() -> No
     assert result.status == REDDOG_MAIN_BOOTSTRAP_READY
     assert result.snapshot_receipt_id and result.snapshot_receipt_id.startswith("sha256:")
     assert result.evidence_bundle_id and result.evidence_bundle_id.startswith("sha256:")
+    assert result.wsp15_allocation_receipt is not None
+    assert result.wsp15_allocation_receipt["receipt_id"].startswith("sha256:")
+    assert result.wsp15_allocation_receipt["mps_total"] >= 16
+    assert result.wsp15_allocation_receipt["priority"] == "P0"
+    assert result.wsp15_allocation_receipt["reasoning_tier"] == "ULTRA"
+    assert result.wsp15_allocation_receipt["worker_plan"]["fusion_required"] is True
+    assert result.wsp15_allocation_receipt["no_model_call_performed"] is True
     assert result.determination_id and result.determination_id.startswith("sha256:")
     assert result.swarm_id and result.swarm_id.startswith("sha256:")
     assert result.assignment_count == 5
@@ -452,6 +459,9 @@ def test_bootstrap_not_ready_without_authoritative_work_state_or_holoindex_recei
     assert "missing_authoritative_work_state_path" in result.rejection_reasons
     assert "missing_holoindex_freshness_receipt_path" in result.rejection_reasons
     assert result.assignment_count == 0
+    assert result.wsp15_allocation_receipt is not None
+    assert result.wsp15_allocation_receipt["priority"] == "P0"
+    assert result.wsp15_allocation_receipt["worker_plan"]["queue_mutation_allowed"] is False
     assert result.no_repo_mutation_performed is True
     assert result.no_holoindex_reindex_performed is True
 
