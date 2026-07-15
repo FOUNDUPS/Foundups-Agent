@@ -1,5 +1,39 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_BOUNDED_WORKER_PILOT_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can load outside-repo pilot inputs
+  for `bounded_worker_pilot`: generic-writer dry-run result,
+  governed-shell dry-run result, artifact contents, and HoloIndex evidence.
+- Added `main.py` env wiring for
+  `REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH`,
+  `REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH`,
+  `REDDOG_ARTIFACT_CONTENTS_PATH`, and
+  `REDDOG_HOLOINDEX_EVIDENCE_PATH`.
+- Added result attestations distinguishing isolated worktree creation from
+  bounded pilot materialization:
+  `no_bounded_task_execution_performed` and
+  `no_bounded_file_edit_performed`.
+- Added tests proving the stage-8 happy path materializes exactly one declared
+  artifact under `modules/foundups/paccess_001/**` inside the isolated
+  worktree only, leaves the repo checkout untouched, redacts the sovereign
+  token from chain results, preserves no-shell/no-OpenClaw/no-Hermes/no-PR/
+  no-HoloIndex-reindex boundaries, and advances to
+  `RUN_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE`.
+- Added fail-closed coverage proving missing bounded-pilot artifacts stop the
+  loop at `stage:bounded_worker_pilot`.
+- Validation: `test_reddog_main_resident_queue_serial_loop_bootstrap.py` (20
+  passed) and adjacent resident/worktree/pilot/cwd suites (86 passed).
+- HoloIndex read-only probe for `RedDog main resident queue bounded worker
+  pilot bootstrap artifact contents generic writer dryrun governed shell`
+  returned adjacent governed-shell/generic-spine assets, but not this bootstrap
+  seam; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_BOUNDED_WORKER_PILOT_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_WORKTREE_CREATE_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97

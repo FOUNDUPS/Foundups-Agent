@@ -1536,6 +1536,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo authority profile JSON
         REDDOG_WORK_ORDERS_PATH                              Outside-repo work-order JSON snapshot
         REDDOG_EXECUTION_VALVE_ENV_PATH                      Outside-repo valve environment JSON
+        REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH             Outside-repo generic writer dry-run JSON
+        REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH             Outside-repo governed shell dry-run JSON
+        REDDOG_ARTIFACT_CONTENTS_PATH                        Outside-repo artifact contents JSON
+        REDDOG_HOLOINDEX_EVIDENCE_PATH                       Outside-repo HoloIndex evidence JSON
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -1585,6 +1589,16 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
             work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
             valve_environment_path=os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH", "") or None,
+            generic_writer_dryrun_result_path=os.getenv(
+                "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH", ""
+            )
+            or None,
+            governed_shell_dryrun_result_path=os.getenv(
+                "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH", ""
+            )
+            or None,
+            artifact_contents_path=os.getenv("REDDOG_ARTIFACT_CONTENTS_PATH", "") or None,
+            holoindex_evidence_path=os.getenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", "") or None,
             authority_state_path=os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", "") or None,
             permission_snapshots_path=os.getenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", "") or None,
             principal_authority_records_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", "") or None,
