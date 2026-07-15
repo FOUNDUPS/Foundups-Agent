@@ -77,6 +77,8 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_verified_draft_pr_publish_performed: bool = True
     no_verified_outcome_ratchet_performed: bool = True
     no_held_out_regression_gate_performed: bool = True
+    no_pattern_memory_admission_performed: bool = True
+    no_pattern_memory_write_performed: bool = True
     no_shell_command_executed: bool = True
     no_openclaw_enqueue_performed: bool = True
     no_hermes_dispatch_performed: bool = True
@@ -124,6 +126,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     ratchet_request_path: Path | str | None = None,
     outcome_ratchet_store_path: Path | str | None = None,
     held_out_gate_request_path: Path | str | None = None,
+    admission_request_path: Path | str | None = None,
     authority_state_path: Path | str | None = None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
@@ -139,6 +142,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     outcome_ratchet_store: Any = None,
     explicit_pattern_memory_write_requested: bool = False,
     ratchet_pattern_memory_sink: Any = None,
+    pattern_memory_admission_sink: Any = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
@@ -282,6 +286,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if held_out_gate_request_reasons:
         return _not_ready(held_out_gate_request_reasons, chain_results_path=None)
 
+    admission_request, admission_request_reasons = _read_json_outside_repo(
+        root,
+        admission_request_path,
+        missing_reason="missing_admission_request_path",
+        inside_reason="admission_request_path_inside_repo",
+        unreadable_reason="malformed_admission_request",
+        required=False,
+    )
+    if admission_request_reasons:
+        return _not_ready(admission_request_reasons, chain_results_path=None)
+
     resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
         root,
         injected_store=outcome_ratchet_store,
@@ -353,6 +368,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         held_out_gate_request=held_out_gate_request,
         explicit_pattern_memory_write_requested=explicit_pattern_memory_write_requested,
         ratchet_pattern_memory_sink=ratchet_pattern_memory_sink,
+        admission_request=admission_request,
+        pattern_memory_admission_sink=pattern_memory_admission_sink,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))
@@ -592,6 +609,12 @@ def _from_loop(
         ),
         no_held_out_regression_gate_performed=(
             "held_out_regression_gate" not in loop.dispatched_stages
+        ),
+        no_pattern_memory_admission_performed=(
+            "pattern_memory_admission" not in loop.dispatched_stages
+        ),
+        no_pattern_memory_write_performed=not (
+            accepted and "pattern_memory_admission" in loop.dispatched_stages
         ),
         no_repo_mutation_performed=not any(
             stage in loop.dispatched_stages for stage in ("worktree_create", "bounded_worker_pilot")
