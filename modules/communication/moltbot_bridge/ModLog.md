@@ -1,5 +1,34 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_WORK_ORDER_MATERIALIZER_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Added explicit `REDDOG_WORK_ORDER_MATERIALIZER_MODE=authority_profile`
+  startup wiring for the resident queue serial loop.
+- When `REDDOG_WORK_ORDERS_PATH` is absent and the materializer mode is
+  explicitly set, the bootstrap derives one in-memory governed work order from
+  the selected authoritative queue item and the signed-authority profile.
+- The derived work order is bound to the same `work_order_id`, repo,
+  requested operation, permission snapshot digest, allowed paths, and denied
+  paths used by the delegated-authority request. It feeds only the existing
+  `work_order_invocation` resolver path; it does not write a work-order file.
+- The materializer now requires real operational context binding
+  (`snapshot_receipt_id`, `context_view_id`, `evidence_bundle_id`,
+  `decision_id`) plus a supplied WSP_15 allocation receipt and supplied
+  HoloIndex evidence. Missing evidence fails closed; this slice does not
+  fabricate retrieval success, work-focus digests, WSP prompt digests, or run
+  trace digests from authority text alone.
+- Fail-closed edges reject unsupported materializer modes and reject ambiguous
+  use with an explicit `REDDOG_WORK_ORDERS_PATH`.
+- No signer behavior, worktree creation, shell command, OpenClaw enqueue,
+  Hermes dispatch, draft PR, merge, reward settlement, PatternMemory write, or
+  HoloIndex runtime re-index is added.
+- HoloIndex read-only probe for `RedDog resident queue work order materializer
+  authority profile bootstrap` is recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_WORK_ORDER_MATERIALIZER_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_DRAFT_PR_RUNNER_BRIDGE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
