@@ -1,5 +1,32 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
+
+- Extended `src/reddog_main_resident_queue_serial_loop_bootstrap.py` so an
+  explicitly enabled resident serial loop can load an outside-repo
+  `publish_request` JSON artifact and, with an explicitly injected draft-PR
+  runner, advance from `slice_verifier` to `verified_draft_pr_publish`.
+- Added `main.py` env wiring for `REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH`.
+  This slice does not construct a real PR runner from `main.py`; installed
+  runtime still fails closed at this stage unless a future explicit runner
+  bridge is added.
+- Added the `no_verified_draft_pr_publish_performed` result attestation and
+  wired `no_pr_created` to the verified draft-PR publish stage boundary.
+- Added tests proving the stage-10 happy path publishes only a draft PR through
+  an injected fake runner, advances to
+  `RUN_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE`, and preserves
+  no-ready, no-merge, no-PatternMemory, no-reward, and no-HoloIndex-reindex
+  invariants.
+- Added fail-closed coverage proving a publish request without an injected
+  draft-PR runner stops the loop at `stage:verified_draft_pr_publish`.
+- HoloIndex read-only probe for `RedDog main resident queue verified draft PR
+  publish bootstrap publish request injected draft PR runner` returned adjacent
+  worktree PR runner and audit assets, but not this bootstrap seam; recorded as
+  `HOLOINDEX_REDDOG_MAIN_RESIDENT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_BOOTSTRAP_INDEX_GAP_PHASE1`.
+  No runtime re-index is performed in this slice.
+
 ## 2026-07-14: REDDOG_MAIN_RESIDENT_QUEUE_SLICE_VERIFIER_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 34, 50, 97
