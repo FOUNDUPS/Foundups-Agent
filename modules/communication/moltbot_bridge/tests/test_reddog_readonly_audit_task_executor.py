@@ -21,6 +21,7 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
     HoloIndexReadOnlyQueryAdapter,
     RepoAuditModelResult,
 )
+import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
     AUTHORITATIVE_WORK_STATE_REFRESH_SLICE,
     READONLY_AUDIT_LANE_ANALYZER_SLICE,
@@ -504,6 +505,60 @@ def test_model_backed_rejects_stop_with_next_slice(tmp_path: Path) -> None:
 
     assert result.accepted is False
     assert any("stop_next_slice" in reason for reason in result.rejection_reasons)
+
+
+def test_production_runner_uses_fusion_synthesis_excerpt_for_json(tmp_path: Path, monkeypatch) -> None:
+    root = _repo(tmp_path)
+    monkeypatch.setenv("REDDOG_READONLY_AUDIT_RUNTIME_MODE", "foundups_fusion")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+
+    def fake_fusion(api_key, redacted_prompt, history, payload):  # noqa: ANN001, ARG001
+        import re
+
+        match = re.search(r"file:[^\"\\]+:lines:\d+", str(redacted_prompt))
+        evidence_ref = match.group(0) if match else ""
+        return {
+            "ok": True,
+            "content": "## Lead\nnot json\n## Synthesis\nnot json",
+            "review_packet": {
+                "receipt_id": "fusion-receipt-1",
+                "synthesis_excerpt": json.dumps(
+                    {
+                        "summary": "Synthesis JSON accepted.",
+                        "evidence_refs": [evidence_ref],
+                        "findings": [
+                            {
+                                "finding_id": "synthesis-json-1",
+                                "claim": "The worker parsed the Fusion synthesis excerpt.",
+                                "wsp97_label": "OBSERVED",
+                                "recommended_action": "FIX",
+                                "wsp15_priority": "P1",
+                                "severity": "MAJOR",
+                                "evidence_refs": [evidence_ref],
+                                "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1",
+                            }
+                        ],
+                    },
+                    sort_keys=True,
+                ),
+            },
+        }
+
+    monkeypatch.setattr(readonly_worker_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=FoundupsFusionRepoAuditModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert result.report is not None
+    assert result.report["summary"] == "Synthesis JSON accepted."
+    assert result.report["worker_receipt"]["model_route_receipt"]["made_network_call"] is True
 
 
 def test_model_backed_requires_valid_wsp15_receipt(tmp_path: Path) -> None:

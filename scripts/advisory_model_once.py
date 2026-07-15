@@ -249,7 +249,17 @@ def _critic_challenges_framing_and_priority(text: object) -> bool:
         "fail",
         "needs_verification",
     )
-    framing_terms = ("framing", "frame", "assumption", "scope", "premise", "question")
+    framing_terms = (
+        "framing",
+        "frame",
+        "assumption",
+        "scope",
+        "premise",
+        "question",
+        "evidence",
+        "claim",
+        "finding",
+    )
     priority_terms = ("priority", "wsp_15", "p0", "p1", "p2", "next safest", "sequence", "order")
     return (
         any(term in lowered for term in challenge_terms)
@@ -364,6 +374,8 @@ def _run_foundups_fusion(
     lead_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
     panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
     base_system = _system_prompt(payload)
+    response_contract = str(payload.get("response_contract") or "")
+    strict_json_contract = response_contract.startswith("strict_json")
     missing_evidence = _missing_required_evidence(
         payload.get("required_target_paths"),
         payload.get("_redacted_evidence_context"),
@@ -382,6 +394,8 @@ def _run_foundups_fusion(
         base_system
         + "\n\nLead pass: produce the initial RedDog Architect answer. Include findings, evidence, proposed fixes, uncertainties, WSP_15 priority, and next safest step."
     )
+    if strict_json_contract:
+        lead_system += "\nReturn only a JSON object matching the requested schema. Do not wrap it in markdown."
     lead_messages = [{"role": "system", "content": lead_system}]
     lead_messages.extend(history)
     lead_messages.append({"role": "user", "content": redacted_prompt})
@@ -415,7 +429,7 @@ def _run_foundups_fusion(
     _progress("lead_done", "Lead response received: " + lead_model)
     critic_system = (
         base_system
-        + "\n\nPanel critic pass: attack the lead answer for missing WSP_97 truth labels, missing WSP_15 scoring, unsupported evidence, weak HoloIndex retrieval, and fixes that are not actionable. Do not claim authority."
+        + "\n\nPanel critic pass: attack the lead answer for missing WSP_97 truth labels, missing WSP_15 scoring, unsupported evidence, weak HoloIndex retrieval, and fixes that are not actionable. Start with `Challenge:` when any evidence, claim, framing, scope, or WSP_15 priority issue exists, and explicitly mention the WSP_15 priority. Start with `No material challenge:` only when the lead framing, evidence, and priority are all sound. Do not claim authority."
     )
     critic_user = "Original task:\n" + redacted_prompt + "\n\nLead answer:\n" + lead_text[:16000]
     critic_messages = [
@@ -465,10 +479,16 @@ def _run_foundups_fusion(
             challenging_critics=[],
         )
 
-    synthesis_system = (
-        base_system
-        + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return the best actionable WSP-compliant recommendation. The final section must be WSP_15 Priority followed by Next safest step."
-    )
+    if strict_json_contract:
+        synthesis_system = (
+            base_system
+            + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return only the final strict JSON object requested by the user. Do not include markdown fences or prose outside the JSON object."
+        )
+    else:
+        synthesis_system = (
+            base_system
+            + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return the best actionable WSP-compliant recommendation. The final section must be WSP_15 Priority followed by Next safest step."
+        )
     panel_text = "\n\n".join(
         _model_label(model) + " critique:\n" + text[:8000]
         for model, text in panel_results.items()
