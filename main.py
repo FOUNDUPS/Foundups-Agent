@@ -1535,6 +1535,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH             Outside-repo chain-results JSON
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo authority profile JSON
         REDDOG_WORK_ORDERS_PATH                              Outside-repo work-order JSON snapshot
+        REDDOG_WORK_ORDER_MATERIALIZER_MODE                  Optional `authority_profile` in-memory materializer
         REDDOG_EXECUTION_VALVE_ENV_PATH                      Outside-repo valve environment JSON
         REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH             Outside-repo generic writer dry-run JSON
         REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH             Outside-repo governed shell dry-run JSON
@@ -1617,6 +1618,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
             authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
             work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
+            work_order_materializer_mode=os.getenv("REDDOG_WORK_ORDER_MATERIALIZER_MODE", "") or None,
             valve_environment_path=os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH", "") or None,
             generic_writer_dryrun_result_path=os.getenv(
                 "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH", ""

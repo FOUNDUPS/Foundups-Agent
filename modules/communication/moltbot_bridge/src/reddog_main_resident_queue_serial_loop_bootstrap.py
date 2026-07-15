@@ -17,6 +17,7 @@ later-stage dependencies fail closed through the registry and dispatcher.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -42,6 +43,12 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handler_registry import (
     build_reddog_resident_queue_stage_handler_registry,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
+    plan_reddog_wre_queue_authority_request_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
+    plan_reddog_wre_queue_consumer_dry_run,
+)
 from modules.infrastructure.wre_core.src.reddog_verified_outcome_ratchet import (
     JsonlOutcomeRatchetStore,
 )
@@ -49,6 +56,7 @@ from modules.infrastructure.wre_core.src.reddog_verified_outcome_ratchet import 
 
 REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED = "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED"
 REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY = "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY"
+WORK_ORDER_MATERIALIZER_MODE_AUTHORITY_PROFILE = "authority_profile"
 
 
 @dataclass(frozen=True)
@@ -116,6 +124,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     chain_results_path: Path | str | None,
     authority_profile_path: Path | str | None,
     work_orders_path: Path | str | None = None,
+    work_order_materializer_mode: str | None = None,
     valve_environment_path: Path | str | None = None,
     generic_writer_dryrun_result_path: Path | str | None = None,
     governed_shell_dryrun_result_path: Path | str | None = None,
@@ -183,7 +192,15 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
 
-    work_orders, work_order_reasons = _load_work_orders(root, work_orders_path)
+    work_orders, work_order_reasons = _load_or_materialize_work_orders(
+        root,
+        work_orders_path,
+        mode=work_order_materializer_mode,
+        snapshot=snapshot,
+        authority_profile=profile,
+        requested_queue_item_id=requested_queue_item_id,
+        now_iso=now_iso,
+    )
     if work_order_reasons:
         return _not_ready(work_order_reasons, chain_results_path=None)
 
@@ -465,6 +482,328 @@ def _load_work_orders(
     return work_orders, ()
 
 
+def _load_or_materialize_work_orders(
+    repo_root: Path,
+    value: Path | str | None,
+    *,
+    mode: str | None,
+    snapshot: Mapping[str, Any],
+    authority_profile: Mapping[str, Any],
+    requested_queue_item_id: str | None,
+    now_iso: str | None,
+) -> tuple[Optional[Mapping[str, Mapping[str, Any]]], tuple[str, ...]]:
+    normalized_mode = str(mode or "").strip().lower()
+    if value and normalized_mode:
+        return None, ("work_order_materializer_conflicts_with_work_orders_path",)
+    if normalized_mode and normalized_mode != WORK_ORDER_MATERIALIZER_MODE_AUTHORITY_PROFILE:
+        return None, ("unsupported_work_order_materializer_mode",)
+
+    work_orders, reasons = _load_work_orders(repo_root, value)
+    if reasons or work_orders is not None or not normalized_mode:
+        return work_orders, reasons
+
+    return _materialize_work_orders_from_authority_profile(
+        snapshot=snapshot,
+        authority_profile=authority_profile,
+        requested_queue_item_id=requested_queue_item_id,
+        now_iso=now_iso,
+    )
+
+
+def _materialize_work_orders_from_authority_profile(
+    *,
+    snapshot: Mapping[str, Any],
+    authority_profile: Mapping[str, Any],
+    requested_queue_item_id: str | None,
+    now_iso: str | None,
+) -> tuple[Optional[Mapping[str, Mapping[str, Any]]], tuple[str, ...]]:
+    queue_result = plan_reddog_wre_queue_consumer_dry_run(
+        snapshot,
+        now_iso=now_iso,
+        requested_queue_item_id=requested_queue_item_id,
+    )
+    if queue_result.accepted is not True:
+        return None, tuple(
+            f"work_order_materializer_queue:{reason}" for reason in queue_result.rejection_reasons
+        )
+
+    authority_request = plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=queue_result.to_dict(),
+        authority_profile=authority_profile,
+    )
+    if authority_request.accepted is not True or authority_request.delegated_authority_request is None:
+        return None, tuple(
+            f"work_order_materializer_authority:{reason}" for reason in authority_request.rejection_reasons
+        )
+
+    receipt = authority_request.receipt
+    if receipt is None:
+        return None, ("work_order_materializer_authority:missing_receipt",)
+
+    request = authority_request.delegated_authority_request
+    work_order_id = str(request.get("work_order_id") or "")
+    if not work_order_id:
+        return None, ("work_order_materializer_missing_work_order_id",)
+
+    queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
+    slice_id = str(queue_receipt.get("slice_id") or "")
+    created_at = str(now_iso or _snapshot_timestamp(snapshot) or "1970-01-01T00:00:00+00:00")
+    expiry = str(_claim_expiry(snapshot, queue_receipt) or authority_profile.get("expiry") or "")
+    if not expiry:
+        return None, ("work_order_materializer_missing_expiry",)
+
+    context_binding, binding_reasons = _operational_context_binding(
+        authority_profile=authority_profile,
+        snapshot=snapshot,
+    )
+    if binding_reasons:
+        return None, binding_reasons
+
+    holoindex_evidence, holo_reasons = _holoindex_evidence(authority_profile, snapshot)
+    if holo_reasons:
+        return None, holo_reasons
+
+    evidence_seed = {
+        "queue_receipt": queue_receipt,
+        "delegated_authority_request": request,
+        "authority_request_receipt": receipt.to_dict(),
+        "operational_context_binding": context_binding,
+        "holoindex_evidence": holoindex_evidence,
+    }
+    evidence_digest = _canonical_digest(evidence_seed)
+    wsps = _string_list(authority_profile.get("wsp_applicability")) or ["WSP_34", "WSP_50", "WSP_97"]
+    code_ref = "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py"
+    work_order = {
+        "work_order_id": work_order_id,
+        "created_at": created_at,
+        "red_dog_instance_id": str(authority_profile.get("red_dog_instance_id") or "reddog-main-resident-queue"),
+        "authenticated_principal": str(request.get("principal_id") or ""),
+        "principal_provider": str(request.get("principal_provider") or ""),
+        "repo_full_name": str(request.get("repo_full_name") or ""),
+        "repo_permission_snapshot": {
+            "permission_level": str(authority_profile.get("permission_level") or "write"),
+            "captured_at": str(authority_profile.get("permission_captured_at") or created_at),
+            "source": str(authority_profile.get("permission_source") or "authority_profile"),
+            "digest": str(request.get("permission_snapshot_digest") or ""),
+        },
+        "requested_operation": str(request.get("requested_operation") or ""),
+        "authority_tier": str(authority_profile.get("authority_tier") or "source"),
+        "allowed_paths": _string_list(request.get("allowed_paths")),
+        "denied_paths": _string_list(request.get("denied_paths")),
+        "branch_name": str(
+            authority_profile.get("branch_name")
+            or _branch_name(slice_id=slice_id, queue_item_id=str(queue_receipt.get("queue_item_id") or ""))
+        ),
+        "base_ref": str(authority_profile.get("base_ref") or "main"),
+        "task_summary": str(
+            authority_profile.get("task_summary")
+            or f"Resident queue materialized governed work order for {slice_id or 'selected slice'}."
+        ),
+        "wsp_applicability": wsps,
+        "holoindex_evidence_refs": _string_list(authority_profile.get("holoindex_evidence_refs")) or [code_ref],
+        "skillz_candidates": _string_list(authority_profile.get("skillz_candidates")),
+        "required_tests": _string_list(authority_profile.get("required_tests")),
+        "required_policy_gates": _string_list(authority_profile.get("required_policy_gates"))
+        or ["signed_work_order_authority", "execution_valve"],
+        "required_reviewers": _string_list(authority_profile.get("required_reviewers")),
+        "sentinel_checks": _string_list(authority_profile.get("sentinel_checks")),
+        "rollback_plan": str(
+            authority_profile.get("rollback_plan")
+            or "Abort the resident queue chain before live mutation; generated work order is in-memory only."
+        ),
+        "expiry": expiry,
+        "nonce": str(
+            authority_profile.get("work_order_nonce")
+            or f"work-order:{request.get('work_authority_nonce') or work_order_id}"
+        ),
+        "evidence_digest": evidence_digest,
+        "advisory_only_source_packet": _advisory_source_packet(evidence_seed),
+        "holoindex_evidence": holoindex_evidence,
+        "operational_context_binding": context_binding,
+    }
+    return {work_order_id: work_order}, ()
+
+
+def _canonical_digest(payload: Any) -> str:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, (list, tuple)):
+        return []
+    return [str(item) for item in value]
+
+
+def _snapshot_timestamp(snapshot: Mapping[str, Any]) -> str:
+    for field in ("captured_at", "generated_at", "updated_at"):
+        value = snapshot.get(field)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def _claim_expiry(snapshot: Mapping[str, Any], queue_receipt: Mapping[str, Any]) -> str:
+    claim_id = str(queue_receipt.get("claim_id") or "")
+    claims = snapshot.get("worker_claims")
+    if not isinstance(claims, list):
+        return ""
+    for claim in claims:
+        if isinstance(claim, Mapping) and str(claim.get("claim_id") or "") == claim_id:
+            value = claim.get("expires_at")
+            return str(value).strip() if value else ""
+    return ""
+
+
+def _slug(value: str) -> str:
+    chars: list[str] = []
+    for char in value.lower():
+        if char.isalnum():
+            chars.append(char)
+        elif char in {"-", "_", "."}:
+            chars.append("-")
+    cleaned = "-".join(part for part in "".join(chars).split("-") if part)
+    return cleaned[:48].strip("-") or "slice"
+
+
+def _branch_name(*, slice_id: str, queue_item_id: str) -> str:
+    return f"feat/reddog-{_slug(slice_id)}-{_slug(queue_item_id)[:16]}"
+
+
+def _advisory_source_packet(seed: Mapping[str, Any]) -> Mapping[str, str]:
+    return {
+        "work_focus_digest": _canonical_digest({"work_focus": seed}),
+        "wsp_prompt_digest": _canonical_digest({"wsp_prompt": seed}),
+        "copy_md_run_trace_digest": _canonical_digest({"run_trace": seed}),
+    }
+
+
+def _nested_mapping(source: Mapping[str, Any], key: str) -> Mapping[str, Any]:
+    value = source.get(key)
+    return value if isinstance(value, Mapping) else {}
+
+
+def _lookup_text(
+    *,
+    authority_profile: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    names: tuple[str, ...],
+) -> str:
+    sources = (
+        authority_profile,
+        _nested_mapping(authority_profile, "operational_context_binding"),
+        snapshot,
+        _nested_mapping(snapshot, "operational_context_binding"),
+    )
+    for source in sources:
+        for name in names:
+            value = source.get(name)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return ""
+
+
+def _lookup_mapping(
+    *,
+    authority_profile: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    names: tuple[str, ...],
+) -> Mapping[str, Any]:
+    sources = (
+        authority_profile,
+        _nested_mapping(authority_profile, "operational_context_binding"),
+        snapshot,
+        _nested_mapping(snapshot, "operational_context_binding"),
+    )
+    for source in sources:
+        for name in names:
+            value = source.get(name)
+            if isinstance(value, Mapping):
+                return value
+    return {}
+
+
+def _operational_context_binding(
+    *,
+    authority_profile: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], tuple[str, ...]]:
+    snapshot_receipt_id = _lookup_text(
+        authority_profile=authority_profile,
+        snapshot=snapshot,
+        names=("snapshot_receipt_id",),
+    )
+    context_view_id = _lookup_text(
+        authority_profile=authority_profile,
+        snapshot=snapshot,
+        names=("context_view_id",),
+    )
+    evidence_bundle_id = _lookup_text(
+        authority_profile=authority_profile,
+        snapshot=snapshot,
+        names=("evidence_bundle_id",),
+    )
+    decision_id = _lookup_text(
+        authority_profile=authority_profile,
+        snapshot=snapshot,
+        names=("readonly_audit_decision_id", "decision_id", "determination_id", "latest_decision_id"),
+    )
+    allocation = _lookup_mapping(
+        authority_profile=authority_profile,
+        snapshot=snapshot,
+        names=("wsp15_allocation_receipt", "wsp_15_allocation_receipt", "wsp_15_allocation"),
+    )
+    reasons: list[str] = []
+    required = {
+        "snapshot_receipt_id": snapshot_receipt_id,
+        "context_view_id": context_view_id,
+        "evidence_bundle_id": evidence_bundle_id,
+        "decision_id": decision_id,
+    }
+    for name, value in required.items():
+        if not value:
+            reasons.append(f"work_order_materializer_missing_context_binding:{name}")
+    if not allocation:
+        reasons.append("work_order_materializer_missing_wsp15_allocation_receipt")
+    else:
+        for field in ("mps_total", "priority", "reasoning_tier", "worker_plan"):
+            if field not in allocation or allocation.get(field) in (None, "", (), {}):
+                reasons.append(f"work_order_materializer_malformed_wsp15_allocation_receipt:{field}")
+    if reasons:
+        return {}, tuple(reasons)
+    return {
+        **required,
+        "wsp15_allocation_receipt": dict(allocation),
+    }, ()
+
+
+def _holoindex_evidence(
+    authority_profile: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], tuple[str, ...]]:
+    supplied = authority_profile.get("holoindex_evidence")
+    if not isinstance(supplied, Mapping):
+        supplied = snapshot.get("holoindex_evidence")
+    if not isinstance(supplied, Mapping):
+        supplied = _nested_mapping(snapshot, "operational_context_binding").get("holoindex_evidence")
+    if not isinstance(supplied, Mapping):
+        return {}, ("work_order_materializer_missing_holoindex_evidence",)
+
+    evidence = dict(supplied)
+    required = (
+        "holoindex_query",
+        "holoindex_status",
+        "index_gap_detected",
+        "retrieval_quality",
+        "applicable_wsps",
+        "evidence_refs",
+    )
+    missing = [field for field in required if field not in evidence or evidence.get(field) in (None, "")]
+    if missing:
+        return {}, tuple(f"work_order_materializer_malformed_holoindex_evidence:{field}" for field in missing)
+    return evidence, ()
+
+
 def _build_worktree_runner(
     repo_root: Path,
     *,
@@ -628,5 +967,6 @@ __all__ = [
     "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED",
     "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY",
     "RedDogMainResidentQueueSerialLoopBootstrapResult",
+    "WORK_ORDER_MATERIALIZER_MODE_AUTHORITY_PROFILE",
     "run_reddog_main_resident_queue_serial_loop_bootstrap",
 ]
