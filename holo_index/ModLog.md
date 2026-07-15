@@ -1,5 +1,23 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_EVENT_DRIVEN_INCREMENTAL_INDEX_EXECUTOR_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97
+
+- ADD `holo_index/incremental_index_executor.py`: WRE/CI-owned executor for
+  applying a precomputed FoundUp-scoped incremental index plan to injected
+  collection handles. It supports stable-ID upserts, stable-ID deletes, scoped
+  source reads, deterministic execution receipts, and optional freshness receipt
+  writes from a supplied HoloIndex snapshot.
+- TEST `tests/test_holoindex_incremental_index_executor.py`: scoped upsert,
+  delete-without-source-read, rejected/noop plans, missing-source fail-closed,
+  freshness receipt emission, and AST guards against subprocess/full-reindex
+  calls.
+- Boundary: no full re-index, no `_reset_collection`, no HoloIndex runtime query
+  mutation, no RedDog runtime re-index, no subprocess, and no collection handle
+  discovery from this module. WRE/CI must inject the gateway and authorization.
+
 ## [2026-07-16] HOLOINDEX_COLLECTION_FRESHNESS_TRUTH_REPAIR_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
