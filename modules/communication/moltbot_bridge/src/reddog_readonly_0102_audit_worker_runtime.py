@@ -44,6 +44,7 @@ from holo_index.query_receipt import (
     build_query_receipt,
     load_generation_binding,
 )
+from holo_index.memex_query_routing import build_memex_projection_query_receipt
 
 
 READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA = "readonly_0102_audit_worker_receipt.v1"
@@ -471,9 +472,18 @@ def execute_model_backed_repo_code_audit(
     code_reject = _query_rejection_reason(code_receipt)
     if code_reject:
         return _reject([code_reject])
+    memex_receipt = _optional_memex_query_receipt(
+        task_context=task_context,
+        assignment=assignment,
+        query=query,
+    )
+    memex_reject = _query_rejection_reason(memex_receipt) if memex_receipt else None
+    if memex_reject:
+        return _reject([memex_reject])
     index_query_errors = tuple(
         str(receipt.get("error") or "")
-        for receipt in (holo_receipt, code_receipt)
+        for receipt in (holo_receipt, code_receipt, memex_receipt)
+        if receipt is not None
         if receipt.get("ok") is not True and str(receipt.get("error") or "").strip()
     )
 
@@ -487,6 +497,7 @@ def execute_model_backed_repo_code_audit(
         snapshots=snapshots,
         holo_receipt=holo_receipt,
         code_receipt=code_receipt,
+        memex_receipt=memex_receipt,
     )
     try:
         prompt = _build_repo_audit_model_prompt(assignment=assignment, allocation=allocation)
@@ -495,6 +506,7 @@ def execute_model_backed_repo_code_audit(
             holo_receipt=holo_receipt,
             code_receipt=code_receipt,
             index_query_errors=index_query_errors,
+            memex_receipt=memex_receipt,
         )
     except ValueError:
         return _reject([ReadOnlyAuditTaskRejectReason.PROMPT_BUDGET_EXCEEDED])
@@ -530,6 +542,7 @@ def execute_model_backed_repo_code_audit(
         holo_receipt=holo_receipt,
         code_receipt=code_receipt,
         index_query_errors=index_query_errors,
+        memex_receipt=memex_receipt,
         task_id=task_id,
         repo_head=_observe_repo_head(repo_root),
     )
@@ -570,6 +583,35 @@ def _query_index(
         result=result,
         require_generation=source == "holoindex",
     )
+
+
+def _optional_memex_query_receipt(
+    *,
+    task_context: Mapping[str, Any],
+    assignment: Mapping[str, Any],
+    query: str,
+) -> Mapping[str, Any] | None:
+    projection = task_context.get("memex_projection")
+    if projection is None:
+        projection = assignment.get("memex_projection")
+    if projection is None:
+        return None
+    try:
+        return build_memex_projection_query_receipt(query=query, projection=projection)
+    except Exception as exc:
+        return build_query_receipt(
+            source="memex_projection",
+            source_class="memex",
+            query=query,
+            result={
+                "ok": False,
+                "query": query,
+                "freshness": "UNKNOWN",
+                "hits": [],
+                "error": f"memex_query_failed:{type(exc).__name__}",
+            },
+            require_generation=False,
+        )
 
 
 def _query_rejection_reason(receipt: Mapping[str, Any]) -> str:
@@ -746,8 +788,9 @@ def _model_binding(
     snapshots: Sequence[_ReadOnlyTargetSnapshot],
     holo_receipt: Mapping[str, Any],
     code_receipt: Mapping[str, Any],
+    memex_receipt: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any]:
-    return {
+    payload = {
         "schema_version": READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA,
         "task_id": str(task_id or ""),
         "assignment_id": str(assignment.get("assignment_id") or ""),
@@ -767,6 +810,9 @@ def _model_binding(
         "holoindex_query_receipt_id": holo_receipt.get("receipt_id"),
         "codeindex_query_receipt_id": code_receipt.get("receipt_id"),
     }
+    if memex_receipt is not None:
+        payload["memex_query_receipt_id"] = memex_receipt.get("receipt_id")
+    return payload
 
 
 def _build_repo_audit_model_prompt(
@@ -818,6 +864,7 @@ def _build_repo_audit_model_context(
     holo_receipt: Mapping[str, Any],
     code_receipt: Mapping[str, Any],
     index_query_errors: Sequence[str],
+    memex_receipt: Mapping[str, Any] | None = None,
 ) -> str:
     payload = {
         "untrusted_repository_evidence": [
@@ -835,6 +882,8 @@ def _build_repo_audit_model_context(
         "index_query_errors": list(index_query_errors),
         "no_holoindex_reindex_performed": True,
     }
+    if memex_receipt is not None:
+        payload["memex_query_receipt"] = memex_receipt
     return _budgeted_json(payload, MAX_MODEL_CONTEXT_CHARS)
 
 
@@ -927,6 +976,7 @@ def _build_model_report(
     holo_receipt: Mapping[str, Any],
     code_receipt: Mapping[str, Any],
     index_query_errors: Sequence[str],
+    memex_receipt: Mapping[str, Any] | None,
     task_id: str | None,
     repo_head: str,
 ) -> Mapping[str, Any]:
@@ -968,6 +1018,9 @@ def _build_model_report(
             "no_worktree_operation_performed": True,
         },
     }
+    if memex_receipt is not None:
+        receipt_payload["memex_query_receipt"] = dict(memex_receipt)
+        receipt_payload["memex_query_receipt_id"] = memex_receipt.get("receipt_id")
     receipt = {**receipt_payload, "receipt_id": "sha256:" + _digest(receipt_payload)}
     report = {
         "assignment_id": str(assignment.get("assignment_id") or ""),

@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MEMEX_QUERY_RECEIPT_RUNTIME_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
+
+- Updated `reddog_readonly_0102_audit_worker_runtime.py` so a model-backed
+  read-only repo audit can optionally consume a caller-supplied governed Memex
+  projection and convert it into a `source_class=memex` query receipt before
+  the RedDog/Fusion model call.
+- The Memex receipt is included in the model context, model binding, and worker
+  receipt only when supplied; existing no-Memex task contexts remain unchanged.
+- Invalid supplied Memex projections fail closed before the model call. A
+  successful Memex query miss is not treated as a HoloIndex freshness gap.
+- Added tests proving Memex receipt propagation, generation binding,
+  pre-model rejection for malformed Memex projections, and preservation of the
+  read-only/no-reindex side-effect boundary.
+- No Memex write, Brain/Breadcrumb write, HoloIndex re-index, repo mutation,
+  worker spawn, OpenClaw enqueue, Hermes dispatch, PR creation, or authority
+  promotion is added.
+
 ## 2026-07-15: REDDOG_OPENCLAW_READONLY_0102_AUDIT_WORKER_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
