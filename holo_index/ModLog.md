@@ -1,5 +1,26 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_MEMEX_QUERY_RECEIPT_ROUTING_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 60, 97
+
+- ADD `holo_index/memex_query_routing.py`: read-only deterministic query
+  receipts over already-projected Memex shadow records. Results use
+  `source_class=memex`, `memex://...` paths, evidence refs, projection receipt
+  digest binding, and the projection `holoindex_generation_id`.
+- ADD query semantics: misses return an empty successful Memex receipt rather
+  than a false index-gap claim; empty queries, missing projection receipts, and
+  rejected projections fail closed.
+- TEST `tests/test_holoindex_memex_query_routing.py`: source-class and
+  generation binding, plain-dict projection compatibility, miss behavior,
+  fail-closed malformed inputs, rejected projections, and AST no-write/no-exec
+  guards.
+- Boundary: no HoloIndex re-index, no Memex/HoloIndex write, no external
+  retrieval, no current-code proof, no authority promotion, and no runtime
+  RedDog wiring. This slice gives RedDog/WRE a receipt format for Memex
+  evidence; it does not decide work or mutate state.
+
 ## [2026-07-16] HOLOINDEX_MEMEX_GOVERNED_PROJECTION_ADAPTER_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
