@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_STAGE_OWNERSHIP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added explicit signed-worker stage ownership for resident RedDog queue work:
+  signed `0102` bounded-code workers now complete after their assigned
+  bounded-worker stage instead of requeueing into stages they do not own.
+- Added the OpenClaw `queue_stage_progress` capability for post-bounded queue
+  stages, gated by resident queue readiness and an explicit runtime flag.
+- Strengthened the `main.py` startup-preflight complete-chain regression so
+  one coding task and one queue-stage task serially drain generated artifact
+  materialization, verification, draft-PR request, outcome ratchet, held-out
+  gate, and PatternMemory admission.
+
 ## 2026-07-16: REDDOG_MAIN_OPENCLAW_GENERATED_ARTIFACT_COMPLETE_CHAIN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

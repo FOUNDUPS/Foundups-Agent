@@ -39,6 +39,9 @@ class SignedWorkerQueueSerialLoopRunnerReason:
     CODE_STAGE_MAX_STEPS_INVALID = "REJECT_0102_BOUNDED_CODE_MAX_STEPS_INVALID"
     CODE_ARTIFACT_GENERATION_MISSING = "REJECT_0102_BOUNDED_CODE_ARTIFACT_GENERATION_MISSING"
     CODE_STATIC_ARTIFACTS_FORBIDDEN = "REJECT_0102_BOUNDED_CODE_STATIC_ARTIFACTS_FORBIDDEN"
+    CODE_ASSIGNED_STAGE_NOT_DISPATCHED = "REJECT_0102_BOUNDED_CODE_ASSIGNED_STAGE_NOT_DISPATCHED"
+    QUEUE_STAGE_NOT_READY = "REJECT_OPENCLAW_QUEUE_STAGE_NOT_READY"
+    QUEUE_STAGE_MAX_STEPS_INVALID = "REJECT_OPENCLAW_QUEUE_STAGE_MAX_STEPS_INVALID"
     BOOTSTRAP_REJECTED = "REJECT_RESIDENT_QUEUE_BOOTSTRAP_REJECTED"
     BOOTSTRAP_UNSAFE = "REJECT_RESIDENT_QUEUE_BOOTSTRAP_UNSAFE"
     BOOTSTRAP_EXCEPTION = "REJECT_RESIDENT_QUEUE_BOOTSTRAP_EXCEPTION"
@@ -61,12 +64,22 @@ _RESERVED_BOOTSTRAP_KWARGS = frozenset(
 
 _OPENCLAW_QUEUE_RUNTIME = "openclaw"
 _OPENCLAW_QUEUE_CAPABILITY = "candidate_queue_review"
+_OPENCLAW_QUEUE_STAGE_CAPABILITY = "queue_stage_progress"
 _SIGNED_0102_RUNTIME = "0102"
 _SIGNED_0102_BOUNDED_CODE_CAPABILITY = "bounded_code_change"
 _BOUNDED_WORKER_PILOT_STAGE = "bounded_worker_pilot"
 _BOUNDED_WORKER_PILOT_ACTION = "RUN_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE"
 _ARTIFACT_GENERATOR_MODE_FOUNDUPS_FUSION = "foundups_fusion"
 _QUEUE_CHAIN_COMPLETE_ACTION = "STOP_QUEUE_CHAIN_COMPLETE"
+_POST_BOUNDED_QUEUE_STAGES = frozenset(
+    {
+        "slice_verifier",
+        "verified_draft_pr_publish",
+        "verified_outcome_ratchet",
+        "held_out_regression_gate",
+        "pattern_memory_admission",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -117,7 +130,11 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
         if target_kind is None:
             if worker_runtime not in {_OPENCLAW_QUEUE_RUNTIME, _SIGNED_0102_RUNTIME}:
                 reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_WORKER_RUNTIME)
-            if capability not in {_OPENCLAW_QUEUE_CAPABILITY, _SIGNED_0102_BOUNDED_CODE_CAPABILITY}:
+            if capability not in {
+                _OPENCLAW_QUEUE_CAPABILITY,
+                _OPENCLAW_QUEUE_STAGE_CAPABILITY,
+                _SIGNED_0102_BOUNDED_CODE_CAPABILITY,
+            }:
                 reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_CAPABILITY)
             if not reasons:
                 reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_CAPABILITY)
@@ -131,6 +148,8 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
             reasons.append(SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_KWARG_CONFLICT)
         if target_kind == "0102_bounded_code_change":
             reasons.extend(_bounded_code_stage_reasons(self.config, queue_item_id=queue_item_id))
+        if target_kind == "openclaw_queue_stage_progress":
+            reasons.extend(_queue_stage_progress_reasons(self.config, queue_item_id=queue_item_id))
         if reasons:
             return _reject(task_id, reasons)
 
@@ -168,7 +187,18 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
                 [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE],
                 bootstrap_result=payload,
             )
+        dispatched = set(_string_list(payload.get("dispatched_stages")))
+        if (
+            target_kind == "0102_bounded_code_change"
+            and _BOUNDED_WORKER_PILOT_STAGE not in dispatched
+        ):
+            return _reject(
+                task_id,
+                [SignedWorkerQueueSerialLoopRunnerReason.CODE_ASSIGNED_STAGE_NOT_DISPATCHED],
+                bootstrap_result=payload,
+            )
         queue_chain_complete = str(payload.get("next_action") or "") == _QUEUE_CHAIN_COMPLETE_ACTION
+        assigned_stage_complete = target_kind == "0102_bounded_code_change"
 
         return {
             "accepted": True,
@@ -177,7 +207,8 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
             "queue_item_id": queue_item_id,
             "bootstrap_result": dict(payload),
             "queue_chain_complete": queue_chain_complete,
-            "queue_chain_requeue_required": not queue_chain_complete,
+            "assigned_stage_complete": assigned_stage_complete,
+            "queue_chain_requeue_required": (not queue_chain_complete and not assigned_stage_complete),
             "rejection_reasons": [],
             "no_source_repo_mutation_performed": True,
             "no_shell_command_executed": True,
@@ -280,6 +311,8 @@ def _reject(
 def _target_kind(*, worker_runtime: str, capability: str) -> str | None:
     if worker_runtime == _OPENCLAW_QUEUE_RUNTIME and capability == _OPENCLAW_QUEUE_CAPABILITY:
         return "openclaw_candidate_queue_review"
+    if worker_runtime == _OPENCLAW_QUEUE_RUNTIME and capability == _OPENCLAW_QUEUE_STAGE_CAPABILITY:
+        return "openclaw_queue_stage_progress"
     if worker_runtime == _SIGNED_0102_RUNTIME and capability == _SIGNED_0102_BOUNDED_CODE_CAPABILITY:
         return "0102_bounded_code_change"
     return None
@@ -315,6 +348,25 @@ def _bounded_code_stage_reasons(
         or plan.get("next_action") != _BOUNDED_WORKER_PILOT_ACTION
     ):
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CODE_STAGE_NOT_READY)
+    return reasons
+
+
+def _queue_stage_progress_reasons(
+    config: SignedWorkerQueueSerialLoopRunnerConfig,
+    *,
+    queue_item_id: str,
+) -> list[str]:
+    reasons: list[str] = []
+    if config.max_steps != 1:
+        reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_STAGE_MAX_STEPS_INVALID)
+
+    plan = _read_current_plan(config, queue_item_id=queue_item_id)
+    if (
+        not plan
+        or plan.get("accepted") is not True
+        or str(plan.get("current_stage") or "") not in _POST_BOUNDED_QUEUE_STAGES
+    ):
+        reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_STAGE_NOT_READY)
     return reasons
 
 

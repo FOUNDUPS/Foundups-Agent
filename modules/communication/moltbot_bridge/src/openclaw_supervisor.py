@@ -291,6 +291,7 @@ def claim_reddog_signed_worker_dispatch_task_once(
                 or _signed_0102_readonly_tasks_enabled_from_env()
             ),
             include_0102_bounded_code=_signed_0102_bounded_code_tasks_enabled_from_env(),
+            include_queue_stage_progress=_openclaw_queue_stage_tasks_enabled_from_env(),
             env=os.environ,
         )
     except Exception as exc:
@@ -537,11 +538,13 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
     source: str,
     include_0102_readonly: bool = False,
     include_0102_bounded_code: bool = False,
+    include_queue_stage_progress: bool = False,
     env: Mapping[str, str] | None = None,
 ) -> Optional[Dict[str, Any]]:
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
         is_0102_bounded_code_change_signed_worker_context,
         is_openclaw_candidate_signed_worker_context,
+        is_openclaw_queue_stage_progress_signed_worker_context,
     )
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
         is_0102_readonly_signed_worker_context,
@@ -578,6 +581,11 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
                     include_0102_bounded_code
                     and is_0102_bounded_code_change_signed_worker_context(candidate_context)
                     and _signed_0102_bounded_code_stage_ready_from_env(candidate_context, env or os.environ)
+                )
+                or (
+                    include_queue_stage_progress
+                    and is_openclaw_queue_stage_progress_signed_worker_context(candidate_context)
+                    and _openclaw_queue_stage_progress_ready_from_env(candidate_context, env or os.environ)
                 )
             ):
                 row = candidate
@@ -786,6 +794,17 @@ def _signed_0102_bounded_code_tasks_enabled_from_env() -> bool:
     )
 
 
+def _openclaw_queue_stage_tasks_enabled_from_env() -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    return resident_queue_runtime_flag_enabled(
+        os.environ,
+        "OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED",
+    )
+
+
 def _signed_0102_bounded_code_stage_ready_from_env(
     context: Mapping[str, Any] | None,
     env: Mapping[str, str],
@@ -844,6 +863,57 @@ def _signed_0102_bounded_code_stage_ready_from_env(
     )
 
 
+def _openclaw_queue_stage_progress_ready_from_env(
+    context: Mapping[str, Any] | None,
+    env: Mapping[str, str],
+) -> bool:
+    """Return True only when a queue-stage worker may claim a post-code stage."""
+
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    if not isinstance(context, Mapping):
+        return False
+    if not resident_queue_runtime_flag_enabled(env, "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER"):
+        return False
+    work_state_path = str(env.get("REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or "").strip()
+    chain_results_path = str(env.get("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH") or "").strip()
+    if not work_state_path or not chain_results_path:
+        return False
+    queue_item_id = str(context.get("queue_item_id") or "").strip()
+    if not queue_item_id:
+        return False
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
+            RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
+            plan_reddog_resident_queue_orchestration,
+        )
+
+        work_state = _read_json_mapping(Path(work_state_path))
+        chain_state = _read_json_mapping(Path(chain_results_path))
+        plan = plan_reddog_resident_queue_orchestration(
+            work_state,
+            chain_results=_resident_queue_stage_results(chain_state),
+            requested_queue_item_id=queue_item_id,
+            now_iso=str(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO") or ""),
+        )
+    except Exception:
+        return False
+    return (
+        plan.accepted is True
+        and plan.status == RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY
+        and str(plan.current_stage or "")
+        in {
+            "slice_verifier",
+            "verified_draft_pr_publish",
+            "verified_outcome_ratchet",
+            "held_out_regression_gate",
+            "pattern_memory_admission",
+        }
+    )
+
+
 def _read_json_mapping(path: Path) -> Mapping[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, Mapping) else {}
@@ -863,6 +933,7 @@ def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
         is_0102_bounded_code_change_signed_worker_context,
         is_openclaw_candidate_signed_worker_context,
+        is_openclaw_queue_stage_progress_signed_worker_context,
     )
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
         is_0102_readonly_signed_worker_context,
@@ -871,6 +942,7 @@ def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
 
     include_0102_readonly = _signed_0102_readonly_tasks_enabled_from_env()
     include_0102_bounded_code = _signed_0102_bounded_code_tasks_enabled_from_env()
+    include_queue_stage_progress = _openclaw_queue_stage_tasks_enabled_from_env()
     db = AgentDB()
     for task in db.get_autonomous_tasks(status="pending", limit=limit):
         if str(task.get("discovered_by") or "") != SIGNED_WORKER_DISPATCH_TASK_SOURCE:
@@ -884,6 +956,11 @@ def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
                 include_0102_bounded_code
                 and is_0102_bounded_code_change_signed_worker_context(normalized)
                 and _signed_0102_bounded_code_stage_ready_from_env(normalized, os.environ)
+            )
+            or (
+                include_queue_stage_progress
+                and is_openclaw_queue_stage_progress_signed_worker_context(normalized)
+                and _openclaw_queue_stage_progress_ready_from_env(normalized, os.environ)
             )
         ):
             return True
