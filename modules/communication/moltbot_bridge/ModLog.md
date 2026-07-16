@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MAIN_OPENCLAW_SIGNED_WORKER_COMPLETE_CHAIN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a `main.py` startup-preflight regression proving the RedDog OpenClaw
+  signed-worker claim loop can drain an env-bound signed worker task through
+  bounded worker pilot, slice verification, draft-PR request, outcome ratchet,
+  held-out gate, and PatternMemory admission.
+- Boundary remains constrained to governed runtime artifacts and an isolated
+  worktree: no source repo mutation, no shell execution, no Hermes dispatch,
+  no live OpenClaw enqueue, no real PR publication, no reward settlement, and
+  no HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_MAIN_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
