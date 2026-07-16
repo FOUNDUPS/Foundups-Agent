@@ -401,6 +401,29 @@ def _pilot_payloads(repo: Path, worktree: Path, work_order: Mapping[str, object]
     }
 
 
+def _pilot_bounded_worker_plan() -> dict[str, object]:
+    return {
+        "operation": PILOT_OPERATION,
+        "domain_id": PILOT_DOMAIN_ID,
+        "domain_profile": _pilot_domain_profile().to_dict(),
+        "planned_artifacts": [PILOT_ARTIFACT],
+        "requested_allowed_paths": _pilot_allowed_paths(),
+        "shell_profile": _pilot_shell_profile().to_dict(),
+        "shell_argv": [
+            "python",
+            "-m",
+            "pytest",
+            "modules/communication/moltbot_bridge/tests/"
+            "test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+            "-q",
+        ],
+        "selection_receipt": _pilot_selection_receipt(),
+        "signed_receipt_chain": _pilot_receipt_chain(),
+        "stdin_policy": "none",
+        "env_policy": {"scrubbed": True},
+    }
+
+
 def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
 
@@ -1508,6 +1531,124 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
     assert stage["openclaw_enqueue_performed"] is False
     assert stage["hermes_dispatch_performed"] is False
     assert stage["holoindex_reindex_performed"] is False
+    assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith(
+        "# Resident Queue Pilot"
+    )
+    assert not (repo / PILOT_ARTIFACT).exists()
+    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+
+
+def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(
+        **{
+            **pilot_overrides,
+            "bounded_worker_plan": _pilot_bounded_worker_plan(),
+        }
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        {
+            PILOT_ARTIFACT: (
+                "# Resident Queue Pilot\n\n"
+                "The dry-run planner receipts were bound from resident queue state.\n"
+            )
+        },
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
+        },
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        pilot_dryrun_binding_enabled=True,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=9,
+    )
+
+    assert result.accepted is True
+    assert result.steps_run == 9
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "worker_dispatch_dryrun",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+        "worktree_create",
+        "bounded_worker_pilot",
+    )
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE"
+    assert result.no_worktree_created is False
+    assert result.no_bounded_task_execution_performed is False
+    assert result.no_bounded_file_edit_performed is False
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_pr_created is True
+    assert result.no_holoindex_reindex_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["bounded_worker_pilot"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
+    binding = stage["pilot_dryrun_binding_result"]
+    assert binding["accepted"] is True
+    assert binding["generic_writer_dryrun_result"]["accepted"] is True
+    assert binding["governed_shell_dryrun_result"]["accepted"] is True
+    assert stage["shell_command_executed"] is False
     assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith(
         "# Resident Queue Pilot"
     )
@@ -3156,6 +3297,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_WORK_ORDERS_PATH": str(tmp_path / "work_orders.json"),
                 "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "",
                 "REDDOG_EXECUTION_VALVE_ENV_PATH": str(tmp_path / "valve_env.json"),
+                "REDDOG_PILOT_DRYRUN_BINDING": "1",
                 "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH": str(tmp_path / "generic_writer.json"),
                 "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH": str(tmp_path / "governed_shell.json"),
                 "REDDOG_ARTIFACT_CONTENTS_PATH": str(tmp_path / "artifact_contents.json"),
@@ -3203,6 +3345,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["work_orders_path"] == str(tmp_path / "work_orders.json")
     assert mocked.call_args.kwargs["work_order_materializer_mode"] is None
     assert mocked.call_args.kwargs["valve_environment_path"] == str(tmp_path / "valve_env.json")
+    assert mocked.call_args.kwargs["pilot_dryrun_binding_enabled"] is True
     assert mocked.call_args.kwargs["generic_writer_dryrun_result_path"] == str(
         tmp_path / "generic_writer.json"
     )

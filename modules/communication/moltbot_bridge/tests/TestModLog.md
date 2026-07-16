@@ -1,3 +1,23 @@
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_PILOT_DRYRUN_BINDING_PHASE1
+
+**Files**: `test_reddog_resident_queue_pilot_dryrun_binding.py` (NEW),
+`test_reddog_resident_queue_bounded_worker_pilot_handler.py`,
+`test_reddog_resident_queue_stage_handler_registry.py`,
+`test_reddog_main_resident_queue_serial_loop_bootstrap.py` (UPDATED)
+
+**Slice**: `REDDOG_RESIDENT_QUEUE_PILOT_DRYRUN_BINDING_PHASE1` |
+**Predecessor**: #1121 bounded artifact generation binding
+
+Resident queue bounded-worker pilot can now derive generic-writer and
+governed-shell dry-run receipts from an explicit work-order
+`bounded_worker_plan` plus recorded signed-authority, authority-verification,
+execution-valve, and worktree-create stage results. Tests prove accepted
+derivation, missing-plan rejection, malformed-plan rejection, rejected-authority
+blocking, HoloIndex index-gap propagation, registry opt-in behavior, startup
+env forwarding, and a full bootstrap path with no external writer/shell JSON.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_bounded_artifact_generation_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_bounded_worker_pilot_invoke.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_pilot_dryrun_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_bounded_worker_pilot_handler.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py -q`
+
 ## 2026-07-16: REDDOG_BOUNDED_ARTIFACT_GENERATION_BINDING_PHASE1
 
 **Files**: `test_reddog_bounded_artifact_generation_runtime.py` (NEW),

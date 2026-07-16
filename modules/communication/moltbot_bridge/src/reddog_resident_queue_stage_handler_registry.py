@@ -192,6 +192,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     intake_target: str = "foundup_job",
     expected_valve_state: str = VALVE_OPEN_WORKTREE_CREATE,
     worktree_runner: Any = None,
+    pilot_dryrun_binding_enabled: bool = False,
     generic_writer_dryrun_result: Optional[Mapping[str, Any]] = None,
     governed_shell_dryrun_result: Optional[Mapping[str, Any]] = None,
     artifact_contents: Optional[Mapping[str, Any]] = None,
@@ -354,13 +355,14 @@ def build_reddog_resident_queue_stage_handler_registry(
             artifact_contents=artifact_contents,
             artifact_generation_request=artifact_generation_request,
             artifact_generator=artifact_generator,
+            pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
             repo_root=root,
         ),
         lambda: build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
             chain_results_store=chain_results_store,
             work_order_resolver=work_order_resolver,
-            generic_writer_dryrun_result=generic_writer_dryrun_result or {},
-            governed_shell_dryrun_result=governed_shell_dryrun_result or {},
+            generic_writer_dryrun_result=generic_writer_dryrun_result,
+            governed_shell_dryrun_result=governed_shell_dryrun_result,
             artifact_contents=artifact_contents,
             repo_root=root or Path("."),
             operation_cwd=operation_cwd,
@@ -445,16 +447,22 @@ def _bounded_worker_pilot_missing(
     artifact_contents: Optional[Mapping[str, Any]],
     artifact_generation_request: Optional[Mapping[str, Any]],
     artifact_generator: Any,
+    pilot_dryrun_binding_enabled: bool,
     repo_root: Optional[Path],
 ) -> tuple[str, ...]:
     reasons = list(
         _missing(
             ("work_order_resolver", work_order_resolver),
-            ("generic_writer_dryrun_result", generic_writer_dryrun_result),
-            ("governed_shell_dryrun_result", governed_shell_dryrun_result),
             ("repo_root", repo_root),
         )
     )
+    if not pilot_dryrun_binding_enabled:
+        reasons.extend(
+            _missing(
+                ("generic_writer_dryrun_result", generic_writer_dryrun_result),
+                ("governed_shell_dryrun_result", governed_shell_dryrun_result),
+            )
+        )
     if artifact_contents:
         return tuple(reasons)
     if artifact_generation_request and artifact_generator is not None:

@@ -1598,6 +1598,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_WORK_ORDERS_PATH                              Outside-repo work-order JSON snapshot
         REDDOG_WORK_ORDER_MATERIALIZER_MODE                  Optional `authority_profile` in-memory materializer
         REDDOG_EXECUTION_VALVE_ENV_PATH                      Outside-repo valve environment JSON
+        REDDOG_PILOT_DRYRUN_BINDING                          Derive pilot dry-run receipts from queue chain state
         REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH             Outside-repo generic writer dry-run JSON
         REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH             Outside-repo governed shell dry-run JSON
         REDDOG_ARTIFACT_CONTENTS_PATH                        Outside-repo artifact contents JSON
@@ -1710,6 +1711,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signer_socket_timeout_s=signer_socket_timeout_s,
             signer_socket_max_response_bytes=signer_socket_max_response_bytes,
             signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
+            pilot_dryrun_binding_enabled=os.getenv("REDDOG_PILOT_DRYRUN_BINDING", "0") != "0",
             worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
             worktree_runner_timeout_s=worktree_runner_timeout_s,
             artifact_generator_mode=os.getenv("REDDOG_ARTIFACT_GENERATOR_MODE", "") or None,
