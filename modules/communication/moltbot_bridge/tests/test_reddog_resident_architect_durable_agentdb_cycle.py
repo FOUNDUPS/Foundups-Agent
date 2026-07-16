@@ -91,6 +91,21 @@ def _work_state() -> dict[str, object]:
     }
 
 
+def _foundup_work_state() -> dict[str, object]:
+    state = dict(_work_state())
+    state["worker_claims"] = [
+        {
+            "claim_id": "claim-resident",
+            "slice_id": "REDDOG_RESIDENT_ARCHITECT_DURABLE_AGENTDB_CYCLE_PHASE1",
+            "foundup_id": "foundups_agent",
+        }
+    ]
+    state["wre_queue_items"] = [
+        {"queue_item_id": "queue-resident", "claim_id": "claim-resident", "foundup_id": "foundups_agent"}
+    ]
+    return state
+
+
 def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
     return HoloIndexFreshnessReceipt(
         schema_version="holoindex_freshness_receipt.v1",
@@ -270,6 +285,63 @@ def test_durable_cycle_submits_agentdb_tasks_openclaw_claims_reports_and_determi
 
     tasks = AgentDB().get_autonomous_tasks(status="completed", limit=10)
     assert len([task for task in tasks if task["discovered_by"] == READONLY_AUDIT_TASK_SOURCE]) == 5
+
+
+def test_durable_cycle_supplies_operational_memex_to_openclaw_workers() -> None:
+    audit_runner = _AuditModelRunner()
+    intent = dict(_intent())
+    intent["principal_ref"] = "principal-012"
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(
+            red_dog_intent=intent,
+            work_state_snapshot_override=_foundup_work_state(),
+            breadcrumbs=[
+                {
+                    "breadcrumb_id": "crumb-resident",
+                    "continuity_id": "REDDOG_RESIDENT_ARCHITECT_DURABLE_AGENTDB_CYCLE_PHASE1",
+                    "task_id": "task-resident",
+                    "created_at": NOW,
+                }
+            ],
+            brain_state={
+                "available": True,
+                "signature_digest": "sha256:brain-resident",
+                "summary_digest": "sha256:brain-summary-resident",
+                "record_count": 9,
+            },
+            memex_snapshot_supply_config={
+                "foundup_id": "foundups_agent",
+                "identity": {"foundup_id": "foundups_agent", "name": "Foundups Agent"},
+                "roadmap_state": {
+                    "foundup_id": "foundups_agent",
+                    "roadmap_id": "resident-roadmap",
+                    "version": "1",
+                    "content_digest": "sha256:resident-roadmap",
+                },
+            },
+            audit_model_runner=audit_runner,
+        )
+    )
+
+    assert result.accepted is True
+    assert result.status == STATUS_DETERMINED
+    assert result.final_bootstrap is not None
+    assert result.final_bootstrap.memex_snapshot_supply_attempted is False
+    assert len(audit_runner.calls) == 5
+    contexts = [json.loads(call["context"]) for call in audit_runner.calls]
+    assert all(context["memex_query_receipt"]["source_class"] == "memex" for context in contexts)
+    assert all(context["memex_query_receipt"]["freshness_generation_id"] == "sha256:holo-generation-resident" for context in contexts)
+    assert all(context["memex_evidence_bundle"]["records"] for context in contexts)
+    completed = AgentDB().get_autonomous_tasks(status="completed", limit=10)
+    readonly_contexts = [
+        task["context"] if isinstance(task["context"], dict) else json.loads(task["context"])
+        for task in completed
+        if task["discovered_by"] == READONLY_AUDIT_TASK_SOURCE
+    ]
+    assert readonly_contexts
+    assert all(context["assignment"]["principal_id"] == "principal-012" for context in readonly_contexts)
+    assert all(context["assignment"]["memex_holoindex_generation_id"] == "sha256:holo-generation-resident" for context in readonly_contexts)
 
 
 def test_duplicate_intent_reconnects_to_persisted_cycle_without_new_claims() -> None:

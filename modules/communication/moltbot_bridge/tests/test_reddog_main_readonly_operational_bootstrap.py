@@ -515,6 +515,71 @@ def test_bootstrap_enqueue_opt_in_publishes_readonly_audit_tasks() -> None:
     assert result.no_queue_mutation_performed is False
 
 
+def test_bootstrap_memex_supply_enriches_enqueued_readonly_audit_tasks() -> None:
+    writer = _FakeEnqueueWriter()
+    work_state = dict(_work_state())
+    work_state["worker_claims"] = [
+        {
+            "claim_id": "claim-1",
+            "slice_id": "REDDOG_OPERATIONAL_MEMEX_SNAPSHOT_SUPPLIER_PHASE1",
+            "foundup_id": "foundups_agent",
+        }
+    ]
+    work_state["wre_queue_items"] = [
+        {"queue_item_id": "queue-1", "claim_id": "claim-1", "foundup_id": "foundups_agent"}
+    ]
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=work_state,
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        breadcrumbs=[
+            {
+                "breadcrumb_id": "crumb-1",
+                "continuity_id": work_state["selected_slice"],
+                "task_id": "task-1",
+                "created_at": NOW,
+            }
+        ],
+        brain_state={
+            "available": True,
+            "signature_digest": "sha256:brain",
+            "summary_digest": "sha256:brain-summary",
+            "record_count": 5,
+        },
+        enqueue_readonly_audit_tasks=True,
+        enqueue_writer=writer,
+        memex_snapshot_supply_config={
+            "foundup_id": "foundups_agent",
+            "principal_id": "principal-012",
+            "identity": {"foundup_id": "foundups_agent", "name": "Foundups Agent"},
+            "roadmap_state": {
+                "foundup_id": "foundups_agent",
+                "roadmap_id": "resident-roadmap",
+                "version": "1",
+                "content_digest": "sha256:roadmap",
+            },
+        },
+    )
+
+    assert result.ready is True
+    assert result.memex_snapshot_supply_attempted is True
+    assert result.memex_snapshot_supply_status == "OPERATIONAL_MEMEX_SUPPLY_ACCEPT"
+    assert result.memex_snapshot_supply_view_id
+    assert result.memex_snapshot_supply_rejection_reasons == ()
+    task_context = writer.calls[0][0][0].context
+    assignment = task_context["assignment"]
+    assert task_context["memex_view"]["foundup_id"] == "foundups_agent"
+    assert task_context["memex_view"]["snapshot_id"] == result.snapshot_receipt_id
+    assert assignment["principal_id"] == "principal-012"
+    assert assignment["work_order_id"] == assignment["assignment_id"]
+    assert assignment["memex_holoindex_generation_id"] == "sha256:holo-generation"
+    assert assignment["memex_policy_expires_at"]
+    assert task_context["memex_snapshot_supply_receipt"]["no_holoindex_reindex_performed"] is True
+
+
 def test_bootstrap_enqueue_rejection_is_not_ready_without_spawning_workers() -> None:
     writer = _FakeEnqueueWriter(ok=False)
 

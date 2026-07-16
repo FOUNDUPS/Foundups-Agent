@@ -552,12 +552,16 @@ def _normalize_holoindex_state(
     )
     receipt_digest = _digest(receipt.to_dict() if hasattr(receipt, "to_dict") else receipt or {})
     receipt_head = ""
+    generation_id = ""
     if isinstance(receipt, HoloIndexFreshnessReceipt):
         receipt_head = receipt.repo_head_sha
+        generation_id = receipt.generation_id
     elif isinstance(receipt, Mapping):
         receipt_head = str(receipt.get("repo_head_sha", ""))
+        generation_id = str(receipt.get("generation_id", ""))
     return {
         "receipt_digest": receipt_digest,
+        "generation_id": generation_id,
         "repo_head_sha": receipt_head,
         "freshness_ok": check.ok,
         "required_collections": tuple(check.required_collections),

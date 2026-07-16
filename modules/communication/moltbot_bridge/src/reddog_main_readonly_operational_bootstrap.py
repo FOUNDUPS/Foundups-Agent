@@ -32,6 +32,11 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     ReadOnlyAuditTaskWriter,
     enqueue_reddog_readonly_audit_swarm,
 )
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_snapshot_supplier import (
+    OperationalMemexReadOnlyAuditTaskWriter,
+    OperationalMemexSnapshotSupplyConfig,
+    OperationalMemexTaskEnrichmentResult,
+)
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
     AgentDbReadOnlyAuditReportStore,
     ReadOnlyAuditReportCollectionResult,
@@ -130,6 +135,10 @@ class RedDogMainReadonlyBootstrapResult:
     enqueue_receipt_id: Optional[str] = None
     enqueue_task_count: int = 0
     enqueue_rejection_reasons: tuple[str, ...] = ()
+    memex_snapshot_supply_attempted: bool = False
+    memex_snapshot_supply_status: Optional[str] = None
+    memex_snapshot_supply_view_id: Optional[str] = None
+    memex_snapshot_supply_rejection_reasons: tuple[str, ...] = ()
     no_model_call_performed: bool = True
     no_worker_spawn_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -156,9 +165,14 @@ def run_reddog_main_readonly_operational_bootstrap(
     repo_state_override: Mapping[str, Any] | None = None,
     work_state_snapshot_override: Mapping[str, Any] | None = None,
     holoindex_receipt_override: HoloIndexFreshnessReceipt | Mapping[str, Any] | None = None,
+    breadcrumbs: Sequence[Mapping[str, Any]] = (),
+    brain_state: Mapping[str, Any] | None = None,
+    workspace_memory_notes: Sequence[Mapping[str, Any]] = (),
+    bootstrap_projection: Mapping[str, Any] | None = None,
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     enqueue_readonly_audit_tasks: bool = False,
     enqueue_writer: ReadOnlyAuditTaskWriter | None = None,
+    memex_snapshot_supply_config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any] | None = None,
     seen_assignment_ids: Optional[set[str]] = None,
     collect_readonly_audit_reports: bool = False,
     report_store: ReadOnlyAuditReportStore | None = None,
@@ -227,6 +241,10 @@ def run_reddog_main_readonly_operational_bootstrap(
         changed_paths=paths,
         now_iso=now_iso,
         breadcrumb_scope=str(work_state_snapshot.get("selected_slice") or "main_startup"),
+        breadcrumbs=breadcrumbs,
+        brain_state=brain_state,
+        workspace_memory_notes=workspace_memory_notes,
+        bootstrap_projection=bootstrap_projection,
     )
     if not snapshot_result.accepted or snapshot_result.snapshot is None or snapshot_result.context_view is None:
         return _not_ready(
@@ -286,6 +304,7 @@ def run_reddog_main_readonly_operational_bootstrap(
     decision_result: ReadOnlyAuditDecisionReceipt | None = None
     decision_persist_result: ReadOnlyAuditDecisionPersistResult | None = None
     architect_result: BackendArchitectDeterminationResult | None = None
+    memex_supply_result: OperationalMemexTaskEnrichmentResult | None = None
     if collect_readonly_audit_reports:
         reader = report_store if report_store is not None else AgentDbReadOnlyAuditReportStore()
         collection_result = collect_reddog_readonly_audit_report_bundle(
@@ -420,11 +439,22 @@ def run_reddog_main_readonly_operational_bootstrap(
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None
     if enqueue_readonly_audit_tasks:
         writer = enqueue_writer if enqueue_writer is not None else AgentDbReadOnlyAuditTaskWriter()
+        memex_writer: OperationalMemexReadOnlyAuditTaskWriter | None = None
+        if memex_snapshot_supply_config is not None:
+            memex_writer = OperationalMemexReadOnlyAuditTaskWriter(
+                delegate=writer,
+                snapshot=snapshot,
+                config=memex_snapshot_supply_config,
+                now_iso=now_iso,
+            )
+            writer = memex_writer
         enqueue_result = enqueue_reddog_readonly_audit_swarm(
             plan=plan,
             writer=writer,
             seen_assignment_ids=seen_assignment_ids,
         )
+        if memex_writer is not None:
+            memex_supply_result = memex_writer.last_result
         if not enqueue_result.accepted:
             return _not_ready(
                 reasons=("readonly_audit_enqueue_rejected", *enqueue_result.rejection_reasons),
@@ -440,6 +470,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                 decision_persist_result=decision_persist_result,
                 architect_result=architect_result,
                 enqueue_result=enqueue_result,
+                memex_supply_result=memex_supply_result,
             )
 
     return _ready(
@@ -457,6 +488,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         architect_result=architect_result,
         enqueue_result=enqueue_result,
         enqueue_attempted=enqueue_readonly_audit_tasks,
+        memex_supply_result=memex_supply_result,
     )
 
 
@@ -476,6 +508,7 @@ def _ready(
     architect_result: BackendArchitectDeterminationResult | None,
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None,
     enqueue_attempted: bool,
+    memex_supply_result: OperationalMemexTaskEnrichmentResult | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     assert gate.determination_binding is not None
     bundle = collection_result.validation.bundle if collection_result and collection_result.validation else None
@@ -533,6 +566,12 @@ def _ready(
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
         enqueue_task_count=len(enqueue_result.tasks) if enqueue_result else 0,
         enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
+        memex_snapshot_supply_attempted=memex_supply_result is not None,
+        memex_snapshot_supply_status=memex_supply_result.status if memex_supply_result else None,
+        memex_snapshot_supply_view_id=memex_supply_result.memex_view_id if memex_supply_result else None,
+        memex_snapshot_supply_rejection_reasons=(
+            memex_supply_result.rejection_reasons if memex_supply_result else ()
+        ),
         no_openclaw_enqueue_performed=not bool(enqueue_result and enqueue_result.accepted),
         no_queue_mutation_performed=not bool(enqueue_result and enqueue_result.accepted),
         no_model_call_performed=not bool(
@@ -587,6 +626,7 @@ def _not_ready(
     decision_persist_result: ReadOnlyAuditDecisionPersistResult | None = None,
     architect_result: BackendArchitectDeterminationResult | None = None,
     enqueue_result: ReadOnlyAuditSwarmEnqueueResult | None = None,
+    memex_supply_result: OperationalMemexTaskEnrichmentResult | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     determination_id = None
     if gate and gate.determination_binding:
@@ -649,6 +689,12 @@ def _not_ready(
         enqueue_receipt_id=enqueue_result.receipt.enqueue_receipt_id if enqueue_result else None,
         enqueue_task_count=len(enqueue_result.tasks) if enqueue_result and enqueue_result.accepted else 0,
         enqueue_rejection_reasons=enqueue_result.rejection_reasons if enqueue_result else (),
+        memex_snapshot_supply_attempted=memex_supply_result is not None,
+        memex_snapshot_supply_status=memex_supply_result.status if memex_supply_result else None,
+        memex_snapshot_supply_view_id=memex_supply_result.memex_view_id if memex_supply_result else None,
+        memex_snapshot_supply_rejection_reasons=(
+            memex_supply_result.rejection_reasons if memex_supply_result else ()
+        ),
         no_model_call_performed=not bool(
             architect_result and architect_result.receipt.model_result_digest
         ),
