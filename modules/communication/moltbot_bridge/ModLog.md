@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a GitHub principal/permission snapshot supplier that converts the
+  existing read-only GitHub permission probe into the two runtime artifacts
+  consumed by authority-profile source supply: `PrincipalAuthorityRecord` and
+  `PermissionSnapshot`.
+- Wired the resident profile startup path so principal and permission snapshot
+  supply can run before authority-profile source materialization, with explicit
+  environment overrides (`0` still disables the profile default).
+- Boundary remains constrained: no key inference, signing, signature
+  verification, signer state mutation, worker spawn, worktree, OpenClaw
+  enqueue, Hermes dispatch, repo mutation, PatternMemory write, or HoloIndex
+  re-indexing was added.
+
 ## 2026-07-16: REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

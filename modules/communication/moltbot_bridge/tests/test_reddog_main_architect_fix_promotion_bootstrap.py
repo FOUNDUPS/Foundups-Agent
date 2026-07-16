@@ -135,6 +135,10 @@ def test_main_preflight_auto_runs_when_all_artifacts_are_present(tmp_path: Path)
             "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(files["authority_profile_source"]),
             "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
             "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+            "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+            "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
+            "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
         },
         clear=True,
     ):
@@ -200,6 +204,9 @@ def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_pro
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                     "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
                 },
                 clear=True,
             ):
@@ -275,6 +282,9 @@ def test_main_preflight_model_selection_supply_runs_before_promotion(tmp_path: P
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                     "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                    "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
                     "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH": str(tmp_path / "catalog.json"),
                     "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH": str(tmp_path / "evidence.json"),
                     "REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH": str(tmp_path / "requirements.json"),
@@ -351,6 +361,9 @@ def test_main_preflight_authority_source_supply_runs_before_promotion(tmp_path: 
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                     "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                    "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
                     "REDDOG_AUTHORITY_PROFILE_SEED_PATH": str(tmp_path / "seed.json"),
                     "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": str(tmp_path / "principal.json"),
                     "REDDOG_PERMISSION_SNAPSHOT_PATH": str(tmp_path / "permission.json"),
@@ -401,6 +414,20 @@ def test_main_preflight_profile_runs_artifact_supply_chain_before_promotion(tmp_
             "rejection_reasons": (),
         },
     )()
+    principal_snapshot_result = type(
+        "PrincipalSnapshotResult",
+        (),
+        {
+            "accepted": True,
+            "status": "GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_BOOTSTRAP_APPLIED",
+            "receipt_id": "sha256:principal-snapshot-profile",
+            "principal_authority_record_path": str(runtime_root / "principal_authority_record.json"),
+            "permission_snapshot_path": str(runtime_root / "permission_snapshot.json"),
+            "principal_id": "github:mjtrout",
+            "permission_snapshot_digest": "sha256:permission",
+            "rejection_reasons": (),
+        },
+    )()
     authority_supply_result = type(
         "AuthoritySupplyResult",
         (),
@@ -437,31 +464,36 @@ def test_main_preflight_profile_runs_artifact_supply_chain_before_promotion(tmp_
             return_value=model_supply_result,
         ) as model_supply:
             with patch(
-                "modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap.run_reddog_authority_profile_source_artifact_supply_bootstrap",
-                return_value=authority_supply_result,
-            ) as authority_supply:
+                "modules.communication.moltbot_bridge.src.reddog_github_principal_permission_snapshot_supply_bootstrap.run_reddog_github_principal_permission_snapshot_supply_bootstrap",
+                return_value=principal_snapshot_result,
+            ) as principal_snapshot_supply:
                 with patch(
-                    "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
-                    return_value=promotion_result,
-                ) as promote:
-                    with patch.dict(
-                        "os.environ",
-                        {
-                            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
-                            "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
-                            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
-                            "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "intent-profile",
-                            "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH": str(tmp_path / "catalog.json"),
-                            "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH": str(tmp_path / "evidence.json"),
-                            "REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH": str(tmp_path / "requirements.json"),
-                            "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH": str(tmp_path / "keys.json"),
-                            "REDDOG_AUTHORITY_PROFILE_SEED_PATH": str(tmp_path / "seed.json"),
-                            "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": str(tmp_path / "principal.json"),
-                            "REDDOG_PERMISSION_SNAPSHOT_PATH": str(tmp_path / "permission.json"),
-                        },
-                        clear=True,
-                    ):
-                        assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+                    "modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap.run_reddog_authority_profile_source_artifact_supply_bootstrap",
+                    return_value=authority_supply_result,
+                ) as authority_supply:
+                    with patch(
+                        "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
+                        return_value=promotion_result,
+                    ) as promote:
+                        with patch.dict(
+                            "os.environ",
+                            {
+                                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "intent-profile",
+                                "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH": str(tmp_path / "catalog.json"),
+                                "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH": str(tmp_path / "evidence.json"),
+                                "REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH": str(tmp_path / "requirements.json"),
+                                "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH": str(tmp_path / "keys.json"),
+                                "REDDOG_AUTHORITY_PROFILE_SEED_PATH": str(tmp_path / "seed.json"),
+                                "REDDOG_GITHUB_REPO_FULL_NAME": "FOUNDUPS/Foundups-Agent",
+                                "REDDOG_AUTHORITY_FOUNDUP_ID": "paccess_001",
+                                "REDDOG_PRINCIPAL_PUBLIC_KEY": "pub:principal",
+                            },
+                            clear=True,
+                        ):
+                            assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
 
     handoff.assert_called_once()
     handoff_kwargs = handoff.call_args.kwargs
@@ -473,8 +505,21 @@ def test_main_preflight_profile_runs_artifact_supply_chain_before_promotion(tmp_
     )
     model_supply.assert_called_once()
     assert model_supply.call_args.kwargs["output_path"] == str(runtime_root / "model_selection_receipt.json")
+    principal_snapshot_supply.assert_called_once()
+    assert principal_snapshot_supply.call_args.kwargs["principal_authority_record_output_path"] == str(
+        runtime_root / "principal_authority_record.json"
+    )
+    assert principal_snapshot_supply.call_args.kwargs["permission_snapshot_output_path"] == str(
+        runtime_root / "permission_snapshot.json"
+    )
     authority_supply.assert_called_once()
     assert authority_supply.call_args.kwargs["output_path"] == str(runtime_root / "authority_profile_source.json")
+    assert authority_supply.call_args.kwargs["principal_authority_record_path"] == str(
+        runtime_root / "principal_authority_record.json"
+    )
+    assert authority_supply.call_args.kwargs["permission_snapshot_path"] == str(
+        runtime_root / "permission_snapshot.json"
+    )
     promote.assert_called_once()
     promote_kwargs = promote.call_args.kwargs
     assert promote_kwargs["architect_determination_path"] == str(runtime_root / "architect_determination.json")
@@ -496,20 +541,63 @@ def test_main_preflight_explicit_zero_overrides_profile_artifact_supply(tmp_path
             side_effect=AssertionError("model supply must not run"),
         ):
             with patch(
-                "modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap.run_reddog_authority_profile_source_artifact_supply_bootstrap",
-                side_effect=AssertionError("authority supply must not run"),
+                "modules.communication.moltbot_bridge.src.reddog_github_principal_permission_snapshot_supply_bootstrap.run_reddog_github_principal_permission_snapshot_supply_bootstrap",
+                side_effect=AssertionError("principal snapshot supply must not run"),
             ):
-                with patch.dict(
-                    "os.environ",
-                    {
-                        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
-                        "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
-                        "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
-                        "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
-                    },
-                    clear=True,
+                with patch(
+                    "modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap.run_reddog_authority_profile_source_artifact_supply_bootstrap",
+                    side_effect=AssertionError("authority supply must not run"),
                 ):
-                    assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+                    with patch.dict(
+                        "os.environ",
+                        {
+                            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                            "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                            "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+                            "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
+                            "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
+                        },
+                        clear=True,
+                    ):
+                        assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+
+
+def test_main_preflight_enforced_blocks_principal_snapshot_rejection(tmp_path: Path) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    rejected = type(
+        "PrincipalSnapshotResult",
+        (),
+        {
+            "accepted": False,
+            "status": "GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_BOOTSTRAP_NOT_READY",
+            "receipt_id": None,
+            "principal_authority_record_path": None,
+            "permission_snapshot_path": None,
+            "principal_id": None,
+            "permission_snapshot_digest": None,
+            "rejection_reasons": ("missing_principal_public_key",),
+        },
+    )()
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_github_principal_permission_snapshot_supply_bootstrap.run_reddog_github_principal_permission_snapshot_supply_bootstrap",
+        return_value=rejected,
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "1",
+                "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                "REDDOG_GITHUB_REPO_FULL_NAME": "FOUNDUPS/Foundups-Agent",
+                "REDDOG_AUTHORITY_FOUNDUP_ID": "paccess_001",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_architect_fix_promotion_preflight(repo) is False
 
 
 def test_main_preflight_disabled_without_requested_or_complete_inputs() -> None:
