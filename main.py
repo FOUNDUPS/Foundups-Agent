@@ -1632,7 +1632,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
     Optionally run the bounded resident queue serial loop through injected handlers.
 
     Env:
-        REDDOG_RESIDENT_QUEUE_SERIAL_LOOP=0                  Enable loop (default OFF)
+        REDDOG_RESIDENT_QUEUE_SERIAL_LOOP=0                  Enable loop (profile may default ON)
         REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional `signed_0102_bounded_code`
         REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED=0         Block startup if not applied
         REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS=1        Bounded loop steps
@@ -1668,7 +1668,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S                     Optional draft-PR runner timeout
     """
 
-    if os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "0") == "0":
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    if not resident_queue_runtime_flag_enabled(os.environ, "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP"):
         logger.info("[REDDOG-QUEUE-LOOP] Startup serial loop disabled")
         return True
 
