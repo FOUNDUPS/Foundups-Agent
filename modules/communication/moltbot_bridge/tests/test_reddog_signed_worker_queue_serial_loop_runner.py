@@ -466,6 +466,7 @@ def test_runtime_binding_worktree_profile_supplies_worktree_runner_mode(tmp_path
     assert bootstrap.calls[0]["artifact_generator_mode"] == "foundups_fusion"
     assert bootstrap.calls[0]["worktree_runner_mode"] == "real"
     assert "evidence_command_runner_mode" not in bootstrap.calls[0]
+    assert "outcome_ratchet_store_path" not in bootstrap.calls[0]
 
 
 def test_runtime_binding_explicit_worktree_mode_overrides_worktree_profile(
@@ -609,6 +610,13 @@ def test_runtime_binding_draft_pr_profile_supplies_verified_draft_runner(
     assert bootstrap.calls[0]["artifact_generator_mode"] == "foundups_fusion"
     assert bootstrap.calls[0]["worktree_runner_mode"] == "real"
     assert bootstrap.calls[0]["evidence_command_runner_mode"] == "real"
+    assert bootstrap.calls[0]["outcome_ratchet_store_path"] == str(
+        tmp_path.resolve().parent
+        / ".reddog"
+        / "outcome_ratchet"
+        / tmp_path.resolve().name
+        / "verified_outcomes.jsonl"
+    )
     draft_runner = bootstrap.calls[0]["draft_pr_runner"]
     assert draft_runner.__class__.__name__ == "_FakeDraftPrRunner"
     assert draft_runner.repo_root == tmp_path.resolve()

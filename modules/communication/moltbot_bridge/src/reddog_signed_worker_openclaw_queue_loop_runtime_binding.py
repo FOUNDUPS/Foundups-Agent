@@ -28,6 +28,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     resident_queue_draft_pr_runner_mode,
     resident_queue_evidence_command_runner_mode,
     resident_queue_materializer_mode,
+    resident_queue_outcome_ratchet_store_path,
     resident_queue_runtime_flag_enabled,
     resident_queue_worktree_runner_mode,
 )
@@ -191,7 +192,7 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
             max_steps=max_steps,
         )
 
-    bootstrap_kwargs = _bootstrap_kwargs(env)
+    bootstrap_kwargs = _bootstrap_kwargs(env, repo_root=repo_root)
     if draft_pr_runner is not None:
         bootstrap_kwargs["draft_pr_runner"] = draft_pr_runner
     if pattern_memory_admission_sink is not None:
@@ -220,11 +221,15 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
     )
 
 
-def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
+def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[str, Any]:
     materializer_mode = resident_queue_materializer_mode(env)
     artifact_generator_mode = resident_queue_artifact_generator_mode(env)
     worktree_runner_mode = resident_queue_worktree_runner_mode(env)
     evidence_command_runner_mode = resident_queue_evidence_command_runner_mode(env)
+    outcome_ratchet_store_path = resident_queue_outcome_ratchet_store_path(
+        env,
+        repo_root,
+    )
     pairs = {
         "work_orders_path": "REDDOG_WORK_ORDERS_PATH",
         "valve_environment_path": "REDDOG_EXECUTION_VALVE_ENV_PATH",
@@ -262,6 +267,8 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
         payload["worktree_runner_mode"] = worktree_runner_mode
     if evidence_command_runner_mode:
         payload["evidence_command_runner_mode"] = evidence_command_runner_mode
+    if outcome_ratchet_store_path:
+        payload["outcome_ratchet_store_path"] = outcome_ratchet_store_path
     for key, env_name in (
         ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
         (

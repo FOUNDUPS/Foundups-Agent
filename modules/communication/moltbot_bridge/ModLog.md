@@ -9,12 +9,17 @@
 - The profile derives `foundups_fusion`, the isolated worktree runner, the
   independent evidence command runner, and the existing verified draft-PR
   runner while preserving explicit env overrides.
+- The same profile also derives an outside-repo verified outcome ratchet JSONL
+  store under `.reddog/outcome_ratchet/<repo>/verified_outcomes.jsonl`, so the
+  queue chain can persist verified outcomes without writing into the source
+  checkout.
 - Boundary remains constrained: draft PR publishing is still downstream of the
   queue-authorized slice verifier, evidence production, exact-head checks,
   draft-only guard, and branch policy; the evidence runner uses argv execution
-  with `shell=False`, and this profile does not enable shell execution,
-  PatternMemory writes, HoloIndex re-index, merge authority, reward settlement,
-  or Hermes dispatch.
+  with `shell=False`, verified outcome ratchet writes only to the outside-repo
+  JSONL store, and this profile does not enable shell execution, PatternMemory
+  writes, HoloIndex re-index, merge authority, reward settlement, or Hermes
+  dispatch.
 
 ## 2026-07-16: REDDOG_RESIDENT_FUSION_WORKTREE_PROFILE_PHASE1
 
