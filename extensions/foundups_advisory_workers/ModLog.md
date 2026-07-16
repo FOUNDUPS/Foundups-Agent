@@ -2,6 +2,13 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-16 - REDDOG_EXTENSION_TO_RESIDENT_ARCHITECT_SESSION_RUNTIME_PHASE1 (resident backend session bridge, 0.3.68)
+
+- Added `scripts/reddog_resident_architect_session_once.py`, a JSON-in/JSON-out bridge that delegates to the resident read-only audit/research/backend-architect E2E runtime.
+- Added `foundupsFusion.enableResidentArchitectSession` (default false). When enabled and local runtime-consumption gates pass, the extension calls the resident backend and attaches snapshot/swarm/task/report/architect-decision telemetry to the review packet and Copy MD.
+- Boundary remains read-only: no shell, repo mutation, HoloIndex re-index, Hermes dispatch, worktree operation, PR creation, PatternMemory promotion, or live FoundUp enqueue.
+- Version 0.3.67 -> 0.3.68 (package.json + EXTENSION_VERSION + README + contract-test assertions).
+
 ## 2026-07-14 - REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1 (guarded live-enqueue binding, 0.3.67)
 
 - Added a guarded extension runtime binding for `live_enqueue` wardrobe-selection receipts after grounding, fusion quorum, output validation, and runtime-consumption gates pass.
