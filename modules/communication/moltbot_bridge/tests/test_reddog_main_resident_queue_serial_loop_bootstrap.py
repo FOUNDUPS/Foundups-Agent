@@ -3651,6 +3651,84 @@ def test_main_serial_loop_preflight_profile_enables_serial_loop(
     )
 
 
+def test_main_serial_loop_preflight_profile_materializes_authority_resolver_stores(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    runtime_root.mkdir(parents=True)
+    (runtime_root / "principal_authority_record.json").write_text(
+        json.dumps(
+            {
+                "principal_id": "github:mjtrout",
+                "principal_provider": "github",
+                "principal_public_key": "pub:principal",
+                "repo_scope": ["FOUNDUPS/Foundups-Agent"],
+                "foundup_scope": ["paccess_001"],
+                "verified_subject_digest": "sha256:verified-subject",
+                "reward_account": "reward:012",
+                "owner_dae": "dae:012",
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    (runtime_root / "permission_snapshot.json").write_text(
+        json.dumps(
+            {
+                "evidence_digest": "sha256:snap-1",
+                "expires_at": 1600,
+                "can_write": True,
+                "repo_full_name": "FOUNDUPS/Foundups-Agent",
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("authority_request",),
+                "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
+                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+
+    principal_records = runtime_root / "principal_authority_records.json"
+    permission_snapshots = runtime_root / "permission_snapshots.json"
+    assert mocked.call_args.kwargs["authority_state_path"] == str(
+        runtime_root / "authority_runtime_state.json"
+    )
+    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(principal_records)
+    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(permission_snapshots)
+    principal_store = json.loads(principal_records.read_text(encoding="utf-8"))
+    snapshot_store = json.loads(permission_snapshots.read_text(encoding="utf-8"))
+    assert "github|github:mjtrout" in principal_store["principals"]
+    assert "sha256:snap-1" in snapshot_store["snapshots"]
+
+
 def test_main_serial_loop_preflight_explicit_zero_overrides_profile(
     tmp_path: Path,
 ) -> None:

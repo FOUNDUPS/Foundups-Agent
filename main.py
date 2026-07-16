@@ -2185,7 +2185,12 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_OUTCOME_RATCHET_REQUEST_BINDING               Derive outcome-ratchet request from queue chain state
         REDDOG_HELD_OUT_GATE_REQUEST_BINDING                 Derive held-out gate request from queue chain state
         REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING      Derive PatternMemory admission request from queue chain state
+        REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY=0 Materialize principal/snapshot resolver stores
+        REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if resolver supply fails
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
+        REDDOG_AUTHORITY_RUNTIME_STATE_PATH                  Outside-repo authority runtime state JSON
+        REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission resolver JSON
+        REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal resolver JSON
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
         REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE           Optional `real` runner mode
@@ -2271,6 +2276,83 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 timeout_s=draft_pr_runner_timeout_s,
             )
 
+        explicit_authority_state_path = str(os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH") or "").strip()
+        authority_state_path = explicit_authority_state_path
+        explicit_permission_snapshots_path = str(os.getenv("REDDOG_PERMISSION_SNAPSHOTS_PATH") or "").strip()
+        permission_snapshots_path = explicit_permission_snapshots_path
+        explicit_principal_records_path = str(os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH") or "").strip()
+        principal_authority_records_path = explicit_principal_records_path
+        resolver_permission_snapshots_output_path = resident_queue_runtime_file_path(
+            os.environ,
+            repo_root,
+            "REDDOG_PERMISSION_SNAPSHOTS_PATH",
+        )
+        resolver_principal_records_output_path = resident_queue_runtime_file_path(
+            os.environ,
+            repo_root,
+            "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
+        )
+        resolver_supply_requested = resident_queue_runtime_flag_enabled(
+            os.environ,
+            "REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY",
+        )
+        resolver_supply_enforced = (
+            os.getenv("REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
+        )
+        if resolver_supply_requested:
+            from modules.communication.moltbot_bridge.src.reddog_authority_runtime_resolver_artifact_supply_bootstrap import (
+                run_reddog_authority_runtime_resolver_artifact_supply_bootstrap,
+            )
+
+            resolver_supply = run_reddog_authority_runtime_resolver_artifact_supply_bootstrap(
+                repo_root=repo_root,
+                principal_authority_record_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH",
+                )
+                or None,
+                permission_snapshot_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_PERMISSION_SNAPSHOT_PATH",
+                )
+                or None,
+                principal_records_output_path=resolver_principal_records_output_path,
+                permission_snapshots_output_path=resolver_permission_snapshots_output_path,
+            )
+            resolver_status = "PASS" if resolver_supply.accepted else "WARN"
+            resolver_reasons = (
+                ",".join(resolver_supply.rejection_reasons)
+                if resolver_supply.rejection_reasons
+                else "(none)"
+            )
+            print(
+                f"[REDDOG-AUTHORITY-RESOLVERS] preflight={resolver_status} "
+                f"status={resolver_supply.status} "
+                f"receipt={resolver_supply.resolver_supply_receipt_id or '(none)'} "
+                f"reasons={resolver_reasons}"
+            )
+            if resolver_supply.accepted:
+                if not authority_state_path:
+                    authority_state_path = resident_queue_runtime_file_path(
+                        os.environ,
+                        repo_root,
+                        "REDDOG_AUTHORITY_RUNTIME_STATE_PATH",
+                    )
+                if resolver_supply.principal_records_path:
+                    principal_authority_records_path = resolver_supply.principal_records_path
+                    os.environ["REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH"] = principal_authority_records_path
+                if resolver_supply.permission_snapshots_path:
+                    permission_snapshots_path = resolver_supply.permission_snapshots_path
+                    os.environ["REDDOG_PERMISSION_SNAPSHOTS_PATH"] = permission_snapshots_path
+            elif resolver_supply_enforced:
+                print(
+                    "[REDDOG-AUTHORITY-RESOLVERS] Startup blocked by "
+                    "REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY_ENFORCED=1"
+                )
+                return False
+
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             work_state_path=resident_queue_runtime_file_path(
@@ -2319,9 +2401,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             or None,
             held_out_gate_request_path=os.getenv("REDDOG_HELD_OUT_GATE_REQUEST_PATH", "") or None,
             admission_request_path=os.getenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH", "") or None,
-            authority_state_path=os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", "") or None,
-            permission_snapshots_path=os.getenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", "") or None,
-            principal_authority_records_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", "") or None,
+            authority_state_path=authority_state_path or None,
+            permission_snapshots_path=permission_snapshots_path or None,
+            principal_authority_records_path=principal_authority_records_path or None,
             signer_socket_path=os.getenv("REDDOG_SIGNER_SOCKET_PATH", "") or None,
             signer_socket_timeout_s=signer_socket_timeout_s,
             signer_socket_max_response_bytes=signer_socket_max_response_bytes,
