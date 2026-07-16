@@ -6,6 +6,18 @@
 
 **Dependencies**: requests>=2.25.0
 
+## Model Intelligence Catalog
+
+`src/model_intelligence_catalog.py` provides the runtime evidence layer for
+RedDog model intelligence. It normalizes static registry entries, provider
+catalog payloads, and local role-resolution results into immutable
+`ModelCatalogSnapshot` receipts.
+
+This layer does not choose a model, call a provider, run benchmarks, or promote
+any model to production. Provider catalog entries and `latest`-style aliases are
+eligible candidates only; later benchmark and verifier receipts must promote
+champion/challenger status.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway

@@ -39,6 +39,25 @@ Convenience function for quick AI calls without creating a client instance.
 #### `test_gateway() -> bool`
 Test gateway connectivity and configuration.
 
+#### Model Intelligence Catalog
+
+```python
+normalize_static_registry_cards(...) -> tuple[ModelCapabilityCard, ...]
+normalize_openrouter_catalog(payload) -> tuple[tuple[ModelCapabilityCard, ...], tuple[ModelCatalogRejectedRecord, ...]]
+normalize_local_role_cards(selections) -> tuple[ModelCapabilityCard, ...]
+build_model_catalog_snapshot(cards, ...) -> ModelCatalogSnapshot
+build_canonical_model_catalog(...) -> ModelCatalogSnapshot
+```
+
+These functions produce immutable catalog evidence for downstream model
+selection. They do not call provider APIs, execute commands, compress output,
+benchmark models, or select a RedDog/Fusion panel.
+
+`ModelCapabilityCard` captures provider, canonical model ID, availability,
+context window, modalities, supported parameters, rough cost metadata, task
+families, and promotion state. `ModelCatalogSnapshot` binds cards and rejected
+records to a deterministic `snapshot_id`.
+
 ## Configuration
 
 ### Environment Variables
