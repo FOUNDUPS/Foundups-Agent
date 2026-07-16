@@ -3636,6 +3636,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
             "os.environ",
             {
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
                 "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
@@ -3643,33 +3644,26 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_WORK_ORDERS_PATH": str(tmp_path / "work_orders.json"),
                 "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "",
                 "REDDOG_EXECUTION_VALVE_ENV_PATH": str(tmp_path / "valve_env.json"),
-                "REDDOG_PILOT_DRYRUN_BINDING": "1",
                 "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH": str(tmp_path / "generic_writer.json"),
                 "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH": str(tmp_path / "governed_shell.json"),
                 "REDDOG_ARTIFACT_CONTENTS_PATH": str(tmp_path / "artifact_contents.json"),
                 "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH": str(
                     tmp_path / "artifact_generation_request.json"
                 ),
-                "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "1",
                 "REDDOG_ARTIFACT_GENERATOR_MODE": "foundups_fusion",
                 "REDDOG_HOLOINDEX_EVIDENCE_PATH": str(tmp_path / "holoindex_evidence.json"),
                 "REDDOG_SLICE_VERIFIER_REQUEST_PATH": str(tmp_path / "verifier_request.json"),
                 "REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH": str(
                     tmp_path / "evidence_producer_request.json"
                 ),
-                "REDDOG_SLICE_VERIFIER_REQUEST_BINDING": "1",
                 "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE": "real",
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(tmp_path / "publish_request.json"),
-                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING": "1",
                 "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
-                "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING": "1",
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
                 "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(tmp_path / "held_out_gate_request.json"),
-                "REDDOG_HELD_OUT_GATE_REQUEST_BINDING": "1",
                 "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(
                     tmp_path / "pattern_memory_admission_request.json"
                 ),
-                "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING": "1",
                 "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(
                     tmp_path / "pattern_memory.db"
                 ),
@@ -3695,7 +3689,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["chain_results_path"] == str(tmp_path / "chain.json")
     assert mocked.call_args.kwargs["authority_profile_path"] == str(tmp_path / "profile.json")
     assert mocked.call_args.kwargs["work_orders_path"] == str(tmp_path / "work_orders.json")
-    assert mocked.call_args.kwargs["work_order_materializer_mode"] is None
+    assert mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
     assert mocked.call_args.kwargs["valve_environment_path"] == str(tmp_path / "valve_env.json")
     assert mocked.call_args.kwargs["pilot_dryrun_binding_enabled"] is True
     assert mocked.call_args.kwargs["generic_writer_dryrun_result_path"] == str(

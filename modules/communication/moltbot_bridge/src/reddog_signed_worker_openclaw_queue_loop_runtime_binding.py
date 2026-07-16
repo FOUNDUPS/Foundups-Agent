@@ -22,6 +22,10 @@ from typing import Any, Callable, Mapping, Optional
 from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
     SIGNED_WORKER_DISPATCH_TASK_SOURCE,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+    resident_queue_binding_enabled,
+    resident_queue_materializer_mode,
+)
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_loop_runner import (
     RedDogSignedWorkerQueueSerialLoopRunner,
     SignedWorkerQueueSerialLoopRunnerConfig,
@@ -209,9 +213,9 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
 
 
 def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
+    materializer_mode = resident_queue_materializer_mode(env)
     pairs = {
         "work_orders_path": "REDDOG_WORK_ORDERS_PATH",
-        "work_order_materializer_mode": "REDDOG_WORK_ORDER_MATERIALIZER_MODE",
         "valve_environment_path": "REDDOG_EXECUTION_VALVE_ENV_PATH",
         "generic_writer_dryrun_result_path": "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH",
         "governed_shell_dryrun_result_path": "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH",
@@ -235,6 +239,8 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
         "evidence_command_runner_mode": "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE",
     }
     payload: dict[str, Any] = {}
+    if materializer_mode:
+        payload["work_order_materializer_mode"] = materializer_mode
     for key, env_name in pairs.items():
         value = _stripped(env.get(env_name))
         if value:
@@ -254,7 +260,7 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
             "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING",
         ),
     ):
-        if _stripped(env.get(env_name)) == "1":
+        if resident_queue_binding_enabled(env, env_name):
             payload[key] = True
     return payload
 
