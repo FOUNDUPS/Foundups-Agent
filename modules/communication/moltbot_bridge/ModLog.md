@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Added an explicit resident-cycle runtime that composes the existing RedDog
+  read-only operational bootstrap, read-only audit task enqueue seam, model
+  backed 0102 audit executor, report persistence, report collection, and
+  backend architect determination.
+- The cycle now proves the current operational loop can plan the five default
+  audit lanes, execute those read-only worker tasks with injected model/index
+  adapters, persist their reports, validate the report bundle, and emit one
+  backend architect queue candidate.
+- Added fail-closed coverage for task execution rejection and report
+  persistence rejection before any final architect determination.
+- Boundary remains read-only: no shell execution, repository mutation,
+  worktree operation, Hermes dispatch, live FoundUp enqueue, PR creation,
+  PatternMemory promotion, or HoloIndex re-index.
+
 ## 2026-07-16: REDDOG_EXTERNAL_RESEARCH_AUDIT_RUNTIME_CONSUMPTION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

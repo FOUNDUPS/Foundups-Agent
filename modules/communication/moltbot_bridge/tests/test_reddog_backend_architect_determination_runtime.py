@@ -125,6 +125,7 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
         repo_head_sha=HEAD,
         ssd_path="E:/HoloIndex",
         source="ci_targeted_reindex",
+        generation_id="sha256:holo-generation",
         collections=[
             CollectionFreshness(
                 name="navigation_work_ledger",
@@ -133,6 +134,9 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source="ci_targeted_reindex",
                 repo_head_sha=HEAD,
                 last_indexed_at=NOW,
+                source_manifest_digest="sha256:work-ledger-manifest",
+                indexed_paths_digest="sha256:work-ledger-paths",
+                verification="PASS",
             ),
             CollectionFreshness(
                 name="navigation_symbols",
@@ -141,6 +145,9 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source="ci_targeted_reindex",
                 repo_head_sha=HEAD,
                 last_indexed_at=NOW,
+                source_manifest_digest="sha256:symbols-manifest",
+                indexed_paths_digest="sha256:symbols-paths",
+                verification="PASS",
             ),
         ],
     )
