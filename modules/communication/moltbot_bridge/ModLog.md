@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_0102_READONLY_REVIEW_RUNTIME_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a signed 0102 read-only review runner that adapts signed worker
+  dispatch intents for `architect_review`, `adversarial_review`, and
+  `diff_verification` into the existing model-backed read-only audit worker.
+- Bound review evidence to the signed WSP_15 allocation receipt's
+  `allowed_read_targets`; `bounded_code_change` remains explicitly unsupported
+  by this read-only runner.
+- Wired OpenClaw signed-worker claiming to include 0102 read-only review tasks
+  only when `OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED=1`.
+- Boundary remains explicit: no shell execution, source repository mutation,
+  worktree operation, Hermes dispatch, PR publish, PatternMemory write,
+  HoloIndex re-index, reward settlement, or coding-worker execution is added.
+
 ## 2026-07-16: REDDOG_OPENCLAW_SUPERVISOR_SIGNED_WORKER_LOOP_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

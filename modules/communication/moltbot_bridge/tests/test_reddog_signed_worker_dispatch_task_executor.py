@@ -34,6 +34,17 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task
     SignedWorkerDispatchTaskExecutorReason,
     execute_reddog_signed_worker_dispatch_task,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
+    SIGNED_0102_READONLY_REVIEW_BINDING_ACCEPT,
+    Signed0102ReadOnlyReviewBindingReason,
+    Signed0102ReadOnlyReviewRunner,
+)
+from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
+    RepoAuditModelResult,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_serial_loop_bootstrap import (
     NOW as BOOTSTRAP_NOW,
     PILOT_ARTIFACT,
@@ -122,6 +133,64 @@ class _FakeRunner:
         }
 
 
+class _FakeQueryAdapter:
+    def query(self, *, query: str, allowed_paths, limit: int):
+        path = allowed_paths[0] if allowed_paths else "docs/work_ledger.schema.json"
+        return {
+            "ok": True,
+            "source": "fake",
+            "query": query,
+            "freshness": "CURRENT",
+            "hits": [
+                {
+                    "path": path,
+                    "title": "fake hit",
+                    "score": 0.99,
+                    "digest": "sha256:index-hit",
+                }
+            ],
+            "error": "",
+            "freshness_generation_id": "generation-1",
+            "freshness_receipt_digest": "sha256:freshness",
+            "freshness_receipt_path": "O:/Foundups-Agent/.holoindex/freshness.json",
+            "repo_head_sha": "abc123",
+        }
+
+
+class _EchoEvidenceModelRunner:
+    def __init__(self) -> None:
+        self.calls = []
+
+    def run_repo_code_audit(self, *, prompt: str, context: str, binding, timeout_seconds: int):
+        self.calls.append({"prompt": prompt, "context": context, "binding": dict(binding)})
+        parsed = json.loads(context)
+        evidence_ref = parsed["untrusted_repository_evidence"][0]["evidence_ref"]
+        output = {
+            "summary": "Signed 0102 read-only review used supplied repository evidence.",
+            "evidence_refs": [evidence_ref],
+            "findings": [
+                {
+                    "finding_id": "signed-0102-readonly-review-1",
+                    "claim": "The signed 0102 review cited the bound repository evidence.",
+                    "wsp97_label": "OBSERVED",
+                    "recommended_action": "FIX",
+                    "wsp15_priority": "P1",
+                    "severity": "MAJOR",
+                    "evidence_refs": [evidence_ref],
+                    "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1",
+                }
+            ],
+        }
+        return RepoAuditModelResult(
+            ok=True,
+            status="MODEL_OK",
+            content=json.dumps(output, sort_keys=True),
+            model_receipt_id="model-receipt-1",
+            model_result_digest="sha256:model-result-1",
+            made_network_call=True,
+        )
+
+
 class _FakeEnvDraftPrRunner:
     instances: list["_FakeEnvDraftPrRunner"] = []
 
@@ -191,6 +260,14 @@ def _allocation(**overrides):
     }
     payload.update(overrides)
     return payload
+
+
+def _valid_readonly_allocation(*, targets=("docs/work_ledger.schema.json",)):
+    return allocate_reddog_wsp15_receipt(
+        requested_operation="signed_0102_readonly_review:redDog_runtime_security",
+        prompt_text="RedDog OpenClaw signed 0102 read-only review runtime security audit.",
+        allowed_read_targets=targets,
+    ).to_dict()
 
 
 def _intent(allocation=None, **overrides):
@@ -287,6 +364,27 @@ def _publish_agentdb_task(**intent_overrides) -> str:
     return result.receipt.task_ids[0]
 
 
+def _publish_agentdb_task_with_allocation(allocation, **intent_overrides) -> str:
+    intent = _intent(allocation, **intent_overrides)
+    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
+    )
+    assert result.accepted is True
+    assert result.receipt is not None
+    return result.receipt.task_ids[0]
+
+
+def _repo_with_readonly_target(tmp_path: Path) -> Path:
+    root = tmp_path / "repo"
+    target = root / "docs" / "work_ledger.schema.json"
+    target.parent.mkdir(parents=True)
+    target.write_text('{"schema": "work-ledger", "version": 1}\n', encoding="utf-8")
+    return root
+
+
 def test_signed_worker_executor_accepts_valid_task_with_injected_runner(tmp_path: Path) -> None:
     runner = _FakeRunner()
 
@@ -304,6 +402,82 @@ def test_signed_worker_executor_accepts_valid_task_with_injected_runner(tmp_path
     assert result.no_shell_command_executed is True
     assert result.no_source_repo_mutation_performed is True
     assert runner.calls[0]["worker_dispatch_intent"]["intent_id"] == "worker_dispatch_intent_openclaw_candidate"
+
+
+def test_signed_0102_readonly_runner_executes_architect_review_with_bound_targets(
+    tmp_path: Path,
+) -> None:
+    repo = _repo_with_readonly_target(tmp_path)
+    allocation = _valid_readonly_allocation()
+    intent = _intent(
+        allocation,
+        intent_id="worker_dispatch_intent_fusion_lead",
+        role="fusion_lead",
+        worker_runtime="0102",
+        capability="architect_review",
+    )
+    context = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=_CollectingWriter(),
+    ).tasks[0].context
+    model_runner = _EchoEvidenceModelRunner()
+    runner = Signed0102ReadOnlyReviewRunner(
+        model_runner=model_runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-0102-1",
+        repo_root=repo,
+        runner=runner,
+    )
+
+    assert result.accepted is True
+    assert result.decision == SIGNED_WORKER_DISPATCH_TASK_EXECUTOR_ACCEPT
+    assert result.worker_runtime == "0102"
+    assert result.capability == "architect_review"
+    assert result.runner_result["decision"] == SIGNED_0102_READONLY_REVIEW_BINDING_ACCEPT
+    readonly = result.runner_result["readonly_result"]
+    assert readonly["accepted"] is True
+    assert readonly["report"]["model_backed_0102_worker_performed"] is True
+    assert readonly["report"]["target_evidence"][0]["path"] == "docs/work_ledger.schema.json"
+    assert model_runner.calls[0]["binding"]["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
+    assert result.no_source_repo_mutation_performed is True
+    assert result.no_shell_command_executed is True
+
+
+def test_signed_0102_readonly_runner_rejects_bounded_code_change(tmp_path: Path) -> None:
+    repo = _repo_with_readonly_target(tmp_path)
+    allocation = _valid_readonly_allocation()
+    intent = _intent(
+        allocation,
+        intent_id="worker_dispatch_intent_coding_worker_1",
+        role="coding_worker_1",
+        worker_runtime="0102",
+        capability="bounded_code_change",
+    )
+    context = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=_CollectingWriter(),
+    ).tasks[0].context
+
+    result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-0102-code",
+        repo_root=repo,
+        runner=Signed0102ReadOnlyReviewRunner(model_runner=_EchoEvidenceModelRunner()),
+    )
+
+    assert result.accepted is False
+    assert Signed0102ReadOnlyReviewBindingReason.UNSUPPORTED_CONTEXT in result.rejection_reasons
+    assert result.no_source_repo_mutation_performed is True
+    assert result.no_shell_command_executed is True
 
 
 def test_signed_worker_executor_rejects_without_runner(tmp_path: Path) -> None:
@@ -410,6 +584,79 @@ def test_run_task_uses_env_bound_queue_loop_runner_when_enabled(
     assert result["structured_result"]["accepted"] is True
     assert runner.calls[0]["task_id"] == task_id
     assert db.get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+
+def test_openclaw_claim_ignores_0102_readonly_task_until_env_enabled(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    allocation = _valid_readonly_allocation()
+    task_id = _publish_agentdb_task_with_allocation(
+        allocation,
+        intent_id="worker_dispatch_intent_fusion_lead",
+        role="fusion_lead",
+        worker_runtime="0102",
+        capability="architect_review",
+    )
+    monkeypatch.delenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", raising=False)
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
+
+
+def test_openclaw_claim_executes_0102_readonly_task_when_env_enabled(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    allocation = _valid_readonly_allocation()
+    task_id = _publish_agentdb_task_with_allocation(
+        allocation,
+        intent_id="worker_dispatch_intent_fusion_lead",
+        role="fusion_lead",
+        worker_runtime="0102",
+        capability="architect_review",
+    )
+    runner = _FakeRunner()
+    monkeypatch.setenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", "1")
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_0102_readonly_review_binding as review_binding,
+    )
+
+    monkeypatch.setattr(review_binding, "Signed0102ReadOnlyReviewRunner", lambda: runner)
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
+
+    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["task_id"] == task_id
+    assert result["worker_runtime"] == "0102"
+    assert result["capability"] == "architect_review"
+    assert runner.calls[0]["task_id"] == task_id
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+
+def test_openclaw_claim_does_not_claim_0102_bounded_code_change_even_when_readonly_enabled(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    allocation = _valid_readonly_allocation()
+    task_id = _publish_agentdb_task_with_allocation(
+        allocation,
+        intent_id="worker_dispatch_intent_coding_worker_1",
+        role="coding_worker_1",
+        worker_runtime="0102",
+        capability="bounded_code_change",
+    )
+    monkeypatch.setenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", "1")
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
 
 
 def test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact(
