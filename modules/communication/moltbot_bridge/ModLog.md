@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_ARCHITECT_DURABLE_AGENTDB_CYCLE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a durable resident RedDog cycle runtime that persists
+  `reddog_intent.v1`, enqueues read-only audit tasks to AgentDB, resumes by
+  `intent_id`, handles duplicate/cancel/timeout states, and persists backend
+  architect determinations.
+- Added an OpenClaw-owned RedDog read-only audit claim seam so resident RedDog
+  no longer runs audit tasks through the previous inline E2E shortcut.
+- Updated the resident architect session bridge to call the durable AgentDB
+  cycle and surface cycle/task/claim status to the thin client.
+- Added tests for durable submission, OpenClaw claiming, report persistence,
+  architect determination, duplicate reconnect, missing governed
+  external-research retriever rejection, timeout, cancellation, and bridge
+  summarization.
+- Boundary remains read-only: no shell, repo mutation, HoloIndex re-index,
+  Hermes dispatch, worktree operation, PR creation, PatternMemory promotion,
+  or live FoundUp enqueue.
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_DRAFT_PR_PUBLISH_REQUEST_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

@@ -16,11 +16,6 @@ SPEC.loader.exec_module(bridge)
 
 
 def _accepted_result():
-    initial = SimpleNamespace(
-        status="READY",
-        snapshot_receipt_id="sha256:snapshot",
-        swarm_id="sha256:swarm",
-    )
     final = SimpleNamespace(
         status="READY",
         snapshot_receipt_id="sha256:final",
@@ -31,12 +26,21 @@ def _accepted_result():
     )
     return SimpleNamespace(
         accepted=True,
-        status="READONLY_AUDIT_RESEARCH_DECISION_E2E_ACCEPT",
-        initial_bootstrap=initial,
+        status="DETERMINED",
+        intent_id="sha256:intent",
+        cycle_id="sha256:cycle",
+        snapshot_id="sha256:snapshot",
+        swarm_id="sha256:swarm",
+        task_ids=("task-a", "task-b"),
+        task_status_counts={"completed": 2},
+        openclaw_claims=({"accepted": True}, {"accepted": True}),
+        duplicate_intent_reused=False,
+        recovered_existing_cycle=False,
         final_bootstrap=final,
-        task_runs=(SimpleNamespace(persist_accepted=True), SimpleNamespace(persist_accepted=True)),
-        readonly_audit_tasks_enqueued=True,
-        readonly_audit_tasks_executed=True,
+        architect_action="FIX",
+        architect_next_slice="REDDOG_NEXT_PHASE1",
+        architect_determination_id="sha256:architect",
+        queue_candidate_count=1,
         rejection_reasons=(),
         no_shell_command_executed=True,
         no_repo_mutation_performed=True,
@@ -46,7 +50,6 @@ def _accepted_result():
         no_pr_created=True,
         no_pattern_memory_promotion_performed=True,
         no_live_foundup_enqueue_performed=True,
-        coding_worker_spawned=False,
     )
 
 
@@ -60,17 +63,22 @@ def test_resident_architect_session_requires_explicit_request() -> None:
     assert result["no_holoindex_reindex_performed"] is True
 
 
-def test_resident_architect_session_summarizes_e2e_runtime(monkeypatch) -> None:
+def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch) -> None:
     calls = []
 
-    def fake_e2e(**kwargs):
+    def fake_cycle(**kwargs):
         calls.append(kwargs)
         return _accepted_result()
 
-    monkeypatch.setattr(bridge, "run_reddog_readonly_audit_research_decision_e2e", fake_e2e)
+    monkeypatch.setattr(bridge, "run_reddog_resident_architect_durable_agentdb_cycle", fake_cycle)
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
+            "red_dog_intent": {
+                "schema_version": "reddog_intent.v1",
+                "intent_id": "sha256:intent",
+                "submits_executable_authority": False,
+            },
             "repo_root": ".",
             "work_focus": "audit resident loop",
             "work_state_path": "O:/state/work_state.json",
@@ -81,15 +89,19 @@ def test_resident_architect_session_summarizes_e2e_runtime(monkeypatch) -> None:
     )
 
     assert calls and calls[0]["requested_operation"] == "extension_resident_architect_session"
+    assert calls[0]["red_dog_intent"]["intent_id"] == "sha256:intent"
     assert calls[0]["prompt_text"] == "audit resident loop"
     assert calls[0]["timeout_seconds"] == 13
     assert result["decision"] == bridge.RESIDENT_ARCHITECT_SESSION_ACCEPT
     assert result["accepted"] is True
     assert result["resident_backend_invoked"] is True
+    assert result["durable_agentdb_cycle"] is True
+    assert result["cycle_id"] == "sha256:cycle"
     assert result["snapshot_id"] == "sha256:snapshot"
     assert result["swarm_id"] == "sha256:swarm"
     assert result["task_count"] == 2
     assert result["reports_persisted"] == 2
+    assert result["openclaw_claim_count"] == 2
     assert result["architect_action"] == "FIX"
     assert result["architect_next_slice"] == "REDDOG_NEXT_PHASE1"
     assert result["queue_candidate_count"] == 1
@@ -99,11 +111,20 @@ def test_resident_architect_session_summarizes_e2e_runtime(monkeypatch) -> None:
 
 
 def test_resident_architect_session_bridge_failure_fails_closed(monkeypatch) -> None:
-    def fail_e2e(**kwargs):
+    def fail_cycle(**kwargs):
         raise RuntimeError("boom")
 
-    monkeypatch.setattr(bridge, "run_reddog_readonly_audit_research_decision_e2e", fail_e2e)
-    result = bridge._result({"explicit_resident_architect_session_requested": True})
+    monkeypatch.setattr(bridge, "run_reddog_resident_architect_durable_agentdb_cycle", fail_cycle)
+    result = bridge._result(
+        {
+            "explicit_resident_architect_session_requested": True,
+            "red_dog_intent": {
+                "schema_version": "reddog_intent.v1",
+                "intent_id": "sha256:intent",
+                "submits_executable_authority": False,
+            },
+        }
+    )
 
     assert result["decision"] == bridge.RESIDENT_ARCHITECT_SESSION_REJECT
     assert result["resident_backend_invoked"] is True
