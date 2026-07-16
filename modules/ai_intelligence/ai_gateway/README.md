@@ -18,6 +18,20 @@ any model to production. Provider catalog entries and `latest`-style aliases are
 eligible candidates only; later benchmark and verifier receipts must promote
 champion/challenger status.
 
+## Model Selection Receipts
+
+`src/model_intelligence_selection.py` consumes a `ModelCatalogSnapshot` and
+`ModelTaskRequirements` to produce a deterministic `ModelSelectionReceipt`.
+
+Two purposes are supported:
+
+- `evaluation`: may select candidate models for benchmark or shadow testing.
+- `production`: requires champion promotion, task benchmark evidence, and verifier
+  pass-rate evidence.
+
+This keeps RedDog flexible without allowing a newly discovered model alias to
+become production authority before measured FoundUps performance exists.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway

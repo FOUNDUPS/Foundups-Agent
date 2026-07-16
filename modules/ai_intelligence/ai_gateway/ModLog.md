@@ -1,5 +1,34 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Model Intelligence Task Selection Receipts
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation
+**Slice:** MODEL_INTELLIGENCE_TASK_SELECTION_RECEIPT_PHASE1
+
+**What:** Added task-scoped model selection receipts over canonical catalog snapshots.
+
+**Why:** RedDog should request capabilities, budget and WSP_15 task requirements, not
+hardcoded model names. This slice provides the deterministic receipt layer that later
+RedDog runtime binding and benchmark promotion can consume.
+
+**Files:**
+- `src/model_intelligence_selection.py` - model task requirements, single/panel
+  selection, production/evaluation modes, candidate rankings, digest-bound receipts.
+- `tests/test_model_intelligence_selection.py` - production fail-closed, panel
+  diversity, capability/cost filtering, digest, and no-network/no-command tests.
+
+**Truth Boundary:**
+- IMPLEMENTED: evaluation can select candidate models for benchmarking.
+- IMPLEMENTED: production rejects unbenchmarked non-champion candidates.
+- IMPLEMENTED: panel mode prefers provider diversity without hardcoded providers.
+- NOT IMPLEMENTED: RedDog bridge binding, benchmark ledger, champion/challenger
+  promotion writes, AutoResearch campaigns, or provider calls.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Model Intelligence Canonical Catalog Runtime
 
 **Who:** 0102 Codex
