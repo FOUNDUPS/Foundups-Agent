@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_READONLY_AUDIT_MULTI_LANE_MODEL_WORKERS_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Updated read-only audit swarm enqueue so all default audit lanes are explicit
+  `model_backed_0102` worker tasks, not only `repo_code_audit`.
+- Generalized the guarded model-backed read-only audit path to accept any
+  explicit audit lane while preserving WSP_15 binding, HoloIndex/CodeIndex
+  query receipts, governed direct reads, Memex evidence, redaction-gated model
+  calls, strict JSON validation, and typed evidence citation policy.
+- Added a runtime-freshness lane regression proving a non-repo lane reaches the
+  same guarded model path and carries its lane in the prompt.
+- Updated the enqueue fixture to satisfy current HoloIndex freshness receipt
+  generation/manifest verification semantics.
+- Boundary remains read-only: no repository mutation, shell execution, worktree
+  operation, OpenClaw child enqueue, Hermes dispatch, HoloIndex re-index, PR
+  creation, merge authority, or PatternMemory promotion.
+
 ## 2026-07-16: REDDOG_MEMEX_SNAPSHOT_PROJECTION_SUPPLIER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

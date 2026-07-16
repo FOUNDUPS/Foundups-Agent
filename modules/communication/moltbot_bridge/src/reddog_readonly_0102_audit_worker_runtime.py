@@ -1,12 +1,12 @@
-"""Model-backed 0102 worker for RedDog read-only repo audit tasks.
+"""Model-backed 0102 worker for RedDog read-only audit tasks.
 
 Slice: REDDOG_OPENCLAW_READONLY_0102_AUDIT_WORKER_RUNTIME_PHASE1
 
-This module owns the model-backed repo_code_audit path. It is only reached
-from read-only AgentDB task contexts that explicitly request the
-``model_backed_0102`` worker mode. It may call the configured RedDog/Fusion
-model path, but it does not mutate the repository, run shell commands, enqueue
-OpenClaw work, dispatch Hermes, create worktrees, or re-index HoloIndex.
+This module owns model-backed read-only audit lanes. It is only reached from
+read-only AgentDB task contexts that explicitly request the ``model_backed_0102``
+worker mode. It may call the configured RedDog/Fusion model path, but it does
+not mutate the repository, run shell commands, enqueue OpenClaw work, dispatch
+Hermes, create worktrees, or re-index HoloIndex.
 """
 
 from __future__ import annotations
@@ -944,8 +944,9 @@ def _module_roots_from_paths(paths: Sequence[str]) -> list[str]:
 
 
 def _repo_audit_query(*, assignment: Mapping[str, Any], seed_targets: Sequence[str]) -> str:
+    lane_id = str(assignment.get("lane_id") or "readonly_audit").strip()
     targets = " ".join(str(value).replace("/", " ") for value in (*tuple(seed_targets), *tuple(assignment.get("allowed_read_targets", ()))))
-    return f"RedDog repo code audit readonly evidence {targets}".strip()
+    return f"RedDog {lane_id} readonly audit evidence {targets}".strip()
 
 
 def _validate_wsp15_binding(
@@ -1014,8 +1015,9 @@ def _build_repo_audit_model_prompt(
     assignment: Mapping[str, Any],
     allocation: Mapping[str, Any],
 ) -> str:
+    lane_id = str(assignment.get("lane_id") or "readonly_audit").strip()
     payload = {
-        "task": "Return one strict JSON read-only repo_code_audit report.",
+        "task": f"Return one strict JSON read-only audit report for lane {lane_id}.",
         "required_json_fields": ["summary", "findings", "evidence_refs"],
         "finding_required_fields": [
             "finding_id",
@@ -1045,7 +1047,7 @@ def _build_repo_audit_model_prompt(
         ],
         "assignment": {
             "assignment_id": assignment.get("assignment_id"),
-            "lane_id": assignment.get("lane_id"),
+            "lane_id": lane_id,
             "snapshot_receipt_id": assignment.get("snapshot_receipt_id"),
             "allowed_read_targets": list(assignment.get("allowed_read_targets", ())),
         },
