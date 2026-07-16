@@ -121,7 +121,7 @@ def test_memex_query_missing_projection_receipt_fails_closed() -> None:
 
     assert receipt["ok"] is False
     assert receipt["freshness"] == "UNKNOWN"
-    assert receipt["error"] == "missing_memex_projection_receipt"
+    assert receipt["error"] == "missing_projection_receipt"
     assert receipt["freshness_generation_id"] == ""
     assert receipt["index_gap_detected"] is False
 
