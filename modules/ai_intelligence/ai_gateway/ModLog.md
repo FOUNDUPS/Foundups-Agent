@@ -1,5 +1,40 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Champion/Challenger Promotion Gate
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation
+**Slice:** MODEL_CHAMPION_CHALLENGER_PROMOTION_GATE_PHASE1
+
+**What:** Added a fail-closed promotion gate over model benchmark evidence.
+
+**Why:** Benchmark evidence alone should not install production authority. RedDog
+needs a separate gate that validates task-set/verifier/topology evidence against
+explicit WSP_15 policy and requires signed promotion authority before a champion
+receipt exists.
+
+**Files:**
+- `src/model_promotion_gate.py` - promotion policy, gate receipt, evidence
+  consistency checks, challenger/hero threshold handling, and signed promotion
+  evidence emission.
+- `tests/test_model_promotion_gate.py` - signed authority, below-threshold
+  challenger, missing evidence, tampered benchmark projection, policy conflict,
+  threshold, deterministic digest, and no-network/no-command tests.
+- `README.md` and `INTERFACE.md` - API and truth-boundary notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: matching benchmark evidence plus signed authority can produce a
+  `ModelPromotionEvidenceReceipt`.
+- IMPLEMENTED: below-threshold candidates remain challengers without champion
+  authority.
+- IMPLEMENTED: mismatched or tampered benchmark evidence fails closed.
+- NOT IMPLEMENTED: model catalog mutation, champion ledger persistence,
+  AutoResearch scheduling, provider calls, or RedDog dynamic runtime binding.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Model Combination Benchmark Harness
 
 **Who:** 0102 Codex

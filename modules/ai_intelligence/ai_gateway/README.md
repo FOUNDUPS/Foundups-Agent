@@ -59,6 +59,17 @@ commands, promote champions, write PatternMemory, or bind RedDog runtime model
 defaults. Panel benchmark evidence remains panel evidence; a later promotion
 gate must decide how, or whether, panel combinations become production choices.
 
+## Champion/Challenger Promotion Gate
+
+`src/model_promotion_gate.py` validates benchmark-run evidence against an
+explicit promotion policy. It can emit a `ModelPromotionEvidenceReceipt` only
+when the benchmark evidence matches the policy and a signed promotion authority
+receipt is supplied.
+
+The gate does not mutate the catalog, write a champion ledger, call providers,
+or bind RedDog runtime defaults. Below-threshold candidates remain challengers;
+tampered or mismatched evidence fails closed.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway
