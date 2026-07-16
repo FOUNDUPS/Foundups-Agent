@@ -161,6 +161,25 @@ def test_registry_rejects_empty_mapping_dependencies() -> None:
     assert "missing_dependency:authority_profile" in registry.missing_stage_reasons["authority_request"]
     assert "missing_dependency:generic_writer_dryrun_result" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:verifier_request" in registry.missing_stage_reasons["slice_verifier"]
+    assert "missing_dependency:evidence_producer_request" in registry.missing_stage_reasons["slice_verifier"]
+    assert "missing_dependency:evidence_command_runner" in registry.missing_stage_reasons["slice_verifier"]
+
+
+def test_registry_registers_slice_verifier_from_evidence_producer_dependencies(tmp_path: Path) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        repo_root=tmp_path,
+        evidence_producer_request={"explicit_evidence_production_requested": True},
+        evidence_command_runner=dummy,
+        now_iso=NOW_ISO,
+    )
+
+    assert "slice_verifier" in registry.registered_stage_keys
+    assert "slice_verifier" not in registry.missing_stage_reasons
+    assert registry.no_default_runner_created is True
 
 
 def test_registry_has_no_shell_network_holoindex_or_default_client_construction() -> None:

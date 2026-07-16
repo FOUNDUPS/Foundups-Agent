@@ -198,6 +198,8 @@ def build_reddog_resident_queue_stage_handler_registry(
     operation_cwd: Optional[Path] = None,
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
     verifier_request: Optional[Mapping[str, Any]] = None,
+    evidence_producer_request: Optional[Mapping[str, Any]] = None,
+    evidence_command_runner: Any = None,
     publish_request: Optional[Mapping[str, Any]] = None,
     draft_pr_runner: Any = None,
     ratchet_request: Optional[Mapping[str, Any]] = None,
@@ -365,10 +367,16 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers,
         missing,
         SLICE_VERIFIER_STAGE_KEY,
-        _missing(("verifier_request", verifier_request)),
+        _slice_verifier_missing(
+            verifier_request=verifier_request,
+            evidence_producer_request=evidence_producer_request,
+            evidence_command_runner=evidence_command_runner,
+        ),
         lambda: build_reddog_resident_queue_slice_verifier_stage_handler(
             chain_results_store=chain_results_store,
-            verifier_request=verifier_request or {},
+            verifier_request=verifier_request,
+            evidence_producer_request=evidence_producer_request,
+            evidence_command_runner=evidence_command_runner,
         ),
     )
     _add_if_ready(
@@ -421,6 +429,26 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers=handlers,
         missing_stage_reasons=missing,
     )
+
+
+def _slice_verifier_missing(
+    *,
+    verifier_request: Optional[Mapping[str, Any]],
+    evidence_producer_request: Optional[Mapping[str, Any]],
+    evidence_command_runner: Any,
+) -> tuple[str, ...]:
+    if verifier_request:
+        return ()
+    if evidence_producer_request and evidence_command_runner is not None:
+        return ()
+    reasons: list[str] = []
+    if not verifier_request:
+        reasons.append("missing_dependency:verifier_request")
+    if not evidence_producer_request:
+        reasons.append("missing_dependency:evidence_producer_request")
+    if evidence_command_runner is None:
+        reasons.append("missing_dependency:evidence_command_runner")
+    return tuple(reasons)
 
 
 __all__ = [
