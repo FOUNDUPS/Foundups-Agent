@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_ARCHITECT_FIX_TO_SIGNED_WSP15_WORK_ORDER_PROMOTION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added the backend RedDog architect `FIX` promotion bridge that turns one
+  accepted architect queue candidate into an authoritative work-state queue
+  item plus durable worker claim for the existing signed WSP_15 authority
+  chain.
+- Bound promotion to the architect determination receipt, WSP_15 allocation
+  digest, production model selection receipt, operational Memex supply
+  receipt, HoloIndex evidence mapping, and current freshness receipt before
+  any queue mutation is committed.
+- Preserved the authority boundary: no signing, worker spawn, OpenClaw enqueue,
+  Hermes dispatch, worktree creation, shell execution, source repo mutation,
+  PR creation, PatternMemory write, or HoloIndex re-index is performed by this
+  slice.
+
 ## 2026-07-16: REDDOG_OPERATIONAL_MEMEX_SNAPSHOT_SUPPLIER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
