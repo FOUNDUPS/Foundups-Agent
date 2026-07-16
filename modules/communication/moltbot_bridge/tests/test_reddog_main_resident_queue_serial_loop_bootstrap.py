@@ -3723,6 +3723,13 @@ def test_main_serial_loop_preflight_profile_materializes_authority_resolver_stor
     )
     assert mocked.call_args.kwargs["principal_authority_records_path"] == str(principal_records)
     assert mocked.call_args.kwargs["permission_snapshots_path"] == str(permission_snapshots)
+    assert mocked.call_args.kwargs["signer_socket_path"] == str(
+        runtime_root / "reddog_signer.sock"
+    )
+    assert (
+        mocked.call_args.kwargs["signature_verifier_backend"]
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
     principal_store = json.loads(principal_records.read_text(encoding="utf-8"))
     snapshot_store = json.loads(permission_snapshots.read_text(encoding="utf-8"))
     assert "github|github:mjtrout" in principal_store["principals"]

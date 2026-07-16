@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNER_SOCKET_PROFILE_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a resident-profile binding that derives the outside-repo isolated
+  signer socket path and defaults the public verifier backend to `ed25519`
+  only when the authority runtime bundle is already configured.
+- Locked the startup bridge with a serial-loop preflight regression that
+  proves resolver-store supply can pass the signer socket path and verifier
+  backend without hand-placed environment values.
+- Boundary remains constrained: no signer spawn, no private-key loading, no
+  vault resolution, no signing, no signer-state mutation, no worker spawn, no
+  worktree, no shell, no OpenClaw enqueue, no Hermes dispatch, no repository
+  mutation, no PatternMemory write, and no HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
