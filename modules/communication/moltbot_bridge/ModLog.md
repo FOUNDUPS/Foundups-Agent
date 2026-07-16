@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MAIN_OPENCLAW_GENERATED_ARTIFACT_COMPLETE_CHAIN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Strengthened the `main.py` startup-preflight complete-chain regression so
+  the OpenClaw signed-worker claim loop drains through bounded artifact
+  generation, slice verification, draft-PR request, outcome ratchet, held-out
+  gate, and PatternMemory admission without using static artifact-content JSON.
+- The generated artifact is still materialized only inside the isolated
+  worktree, and the chain still stops at verified receipts rather than live
+  merge, Hermes dispatch, reward settlement, or HoloIndex re-indexing.
+
 ## 2026-07-16: REDDOG_MAIN_OPENCLAW_ARTIFACT_GENERATION_CHAIN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
