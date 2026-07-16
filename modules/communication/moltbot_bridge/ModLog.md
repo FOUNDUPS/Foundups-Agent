@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MAIN_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an opt-in `main.py` preflight,
+  `REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP=1`, that lets OpenClaw claim
+  signed RedDog worker-dispatch AgentDB tasks through the existing bounded
+  claim loop.
+- Preserved authority boundaries: the preflight creates no tasks, signs no
+  authority, enables no model/shell/worktree/PR modes, dispatches no Hermes,
+  writes no PatternMemory, settles no rewards, and never re-indexes HoloIndex.
+- Added focused tests for default-off behavior, bounded `max_claims`, enforced
+  reject blocking, invalid-claim rejection, and non-enforced exception handling.
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_BINDING_PROFILE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
