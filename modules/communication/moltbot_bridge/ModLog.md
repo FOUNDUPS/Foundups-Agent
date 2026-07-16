@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_QUEUE_LOOP_INCOMPLETE_REQUEUE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added queue-chain completion telemetry to the signed worker serial-loop
+  runner. Non-terminal `next_action` values now emit
+  `queue_chain_requeue_required=true`; only `STOP_QUEUE_CHAIN_COMPLETE` is
+  terminal.
+- Updated OpenClaw signed-worker claiming so an accepted but incomplete
+  queue-loop stage is released back to AgentDB as `pending` instead of being
+  marked `completed`.
+- Extended the bounded signed-worker claim loop to count requeued claims,
+  preserve `requeued_task_ids`, and stop cleanly at the configured
+  `max_claims`.
+- Boundary remains explicit: no new worker authority, no shell execution, no
+  source-repo mutation, no Hermes dispatch, no HoloIndex re-index, no merge
+  authority, and no reward settlement are added.
+
 ## 2026-07-16: REDDOG_SIGNED_0102_BOUNDED_CODE_CHANGE_STAGE_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

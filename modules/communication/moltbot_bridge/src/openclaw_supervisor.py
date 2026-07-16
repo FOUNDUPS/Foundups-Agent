@@ -40,6 +40,7 @@ READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT = "READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT"
 READONLY_AUDIT_OPENCLAW_CLAIM_IDLE = "READONLY_AUDIT_OPENCLAW_CLAIM_IDLE"
 READONLY_AUDIT_OPENCLAW_CLAIM_REJECT = "READONLY_AUDIT_OPENCLAW_CLAIM_REJECT"
 SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT = "SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT"
+SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED = "SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED"
 SIGNED_WORKER_OPENCLAW_CLAIM_IDLE = "SIGNED_WORKER_OPENCLAW_CLAIM_IDLE"
 SIGNED_WORKER_OPENCLAW_CLAIM_REJECT = "SIGNED_WORKER_OPENCLAW_CLAIM_REJECT"
 SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT = "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT"
@@ -369,6 +370,21 @@ def claim_reddog_signed_worker_dispatch_task_once(
             ),
         )
 
+    runner_result = (
+        run_result.runner_result if isinstance(run_result.runner_result, Mapping) else {}
+    )
+    if runner_result.get("queue_chain_requeue_required") is True:
+        _requeue_reddog_signed_worker_dispatch_task(db, task_id)
+        return _signed_worker_claim_result(
+            accepted=True,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
+            task_id=task_id,
+            worker_role=run_result.worker_role,
+            worker_runtime=run_result.worker_runtime,
+            capability=run_result.capability,
+            receipt_id=run_result.receipt_id,
+        )
+
     db.complete_autonomous_task(task_id)
     return _signed_worker_claim_result(
         accepted=True,
@@ -406,6 +422,7 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
 
     claim_results: list[Dict[str, Any]] = []
     completed_task_ids: list[str] = []
+    requeued_task_ids: list[str] = []
     failed_task_ids: list[str] = []
     idle = False
 
@@ -425,6 +442,14 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
                 completed_task_ids.append(task_id)
             continue
 
+        if (
+            claim.get("accepted") is True
+            and status == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
+        ):
+            if task_id:
+                requeued_task_ids.append(task_id)
+            continue
+
         if status == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE:
             idle = True
             break
@@ -441,20 +466,23 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
             max_claims=max_claims,
             claim_results=tuple(claim_results),
             completed_task_ids=tuple(completed_task_ids),
+            requeued_task_ids=tuple(requeued_task_ids),
             failed_task_ids=tuple(failed_task_ids),
             idle=idle,
         )
 
-    if completed_task_ids:
+    if completed_task_ids or requeued_task_ids:
         return _signed_worker_claim_loop_result(
             accepted=True,
             status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT,
             max_claims=max_claims,
             claim_results=tuple(claim_results),
             completed_task_ids=tuple(completed_task_ids),
+            requeued_task_ids=tuple(requeued_task_ids),
             failed_task_ids=tuple(failed_task_ids),
             idle=idle,
-            max_claims_reached=(not idle and len(completed_task_ids) >= max_claims),
+            max_claims_reached=not idle
+            and (len(completed_task_ids) + len(requeued_task_ids)) >= max_claims,
         )
 
     return _signed_worker_claim_loop_result(
@@ -464,6 +492,7 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
         max_claims=max_claims,
         claim_results=tuple(claim_results),
         completed_task_ids=tuple(completed_task_ids),
+        requeued_task_ids=tuple(requeued_task_ids),
         failed_task_ids=tuple(failed_task_ids),
         idle=True,
     )
@@ -600,6 +629,22 @@ def _mark_reddog_signed_worker_dispatch_task_failed(db: Any, task_id: str) -> No
         logger.debug("[SUPERVISOR] Failed to mark RedDog signed-worker task failed", exc_info=True)
 
 
+def _requeue_reddog_signed_worker_dispatch_task(db: Any, task_id: str) -> None:
+    if not task_id:
+        return
+    try:
+        db.db.execute_write(
+            """
+            UPDATE agents_autonomous_tasks
+            SET assigned_to = NULL, assigned_at = NULL, status = 'pending'
+            WHERE task_id = ?
+            """,
+            (task_id,),
+        )
+    except Exception:
+        logger.debug("[SUPERVISOR] Failed to requeue RedDog signed-worker task", exc_info=True)
+
+
 def _readonly_assignment_id(context: Dict[str, Any]) -> str:
     assignment = context.get("assignment") if isinstance(context, dict) else {}
     return str(assignment.get("assignment_id") or "") if isinstance(assignment, dict) else ""
@@ -674,6 +719,7 @@ def _signed_worker_claim_loop_result(
     max_claims: int,
     claim_results=(),
     completed_task_ids=(),
+    requeued_task_ids=(),
     failed_task_ids=(),
     rejection_reasons=(),
     idle: bool = False,
@@ -699,8 +745,10 @@ def _signed_worker_claim_loop_result(
         "accepted": accepted,
         "status": status,
         "max_claims": max_claims,
-        "claimed_count": len(tuple(completed_task_ids or ())),
+        "claimed_count": len(tuple(completed_task_ids or ()))
+        + len(tuple(requeued_task_ids or ())),
         "completed_task_ids": tuple(completed_task_ids or ()),
+        "requeued_task_ids": tuple(requeued_task_ids or ()),
         "failed_task_ids": tuple(failed_task_ids or ()),
         "idle": idle,
         "max_claims_reached": max_claims_reached,
