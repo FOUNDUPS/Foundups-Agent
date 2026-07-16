@@ -681,6 +681,36 @@ def _signed_worker_claim_loop_result(
     }
 
 
+def _signed_worker_task_max_claims_from_env() -> tuple[int, str | None]:
+    raw = os.getenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "1").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        return 0, SignedWorkerOpenClawClaimReason.MAX_CLAIMS_INVALID
+    if value < 1:
+        return value, SignedWorkerOpenClawClaimReason.MAX_CLAIMS_INVALID
+    return value, None
+
+
+def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_openclaw_candidate_signed_worker_context,
+    )
+    from modules.infrastructure.database.src.agent_db import AgentDB
+
+    db = AgentDB()
+    for task in db.get_autonomous_tasks(status="pending", limit=limit):
+        if str(task.get("discovered_by") or "") != SIGNED_WORKER_DISPATCH_TASK_SOURCE:
+            continue
+        context = task.get("context")
+        if is_openclaw_candidate_signed_worker_context(context if isinstance(context, dict) else None):
+            return True
+    return False
+
+
 class OpenClawSupervisor:
     """
     Canonical 0102 supervisor for the resident OpenClaw runtime.
@@ -1169,6 +1199,22 @@ class OpenClawSupervisor:
                 "restart_budget": observation.get("restart_budget", {}),
             }
 
+        signed_worker_tasks_enabled = os.getenv("OPENCLAW_SIGNED_WORKER_TASKS_ENABLED", "0") == "1"
+        if signed_worker_tasks_enabled:
+            max_claims, max_claims_error = _signed_worker_task_max_claims_from_env()
+            if max_claims_error:
+                return {"kind": "escalate", "reason": max_claims_error}
+            try:
+                if _has_pending_reddog_signed_worker_dispatch_task():
+                    return {
+                        "kind": "action",
+                        "reason": "signed_worker_task_pending",
+                        "action": "claim_signed_worker_tasks_until_idle",
+                        "max_claims": max_claims,
+                    }
+            except Exception as exc:
+                logger.warning("Failed to check signed worker tasks: %s", exc)
+
         # Check AgentDB for pending autonomous tasks
         # CIRCUIT BREAKER: Only auto-execute if explicitly enabled by 012
         # Set OPENCLAW_AUTO_TASKS_ENABLED=1 after menu choice to activate
@@ -1338,6 +1384,9 @@ class OpenClawSupervisor:
         if triage["action"] == "execute_maintenance_task":
             plan["maintenance_selection"] = triage.get("maintenance_selection", {})
 
+        if triage["action"] == "claim_signed_worker_tasks_until_idle":
+            plan["max_claims"] = triage.get("max_claims", 1)
+
         # WSP 77: AI Overseer fast classification (Gemma 50-100ms)
         if self._ai_overseer is not None:
             try:
@@ -1389,6 +1438,50 @@ class OpenClawSupervisor:
                         _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
                                  result.get("error", "unknown")[:200],
                                  details={"action": "start_openclaw"})
+                except Exception:
+                    pass
+            return result
+
+        elif plan["action"] == "claim_signed_worker_tasks_until_idle":
+            max_claims = plan.get("max_claims", 1)
+            result = self.claim_reddog_signed_worker_dispatch_tasks_until_idle(
+                max_claims=max_claims if isinstance(max_claims, int) else 1,
+            )
+            result = {
+                "ok": bool(result.get("accepted")),
+                "status": result.get("status", "unknown"),
+                "claimed_count": result.get("claimed_count", 0),
+                "completed_task_ids": result.get("completed_task_ids", ()),
+                "failed_task_ids": result.get("failed_task_ids", ()),
+                "rejection_reasons": result.get("rejection_reasons", ()),
+                "claim_loop": result,
+            }
+            self._action_reporter(
+                "supervisor_execute",
+                result.get("status", "unknown"),
+                {"plan": plan, "result": result},
+            )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok"):
+                        _re_ok(
+                            "openclaw_supervisor",
+                            "supervisor_execute",
+                            _rt_start,
+                            details={
+                                "action": "claim_signed_worker_tasks_until_idle",
+                                "claimed_count": result.get("claimed_count", 0),
+                            },
+                        )
+                    else:
+                        _re_fail(
+                            "openclaw_supervisor",
+                            "supervisor_execute",
+                            _rt_start,
+                            ",".join(str(reason) for reason in result.get("rejection_reasons", ()))[:200]
+                            or str(result.get("status") or "unknown")[:200],
+                            details={"action": "claim_signed_worker_tasks_until_idle"},
+                        )
                 except Exception:
                     pass
             return result
@@ -1548,6 +1641,19 @@ class OpenClawSupervisor:
         broker = self._get_broker()
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
+
+        if plan["action"] == "claim_signed_worker_tasks_until_idle":
+            ok = bool(action_result.get("ok"))
+            reasons = tuple(action_result.get("rejection_reasons") or ())
+            return {
+                "ok": ok,
+                "status": action_result,
+                "claimed_count": action_result.get("claimed_count", 0),
+                "completed_task_ids": action_result.get("completed_task_ids", ()),
+                "failed_task_ids": action_result.get("failed_task_ids", ()),
+                "error": "" if ok else ",".join(str(reason) for reason in reasons),
+                "fidelity": 0.85,
+            }
 
         if plan["action"] == "execute_autonomous_task":
             task = plan.get("task", {})

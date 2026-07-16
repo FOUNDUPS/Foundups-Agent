@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_OPENCLAW_SUPERVISOR_SIGNED_WORKER_LOOP_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Wired the bounded signed-worker claim loop into `OpenClawSupervisor` as an
+  explicit opt-in resident action gated by `OPENCLAW_SIGNED_WORKER_TASKS_ENABLED=1`.
+- Added bounded claim limit parsing via `OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS`
+  and fail-closed triage for invalid limits before any AgentDB claim.
+- Added run-cycle regressions proving signed OpenClaw candidate tasks are
+  selected before generic autonomous tasks when enabled, and that invalid
+  loop configuration escalates without invoking the claim loop.
+- Boundary remains explicit: no default enablement, no Hermes/0102 dispatch,
+  no shell execution, no repository mutation, no HoloIndex re-index, no reward
+  settlement, and no merge authority is added.
+
 ## 2026-07-16: REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_UNTIL_IDLE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
