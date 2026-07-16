@@ -3918,6 +3918,69 @@ def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 92
 
 
+def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_default_sink(
+    tmp_path: Path,
+) -> None:
+    import sqlite3
+
+    import main
+
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path)
+    state_payload = json.loads(Path(ctx["state"]).read_text(encoding="utf-8"))
+    state_payload["worker_claims"][0]["expires_at"] = "2099-01-01T00:00:00+00:00"
+    Path(ctx["state"]).write_text(
+        json.dumps(state_payload, sort_keys=True),
+        encoding="utf-8",
+    )
+    admission_request = _write_runtime_json(
+        tmp_path,
+        "pattern_memory_admission_request.json",
+        _pattern_memory_admission_request(),
+    )
+
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": (
+                "signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory"
+            ),
+            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(ctx["state"]),
+            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(ctx["chain"]),
+            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(ctx["profile"]),
+            "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(admission_request),
+            "REDDOG_WRE_QUEUE_ITEM_ID": "queue-1",
+            "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
+            "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "93",
+        },
+        clear=True,
+    ):
+        assert main.run_reddog_resident_queue_serial_loop_preflight(ctx["repo"]) is True
+
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["pattern_memory_admission"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
+    assert stage["pattern_memory_write_performed"] is True
+    assert stage["receipt"]["pattern_memory_record_id"].startswith("reddog_verified_outcome_")
+    assert stage["no_holoindex_reindex_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+
+    db_path = (
+        Path(ctx["repo"]).resolve().parent
+        / ".reddog"
+        / "pattern_memory"
+        / Path(ctx["repo"]).resolve().name
+        / "pattern_memory.db"
+    )
+    assert db_path.exists()
+    assert not (Path(ctx["repo"]) / ".reddog").exists()
+    with sqlite3.connect(db_path) as conn:
+        rows = conn.execute(
+            "SELECT execution_id, agent, success FROM skill_outcomes"
+        ).fetchall()
+    assert rows == [(stage["receipt"]["pattern_memory_record_id"], "reddog", 1)]
+
+
 def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
     import main
 
