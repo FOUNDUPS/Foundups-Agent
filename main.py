@@ -2191,6 +2191,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_AUTHORITY_RUNTIME_STATE_PATH                  Outside-repo authority runtime state JSON
         REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission resolver JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal resolver JSON
+        REDDOG_SIGNER_SOCKET_PROFILE_BINDING=0              Derive signer socket path/backend when authority runtime is configured
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
         REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE           Optional `real` runner mode
@@ -2282,6 +2283,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         permission_snapshots_path = explicit_permission_snapshots_path
         explicit_principal_records_path = str(os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH") or "").strip()
         principal_authority_records_path = explicit_principal_records_path
+        explicit_signer_socket_path = str(os.getenv("REDDOG_SIGNER_SOCKET_PATH") or "").strip()
+        signer_socket_path = explicit_signer_socket_path
+        explicit_signature_verifier_backend = str(os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND") or "").strip()
+        signature_verifier_backend = explicit_signature_verifier_backend
         resolver_permission_snapshots_output_path = resident_queue_runtime_file_path(
             os.environ,
             repo_root,
@@ -2353,6 +2358,19 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 )
                 return False
 
+        signer_profile_binding_requested = resident_queue_runtime_flag_enabled(
+            os.environ,
+            "REDDOG_SIGNER_SOCKET_PROFILE_BINDING",
+        )
+        if signer_profile_binding_requested and authority_state_path and not signer_socket_path:
+            signer_socket_path = resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_SIGNER_SOCKET_PATH",
+            )
+        if signer_socket_path and not signature_verifier_backend:
+            signature_verifier_backend = "ed25519"
+
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             work_state_path=resident_queue_runtime_file_path(
@@ -2404,10 +2422,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             authority_state_path=authority_state_path or None,
             permission_snapshots_path=permission_snapshots_path or None,
             principal_authority_records_path=principal_authority_records_path or None,
-            signer_socket_path=os.getenv("REDDOG_SIGNER_SOCKET_PATH", "") or None,
+            signer_socket_path=signer_socket_path or None,
             signer_socket_timeout_s=signer_socket_timeout_s,
             signer_socket_max_response_bytes=signer_socket_max_response_bytes,
-            signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
+            signature_verifier_backend=signature_verifier_backend or None,
             pilot_dryrun_binding_enabled=resident_queue_binding_enabled(
                 os.environ,
                 "REDDOG_PILOT_DRYRUN_BINDING",
