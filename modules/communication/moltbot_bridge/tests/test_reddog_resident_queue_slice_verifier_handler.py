@@ -26,9 +26,13 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifi
     FAIL_DISPATCH_STAGE_MISMATCH,
     FAIL_EVIDENCE_COMMAND_RUNNER_MISSING,
     FAIL_EVIDENCE_PRODUCER_REJECTED,
+    FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED,
     FAIL_VERIFIER_REQUEST_MISSING,
     SLICE_VERIFIER_STAGE_KEY,
     build_reddog_resident_queue_slice_verifier_stage_handler,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifier_request_binding import (
+    FAIL_SLICE_VERIFIER_PLAN_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
@@ -61,6 +65,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authorit
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_slice_verifier_invoke import (
     ARTIFACT,
+    WORK_ORDER_ID,
     _queue_pilot_result,
     _verifier_request,
 )
@@ -151,12 +156,20 @@ def _handler(
     verifier_request: dict[str, object] | None = None,
     evidence_producer_request: dict[str, object] | None = None,
     evidence_command_runner: object | None = None,
+    work_order_resolver: object | None = None,
+    repo_root: Path | None = None,
+    slice_verifier_request_binding_enabled: bool = False,
+    holoindex_evidence: dict[str, object] | None = None,
 ):
     return build_reddog_resident_queue_slice_verifier_stage_handler(
         chain_results_store=chain_store,
         verifier_request=verifier_request if verifier_request is not None else _verifier_request(),
         evidence_producer_request=evidence_producer_request,
         evidence_command_runner=evidence_command_runner,
+        work_order_resolver=work_order_resolver,
+        repo_root=repo_root,
+        slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
+        holoindex_evidence=holoindex_evidence,
     )
 
 
@@ -183,6 +196,120 @@ class _FakeEvidenceRunner:
                 ),
             )
         return CommandResult(returncode=0, stdout="ok\n")
+
+
+class _Resolver:
+    def __init__(self, work_order: dict[str, object]) -> None:
+        self.work_order = work_order
+        self.calls: list[dict[str, object | None]] = []
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: str | None,
+        selected_slice: str | None,
+    ) -> dict[str, object]:
+        self.calls.append(
+            {
+                "work_order_id": work_order_id,
+                "queue_item_id": queue_item_id,
+                "selected_slice": selected_slice,
+            }
+        )
+        if work_order_id != self.work_order.get("work_order_id"):
+            return {}
+        return self.work_order
+
+
+def _digest(ch: str) -> str:
+    return "sha256:" + ch * 64
+
+
+def _signed_receipt_chain() -> dict[str, object]:
+    return {
+        "accepted": True,
+        "terminal_receipt_hash": _digest("a"),
+    }
+
+
+def _slice_verifier_plan(**overrides: object) -> dict[str, object]:
+    payload = {
+        "slice_name": "REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_HANDLER_PHASE1",
+        "worker_id": "worker:author",
+        "verifier_id": "worker:verifier",
+        "base_sha": "b" * 40,
+        "head_sha": "a" * 40,
+        "allowed_path_patterns": [
+            "modules/communication/moltbot_bridge/tests/fixtures/reddog_queue_pilot/**"
+        ],
+        "expected_changed_paths": [ARTIFACT],
+        "forbidden_path_patterns": ["**/.env", "**/secrets/**"],
+        "required_checks": [
+            {
+                "name": "pytest",
+                "argv": ["python", "-m", "pytest", "modules/communication/moltbot_bridge/tests", "-q"],
+                "timeout_s": 30,
+            }
+        ],
+        "signed_receipt_chain": _signed_receipt_chain(),
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _work_order(**overrides: object) -> dict[str, object]:
+    payload = {
+        "work_order_id": WORK_ORDER_ID,
+        "allowed_paths": [
+            "modules/communication/moltbot_bridge/tests/fixtures/reddog_queue_pilot/**"
+        ],
+        "denied_paths": ["**/.env", "**/secrets/**"],
+        "slice_verifier_plan": _slice_verifier_plan(),
+        "holoindex_evidence": {
+            "index_gap_detected": False,
+            "holoindex_freshness_receipt_digest": _digest("b"),
+        },
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _binding_store(tmp_path: Path, **stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
+    repo = tmp_path / "repo"
+    worktree = tmp_path / "worktree"
+    repo.mkdir(exist_ok=True)
+    worktree.mkdir(exist_ok=True)
+    return _seeded_store(
+        authority_runtime={
+            "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
+            "authority_result": {
+                "accepted": True,
+                "work_authority": {
+                    "authority_id": "authority-1",
+                    "work_order_id": WORK_ORDER_ID,
+                },
+                "receipt": {
+                    "receipt_id": _digest("8"),
+                    "work_authority_digest": _digest("9"),
+                },
+            }
+        },
+        authority_verification={
+            "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+            "verification_result": {
+                "accepted": True,
+                "receipt_id": _digest("c"),
+            }
+        },
+        worktree_create={
+            "decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT,
+            "worktree_create_result": {
+                "worktree_path": str(worktree),
+            }
+        },
+        **stage_overrides,
+    )
 
 
 def _evidence_producer_request(tmp_path: Path, **overrides: object) -> dict[str, object]:
@@ -308,6 +435,87 @@ def test_dispatcher_produces_independent_evidence_before_slice_verifier(tmp_path
     assert stage["no_reward_settlement_performed"] is True
     assert stage["no_holoindex_reindex_performed"] is True
     assert ("git", "rev-parse", "HEAD") in runner.calls
+
+
+def test_handler_derives_evidence_request_from_resident_queue_chain(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir(exist_ok=True)
+    chain_store = _binding_store(tmp_path)
+    resolver = _Resolver(_work_order())
+    runner = _FakeEvidenceRunner()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            SLICE_VERIFIER_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                verifier_request={},
+                evidence_producer_request={},
+                evidence_command_runner=runner,
+                work_order_resolver=resolver,
+                repo_root=repo,
+                slice_verifier_request_binding_enabled=True,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is True
+    stage = chain_store.load()["stage_results"][SLICE_VERIFIER_STAGE_KEY]
+    binding = stage["slice_verifier_request_binding_result"]
+    assert binding["accepted"] is True
+    request = binding["evidence_producer_request"]
+    assert request["explicit_evidence_production_requested"] is True
+    assert request["expected_changed_paths"] == [ARTIFACT]
+    assert request["worktree_receipt"]["receipt_id"] == "bounded_wt_pilot_1234"
+    assert request["bounded_worker_pilot_receipt"]["written_artifacts"] == [ARTIFACT]
+    assert stage["decision"] == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT
+    assert stage["evidence_producer_result"]["decision"] == EVIDENCE_PRODUCER_ACCEPT
+    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
+    assert stage["bounded_evidence_command_execution_performed"] is True
+    assert stage["no_shell_command_executed"] is True
+    assert resolver.calls == [
+        {
+            "work_order_id": WORK_ORDER_ID,
+            "queue_item_id": "queue-1",
+            "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+        }
+    ]
+
+
+def test_handler_rejects_binding_failure_before_evidence_runner(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir(exist_ok=True)
+    chain_store = _binding_store(tmp_path)
+    resolver = _Resolver(_work_order(slice_verifier_plan={}))
+    runner = _FakeEvidenceRunner()
+    handler = _handler(
+        chain_store=chain_store,
+        verifier_request={},
+        evidence_producer_request={},
+        evidence_command_runner=runner,
+        work_order_resolver=resolver,
+        repo_root=repo,
+        slice_verifier_request_binding_enabled=True,
+    )
+    request = ResidentQueueStageDispatchRequest(
+        stage_key=SLICE_VERIFIER_STAGE_KEY,
+        next_action=NEXT_QUEUE_SLICE_VERIFIER_INVOKE,
+        queue_item_id="queue-1",
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        plan_id="plan-1",
+        accepted_stages=(),
+    )
+
+    result = dict(handler(request))
+
+    assert result["decision"] == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT
+    assert FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED in result["rejection_reasons"]
+    assert FAIL_SLICE_VERIFIER_PLAN_MISSING in result["rejection_reasons"]
+    assert result["slice_verifier_request_binding_result"]["accepted"] is False
+    assert runner.calls == []
 
 
 def test_rejected_evidence_producer_blocks_verifier(tmp_path: Path) -> None:

@@ -203,6 +203,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     verifier_request: Optional[Mapping[str, Any]] = None,
     evidence_producer_request: Optional[Mapping[str, Any]] = None,
     evidence_command_runner: Any = None,
+    slice_verifier_request_binding_enabled: bool = False,
     publish_request: Optional[Mapping[str, Any]] = None,
     draft_pr_runner: Any = None,
     ratchet_request: Optional[Mapping[str, Any]] = None,
@@ -379,12 +380,19 @@ def build_reddog_resident_queue_stage_handler_registry(
             verifier_request=verifier_request,
             evidence_producer_request=evidence_producer_request,
             evidence_command_runner=evidence_command_runner,
+            slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
+            work_order_resolver=work_order_resolver,
+            repo_root=root,
         ),
         lambda: build_reddog_resident_queue_slice_verifier_stage_handler(
             chain_results_store=chain_results_store,
             verifier_request=verifier_request,
             evidence_producer_request=evidence_producer_request,
             evidence_command_runner=evidence_command_runner,
+            work_order_resolver=work_order_resolver,
+            repo_root=root,
+            slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
+            holoindex_evidence=holoindex_evidence,
         ),
     )
     _add_if_ready(
@@ -481,11 +489,20 @@ def _slice_verifier_missing(
     verifier_request: Optional[Mapping[str, Any]],
     evidence_producer_request: Optional[Mapping[str, Any]],
     evidence_command_runner: Any,
+    slice_verifier_request_binding_enabled: bool,
+    work_order_resolver: Any,
+    repo_root: Optional[Path],
 ) -> tuple[str, ...]:
     if verifier_request:
         return ()
     if evidence_producer_request and evidence_command_runner is not None:
         return ()
+    if slice_verifier_request_binding_enabled:
+        return _missing(
+            ("work_order_resolver", work_order_resolver),
+            ("repo_root", repo_root),
+            ("evidence_command_runner", evidence_command_runner),
+        )
     reasons: list[str] = []
     if not verifier_request:
         reasons.append("missing_dependency:verifier_request")

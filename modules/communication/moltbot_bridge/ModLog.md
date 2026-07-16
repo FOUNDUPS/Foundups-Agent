@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_REQUEST_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Added resident queue slice-verifier request binding that derives the
+  independent evidence-producer request from an explicit `slice_verifier_plan`
+  plus recorded authority, authority-verification, worktree-create, and bounded
+  pilot chain results.
+- Wired the resident queue `slice_verifier` stage to use the derived evidence
+  request only when `REDDOG_SLICE_VERIFIER_REQUEST_BINDING` is explicitly
+  enabled; the existing external verifier/evidence JSON paths remain
+  unchanged.
+- Preserved bounded evidence production and autonomous verifier boundaries:
+  no GitHub call, PR publish, merge, PatternMemory write, reward settlement,
+  HoloIndex re-index, OpenClaw enqueue, or Hermes dispatch is added by this
+  slice.
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_PILOT_DRYRUN_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
