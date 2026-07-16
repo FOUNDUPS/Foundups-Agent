@@ -1499,11 +1499,6 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
         "publish_request.json",
         _draft_pr_publish_request(worktree),
     )
-    admission_request = _write_runtime_json(
-        tmp_path,
-        "pattern_memory_admission_request.json",
-        _pattern_memory_admission_request(),
-    )
     outcome_store = tmp_path / "runtime" / "outcomes" / "signed-worker-ratchet.jsonl"
     pattern_memory_db = tmp_path / "runtime" / "pattern_memory.db"
 
@@ -1525,7 +1520,7 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
     monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", str(outcome_store))
     monkeypatch.setenv("REDDOG_HELD_OUT_GATE_REQUEST_BINDING", "1")
-    monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH", str(admission_request))
+    monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)

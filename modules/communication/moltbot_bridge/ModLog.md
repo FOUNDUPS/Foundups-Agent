@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an opt-in resident queue binding for PatternMemory admission requests:
+  `REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING=1`.
+- The binding derives the admission request from the accepted held-out
+  regression gate already recorded in the resident queue chain, removing the
+  final operator-edited JSON request from the requeued signed-worker path.
+- Existing explicit `REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH` remains
+  authoritative when provided; the derived request is used only when the
+  explicit request is absent.
+- Boundary remains explicit: no new worker authority, no shell execution, no
+  source-repo mutation, no Hermes dispatch, no HoloIndex re-index, no merge
+  authority, and no reward settlement are added.
+
 ## 2026-07-16: REDDOG_OPENCLAW_SIGNED_WORKER_REQUEUE_DRAIN_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
