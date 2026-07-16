@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_PROFILE_ARTIFACT_SUPPLY_DEFAULTS_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Extended the resident queue binding profile so the
+  `signed_0102_bounded_code` profile enables the safe artifact-supply
+  preflights for resident fix-promotion handoff, model-selection receipt
+  supply, and authority-profile source supply.
+- Updated `main.py` to use the profile helper for those preflight toggles,
+  preserving explicit environment overrides (`0` still disables a profile
+  default).
+- Boundary remains constrained: the profile only materializes outside-repo
+  receipts already required by the promotion bridge; it does not sign, spawn
+  workers, create worktrees, execute shell commands, enqueue OpenClaw, dispatch
+  Hermes, publish PRs, mutate source files, write PatternMemory, settle
+  rewards, or re-index HoloIndex.
+
 ## 2026-07-16: REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

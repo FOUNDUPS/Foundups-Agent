@@ -72,6 +72,9 @@ PROFILE_BINDING_FLAGS = frozenset(
 
 PROFILE_RUNTIME_FLAGS = frozenset(
     {
+        "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF",
+        "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY",
+        "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY",
         "OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED",
         "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP",
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER",
@@ -117,9 +120,10 @@ def resident_queue_runtime_flag_enabled(env: Mapping[str, str], env_name: str) -
     """Return whether a safe resident runtime control-plane flag is enabled.
 
     Explicit environment values win. The profile only enables known
-    control-plane flags that start existing gated loops; this helper never
-    selects effect modes such as model generation, worktree, draft PR,
-    PatternMemory, HoloIndex, merge, or reward settlement.
+    control-plane flags that start existing gated loops or materialize
+    outside-repo receipts needed by those loops; this helper never selects
+    effect modes such as model generation, worktree, draft PR, PatternMemory,
+    HoloIndex, merge, or reward settlement.
     """
 
     raw = str(env.get(env_name) or "").strip()
