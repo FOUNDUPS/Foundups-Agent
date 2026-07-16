@@ -3610,6 +3610,69 @@ def test_main_serial_loop_preflight_is_disabled_by_default() -> None:
         assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
 
 
+def test_main_serial_loop_preflight_profile_enables_serial_loop(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("authority_request",),
+                "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
+                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+
+    assert mocked.called is True
+    assert mocked.call_args.kwargs["work_state_path"] == str(
+        runtime_root / "authoritative_work_state.json"
+    )
+
+
+def test_main_serial_loop_preflight_explicit_zero_overrides_profile(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "0",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "resident-runtime"),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+
+    assert mocked.called is False
+
+
 def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path) -> None:
     import main
 

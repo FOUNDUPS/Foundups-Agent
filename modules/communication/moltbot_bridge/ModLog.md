@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_PROFILE_SERIAL_LOOP_DEFAULT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Extended resident queue profiles to default `REDDOG_RESIDENT_QUEUE_SERIAL_LOOP=1`
+  as a safe control-plane loop flag, so profile-selected RedDog startup can
+  invoke the existing serial queue bootstrap without an extra manual env var.
+- Preserved explicit `REDDOG_RESIDENT_QUEUE_SERIAL_LOOP=0` override behavior.
+- Boundary remains constrained: the serial loop still consumes the existing
+  signed queue stages and profile-derived outside-repo paths; no shell
+  execution, HoloIndex re-index, merge authority, reward settlement, or Hermes
+  dispatch was added.
+
 ## 2026-07-16: REDDOG_MIDDLE_PREFLIGHTS_PROFILE_PATHS_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
