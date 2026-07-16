@@ -297,8 +297,12 @@ def _bounded_code_stage_reasons(
     kwargs = dict(config.bootstrap_kwargs)
     if kwargs.get("artifact_contents_path"):
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CODE_STATIC_ARTIFACTS_FORBIDDEN)
+    artifact_request_available = bool(
+        kwargs.get("artifact_generation_request_path")
+        or kwargs.get("artifact_generation_request_binding_enabled")
+    )
     if (
-        not kwargs.get("artifact_generation_request_path")
+        not artifact_request_available
         or str(kwargs.get("artifact_generator_mode") or "") != _ARTIFACT_GENERATOR_MODE_FOUNDUPS_FUSION
     ):
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CODE_ARTIFACT_GENERATION_MISSING)

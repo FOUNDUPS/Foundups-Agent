@@ -266,7 +266,12 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
     return accepted
 
 
-def _write_queue_stage_files(tmp_path: Path, *, through_stage: str) -> SignedWorkerQueueSerialLoopRunnerConfig:
+def _write_queue_stage_files(
+    tmp_path: Path,
+    *,
+    through_stage: str,
+    artifact_request_binding: bool = False,
+) -> SignedWorkerQueueSerialLoopRunnerConfig:
     (tmp_path / "work_state.json").write_text(json.dumps(_snapshot(), sort_keys=True), encoding="utf-8")
     (tmp_path / "chain_results.json").write_text(
         json.dumps(
@@ -278,17 +283,21 @@ def _write_queue_stage_files(tmp_path: Path, *, through_stage: str) -> SignedWor
         ),
         encoding="utf-8",
     )
-    (tmp_path / "artifact_request.json").write_text(
-        json.dumps({"explicit_artifact_generation_requested": True}, sort_keys=True),
-        encoding="utf-8",
-    )
+    bootstrap_kwargs = {
+        "work_order_materializer_mode": "authority_profile",
+        "artifact_generator_mode": "foundups_fusion",
+    }
+    if artifact_request_binding:
+        bootstrap_kwargs["artifact_generation_request_binding_enabled"] = True
+    else:
+        (tmp_path / "artifact_request.json").write_text(
+            json.dumps({"explicit_artifact_generation_requested": True}, sort_keys=True),
+            encoding="utf-8",
+        )
+        bootstrap_kwargs["artifact_generation_request_path"] = str(tmp_path / "artifact_request.json")
     return _config(
         tmp_path,
-        bootstrap_kwargs={
-            "work_order_materializer_mode": "authority_profile",
-            "artifact_generation_request_path": str(tmp_path / "artifact_request.json"),
-            "artifact_generator_mode": "foundups_fusion",
-        },
+        bootstrap_kwargs=bootstrap_kwargs,
     )
 
 
@@ -546,6 +555,67 @@ def test_queue_serial_loop_runner_accepts_0102_bounded_code_only_at_artifact_sta
     assert bootstrap.calls[0]["requested_queue_item_id"] == "queue-1"
     assert bootstrap.calls[0]["max_steps"] == 1
     assert bootstrap.calls[0]["artifact_generator_mode"] == "foundups_fusion"
+
+
+def test_queue_serial_loop_runner_accepts_0102_bounded_code_with_artifact_request_binding(
+    tmp_path: Path,
+) -> None:
+    config = _write_queue_stage_files(
+        tmp_path,
+        through_stage="worktree_create",
+        artifact_request_binding=True,
+    )
+    bootstrap = _FakeBootstrap(_bootstrap_payload(dispatched_stages=("bounded_worker_pilot",)))
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=bootstrap)
+    context = _context(worker_runtime="0102", role="coding_worker_1", capability="bounded_code_change")
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-0102-code",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is True, result
+    assert bootstrap.calls[0]["artifact_generation_request_binding_enabled"] is True
+    assert "artifact_generation_request_path" not in bootstrap.calls[0]
+    assert not (tmp_path / "artifact_request.json").exists()
+
+
+def test_queue_serial_loop_runner_rejects_0102_bounded_code_without_generation_source(
+    tmp_path: Path,
+) -> None:
+    config = _write_queue_stage_files(tmp_path, through_stage="worktree_create")
+    config = SignedWorkerQueueSerialLoopRunnerConfig(
+        repo_root=config.repo_root,
+        work_state_path=config.work_state_path,
+        chain_results_path=config.chain_results_path,
+        authority_profile_path=config.authority_profile_path,
+        now_iso=config.now_iso,
+        now_epoch=config.now_epoch,
+        max_steps=1,
+        bootstrap_kwargs={
+            "work_order_materializer_mode": "authority_profile",
+            "artifact_generator_mode": "foundups_fusion",
+        },
+    )
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=_FakeBootstrap())
+    context = _context(worker_runtime="0102", role="coding_worker_1", capability="bounded_code_change")
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-0102-code",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is False
+    assert (
+        SignedWorkerQueueSerialLoopRunnerReason.CODE_ARTIFACT_GENERATION_MISSING
+        in result["rejection_reasons"]
+    )
 
 
 def test_queue_serial_loop_runner_rejects_0102_bounded_code_before_artifact_stage(tmp_path: Path) -> None:
