@@ -24,6 +24,8 @@ from .model_intelligence_catalog import (
 
 
 SELECTION_SCHEMA_VERSION = "model_selection_receipt.v1"
+DEFAULT_PANEL_ROLES = ("principal", "researcher", "critic", "implementer")
+RESERVED_PANEL_ROLES = {"verifier"}
 
 
 class SelectionMode(str, Enum):
@@ -64,7 +66,9 @@ class ModelTaskRequirements:
     allowed_providers: tuple[str, ...] = ()
     denied_providers: tuple[str, ...] = ()
     max_candidates: int = 1
-    min_verifier_pass_rate: float = 0.0
+    min_verifier_pass_rate: float | None = None
+    panel_roles: tuple[str, ...] = ()
+    panel_topology_digest: str | None = None
 
     def normalized(self) -> "ModelTaskRequirements":
         max_candidates = max(1, min(int(self.max_candidates), 5))
@@ -85,7 +89,9 @@ class ModelTaskRequirements:
             allowed_providers=tuple(sorted({_clean_token(v) for v in self.allowed_providers if str(v).strip()})),
             denied_providers=tuple(sorted({_clean_token(v) for v in self.denied_providers if str(v).strip()})),
             max_candidates=max_candidates,
-            min_verifier_pass_rate=max(0.0, min(float(self.min_verifier_pass_rate), 1.0)),
+            min_verifier_pass_rate=_verifier_threshold_or_none(self.min_verifier_pass_rate),
+            panel_roles=_normalize_panel_roles(self.panel_roles, max_candidates, self.selection_mode),
+            panel_topology_digest=_clean_optional_digest(self.panel_topology_digest),
         )
 
 
@@ -100,6 +106,15 @@ class ModelCandidateRanking:
 
 
 @dataclass(frozen=True)
+class ModelPanelRoleAssignment:
+    """Role-to-model assignment for panel selection receipts."""
+
+    role: str
+    canonical_model_id: str
+    provider: str
+
+
+@dataclass(frozen=True)
 class ModelSelectionReceipt:
     """Digest-bound model selection result."""
 
@@ -109,6 +124,8 @@ class ModelSelectionReceipt:
     decision: SelectionDecision
     selected_model_ids: tuple[str, ...]
     rankings: tuple[ModelCandidateRanking, ...]
+    role_assignments: tuple[ModelPanelRoleAssignment, ...] = ()
+    panel_topology_digest: str | None = None
     rejection_reasons: tuple[str, ...] = ()
     schema_version: str = SELECTION_SCHEMA_VERSION
 
@@ -121,6 +138,8 @@ class ModelSelectionReceipt:
             "decision": self.decision.value,
             "selected_model_ids": list(self.selected_model_ids),
             "rankings": [asdict(ranking) for ranking in self.rankings],
+            "role_assignments": [asdict(assignment) for assignment in self.role_assignments],
+            "panel_topology_digest": self.panel_topology_digest,
             "rejection_reasons": list(self.rejection_reasons),
         }
 
@@ -128,6 +147,8 @@ class ModelSelectionReceipt:
 def select_models_for_task(
     snapshot: ModelCatalogSnapshot,
     requirements: ModelTaskRequirements,
+    *,
+    production_evidence: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> ModelSelectionReceipt:
     """Select eligible model candidates from a catalog snapshot."""
 
@@ -135,7 +156,7 @@ def select_models_for_task(
     ranked: list[ModelCandidateRanking] = []
     rejection_counts: dict[str, int] = {}
     for card in snapshot.cards:
-        ok, reasons = _eligible(card, normalized_requirements)
+        ok, reasons = _eligible(card, normalized_requirements, production_evidence or {})
         if not ok:
             for reason in reasons:
                 rejection_counts[reason] = rejection_counts.get(reason, 0) + 1
@@ -144,6 +165,7 @@ def select_models_for_task(
 
     ranked.sort(key=lambda item: (-item.score, item.provider, item.canonical_model_id))
     selected = _select_rankings(ranked, normalized_requirements)
+    role_assignments = _build_role_assignments(selected, normalized_requirements)
     decision = SelectionDecision.SELECTED if selected else SelectionDecision.REJECTED
     rejection_reasons = tuple(
         sorted(f"{reason}:{count}" for reason, count in rejection_counts.items())
@@ -155,6 +177,8 @@ def select_models_for_task(
         "decision": decision.value,
         "selected_model_ids": [item.canonical_model_id for item in selected],
         "rankings": [asdict(item) for item in ranked],
+        "role_assignments": [asdict(item) for item in role_assignments],
+        "panel_topology_digest": _panel_topology_digest(normalized_requirements, selected),
         "rejection_reasons": list(rejection_reasons),
     }
     receipt_id = _digest_prefixed("model_selection_receipt", body)
@@ -165,11 +189,17 @@ def select_models_for_task(
         decision=decision,
         selected_model_ids=tuple(item.canonical_model_id for item in selected),
         rankings=tuple(ranked),
+        role_assignments=role_assignments,
+        panel_topology_digest=_panel_topology_digest(normalized_requirements, selected),
         rejection_reasons=rejection_reasons,
     )
 
 
-def _eligible(card: ModelCapabilityCard, requirements: ModelTaskRequirements) -> tuple[bool, tuple[str, ...]]:
+def _eligible(
+    card: ModelCapabilityCard,
+    requirements: ModelTaskRequirements,
+    production_evidence: Mapping[str, Mapping[str, Any]],
+) -> tuple[bool, tuple[str, ...]]:
     reasons: list[str] = []
     provider = _clean_token(card.provider)
     if requirements.allowed_providers and provider not in requirements.allowed_providers:
@@ -200,14 +230,15 @@ def _eligible(card: ModelCapabilityCard, requirements: ModelTaskRequirements) ->
         if card.output_cost_per_million > requirements.max_output_cost_per_million:
             reasons.append("output_cost_too_high")
     if requirements.purpose == SelectionPurpose.PRODUCTION:
+        if requirements.min_verifier_pass_rate is None or requirements.min_verifier_pass_rate <= 0:
+            reasons.append("production_verifier_threshold_missing")
         if card.promotion_state != PromotionState.CHAMPION:
             reasons.append("not_production_champion")
-        if card.verifier_pass_rate is None:
-            reasons.append("missing_verifier_pass_rate")
-        elif card.verifier_pass_rate < requirements.min_verifier_pass_rate:
-            reasons.append("verifier_pass_rate_too_low")
-        if requirements.task_family not in set(card.benchmark_scores):
-            reasons.append("missing_task_benchmark")
+        evidence = production_evidence.get(card.canonical_model_id)
+        if not evidence:
+            reasons.append("missing_production_evidence")
+        else:
+            reasons.extend(_production_evidence_rejections(card, requirements, evidence))
     return not reasons, tuple(sorted(set(reasons)))
 
 
@@ -269,6 +300,77 @@ def _select_rankings(
     return tuple(selected)
 
 
+def _build_role_assignments(
+    selected: tuple[ModelCandidateRanking, ...],
+    requirements: ModelTaskRequirements,
+) -> tuple[ModelPanelRoleAssignment, ...]:
+    if not selected:
+        return ()
+    roles = ("principal",) if requirements.selection_mode == SelectionMode.SINGLE else requirements.panel_roles
+    return tuple(
+        ModelPanelRoleAssignment(
+            role=roles[index],
+            canonical_model_id=item.canonical_model_id,
+            provider=item.provider,
+        )
+        for index, item in enumerate(selected)
+        if index < len(roles)
+    )
+
+
+def _panel_topology_digest(
+    requirements: ModelTaskRequirements,
+    selected: tuple[ModelCandidateRanking, ...],
+) -> str | None:
+    if requirements.selection_mode != SelectionMode.PANEL:
+        return None
+    if requirements.panel_topology_digest:
+        return requirements.panel_topology_digest
+    body = {
+        "roles": list(requirements.panel_roles),
+        "selected_model_ids": [item.canonical_model_id for item in selected],
+        "providers": [item.provider for item in selected],
+    }
+    return _digest_prefixed("panel_topology", body)
+
+
+def _production_evidence_rejections(
+    card: ModelCapabilityCard,
+    requirements: ModelTaskRequirements,
+    evidence: Mapping[str, Any],
+) -> list[str]:
+    reasons: list[str] = []
+    if str(evidence.get("model_id") or "") != card.canonical_model_id:
+        reasons.append("evidence_model_mismatch")
+    if str(evidence.get("task_family") or "") != requirements.task_family:
+        reasons.append("evidence_task_mismatch")
+    if not evidence.get("benchmark_evidence_receipt_id"):
+        reasons.append("missing_benchmark_evidence_receipt")
+    if not evidence.get("promotion_receipt_id"):
+        reasons.append("missing_promotion_receipt")
+    if not evidence.get("signed_promotion_receipt_id"):
+        reasons.append("missing_signed_promotion_receipt")
+    if not evidence.get("task_set_digest"):
+        reasons.append("missing_task_set_digest")
+    if not evidence.get("held_out_split_digest"):
+        reasons.append("missing_held_out_split_digest")
+    if not evidence.get("verifier_digest"):
+        reasons.append("missing_verifier_digest")
+    if not evidence.get("prompt_topology_digest"):
+        reasons.append("missing_prompt_topology_digest")
+    sample_count = _non_negative_int_or_none(evidence.get("sample_count"))
+    if not sample_count:
+        reasons.append("missing_sample_count")
+    verifier_pass_rate = evidence.get("verifier_pass_rate")
+    if verifier_pass_rate is None:
+        reasons.append("missing_verifier_pass_rate")
+    elif requirements.min_verifier_pass_rate is not None and float(verifier_pass_rate) < requirements.min_verifier_pass_rate:
+        reasons.append("verifier_pass_rate_too_low")
+    if str(evidence.get("promotion_state") or "").lower() != PromotionState.CHAMPION.value:
+        reasons.append("promotion_receipt_not_champion")
+    return reasons
+
+
 def _cost_penalty(value: float | None) -> float:
     if value is None:
         return 0.0
@@ -292,7 +394,26 @@ def _requirements_to_json(requirements: ModelTaskRequirements) -> dict[str, Any]
         "denied_providers": list(normalized.denied_providers),
         "max_candidates": normalized.max_candidates,
         "min_verifier_pass_rate": normalized.min_verifier_pass_rate,
+        "panel_roles": list(normalized.panel_roles),
+        "panel_topology_digest": normalized.panel_topology_digest,
     }
+
+
+def _normalize_panel_roles(
+    value: tuple[str, ...],
+    max_candidates: int,
+    selection_mode: SelectionMode,
+) -> tuple[str, ...]:
+    if selection_mode == SelectionMode.SINGLE:
+        return ("principal",)
+    roles = tuple(_clean_token(role) for role in value if str(role).strip()) or DEFAULT_PANEL_ROLES
+    if any(role in RESERVED_PANEL_ROLES for role in roles):
+        raise ValueError("verifier_role_reserved_for_independent_verifier")
+    if len(set(roles)) != len(roles):
+        raise ValueError("duplicate_panel_roles")
+    if len(roles) < max_candidates:
+        raise ValueError("insufficient_panel_roles")
+    return roles[:max_candidates]
 
 
 def _non_negative_float_or_none(value: float | None) -> float | None:
@@ -300,6 +421,26 @@ def _non_negative_float_or_none(value: float | None) -> float | None:
         return None
     parsed = float(value)
     return parsed if parsed >= 0 else None
+
+
+def _non_negative_int_or_none(value: Any) -> int | None:
+    if value is None:
+        return None
+    parsed = int(value)
+    return parsed if parsed >= 0 else None
+
+
+def _verifier_threshold_or_none(value: float | None) -> float | None:
+    if value is None:
+        return None
+    return max(0.0, min(float(value), 1.0))
+
+
+def _clean_optional_digest(value: str | None) -> str | None:
+    if value is None:
+        return None
+    cleaned = str(value).strip()
+    return cleaned or None
 
 
 def _clean_token(value: Any) -> str:

@@ -1,5 +1,46 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Benchmark Evidence and Outcome Receipts
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation Hardening
+**Slice:** MODEL_BENCHMARK_EVIDENCE_AND_OUTCOME_RECEIPTS_PHASE1
+
+**What:** Hardened model-intelligence production selection with receipt-bound
+benchmark, verifier, promotion, topology, and outcome evidence.
+
+**Why:** #1129 introduced task-selection receipts, but production selection still
+depended on scalar catalog fields (`promotion_state`, `benchmark_scores`,
+`verifier_pass_rate`). Production binding must not trust those fields unless they
+are backed by measured held-out benchmark evidence and signed promotion authority.
+
+**Files:**
+- `src/model_intelligence_outcomes.py` - benchmark evidence receipts, signed
+  promotion evidence receipts, production evidence mapping, and fail-closed
+  outcome receipts.
+- `src/model_intelligence_selection.py` - production selection now requires
+  receipt-bound evidence and an explicit nonzero verifier threshold; panel
+  selection emits role assignments/topology digest and reserves verifier outside
+  the candidate panel.
+- `tests/test_model_intelligence_outcomes.py` and
+  `tests/test_model_intelligence_selection.py` - benchmark digest, held-out
+  split, verifier digest, signed promotion, threshold, panel-role, and no-network
+  guards.
+
+**Truth Boundary:**
+- IMPLEMENTED: evaluation selection behavior remains available for benchmarking.
+- IMPLEMENTED: production selection rejects catalog-only champions.
+- IMPLEMENTED: benchmark evidence binds model ID, task-set digest, held-out split,
+  prompt/topology digest, verifier digest, sample count, cost, and latency.
+- IMPLEMENTED: promotion evidence requires signed promotion authority.
+- NOT IMPLEMENTED: benchmark harness execution, champion/challenger ledger writes,
+  AutoResearch campaigns, RedDog dynamic runtime binding, provider calls, or
+  PatternMemory admission.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Model Intelligence Task Selection Receipts
 
 **Who:** 0102 Codex

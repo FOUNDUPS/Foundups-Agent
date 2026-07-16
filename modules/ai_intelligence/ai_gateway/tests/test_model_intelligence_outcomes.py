@@ -1,0 +1,239 @@
+"""Tests for model benchmark evidence and outcome receipts."""
+
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
+    ModelCapabilityCard,
+    PromotionState,
+    build_model_catalog_snapshot,
+)
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
+    ModelOutcomeMetrics,
+    OutcomeDecision,
+    VerifierDecision,
+    build_model_benchmark_evidence_receipt,
+    build_model_promotion_evidence_receipt,
+    build_model_selection_outcome_receipt,
+    outcome_feedback_record,
+    production_evidence_for_selection,
+)
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
+    ModelTaskRequirements,
+    SelectionDecision,
+    SelectionPurpose,
+    select_models_for_task,
+)
+
+
+def _selected_receipt():
+    snapshot = build_model_catalog_snapshot(
+        (
+            ModelCapabilityCard(
+                provider="provider",
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                source="test",
+                promotion_state=PromotionState.CANDIDATE,
+                task_families=("architecture",),
+            ).normalized(),
+        ),
+        generated_at="2026-07-16T00:00:00+00:00",
+    )
+    receipt = select_models_for_task(snapshot, ModelTaskRequirements(task_family="architecture"))
+    assert receipt.decision == SelectionDecision.SELECTED
+    return receipt
+
+
+def test_benchmark_evidence_binds_held_out_task_set_verifier_topology_and_metrics():
+    receipt = build_model_benchmark_evidence_receipt(
+        model_id="provider/model",
+        task_family="architecture",
+        task_set_digest="sha256:taskset",
+        held_out_split_digest="sha256:heldout",
+        prompt_topology_digest="sha256:topology",
+        verifier_digest="sha256:verifier",
+        verifier_receipt_id="verifier:1",
+        sample_count=25,
+        accepted_count=23,
+        metrics=ModelOutcomeMetrics(latency_ms=1000, input_tokens=200, output_tokens=100, cost_estimate_usd=0.12),
+    )
+
+    assert receipt.receipt_id.startswith("model_benchmark_evidence:")
+    assert receipt.verifier_pass_rate == 0.92
+    assert receipt.task_set_digest == "sha256:taskset"
+    assert receipt.held_out_split_digest == "sha256:heldout"
+    assert receipt.prompt_topology_digest == "sha256:topology"
+    assert receipt.verifier_digest == "sha256:verifier"
+
+
+def test_benchmark_evidence_rejects_missing_digest_and_bad_sample_counts():
+    for kwargs in (
+        {"task_set_digest": ""},
+        {"sample_count": 0},
+        {"accepted_count": 6, "sample_count": 5},
+    ):
+        base = {
+            "model_id": "provider/model",
+            "task_family": "architecture",
+            "task_set_digest": "sha256:taskset",
+            "held_out_split_digest": "sha256:heldout",
+            "prompt_topology_digest": "sha256:topology",
+            "verifier_digest": "sha256:verifier",
+            "verifier_receipt_id": "verifier:1",
+            "sample_count": 5,
+            "accepted_count": 4,
+        }
+        base.update(kwargs)
+        try:
+            build_model_benchmark_evidence_receipt(**base)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"expected rejection for {kwargs}")
+
+
+def test_promotion_evidence_requires_signed_authority_and_threshold():
+    benchmark = build_model_benchmark_evidence_receipt(
+        model_id="provider/model",
+        task_family="architecture",
+        task_set_digest="sha256:taskset",
+        held_out_split_digest="sha256:heldout",
+        prompt_topology_digest="sha256:topology",
+        verifier_digest="sha256:verifier",
+        verifier_receipt_id="verifier:1",
+        sample_count=10,
+        accepted_count=10,
+    )
+
+    promotion = build_model_promotion_evidence_receipt(
+        benchmark_receipt=benchmark,
+        promotion_state=PromotionState.CHAMPION,
+        promotion_authority_receipt_id="authority:1",
+        signed_promotion_receipt_id="signature:1",
+        min_verifier_pass_rate=0.95,
+    )
+
+    assert promotion.receipt_id.startswith("model_promotion_evidence:")
+    assert promotion.signed_promotion_receipt_id == "signature:1"
+
+    try:
+        build_model_promotion_evidence_receipt(
+            benchmark_receipt=benchmark,
+            promotion_state=PromotionState.CHAMPION,
+            promotion_authority_receipt_id="authority:1",
+            signed_promotion_receipt_id="",
+            min_verifier_pass_rate=0.95,
+        )
+    except ValueError as exc:
+        assert str(exc) == "missing_signed_promotion_receipt_id"
+    else:
+        raise AssertionError("expected missing signature rejection")
+
+
+def test_production_evidence_map_feeds_hardened_selection():
+    benchmark = build_model_benchmark_evidence_receipt(
+        model_id="provider/model",
+        task_family="architecture",
+        task_set_digest="sha256:taskset",
+        held_out_split_digest="sha256:heldout",
+        prompt_topology_digest="sha256:topology",
+        verifier_digest="sha256:verifier",
+        verifier_receipt_id="verifier:1",
+        sample_count=10,
+        accepted_count=9,
+    )
+    promotion = build_model_promotion_evidence_receipt(
+        benchmark_receipt=benchmark,
+        promotion_state=PromotionState.CHAMPION,
+        promotion_authority_receipt_id="authority:1",
+        signed_promotion_receipt_id="signature:1",
+        min_verifier_pass_rate=0.9,
+    )
+    snapshot = build_model_catalog_snapshot(
+        (
+            ModelCapabilityCard(
+                provider="provider",
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                source="test",
+                promotion_state=PromotionState.CHAMPION,
+                task_families=("architecture",),
+            ).normalized(),
+        ),
+        generated_at="2026-07-16T00:00:00+00:00",
+    )
+
+    receipt = select_models_for_task(
+        snapshot,
+        ModelTaskRequirements(
+            task_family="architecture",
+            purpose=SelectionPurpose.PRODUCTION,
+            min_verifier_pass_rate=0.9,
+        ),
+        production_evidence=production_evidence_for_selection(benchmark, promotion),
+    )
+
+    assert receipt.selected_model_ids == ("provider/model",)
+
+
+def test_outcome_receipt_accepts_only_verified_complete_results():
+    selection = _selected_receipt()
+    receipt = build_model_selection_outcome_receipt(
+        selection,
+        verifier_decision=VerifierDecision.ACCEPT,
+        verification_receipt_ids=("verify:1",),
+        task_completed=True,
+        evidence_correct=True,
+        metrics=ModelOutcomeMetrics(latency_ms=100),
+    )
+
+    assert receipt.outcome_decision == OutcomeDecision.ACCEPTED
+    assert receipt.feedback_eligible is True
+    assert outcome_feedback_record(receipt)["outcome_receipt_id"] == receipt.receipt_id
+
+
+def test_outcome_receipt_rejects_unverified_or_regressed_results():
+    selection = _selected_receipt()
+    receipt = build_model_selection_outcome_receipt(
+        selection,
+        verifier_decision=VerifierDecision.REJECT,
+        verification_receipt_ids=("verify:1",),
+        task_completed=True,
+        evidence_correct=True,
+        regression_detected=True,
+    )
+
+    assert receipt.outcome_decision == OutcomeDecision.REJECTED
+    assert receipt.feedback_eligible is False
+    assert "verifier_not_accept" in receipt.rejection_reasons
+    assert "regression_detected" in receipt.rejection_reasons
+
+    try:
+        outcome_feedback_record(receipt)
+    except ValueError as exc:
+        assert str(exc) == "outcome_not_feedback_eligible"
+    else:
+        raise AssertionError("rejected outcome must not feed benchmark memory")
+
+
+def test_outcome_module_has_no_network_or_command_execution_imports():
+    source = Path("modules/ai_intelligence/ai_gateway/src/model_intelligence_outcomes.py").read_text()
+    tree = ast.parse(source)
+    imported: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported.add(node.module.split(".")[0])
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            assert not (
+                isinstance(node.func.value, ast.Name)
+                and node.func.value.id in {"os", "subprocess", "requests", "urllib"}
+            )
+
+    assert "subprocess" not in imported
+    assert "requests" not in imported
+    assert "urllib" not in imported

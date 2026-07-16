@@ -74,6 +74,31 @@ rejection reasons, catalog snapshot ID, and requirements. Evaluation mode may
 select candidates for benchmarking. Production mode requires measured champion
 evidence and fails closed for unbenchmarked candidates.
 
+Production model selection must pass `production_evidence` containing
+receipt-bound benchmark and promotion proof. Catalog fields alone do not satisfy
+production authority, even when `promotion_state == CHAMPION`.
+
+Panel mode emits role assignments and a topology digest. The candidate panel may
+include roles such as principal, researcher, critic and implementer; the verifier
+role is reserved for an independent verifier outside the candidate panel.
+
+#### Benchmark Evidence and Outcome Receipts
+
+```python
+build_model_benchmark_evidence_receipt(...) -> ModelBenchmarkEvidenceReceipt
+build_model_promotion_evidence_receipt(...) -> ModelPromotionEvidenceReceipt
+production_evidence_for_selection(...) -> dict[str, dict[str, Any]]
+build_model_selection_outcome_receipt(...) -> ModelSelectionOutcomeReceipt
+outcome_feedback_record(receipt) -> dict[str, Any]
+```
+
+Benchmark evidence binds the model, task family, task-set digest, held-out split
+digest, prompt/topology digest, verifier digest, verifier receipt, sample count,
+accepted count, cost and latency. Promotion evidence binds a signed authority
+receipt to that benchmark evidence. Outcome receipts are feedback-eligible only
+when the independent verifier accepts, task completion is true, evidence is
+verified, and no regression or unauthorized change is detected.
+
 ## Configuration
 
 ### Environment Variables
