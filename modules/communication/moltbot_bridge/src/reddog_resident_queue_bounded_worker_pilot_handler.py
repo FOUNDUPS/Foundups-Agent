@@ -30,6 +30,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE,
 )
+from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
+    generate_bounded_artifact_contents,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
     QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_REJECT,
     invoke_reddog_wre_queue_authorized_bounded_worker_pilot,
@@ -47,6 +50,8 @@ FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
 FAIL_GENERIC_WRITER_DRYRUN_MISSING = "FAIL_GENERIC_WRITER_DRYRUN_MISSING"
 FAIL_GOVERNED_SHELL_DRYRUN_MISSING = "FAIL_GOVERNED_SHELL_DRYRUN_MISSING"
 FAIL_ARTIFACT_CONTENTS_MISSING = "FAIL_ARTIFACT_CONTENTS_MISSING"
+FAIL_ARTIFACT_GENERATOR_MISSING = "FAIL_ARTIFACT_GENERATOR_MISSING"
+FAIL_ARTIFACT_GENERATION_REJECTED = "FAIL_ARTIFACT_GENERATION_REJECTED"
 
 
 class ResidentQueueBoundedWorkerWorkOrderResolver(Protocol):
@@ -109,10 +114,12 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
     work_order_resolver: ResidentQueueBoundedWorkerWorkOrderResolver
     generic_writer_dryrun_result: Mapping[str, Any]
     governed_shell_dryrun_result: Mapping[str, Any]
-    artifact_contents: Mapping[str, Any]
+    artifact_contents: Mapping[str, Any] | None
     repo_root: Path
     operation_cwd: Optional[Path] = None
     holoindex_evidence: Optional[Mapping[str, Any]] = None
+    artifact_generation_request: Mapping[str, Any] | None = None
+    artifact_generator: Any = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != BOUNDED_WORKER_PILOT_STAGE_KEY:
@@ -152,20 +159,39 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
         governed_shell = _mapping(self.governed_shell_dryrun_result)
         if not governed_shell:
             return _reject(FAIL_GOVERNED_SHELL_DRYRUN_MISSING)
-        if not isinstance(self.artifact_contents, Mapping) or not self.artifact_contents:
-            return _reject(FAIL_ARTIFACT_CONTENTS_MISSING)
+        artifact_contents = _mapping(self.artifact_contents)
+        artifact_generation_result: Mapping[str, Any] | None = None
+        if not artifact_contents:
+            generation_request = _mapping(self.artifact_generation_request)
+            if not generation_request:
+                return _reject(FAIL_ARTIFACT_CONTENTS_MISSING)
+            if self.artifact_generator is None:
+                return _reject(FAIL_ARTIFACT_GENERATOR_MISSING)
+            generated = generate_bounded_artifact_contents(
+                generation_request,
+                runner=self.artifact_generator,
+            )
+            artifact_generation_result = generated.to_dict()
+            if generated.accepted is not True:
+                rejected = _reject(FAIL_ARTIFACT_GENERATION_REJECTED, *generated.rejection_reasons)
+                rejected["artifact_generation_result"] = artifact_generation_result
+                return rejected
+            artifact_contents = generated.artifact_contents
 
-        return invoke_reddog_wre_queue_authorized_bounded_worker_pilot(
+        result = invoke_reddog_wre_queue_authorized_bounded_worker_pilot(
             explicit_queue_authorized_bounded_worker_pilot_requested=True,
             queue_worktree_create_result=worktree_create,
             generic_writer_dryrun_result=generic_writer,
             governed_shell_dryrun_result=governed_shell,
-            artifact_contents=self.artifact_contents,
+            artifact_contents=artifact_contents,
             work_order=work_order,
             repo_root=self.repo_root,
             operation_cwd=self.operation_cwd,
             holoindex_evidence=self.holoindex_evidence,
         ).to_dict()
+        if artifact_generation_result is not None:
+            result["artifact_generation_result"] = artifact_generation_result
+        return result
 
 
 def build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
@@ -174,10 +200,12 @@ def build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
     work_order_resolver: ResidentQueueBoundedWorkerWorkOrderResolver,
     generic_writer_dryrun_result: Mapping[str, Any],
     governed_shell_dryrun_result: Mapping[str, Any],
-    artifact_contents: Mapping[str, Any],
+    artifact_contents: Mapping[str, Any] | None = None,
     repo_root: Path,
     operation_cwd: Optional[Path] = None,
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
+    artifact_generation_request: Mapping[str, Any] | None = None,
+    artifact_generator: Any = None,
 ) -> ResidentQueueBoundedWorkerPilotStageHandler:
     """Build the injected bounded-worker-pilot handler for the dispatcher."""
 
@@ -190,11 +218,15 @@ def build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
         repo_root=repo_root,
         operation_cwd=operation_cwd,
         holoindex_evidence=holoindex_evidence,
+        artifact_generation_request=artifact_generation_request,
+        artifact_generator=artifact_generator,
     )
 
 
 __all__ = [
     "BOUNDED_WORKER_PILOT_STAGE_KEY",
+    "FAIL_ARTIFACT_GENERATION_REJECTED",
+    "FAIL_ARTIFACT_GENERATOR_MISSING",
     "FAIL_ARTIFACT_CONTENTS_MISSING",
     "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_STAGE_MISMATCH",

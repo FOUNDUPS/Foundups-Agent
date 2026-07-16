@@ -129,6 +129,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     generic_writer_dryrun_result_path: Path | str | None = None,
     governed_shell_dryrun_result_path: Path | str | None = None,
     artifact_contents_path: Path | str | None = None,
+    artifact_generation_request_path: Path | str | None = None,
     holoindex_evidence_path: Path | str | None = None,
     verifier_request_path: Path | str | None = None,
     evidence_producer_request_path: Path | str | None = None,
@@ -148,6 +149,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     worktree_runner: Any = None,
     worktree_runner_mode: str | None = None,
     worktree_runner_timeout_s: int = 120,
+    artifact_generator: Any = None,
+    artifact_generator_mode: str | None = None,
     evidence_command_runner: Any = None,
     evidence_command_runner_mode: str | None = None,
     draft_pr_runner: Any = None,
@@ -251,6 +254,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if artifact_contents_reasons:
         return _not_ready(artifact_contents_reasons, chain_results_path=None)
 
+    artifact_generation_request, artifact_generation_request_reasons = _read_json_outside_repo(
+        root,
+        artifact_generation_request_path,
+        missing_reason="missing_artifact_generation_request_path",
+        inside_reason="artifact_generation_request_path_inside_repo",
+        unreadable_reason="malformed_artifact_generation_request",
+        required=False,
+    )
+    if artifact_generation_request_reasons:
+        return _not_ready(artifact_generation_request_reasons, chain_results_path=None)
+
     holoindex_evidence, holoindex_reasons = _read_json_outside_repo(
         root,
         holoindex_evidence_path,
@@ -345,6 +359,13 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if runner_reasons:
         return _not_ready(runner_reasons, chain_results_path=None)
 
+    resolved_artifact_generator, artifact_generator_reasons = _build_artifact_generator(
+        injected_runner=artifact_generator,
+        mode=artifact_generator_mode,
+    )
+    if artifact_generator_reasons:
+        return _not_ready(artifact_generator_reasons, chain_results_path=None)
+
     resolved_evidence_command_runner, evidence_runner_reasons = _build_evidence_command_runner(
         injected_runner=evidence_command_runner,
         mode=evidence_command_runner_mode,
@@ -397,6 +418,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         generic_writer_dryrun_result=generic_writer_dryrun_result,
         governed_shell_dryrun_result=governed_shell_dryrun_result,
         artifact_contents=artifact_contents,
+        artifact_generation_request=artifact_generation_request,
+        artifact_generator=resolved_artifact_generator,
         holoindex_evidence=holoindex_evidence,
         verifier_request=verifier_request,
         evidence_producer_request=evidence_producer_request,
@@ -950,6 +973,26 @@ def _build_evidence_command_runner(
     )
 
     return SubprocessEvidenceCommandRunner(), ()
+
+
+def _build_artifact_generator(
+    *,
+    injected_runner: Any,
+    mode: str | None,
+) -> tuple[Any, tuple[str, ...]]:
+    if injected_runner is not None:
+        return injected_runner, ()
+    normalized = str(mode or "").strip().lower()
+    if not normalized:
+        return None, ()
+    if normalized not in {"foundups_fusion", "fusion"}:
+        return None, ("unsupported_artifact_generator_mode",)
+    from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
+        FoundupsFusionArtifactGenerationRunner,
+        RUNTIME_MODE_FOUNDUPS_FUSION,
+    )
+
+    return FoundupsFusionArtifactGenerationRunner(runtime_mode=RUNTIME_MODE_FOUNDUPS_FUSION), ()
 
 
 def _build_outcome_ratchet_store(

@@ -1,3 +1,22 @@
+## 2026-07-16: REDDOG_BOUNDED_ARTIFACT_GENERATION_BINDING_PHASE1
+
+**Files**: `test_reddog_bounded_artifact_generation_runtime.py` (NEW),
+`test_reddog_resident_queue_bounded_worker_pilot_handler.py`,
+`test_reddog_resident_queue_stage_handler_registry.py`,
+`test_reddog_main_resident_queue_serial_loop_bootstrap.py` (UPDATED)
+
+**Slice**: `REDDOG_BOUNDED_ARTIFACT_GENERATION_BINDING_PHASE1` |
+**Predecessor**: #1120 independent evidence producer queue binding
+
+Resident queue bounded-worker pilot can now either consume prebuilt artifact
+contents or generate bounded artifact text from an explicit request using an
+injected/configured artifact generator. Tests prove generation is gated by
+HoloIndex evidence, accepted signed authority, accepted signed receipt chain,
+exact planned artifact matching, no secrets, registry dependency checks, and
+startup env forwarding.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_bounded_artifact_generation_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_bounded_worker_pilot_invoke.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_bounded_worker_pilot_handler.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_serial_loop.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py -q`
+
 ## 2026-07-16: WRE_INDEPENDENT_EVIDENCE_PRODUCER_QUEUE_BINDING_PHASE1
 
 **Files**: `test_reddog_resident_queue_slice_verifier_handler.py`,

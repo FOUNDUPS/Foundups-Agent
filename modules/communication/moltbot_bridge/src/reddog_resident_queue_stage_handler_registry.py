@@ -195,6 +195,8 @@ def build_reddog_resident_queue_stage_handler_registry(
     generic_writer_dryrun_result: Optional[Mapping[str, Any]] = None,
     governed_shell_dryrun_result: Optional[Mapping[str, Any]] = None,
     artifact_contents: Optional[Mapping[str, Any]] = None,
+    artifact_generation_request: Optional[Mapping[str, Any]] = None,
+    artifact_generator: Any = None,
     operation_cwd: Optional[Path] = None,
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
     verifier_request: Optional[Mapping[str, Any]] = None,
@@ -345,22 +347,26 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers,
         missing,
         BOUNDED_WORKER_PILOT_STAGE_KEY,
-        _missing(
-            ("work_order_resolver", work_order_resolver),
-            ("generic_writer_dryrun_result", generic_writer_dryrun_result),
-            ("governed_shell_dryrun_result", governed_shell_dryrun_result),
-            ("artifact_contents", artifact_contents),
-            ("repo_root", root),
+        _bounded_worker_pilot_missing(
+            work_order_resolver=work_order_resolver,
+            generic_writer_dryrun_result=generic_writer_dryrun_result,
+            governed_shell_dryrun_result=governed_shell_dryrun_result,
+            artifact_contents=artifact_contents,
+            artifact_generation_request=artifact_generation_request,
+            artifact_generator=artifact_generator,
+            repo_root=root,
         ),
         lambda: build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
             chain_results_store=chain_results_store,
             work_order_resolver=work_order_resolver,
             generic_writer_dryrun_result=generic_writer_dryrun_result or {},
             governed_shell_dryrun_result=governed_shell_dryrun_result or {},
-            artifact_contents=artifact_contents or {},
+            artifact_contents=artifact_contents,
             repo_root=root or Path("."),
             operation_cwd=operation_cwd,
             holoindex_evidence=holoindex_evidence,
+            artifact_generation_request=artifact_generation_request,
+            artifact_generator=artifact_generator,
         ),
     )
     _add_if_ready(
@@ -429,6 +435,37 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers=handlers,
         missing_stage_reasons=missing,
     )
+
+
+def _bounded_worker_pilot_missing(
+    *,
+    work_order_resolver: Any,
+    generic_writer_dryrun_result: Optional[Mapping[str, Any]],
+    governed_shell_dryrun_result: Optional[Mapping[str, Any]],
+    artifact_contents: Optional[Mapping[str, Any]],
+    artifact_generation_request: Optional[Mapping[str, Any]],
+    artifact_generator: Any,
+    repo_root: Optional[Path],
+) -> tuple[str, ...]:
+    reasons = list(
+        _missing(
+            ("work_order_resolver", work_order_resolver),
+            ("generic_writer_dryrun_result", generic_writer_dryrun_result),
+            ("governed_shell_dryrun_result", governed_shell_dryrun_result),
+            ("repo_root", repo_root),
+        )
+    )
+    if artifact_contents:
+        return tuple(reasons)
+    if artifact_generation_request and artifact_generator is not None:
+        return tuple(reasons)
+    if not artifact_contents:
+        reasons.append("missing_dependency:artifact_contents")
+    if not artifact_generation_request:
+        reasons.append("missing_dependency:artifact_generation_request")
+    if artifact_generator is None:
+        reasons.append("missing_dependency:artifact_generator")
+    return tuple(reasons)
 
 
 def _slice_verifier_missing(

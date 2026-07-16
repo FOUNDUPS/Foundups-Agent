@@ -1601,6 +1601,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH             Outside-repo generic writer dry-run JSON
         REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH             Outside-repo governed shell dry-run JSON
         REDDOG_ARTIFACT_CONTENTS_PATH                        Outside-repo artifact contents JSON
+        REDDOG_ARTIFACT_GENERATION_REQUEST_PATH              Outside-repo artifact generation request JSON
+        REDDOG_ARTIFACT_GENERATOR_MODE                       Optional `foundups_fusion` generator mode
         REDDOG_HOLOINDEX_EVIDENCE_PATH                       Outside-repo HoloIndex evidence JSON
         REDDOG_SLICE_VERIFIER_REQUEST_PATH                   Outside-repo slice verifier request JSON
         REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH                Outside-repo evidence producer request JSON
@@ -1692,6 +1694,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
             or None,
             artifact_contents_path=os.getenv("REDDOG_ARTIFACT_CONTENTS_PATH", "") or None,
+            artifact_generation_request_path=os.getenv("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH", "") or None,
             holoindex_evidence_path=os.getenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", "") or None,
             verifier_request_path=os.getenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", "") or None,
             evidence_producer_request_path=os.getenv("REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH", "") or None,
@@ -1709,6 +1712,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
             worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
             worktree_runner_timeout_s=worktree_runner_timeout_s,
+            artifact_generator_mode=os.getenv("REDDOG_ARTIFACT_GENERATOR_MODE", "") or None,
             evidence_command_runner_mode=os.getenv("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE", "") or None,
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
