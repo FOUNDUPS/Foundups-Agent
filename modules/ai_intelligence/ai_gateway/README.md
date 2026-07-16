@@ -47,6 +47,18 @@ before production model selection can trust a champion:
 Catalog scalar fields remain useful for evaluation and ranking, but production
 selection rejects `CHAMPION` unless these evidence receipts are supplied.
 
+## Model Combination Benchmark Harness
+
+`src/model_combination_benchmark_harness.py` runs deterministic held-out
+benchmarks for single-model and panel candidates through injected runner and
+verifier callables. It binds task-set, held-out split, verifier, role/topology
+and sample results into benchmark evidence receipts.
+
+This layer is still pre-production. It does not call providers, execute shell
+commands, promote champions, write PatternMemory, or bind RedDog runtime model
+defaults. Panel benchmark evidence remains panel evidence; a later promotion
+gate must decide how, or whether, panel combinations become production choices.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway
