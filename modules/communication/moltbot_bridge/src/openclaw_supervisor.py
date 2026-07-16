@@ -273,6 +273,10 @@ def claim_reddog_signed_worker_dispatch_task_once(
         from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
             build_reddog_signed_worker_queue_loop_runner_from_env,
         )
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
+            Signed0102ReadOnlyReviewRunner,
+            is_0102_readonly_signed_worker_context,
+        )
         from modules.infrastructure.database.src.agent_db import AgentDB
 
         factory = agent_db_factory or AgentDB
@@ -281,6 +285,10 @@ def claim_reddog_signed_worker_dispatch_task_once(
             db=db,
             agent_id=agent_id,
             source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            include_0102_readonly=(
+                signed_worker_runner is not None
+                or _signed_0102_readonly_tasks_enabled_from_env()
+            ),
         )
     except Exception as exc:
         return _signed_worker_claim_result(
@@ -317,23 +325,26 @@ def claim_reddog_signed_worker_dispatch_task_once(
 
     effective_runner = signed_worker_runner
     if effective_runner is None:
-        binding_result = build_reddog_signed_worker_queue_loop_runner_from_env(
-            repo_root=repo_root,
-            env=os.environ,
-        )
-        if binding_result.accepted:
-            effective_runner = binding_result.runner
-        elif binding_result.requested:
-            _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
-            return _signed_worker_claim_result(
-                accepted=False,
-                status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
-                task_id=task_id,
-                rejection_reasons=(
-                    SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,
-                    *binding_result.rejection_reasons,
-                ),
+        if is_0102_readonly_signed_worker_context(context) and _signed_0102_readonly_tasks_enabled_from_env():
+            effective_runner = Signed0102ReadOnlyReviewRunner()
+        else:
+            binding_result = build_reddog_signed_worker_queue_loop_runner_from_env(
+                repo_root=repo_root,
+                env=os.environ,
             )
+            if binding_result.accepted:
+                effective_runner = binding_result.runner
+            elif binding_result.requested:
+                _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
+                return _signed_worker_claim_result(
+                    accepted=False,
+                    status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+                    task_id=task_id,
+                    rejection_reasons=(
+                        SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,
+                        *binding_result.rejection_reasons,
+                    ),
+                )
 
     run_result = execute_reddog_signed_worker_dispatch_task(
         task_context=context,
@@ -493,9 +504,13 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
     db: Any,
     agent_id: str,
     source: str,
+    include_0102_readonly: bool = False,
 ) -> Optional[Dict[str, Any]]:
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
         is_openclaw_candidate_signed_worker_context,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
+        is_0102_readonly_signed_worker_context,
     )
 
     with db.db.get_connection() as conn:
@@ -519,7 +534,9 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
                 candidate_context = json.loads(raw_candidate) if isinstance(raw_candidate, str) else raw_candidate
             except Exception:
                 candidate_context = None
-            if is_openclaw_candidate_signed_worker_context(candidate_context):
+            if is_openclaw_candidate_signed_worker_context(candidate_context) or (
+                include_0102_readonly and is_0102_readonly_signed_worker_context(candidate_context)
+            ):
                 row = candidate
                 raw_context = raw_candidate
                 context = candidate_context
@@ -692,6 +709,10 @@ def _signed_worker_task_max_claims_from_env() -> tuple[int, str | None]:
     return value, None
 
 
+def _signed_0102_readonly_tasks_enabled_from_env() -> bool:
+    return os.getenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", "0") == "1"
+
+
 def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
     from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
         SIGNED_WORKER_DISPATCH_TASK_SOURCE,
@@ -699,14 +720,21 @@ def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
         is_openclaw_candidate_signed_worker_context,
     )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
+        is_0102_readonly_signed_worker_context,
+    )
     from modules.infrastructure.database.src.agent_db import AgentDB
 
+    include_0102_readonly = _signed_0102_readonly_tasks_enabled_from_env()
     db = AgentDB()
     for task in db.get_autonomous_tasks(status="pending", limit=limit):
         if str(task.get("discovered_by") or "") != SIGNED_WORKER_DISPATCH_TASK_SOURCE:
             continue
         context = task.get("context")
-        if is_openclaw_candidate_signed_worker_context(context if isinstance(context, dict) else None):
+        normalized = context if isinstance(context, dict) else None
+        if is_openclaw_candidate_signed_worker_context(normalized) or (
+            include_0102_readonly and is_0102_readonly_signed_worker_context(normalized)
+        ):
             return True
     return False
 

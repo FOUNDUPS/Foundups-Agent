@@ -172,6 +172,75 @@ def test_run_cycle_claims_signed_worker_tasks_when_enabled(tmp_path):
     assert any(event[0] == "supervisor_execute" for event in events)
 
 
+def test_run_cycle_claims_signed_0102_readonly_tasks_when_readonly_gate_enabled(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 11,
+        "latest_sequence_id": 11,
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock(
+        return_value={
+            "accepted": True,
+            "status": "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT",
+            "claimed_count": 1,
+            "completed_task_ids": ("task-0102",),
+            "failed_task_ids": (),
+            "rejection_reasons": (),
+        }
+    )
+    pending_task = {
+        "task_id": "task-0102",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "context": {
+            "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            "worker_runtime": "0102",
+            "capability": "architect_review",
+        },
+    }
+
+    with patch.dict(
+        os.environ,
+        {
+            "OPENCLAW_SIGNED_WORKER_TASKS_ENABLED": "1",
+            "OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED": "1",
+            "OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS": "1",
+        },
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        result = supervisor.run_cycle()
+
+    assert result["plan"]["action"] == "claim_signed_worker_tasks_until_idle"
+    assert result["plan"]["max_claims"] == 1
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_called_once_with(
+        max_claims=1
+    )
+    assert result["verify"]["ok"] is True
+    assert result["verify"]["completed_task_ids"] == ("task-0102",)
+
+
 def test_run_cycle_signed_worker_loop_rejects_invalid_max_claims(tmp_path):
     broker = MagicMock()
     broker.get_runtime_status.side_effect = lambda dae_id: {
