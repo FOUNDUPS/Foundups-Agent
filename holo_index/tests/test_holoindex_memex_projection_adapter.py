@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from holo_index.memex_access_policy_receipt import build_memex_access_policy_receipt
 from holo_index.memex_projection_adapter import (
     DEFAULT_ACCESS_POLICY_DIGEST,
     PROJECTION_ACCEPTED,
@@ -15,6 +16,7 @@ from holo_index.memex_projection_adapter import (
 
 MODULE_PATH = Path(__file__).parents[1] / "memex_projection_adapter.py"
 FIXED_NOW = "2026-07-16T00:00:00+00:00"
+POLICY_EXPIRES = "2026-07-17T00:00:00+00:00"
 
 
 def _memex_view() -> dict[str, object]:
@@ -59,6 +61,27 @@ def _project(**overrides: object):
     }
     kwargs.update(overrides)
     return project_foundup_memex_to_holoindex_shadow(**kwargs)
+
+
+def _policy_receipt(**overrides: object) -> dict:
+    kwargs = {
+        "principal_id": "principal:012",
+        "work_order_id": "work-order-1",
+        "foundup_scope": ("foundups-agent",),
+        "source_scope": "foundup:foundups-agent",
+        "sensitivity_classes": ("internal",),
+        "allowed_record_sections": ("identity", "current_state", "roadmap_state"),
+        "denied_record_sections": ("verified_outcome",),
+        "max_records": 8,
+        "issued_at": FIXED_NOW,
+        "expires_at": POLICY_EXPIRES,
+        "policy_generation_id": "policy-generation-1",
+    }
+    kwargs.update(overrides)
+    result = build_memex_access_policy_receipt(**kwargs)
+    assert result.accepted is True
+    assert result.receipt is not None
+    return result.receipt.to_dict()
 
 
 def test_memex_projection_builds_shadow_records_and_receipt() -> None:
@@ -160,6 +183,30 @@ def test_memex_projection_rejects_invalid_access_policy_digest() -> None:
 
     assert result.accepted is False
     assert "invalid_access_policy_digest" in result.rejection_reasons
+
+
+def test_memex_projection_binds_valid_access_policy_receipt() -> None:
+    policy = _policy_receipt()
+
+    result = _project(access_policy_receipt=policy)
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.receipt.access_policy_digest == policy["receipt_id"]
+    assert result.receipt.records_indexed == 3
+    assert result.receipt.records_rejected == 1
+    assert result.receipt.rejected_reasons == ("access_policy_denied_record:verified_outcome:0",)
+    assert all(record.metadata["access_policy_digest"] == policy["receipt_id"] for record in result.records)
+
+
+def test_memex_projection_rejects_tampered_access_policy_receipt() -> None:
+    policy = _policy_receipt()
+    policy["principal_id"] = "principal:attacker"
+
+    result = _project(access_policy_receipt=policy)
+
+    assert result.accepted is False
+    assert "access_policy_receipt:access_policy_receipt_id_mismatch" in result.rejection_reasons
 
 
 def test_memex_projection_is_projection_only_by_ast() -> None:
