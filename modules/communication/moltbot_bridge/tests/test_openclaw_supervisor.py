@@ -99,6 +99,121 @@ def test_run_cycle_idles_when_resident_runtime_is_healthy(tmp_path):
     assert any(action == "supervisor_cycle" for action, _, _ in events)
 
 
+def test_run_cycle_claims_signed_worker_tasks_when_enabled(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 10,
+        "latest_sequence_id": 10,
+    }
+
+    events = []
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: events.append((action, result, details)),
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock(
+        return_value={
+            "accepted": True,
+            "status": "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT",
+            "claimed_count": 2,
+            "completed_task_ids": ("task-1", "task-2"),
+            "failed_task_ids": (),
+            "rejection_reasons": (),
+        }
+    )
+    pending_task = {
+        "task_id": "signed-task-1",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "context": {
+            "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            "worker_runtime": "openclaw",
+            "capability": "candidate_queue_review",
+        },
+    }
+
+    with patch.dict(
+        os.environ,
+        {
+            "OPENCLAW_SIGNED_WORKER_TASKS_ENABLED": "1",
+            "OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS": "2",
+            "OPENCLAW_AUTO_TASKS_ENABLED": "1",
+        },
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        result = supervisor.run_cycle()
+
+    assert result["plan"]["action"] == "claim_signed_worker_tasks_until_idle"
+    assert result["plan"]["max_claims"] == 2
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_called_once_with(
+        max_claims=2
+    )
+    assert result["action_result"]["ok"] is True
+    assert result["action_result"]["claimed_count"] == 2
+    assert result["verify"]["ok"] is True
+    assert result["verify"]["completed_task_ids"] == ("task-1", "task-2")
+    assert any(event[0] == "supervisor_execute" for event in events)
+
+
+def test_run_cycle_signed_worker_loop_rejects_invalid_max_claims(tmp_path):
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 11,
+        "latest_sequence_id": 11,
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock()
+
+    with patch.dict(
+        os.environ,
+        {
+            "OPENCLAW_SIGNED_WORKER_TASKS_ENABLED": "1",
+            "OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS": "0",
+        },
+    ):
+        result = supervisor.run_cycle()
+
+    assert result["triage"]["kind"] == "escalate"
+    assert result["triage"]["reason"] == "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
+    assert result["verify"]["ok"] is False
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_not_called()
+
+
 def test_run_cycle_escalates_when_restart_budget_is_exhausted(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENCLAW_SUPERVISOR_MAX_RESTARTS", "2")
     monkeypatch.setenv("OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC", "600")
