@@ -1798,6 +1798,7 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
 
     Env:
         REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP=0           Enable loop (default OFF)
+        REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional `signed_0102_bounded_code`
         REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_ENFORCED=0  Block startup on reject
         OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS=1             Bounded claims
 
@@ -1807,7 +1808,14 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
     OpenClaw signed-worker claim loop, whose per-task gates decide what can run.
     """
 
-    if os.getenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP", "0") == "0":
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    if not resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP",
+    ):
         logger.info("[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop disabled")
         return True
 

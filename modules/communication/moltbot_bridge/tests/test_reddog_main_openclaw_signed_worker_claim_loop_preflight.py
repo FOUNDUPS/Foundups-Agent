@@ -54,6 +54,46 @@ def test_main_openclaw_signed_worker_claim_loop_passes_when_idle(capsys) -> None
     assert "max_claims=3" in captured
 
 
+def test_main_openclaw_signed_worker_claim_loop_profile_enables_control_plane() -> None:
+    import main
+
+    with patch(
+        CLAIM_LOOP,
+        return_value={
+            "accepted": True,
+            "status": "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE",
+            "claimed_count": 0,
+            "completed_task_ids": (),
+            "requeued_task_ids": (),
+            "failed_task_ids": (),
+            "rejection_reasons": ("NO_PENDING_TASK",),
+        },
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {"REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code"},
+            clear=True,
+        ):
+            assert main.run_reddog_openclaw_signed_worker_claim_loop_preflight(REPO_ROOT) is True
+
+    assert mocked.call_count == 1
+
+
+def test_main_openclaw_signed_worker_claim_loop_explicit_zero_overrides_profile() -> None:
+    import main
+
+    with patch(CLAIM_LOOP, side_effect=AssertionError("claim loop must not run")):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP": "0",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_openclaw_signed_worker_claim_loop_preflight(REPO_ROOT) is True
+
+
 def test_main_openclaw_signed_worker_claim_loop_blocks_when_enforced() -> None:
     import main
 
