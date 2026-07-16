@@ -99,6 +99,24 @@ receipt to that benchmark evidence. Outcome receipts are feedback-eligible only
 when the independent verifier accepts, task completion is true, evidence is
 verified, and no regression or unauthorized change is detected.
 
+#### Model Combination Benchmark Harness
+
+```python
+build_model_benchmark_candidate(role_assignments) -> ModelBenchmarkCandidate
+run_model_combination_benchmark(...) -> ModelCombinationBenchmarkRunReceipt
+```
+
+The harness evaluates single-model or panel candidates against a held-out
+`ModelBenchmarkTask` set using injected runner and verifier callables. It
+produces per-candidate `ModelBenchmarkEvidenceReceipt` records and a digest-bound
+run receipt over task-set digest, held-out split digest, verifier digest,
+role/topology assignments, sample receipts, and benchmark evidence receipt IDs.
+
+The verifier role is reserved for an independent verifier and cannot be part of
+the candidate panel. The harness does not call model providers, execute commands,
+promote champions, persist PatternMemory, mutate HoloIndex, or bind RedDog
+runtime defaults.
+
 ## Configuration
 
 ### Environment Variables

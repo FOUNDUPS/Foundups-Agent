@@ -1,5 +1,43 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Model Combination Benchmark Harness
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation
+**Slice:** MODEL_COMBINATION_BENCHMARK_HARNESS_PHASE1
+
+**What:** Added a deterministic benchmark harness for single-model and Fusion
+panel candidates.
+
+**Why:** RedDog model selection must be driven by measured task fitness. After
+receipt-bound production evidence landed, the next missing layer was a governed
+way to produce benchmark evidence from held-out tasks without turning provider
+catalog claims or model self-reports into production authority.
+
+**Files:**
+- `src/model_combination_benchmark_harness.py` - held-out task and candidate
+  schemas, role/topology-bound candidate construction, injected runner/verifier
+  benchmark execution, fail-closed sample receipts, and benchmark run receipts.
+- `tests/test_model_combination_benchmark_harness.py` - single-model, panel,
+  verifier-role exclusion, runner/verifier failure, deterministic digest, task
+  validation, panel evidence boundary, and no-network/no-command tests.
+- `README.md` and `INTERFACE.md` - public truth boundary and API notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: benchmark evidence can be produced for single-model and panel
+  candidates from injected runner/verifier seams.
+- IMPLEMENTED: task-set, held-out split, verifier, sample count, cost, latency,
+  and role/topology digests are bound into receipts.
+- IMPLEMENTED: runner/verifier failures produce rejected sample evidence rather
+  than promotion evidence by assertion.
+- NOT IMPLEMENTED: provider calls, benchmark scheduling, champion/challenger
+  promotion gates, PatternMemory writes, AutoResearch campaigns, or RedDog
+  dynamic runtime binding.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Benchmark Evidence and Outcome Receipts
 
 **Who:** 0102 Codex
