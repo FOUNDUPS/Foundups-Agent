@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from holo_index.memex_access_policy_receipt import build_memex_access_policy_receipt
 from holo_index.memex_projection_adapter import project_foundup_memex_to_holoindex_shadow
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
@@ -56,6 +57,11 @@ MODEL_WORKER_MODULE_PATH = (
     / "src"
     / "reddog_readonly_0102_audit_worker_runtime.py"
 )
+MEMEX_FOUNDUP_ID = "foundups-agent"
+MEMEX_GENERATION_ID = "sha256:memex-generation"
+MEMEX_SOURCE_REVISION = "abc123"
+MEMEX_SOURCE_SCOPE = f"foundup:{MEMEX_FOUNDUP_ID}:lane:{REPO_CODE_AUDIT_LANE}"
+MEMEX_NOW = "2026-07-16T00:01:00+00:00"
 
 
 @pytest.fixture(autouse=True)
@@ -250,30 +256,57 @@ def _model_context(
         allowed_read_targets=context["assignment"]["allowed_read_targets"],
     ).to_dict()
     context["worker_mode"] = MODEL_WORKER_MODE
+    context["principal_id"] = "principal-012"
+    context["work_order_id"] = "assignment-1"
+    context["foundup_id"] = MEMEX_FOUNDUP_ID
+    context["memex_now_iso"] = MEMEX_NOW
     context["wsp15_allocation_receipt"] = allocation
     context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
     context["wsp15_allocation_digest"] = canonical_reddog_wsp15_allocation_digest(allocation)
     context["assignment"] = dict(context["assignment"])
     context["assignment"]["lane_id"] = REPO_CODE_AUDIT_LANE
+    context["assignment"]["foundup_id"] = MEMEX_FOUNDUP_ID
+    context["assignment"]["principal_id"] = "principal-012"
+    context["assignment"]["work_order_id"] = "assignment-1"
     context["assignment"]["snapshot_content_digest"] = "sha256:snapshot-content"
     context["assignment"]["context_view_id"] = "sha256:context-view"
     context["assignment"]["evidence_bundle_id"] = "sha256:evidence-bundle"
     context["assignment"]["determination_id"] = "sha256:determination"
     context["assignment"]["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
     context["assignment"]["wsp15_allocation_digest"] = context["wsp15_allocation_digest"]
+    context["assignment"]["memex_source_scope"] = MEMEX_SOURCE_SCOPE
+    context["assignment"]["memex_source_revision"] = MEMEX_SOURCE_REVISION
+    context["assignment"]["memex_holoindex_generation_id"] = MEMEX_GENERATION_ID
     return context
 
 
-def _memex_projection() -> dict:
+def _memex_access_policy_receipt() -> dict:
+    result = build_memex_access_policy_receipt(
+        principal_id="principal-012",
+        work_order_id="assignment-1",
+        foundup_scope=(MEMEX_FOUNDUP_ID,),
+        source_scope=MEMEX_SOURCE_SCOPE,
+        sensitivity_classes=("internal",),
+        issued_at="2026-07-16T00:00:00+00:00",
+        expires_at="2026-07-16T01:00:00+00:00",
+        policy_generation_id="policy-generation-1",
+    )
+    assert result.accepted is True
+    assert result.receipt is not None
+    return result.receipt.to_dict()
+
+
+def _memex_projection(*, access_policy_receipt: dict | None = None) -> dict:
+    access_policy_receipt = access_policy_receipt or _memex_access_policy_receipt()
     result = project_foundup_memex_to_holoindex_shadow(
         memex_view={
             "schema_version": "foundup_brain_current_state.v1",
             "foundup_brain_view_id": "sha256:brain-view",
-            "foundup_id": "foundups-agent",
+            "foundup_id": MEMEX_FOUNDUP_ID,
             "snapshot_id": "snapshot-1",
-            "snapshot_content_digest": "sha256:snapshot",
+            "snapshot_content_digest": "sha256:snapshot-content",
             "identity": {
-                "foundup_id": "foundups-agent",
+                "foundup_id": MEMEX_FOUNDUP_ID,
                 "name": "Foundups Agent",
             },
             "current_state": {
@@ -284,12 +317,12 @@ def _memex_projection() -> dict:
                 "next_slice": "REDDOG_RUNTIME_NEXT_PHASE1",
             },
         },
-        source_scope="foundup:foundups-agent",
-        source_revision="abc123",
-        allowed_foundup_ids=("foundups-agent",),
-        access_policy_digest="sha256:" + "2" * 64,
-        holoindex_generation_id="sha256:memex-generation",
-        now_iso="2026-07-16T00:00:00+00:00",
+        source_scope=MEMEX_SOURCE_SCOPE,
+        source_revision=MEMEX_SOURCE_REVISION,
+        allowed_foundup_ids=(MEMEX_FOUNDUP_ID,),
+        access_policy_receipt=access_policy_receipt,
+        holoindex_generation_id=MEMEX_GENERATION_ID,
+        now_iso=MEMEX_NOW,
     )
     assert result.accepted is True
     return result.to_dict()
@@ -480,7 +513,10 @@ def test_model_backed_includes_optional_memex_query_receipt(tmp_path: Path) -> N
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
     context = _model_context()
-    context["memex_projection"] = _memex_projection()
+    context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
+    context["memex_projection"] = _memex_projection(
+        access_policy_receipt=context["memex_access_policy_receipt"]
+    )
 
     result = execute_reddog_readonly_audit_task(
         task_context=context,
@@ -510,6 +546,7 @@ def test_model_backed_rejects_invalid_supplied_memex_projection_before_model(tmp
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
     context = _model_context()
+    context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
     context["memex_projection"] = {"accepted": True, "records": [], "receipt": None}
 
     result = execute_reddog_readonly_audit_task(
@@ -530,9 +567,111 @@ def test_model_backed_rejects_tampered_memex_projection_before_model(tmp_path: P
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
     context = _model_context()
-    projection = _memex_projection()
+    context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
+    projection = _memex_projection(access_policy_receipt=context["memex_access_policy_receipt"])
     projection["records"][0]["text"] = projection["records"][0]["text"] + " tampered"
     context["memex_projection"] = projection
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_rejects_memex_projection_without_policy_receipt(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    context["memex_projection"] = _memex_projection()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_rejects_memex_policy_work_order_mismatch(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    bad_policy = build_memex_access_policy_receipt(
+        principal_id="principal-012",
+        work_order_id="other-assignment",
+        foundup_scope=(MEMEX_FOUNDUP_ID,),
+        source_scope=MEMEX_SOURCE_SCOPE,
+        sensitivity_classes=("internal",),
+        issued_at="2026-07-16T00:00:00+00:00",
+        expires_at="2026-07-16T01:00:00+00:00",
+        policy_generation_id="policy-generation-1",
+    )
+    assert bad_policy.accepted is True and bad_policy.receipt is not None
+    context["memex_access_policy_receipt"] = bad_policy.receipt.to_dict()
+    context["memex_projection"] = _memex_projection(
+        access_policy_receipt=context["memex_access_policy_receipt"]
+    )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_rejects_memex_projection_snapshot_binding_mismatch(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
+    projection = _memex_projection(access_policy_receipt=context["memex_access_policy_receipt"])
+    projection["records"][0]["metadata"] = dict(projection["records"][0]["metadata"])
+    projection["records"][0]["metadata"]["snapshot_content_digest"] = "sha256:other-snapshot"
+    context["memex_projection"] = projection
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_rejects_replayed_memex_projection_receipt(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
+    projection = _memex_projection(access_policy_receipt=context["memex_access_policy_receipt"])
+    context["memex_projection"] = projection
+    context["seen_memex_projection_receipt_ids"] = [projection["receipt"]["receipt_id"]]
 
     result = execute_reddog_readonly_audit_task(
         task_context=context,

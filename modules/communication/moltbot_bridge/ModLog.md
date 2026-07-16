@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MEMEX_SNAPSHOT_ASSIGNMENT_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
+
+- Hardened the model-backed read-only audit worker so supplied Memex
+  projections are assignment-bound before any model call.
+- Runtime Memex consumption now requires and revalidates an access-policy
+  receipt against principal, work order, FoundUp id, source scope, and expiry.
+- The projection integrity gate is invoked with expected FoundUp, source scope,
+  source revision, HoloIndex generation, operational snapshot id/content
+  digest, access-policy digest, replay state, and revocation state.
+- Missing policy receipts, mismatched policy work orders, mismatched projection
+  snapshot bindings, and replayed projection receipts fail closed before the
+  RedDog/Fusion model runner is called.
+- Boundary remains read-only: no Memex supplier, content-bearing citation
+  policy, worker spawn, OpenClaw enqueue, Hermes dispatch, repo mutation,
+  HoloIndex re-index, or authority promotion.
+
 ## 2026-07-16: FOUNDUP_MEMEX_MULTI_FOUNDUP_SCOPE_HARDENING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
