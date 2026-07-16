@@ -265,6 +265,9 @@ def claim_reddog_signed_worker_dispatch_task_once(
         from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
             execute_reddog_signed_worker_dispatch_task,
         )
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+            build_reddog_signed_worker_queue_loop_runner_from_env,
+        )
         from modules.infrastructure.database.src.agent_db import AgentDB
 
         factory = agent_db_factory or AgentDB
@@ -307,11 +310,31 @@ def claim_reddog_signed_worker_dispatch_task_once(
             rejection_reasons=(SignedWorkerOpenClawClaimReason.MALFORMED_CONTEXT,),
         )
 
+    effective_runner = signed_worker_runner
+    if effective_runner is None:
+        binding_result = build_reddog_signed_worker_queue_loop_runner_from_env(
+            repo_root=repo_root,
+            env=os.environ,
+        )
+        if binding_result.accepted:
+            effective_runner = binding_result.runner
+        elif binding_result.requested:
+            _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
+            return _signed_worker_claim_result(
+                accepted=False,
+                status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+                task_id=task_id,
+                rejection_reasons=(
+                    SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,
+                    *binding_result.rejection_reasons,
+                ),
+            )
+
     run_result = execute_reddog_signed_worker_dispatch_task(
         task_context=context,
         task_id=task_id,
         repo_root=repo_root,
-        runner=signed_worker_runner,
+        runner=effective_runner,
     )
     if not run_result.accepted:
         _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
@@ -378,17 +401,37 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
     agent_id: str,
     source: str,
 ) -> Optional[Dict[str, Any]]:
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_openclaw_candidate_signed_worker_context,
+    )
+
     with db.db.get_connection() as conn:
-        row = conn.execute(
+        rows = conn.execute(
             """
             SELECT task_id, context FROM agents_autonomous_tasks
             WHERE status = 'pending' AND discovered_by = ?
             ORDER BY priority_score DESC, discovered_at ASC
-            LIMIT 1
+            LIMIT 50
             """,
             (source,),
-        ).fetchone()
-        if not row:
+        ).fetchall()
+        if not rows:
+            return None
+        row = None
+        context: Any = None
+        raw_context: Any = None
+        for candidate in rows:
+            raw_candidate = candidate["context"] if hasattr(candidate, "keys") else candidate[1]
+            try:
+                candidate_context = json.loads(raw_candidate) if isinstance(raw_candidate, str) else raw_candidate
+            except Exception:
+                candidate_context = None
+            if is_openclaw_candidate_signed_worker_context(candidate_context):
+                row = candidate
+                raw_context = raw_candidate
+                context = candidate_context
+                break
+        if row is None:
             return None
         task_id = row["task_id"] if hasattr(row, "keys") else row[0]
         updated = conn.execute(
@@ -401,11 +444,11 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
         ).rowcount
         if updated != 1:
             return {"task_id": task_id, "claim_race_lost": True}
-        raw_context = row["context"] if hasattr(row, "keys") else row[1]
-    try:
-        context = json.loads(raw_context) if isinstance(raw_context, str) else raw_context
-    except Exception:
-        context = None
+    if context is None:
+        try:
+            context = json.loads(raw_context) if isinstance(raw_context, str) else raw_context
+        except Exception:
+            context = None
     return {"task_id": task_id, "context": context}
 
 
