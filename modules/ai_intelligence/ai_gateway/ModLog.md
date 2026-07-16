@@ -1,5 +1,41 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Champion/Challenger AutoResearch Planner
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation
+**Slice:** MODEL_CHAMPION_CHALLENGER_AUTORESEARCH_PHASE1
+
+**What:** Added a receipt-bound AutoResearch campaign planner for model
+champion/challenger evaluation.
+
+**Why:** After benchmark harness and promotion gate receipts exist, RedDog needs
+a governed way to decide which model or panel candidates should be benchmarked
+next without running providers, writing PatternMemory, or installing runtime
+defaults.
+
+**Files:**
+- `src/model_champion_challenger_autoresearch.py` - AutoResearch policy, campaign
+  items, plan receipts, gate/candidate binding, and fail-closed budget/verifier
+  checks.
+- `tests/test_model_champion_challenger_autoresearch.py` - new-candidate,
+  challenger-retest, stop, missing gate/budget, verifier mismatch, cap,
+  deterministic digest, and no-network/no-command tests.
+- `README.md` and `INTERFACE.md` - API and truth-boundary notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: promotion-gate receipts can produce a deterministic benchmark
+  campaign plan.
+- IMPLEMENTED: untested candidates and challengers are routed separately.
+- IMPLEMENTED: missing gate receipts, verifier mismatch, and missing cost budget
+  fail closed.
+- NOT IMPLEMENTED: campaign execution, provider calls, PatternMemory writes,
+  champion ledger writes, AutoResearch git mutation, or RedDog runtime binding.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Champion/Challenger Promotion Gate
 
 **Who:** 0102 Codex

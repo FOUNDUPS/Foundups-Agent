@@ -70,6 +70,17 @@ The gate does not mutate the catalog, write a champion ledger, call providers,
 or bind RedDog runtime defaults. Below-threshold candidates remain challengers;
 tampered or mismatched evidence fails closed.
 
+## Champion/Challenger AutoResearch Planner
+
+`src/model_champion_challenger_autoresearch.py` converts promotion-gate receipts
+and candidate pools into a digest-bound benchmark campaign plan. It can propose
+benchmarking untested candidates or rebenchmarking challengers, but it does not
+execute those campaigns.
+
+The planner requires source promotion-gate receipts and a cost-budget receipt.
+It does not call providers, run benchmarks, mutate catalogs, write
+PatternMemory, or bind RedDog runtime defaults.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway
