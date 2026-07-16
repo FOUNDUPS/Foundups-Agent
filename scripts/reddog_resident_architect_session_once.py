@@ -114,6 +114,16 @@ def _external_retriever_from_env() -> Any | None:
     return _ConfiguredExternalResearchRetriever(path) if path.is_file() else None
 
 
+def _mapping(value: Any) -> Mapping[str, Any] | None:
+    return value if isinstance(value, Mapping) else None
+
+
+def _sequence_of_mappings(value: Any) -> tuple[Mapping[str, Any], ...]:
+    if not isinstance(value, list):
+        return ()
+    return tuple(item for item in value if isinstance(item, Mapping))
+
+
 def _summarize_result(result: Any) -> Dict[str, Any]:
     final = result.final_bootstrap
     final_status = final.status if final else ""
@@ -189,6 +199,10 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
             holoindex_ssd_path=_string(payload.get("holoindex_ssd_path") or os.getenv("HOLOINDEX_SSD_PATH", "")),
             requested_operation="extension_resident_architect_session",
             prompt_text=_string(payload.get("work_focus") or "extension resident RedDog architect session"),
+            breadcrumbs=_sequence_of_mappings(payload.get("breadcrumbs")),
+            brain_state=_mapping(payload.get("brain_state")),
+            workspace_memory_notes=_sequence_of_mappings(payload.get("workspace_memory_notes")),
+            memex_snapshot_supply_config=_mapping(payload.get("memex_snapshot_supply")),
             external_research_retriever=_external_retriever_from_env(),
             timeout_seconds=_int(payload.get("timeout_seconds"), 60),
         )

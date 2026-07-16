@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_OPERATIONAL_MEMEX_SNAPSHOT_SUPPLIER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an operational Memex snapshot supplier wrapper for resident RedDog
+  read-only audit tasks. It assembles a FoundUp Memex view from the accepted
+  operational snapshot and injects assignment-bound Memex bindings into
+  AgentDB task context before OpenClaw workers claim the task.
+- Wired optional Memex supply through the main read-only bootstrap, durable
+  resident AgentDB cycle, and thin-client bridge payload while keeping the
+  default resident cycle unchanged.
+- Added a HoloIndex generation binding to operational snapshots so Memex
+  projections bind to the exact retrieval generation used by the resident
+  cycle.
+- Tightened worker model-context packing so Memex remains supplemental and
+  cannot crowd out current repository evidence; full Memex receipt IDs remain
+  bound in worker receipts.
+- Boundary remains read-only: no Memex write, Brain/Breadcrumb write,
+  HoloIndex re-index, shell, repo mutation, worker spawn expansion, Hermes
+  dispatch, worktree operation, PR, PatternMemory promotion, or live FoundUp
+  enqueue.
+
 ## 2026-07-16: REDDOG_RESIDENT_ARCHITECT_DURABLE_AGENTDB_CYCLE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

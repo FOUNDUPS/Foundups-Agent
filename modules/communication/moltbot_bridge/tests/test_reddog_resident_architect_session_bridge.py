@@ -85,6 +85,14 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
             "holoindex_receipt_path": "O:/state/holo.json",
             "holoindex_ssd_path": "E:/HoloIndex",
             "timeout_seconds": 13,
+            "breadcrumbs": [{"breadcrumb_id": "crumb-1"}],
+            "brain_state": {"available": True, "signature_digest": "sha256:brain"},
+            "workspace_memory_notes": [{"note_id": "note-1"}],
+            "memex_snapshot_supply": {
+                "foundup_id": "foundups_agent",
+                "identity": {"foundup_id": "foundups_agent", "name": "Foundups Agent"},
+                "roadmap_state": {"foundup_id": "foundups_agent", "roadmap_id": "r1"},
+            },
         }
     )
 
@@ -92,6 +100,10 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
     assert calls[0]["red_dog_intent"]["intent_id"] == "sha256:intent"
     assert calls[0]["prompt_text"] == "audit resident loop"
     assert calls[0]["timeout_seconds"] == 13
+    assert calls[0]["breadcrumbs"] == ({"breadcrumb_id": "crumb-1"},)
+    assert calls[0]["brain_state"] == {"available": True, "signature_digest": "sha256:brain"}
+    assert calls[0]["workspace_memory_notes"] == ({"note_id": "note-1"},)
+    assert calls[0]["memex_snapshot_supply_config"]["foundup_id"] == "foundups_agent"
     assert result["decision"] == bridge.RESIDENT_ARCHITECT_SESSION_ACCEPT
     assert result["accepted"] is True
     assert result["resident_backend_invoked"] is True

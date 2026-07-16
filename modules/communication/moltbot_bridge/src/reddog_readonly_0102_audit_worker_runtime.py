@@ -69,6 +69,9 @@ RUNTIME_MODE_FOUNDUPS_FUSION = "foundups_fusion"
 
 MAX_MODEL_PROMPT_CHARS = 24_000
 MAX_MODEL_CONTEXT_CHARS = 36_000
+MAX_MEMEX_EVIDENCE_RECORD_CHARS = 1_200
+MAX_MODEL_MEMEX_RECORD_CHARS = 240
+MAX_MODEL_MEMEX_RECORDS = 1
 MAX_DISCOVERED_TARGETS = 16
 FRESH_INDEX_STATES = frozenset({"CURRENT", "FRESH"})
 
@@ -800,6 +803,7 @@ def _optional_memex_query_artifacts(
         bundle_result = build_memex_content_evidence_bundle(
             query_receipt=receipt,
             projection=gate.projection,
+            max_record_chars=MAX_MEMEX_EVIDENCE_RECORD_CHARS,
         )
         if not bundle_result.accepted or bundle_result.bundle is None:
             return (
@@ -1321,14 +1325,81 @@ def _build_repo_audit_model_context(
         "no_holoindex_reindex_performed": True,
     }
     if memex_receipt is not None:
-        payload["memex_query_receipt"] = memex_receipt
+        payload["memex_query_receipt"] = _compact_memex_query_receipt(memex_receipt)
     if memex_evidence_bundle is not None:
-        payload["memex_evidence_bundle"] = memex_evidence_bundle
+        payload["memex_evidence_bundle"] = _compact_memex_evidence_bundle(memex_evidence_bundle)
     if external_research_receipt is not None:
         payload["external_research_query_receipt"] = external_research_receipt
     if external_research_evidence_bundle is not None:
         payload["untrusted_external_research_evidence"] = external_research_evidence_bundle
-    return _budgeted_json(payload, MAX_MODEL_CONTEXT_CHARS)
+    try:
+        return _budgeted_json(payload, MAX_MODEL_CONTEXT_CHARS)
+    except ValueError:
+        if memex_evidence_bundle is not None:
+            payload["memex_evidence_bundle"] = _minimal_memex_evidence_bundle(memex_evidence_bundle)
+            return _budgeted_json(payload, MAX_MODEL_CONTEXT_CHARS)
+        raise
+
+
+def _compact_memex_query_receipt(receipt: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Keep model-visible Memex query receipts bounded.
+
+    The complete receipt remains available in the worker receipt. The model
+    context needs the generation binding, hits, and a small verdict sample only.
+    """
+
+    compact = dict(receipt)
+    verdicts = compact.get("per_target_retrieval_verdicts")
+    if not isinstance(verdicts, (str, bytes)) and isinstance(verdicts, Sequence):
+        compact["per_target_retrieval_verdicts"] = [
+            {
+                "target": _bound_text(item.get("target"), 80),
+                "source_class": _bound_text(item.get("source_class"), 32),
+                "verdict": _bound_text(item.get("verdict"), 32),
+            }
+            for item in verdicts[:8]
+            if isinstance(item, Mapping)
+        ]
+    return compact
+
+
+def _compact_memex_evidence_bundle(bundle: Mapping[str, Any]) -> Mapping[str, Any]:
+    compact = dict(bundle)
+    records = bundle.get("records")
+    if not isinstance(records, (str, bytes)) and isinstance(records, Sequence):
+        compact_records = []
+        for record in records[:MAX_MODEL_MEMEX_RECORDS]:
+            if not isinstance(record, Mapping):
+                continue
+            item = dict(record)
+            text = str(item.get("text") or "")
+            item["text"] = _bound_text(text, MAX_MODEL_MEMEX_RECORD_CHARS)
+            item["text_truncated"] = bool(item.get("text_truncated")) or len(text) > MAX_MODEL_MEMEX_RECORD_CHARS
+            compact_records.append(item)
+        compact["records"] = compact_records
+        compact["model_context_record_limit"] = MAX_MODEL_MEMEX_RECORDS
+        compact["model_context_record_chars"] = MAX_MODEL_MEMEX_RECORD_CHARS
+        compact["model_context_compacted"] = len(compact_records) != len(records) or any(
+            bool(record.get("text_truncated")) for record in compact_records if isinstance(record, Mapping)
+        )
+    return compact
+
+
+def _minimal_memex_evidence_bundle(bundle: Mapping[str, Any]) -> Mapping[str, Any]:
+    return {
+        "schema_version": str(bundle.get("schema_version") or ""),
+        "projection_receipt_id": str(bundle.get("projection_receipt_id") or ""),
+        "query_receipt_id": str(bundle.get("query_receipt_id") or ""),
+        "bundle_id": str(bundle.get("bundle_id") or ""),
+        "record_count": int(bundle.get("record_count") or 0),
+        "record_digests": list(bundle.get("record_digests") or ())[:8],
+        "records": [],
+        "model_context_omitted_reason": "memex_supplemental_budget_preserves_repository_evidence",
+        "no_memex_write_performed": True,
+        "no_holoindex_write_performed": True,
+        "no_brain_write_performed": True,
+        "no_breadcrumb_write_performed": True,
+    }
 
 
 def _bounded_repository_evidence(

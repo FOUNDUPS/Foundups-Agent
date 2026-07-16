@@ -40,6 +40,9 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     AgentDbReadOnlyAuditTaskWriter,
     READONLY_AUDIT_TASK_SOURCE,
 )
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_snapshot_supplier import (
+    OperationalMemexSnapshotSupplyConfig,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_runtime import (
     DEFAULT_AUDIT_LANES,
 )
@@ -293,6 +296,10 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
     repo_state_override: Mapping[str, Any] | None = None,
     work_state_snapshot_override: Mapping[str, Any] | None = None,
     holoindex_receipt_override: HoloIndexFreshnessReceipt | Mapping[str, Any] | None = None,
+    breadcrumbs: Sequence[Mapping[str, Any]] = (),
+    brain_state: Mapping[str, Any] | None = None,
+    workspace_memory_notes: Sequence[Mapping[str, Any]] = (),
+    memex_snapshot_supply_config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any] | None = None,
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     cycle_store: ResidentArchitectCycleStore | None = None,
     agent_db_factory: Optional[Callable[[], Any]] = None,
@@ -370,9 +377,16 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             repo_state_override=repo_state_override,
             work_state_snapshot_override=work_state_snapshot_override,
             holoindex_receipt_override=holoindex_receipt_override,
+            breadcrumbs=breadcrumbs,
+            brain_state=brain_state,
+            workspace_memory_notes=workspace_memory_notes,
             audit_lanes=audit_lanes,
             enqueue_readonly_audit_tasks=True,
             enqueue_writer=AgentDbReadOnlyAuditTaskWriter(agent_db_factory=agent_db_factory),
+            memex_snapshot_supply_config=_intent_bound_memex_config(
+                red_dog_intent=red_dog_intent,
+                config=memex_snapshot_supply_config,
+            ),
         )
         if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
             record.update(
@@ -466,6 +480,9 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         repo_state_override=repo_state_override,
         work_state_snapshot_override=work_state_snapshot_override,
         holoindex_receipt_override=holoindex_receipt_override,
+        breadcrumbs=breadcrumbs,
+        brain_state=brain_state,
+        workspace_memory_notes=workspace_memory_notes,
         audit_lanes=audit_lanes,
         collect_readonly_audit_reports=True,
         report_store=report_store or AgentDbReadOnlyAuditReportStore(agent_db_factory=agent_db_factory),
@@ -548,6 +565,43 @@ def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
     if intent.get("submits_executable_authority") is not False:
         reasons.append(ResidentCycleReason.EXECUTABLE_AUTHORITY_REQUESTED)
     return tuple(dict.fromkeys(reasons))
+
+
+def _intent_bound_memex_config(
+    *,
+    red_dog_intent: Mapping[str, Any],
+    config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any] | None,
+) -> OperationalMemexSnapshotSupplyConfig | Mapping[str, Any] | None:
+    if config is None:
+        return None
+    if isinstance(config, OperationalMemexSnapshotSupplyConfig):
+        if config.principal_id:
+            return config
+        return OperationalMemexSnapshotSupplyConfig(
+            foundup_id=config.foundup_id,
+            principal_id=_principal_id(red_dog_intent),
+            identity=config.identity,
+            roadmap_state=config.roadmap_state,
+            verified_outcomes=config.verified_outcomes,
+            policy_issued_at=config.policy_issued_at,
+            policy_expires_at=config.policy_expires_at,
+            holoindex_generation_id=config.holoindex_generation_id,
+            source_revision=config.source_revision,
+            max_records=config.max_records,
+        )
+    data = dict(config)
+    data.setdefault("principal_id", _principal_id(red_dog_intent))
+    data.setdefault("foundup_id", str(red_dog_intent.get("foundup_id") or "").strip())
+    return data
+
+
+def _principal_id(intent: Mapping[str, Any]) -> str:
+    return str(
+        intent.get("principal_id")
+        or intent.get("principal_ref")
+        or intent.get("origin_principal")
+        or ""
+    ).strip()
 
 
 def _failure_updates(status: str, reasons: Sequence[str]) -> dict[str, Any]:
