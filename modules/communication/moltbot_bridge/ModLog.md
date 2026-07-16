@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a resident authority-profile seed supplier that derives the seed from
+  architect determination, model-selection, Memex, principal-authority, and
+  permission-snapshot runtime receipts instead of requiring a hand-placed
+  `REDDOG_AUTHORITY_PROFILE_SEED_PATH`.
+- Wired the resident profile startup path so seed supply runs after the GitHub
+  principal/permission snapshot and before authority-profile source
+  materialization; explicit `REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY=0` still
+  disables the profile default.
+- Boundary remains constrained: no signing, signature verification, signer
+  state mutation, worker spawn, worktree, shell execution, OpenClaw enqueue,
+  Hermes dispatch, work-state mutation, repository mutation, PatternMemory
+  write, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
