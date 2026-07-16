@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_PILOT_DRYRUN_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Added resident queue pilot dry-run binding that derives generic-writer and
+  governed-shell dry-run receipts from an explicit `bounded_worker_plan` plus
+  recorded authority, verification, valve, and worktree chain results.
+- Wired the resident queue `bounded_worker_pilot` stage to use the derived
+  dry-run receipts only when `REDDOG_PILOT_DRYRUN_BINDING` is explicitly
+  enabled; the existing external dry-run JSON path remains unchanged.
+- Added `main.py` startup plumbing for `REDDOG_PILOT_DRYRUN_BINDING`.
+- Boundary remains dry-run guarded: no extra worktree creation, shell command,
+  GitHub call, PR publish, merge, PatternMemory write, reward settlement,
+  HoloIndex re-index, OpenClaw enqueue, or Hermes dispatch.
+
 ## 2026-07-16: REDDOG_BOUNDED_ARTIFACT_GENERATION_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

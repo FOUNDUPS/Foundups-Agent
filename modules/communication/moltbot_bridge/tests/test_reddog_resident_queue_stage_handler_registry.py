@@ -188,6 +188,49 @@ def test_registry_registers_bounded_worker_pilot_from_artifact_generation_depend
     assert registry.no_default_runner_created is True
 
 
+def test_registry_registers_bounded_worker_pilot_from_pilot_dryrun_binding_dependencies(
+    tmp_path: Path,
+) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        repo_root=tmp_path,
+        pilot_dryrun_binding_enabled=True,
+        artifact_contents={"README.md": "content"},
+        now_iso=NOW_ISO,
+    )
+
+    assert "bounded_worker_pilot" in registry.registered_stage_keys
+    assert "bounded_worker_pilot" not in registry.missing_stage_reasons
+    assert registry.no_default_runner_created is True
+
+
+def test_registry_still_requires_external_pilot_dryruns_without_binding_flag(
+    tmp_path: Path,
+) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        repo_root=tmp_path,
+        artifact_contents={"README.md": "content"},
+        now_iso=NOW_ISO,
+    )
+
+    assert "bounded_worker_pilot" not in registry.registered_stage_keys
+    assert "missing_dependency:generic_writer_dryrun_result" in (
+        registry.missing_stage_reasons["bounded_worker_pilot"]
+    )
+    assert "missing_dependency:governed_shell_dryrun_result" in (
+        registry.missing_stage_reasons["bounded_worker_pilot"]
+    )
+
+
 def test_registry_registers_slice_verifier_from_evidence_producer_dependencies(tmp_path: Path) -> None:
     dummy = Dummy()
     registry = build_reddog_resident_queue_stage_handler_registry(
