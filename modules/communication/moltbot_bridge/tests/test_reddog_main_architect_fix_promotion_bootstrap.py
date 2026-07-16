@@ -146,6 +146,81 @@ def test_main_preflight_auto_runs_when_all_artifacts_are_present(tmp_path: Path)
     assert (runtime_root / "authority_profile.json").exists()
 
 
+def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_promotion(tmp_path: Path) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    work_state = _write_json(tmp_path, "authoritative_work_state.json", _work_state())
+    model_selection = _write_json(tmp_path, "model_selection_receipt.json", _model_selection())
+    authority_source = _write_json(tmp_path, "authority_profile_source.json", _authority_profile())
+    handoff_result = type(
+        "HandoffResult",
+        (),
+        {
+            "accepted": True,
+            "status": "RESIDENT_FIX_HANDOFF_APPLIED",
+            "architect_determination_id": "sha256:architect-determination-1",
+            "architect_determination_path": str(runtime_root / "architect_determination.json"),
+            "memex_supply_receipt_path": str(runtime_root / "memex_supply_receipt.json"),
+            "rejection_reasons": (),
+        },
+    )()
+    promotion_result = type(
+        "PromotionResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
+            "promotion_receipt_id": "sha256:promotion",
+            "queue_item_id": "queue-1",
+            "claim_id": "claim-1",
+            "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "committed_revision": "sha256:revision",
+            "rejection_reasons": (),
+        },
+    )()
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff.run_reddog_resident_fix_promotion_artifact_handoff",
+        return_value=handoff_result,
+    ) as handoff:
+        with patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
+            return_value=promotion_result,
+        ) as promote:
+            with patch.dict(
+                "os.environ",
+                {
+                    "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-handoff",
+                    "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                    "REDDOG_MODEL_SELECTION_RECEIPT_PATH": str(model_selection),
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
+                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                },
+                clear=True,
+            ):
+                assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+
+    handoff.assert_called_once()
+    handoff_kwargs = handoff.call_args.kwargs
+    assert handoff_kwargs["intent_id"] == "sha256:intent-handoff"
+    assert handoff_kwargs["architect_determination_output_path"] == str(
+        runtime_root / "architect_determination.json"
+    )
+    assert handoff_kwargs["memex_supply_receipt_output_path"] == str(runtime_root / "memex_supply_receipt.json")
+    promote.assert_called_once()
+    promote_kwargs = promote.call_args.kwargs
+    assert promote_kwargs["architect_determination_path"] == str(runtime_root / "architect_determination.json")
+    assert promote_kwargs["memex_supply_receipt_path"] == str(runtime_root / "memex_supply_receipt.json")
+    assert promote_kwargs["model_selection_receipt_path"] == str(model_selection)
+    assert promote_kwargs["authority_profile_source_path"] == str(authority_source)
+    assert promote_kwargs["authority_profile_output_path"] == str(runtime_root / "authority_profile.json")
+
+
 def test_main_preflight_disabled_without_requested_or_complete_inputs() -> None:
     import main
 

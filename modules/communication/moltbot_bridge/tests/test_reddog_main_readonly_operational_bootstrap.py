@@ -568,6 +568,13 @@ def test_bootstrap_memex_supply_enriches_enqueued_readonly_audit_tasks() -> None
     assert result.memex_snapshot_supply_attempted is True
     assert result.memex_snapshot_supply_status == "OPERATIONAL_MEMEX_SUPPLY_ACCEPT"
     assert result.memex_snapshot_supply_view_id
+    assert result.memex_snapshot_supply_receipt is not None
+    assert result.memex_snapshot_supply_receipt["schema_version"] == (
+        "reddog_operational_memex_snapshot_supply_receipt.v1"
+    )
+    assert result.memex_snapshot_supply_receipt["snapshot_receipt_id"] == result.snapshot_receipt_id
+    assert result.memex_snapshot_supply_receipt["assignment_count"] == result.assignment_count
+    assert result.memex_snapshot_supply_receipt["receipt_id"].startswith("sha256:")
     assert result.memex_snapshot_supply_rejection_reasons == ()
     task_context = writer.calls[0][0][0].context
     assignment = task_context["assignment"]

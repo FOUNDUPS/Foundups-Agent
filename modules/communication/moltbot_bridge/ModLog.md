@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_CYCLE_FIX_PROMOTION_ARTIFACT_HANDOFF_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a resident-cycle handoff runtime that materializes backend architect
+  determination and cycle-level Memex supply receipt JSON artifacts outside
+  the source repository for the existing architect-FIX promotion bridge.
+- Extended the operational Memex supplier to emit one aggregate
+  cycle-level supply receipt while preserving per-assignment worker receipts.
+- Wired `main.py` behind explicit `REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=1`
+  so a determined resident cycle can feed promotion without manual Copy-MD
+  artifact handling. The boundary remains read/serialize-only: no signing,
+  worker spawn, shell, worktree, OpenClaw enqueue, Hermes dispatch, PR,
+  PatternMemory, source mutation, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_ARCHITECT_FIX_PROMOTION_MAIN_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

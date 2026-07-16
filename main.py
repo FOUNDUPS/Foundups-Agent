@@ -1489,6 +1489,8 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_AUTHORITY_PROFILE_SOURCE_PATH                 Outside-repo authority seed JSON
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo promoted profile JSON
         REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
+        REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
+        REDDOG_RESIDENT_ARCHITECT_INTENT_ID                  Intent ID for the determined resident cycle
     """
 
     try:
@@ -1499,19 +1501,80 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         logger.error(f"[REDDOG-FIX-PROMOTION] profile helper import failed: {exc}")
         return True
 
+    work_state_path = resident_queue_runtime_file_path(os.environ, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")
+    architect_determination_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH",
+    )
+    model_selection_receipt_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_MODEL_SELECTION_RECEIPT_PATH",
+    )
+    memex_supply_receipt_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH",
+    )
+    authority_profile_source_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH",
+    )
     authority_profile_path = resident_queue_runtime_file_path(
         os.environ,
         repo_root,
         "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
     )
+    handoff_requested = os.getenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF", "0") == "1"
+    handoff_enforced = os.getenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_ENFORCED", "0") != "0"
+    if handoff_requested:
+        try:
+            from modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff import (
+                run_reddog_resident_fix_promotion_artifact_handoff,
+            )
+
+            handoff = run_reddog_resident_fix_promotion_artifact_handoff(
+                repo_root=repo_root,
+                intent_id=os.getenv("REDDOG_RESIDENT_ARCHITECT_INTENT_ID", ""),
+                architect_determination_output_path=architect_determination_path,
+                memex_supply_receipt_output_path=memex_supply_receipt_path,
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-FIX-HANDOFF] Startup handoff failed: {exc}")
+            if handoff_enforced:
+                print(f"[REDDOG-FIX-HANDOFF] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-FIX-HANDOFF] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        handoff_status = "PASS" if handoff.accepted else "WARN"
+        handoff_reasons = ",".join(handoff.rejection_reasons) if handoff.rejection_reasons else "(none)"
+        print(
+            f"[REDDOG-FIX-HANDOFF] preflight={handoff_status} status={handoff.status} "
+            f"architect_determination={handoff.architect_determination_id or '(none)'} "
+            f"reasons={handoff_reasons}"
+        )
+        if handoff.accepted:
+            if handoff.architect_determination_path:
+                architect_determination_path = handoff.architect_determination_path
+                os.environ["REDDOG_ARCHITECT_FIX_DETERMINATION_PATH"] = architect_determination_path
+            if handoff.memex_supply_receipt_path:
+                memex_supply_receipt_path = handoff.memex_supply_receipt_path
+                os.environ["REDDOG_MEMEX_SUPPLY_RECEIPT_PATH"] = memex_supply_receipt_path
+        elif handoff_enforced:
+            print("[REDDOG-FIX-HANDOFF] Startup blocked by REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_ENFORCED=1")
+            return False
+
     required_inputs_present = all(
-        str(os.getenv(name) or "").strip()
-        for name in (
-            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
-            "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH",
-            "REDDOG_MODEL_SELECTION_RECEIPT_PATH",
-            "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH",
-            "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH",
+        str(value or "").strip()
+        for value in (
+            work_state_path,
+            architect_determination_path,
+            model_selection_receipt_path,
+            memex_supply_receipt_path,
+            authority_profile_source_path,
         )
     ) and bool(authority_profile_path)
     raw_requested = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME")
@@ -1528,11 +1591,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
 
         result = run_reddog_main_architect_fix_promotion_bootstrap(
             repo_root=repo_root,
-            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
-            architect_determination_path=os.getenv("REDDOG_ARCHITECT_FIX_DETERMINATION_PATH", ""),
-            model_selection_receipt_path=os.getenv("REDDOG_MODEL_SELECTION_RECEIPT_PATH", ""),
-            memex_supply_receipt_path=os.getenv("REDDOG_MEMEX_SUPPLY_RECEIPT_PATH", ""),
-            authority_profile_source_path=os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_PATH", ""),
+            work_state_path=work_state_path,
+            architect_determination_path=architect_determination_path,
+            model_selection_receipt_path=model_selection_receipt_path,
+            memex_supply_receipt_path=memex_supply_receipt_path,
+            authority_profile_source_path=authority_profile_source_path,
             authority_profile_output_path=authority_profile_path,
             worker_id=os.getenv(
                 "REDDOG_ARCHITECT_FIX_PROMOTION_WORKER_ID",

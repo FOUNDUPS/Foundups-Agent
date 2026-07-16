@@ -61,6 +61,7 @@ class OperationalMemexTaskEnrichmentResult:
     tasks: tuple[ReadOnlyAuditTaskSpec, ...]
     memex_view_id: str | None
     rejection_reasons: tuple[str, ...]
+    supply_receipt: Mapping[str, Any] | None = None
     no_memex_write_performed: bool = True
     no_holoindex_reindex_performed: bool = True
     no_repo_mutation_performed: bool = True
@@ -73,6 +74,7 @@ class OperationalMemexTaskEnrichmentResult:
             "status": self.status,
             "tasks": [task.to_dict() for task in self.tasks],
             "memex_view_id": self.memex_view_id,
+            "supply_receipt": dict(self.supply_receipt or {}),
             "rejection_reasons": list(self.rejection_reasons),
             "no_memex_write_performed": self.no_memex_write_performed,
             "no_holoindex_reindex_performed": self.no_holoindex_reindex_performed,
@@ -201,6 +203,7 @@ def enrich_readonly_audit_tasks_with_operational_memex(
     memex_view = assembly.view.to_dict()
     view_id = _clean(memex_view.get("foundup_brain_view_id"))
     enriched: list[ReadOnlyAuditTaskSpec] = []
+    assignment_receipts: list[Mapping[str, Any]] = []
     for task in tasks:
         context = dict(task.context)
         assignment = dict(context.get("assignment") or {})
@@ -221,7 +224,7 @@ def enrich_readonly_audit_tasks_with_operational_memex(
         context.update(binding)
         context["assignment"] = assignment
         context["memex_view"] = memex_view
-        context["memex_snapshot_supply_receipt"] = {
+        assignment_receipt = {
             "schema_version": "reddog_operational_memex_snapshot_supply_receipt.v1",
             "foundup_id": cfg.foundup_id,
             "principal_id": cfg.principal_id,
@@ -249,13 +252,28 @@ def enrich_readonly_audit_tasks_with_operational_memex(
             "no_holoindex_reindex_performed": True,
             "no_repo_mutation_performed": True,
         }
+        context["memex_snapshot_supply_receipt"] = assignment_receipt
+        assignment_receipts.append(assignment_receipt)
         enriched.append(replace(task, context=context))
+
+    supply_receipt = _cycle_supply_receipt(
+        config=cfg,
+        snapshot=snapshot,
+        memex_view_id=view_id,
+        generation_id=generation_id,
+        source_revision=source_revision,
+        issued_at=issued_at,
+        expires_at=expires_at,
+        tasks=enriched,
+        assignment_receipts=assignment_receipts,
+    )
 
     return OperationalMemexTaskEnrichmentResult(
         accepted=True,
         status=OPERATIONAL_MEMEX_SUPPLY_ACCEPT,
         tasks=tuple(enriched),
         memex_view_id=view_id,
+        supply_receipt=supply_receipt,
         rejection_reasons=(),
     )
 
@@ -284,6 +302,55 @@ def _validate_snapshot_memory_sources(snapshot: OperationalContextSnapshot) -> l
     if int(snapshot.breadcrumbs_state.get("record_count") or 0) <= 0:
         reasons.append("breadcrumbs_source_empty")
     return reasons
+
+
+def _cycle_supply_receipt(
+    *,
+    config: OperationalMemexSnapshotSupplyConfig,
+    snapshot: OperationalContextSnapshot,
+    memex_view_id: str,
+    generation_id: str,
+    source_revision: str,
+    issued_at: str,
+    expires_at: str,
+    tasks: Sequence[ReadOnlyAuditTaskSpec],
+    assignment_receipts: Sequence[Mapping[str, Any]],
+) -> Mapping[str, Any]:
+    """Return one cycle-level receipt for all assignment-bound Memex supplies."""
+
+    assignment_ids: list[str] = []
+    lane_ids: list[str] = []
+    task_ids: list[str] = []
+    assignment_receipt_ids: list[str] = []
+    for task, receipt in zip(tasks, assignment_receipts):
+        assignment = task.context.get("assignment") if isinstance(task.context, Mapping) else {}
+        assignment_ids.append(_clean(assignment.get("assignment_id")) or task.task_id)
+        lane_ids.append(_clean(assignment.get("lane_id")) or "unknown_lane")
+        task_ids.append(task.task_id)
+        assignment_receipt_ids.append(_clean(receipt.get("receipt_id")))
+
+    body = {
+        "schema_version": "reddog_operational_memex_snapshot_supply_receipt.v1",
+        "foundup_id": config.foundup_id,
+        "principal_id": config.principal_id,
+        "snapshot_receipt_id": snapshot.snapshot_receipt_id,
+        "snapshot_content_digest": snapshot.snapshot_content_digest,
+        "memex_view_id": memex_view_id,
+        "holoindex_generation_id": generation_id,
+        "source_revision": source_revision,
+        "policy_issued_at": issued_at,
+        "policy_expires_at": expires_at,
+        "assignment_count": len(assignment_ids),
+        "assignment_ids": tuple(assignment_ids),
+        "lane_ids": tuple(lane_ids),
+        "task_ids": tuple(task_ids),
+        "assignment_receipt_ids": tuple(assignment_receipt_ids),
+        "max_records": config.max_records,
+        "no_memex_write_performed": True,
+        "no_holoindex_reindex_performed": True,
+        "no_repo_mutation_performed": True,
+    }
+    return {**body, "receipt_id": _digest(body)}
 
 
 def _reject(*reasons: Any) -> OperationalMemexTaskEnrichmentResult:
