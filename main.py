@@ -1475,6 +1475,99 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
     return True
 
 
+def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
+    """
+    Optionally promote a backend architect FIX determination into the resident queue.
+
+    Env:
+        REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME=0             Enable promotion bridge
+        REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED=0            Block startup if rejected
+        REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
+        REDDOG_ARCHITECT_FIX_DETERMINATION_PATH              Outside-repo determination JSON
+        REDDOG_MODEL_SELECTION_RECEIPT_PATH                  Outside-repo model receipt JSON
+        REDDOG_MEMEX_SUPPLY_RECEIPT_PATH                     Outside-repo Memex supply JSON
+        REDDOG_AUTHORITY_PROFILE_SOURCE_PATH                 Outside-repo authority seed JSON
+        REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo promoted profile JSON
+        REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
+    """
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_file_path,
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-FIX-PROMOTION] profile helper import failed: {exc}")
+        return True
+
+    authority_profile_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+    )
+    required_inputs_present = all(
+        str(os.getenv(name) or "").strip()
+        for name in (
+            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH",
+            "REDDOG_MODEL_SELECTION_RECEIPT_PATH",
+            "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH",
+            "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH",
+        )
+    ) and bool(authority_profile_path)
+    raw_requested = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME")
+    requested = raw_requested == "1" or (raw_requested is None and required_inputs_present)
+    if not requested:
+        logger.info("[REDDOG-FIX-PROMOTION] Startup promotion bridge disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") != "0"
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
+            run_reddog_main_architect_fix_promotion_bootstrap,
+        )
+
+        result = run_reddog_main_architect_fix_promotion_bootstrap(
+            repo_root=repo_root,
+            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            architect_determination_path=os.getenv("REDDOG_ARCHITECT_FIX_DETERMINATION_PATH", ""),
+            model_selection_receipt_path=os.getenv("REDDOG_MODEL_SELECTION_RECEIPT_PATH", ""),
+            memex_supply_receipt_path=os.getenv("REDDOG_MEMEX_SUPPLY_RECEIPT_PATH", ""),
+            authority_profile_source_path=os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_PATH", ""),
+            authority_profile_output_path=authority_profile_path,
+            worker_id=os.getenv(
+                "REDDOG_ARCHITECT_FIX_PROMOTION_WORKER_ID",
+                "reddog-main-architect-fix-promotion",
+            ),
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-FIX-PROMOTION] Startup promotion bridge failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-FIX-PROMOTION] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-FIX-PROMOTION] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    status = "PASS" if result.accepted else "WARN"
+    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    print(
+        f"[REDDOG-FIX-PROMOTION] preflight={status} status={result.status} "
+        f"queue_item={result.queue_item_id or '(none)'} "
+        f"selected_slice={result.selected_slice or '(none)'} reasons={reasons}"
+    )
+    if result.accepted and result.authority_profile_path:
+        os.environ["REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH"] = result.authority_profile_path
+        print(
+            f"[REDDOG-FIX-PROMOTION] receipt={result.promotion_receipt_id} "
+            f"revision={result.committed_revision}"
+        )
+        return True
+
+    if enforced:
+        print("[REDDOG-FIX-PROMOTION] Startup blocked by REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED=1")
+        return False
+    return True
+
+
 def run_reddog_resident_queue_orchestration_plan_preflight(repo_root: Path) -> bool:
     """
     Plan the next resident RedDog queue bridge from the authoritative snapshot.
@@ -2127,6 +2220,8 @@ def main():
     if not run_git_main_merge_sentinel_preflight(repo_root):
         return
     if not run_reddog_authoritative_work_state_refresh_preflight(repo_root):
+        return
+    if not run_reddog_architect_fix_promotion_preflight(repo_root):
         return
     if not run_reddog_wre_queue_consumer_preflight(repo_root):
         return

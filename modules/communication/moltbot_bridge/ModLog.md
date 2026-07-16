@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_ARCHITECT_FIX_PROMOTION_MAIN_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a `main.py` promotion bridge that consumes outside-repo backend
+  architect FIX, model-selection, Memex-supply, and authority-profile receipts.
+- The bridge calls the existing signed WSP_15 promotion runtime, atomically
+  updates the outside-repo authoritative work-state snapshot, and writes the
+  promoted authority profile consumed by the resident serial loop.
+- Boundary remains constrained: no signing, worker spawn, worktree creation,
+  shell execution, OpenClaw enqueue, Hermes dispatch, PR creation,
+  PatternMemory write, reward settlement, source-repo mutation, or HoloIndex
+  re-indexing was added.
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_PLAN_OPTIONAL_PROFILE_CHAIN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
