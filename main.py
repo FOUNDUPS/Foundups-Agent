@@ -1590,6 +1590,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
     Env:
         REDDOG_RESIDENT_QUEUE_SERIAL_LOOP=0                  Enable loop (default OFF)
+        REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional `signed_0102_bounded_code`
         REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED=0         Block startup if not applied
         REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS=1        Bounded loop steps
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
@@ -1663,6 +1664,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
             run_reddog_main_resident_queue_serial_loop_bootstrap,
         )
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_binding_enabled,
+            resident_queue_materializer_mode,
+        )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
             build_reddog_verified_pattern_memory_sink,
         )
@@ -1691,7 +1696,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
             authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
             work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
-            work_order_materializer_mode=os.getenv("REDDOG_WORK_ORDER_MATERIALIZER_MODE", "") or None,
+            work_order_materializer_mode=resident_queue_materializer_mode(os.environ) or None,
             valve_environment_path=os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH", "") or None,
             generic_writer_dryrun_result_path=os.getenv(
                 "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH", ""
@@ -1703,10 +1708,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             or None,
             artifact_contents_path=os.getenv("REDDOG_ARTIFACT_CONTENTS_PATH", "") or None,
             artifact_generation_request_path=os.getenv("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH", "") or None,
-            artifact_generation_request_binding_enabled=os.getenv(
-                "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "0"
-            )
-            != "0",
+            artifact_generation_request_binding_enabled=resident_queue_binding_enabled(
+                os.environ,
+                "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING",
+            ),
             holoindex_evidence_path=os.getenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", "") or None,
             verifier_request_path=os.getenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", "") or None,
             evidence_producer_request_path=os.getenv("REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH", "") or None,
@@ -1722,31 +1727,34 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signer_socket_timeout_s=signer_socket_timeout_s,
             signer_socket_max_response_bytes=signer_socket_max_response_bytes,
             signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
-            pilot_dryrun_binding_enabled=os.getenv("REDDOG_PILOT_DRYRUN_BINDING", "0") != "0",
+            pilot_dryrun_binding_enabled=resident_queue_binding_enabled(
+                os.environ,
+                "REDDOG_PILOT_DRYRUN_BINDING",
+            ),
             worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
             worktree_runner_timeout_s=worktree_runner_timeout_s,
             artifact_generator_mode=os.getenv("REDDOG_ARTIFACT_GENERATOR_MODE", "") or None,
-            slice_verifier_request_binding_enabled=os.getenv(
-                "REDDOG_SLICE_VERIFIER_REQUEST_BINDING", "0"
-            )
-            != "0",
+            slice_verifier_request_binding_enabled=resident_queue_binding_enabled(
+                os.environ,
+                "REDDOG_SLICE_VERIFIER_REQUEST_BINDING",
+            ),
             evidence_command_runner_mode=os.getenv("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE", "") or None,
-            draft_pr_publish_request_binding_enabled=os.getenv(
-                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING", "0"
-            )
-            != "0",
-            outcome_ratchet_request_binding_enabled=os.getenv(
-                "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING", "0"
-            )
-            != "0",
-            held_out_gate_request_binding_enabled=os.getenv(
-                "REDDOG_HELD_OUT_GATE_REQUEST_BINDING", "0"
-            )
-            != "0",
-            pattern_memory_admission_request_binding_enabled=os.getenv(
-                "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING", "0"
-            )
-            != "0",
+            draft_pr_publish_request_binding_enabled=resident_queue_binding_enabled(
+                os.environ,
+                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING",
+            ),
+            outcome_ratchet_request_binding_enabled=resident_queue_binding_enabled(
+                os.environ,
+                "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING",
+            ),
+            held_out_gate_request_binding_enabled=resident_queue_binding_enabled(
+                os.environ,
+                "REDDOG_HELD_OUT_GATE_REQUEST_BINDING",
+            ),
+            pattern_memory_admission_request_binding_enabled=resident_queue_binding_enabled(
+                os.environ,
+                "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING",
+            ),
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,

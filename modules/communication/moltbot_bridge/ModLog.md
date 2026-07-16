@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_BINDING_PROFILE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code`
+  as a safe resident-queue profile for derivation/request bindings.
+- The profile defaults only resident queue derivation flags plus
+  `REDDOG_WORK_ORDER_MATERIALIZER_MODE=authority_profile`; explicit env values
+  still win, including explicit `0` disables for individual bindings.
+- Boundary remains unchanged: the profile does not enable artifact generator
+  mode, evidence command runner mode, real worktree runner, draft PR runner,
+  PatternMemory sink, shell execution, model calls, HoloIndex re-index, merge
+  authority, or reward settlement.
+
 ## 2026-07-16: REDDOG_OPENCLAW_BOUNDED_CODE_ARTIFACT_BINDING_STAGE_READY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

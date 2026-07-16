@@ -471,6 +471,80 @@ def test_runtime_binding_builds_pattern_memory_admission_sink_from_outside_repo_
     assert sink.db_path == (tmp_path / "pattern_memory.db").resolve()
 
 
+def test_runtime_binding_profile_defaults_derivation_flags(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=repo,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.runner is not None
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=repo,
+    )
+
+    assert result["accepted"] is True
+    call = bootstrap.calls[0]
+    assert call["work_order_materializer_mode"] == "authority_profile"
+    assert call["pilot_dryrun_binding_enabled"] is True
+    assert call["artifact_generation_request_binding_enabled"] is True
+    assert call["slice_verifier_request_binding_enabled"] is True
+    assert call["draft_pr_publish_request_binding_enabled"] is True
+    assert call["outcome_ratchet_request_binding_enabled"] is True
+    assert call["held_out_gate_request_binding_enabled"] is True
+    assert call["pattern_memory_admission_request_binding_enabled"] is True
+    assert "artifact_generator_mode" not in call
+    assert "draft_pr_runner" not in call
+
+
+def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+        "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "0",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=repo,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=repo,
+    )
+
+    assert result["accepted"] is True
+    assert "artifact_generation_request_binding_enabled" not in bootstrap.calls[0]
+
+
 def test_runtime_binding_rejects_pattern_memory_admission_db_inside_repo(
     tmp_path: Path,
 ) -> None:

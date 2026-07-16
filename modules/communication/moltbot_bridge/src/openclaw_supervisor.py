@@ -785,6 +785,10 @@ def _signed_0102_bounded_code_stage_ready_from_env(
 ) -> bool:
     """Return True only when a coding task may safely drive the artifact stage."""
 
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_binding_enabled,
+    )
+
     if not isinstance(context, Mapping):
         return False
     if str(env.get("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER") or "").strip() != "1":
@@ -793,7 +797,7 @@ def _signed_0102_bounded_code_stage_ready_from_env(
         return False
     artifact_request_ready = bool(
         str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH") or "").strip()
-        or str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING") or "").strip() == "1"
+        or resident_queue_binding_enabled(env, "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING")
     )
     if not artifact_request_ready:
         return False
