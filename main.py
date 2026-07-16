@@ -1435,10 +1435,17 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
         from modules.communication.moltbot_bridge.src.reddog_main_wre_queue_consumer_bootstrap import (
             run_reddog_main_wre_queue_consumer_bootstrap,
         )
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_file_path,
+        )
 
         result = run_reddog_main_wre_queue_consumer_bootstrap(
             repo_root=repo_root,
-            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            work_state_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            ),
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
         )
     except Exception as exc:
@@ -1490,11 +1497,23 @@ def run_reddog_resident_queue_orchestration_plan_preflight(repo_root: Path) -> b
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_orchestration_plan_bootstrap import (
             run_reddog_main_resident_queue_orchestration_plan_bootstrap,
         )
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_file_path,
+        )
 
         result = run_reddog_main_resident_queue_orchestration_plan_bootstrap(
             repo_root=repo_root,
-            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
-            chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
+            work_state_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            ),
+            chain_results_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+            )
+            or None,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
         )
     except Exception as exc:
@@ -1553,12 +1572,29 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_next_stage_dispatch_bootstrap import (
             run_reddog_main_resident_queue_next_stage_dispatch_bootstrap,
         )
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_file_path,
+        )
 
         result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
             repo_root=repo_root,
-            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
-            chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
-            authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
+            work_state_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            ),
+            chain_results_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+            )
+            or None,
+            authority_profile_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+            )
+            or None,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
         )
     except Exception as exc:

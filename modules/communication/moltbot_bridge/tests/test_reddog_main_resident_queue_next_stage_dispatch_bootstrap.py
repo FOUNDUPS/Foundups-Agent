@@ -258,6 +258,53 @@ def test_main_next_stage_dispatch_preflight_passes_when_bootstrap_applies(tmp_pa
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
 
 
+def test_main_next_stage_dispatch_preflight_profile_derives_runtime_paths(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_next_stage_dispatch_bootstrap.run_reddog_main_resident_queue_next_stage_dispatch_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "dispatched_stage": AUTHORITY_REQUEST_STAGE_KEY,
+                "next_action": NEXT_QUEUE_AUTHORITY_RUNTIME_INVOKE,
+                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_NEXT_STAGE_DISPATCH": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_next_stage_dispatch_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["work_state_path"] == str(
+        runtime_root / "authoritative_work_state.json"
+    )
+    assert mocked.call_args.kwargs["chain_results_path"] == str(
+        runtime_root / "resident_queue_chain_results.json"
+    )
+    assert mocked.call_args.kwargs["authority_profile_path"] == str(
+        runtime_root / "authority_profile.json"
+    )
+    assert not runtime_root.exists()
+
+
 def test_main_next_stage_dispatch_preflight_blocks_when_enforced() -> None:
     import main
 

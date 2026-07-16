@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MIDDLE_PREFLIGHTS_PROFILE_PATHS_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Aligned the WRE queue consumer, resident orchestration-plan, and
+  next-stage dispatch `main.py` preflights with the resident profile runtime
+  path helper.
+- These preflights now consume the same profile-derived work-state,
+  chain-results, and authority-profile paths as the refresh producer and
+  serial-loop runner when explicit env vars are absent.
+- Added regression tests proving the derived paths are passed without creating
+  runtime files or writing inside the source checkout.
+
 ## 2026-07-16: REDDOG_WORK_STATE_REFRESH_PROFILE_PATH_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
