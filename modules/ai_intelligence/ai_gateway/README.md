@@ -81,6 +81,22 @@ The planner requires source promotion-gate receipts and a cost-budget receipt.
 It does not call providers, run benchmarks, mutate catalogs, write
 PatternMemory, or bind RedDog runtime defaults.
 
+## RedDog Runtime Model Binding
+
+`src/model_runtime_binding.py` is the first production-facing binding layer for
+dynamic RedDog model selection. It consumes a production `ModelSelectionReceipt`,
+the matching catalog snapshot, benchmark evidence receipts, promotion evidence
+receipts, and an explicit runtime policy. Only after those receipts agree does it
+emit a digest-bound `RedDogModelRuntimeBindingReceipt` plus a minimal
+RedDog/Fusion bridge payload (`lead_model`, `panel_models`, role bindings, and
+binding receipt IDs).
+
+Catalog-only `CHAMPION` fields do not bind runtime authority. Evaluation
+selections remain valid for benchmarking, but cannot become RedDog runtime
+defaults. This layer still does not call providers, run benchmarks, mutate the
+extension, persist champion ledgers, write PatternMemory, or change
+`extension.js`.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway
