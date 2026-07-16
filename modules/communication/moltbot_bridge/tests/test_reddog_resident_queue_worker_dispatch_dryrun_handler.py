@@ -17,8 +17,8 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
     invoke_reddog_resident_queue_next_stage_dispatch,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
-    NEXT_QUEUE_WORK_ORDER_INVOCATION,
     NEXT_QUEUE_WORKER_DISPATCH_DRYRUN,
+    NEXT_QUEUE_WORKER_DISPATCH_RUNTIME,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_dryrun_handler import (
     AUTHORITY_RUNTIME_STAGE_KEY,
@@ -222,7 +222,7 @@ def test_dispatcher_records_worker_dispatch_dryrun_and_advances_to_work_order_in
     assert result.accepted is True
     assert result.decision == RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT
     assert result.dispatched_stage == WORKER_DISPATCH_DRYRUN_STAGE_KEY
-    assert result.next_action == NEXT_QUEUE_WORK_ORDER_INVOCATION
+    assert result.next_action == NEXT_QUEUE_WORKER_DISPATCH_RUNTIME
     stage = store.load()["stage_results"][WORKER_DISPATCH_DRYRUN_STAGE_KEY]
     assert stage["accepted"] is True
     assert stage["decision"] == SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT

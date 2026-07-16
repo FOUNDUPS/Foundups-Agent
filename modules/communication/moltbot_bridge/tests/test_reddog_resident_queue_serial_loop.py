@@ -36,6 +36,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verific
 from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+    SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
     QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT,
 )
@@ -87,6 +90,7 @@ STAGE_ACCEPT_VALUES = {
     "authority_runtime": ("decision", QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT),
     "authority_verification": ("decision", QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT),
     "worker_dispatch_dryrun": ("decision", SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT),
+    "worker_dispatch_runtime": ("decision", SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT),
     "work_order_invocation": ("decision", QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT),
     "executor_plan": ("decision", QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT),
     "execution_valve": ("decision", QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT),

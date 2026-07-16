@@ -86,6 +86,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "worker_dispatch_dryrun": {
             "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT",
         },
+        "worker_dispatch_runtime": {
+            "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT",
+        },
         "work_order_invocation": {
             "decision": "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT",
         },

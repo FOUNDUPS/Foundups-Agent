@@ -74,6 +74,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispa
     WORKER_DISPATCH_DRYRUN_STAGE_KEY,
     build_reddog_resident_queue_worker_dispatch_dryrun_stage_handler,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_runtime_handler import (
+    WORKER_DISPATCH_RUNTIME_STAGE_KEY,
+    build_reddog_resident_queue_worker_dispatch_runtime_stage_handler,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worktree_create_handler import (
     WORKTREE_CREATE_STAGE_KEY,
     build_reddog_resident_queue_worktree_create_stage_handler,
@@ -214,6 +218,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     held_out_gate_request: Optional[Mapping[str, Any]] = None,
     admission_request: Optional[Mapping[str, Any]] = None,
     pattern_memory_admission_sink: Any = None,
+    worker_dispatch_writer: Any = None,
 ) -> ResidentQueueStageHandlerRegistry:
     """Build a handler map from explicitly injected dependencies."""
 
@@ -287,6 +292,17 @@ def build_reddog_resident_queue_stage_handler_registry(
         lambda: build_reddog_resident_queue_worker_dispatch_dryrun_stage_handler(
             work_state_snapshot=work_state_snapshot,
             chain_results_store=chain_results_store,
+        ),
+    )
+    _add_if_ready(
+        handlers,
+        missing,
+        WORKER_DISPATCH_RUNTIME_STAGE_KEY,
+        _missing(("worker_dispatch_writer", worker_dispatch_writer)),
+        lambda: build_reddog_resident_queue_worker_dispatch_runtime_stage_handler(
+            work_state_snapshot=work_state_snapshot,
+            chain_results_store=chain_results_store,
+            writer=worker_dispatch_writer,
         ),
     )
     _add_if_ready(
