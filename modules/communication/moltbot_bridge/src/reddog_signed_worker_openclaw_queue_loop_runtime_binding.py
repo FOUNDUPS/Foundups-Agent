@@ -34,6 +34,8 @@ SIGNED_WORKER_QUEUE_LOOP_BINDING_REJECT = "SIGNED_WORKER_QUEUE_LOOP_BINDING_REJE
 
 OPENCLAW_SIGNED_WORKER_RUNTIME = "openclaw"
 OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY = "candidate_queue_review"
+SIGNED_0102_WORKER_RUNTIME = "0102"
+SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY = "bounded_code_change"
 
 
 class SignedWorkerOpenClawQueueLoopBindingReason:
@@ -91,6 +93,19 @@ def is_openclaw_candidate_signed_worker_context(context: Mapping[str, Any] | Non
         str(context.get("source") or "") == SIGNED_WORKER_DISPATCH_TASK_SOURCE
         and str(context.get("worker_runtime") or "").strip().lower() == OPENCLAW_SIGNED_WORKER_RUNTIME
         and str(context.get("capability") or "").strip().lower() == OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY
+    )
+
+
+def is_0102_bounded_code_change_signed_worker_context(context: Mapping[str, Any] | None) -> bool:
+    """Return True only for signed 0102 coding tasks handled at the bounded stage."""
+
+    if not isinstance(context, Mapping):
+        return False
+    return (
+        str(context.get("source") or "") == SIGNED_WORKER_DISPATCH_TASK_SOURCE
+        and str(context.get("worker_runtime") or "").strip() == SIGNED_0102_WORKER_RUNTIME
+        and str(context.get("capability") or "").strip().lower()
+        == SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY
     )
 
 
@@ -296,11 +311,14 @@ def _stripped(value: Any) -> str:
 __all__ = [
     "OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY",
     "OPENCLAW_SIGNED_WORKER_RUNTIME",
+    "SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY",
+    "SIGNED_0102_WORKER_RUNTIME",
     "SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED",
     "SIGNED_WORKER_QUEUE_LOOP_BINDING_READY",
     "SIGNED_WORKER_QUEUE_LOOP_BINDING_REJECT",
     "SignedWorkerOpenClawQueueLoopBindingReason",
     "SignedWorkerOpenClawQueueLoopBindingResult",
     "build_reddog_signed_worker_queue_loop_runner_from_env",
+    "is_0102_bounded_code_change_signed_worker_context",
     "is_openclaw_candidate_signed_worker_context",
 ]

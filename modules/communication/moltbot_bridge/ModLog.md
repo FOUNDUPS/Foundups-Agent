@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_0102_BOUNDED_CODE_CHANGE_STAGE_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a stage-scoped signed 0102 `bounded_code_change` binding to the
+  resident queue-loop runner. It may advance exactly one queue stage only when
+  the authoritative chain is already at `bounded_worker_pilot`.
+- Required explicit artifact generation for 0102 coding tasks:
+  `artifact_generation_request_path` plus `artifact_generator_mode=foundups_fusion`;
+  static `artifact_contents_path` is rejected for this capability.
+- Wired OpenClaw task discovery to claim 0102 bounded-code tasks only when
+  `OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED=1`, the queue-loop runner is
+  configured, and the chain plan is stage-ready. Early tasks remain pending
+  instead of being failed.
+- Boundary remains explicit: no broad 0102 worker launch, no shell execution,
+  no source-repo mutation, no Hermes dispatch, no PR publish/merge, no
+  HoloIndex re-index, no reward settlement, and no authority beyond the
+  existing bounded-worker-pilot stage is added.
+
 ## 2026-07-16: REDDOG_SIGNED_0102_READONLY_REVIEW_RUNTIME_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
