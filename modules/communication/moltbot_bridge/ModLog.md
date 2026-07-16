@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_PLAN_OPTIONAL_PROFILE_CHAIN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Fixed the resident orchestration-plan preflight so a profile-derived default
+  `REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH` is optional until the serial loop
+  creates the chain-results file.
+- Preserved strict behavior for an explicit `REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH`;
+  if the operator supplies a path, the planner still validates it.
+- Added real-path and mocked regressions proving the first resident profile
+  plan does not warn on a missing default chain file, while existing chain
+  files and explicit paths are still passed through.
+
 ## 2026-07-16: REDDOG_RESIDENT_PROFILE_SERIAL_LOOP_DEFAULT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

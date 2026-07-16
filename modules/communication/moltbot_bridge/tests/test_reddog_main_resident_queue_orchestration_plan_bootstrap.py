@@ -260,10 +260,123 @@ def test_main_resident_queue_plan_preflight_profile_derives_runtime_paths(
     assert mocked.call_args.kwargs["work_state_path"] == str(
         runtime_root / "authoritative_work_state.json"
     )
-    assert mocked.call_args.kwargs["chain_results_path"] == str(
-        runtime_root / "resident_queue_chain_results.json"
-    )
+    assert mocked.call_args.kwargs["chain_results_path"] is None
     assert not runtime_root.exists()
+
+
+def test_main_resident_queue_plan_preflight_profile_uses_existing_chain_file(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    chain_path = runtime_root / "resident_queue_chain_results.json"
+    chain_path.parent.mkdir(parents=True)
+    chain_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "reddog_resident_queue_chain_results.v1",
+                "stage_results": {},
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_orchestration_plan_bootstrap.run_reddog_main_resident_queue_orchestration_plan_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "ready": True,
+                "status": REDDOG_RESIDENT_QUEUE_PLAN_BOOTSTRAP_READY,
+                "plan_id": "plan-1",
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "current_stage": "authority_request",
+                "next_action": NEXT_QUEUE_AUTHORITY_REQUEST_DRYRUN,
+                "accepted_stage_count": 1,
+                "chain_complete": False,
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_orchestration_plan_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["chain_results_path"] == str(chain_path)
+
+
+def test_main_resident_queue_plan_preflight_preserves_explicit_chain_path(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    explicit_chain = tmp_path / "runtime" / "missing-chain-results.json"
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_orchestration_plan_bootstrap.run_reddog_main_resident_queue_orchestration_plan_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "ready": True,
+                "status": REDDOG_RESIDENT_QUEUE_PLAN_BOOTSTRAP_READY,
+                "plan_id": "plan-1",
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "current_stage": "authority_request",
+                "next_action": NEXT_QUEUE_AUTHORITY_REQUEST_DRYRUN,
+                "accepted_stage_count": 1,
+                "chain_complete": False,
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "resident-runtime"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(explicit_chain),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_orchestration_plan_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["chain_results_path"] == str(explicit_chain)
+
+
+def test_main_resident_queue_plan_preflight_profile_missing_chain_file_still_plans(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    state_path = runtime_root / "authoritative_work_state.json"
+    state_path.parent.mkdir(parents=True)
+    state_path.write_text(json.dumps(_snapshot(), sort_keys=True), encoding="utf-8")
+
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_RESIDENT_QUEUE_ORCHESTRATION_PLAN": "1",
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+            "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+        },
+        clear=True,
+    ):
+        assert main.run_reddog_resident_queue_orchestration_plan_preflight(REPO_ROOT) is True
+
+    assert not (runtime_root / "resident_queue_chain_results.json").exists()
 
 
 def test_main_resident_queue_plan_preflight_blocks_when_enforced() -> None:
