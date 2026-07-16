@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MAIN_OPENCLAW_ARTIFACT_GENERATION_CHAIN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Hardened the bounded artifact generation runner so it resolves the
+  `advisory_model_once` Fusion bridge through a repo-path fallback instead of
+  depending on an ambient `scripts` package import.
+- Added a `main.py` startup-preflight regression proving OpenClaw can claim a
+  signed `0102` bounded-code task at the bounded-worker stage, derive the
+  artifact-generation request from the existing queue chain, invoke the
+  FoundUps Fusion artifact generator, and materialize the generated artifact
+  only inside the isolated worktree.
+- Boundary remains constrained: no static artifact-content JSON, no source
+  repo mutation, no shell execution, no Hermes dispatch, no live OpenClaw
+  enqueue, no real PR publication, no reward settlement, and no HoloIndex
+  re-indexing was added.
+
 ## 2026-07-16: REDDOG_MAIN_OPENCLAW_SIGNED_WORKER_COMPLETE_CHAIN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

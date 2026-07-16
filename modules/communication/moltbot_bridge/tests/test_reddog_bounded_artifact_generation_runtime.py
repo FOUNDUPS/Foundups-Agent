@@ -21,6 +21,7 @@ from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation
     ArtifactGenerationModelResult,
     generate_bounded_artifact_contents,
 )
+from modules.communication.moltbot_bridge.src import reddog_bounded_artifact_generation_runtime
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -111,6 +112,13 @@ def test_valid_generation_returns_exact_bounded_artifacts() -> None:
     assert result.no_shell_command_executed is True
     assert runner.calls
     assert runner.calls[0]["binding"]["work_order_id"] == "work-order-1"
+
+
+def test_foundups_fusion_runner_loader_resolves_repo_bridge() -> None:
+    runner = reddog_bounded_artifact_generation_runtime._load_foundups_fusion_runner()
+
+    assert callable(runner)
+    assert runner.__name__ == "_run_foundups_fusion"
 
 
 def test_missing_explicit_request_rejects_before_runner() -> None:
