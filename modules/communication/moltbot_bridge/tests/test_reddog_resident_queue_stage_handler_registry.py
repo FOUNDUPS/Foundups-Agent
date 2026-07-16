@@ -283,6 +283,39 @@ def test_registry_binding_slice_verifier_requires_resolver_repo_and_runner(tmp_p
     assert "missing_dependency:evidence_command_runner" not in registry.missing_stage_reasons["slice_verifier"]
 
 
+def test_registry_registers_draft_pr_publish_from_request_binding_dependencies(tmp_path: Path) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        draft_pr_runner=dummy,
+        draft_pr_publish_request_binding_enabled=True,
+        now_iso=NOW_ISO,
+    )
+
+    assert "verified_draft_pr_publish" in registry.registered_stage_keys
+    assert "verified_draft_pr_publish" not in registry.missing_stage_reasons
+    assert registry.no_default_runner_created is True
+
+
+def test_registry_binding_draft_pr_publish_requires_resolver_and_runner() -> None:
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        draft_pr_publish_request_binding_enabled=True,
+        now_iso=NOW_ISO,
+    )
+
+    assert "verified_draft_pr_publish" not in registry.registered_stage_keys
+    reasons = registry.missing_stage_reasons["verified_draft_pr_publish"]
+    assert "missing_dependency:work_order_resolver" in reasons
+    assert "missing_dependency:draft_pr_runner" in reasons
+    assert "missing_dependency:publish_request" not in reasons
+
+
 def test_registry_has_no_shell_network_holoindex_or_default_client_construction() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     banned_import_roots = {

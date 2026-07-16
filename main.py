@@ -1609,6 +1609,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH                Outside-repo evidence producer request JSON
         REDDOG_SLICE_VERIFIER_REQUEST_BINDING                Derive verifier request from queue chain state
         REDDOG_EVIDENCE_COMMAND_RUNNER_MODE                  Optional `real` evidence command runner mode
+        REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH                 Outside-repo draft PR publish request JSON
+        REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING              Derive draft PR publish request from queue chain state
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -1721,6 +1723,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
             != "0",
             evidence_command_runner_mode=os.getenv("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE", "") or None,
+            draft_pr_publish_request_binding_enabled=os.getenv(
+                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING", "0"
+            )
+            != "0",
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,

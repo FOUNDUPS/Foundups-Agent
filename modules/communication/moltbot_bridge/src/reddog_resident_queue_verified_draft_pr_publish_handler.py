@@ -15,7 +15,7 @@ dispatch Hermes, write PatternMemory, settle rewards, or re-index HoloIndex.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     ResidentQueueChainResultsStore,
@@ -25,6 +25,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_INVOKE,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_draft_pr_publish_request_binding import (
+    build_resident_queue_draft_pr_publish_request,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verified_draft_pr_publish_invoke import (
     QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_REJECT,
@@ -40,6 +43,24 @@ FAIL_DISPATCH_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_NEXT_ACTION_MISMATCH"
 FAIL_SLICE_VERIFIER_STAGE_MISSING = "FAIL_SLICE_VERIFIER_STAGE_MISSING"
 FAIL_PUBLISH_REQUEST_MISSING = "FAIL_PUBLISH_REQUEST_MISSING"
 FAIL_DRAFT_PR_RUNNER_MISSING = "FAIL_DRAFT_PR_RUNNER_MISSING"
+FAIL_WORK_ORDER_ID_MISSING = "FAIL_WORK_ORDER_ID_MISSING"
+FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
+FAIL_DRAFT_PR_PUBLISH_REQUEST_BINDING_REJECTED = (
+    "FAIL_DRAFT_PR_PUBLISH_REQUEST_BINDING_REJECTED"
+)
+
+
+class ResidentQueueDraftPrPublishWorkOrderResolver(Protocol):
+    """Injected resolver for the work order bound to the slice verifier."""
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: Optional[str],
+        selected_slice: Optional[str],
+    ) -> Mapping[str, Any]:
+        """Return the queue-bound work order mapping."""
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -56,6 +77,12 @@ def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
     if not isinstance(raw, Mapping):
         return {}
     return {str(key): value for key, value in raw.items() if isinstance(value, Mapping)}
+
+
+def _work_order_id_from_slice_verifier(slice_verifier: Mapping[str, Any]) -> str:
+    verifier_result = _mapping(slice_verifier.get("verifier_result"))
+    receipt = _mapping(verifier_result.get("receipt"))
+    return str(receipt.get("work_order_id") or "").strip()
 
 
 def _reject(*reasons: str) -> dict[str, Any]:
@@ -77,8 +104,10 @@ class ResidentQueueVerifiedDraftPrPublishStageHandler:
     """Callable handler for the resident queue `verified_draft_pr_publish` stage."""
 
     chain_results_store: ResidentQueueChainResultsStore
-    publish_request: Mapping[str, Any]
-    runner: Optional[Any]
+    publish_request: Mapping[str, Any] | None = None
+    runner: Optional[Any] = None
+    work_order_resolver: ResidentQueueDraftPrPublishWorkOrderResolver | None = None
+    draft_pr_publish_request_binding_enabled: bool = False
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY:
@@ -100,24 +129,62 @@ class ResidentQueueVerifiedDraftPrPublishStageHandler:
             return _reject(FAIL_SLICE_VERIFIER_STAGE_MISSING)
 
         publish_request = _mapping(self.publish_request)
+        draft_pr_publish_request_binding_result: Mapping[str, Any] | None = None
+        if not publish_request and self.draft_pr_publish_request_binding_enabled:
+            if self.work_order_resolver is None:
+                return _reject(FAIL_WORK_ORDER_MISSING, "missing_dependency:work_order_resolver")
+            work_order_id = _work_order_id_from_slice_verifier(slice_verifier)
+            if not work_order_id:
+                return _reject(FAIL_WORK_ORDER_ID_MISSING)
+            work_order = _mapping(
+                self.work_order_resolver.resolve(
+                    work_order_id=work_order_id,
+                    queue_item_id=request.queue_item_id,
+                    selected_slice=request.selected_slice,
+                )
+            )
+            if not work_order:
+                return _reject(FAIL_WORK_ORDER_MISSING, f"work_order_id:{work_order_id}")
+            bound = build_resident_queue_draft_pr_publish_request(
+                work_order=work_order,
+                stage_results=stage_results,
+            )
+            draft_pr_publish_request_binding_result = bound.to_dict()
+            if bound.accepted is not True:
+                rejected = _reject(
+                    FAIL_DRAFT_PR_PUBLISH_REQUEST_BINDING_REJECTED,
+                    *bound.rejection_reasons,
+                )
+                rejected["draft_pr_publish_request_binding_result"] = (
+                    draft_pr_publish_request_binding_result
+                )
+                return rejected
+            publish_request = bound.publish_request
         if not publish_request:
             return _reject(FAIL_PUBLISH_REQUEST_MISSING)
         if self.runner is None:
             return _reject(FAIL_DRAFT_PR_RUNNER_MISSING)
 
-        return invoke_reddog_wre_queue_authorized_verified_draft_pr_publish(
+        result = invoke_reddog_wre_queue_authorized_verified_draft_pr_publish(
             explicit_queue_authorized_verified_draft_pr_publish_requested=True,
             queue_slice_verifier_result=slice_verifier,
             publish_request=publish_request,
             runner=self.runner,
         ).to_dict()
+        if draft_pr_publish_request_binding_result is not None:
+            result["draft_pr_publish_request_binding_result"] = (
+                draft_pr_publish_request_binding_result
+            )
+        return result
 
 
 def build_reddog_resident_queue_verified_draft_pr_publish_stage_handler(
     *,
     chain_results_store: ResidentQueueChainResultsStore,
-    publish_request: Mapping[str, Any],
+    publish_request: Mapping[str, Any] | None = None,
     runner: Optional[Any],
+    work_order_resolver: ResidentQueueDraftPrPublishWorkOrderResolver | None = None,
+    draft_pr_publish_request_binding_enabled: bool = False,
 ) -> ResidentQueueVerifiedDraftPrPublishStageHandler:
     """Build the injected verified-draft-PR-publish handler for the dispatcher."""
 
@@ -125,15 +192,21 @@ def build_reddog_resident_queue_verified_draft_pr_publish_stage_handler(
         chain_results_store=chain_results_store,
         publish_request=publish_request,
         runner=runner,
+        work_order_resolver=work_order_resolver,
+        draft_pr_publish_request_binding_enabled=draft_pr_publish_request_binding_enabled,
     )
 
 
 __all__ = [
     "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_STAGE_MISMATCH",
+    "FAIL_DRAFT_PR_PUBLISH_REQUEST_BINDING_REJECTED",
     "FAIL_DRAFT_PR_RUNNER_MISSING",
     "FAIL_PUBLISH_REQUEST_MISSING",
     "FAIL_SLICE_VERIFIER_STAGE_MISSING",
+    "FAIL_WORK_ORDER_ID_MISSING",
+    "FAIL_WORK_ORDER_MISSING",
+    "ResidentQueueDraftPrPublishWorkOrderResolver",
     "ResidentQueueVerifiedDraftPrPublishStageHandler",
     "SLICE_VERIFIER_STAGE_KEY",
     "VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY",

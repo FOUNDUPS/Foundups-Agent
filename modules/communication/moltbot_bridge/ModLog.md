@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_DRAFT_PR_PUBLISH_REQUEST_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Added resident queue verified draft-PR publish request binding that derives
+  the publish request from an explicit `draft_pr_publish_plan` plus recorded
+  slice-verifier and worktree-create chain results.
+- Wired the resident queue `verified_draft_pr_publish` stage to use the
+  derived publish request only when
+  `REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING` is explicitly enabled; the
+  existing external publish request JSON path remains unchanged.
+- Boundary remains draft-only and runner-gated: no default runner, mark-ready,
+  merge, command execution, PatternMemory write, reward settlement, HoloIndex
+  re-index, OpenClaw enqueue, or Hermes dispatch is added by this slice.
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_REQUEST_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

@@ -205,6 +205,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     evidence_command_runner: Any = None,
     slice_verifier_request_binding_enabled: bool = False,
     publish_request: Optional[Mapping[str, Any]] = None,
+    draft_pr_publish_request_binding_enabled: bool = False,
     draft_pr_runner: Any = None,
     ratchet_request: Optional[Mapping[str, Any]] = None,
     outcome_ratchet_store: Any = None,
@@ -399,11 +400,18 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers,
         missing,
         VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY,
-        _missing(("publish_request", publish_request), ("draft_pr_runner", draft_pr_runner)),
+        _draft_pr_publish_missing(
+            publish_request=publish_request,
+            draft_pr_publish_request_binding_enabled=draft_pr_publish_request_binding_enabled,
+            work_order_resolver=work_order_resolver,
+            draft_pr_runner=draft_pr_runner,
+        ),
         lambda: build_reddog_resident_queue_verified_draft_pr_publish_stage_handler(
             chain_results_store=chain_results_store,
             publish_request=publish_request or {},
             runner=draft_pr_runner,
+            work_order_resolver=work_order_resolver,
+            draft_pr_publish_request_binding_enabled=draft_pr_publish_request_binding_enabled,
         ),
     )
     _add_if_ready(
@@ -511,6 +519,23 @@ def _slice_verifier_missing(
     if evidence_command_runner is None:
         reasons.append("missing_dependency:evidence_command_runner")
     return tuple(reasons)
+
+
+def _draft_pr_publish_missing(
+    *,
+    publish_request: Optional[Mapping[str, Any]],
+    draft_pr_publish_request_binding_enabled: bool,
+    work_order_resolver: Any,
+    draft_pr_runner: Any,
+) -> tuple[str, ...]:
+    if publish_request and draft_pr_runner is not None:
+        return ()
+    if draft_pr_publish_request_binding_enabled:
+        return _missing(
+            ("work_order_resolver", work_order_resolver),
+            ("draft_pr_runner", draft_pr_runner),
+        )
+    return _missing(("publish_request", publish_request), ("draft_pr_runner", draft_pr_runner))
 
 
 __all__ = [
