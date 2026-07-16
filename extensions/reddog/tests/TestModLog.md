@@ -1,4 +1,4 @@
-# Foundups®Agent TestModLog
+# Foundups(R)Agent TestModLog
 
 ## 2026-07-09 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (WRE-DRY-001..WRE-DRY-010)
 
@@ -235,13 +235,13 @@ git diff --check -- extensions/foundups_advisory_workers
 - Verified Working Tail DOM precedes toolbar and work focus composer in HTML order.
 - Verified `Worker` UI label removed; `0102 Role` label present.
 - Verified `buildCopyMarkdown` Run Trace fields, BLOCKED_LOCALLY redaction block, repair-failure warnings.
-- Verified `detectMojibake` catches `窶` and `竊`.
+- Verified `detectMojibake` catches `` and ``.
 
 ## 2026-06-24 - v0.3.18 Branding Contract
-- Verified user-facing branding uses Foundups®Agent while the internal package id and command id remain stable.
+- Verified user-facing branding uses Foundups(R)Agent while the internal package id and command id remain stable.
 - Verified Fusion remains documented as an internal mode, not the product identity.
 
-## 2026-06-23 窶・v0.3.17 Working Trail Phase 2 CODE Tests
+## 2026-06-23 v0.3.17 Working Trail Phase 2 CODE Tests
 
 - Trail DOM + progress command shape + operator message rg gate.
 - `REDDOG_STAGE_ACTIONS` key set equals unique `_progress` stages from bridge (16/16).

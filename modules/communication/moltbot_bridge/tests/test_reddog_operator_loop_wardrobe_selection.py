@@ -44,7 +44,7 @@ def _holo(**overrides):
     payload = {
         "holoindex_query": "RedDog operator loop wardrobe selection",
         "holoindex_status": "bundle_json_ok",
-        "code_hits": [{"path": "extensions/foundups_advisory_workers/extension.js"}],
+        "code_hits": [{"path": "extensions/reddog/extension.js"}],
         "wsp_hits": [{"path": "WSP_knowledge/src/WSP_97_System_Execution_Prompting_Protocol.md"}],
         "skill_hits": [{"skill_name": "autonomous_slice_worker"}],
         "index_gap_detected": False,
@@ -182,7 +182,7 @@ def test_index_gap_rejects_write_sensitive_selection() -> None:
         "Implement RedDog extension to live enqueue.",
         authority_request="draft_pr",
         holoindex_evidence=_holo(index_gap_detected=True, retrieval_quality="INDEX_GAP"),
-        required_targets=["extensions/foundups_advisory_workers/extension.js"],
+        required_targets=["extensions/reddog/extension.js"],
         target_recall_ok=True,
     )
     assert result.decision == WARDROBE_SELECTION_REJECT

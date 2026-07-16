@@ -141,7 +141,7 @@ def test_changed_paths_map_to_freshness_collections() -> None:
         "modules/foundups/agent/SKILLz.md",
         "docs/0102_session_briefings/work_ledger.schema.json",
         "WSP_knowledge/docs/Papers/PQN_Deep_Dive.md",
-        "extensions/foundups_advisory_workers/extension.js",
+        "extensions/reddog/extension.js",
     ]
 
     assert collections_for_changed_paths(paths) == [

@@ -29,7 +29,7 @@ MODULE_PATH = (
     / "src"
     / "reddog_extension_live_enqueue_invoke.py"
 )
-EXTENSION_JS = REPO_ROOT / "extensions" / "foundups_advisory_workers" / "extension.js"
+EXTENSION_JS = REPO_ROOT / "extensions" / "reddog" / "extension.js"
 
 
 class _FakeWriter:

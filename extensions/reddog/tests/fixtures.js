@@ -1,12 +1,12 @@
 /**
  * Shared contract-test fixtures. Reuse in verify_extension_contract.js and future
- * RedDog slices — do not duplicate prompt strings across test files.
+ * RedDog slices Edo not duplicate prompt strings across test files.
  */
-const EXT_ACC_001_PROMPT = 'Review extensions/foundups_advisory_workers/extension.js for WSP_97 truth-label compliance. List OBSERVED vs INFERRED claims, missing evidence, and smallest valid fixes. Include WSP_15 priority for each fix.';
+const EXT_ACC_001_PROMPT = 'Review extensions/reddog/extension.js for WSP_97 truth-label compliance. List OBSERVED vs INFERRED claims, missing evidence, and smallest valid fixes. Include WSP_15 priority for each fix.';
 
-const EXT_ACC_001_TARGET_PATH = 'extensions/foundups_advisory_workers/extension.js';
+const EXT_ACC_001_TARGET_PATH = 'extensions/reddog/extension.js';
 
-const BUILD_COPY_MARKDOWN_PROMPT = 'Review buildCopyMarkdown in extensions/foundups_advisory_workers/extension.js for WSP_97 compliance.';
+const BUILD_COPY_MARKDOWN_PROMPT = 'Review buildCopyMarkdown in extensions/reddog/extension.js for WSP_97 compliance.';
 
 const REGULAR_SMOKE_PROMPT = 'Reply with exactly: regular mode works';
 
@@ -28,7 +28,7 @@ const REPAIR_DRAFT_WITH_BLOCK_LITERALS = [
 
 const REPAIR_SUPPLEMENT_SECTIONS = [
   '## Evidence',
-  'E1: OBSERVED — primary pass completed with bounded context attached.',
+  'E1: OBSERVED Eprimary pass completed with bounded context attached.',
   '## Proposed fixes',
   'F1: defer until verified.',
   '## Uncertainties',
@@ -49,7 +49,7 @@ const REPAIR_SUPPLEMENT_SECTIONS = [
 
 const REPAIR_TAIL_SUPPLEMENT = [
   '## Evidence',
-  'E1: OBSERVED — primary Fusion pass completed with routing summary attached.',
+  'E1: OBSERVED Eprimary Fusion pass completed with routing summary attached.',
   '## Architect Trace',
   '- Evidence retrieved: primary lead/panel/synthesis excerpts from prior pass.',
   '- Alternatives considered: full re-run rejected; schema supplement chosen.',
@@ -59,17 +59,17 @@ const REPAIR_TAIL_SUPPLEMENT = [
   '012 confirms Run Trace shows repair_minimal + openrouter_single, then land if validation passes.'
 ].join('\n\n');
 
-// REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3): a FoundUp-creation audit
+// REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3): a FoundUps-creation audit
 // prompt carrying an explicit "Required direct-read targets" list. The detector
 // must honestly report index_gap_detected when none of these are recalled.
 const FOUNDUP_REQUIRED_TARGETS = [
-  'WSP_framework/src/WSP_109_FoundUp_Onboarding_Protocol.md',
+  'WSP_framework/src/WSP_109_FoundUps_Onboarding_Protocol.md',
   'modules/infrastructure/openclaw/src/openclaw_foundup_orchestrator.py',
   'modules/communication/moltbot_bridge/src/hermes_foundup_job_executor.py'
 ];
 
 const FOUNDUP_CREATION_PROMPT = [
-  'Audit the FoundUp creation monorepo WSP_109 execution path.',
+  'Audit the FoundUps creation monorepo WSP_109 execution path.',
   '',
   'Required direct-read targets:',
   '- ' + FOUNDUP_REQUIRED_TARGETS[0],
@@ -83,9 +83,9 @@ const TARGET_READ_DENIED_PATHS = [
   ['C:/Windows/System32/drivers/etc/hosts', 'absolute path'],
   ['../outside.txt', 'traversal'],
   ['.env', '.env basename'],
-  ['extensions/foundups_advisory_workers/node_modules/pkg/index.js', 'node_modules segment'],
+  ['extensions/reddog/node_modules/pkg/index.js', 'node_modules segment'],
   ['.git/config', '.git segment'],
-  ['extensions/foundups_advisory_workers/foundups-fusion-worker-0.3.21.vsix', 'vsix extension']
+  ['extensions/reddog/foundups-fusion-worker-0.3.21.vsix', 'vsix extension']
 ];
 
 // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (WFTD): free-form work-focus prompt shapes.
@@ -140,7 +140,7 @@ const WORK_FOCUS_COMMAND_FENCE_PROMPT = [
   'Validate the change.',
   '',
   '```powershell',
-  'node --check extensions/foundups_advisory_workers/extension.js',
+  'node --check extensions/reddog/extension.js',
   'python holo_index.py --search "reddog work focus"',
   '```',
   '',

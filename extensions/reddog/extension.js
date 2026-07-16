@@ -4,7 +4,11 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.68';
+const EXTENSION_VERSION = '0.4.0';
+const REDDOG_EXTENSION_ID = 'foundups.reddog';
+const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
+const REDDOG_CONFIG_NAMESPACE = 'reddog';
+const REDDOG_LEGACY_CONFIG_NAMESPACE = 'foundupsFusion';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -45,6 +49,7 @@ const WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES = 262144;
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
 const REDDOG_EXTENSION_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_SLICE = 'REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1';
 const REDDOG_RESIDENT_ARCHITECT_SESSION_RUNTIME_SLICE = 'REDDOG_EXTENSION_TO_RESIDENT_ARCHITECT_SESSION_RUNTIME_PHASE1';
+const REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE = 'REDDOG_PRODUCT_IDENTITY_AND_THIN_CLIENT_0_4_0';
 const REDDOG_OPENCLAW_LIVE_ENQUEUE_TARGET = 'reddog_openclaw_live_enqueue';
 const TRUSTED_PERMISSION_SNAPSHOT_SOURCES = new Set(['gh_cli', 'github_api', 'mock']);
 const MOJIBAKE_MARKERS = ['\u7aa6', '\u7aaa'];
@@ -483,7 +488,7 @@ function resolveProviderReasoningReport(resolvedEffort) {
 // source in REDDOG_HOLOINDEX_INDEX_GAP_ARCHITECT_REVIEW_PHASE1 where retrieving
 // extension.js falsely satisfied the recall check.
 const TARGET_RECALL_SELF_FILE_BASENAMES = ['extension.js'];
-const TARGET_RECALL_SELF_FILE_PATHS = ['extensions/foundups_advisory_workers/extension.js'];
+const TARGET_RECALL_SELF_FILE_PATHS = ['extensions/reddog/extension.js'];
 
 // Header lines that introduce an explicit required-direct-read-target list in a
 // 012 work focus / prompt. Matched case-insensitively; list items follow until a
@@ -1840,7 +1845,7 @@ function inferRecallTargetPaths(taskText) {
   const task = String(taskText || '').toLowerCase();
   const targets = [];
   if (/extension\.js|foundups.*agent|copy md|run trace|work trail|buildcopymarkdown|reddog.*extension/.test(task)) {
-    targets.push('extensions/foundups_advisory_workers/extension.js');
+    targets.push('extensions/reddog/extension.js');
   }
   if (/buildcopymarkdown/.test(task)) {
     targets.push('symbol:buildCopyMarkdown');
@@ -1849,7 +1854,7 @@ function inferRecallTargetPaths(taskText) {
     targets.push('scripts/advisory_model_once.py');
   }
   if (/acceptance baseline|ext-acc|external acceptance/.test(task)) {
-    targets.push('extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md');
+    targets.push('extensions/reddog/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md');
   }
   return targets;
 }
@@ -3034,8 +3039,7 @@ function runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, p
   }
   const root = workspaceRoot();
   const script = path.join(root, REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT);
-  const config = vscode.workspace.getConfiguration('foundupsFusion');
-  const configuredPython = config.get('pythonPath') || 'python';
+  const configuredPython = reddogConfigValue('pythonPath', 'python');
   const interpreter = resolvePythonInterpreter(root, configuredPython);
   try {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
@@ -3125,8 +3129,7 @@ function runGithubPermissionProbeBridge(context, options) {
   }
   const root = workspaceRoot();
   const script = path.join(root, REDDOG_GITHUB_PERMISSION_PROBE_SCRIPT);
-  const config = vscode.workspace.getConfiguration('foundupsFusion');
-  const configuredPython = config.get('pythonPath') || 'python';
+  const configuredPython = reddogConfigValue('pythonPath', 'python');
   const interpreter = resolvePythonInterpreter(root, configuredPython);
   try {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
@@ -3322,8 +3325,7 @@ function invokeWreOperationalSpineExplicitValveBridge(context, preview, options)
   }
   const root = workspaceRoot();
   const script = path.join(root, WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT);
-  const config = vscode.workspace.getConfiguration('foundupsFusion');
-  const configuredPython = config.get('pythonPath') || 'python';
+  const configuredPython = reddogConfigValue('pythonPath', 'python');
   const interpreter = resolvePythonInterpreter(root, configuredPython);
   try {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
@@ -3505,8 +3507,7 @@ function invokeOpenClawLiveEnqueueRuntimeBindingBridge(context, packet, selectio
   }
   const root = workspaceRoot();
   const script = path.join(root, REDDOG_EXTENSION_LIVE_ENQUEUE_INVOKE_SCRIPT);
-  const config = vscode.workspace.getConfiguration('foundupsFusion');
-  const configuredPython = config.get('pythonPath') || 'python';
+  const configuredPython = reddogConfigValue('pythonPath', 'python');
   const interpreter = resolvePythonInterpreter(root, configuredPython);
   try {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
@@ -3565,12 +3566,31 @@ function buildResidentArchitectSessionPayload(workFocus, options) {
       payload: null
     };
   }
+  const focus = String(workFocus || '');
+  const intentId = 'sha256:' + crypto.createHash('sha256')
+    .update([REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE, EXTENSION_VERSION, focus].join('|'), 'utf8')
+    .digest('hex');
+  const redDogIntent = {
+    schema_version: 'reddog_intent.v1',
+    intent_id: intentId,
+    source_surface: 'editor_thin_client',
+    extension_id: REDDOG_EXTENSION_ID,
+    extension_version: EXTENSION_VERSION,
+    work_focus: focus,
+    requested_operation: 'resident_architect_session',
+    submits_executable_authority: false,
+    shell_authority_requested: false,
+    repo_write_authority_requested: false,
+    merge_authority_requested: false
+  };
   return {
     ok: true,
     rejection_reasons: [],
     payload: {
+      red_dog_intent: redDogIntent,
+      intent_id: intentId,
       explicit_resident_architect_session_requested: true,
-      work_focus: String(workFocus || ''),
+      work_focus: focus,
       repo_root: opts.repoRoot ? String(opts.repoRoot) : undefined,
       work_state_path: opts.workStatePath ? String(opts.workStatePath) : undefined,
       holoindex_receipt_path: opts.holoindexReceiptPath ? String(opts.holoindexReceiptPath) : undefined,
@@ -3583,10 +3603,14 @@ function buildResidentArchitectSessionPayload(workFocus, options) {
 function buildResidentArchitectSessionResult(decision, fields) {
   const payload = fields && typeof fields === 'object' ? fields : {};
   return Object.assign({
+    product_slice_name: REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE,
     slice_name: REDDOG_RESIDENT_ARCHITECT_SESSION_RUNTIME_SLICE,
     decision: decision,
     accepted: false,
     resident_backend_invoked: false,
+    red_dog_intent_submitted: false,
+    intent_id: '',
+    cycle_id: '',
     python_invocation_performed: false,
     snapshot_id: '',
     final_snapshot_id: '',
@@ -3628,13 +3652,15 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
     const parsed = typeof runnerResult === 'string' ? JSON.parse(runnerResult) : (runnerResult || {});
     return buildResidentArchitectSessionResult(
       parsed.decision || 'RESIDENT_ARCHITECT_SESSION_BRIDGE_RESULT',
-      parsed
+      Object.assign({}, parsed, {
+        red_dog_intent_submitted: true,
+        intent_id: payloadResult.payload.intent_id
+      })
     );
   }
   const root = workspaceRoot();
   const script = path.join(root, REDDOG_RESIDENT_ARCHITECT_SESSION_SCRIPT);
-  const config = vscode.workspace.getConfiguration('foundupsFusion');
-  const configuredPython = config.get('pythonPath') || 'python';
+  const configuredPython = reddogConfigValue('pythonPath', 'python');
   const interpreter = resolvePythonInterpreter(root, configuredPython);
   try {
     const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
@@ -3649,6 +3675,8 @@ function runResidentArchitectSessionBridge(context, workFocus, options) {
     return buildResidentArchitectSessionResult(
       parsed.decision || 'RESIDENT_ARCHITECT_SESSION_BRIDGE_RESULT',
       Object.assign({}, parsed, {
+        red_dog_intent_submitted: true,
+        intent_id: payloadResult.payload.intent_id,
         python_invocation_performed: true,
         python_interpreter_source: interpreter.source
       })
@@ -3667,7 +3695,11 @@ function buildResidentArchitectSessionSection(sessionResult) {
   const r = sessionResult && typeof sessionResult === 'object' ? sessionResult : {};
   return [
     '## Resident RedDog Architect Session',
+    '- product_slice_name: ' + (r.product_slice_name || REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE) + ' [OBSERVED]',
     '- slice_name: ' + (r.slice_name || REDDOG_RESIDENT_ARCHITECT_SESSION_RUNTIME_SLICE) + ' [OBSERVED]',
+    '- red_dog_intent_submitted: ' + (r.red_dog_intent_submitted === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- intent_id: ' + (r.intent_id || 'unknown') + ' [OBSERVED]',
+    '- cycle_id: ' + (r.cycle_id || r.swarm_id || 'unknown') + ' [OBSERVED]',
     '- decision: ' + (r.decision || 'unknown') + ' [OBSERVED]',
     '- accepted: ' + (r.accepted === true ? 'true' : 'false') + ' [OBSERVED]',
     '- resident_backend_invoked: ' + (r.resident_backend_invoked === true ? 'true' : 'false') + ' [OBSERVED]',
@@ -3702,6 +3734,7 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
   const ctx = copyContext && typeof copyContext === 'object' ? copyContext : {};
   const sections = [buildRunTraceSection(packet, workerType, contextSummary, holoScorecard, resolvedEffort)];
   sections.push(buildWorkTrailSection(workTrail || packet.work_trail || []));
+  sections.push(buildRedDogInstallStateSection(ctx.installState || packet.install_state));
   if (packet.reason === 'redaction_blocked') {
     const report = packet.redaction_gate_report || buildRedactionGateReport(packet, ctx.promptConstruction, ctx.contextMode);
     sections.push(buildRedactionGateReportSection(report));
@@ -3782,21 +3815,22 @@ function appendValidationFailureContent(content, validationState) {
     + VALIDATION_FAILED_FOOTER;
 }
 const DEFAULT_FUSION_WORKER = {
-  title: 'Foundups\u00aeAgent',
+  title: 'RedDog',
   lead: 'z-ai/glm-5.2',
   panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code']
 };
 
 const REDDOG_ARCHITECT_SYSTEM_PROMPT = [
-  'You are 0102 operating as the RedDog Architect advisory surface for FoundUps.',
+  'You are 0102 operating as RedDog, the resident FoundUps architect thin-client surface.',
   'Operate in WSP_00: self=0102, role=architect unless a narrower role is supplied, origin=external_principal.',
   'Apply WSP_97: retrieve/evaluate supplied evidence before stating facts; separate OBSERVED, INFERRED, and NEEDS_VERIFICATION; never claim direct repo access beyond the bounded context packet.',
   'Apply WSP_15 at the bottom of every substantive answer: score each recommended next action with Complexity, Importance, Deferability, Impact, MPS total, and P0-P4 priority.',
   'For every finding, include an actionable proposed fix or a reason the fix must be deferred.',
-  'If the 012 work focus describes operational work, map it to an existing Skillz/Wardrobe/Rolodex/OpenClaw/Hermes handoff surface when evidence is supplied; do not execute it from this advisory tab.',
+  'If the 012 work focus describes operational work, map it to an existing Skillz/Wardrobe/Rolodex/OpenClaw/Hermes handoff surface when evidence is supplied; this editor tab submits intent only.',
   'If HoloIndex recall is weak, offline, stale, or returns zero WSP hits, treat that as a retrieval-quality finding and propose the next retrieval/index repair step instead of overclaiming.',
   'If a public/, pfMALL, RedDog, WRE, OpenClaw, Hermes, Kanban, CABR, or FoundUp onboarding boundary appears, classify whether it is implemented, specified-not-implemented, inferred, or unknown.',
-  'Do not edit files, run commands, merge PRs, create repos, grant authority, route payouts, or claim CABR/verification truth. Advisory only.',
+  'This editor surface does not edit files, run shell, merge PRs, create repos, grant authority, route payouts, or claim CABR/verification truth.',
+  'Repo, shell, worktree, merge, and release actions require signed resident worker receipts through OpenClaw/WRE/Hermes.',
   'Never expose raw hidden chain-of-thought. Use a structured Architect Trace: evidence retrieved, alternatives considered, critic disagreements, and synthesis rationale.',
   'Output format: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace, WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step.'
 ].join(' ');
@@ -3814,9 +3848,9 @@ const REDDOG_REQUIRED_OUTPUT_SECTIONS = [
 ];
 
 const PROMPT_AUTHORING_CONTEXT_TARGETS = [
-  'extensions/foundups_advisory_workers/INTERFACE.md',
-  'extensions/foundups_advisory_workers/ROADMAP.md',
-  'extensions/foundups_advisory_workers/ModLog.md',
+  'extensions/reddog/INTERFACE.md',
+  'extensions/reddog/ROADMAP.md',
+  'extensions/reddog/ModLog.md',
   'modules/communication/moltbot_bridge/src/reddog_determine_answer_contract.py',
   'modules/communication/moltbot_bridge/src/reddog_adversarial_verifier_panel.py',
   'modules/communication/moltbot_bridge/src/reddog_repair_evidence_guard.py',
@@ -4280,7 +4314,7 @@ function buildSimpleIdentityFastPathResult(workFocus, workerType, worker) {
   const workerLabel = WORKER_TYPES[workerKey] ? WORKER_TYPES[workerKey].label : workerKey;
   const content = [
     '## Decision',
-    'Yes. I am RedDog, the 0102 RedDog Architect advisory surface inside Foundups Agent.',
+    'Yes. I am RedDog, the resident 0102 FoundUps architect thin client.',
     '',
     '## Findings',
     '- OBSERVED: This was a simple identity/status question and used `' + SIMPLE_IDENTITY_FAST_PATH_SLICE + '`.',
@@ -4885,7 +4919,8 @@ function buildRepairBoundedContext() {
     'Target recall snippets may contain egress-safe placeholders; do not claim placeholders exist in committed repo source.',
     '',
     '## WSP_OPERATING_CONTRACT',
-    '- Advisory only. No shell, repo modification, credential, browser, deploy, or runtime control.',
+    '- RedDog thin client only. No shell, repo modification, credential, browser, deploy, or runtime control from this editor pass.',
+    '- Worker execution requires signed resident backend receipts.',
     '- Apply WSP_97 truth labels on any new claims.'
   ].join('\n');
 }
@@ -4957,8 +4992,7 @@ function hasDetermineAnswersBlock(text) {
 function runRepairGuard(context, action, prompt, primary, repaired) {
   try {
     const root = workspaceRoot();
-    const config = vscode.workspace.getConfiguration('foundupsFusion');
-    const configuredPython = config.get('pythonPath') || 'python';
+    const configuredPython = reddogConfigValue('pythonPath', 'python');
     const interpreter = resolvePythonInterpreter(root, configuredPython);
     const script = path.join(root, 'scripts', 'reddog_repair_guard_once.py');
     const payload = { action: action, prompt: String(prompt || ''), primary: String(primary || '') };
@@ -4989,8 +5023,7 @@ function runRepairGuard(context, action, prompt, primary, repaired) {
 function runJudgmentVerifier(context, prompt, output, scorecard, directReadHits) {
   try {
     const root = workspaceRoot();
-    const config = vscode.workspace.getConfiguration('foundupsFusion');
-    const configuredPython = config.get('pythonPath') || 'python';
+      const configuredPython = reddogConfigValue('pythonPath', 'python');
     const interpreter = resolvePythonInterpreter(root, configuredPython);
     const script = path.join(root, 'scripts', 'reddog_judgment_verifier_once.py');
     const payload = {
@@ -5062,7 +5095,7 @@ function routingSummary(workerType, classification, resolvedEffort, resolvedMode
     '- Principal: ' + worker.lead,
     '- Panel: ' + worker.panel.join(' + '),
     '- Context: ' + resolvedContextMode,
-    '- Boundary: advisory-only; Skillz/OpenClaw/Hermes execution requires governed handoff.'
+    '- Boundary: resident-thin-client; Skillz/OpenClaw/Hermes execution requires signed governed receipts.'
   ].join('\n');
 }
 
@@ -5093,15 +5126,22 @@ const EFFORT_GUIDANCE = {
 };
 
 function activate(context) {
+  const installState = detectRedDogInstallState(context);
+  if (installState.stale_install_detected) {
+    vscode.window.showWarningMessage(
+      'RedDog 0.4.0 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
+    );
+  }
   context.subscriptions.push(
-    vscode.commands.registerCommand('foundupsFusion.open', () => openFusionEditor(context))
+    vscode.commands.registerCommand('reddog.open', () => openFusionEditor(context, installState)),
+    vscode.commands.registerCommand('foundupsFusion.open', () => openFusionEditor(context, installState))
   );
 }
 
-function openFusionEditor(context) {
+function openFusionEditor(context, installState) {
   const worker = fusionWorkerFromConfig();
   const panel = vscode.window.createWebviewPanel(
-    'foundupsFusionWorker',
+    'reddog',
     worker.title,
     vscode.ViewColumn.Beside,
     {
@@ -5119,12 +5159,13 @@ function openFusionEditor(context) {
     disposed: false,
     liveEnqueueKeys: new Set()
   };
+  state.installState = installState || detectRedDogInstallState(context);
   wireFusionWebview(context, panel.webview, worker, state);
   panel.onDidDispose(() => {
     killBridgeChild(state);
     state.disposed = true;
   });
-  panel.webview.html = renderHtml(worker, 'editor', logoUri.toString());
+  panel.webview.html = renderHtml(worker, 'editor', logoUri.toString(), state.installState);
 }
 
 function workspaceRoot() {
@@ -5132,10 +5173,54 @@ function workspaceRoot() {
   return folder ? folder.uri.fsPath : process.cwd();
 }
 
+function reddogConfigValue(key, fallback) {
+  const current = vscode.workspace.getConfiguration(REDDOG_CONFIG_NAMESPACE);
+  const legacy = vscode.workspace.getConfiguration(REDDOG_LEGACY_CONFIG_NAMESPACE);
+  const currentValue = current.get(key);
+  if (currentValue !== undefined && currentValue !== null && currentValue !== '') {
+    return currentValue;
+  }
+  const legacyValue = legacy.get(key);
+  if (legacyValue !== undefined && legacyValue !== null && legacyValue !== '') {
+    return legacyValue;
+  }
+  return fallback;
+}
+
+function detectRedDogInstallState(context) {
+  const legacy = vscode.extensions.getExtension(REDDOG_LEGACY_EXTENSION_ID);
+  const current = vscode.extensions.getExtension(REDDOG_EXTENSION_ID);
+  const legacyPresent = !!legacy && legacy.id !== context.extension.id;
+  const duplicateDetected = legacyPresent && !!current;
+  return {
+    extension_id: context.extension.id,
+    expected_extension_id: REDDOG_EXTENSION_ID,
+    legacy_extension_id: REDDOG_LEGACY_EXTENSION_ID,
+    version: EXTENSION_VERSION,
+    duplicate_extension_detected: duplicateDetected,
+    legacy_extension_present: legacyPresent,
+    stale_install_detected: legacyPresent || context.extension.id !== REDDOG_EXTENSION_ID,
+    legacy_extension_version: legacy && legacy.packageJSON ? String(legacy.packageJSON.version || '') : ''
+  };
+}
+
+function buildRedDogInstallStateSection(state) {
+  const s = state && typeof state === 'object' ? state : {};
+  return [
+    '## RedDog Install State',
+    '- extension_id: ' + (s.extension_id || 'unknown') + ' [OBSERVED]',
+    '- expected_extension_id: ' + (s.expected_extension_id || REDDOG_EXTENSION_ID) + ' [OBSERVED]',
+    '- extension_version: ' + (s.version || EXTENSION_VERSION) + ' [OBSERVED]',
+    '- legacy_extension_present: ' + (s.legacy_extension_present === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- duplicate_extension_detected: ' + (s.duplicate_extension_detected === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- stale_install_detected: ' + (s.stale_install_detected === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- legacy_extension_version: ' + (s.legacy_extension_version || 'none') + ' [OBSERVED]'
+  ].join('\n');
+}
+
 function fusionWorkerFromConfig() {
-  const config = vscode.workspace.getConfiguration('foundupsFusion');
-  const lead = cleanModel(config.get('leadModel'), DEFAULT_FUSION_WORKER.lead);
-  const configuredPanel = config.get('panelModels');
+  const lead = cleanModel(reddogConfigValue('leadModel', DEFAULT_FUSION_WORKER.lead), DEFAULT_FUSION_WORKER.lead);
+  const configuredPanel = reddogConfigValue('panelModels', DEFAULT_FUSION_WORKER.panel);
   const panel = Array.isArray(configuredPanel)
     ? configuredPanel.map((item) => cleanModel(item, '')).filter(Boolean).slice(0, 4)
     : DEFAULT_FUSION_WORKER.panel;
@@ -5561,7 +5646,7 @@ function wireFusionWebview(context, webview, worker, state) {
     const runtimeConsumptionGate = buildRuntimeConsumptionGate(result, validationState, mode, substantiveTask);
     const actionPlanningAllowed = runtimeConsumptionGate.passed === true;
     const residentArchitectSessionEnabled = (
-      vscode.workspace.getConfiguration('foundupsFusion').get('enableResidentArchitectSession') === true
+      reddogConfigValue('enableResidentArchitectSession', false) === true
     );
     const operatorWardrobeSelectionResult = actionPlanningAllowed
       ? runOperatorWardrobeSelectionBridge(context, workFocus, holoScorecard, promptConstruction, handoffRecommendation, {
@@ -5621,6 +5706,8 @@ function wireFusionWebview(context, webview, worker, state) {
     );
     result.runtime_consumption_gate = runtimeConsumptionGate;
     result.review_packet.runtime_consumption_gate = runtimeConsumptionGate;
+    result.install_state = state.installState || null;
+    result.review_packet.install_state = result.install_state;
     result.governed_handoff_recommendation = handoffRecommendation;
     if (operatorWardrobeSelectionResult) {
       result.operator_wardrobe_selection_result = operatorWardrobeSelectionResult;
@@ -5703,6 +5790,7 @@ function wireFusionWebview(context, webview, worker, state) {
       wreSpineInvokeResult: wreSpineInvokeResult,
       openClawLiveEnqueueInvokeResult: openClawLiveEnqueueInvokeResult,
       residentArchitectSessionResult: residentArchitectSessionResult,
+      installState: state.installState,
       continuationEnabled: continuationEnabled,
       continuationTelemetry: continuationTelemetry,
       // Only pass the summary for Copy MD inclusion when appended this run (fail-closed).
@@ -5788,8 +5876,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
   return new Promise((resolve) => {
     const root = workspaceRoot();
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
-    const config = vscode.workspace.getConfiguration('foundupsFusion');
-    const configuredPython = config.get('pythonPath') || 'python';
+      const configuredPython = reddogConfigValue('pythonPath', 'python');
     const interpreter = resolvePythonInterpreter(root, configuredPython);
     const callOptions = callOptionsArg && typeof callOptionsArg === 'object' ? callOptionsArg : {};
     const promptSource = callOptions.promptSource ? callOptions.promptSource : 'prompt';
@@ -6191,7 +6278,7 @@ function buildBoundedRepoContext(mode, taskText) {
   const root = workspaceRoot();
   const sections = [
     '## WSP_OPERATING_CONTRACT',
-    '- You are an advisory 0102 worker surface. 012 remains the external principal and final decision holder.',
+    '- You are a resident RedDog 0102 architect thin-client surface. 012 remains the external principal and final decision holder.',
     '- Operate in WSP_00: HoloIndex-first recall, anti-vibecoding, verify before recommending action.',
     '- Apply WSP_97: label each factual claim as OBSERVED, INFERRED, or NEEDS_VERIFICATION.',
     '- Apply WSP_15: every recommended fix must include C/I/D/Impact/MPS/Priority.',
@@ -6270,7 +6357,7 @@ function buildBoundedRepoContext(mode, taskText) {
   if (mode !== 'none') {
     const targetSection = buildTargetRecallContentSection(root, taskText || '', 24000);
     // ADDENDUM B (3): when explicit required targets exist, demote/OMIT the self-file
-    // target-recall snippet (extensions/foundups_advisory_workers/extension.js) so it
+    // target-recall snippet (extensions/reddog/extension.js) so it
     // cannot consume the protected required-target budget. Its meta is still recorded.
     const selfOnly = Array.isArray(targetSection.meta && targetSection.meta.target_content_paths)
       && targetSection.meta.target_content_paths.length > 0
@@ -6797,11 +6884,11 @@ function relativePath(root, filePath) {
 function moduleHintFromActive(root) {
   const editor = vscode.window.activeTextEditor || (vscode.window.visibleTextEditors && vscode.window.visibleTextEditors[0]);
   if (!editor || !editor.document || !editor.document.uri || editor.document.uri.scheme !== 'file') {
-    return 'extensions/foundups_advisory_workers';
+    return 'extensions/reddog';
   }
   const rel = relativePath(root, editor.document.uri.fsPath).replace(/\\/g, '/');
   if (!rel || rel.startsWith('..')) {
-    return 'extensions/foundups_advisory_workers';
+    return 'extensions/reddog';
   }
   const parts = rel.split('/');
   if (parts[0] === 'modules' && parts.length >= 3) {
@@ -7177,12 +7264,18 @@ function reddogTrailWebviewBootstrapJson() {
   });
 }
 
-function renderHtml(worker, surface, logoUri) {
+function renderHtml(worker, surface, logoUri, installState) {
   const escapedTitle = escapeHtml(worker.title);
   const escapedLead = escapeHtml(worker.lead);
   const escapedPanel = escapeHtml(worker.panel.join(' + '));
   const escapedSurface = escapeHtml(surface);
   const escapedLogoUri = escapeHtml(logoUri || '');
+  const state = installState && typeof installState === 'object' ? installState : {};
+  const escapedInstall = escapeHtml(
+    state.stale_install_detected
+      ? 'Legacy extension detected: remove foundups-fusion-worker after migration.'
+      : 'Install state: canonical RedDog extension.'
+  );
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7234,10 +7327,10 @@ function renderHtml(worker, surface, logoUri) {
   <div class="wrap">
     <header>
       <div class="brand"><img src="${escapedLogoUri}" alt="RedDawg"><h1>${escapedTitle}</h1></div>
-      <div class="meta">Build: ${EXTENSION_VERSION}<br>Surface: ${escapedSurface}<br>Principal: ${escapedLead}<br>Panel: ${escapedPanel}<br>Advisory only. Redaction-gated. No repo, shell, or merge authority.</div>
+      <div class="meta">Build: ${EXTENSION_VERSION}<br>Surface: ${escapedSurface}<br>Principal: ${escapedLead}<br>Panel: ${escapedPanel}<br>Resident thin client. Redaction-gated. Worker actions require signed OpenClaw/WRE/Hermes receipts.<br>${escapedInstall}</div>
     </header>
-    <main id="log" aria-label="Foundups\u00aeAgent output scrollback">
-      <div class="entry status"><span class="label">status</span>Foundups\u00aeAgent extension ${EXTENSION_VERSION} loaded.</div>
+    <main id="log" aria-label="RedDog output scrollback">
+      <div class="entry status"><span class="label">status</span>RedDog extension ${EXTENSION_VERSION} loaded.</div>
       <div class="entry status"><span class="label">status</span>OPENROUTER_API_KEY must be set in the environment used to launch Cursor. Do not paste secrets.</div>
     </main>
     <form id="form">
@@ -7658,6 +7751,8 @@ module.exports = {
   buildOpenClawLiveEnqueueRuntimeBindingPayload,
   invokeOpenClawLiveEnqueueRuntimeBindingBridge,
   buildOpenClawLiveEnqueueRuntimeBindingSection,
+  detectRedDogInstallState,
+  buildRedDogInstallStateSection,
   buildResidentArchitectSessionPayload,
   runResidentArchitectSessionBridge,
   buildResidentArchitectSessionSection,

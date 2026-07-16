@@ -7,7 +7,7 @@ const Module = require('module');
 const fixtures = require('./fixtures');
 
 const root = path.resolve(__dirname, '..', '..', '..');
-const extDir = path.join(root, 'extensions', 'foundups_advisory_workers');
+const extDir = path.join(root, 'extensions', 'reddog');
 const extensionJs = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8');
 const bridgePy = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_once.py'), 'utf8');
 const residentArchitectBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_resident_architect_session_once.py'), 'utf8');
@@ -198,15 +198,18 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.68', 'package version must be 0.3.68');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.68'", 'extension build mismatch');
-assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
-assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
-includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
-includes(extensionJs, "title: 'Foundups\\u00aeAgent'", 'webview title must use Foundups\u00aeAgent');
-includes(readme, 'Foundups\u00aeAgent is the product surface', 'README product identity statement missing');
+assert.strictEqual(pkg.version, '0.4.0', 'package version must be 0.4.0');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.0'", 'extension build mismatch');
+assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
+assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
+includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
+includes(JSON.stringify(pkg), 'foundupsFusion.open', 'legacy command alias must be retained for 0.4.0 migration');
+includes(JSON.stringify(pkg), 'reddog.enableResidentArchitectSession', 'canonical resident session setting missing');
+includes(JSON.stringify(pkg), 'foundupsFusion.enableResidentArchitectSession', 'legacy resident session setting alias missing');
+includes(extensionJs, "title: 'RedDog'", 'webview title must use RedDog');
+includes(readme, 'RedDog is the resident FoundUps architect', 'README product identity statement missing');
 includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
-includes(roadmap, 'Foundups\u00aeAgent is the product surface', 'ROADMAP product identity statement missing');
+includes(roadmap, 'RedDog is the resident FoundUps architect', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
 includes(extensionJs, "command: 'progress'", 'progress command shape missing');
@@ -216,7 +219,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.68', 'README version mismatch');
+includes(readme, 'Version: 0.4.0', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -422,6 +425,9 @@ const vscodeMock = {
     getConfiguration: () => ({ get: (_key, fallback) => fallback })
   },
   commands: { registerCommand: () => ({ dispose() {} }) },
+  extensions: {
+    getExtension: () => undefined
+  },
   env: { clipboard: { writeText: async () => {} } },
   Uri: { joinPath: (_base, _name) => ({ fsPath: path.join(extDir, 'icon.png') }) },
   ViewColumn: { Beside: 2 }
@@ -579,7 +585,7 @@ assert.strictEqual(
 includes(extensionJs, 'function analyzeOperationalDiagnosticShape', 'OOTG-001: operational diagnostic shape detector missing');
 const noisyOperationalOutputPrompt = [
   'Please analyze this browser DAEmon output.',
-  'antifaFM/live 1/3 2/3 3/3 UnDaoDu/live FoundUps/live MOVE2JAPAN/live',
+  'antifaFM/live 1/3 2/3 3/3 UnDaoDu/live FoundUp/live MOVE2JAPAN/live',
   'www.youtube.com studio.youtube.com/channel/UCSNTUXjAgpd4sgWYP0xoJgw/videos/short',
   '11.7s 17.0s 17.4s 84.6s 94.1s 519.7s 824.0s 100.0 0.7',
   'diag_page_content_timeout_20260713_171947.png',
@@ -662,9 +668,9 @@ includes(promptAuthoringWsp, 'DEFINITION_GAP', 'PAD-002: missing definitions mus
 const promptAuthoringTargets = orchestrator.collectRequiredTargets(promptAuthoringFocus);
 assert(promptAuthoringTargets.derivation_sources.includes('prompt_authoring_context'), 'PAD-003: prompt-authoring context source must be recorded');
 for (const p of [
-  'extensions/foundups_advisory_workers/INTERFACE.md',
-  'extensions/foundups_advisory_workers/ROADMAP.md',
-  'extensions/foundups_advisory_workers/ModLog.md',
+  'extensions/reddog/INTERFACE.md',
+  'extensions/reddog/ROADMAP.md',
+  'extensions/reddog/ModLog.md',
   'modules/communication/moltbot_bridge/src/reddog_determine_answer_contract.py',
   'modules/communication/moltbot_bridge/src/reddog_adversarial_verifier_panel.py',
   'modules/communication/moltbot_bridge/src/reddog_repair_evidence_guard.py',
@@ -690,7 +696,7 @@ assert.strictEqual(promptDaemonClass.localFastPath, null, 'DPAO-001: prompt-auth
 assert.notStrictEqual(orchestrator.resolveModelMode(promptDaemonClass, 'auto', 'reddog_architect'), 'local_daemon_output_assessment', 'DPAO-001: prompt-authoring must not resolve to local daemon mode');
 const promptDaemonTargets = orchestrator.collectRequiredTargets(promptAuthoringWithDaemonOutput);
 assert(promptDaemonTargets.derivation_sources.includes('prompt_authoring_context'), 'DPAO-002: prompt-authoring context source must be retained');
-assert(promptDaemonTargets.targets.includes('extensions/foundups_advisory_workers/INTERFACE.md'), 'DPAO-002: prompt-authoring context targets must be present');
+assert(promptDaemonTargets.targets.includes('extensions/reddog/INTERFACE.md'), 'DPAO-002: prompt-authoring context targets must be present');
 assert(!promptDaemonTargets.targets.includes('SKILL.md'), 'DPAO-002: pasted log filenames must not become prompt-authoring repo targets');
 assert(!promptDaemonTargets.targets.some((t) => /diag_page_content_timeout|11\.7s|www\.youtube\.com/i.test(t)), 'DPAO-002: pasted log fragments must not become prompt-authoring repo targets');
 const promptDaemonTyped = orchestrator.extractTypedTargets(promptAuthoringWithDaemonOutput);
@@ -733,7 +739,7 @@ const validWorkerPromptBlock = [
   'MISSION:',
   '  OBJ: Audit and repair the prompt-authoring gate.',
   'READ_FIRST:',
-  '  - extensions/foundups_advisory_workers/INTERFACE.md',
+  '  - extensions/reddog/INTERFACE.md',
   'FAIL:',
   '  - Stop on missing grounding.',
   'VALIDATION:',
@@ -1081,7 +1087,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.68', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.0', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -1142,7 +1148,7 @@ const wardrobePayload = orchestrator.buildWardrobeSelectionPayload(
   },
   {
     required_targets_authoritative_paths: [
-      'extensions/foundups_advisory_workers/extension.js',
+      'extensions/reddog/extension.js',
       'scripts/reddog_operator_wardrobe_selection_once.py'
     ]
   },
@@ -1151,7 +1157,7 @@ const wardrobePayload = orchestrator.buildWardrobeSelectionPayload(
 );
 assert.strictEqual(wardrobePayload.authority_request, 'worktree_write', 'wardrobe payload carries authority request');
 assert.deepStrictEqual(wardrobePayload.required_targets, [
-  'extensions/foundups_advisory_workers/extension.js',
+  'extensions/reddog/extension.js',
   'scripts/reddog_operator_wardrobe_selection_once.py'
 ], 'wardrobe payload carries required targets');
 assert.strictEqual(wardrobePayload.holoindex_evidence.holoindex_status, 'bundle_json_ok', 'wardrobe payload carries HoloIndex status');
@@ -1172,7 +1178,7 @@ const groundedWardrobePayload = orchestrator.buildWardrobeSelectionPayload(
     external_research_targets_count: 0,
     quoted_reference_blocks_count: 0
   },
-  { required_targets_authoritative_paths: ['extensions/foundups_advisory_workers/extension.js'] },
+  { required_targets_authoritative_paths: ['extensions/reddog/extension.js'] },
   handoffRec,
   { authorityRequest: 'draft_pr' }
 );
@@ -1212,7 +1218,7 @@ const fakeWardrobeSelection = orchestrator.runOperatorWardrobeSelectionBridge(
   null,
   'Run governed worktree worker',
   { holoindex_status: 'bundle_json_ok', index_gap_detected: false },
-  { required_targets_authoritative_paths: ['extensions/foundups_advisory_workers/extension.js'] },
+  { required_targets_authoritative_paths: ['extensions/reddog/extension.js'] },
   handoffRec,
   {
     authorityRequest: 'worktree_write',
@@ -1505,7 +1511,7 @@ const permissionObservedPreview = orchestrator.buildWreOperationalSpineDryRunPre
     createdAt: '2026-07-12T12:00:00Z',
     repoPermissionSnapshot: fakePermissionProbe.repo_permission_snapshot,
     promptConstruction: {
-      required_targets_authoritative_paths: ['extensions/foundups_advisory_workers/extension.js']
+      required_targets_authoritative_paths: ['extensions/reddog/extension.js']
     }
   }
 );
@@ -1565,7 +1571,7 @@ const authoritySeed = orchestrator.buildRedDogGovernedWorkOrderCandidate(
   {
     createdAt: fixedAuthorityCreatedAt,
     repoPermissionSnapshot: freshPermissionSnapshot,
-    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+    requiredTargets: ['extensions/reddog/extension.js']
   }
 );
 const authorityBound = orchestrator.buildRedDogGovernedWorkOrderCandidate(
@@ -1582,7 +1588,7 @@ const authorityBound = orchestrator.buildRedDogGovernedWorkOrderCandidate(
       signature: 'must-not-leak'
     },
     explicitValveRequested: true,
-    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+    requiredTargets: ['extensions/reddog/extension.js']
   }
 );
 assert.strictEqual(authorityBound.permission_binding.permission_truth_label, 'OBSERVED', 'fresh trusted permission snapshot should be observed');
@@ -1696,7 +1702,7 @@ const signatureMismatch = orchestrator.buildRedDogGovernedWorkOrderCandidate(
     repoPermissionSnapshot: freshPermissionSnapshot,
     signatureVerificationResult: { accepted: true, reason_codes: [], work_order_id: 'rdog-wo-deadbeefdeadbeef' },
     explicitValveRequested: true,
-    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+    requiredTargets: ['extensions/reddog/extension.js']
   }
 );
 assert.strictEqual(signatureMismatch.ready_for_wre_invocation, false, 'signature work_order_id mismatch must block readiness');
@@ -1721,7 +1727,7 @@ const expiredPermission = orchestrator.buildRedDogGovernedWorkOrderCandidate(
       work_order_id: authoritySeed.work_order.work_order_id
     },
     explicitValveRequested: true,
-    requiredTargets: ['extensions/foundups_advisory_workers/extension.js']
+    requiredTargets: ['extensions/reddog/extension.js']
   }
 );
 assert.strictEqual(expiredPermission.permission_binding.permission_snapshot_fresh, false, 'expired permission snapshot must not be fresh');
@@ -1797,17 +1803,17 @@ includes(blockedCopy, 'holoindex_status:', 'Copy MD must include HoloIndex recal
 includes(blockedCopy, 'code_hits_count:', 'Run Trace must include code_hits_count');
 includes(blockedCopy, 'target_recall_ok:', 'Run Trace must include target_recall_ok');
 
-const recallHit = orchestrator.evaluateTargetRecall('Review extensions/foundups_advisory_workers/extension.js for WSP_97', {
+const recallHit = orchestrator.evaluateTargetRecall('Review extensions/reddog/extension.js for WSP_97', {
   task_retrieval: {
-    code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'path match: extension.js' }]
+    code_hits: [{ location: 'extensions/reddog/extension.js', need: 'path match: extension.js' }]
   }
 });
 assert.strictEqual(recallHit.target_recall_ok, true, 'target recall must pass when extension.js is in hits');
 assert.strictEqual(recallHit.index_gap_detected, false, 'index_gap must be false when target recall ok');
 
-const recallMiss = orchestrator.evaluateTargetRecall('Review extensions/foundups_advisory_workers/extension.js for WSP_97', {
+const recallMiss = orchestrator.evaluateTargetRecall('Review extensions/reddog/extension.js for WSP_97', {
   task_retrieval: {
-    code_hits: [{ location: 'extensions/foundups_advisory_workers/package.json', need: 'path match: package.json' }]
+    code_hits: [{ location: 'extensions/reddog/package.json', need: 'path match: package.json' }]
   }
 });
 assert.strictEqual(recallMiss.target_recall_ok, false, 'target recall must fail when only adjacent paths hit');
@@ -1843,11 +1849,11 @@ for (const req of fixtures.FOUNDUP_REQUIRED_TARGETS) {
 
 // TRP-003: self-file guard - retrieving ONLY extension.js must NOT satisfy required targets.
 const trpSelfOnly = orchestrator.evaluateTargetRecall(fixtures.FOUNDUP_CREATION_PROMPT, {
-  task_retrieval: { code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'path match: extension.js' }] }
+  task_retrieval: { code_hits: [{ location: 'extensions/reddog/extension.js', need: 'path match: extension.js' }] }
 });
 assert.strictEqual(trpSelfOnly.index_gap_detected, true, 'TRP-003: self-file only must set index_gap_detected=true');
 assert.strictEqual(trpSelfOnly.required_targets_recalled, 0, 'TRP-003: self-file must not count toward required recall');
-assert(orchestrator.isSelfFileLocation('extensions/foundups_advisory_workers/extension.js'), 'TRP-003: extension.js path must be self-file');
+assert(orchestrator.isSelfFileLocation('extensions/reddog/extension.js'), 'TRP-003: extension.js path must be self-file');
 assert(orchestrator.isSelfFileLocation('some/other/extension.js'), 'TRP-003: extension.js basename must be self-file');
 assert(!orchestrator.isSelfFileLocation('WSP_framework/src/WSP_109_FoundUp_Onboarding_Protocol.md'), 'TRP-003: required target must not be self-file');
 
@@ -1862,7 +1868,7 @@ assert.strictEqual(trpAllPresent.required_targets_missing.length, 0, 'TRP-004: n
 
 // TRP-005: self-file plus required targets present => required still satisfied (self-file ignored, not penalized).
 const trpMixed = orchestrator.evaluateTargetRecall(fixtures.FOUNDUP_CREATION_PROMPT, {
-  task_retrieval: { code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'self' }].concat(
+  task_retrieval: { code_hits: [{ location: 'extensions/reddog/extension.js', need: 'self' }].concat(
     fixtures.FOUNDUP_REQUIRED_TARGETS.map((p) => ({ location: p, need: 'path match: ' + p }))
   ) }
 });
@@ -1870,8 +1876,8 @@ assert.strictEqual(trpMixed.target_recall_ok, true, 'TRP-005: self-file alongsid
 assert.strictEqual(trpMixed.required_targets_recalled, fixtures.FOUNDUP_REQUIRED_TARGETS.length, 'TRP-005: self-file must not reduce recalled count');
 
 // TRP-006: backward-compat - no required list preserves prior inference behavior and never claims unknown as a gap.
-const trpLegacy = orchestrator.evaluateTargetRecall('Review extensions/foundups_advisory_workers/extension.js for WSP_97', {
-  task_retrieval: { code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'path match: extension.js' }] }
+const trpLegacy = orchestrator.evaluateTargetRecall('Review extensions/reddog/extension.js for WSP_97', {
+  task_retrieval: { code_hits: [{ location: 'extensions/reddog/extension.js', need: 'path match: extension.js' }] }
 });
 assert.strictEqual(trpLegacy.target_recall_ok, true, 'TRP-006: legacy inferred recall must still pass');
 assert.strictEqual(trpLegacy.index_gap_detected, false, 'TRP-006: legacy inferred recall must not flag gap');
@@ -2573,7 +2579,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.68'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.0'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2587,7 +2593,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.68'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.0'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2599,7 +2605,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.68'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.0'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -3469,9 +3475,30 @@ const semanticExternalStillBlocked = orchestrator.buildTypedGroundingPreflight(t
 assert.strictEqual(semanticExternalStillBlocked.passed, false, 'SGP-012: external research remains fail-closed even when semantic evidence exists');
 assert(semanticExternalStillBlocked.rejection_reasons.includes('external_research_retrieval_not_implemented'), 'SGP-012: external research fail-closed reason preserved');
 
+const cleanInstallState = orchestrator.detectRedDogInstallState({
+  extension: { id: 'foundups.reddog' }
+});
+assert.strictEqual(cleanInstallState.stale_install_detected, false, 'RPI-001: canonical RedDog install is not stale');
+const originalGetExtension = vscodeMock.extensions.getExtension;
+vscodeMock.extensions.getExtension = (id) => (
+  id === 'foundups.foundups-fusion-worker'
+    ? { id, packageJSON: { version: '0.3.68' } }
+    : id === 'foundups.reddog'
+      ? { id, packageJSON: { version: '0.4.0' } }
+      : undefined
+);
+const duplicateDetectedState = orchestrator.detectRedDogInstallState({
+  extension: { id: 'foundups.reddog' }
+});
+assert.strictEqual(duplicateDetectedState.duplicate_extension_detected, true, 'RPI-002: legacy duplicate install must be detected');
+const installSection = orchestrator.buildRedDogInstallStateSection(duplicateDetectedState);
+includes(installSection, '- duplicate_extension_detected: true', 'RPI-003: install state section renders duplicate');
+vscodeMock.extensions.getExtension = originalGetExtension;
+
 includes(extensionJs, 'REDDOG_RESIDENT_ARCHITECT_SESSION_SCRIPT', 'RAS-001: resident architect session script constant missing');
-includes(JSON.stringify(pkg), 'foundupsFusion.enableResidentArchitectSession', 'RAS-001: resident session setting missing');
-includes(extensionJs, "get('enableResidentArchitectSession')", 'RAS-001: resident session runtime setting read missing');
+includes(JSON.stringify(pkg), 'reddog.enableResidentArchitectSession', 'RAS-001: canonical resident session setting missing');
+includes(JSON.stringify(pkg), 'foundupsFusion.enableResidentArchitectSession', 'RAS-001: legacy resident session setting missing');
+includes(extensionJs, "reddogConfigValue('enableResidentArchitectSession'", 'RAS-001: resident session runtime setting helper missing');
 includes(extensionJs, 'function runResidentArchitectSessionBridge', 'RAS-001: resident session extension bridge missing');
 includes(extensionJs, 'resident_architect_session_result', 'RAS-001: resident session result must attach to review packet');
 includes(extensionJs, 'buildResidentArchitectSessionSection', 'RAS-001: Copy MD resident session section missing');
@@ -3495,6 +3522,10 @@ assert.strictEqual(residentPayload.ok, true, 'RAS-004: explicit request builds r
 assert.strictEqual(residentPayload.payload.work_focus, 'audit work', 'RAS-004: work focus preserved');
 assert.strictEqual(residentPayload.payload.repo_root, 'O:/Foundups-Agent', 'RAS-004: repo root preserved');
 assert.strictEqual(residentPayload.payload.timeout_seconds, 77, 'RAS-004: timeout preserved');
+assert.strictEqual(residentPayload.payload.red_dog_intent.schema_version, 'reddog_intent.v1', 'RPI-004: resident payload carries typed RedDogIntent');
+assert.strictEqual(residentPayload.payload.red_dog_intent.submits_executable_authority, false, 'RPI-004: RedDogIntent must not submit executable authority');
+assert.strictEqual(residentPayload.payload.red_dog_intent.shell_authority_requested, false, 'RPI-004: RedDogIntent must not request shell authority');
+assert(residentPayload.payload.intent_id.startsWith('sha256:'), 'RPI-004: resident intent id must be digest-bound');
 
 let residentRunnerPayload = null;
 const residentBridgeResult = orchestrator.runResidentArchitectSessionBridge(null, 'audit work', {
@@ -3505,6 +3536,7 @@ const residentBridgeResult = orchestrator.runResidentArchitectSessionBridge(null
       decision: 'RESIDENT_ARCHITECT_SESSION_ACCEPT',
       accepted: true,
       resident_backend_invoked: true,
+      cycle_id: 'sha256:cycle',
       python_invocation_performed: false,
       snapshot_id: 'sha256:snapshot',
       final_snapshot_id: 'sha256:final',
@@ -3531,12 +3563,18 @@ const residentBridgeResult = orchestrator.runResidentArchitectSessionBridge(null
   }
 });
 assert.strictEqual(residentRunnerPayload.explicit_resident_architect_session_requested, true, 'RAS-005: runner payload explicit flag');
+assert.strictEqual(residentRunnerPayload.red_dog_intent.schema_version, 'reddog_intent.v1', 'RPI-005: runner receives typed RedDogIntent');
+assert.strictEqual(residentRunnerPayload.red_dog_intent.repo_write_authority_requested, false, 'RPI-005: runner intent does not request repo write authority');
 assert.strictEqual(residentBridgeResult.accepted, true, 'RAS-005: injected resident runner acceptance preserved');
+assert.strictEqual(residentBridgeResult.red_dog_intent_submitted, true, 'RPI-005: bridge result records intent submission');
+assert.strictEqual(residentBridgeResult.intent_id, residentRunnerPayload.intent_id, 'RPI-005: bridge result binds intent id');
 assert.strictEqual(residentBridgeResult.queue_candidate_count, 1, 'RAS-005: queue candidate count preserved');
 assert.strictEqual(residentBridgeResult.no_repo_mutation_performed, true, 'RAS-005: no repo mutation preserved');
 const residentSection = orchestrator.buildResidentArchitectSessionSection(residentBridgeResult);
 includes(residentSection, '- resident_backend_invoked: true', 'RAS-006: section reports backend invocation');
+includes(residentSection, '- red_dog_intent_submitted: true', 'RPI-006: section reports RedDogIntent submission');
+includes(residentSection, '- cycle_id: sha256:cycle', 'RPI-006: section reports cycle id');
 includes(residentSection, '- architect_action: FIX', 'RAS-006: section reports architect action');
 includes(residentSection, '- no_holoindex_reindex_performed: true', 'RAS-006: section reports no reindex');
 
-console.log('Foundups\u00aeAgent extension contract checks passed.');
+console.log('RedDog extension contract checks passed.');

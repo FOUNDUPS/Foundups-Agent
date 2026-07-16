@@ -34,7 +34,7 @@ def _base_order(**overrides):
         },
         "requested_operation": "feature_slice",
         "authority_tier": "source",
-        "allowed_paths": ["extensions/foundups_advisory_workers/**"],
+        "allowed_paths": ["extensions/reddog/**"],
         "denied_paths": [".env"],
         "branch_name": "feat/reddog-dryrun-test",
         "base_ref": "main",

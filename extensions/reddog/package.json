@@ -1,0 +1,118 @@
+{
+  "name": "reddog",
+  "displayName": "RedDog - FoundUps Architect",
+  "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
+  "version": "0.4.0",
+  "publisher": "foundups",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:reddog.open",
+    "onCommand:foundupsFusion.open"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "reddog.open",
+        "title": "RedDog: Open",
+        "category": "RedDog"
+      },
+      {
+        "command": "foundupsFusion.open",
+        "title": "Foundups Agent: Open (Legacy)",
+        "category": "RedDog"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "reddog.open"
+        },
+        {
+          "command": "foundupsFusion.open"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "reddog.open",
+          "group": "navigation@100"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "reddog.open",
+          "group": "navigation@100"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "RedDog",
+      "properties": {
+        "reddog.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable used to call the redaction-gated RedDog bridge."
+        },
+        "reddog.leadModel": {
+          "type": "string",
+          "default": "z-ai/glm-5.2",
+          "description": "OpenRouter model slug for the principal/synthesis worker."
+        },
+        "reddog.panelModels": {
+          "type": "array",
+          "default": [
+            "deepseek/deepseek-v4-pro",
+            "moonshotai/kimi-k2.7-code"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "OpenRouter model slugs for panel critics. The extension uses up to four."
+        },
+        "reddog.enableResidentArchitectSession": {
+          "type": "boolean",
+          "default": false,
+          "description": "Explicitly run the resident RedDog read-only audit/research/architect decision cycle after local runtime gates pass. Default false."
+        },
+        "foundupsFusion.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Legacy alias for reddog.pythonPath. Retained for the 0.4.0 migration."
+        },
+        "foundupsFusion.leadModel": {
+          "type": "string",
+          "default": "z-ai/glm-5.2",
+          "description": "Legacy alias for reddog.leadModel. Retained for the 0.4.0 migration."
+        },
+        "foundupsFusion.panelModels": {
+          "type": "array",
+          "default": [
+            "deepseek/deepseek-v4-pro",
+            "moonshotai/kimi-k2.7-code"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Legacy alias for reddog.panelModels. Retained for the 0.4.0 migration."
+        },
+        "foundupsFusion.enableResidentArchitectSession": {
+          "type": "boolean",
+          "default": false,
+          "description": "Legacy alias for reddog.enableResidentArchitectSession. Retained for the 0.4.0 migration."
+        }
+      }
+    }
+  },
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/FOUNDUPS/Foundups-Agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FOUNDUPS/Foundups-Agent"
+  }
+}

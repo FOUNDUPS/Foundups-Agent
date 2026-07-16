@@ -1,4 +1,4 @@
-# Foundups(R)Agent Extension Tests
+# RedDog Extension Tests
 
 ## Test strategy
 
@@ -11,9 +11,9 @@ Contract tests run **without OpenRouter, Cursor UI, or live bridge calls**. They
 From repo root:
 
 ```powershell
-node --check extensions/foundups_advisory_workers/extension.js
-node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
-git diff --check -- extensions/foundups_advisory_workers
+node --check extensions/reddog/extension.js
+node extensions/reddog/tests/verify_extension_contract.js
+git diff --check -- extensions/reddog
 ```
 
 HoloIndex bundle recall (separate module tests):
