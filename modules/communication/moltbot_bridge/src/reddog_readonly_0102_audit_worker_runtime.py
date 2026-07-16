@@ -44,6 +44,7 @@ from holo_index.query_receipt import (
     build_query_receipt,
     load_generation_binding,
 )
+from holo_index.memex_access_policy_receipt import validate_memex_access_policy_receipt
 from holo_index.memex_query_routing import build_memex_projection_query_receipt
 from holo_index.memex_projection_integrity import verify_and_rehydrate_memex_projection
 
@@ -598,37 +599,116 @@ def _optional_memex_query_receipt(
     if projection is None:
         return None
     try:
-        gate = verify_and_rehydrate_memex_projection(projection, runtime_mode=True)
-        if not gate.accepted or gate.projection is None:
-            return build_query_receipt(
-                source="memex_projection",
-                source_class="memex",
+        expected_foundup_id = _first_text(task_context, assignment, "foundup_id")
+        expected_source_scope = _first_text(task_context, assignment, "memex_source_scope")
+        expected_source_revision = _first_text(task_context, assignment, "memex_source_revision")
+        expected_generation_id = _first_text(task_context, assignment, "memex_holoindex_generation_id")
+        expected_principal_id = _first_text(task_context, assignment, "principal_id")
+        expected_work_order_id = (
+            _first_text(task_context, assignment, "work_order_id")
+            or str(assignment.get("assignment_id") or "").strip()
+        )
+        expected_snapshot_id = str(assignment.get("snapshot_receipt_id") or "").strip()
+        expected_snapshot_digest = str(assignment.get("snapshot_content_digest") or "").strip()
+        now_iso = _first_text(task_context, assignment, "memex_now_iso")
+
+        missing_binding = [
+            name
+            for name, value in (
+                ("foundup_id", expected_foundup_id),
+                ("memex_source_scope", expected_source_scope),
+                ("memex_holoindex_generation_id", expected_generation_id),
+                ("principal_id", expected_principal_id),
+                ("work_order_id", expected_work_order_id),
+                ("snapshot_receipt_id", expected_snapshot_id),
+                ("snapshot_content_digest", expected_snapshot_digest),
+            )
+            if not value
+        ]
+        if missing_binding:
+            return _memex_error_receipt(
                 query=query,
-                result={
-                    "ok": False,
-                    "query": query,
-                    "freshness": "UNKNOWN",
-                    "hits": [],
-                    "error": "memex_projection_integrity_failed:"
-                    + ",".join(gate.rejection_reasons),
-                },
-                require_generation=False,
+                error="memex_assignment_binding_failed:missing_" + ",".join(missing_binding),
+            )
+
+        policy_receipt = task_context.get("memex_access_policy_receipt")
+        if policy_receipt is None:
+            policy_receipt = assignment.get("memex_access_policy_receipt")
+        if policy_receipt is None:
+            return _memex_error_receipt(query=query, error="memex_access_policy_missing")
+
+        policy_validation = validate_memex_access_policy_receipt(
+            policy_receipt,
+            expected_foundup_id=expected_foundup_id,
+            expected_source_scope=expected_source_scope,
+            expected_principal_id=expected_principal_id,
+            expected_work_order_id=expected_work_order_id,
+            now_iso=now_iso or None,
+            seen_receipt_ids=_text_sequence(task_context.get("seen_memex_access_policy_receipt_ids"))
+            + _text_sequence(assignment.get("seen_memex_access_policy_receipt_ids")),
+            revoked_receipt_ids=_text_sequence(task_context.get("revoked_memex_access_policy_receipt_ids"))
+            + _text_sequence(assignment.get("revoked_memex_access_policy_receipt_ids")),
+        )
+        if not policy_validation.accepted or policy_validation.receipt is None:
+            return _memex_error_receipt(
+                query=query,
+                error="memex_access_policy_failed:" + ",".join(policy_validation.rejection_reasons),
+            )
+
+        gate = verify_and_rehydrate_memex_projection(
+            projection,
+            runtime_mode=True,
+            now_iso=now_iso or None,
+            seen_receipt_ids=_text_sequence(task_context.get("seen_memex_projection_receipt_ids"))
+            + _text_sequence(assignment.get("seen_memex_projection_receipt_ids")),
+            revoked_snapshot_ids=_text_sequence(task_context.get("revoked_memex_snapshot_ids"))
+            + _text_sequence(assignment.get("revoked_memex_snapshot_ids")),
+            expected_foundup_id=expected_foundup_id,
+            expected_source_scope=expected_source_scope,
+            expected_source_revision=expected_source_revision or None,
+            expected_access_policy_digest=policy_validation.receipt.receipt_id,
+            expected_holoindex_generation_id=expected_generation_id,
+            expected_operational_snapshot_id=expected_snapshot_id,
+            expected_operational_snapshot_content_digest=expected_snapshot_digest,
+        )
+        if not gate.accepted or gate.projection is None:
+            return _memex_error_receipt(
+                query=query,
+                error="memex_projection_integrity_failed:" + ",".join(gate.rejection_reasons),
             )
         return build_memex_projection_query_receipt(query=query, projection=gate.projection)
     except Exception as exc:
-        return build_query_receipt(
-            source="memex_projection",
-            source_class="memex",
-            query=query,
-            result={
-                "ok": False,
-                "query": query,
-                "freshness": "UNKNOWN",
-                "hits": [],
-                "error": f"memex_query_failed:{type(exc).__name__}",
-            },
-            require_generation=False,
-        )
+        return _memex_error_receipt(query=query, error=f"memex_query_failed:{type(exc).__name__}")
+
+
+def _memex_error_receipt(*, query: str, error: str) -> Mapping[str, Any]:
+    return build_query_receipt(
+        source="memex_projection",
+        source_class="memex",
+        query=query,
+        result={
+            "ok": False,
+            "query": query,
+            "freshness": "UNKNOWN",
+            "hits": [],
+            "error": error,
+        },
+        require_generation=False,
+    )
+
+
+def _first_text(
+    task_context: Mapping[str, Any],
+    assignment: Mapping[str, Any],
+    key: str,
+) -> str:
+    return str(task_context.get(key) or assignment.get(key) or "").strip()
+
+
+def _text_sequence(value: Any) -> tuple[str, ...]:
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
+        return ()
+    return tuple(dict.fromkeys(str(item).strip() for item in value if str(item).strip()))
 
 
 def _query_rejection_reason(receipt: Mapping[str, Any]) -> str:
