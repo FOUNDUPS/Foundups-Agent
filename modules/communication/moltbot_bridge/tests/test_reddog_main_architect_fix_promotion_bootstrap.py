@@ -372,6 +372,146 @@ def test_main_preflight_authority_source_supply_runs_before_promotion(tmp_path: 
     assert promote_kwargs["authority_profile_source_path"] == str(runtime_root / "authority_profile_source.json")
 
 
+def test_main_preflight_profile_runs_artifact_supply_chain_before_promotion(tmp_path: Path) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    work_state = runtime_root / "authoritative_work_state.json"
+    handoff_result = type(
+        "HandoffResult",
+        (),
+        {
+            "accepted": True,
+            "status": "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_APPLIED",
+            "architect_determination_id": "architect_determination:profile",
+            "architect_determination_path": str(runtime_root / "architect_determination.json"),
+            "memex_supply_receipt_path": str(runtime_root / "memex_supply_receipt.json"),
+            "rejection_reasons": (),
+        },
+    )()
+    model_supply_result = type(
+        "ModelSupplyResult",
+        (),
+        {
+            "accepted": True,
+            "status": "MODEL_SELECTION_BOOTSTRAP_APPLIED",
+            "model_selection_receipt_id": "model_selection_receipt:profile",
+            "output_path": str(runtime_root / "model_selection_receipt.json"),
+            "rejection_reasons": (),
+        },
+    )()
+    authority_supply_result = type(
+        "AuthoritySupplyResult",
+        (),
+        {
+            "accepted": True,
+            "status": "AUTHORITY_PROFILE_SOURCE_BOOTSTRAP_APPLIED",
+            "authority_profile_source_receipt_id": "sha256:authority-source-profile",
+            "output_path": str(runtime_root / "authority_profile_source.json"),
+            "rejection_reasons": (),
+        },
+    )()
+    promotion_result = type(
+        "PromotionResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
+            "promotion_receipt_id": "sha256:promotion",
+            "queue_item_id": "queue-1",
+            "claim_id": "claim-1",
+            "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "committed_revision": "sha256:revision",
+            "rejection_reasons": (),
+        },
+    )()
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff.run_reddog_resident_fix_promotion_artifact_handoff",
+        return_value=handoff_result,
+    ) as handoff:
+        with patch(
+            "modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply_bootstrap.run_reddog_model_selection_artifact_supply_bootstrap",
+            return_value=model_supply_result,
+        ) as model_supply:
+            with patch(
+                "modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap.run_reddog_authority_profile_source_artifact_supply_bootstrap",
+                return_value=authority_supply_result,
+            ) as authority_supply:
+                with patch(
+                    "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
+                    return_value=promotion_result,
+                ) as promote:
+                    with patch.dict(
+                        "os.environ",
+                        {
+                            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                            "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                            "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "intent-profile",
+                            "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH": str(tmp_path / "catalog.json"),
+                            "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH": str(tmp_path / "evidence.json"),
+                            "REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH": str(tmp_path / "requirements.json"),
+                            "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH": str(tmp_path / "keys.json"),
+                            "REDDOG_AUTHORITY_PROFILE_SEED_PATH": str(tmp_path / "seed.json"),
+                            "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": str(tmp_path / "principal.json"),
+                            "REDDOG_PERMISSION_SNAPSHOT_PATH": str(tmp_path / "permission.json"),
+                        },
+                        clear=True,
+                    ):
+                        assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+
+    handoff.assert_called_once()
+    handoff_kwargs = handoff.call_args.kwargs
+    assert handoff_kwargs["architect_determination_output_path"] == str(
+        runtime_root / "architect_determination.json"
+    )
+    assert handoff_kwargs["memex_supply_receipt_output_path"] == str(
+        runtime_root / "memex_supply_receipt.json"
+    )
+    model_supply.assert_called_once()
+    assert model_supply.call_args.kwargs["output_path"] == str(runtime_root / "model_selection_receipt.json")
+    authority_supply.assert_called_once()
+    assert authority_supply.call_args.kwargs["output_path"] == str(runtime_root / "authority_profile_source.json")
+    promote.assert_called_once()
+    promote_kwargs = promote.call_args.kwargs
+    assert promote_kwargs["architect_determination_path"] == str(runtime_root / "architect_determination.json")
+    assert promote_kwargs["model_selection_receipt_path"] == str(runtime_root / "model_selection_receipt.json")
+    assert promote_kwargs["memex_supply_receipt_path"] == str(runtime_root / "memex_supply_receipt.json")
+    assert promote_kwargs["authority_profile_source_path"] == str(runtime_root / "authority_profile_source.json")
+
+
+def test_main_preflight_explicit_zero_overrides_profile_artifact_supply(tmp_path: Path) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff.run_reddog_resident_fix_promotion_artifact_handoff",
+        side_effect=AssertionError("handoff supply must not run"),
+    ):
+        with patch(
+            "modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply_bootstrap.run_reddog_model_selection_artifact_supply_bootstrap",
+            side_effect=AssertionError("model supply must not run"),
+        ):
+            with patch(
+                "modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap.run_reddog_authority_profile_source_artifact_supply_bootstrap",
+                side_effect=AssertionError("authority supply must not run"),
+            ):
+                with patch.dict(
+                    "os.environ",
+                    {
+                        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                        "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                        "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+                        "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
+                    },
+                    clear=True,
+                ):
+                    assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+
+
 def test_main_preflight_disabled_without_requested_or_complete_inputs() -> None:
     import main
 

@@ -1504,6 +1504,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_flag_enabled,
             resident_queue_runtime_file_path,
         )
     except Exception as exc:
@@ -1536,7 +1537,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         repo_root,
         "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
     )
-    handoff_requested = os.getenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF", "0") == "1"
+    handoff_requested = resident_queue_runtime_flag_enabled(os.environ, "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF")
     handoff_enforced = os.getenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_ENFORCED", "0") != "0"
     if handoff_requested:
         try:
@@ -1576,7 +1577,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             print("[REDDOG-FIX-HANDOFF] Startup blocked by REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_ENFORCED=1")
             return False
 
-    model_supply_requested = os.getenv("REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY", "0") == "1"
+    model_supply_requested = resident_queue_runtime_flag_enabled(os.environ, "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY")
     model_supply_enforced = os.getenv("REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
     if model_supply_requested:
         try:
@@ -1619,7 +1620,10 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             print("[REDDOG-MODEL-SELECTION] Startup blocked by REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED=1")
             return False
 
-    authority_supply_requested = os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY", "0") == "1"
+    authority_supply_requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY",
+    )
     authority_supply_enforced = os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
     if authority_supply_requested:
         try:
