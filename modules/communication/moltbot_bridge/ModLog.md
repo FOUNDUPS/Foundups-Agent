@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a runtime active/work ledger projection supplier that consumes supplied
+  GitHub PR and W10 source-record JSON files and writes fresh source
+  projections outside the repository for authoritative work-state refresh.
+- Wired the resident profile startup path so the sequence is now source
+  records -> runtime ledger projection -> authoritative work-state refresh,
+  with explicit environment overrides still able to disable the profile
+  default.
+- Boundary remains constrained: no canonical ledger file mutation, source
+  mutation, work-state commit inside the projection supplier, worker spawn,
+  shell execution, OpenClaw enqueue, Hermes dispatch, PatternMemory write, or
+  HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_AUTHORITATIVE_WORK_STATE_SOURCE_RECORD_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

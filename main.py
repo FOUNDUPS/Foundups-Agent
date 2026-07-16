@@ -1345,6 +1345,8 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
         REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_ENFORCED=0 Block startup if not ready
         REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY=0           Materialize PR/W10 source records
         REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY_ENFORCED=0  Block startup if supply fails
+        REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY=0      Materialize fresh runtime ledger projections
+        REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY_ENFORCED=0 Block startup if projection fails
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Output/read path for snapshot JSON
         REDDOG_ACTIVE_SLICE_LEDGER_PATH                    Optional active ledger source
         REDDOG_WORK_LEDGER_JSON_PATH                       Optional work ledger source
@@ -1373,6 +1375,8 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
             resident_queue_runtime_file_path,
         )
 
+        active_slice_ledger_path = os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", "")
+        work_ledger_json_path = os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "")
         github_pr_records_path = resident_queue_runtime_file_path(
             os.environ,
             repo_root,
@@ -1422,10 +1426,56 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
                 )
                 return False
 
+        projection_requested = resident_queue_runtime_flag_enabled(
+            os.environ,
+            "REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY",
+        )
+        projection_enforced = os.getenv("REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY_ENFORCED", "0") != "0"
+        if projection_requested:
+            from modules.communication.moltbot_bridge.src.reddog_work_ledger_source_projection_supply_bootstrap import (
+                run_reddog_work_ledger_source_projection_supply_bootstrap,
+            )
+
+            projection = run_reddog_work_ledger_source_projection_supply_bootstrap(
+                repo_root=repo_root,
+                github_pr_records_path=github_pr_records_path,
+                w10_report_records_path=w10_report_records_path,
+                active_slice_ledger_output_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_ACTIVE_SLICE_LEDGER_PATH",
+                ),
+                work_ledger_json_output_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_WORK_LEDGER_JSON_PATH",
+                ),
+            )
+            projection_status = "PASS" if projection.accepted else "WARN"
+            projection_reasons = ",".join(projection.rejection_reasons) if projection.rejection_reasons else "(none)"
+            print(
+                f"[REDDOG-WORK-LEDGER-PROJECTION] preflight={projection_status} status={projection.status} "
+                f"projected_slices={projection.projected_slice_count} open_slices={projection.open_slice_count} "
+                f"reasons={projection_reasons}"
+            )
+            if projection.accepted:
+                if projection.active_slice_ledger_path:
+                    active_slice_ledger_path = projection.active_slice_ledger_path
+                    os.environ["REDDOG_ACTIVE_SLICE_LEDGER_PATH"] = active_slice_ledger_path
+                if projection.work_ledger_json_path:
+                    work_ledger_json_path = projection.work_ledger_json_path
+                    os.environ["REDDOG_WORK_LEDGER_JSON_PATH"] = work_ledger_json_path
+            elif projection_enforced:
+                print(
+                    "[REDDOG-WORK-LEDGER-PROJECTION] Startup blocked by "
+                    "REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY_ENFORCED=1"
+                )
+                return False
+
         result = run_reddog_main_authoritative_work_state_refresh_bootstrap(
             repo_root=repo_root,
-            active_slice_ledger_path=os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", ""),
-            work_ledger_json_path=os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", ""),
+            active_slice_ledger_path=active_slice_ledger_path,
+            work_ledger_json_path=work_ledger_json_path,
             github_pr_records_path=github_pr_records_path,
             w10_report_records_path=w10_report_records_path,
             work_state_output_path=resident_queue_runtime_file_path(
