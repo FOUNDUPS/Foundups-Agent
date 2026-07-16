@@ -2,6 +2,34 @@
 
 ## Chronological Change Log
 
+### [2026-07-16] - WRE_INDEPENDENT_EVIDENCE_PRODUCER_RUNTIME_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15
+(Priority), WSP 34 (Git Operations), WSP 50 (Pre-Action), WSP 97 (Truth
+Boundary), WSP 22 (ModLog)
+
+**Type**: Runtime evidence production for autonomous coding slices.
+
+**Deliverable**:
+- Added `src/wre_independent_evidence_producer_runtime.py`: explicit,
+  isolated-worktree evidence producer that computes machine-derived Git diff
+  evidence, runs allowlisted check argv, and emits verifier-compatible
+  `diff_evidence` / `test_evidence` plus a receipt.
+- Added `tests/test_wre_independent_evidence_producer_runtime.py`: proves the
+  produced evidence is accepted by the existing autonomous slice verifier and
+  fails closed on missing explicit request, shared-repo worktree, head mismatch,
+  scope/protected-path violations, secret-bearing diff, unsafe command argv,
+  failed tests, and HoloIndex gaps.
+
+**Boundary**: This slice does not edit files, create worktrees, publish PRs,
+merge, call GitHub, write PatternMemory, settle rewards, or re-index HoloIndex.
+Production command execution is limited to argv-only subprocess calls in the
+assigned isolated worktree; tests use an injected runner.
+
+**Verification**: Focused evidence/verifier/ratchet path tests passed locally.
+
+---
+
 ### [2026-07-14] - WRE_CODEACT_GIT_CWD_GUARD_INTEGRATION_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15

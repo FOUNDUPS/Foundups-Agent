@@ -1,5 +1,23 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-16: WRE_INDEPENDENT_EVIDENCE_PRODUCER_RUNTIME_PHASE1
+
+**Slice**: `WRE_INDEPENDENT_EVIDENCE_PRODUCER_RUNTIME_PHASE1`
+
+**New** `test_wre_independent_evidence_producer_runtime.py` (11 tests):
+- Verifier-compatible happy path: injected machine-derived Git diff/test
+  evidence feeds `verify_autonomous_slice_runtime()` and is accepted.
+- Fail-closed guards: explicit request required, worktree inside repo rejected
+  before runner calls, head mismatch blocks required checks, scope/protected
+  path violations block tests, secret-bearing diff rejected, truncated diff
+  rejected, unsafe check argv rejected, failed checks rejected, and HoloIndex
+  gap rejects before runner use.
+- AST boundary: no GitHub, HoloIndex mutation, PatternMemory, PR publish, or
+  merge surfaces; production subprocess path is argv-only with `shell=False`.
+
+**Run**: focused new file + adjacent verifier/ratchet/handler path -> 102
+passed.
+
 ## 2026-06-04: HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1 (W6)
 
 **Slice**: `HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1` | **Predecessors**: #757 (HERMES_AGENT_RUNTIME_INSTALL_AND_PATH_AUDIT_PHASE1)
