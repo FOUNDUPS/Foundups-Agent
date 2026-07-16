@@ -22,6 +22,7 @@ from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE,
     SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT,
     SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+    SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
     SignedWorkerOpenClawClaimReason,
     claim_reddog_signed_worker_dispatch_task_once,
     claim_reddog_signed_worker_dispatch_tasks_until_idle,
@@ -101,9 +102,16 @@ def isolated_agent_db(tmp_path, monkeypatch):
 
 
 class _FakeRunner:
-    def __init__(self, *, accepted: bool = True, unsafe: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        accepted: bool = True,
+        unsafe: bool = False,
+        requeue_required: bool = False,
+    ) -> None:
         self.accepted = accepted
         self.unsafe = unsafe
+        self.requeue_required = requeue_required
         self.calls = []
 
     def run_signed_worker_dispatch_task(
@@ -124,13 +132,17 @@ class _FakeRunner:
                 "repo_root": Path(repo_root),
             }
         )
-        return {
+        result = {
             "accepted": self.accepted,
             "receipt_id": "fake-signed-worker-runner-receipt",
             "rejection_reasons": [] if self.accepted else ["runner_declined"],
             "no_source_repo_mutation_performed": not self.unsafe,
             "no_shell_command_executed": not self.unsafe,
         }
+        if self.requeue_required:
+            result["queue_chain_complete"] = False
+            result["queue_chain_requeue_required"] = True
+        return result
 
 
 class _FakeQueryAdapter:
@@ -870,11 +882,11 @@ def test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifac
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
 
     assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
     assert result["task_id"] == task_id
     assert result["worker_runtime"] == "openclaw"
     assert result["capability"] == "candidate_queue_review"
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
     stage = stored["stage_results"]["bounded_worker_pilot"]
@@ -993,11 +1005,11 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
 
     assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
     assert result["task_id"] == task_id
     assert result["worker_runtime"] == "openclaw"
     assert result["capability"] == "candidate_queue_review"
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
     stage = stored["stage_results"]["slice_verifier"]
@@ -1128,9 +1140,9 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_pu
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
 
     assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
     assert result["task_id"] == task_id
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
     assert len(_FakeEnvDraftPrRunner.instances) == 1
     draft_runner = _FakeEnvDraftPrRunner.instances[0]
     assert draft_runner.repo_root == repo.resolve()
@@ -1269,9 +1281,9 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_rat
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
 
     assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
     assert result["task_id"] == task_id
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
     stage = stored["stage_results"]["verified_outcome_ratchet"]
@@ -1321,9 +1333,9 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_held_out_regression_
     result = claim_reddog_signed_worker_dispatch_task_once(repo_root=ctx["repo"])
 
     assert result["accepted"] is True, json.dumps(result, sort_keys=True)
-    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
     assert result["task_id"] == task_id
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
 
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
     stage = stored["stage_results"]["held_out_regression_gate"]
@@ -1408,6 +1420,26 @@ def test_openclaw_claims_signed_worker_task_once_and_completes_it(tmp_path: Path
     assert result["worker_runtime"] == "openclaw"
     assert result["receipt_id"]
     assert db.get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+
+def test_openclaw_claim_requeues_incomplete_queue_chain_task(tmp_path: Path) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=True),
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
+    assert result["task_id"] == task_id
+    assert result["worker_runtime"] == "openclaw"
+    assert result["receipt_id"]
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored["status"] == "pending"
+    assert stored["assigned_to"] is None
+    assert stored["assigned_at"] is None
 
 
 def test_openclaw_claim_ignores_non_openclaw_signed_worker_task(tmp_path: Path) -> None:
@@ -1510,6 +1542,27 @@ def test_openclaw_claim_loop_respects_max_claims(tmp_path: Path) -> None:
     assert result["idle"] is False
     assert db.get_autonomous_task_by_id(task_id_1)["status"] == "completed"
     assert db.get_autonomous_task_by_id(task_id_2)["status"] == "pending"
+
+
+def test_openclaw_claim_loop_counts_requeued_claims(tmp_path: Path) -> None:
+    task_id = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
+    db = AgentDB()
+
+    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=True),
+        max_claims=2,
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT
+    assert result["claimed_count"] == 2
+    assert result["completed_task_ids"] == ()
+    assert result["requeued_task_ids"] == (task_id, task_id)
+    assert result["failed_task_ids"] == ()
+    assert result["idle"] is False
+    assert result["max_claims_reached"] is True
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "pending"
 
 
 def test_openclaw_claim_loop_reports_idle_without_work(tmp_path: Path) -> None:

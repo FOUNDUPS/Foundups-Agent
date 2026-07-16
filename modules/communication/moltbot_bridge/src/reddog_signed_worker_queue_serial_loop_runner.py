@@ -66,6 +66,7 @@ _SIGNED_0102_BOUNDED_CODE_CAPABILITY = "bounded_code_change"
 _BOUNDED_WORKER_PILOT_STAGE = "bounded_worker_pilot"
 _BOUNDED_WORKER_PILOT_ACTION = "RUN_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE"
 _ARTIFACT_GENERATOR_MODE_FOUNDUPS_FUSION = "foundups_fusion"
+_QUEUE_CHAIN_COMPLETE_ACTION = "STOP_QUEUE_CHAIN_COMPLETE"
 
 
 @dataclass(frozen=True)
@@ -167,6 +168,7 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
                 [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE],
                 bootstrap_result=payload,
             )
+        queue_chain_complete = str(payload.get("next_action") or "") == _QUEUE_CHAIN_COMPLETE_ACTION
 
         return {
             "accepted": True,
@@ -174,6 +176,8 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
             "receipt_id": _receipt_id(task_id, queue_item_id, payload),
             "queue_item_id": queue_item_id,
             "bootstrap_result": dict(payload),
+            "queue_chain_complete": queue_chain_complete,
+            "queue_chain_requeue_required": not queue_chain_complete,
             "rejection_reasons": [],
             "no_source_repo_mutation_performed": True,
             "no_shell_command_executed": True,

@@ -682,6 +682,8 @@ def test_queue_serial_loop_runner_allows_bounded_isolated_worktree_progress(
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert result["no_source_repo_mutation_performed"] is True
     assert result["no_shell_command_executed"] is True
+    assert result["queue_chain_complete"] is False
+    assert result["queue_chain_requeue_required"] is True
 
 
 def test_queue_serial_loop_runner_allows_verified_draft_pr_publish_progress(
@@ -711,6 +713,8 @@ def test_queue_serial_loop_runner_allows_verified_draft_pr_publish_progress(
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert result["no_pr_created"] is False
     assert result["no_shell_command_executed"] is True
+    assert result["queue_chain_complete"] is False
+    assert result["queue_chain_requeue_required"] is True
 
 
 def test_queue_serial_loop_runner_rejects_unexpected_pr_creation(tmp_path: Path) -> None:
@@ -765,6 +769,8 @@ def test_queue_serial_loop_runner_allows_pattern_memory_admission_progress(
     assert result["no_pattern_memory_write_performed"] is False
     assert result["no_reward_settlement_performed"] is True
     assert result["no_holoindex_reindex_performed"] is True
+    assert result["queue_chain_complete"] is True
+    assert result["queue_chain_requeue_required"] is False
 
 
 def test_queue_serial_loop_runner_rejects_unexpected_pattern_memory_write(
@@ -808,6 +814,7 @@ def test_signed_worker_executor_accepts_queue_serial_loop_runner(tmp_path: Path)
     assert result.decision == SIGNED_WORKER_DISPATCH_TASK_EXECUTOR_ACCEPT
     assert result.runner_result is not None
     assert result.runner_result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
+    assert result.runner_result["queue_chain_requeue_required"] is True
 
 
 def test_signed_worker_executor_rejects_unsupported_queue_runner_target(tmp_path: Path) -> None:
