@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_VERIFIED_OUTCOME_RATCHET_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an end-to-end regression proving an AgentDB signed OpenClaw
+  `candidate_queue_review` task can be claimed, routed through the real
+  environment-bound queue-loop runner, and advance an accepted verified draft
+  PR publish result into the verified-outcome ratchet stage.
+- Verified the env-bound runner consumes an outside-repo ratchet request and
+  writes the outcome ratchet JSONL store only outside the source repository.
+- Boundary remains explicit: no shell execution, PR publish, ready-for-review,
+  merge, PatternMemory admission, HoloIndex re-index, or reward settlement is
+  performed by this slice.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_VERIFIED_DRAFT_PR_RUNNER_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
