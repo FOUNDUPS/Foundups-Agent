@@ -1672,6 +1672,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_materializer_mode,
             resident_queue_outcome_ratchet_store_path,
             resident_queue_pattern_memory_admission_db_path,
+            resident_queue_runtime_file_path,
             resident_queue_worktree_runner_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
@@ -1699,9 +1700,23 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
-            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
-            chain_results_path=os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", "") or None,
-            authority_profile_path=os.getenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", "") or None,
+            work_state_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            ),
+            chain_results_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+            )
+            or None,
+            authority_profile_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+            )
+            or None,
             work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
             work_order_materializer_mode=resident_queue_materializer_mode(os.environ) or None,
             valve_environment_path=os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH", "") or None,

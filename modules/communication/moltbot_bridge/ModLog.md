@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_RUNTIME_PATH_DEFAULTS_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added profile-derived mandatory resident runtime paths under
+  `.reddog/resident/<repo>/` or explicit `REDDOG_RESIDENT_RUNTIME_ROOT`.
+- `main.py` preflight and the OpenClaw signed-worker queue-loop runtime now
+  derive work-state, chain-results, and authority-profile paths when a
+  resident profile is active and the explicit env vars are absent.
+- Explicit path env vars still win, and the helper only returns paths; it does
+  not create files, write runtime state, re-index HoloIndex, dispatch Hermes,
+  merge, settle rewards, or grant additional authority.
+
 ## 2026-07-16: REDDOG_RESIDENT_FULL_RECURSIVE_PROFILE_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

@@ -785,6 +785,41 @@ def test_runtime_binding_profile_defaults_derivation_flags(tmp_path: Path) -> No
     assert "draft_pr_runner" not in call
 
 
+def test_runtime_binding_profile_derives_mandatory_paths_from_runtime_root(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime_root = tmp_path / "resident-runtime"
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=repo,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.runner is not None
+    assert binding.work_state_path == str(runtime_root / "authoritative_work_state.json")
+    assert binding.chain_results_path == str(runtime_root / "resident_queue_chain_results.json")
+    assert binding.authority_profile_path == str(runtime_root / "authority_profile.json")
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=repo,
+    )
+
+    assert result["accepted"] is True
+    assert not runtime_root.exists()
+
+
 def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()

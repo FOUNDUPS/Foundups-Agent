@@ -78,6 +78,12 @@ PROFILE_RUNTIME_FLAGS = frozenset(
     }
 )
 
+PROFILE_RUNTIME_PATH_FILENAMES = {
+    "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "authoritative_work_state.json",
+    "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": "resident_queue_chain_results.json",
+    "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": "authority_profile.json",
+}
+
 
 def resident_queue_binding_profile(env: Mapping[str, str]) -> str:
     """Return the normalized resident queue binding profile."""
@@ -118,6 +124,40 @@ def resident_queue_runtime_flag_enabled(env: Mapping[str, str], env_name: str) -
         env_name in PROFILE_RUNTIME_FLAGS
         and resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES
     )
+
+
+def resident_queue_runtime_root_path(env: Mapping[str, str], repo_root: Path | str) -> str:
+    """Return explicit/default outside-repo resident runtime root for profiles."""
+
+    root = Path(repo_root).resolve()
+    raw = str(env.get("REDDOG_RESIDENT_RUNTIME_ROOT") or "").strip()
+    if raw:
+        path = Path(raw)
+        if not path.is_absolute():
+            path = root.parent / path
+        return str(path.resolve())
+    if resident_queue_binding_profile(env) not in RESIDENT_QUEUE_PROFILES:
+        return ""
+    return str(root.parent / ".reddog" / "resident" / _repo_slug(root))
+
+
+def resident_queue_runtime_file_path(
+    env: Mapping[str, str],
+    repo_root: Path | str,
+    env_name: str,
+) -> str:
+    """Return an explicit env path or a profile-derived runtime file path."""
+
+    raw = str(env.get(env_name) or "").strip()
+    if raw:
+        return raw
+    filename = PROFILE_RUNTIME_PATH_FILENAMES.get(env_name)
+    if not filename:
+        return ""
+    root = resident_queue_runtime_root_path(env, repo_root)
+    if not root:
+        return ""
+    return str(Path(root) / filename)
 
 
 def resident_queue_artifact_generator_mode(env: Mapping[str, str]) -> str:
@@ -235,6 +275,7 @@ __all__ = [
     "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR",
     "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE",
     "PROFILE_SIGNED_0102_BOUNDED_CODE",
+    "PROFILE_RUNTIME_PATH_FILENAMES",
     "RESIDENT_QUEUE_PROFILES",
     "resident_queue_artifact_generator_mode",
     "resident_queue_binding_enabled",
@@ -244,6 +285,8 @@ __all__ = [
     "resident_queue_materializer_mode",
     "resident_queue_outcome_ratchet_store_path",
     "resident_queue_pattern_memory_admission_db_path",
+    "resident_queue_runtime_file_path",
     "resident_queue_runtime_flag_enabled",
+    "resident_queue_runtime_root_path",
     "resident_queue_worktree_runner_mode",
 ]

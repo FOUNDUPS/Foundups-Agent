@@ -31,6 +31,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     resident_queue_materializer_mode,
     resident_queue_outcome_ratchet_store_path,
     resident_queue_pattern_memory_admission_db_path,
+    resident_queue_runtime_file_path,
     resident_queue_runtime_flag_enabled,
     resident_queue_worktree_runner_mode,
 )
@@ -142,9 +143,15 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
             rejection_reasons=(SignedWorkerOpenClawQueueLoopBindingReason.NOT_REQUESTED,),
         )
 
-    work_state_path = _stripped(env.get("REDDOG_AUTHORITATIVE_WORK_STATE_PATH"))
-    chain_results_path = _stripped(env.get("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH"))
-    authority_profile_path = _stripped(env.get("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH"))
+    work_state_path = _stripped(
+        resident_queue_runtime_file_path(env, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")
+    )
+    chain_results_path = _stripped(
+        resident_queue_runtime_file_path(env, repo_root, "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH")
+    )
+    authority_profile_path = _stripped(
+        resident_queue_runtime_file_path(env, repo_root, "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH")
+    )
     reasons: list[str] = []
     if not work_state_path:
         reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.WORK_STATE_PATH_MISSING)
