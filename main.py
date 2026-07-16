@@ -1495,6 +1495,10 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
         REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
         REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
+        REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY=0    Materialize authority source from seed/principal/snapshot
+        REDDOG_AUTHORITY_PROFILE_SEED_PATH                   Outside-repo authority seed input JSON
+        REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH               Outside-repo principal authority record JSON
+        REDDOG_PERMISSION_SNAPSHOT_PATH                      Outside-repo permission snapshot JSON
         REDDOG_RESIDENT_ARCHITECT_INTENT_ID                  Intent ID for the determined resident cycle
     """
 
@@ -1613,6 +1617,50 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             os.environ["REDDOG_MODEL_SELECTION_RECEIPT_PATH"] = model_selection_receipt_path
         elif model_supply_enforced:
             print("[REDDOG-MODEL-SELECTION] Startup blocked by REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED=1")
+            return False
+
+    authority_supply_requested = os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY", "0") == "1"
+    authority_supply_enforced = os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
+    if authority_supply_requested:
+        try:
+            from modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap import (
+                run_reddog_authority_profile_source_artifact_supply_bootstrap,
+            )
+
+            raw_now = os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_NOW_EPOCH", "").strip()
+            authority_supply = run_reddog_authority_profile_source_artifact_supply_bootstrap(
+                repo_root=repo_root,
+                authority_seed_path=os.getenv("REDDOG_AUTHORITY_PROFILE_SEED_PATH", "") or None,
+                principal_authority_record_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH", "") or None,
+                permission_snapshot_path=os.getenv("REDDOG_PERMISSION_SNAPSHOT_PATH", "") or None,
+                output_path=authority_profile_source_path,
+                now_epoch=(int(raw_now) if raw_now else None),
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-AUTHORITY-SOURCE] Startup artifact supply failed: {exc}")
+            if authority_supply_enforced:
+                print(f"[REDDOG-AUTHORITY-SOURCE] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-AUTHORITY-SOURCE] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        authority_status = "PASS" if authority_supply.accepted else "WARN"
+        authority_reasons = (
+            ",".join(authority_supply.rejection_reasons) if authority_supply.rejection_reasons else "(none)"
+        )
+        print(
+            f"[REDDOG-AUTHORITY-SOURCE] preflight={authority_status} status={authority_supply.status} "
+            f"receipt={authority_supply.authority_profile_source_receipt_id or '(none)'} "
+            f"reasons={authority_reasons}"
+        )
+        if authority_supply.accepted and authority_supply.output_path:
+            authority_profile_source_path = authority_supply.output_path
+            os.environ["REDDOG_AUTHORITY_PROFILE_SOURCE_PATH"] = authority_profile_source_path
+        elif authority_supply_enforced:
+            print(
+                "[REDDOG-AUTHORITY-SOURCE] Startup blocked by "
+                "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY_ENFORCED=1"
+            )
             return False
 
     required_inputs_present = all(

@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Wired `main.py` to optionally materialize the authority-profile source
+  artifact before architect-FIX promotion when
+  `REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY=1` is set.
+- The preflight consumes outside-repo authority seed, token-verified principal,
+  and permission snapshot JSON files, then feeds the resulting
+  authority-profile source path into the existing promotion bridge.
+- Boundary remains constrained: no signing, signature verification, signer
+  state mutation, work-state mutation, worker spawn, shell, worktree,
+  OpenClaw enqueue, Hermes dispatch, PR creation, PatternMemory write, source
+  mutation, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
