@@ -1,5 +1,43 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - RedDog Dynamic Runtime Model Binding
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation
+**Slice:** REDDOG_DYNAMIC_MODEL_SELECTION_RUNTIME_BINDING_PHASE1
+
+**What:** Added a receipt-bound runtime binding layer for RedDog dynamic model
+selection.
+
+**Why:** RedDog must not install hard-coded GLM/DeepSeek/Kimi panels or
+catalog-only champion fields as production authority. Runtime model binding must
+consume the catalog snapshot, production selection receipt, benchmark evidence,
+signed promotion evidence, role/topology bindings, and explicit WSP_15 policy
+before emitting bridge-ready model IDs.
+
+**Files:**
+- `src/model_runtime_binding.py` - runtime binding policy, receipt, role binding,
+  evidence checks, and bridge-payload projection.
+- `tests/test_model_runtime_binding.py` - single-model binding, catalog-only
+  champion rejection, evaluation rejection, policy mismatch, panel role/topology,
+  duplicate evidence, and no-network/no-command tests.
+- `README.md` and `INTERFACE.md` - API and truth-boundary notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: receipt-bound production model selections can produce a RedDog
+  bridge payload.
+- IMPLEMENTED: catalog-only champions and evaluation selections fail closed for
+  runtime binding.
+- IMPLEMENTED: panel role/topology evidence is bound, with verifier kept outside
+  the candidate panel.
+- NOT IMPLEMENTED: extension runtime mutation, provider calls, benchmark
+  execution, champion ledger writes, PatternMemory promotion, or dynamic default
+  persistence.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Champion/Challenger AutoResearch Planner
 
 **Who:** 0102 Codex

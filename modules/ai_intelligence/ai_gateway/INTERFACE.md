@@ -152,6 +152,34 @@ receipts, verifier mismatch, or missing budget evidence fails closed. The planne
 does not execute benchmarks, call providers, write PatternMemory, mutate
 catalogs, or bind runtime defaults.
 
+#### RedDog Runtime Model Binding
+
+```python
+bind_reddog_runtime_models(...) -> RedDogModelRuntimeBindingReceipt
+```
+
+`ModelRuntimeBindingPolicy` binds the task family, runtime surface, minimum
+verifier pass rate, required task-set digest, held-out split digest, verifier
+digest, optional panel topology digest, and optional authority receipt ID.
+
+The binding function consumes:
+
+- the `ModelCatalogSnapshot` used for selection
+- a production `ModelSelectionReceipt`
+- per-selected-model `ModelBenchmarkEvidenceReceipt` records
+- per-selected-model `ModelPromotionEvidenceReceipt` records
+
+It returns `BOUND` only when every selected model is present in the catalog,
+selection is production-scoped, benchmark and signed-promotion evidence match the
+runtime policy, and panel role/topology bindings are valid. A bound receipt can
+produce a minimal RedDog bridge payload via `to_reddog_bridge_payload()`.
+
+The verifier role remains outside candidate panels. Catalog-only champions,
+evaluation selections, stale topology, mismatched benchmark evidence, missing
+signed promotion receipts, and below-threshold evidence fail closed. This API
+does not call model providers, run benchmarks, mutate the extension, persist
+runtime defaults, or write PatternMemory.
+
 ## Configuration
 
 ### Environment Variables
