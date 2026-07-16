@@ -7,7 +7,8 @@ control-plane loop flags. The fusion profile additionally selects the existing
 `foundups_fusion` artifact generator mode. The worktree profile additionally
 selects the existing isolated worktree runner. The draft-PR profile
 additionally selects the existing independent evidence runner and verified
-draft-PR runner. No profile enables shell execution, PatternMemory writes,
+draft-PR runner. The PatternMemory profile additionally selects the existing
+verified PatternMemory admission sink. No profile enables shell execution,
 reward settlement, merge authority, or HoloIndex re-indexing.
 """
 
@@ -25,12 +26,35 @@ PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE = "signed_0102_bounded_code_fus
 PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR = (
     "signed_0102_bounded_code_fusion_worktree_draft_pr"
 )
+PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY = (
+    "signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory"
+)
 RESIDENT_QUEUE_PROFILES = frozenset(
     {
         PROFILE_SIGNED_0102_BOUNDED_CODE,
         PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION,
         PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
         PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+    }
+)
+
+_DRAFT_PR_OR_HIGHER_PROFILES = frozenset(
+    {
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+    }
+)
+_WORKTREE_OR_HIGHER_PROFILES = frozenset(
+    {
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+        *_DRAFT_PR_OR_HIGHER_PROFILES,
+    }
+)
+_FUSION_OR_HIGHER_PROFILES = frozenset(
+    {
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION,
+        *_WORKTREE_OR_HIGHER_PROFILES,
     }
 )
 
@@ -82,9 +106,9 @@ def resident_queue_runtime_flag_enabled(env: Mapping[str, str], env_name: str) -
     """Return whether a safe resident runtime control-plane flag is enabled.
 
     Explicit environment values win. The profile only enables known
-    control-plane flags that start existing gated loops; it never enables
-    model, shell, worktree, draft-PR, PatternMemory, HoloIndex, merge, or
-    reward-settlement effect modes.
+    control-plane flags that start existing gated loops; this helper never
+    selects effect modes such as model generation, worktree, draft PR,
+    PatternMemory, HoloIndex, merge, or reward settlement.
     """
 
     raw = str(env.get(env_name) or "").strip()
@@ -102,11 +126,7 @@ def resident_queue_artifact_generator_mode(env: Mapping[str, str]) -> str:
     raw = str(env.get("REDDOG_ARTIFACT_GENERATOR_MODE") or "").strip()
     if raw:
         return raw
-    if resident_queue_binding_profile(env) in {
-        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION,
-        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
-        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
-    }:
+    if resident_queue_binding_profile(env) in _FUSION_OR_HIGHER_PROFILES:
         return "foundups_fusion"
     return ""
 
@@ -117,10 +137,7 @@ def resident_queue_worktree_runner_mode(env: Mapping[str, str]) -> str:
     raw = str(env.get("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE") or "").strip()
     if raw:
         return raw
-    if resident_queue_binding_profile(env) in {
-        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
-        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
-    }:
+    if resident_queue_binding_profile(env) in _WORKTREE_OR_HIGHER_PROFILES:
         return "real"
     return ""
 
@@ -131,7 +148,7 @@ def resident_queue_draft_pr_runner_mode(env: Mapping[str, str]) -> str:
     raw = str(env.get("REDDOG_DRAFT_PR_RUNNER_MODE") or "").strip()
     if raw:
         return raw
-    if resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR:
+    if resident_queue_binding_profile(env) in _DRAFT_PR_OR_HIGHER_PROFILES:
         return "real"
     return ""
 
@@ -142,7 +159,7 @@ def resident_queue_evidence_command_runner_mode(env: Mapping[str, str]) -> str:
     raw = str(env.get("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE") or "").strip()
     if raw:
         return raw
-    if resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR:
+    if resident_queue_binding_profile(env) in _DRAFT_PR_OR_HIGHER_PROFILES:
         return "real"
     return ""
 
@@ -156,7 +173,7 @@ def resident_queue_outcome_ratchet_store_path(
     raw = str(env.get("REDDOG_OUTCOME_RATCHET_STORE_PATH") or "").strip()
     if raw:
         return raw
-    if resident_queue_binding_profile(env) != PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR:
+    if resident_queue_binding_profile(env) not in _DRAFT_PR_OR_HIGHER_PROFILES:
         return ""
     root = Path(repo_root).resolve()
     return str(
@@ -165,6 +182,30 @@ def resident_queue_outcome_ratchet_store_path(
         / "outcome_ratchet"
         / _repo_slug(root)
         / "verified_outcomes.jsonl"
+    )
+
+
+def resident_queue_pattern_memory_admission_db_path(
+    env: Mapping[str, str],
+    repo_root: Path | str,
+) -> str:
+    """Return explicit/default verified PatternMemory admission DB path."""
+
+    raw = str(env.get("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH") or "").strip()
+    if raw:
+        return raw
+    if (
+        resident_queue_binding_profile(env)
+        != PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY
+    ):
+        return ""
+    root = Path(repo_root).resolve()
+    return str(
+        root.parent
+        / ".reddog"
+        / "pattern_memory"
+        / _repo_slug(root)
+        / "pattern_memory.db"
     )
 
 
@@ -190,6 +231,7 @@ __all__ = [
     "PROFILE_BINDING_FLAGS",
     "PROFILE_RUNTIME_FLAGS",
     "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION",
+    "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY",
     "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR",
     "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE",
     "PROFILE_SIGNED_0102_BOUNDED_CODE",
@@ -201,6 +243,7 @@ __all__ = [
     "resident_queue_evidence_command_runner_mode",
     "resident_queue_materializer_mode",
     "resident_queue_outcome_ratchet_store_path",
+    "resident_queue_pattern_memory_admission_db_path",
     "resident_queue_runtime_flag_enabled",
     "resident_queue_worktree_runner_mode",
 ]

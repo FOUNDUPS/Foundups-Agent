@@ -8,9 +8,10 @@ environment/configuration, accepts only the OpenClaw candidate queue-review
 capability, and delegates all queue advancement to the existing bounded
 resident queue serial-loop bootstrap.
 
-It does not execute shell commands, mutate repository files, create worktrees,
-publish PRs, dispatch Hermes, settle rewards, write PatternMemory, or re-index
-HoloIndex.
+It does not execute shell commands, mutate repository files, dispatch Hermes,
+settle rewards, or re-index HoloIndex. Higher resident profiles can supply
+existing guarded worktree, draft-PR, outcome-ratchet, and PatternMemory sinks;
+those effects remain downstream of their own queue-stage gates.
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     resident_queue_evidence_command_runner_mode,
     resident_queue_materializer_mode,
     resident_queue_outcome_ratchet_store_path,
+    resident_queue_pattern_memory_admission_db_path,
     resident_queue_runtime_flag_enabled,
     resident_queue_worktree_runner_mode,
 )
@@ -324,7 +326,7 @@ def _build_pattern_memory_admission_sink(
     repo_root: Path | str,
     env: Mapping[str, str],
 ) -> tuple[Any, tuple[str, ...]]:
-    db_path = _stripped(env.get("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH"))
+    db_path = resident_queue_pattern_memory_admission_db_path(env, repo_root)
     if not db_path:
         return None, ()
 

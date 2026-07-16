@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_PATTERN_MEMORY_ADMISSION_PROFILE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added
+  `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory`
+  as the next resident queue profile above the verified draft-PR profile.
+- The profile preserves the existing fusion, isolated worktree, independent
+  evidence, verified draft-PR, and verified outcome ratchet defaults, then
+  derives an outside-repo PatternMemory admission DB path under
+  `.reddog/pattern_memory/<repo>/pattern_memory.db`.
+- Boundary remains constrained: PatternMemory writes still require the
+  queue-authorized verified draft PR, verified outcome ratchet, held-out gate
+  acceptance, derived admission request, and verified PatternMemory sink guard.
+  The profile does not enable shell execution, HoloIndex re-indexing, merge
+  authority, reward settlement, or Hermes dispatch.
+
 ## 2026-07-16: REDDOG_RESIDENT_FUSION_WORKTREE_DRAFT_PR_PROFILE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
