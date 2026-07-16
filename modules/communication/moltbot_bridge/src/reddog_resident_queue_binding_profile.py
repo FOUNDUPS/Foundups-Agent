@@ -5,9 +5,10 @@ Slice: REDDOG_RESIDENT_QUEUE_BINDING_PROFILE_PHASE1
 The base profile defaults derivation/request-binding controls and safe
 control-plane loop flags. The fusion profile additionally selects the existing
 `foundups_fusion` artifact generator mode. The worktree profile additionally
-selects the existing isolated worktree runner. No profile enables shell
-execution, draft PR publishing, PatternMemory writes, reward settlement, merge
-authority, or HoloIndex re-indexing.
+selects the existing isolated worktree runner. The draft-PR profile
+additionally selects the existing verified draft-PR runner. No profile enables
+shell execution, PatternMemory writes, reward settlement, merge authority, or
+HoloIndex re-indexing.
 """
 
 from __future__ import annotations
@@ -19,11 +20,15 @@ ENV_REDDOG_RESIDENT_QUEUE_BINDING_PROFILE = "REDDOG_RESIDENT_QUEUE_BINDING_PROFI
 PROFILE_SIGNED_0102_BOUNDED_CODE = "signed_0102_bounded_code"
 PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION = "signed_0102_bounded_code_fusion"
 PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE = "signed_0102_bounded_code_fusion_worktree"
+PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR = (
+    "signed_0102_bounded_code_fusion_worktree_draft_pr"
+)
 RESIDENT_QUEUE_PROFILES = frozenset(
     {
         PROFILE_SIGNED_0102_BOUNDED_CODE,
         PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION,
         PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
     }
 )
 
@@ -98,6 +103,7 @@ def resident_queue_artifact_generator_mode(env: Mapping[str, str]) -> str:
     if resident_queue_binding_profile(env) in {
         PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION,
         PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
     }:
         return "foundups_fusion"
     return ""
@@ -109,7 +115,21 @@ def resident_queue_worktree_runner_mode(env: Mapping[str, str]) -> str:
     raw = str(env.get("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE") or "").strip()
     if raw:
         return raw
-    if resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE:
+    if resident_queue_binding_profile(env) in {
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
+    }:
+        return "real"
+    return ""
+
+
+def resident_queue_draft_pr_runner_mode(env: Mapping[str, str]) -> str:
+    """Return explicit/default verified draft-PR runner mode for the profile."""
+
+    raw = str(env.get("REDDOG_DRAFT_PR_RUNNER_MODE") or "").strip()
+    if raw:
+        return raw
+    if resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR:
         return "real"
     return ""
 
@@ -130,12 +150,14 @@ __all__ = [
     "PROFILE_BINDING_FLAGS",
     "PROFILE_RUNTIME_FLAGS",
     "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION",
+    "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR",
     "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE",
     "PROFILE_SIGNED_0102_BOUNDED_CODE",
     "RESIDENT_QUEUE_PROFILES",
     "resident_queue_artifact_generator_mode",
     "resident_queue_binding_enabled",
     "resident_queue_binding_profile",
+    "resident_queue_draft_pr_runner_mode",
     "resident_queue_materializer_mode",
     "resident_queue_runtime_flag_enabled",
     "resident_queue_worktree_runner_mode",

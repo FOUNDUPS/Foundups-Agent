@@ -572,6 +572,47 @@ def test_runtime_binding_builds_draft_pr_runner_when_requested(
     assert draft_runner.timeout_s == 88
 
 
+def test_runtime_binding_draft_pr_profile_supplies_verified_draft_runner(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    from modules.foundups.agent.src import worktree_pr_runner
+
+    monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeDraftPrRunner)
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "89",
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=tmp_path,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.runner is not None
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path,
+    )
+
+    assert result["accepted"] is True
+    assert bootstrap.calls[0]["artifact_generator_mode"] == "foundups_fusion"
+    assert bootstrap.calls[0]["worktree_runner_mode"] == "real"
+    draft_runner = bootstrap.calls[0]["draft_pr_runner"]
+    assert draft_runner.__class__.__name__ == "_FakeDraftPrRunner"
+    assert draft_runner.repo_root == tmp_path.resolve()
+    assert draft_runner.timeout_s == 89
+
+
 def test_runtime_binding_rejects_unsupported_draft_pr_runner_mode(tmp_path: Path) -> None:
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
         repo_root=tmp_path,
