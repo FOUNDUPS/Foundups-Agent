@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_BOUNDED_CODE_ARTIFACT_REQUEST_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Updated the signed 0102 bounded-code queue-loop runner so
+  `REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING=1` can satisfy the artifact
+  generation readiness gate when paired with the existing explicit
+  `foundups_fusion` artifact generator mode.
+- Preserved existing boundaries: static `REDDOG_ARTIFACT_CONTENTS_PATH` remains
+  forbidden for signed bounded-code workers, `max_steps` must remain 1, and the
+  queue stage must already be `bounded_worker_pilot`.
+- Kept the legacy explicit `REDDOG_ARTIFACT_GENERATION_REQUEST_PATH` flow
+  working; this slice only removes the need for hand-authored request JSON when
+  the resident queue can derive it from signed chain state.
+
 ## 2026-07-16: REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
