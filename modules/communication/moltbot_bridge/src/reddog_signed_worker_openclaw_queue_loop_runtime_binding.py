@@ -25,6 +25,7 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     resident_queue_artifact_generator_mode,
     resident_queue_binding_enabled,
+    resident_queue_draft_pr_runner_mode,
     resident_queue_materializer_mode,
     resident_queue_runtime_flag_enabled,
     resident_queue_worktree_runner_mode,
@@ -282,7 +283,7 @@ def _build_draft_pr_runner(
     repo_root: Path | str,
     env: Mapping[str, str],
 ) -> tuple[Any, tuple[str, ...]]:
-    mode = _stripped(env.get("REDDOG_DRAFT_PR_RUNNER_MODE")).lower()
+    mode = resident_queue_draft_pr_runner_mode(env).strip().lower()
     if not mode:
         return None, ()
     if mode != "real":

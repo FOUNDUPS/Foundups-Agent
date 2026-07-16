@@ -1667,6 +1667,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
             resident_queue_binding_enabled,
             resident_queue_artifact_generator_mode,
+            resident_queue_draft_pr_runner_mode,
             resident_queue_materializer_mode,
             resident_queue_worktree_runner_mode,
         )
@@ -1679,7 +1680,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             db_path=os.getenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", "") or None,
         )
         draft_pr_runner = None
-        draft_pr_runner_mode = os.getenv("REDDOG_DRAFT_PR_RUNNER_MODE", "").strip().lower()
+        draft_pr_runner_mode = resident_queue_draft_pr_runner_mode(os.environ).strip().lower()
         if draft_pr_runner_mode:
             if draft_pr_runner_mode != "real":
                 raise ValueError("unsupported_draft_pr_runner_mode")
