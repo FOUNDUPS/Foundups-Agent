@@ -3797,6 +3797,7 @@ def test_main_serial_loop_preflight_worktree_profile_derives_model_and_worktree_
     assert mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["evidence_command_runner_mode"] is None
 
 
 def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
@@ -3839,6 +3840,7 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
 
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 91
 

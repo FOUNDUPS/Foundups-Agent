@@ -6,9 +6,9 @@ The base profile defaults derivation/request-binding controls and safe
 control-plane loop flags. The fusion profile additionally selects the existing
 `foundups_fusion` artifact generator mode. The worktree profile additionally
 selects the existing isolated worktree runner. The draft-PR profile
-additionally selects the existing verified draft-PR runner. No profile enables
-shell execution, PatternMemory writes, reward settlement, merge authority, or
-HoloIndex re-indexing.
+additionally selects the existing independent evidence runner and verified
+draft-PR runner. No profile enables shell execution, PatternMemory writes,
+reward settlement, merge authority, or HoloIndex re-indexing.
 """
 
 from __future__ import annotations
@@ -134,6 +134,17 @@ def resident_queue_draft_pr_runner_mode(env: Mapping[str, str]) -> str:
     return ""
 
 
+def resident_queue_evidence_command_runner_mode(env: Mapping[str, str]) -> str:
+    """Return explicit/default independent evidence command runner mode."""
+
+    raw = str(env.get("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE") or "").strip()
+    if raw:
+        return raw
+    if resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR:
+        return "real"
+    return ""
+
+
 def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     """Return explicit/default work-order materializer mode for the profile."""
 
@@ -158,6 +169,7 @@ __all__ = [
     "resident_queue_binding_enabled",
     "resident_queue_binding_profile",
     "resident_queue_draft_pr_runner_mode",
+    "resident_queue_evidence_command_runner_mode",
     "resident_queue_materializer_mode",
     "resident_queue_runtime_flag_enabled",
     "resident_queue_worktree_runner_mode",

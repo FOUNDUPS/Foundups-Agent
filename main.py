@@ -1668,6 +1668,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_binding_enabled,
             resident_queue_artifact_generator_mode,
             resident_queue_draft_pr_runner_mode,
+            resident_queue_evidence_command_runner_mode,
             resident_queue_materializer_mode,
             resident_queue_worktree_runner_mode,
         )
@@ -1741,7 +1742,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 os.environ,
                 "REDDOG_SLICE_VERIFIER_REQUEST_BINDING",
             ),
-            evidence_command_runner_mode=os.getenv("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE", "") or None,
+            evidence_command_runner_mode=resident_queue_evidence_command_runner_mode(os.environ)
+            or None,
             draft_pr_publish_request_binding_enabled=resident_queue_binding_enabled(
                 os.environ,
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING",
