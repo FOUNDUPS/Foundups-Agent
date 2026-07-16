@@ -49,6 +49,7 @@ def build_memex_projection_query_receipt(
     hits = []
     if projection_ok and receipt:
         hits = _rank_records(records, terms=terms, limit=limit)
+    verdicts = _per_target_verdicts(records, terms=terms) if projection_ok else []
 
     result = {
         "ok": projection_ok,
@@ -56,6 +57,8 @@ def build_memex_projection_query_receipt(
         "freshness": "CURRENT" if projection_ok else "UNKNOWN",
         "hits": hits,
         "error": error,
+        "retrieval_verdict": "FOUND" if hits else "MISS",
+        "per_target_retrieval_verdicts": verdicts,
     }
     generation_binding = {
         "freshness_generation_id": receipt.holoindex_generation_id if receipt else "",
@@ -118,6 +121,37 @@ def _rank_records(
         )
     ranked.sort(key=lambda item: (-float(item["score"]), str(item["path"])))
     return ranked[: max(0, int(limit or 0))]
+
+
+def _per_target_verdicts(
+    records: Sequence[MemexProjectionRecord],
+    *,
+    terms: Sequence[str],
+) -> list[dict[str, Any]]:
+    verdicts = []
+    for term in terms:
+        matched_refs = []
+        for record in records:
+            haystack = f"{record.title}\n{record.text}".lower()
+            if term not in haystack:
+                continue
+            matched_refs.append(_record_evidence_ref(record))
+        verdicts.append(
+            {
+                "target": term,
+                "source_class": SOURCE_CLASS_MEMEX,
+                "verdict": "FOUND" if matched_refs else "MISS",
+                "matched_evidence_refs": matched_refs,
+            }
+        )
+    return verdicts
+
+
+def _record_evidence_ref(record: MemexProjectionRecord) -> str:
+    return (
+        f"memex:{record.memex_snapshot_id}:{record.record_id}:"
+        f"{record.metadata.get('section', '')}"
+    )
 
 
 def projection_to_plain_dict(value: MemexProjectionResult) -> dict[str, Any]:

@@ -1,5 +1,22 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_MEMEX_PER_TARGET_RETRIEVAL_VERDICT_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 60, 97
+
+- UPDATE `holo_index/memex_query_routing.py`: Memex query receipts now expose
+  an overall `retrieval_verdict` and deterministic
+  `per_target_retrieval_verdicts` for every query term.
+- UPDATE `holo_index/query_receipt.py`: query receipts bind optional
+  retrieval verdict fields into the receipt digest instead of dropping them
+  during normalization.
+- TEST `tests/test_holoindex_memex_query_routing.py`: found and missed Memex
+  targets now report explicit per-target verdicts without creating index-gap
+  false positives.
+- Boundary: verdicts are read-only query metadata. No Memex supplier, external
+  retrieval, HoloIndex re-index, or evidence promotion is added.
+
 ## [2026-07-16] REDDOG_MEMEX_CONTENT_BEARING_EVIDENCE_BUNDLE_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
