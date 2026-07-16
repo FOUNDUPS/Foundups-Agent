@@ -127,8 +127,16 @@ def _patch_default_query_adapters(monkeypatch) -> None:
 
 
 class _EchoEvidenceModelRunner:
-    def __init__(self, *, unknown_ref: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        unknown_ref: bool = False,
+        include_memex_ref: bool = False,
+        memex_only_ref: bool = False,
+    ) -> None:
         self.unknown_ref = unknown_ref
+        self.include_memex_ref = include_memex_ref
+        self.memex_only_ref = memex_only_ref
         self.calls = []
 
     def run_repo_code_audit(self, *, prompt: str, context: str, binding, timeout_seconds: int):
@@ -137,9 +145,15 @@ class _EchoEvidenceModelRunner:
         evidence_ref = parsed["untrusted_repository_evidence"][0]["evidence_ref"]
         if self.unknown_ref:
             evidence_ref = "file:missing.py:sha256:missing:lines:1"
+        evidence_refs = [evidence_ref]
+        memex_records = parsed.get("memex_evidence_bundle", {}).get("records", [])
+        if self.include_memex_ref and memex_records:
+            evidence_refs.append(memex_records[0]["evidence_ref"])
+        if self.memex_only_ref and memex_records:
+            evidence_refs = [memex_records[0]["evidence_ref"]]
         output = {
             "summary": "Model-backed repo audit verified supplied evidence.",
-            "evidence_refs": [evidence_ref],
+            "evidence_refs": evidence_refs,
             "findings": [
                 {
                     "finding_id": "repo-code-audit-finding-1",
@@ -148,7 +162,7 @@ class _EchoEvidenceModelRunner:
                     "recommended_action": "FIX",
                     "wsp15_priority": "P1",
                     "severity": "MAJOR",
-                    "evidence_refs": [evidence_ref],
+                    "evidence_refs": evidence_refs,
                     "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1",
                 }
             ],
@@ -547,6 +561,56 @@ def test_model_backed_includes_optional_memex_query_receipt(tmp_path: Path) -> N
     assert worker_receipt["memex_query_receipt_id"] == memex_receipt["receipt_id"]
     assert worker_receipt["memex_evidence_bundle_id"] == memex_bundle["bundle_id"]
     assert worker_receipt["no_side_effect_attestations"]["no_holoindex_reindex_performed"] is True
+
+
+def test_model_backed_allows_memex_refs_only_as_supplemental_citations(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner(include_memex_ref=True)
+    context = _model_context()
+    context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
+    context["memex_projection"] = _memex_projection(
+        access_policy_receipt=context["memex_access_policy_receipt"]
+    )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert result.report is not None
+    finding_refs = result.report["findings"][0]["evidence_refs"]
+    assert any(ref.startswith("file:") for ref in finding_refs)
+    assert any(ref.startswith("memex:") for ref in finding_refs)
+
+
+def test_model_backed_rejects_memex_only_citation_for_repo_audit_finding(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner(memex_only_ref=True)
+    context = _model_context()
+    context["memex_access_policy_receipt"] = _memex_access_policy_receipt()
+    context["memex_projection"] = _memex_projection(
+        access_policy_receipt=context["memex_access_policy_receipt"]
+    )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert any(
+        "memex_cannot_replace_repo_file_evidence" in reason
+        for reason in result.rejection_reasons
+    )
 
 
 def test_model_backed_rejects_invalid_supplied_memex_projection_before_model(tmp_path: Path) -> None:
