@@ -24,6 +24,7 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
     build_model_promotion_evidence_receipt,
     production_evidence_for_selection,
 )
+from model_signed_evidence_test_helpers import make_verified_production_evidence
 
 
 def _snapshot(*cards: ModelCapabilityCard):
@@ -148,6 +149,7 @@ def test_production_requires_explicit_nonzero_verifier_threshold():
 
     assert receipt.decision == SelectionDecision.REJECTED
     assert "production_verifier_threshold_missing:1" in receipt.rejection_reasons
+    assert "production_evidence_not_authenticated:1" in receipt.rejection_reasons
 
 
 def test_production_selects_champion_only_with_benchmark_and_signed_promotion_receipts():
@@ -184,8 +186,55 @@ def test_production_selects_champion_only_with_benchmark_and_signed_promotion_re
         signed_promotion_receipt_id="signed_promotion:1",
         min_verifier_pass_rate=0.9,
     )
+    snapshot = _snapshot(candidate, champion)
+    verified_evidence = make_verified_production_evidence(
+        benchmark,
+        promotion,
+        catalog_snapshot_id=snapshot.snapshot_id,
+    )
     receipt = select_models_for_task(
-        _snapshot(candidate, champion),
+        snapshot,
+        ModelTaskRequirements(
+            task_family="architecture",
+            purpose=SelectionPurpose.PRODUCTION,
+            min_verifier_pass_rate=0.9,
+        ),
+        production_evidence=verified_evidence,
+    )
+
+    assert receipt.decision == SelectionDecision.SELECTED
+    assert receipt.selected_model_ids == ("provider/champion",)
+    assert all(item.canonical_model_id != "provider/candidate" for item in receipt.rankings)
+
+
+def test_raw_production_evidence_mapping_is_not_authority():
+    champion = _card(
+        "provider/champion",
+        promotion_state=PromotionState.CHAMPION,
+        verifier_pass_rate=0.99,
+        benchmark_scores={"architecture": 0.99},
+    )
+    benchmark = build_model_benchmark_evidence_receipt(
+        model_id="provider/champion",
+        task_family="architecture",
+        task_set_digest="sha256:task-set",
+        held_out_split_digest="sha256:held-out",
+        prompt_topology_digest="sha256:topology",
+        verifier_digest="sha256:verifier",
+        verifier_receipt_id="verifier_receipt:1",
+        sample_count=50,
+        accepted_count=47,
+    )
+    promotion = build_model_promotion_evidence_receipt(
+        benchmark_receipt=benchmark,
+        promotion_state=PromotionState.CHAMPION,
+        promotion_authority_receipt_id="promotion_authority:1",
+        signed_promotion_receipt_id="signed_promotion:1",
+        min_verifier_pass_rate=0.9,
+    )
+
+    receipt = select_models_for_task(
+        _snapshot(champion),
         ModelTaskRequirements(
             task_family="architecture",
             purpose=SelectionPurpose.PRODUCTION,
@@ -194,9 +243,8 @@ def test_production_selects_champion_only_with_benchmark_and_signed_promotion_re
         production_evidence=production_evidence_for_selection(benchmark, promotion),
     )
 
-    assert receipt.decision == SelectionDecision.SELECTED
-    assert receipt.selected_model_ids == ("provider/champion",)
-    assert all(item.canonical_model_id != "provider/candidate" for item in receipt.rankings)
+    assert receipt.decision == SelectionDecision.REJECTED
+    assert "production_evidence_not_authenticated:1" in receipt.rejection_reasons
 
 
 def test_requirements_filter_context_tools_structured_reasoning_and_cost():

@@ -1,5 +1,49 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Model Intelligence Receipt Rehydration and Signed Evidence
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation Hardening
+**Slice:** MODEL_INTELLIGENCE_RECEIPT_REHYDRATION_AND_SIGNED_EVIDENCE_VERIFICATION_PHASE1
+
+**What:** Added the signed production-evidence admission gate for model
+intelligence and wired production model selection/runtime binding to it.
+
+**Why:** Production selection previously accepted raw `production_evidence`
+mappings and presence-checked receipt IDs. A forged mapping could produce a
+production `ModelSelectionReceipt` without authentic benchmark-verifier and
+promotion-authority signatures.
+
+**Files:**
+- `src/model_signed_evidence.py` - receipt rehydration, deterministic ID
+  recomputation, role-specific signed evidence verification, nonce admission
+  handling, and typed `VerifiedModelProductionEvidence`.
+- `src/model_intelligence_selection.py` - production selection now rejects raw
+  mappings and requires verified signed evidence.
+- `src/model_runtime_binding.py` - runtime bridge binding now requires verified
+  production evidence and keeps panel runtime binding deferred.
+- `tests/test_model_signed_evidence.py` and helper - rehydration, tamper,
+  signer-role, signature, nonce and panel-deferred tests.
+- Existing selection/outcome/runtime-binding tests - updated for the new truth
+  boundary.
+- `README.md` and `INTERFACE.md` - API and truth-boundary notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: benchmark/promotion/catalog/selection/runtime receipts can be
+  rehydrated and digest-checked.
+- IMPLEMENTED: single-model production evidence requires signed
+  `benchmark_verifier` and `promotion_authority` receipts.
+- IMPLEMENTED: production selection rejects raw evidence mappings.
+- IMPLEMENTED: runtime binding requires verified production evidence.
+- IMPLEMENTED: panel runtime binding remains fail-closed/deferred.
+- NOT IMPLEMENTED: private-key handling, signing, provider calls, benchmark
+  execution, panel topology promotion, extension runtime mutation, PatternMemory
+  writes, or HoloIndex re-indexing.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - RedDog Dynamic Runtime Model Binding
 
 **Who:** 0102 Codex

@@ -148,15 +148,19 @@ def select_models_for_task(
     snapshot: ModelCatalogSnapshot,
     requirements: ModelTaskRequirements,
     *,
-    production_evidence: Mapping[str, Mapping[str, Any]] | None = None,
+    production_evidence: Any | None = None,
 ) -> ModelSelectionReceipt:
     """Select eligible model candidates from a catalog snapshot."""
 
     normalized_requirements = requirements.normalized()
+    production_evidence_map, production_evidence_error = _production_evidence_map(
+        production_evidence,
+        normalized_requirements,
+    )
     ranked: list[ModelCandidateRanking] = []
     rejection_counts: dict[str, int] = {}
     for card in snapshot.cards:
-        ok, reasons = _eligible(card, normalized_requirements, production_evidence or {})
+        ok, reasons = _eligible(card, normalized_requirements, production_evidence_map, production_evidence_error)
         if not ok:
             for reason in reasons:
                 rejection_counts[reason] = rejection_counts.get(reason, 0) + 1
@@ -199,6 +203,7 @@ def _eligible(
     card: ModelCapabilityCard,
     requirements: ModelTaskRequirements,
     production_evidence: Mapping[str, Mapping[str, Any]],
+    production_evidence_error: str | None = None,
 ) -> tuple[bool, tuple[str, ...]]:
     reasons: list[str] = []
     provider = _clean_token(card.provider)
@@ -234,12 +239,40 @@ def _eligible(
             reasons.append("production_verifier_threshold_missing")
         if card.promotion_state != PromotionState.CHAMPION:
             reasons.append("not_production_champion")
+        if production_evidence_error:
+            reasons.append(production_evidence_error)
         evidence = production_evidence.get(card.canonical_model_id)
         if not evidence:
             reasons.append("missing_production_evidence")
         else:
             reasons.extend(_production_evidence_rejections(card, requirements, evidence))
     return not reasons, tuple(sorted(set(reasons)))
+
+
+def _production_evidence_map(
+    production_evidence: Any | None,
+    requirements: ModelTaskRequirements,
+) -> tuple[Mapping[str, Mapping[str, Any]], str | None]:
+    if requirements.purpose != SelectionPurpose.PRODUCTION:
+        if production_evidence is None:
+            return {}, None
+        if isinstance(production_evidence, Mapping):
+            return production_evidence, None
+        if hasattr(production_evidence, "to_selection_mapping"):
+            return production_evidence.to_selection_mapping(), None
+        return {}, None
+    if production_evidence is None:
+        return {}, None
+    try:
+        from .model_signed_evidence import VerifiedModelProductionEvidence
+    except Exception:
+        VerifiedModelProductionEvidence = ()  # type: ignore[assignment]
+    if not isinstance(production_evidence, VerifiedModelProductionEvidence):
+        return {}, "production_evidence_not_authenticated"
+    mapping = production_evidence.to_selection_mapping()
+    if not isinstance(mapping, Mapping):
+        return {}, "production_evidence_not_authenticated"
+    return mapping, None
 
 
 def _rank_candidate(card: ModelCapabilityCard, requirements: ModelTaskRequirements) -> ModelCandidateRanking:

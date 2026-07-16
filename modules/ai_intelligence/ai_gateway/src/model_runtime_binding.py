@@ -165,6 +165,7 @@ def bind_reddog_runtime_models(
     benchmark_evidence_receipts: Sequence[ModelBenchmarkEvidenceReceipt],
     promotion_evidence_receipts: Sequence[ModelPromotionEvidenceReceipt],
     policy: ModelRuntimeBindingPolicy,
+    verified_production_evidence: Any | None = None,
 ) -> RedDogModelRuntimeBindingReceipt:
     """Validate and bind a production model selection for RedDog runtime."""
 
@@ -177,6 +178,7 @@ def bind_reddog_runtime_models(
         benchmark_by_model=benchmark_by_model,
         promotion_by_model=promotion_by_model,
         policy=normalized_policy,
+        verified_production_evidence=verified_production_evidence,
     )
     role_bindings: tuple[RuntimeModelRoleBinding, ...] = ()
     principal_model: str | None = None
@@ -246,6 +248,7 @@ def _runtime_binding_rejections(
     benchmark_by_model: Mapping[str, ModelBenchmarkEvidenceReceipt],
     promotion_by_model: Mapping[str, ModelPromotionEvidenceReceipt],
     policy: ModelRuntimeBindingPolicy,
+    verified_production_evidence: Any | None,
 ) -> list[str]:
     reasons: list[str] = []
     selected_ids = tuple(selection_receipt.selected_model_ids)
@@ -256,6 +259,18 @@ def _runtime_binding_rejections(
         reasons.append("selection_not_selected")
     if selection_receipt.requirements.purpose != SelectionPurpose.PRODUCTION:
         reasons.append("selection_not_production")
+    if not getattr(verified_production_evidence, "signed_evidence_verified", False):
+        reasons.append("missing_verified_production_evidence")
+    verified_model_ids: set[str] = set()
+    verified_selection_ids: tuple[str, ...] = ()
+    if getattr(verified_production_evidence, "signed_evidence_verified", False):
+        try:
+            verified_model_ids = set(verified_production_evidence.model_ids())
+            verified_selection_ids = tuple(verified_production_evidence.selection_receipt_ids())
+        except Exception:
+            reasons.append("invalid_verified_production_evidence")
+        if verified_selection_ids and verified_selection_ids != (selection_receipt.receipt_id,):
+            reasons.append("signed_evidence_selection_receipt_mismatch")
     if selection_receipt.requirements.task_family != policy.task_family:
         reasons.append("task_family_mismatch")
     if not selected_ids:
@@ -265,6 +280,7 @@ def _runtime_binding_rejections(
     elif selection_receipt.requirements.min_verifier_pass_rate < policy.min_verifier_pass_rate:
         reasons.append("selection_threshold_below_runtime_policy")
     if selection_receipt.requirements.selection_mode == SelectionMode.PANEL:
+        reasons.append("panel_runtime_binding_deferred")
         if not selection_receipt.panel_topology_digest:
             reasons.append("missing_panel_topology_digest")
         if policy.required_panel_topology_digest and selection_receipt.panel_topology_digest != policy.required_panel_topology_digest:
@@ -276,6 +292,8 @@ def _runtime_binding_rejections(
     for model_id in selected_ids:
         if model_id not in catalog_ids:
             reasons.append("selected_model_not_in_catalog")
+        if verified_model_ids and model_id not in verified_model_ids:
+            reasons.append("selected_model_missing_signed_evidence")
         benchmark = benchmark_by_model.get(model_id)
         promotion = promotion_by_model.get(model_id)
         if benchmark is None:

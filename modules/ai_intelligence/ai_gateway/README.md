@@ -97,6 +97,22 @@ defaults. This layer still does not call providers, run benchmarks, mutate the
 extension, persist champion ledgers, write PatternMemory, or change
 `extension.js`.
 
+## Signed Production Evidence
+
+`src/model_signed_evidence.py` is the production evidence admission gate between
+benchmark/promotion receipts and model selection/runtime binding. It rehydrates
+serialized catalog, selection, benchmark, promotion and runtime binding receipts,
+recomputes deterministic IDs, and verifies role-specific signed evidence through
+the existing RedDog signature verifier interface.
+
+Production selection no longer accepts raw `production_evidence` mappings as
+authority. Those mappings remain useful as legacy scalar projections, but
+`selection.purpose == production` requires a typed
+`VerifiedModelProductionEvidence` object that passed signed-evidence
+verification. Runtime binding also requires that verified object before a bridge
+payload can be emitted. Single-model chains can pass; panel runtime binding is
+still deferred until topology-bound panel evidence is signed and verified.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway

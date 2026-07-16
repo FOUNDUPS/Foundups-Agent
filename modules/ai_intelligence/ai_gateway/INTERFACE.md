@@ -75,8 +75,9 @@ select candidates for benchmarking. Production mode requires measured champion
 evidence and fails closed for unbenchmarked candidates.
 
 Production model selection must pass `production_evidence` containing
-receipt-bound benchmark and promotion proof. Catalog fields alone do not satisfy
-production authority, even when `promotion_state == CHAMPION`.
+typed, rehydrated and signature-verified benchmark/promotion proof. Catalog
+fields and raw evidence mappings do not satisfy production authority, even when
+`promotion_state == CHAMPION`.
 
 Panel mode emits role assignments and a topology digest. The candidate panel may
 include roles such as principal, researcher, critic and implementer; the verifier
@@ -176,9 +177,35 @@ produce a minimal RedDog bridge payload via `to_reddog_bridge_payload()`.
 
 The verifier role remains outside candidate panels. Catalog-only champions,
 evaluation selections, stale topology, mismatched benchmark evidence, missing
-signed promotion receipts, and below-threshold evidence fail closed. This API
-does not call model providers, run benchmarks, mutate the extension, persist
-runtime defaults, or write PatternMemory.
+verified production evidence, missing signed promotion receipts, and
+below-threshold evidence fail closed. Panel runtime binding is intentionally
+deferred until panel topology evidence is signed and verified. This API does not
+call model providers, run benchmarks, mutate the extension, persist runtime
+defaults, or write PatternMemory.
+
+#### Signed Production Evidence
+
+```python
+rehydrate_model_benchmark_evidence_receipt(...)
+rehydrate_model_promotion_evidence_receipt(...)
+rehydrate_model_selection_receipt(...)
+rehydrate_model_runtime_binding_receipt(...)
+rehydrate_model_signed_evidence_receipt(...)
+build_verified_model_production_evidence(...) -> VerifiedModelProductionEvidence
+verify_model_signed_evidence_receipt(...) -> SignedEvidenceVerificationResult
+```
+
+Signed evidence binds signer role, public key fingerprint, key epoch, model
+subject, catalog snapshot, selection receipt, benchmark run, benchmark evidence,
+task set, held-out split, verifier digest, prompt/topology digest, promotion
+evidence, promotion policy, issued/expiry time and nonce.
+
+Accepted signer roles are `benchmark_verifier` and `promotion_authority`.
+Signatures are verified through the existing RedDog `SignatureVerifier`
+interface; this module never signs, never holds private keys and never imports a
+crypto signing library. Nonces are consumed only when admission explicitly
+requests it. Downstream selection and runtime checks validate immutable verified
+evidence and do not consume single-use nonces again.
 
 ## Configuration
 
