@@ -17,6 +17,7 @@ re-index HoloIndex.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol
@@ -81,6 +82,14 @@ def _mapping(value: Any) -> Mapping[str, Any]:
     return {}
 
 
+def _list(value: Any) -> list[Any]:
+    if isinstance(value, list):
+        return value
+    if isinstance(value, tuple):
+        return list(value)
+    return []
+
+
 def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
     raw = state.get("stage_results") if state.get("schema_version") == "reddog_resident_queue_chain_results.v1" else state
     if not isinstance(raw, Mapping):
@@ -124,6 +133,7 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
     operation_cwd: Optional[Path] = None
     holoindex_evidence: Optional[Mapping[str, Any]] = None
     artifact_generation_request: Mapping[str, Any] | None = None
+    artifact_generation_request_binding_enabled: bool = False
     artifact_generator: Any = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
@@ -192,6 +202,13 @@ class ResidentQueueBoundedWorkerPilotStageHandler:
         artifact_generation_result: Mapping[str, Any] | None = None
         if not artifact_contents:
             generation_request = _mapping(self.artifact_generation_request)
+            if not generation_request and self.artifact_generation_request_binding_enabled:
+                generation_request = _derive_artifact_generation_request(
+                    work_order=work_order,
+                    stage_results=stage_results,
+                    repo_root=self.repo_root,
+                    holoindex_evidence=self.holoindex_evidence,
+                )
             if not generation_request:
                 return _reject(FAIL_ARTIFACT_CONTENTS_MISSING)
             if self.artifact_generator is None:
@@ -236,6 +253,7 @@ def build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
     operation_cwd: Optional[Path] = None,
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
     artifact_generation_request: Mapping[str, Any] | None = None,
+    artifact_generation_request_binding_enabled: bool = False,
     artifact_generator: Any = None,
 ) -> ResidentQueueBoundedWorkerPilotStageHandler:
     """Build the injected bounded-worker-pilot handler for the dispatcher."""
@@ -250,8 +268,75 @@ def build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
         operation_cwd=operation_cwd,
         holoindex_evidence=holoindex_evidence,
         artifact_generation_request=artifact_generation_request,
+        artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
         artifact_generator=artifact_generator,
     )
+
+
+def _derive_artifact_generation_request(
+    *,
+    work_order: Mapping[str, Any],
+    stage_results: Mapping[str, Mapping[str, Any]],
+    repo_root: Path,
+    holoindex_evidence: Optional[Mapping[str, Any]],
+) -> Mapping[str, Any]:
+    plan = _mapping(work_order.get("bounded_worker_plan"))
+    worktree_stage = _mapping(stage_results.get(WORKTREE_CREATE_STAGE_KEY))
+    worktree_result = _mapping(worktree_stage.get("worktree_create_result"))
+    authority_stage = _mapping(stage_results.get("authority_runtime"))
+    authority_result = _mapping(authority_stage.get("authority_result"))
+    work_authority = _mapping(authority_result.get("work_authority"))
+    authority_receipt = _mapping(authority_result.get("receipt"))
+    signed_receipt_chain = _mapping(plan.get("signed_receipt_chain"))
+    planned_artifacts = _list(plan.get("planned_artifacts"))
+    task_summary = str(work_order.get("task_summary") or "")
+    if (
+        not plan
+        or not planned_artifacts
+        or not signed_receipt_chain
+        or authority_result.get("accepted") is not True
+        or not work_authority
+        or not task_summary
+        or not worktree_result.get("worktree_path")
+    ):
+        return {}
+    evidence = (
+        holoindex_evidence
+        if isinstance(holoindex_evidence, Mapping)
+        else _mapping(work_order.get("holoindex_evidence"))
+    )
+    signed_authority = {
+        **dict(work_authority),
+        "accepted": True,
+        "signature_gate_digest": str(
+            authority_receipt.get("work_authority_digest")
+            or authority_receipt.get("receipt_id")
+            or ""
+        ),
+    }
+    return {
+        "explicit_artifact_generation_requested": True,
+        "work_order_id": str(work_order.get("work_order_id") or ""),
+        "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
+        "task_summary": task_summary,
+        "planned_artifacts": planned_artifacts,
+        "evidence_context": json.dumps(
+            {
+                "task_summary": task_summary,
+                "holoindex_evidence": dict(evidence),
+                "holoindex_evidence_refs": _list(work_order.get("holoindex_evidence_refs")),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ),
+        "repo_root": str(repo_root),
+        "worktree_path": str(worktree_result.get("worktree_path") or ""),
+        "holoindex_evidence": dict(evidence),
+        "signed_authority": signed_authority,
+        "signed_receipt_chain": dict(signed_receipt_chain),
+        "timeout_seconds": 30,
+    }
 
 
 __all__ = [

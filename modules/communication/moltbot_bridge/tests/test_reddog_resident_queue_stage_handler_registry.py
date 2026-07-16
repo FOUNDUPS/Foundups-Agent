@@ -193,6 +193,48 @@ def test_registry_registers_bounded_worker_pilot_from_artifact_generation_depend
     assert registry.no_default_runner_created is True
 
 
+def test_registry_registers_bounded_worker_pilot_from_artifact_generation_binding(
+    tmp_path: Path,
+) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        repo_root=tmp_path,
+        generic_writer_dryrun_result={"accepted": True},
+        governed_shell_dryrun_result={"accepted": True},
+        artifact_generation_request_binding_enabled=True,
+        artifact_generator=dummy,
+        now_iso=NOW_ISO,
+    )
+
+    assert "bounded_worker_pilot" in registry.registered_stage_keys
+    assert "bounded_worker_pilot" not in registry.missing_stage_reasons
+    assert registry.no_default_runner_created is True
+
+
+def test_registry_artifact_generation_binding_still_requires_generator(tmp_path: Path) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        repo_root=tmp_path,
+        generic_writer_dryrun_result={"accepted": True},
+        governed_shell_dryrun_result={"accepted": True},
+        artifact_generation_request_binding_enabled=True,
+        now_iso=NOW_ISO,
+    )
+
+    assert "bounded_worker_pilot" not in registry.registered_stage_keys
+    assert "missing_dependency:artifact_generator" in (
+        registry.missing_stage_reasons["bounded_worker_pilot"]
+    )
+
+
 def test_registry_registers_bounded_worker_pilot_from_pilot_dryrun_binding_dependencies(
     tmp_path: Path,
 ) -> None:
