@@ -74,6 +74,10 @@ def test_memex_query_receipt_binds_projection_generation_and_source_class() -> N
     assert receipt["hits"][0]["path"].startswith("memex://sha256:brain-view/")
     assert receipt["hits"][0]["digest"].startswith("sha256:")
     assert "current_state" in receipt["hits"][0]["evidence_ref"]
+    assert receipt["retrieval_verdict"] == "FOUND"
+    verdicts = {item["target"]: item for item in receipt["per_target_retrieval_verdicts"]}
+    assert verdicts["authoritative"]["verdict"] == "FOUND"
+    assert verdicts["reconciliation"]["matched_evidence_refs"]
 
 
 def test_memex_query_receipt_accepts_plain_projection_dict() -> None:
@@ -98,6 +102,11 @@ def test_memex_query_miss_is_not_a_generation_gap() -> None:
     assert receipt["ok"] is True
     assert receipt["hits"] == []
     assert receipt["index_gap_detected"] is False
+    assert receipt["retrieval_verdict"] == "MISS"
+    assert all(
+        item["verdict"] == "MISS"
+        for item in receipt["per_target_retrieval_verdicts"]
+    )
     assert receipt["stale_reasons"] == []
 
 

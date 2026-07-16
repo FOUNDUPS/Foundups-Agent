@@ -224,6 +224,29 @@ def build_query_receipt(
         "stale_reasons": stale_reasons,
         "no_holoindex_reindex_performed": True,
     }
+    retrieval_verdict = str(result.get("retrieval_verdict") or "").strip()
+    if retrieval_verdict:
+        payload["retrieval_verdict"] = retrieval_verdict
+    per_target = result.get("per_target_retrieval_verdicts")
+    if not isinstance(per_target, (str, bytes)) and isinstance(per_target, Sequence):
+        payload["per_target_retrieval_verdicts"] = [
+            {
+                "target": str(item.get("target") or ""),
+                "source_class": str(item.get("source_class") or ""),
+                "verdict": str(item.get("verdict") or ""),
+                "matched_evidence_refs": [
+                    str(ref)
+                    for ref in (
+                        item.get("matched_evidence_refs")
+                        if not isinstance(item.get("matched_evidence_refs"), (str, bytes))
+                        and isinstance(item.get("matched_evidence_refs"), Sequence)
+                        else ()
+                    )
+                ],
+            }
+            for item in per_target
+            if isinstance(item, Mapping)
+        ]
     return {**payload, "receipt_id": digest_json(payload)}
 
 
