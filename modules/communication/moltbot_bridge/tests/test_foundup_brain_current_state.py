@@ -174,6 +174,7 @@ def _assemble(**overrides):
         "roadmap_state": _roadmap(),
         "verified_outcomes": [_verified_outcome()],
         "now_iso": VALID_NOW,
+        "policy_foundup_scope": (FOUNDUP_ID,),
     }
     kwargs.update(overrides)
     return assemble_foundup_brain_current_state(**kwargs)
@@ -195,6 +196,10 @@ def test_assembles_deterministic_read_only_foundup_brain_view() -> None:
     assert first.view.current_state["breadcrumb_scope"] == FOUNDUP_ID
     assert first.view.current_state["brain_signature_digest"] == "sha256:foundup-brain"
     assert first.view.current_state["active_work"][0]["foundup_id"] == FOUNDUP_ID
+    assert first.view.assembly_receipt is not None
+    assert first.view.assembly_receipt["policy_foundup_scope"] == (FOUNDUP_ID,)
+    assert first.view.assembly_receipt["excluded_record_count"] == 0
+    assert first.view.assembly_receipt["excluded_record_digest"].startswith("sha256:")
     assert first.view.learning_candidates == ()
     assert first.view.roadmap_signals == ()
     assert all(first.view.invariants.values())
@@ -220,23 +225,102 @@ def test_cross_foundup_identity_roadmap_and_outcome_are_rejected() -> None:
     assert "verified_outcome_foundup_id_mismatch" in result.rejection_reasons
 
 
-def test_cross_foundup_work_claim_and_queue_item_are_rejected() -> None:
+def test_cross_foundup_work_claim_and_queue_item_are_excluded_not_leaked() -> None:
     snapshot = _snapshot(
         worker_claims=[{"claim_id": "foreign-claim", "foundup_id": "other-foundup"}],
         queue_items=[{"queue_item_id": "foreign-queue", "foundup_id": "other-foundup"}],
     )
     result = _assemble(snapshot=snapshot, verified_outcomes=[])
-    assert result.accepted is False
-    assert "worker_claim_foundup_id_mismatch" in result.rejection_reasons
-    assert "queue_item_foundup_id_mismatch" in result.rejection_reasons
+    assert result.accepted is True
+    assert result.view is not None
+    assert result.view.current_state["active_work"] == ()
+    assert result.view.current_state["queued_work"] == ()
+    assert result.view.assembly_receipt is not None
+    assert result.view.assembly_receipt["excluded_record_count"] == 2
+    assert result.view.assembly_receipt["excluded_record_digest"].startswith("sha256:")
 
 
-def test_legacy_unscoped_work_record_is_visible_only_in_single_foundup_poc() -> None:
+def test_unscoped_work_record_fails_in_resident_mode() -> None:
     snapshot = _snapshot(worker_claims=[{"claim_id": "legacy-claim", "status": "ACTIVE"}])
     result = _assemble(snapshot=snapshot, verified_outcomes=[])
+    assert result.accepted is False
+    assert "worker_claim_missing_foundup_id" in result.rejection_reasons
+
+
+def test_legacy_unscoped_work_record_requires_explicit_compatibility_mode() -> None:
+    snapshot = _snapshot(worker_claims=[{"claim_id": "legacy-claim", "status": "ACTIVE"}])
+    result = _assemble(
+        snapshot=snapshot,
+        verified_outcomes=[],
+        legacy_single_foundup_compatibility=True,
+    )
     assert result.accepted is True
     assert result.view is not None
     assert result.view.current_state["active_work"][0]["claim_id"] == "legacy-claim"
+    assert (
+        result.view.current_state["active_work"][0]["scope_origin"]
+        == "legacy_single_foundup_compatibility"
+    )
+
+
+def test_mixed_foundup_snapshot_can_build_independent_views_without_leakage() -> None:
+    snapshot = _snapshot(
+        worker_claims=[
+            {"claim_id": "a-claim", "foundup_id": FOUNDUP_ID, "status": "ACTIVE"},
+            {"claim_id": "b-claim", "foundup_id": "foundup-b", "status": "ACTIVE"},
+        ],
+        queue_items=[
+            {"queue_item_id": "a-queue", "foundup_id": FOUNDUP_ID},
+            {"queue_item_id": "b-queue", "foundup_id": "foundup-b"},
+        ],
+    )
+
+    view_a = _assemble(snapshot=snapshot, verified_outcomes=[])
+    view_b = _assemble(
+        foundup_id="foundup-b",
+        snapshot=snapshot,
+        identity=_identity("foundup-b"),
+        roadmap_state=_roadmap("foundup-b"),
+        verified_outcomes=[],
+        policy_foundup_scope=("foundup-b",),
+    )
+
+    assert view_a.accepted is True and view_a.view is not None
+    assert view_b.accepted is True and view_b.view is not None
+    assert [item["claim_id"] for item in view_a.view.current_state["active_work"]] == ["a-claim"]
+    assert [item["queue_item_id"] for item in view_a.view.current_state["queued_work"]] == ["a-queue"]
+    assert [item["claim_id"] for item in view_b.view.current_state["active_work"]] == ["b-claim"]
+    assert [item["queue_item_id"] for item in view_b.view.current_state["queued_work"]] == ["b-queue"]
+    assert view_a.view.assembly_receipt["excluded_record_count"] == 2
+    assert view_b.view.assembly_receipt["excluded_record_count"] == 2
+
+
+def test_identity_roadmap_outcome_and_policy_scope_must_match_foundup() -> None:
+    result = _assemble(
+        identity={"name": "Foundups Agent"},
+        roadmap_state={
+            "roadmap_id": "foundups-agent-roadmap",
+            "version": "phase1",
+            "content_digest": "sha256:roadmap",
+        },
+        verified_outcomes=[
+            {
+                "outcome_id": "outcome-1",
+                "verification_receipt_id": "sha256:verification",
+                "held_out_receipt_id": "sha256:held-out",
+                "head_sha": HEAD,
+                "accepted": True,
+                "held_out_passed": True,
+                "content_digest": "sha256:outcome",
+            }
+        ],
+        policy_foundup_scope=("other-foundup",),
+    )
+    assert result.accepted is False
+    assert "identity_missing_foundup_id" in result.rejection_reasons
+    assert "roadmap_missing_foundup_id" in result.rejection_reasons
+    assert "verified_outcome_missing_foundup_id" in result.rejection_reasons
+    assert "policy_foundup_scope_mismatch" in result.rejection_reasons
 
 
 def test_missing_roadmap_binding_fails_closed() -> None:

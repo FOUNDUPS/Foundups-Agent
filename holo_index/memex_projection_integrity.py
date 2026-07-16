@@ -65,6 +65,8 @@ def verify_and_rehydrate_memex_projection(
     expected_source_revision: str | None = None,
     expected_access_policy_digest: str | None = None,
     expected_holoindex_generation_id: str | None = None,
+    expected_operational_snapshot_id: str | None = None,
+    expected_operational_snapshot_content_digest: str | None = None,
 ) -> MemexProjectionIntegrityResult:
     """Return a typed verified projection or fail closed.
 
@@ -143,6 +145,16 @@ def verify_and_rehydrate_memex_projection(
         for record in records
         if isinstance(record.metadata, Mapping)
     }
+    operational_snapshot_ids = {
+        str(record.metadata.get("snapshot_id") or "").strip()
+        for record in records
+        if isinstance(record.metadata, Mapping)
+    }
+    operational_snapshot_content_digests = {
+        str(record.metadata.get("snapshot_content_digest") or "").strip()
+        for record in records
+        if isinstance(record.metadata, Mapping)
+    }
 
     if len(foundup_ids) != 1:
         reasons.append("mixed_foundup_records")
@@ -156,6 +168,12 @@ def verify_and_rehydrate_memex_projection(
         policy_digests and next(iter(policy_digests)) != receipt.access_policy_digest
     ):
         reasons.append("mixed_policy_digests")
+    if len(operational_snapshot_ids) != 1 or not next(iter(operational_snapshot_ids or {""})):
+        reasons.append("mixed_operational_snapshot_ids")
+    if len(operational_snapshot_content_digests) != 1 or not next(
+        iter(operational_snapshot_content_digests or {""})
+    ):
+        reasons.append("mixed_operational_snapshot_content_digests")
 
     if expected_foundup_id and foundup_ids != {_clean(expected_foundup_id)}:
         reasons.append("expected_foundup_mismatch")
@@ -171,6 +189,14 @@ def verify_and_rehydrate_memex_projection(
         expected_holoindex_generation_id
     ):
         reasons.append("expected_generation_mismatch")
+    if expected_operational_snapshot_id and operational_snapshot_ids != {
+        _clean(expected_operational_snapshot_id)
+    }:
+        reasons.append("expected_operational_snapshot_id_mismatch")
+    if expected_operational_snapshot_content_digest and operational_snapshot_content_digests != {
+        _clean(expected_operational_snapshot_content_digest)
+    }:
+        reasons.append("expected_operational_snapshot_content_digest_mismatch")
 
     for record in records:
         reasons.extend(_record_integrity_reasons(record, receipt=receipt))
@@ -256,6 +282,10 @@ def _record_integrity_reasons(
         reasons.append("metadata_source_revision_mismatch")
     if record.metadata.get("access_policy_digest") != receipt.access_policy_digest:
         reasons.append("metadata_access_policy_mismatch")
+    if not str(record.metadata.get("snapshot_id") or "").strip():
+        reasons.append("metadata_snapshot_id_missing")
+    if not str(record.metadata.get("snapshot_content_digest") or "").strip():
+        reasons.append("metadata_snapshot_content_digest_missing")
     section = str(record.metadata.get("section") or "").strip()
     if not section:
         reasons.append("missing_record_section")

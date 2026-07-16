@@ -42,6 +42,9 @@ def assemble_foundup_memex_current_state(
     roadmap_state: Mapping[str, Any] | None = None,
     verified_outcomes: Sequence[Mapping[str, Any]] = (),
     now_iso: str | None = None,
+    resident_mode: bool = True,
+    legacy_single_foundup_compatibility: bool = False,
+    policy_foundup_scope: Sequence[str] | None = None,
 ) -> FoundUpMemexAssemblyResult:
     """Assemble the read-only current-state Memex view for one FoundUp.
 
@@ -56,4 +59,7 @@ def assemble_foundup_memex_current_state(
         roadmap_state=roadmap_state,
         verified_outcomes=verified_outcomes,
         now_iso=now_iso,
+        resident_mode=resident_mode,
+        legacy_single_foundup_compatibility=legacy_single_foundup_compatibility,
+        policy_foundup_scope=policy_foundup_scope,
     )

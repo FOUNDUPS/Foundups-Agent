@@ -1,5 +1,23 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] FOUNDUP_MEMEX_MULTI_FOUNDUP_SCOPE_HARDENING_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 60, 97
+
+- UPDATE `holo_index/memex_projection_integrity.py`: serialized Memex
+  projection records must now carry consistent operational snapshot
+  `metadata.snapshot_id` and `metadata.snapshot_content_digest` values across
+  every record.
+- ADD optional expected binding checks for operational snapshot id and content
+  digest so a later assignment-binding slice can pin the Memex projection to
+  the exact RedDog snapshot.
+- TEST `tests/test_holoindex_memex_projection_integrity.py`: mixed, missing,
+  and expected-mismatched operational snapshot metadata all fail closed.
+- Boundary: this remains integrity, not authentication. Runtime policy
+  issuance, assignment-bound authorization, content-bearing evidence, and typed
+  citation policy remain downstream.
+
 ## [2026-07-16] HOLOINDEX_MEMEX_ACCESS_POLICY_RECEIPT_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice

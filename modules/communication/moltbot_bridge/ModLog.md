@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: FOUNDUP_MEMEX_MULTI_FOUNDUP_SCOPE_HARDENING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
+
+- Hardened FoundUp Brain/Memex current-state assembly for resident
+  multi-FoundUp operation.
+- Resident mode now requires explicit FoundUp scoping across identity,
+  roadmap, outcomes, worker claims, queue items, and policy FoundUp scope.
+- Foreign worker claims and queue items are excluded with deterministic
+  count/digest accounting instead of leaking into the selected FoundUp or
+  rejecting the whole mixed snapshot.
+- Legacy single-FoundUp inference now requires explicit compatibility mode and
+  marks inferred records with `legacy_single_foundup_compatibility`.
+- Added an assembly receipt to the read-only view with included/excluded work
+  counts, excluded-record digest, policy scope, and no-write attestations.
+- Tests cover independent A/B FoundUp views from one mixed snapshot, resident
+  rejection of unscoped records, explicit compatibility mode, and policy-scope
+  mismatch.
+
 ## 2026-07-16: HOLOINDEX_MEMEX_PROJECTION_INTEGRITY_AND_REHYDRATION_GATE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97

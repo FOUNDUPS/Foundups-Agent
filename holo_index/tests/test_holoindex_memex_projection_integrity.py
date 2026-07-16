@@ -138,6 +138,35 @@ def test_mixed_policy_digests_rejected() -> None:
     _assert_fail(projection, "mixed_policy_digests")
 
 
+def test_operational_snapshot_metadata_bindings_are_validated() -> None:
+    projection = _projection()
+    projection["records"][0]["metadata"] = dict(projection["records"][0]["metadata"])
+    projection["records"][0]["metadata"]["snapshot_id"] = "other-snapshot"
+
+    _assert_fail(projection, "mixed_operational_snapshot_ids")
+
+    digest_mismatch = _projection()
+    digest_mismatch["records"][0]["metadata"] = dict(digest_mismatch["records"][0]["metadata"])
+    digest_mismatch["records"][0]["metadata"]["snapshot_content_digest"] = "sha256:other-snapshot"
+    _assert_fail(digest_mismatch, "mixed_operational_snapshot_content_digests")
+
+    missing = _projection()
+    missing["records"][0]["metadata"] = dict(missing["records"][0]["metadata"])
+    missing["records"][0]["metadata"]["snapshot_id"] = ""
+    _assert_fail(missing, "metadata_snapshot_id_missing")
+
+    _assert_fail(
+        _projection(),
+        "expected_operational_snapshot_id_mismatch",
+        expected_operational_snapshot_id="other-snapshot",
+    )
+    _assert_fail(
+        _projection(),
+        "expected_operational_snapshot_content_digest_mismatch",
+        expected_operational_snapshot_content_digest="sha256:other-snapshot",
+    )
+
+
 def test_record_count_and_rejected_count_are_validated() -> None:
     projection = _projection()
     projection["receipt"]["records_indexed"] = 99

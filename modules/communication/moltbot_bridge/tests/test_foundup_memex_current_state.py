@@ -49,6 +49,9 @@ def test_memex_adapter_delegates_exact_inputs_without_new_authority() -> None:
             roadmap_state=roadmap,
             verified_outcomes=outcomes,
             now_iso="2026-07-14T00:00:00+00:00",
+            resident_mode=True,
+            legacy_single_foundup_compatibility=False,
+            policy_foundup_scope=("foundups-agent",),
         )
 
     assert result is sentinel
@@ -59,6 +62,9 @@ def test_memex_adapter_delegates_exact_inputs_without_new_authority() -> None:
         roadmap_state=roadmap,
         verified_outcomes=outcomes,
         now_iso="2026-07-14T00:00:00+00:00",
+        resident_mode=True,
+        legacy_single_foundup_compatibility=False,
+        policy_foundup_scope=("foundups-agent",),
     )
 
 
