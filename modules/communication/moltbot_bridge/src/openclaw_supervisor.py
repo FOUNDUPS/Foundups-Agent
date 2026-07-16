@@ -776,7 +776,14 @@ def _signed_0102_readonly_tasks_enabled_from_env() -> bool:
 
 
 def _signed_0102_bounded_code_tasks_enabled_from_env() -> bool:
-    return os.getenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "0") == "1"
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    return resident_queue_runtime_flag_enabled(
+        os.environ,
+        "OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED",
+    )
 
 
 def _signed_0102_bounded_code_stage_ready_from_env(
@@ -787,11 +794,12 @@ def _signed_0102_bounded_code_stage_ready_from_env(
 
     from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
         resident_queue_binding_enabled,
+        resident_queue_runtime_flag_enabled,
     )
 
     if not isinstance(context, Mapping):
         return False
-    if str(env.get("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER") or "").strip() != "1":
+    if not resident_queue_runtime_flag_enabled(env, "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER"):
         return False
     if str(env.get("REDDOG_ARTIFACT_GENERATOR_MODE") or "").strip() != "foundups_fusion":
         return False
