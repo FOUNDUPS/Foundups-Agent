@@ -1671,6 +1671,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_evidence_command_runner_mode,
             resident_queue_materializer_mode,
             resident_queue_outcome_ratchet_store_path,
+            resident_queue_pattern_memory_admission_db_path,
             resident_queue_worktree_runner_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
@@ -1679,7 +1680,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
         pattern_memory_admission_sink = build_reddog_verified_pattern_memory_sink(
             repo_root=repo_root,
-            db_path=os.getenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", "") or None,
+            db_path=resident_queue_pattern_memory_admission_db_path(os.environ, repo_root)
+            or None,
         )
         draft_pr_runner = None
         draft_pr_runner_mode = resident_queue_draft_pr_runner_mode(os.environ).strip().lower()
