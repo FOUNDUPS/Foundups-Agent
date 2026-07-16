@@ -711,17 +711,44 @@ def test_openclaw_claim_0102_bounded_code_waits_for_bounded_stage(
         "chain_results.json",
         _queue_chain_results_through("execution_valve"),
     )
-    artifact_request = _write_runtime_json(
+    monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
+    monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
+
+
+def test_openclaw_claim_0102_bounded_code_requires_artifact_request_source(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    task_id = _publish_agentdb_task_with_allocation(
+        _allocation(),
+        intent_id="worker_dispatch_intent_coding_worker_1",
+        role="coding_worker_1",
+        worker_runtime="0102",
+        capability="bounded_code_change",
+    )
+    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    chain = _write_runtime_json(
         tmp_path,
-        "artifact_generation_request.json",
-        {"explicit_artifact_generation_requested": True},
+        "chain_results.json",
+        _queue_chain_results_through("worktree_create"),
     )
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
-    monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH", str(artifact_request))
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
 
@@ -749,18 +776,13 @@ def test_openclaw_claim_executes_0102_bounded_code_when_bounded_stage_ready(
         "chain_results.json",
         _queue_chain_results_through("worktree_create"),
     )
-    artifact_request = _write_runtime_json(
-        tmp_path,
-        "artifact_generation_request.json",
-        {"explicit_artifact_generation_requested": True},
-    )
     runner = _FakeRunner()
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
-    monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH", str(artifact_request))
+    monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     from modules.communication.moltbot_bridge.src import (
@@ -781,6 +803,7 @@ def test_openclaw_claim_executes_0102_bounded_code_when_bounded_stage_ready(
     assert result["worker_runtime"] == "0102"
     assert result["capability"] == "bounded_code_change"
     assert runner.calls[0]["task_id"] == task_id
+    assert not (tmp_path / "artifact_generation_request.json").exists()
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
 
 
