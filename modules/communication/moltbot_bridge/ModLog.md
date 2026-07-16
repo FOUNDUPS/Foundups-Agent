@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a signed-worker runner adapter for the OpenClaw candidate task that
+  advances the existing resident queue serial-loop bootstrap for the bound
+  queue item.
+- Restricted this runner to `openclaw` / `candidate_queue_review` signed
+  worker intents; 0102 coding workers and other capabilities remain blocked
+  for later dedicated runners.
+- Bound runner success to bootstrap acceptance plus no source-repo mutation and
+  no shell command execution, so it can be safely consumed by the signed-worker
+  task executor.
+- Boundary remains explicit and non-mutating by this adapter: no default
+  bootstrap bypass, no task creation, no signing, no source repo mutation, no
+  shell command, no PR, no PatternMemory write, no HoloIndex re-index, and no
+  reward settlement is performed by this slice.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_TASK_OPENCLAW_CLAIM_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
