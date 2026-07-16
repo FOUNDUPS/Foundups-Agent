@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_BOUNDED_ARTIFACT_GENERATION_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Added a bounded artifact-generation runtime that validates model/generated
+  artifact text before the resident queue bounded-worker pilot may materialize
+  it in an isolated worktree.
+- Wired the resident queue `bounded_worker_pilot` stage to accept either
+  prebuilt artifact contents or an explicit artifact-generation request plus an
+  explicitly injected/configured generator. No default generator is created.
+- Added `main.py` preflight environment plumbing for
+  `REDDOG_ARTIFACT_GENERATION_REQUEST_PATH` and
+  `REDDOG_ARTIFACT_GENERATOR_MODE`.
+- Boundary remains guarded by the existing bounded-worker pilot: no shell
+  execution, GitHub call, PR publish, merge, PatternMemory write, reward
+  settlement, HoloIndex re-index, OpenClaw enqueue, or Hermes dispatch is added
+  by this slice.
+
 ## 2026-07-16: WRE_INDEPENDENT_EVIDENCE_PRODUCER_QUEUE_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

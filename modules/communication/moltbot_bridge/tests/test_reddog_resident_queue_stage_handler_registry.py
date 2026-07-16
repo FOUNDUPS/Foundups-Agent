@@ -160,9 +160,32 @@ def test_registry_rejects_empty_mapping_dependencies() -> None:
     assert registry.registered_stage_keys == ("worker_dispatch_dryrun",)
     assert "missing_dependency:authority_profile" in registry.missing_stage_reasons["authority_request"]
     assert "missing_dependency:generic_writer_dryrun_result" in registry.missing_stage_reasons["bounded_worker_pilot"]
+    assert "missing_dependency:artifact_contents" in registry.missing_stage_reasons["bounded_worker_pilot"]
+    assert "missing_dependency:artifact_generation_request" in registry.missing_stage_reasons["bounded_worker_pilot"]
+    assert "missing_dependency:artifact_generator" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:verifier_request" in registry.missing_stage_reasons["slice_verifier"]
     assert "missing_dependency:evidence_producer_request" in registry.missing_stage_reasons["slice_verifier"]
     assert "missing_dependency:evidence_command_runner" in registry.missing_stage_reasons["slice_verifier"]
+
+
+def test_registry_registers_bounded_worker_pilot_from_artifact_generation_dependencies(tmp_path: Path) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        repo_root=tmp_path,
+        generic_writer_dryrun_result={"accepted": True},
+        governed_shell_dryrun_result={"accepted": True},
+        artifact_generation_request={"explicit_artifact_generation_requested": True},
+        artifact_generator=dummy,
+        now_iso=NOW_ISO,
+    )
+
+    assert "bounded_worker_pilot" in registry.registered_stage_keys
+    assert "bounded_worker_pilot" not in registry.missing_stage_reasons
+    assert registry.no_default_runner_created is True
 
 
 def test_registry_registers_slice_verifier_from_evidence_producer_dependencies(tmp_path: Path) -> None:
