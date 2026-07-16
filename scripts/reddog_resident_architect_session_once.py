@@ -1,4 +1,4 @@
-"""One-shot bridge for extension -> resident RedDog architect session.
+"""One-shot bridge for RedDog thin client -> resident architect session.
 
 Slice: REDDOG_EXTENSION_TO_RESIDENT_ARCHITECT_SESSION_RUNTIME_PHASE1
 
@@ -91,10 +91,12 @@ def _summarize_result(result: Any) -> Dict[str, Any]:
         "accepted": bool(result.accepted),
         "status": str(result.status),
         "resident_backend_invoked": True,
+        "red_dog_intent_submitted": True,
         "python_invocation_performed": True,
         "snapshot_id": _string(getattr(initial, "snapshot_receipt_id", "")),
         "final_snapshot_id": _string(getattr(final, "snapshot_receipt_id", "")) if final else "",
         "swarm_id": _string(getattr(initial, "swarm_id", "")),
+        "cycle_id": _string(getattr(initial, "swarm_id", "")),
         "initial_status": _string(getattr(initial, "status", "")),
         "final_status": final_status,
         "task_count": len(result.task_runs),
@@ -129,6 +131,11 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
         return _reject(str(payload["_bridge_error"]), bridge_error_class=str(payload.get("_bridge_error_class") or "Error"))
     if payload.get("explicit_resident_architect_session_requested") is not True:
         return _reject("explicit_resident_architect_session_request_missing")
+    intent = payload.get("red_dog_intent")
+    if not isinstance(intent, dict) or intent.get("schema_version") != "reddog_intent.v1":
+        return _reject("reddog_intent_missing_or_invalid")
+    if intent.get("submits_executable_authority") is not False:
+        return _reject("reddog_intent_must_not_submit_executable_authority")
 
     repo_root_text = payload.get("repo_root")
     repo_root = Path(str(repo_root_text)).resolve() if repo_root_text else REPO_ROOT
@@ -146,7 +153,9 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
         output = _reject("resident_architect_session_bridge_failed", bridge_error_class=type(exc).__name__)
         output["resident_backend_invoked"] = True
         return output
-    return _summarize_result(result)
+    summary = _summarize_result(result)
+    summary["intent_id"] = _string(payload.get("intent_id") or intent.get("intent_id"))
+    return summary
 
 
 def main() -> int:

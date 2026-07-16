@@ -1,12 +1,12 @@
-# Foundups®Agent Interface
+# RedDog Interface
 
 ## Purpose
 
-`foundups-fusion-worker` is a local Cursor/VS Code extension whose user-facing product name is Foundups®Agent. It opens a RedDog Architect advisory surface backed by OpenRouter models through `scripts/advisory_model_once.py`.
+`reddog` is a local Cursor/VS Code extension whose user-facing product name is RedDog. It opens the resident 0102 FoundUps architect thin client and retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
 
-It is an IDE-side proof surface for the future RedDog/pfMALL/WRE intake pattern. It does not implement pfMALL runtime wiring, WRE dispatch, FoundUp registration, repository creation, or CABR verification.
+It is the IDE-side thin-client surface for the resident RedDog backend and the OpenClaw/WRE/Hermes execution spine. The extension submits typed intent and displays receipts; it does not grant shell, repository write, merge, FoundUp registration, or CABR authority.
 
-Foundups®Agent is the product surface. RedDog is the 0102 digital-twin architect inside it. Fusion is one internal reasoning mode, not the product identity.
+RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode, not the product identity.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
@@ -29,7 +29,7 @@ Foundups®Agent is the product surface. RedDog is the 0102 digital-twin architec
 | OpenClaw | Policy and intent gate. |
 | HoloIndex | Memory and retrieval. |
 | Skillz/Rolodex | Capability catalog. |
-| Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUp launch. |
+| Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUps launch. |
 | Sentinels | Critique, truth, drift, regression review. Review only, no execution. |
 | WRE | Repo and process authority. Verification and dispatch. |
 | CABR/pAVS | Benefit validation, routing, reputation. |
@@ -53,46 +53,46 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 | Merge/PR authority | NO | Advisory output only |
 | CABR/payout/source authority | NO | Blocked by Fusion redaction gate and prompt contract |
 | pfMALL integration | SPECIFIED_NOT_IMPLEMENTED | Roadmap only |
-| FoundUp onboarding automation | SPECIFIED_NOT_IMPLEMENTED | Roadmap only; WSP_109 packet production is not implemented here |
+| FoundUps onboarding automation | SPECIFIED_NOT_IMPLEMENTED | Roadmap only; WSP_109 packet production is not implemented here |
 
 ## F0 Safety Boundary
 
-F0 is the foundation Foundups-Agent repo. Foundups®Agent must never mutate F0 automatically.
+F0 is the foundation Foundups-Agent repo. RedDog must never mutate F0 directly from the extension thin client.
 
 The extension may gather bounded context and produce advisory review packets. It must not execute model-generated code, install packages, create persistence, write files, mutate repositories, publish artifacts, or call Skillz/OpenClaw/Hermes/WRE execution surfaces directly. Any future execution path must be a governed handoff where WRE retains repo/process authority and 012 remains sovereign for test, land, publish, and override decisions.
 
-External repositories are assessed through advisory WSP intake before they can become FoundUps candidates. The extension can recommend a FoundUp intake packet and integration risk report; it cannot automatically enroll or mutate an external repo.
+External repositories are assessed through advisory WSP intake before they can become FoundUps candidates. The extension can recommend a FoundUps intake packet and integration risk report; it cannot automatically enroll or mutate an external repo.
 
 ## Governed Repo Work Order Contract
 
-RedDog is the 0102 architect interface — **not an authority owner**. RedDog receives **bounded delegated capability for one work order after fresh verification**; it does not "have authority."
+RedDog is the 0102 architect interface - **not an authority owner**. RedDog receives **bounded delegated capability for one work order after fresh verification**; it does not "have authority."
 
 | Artifact | Location |
 |---|---|
 | Authority contract + schema | `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md` |
-| Slice queue | `extensions/foundups_advisory_workers/ROADMAP.md` |
+| Slice queue | `extensions/reddog/ROADMAP.md` |
 
-**Dry-run validator (no mutation):** `modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py` — validates envelope + HoloIndex evidence packet; returns `WOULD_ACCEPT` / `WOULD_REJECT` / `WOULD_ACCEPT_WITH_RETRIEVAL_GAP`. Extension v0.3.27 does not invoke it yet.
+**Dry-run validator (no mutation):** `modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py` - validates envelope + HoloIndex evidence packet; returns `WOULD_ACCEPT` / `WOULD_REJECT` / `WOULD_ACCEPT_WITH_RETRIEVAL_GAP`. Extension v0.3.27 does not invoke it yet.
 
 **Permission probe (read-only):** `modules/platform_integration/github_integration/src/reddog_github_permission_probe.py` -- `probe_repo_permission()` produces fresh `repo_permission_snapshot` evidence. Extension v0.3.53 invokes it through `scripts/reddog_github_permission_probe_once.py` for read-only permission evidence only.
 
-**OpenClaw policy gate (no execution):** `modules/communication/moltbot_bridge/src/reddog_openclaw_work_order_policy_gate.py` — `evaluate_work_order_policy_gate()` composes dry-run + permission freshness + HoloIndex policy; returns `PolicyGateReceipt`. Extension does not invoke it yet.
+**OpenClaw policy gate (no execution):** `modules/communication/moltbot_bridge/src/reddog_openclaw_work_order_policy_gate.py` - `evaluate_work_order_policy_gate()` composes dry-run + permission freshness + HoloIndex policy; returns `PolicyGateReceipt`. Extension does not invoke it yet.
 
-**Work-order receipt (Hermes-compatible audit):** `modules/communication/moltbot_bridge/src/reddog_work_order_receipt.py` — `emit_work_order_receipt()` persists/emits pre-execution audit records from `PolicyGateReceipt`. Extension does not invoke it yet.
+**Work-order receipt (Hermes-compatible audit):** `modules/communication/moltbot_bridge/src/reddog_work_order_receipt.py` - `emit_work_order_receipt()` persists/emits pre-execution audit records from `PolicyGateReceipt`. Extension does not invoke it yet.
 
-**Runtime invocation dry-run:** `modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py` — `invoke_reddog_work_order_dryrun()` chains policy gate + receipt; returns audit result. Extension does not invoke it yet.
+**Runtime invocation dry-run:** `modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py` - `invoke_reddog_work_order_dryrun()` chains policy gate + receipt; returns audit result. Extension does not invoke it yet.
 
-**WRE isolated worktree executor (contract only):** `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md` — defines future executor cage; **no implementation**.
+**WRE isolated worktree executor (contract only):** `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md` - defines future executor cage; **no implementation**.
 
-**WRE executor dry-run planner:** `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py` — `plan_wre_isolated_worktree_execution_dryrun()`; plan + phase receipts; **no git/worktree mutation**.
+**WRE executor dry-run planner:** `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py` - `plan_wre_isolated_worktree_execution_dryrun()`; plan + phase receipts; **no git/worktree mutation**.
 
-**OpenClaw handoff adapter (contract only):** `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md` — RedDog → FoundUpJob mapping; OpenClaw owns worker loop; **AssignmentDispatcher not canonical**.
+**OpenClaw handoff adapter (contract only):** `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md` - RedDog -> FoundUpsJob mapping; OpenClaw owns worker loop; **AssignmentDispatcher not canonical**.
 
 **WRE execution valve:** `modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py` -- `evaluate_reddog_execution_valve()`; default `VALVE_CLOSED`; pure evaluation only. Contract: `docs/audits/architecture/REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md`.
 
-**OpenClaw adapter dry-run:** `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py` -- `plan_reddog_openclaw_adapter_dryrun()`; proposes FoundUpJob / `autonomous_task` intake only; **no enqueue**. Contract: `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`.
+**OpenClaw adapter dry-run:** `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py` -- `plan_reddog_openclaw_adapter_dryrun()`; proposes FoundUpsJob / `autonomous_task` intake only; **no enqueue**. Contract: `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`.
 
-**OpenClaw live enqueue contract:** `docs/audits/architecture/REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1.md` -- future conversion from proposed FoundUpJob / `autonomous_task` intake to live queue item. Requires future `VALVE_OPEN_LIVE_ENQUEUE`, accepted signed work authority, and signed receipt-chain verification. Contract only; no live enqueue in this slice.
+**OpenClaw live enqueue contract:** `docs/audits/architecture/REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1.md` -- future conversion from proposed FoundUpsJob / `autonomous_task` intake to live queue item. Requires future `VALVE_OPEN_LIVE_ENQUEUE`, accepted signed work authority, and signed receipt-chain verification. Contract only; no live enqueue in this slice.
 
 **WRE operational spine dry-run preview (extension v0.3.46):** `buildWreOperationalSpineDryRunPreview()` emits `review_packet.wre_operational_spine_dryrun_preview` and Copy MD section `## WRE Operational Spine Dry-Run Preview`. It references `modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine` as a future call target only. The extension does **not** invoke Python for this preview and records `python_invocation_performed=false`, `wre_spine_invoked=false`, `worktree_create_performed=false`, `task_execution_performed=false`, `openclaw_enqueue_performed=false`, `hermes_dispatch_performed=false`, `pr_created=false`, and `merge_performed=false`. Future live use requires `VALVE_OPEN_WORKTREE_CREATE` and `012_sovereign`.
 
@@ -120,7 +120,7 @@ authenticated principal -> GitHub permission snapshot -> RedDogGovernedWorkOrder
 
 **WSP Applicability Preflight (specified):** before any future work-order emission, identify applicable WSPs (WSP_34, WSP_50, WSP_54, WSP_95, WSP_97, WSP_109) and Skillz candidates from HoloIndex; attach evidence refs; block if recall is weak.
 
-**F0 autonomous merge:** SPECIFIED_NOT_IMPLEMENTED — not planned behavior until dryrun, permission probe, OpenClaw envelope gate, WRE executor, and review receipts land.
+**F0 autonomous merge:** SPECIFIED_NOT_IMPLEMENTED - not planned behavior until dryrun, permission probe, OpenClaw envelope gate, WRE executor, and review receipts land.
 
 ## Webview Contract
 
@@ -235,7 +235,7 @@ Governed direct-read-by-path (REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1, slice 
 
 Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`, `parseRequiredTargetPaths`, `deriveWorkFocusTargets`, `collectRequiredTargets`, `extractInlinePathTokens`, `extractM2mArrayTargets`, `isSelfFileLocation`, `requiredTargetMatchesLocation`, `formatHoloIndexScorecardLines`, `buildMustIncludeArgs`, `buildDirectReadContentSection`, `buildRequiredTargetProtectedSection`, `assembleFinalBoundedContext`, `computeRequiredTargetContextProof`, `requiredTargetSectionSurvived`, `neutralizeRequiredTargetMarker`.
 
-Audit-context bridge wire (REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1, v0.3.34): when `buildDirectReadContentSection()` sets `audit_context: true` (governance direct-read fetch), `buildBoundedRepoContext()` preserves the flag; `callFusion()` sends `audit_context: true` in the bridge stdin payload; `scripts/advisory_model_once.py` passes `audit_mode=True` into `evaluate_redaction_gate()` **only** when explicitly requested. Default path (no governance direct-read) remains byte-identical strict blocking. HoloIndex anchor terms: `audit_context bridge wire`, `advisory_model_once audit_mode`, `buildDirectReadContentSection audit_context`, `fusion_redaction_gate audit_mode`, `RedDog golden FoundUp creation audit`. Follow-up if not indexed: `HOLOINDEX_REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_INDEX_GAP_PHASE1`.
+Audit-context bridge wire (REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1, v0.3.34): when `buildDirectReadContentSection()` sets `audit_context: true` (governance direct-read fetch), `buildBoundedRepoContext()` preserves the flag; `callFusion()` sends `audit_context: true` in the bridge stdin payload; `scripts/advisory_model_once.py` passes `audit_mode=True` into `evaluate_redaction_gate()` **only** when explicitly requested. Default path (no governance direct-read) remains byte-identical strict blocking. HoloIndex anchor terms: `audit_context bridge wire`, `advisory_model_once audit_mode`, `buildDirectReadContentSection audit_context`, `fusion_redaction_gate audit_mode`, `RedDog golden FoundUps creation audit`. Follow-up if not indexed: `HOLOINDEX_REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_INDEX_GAP_PHASE1`.
 
 Required-target context packing (REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1, v0.3.35): the FINAL bounded context is capped at `BOUNDED_CONTEXT_MAX_CHARS` (42000) by a single tail slice. Before this slice, `buildBoundedRepoContext()` split assembly into a fixed head (WSP contract + `BOUNDED_REPO_CONTEXT` preamble) and lower-priority sections (HoloIndex raw JSON blob, direct-read section, target-recall self-file snippet, Skillz, git diff). When a prompt carries an explicit "Required direct-read targets" list AND the governed fetch succeeded (`direct_read_fallback_used`), `buildRequiredTargetProtectedSection(requiredTargets, directReadSection)` renders each required target from the ALREADY-FETCHED direct-read hit content (no new fs read) with the STABLE marker `### Required direct-read target: <path>` (see `REQUIRED_TARGET_MARKER_PREFIX`), under a per-target minimum-first budget (min 1800 / max 6000 chars, protected total 30000). `assembleFinalBoundedContext(head, protected, lower)` packs the protected block FIRST so the lower-priority sections yield to the 42K cut, never the required-target excerpts; the self-file `extension.js` target-recall snippet is DEMOTED/OMITTED in explicit-target audit mode and can never precede the required-target markers. `computeRequiredTargetContextProof(finalText, requiredTargets, protectedMeta)` computes the `required_targets_in_model_context` / `required_targets_context_missing` / `required_targets_context_chars` / `required_targets_context_truncated` fields by scanning the FINAL post-cut context for the markers -- proof of model visibility, NOT fetch telemetry. Run Trace renders BOTH `required_targets_recalled` (fetched/available) and `required_targets_in_model_context` (model-visible); they are distinct layers. Prompts without a required list pack byte-identically and leave the proof fields `unknown`. Exported helpers: `buildRequiredTargetProtectedSection`, `assembleFinalBoundedContext`, `computeRequiredTargetContextProof`, `REQUIRED_TARGET_MARKER_PREFIX`, `BOUNDED_CONTEXT_MAX_CHARS`. HoloIndex anchor terms: `RedDog required target context packing`, `buildBoundedRepoContext 42000 slice`, `buildRequiredTargetProtectedSection`, `required_targets_in_model_context`, `assembleFinalBoundedContext protected required target`. Follow-up if not indexed: `HOLOINDEX_REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_INDEX_GAP_PHASE1` (SPECIFIED_NOT_IMPLEMENTED -- no ranking/reindex code changed here).
 
@@ -297,7 +297,7 @@ Required substantive output sections:
 Auto effort rules:
 
 - `ULTRA`: auth/security/secrets/live runtime/public surface/pfMALL/WRE/OpenClaw/Hermes/Kanban/CABR/merge authority/repo creation.
-- `HIGH`: architecture, WSP protocol, HoloIndex gaps, extension routing, FoundUp intake, RedDog/pfMALL planning.
+- `HIGH`: architecture, WSP protocol, HoloIndex gaps, extension routing, FoundUps intake, RedDog/pfMALL planning.
 - `REGULAR`: simple smoke tests, simple code explanation, non-runtime UI polish.
 - If uncertain, choose `HIGH`.
 
@@ -331,9 +331,9 @@ Review packet additions:
 
 In-memory WSP_97-safe continuation from the last successful or `BLOCKED_LOCALLY` run:
 
-- `buildSanitizedContinuationSummary()` — extracts Decision/Findings/WSP_97/WSP_15/Next step summaries; strips secrets and blocked-policy literals.
-- `appendContinuationSummaryToWspPrompt()` — appends sanitized summary to the next WSP task prompt when **Use last RedDog packet** is enabled (default OFF as of v0.3.36 — continuation is opt-in; 012 checks the box to enable).
-- `state.lastContinuationSummary` — per-tab in-memory only; no disk persistence in Phase 1.
+- `buildSanitizedContinuationSummary()` - extracts Decision/Findings/WSP_97/WSP_15/Next step summaries; strips secrets and blocked-policy literals.
+- `appendContinuationSummaryToWspPrompt()` - appends sanitized summary to the next WSP task prompt when **Use last RedDog packet** is enabled (default OFF as of v0.3.36 - continuation is opt-in; 012 checks the box to enable).
+- `state.lastContinuationSummary` - per-tab in-memory only; no disk persistence in Phase 1.
 - Copy MD may include a safe **Continuation Summary** section for the stored packet (not raw prior model output).
 
 Does **not** paste raw Copy MD, bounded context, or blocked snippets into follow-up prompts.
@@ -389,7 +389,7 @@ Formal contract:
 | RedDog runtime invocation dry-run | OBSERVED (moltbot_bridge module); no execution |
 | WRE isolated worktree executor | SPECIFIED_NOT_IMPLEMENTED (contract doc only) |
 | WRE executor dry-run planner | OBSERVED (moltbot_bridge module); no mutation |
-| OpenClaw FoundUpJob adapter | SPECIFIED_NOT_IMPLEMENTED (contract doc only) |
+| OpenClaw FoundUpsJob adapter | SPECIFIED_NOT_IMPLEMENTED (contract doc only) |
 | AssignmentDispatcher as worker launcher | FORBIDDEN (simulated scaffold only) |
 | Governed repo work order dry-run validator | OBSERVED (OpenClaw bridge module) |
 | Governed repo work order (`RedDogGovernedWorkOrder`) | OBSERVED (candidate runtime emission from extension; authority binding still required) |
@@ -472,9 +472,9 @@ Foundups(R)Agent external-lane usefulness is measured by a **fixed 15-prompt acc
 
 | Layer | Scope |
 | --- | --- |
-| CI | Contract tests, syntax, bridge AST — **no live OpenRouter** |
+| CI | Contract tests, syntax, bridge AST - **no live OpenRouter** |
 | 012 manual | Full prompt pack, rubric scoring, Copy MD artifacts, sovereign verdict |
-| Artifacts | Redacted records under `docs/acceptance/` — no secrets |
+| Artifacts | Redacted records under `docs/acceptance/` - no secrets |
 
 Baseline pass records honest scores on v0.3.21. Replacement pass reruns the same prompts after HoloIndex/dispatch improvements.
 

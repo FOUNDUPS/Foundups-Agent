@@ -119,6 +119,6 @@ def test_collection_reset_refuses_readonly_context() -> None:
 
 
 def test_reddog_extension_sets_readonly_env_for_holoindex_calls() -> None:
-    source = (REPO_ROOT / "extensions" / "foundups_advisory_workers" / "extension.js").read_text(encoding="utf-8")
+    source = (REPO_ROOT / "extensions" / "reddog" / "extension.js").read_text(encoding="utf-8")
     assert "HOLOINDEX_QUERY_READONLY: '1'" in source
     assert "HOLO_SKIP_MODEL: '1', HOLOINDEX_QUERY_READONLY: '1'" in source

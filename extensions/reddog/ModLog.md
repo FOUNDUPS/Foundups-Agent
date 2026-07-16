@@ -1,12 +1,20 @@
-# Foundups®Agent ModLog
+# RedDog ModLog
 
-# ModLog - Foundups®Agent Extension
+# ModLog - RedDog Extension
+
+## 2026-07-16 - REDDOG_PRODUCT_IDENTITY_AND_THIN_CLIENT_0_4_0 (product identity migration, 0.4.0)
+
+- Renamed the extension folder and product identity from the legacy Foundups Fusion Worker / Foundups(R)Agent surface to RedDog.
+- Added canonical `reddog.open` command and `reddog.*` settings while retaining `foundupsFusion.*` aliases for one migration release.
+- Added duplicate/stale install telemetry so Copy MD can reject old VSIX or dual-extension host states.
+- Added a typed `reddog_intent.v1` resident-session payload. The extension submits intent and receives receipts; it does not submit executable authority, shell authority, repo-write authority, or merge authority.
+- Version 0.3.68 -> 0.4.0 (package.json + EXTENSION_VERSION + docs + contract-test assertions).
 
 ## 2026-07-16 - REDDOG_EXTENSION_TO_RESIDENT_ARCHITECT_SESSION_RUNTIME_PHASE1 (resident backend session bridge, 0.3.68)
 
 - Added `scripts/reddog_resident_architect_session_once.py`, a JSON-in/JSON-out bridge that delegates to the resident read-only audit/research/backend-architect E2E runtime.
 - Added `foundupsFusion.enableResidentArchitectSession` (default false). When enabled and local runtime-consumption gates pass, the extension calls the resident backend and attaches snapshot/swarm/task/report/architect-decision telemetry to the review packet and Copy MD.
-- Boundary remains read-only: no shell, repo mutation, HoloIndex re-index, Hermes dispatch, worktree operation, PR creation, PatternMemory promotion, or live FoundUp enqueue.
+- Boundary remains read-only: no shell, repo mutation, HoloIndex re-index, Hermes dispatch, worktree operation, PR creation, PatternMemory promotion, or live FoundUps enqueue.
 - Version 0.3.67 -> 0.3.68 (package.json + EXTENSION_VERSION + README + contract-test assertions).
 
 ## 2026-07-14 - REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1 (guarded live-enqueue binding, 0.3.67)
@@ -539,7 +547,7 @@
 
 ## 2026-07-03 - REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (protect required-target excerpts in final model context, 0.3.35)
 
-- Problem (golden 6-file FoundUp-creation audit on 0.3.34): senses stack PASS
+- Problem (golden 6-file FoundUps-creation audit on 0.3.34): senses stack PASS
   (direct_read_fallback_used=true, target_recall_ok=true, 6/6 recalled) and audit egress PASS
   (audit_context requested+applied, redaction passed), but the model pass FAILED: the model claimed
   fetched files (foundup_job_contract.py, hermes_foundup_job_executor.py,
@@ -588,7 +596,7 @@
 ## 2026-07-02 - REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1 (audit_context bridge wire, 0.3.34)
 
 - Problem (golden rerun on 0.3.33): **senses stack PASS** (7/7 recall, direct_read_fallback_used=true,
-  continuation off) but **model pass FAIL** — `redaction gate status: BLOCKED_LOCALLY`,
+  continuation off) but **model pass FAIL** - `redaction gate status: BLOCKED_LOCALLY`,
   `made_network_call: false`. Root cause: slice-3 `audit_mode` exists in `fusion_redaction_gate.py` and
   `buildDirectReadContentSection()` surfaces `audit_context: true`, but the live path
   `extension.js` -> `scripts/advisory_model_once.py` never passed the flag into
@@ -602,8 +610,8 @@
   `scripts/tests/test_advisory_model_once_hardening.py`.
 - HoloIndex discoverability (ADDENDUM A, pre-edit): queries for bridge wire / audit_mode did NOT surface
   `extension.js`, `advisory_model_once.py`, or `fusion_redaction_gate.py` in top code hits
-  (INDEX_GAP — OBSERVED). Static anchors added to INTERFACE.md / ROADMAP.md. Follow-up indexing slice:
-  `HOLOINDEX_REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_INDEX_GAP_PHASE1` (SPECIFIED_NOT_IMPLEMENTED — no ranking
+  (INDEX_GAP - OBSERVED). Static anchors added to INTERFACE.md / ROADMAP.md. Follow-up indexing slice:
+  `HOLOINDEX_REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_INDEX_GAP_PHASE1` (SPECIFIED_NOT_IMPLEMENTED - no ranking
   code changed in this slice).
 - Version: mechanical LIVE-surface bump 0.3.33 -> 0.3.34.
 - WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
@@ -615,7 +623,7 @@
   (direct_read_fallback_used=false, 0 paths, 0 rejected). CONFIRMED ROOT CAUSE = maxBuffer overflow,
   swallowed silently. The caller passes maxChars=18000; the enriched `execFileSync` set
   `maxBuffer: Math.max(maxChars*8, 131072)` = 144000 bytes (~141KB). The enriched bundle for the 8
-  FoundUp targets is ~184.5KB (proxy-measured 184529 bytes = semantic bundle + governed fetched
+  FoundUps targets is ~184.5KB (proxy-measured 184529 bytes = semantic bundle + governed fetched
   content). 184.5KB > 141KB => the subprocess throws ENOBUFS+SIGTERM, and the EMPTY `catch (fetchErr)`
   swallowed it, keeping the pre-fetch bundle/meta and reporting fallback_used=false with no cause.
 - Fix 1 (buffer + timeout): the enriched call now sizes `maxBuffer = Math.max(maxChars*16, 8*1024*1024)`
@@ -698,7 +706,7 @@ WSP: WSP_22.
   categories + audit value redactors), `.../src/fusion_alias_live.py` (`audit_context` param),
   `extensions/foundups_advisory_workers/extension.js` (`buildDirectReadContentSection` surfaces
   `audit_context=true` when slice-2 direct-read fetched required governance targets).
-- Goal: fix the FoundUp-creation over-sanitization -- `source_authority`, `merge_authorization`,
+- Goal: fix the FoundUps-creation over-sanitization -- `source_authority`, `merge_authorization`,
   `cabr_payout_authority`, `governance_instruction` matched on the bare identifier and BLOCKED the whole
   fetched payload, hiding the enum members / field names / gate ordering a governance audit must read.
 - Value-vs-structure line: audit_mode PRESERVES identifiers (enum members `SourceAuthority.MONOREPO_POC`,
@@ -749,7 +757,7 @@ WSP: WSP_22.
 - Boundary: NO redaction-category change and NO audit-mode change (slice 3). Fetched content passes through the
   EXISTING redaction gate unchanged (governance content may still be over-sanitized until slice 3 - expected).
   NO execution authority, NO write capability, NO shell-out added.
-- Acceptance (slice-2 bar): on the FoundUp-creation required-target list against a bundle lacking them, the
+- Acceptance (slice-2 bar): on the FoundUps-creation required-target list against a bundle lacking them, the
   targets (WSP_109, openclaw_foundup_orchestrator, hermes_foundup_job_executor, foundup_job_contract,
   reddog_governed_work_order_dryrun, reddog_wre_execution_valve, source_authority) are fetched + present,
   `direct_read_fallback_used=true`, `target_recall_ok=true`.
@@ -763,7 +771,7 @@ WSP: WSP_22.
 ## 2026-07-01 - REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3, detector only)
 
 - File: `extensions/foundups_advisory_workers/extension.js`
-- Problem: on the FoundUp-creation audit run, the run trace reported `index_gap_detected: false` even though
+- Problem: on the FoundUps-creation audit run, the run trace reported `index_gap_detected: false` even though
   none of the 20+ required direct-read targets were retrieved. The only retrieved file was `extension.js`
   (RedDog itself), and that "content included" falsely satisfied the recall check
   (`content_included(any file) != required_targets_recalled`).
@@ -783,7 +791,7 @@ WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
 ## 2026-06-28 - REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1 (extension pointers)
 
 - Module: `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py`
-- `plan_reddog_openclaw_adapter_dryrun()` -- propose FoundUpJob / autonomous_task intake; no enqueue.
+- `plan_reddog_openclaw_adapter_dryrun()` -- propose FoundUpsJob / autonomous_task intake; no enqueue.
 - Contract: `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`
 
 WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
@@ -799,15 +807,15 @@ WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
 ## 2026-06-28 - REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1 (LANDED #901)
 
 - Canonical: `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md`
-- Ruling: OpenClaw Supervisor / FoundUpJob intake is canonical; AssignmentDispatcher is simulated scaffold only.
+- Ruling: OpenClaw Supervisor / FoundUpsJob intake is canonical; AssignmentDispatcher is simulated scaffold only.
 - No runtime adapter in this slice.
 
 WSP: WSP_00, WSP_15, WSP_50, WSP_77, WSP_97, WSP_22.
 
 ## 2026-06-28 - REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1 (LANDED #899)
 
-- ADD `buildSanitizedContinuationSummary()` — WSP_97-safe packet memory from last run (success or BLOCKED_LOCALLY).
-- ADD `appendContinuationSummaryToWspPrompt()` — follow-up path without pasting raw Copy MD.
+- ADD `buildSanitizedContinuationSummary()` - WSP_97-safe packet memory from last run (success or BLOCKED_LOCALLY).
+- ADD `appendContinuationSummaryToWspPrompt()` - follow-up path without pasting raw Copy MD.
 - UI: "Use last RedDog packet" checkbox (default ON); in-memory `state.lastContinuationSummary` only.
 - Copy MD optional safe Continuation Summary section; fusion redaction gate tested on continuation block.
 
@@ -816,7 +824,7 @@ WSP: WSP_00, WSP_50, WSP_97, WSP_22. Version 0.3.27 -> 0.3.28.
 ## 2026-06-28 - REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1 (extension pointers)
 
 - Module: `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py`
-- `plan_wre_isolated_worktree_execution_dryrun()` — plan + phase receipts; no git/worktree mutation.
+- `plan_wre_isolated_worktree_execution_dryrun()` - plan + phase receipts; no git/worktree mutation.
 
 WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
 
@@ -858,14 +866,14 @@ WSP: WSP_34, WSP_50, WSP_97.
 
 ## 2026-06-28 - #890 LANDED + post-dryrun queue revision
 
-- **#890 merged** @ `bd68ab83a` — `validate_work_order_dryrun()` pure validation module.
-- P0 sequence: GitHub permission probe → OpenClaw policy gate → Hermes receipts → WRE executor.
+- **#890 merged** @ `bd68ab83a` - `validate_work_order_dryrun()` pure validation module.
+- P0 sequence: GitHub permission probe -> OpenClaw policy gate -> Hermes receipts -> WRE executor.
 
 WSP: WSP_15, WSP_22.
 
 ## 2026-06-28 - REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
 
-- Added `reddog_governed_work_order_dryrun.py` — typed `RedDogGovernedWorkOrder` + `HoloIndexEvidencePacket` dry-run validator.
+- Added `reddog_governed_work_order_dryrun.py` - typed `RedDogGovernedWorkOrder` + `HoloIndexEvidencePacket` dry-run validator.
 - Decisions: `WOULD_ACCEPT`, `WOULD_REJECT`, `WOULD_ACCEPT_WITH_RETRIEVAL_GAP`; receipt digest; in-memory nonce replay guard.
 - Gates: required fields, expiry, nonce, forbidden ops/paths, main mutation block, HoloIndex evidence (Addendum A), WAE-L1 mapping docstring (Addendum B).
 - Tests: 13 pytest cases (accept + all rejection paths).
@@ -875,7 +883,7 @@ WSP: WSP_34, WSP_50, WSP_97, WSP_22.
 
 ## 2026-06-28 - REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1
 
-- Added `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md` — authority model, `RedDogGovernedWorkOrder` schema, HoloIndex discoverability + reindex gate.
+- Added `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md` - authority model, `RedDogGovernedWorkOrder` schema, HoloIndex discoverability + reindex gate.
 - Updated ROADMAP queue: contract DONE; P0 dryrun + GitHub probe + OpenClaw gate + WRE executor.
 - README/INTERFACE: governed work-order contract pointers; authenticated principal wording; F0 merge SPECIFIED_NOT_IMPLEMENTED.
 - HoloIndex: baseline Phase 0 + targeted `--index-docs` post-edit (Addendum C).
@@ -998,7 +1006,7 @@ WSP: WSP_97, WSP_22.
 ## 2026-06-26 - EXT-ACC-001 post-#882 probe r3 (telemetry gate still open)
 
 - Same path-only signal as r2; repair redaction passed (r2 repair blocked).
-- Run Trace still `v0.3.20` — force-install did not reflect in host; telemetry gate open.
+- Run Trace still `v0.3.20` - force-install did not reflect in host; telemetry gate open.
 - Queue content inclusion; hold dispatch until `target_recall_ok` appears in Run Trace.
 
 WSP: WSP_97, WSP_22.
@@ -1014,18 +1022,18 @@ WSP: WSP_97, WSP_22.
 ## 2026-06-26 - EXT-ACC-001 post-#882 probe r2 (needs_repair, stale telemetry)
 
 - Main egress succeeded; RedDog correctly BLOCKed on missing source (path hit ~7.4%, no content body).
-- **Queue** `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` — do **not** treat as final post-#882 proof (v0.3.20 note; no `target_recall_ok` / `code_hits_count`).
+- **Queue** `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` - do **not** treat as final post-#882 proof (v0.3.20 note; no `target_recall_ok` / `code_hits_count`).
 - **Pending:** Clean EXT-ACC-001 after force-install VSIX; then dispatch content-inclusion if criterion #2 still fails with telemetry active.
 
 WSP: WSP_97, WSP_22.
 
 ## 2026-06-26 - EXT-ACC-001 post-#882 probe recorded (blocked)
 
-- **Verdict:** `blocked` — `redactor_error` before OpenRouter; HoloIndex fix not assessable at model layer.
-- **Distinction:** `redactor_error` (gate scan error, fail-closed) ≠ `blocked_policy` (intentional policy block).
-- **Next slice (P0):** `REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1` — before `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`.
+- **Verdict:** `blocked` - `redactor_error` before OpenRouter; HoloIndex fix not assessable at model layer.
+- **Distinction:** `redactor_error` (gate scan error, fail-closed)  `blocked_policy` (intentional policy block).
+- **Next slice (P0):** `REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1` - before `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`.
 - **Pending:** EXT-ACC-003 post-#882 probe (confirms context bundle vs work focus if same error).
-- **Note:** Trace showed `v0.3.20` provider note — reinstall post-#882 VSIX before reruns.
+- **Note:** Trace showed `v0.3.20` provider note - reinstall post-#882 VSIX before reruns.
 
 WSP: WSP_97, WSP_22.
 
@@ -1033,7 +1041,7 @@ WSP: WSP_97, WSP_22.
 
 - Updated `REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`: EXT-ACC-001 replacement pass requires five criteria (path hit, source content in bounded context, WSP_97 finding on source, `target_recall_ok`, output validation).
 - Documented path-ranking vs content-inclusion distinction; post-#882 probe order (001 + 003 only before full 15-pack).
-- Recorded conditional follow-on `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` — do not start until post-land probe proves path-only context.
+- Recorded conditional follow-on `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` - do not start until post-land probe proves path-only context.
 
 WSP: WSP_97, WSP_22.
 
@@ -1074,21 +1082,21 @@ WSP: WSP_22, WSP_97.
 WSP: WSP_22, WSP_97, WSP_15.
 
 ## 2026-06-24 - v0.3.19 RedDog UX + Review Packet Polish
-- Moved Working Tail strip above controls row (output → trail → 0102 Role/controls → 012 work focus).
-- Renamed UI label `Worker` → `0102 Role`; role options unchanged.
+- Moved Working Tail strip above controls row (output -> trail -> 0102 Role/controls -> 012 work focus).
+- Renamed UI label `Worker` -> `0102 Role`; role options unchanged.
 - Copy MD now prepends `Run Trace` (role, tier, effort, mode, models, context, redaction, validation).
 - Redaction-block and repair-failure Copy MD include `BLOCKED_LOCALLY` / `OUTPUT_VALIDATION_FAILED` with explicit incomplete-advisory wording.
-- Added mojibake detector (`窶`, `竊`) with `mojibake_detected` flag in output_validation and Copy MD warning.
+- Added mojibake detector (``, ``) with `mojibake_detected` flag in output_validation and Copy MD warning.
 - Validation repair failure appends local static footer (Verification Gaps + Next safest step); no extra network call.
 
 WSP: WSP_22, WSP_97.
 
-## 2026-06-24 - v0.3.18 Foundups®Agent Branding
-- Renamed user-facing extension surface from "FoundUps Fusion Worker" to "Foundups®Agent".
+## 2026-06-24 - v0.3.18 Foundups(R)Agent Branding
+- Renamed user-facing extension surface from "FoundUps Fusion Worker" to "Foundups(R)Agent".
 - Kept internal package id and command id stable (`foundups-fusion-worker`, `foundupsFusion.open`) to avoid breaking existing installs/settings.
-- Clarified that RedDog is the 0102 digital-twin architect inside Foundups®Agent and Fusion is an internal reasoning mode.
+- Clarified that RedDog is the 0102 digital-twin architect inside Foundups(R)Agent and Fusion is an internal reasoning mode.
 
-## V0.3.17 窶・REDDOG_WORKING_TRAIL_PHASE1_CODE 窶・2026-06-23
+## V0.3.17 REDDOG_WORKING_TRAIL_PHASE1_CODE 2026-06-23
 
 - Implemented RedDog working trail strip (`#reddogWorkingTrail`) under work focus composer.
 - ASCII pixel grammar: `~~~`, `.rd.`, `<rd>`, `>rd>`, `!rd!`.
@@ -1113,7 +1121,7 @@ Audit and doc additions for correct FoundUps architecture capture:
 
 WSP: WSP_00, WSP_48, WSP_54, WSP_73, WSP_97.
 
-## V0.3.17b 窶・REDDOG_WORKING_TRAIL_PHASE1_REPAIR 窶・2026-06-23
+## V0.3.17b REDDOG_WORKING_TRAIL_PHASE1_REPAIR 2026-06-23
 
 - Repair pass on docs/REDDOG_WORKING_TRAIL_PHASE1.md.
 - ASCII pixel grammar: replaced `.v.`, `xvx`, `!v!`, `IvI` Unicode glyphs with `.rd.`, `<rd>`, `!rd!`, `>rd>` throughout (tables, code blocks, prose, JS signatures, CSS). Zero non-ASCII confirmed by rg scan.

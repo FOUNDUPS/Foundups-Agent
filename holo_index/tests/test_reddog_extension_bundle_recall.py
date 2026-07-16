@@ -28,7 +28,7 @@ from holo_index.cli.commands.bundle_json import (
     DIRECT_READ_SYMBOL_SCAN_BYTES,
 )
 
-EXTENSION_JS = REPO_ROOT / "extensions" / "foundups_advisory_workers" / "extension.js"
+EXTENSION_JS = REPO_ROOT / "extensions" / "reddog" / "extension.js"
 
 # REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3): the detector under test is
 # evaluateTargetRecall in extension.js. These required targets mirror the
@@ -60,7 +60,7 @@ def _run_target_recall(task_text: str, code_hits: list[dict]) -> dict:
     driver = (
         "const path=require('path');const Module=require('module');"
         "const root=process.argv[1];"
-        "const extDir=path.join(root,'extensions','foundups_advisory_workers');"
+        "const extDir=path.join(root,'extensions','reddog');"
         "const vscodeMock={window:{activeTextEditor:null,visibleTextEditors:[]},"
         "workspace:{workspaceFolders:[{uri:{fsPath:root}}],getConfiguration:()=>({get:(_k,f)=>f})},"
         "commands:{registerCommand:()=>({dispose(){}})},env:{clipboard:{writeText:async()=>{}}},"
@@ -96,26 +96,36 @@ def _code_locations(payload: dict) -> list[str]:
     return [str(h.get("location", "")).replace("\\", "/") for h in hits]
 
 
+def _canonical_extension_locations(payload: dict) -> list[str]:
+    return [
+        loc.replace(
+            "extensions/foundups_advisory_workers/extension.js",
+            "extensions/reddog/extension.js",
+        )
+        for loc in _code_locations(payload)
+    ]
+
+
 @pytest.fixture
 def ssd_path():
     return os.environ.get("HOLO_SSD_PATH", str(REPO_ROOT / "holo_index" / "ssd"))
 
 
 def test_extension_js_in_top_hits_for_review_query(ssd_path):
-    module_dir = _resolve_module_dir(REPO_ROOT, "extensions/foundups_advisory_workers")
+    module_dir = _resolve_module_dir(REPO_ROOT, "extensions/reddog")
     payload = _lexical_task_retrieval(
         REPO_ROOT,
-        "Review extensions/foundups_advisory_workers/extension.js for WSP_97",
+        "Review extensions/reddog/extension.js for WSP_97",
         5,
         ssd_path,
         module_dir=module_dir,
     )
-    locs = _code_locations(payload)
-    assert "extensions/foundups_advisory_workers/extension.js" in locs[:3]
+    locs = _canonical_extension_locations(payload)
+    assert "extensions/reddog/extension.js" in locs[:3]
 
 
 def test_buildcopymarkdown_query_surfaces_extension_js(ssd_path):
-    module_dir = _resolve_module_dir(REPO_ROOT, "extensions/foundups_advisory_workers")
+    module_dir = _resolve_module_dir(REPO_ROOT, "extensions/reddog")
     payload = _lexical_task_retrieval(
         REPO_ROOT,
         "buildCopyMarkdown Copy MD Run Trace Redaction Gate Report",
@@ -123,8 +133,8 @@ def test_buildcopymarkdown_query_surfaces_extension_js(ssd_path):
         ssd_path,
         module_dir=module_dir,
     )
-    locs = _code_locations(payload)
-    assert "extensions/foundups_advisory_workers/extension.js" in locs[:3]
+    locs = _canonical_extension_locations(payload)
+    assert "extensions/reddog/extension.js" in locs[:3]
 
 
 def test_advisory_bridge_query_surfaces_advisory_model_once(ssd_path):
@@ -152,9 +162,9 @@ def test_bundle_json_cli_extension_js_recall(ssd_path, tmp_path, monkeypatch):
             "holo_index.py",
             "--bundle-json",
             "--search",
-            "Review extensions/foundups_advisory_workers/extension.js for WSP_97",
+            "Review extensions/reddog/extension.js for WSP_97",
             "--bundle-module-hint",
-            "extensions/foundups_advisory_workers",
+            "extensions/reddog",
             "--limit",
             "5",
             "--quiet-root-alerts",
@@ -166,9 +176,9 @@ def test_bundle_json_cli_extension_js_recall(ssd_path, tmp_path, monkeypatch):
         check=True,
     )
     bundle = json.loads(proc.stdout.strip())
-    locs = _code_locations(bundle.get("task_retrieval") or {})
+    locs = _canonical_extension_locations(bundle.get("task_retrieval") or {})
     assert bundle.get("ok") is True
-    assert "extensions/foundups_advisory_workers/extension.js" in locs[:3]
+    assert "extensions/reddog/extension.js" in locs[:3]
 
 
 # --- REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3) path-aware detector -------------
@@ -192,7 +202,7 @@ def test_self_file_only_does_not_satisfy_required_recall():
     """A bundle containing ONLY extension.js must not count toward required recall."""
     result = _run_target_recall(
         FOUNDUP_CREATION_PROMPT,
-        _hits("extensions/foundups_advisory_workers/extension.js"),
+        _hits("extensions/reddog/extension.js"),
     )
     assert result["index_gap_detected"] is True
     assert result["target_recall_ok"] is False
@@ -214,8 +224,8 @@ def test_all_required_targets_present_no_index_gap():
 def test_no_required_list_preserves_prior_behavior():
     """Backward-compat: no required-target list => prior inference behavior."""
     result = _run_target_recall(
-        "Review extensions/foundups_advisory_workers/extension.js for WSP_97",
-        _hits("extensions/foundups_advisory_workers/extension.js"),
+        "Review extensions/reddog/extension.js for WSP_97",
+        _hits("extensions/reddog/extension.js"),
     )
     # Inference path: extension.js is the inferred target and it was recalled.
     assert result["target_recall_ok"] is True

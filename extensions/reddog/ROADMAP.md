@@ -1,12 +1,12 @@
-# Foundups®Agent Roadmap
+# RedDog Roadmap
 
 ## Status
 
-Phase: IDE-side RedDog Architect proof surface.
+Phase: RedDog 0.4.0 resident architect thin-client surface.
 
 Current implementation:
 
-- Cursor command: `Foundups®Agent: Open`.
+- Cursor command: `RedDog: Open`.
 - Bottom-composer webview with scrollback output.
 - OpenRouter bridge with redaction gate.
 - WSP_00/WSP_97/WSP_15 operating prompt.
@@ -29,9 +29,9 @@ Current implementation:
 
 ## Architecture Direction
 
-This extension is not the final RedDog runtime. It is the operator-facing proof surface for how RedDog should behave before becoming accessible through pfMALL or an OpenClaw/WRE route.
+This extension is the RedDog thin client. The resident backend and OpenClaw/WRE/Hermes workers remain the authority-bearing runtime.
 
-Foundups®Agent is the product surface. RedDog is the 0102 digital-twin architect inside it. Fusion is one internal reasoning mode, not the product identity.
+RedDog is the resident FoundUps architect thin client and product surface. Fusion is one internal reasoning mode; authority-bearing work remains in the resident backend and signed OpenClaw/WRE/Hermes worker path.
 
 ### RedDog and the Recursive 0102 DAE Ecosystem
 
@@ -59,10 +59,10 @@ Target path:
 ```text
 IDE extension POC
   -> RedDog Architect contract hardening
-  -> WSP_109 FoundUp intake packet generation
+  -> WSP_109 FoundUps intake packet generation
   -> WRE/OpenClaw/Hermes dispatch surface
   -> pfMALL RedDog surface
-  -> governed public FoundUp launch flow
+  -> governed public FoundUps launch flow
 ```
 
 ## WSP_15 Priorities
@@ -71,14 +71,14 @@ IDE extension POC
 |---|---:|---:|---:|---:|---:|---|---|
 | Layout + RedDog Architect contract | 2 | 5 | 5 | 4 | 16 | P0 | Required for usable 012 feedback loop |
 | Tier-0/Tier-1 memory files | 1 | 4 | 4 | 4 | 13 | P1 | Required for HoloIndex discovery |
-| WSP_109 intake packet mode | 3 | 5 | 4 | 5 | 17 | P0 | Converts external project ideas into FoundUp intake artifacts |
+| WSP_109 intake packet mode | 3 | 5 | 4 | 5 | 17 | P0 | Converts external project ideas into FoundUps intake artifacts |
 | Review packet persistence | 3 | 4 | 3 | 4 | 14 | P1 | Enables outcome learning and model performance memory |
 | pfMALL RedDog binding | 4 | 5 | 3 | 5 | 17 | P0 | Public/operator surface after safety contracts harden |
 | WRE/OpenClaw dispatch bridge | 4 | 5 | 3 | 5 | 17 | P0 | Must remain governed; extension cannot dispatch directly |
 
 ## External RedDog Lane Queue (post-#888)
 
-Goal: **RedDog replaces Claude Code-style work** — not only extension polish. Advisory RedDog must bridge to governed WRE execution before random implementation.
+Goal: **RedDog replaces Claude Code-style work** - not only extension polish. Advisory RedDog must bridge to governed WRE execution before random implementation.
 
 ```text
 DONE
@@ -94,14 +94,14 @@ DONE
 10. #897 WRE isolated worktree executor contract (2fe60a280)
 11. #898 WRE executor plan dry-run (e215bf890)
 12. #899 RedDog continuation memory (c70433d7d)
-13. #901 OpenClaw FoundUpJob adapter contract (2c8df23dd)
+13. #901 OpenClaw FoundUpsJob adapter contract (2c8df23dd)
 14. #903 WRE execution valve (2761f2e65)
 
 P0 NEXT (execution track)
 15. REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1
     - refreshed contract boundary for future live OpenClaw enqueue; no runtime enqueue
 15. REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
-    - propose FoundUpJob / autonomous_task intake; no live enqueue
+    - propose FoundUpsJob / autonomous_task intake; no live enqueue
 
 P1
 16. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
@@ -120,14 +120,14 @@ P2/P3
 25. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
 
-**Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
+**Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between "advisory RedDog" and "RedDog can direct WRE to do meaningful code work."
 
 ## Next Slices
 
 ### REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1
 
 - **Baseline pass (v0.3.21):** 15 fixed prompts, 012 rubric, redacted artifact template (`docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`).
-- Measures "Can 012 use Foundups(R)Agent instead of Claude Code for advisory work?" — does **not** require fixes in the same slice.
+- Measures "Can 012 use Foundups(R)Agent instead of Claude Code for advisory work?" - does **not** require fixes in the same slice.
 - **Replacement pass (future):** rerun same pack after HoloIndex index-gap and dispatch improvements; compare against baseline artifacts in `docs/acceptance/`.
 
 ### REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1
@@ -138,7 +138,7 @@ P2/P3
 ### FOUNDUPS_AGENT_INTAKE_MODE_PHASE1
 
 - Assess arbitrary external repositories for FoundUps integration readiness.
-- Produce advisory WSP readiness audit, FoundUp intake packet, Skillz map, and integration risk report.
+- Produce advisory WSP readiness audit, FoundUps intake packet, Skillz map, and integration risk report.
 - No automatic onboarding, repo mutation, package install, or execution.
 - Governed WRE handoff recommendation only.
 
@@ -172,10 +172,10 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
 
-- Index `extensions/foundups_advisory_workers/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.
+- Index `extensions/reddog/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.
 - Improve semantic recall for RedDog auto-router, WSP_15/97, and governed-handoff queries.
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
-- **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
+- **Status:** **LANDED** #882 (`99d0e35c2`) - ranking + target recall telemetry only; not source-content inclusion.
 
 ### REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (v0.3.45)
 
@@ -282,7 +282,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Telemetry: 5 new counts-only fields in the Run Trace scorecard (`required_targets_redaction_checked`,
   `_passed`, `_blocked`, `_blocked_paths`, `_blocked_reasons`), emitted by the gate report through the
   bridge. Default zero/empty on the non-audit / no-marker path (backward compatible).
-- Golden bar: the 6-file FoundUp-creation audit (clean, 0 triggers) yields
+- Golden bar: the 6-file FoundUps-creation audit (clean, 0 triggers) yields
   `required_targets_redaction_blocked: 0` and `required_targets_in_model_context: 6`. Adversarial proof:
   N>=3 sections with exactly ONE private_reasoning trigger -> only that target omitted, the rest survive,
   overall gate passes. 89/89 Python redaction tests pass; JS contract suite exit 0 on 0.3.38.
@@ -306,7 +306,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 ### REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (v0.3.36)
 
 - **Status:** VERIFIED_READY (this slice). The webview "Use last RedDog packet" checkbox now defaults
-  UNCHECKED — continuation is opt-IN, not opt-out. One-line HTML edit removed the `checked` attribute; the
+  UNCHECKED - continuation is opt-IN, not opt-out. One-line HTML edit removed the `checked` attribute; the
   feature stays manually available (012 checks the box to append the prior WSP_97-safe summary).
 - No backend logic change: the #911 fail-closed backend (`message.useLastPacket === true`) already treats
   missing/false as OFF, so an unchecked default yields `continuation_enabled=false` AND
@@ -319,7 +319,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (v0.3.35)
 
-- **Status:** PACKING COMPLETE (this slice). Golden 6-file FoundUp-creation audit on 0.3.34 proved senses
+- **Status:** PACKING COMPLETE (this slice). Golden 6-file FoundUps-creation audit on 0.3.34 proved senses
   PASS (direct_read_fallback_used=true, 6/6 recalled) and audit egress PASS, but the MODEL claimed fetched
   files were "not in bounded context". Root cause = PACKING: `buildBoundedRepoContext()` joined all sections
   then applied one `.slice(0, 42000)` tail cut, so the HoloIndex JSON blob + git diff + self-file
@@ -382,72 +382,72 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1
 
-- **Status:** **LANDED** #885 (`888d0c9cc`) — REGULAR auto context `none` -> `wsp_holo`.
+- **Status:** **LANDED** #885 (`888d0c9cc`) - REGULAR auto context `none` -> `wsp_holo`.
 - Every auto-routed tier attaches HoloIndex bundle-json at minimum; REGULAR stays single-model without Skillz/git.
 - Prerequisite: #883 landed (target content + sanitization on v0.3.22).
 - Does not fix output validation, made_network_call telemetry, or mojibake (separate slices).
 
 ### REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1
 
-- **Status:** **LANDED** #886 (`ca5703611`) — JS surrogate normalization + bridge UTF-8 stdin (0.3.25).
+- **Status:** **LANDED** #886 (`ca5703611`) - JS surrogate normalization + bridge UTF-8 stdin (0.3.25).
 
 ### REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
 
-- **Status:** **LANDED** #888 (`9c3a8f829`) — v0.3.27; 012 smoke PASS (2026-06-27).
+- **Status:** **LANDED** #888 (`9c3a8f829`) - v0.3.27; 012 smoke PASS (2026-06-27).
 - Repair telemetry, isolated Work Trail (`repair_single_*`), section-aware merge, OSR-007..010.
 - Run Trace: `repair_context_mode: repair_minimal`, `repair_mode: openrouter_single`.
 - Stale `provider_reasoning_note` deferred to `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1`.
 
 ### REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1
 
-- **Status:** **LANDED** #889 (`764084bc4`) — docs/audit only; no runtime wiring.
+- **Status:** **LANDED** #889 (`764084bc4`) - docs/audit only; no runtime wiring.
 - **Canonical audit:** `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md`
-- **Purpose:** Authority model for RedDog → WRE worker path; `RedDogGovernedWorkOrder` schema draft.
-- **Records:** authenticated principal → GitHub permission snapshot → governed work order → OpenClaw → Hermes → WRE → review → merge gate.
-- **RedDog receives bounded delegated capability per work order** — does not hold standing repo authority.
+- **Purpose:** Authority model for RedDog -> WRE worker path; `RedDogGovernedWorkOrder` schema draft.
+- **Records:** authenticated principal -> GitHub permission snapshot -> governed work order -> OpenClaw -> Hermes -> WRE -> review -> merge gate.
+- **RedDog receives bounded delegated capability per work order** - does not hold standing repo authority.
 - **F0 autonomous merge:** SPECIFIED_NOT_IMPLEMENTED (not planned until prior gates land).
 - **Blocks:** runtime execution slices until dryrun + permission probe land.
-- **HoloIndex:** `--index-docs` gate PASS for audit doc (query 1); INDEX_GAP for extension ROADMAP/INTERFACE (probe 7) — follow-up slice required.
+- **HoloIndex:** `--index-docs` gate PASS for audit doc (query 1); INDEX_GAP for extension ROADMAP/INTERFACE (probe 7) - follow-up slice required.
 
 ### REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
 
-- **Status:** **LANDED** #890 (`bd68ab83a`) — pure validation; stdlib only; `no_mutation_performed: true` invariant.
+- **Status:** **LANDED** #890 (`bd68ab83a`) - pure validation; stdlib only; `no_mutation_performed: true` invariant.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py`
 - **Tests:** 13 pytest in `test_reddog_governed_work_order_dryrun.py`
 
 ### REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
 
-- **Status:** **LANDED** #892 (`21aeff32d`) — read-only `probe_repo_permission()` in github_integration.
+- **Status:** **LANDED** #892 (`21aeff32d`) - read-only `probe_repo_permission()` in github_integration.
 - **Module:** `modules/platform_integration/github_integration/src/reddog_github_permission_probe.py`
 
 ### REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
 
-- **Status:** **LANDED** #893 (`329db7113`) — `evaluate_work_order_policy_gate()` in moltbot_bridge.
+- **Status:** **LANDED** #893 (`329db7113`) - `evaluate_work_order_policy_gate()` in moltbot_bridge.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_openclaw_work_order_policy_gate.py`
 
 ### REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
 
-- **Status:** **LANDED** #894 (`b42db2165`) — `emit_work_order_receipt()` + SQLite audit store.
+- **Status:** **LANDED** #894 (`b42db2165`) - `emit_work_order_receipt()` + SQLite audit store.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_work_order_receipt.py`
 
 ### REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1
 
-- **Status:** **LANDED** #896 (`f65ecff4e`) — `invoke_reddog_work_order_dryrun()` chains #893 + #894.
+- **Status:** **LANDED** #896 (`f65ecff4e`) - `invoke_reddog_work_order_dryrun()` chains #893 + #894.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py`
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1
 
-- **Status:** **LANDED** #897 (`2fe60a280`) — contract-only audit doc; no executor code.
+- **Status:** **LANDED** #897 (`2fe60a280`) - contract-only audit doc; no executor code.
 - **Canonical:** `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md`
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
 
-- **Status:** **LANDED** #898 (`e215bf890`) — `plan_wre_isolated_worktree_execution_dryrun()`.
+- **Status:** **LANDED** #898 (`e215bf890`) - `plan_wre_isolated_worktree_execution_dryrun()`.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py`
 
 ### REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1
 
-- **Status:** **LANDED** #899 (`c70433d7d`) — in-memory WSP_97-safe continuation; v0.3.28.
+- **Status:** **LANDED** #899 (`c70433d7d`) - in-memory WSP_97-safe continuation; v0.3.28.
 
 ### REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1
 
@@ -493,31 +493,31 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 
-- **Status:** **P1 QUEUED** — Sentinel + reviewer signed opinions; Hermes receipts.
+- **Status:** **P1 QUEUED** - Sentinel + reviewer signed opinions; Hermes receipts.
 
 ### REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1
 
-- **Status:** **P3 BLOCKED** — until dryrun, permission probe, OpenClaw gate, WRE executor, review receipts land.
+- **Status:** **P3 BLOCKED** - until dryrun, permission probe, OpenClaw gate, WRE executor, review receipts land.
 
 ### HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
 
-- **Status:** **P1 REQUIRED** — probe query 7 misses `extensions/foundups_advisory_workers/{ROADMAP,INTERFACE}.md`; `index_docs_entries` excludes `extensions/`.
+- **Status:** **P1 REQUIRED** - probe query 7 misses `extensions/reddog/{ROADMAP,INTERFACE}.md`; `index_docs_entries` excludes `extensions/`.
 
 ### REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
 
-- **Status:** **P1 QUEUED** — tell RedDog target snippets may contain egress-safe placeholders; not repo source truth.
+- **Status:** **P1 QUEUED** - tell RedDog target snippets may contain egress-safe placeholders; not repo source truth.
 - **Trigger:** model misreads `[SANITIZED_BLOCK:NN]` in bounded context as live repo source (F10 class).
 
 ### REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
 
-- **Status:** **P1 QUEUED** — report-only telemetry fixes; not functional blockers.
+- **Status:** **P1 QUEUED** - report-only telemetry fixes; not functional blockers.
 - **Scope:** stale `provider_reasoning_note: Report-only in v0.3.23`; `made_network_call: unknown`; Work Trail duplicate cleanup.
 
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 
 - **Status:** VERIFIED_READY on #883 (v0.3.22) - stacked base for grounding slice.
 - Inject target file **content/snippets** into bounded bridge context when HoloIndex ranks the path but omits source body.
-- Trigger: EXT-ACC-001 criterion #2 fail with model egress (path hit ~7.4%, no source body) — **OBSERVED**.
+- Trigger: EXT-ACC-001 criterion #2 fail with model egress (path hit ~7.4%, no source body) - **OBSERVED**.
 - Run Trace: `target_content_included`, `target_content_paths`, `target_content_chars`, `target_content_omitted_reason`, `target_content_truncated`.
 - WSP_97 tasks: bounded protocol excerpt section.
 - Bump version **0.3.22** (install hygiene after #882 no-bump trap).
@@ -526,7 +526,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1
 
-- **Status:** DEFERRED — implementation follows `REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1` audit.
+- **Status:** DEFERRED - implementation follows `REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1` audit.
 - Typed handoff from RedDog review packet to WRE/OpenClaw/Hermes.
 - Skillz match recommendations become structured dispatch payloads.
 - Extension remains advisory; WRE retains execution authority.
@@ -539,13 +539,13 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1
 
-- **Status:** **PR-READY** — in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default OFF as of v0.3.36 — opt-in; see REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1).
+- **Status:** **PR-READY** - in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default OFF as of v0.3.36 - opt-in; see REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1).
 - Sanitized follow-up memory from last run; appends to WSP task prompt without raw Copy MD paste.
 - No disk persistence, no WRE/OpenClaw runtime wiring.
 
 ### REDDOG_REVIEW_PACKET_MEMORY_PHASE1
 
-- **Status:** **PARTIAL** — Phase 1 in-memory continuation only (`REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1`).
+- **Status:** **PARTIAL** - Phase 1 in-memory continuation only (`REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1`).
 - Persist redacted review packets for HoloIndex recall and cross-session continuity (future).
 
 ### REDDOG_FUSION_ORCHESTRATOR_PHASE2
@@ -582,7 +582,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WRE_OPENCLAW_HANDOFF_CONTRACT_PHASE1
 
-- **Status:** DEFERRED — folded under work-order contract + dryrun phases.
+- **Status:** DEFERRED - folded under work-order contract + dryrun phases.
 - Define a typed handoff from RedDog review packet to WRE/OpenClaw.
 - No direct Hermes/Kanban dispatch from the extension.
 - WRE remains dispatch authority.

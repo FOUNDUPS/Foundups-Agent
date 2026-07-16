@@ -31,7 +31,7 @@ MODULE_PATH = (
     / "src"
     / "reddog_extension_wre_operational_spine_invoke.py"
 )
-EXTENSION_JS = REPO_ROOT / "extensions" / "foundups_advisory_workers" / "extension.js"
+EXTENSION_JS = REPO_ROOT / "extensions" / "reddog" / "extension.js"
 _TOKEN = "SOVEREIGN-WRE-SPINE-INVOKE-TEST"
 
 

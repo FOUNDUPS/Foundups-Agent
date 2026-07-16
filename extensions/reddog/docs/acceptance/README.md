@@ -1,4 +1,4 @@
-# Foundups(R)Agent External Acceptance Artifacts
+# Foundups(R)s(R)(R)Agent External Acceptance Artifacts
 
 Store **redacted baseline records** from `REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1` runs here.
 

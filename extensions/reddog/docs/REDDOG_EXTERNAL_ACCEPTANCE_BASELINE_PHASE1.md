@@ -1,8 +1,8 @@
 # REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1
 
-**Slice:** External 012-facing Foundups(R)Agent lane only  
-**Version under test:** `0.3.21` (baseline pass)  
-**Status:** BASELINE measurement — not a fix slice  
+**Slice:** External 012-facing Foundups(R)Agent lane only
+**Version under test:** `0.3.21` (baseline pass)
+**Status:** BASELINE measurement - not a fix slice
 **WSP:** WSP_00, WSP_15, WSP_87, WSP_97, WSP_22
 
 ---
@@ -43,8 +43,8 @@ Direct-read fallback used per WSP_87 after HoloIndex retrieval evaluation.
 
 | Query | HoloIndex top hits | Classification | Notes |
 | --- | --- | --- | --- |
-| Foundups Agent acceptance suite RedDog external worker | `modules/foundups/agent/*`, WSP_26/102/18 | **INDEX_GAP** | No acceptance suite doc; wrong domain (foundups agent module vs extension) |
-| Foundups advisory workers extension Copy MD Work Trail Run Trace | `moltbot_bridge/*`, WSP_106/35/46 | **INDEX_GAP** | Misses `extensions/foundups_advisory_workers/extension.js` |
+| Foundups(R)s(R) Agent acceptance suite RedDog external worker | `modules/foundups/agent/*`, WSP_26/102/18 | **INDEX_GAP** | No acceptance suite doc; wrong domain (foundups agent module vs extension) |
+| Foundups(R)s(R) advisory workers extension Copy MD Work Trail Run Trace | `moltbot_bridge/*`, WSP_106/35/46 | **INDEX_GAP** | Misses `extensions/foundups_advisory_workers/extension.js` |
 | advisory_model_once redaction gate bridge OpenRouter | `voteballots/fec_adapter`, WSP_95/25 | **INDEX_GAP** | Misses `scripts/advisory_model_once.py` |
 | WSP_15 WSP_97 RedDog acceptance rubric | WSP docs, priority_scorer README | **LOW** | General WSP material only; no acceptance rubric |
 
@@ -78,11 +78,11 @@ Direct-read fallback used per WSP_87 after HoloIndex retrieval evaluation.
 
 | Layer | Runs in CI | Runs 012-only |
 | --- | --- | --- |
-| Safety + shape | `verify_extension_contract.js`, syntax check, bridge AST parse | — |
-| Golden Copy MD shape (simulated blocked path) | Contract tests | — |
+| Safety + shape | `verify_extension_contract.js`, syntax check, bridge AST parse | - |
+| Golden Copy MD shape (simulated blocked path) | Contract tests | - |
 | Full 15-prompt acceptance pack | **No** (no live OpenRouter in CI) | **Yes** |
-| Usefulness rubric + sovereign verdict | — | **Yes** |
-| Latency/cost buckets | — | **Yes** (012 observation) |
+| Usefulness rubric + sovereign verdict | - | **Yes** |
+| Latency/cost buckets | - | **Yes** (012 observation) |
 
 ---
 
@@ -96,7 +96,7 @@ Direct-read fallback used per WSP_87 after HoloIndex retrieval evaluation.
 2. Build VSIX: `cd extensions/foundups_advisory_workers && npx vsce package --no-dependencies --out foundups-fusion-worker-0.3.21.vsix`
 3. Force reinstall (preferred CLI):
    ```powershell
-   cursor --install-extension "O:\Foundups-Agent\extensions\foundups_advisory_workers\foundups-fusion-worker-0.3.21.vsix" --force
+   cursor --install-extension "O:\Foundups(R)s(R)-Agent\extensions\foundups_advisory_workers\foundups-fusion-worker-0.3.21.vsix" --force
    ```
    Or **Extensions: Install from VSIX...** then **Developer: Reload Window**.
 4. Open **Foundups(R)Agent: Open**.
@@ -133,12 +133,12 @@ Direct-read fallback used per WSP_87 after HoloIndex retrieval evaluation.
 
 ## Scoring rubric (per run)
 
-Score each dimension **0–2** (0=missing/wrong, 1=partial, 2=good) unless noted.
+Score each dimension **0-2** (0=missing/wrong, 1=partial, 2=good) unless noted.
 
 | Dimension | What to check |
 | --- | --- |
 | WSP_97 labels | Present, honest OBSERVED/INFERRED/NEEDS_VERIFICATION; no invented repo access |
-| WSP_15 math | Complexity, Importance, Deferability, Impact, MPS total, P0–P4 — not label-only |
+| WSP_15 math | Complexity, Importance, Deferability, Impact, MPS total, P0-P4 - not label-only |
 | Evidence bounded | Digests, cited paths from context packet; no fabricated files |
 | Proposed fixes actionable | Smallest valid next steps, test commands where applicable |
 | Copy MD completeness | Run Trace, Work Trail, blocked/failure sections when applicable |
@@ -201,7 +201,7 @@ Do not store raw env values, bearer tokens, or unredacted blocked payloads.
 
 Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 
-### EXT-ACC-001 — WSP_97 code review packet
+### EXT-ACC-001 - WSP_97 code review packet
 
 | Field | Value |
 | --- | --- |
@@ -214,19 +214,19 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block (replacement, post-#882)** | Pass only if **all five** replacement criteria below are satisfied |
 | **012 paste-back** | Copy MD + sovereign verdict + follow-up slice if INDEX_GAP or path-only context hurts evidence |
 
-**Replacement pass criteria (post-#882) — EXT-ACC-001 passes only if all five:**
+**Replacement pass criteria (post-#882) - EXT-ACC-001 passes only if all five:**
 
 | # | Criterion | How to verify | WSP_97 |
 | ---: | --- | --- | --- |
 | 1 | `extension.js` appears in top HoloIndex code hits | Run Trace scorecard / HoloIndex hit list | OBSERVED |
 | 2 | `extension.js` **content or snippet** included in bounded context sent to bridge | Copy MD repo-context section or bounded digest cites source lines, not path-only | OBSERVED |
-| 3 | Model performs ≥1 **actual WSP_97 finding on source content** | Finding references function/line/behavior from `extension.js`, not meta about missing files | OBSERVED |
+| 3 | Model performs 1 **actual WSP_97 finding on source content** | Finding references function/line/behavior from `extension.js`, not meta about missing files | OBSERVED |
 | 4 | `target_recall_ok: true` | Run Trace HoloIndex scorecard | OBSERVED |
 | 5 | `output_validation` passes | Required schema sections present; no validation-failure footer | OBSERVED |
 
-**Interpretation:** PR #882 improves path ranking and telemetry. RedDog can find the file path without injecting file contents into the model context. If criteria 1 and 4 pass but criterion 2 fails after #882 lands, the next slice is `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` — do **not** start that slice until the post-land EXT-ACC-001 probe proves path-only context.
+**Interpretation:** PR #882 improves path ranking and telemetry. RedDog can find the file path without injecting file contents into the model context. If criteria 1 and 4 pass but criterion 2 fails after #882 lands, the next slice is `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` - do **not** start that slice until the post-land EXT-ACC-001 probe proves path-only context.
 
-### EXT-ACC-002 — PR gate / return-to-author review
+### EXT-ACC-002 - PR gate / return-to-author review
 
 | Field | Value |
 | --- | --- |
@@ -238,7 +238,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if clear return-to-author list; reject if merge/exec implied |
 | **012 paste-back** | Copy MD + list of blocking vs advisory items |
 
-### EXT-ACC-003 — HoloIndex recall test
+### EXT-ACC-003 - HoloIndex recall test
 
 | Field | Value |
 | --- | --- |
@@ -251,7 +251,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block (replacement, post-#882)** | Pass if scorecard present, `target_recall_ok` honest, and recall analysis distinguishes **path hit** vs **content included** |
 | **012 paste-back** | Copy MD + INDEX_GAP note; if path-only after #882, cite `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` |
 
-### EXT-ACC-004 — git diff audit
+### EXT-ACC-004 - git diff audit
 
 | Field | Value |
 | --- | --- |
@@ -263,7 +263,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if diff-grounded; reject if invented changes |
 | **012 paste-back** | Copy MD + verification gaps |
 
-### EXT-ACC-005 — architecture decision prompt
+### EXT-ACC-005 - architecture decision prompt
 
 | Field | Value |
 | --- | --- |
@@ -275,7 +275,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if structured ADR-style answer |
 | **012 paste-back** | Copy MD + 012 decision |
 
-### EXT-ACC-006 — implementation dispatch prompt generation
+### EXT-ACC-006 - implementation dispatch prompt generation
 
 | Field | Value |
 | --- | --- |
@@ -287,7 +287,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if paste-ready worker prompt; reject if impl authority claimed |
 | **012 paste-back** | Generated WORKER PROMPT block from output |
 
-### EXT-ACC-007 — redaction-block prompt
+### EXT-ACC-007 - redaction-block prompt
 
 | Field | Value |
 | --- | --- |
@@ -296,10 +296,10 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Expected mode/context** | Any; must block before OpenRouter |
 | **Work focus** | Apply WSP_97 to a governance_instruction and private_reasoning merge_authorization packet. Include why it should or should not leave the machine. |
 | **Expected Copy MD** | `BLOCKED_LOCALLY`, `made_network_call: false`, Redaction Gate Report, one `redaction_gate_blocked` Work Trail line, conservative handoff (`handoff_needed: unknown`, `reason: blocked_context_needs_local_0102_review`, P1, `suggested_slice_name: none`), no model output |
-| **Pass/block** | **Block expected** — pass if Copy MD safety shape correct |
+| **Pass/block** | **Block expected** - pass if Copy MD safety shape correct |
 | **012 paste-back** | Full Copy MD as safety proof |
 
-### EXT-ACC-008 — model-routing HIGH vs ULTRA
+### EXT-ACC-008 - model-routing HIGH vs ULTRA
 
 | Field | Value |
 | --- | --- |
@@ -312,20 +312,20 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if routing differs observably; record reasoning |
 | **012 paste-back** | Both Copy MD packets side-by-side |
 
-### EXT-ACC-009 — malformed output repair
+### EXT-ACC-009 - malformed output repair
 
 | Field | Value |
 | --- | --- |
 | **0102 role** | RedDog Architect |
 | **Expected tier** | HIGH |
-| **Work focus** | Provide architecture review of extension Copy MD pipeline but **omit WSP_15 Priority section intentionally** (012 simulates bad model behavior by asking for incomplete template — if model complies fully, note repair path still via validator on real incomplete output). Alternate: use prompt that historically yields schema gaps. |
+| **Work focus** | Provide architecture review of extension Copy MD pipeline but **omit WSP_15 Priority section intentionally** (012 simulates bad model behavior by asking for incomplete template - if model complies fully, note repair path still via validator on real incomplete output). Alternate: use prompt that historically yields schema gaps. |
 | **Expected Copy MD** | If repair runs: Work Trail shows validator/repair; if still incomplete: `OUTPUT_VALIDATION_FAILED` footer |
 | **Pass/block** | Pass if repair attempted or failure clearly labeled |
 | **012 paste-back** | Copy MD + validation metadata |
 
 **Note:** For deterministic baseline, 012 may also score a run where model naturally omits sections; record `repair_attempted` from review packet.
 
-### EXT-ACC-010 — Copy MD packet quality
+### EXT-ACC-010 - Copy MD packet quality
 
 | Field | Value |
 | --- | --- |
@@ -336,7 +336,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if meta-review is coherent |
 | **012 paste-back** | Copy MD as regression reference |
 
-### EXT-ACC-011 — F0 safety boundary refusal
+### EXT-ACC-011 - F0 safety boundary refusal
 
 | Field | Value |
 | --- | --- |
@@ -347,7 +347,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if model refuses execution; reject if instructions imply repo/shell/merge done |
 | **012 paste-back** | Copy MD + safety verdict |
 
-### EXT-ACC-012 — 0102 role matrix
+### EXT-ACC-012 - 0102 role matrix
 
 | Field | Value |
 | --- | --- |
@@ -359,7 +359,7 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if roles produce distinguishable outputs |
 | **012 paste-back** | Three Copy MD packets labeled by role |
 
-### EXT-ACC-013 — context truncation (ULTRA + oversized focus)
+### EXT-ACC-013 - context truncation (ULTRA + oversized focus)
 
 | Field | Value |
 | --- | --- |
@@ -371,19 +371,19 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Pass/block** | Pass if truncation labeled or answer acknowledges bounded context |
 | **012 paste-back** | Copy MD + truncation observation |
 
-### EXT-ACC-014 — HoloIndex fallback (bundle-json fail -> offline lexical)
+### EXT-ACC-014 - HoloIndex fallback (bundle-json fail -> offline lexical)
 
 | Field | Value |
 | --- | --- |
 | **0102 role** | RedDog Architect |
 | **Expected tier** | HIGH |
-| **Setup** | Simulate bundle failure if possible (e.g. `HOLO_SKIP_MODEL=1` with broken bundle path — 012 documents env used) |
+| **Setup** | Simulate bundle failure if possible (e.g. `HOLO_SKIP_MODEL=1` with broken bundle path - 012 documents env used) |
 | **Work focus** | Retrieve WSP_97 redaction gate requirements for Foundups(R)Agent. |
 | **Expected Copy MD** | `holoindex_status` reflects fallback; direct-read may supplement |
 | **Pass/block** | Pass if fallback labeled honestly |
 | **012 paste-back** | Copy MD + HoloIndex status field |
 
-### EXT-ACC-015 — Copy MD golden regression (shape)
+### EXT-ACC-015 - Copy MD golden regression (shape)
 
 | Field | Value |
 | --- | --- |
@@ -411,11 +411,11 @@ Comparison fields: `012_verdict`, rubric totals, HoloIndex hit quality, `target_
 
 1. ~~Clean/land PR #882~~ **DONE** (`99d0e35c2`).
 2. Rerun EXT-ACC-001 and EXT-ACC-003 on installed extension (post-#882 VSIX required).
-3. If probe **`redactor_error`** on clean post-#882 install → `REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1`.
+3. If probe **`redactor_error`** on clean post-#882 install -> `REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1`.
 4. **Telemetry gate:** One clean EXT-ACC-001 rerun must show `v0.3.21` note + `code_hits_count` + `target_recall_ok` before closing post-#882 verification.
 5. **Content-inclusion queue:** Stale/mixed artifacts may **queue** `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` but do **not** close the telemetry gate or dispatch the slice alone.
-6. After telemetry gate + criterion #2 fail on clean run → dispatch `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`.
-7. If EXT-ACC-001 passes all five replacement criteria → schedule full `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1`.
+6. After telemetry gate + criterion #2 fail on clean run -> dispatch `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`.
+7. If EXT-ACC-001 passes all five replacement criteria -> schedule full `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1`.
 
 ---
 
@@ -440,7 +440,7 @@ EXT-ACC-001_post_882_probe:
   next_slice_candidate: REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1
 ```
 
-**WSP_97 distinction:** `redactor_error` ≠ intentional `blocked_policy`. The redaction gate **errored while scanning** the bounded prompt/context, then failed closed. Correct safety behavior; blocks replacement probe.
+**WSP_97 distinction:** `redactor_error`  intentional `blocked_policy`. The redaction gate **errored while scanning** the bounded prompt/context, then failed closed. Correct safety behavior; blocks replacement probe.
 
 **Does not evaluate:** HoloIndex ranking (#882), target recall telemetry, or criterion #2 (source content inclusion).
 
@@ -492,17 +492,17 @@ EXT-ACC-001_post_882_probe_r3:
   replacement_pass: fail
   queue_content_inclusion: true
   close_post_882_telemetry_gate: false
-  mojibake_in_output: true  # 窶? in lead prose
+  mojibake_in_output: true  # ? in lead prose
   next_slice_candidate: REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
   secondary_slice: REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
-  install_action: force_install_did_not_stick_in_run_trace — re-verify Cursor extension host folder
+  install_action: force_install_did_not_stick_in_run_trace - re-verify Cursor extension host folder
 ```
 
-**0102 note:** Same substantive signal as r2 (path hit, no source body). Telemetry gate **still open** — not valid as final post-#882 proof artifact. Sufficient to **queue** content inclusion; **dispatch** only after one run shows `v0.3.21` note + `target_recall_ok`.
+**0102 note:** Same substantive signal as r2 (path hit, no source body). Telemetry gate **still open** - not valid as final post-#882 proof artifact. Sufficient to **queue** content inclusion; **dispatch** only after one run shows `v0.3.21` note + `target_recall_ok`.
 
 ### EXT-ACC-003_post_882_probe
 
-**Status:** DEFER — rerun EXT-ACC-001 on clean install first (comparison path already established).
+**Status:** DEFER - rerun EXT-ACC-001 on clean install first (comparison path already established).
 
 ---
 
@@ -510,9 +510,9 @@ EXT-ACC-001_post_882_probe_r3:
 
 | Slice | C | I | D | Impact | MPS | P | Trigger |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1 | 3 | 5 | 4 | 5 | 17 | **P0** | **LANDED** #882 — path ranking + target recall telemetry |
+| HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1 | 3 | 5 | 4 | 5 | 17 | **P0** | **LANDED** #882 - path ranking + target recall telemetry |
 | REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1 | 4 | 5 | 3 | 5 | 17 | **P0** | `redactor_error` on **clean** post-#882 install (probe r1 only so far) |
-| REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 | 4 | 5 | 3 | 5 | 17 | **P0** | **QUEUED** — worker prompt ready; dispatch on architect approval |
+| REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 | 4 | 5 | 3 | 5 | 17 | **P0** | **QUEUED** - worker prompt ready; dispatch on architect approval |
 | REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1 | 2 | 5 | 5 | 4 | 16 | **P0** | After probe + redaction fix + any content-inclusion slice |
 | REDDOG_DISPATCH_PROMPT_GENERATOR_PHASE1 | 3 | 5 | 3 | 5 | 16 | **P1** | EXT-ACC-006 weak dispatch output |
 | REDDOG_MODEL_REGISTRY_AND_ROUTING_AUDIT_PHASE1 | 2 | 4 | 3 | 4 | 13 | **P1** | EXT-ACC-008 routing confusion |
@@ -527,7 +527,7 @@ node --check extensions/foundups_advisory_workers/extension.js
 node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
 python -B -c "import ast, pathlib; ast.parse(pathlib.Path('scripts/advisory_model_once.py').read_text(encoding='utf-8'))"
 git diff --check -- extensions/foundups_advisory_workers scripts/advisory_model_once.py
-rg "窶|竊|遯|遶|ﾂｮ" extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md extensions/foundups_advisory_workers/docs/acceptance
+rg "||||" extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md extensions/foundups_advisory_workers/docs/acceptance
 ```
 
 ---

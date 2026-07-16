@@ -1,14 +1,14 @@
-# Foundups®Agent
+# RedDog
 
-Version: 0.3.68
+Version: 0.4.0
 
-This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
+This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
 
-Foundups®Agent is the product surface. RedDog is the 0102 digital-twin architect inside it. Fusion is one internal reasoning mode, not the product identity.
+RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
 Command:
 
-- `Foundups®Agent: Open`
+- `RedDog: Open`
 
 Default panel:
 
@@ -33,13 +33,13 @@ Default panel:
 | --- | --- |
 | RedDog | Digital-twin architect/interface. 012's first contact point. Assembles WSP task prompts, classifies work focus, recommends handoffs. |
 | Hermes | Scaffolding, lifecycle, scheduling, queues, receipts. Infrastructure coordination. Not policy authority. |
-| OpenClaw | Policy and intent gate. Validates FoundUp onboarding, enforces WSP boundaries, governs dispatch. |
+| OpenClaw | Policy and intent gate. Validates FoundUps onboarding, enforces WSP boundaries, governs dispatch. |
 | HoloIndex | Memory and retrieval. Semantic code search, WSP lookup, module discovery. |
 | Skillz/Rolodex | Capability catalog. Wardrobe discovery for governed handoff recommendations. |
-| Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUp launch. Bounded work under WRE verification. |
+| Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUps launch. Bounded work under WRE verification. |
 | Sentinels | Critique, truth, drift, regression review. Observe and flag, do not execute. |
 | WRE | Repo and process authority. Verification, dispatch, coordination. Retains execution control. |
-| CABR/pAVS | Benefit validation, routing, reputation. Proof-of-Benefit scoring for FoundUp work. |
+| CABR/pAVS | Benefit validation, routing, reputation. Proof-of-Benefit scoring for FoundUps work. |
 | 012 | Work focus, testing, sovereign authorization, override. Harmonic Recursive Partner role (WSP 54). |
 
 ### Autonomy Boundary
@@ -66,25 +66,25 @@ The extension is a bounded 0102 advisory surface:
 - Prompt-authoring override (v0.3.65): requests for worker/slice/M2M prompts override the DAEmon/log local diagnostic fast path, so pasted logs can be used as context for governed prompt generation instead of being answered instantly as non-actionable diagnostics.
 - Semantic grounding per-target proof (v0.3.66): semantic targets now require independent content-bearing HoloIndex evidence refs before Fusion or wardrobe selection may proceed. Aggregate `code_hits` / `wsp_hits` no longer satisfy unrelated semantic targets; missing, errored, or ref-less semantic evidence fails closed and is surfaced through `semantic_targets_required`, `semantic_targets_grounded`, `semantic_targets_missing`, and `semantic_target_coverage_digest` telemetry.
 - OpenClaw live-enqueue runtime binding (v0.3.67): after grounding, fusion quorum, output validation, wardrobe selection, and runtime-consumption gates pass, the extension may call the one-shot explicit live-enqueue invoke bridge for `live_enqueue` authority requests. This slice keeps `enableConcreteWriter=false`, so the editor subprocess can prove the guarded path is reachable but cannot perform a durable OpenClaw queue write.
-- Resident architect session bridge (v0.3.68): when `foundupsFusion.enableResidentArchitectSession=true` and local runtime-consumption gates pass, the extension may call the resident read-only RedDog audit -> research -> backend architect determination E2E runtime. The bridge returns snapshot/swarm/task/report/architect decision telemetry plus no-mutation attestations. It does not edit files, re-index HoloIndex, dispatch Hermes, create worktrees, enqueue live FoundUp work, create PRs, merge, or promote PatternMemory.
+- Resident architect session bridge (v0.3.68): when `reddog.enableResidentArchitectSession=true` and local runtime-consumption gates pass, the extension may call the resident read-only RedDog audit -> research -> backend architect determination E2E runtime. The bridge returns snapshot/swarm/task/report/architect decision telemetry plus no-mutation attestations. It does not edit files, re-index HoloIndex, dispatch Hermes, create worktrees, enqueue live FoundUps work, create PRs, merge, or promote PatternMemory.
 
 The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
 
 ## F0 Safety Boundary
 
-F0 is the foundation Foundups-Agent repo. Foundups®Agent must never mutate F0 automatically.
+F0 is the foundation Foundups-Agent repo. RedDog must never mutate F0 directly from the extension thin client.
 
-Current behavior is advisory-only:
+Current editor behavior is resident thin-client only:
 
 - no model-controlled shell execution
 - no automatic file edits
 - no automatic PR creation, merge, deployment, or repository creation
 - no CABR, payout, source-authority, or verification claims
-- no direct Skillz/OpenClaw/Hermes/WRE execution from the extension
+- no direct Skillz/OpenClaw/Hermes/WRE execution from the webview
 - redaction gate runs before any OpenRouter egress
 - WRE operational spine preview is dry-run metadata only; the extension does not call the spine, create a worktree, run tests, enqueue OpenClaw, dispatch Hermes, create a PR, or merge.
 
-External repositories can be assessed for FoundUps integration through advisory WSP intake, not automatic execution. The future path is FoundUps Agent Intake Mode: WSP readiness audit, FoundUp intake packet, Skillz map, integration risk report, and governed WRE handoff recommendation.
+External repositories can be assessed for FoundUps integration through advisory WSP intake, not automatic execution. The future path is FoundUps Agent Intake Mode: WSP readiness audit, FoundUps intake packet, Skillz map, integration risk report, and governed WRE handoff recommendation.
 
 ## Governed Repo Work Order (contract)
 
@@ -188,8 +188,8 @@ The lead is configurable. Use Cursor settings or workspace/user settings:
 
 ```json
 {
-  "foundupsFusion.leadModel": "z-ai/glm-5.2",
-  "foundupsFusion.panelModels": [
+  "reddog.leadModel": "z-ai/glm-5.2",
+  "reddog.panelModels": [
     "deepseek/deepseek-v4-pro",
     "moonshotai/kimi-k2.7-code"
   ]
@@ -217,13 +217,13 @@ Set `OPENROUTER_API_KEY` in the environment used to launch Cursor. Do not store 
 Build the VSIX locally from tracked source with `vsce package --no-dependencies`. Do not commit `*.vsix`.
 
 ```powershell
-cd extensions/foundups_advisory_workers
+cd extensions/reddog
 vsce package --no-dependencies
 ```
 
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.18.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.0.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
-4. Run `Foundups®Agent: Open` from Command Palette or the three-dot command list.
+4. Run `RedDog: Open` from Command Palette or the three-dot command list.
