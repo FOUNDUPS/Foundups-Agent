@@ -18,6 +18,12 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
     SelectionPurpose,
     select_models_for_task,
 )
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
+    ModelOutcomeMetrics,
+    build_model_benchmark_evidence_receipt,
+    build_model_promotion_evidence_receipt,
+    production_evidence_for_selection,
+)
 
 
 def _snapshot(*cards: ModelCapabilityCard):
@@ -84,17 +90,73 @@ def test_production_rejects_unbenchmarked_non_champion_candidate():
     assert receipt.decision == SelectionDecision.REJECTED
     assert receipt.selected_model_ids == ()
     assert "not_production_champion:1" in receipt.rejection_reasons
-    assert "missing_verifier_pass_rate:1" in receipt.rejection_reasons
-    assert "missing_task_benchmark:1" in receipt.rejection_reasons
+    assert "missing_production_evidence:1" in receipt.rejection_reasons
 
 
-def test_production_selects_measured_champion_over_weaker_candidate():
+def test_production_rejects_catalog_only_champion_without_receipt_bound_evidence():
     champion = _card(
         "provider/champion",
         provider="a",
         promotion_state=PromotionState.CHAMPION,
         verifier_pass_rate=0.96,
         benchmark_scores={"architecture": 0.88},
+    )
+    receipt = select_models_for_task(
+        _snapshot(champion),
+        ModelTaskRequirements(
+            task_family="architecture",
+            purpose=SelectionPurpose.PRODUCTION,
+            min_verifier_pass_rate=0.9,
+        ),
+    )
+
+    assert receipt.decision == SelectionDecision.REJECTED
+    assert receipt.selected_model_ids == ()
+    assert "missing_production_evidence:1" in receipt.rejection_reasons
+
+
+def test_production_requires_explicit_nonzero_verifier_threshold():
+    champion = _card(
+        "provider/champion",
+        promotion_state=PromotionState.CHAMPION,
+        verifier_pass_rate=0.99,
+        benchmark_scores={"architecture": 0.99},
+    )
+    receipt = select_models_for_task(
+        _snapshot(champion),
+        ModelTaskRequirements(
+            task_family="architecture",
+            purpose=SelectionPurpose.PRODUCTION,
+        ),
+        production_evidence={
+            "provider/champion": {
+                "model_id": "provider/champion",
+                "task_family": "architecture",
+                "benchmark_evidence_receipt_id": "benchmark:1",
+                "promotion_receipt_id": "promotion:1",
+                "signed_promotion_receipt_id": "signed:1",
+                "task_set_digest": "sha256:taskset",
+                "held_out_split_digest": "sha256:heldout",
+                "prompt_topology_digest": "sha256:topology",
+                "verifier_digest": "sha256:verifier",
+                "sample_count": 10,
+                "verifier_pass_rate": 0.99,
+                "promotion_state": "champion",
+            }
+        },
+    )
+
+    assert receipt.decision == SelectionDecision.REJECTED
+    assert "production_verifier_threshold_missing:1" in receipt.rejection_reasons
+
+
+def test_production_selects_champion_only_with_benchmark_and_signed_promotion_receipts():
+    champion = _card(
+        "provider/champion",
+        provider="a",
+        promotion_state=PromotionState.CHAMPION,
+        verifier_pass_rate=0.01,
+        benchmark_scores={},
     )
     candidate = _card(
         "provider/candidate",
@@ -103,6 +165,25 @@ def test_production_selects_measured_champion_over_weaker_candidate():
         verifier_pass_rate=0.99,
         benchmark_scores={"architecture": 0.99},
     )
+    benchmark = build_model_benchmark_evidence_receipt(
+        model_id="provider/champion",
+        task_family="architecture",
+        task_set_digest="sha256:task-set",
+        held_out_split_digest="sha256:held-out",
+        prompt_topology_digest="sha256:topology",
+        verifier_digest="sha256:verifier",
+        verifier_receipt_id="verifier_receipt:1",
+        sample_count=50,
+        accepted_count=47,
+        metrics=ModelOutcomeMetrics(latency_ms=1200, input_tokens=1000, output_tokens=500),
+    )
+    promotion = build_model_promotion_evidence_receipt(
+        benchmark_receipt=benchmark,
+        promotion_state=PromotionState.CHAMPION,
+        promotion_authority_receipt_id="promotion_authority:1",
+        signed_promotion_receipt_id="signed_promotion:1",
+        min_verifier_pass_rate=0.9,
+    )
     receipt = select_models_for_task(
         _snapshot(candidate, champion),
         ModelTaskRequirements(
@@ -110,6 +191,7 @@ def test_production_selects_measured_champion_over_weaker_candidate():
             purpose=SelectionPurpose.PRODUCTION,
             min_verifier_pass_rate=0.9,
         ),
+        production_evidence=production_evidence_for_selection(benchmark, promotion),
     )
 
     assert receipt.decision == SelectionDecision.SELECTED
@@ -169,10 +251,31 @@ def test_panel_selection_prefers_provider_diversity():
 
     assert receipt.decision == SelectionDecision.SELECTED
     assert len(receipt.selected_model_ids) == 2
+    assert receipt.panel_topology_digest
+    assert [assignment.role for assignment in receipt.role_assignments] == ["principal", "researcher"]
     selected_providers = {
         item.provider for item in receipt.rankings if item.canonical_model_id in receipt.selected_model_ids
     }
     assert selected_providers == {"a", "b"}
+
+
+def test_panel_selection_reserves_verifier_role_for_independent_verifier():
+    snapshot = _snapshot(_card("a/strong", provider="a"), _card("b/diverse", provider="b"))
+
+    try:
+        select_models_for_task(
+            snapshot,
+            ModelTaskRequirements(
+                task_family="architecture",
+                selection_mode=SelectionMode.PANEL,
+                max_candidates=2,
+                panel_roles=("principal", "verifier"),
+            ),
+        )
+    except ValueError as exc:
+        assert str(exc) == "verifier_role_reserved_for_independent_verifier"
+    else:
+        raise AssertionError("expected verifier role to be rejected")
 
 
 def test_blocked_and_unavailable_models_are_never_selected():

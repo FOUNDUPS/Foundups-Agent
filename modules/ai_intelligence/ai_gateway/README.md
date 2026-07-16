@@ -32,6 +32,21 @@ Two purposes are supported:
 This keeps RedDog flexible without allowing a newly discovered model alias to
 become production authority before measured FoundUps performance exists.
 
+## Benchmark Evidence and Outcome Receipts
+
+`src/model_intelligence_outcomes.py` defines the receipt-bound evidence required
+before production model selection can trust a champion:
+
+- held-out benchmark evidence bound to model ID, task family, task-set digest,
+  held-out split digest, prompt/topology digest, verifier digest, sample count,
+  cost and latency
+- signed promotion evidence over the benchmark receipt
+- selection outcome receipts that become feedback-eligible only after independent
+  verifier acceptance and regression/unauthorized-change checks
+
+Catalog scalar fields remain useful for evaluation and ranking, but production
+selection rejects `CHAMPION` unless these evidence receipts are supplied.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway
