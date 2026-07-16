@@ -1597,6 +1597,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
         REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
         REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
+        REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY=0 Materialize principal/snapshot from GitHub probe
+        REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED=0 Block startup if rejected
+        REDDOG_GITHUB_REPO_FULL_NAME                         GitHub repo full name for permission probe
+        REDDOG_AUTHORITY_FOUNDUP_ID                          FoundUp scope for principal authority record
+        REDDOG_PRINCIPAL_PUBLIC_KEY                          Principal public key, required; never inferred
         REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY=0    Materialize authority source from seed/principal/snapshot
         REDDOG_AUTHORITY_PROFILE_SEED_PATH                   Outside-repo authority seed input JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH               Outside-repo principal authority record JSON
@@ -1720,6 +1725,77 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             os.environ["REDDOG_MODEL_SELECTION_RECEIPT_PATH"] = model_selection_receipt_path
         elif model_supply_enforced:
             print("[REDDOG-MODEL-SELECTION] Startup blocked by REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED=1")
+            return False
+
+    principal_snapshot_supply_requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY",
+    )
+    principal_snapshot_supply_enforced = (
+        os.getenv("REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED", "0") != "0"
+    )
+    if principal_snapshot_supply_requested:
+        try:
+            from modules.communication.moltbot_bridge.src.reddog_github_principal_permission_snapshot_supply_bootstrap import (
+                run_reddog_github_principal_permission_snapshot_supply_bootstrap,
+            )
+
+            ttl_raw = os.getenv("REDDOG_GITHUB_PERMISSION_SNAPSHOT_TTL_SECONDS", "").strip()
+            principal_snapshot_supply = run_reddog_github_principal_permission_snapshot_supply_bootstrap(
+                repo_root=repo_root,
+                repo_full_name=os.getenv("REDDOG_GITHUB_REPO_FULL_NAME", "FOUNDUPS/Foundups-Agent"),
+                foundup_id=os.getenv("REDDOG_AUTHORITY_FOUNDUP_ID", ""),
+                principal_public_key=os.getenv("REDDOG_PRINCIPAL_PUBLIC_KEY", ""),
+                principal_authority_record_output_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH",
+                ),
+                permission_snapshot_output_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_PERMISSION_SNAPSHOT_PATH",
+                ),
+                principal_provider=os.getenv("REDDOG_PRINCIPAL_PROVIDER", "github"),
+                reward_account=os.getenv("REDDOG_PRINCIPAL_REWARD_ACCOUNT", "") or None,
+                owner_dae=os.getenv("REDDOG_PRINCIPAL_OWNER_DAE", "") or None,
+                principal_wallet=os.getenv("REDDOG_PRINCIPAL_WALLET", "") or None,
+                now_iso=os.getenv("REDDOG_GITHUB_PERMISSION_SNAPSHOT_NOW_ISO", "") or None,
+                ttl_seconds=(int(ttl_raw) if ttl_raw else 300),
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-GITHUB-PRINCIPAL] Startup snapshot supply failed: {exc}")
+            if principal_snapshot_supply_enforced:
+                print(f"[REDDOG-GITHUB-PRINCIPAL] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-GITHUB-PRINCIPAL] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        principal_status = "PASS" if principal_snapshot_supply.accepted else "WARN"
+        principal_reasons = (
+            ",".join(principal_snapshot_supply.rejection_reasons)
+            if principal_snapshot_supply.rejection_reasons
+            else "(none)"
+        )
+        print(
+            f"[REDDOG-GITHUB-PRINCIPAL] preflight={principal_status} "
+            f"status={principal_snapshot_supply.status} "
+            f"principal={principal_snapshot_supply.principal_id or '(none)'} "
+            f"permission={principal_snapshot_supply.permission_snapshot_digest or '(none)'} "
+            f"reasons={principal_reasons}"
+        )
+        if principal_snapshot_supply.accepted:
+            if principal_snapshot_supply.principal_authority_record_path:
+                os.environ["REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH"] = (
+                    principal_snapshot_supply.principal_authority_record_path
+                )
+            if principal_snapshot_supply.permission_snapshot_path:
+                os.environ["REDDOG_PERMISSION_SNAPSHOT_PATH"] = principal_snapshot_supply.permission_snapshot_path
+        elif principal_snapshot_supply_enforced:
+            print(
+                "[REDDOG-GITHUB-PRINCIPAL] Startup blocked by "
+                "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED=1"
+            )
             return False
 
     authority_supply_requested = resident_queue_runtime_flag_enabled(
