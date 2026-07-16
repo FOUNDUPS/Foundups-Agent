@@ -1,3 +1,23 @@
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_DRAFT_PR_PUBLISH_REQUEST_BINDING_PHASE1
+
+**Files**: `test_reddog_resident_queue_draft_pr_publish_request_binding.py`
+(NEW), `test_reddog_resident_queue_verified_draft_pr_publish_handler.py`,
+`test_reddog_resident_queue_stage_handler_registry.py`,
+`test_reddog_main_resident_queue_serial_loop_bootstrap.py` (UPDATED)
+
+**Slice**: `REDDOG_RESIDENT_QUEUE_DRAFT_PR_PUBLISH_REQUEST_BINDING_PHASE1` |
+**Predecessor**: #1123 resident queue slice-verifier request binding
+
+Resident queue verified draft PR publish can now derive its publish request
+from the queue-bound work order's `draft_pr_publish_plan` plus recorded
+slice-verifier and worktree-create chain receipts. Tests prove accepted
+derivation, missing-plan rejection, rejected-verifier rejection, missing
+worktree rejection, draft-only policy rejection, registry opt-in behavior,
+startup env forwarding, and a full bootstrap path with no external publish
+request JSON.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_draft_pr_publish_request_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_verified_draft_pr_publish_handler.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py -q`
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_REQUEST_BINDING_PHASE1
 
 **Files**: `test_reddog_resident_queue_slice_verifier_request_binding.py`

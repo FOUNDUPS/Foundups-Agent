@@ -572,6 +572,18 @@ def _draft_pr_publish_request(worktree_path: Path) -> dict[str, object]:
     }
 
 
+def _draft_pr_publish_plan() -> dict[str, object]:
+    return {
+        "branch_name": "feat/reddog-resident-queue-paccess-pilot",
+        "base_branch": "main",
+        "pr_title": "feat(reddog): resident queue paccess pilot",
+        "pr_body": "Verified by WRE autonomous slice verifier.",
+        "draft_pr_only": True,
+        "mark_ready": False,
+        "merge": False,
+    }
+
+
 def _outcome_ratchet_request(
     verification_result: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
@@ -2261,6 +2273,134 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
     assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
 
 
+def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(
+        **{
+            **pilot_overrides,
+            "bounded_worker_plan": _pilot_bounded_worker_plan(),
+            "slice_verifier_plan": _slice_verifier_plan(),
+            "draft_pr_publish_plan": _draft_pr_publish_plan(),
+        }
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        {
+            PILOT_ARTIFACT: (
+                "# Resident Queue Pilot\n\n"
+                "The draft PR request was bound from resident queue state.\n"
+            )
+        },
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        {
+            "index_gap_detected": False,
+            "retrieval_quality": "HIGH",
+            "holoindex_freshness_receipt_digest": _digest("b"),
+        },
+    )
+    evidence_runner = _FakeEvidenceRunner()
+    draft_pr_runner = FakeDraftPrRunner()
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        pilot_dryrun_binding_enabled=True,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=worktree_runner,
+        evidence_command_runner=evidence_runner,
+        slice_verifier_request_binding_enabled=True,
+        draft_pr_runner=draft_pr_runner,
+        draft_pr_publish_request_binding_enabled=True,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=11,
+    )
+
+    assert result.accepted is True
+    assert result.steps_run == 11
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+        "worker_dispatch_dryrun",
+        "work_order_invocation",
+        "executor_plan",
+        "execution_valve",
+        "worktree_create",
+        "bounded_worker_pilot",
+        "slice_verifier",
+        "verified_draft_pr_publish",
+    )
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE"
+    assert result.no_slice_verification_performed is False
+    assert result.no_verified_draft_pr_publish_performed is False
+    assert result.no_pr_created is False
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+    assert result.no_hermes_dispatch_performed is True
+    assert result.no_holoindex_reindex_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["verified_draft_pr_publish"]
+    binding = stage["draft_pr_publish_request_binding_result"]
+    assert binding["accepted"] is True
+    assert binding["publish_request"]["branch_name"] == "feat/reddog-resident-queue-paccess-pilot"
+    assert binding["publish_request"]["draft_pr_only"] is True
+    assert binding["publish_request"]["mark_ready"] is False
+    assert binding["publish_request"]["merge"] is False
+    assert stage["decision"] == "QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT"
+    assert stage["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
+    assert stage["no_ready_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert [call[0] for call in draft_pr_runner.calls] == ["push_branch", "create_draft_pr"]
+    assert ("git", "rev-parse", "HEAD") in evidence_runner.calls
+    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+
+
 def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store(
     tmp_path: Path,
 ) -> None:
@@ -3463,6 +3603,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_SLICE_VERIFIER_REQUEST_BINDING": "1",
                 "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE": "real",
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(tmp_path / "publish_request.json"),
+                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING": "1",
                 "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
                 "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(tmp_path / "held_out_gate_request.json"),
@@ -3524,6 +3665,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["publish_request_path"] == str(
         tmp_path / "publish_request.json"
     )
+    assert mocked.call_args.kwargs["draft_pr_publish_request_binding_enabled"] is True
     assert mocked.call_args.kwargs["ratchet_request_path"] == str(
         tmp_path / "ratchet_request.json"
     )

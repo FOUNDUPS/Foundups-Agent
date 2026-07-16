@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     NEXT_QUEUE_VERIFIED_OUTCOME_RATCHET_INVOKE,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_verified_draft_pr_publish_handler import (
+    FAIL_DRAFT_PR_PUBLISH_REQUEST_BINDING_REJECTED,
     FAIL_DISPATCH_NEXT_ACTION_MISMATCH,
     FAIL_DISPATCH_STAGE_MISMATCH,
     FAIL_DRAFT_PR_RUNNER_MISSING,
@@ -28,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_verified_dra
     SLICE_VERIFIER_STAGE_KEY,
     VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY,
     build_reddog_resident_queue_verified_draft_pr_publish_stage_handler,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_draft_pr_publish_request_binding import (
+    FAIL_DRAFT_PR_PUBLISH_PLAN_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
@@ -66,6 +70,8 @@ from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_verified_draft_pr_publish_invoke import (
     FakeDraftPrRunner,
+    HEAD_SHA,
+    WORK_ORDER_ID,
     _publish_request,
     _queue_verifier_result,
 )
@@ -151,11 +157,77 @@ def _handler(
     chain_store: InMemoryResidentQueueChainResultsStore,
     publish_request: dict[str, object] | None = None,
     runner: FakeDraftPrRunner | None = None,
+    work_order_resolver: object | None = None,
+    draft_pr_publish_request_binding_enabled: bool = False,
 ):
     return build_reddog_resident_queue_verified_draft_pr_publish_stage_handler(
         chain_results_store=chain_store,
         publish_request=publish_request if publish_request is not None else _publish_request(),
         runner=runner if runner is not None else FakeDraftPrRunner(),
+        work_order_resolver=work_order_resolver,
+        draft_pr_publish_request_binding_enabled=draft_pr_publish_request_binding_enabled,
+    )
+
+
+class _Resolver:
+    def __init__(self, work_order: dict[str, object]) -> None:
+        self.work_order = work_order
+        self.calls: list[dict[str, object | None]] = []
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: str | None,
+        selected_slice: str | None,
+    ) -> dict[str, object]:
+        self.calls.append(
+            {
+                "work_order_id": work_order_id,
+                "queue_item_id": queue_item_id,
+                "selected_slice": selected_slice,
+            }
+        )
+        if work_order_id != self.work_order.get("work_order_id"):
+            return {}
+        return self.work_order
+
+
+def _draft_pr_publish_plan(**overrides: object) -> dict[str, object]:
+    payload = {
+        "branch_name": "feat/reddog-queue-draft-pr-publish",
+        "base_branch": "main",
+        "pr_title": "feat(reddog): verified queue draft pr publish",
+        "pr_body": "Verified by WRE autonomous slice verifier.",
+        "draft_pr_only": True,
+        "mark_ready": False,
+        "merge": False,
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _work_order(**overrides: object) -> dict[str, object]:
+    payload = {
+        "work_order_id": WORK_ORDER_ID,
+        "base_ref": "main",
+        "draft_pr_publish_plan": _draft_pr_publish_plan(),
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _binding_store(tmp_path: Path, **stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
+    worktree = tmp_path / "worktree"
+    worktree.mkdir(exist_ok=True)
+    return _seeded_store(
+        worktree_create={
+            "decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT,
+            "worktree_create_result": {
+                "worktree_path": str(worktree),
+            },
+        },
+        **stage_overrides,
     )
 
 
@@ -190,6 +262,77 @@ def test_dispatcher_records_draft_pr_publish_and_advances_to_outcome_ratchet() -
     assert stage["no_reward_settlement_performed"] is True
     assert stage["no_holoindex_reindex_performed"] is True
     assert [call[0] for call in runner.calls] == ["push_branch", "create_draft_pr"]
+
+
+def test_handler_derives_publish_request_from_resident_queue_chain(tmp_path: Path) -> None:
+    chain_store = _binding_store(tmp_path)
+    runner = FakeDraftPrRunner()
+    resolver = _Resolver(_work_order())
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                publish_request={},
+                runner=runner,
+                work_order_resolver=resolver,
+                draft_pr_publish_request_binding_enabled=True,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is True
+    stage = chain_store.load()["stage_results"][VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY]
+    binding = stage["draft_pr_publish_request_binding_result"]
+    assert binding["accepted"] is True
+    request = binding["publish_request"]
+    assert request["work_order_id"] == WORK_ORDER_ID
+    assert request["pre_publish_branch_head_sha"] == HEAD_SHA
+    assert request["draft_pr_only"] is True
+    assert request["mark_ready"] is False
+    assert request["merge"] is False
+    assert stage["decision"] == QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT
+    assert stage["publish_result"]["decision"] == VERIFIED_DRAFT_PR_PUBLISH_ACCEPT
+    assert [call[0] for call in runner.calls] == ["push_branch", "create_draft_pr"]
+    assert resolver.calls == [
+        {
+            "work_order_id": WORK_ORDER_ID,
+            "queue_item_id": "queue-1",
+            "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+        }
+    ]
+
+
+def test_handler_rejects_binding_failure_before_draft_pr_runner(tmp_path: Path) -> None:
+    chain_store = _binding_store(tmp_path)
+    runner = FakeDraftPrRunner()
+    handler = _handler(
+        chain_store=chain_store,
+        publish_request={},
+        runner=runner,
+        work_order_resolver=_Resolver(_work_order(draft_pr_publish_plan={})),
+        draft_pr_publish_request_binding_enabled=True,
+    )
+    request = ResidentQueueStageDispatchRequest(
+        stage_key=VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY,
+        next_action=NEXT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_INVOKE,
+        queue_item_id="queue-1",
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        plan_id="plan-1",
+        accepted_stages=(),
+    )
+
+    result = dict(handler(request))
+
+    assert result["decision"] == QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_REJECT
+    assert FAIL_DRAFT_PR_PUBLISH_REQUEST_BINDING_REJECTED in result["rejection_reasons"]
+    assert FAIL_DRAFT_PR_PUBLISH_PLAN_MISSING in result["rejection_reasons"]
+    assert result["draft_pr_publish_request_binding_result"]["accepted"] is False
+    assert runner.calls == []
 
 
 def test_missing_slice_verifier_stage_rejects_direct_handler_call() -> None:
