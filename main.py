@@ -1343,6 +1343,8 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
     Env:
         REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH=1          Enable check (default ON)
         REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_ENFORCED=0 Block startup if not ready
+        REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY=0           Materialize PR/W10 source records
+        REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY_ENFORCED=0  Block startup if supply fails
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Output/read path for snapshot JSON
         REDDOG_ACTIVE_SLICE_LEDGER_PATH                    Optional active ledger source
         REDDOG_WORK_LEDGER_JSON_PATH                       Optional work ledger source
@@ -1367,15 +1369,65 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
             run_reddog_main_authoritative_work_state_refresh_bootstrap,
         )
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_flag_enabled,
             resident_queue_runtime_file_path,
         )
+
+        github_pr_records_path = resident_queue_runtime_file_path(
+            os.environ,
+            repo_root,
+            "REDDOG_GITHUB_PR_RECORDS_PATH",
+        )
+        w10_report_records_path = resident_queue_runtime_file_path(
+            os.environ,
+            repo_root,
+            "REDDOG_W10_REPORT_RECORDS_PATH",
+        )
+        source_supply_requested = resident_queue_runtime_flag_enabled(
+            os.environ,
+            "REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY",
+        )
+        source_supply_enforced = os.getenv("REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY_ENFORCED", "0") != "0"
+        if source_supply_requested:
+            from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_source_record_supply_bootstrap import (
+                run_reddog_authoritative_work_state_source_record_supply_bootstrap,
+            )
+
+            supply = run_reddog_authoritative_work_state_source_record_supply_bootstrap(
+                repo_root=repo_root,
+                github_pr_records_output_path=github_pr_records_path,
+                w10_report_records_output_path=w10_report_records_path,
+                work_ledger_json_path=os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "") or None,
+                github_repo_full_name=os.getenv("REDDOG_GITHUB_REPO_FULL_NAME", "FOUNDUPS/Foundups-Agent"),
+                github_state=os.getenv("REDDOG_GITHUB_PR_SOURCE_STATE", "open"),
+            )
+            supply_status = "PASS" if supply.accepted else "WARN"
+            supply_reasons = ",".join(supply.rejection_reasons) if supply.rejection_reasons else "(none)"
+            print(
+                f"[REDDOG-WORK-STATE-SOURCES] preflight={supply_status} status={supply.status} "
+                f"github_records={supply.github_record_count} w10_records={supply.w10_record_count} "
+                f"reasons={supply_reasons}"
+            )
+            if supply.accepted:
+                if supply.github_pr_records_path:
+                    github_pr_records_path = supply.github_pr_records_path
+                    os.environ["REDDOG_GITHUB_PR_RECORDS_PATH"] = github_pr_records_path
+                if supply.w10_report_records_path:
+                    w10_report_records_path = supply.w10_report_records_path
+                    os.environ["REDDOG_W10_REPORT_RECORDS_PATH"] = w10_report_records_path
+            elif source_supply_enforced:
+                print(
+                    "[REDDOG-WORK-STATE-SOURCES] Startup blocked by "
+                    "REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY_ENFORCED=1"
+                )
+                return False
 
         result = run_reddog_main_authoritative_work_state_refresh_bootstrap(
             repo_root=repo_root,
             active_slice_ledger_path=os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", ""),
             work_ledger_json_path=os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", ""),
-            github_pr_records_path=os.getenv("REDDOG_GITHUB_PR_RECORDS_PATH", ""),
-            w10_report_records_path=os.getenv("REDDOG_W10_REPORT_RECORDS_PATH", ""),
+            github_pr_records_path=github_pr_records_path,
+            w10_report_records_path=w10_report_records_path,
             work_state_output_path=resident_queue_runtime_file_path(
                 os.environ,
                 repo_root,

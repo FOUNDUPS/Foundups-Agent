@@ -72,6 +72,7 @@ PROFILE_BINDING_FLAGS = frozenset(
 
 PROFILE_RUNTIME_FLAGS = frozenset(
     {
+        "REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY",
         "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF",
         "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY",
         "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY",
@@ -84,6 +85,8 @@ PROFILE_RUNTIME_FLAGS = frozenset(
 
 PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "authoritative_work_state.json",
+    "REDDOG_GITHUB_PR_RECORDS_PATH": "github_pr_records.json",
+    "REDDOG_W10_REPORT_RECORDS_PATH": "w10_report_records.json",
     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": "architect_determination.json",
     "REDDOG_MODEL_SELECTION_RECEIPT_PATH": "model_selection_receipt.json",
     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": "memex_supply_receipt.json",

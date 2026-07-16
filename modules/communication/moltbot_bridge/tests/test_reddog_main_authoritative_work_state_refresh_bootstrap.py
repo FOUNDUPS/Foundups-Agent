@@ -463,6 +463,123 @@ def test_main_preflight_profile_derives_work_state_output_path(tmp_path: Path) -
     assert not (paths["repo"] / ".reddog").exists()
 
 
+def test_main_preflight_profile_runs_source_record_supply_before_refresh(tmp_path: Path) -> None:
+    import main
+
+    paths = _write_sources(tmp_path)
+    runtime_root = tmp_path / "resident-runtime"
+    github_path = runtime_root / "github_pr_records.json"
+    w10_path = runtime_root / "w10_report_records.json"
+
+    source_result = type(
+        "SourceResult",
+        (),
+        {
+            "accepted": True,
+            "status": "SOURCE_RECORD_SUPPLY_APPLIED",
+            "github_pr_records_path": str(github_path),
+            "w10_report_records_path": str(w10_path),
+            "receipt_id": "sha256:source-records",
+            "github_record_count": 1,
+            "w10_record_count": 1,
+            "rejection_reasons": (),
+        },
+    )()
+    refresh_result = type(
+        "RefreshResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_WORK_STATE_BOOTSTRAP_APPLIED,
+            "work_state_path": str(runtime_root / "authoritative_work_state.json"),
+            "refresh_id": "refresh",
+            "committed_revision": "revision",
+            "selected_slice": SLICE_ID,
+            "queue_item_count": 1,
+            "rejection_reasons": (),
+            "latest_decision_attempted": False,
+            "latest_decision_next_slice": None,
+        },
+    )()
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_source_record_supply_bootstrap.run_reddog_authoritative_work_state_source_record_supply_bootstrap",
+        return_value=source_result,
+    ) as supply_mock:
+        with patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_authoritative_work_state_refresh_bootstrap.run_reddog_main_authoritative_work_state_refresh_bootstrap",
+            return_value=refresh_result,
+        ) as refresh_mock:
+            with patch.dict(
+                "os.environ",
+                {
+                    "REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH": "1",
+                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_ACTIVE_SLICE_LEDGER_PATH": str(paths["active"]),
+                    "REDDOG_WORK_LEDGER_JSON_PATH": str(paths["ledger"]),
+                },
+                clear=True,
+            ):
+                assert main.run_reddog_authoritative_work_state_refresh_preflight(paths["repo"]) is True
+
+    assert supply_mock.called is True
+    assert supply_mock.call_args.kwargs["github_pr_records_output_path"] == str(github_path)
+    assert supply_mock.call_args.kwargs["w10_report_records_output_path"] == str(w10_path)
+    assert refresh_mock.call_args.kwargs["github_pr_records_path"] == str(github_path)
+    assert refresh_mock.call_args.kwargs["w10_report_records_path"] == str(w10_path)
+
+
+def test_main_preflight_explicit_zero_disables_profile_source_supply(tmp_path: Path) -> None:
+    import main
+
+    paths = _write_sources(tmp_path)
+    runtime_root = tmp_path / "resident-runtime"
+    refresh_result = type(
+        "RefreshResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_WORK_STATE_BOOTSTRAP_APPLIED,
+            "work_state_path": str(runtime_root / "authoritative_work_state.json"),
+            "refresh_id": "refresh",
+            "committed_revision": "revision",
+            "selected_slice": SLICE_ID,
+            "queue_item_count": 1,
+            "rejection_reasons": (),
+            "latest_decision_attempted": False,
+            "latest_decision_next_slice": None,
+        },
+    )()
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_source_record_supply_bootstrap.run_reddog_authoritative_work_state_source_record_supply_bootstrap",
+        side_effect=AssertionError("source supply should not run"),
+    ):
+        with patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_authoritative_work_state_refresh_bootstrap.run_reddog_main_authoritative_work_state_refresh_bootstrap",
+            return_value=refresh_result,
+        ) as refresh_mock:
+            with patch.dict(
+                "os.environ",
+                {
+                    "REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH": "1",
+                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY": "0",
+                    "REDDOG_ACTIVE_SLICE_LEDGER_PATH": str(paths["active"]),
+                    "REDDOG_WORK_LEDGER_JSON_PATH": str(paths["ledger"]),
+                    "REDDOG_GITHUB_PR_RECORDS_PATH": str(paths["github"]),
+                    "REDDOG_W10_REPORT_RECORDS_PATH": str(paths["w10"]),
+                },
+                clear=True,
+            ):
+                assert main.run_reddog_authoritative_work_state_refresh_preflight(paths["repo"]) is True
+
+    assert refresh_mock.call_args.kwargs["github_pr_records_path"] == str(paths["github"])
+    assert refresh_mock.call_args.kwargs["w10_report_records_path"] == str(paths["w10"])
+
+
 def test_main_preflight_enables_latest_decision_bridge_with_openclaw_auto_tasks(tmp_path: Path) -> None:
     import main
 
