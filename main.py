@@ -1670,6 +1670,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_draft_pr_runner_mode,
             resident_queue_evidence_command_runner_mode,
             resident_queue_materializer_mode,
+            resident_queue_outcome_ratchet_store_path,
             resident_queue_worktree_runner_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
@@ -1721,7 +1722,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             evidence_producer_request_path=os.getenv("REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH", "") or None,
             publish_request_path=os.getenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", "") or None,
             ratchet_request_path=os.getenv("REDDOG_OUTCOME_RATCHET_REQUEST_PATH", "") or None,
-            outcome_ratchet_store_path=os.getenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", "") or None,
+            outcome_ratchet_store_path=resident_queue_outcome_ratchet_store_path(
+                os.environ,
+                repo_root,
+            )
+            or None,
             held_out_gate_request_path=os.getenv("REDDOG_HELD_OUT_GATE_REQUEST_PATH", "") or None,
             admission_request_path=os.getenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH", "") or None,
             authority_state_path=os.getenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", "") or None,

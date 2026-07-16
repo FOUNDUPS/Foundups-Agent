@@ -13,6 +13,8 @@ reward settlement, merge authority, or HoloIndex re-indexing.
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
 from typing import Mapping
 
 
@@ -145,6 +147,27 @@ def resident_queue_evidence_command_runner_mode(env: Mapping[str, str]) -> str:
     return ""
 
 
+def resident_queue_outcome_ratchet_store_path(
+    env: Mapping[str, str],
+    repo_root: Path | str,
+) -> str:
+    """Return explicit/default verified outcome ratchet store path."""
+
+    raw = str(env.get("REDDOG_OUTCOME_RATCHET_STORE_PATH") or "").strip()
+    if raw:
+        return raw
+    if resident_queue_binding_profile(env) != PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR:
+        return ""
+    root = Path(repo_root).resolve()
+    return str(
+        root.parent
+        / ".reddog"
+        / "outcome_ratchet"
+        / _repo_slug(root)
+        / "verified_outcomes.jsonl"
+    )
+
+
 def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     """Return explicit/default work-order materializer mode for the profile."""
 
@@ -154,6 +177,12 @@ def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     if resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES:
         return "authority_profile"
     return ""
+
+
+def _repo_slug(root: Path) -> str:
+    raw = root.name or "repo"
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", raw).strip(".-_")
+    return slug or "repo"
 
 
 __all__ = [
@@ -171,6 +200,7 @@ __all__ = [
     "resident_queue_draft_pr_runner_mode",
     "resident_queue_evidence_command_runner_mode",
     "resident_queue_materializer_mode",
+    "resident_queue_outcome_ratchet_store_path",
     "resident_queue_runtime_flag_enabled",
     "resident_queue_worktree_runner_mode",
 ]

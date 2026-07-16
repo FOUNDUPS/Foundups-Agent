@@ -3798,6 +3798,7 @@ def test_main_serial_loop_preflight_worktree_profile_derives_model_and_worktree_
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["evidence_command_runner_mode"] is None
+    assert mocked.call_args.kwargs["outcome_ratchet_store_path"] is None
 
 
 def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
@@ -3841,6 +3842,13 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
+    assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
+        REPO_ROOT.resolve().parent
+        / ".reddog"
+        / "outcome_ratchet"
+        / REPO_ROOT.resolve().name
+        / "verified_outcomes.jsonl"
+    )
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 91
 
