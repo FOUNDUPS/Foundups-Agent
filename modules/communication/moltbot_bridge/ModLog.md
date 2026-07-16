@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a bounded authority-profile source supplier that validates an explicit
+  authority seed against a token-verified principal record and fresh permission
+  snapshot, then writes one profile-source JSON artifact outside the source
+  repository.
+- The supplier enforces FoundUp-scoped allowed/denied paths, principal
+  repo/FoundUp scope, permission snapshot freshness/grants, high-authority
+  co-sign evidence, HoloIndex no-gap evidence, non-reused principal/RedDog
+  public keys, and outside-repo output.
+- Boundary remains constrained: no signing, signature verification, signer
+  state mutation, work-state mutation, worker spawn, shell, worktree,
+  OpenClaw enqueue, Hermes dispatch, PatternMemory write, source mutation, or
+  HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_RESIDENT_CYCLE_FIX_PROMOTION_ARTIFACT_HANDOFF_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
