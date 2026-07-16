@@ -58,6 +58,22 @@ context window, modalities, supported parameters, rough cost metadata, task
 families, and promotion state. `ModelCatalogSnapshot` binds cards and rejected
 records to a deterministic `snapshot_id`.
 
+#### Model Intelligence Selection
+
+```python
+select_models_for_task(snapshot, requirements) -> ModelSelectionReceipt
+```
+
+`ModelTaskRequirements` describes task family, single/panel mode, evaluation vs
+production purpose, required modalities, context size, tool/structured/reasoning
+requirements, cost ceilings, provider allow/deny sets, candidate count, and
+minimum verifier pass rate.
+
+`ModelSelectionReceipt` binds the selected model IDs, ranked candidates,
+rejection reasons, catalog snapshot ID, and requirements. Evaluation mode may
+select candidates for benchmarking. Production mode requires measured champion
+evidence and fails closed for unbenchmarked candidates.
+
 ## Configuration
 
 ### Environment Variables
