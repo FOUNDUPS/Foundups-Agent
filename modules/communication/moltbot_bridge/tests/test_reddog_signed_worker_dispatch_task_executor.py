@@ -44,12 +44,16 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _principals,
     _profile as _bootstrap_profile,
     _repo,
+    _slice_verifier_request,
     _snapshot as _bootstrap_snapshot,
     _snapshots,
     _valve_environment,
     _work_order,
     _write_runtime_json,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
+)
+from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
+    AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
 )
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
@@ -495,6 +499,130 @@ def test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifac
     assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith(
         "# Resident Queue Pilot"
     )
+    assert not (repo / PILOT_ARTIFACT).exists()
+
+
+def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _bootstrap_profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {str(work_order["work_order_id"]): work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+
+    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        now_iso=BOOTSTRAP_NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=10,
+    )
+    assert seed.accepted is True
+    assert seed.dispatched_stages[-1] == "bounded_worker_pilot"
+    assert (worktree / PILOT_ARTIFACT).exists()
+
+    task_id = _publish_agentdb_task()
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
+    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
+    monkeypatch.setenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", str(verifier))
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
+
+    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["task_id"] == task_id
+    assert result["worker_runtime"] == "openclaw"
+    assert result["capability"] == "candidate_queue_review"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["slice_verifier"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT"
+    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
+    assert stage["verifier_result"]["receipt"]["changed_paths"] == [PILOT_ARTIFACT]
+    assert stage["no_command_execution_performed"] is True
+    assert stage["no_github_call_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_pattern_memory_write_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+    assert (worktree / PILOT_ARTIFACT).exists()
     assert not (repo / PILOT_ARTIFACT).exists()
 
 

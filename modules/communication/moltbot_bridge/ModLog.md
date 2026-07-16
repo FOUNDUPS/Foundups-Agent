@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_SLICE_VERIFIER_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an end-to-end regression proving an AgentDB signed OpenClaw
+  `candidate_queue_review` task can be claimed, routed through the real
+  environment-bound queue-loop runner, and advance an already materialized
+  bounded artifact into the independent slice-verifier stage.
+- Verified the env-bound runner can consume an outside-repo verifier request
+  and persist a slice-verifier receipt without shell execution, GitHub calls,
+  PR publication, merge, PatternMemory write, HoloIndex re-index, or reward
+  settlement.
+- Boundary remains explicit: this slice adds no live model call, no source
+  checkout write, no OpenClaw enqueue expansion, no Hermes dispatch, and no
+  runtime authority widening.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_BOUNDED_ARTIFACT_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
