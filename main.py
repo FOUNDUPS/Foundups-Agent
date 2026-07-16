@@ -1490,6 +1490,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo promoted profile JSON
         REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
         REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
+        REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=0             Materialize model selection receipt from signed evidence
+        REDDOG_MODEL_CATALOG_SNAPSHOT_PATH                   Outside-repo model catalog snapshot JSON
+        REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
+        REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
+        REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
         REDDOG_RESIDENT_ARCHITECT_INTENT_ID                  Intent ID for the determined resident cycle
     """
 
@@ -1565,6 +1570,49 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
                 os.environ["REDDOG_MEMEX_SUPPLY_RECEIPT_PATH"] = memex_supply_receipt_path
         elif handoff_enforced:
             print("[REDDOG-FIX-HANDOFF] Startup blocked by REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_ENFORCED=1")
+            return False
+
+    model_supply_requested = os.getenv("REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY", "0") == "1"
+    model_supply_enforced = os.getenv("REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
+    if model_supply_requested:
+        try:
+            from modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply_bootstrap import (
+                run_reddog_model_selection_artifact_supply_bootstrap,
+            )
+
+            raw_now = os.getenv("REDDOG_MODEL_SELECTION_EVIDENCE_NOW_EPOCH", "").strip()
+            model_supply = run_reddog_model_selection_artifact_supply_bootstrap(
+                repo_root=repo_root,
+                catalog_snapshot_path=os.getenv("REDDOG_MODEL_CATALOG_SNAPSHOT_PATH", "") or None,
+                evidence_bundle_path=os.getenv("REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH", "") or None,
+                requirements_path=os.getenv("REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH", "") or None,
+                trusted_keys_path=os.getenv("REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH", "") or None,
+                output_path=model_selection_receipt_path,
+                signature_verifier_backend=os.getenv(
+                    "REDDOG_MODEL_EVIDENCE_SIGNATURE_VERIFIER_BACKEND",
+                    "ed25519",
+                ),
+                now_epoch=(int(raw_now) if raw_now else None),
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-MODEL-SELECTION] Startup artifact supply failed: {exc}")
+            if model_supply_enforced:
+                print(f"[REDDOG-MODEL-SELECTION] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-MODEL-SELECTION] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        model_status = "PASS" if model_supply.accepted else "WARN"
+        model_reasons = ",".join(model_supply.rejection_reasons) if model_supply.rejection_reasons else "(none)"
+        print(
+            f"[REDDOG-MODEL-SELECTION] preflight={model_status} status={model_supply.status} "
+            f"receipt={model_supply.model_selection_receipt_id or '(none)'} reasons={model_reasons}"
+        )
+        if model_supply.accepted and model_supply.output_path:
+            model_selection_receipt_path = model_supply.output_path
+            os.environ["REDDOG_MODEL_SELECTION_RECEIPT_PATH"] = model_selection_receipt_path
+        elif model_supply_enforced:
+            print("[REDDOG-MODEL-SELECTION] Startup blocked by REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED=1")
             return False
 
     required_inputs_present = all(

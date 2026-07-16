@@ -128,6 +128,14 @@ write artifacts inside the repository. It does not call providers, run
 benchmarks, execute commands, persist telemetry, re-index HoloIndex, bind
 runtime model defaults, mutate `extension.js`, or dispatch workers.
 
+`src/model_selection_artifact_supply_bootstrap.py` is the optional `main.py`
+startup adapter for that supplier. When explicitly enabled, it reads the model
+catalog snapshot, signed production-evidence bundle, selection requirements and
+trusted public-key records from outside-repo runtime files, then writes the
+selection receipt path consumed by RedDog FIX promotion. The adapter defaults to
+the existing Ed25519 public verifier and fails closed when trusted keys or
+signed evidence are absent.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway
