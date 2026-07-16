@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Protocol, Sequence
 from urllib.parse import urlparse
@@ -36,6 +37,7 @@ DEFAULT_APPROVED_DOMAINS = (
     "nber.org",
 )
 DEFAULT_MAX_SNAPSHOT_AGE_S = 7 * 24 * 60 * 60
+MAX_EXTERNAL_CONTENT_EXCERPT_CHARS = 2_400
 
 PROMPT_INJECTION_MARKERS = (
     "ignore previous instructions",
@@ -73,6 +75,7 @@ class GroundedResearchTarget:
     content_digest: Optional[str]
     freshness_receipt_digest: Optional[str]
     provenance_refs: List[str]
+    content_excerpt: str
     finding_status: str
     prompt_injection_markers_detected: bool
     untrusted_data_only: bool
@@ -250,6 +253,21 @@ def _prompt_injection_detected(snapshot: Mapping[str, Any]) -> bool:
     return any(marker in body for marker in PROMPT_INJECTION_MARKERS)
 
 
+def _content_excerpt(snapshot: Mapping[str, Any]) -> str:
+    body = str(snapshot.get("content_text") or snapshot.get("content") or "")
+    if not body:
+        return ""
+    sanitized = body
+    for marker in PROMPT_INJECTION_MARKERS:
+        sanitized = re.sub(
+            re.escape(marker),
+            "[external_prompt_injection_marker_removed]",
+            sanitized,
+            flags=re.IGNORECASE,
+        )
+    return sanitized[:MAX_EXTERNAL_CONTENT_EXCERPT_CHARS]
+
+
 def _snapshot_valid(
     snapshot: Mapping[str, Any],
     *,
@@ -343,6 +361,7 @@ def ground_reddog_holoindex_first_external_research(
         content_digest: Optional[str] = None
         freshness_digest: Optional[str] = None
         provenance: List[str] = []
+        content_excerpt = ""
         finding_status = "internal_memory"
         grounding_channel = "holoindex"
         prompt_injection = False
@@ -376,6 +395,7 @@ def ground_reddog_holoindex_first_external_research(
                     snapshot.get("freshness_receipt_digest") or snapshot_digest
                 )
                 provenance = _provenance_refs(snapshot)
+                content_excerpt = _content_excerpt(snapshot)
                 finding_status = str(snapshot.get("finding_status") or "unverified")
                 prompt_injection = _prompt_injection_detected(snapshot)
                 grounding_channel = "external_snapshot"
@@ -402,6 +422,7 @@ def ground_reddog_holoindex_first_external_research(
                 content_digest=content_digest,
                 freshness_receipt_digest=freshness_digest,
                 provenance_refs=provenance,
+                content_excerpt=content_excerpt,
                 finding_status=finding_status,
                 prompt_injection_markers_detected=prompt_injection,
                 untrusted_data_only=True,
