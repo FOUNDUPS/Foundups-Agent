@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MEMEX_CONTENT_BEARING_EVIDENCE_BUNDLE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
+
+- Updated the model-backed read-only audit worker to attach a content-bearing
+  `memex_evidence_bundle` whenever an assignment-bound Memex query receipt is
+  accepted.
+- The model context now receives bounded Memex record text with a clear trust
+  boundary that Memex memory is not current repository proof.
+- Worker receipts bind the `memex_evidence_bundle_id` beside the Memex query
+  receipt id for replayable review.
+- Existing output validation still permits only repository file evidence refs
+  in findings; typed Memex citation policy remains the next slice.
+- Boundary remains read-only: no Memex supplier, citation-policy expansion,
+  worker spawn, OpenClaw enqueue, Hermes dispatch, repo mutation, HoloIndex
+  re-index, or authority promotion.
+
 ## 2026-07-16: REDDOG_MEMEX_SNAPSHOT_ASSIGNMENT_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97

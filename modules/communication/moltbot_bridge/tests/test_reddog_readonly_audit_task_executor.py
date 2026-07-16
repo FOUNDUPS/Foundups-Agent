@@ -535,10 +535,17 @@ def test_model_backed_includes_optional_memex_query_receipt(tmp_path: Path) -> N
     assert memex_receipt["freshness_generation_id"] == "sha256:memex-generation"
     assert memex_receipt["hits"]
     assert memex_receipt["hits"][0]["path"].startswith("memex://sha256:brain-view/")
+    memex_bundle = model_context["memex_evidence_bundle"]
+    assert memex_bundle["schema_version"] == "holoindex_memex_content_evidence_bundle.v1"
+    assert memex_bundle["projection_receipt_id"] == memex_receipt["freshness_receipt_digest"]
+    assert memex_bundle["records"]
+    assert memex_bundle["records"][0]["text"]
+    assert memex_bundle["records"][0]["trust_boundary"] == "memex_memory_not_current_code_proof"
     assert result.report is not None
     worker_receipt = result.report["worker_receipt"]
     assert worker_receipt["memex_query_receipt"]["source_class"] == "memex"
     assert worker_receipt["memex_query_receipt_id"] == memex_receipt["receipt_id"]
+    assert worker_receipt["memex_evidence_bundle_id"] == memex_bundle["bundle_id"]
     assert worker_receipt["no_side_effect_attestations"]["no_holoindex_reindex_performed"] is True
 
 
