@@ -2,7 +2,7 @@
     "name":  "foundups-fusion-worker",
     "displayName":  "Foundups\u00aeAgent",
     "description":  "Open a WSP_00/WSP_97 RedDog Architect advisory worker in a Cursor editor webview tab.",
-    "version":  "0.3.67",
+    "version":  "0.3.68",
     "publisher":  "foundups",
     "icon":  "icon.png",
     "engines":  {
@@ -56,16 +56,21 @@
                                                                                                   "description":  "OpenRouter model slug for the principal/synthesis worker."
                                                                                               },
                                                                  "foundupsFusion.panelModels":  {
-                                                                                                    "type":  "array",
-                                                                                                    "default":  [
-                                                                                                                    "deepseek/deepseek-v4-pro",
-                                                                                                                    "moonshotai/kimi-k2.7-code"
-                                                                                                                ],
-                                                                                                    "items":  {
-                                                                                                                  "type":  "string"
-                                                                                                              },
-                                                                                                    "description":  "OpenRouter model slugs for panel critics. The extension uses up to four."
-                                                                                                }
+                                                                                                     "type":  "array",
+                                                                                                     "default":  [
+                                                                                                                     "deepseek/deepseek-v4-pro",
+                                                                                                                     "moonshotai/kimi-k2.7-code"
+                                                                                                                 ],
+                                                                                                     "items":  {
+                                                                                                                   "type":  "string"
+                                                                                                               },
+                                                                                                     "description":  "OpenRouter model slugs for panel critics. The extension uses up to four."
+                                                                                                },
+                                                                 "foundupsFusion.enableResidentArchitectSession":  {
+                                                                                                                       "type":  "boolean",
+                                                                                                                       "default":  false,
+                                                                                                                       "description":  "Explicitly run the resident RedDog read-only audit/research/architect decision cycle after local runtime gates pass. Default false."
+                                                                                                 }
                                                              }
                                           }
                     },
