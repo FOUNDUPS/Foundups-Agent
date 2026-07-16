@@ -1,5 +1,35 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Model Intelligence Canonical Catalog Runtime
+
+**Who:** 0102 Codex
+**Type:** Runtime Foundation
+**Slice:** MODEL_INTELLIGENCE_CANONICAL_CATALOG_RUNTIME_PHASE1
+
+**What:** Added a canonical model catalog snapshot layer for RedDog model intelligence.
+
+**Why:** RedDog must select models by measured task fitness, not by permanent hardcoded
+GLM/DeepSeek/Kimi or static gateway defaults. This slice creates the receipt-bound
+catalog evidence layer that later selection, benchmarking, and champion/challenger
+promotion can consume.
+
+**Files:**
+- `src/model_intelligence_catalog.py` - model capability cards, catalog snapshot receipts,
+  static registry normalization, OpenRouter-style catalog normalization, and local role
+  normalization.
+- `tests/test_model_intelligence_catalog.py` - deterministic digest, malformed record,
+  local path privacy, and no-network/no-command guard tests.
+
+**Truth Boundary:**
+- IMPLEMENTED: immutable catalog snapshot receipts and normalized capability cards.
+- IMPLEMENTED: "latest/provider catalog" evidence remains `candidate`, never `champion`.
+- NOT IMPLEMENTED: task selection receipts, benchmark harness, fusion panel optimization,
+  RedDog bridge binding, AutoResearch promotion, or provider network fetch.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-02-17] - Full Model Registry Refresh (Feb 2026 Current)
 
 **Who:** 0102
