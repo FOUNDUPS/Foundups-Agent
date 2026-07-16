@@ -4,9 +4,15 @@ from __future__ import annotations
 
 import ast
 import json
+import socket
+import tempfile
+import threading
+import uuid
 from pathlib import Path
 from typing import Mapping
 from unittest.mock import patch
+
+import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
@@ -39,9 +45,14 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
 )
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_service import (
+    SIGNER_SOCKET_SERVICE_SERVED,
+    serve_reddog_isolated_signer_socket_once,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
     RuntimeRejectCode,
+    SigningResponse,
     public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
@@ -753,6 +764,31 @@ class _AuditMacBuilder:
         return "audit:" + request.payload_digest
 
 
+class _StaticSocketPeerAttestor:
+    def attest(self, connection) -> SignerPeerAttestation:
+        return SignerPeerAttestation(
+            peer_principal_id="github:mjtrout",
+            transport="unix_socket",
+            credential_source="test_peer_credential",
+            boundary_attested=True,
+        )
+
+
+class _SwitchingSignerBackend:
+    def __init__(self, backends: Mapping[str, Ed25519SignerBackend]) -> None:
+        self._backends = dict(backends)
+
+    def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
+        backend = self._backends.get(request.signer_public_key)
+        if backend is None:
+            return SigningResponse(
+                accepted=False,
+                rejection_code=RuntimeRejectCode.SIGNER_NOT_CONFIGURED,
+                no_secret_material_returned=True,
+            )
+        return backend.sign(request, peer)
+
+
 class _FakeWorktreeRunner:
     def __init__(self, *, ok: bool = True) -> None:
         self.ok = ok
@@ -904,6 +940,50 @@ def _ed25519_signing_material():
         return json.dumps(response.to_dict(), sort_keys=True).encode("utf-8")
 
     return principal_public, reddog_public, connector
+
+
+def _ed25519_signing_material_with_socket_backend():
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    principal_key = Ed25519PrivateKey.generate()
+    reddog_key = Ed25519PrivateKey.generate()
+    principal_public = encode_ed25519_public_key(
+        principal_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    reddog_public = encode_ed25519_public_key(
+        reddog_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+    return (
+        principal_public,
+        reddog_public,
+        _SwitchingSignerBackend(
+            {
+                principal_public: Ed25519SignerBackend(
+                    private_key=principal_key,
+                    public_key=principal_public,
+                    key_epoch="epoch-1",
+                    audit_mac_builder=_AuditMacBuilder(),
+                ),
+                reddog_public: Ed25519SignerBackend(
+                    private_key=reddog_key,
+                    public_key=reddog_public,
+                    key_epoch="epoch-1",
+                    audit_mac_builder=_AuditMacBuilder(),
+                ),
+            }
+        ),
+    )
+
+
+def _outside_repo_socket_path() -> Path:
+    return Path(tempfile.gettempdir()) / f"rdog-{uuid.uuid4().hex}.sock"
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -1271,6 +1351,97 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
     assert verification["verification_result"]["accepted"] is True
     authority = json.loads(authority_state.read_text(encoding="utf-8"))
     assert authority["verified_work_authority_nonces"] == ["workauth-nonce-0001"]
+
+
+def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
+    tmp_path: Path,
+) -> None:
+    if not hasattr(socket, "AF_UNIX"):
+        pytest.skip("AF_UNIX sockets are unavailable in this Python build")
+
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, backend = _ed25519_signing_material_with_socket_backend()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = _outside_repo_socket_path()
+    ready = threading.Event()
+    service_result: dict[str, object] = {}
+
+    def serve_once() -> None:
+        service_result["result"] = serve_reddog_isolated_signer_socket_once(
+            repo_root=repo,
+            socket_path=socket_path,
+            backend=backend,
+            peer_attestor=_StaticSocketPeerAttestor(),
+            timeout_s=5.0,
+            ready_callback=ready.set,
+        )
+
+    thread = threading.Thread(target=serve_once, daemon=True)
+    thread.start()
+    assert ready.wait(5.0)
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=3,
+    )
+    thread.join(5.0)
+
+    assert thread.is_alive() is False
+    served = service_result["result"]
+    assert served.accepted is True
+    assert served.status == SIGNER_SOCKET_SERVICE_SERVED
+    assert served.request_handled is True
+    assert served.socket_removed is True
+    assert served.no_private_key_loaded is True
+    assert served.no_repo_mutation_performed is True
+    assert served.no_openclaw_enqueue_performed is True
+    assert served.no_holoindex_reindex_performed is True
+
+    assert result.accepted is True
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
+    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert result.steps_run == 3
+    assert result.dispatched_stages == (
+        "authority_request",
+        "authority_runtime",
+        "authority_verification",
+    )
+    assert result.next_action == "RUN_QUEUE_SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN"
+    assert result.no_signature_verification_performed is False
+    assert result.no_worktree_created is True
+    assert result.no_shell_command_executed is True
+    assert result.no_openclaw_enqueue_performed is True
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    runtime = stored["stage_results"]["authority_runtime"]
+    assert runtime["decision"] == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    verification = stored["stage_results"]["authority_verification"]
+    assert verification["decision"] == "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
+    assert verification["verification_result"]["accepted"] is True
+    authority = json.loads(authority_state.read_text(encoding="utf-8"))
+    assert authority["verified_work_authority_nonces"] == ["workauth-nonce-0001"]
+    assert not socket_path.exists()
 
 
 def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_inputs(
