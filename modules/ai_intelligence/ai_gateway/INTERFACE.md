@@ -207,6 +207,25 @@ crypto signing library. Nonces are consumed only when admission explicitly
 requests it. Downstream selection and runtime checks validate immutable verified
 evidence and do not consume single-use nonces again.
 
+#### RedDog Model Selection Artifact Supply
+
+```python
+run_reddog_model_selection_artifact_supply(...) -> ModelSelectionArtifactSupplyResult
+```
+
+The supplier rehydrates a catalog snapshot, verifies serialized signed
+benchmark/promotion evidence into `VerifiedModelProductionEvidence`, runs
+production model selection, and atomically writes one `ModelSelectionReceipt`
+JSON artifact outside the repository. It is intended for the resident RedDog
+architect FIX promotion bridge, where the promotion layer expects a file path
+rather than an in-memory object.
+
+Evaluation requirements, raw serialized evidence without a key resolver and
+signature verifier, rejected model selections, missing output paths, and
+repository-internal output paths fail closed. The API does not call providers,
+run benchmarks, execute commands, persist telemetry, re-index HoloIndex, bind
+runtime defaults, mutate the extension, dispatch workers, or write PatternMemory.
+
 ## Configuration
 
 ### Environment Variables

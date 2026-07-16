@@ -113,6 +113,21 @@ verification. Runtime binding also requires that verified object before a bridge
 payload can be emitted. Single-model chains can pass; panel runtime binding is
 still deferred until topology-bound panel evidence is signed and verified.
 
+## RedDog Model Selection Artifact Supply
+
+`src/model_selection_artifact_supply.py` materializes a production
+`ModelSelectionReceipt` JSON artifact from a model catalog snapshot and signed
+benchmark/promotion evidence. It is a bounded bridge for RedDog architect FIX
+promotion: the resident cycle can write the receipt path expected by the
+promotion bridge without calling models or trusting raw production-evidence
+mappings.
+
+The supplier verifies serialized evidence through the signed-evidence gate
+before production selection, rejects non-production requirements, and refuses to
+write artifacts inside the repository. It does not call providers, run
+benchmarks, execute commands, persist telemetry, re-index HoloIndex, bind
+runtime model defaults, mutate `extension.js`, or dispatch workers.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway

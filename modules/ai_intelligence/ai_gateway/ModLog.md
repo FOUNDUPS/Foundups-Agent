@@ -1,5 +1,42 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - RedDog Model Selection Artifact Supply
+
+**Who:** 0102 Codex
+**Type:** Runtime Artifact Bridge
+**Slice:** REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_PHASE1
+
+**What:** Added a bounded supplier that materializes a production
+`ModelSelectionReceipt` JSON artifact from a catalog snapshot and signed
+benchmark/promotion evidence.
+
+**Why:** The resident RedDog architect FIX promotion bridge expects a
+model-selection receipt path. After signed production-evidence hardening,
+production model selection must be created from verified evidence, not raw
+mappings or catalog-only champion fields.
+
+**Files:**
+- `src/model_selection_artifact_supply.py` - rehydrates the catalog snapshot,
+  verifies serialized signed evidence, runs production model selection, and
+  atomically writes one receipt outside the repository.
+- `tests/test_model_selection_artifact_supply.py` - serialized and typed
+  evidence acceptance, missing signature-gate rejection, non-production
+  rejection, repository-output rejection, and AST boundary tests.
+- `README.md` and `INTERFACE.md` - API and truth-boundary notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: production model-selection receipt artifact supply.
+- IMPLEMENTED: serialized evidence requires key resolution and signature
+  verification before production selection.
+- IMPLEMENTED: receipt output must live outside the repository.
+- NOT IMPLEMENTED: provider calls, benchmark execution, telemetry persistence,
+  HoloIndex re-indexing, runtime model default binding, extension mutation,
+  worker dispatch, PatternMemory writes, or panel runtime promotion.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Model Intelligence Receipt Rehydration and Signed Evidence
 
 **Who:** 0102 Codex
