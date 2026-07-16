@@ -2,9 +2,11 @@
 
 Slice: REDDOG_RESIDENT_QUEUE_BINDING_PROFILE_PHASE1
 
-The profile defaults only derivation/request-binding controls. It does not
-enable model execution, shell execution, worktree runners, draft PR publishing,
-PatternMemory writes, reward settlement, or HoloIndex re-indexing.
+The base profile defaults derivation/request-binding controls and safe
+control-plane loop flags. The fusion profile additionally selects the existing
+`foundups_fusion` artifact generator mode. Neither profile enables shell
+execution, worktree runners, draft PR publishing, PatternMemory writes, reward
+settlement, merge authority, or HoloIndex re-indexing.
 """
 
 from __future__ import annotations
@@ -14,6 +16,13 @@ from typing import Mapping
 
 ENV_REDDOG_RESIDENT_QUEUE_BINDING_PROFILE = "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"
 PROFILE_SIGNED_0102_BOUNDED_CODE = "signed_0102_bounded_code"
+PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION = "signed_0102_bounded_code_fusion"
+RESIDENT_QUEUE_PROFILES = frozenset(
+    {
+        PROFILE_SIGNED_0102_BOUNDED_CODE,
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION,
+    }
+)
 
 PROFILE_BINDING_FLAGS = frozenset(
     {
@@ -40,7 +49,7 @@ def resident_queue_binding_profile(env: Mapping[str, str]) -> str:
     """Return the normalized resident queue binding profile."""
 
     value = str(env.get(ENV_REDDOG_RESIDENT_QUEUE_BINDING_PROFILE) or "").strip().lower()
-    return value if value == PROFILE_SIGNED_0102_BOUNDED_CODE else ""
+    return value if value in RESIDENT_QUEUE_PROFILES else ""
 
 
 def resident_queue_binding_enabled(env: Mapping[str, str], env_name: str) -> bool:
@@ -55,7 +64,7 @@ def resident_queue_binding_enabled(env: Mapping[str, str], env_name: str) -> boo
         return raw == "1"
     return (
         env_name in PROFILE_BINDING_FLAGS
-        and resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE
+        and resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES
     )
 
 
@@ -73,8 +82,19 @@ def resident_queue_runtime_flag_enabled(env: Mapping[str, str], env_name: str) -
         return raw == "1"
     return (
         env_name in PROFILE_RUNTIME_FLAGS
-        and resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE
+        and resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES
     )
+
+
+def resident_queue_artifact_generator_mode(env: Mapping[str, str]) -> str:
+    """Return explicit/default artifact generator mode for the profile."""
+
+    raw = str(env.get("REDDOG_ARTIFACT_GENERATOR_MODE") or "").strip()
+    if raw:
+        return raw
+    if resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION:
+        return "foundups_fusion"
+    return ""
 
 
 def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
@@ -83,7 +103,7 @@ def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     raw = str(env.get("REDDOG_WORK_ORDER_MATERIALIZER_MODE") or "").strip()
     if raw:
         return raw
-    if resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE:
+    if resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES:
         return "authority_profile"
     return ""
 
@@ -92,7 +112,10 @@ __all__ = [
     "ENV_REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
     "PROFILE_BINDING_FLAGS",
     "PROFILE_RUNTIME_FLAGS",
+    "PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION",
     "PROFILE_SIGNED_0102_BOUNDED_CODE",
+    "RESIDENT_QUEUE_PROFILES",
+    "resident_queue_artifact_generator_mode",
     "resident_queue_binding_enabled",
     "resident_queue_binding_profile",
     "resident_queue_materializer_mode",

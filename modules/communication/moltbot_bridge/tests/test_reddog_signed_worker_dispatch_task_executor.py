@@ -851,6 +851,49 @@ def test_openclaw_claim_profile_enables_0102_bounded_code_when_stage_ready(
     assert runner.calls[0]["task_id"] == task_id
 
 
+def test_openclaw_claim_fusion_profile_supplies_artifact_generator_mode(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    task_id = _publish_agentdb_task_with_allocation(
+        _allocation(),
+        intent_id="worker_dispatch_intent_coding_worker_1",
+        role="coding_worker_1",
+        worker_runtime="0102",
+        capability="bounded_code_change",
+    )
+    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    chain = _write_runtime_json(
+        tmp_path,
+        "chain_results.json",
+        _queue_chain_results_through("worktree_create"),
+    )
+    runner = _FakeRunner()
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code_fusion")
+    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_openclaw_queue_loop_runtime_binding as binding_module,
+    )
+
+    monkeypatch.setattr(
+        binding_module,
+        "build_reddog_signed_worker_queue_loop_runner_from_env",
+        lambda *, repo_root, env: _FakeBinding(runner),
+    )
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
+
+    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["task_id"] == task_id
+    assert result["worker_runtime"] == "0102"
+    assert result["capability"] == "bounded_code_change"
+    assert runner.calls[0]["task_id"] == task_id
+
+
 def test_openclaw_claim_explicit_zero_disables_profile_0102_bounded_code(
     tmp_path: Path,
     monkeypatch,
