@@ -835,6 +835,26 @@ class _FakePatternMemoryAdmissionSink:
         return "pattern-memory-record-1"
 
 
+class _FakeWorkerDispatchTaskWriter:
+    def __init__(self, *, accepted: bool = True) -> None:
+        self.accepted = accepted
+        self.calls: list[dict[str, object]] = []
+
+    def enqueue_signed_worker_dispatch_tasks(self, tasks, receipt):
+        task_ids = [task.task_id for task in tasks]
+        self.calls.append(
+            {
+                "task_ids": task_ids,
+                "receipt_id": receipt.receipt_id,
+            }
+        )
+        return {
+            "ok": self.accepted,
+            "created_task_ids": task_ids,
+            "receipt_id": receipt.receipt_id,
+        }
+
+
 def _ed25519_signing_material():
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -974,11 +994,12 @@ def _run_bootstrap_to_verified_outcome_ratchet(tmp_path: Path) -> dict[str, obje
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
     assert verifier_run.accepted is True
     verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
@@ -1009,6 +1030,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(tmp_path: Path) -> dict[str, obje
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
@@ -1221,6 +1243,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
@@ -1282,21 +1305,23 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=7,
+        max_steps=8,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.steps_run == 7
+    assert result.steps_run == 8
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
     )
@@ -1356,21 +1381,23 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=7,
+        max_steps=8,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.steps_run == 7
+    assert result.steps_run == 8
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
     )
@@ -1422,22 +1449,24 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=8,
+        max_steps=9,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.steps_run == 8
+    assert result.steps_run == 9
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
@@ -1535,21 +1564,23 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 9
+    assert result.steps_run == 10
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
@@ -1654,21 +1685,23 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 9
+    assert result.steps_run == 10
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
@@ -1773,23 +1806,25 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         evidence_command_runner=evidence_runner,
         slice_verifier_request_binding_enabled=True,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 10
+    assert result.steps_run == 11
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
@@ -1895,21 +1930,23 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 10
+    assert result.steps_run == 11
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
@@ -2013,12 +2050,13 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         artifact_generator=artifact_generator,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
 
     assert result.accepted is True
@@ -2111,15 +2149,16 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 10
+    assert result.steps_run == 11
     assert result.dispatched_stages[-1] == "slice_verifier"
     assert result.no_slice_verification_performed is False
     stored = json.loads(chain.read_text(encoding="utf-8"))
@@ -2225,22 +2264,24 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 11
+    assert result.steps_run == 12
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
@@ -2349,6 +2390,7 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         evidence_command_runner=evidence_runner,
         slice_verifier_request_binding_enabled=True,
@@ -2357,17 +2399,18 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 11
+    assert result.steps_run == 12
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
@@ -2485,11 +2528,12 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
     assert verifier_run.accepted is True
     verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
@@ -2520,6 +2564,7 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
@@ -2754,16 +2799,17 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=9,
+        max_steps=10,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 8
+    assert result.steps_run == 9
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:bounded_worker_pilot" in result.rejection_reasons
     assert result.no_worktree_created is False
@@ -2842,16 +2888,17 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 9
+    assert result.steps_run == 10
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:slice_verifier" in result.rejection_reasons
     assert result.no_slice_verification_performed is True
@@ -2941,16 +2988,17 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 10
+    assert result.steps_run == 11
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:verified_draft_pr_publish" in result.rejection_reasons
     assert result.no_slice_verification_performed is False
@@ -3041,11 +3089,12 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
     assert verifier_run.accepted is True
     verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
@@ -3075,6 +3124,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
@@ -3126,21 +3176,23 @@ def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=8,
+        max_steps=9,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 7
+    assert result.steps_run == 8
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-        "work_order_invocation",
+            "worker_dispatch_runtime",
+            "work_order_invocation",
         "executor_plan",
         "execution_valve",
     )
@@ -3215,21 +3267,23 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=5,
+        max_steps=6,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 4
+    assert result.steps_run == 5
     assert result.dispatched_stages == (
         "authority_request",
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-    )
+            "worker_dispatch_runtime",
+            )
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:work_order_invocation" in result.rejection_reasons
     assert result.no_worktree_created is True
@@ -3369,10 +3423,11 @@ def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_i
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
-        max_steps=6,
+        max_steps=7,
     )
 
     assert result.accepted is True

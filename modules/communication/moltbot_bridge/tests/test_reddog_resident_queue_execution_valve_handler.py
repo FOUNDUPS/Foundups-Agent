@@ -58,6 +58,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authorit
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
+    WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
     with_queue_wsp15_allocation,
 )
 
@@ -267,6 +268,7 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "authority_runtime": {"decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT},
         "authority_verification": {"decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT},
         "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
+        "worker_dispatch_runtime": WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
         WORK_ORDER_INVOCATION_STAGE_KEY: _work_order_invocation_result(),
         EXECUTOR_PLAN_STAGE_KEY: _executor_plan_result(),
     }

@@ -29,6 +29,7 @@ ALL_STAGE_KEYS = (
     "authority_runtime",
     "authority_verification",
     "worker_dispatch_dryrun",
+    "worker_dispatch_runtime",
     "work_order_invocation",
     "executor_plan",
     "execution_valve",
@@ -103,6 +104,7 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
         nonce_store=dummy,
         revocation_oracle=dummy,
         work_order_resolver=dummy,
+        worker_dispatch_writer=dummy,
         repo_root=tmp_path,
         valve_environment={"valve_worktree_create_enabled": True},
         worktree_runner=dummy,
@@ -159,6 +161,9 @@ def test_registry_rejects_empty_mapping_dependencies() -> None:
 
     assert registry.registered_stage_keys == ("worker_dispatch_dryrun",)
     assert "missing_dependency:authority_profile" in registry.missing_stage_reasons["authority_request"]
+    assert "missing_dependency:worker_dispatch_writer" in (
+        registry.missing_stage_reasons["worker_dispatch_runtime"]
+    )
     assert "missing_dependency:generic_writer_dryrun_result" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:artifact_contents" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:artifact_generation_request" in registry.missing_stage_reasons["bounded_worker_pilot"]

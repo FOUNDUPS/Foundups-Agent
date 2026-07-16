@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_OPENCLAW_HERMES_0102_WORKER_DISPATCH_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added the signed worker-dispatch runtime publication stage that converts
+  accepted dry-run worker intents into pending AgentDB task specs via an
+  injected writer.
+- Inserted `worker_dispatch_runtime` between `worker_dispatch_dryrun` and
+  `work_order_invocation` in the resident queue orchestration plan, keeping
+  downstream work-order invocation blocked until task publication succeeds.
+- Preserved the authority boundary: no worker process start, Hermes
+  execution, shell command, worktree creation, source repo mutation, PR,
+  PatternMemory write, HoloIndex re-index, reward settlement, or automatic
+  runtime invocation is performed by this slice.
+
 ## 2026-07-16: REDDOG_ARCHITECT_FIX_TO_SIGNED_WSP15_WORK_ORDER_PROMOTION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

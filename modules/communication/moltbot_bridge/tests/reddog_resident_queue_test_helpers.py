@@ -13,6 +13,10 @@ WORKER_DISPATCH_DRYRUN_STAGE_RESULT = {
     "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT",
 }
 
+WORKER_DISPATCH_RUNTIME_STAGE_RESULT = {
+    "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT",
+}
+
 
 def queue_wsp15_allocation_receipt(*, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
     return allocate_reddog_wsp15_receipt(

@@ -161,6 +161,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     explicit_pattern_memory_write_requested: bool = False,
     ratchet_pattern_memory_sink: Any = None,
     pattern_memory_admission_sink: Any = None,
+    worker_dispatch_writer: Any = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
@@ -439,6 +440,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         ratchet_pattern_memory_sink=ratchet_pattern_memory_sink,
         admission_request=admission_request,
         pattern_memory_admission_sink=pattern_memory_admission_sink,
+        worker_dispatch_writer=worker_dispatch_writer,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))

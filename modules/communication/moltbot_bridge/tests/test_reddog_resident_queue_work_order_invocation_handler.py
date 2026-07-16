@@ -22,6 +22,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_ve
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     InMemoryResidentQueueChainResultsStore,
+    record_resident_queue_stage_result,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     FAIL_RECORD_REJECTED,
@@ -36,6 +37,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_dryrun_handler import (
     WORKER_DISPATCH_DRYRUN_STAGE_KEY,
     build_reddog_resident_queue_worker_dispatch_dryrun_stage_handler,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_runtime_handler import (
+    WORKER_DISPATCH_RUNTIME_STAGE_KEY,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_work_order_invocation_handler import (
     FAIL_AUTHORITY_RUNTIME_STAGE_MISSING,
@@ -67,6 +71,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authorit
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
 )
 
 
@@ -385,6 +392,15 @@ def _seed_verified_authority(chain_store: InMemoryResidentQueueChainResultsStore
         now_iso=NOW_ISO,
     )
     assert dispatch_result.accepted is True
+
+    runtime_result = record_resident_queue_stage_result(
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        stage_key=WORKER_DISPATCH_RUNTIME_STAGE_KEY,
+        stage_result=WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
+        now_iso=NOW_ISO,
+    )
+    assert runtime_result.accepted is True
 
 
 def _handler(
