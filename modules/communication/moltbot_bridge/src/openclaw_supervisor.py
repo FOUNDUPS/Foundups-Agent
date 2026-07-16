@@ -32,7 +32,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Deque, Dict, List, Optional
+from typing import Any, Callable, Deque, Dict, List, Mapping, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -289,6 +289,8 @@ def claim_reddog_signed_worker_dispatch_task_once(
                 signed_worker_runner is not None
                 or _signed_0102_readonly_tasks_enabled_from_env()
             ),
+            include_0102_bounded_code=_signed_0102_bounded_code_tasks_enabled_from_env(),
+            env=os.environ,
         )
     except Exception as exc:
         return _signed_worker_claim_result(
@@ -505,8 +507,11 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
     agent_id: str,
     source: str,
     include_0102_readonly: bool = False,
+    include_0102_bounded_code: bool = False,
+    env: Mapping[str, str] | None = None,
 ) -> Optional[Dict[str, Any]]:
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_0102_bounded_code_change_signed_worker_context,
         is_openclaw_candidate_signed_worker_context,
     )
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
@@ -534,8 +539,17 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
                 candidate_context = json.loads(raw_candidate) if isinstance(raw_candidate, str) else raw_candidate
             except Exception:
                 candidate_context = None
-            if is_openclaw_candidate_signed_worker_context(candidate_context) or (
-                include_0102_readonly and is_0102_readonly_signed_worker_context(candidate_context)
+            if (
+                is_openclaw_candidate_signed_worker_context(candidate_context)
+                or (
+                    include_0102_readonly
+                    and is_0102_readonly_signed_worker_context(candidate_context)
+                )
+                or (
+                    include_0102_bounded_code
+                    and is_0102_bounded_code_change_signed_worker_context(candidate_context)
+                    and _signed_0102_bounded_code_stage_ready_from_env(candidate_context, env or os.environ)
+                )
             ):
                 row = candidate
                 raw_context = raw_candidate
@@ -713,11 +727,76 @@ def _signed_0102_readonly_tasks_enabled_from_env() -> bool:
     return os.getenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", "0") == "1"
 
 
+def _signed_0102_bounded_code_tasks_enabled_from_env() -> bool:
+    return os.getenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "0") == "1"
+
+
+def _signed_0102_bounded_code_stage_ready_from_env(
+    context: Mapping[str, Any] | None,
+    env: Mapping[str, str],
+) -> bool:
+    """Return True only when a coding task may safely drive the artifact stage."""
+
+    if not isinstance(context, Mapping):
+        return False
+    if str(env.get("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER") or "").strip() != "1":
+        return False
+    if str(env.get("REDDOG_ARTIFACT_GENERATOR_MODE") or "").strip() != "foundups_fusion":
+        return False
+    if not str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH") or "").strip():
+        return False
+    if str(env.get("REDDOG_ARTIFACT_CONTENTS_PATH") or "").strip():
+        return False
+    work_state_path = str(env.get("REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or "").strip()
+    chain_results_path = str(env.get("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH") or "").strip()
+    if not work_state_path or not chain_results_path:
+        return False
+    queue_item_id = str(context.get("queue_item_id") or "").strip()
+    if not queue_item_id:
+        return False
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
+            NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE,
+            RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
+            plan_reddog_resident_queue_orchestration,
+        )
+
+        work_state = _read_json_mapping(Path(work_state_path))
+        chain_state = _read_json_mapping(Path(chain_results_path))
+        plan = plan_reddog_resident_queue_orchestration(
+            work_state,
+            chain_results=_resident_queue_stage_results(chain_state),
+            requested_queue_item_id=queue_item_id,
+            now_iso=str(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO") or ""),
+        )
+    except Exception:
+        return False
+    return (
+        plan.accepted is True
+        and plan.status == RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY
+        and plan.current_stage == "bounded_worker_pilot"
+        and plan.next_action == NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE
+    )
+
+
+def _read_json_mapping(path: Path) -> Mapping[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, Mapping) else {}
+
+
+def _resident_queue_stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
+    raw = state.get("stage_results") if state.get("schema_version") == "reddog_resident_queue_chain_results.v1" else state
+    if not isinstance(raw, Mapping):
+        return {}
+    return {str(key): value for key, value in raw.items() if isinstance(value, Mapping)}
+
+
 def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
     from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
         SIGNED_WORKER_DISPATCH_TASK_SOURCE,
     )
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_0102_bounded_code_change_signed_worker_context,
         is_openclaw_candidate_signed_worker_context,
     )
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly_review_binding import (
@@ -726,14 +805,21 @@ def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
     from modules.infrastructure.database.src.agent_db import AgentDB
 
     include_0102_readonly = _signed_0102_readonly_tasks_enabled_from_env()
+    include_0102_bounded_code = _signed_0102_bounded_code_tasks_enabled_from_env()
     db = AgentDB()
     for task in db.get_autonomous_tasks(status="pending", limit=limit):
         if str(task.get("discovered_by") or "") != SIGNED_WORKER_DISPATCH_TASK_SOURCE:
             continue
         context = task.get("context")
         normalized = context if isinstance(context, dict) else None
-        if is_openclaw_candidate_signed_worker_context(normalized) or (
-            include_0102_readonly and is_0102_readonly_signed_worker_context(normalized)
+        if (
+            is_openclaw_candidate_signed_worker_context(normalized)
+            or (include_0102_readonly and is_0102_readonly_signed_worker_context(normalized))
+            or (
+                include_0102_bounded_code
+                and is_0102_bounded_code_change_signed_worker_context(normalized)
+                and _signed_0102_bounded_code_stage_ready_from_env(normalized, os.environ)
+            )
         ):
             return True
     return False
