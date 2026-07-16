@@ -1501,6 +1501,17 @@ def run_reddog_resident_queue_orchestration_plan_preflight(repo_root: Path) -> b
             resident_queue_runtime_file_path,
         )
 
+        explicit_chain_results_path = str(
+            os.getenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH") or ""
+        ).strip()
+        chain_results_path = resident_queue_runtime_file_path(
+            os.environ,
+            repo_root,
+            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+        )
+        if not explicit_chain_results_path and chain_results_path:
+            chain_results_path = chain_results_path if Path(chain_results_path).exists() else ""
+
         result = run_reddog_main_resident_queue_orchestration_plan_bootstrap(
             repo_root=repo_root,
             work_state_path=resident_queue_runtime_file_path(
@@ -1508,12 +1519,7 @@ def run_reddog_resident_queue_orchestration_plan_preflight(repo_root: Path) -> b
                 repo_root,
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
             ),
-            chain_results_path=resident_queue_runtime_file_path(
-                os.environ,
-                repo_root,
-                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
-            )
-            or None,
+            chain_results_path=chain_results_path or None,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
         )
     except Exception as exc:
