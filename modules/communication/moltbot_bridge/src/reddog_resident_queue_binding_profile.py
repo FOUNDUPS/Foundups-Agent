@@ -27,6 +27,13 @@ PROFILE_BINDING_FLAGS = frozenset(
     }
 )
 
+PROFILE_RUNTIME_FLAGS = frozenset(
+    {
+        "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP",
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER",
+    }
+)
+
 
 def resident_queue_binding_profile(env: Mapping[str, str]) -> str:
     """Return the normalized resident queue binding profile."""
@@ -51,6 +58,24 @@ def resident_queue_binding_enabled(env: Mapping[str, str], env_name: str) -> boo
     )
 
 
+def resident_queue_runtime_flag_enabled(env: Mapping[str, str], env_name: str) -> bool:
+    """Return whether a safe resident runtime control-plane flag is enabled.
+
+    Explicit environment values win. The profile only enables known
+    control-plane flags that start existing gated loops; it never enables
+    model, shell, worktree, draft-PR, PatternMemory, HoloIndex, merge, or
+    reward-settlement effect modes.
+    """
+
+    raw = str(env.get(env_name) or "").strip()
+    if raw:
+        return raw == "1"
+    return (
+        env_name in PROFILE_RUNTIME_FLAGS
+        and resident_queue_binding_profile(env) == PROFILE_SIGNED_0102_BOUNDED_CODE
+    )
+
+
 def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     """Return explicit/default work-order materializer mode for the profile."""
 
@@ -65,8 +90,10 @@ def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
 __all__ = [
     "ENV_REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
     "PROFILE_BINDING_FLAGS",
+    "PROFILE_RUNTIME_FLAGS",
     "PROFILE_SIGNED_0102_BOUNDED_CODE",
     "resident_queue_binding_enabled",
     "resident_queue_binding_profile",
     "resident_queue_materializer_mode",
+    "resident_queue_runtime_flag_enabled",
 ]

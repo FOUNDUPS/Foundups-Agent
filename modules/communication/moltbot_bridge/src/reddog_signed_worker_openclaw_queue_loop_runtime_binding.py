@@ -25,6 +25,7 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     resident_queue_binding_enabled,
     resident_queue_materializer_mode,
+    resident_queue_runtime_flag_enabled,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_loop_runner import (
     RedDogSignedWorkerQueueSerialLoopRunner,
@@ -121,7 +122,10 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
 ) -> SignedWorkerOpenClawQueueLoopBindingResult:
     """Build the OpenClaw queue-loop runner from explicit runtime config."""
 
-    requested = str(env.get("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "0")).strip() == "1"
+    requested = resident_queue_runtime_flag_enabled(
+        env,
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER",
+    )
     if not requested:
         return SignedWorkerOpenClawQueueLoopBindingResult(
             accepted=False,

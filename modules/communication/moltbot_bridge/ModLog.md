@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_PROFILE_OPENCLAW_CLAIM_LOOP_DEFAULTS_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Extended `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code`
+  to default only the safe control-plane flags for the OpenClaw signed-worker
+  claim loop and signed-worker queue-loop runner.
+- Explicit env values still win, including explicit `0` disables.
+- Boundary remains unchanged: the profile still does not enable model
+  execution, shell execution, worktree runners, draft PR publishing,
+  PatternMemory writes, HoloIndex re-index, merge authority, or rewards.
+
 ## 2026-07-16: REDDOG_MAIN_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
