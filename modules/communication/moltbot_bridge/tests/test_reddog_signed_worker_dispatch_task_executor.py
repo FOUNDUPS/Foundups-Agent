@@ -38,6 +38,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _ed25519_signing_material,
     _FakeWorkerDispatchTaskWriter,
     _FakeWorktreeRunner,
+    _held_out_gate_request,
     _outcome_ratchet_request,
     _pilot_allowed_paths,
     _pilot_path_overrides,
@@ -49,6 +50,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _slice_verifier_request,
     _snapshot as _bootstrap_snapshot,
     _snapshots,
+    _run_bootstrap_to_verified_outcome_ratchet,
     _valve_environment,
     _work_order,
     _write_runtime_json,
@@ -926,6 +928,52 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_rat
     assert records[0]["ratchet_receipt"]["work_order_id"] == work_order["work_order_id"]
     assert records[0]["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
     assert not (repo / "runtime" / "outcomes" / "signed-worker-ratchet.jsonl").exists()
+
+
+def test_openclaw_claim_env_bound_queue_loop_runner_reaches_held_out_regression_gate(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path)
+    verifier_stage = ctx["verifier_stage"]
+    held_out_request = _write_runtime_json(
+        tmp_path,
+        "held_out_gate_request.json",
+        _held_out_gate_request(verifier_stage["verifier_result"]),
+    )
+    task_id = _publish_agentdb_task()
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(ctx["state"]))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(ctx["chain"]))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(ctx["profile"]))
+    monkeypatch.setenv("REDDOG_HELD_OUT_GATE_REQUEST_PATH", str(held_out_request))
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=ctx["repo"])
+
+    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["task_id"] == task_id
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+    stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["held_out_regression_gate"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    assert (
+        stage["gate_result"]["decision"]
+        == "HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT"
+    )
+    assert stage["gate_result"]["receipt"]["no_pattern_memory_write_performed"] is True
+    assert stage["no_command_execution_performed"] is True
+    assert stage["no_test_execution_performed"] is True
+    assert stage["no_pattern_memory_write_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+    assert "pattern_memory_admission" not in stored["stage_results"]
 
 
 def test_openclaw_claims_signed_worker_task_once_and_completes_it(tmp_path: Path) -> None:

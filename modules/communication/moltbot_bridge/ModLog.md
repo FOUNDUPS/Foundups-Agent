@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_HELD_OUT_REGRESSION_GATE_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an end-to-end regression proving an AgentDB signed OpenClaw
+  `candidate_queue_review` task can be claimed, routed through the real
+  environment-bound queue-loop runner, and advance an accepted
+  verified-outcome ratchet into the held-out regression gate stage.
+- Verified the env-bound runner consumes the held-out gate request and persists
+  an accepted gate receipt without executing tests or commands.
+- Boundary remains explicit: no PatternMemory admission, shell execution, PR
+  publish, ready-for-review, merge, HoloIndex re-index, or reward settlement is
+  performed by this slice.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_VERIFIED_OUTCOME_RATCHET_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
