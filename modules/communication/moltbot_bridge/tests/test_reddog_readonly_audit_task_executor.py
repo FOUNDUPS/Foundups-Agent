@@ -62,6 +62,7 @@ MEMEX_GENERATION_ID = "sha256:memex-generation"
 MEMEX_SOURCE_REVISION = "abc123"
 MEMEX_SOURCE_SCOPE = f"foundup:{MEMEX_FOUNDUP_ID}:lane:{REPO_CODE_AUDIT_LANE}"
 MEMEX_NOW = "2026-07-16T00:01:00+00:00"
+MEMEX_POLICY_EXPIRES_AT = "2026-07-16T01:00:00+00:00"
 
 
 @pytest.fixture(autouse=True)
@@ -291,6 +292,7 @@ def _model_context(
     context["assignment"]["memex_source_scope"] = MEMEX_SOURCE_SCOPE
     context["assignment"]["memex_source_revision"] = MEMEX_SOURCE_REVISION
     context["assignment"]["memex_holoindex_generation_id"] = MEMEX_GENERATION_ID
+    context["assignment"]["memex_policy_expires_at"] = MEMEX_POLICY_EXPIRES_AT
     return context
 
 
@@ -302,7 +304,7 @@ def _memex_access_policy_receipt() -> dict:
         source_scope=MEMEX_SOURCE_SCOPE,
         sensitivity_classes=("internal",),
         issued_at="2026-07-16T00:00:00+00:00",
-        expires_at="2026-07-16T01:00:00+00:00",
+        expires_at=MEMEX_POLICY_EXPIRES_AT,
         policy_generation_id="policy-generation-1",
     )
     assert result.accepted is True
@@ -310,27 +312,31 @@ def _memex_access_policy_receipt() -> dict:
     return result.receipt.to_dict()
 
 
+def _memex_view() -> dict:
+    return {
+        "schema_version": "foundup_brain_current_state.v1",
+        "foundup_brain_view_id": "sha256:brain-view",
+        "foundup_id": MEMEX_FOUNDUP_ID,
+        "snapshot_id": "snapshot-1",
+        "snapshot_content_digest": "sha256:snapshot-content",
+        "identity": {
+            "foundup_id": MEMEX_FOUNDUP_ID,
+            "name": "Foundups Agent",
+        },
+        "current_state": {
+            "selected_slice": "REDDOG_MEMEX_QUERY_RECEIPT_RUNTIME_BINDING_PHASE1",
+            "evidence_path": "modules/communication/moltbot_bridge/src/sample.py",
+        },
+        "roadmap_state": {
+            "next_slice": "REDDOG_RUNTIME_NEXT_PHASE1",
+        },
+    }
+
+
 def _memex_projection(*, access_policy_receipt: dict | None = None) -> dict:
     access_policy_receipt = access_policy_receipt or _memex_access_policy_receipt()
     result = project_foundup_memex_to_holoindex_shadow(
-        memex_view={
-            "schema_version": "foundup_brain_current_state.v1",
-            "foundup_brain_view_id": "sha256:brain-view",
-            "foundup_id": MEMEX_FOUNDUP_ID,
-            "snapshot_id": "snapshot-1",
-            "snapshot_content_digest": "sha256:snapshot-content",
-            "identity": {
-                "foundup_id": MEMEX_FOUNDUP_ID,
-                "name": "Foundups Agent",
-            },
-            "current_state": {
-                "selected_slice": "REDDOG_MEMEX_QUERY_RECEIPT_RUNTIME_BINDING_PHASE1",
-                "evidence_path": "modules/communication/moltbot_bridge/src/sample.py",
-            },
-            "roadmap_state": {
-                "next_slice": "REDDOG_RUNTIME_NEXT_PHASE1",
-            },
-        },
+        memex_view=_memex_view(),
         source_scope=MEMEX_SOURCE_SCOPE,
         source_revision=MEMEX_SOURCE_REVISION,
         allowed_foundup_ids=(MEMEX_FOUNDUP_ID,),
@@ -561,6 +567,58 @@ def test_model_backed_includes_optional_memex_query_receipt(tmp_path: Path) -> N
     assert worker_receipt["memex_query_receipt_id"] == memex_receipt["receipt_id"]
     assert worker_receipt["memex_evidence_bundle_id"] == memex_bundle["bundle_id"]
     assert worker_receipt["no_side_effect_attestations"]["no_holoindex_reindex_performed"] is True
+
+
+def test_model_backed_supplies_assignment_bound_memex_projection_from_view(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    context["memex_view"] = _memex_view()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert runner.calls
+    model_context = json.loads(runner.calls[0]["context"])
+    memex_receipt = model_context["memex_query_receipt"]
+    memex_bundle = model_context["memex_evidence_bundle"]
+    assert memex_receipt["source_class"] == "memex"
+    assert memex_receipt["freshness_generation_id"] == MEMEX_GENERATION_ID
+    assert memex_bundle["records"]
+    assert result.report is not None
+    worker_receipt = result.report["worker_receipt"]
+    assert worker_receipt["memex_query_receipt_id"] == memex_receipt["receipt_id"]
+    assert worker_receipt["memex_evidence_bundle_id"] == memex_bundle["bundle_id"]
+    assert worker_receipt["no_side_effect_attestations"]["no_holoindex_reindex_performed"] is True
+
+
+def test_model_backed_rejects_memex_view_without_supplier_expiry_before_model(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    context["assignment"] = dict(context["assignment"])
+    context["assignment"].pop("memex_policy_expires_at")
+    context["memex_view"] = _memex_view()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
+    assert not runner.calls
 
 
 def test_model_backed_allows_memex_refs_only_as_supplemental_citations(tmp_path: Path) -> None:

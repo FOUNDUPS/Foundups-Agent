@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MEMEX_SNAPSHOT_PROJECTION_SUPPLIER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Added an assignment-bound Memex snapshot projection supplier for read-only
+  RedDog audit workers.
+- Runtime can now take an explicit `memex_view`, construct a matching access
+  policy receipt and HoloIndex shadow projection, then reuse the existing
+  integrity, query-receipt, evidence-bundle, and citation gates.
+- Missing assignment bindings, missing policy expiry, scope mismatch, snapshot
+  mismatch, projection tampering, replay, and policy failures reject before any
+  model call.
+- Boundary remains read-only: no HoloIndex re-index, Memex write, Brain write,
+  Breadcrumb write, repo mutation, shell execution, OpenClaw enqueue, Hermes
+  dispatch, worktree operation, PR, merge, or PatternMemory promotion.
+- Policy issuance is still deterministic integrity only; authenticated policy
+  authority remains outside this slice.
+
 ## 2026-07-16: REDDOG_TYPED_EVIDENCE_CITATION_POLICY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
