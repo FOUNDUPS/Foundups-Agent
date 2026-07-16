@@ -34,6 +34,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     PILOT_ARTIFACT,
     PILOT_OPERATION,
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+    _draft_pr_publish_request,
     _ed25519_signing_material,
     _FakeWorkerDispatchTaskWriter,
     _FakeWorktreeRunner,
@@ -109,6 +110,24 @@ class _FakeRunner:
             "no_source_repo_mutation_performed": not self.unsafe,
             "no_shell_command_executed": not self.unsafe,
         }
+
+
+class _FakeEnvDraftPrRunner:
+    instances: list["_FakeEnvDraftPrRunner"] = []
+
+    def __init__(self, *, repo_root: Path, timeout_s: int) -> None:
+        self.repo_root = Path(repo_root)
+        self.timeout_s = timeout_s
+        self.calls: list[tuple[str, ...]] = []
+        self.__class__.instances.append(self)
+
+    def push_branch(self, *, worktree_path: Path, branch_name: str):
+        self.calls.append(("push_branch", str(worktree_path), branch_name))
+        return {"ok": True, "branch_name": branch_name}
+
+    def create_draft_pr(self, *, branch_name: str, base_branch: str, title: str, body: str):
+        self.calls.append(("create_draft_pr", branch_name, base_branch, title, body))
+        return "https://github.com/FOUNDUPS/Foundups-Agent/pull/4242"
 
 
 class _FakeBinding:
@@ -624,6 +643,139 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
     assert stage["no_holoindex_reindex_performed"] is True
     assert (worktree / PILOT_ARTIFACT).exists()
     assert not (repo / PILOT_ARTIFACT).exists()
+
+
+def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    from modules.foundups.agent.src import worktree_pr_runner
+
+    _FakeEnvDraftPrRunner.instances.clear()
+    monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeEnvDraftPrRunner)
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _bootstrap_profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {str(work_order["work_order_id"]): work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    verifier = _write_runtime_json(
+        tmp_path,
+        "verifier_request.json",
+        _slice_verifier_request(),
+    )
+    publish_request = _write_runtime_json(
+        tmp_path,
+        "publish_request.json",
+        _draft_pr_publish_request(worktree),
+    )
+
+    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        verifier_request_path=verifier,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        now_iso=BOOTSTRAP_NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=11,
+    )
+    assert seed.accepted is True
+    assert seed.dispatched_stages[-1] == "slice_verifier"
+
+    task_id = _publish_agentdb_task()
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
+    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
+    monkeypatch.setenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", str(publish_request))
+    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
+    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "88")
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=repo)
+
+    assert result["accepted"] is True, json.dumps(result, sort_keys=True)
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["task_id"] == task_id
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert len(_FakeEnvDraftPrRunner.instances) == 1
+    draft_runner = _FakeEnvDraftPrRunner.instances[0]
+    assert draft_runner.repo_root == repo.resolve()
+    assert draft_runner.timeout_s == 88
+    assert [call[0] for call in draft_runner.calls] == ["push_branch", "create_draft_pr"]
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["verified_draft_pr_publish"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT"
+    assert stage["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
+    assert stage["no_ready_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_pattern_memory_write_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
 
 
 def test_openclaw_claims_signed_worker_task_once_and_completes_it(tmp_path: Path) -> None:

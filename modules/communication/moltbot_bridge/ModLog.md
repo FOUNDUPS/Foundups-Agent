@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_VERIFIED_DRAFT_PR_RUNNER_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added draft-PR runner construction to the signed OpenClaw queue-loop
+  environment binding, matching the existing `main.py` resident-loop mode:
+  `REDDOG_DRAFT_PR_RUNNER_MODE=real` plus a positive timeout.
+- Preserved fail-closed behavior for unsupported draft-PR runner modes and
+  invalid timeouts; default behavior still provides no draft-PR runner.
+- Refined the queue-loop runner safety rule so PR creation is accepted only
+  when the dispatched stage is `verified_draft_pr_publish`; unexpected PR
+  creation remains unsafe.
+- Added an end-to-end regression proving an AgentDB signed OpenClaw task can
+  advance from an accepted slice-verifier result to verified draft-PR publish
+  through the environment-bound runner, using a monkeypatched runner so no
+  real GitHub call occurs in tests.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_SLICE_VERIFIER_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

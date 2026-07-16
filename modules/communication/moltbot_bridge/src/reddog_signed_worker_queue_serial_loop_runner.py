@@ -216,11 +216,15 @@ def _unsafe_bootstrap_effect_detected(payload: Mapping[str, Any]) -> bool:
         "no_openclaw_enqueue_performed",
         "no_hermes_dispatch_performed",
         "no_holoindex_reindex_performed",
-        "no_pr_created",
         "no_pattern_memory_write_performed",
         "no_reward_settlement_performed",
     )
-    return any(payload.get(flag) is not True for flag in guarded_true_flags)
+    if any(payload.get(flag) is not True for flag in guarded_true_flags):
+        return True
+    if payload.get("no_pr_created") is True:
+        return False
+    dispatched = set(_string_list(payload.get("dispatched_stages")))
+    return "verified_draft_pr_publish" not in dispatched
 
 
 def _reject(
