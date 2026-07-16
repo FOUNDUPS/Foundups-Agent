@@ -18,9 +18,13 @@ from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     OpenClawSupervisor,
     SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT,
     SIGNED_WORKER_OPENCLAW_CLAIM_IDLE,
+    SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT,
+    SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE,
+    SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT,
     SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
     SignedWorkerOpenClawClaimReason,
     claim_reddog_signed_worker_dispatch_task_once,
+    claim_reddog_signed_worker_dispatch_tasks_until_idle,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
@@ -1097,6 +1101,141 @@ def test_openclaw_claim_rejects_without_runner_and_idle_when_empty(tmp_path: Pat
     assert db.get_autonomous_task_by_id(task_id)["status"] == "failed"
     assert idle["accepted"] is False
     assert idle["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
+
+
+def test_openclaw_claim_loop_claims_until_idle(tmp_path: Path) -> None:
+    task_id_1 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
+    task_id_2 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_2")
+    db = AgentDB()
+
+    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        max_claims=5,
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT
+    assert result["claimed_count"] == 2
+    assert set(result["completed_task_ids"]) == {task_id_1, task_id_2}
+    assert result["failed_task_ids"] == ()
+    assert result["idle"] is True
+    assert result["max_claims_reached"] is False
+    assert len(result["claim_results"]) == 3
+    assert result["claim_results"][-1]["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
+    assert db.get_autonomous_task_by_id(task_id_1)["status"] == "completed"
+    assert db.get_autonomous_task_by_id(task_id_2)["status"] == "completed"
+    assert result["no_shell_command_executed"] is True
+    assert result["no_repo_mutation_performed"] is True
+    assert result["no_holoindex_reindex_performed"] is True
+    assert result["no_hermes_dispatch_performed"] is True
+
+
+def test_openclaw_claim_loop_respects_max_claims(tmp_path: Path) -> None:
+    task_id_1 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
+    task_id_2 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_2")
+    db = AgentDB()
+
+    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        max_claims=1,
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT
+    assert result["claimed_count"] == 1
+    assert result["completed_task_ids"] == (task_id_1,)
+    assert result["max_claims_reached"] is True
+    assert result["idle"] is False
+    assert db.get_autonomous_task_by_id(task_id_1)["status"] == "completed"
+    assert db.get_autonomous_task_by_id(task_id_2)["status"] == "pending"
+
+
+def test_openclaw_claim_loop_reports_idle_without_work(tmp_path: Path) -> None:
+    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        max_claims=3,
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE
+    assert result["claimed_count"] == 0
+    assert result["idle"] is True
+    assert SignedWorkerOpenClawClaimReason.NO_PENDING_TASK in result["rejection_reasons"]
+
+
+def test_openclaw_claim_loop_ignores_non_openclaw_tasks(tmp_path: Path) -> None:
+    task_id = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_hermes_candidate",
+        role="hermes_candidate",
+        worker_runtime="hermes",
+        capability="bounded_code_change",
+    )
+    db = AgentDB()
+
+    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        max_claims=3,
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE
+    assert result["claimed_count"] == 0
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "pending"
+
+
+def test_openclaw_claim_loop_stops_after_first_rejected_claim(tmp_path: Path) -> None:
+    task_id_1 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
+    task_id_2 = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_2")
+    db = AgentDB()
+
+    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(accepted=False),
+        max_claims=5,
+    )
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT
+    assert result["claimed_count"] == 0
+    assert len(result["failed_task_ids"]) == 1
+    assert SignedWorkerOpenClawClaimReason.CLAIM_REJECTED in result["rejection_reasons"]
+    statuses = {
+        task_id_1: db.get_autonomous_task_by_id(task_id_1)["status"],
+        task_id_2: db.get_autonomous_task_by_id(task_id_2)["status"],
+    }
+    assert sorted(statuses.values()) == ["failed", "pending"]
+
+
+def test_openclaw_claim_loop_rejects_invalid_max_claims(tmp_path: Path) -> None:
+    result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        max_claims=0,
+    )
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT
+    assert SignedWorkerOpenClawClaimReason.MAX_CLAIMS_INVALID in result["rejection_reasons"]
+
+
+def test_openclaw_supervisor_instance_claims_signed_worker_tasks_until_idle(tmp_path: Path) -> None:
+    task_id = _publish_agentdb_task(intent_id="worker_dispatch_intent_openclaw_candidate_1")
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+
+    result = supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        signed_worker_runner=_FakeRunner(),
+        max_claims=2,
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT
+    assert result["completed_task_ids"] == (task_id,)
+    assert result["idle"] is True
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
 
 
 def test_signed_worker_executor_ast_has_no_shell_network_or_runtime_mutation() -> None:

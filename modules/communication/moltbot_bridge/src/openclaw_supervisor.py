@@ -42,6 +42,9 @@ READONLY_AUDIT_OPENCLAW_CLAIM_REJECT = "READONLY_AUDIT_OPENCLAW_CLAIM_REJECT"
 SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT = "SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT"
 SIGNED_WORKER_OPENCLAW_CLAIM_IDLE = "SIGNED_WORKER_OPENCLAW_CLAIM_IDLE"
 SIGNED_WORKER_OPENCLAW_CLAIM_REJECT = "SIGNED_WORKER_OPENCLAW_CLAIM_REJECT"
+SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT = "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT"
+SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE = "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE"
+SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT = "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT"
 
 
 class ReadOnlyAuditOpenClawClaimReason:
@@ -59,6 +62,8 @@ class SignedWorkerOpenClawClaimReason:
     MALFORMED_CONTEXT = "REJECT_REDDOG_SIGNED_WORKER_MALFORMED_CONTEXT"
     TASK_EXECUTION_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_TASK_EXECUTION_REJECTED"
     AGENTDB_FAILURE = "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_FAILURE"
+    MAX_CLAIMS_INVALID = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
+    CLAIM_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_CLAIM_REJECTED"
 
 
 @dataclass
@@ -363,6 +368,94 @@ def claim_reddog_signed_worker_dispatch_task_once(
     )
 
 
+def claim_reddog_signed_worker_dispatch_tasks_until_idle(
+    *,
+    repo_root: Path,
+    agent_id: str = "openclaw_supervisor",
+    agent_db_factory: Optional[Callable[[], Any]] = None,
+    signed_worker_runner: Any | None = None,
+    max_claims: int = 1,
+) -> Dict[str, Any]:
+    """Claim signed RedDog worker-dispatch tasks until idle or max_claims.
+
+    This bounded resident-loop wrapper widens no authority: each task is still
+    claimed by the existing OpenClaw one-shot primitive and validated by the
+    signed-worker task executor.
+    """
+
+    if not isinstance(max_claims, int) or isinstance(max_claims, bool) or max_claims < 1:
+        return _signed_worker_claim_loop_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT,
+            rejection_reasons=(SignedWorkerOpenClawClaimReason.MAX_CLAIMS_INVALID,),
+            max_claims=max_claims,
+        )
+
+    claim_results: list[Dict[str, Any]] = []
+    completed_task_ids: list[str] = []
+    failed_task_ids: list[str] = []
+    idle = False
+
+    for _ in range(max_claims):
+        claim = claim_reddog_signed_worker_dispatch_task_once(
+            repo_root=repo_root,
+            agent_id=agent_id,
+            agent_db_factory=agent_db_factory,
+            signed_worker_runner=signed_worker_runner,
+        )
+        claim_results.append(claim)
+
+        task_id = str(claim.get("task_id") or "")
+        status = str(claim.get("status") or "")
+        if claim.get("accepted") is True and status == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT:
+            if task_id:
+                completed_task_ids.append(task_id)
+            continue
+
+        if status == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE:
+            idle = True
+            break
+
+        if task_id:
+            failed_task_ids.append(task_id)
+        return _signed_worker_claim_loop_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT,
+            rejection_reasons=(
+                SignedWorkerOpenClawClaimReason.CLAIM_REJECTED,
+                *tuple(claim.get("rejection_reasons") or ()),
+            ),
+            max_claims=max_claims,
+            claim_results=tuple(claim_results),
+            completed_task_ids=tuple(completed_task_ids),
+            failed_task_ids=tuple(failed_task_ids),
+            idle=idle,
+        )
+
+    if completed_task_ids:
+        return _signed_worker_claim_loop_result(
+            accepted=True,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT,
+            max_claims=max_claims,
+            claim_results=tuple(claim_results),
+            completed_task_ids=tuple(completed_task_ids),
+            failed_task_ids=tuple(failed_task_ids),
+            idle=idle,
+            max_claims_reached=(not idle and len(completed_task_ids) >= max_claims),
+        )
+
+    return _signed_worker_claim_loop_result(
+        accepted=True,
+        status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_IDLE,
+        rejection_reasons=(SignedWorkerOpenClawClaimReason.NO_PENDING_TASK,),
+        max_claims=max_claims,
+        claim_results=tuple(claim_results),
+        completed_task_ids=tuple(completed_task_ids),
+        failed_task_ids=tuple(failed_task_ids),
+        idle=True,
+    )
+
+
 def _claim_pending_reddog_readonly_audit_task(*, db: Any, agent_id: str, source: str) -> Optional[Dict[str, Any]]:
     with db.db.get_connection() as conn:
         row = conn.execute(
@@ -543,6 +636,51 @@ def _signed_worker_claim_result(
     }
 
 
+def _signed_worker_claim_loop_result(
+    *,
+    accepted: bool,
+    status: str,
+    max_claims: int,
+    claim_results=(),
+    completed_task_ids=(),
+    failed_task_ids=(),
+    rejection_reasons=(),
+    idle: bool = False,
+    max_claims_reached: bool = False,
+) -> Dict[str, Any]:
+    results = tuple(claim_results or ())
+    no_fields = (
+        "no_shell_command_executed",
+        "no_repo_mutation_performed",
+        "no_holoindex_reindex_performed",
+        "no_hermes_dispatch_performed",
+        "no_worktree_operation_performed",
+        "no_pr_created",
+        "no_live_foundup_enqueue_performed",
+        "no_pattern_memory_write_performed",
+        "no_reward_settlement_performed",
+    )
+    aggregate_no = {
+        key: all(bool(result.get(key, True)) for result in results)
+        for key in no_fields
+    }
+    return {
+        "accepted": accepted,
+        "status": status,
+        "max_claims": max_claims,
+        "claimed_count": len(tuple(completed_task_ids or ())),
+        "completed_task_ids": tuple(completed_task_ids or ()),
+        "failed_task_ids": tuple(failed_task_ids or ()),
+        "idle": idle,
+        "max_claims_reached": max_claims_reached,
+        "claim_results": results,
+        "rejection_reasons": tuple(
+            dict.fromkeys(str(reason) for reason in rejection_reasons if str(reason))
+        ),
+        **aggregate_no,
+    }
+
+
 class OpenClawSupervisor:
     """
     Canonical 0102 supervisor for the resident OpenClaw runtime.
@@ -625,6 +763,23 @@ class OpenClawSupervisor:
             agent_id="openclaw_supervisor",
             agent_db_factory=agent_db_factory,
             signed_worker_runner=signed_worker_runner,
+        )
+
+    def claim_reddog_signed_worker_dispatch_tasks_until_idle(
+        self,
+        *,
+        agent_db_factory: Optional[Callable[[], Any]] = None,
+        signed_worker_runner: Any | None = None,
+        max_claims: int = 1,
+    ) -> Dict[str, Any]:
+        """Claim signed RedDog worker-dispatch tasks until idle/max."""
+
+        return claim_reddog_signed_worker_dispatch_tasks_until_idle(
+            repo_root=self.repo_root,
+            agent_id="openclaw_supervisor",
+            agent_db_factory=agent_db_factory,
+            signed_worker_runner=signed_worker_runner,
+            max_claims=max_claims,
         )
 
     def stop(self) -> None:

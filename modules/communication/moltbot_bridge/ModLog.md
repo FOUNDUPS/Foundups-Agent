@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_UNTIL_IDLE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a bounded OpenClaw signed-worker claim loop that reuses the existing
+  one-task `claim_reddog_signed_worker_dispatch_task_once` primitive until
+  AgentDB is idle or `max_claims` is reached.
+- Preserved the signed OpenClaw `candidate_queue_review` boundary; the loop
+  does not add Hermes/0102 dispatch, shell execution, repository mutation,
+  HoloIndex re-index, reward settlement, or merge authority.
+- Added focused AgentDB regressions for multi-task draining, max-claim
+  stopping, idle behavior, non-OpenClaw task isolation, failure stop, invalid
+  max-claim rejection, and the `OpenClawSupervisor` instance entrypoint.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_PATTERN_MEMORY_ADMISSION_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
