@@ -14,6 +14,11 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 
+from holo_index.memex_access_policy_receipt import (
+    MemexAccessPolicyReceipt,
+    section_allowed_by_policy,
+    validate_memex_access_policy_receipt,
+)
 from holo_index.query_receipt import SOURCE_CLASS_MEMEX, digest_json
 
 
@@ -108,6 +113,7 @@ def project_foundup_memex_to_holoindex_shadow(
     source_revision: str,
     allowed_foundup_ids: Sequence[str],
     access_policy_digest: str = DEFAULT_ACCESS_POLICY_DIGEST,
+    access_policy_receipt: MemexAccessPolicyReceipt | Mapping[str, Any] | None = None,
     holoindex_generation_id: str = "",
     now_iso: str | None = None,
 ) -> MemexProjectionResult:
@@ -138,10 +144,38 @@ def project_foundup_memex_to_holoindex_shadow(
     if not _clean(access_policy_digest).startswith("sha256:"):
         reasons.append("invalid_access_policy_digest")
 
+    policy_receipt: MemexAccessPolicyReceipt | None = None
+    if access_policy_receipt is not None:
+        policy_validation = validate_memex_access_policy_receipt(
+            access_policy_receipt,
+            expected_foundup_id=foundup_id,
+            expected_source_scope=_clean(source_scope),
+            now_iso=now_iso,
+        )
+        if not policy_validation.accepted or policy_validation.receipt is None:
+            reasons.extend(
+                f"access_policy_receipt:{reason}"
+                for reason in policy_validation.rejection_reasons
+            )
+        else:
+            policy_receipt = policy_validation.receipt
+            if (
+                access_policy_digest != DEFAULT_ACCESS_POLICY_DIGEST
+                and _clean(access_policy_digest) != policy_receipt.receipt_id
+            ):
+                reasons.append("access_policy_digest_mismatch")
+            access_policy_digest = policy_receipt.receipt_id
+
     candidate_sections = _candidate_sections(memex_view)
     records: list[MemexProjectionRecord] = []
     rejected: list[str] = []
     for label, payload in candidate_sections:
+        if policy_receipt is not None and not section_allowed_by_policy(label, policy_receipt):
+            rejected.append(f"access_policy_denied_record:{label}")
+            continue
+        if policy_receipt is not None and len(records) >= policy_receipt.max_records:
+            rejected.append(f"access_policy_max_records:{label}")
+            continue
         if _contains_secret(payload):
             rejected.append(f"secret_bearing_record:{label}")
             continue

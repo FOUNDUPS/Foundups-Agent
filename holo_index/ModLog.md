@@ -1,5 +1,26 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_MEMEX_ACCESS_POLICY_RECEIPT_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 60, 97
+
+- ADD `holo_index/memex_access_policy_receipt.py`: deterministic read-only
+  access-policy receipt for governed Memex projection. The receipt binds
+  principal, work order, FoundUp scope, source scope, sensitivity classes,
+  allowed/denied record sections, record cap, TTL, and policy generation.
+- UPDATE `holo_index/memex_projection_adapter.py`: optional
+  `access_policy_receipt` validation derives the projection
+  `access_policy_digest` from the receipt id, rejects tampered policy receipts,
+  and filters denied sections without dropping allowed siblings.
+- TEST `tests/test_holoindex_memex_access_policy_receipt.py` plus projection
+  adapter regressions: deterministic receipt, tamper, expiry, replay,
+  revocation, scope mismatch, unsupported sensitivity, section allow/deny,
+  policy-bound projection, and AST no-write/no-exec guards.
+- Boundary: no Memex write, no HoloIndex write, no Brain/Breadcrumb write, no
+  external retrieval, no runtime re-index, and no automatic snapshot supplier.
+  Multi-FoundUp hardening and assignment-bound supplier remain downstream.
+
 ## [2026-07-16] HOLOINDEX_MEMEX_PROJECTION_INTEGRITY_AND_REHYDRATION_GATE_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
