@@ -1366,6 +1366,9 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
         from modules.communication.moltbot_bridge.src.reddog_main_authoritative_work_state_refresh_bootstrap import (
             run_reddog_main_authoritative_work_state_refresh_bootstrap,
         )
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_file_path,
+        )
 
         result = run_reddog_main_authoritative_work_state_refresh_bootstrap(
             repo_root=repo_root,
@@ -1373,7 +1376,11 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
             work_ledger_json_path=os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", ""),
             github_pr_records_path=os.getenv("REDDOG_GITHUB_PR_RECORDS_PATH", ""),
             w10_report_records_path=os.getenv("REDDOG_W10_REPORT_RECORDS_PATH", ""),
-            work_state_output_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            work_state_output_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            ),
             worker_id=os.getenv("REDDOG_WORK_STATE_REFRESH_WORKER_ID", "reddog-main-bootstrap"),
             use_latest_readonly_audit_decision=use_latest_decision,
         )

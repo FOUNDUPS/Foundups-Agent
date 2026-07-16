@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_WORK_STATE_REFRESH_PROFILE_PATH_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Aligned `main.py` authoritative work-state refresh with the resident profile
+  runtime path helper, so an active resident profile writes the authoritative
+  work-state snapshot to the same outside-repo runtime root consumed by the
+  serial queue loop.
+- Preserved the existing explicit `REDDOG_AUTHORITATIVE_WORK_STATE_PATH`
+  override and the legacy non-profile default path.
+- Added a regression proving the profile-derived work-state output is created
+  outside the source checkout and exported back to `os.environ` for downstream
+  RedDog preflights.
+
 ## 2026-07-16: REDDOG_RESIDENT_RUNTIME_PATH_DEFAULTS_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

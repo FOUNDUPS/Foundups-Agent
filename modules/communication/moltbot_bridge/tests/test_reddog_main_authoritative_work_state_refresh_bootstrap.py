@@ -432,6 +432,37 @@ def test_main_preflight_sets_work_state_path_after_success(tmp_path: Path) -> No
         assert os.environ["REDDOG_AUTHORITATIVE_WORK_STATE_PATH"] == str(paths["output"].resolve())
 
 
+def test_main_preflight_profile_derives_work_state_output_path(tmp_path: Path) -> None:
+    import main
+
+    paths = _write_sources(tmp_path)
+    runtime_root = tmp_path / "resident-runtime"
+    expected_output = runtime_root / "authoritative_work_state.json"
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH": "1",
+            "REDDOG_AUTHORITATIVE_WORK_STATE_REFRESH_ENFORCED": "0",
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+            "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            "REDDOG_ACTIVE_SLICE_LEDGER_PATH": str(paths["active"]),
+            "REDDOG_WORK_LEDGER_JSON_PATH": str(paths["ledger"]),
+            "REDDOG_GITHUB_PR_RECORDS_PATH": str(paths["github"]),
+            "REDDOG_W10_REPORT_RECORDS_PATH": str(paths["w10"]),
+        },
+        clear=True,
+    ):
+        assert main.run_reddog_authoritative_work_state_refresh_preflight(paths["repo"]) is True
+        import os
+
+        assert os.environ["REDDOG_AUTHORITATIVE_WORK_STATE_PATH"] == str(
+            expected_output.resolve()
+        )
+
+    assert expected_output.exists()
+    assert not (paths["repo"] / ".reddog").exists()
+
+
 def test_main_preflight_enables_latest_decision_bridge_with_openclaw_auto_tasks(tmp_path: Path) -> None:
     import main
 
