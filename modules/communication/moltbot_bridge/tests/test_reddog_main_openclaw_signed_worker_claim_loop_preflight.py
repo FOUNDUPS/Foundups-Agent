@@ -466,8 +466,9 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
     assert "status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT" in captured
     assert "claimed_count=1" in captured
-    assert f"requeued={task_id}" in captured
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
+    assert f"completed={task_id}" in captured
+    assert "requeued=(none)" in captured
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
     assert calls
     assert calls[0]["api_key"] == "test-openrouter-key"
     payload = calls[0]["payload"]
@@ -574,8 +575,24 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     outcome_store = tmp_path / "runtime" / "outcomes" / "signed-worker-ratchet.jsonl"
     pattern_memory_db = tmp_path / "runtime" / "pattern_memory.db"
 
-    task_id = _publish_agentdb_task()
+    allocation = _allocation()
+    coding_task_id = _publish_agentdb_task_with_allocation(
+        allocation,
+        intent_id="worker_dispatch_intent_coding_worker_1",
+        role="coding_worker_1",
+        worker_runtime="0102",
+        capability="bounded_code_change",
+    )
+    queue_stage_task_id = _publish_agentdb_task_with_allocation(
+        allocation,
+        intent_id="worker_dispatch_intent_queue_stage_progress",
+        role="queue_stage_worker",
+        worker_runtime="openclaw",
+        capability="queue_stage_progress",
+    )
     monkeypatch.setenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED", "1")
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "7")
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
@@ -604,8 +621,9 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
     assert "status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT" in captured
     assert "claimed_count=6" in captured
-    assert f"completed={task_id}" in captured
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert f"completed={coding_task_id},{queue_stage_task_id}" in captured
+    assert AgentDB().get_autonomous_task_by_id(coding_task_id)["status"] == "completed"
+    assert AgentDB().get_autonomous_task_by_id(queue_stage_task_id)["status"] == "completed"
     assert calls
     assert calls[0]["api_key"] == "test-openrouter-key"
 
