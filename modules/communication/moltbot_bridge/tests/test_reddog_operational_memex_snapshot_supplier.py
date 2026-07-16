@@ -205,6 +205,60 @@ def test_enriches_task_with_snapshot_bound_memex_view_and_worker_bindings() -> N
     assert assignment["memex_source_revision"] == REVISION
     assert assignment["memex_holoindex_generation_id"] == GENERATION_ID
     assert enriched["memex_snapshot_supply_receipt"]["no_holoindex_reindex_performed"] is True
+    assert result.supply_receipt is not None
+    assert result.supply_receipt["schema_version"] == "reddog_operational_memex_snapshot_supply_receipt.v1"
+    assert result.supply_receipt["receipt_id"].startswith("sha256:")
+    assert result.supply_receipt["snapshot_receipt_id"] == snapshot.snapshot_receipt_id
+    assert result.supply_receipt["assignment_count"] == 1
+    assert result.supply_receipt["assignment_receipt_ids"] == (
+        enriched["memex_snapshot_supply_receipt"]["receipt_id"],
+    )
+    assert result.supply_receipt["no_holoindex_reindex_performed"] is True
+
+
+def test_cycle_supply_receipt_aggregates_assignment_receipts() -> None:
+    snapshot = _snapshot()
+    first = _task("repo_code_audit")
+    second = replace(
+        _task("external_research"),
+        task_id="task-2",
+        context={
+            "assignment": {
+                "assignment_id": "assignment-2",
+                "lane_id": "external_research",
+                "snapshot_receipt_id": snapshot.snapshot_receipt_id,
+                "snapshot_content_digest": snapshot.snapshot_content_digest,
+            }
+        },
+    )
+    first = replace(
+        first,
+        context={
+            **first.context,
+            "assignment": {
+                **first.context["assignment"],
+                "snapshot_receipt_id": snapshot.snapshot_receipt_id,
+                "snapshot_content_digest": snapshot.snapshot_content_digest,
+            },
+        },
+    )
+
+    result = enrich_readonly_audit_tasks_with_operational_memex(
+        tasks=(first, second),
+        snapshot=snapshot,
+        config=_config(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.supply_receipt is not None
+    assert result.supply_receipt["assignment_count"] == 2
+    assert result.supply_receipt["assignment_ids"] == ("assignment-1", "assignment-2")
+    assert result.supply_receipt["lane_ids"] == ("repo_code_audit", "external_research")
+    assert result.supply_receipt["task_ids"] == ("task-1", "task-2")
+    assert result.supply_receipt["assignment_receipt_ids"] == tuple(
+        task.context["memex_snapshot_supply_receipt"]["receipt_id"] for task in result.tasks
+    )
 
 
 def test_rejects_before_enqueue_when_memex_sources_are_not_fresh() -> None:

@@ -81,6 +81,10 @@ PROFILE_RUNTIME_FLAGS = frozenset(
 
 PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "authoritative_work_state.json",
+    "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": "architect_determination.json",
+    "REDDOG_MODEL_SELECTION_RECEIPT_PATH": "model_selection_receipt.json",
+    "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": "memex_supply_receipt.json",
+    "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": "authority_profile_source.json",
     "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": "resident_queue_chain_results.json",
     "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": "authority_profile.json",
 }

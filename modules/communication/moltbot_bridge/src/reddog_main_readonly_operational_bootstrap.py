@@ -138,6 +138,7 @@ class RedDogMainReadonlyBootstrapResult:
     memex_snapshot_supply_attempted: bool = False
     memex_snapshot_supply_status: Optional[str] = None
     memex_snapshot_supply_view_id: Optional[str] = None
+    memex_snapshot_supply_receipt: Optional[Mapping[str, Any]] = None
     memex_snapshot_supply_rejection_reasons: tuple[str, ...] = ()
     no_model_call_performed: bool = True
     no_worker_spawn_performed: bool = True
@@ -569,6 +570,9 @@ def _ready(
         memex_snapshot_supply_attempted=memex_supply_result is not None,
         memex_snapshot_supply_status=memex_supply_result.status if memex_supply_result else None,
         memex_snapshot_supply_view_id=memex_supply_result.memex_view_id if memex_supply_result else None,
+        memex_snapshot_supply_receipt=(
+            dict(memex_supply_result.supply_receipt or {}) if memex_supply_result else None
+        ),
         memex_snapshot_supply_rejection_reasons=(
             memex_supply_result.rejection_reasons if memex_supply_result else ()
         ),
@@ -692,6 +696,9 @@ def _not_ready(
         memex_snapshot_supply_attempted=memex_supply_result is not None,
         memex_snapshot_supply_status=memex_supply_result.status if memex_supply_result else None,
         memex_snapshot_supply_view_id=memex_supply_result.memex_view_id if memex_supply_result else None,
+        memex_snapshot_supply_receipt=(
+            dict(memex_supply_result.supply_receipt or {}) if memex_supply_result else None
+        ),
         memex_snapshot_supply_rejection_reasons=(
             memex_supply_result.rejection_reasons if memex_supply_result else ()
         ),
