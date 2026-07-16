@@ -1792,6 +1792,74 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
     return True
 
 
+def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> bool:
+    """
+    Optionally let OpenClaw claim signed RedDog worker-dispatch AgentDB tasks.
+
+    Env:
+        REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP=0           Enable loop (default OFF)
+        REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_ENFORCED=0  Block startup on reject
+        OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS=1             Bounded claims
+
+    This preflight does not create tasks, sign authority, create worktrees,
+    execute shell commands, publish PRs, dispatch Hermes, write PatternMemory,
+    settle rewards, or re-index HoloIndex. It only invokes the existing
+    OpenClaw signed-worker claim loop, whose per-task gates decide what can run.
+    """
+
+    if os.getenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP", "0") == "0":
+        logger.info("[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_ENFORCED", "0") != "0"
+    max_claims_raw = os.getenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "1").strip()
+    try:
+        max_claims = int(max_claims_raw)
+    except ValueError:
+        max_claims = 0
+    if max_claims < 1:
+        print("[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=FAIL error=invalid_max_claims")
+        return not enforced
+
+    try:
+        from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
+            claim_reddog_signed_worker_dispatch_tasks_until_idle,
+        )
+
+        result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+            repo_root=repo_root,
+            max_claims=max_claims,
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    accepted = bool(result.get("accepted"))
+    status = str(result.get("status") or "(unknown)")
+    claimed_count = int(result.get("claimed_count") or 0)
+    completed = ",".join(str(item) for item in result.get("completed_task_ids", ()) or ()) or "(none)"
+    requeued = ",".join(str(item) for item in result.get("requeued_task_ids", ()) or ()) or "(none)"
+    failed = ",".join(str(item) for item in result.get("failed_task_ids", ()) or ()) or "(none)"
+    reasons = ",".join(str(reason) for reason in result.get("rejection_reasons", ()) or ()) or "(none)"
+    status_label = "PASS" if accepted else "WARN"
+    print(
+        f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight={status_label} status={status} "
+        f"claimed_count={claimed_count} max_claims={max_claims} "
+        f"completed={completed} requeued={requeued} failed={failed} reasons={reasons}"
+    )
+    if accepted:
+        return True
+
+    if enforced:
+        print("[REDDOG-OPENCLAW-CLAIM-LOOP] Startup blocked by REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_ENFORCED=1")
+        return False
+    return True
+
+
 def bootstrap_runtime_dae_launches() -> None:
     """Register broker-managed DAE entrypoints for an already running system."""
     daemon = get_central_daemon()
@@ -1979,6 +2047,8 @@ def main():
     if not run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root):
         return
     if not run_reddog_resident_queue_serial_loop_preflight(repo_root):
+        return
+    if not run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root):
         return
     if not run_reddog_readonly_operational_bootstrap_preflight(repo_root):
         return
