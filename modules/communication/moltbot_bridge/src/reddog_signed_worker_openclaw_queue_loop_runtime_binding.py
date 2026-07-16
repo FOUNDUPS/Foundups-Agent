@@ -43,6 +43,12 @@ class SignedWorkerOpenClawQueueLoopBindingReason:
     AUTHORITY_PROFILE_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_AUTHORITY_PROFILE_PATH_MISSING"
     MAX_STEPS_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS_INVALID"
     NOW_EPOCH_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_NOW_EPOCH_INVALID"
+    DRAFT_PR_RUNNER_MODE_UNSUPPORTED = (
+        "REJECT_SIGNED_WORKER_QUEUE_LOOP_DRAFT_PR_RUNNER_MODE_UNSUPPORTED"
+    )
+    DRAFT_PR_RUNNER_TIMEOUT_INVALID = (
+        "REJECT_SIGNED_WORKER_QUEUE_LOOP_DRAFT_PR_RUNNER_TIMEOUT_INVALID"
+    )
 
 
 @dataclass(frozen=True)
@@ -131,6 +137,12 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         now_epoch = None
         reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.NOW_EPOCH_INVALID)
 
+    draft_pr_runner, draft_pr_reasons = _build_draft_pr_runner(
+        repo_root=repo_root,
+        env=env,
+    )
+    reasons.extend(draft_pr_reasons)
+
     if reasons:
         return SignedWorkerOpenClawQueueLoopBindingResult(
             accepted=False,
@@ -145,6 +157,8 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         )
 
     bootstrap_kwargs = _bootstrap_kwargs(env)
+    if draft_pr_runner is not None:
+        bootstrap_kwargs["draft_pr_runner"] = draft_pr_runner
     config = SignedWorkerQueueSerialLoopRunnerConfig(
         work_state_path=str(work_state_path),
         chain_results_path=str(chain_results_path),
@@ -194,7 +208,6 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
         "worktree_runner_mode": "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE",
         "artifact_generator_mode": "REDDOG_ARTIFACT_GENERATOR_MODE",
         "evidence_command_runner_mode": "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE",
-        "draft_pr_runner_mode": "REDDOG_DRAFT_PR_RUNNER_MODE",
     }
     payload: dict[str, Any] = {}
     for key, env_name in pairs.items():
@@ -209,6 +222,36 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
         if _stripped(env.get(env_name)) == "1":
             payload[key] = True
     return payload
+
+
+def _build_draft_pr_runner(
+    *,
+    repo_root: Path | str,
+    env: Mapping[str, str],
+) -> tuple[Any, tuple[str, ...]]:
+    mode = _stripped(env.get("REDDOG_DRAFT_PR_RUNNER_MODE")).lower()
+    if not mode:
+        return None, ()
+    if mode != "real":
+        return None, (
+            SignedWorkerOpenClawQueueLoopBindingReason.DRAFT_PR_RUNNER_MODE_UNSUPPORTED,
+        )
+    timeout_raw = _stripped(env.get("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S"))
+    try:
+        timeout_s = int(timeout_raw) if timeout_raw else 120
+    except ValueError:
+        timeout_s = 0
+    if timeout_s <= 0:
+        return None, (
+            SignedWorkerOpenClawQueueLoopBindingReason.DRAFT_PR_RUNNER_TIMEOUT_INVALID,
+        )
+
+    from modules.foundups.agent.src.worktree_pr_runner import RealWorktreeRunner
+
+    return RealWorktreeRunner(
+        repo_root=Path(repo_root).resolve(),
+        timeout_s=timeout_s,
+    ), ()
 
 
 def _stripped(value: Any) -> str:

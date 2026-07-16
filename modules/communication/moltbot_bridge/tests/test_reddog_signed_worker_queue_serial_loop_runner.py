@@ -71,6 +71,12 @@ class _FakeBootstrap:
         return _FakeBootstrapResult(self.payload)
 
 
+class _FakeDraftPrRunner:
+    def __init__(self, *, repo_root: Path, timeout_s: int) -> None:
+        self.repo_root = Path(repo_root)
+        self.timeout_s = timeout_s
+
+
 def _digest(value: object) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
@@ -265,6 +271,67 @@ def test_runtime_binding_rejects_missing_required_paths(tmp_path: Path) -> None:
     assert SignedWorkerOpenClawQueueLoopBindingReason.AUTHORITY_PROFILE_PATH_MISSING in binding.rejection_reasons
 
 
+def test_runtime_binding_builds_draft_pr_runner_when_requested(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    from modules.foundups.agent.src import worktree_pr_runner
+
+    monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeDraftPrRunner)
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        "REDDOG_DRAFT_PR_RUNNER_MODE": "real",
+        "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "88",
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=tmp_path,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.runner is not None
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path,
+    )
+
+    assert result["accepted"] is True
+    draft_runner = bootstrap.calls[0]["draft_pr_runner"]
+    assert draft_runner.__class__.__name__ == "_FakeDraftPrRunner"
+    assert draft_runner.repo_root == tmp_path.resolve()
+    assert draft_runner.timeout_s == 88
+
+
+def test_runtime_binding_rejects_unsupported_draft_pr_runner_mode(tmp_path: Path) -> None:
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=tmp_path,
+        env={
+            "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+            "REDDOG_DRAFT_PR_RUNNER_MODE": "unsafe",
+        },
+        bootstrap=_FakeBootstrap(),
+    )
+
+    assert binding.accepted is False
+    assert binding.requested is True
+    assert (
+        SignedWorkerOpenClawQueueLoopBindingReason.DRAFT_PR_RUNNER_MODE_UNSUPPORTED
+        in binding.rejection_reasons
+    )
+
+
 def test_queue_serial_loop_runner_accepts_openclaw_candidate(tmp_path: Path) -> None:
     bootstrap = _FakeBootstrap()
     runner = RedDogSignedWorkerQueueSerialLoopRunner(_config(tmp_path), bootstrap=bootstrap)
@@ -392,6 +459,59 @@ def test_queue_serial_loop_runner_allows_bounded_isolated_worktree_progress(
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert result["no_source_repo_mutation_performed"] is True
     assert result["no_shell_command_executed"] is True
+
+
+def test_queue_serial_loop_runner_allows_verified_draft_pr_publish_progress(
+    tmp_path: Path,
+) -> None:
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(
+        _config(tmp_path),
+        bootstrap=_FakeBootstrap(
+            _bootstrap_payload(
+                dispatched_stages=("verified_draft_pr_publish",),
+                no_pr_created=False,
+                next_action="RUN_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE",
+            )
+        ),
+    )
+    context = _context()
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is True
+    assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
+    assert result["no_pr_created"] is False
+    assert result["no_shell_command_executed"] is True
+
+
+def test_queue_serial_loop_runner_rejects_unexpected_pr_creation(tmp_path: Path) -> None:
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(
+        _config(tmp_path),
+        bootstrap=_FakeBootstrap(
+            _bootstrap_payload(
+                dispatched_stages=("slice_verifier",),
+                no_pr_created=False,
+            )
+        ),
+    )
+    context = _context()
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is False
+    assert SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE in result["rejection_reasons"]
 
 
 def test_signed_worker_executor_accepts_queue_serial_loop_runner(tmp_path: Path) -> None:
