@@ -117,6 +117,25 @@ the candidate panel. The harness does not call model providers, execute commands
 promote champions, persist PatternMemory, mutate HoloIndex, or bind RedDog
 runtime defaults.
 
+#### Champion/Challenger Promotion Gate
+
+```python
+evaluate_model_promotion_gate(...) -> ModelPromotionGateReceipt
+```
+
+`ModelPromotionPolicy` binds task family, candidate ID, minimum verifier pass
+rate, minimum sample count, required task-set digest, required held-out split
+digest, required verifier digest, and optional latency/cost ceilings.
+
+The gate validates a `ModelCombinationBenchmarkRunReceipt` and emits
+`PROMOTE_CHAMPION` only when benchmark evidence matches the policy and signed
+promotion authority is supplied. `KEEP_CHALLENGER` records below-threshold
+benchmark evidence without creating champion authority. Mismatched or tampered
+benchmark projections return `REJECT`.
+
+This API does not mutate model catalogs, write champion ledgers, call providers,
+or bind runtime RedDog model defaults.
+
 ## Configuration
 
 ### Environment Variables
