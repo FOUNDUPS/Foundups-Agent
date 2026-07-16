@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_TASK_OPENCLAW_CLAIM_RUNTIME_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added the exact signed worker-dispatch AgentDB task executor that validates
+  the published worker-dispatch context and calls only an explicitly injected
+  runner.
+- Wired `run_task.execute_task()` to route signed worker-dispatch tasks before
+  generic WRE fallback, so a missing runner fails closed instead of executing
+  as a generic skill.
+- Added an OpenClaw claim-once seam for signed worker-dispatch tasks that
+  atomically claims the AgentDB task, runs the exact executor, completes or
+  fails the task, and returns a bounded claim receipt.
+- Boundary remains non-mutating by default: no default worker runner, shell
+  command, source repo mutation, worktree operation, Hermes dispatch, PR,
+  PatternMemory write, HoloIndex re-index, or reward settlement is performed
+  by this slice.
+
 ## 2026-07-16: REDDOG_OPENCLAW_HERMES_0102_WORKER_DISPATCH_RUNTIME_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

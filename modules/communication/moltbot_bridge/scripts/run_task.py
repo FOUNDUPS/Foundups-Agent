@@ -29,7 +29,12 @@ sys.path.insert(0, str(REPO_ROOT))
 logger = logging.getLogger(__name__)
 
 
-def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
+def execute_task(
+    task_id: str,
+    repo_root: Path | None = None,
+    *,
+    signed_worker_runner: Any | None = None,
+) -> Dict[str, Any]:
     """
     Execute a single autonomous task from AgentDB.
 
@@ -80,7 +85,20 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
         if readonly_result is not None:
             result = readonly_result
 
-    # Dispatch path 2: WRE skill execution.
+    # Dispatch path 2: exact RedDog signed worker-dispatch task execution.
+    if not result["ok"] and result["detail"] == "no_executor_matched":
+        signed_worker_result = _try_reddog_signed_worker_dispatch(
+            repo_root,
+            task_id,
+            context,
+            required_skills,
+            source,
+            signed_worker_runner,
+        )
+        if signed_worker_result is not None:
+            result = signed_worker_result
+
+    # Dispatch path 3: WRE skill execution.
     if required_skills:
         if not result["ok"] and result["detail"] == "no_executor_matched":
             wre_result = _try_wre_dispatch(repo_root, task_id, required_skills, context, description)
@@ -212,6 +230,54 @@ def _try_reddog_readonly_audit_report_persist(
             "accepted": False,
             "status": "READONLY_AUDIT_REPORT_PERSIST_REJECT",
             "rejection_reasons": ["report_store_error"],
+        }
+
+
+def _try_reddog_signed_worker_dispatch(
+    repo_root: Path,
+    task_id: str,
+    context: dict,
+    required_skills: list,
+    source: str,
+    signed_worker_runner: Any | None,
+) -> Dict[str, Any] | None:
+    """Execute exact RedDog signed worker-dispatch tasks before WRE fallback."""
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
+            SIGNED_WORKER_DISPATCH_TASK_SKILL,
+            SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            execute_reddog_signed_worker_dispatch_task,
+        )
+    except ImportError as e:
+        logger.debug("[RUN_TASK] RedDog signed-worker executor unavailable: %s", e)
+        return None
+
+    if SIGNED_WORKER_DISPATCH_TASK_SKILL not in required_skills:
+        return None
+    if source != SIGNED_WORKER_DISPATCH_TASK_SOURCE:
+        return None
+
+    try:
+        execution = execute_reddog_signed_worker_dispatch_task(
+            task_context=context,
+            task_id=task_id,
+            repo_root=repo_root,
+            runner=signed_worker_runner,
+        )
+        payload = execution.to_dict()
+        return {
+            "ok": bool(execution.accepted),
+            "detail": json.dumps(payload, default=str)[:1000],
+            "executor": "reddog:signed_worker_dispatch",
+            "structured_result": payload,
+        }
+    except Exception as e:
+        logger.warning("[RUN_TASK] RedDog signed-worker dispatch error: %s", e)
+        return {
+            "ok": False,
+            "detail": f"reddog_signed_worker_dispatch_error: {e}",
+            "executor": "reddog:signed_worker_dispatch",
         }
 
 
