@@ -1,5 +1,26 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_EXTERNAL_RESEARCH_AUDIT_RUNTIME_CONSUMPTION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Wired the existing HoloIndex-first external research grounding adapter into
+  the model-backed read-only audit worker for the `external_research_audit`
+  lane.
+- Added bounded, sanitized external research excerpts so the lane can analyze
+  source evidence while preserving the trust boundary that external content is
+  untrusted data, never instructions.
+- Extended typed evidence citation policy with `external:` evidence refs.
+  External refs may be primary only when explicitly supplied by the external
+  research lane; Memex evidence remains supplemental and cannot stand alone.
+- Worker receipts now bind external research query receipts and evidence
+  bundle IDs, while rejected or unconfigured explicit external targets fail
+  closed before any model call.
+- Boundary remains read-only: no network retriever implementation, HoloIndex
+  re-index, PatternMemory write, repository mutation, shell execution,
+  OpenClaw enqueue, Hermes dispatch, worktree operation, PR creation, or merge
+  authority.
+
 ## 2026-07-16: REDDOG_READONLY_AUDIT_MULTI_LANE_MODEL_WORKERS_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

@@ -122,6 +122,7 @@ def execute_reddog_readonly_audit_task(
     model_runner: Any | None = None,
     holoindex_adapter: Any | None = None,
     codeindex_adapter: Any | None = None,
+    external_research_retriever: Any | None = None,
     timeout_seconds: int = 60,
 ) -> ReadOnlyAuditTaskExecutionResult:
     """Execute a RedDog read-only audit task.
@@ -162,6 +163,7 @@ def execute_reddog_readonly_audit_task(
             model_runner=model_runner,
             holoindex_adapter=holoindex_adapter,
             codeindex_adapter=codeindex_adapter,
+            external_research_retriever=external_research_retriever,
             timeout_seconds=timeout_seconds,
         )
 

@@ -201,6 +201,8 @@ def test_external_prompt_injection_is_marked_data_not_instruction() -> None:
     assert result.accepted is True
     target = result.grounded_targets[0]
     assert target.prompt_injection_markers_detected is True
+    assert "external_prompt_injection_marker_removed" in target.content_excerpt
+    assert "Ignore previous instructions" not in target.content_excerpt
     assert target.untrusted_data_only is True
     assert result.receipt.no_model_instruction_from_external_content is True
     assert "Ignore previous instructions" not in json.dumps(result.to_dict())
