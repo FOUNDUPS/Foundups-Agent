@@ -377,6 +377,66 @@ def test_runtime_binding_profile_enables_runner_without_explicit_runner_flag(tmp
     assert binding.runner is not None
 
 
+def test_runtime_binding_fusion_profile_supplies_artifact_generator_mode(tmp_path: Path) -> None:
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=tmp_path,
+        env=env,
+        bootstrap=bootstrap,
+    )
+
+    assert binding.accepted is True
+    assert binding.runner is not None
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path,
+    )
+
+    assert result["accepted"] is True
+    assert bootstrap.calls[0]["artifact_generator_mode"] == "foundups_fusion"
+
+
+def test_runtime_binding_explicit_artifact_generator_mode_overrides_fusion_profile(
+    tmp_path: Path,
+) -> None:
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
+        "REDDOG_ARTIFACT_GENERATOR_MODE": "unsafe",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=tmp_path,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.runner is not None
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path,
+    )
+
+    assert result["accepted"] is True
+    assert bootstrap.calls[0]["artifact_generator_mode"] == "unsafe"
+
+
 def test_runtime_binding_explicit_zero_disables_runner_profile(tmp_path: Path) -> None:
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",

@@ -793,6 +793,7 @@ def _signed_0102_bounded_code_stage_ready_from_env(
     """Return True only when a coding task may safely drive the artifact stage."""
 
     from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_artifact_generator_mode,
         resident_queue_binding_enabled,
         resident_queue_runtime_flag_enabled,
     )
@@ -801,7 +802,7 @@ def _signed_0102_bounded_code_stage_ready_from_env(
         return False
     if not resident_queue_runtime_flag_enabled(env, "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER"):
         return False
-    if str(env.get("REDDOG_ARTIFACT_GENERATOR_MODE") or "").strip() != "foundups_fusion":
+    if resident_queue_artifact_generator_mode(env) != "foundups_fusion":
         return False
     artifact_request_ready = bool(
         str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH") or "").strip()

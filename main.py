@@ -1666,6 +1666,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         )
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
             resident_queue_binding_enabled,
+            resident_queue_artifact_generator_mode,
             resident_queue_materializer_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
@@ -1733,7 +1734,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             ),
             worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
             worktree_runner_timeout_s=worktree_runner_timeout_s,
-            artifact_generator_mode=os.getenv("REDDOG_ARTIFACT_GENERATOR_MODE", "") or None,
+            artifact_generator_mode=resident_queue_artifact_generator_mode(os.environ) or None,
             slice_verifier_request_binding_enabled=resident_queue_binding_enabled(
                 os.environ,
                 "REDDOG_SLICE_VERIFIER_REQUEST_BINDING",

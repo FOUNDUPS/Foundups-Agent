@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_FUSION_ARTIFACT_PROFILE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code_fusion`
+  as a higher-authority resident profile that defaults the artifact generator
+  mode to `foundups_fusion`.
+- Preserved the base `signed_0102_bounded_code` profile as non-model and
+  preserved explicit `REDDOG_ARTIFACT_GENERATOR_MODE` override behavior.
+- Boundary remains constrained: the fusion profile selects the model artifact
+  generator only after signed queue-loop and bounded-code stage gates pass; it
+  still does not enable shell execution, worktree runners, draft PR publishing,
+  PatternMemory writes, HoloIndex re-index, merge authority, or rewards.
+
 ## 2026-07-16: REDDOG_RESIDENT_PROFILE_0102_BOUNDED_CODE_TASK_DEFAULT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
