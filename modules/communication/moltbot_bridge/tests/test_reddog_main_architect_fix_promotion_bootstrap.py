@@ -297,6 +297,81 @@ def test_main_preflight_model_selection_supply_runs_before_promotion(tmp_path: P
     assert promote_kwargs["model_selection_receipt_path"] == str(runtime_root / "model_selection_receipt.json")
 
 
+def test_main_preflight_authority_source_supply_runs_before_promotion(tmp_path: Path) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    work_state = _write_json(tmp_path, "authoritative_work_state.json", _work_state())
+    determination = _write_json(tmp_path, "architect_determination.json", _determination())
+    model_selection = _write_json(tmp_path, "model_selection_receipt.json", _model_selection())
+    memex = _write_json(tmp_path, "memex_supply_receipt.json", _memex_supply())
+    authority_supply_result = type(
+        "AuthoritySupplyResult",
+        (),
+        {
+            "accepted": True,
+            "status": "AUTHORITY_PROFILE_SOURCE_BOOTSTRAP_APPLIED",
+            "authority_profile_source_receipt_id": "sha256:authority-source",
+            "output_path": str(runtime_root / "authority_profile_source.json"),
+            "rejection_reasons": (),
+        },
+    )()
+    promotion_result = type(
+        "PromotionResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
+            "promotion_receipt_id": "sha256:promotion",
+            "queue_item_id": "queue-1",
+            "claim_id": "claim-1",
+            "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "committed_revision": "sha256:revision",
+            "rejection_reasons": (),
+        },
+    )()
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply_bootstrap.run_reddog_authority_profile_source_artifact_supply_bootstrap",
+        return_value=authority_supply_result,
+    ) as authority_supply:
+        with patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
+            return_value=promotion_result,
+        ) as promote:
+            with patch.dict(
+                "os.environ",
+                {
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "1",
+                    "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                    "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "REDDOG_MODEL_SELECTION_RECEIPT_PATH": str(model_selection),
+                    "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
+                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_AUTHORITY_PROFILE_SEED_PATH": str(tmp_path / "seed.json"),
+                    "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": str(tmp_path / "principal.json"),
+                    "REDDOG_PERMISSION_SNAPSHOT_PATH": str(tmp_path / "permission.json"),
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_NOW_EPOCH": "1800000000",
+                },
+                clear=True,
+            ):
+                assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+                assert main.os.environ["REDDOG_AUTHORITY_PROFILE_SOURCE_PATH"] == str(
+                    runtime_root / "authority_profile_source.json"
+                )
+
+    authority_supply.assert_called_once()
+    authority_kwargs = authority_supply.call_args.kwargs
+    assert authority_kwargs["output_path"] == str(runtime_root / "authority_profile_source.json")
+    assert authority_kwargs["now_epoch"] == 1_800_000_000
+    promote.assert_called_once()
+    promote_kwargs = promote.call_args.kwargs
+    assert promote_kwargs["authority_profile_source_path"] == str(runtime_root / "authority_profile_source.json")
+
+
 def test_main_preflight_disabled_without_requested_or_complete_inputs() -> None:
     import main
 
