@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
@@ -696,6 +697,117 @@ def test_main_preflight_reports_ready_without_blocking_menu(capsys) -> None:
     assert "decision_action=FIX" in output
     assert "decision_next_slice=REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1" in output
     assert "decision_persist_attempted=False" in output
+
+
+def _e2e_result(*, accepted: bool = True):
+    final_bootstrap = SimpleNamespace(
+        status=REDDOG_MAIN_BOOTSTRAP_READY if accepted else REDDOG_MAIN_BOOTSTRAP_NOT_READY,
+        backend_architect_determination_action=ACTION_FIX if accepted else None,
+        backend_architect_determination_next_slice="REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1" if accepted else None,
+        backend_architect_determination_queue_candidate_count=1 if accepted else 0,
+    )
+    return SimpleNamespace(
+        accepted=accepted,
+        status="ACCEPT" if accepted else "REJECT",
+        initial_bootstrap=SimpleNamespace(status=REDDOG_MAIN_BOOTSTRAP_READY),
+        final_bootstrap=final_bootstrap if accepted else None,
+        task_runs=(SimpleNamespace(persist_accepted=True),) if accepted else (),
+        rejection_reasons=() if accepted else ("forced_reject",),
+        no_shell_command_executed=True,
+        no_repo_mutation_performed=True,
+        no_holoindex_reindex_performed=True,
+        no_hermes_dispatch_performed=True,
+        no_worktree_operation_performed=True,
+        no_pr_created=True,
+        no_pattern_memory_promotion_performed=True,
+        no_live_foundup_enqueue_performed=True,
+        coding_worker_spawned=False,
+        readonly_audit_tasks_enqueued=accepted,
+        readonly_audit_tasks_executed=accepted,
+    )
+
+
+def test_main_preflight_runs_explicit_readonly_e2e_runtime(capsys) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_readonly_audit_research_decision_e2e_runtime."
+        "run_reddog_readonly_audit_research_decision_e2e",
+        return_value=_e2e_result(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
+                "REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED": "1",
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "O:/state/work_state.json",
+                "HOLOINDEX_FRESHNESS_RECEIPT": "O:/state/holo_receipt.json",
+                "HOLOINDEX_SSD_PATH": "E:/HoloIndex",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["repo_root"] == REPO_ROOT
+    assert mocked.call_args.kwargs["work_state_path"] == "O:/state/work_state.json"
+    assert mocked.call_args.kwargs["holoindex_receipt_path"] == "O:/state/holo_receipt.json"
+    output = capsys.readouterr().out
+    assert "[REDDOG-BOOTSTRAP-E2E] preflight=PASS" in output
+    assert "tasks=1" in output
+    assert "reports_persisted=1" in output
+    assert "architect_action=FIX" in output
+    assert "queue_candidates=1" in output
+    assert "no_repo_mutation=True" in output
+    assert "no_holoindex_reindex=True" in output
+    assert "coding_worker_spawned=False" in output
+
+
+def test_main_preflight_e2e_runtime_reject_is_nonblocking_by_default(capsys) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_readonly_audit_research_decision_e2e_runtime."
+        "run_reddog_readonly_audit_research_decision_e2e",
+        return_value=_e2e_result(accepted=False),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
+                "REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED": "1",
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED": "0",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is True
+
+    output = capsys.readouterr().out
+    assert "[REDDOG-BOOTSTRAP-E2E] preflight=WARN" in output
+    assert "reasons=forced_reject" in output
+
+
+def test_main_preflight_e2e_runtime_reject_blocks_when_enforced(capsys) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_readonly_audit_research_decision_e2e_runtime."
+        "run_reddog_readonly_audit_research_decision_e2e",
+        return_value=_e2e_result(accepted=False),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
+                "REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED": "1",
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED": "1",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_readonly_operational_bootstrap_preflight(REPO_ROOT) is False
+
+    output = capsys.readouterr().out
+    assert "[REDDOG-BOOTSTRAP-E2E] preflight=WARN" in output
+    assert "Startup blocked by REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=1" in output
 
 
 def test_main_preflight_enables_enqueue_when_openclaw_auto_tasks_enabled() -> None:

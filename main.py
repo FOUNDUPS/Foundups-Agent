@@ -1193,6 +1193,8 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED   Override audit report collection bridge
         REDDOG_READONLY_AUDIT_DECISION_PERSIST_ENABLED    Override audit decision persistence bridge
         REDDOG_READONLY_AUDIT_SWARM_ENQUEUE_ENABLED       Override audit task enqueue bridge
+        REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED
+                                                            Run one explicit read-only audit/research/decision cycle
         OPENCLAW_AUTO_TASKS_ENABLED                       Enables audit task enqueue if no override
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH              Existing work-state JSON
         HOLOINDEX_FRESHNESS_RECEIPT                       Existing HoloIndex receipt
@@ -1219,6 +1221,65 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         decision_persist_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
     else:
         decision_persist_requested = decision_persist_override != "0"
+    e2e_requested = os.getenv("REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED", "0") != "0"
+
+    if e2e_requested:
+        try:
+            from modules.communication.moltbot_bridge.src.reddog_readonly_audit_research_decision_e2e_runtime import (
+                run_reddog_readonly_audit_research_decision_e2e,
+            )
+
+            e2e_result = run_reddog_readonly_audit_research_decision_e2e(
+                repo_root=repo_root,
+                work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+                holoindex_receipt_path=os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", ""),
+                holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-BOOTSTRAP-E2E] Startup runtime failed: {exc}")
+            if enforced:
+                print(f"[REDDOG-BOOTSTRAP-E2E] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-BOOTSTRAP-E2E] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        e2e_status = "PASS" if e2e_result.accepted else "WARN"
+        e2e_reasons = ",".join(e2e_result.rejection_reasons) if e2e_result.rejection_reasons else "(none)"
+        final_bootstrap = e2e_result.final_bootstrap
+        reports_persisted = sum(1 for task in e2e_result.task_runs if task.persist_accepted)
+        print(
+            f"[REDDOG-BOOTSTRAP-E2E] preflight={e2e_status} status={e2e_result.status} "
+            f"accepted={e2e_result.accepted} initial_status={e2e_result.initial_bootstrap.status} "
+            f"final_status={final_bootstrap.status if final_bootstrap else '(none)'} "
+            f"tasks={len(e2e_result.task_runs)} reports_persisted={reports_persisted} "
+            f"tasks_enqueued={e2e_result.readonly_audit_tasks_enqueued} "
+            f"tasks_executed={e2e_result.readonly_audit_tasks_executed} "
+            f"architect_action={(final_bootstrap.backend_architect_determination_action if final_bootstrap else None) or '(none)'} "
+            f"architect_next_slice={(final_bootstrap.backend_architect_determination_next_slice if final_bootstrap else None) or '(none)'} "
+            f"queue_candidates={(final_bootstrap.backend_architect_determination_queue_candidate_count if final_bootstrap else 0)} "
+            f"reasons={e2e_reasons}"
+        )
+        print(
+            "[REDDOG-BOOTSTRAP-E2E] "
+            f"no_shell={e2e_result.no_shell_command_executed} "
+            f"no_repo_mutation={e2e_result.no_repo_mutation_performed} "
+            f"no_holoindex_reindex={e2e_result.no_holoindex_reindex_performed} "
+            f"no_hermes_dispatch={e2e_result.no_hermes_dispatch_performed} "
+            f"no_worktree={e2e_result.no_worktree_operation_performed} "
+            f"no_pr={e2e_result.no_pr_created} "
+            f"no_pattern_memory={e2e_result.no_pattern_memory_promotion_performed} "
+            f"no_live_foundup_enqueue={e2e_result.no_live_foundup_enqueue_performed} "
+            f"coding_worker_spawned={e2e_result.coding_worker_spawned}"
+        )
+        if e2e_result.accepted:
+            return True
+        if enforced:
+            print(
+                "[REDDOG-BOOTSTRAP-E2E] Startup blocked by "
+                "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=1"
+            )
+            return False
+        return True
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
