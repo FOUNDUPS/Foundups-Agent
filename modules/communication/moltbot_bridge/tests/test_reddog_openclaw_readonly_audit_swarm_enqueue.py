@@ -84,6 +84,7 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
         repo_head_sha=HEAD,
         ssd_path="E:/HoloIndex",
         source="ci_targeted_reindex",
+        generation_id="sha256:holo-generation",
         collections=[
             CollectionFreshness(
                 name="navigation_work_ledger",
@@ -92,6 +93,9 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source="ci_targeted_reindex",
                 repo_head_sha=HEAD,
                 last_indexed_at=NOW,
+                source_manifest_digest="sha256:work-ledger-manifest",
+                indexed_paths_digest="sha256:work-ledger-paths",
+                verification="PASS",
             ),
             CollectionFreshness(
                 name="navigation_symbols",
@@ -100,6 +104,9 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source="ci_targeted_reindex",
                 repo_head_sha=HEAD,
                 last_indexed_at=NOW,
+                source_manifest_digest="sha256:symbols-manifest",
+                indexed_paths_digest="sha256:symbols-paths",
+                verification="PASS",
             ),
         ],
     )
@@ -190,10 +197,11 @@ def test_enqueue_accepts_plan_and_builds_pending_readonly_tasks() -> None:
     assert tuple(task.context["assignment"]["lane_id"] for task in result.tasks) == DEFAULT_AUDIT_LANES
     assert all(task.required_skills == (READONLY_AUDIT_TASK_SKILL,) for task in result.tasks)
     assert all(task.context["source"] == READONLY_AUDIT_TASK_SOURCE for task in result.tasks)
+    assert all(task.context["worker_mode"] == "model_backed_0102" for task in result.tasks)
     assert writer.calls and len(writer.calls[0][0]) == 5
 
 
-def test_enqueue_carries_wsp15_allocation_into_repo_code_task_context() -> None:
+def test_enqueue_carries_wsp15_allocation_into_every_task_context() -> None:
     allocation = allocate_reddog_wsp15_receipt(
         requested_operation="readonly_audit_swarm",
         prompt_text="audit current RedDog operational loop",
@@ -204,11 +212,12 @@ def test_enqueue_carries_wsp15_allocation_into_repo_code_task_context() -> None:
     result = enqueue_reddog_readonly_audit_swarm(plan=plan, writer=_FakeWriter())
 
     assert result.accepted is True
-    repo_task = next(task for task in result.tasks if task.context["assignment"]["lane_id"] == "repo_code_audit")
-    assert repo_task.context["worker_mode"] == "model_backed_0102"
-    assert repo_task.context["wsp15_allocation_receipt"]["receipt_id"] == allocation["receipt_id"]
-    assert repo_task.context["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
-    assert repo_task.context["wsp15_allocation_digest"]
+    assert len(result.tasks) == len(DEFAULT_AUDIT_LANES)
+    for task in result.tasks:
+        assert task.context["worker_mode"] == "model_backed_0102"
+        assert task.context["wsp15_allocation_receipt"]["receipt_id"] == allocation["receipt_id"]
+        assert task.context["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
+        assert task.context["wsp15_allocation_digest"]
 
 
 def test_rejects_rejected_plan_and_missing_writer_before_publication() -> None:

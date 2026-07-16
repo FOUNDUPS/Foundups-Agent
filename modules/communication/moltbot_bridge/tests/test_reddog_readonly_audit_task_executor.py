@@ -258,6 +258,7 @@ def _context() -> dict:
 def _model_context(
     *,
     allowed_read_targets: tuple[str, ...] | None = None,
+    lane_id: str = REPO_CODE_AUDIT_LANE,
     requested_operation: str = "repo_code_audit",
     prompt_text: str = "Run model-backed RedDog repo code audit.",
 ) -> dict:
@@ -279,7 +280,7 @@ def _model_context(
     context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
     context["wsp15_allocation_digest"] = canonical_reddog_wsp15_allocation_digest(allocation)
     context["assignment"] = dict(context["assignment"])
-    context["assignment"]["lane_id"] = REPO_CODE_AUDIT_LANE
+    context["assignment"]["lane_id"] = lane_id
     context["assignment"]["foundup_id"] = MEMEX_FOUNDUP_ID
     context["assignment"]["principal_id"] = "principal-012"
     context["assignment"]["work_order_id"] = "assignment-1"
@@ -289,7 +290,7 @@ def _model_context(
     context["assignment"]["determination_id"] = "sha256:determination"
     context["assignment"]["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
     context["assignment"]["wsp15_allocation_digest"] = context["wsp15_allocation_digest"]
-    context["assignment"]["memex_source_scope"] = MEMEX_SOURCE_SCOPE
+    context["assignment"]["memex_source_scope"] = f"foundup:{MEMEX_FOUNDUP_ID}:lane:{lane_id}"
     context["assignment"]["memex_source_revision"] = MEMEX_SOURCE_REVISION
     context["assignment"]["memex_holoindex_generation_id"] = MEMEX_GENERATION_ID
     context["assignment"]["memex_policy_expires_at"] = MEMEX_POLICY_EXPIRES_AT
@@ -411,6 +412,35 @@ def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_p
     assert result.report["worker_receipt"]["model_receipt_id"] == "model-receipt-1"
     assert result.report["worker_receipt"]["model_route_receipt_id"].startswith("sha256:")
     assert result.report["findings"][0]["evidence_refs"][0] in result.report["evidence_refs"]
+
+
+def test_model_backed_runtime_freshness_lane_uses_same_guarded_path(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context(
+        lane_id="runtime_freshness_audit",
+        requested_operation="runtime_freshness_audit",
+        prompt_text="Run model-backed runtime freshness audit.",
+    )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert result.no_model_call_performed is False
+    assert runner.calls
+    assert result.report is not None
+    assert result.report["lane_id"] == "runtime_freshness_audit"
+    assert result.report["model_backed_0102_worker_performed"] is True
+    model_prompt = json.loads(runner.calls[0]["prompt"])
+    assert model_prompt["assignment"]["lane_id"] == "runtime_freshness_audit"
+    assert "runtime_freshness_audit" in model_prompt["task"]
 
 
 def test_model_backed_discovers_index_candidate_before_direct_read(tmp_path: Path) -> None:

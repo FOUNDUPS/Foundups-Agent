@@ -316,7 +316,7 @@ def _build_task_spec(plan: ReadOnlyAuditSwarmPlan, assignment: ReadOnlyAuditAssi
     context = {
         "source": READONLY_AUDIT_TASK_SOURCE,
         "slice_name": "REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_AGENTDB_ENQUEUE_PHASE1",
-        "worker_mode": "model_backed_0102" if assignment.lane_id == "repo_code_audit" else "deterministic_readonly",
+        "worker_mode": "model_backed_0102",
         "wsp15_allocation_receipt_id": assignment.wsp15_allocation_receipt_id,
         "wsp15_allocation_digest": assignment.wsp15_allocation_digest,
         "wsp15_allocation_receipt": dict(plan.receipt.wsp15_allocation_receipt),

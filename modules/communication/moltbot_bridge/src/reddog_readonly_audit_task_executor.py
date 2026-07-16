@@ -148,7 +148,7 @@ def execute_reddog_readonly_audit_task(
 
     root = Path(repo_root).resolve()
     lane_id = str(assignment.get("lane_id") or "")
-    if lane_id == "repo_code_audit" and task_context.get("worker_mode") == "model_backed_0102":
+    if task_context.get("worker_mode") == "model_backed_0102":
         from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
             execute_model_backed_repo_code_audit,
         )
