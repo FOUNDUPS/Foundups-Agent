@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_PROFILE_0102_BOUNDED_CODE_TASK_DEFAULT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Extended `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code`
+  to default `OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED=1` as a
+  control-plane task inclusion flag.
+- Preserved the existing stage-ready gate: bounded-code tasks still require
+  the signed queue-loop runner, `foundups_fusion` artifact generator mode,
+  a derivable or explicit artifact request, the correct queue stage, and no
+  static artifact contents.
+- Explicit `OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED=0` still disables
+  bounded-code task claims even when the resident profile is active.
+
 ## 2026-07-16: REDDOG_RESIDENT_PROFILE_OPENCLAW_CLAIM_LOOP_DEFAULTS_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
