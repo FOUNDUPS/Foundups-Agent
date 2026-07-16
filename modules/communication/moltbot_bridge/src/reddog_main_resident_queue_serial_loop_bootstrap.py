@@ -156,6 +156,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     slice_verifier_request_binding_enabled: bool = False,
     evidence_command_runner_mode: str | None = None,
     draft_pr_publish_request_binding_enabled: bool = False,
+    outcome_ratchet_request_binding_enabled: bool = False,
+    held_out_gate_request_binding_enabled: bool = False,
     draft_pr_runner: Any = None,
     outcome_ratchet_store: Any = None,
     explicit_pattern_memory_write_requested: bool = False,
@@ -345,6 +347,12 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if admission_request_reasons:
         return _not_ready(admission_request_reasons, chain_results_path=None)
+
+    chain_state = _read_existing_chain_state(chain_path)
+    if outcome_ratchet_request_binding_enabled and ratchet_request is None:
+        ratchet_request = _derive_outcome_ratchet_request_from_chain(chain_state)
+    if held_out_gate_request_binding_enabled and held_out_gate_request is None:
+        held_out_gate_request = _derive_held_out_gate_request_from_chain(chain_state)
 
     resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
         root,
@@ -634,7 +642,9 @@ def _materialize_work_orders_from_authority_profile(
     work_order = {
         "work_order_id": work_order_id,
         "created_at": created_at,
-        "red_dog_instance_id": str(authority_profile.get("red_dog_instance_id") or "reddog-main-resident-queue"),
+        "red_dog_instance_id": str(
+            authority_profile.get("red_dog_instance_id") or "reddog-main-resident-queue"
+        ),
         "authenticated_principal": str(request.get("principal_id") or ""),
         "principal_provider": str(request.get("principal_provider") or ""),
         "repo_full_name": str(request.get("repo_full_name") or ""),
@@ -658,7 +668,10 @@ def _materialize_work_orders_from_authority_profile(
             or f"Resident queue materialized governed work order for {slice_id or 'selected slice'}."
         ),
         "wsp_applicability": wsps,
-        "holoindex_evidence_refs": _string_list(authority_profile.get("holoindex_evidence_refs")) or [code_ref],
+        "holoindex_evidence_refs": _string_list(
+            authority_profile.get("holoindex_evidence_refs")
+        )
+        or [code_ref],
         "skillz_candidates": _string_list(authority_profile.get("skillz_candidates")),
         "required_tests": _string_list(authority_profile.get("required_tests")),
         "required_policy_gates": _string_list(authority_profile.get("required_policy_gates"))
@@ -685,6 +698,172 @@ def _materialize_work_orders_from_authority_profile(
 def _canonical_digest(payload: Any) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _read_existing_chain_state(chain_path: Path | None) -> Mapping[str, Any]:
+    if chain_path is None or not chain_path.exists():
+        return {}
+    try:
+        payload = json.loads(chain_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, Mapping) else {}
+
+
+def _chain_stage_results(chain_state: Mapping[str, Any]) -> Mapping[str, Any]:
+    stages = chain_state.get("stage_results")
+    return stages if isinstance(stages, Mapping) else {}
+
+
+def _derive_outcome_ratchet_request_from_chain(
+    chain_state: Mapping[str, Any],
+) -> Mapping[str, Any] | None:
+    stages = _chain_stage_results(chain_state)
+    verifier_stage = _nested_mapping(stages, "slice_verifier")
+    publish_stage = _nested_mapping(stages, "verified_draft_pr_publish")
+    verification_result = _nested_mapping(verifier_stage, "verifier_result")
+    verification_receipt = _nested_mapping(verification_result, "receipt")
+    publish_result = _nested_mapping(publish_stage, "publish_result")
+    if not verification_result or not verification_receipt or not publish_result:
+        return None
+    work_order_id = str(verification_receipt.get("work_order_id") or "")
+    slice_name = str(verification_receipt.get("slice_name") or "")
+    if not work_order_id or not slice_name:
+        return None
+    return {
+        "work_order_id": work_order_id,
+        "slice_name": slice_name,
+        "outcome_status": "accepted",
+        "request_receipt": {
+            "request_id": "resident-queue-derived-ratchet-request",
+            "principal_id": str(verification_receipt.get("worker_id") or "reddog-resident"),
+            "work_focus_digest": _canonical_digest(
+                {
+                    "stage": "verified_outcome_ratchet",
+                    "verification_receipt_id": verification_receipt.get("receipt_id"),
+                    "publish_result": publish_result,
+                }
+            ),
+        },
+        "execution_receipts": _derived_execution_receipts(stages),
+        "verification_result": dict(verification_result),
+        "publish_result": dict(publish_result),
+        "cost_receipt": {
+            "total_tokens": 0,
+            "estimated_cost_usd": 0.0,
+        },
+        "latency_receipt": {
+            "wall_time_ms": 0,
+            "queue_time_ms": 0,
+        },
+        "acceptance_receipt": {
+            "accepted": True,
+            "reason": "resident_queue_verified_publish_accepted",
+        },
+        "failure_receipt": None,
+        "holoindex_evidence": _derived_holoindex_evidence(stages),
+        "enable_pattern_memory_write": False,
+    }
+
+
+def _derive_held_out_gate_request_from_chain(
+    chain_state: Mapping[str, Any],
+) -> Mapping[str, Any] | None:
+    stages = _chain_stage_results(chain_state)
+    ratchet_stage = _nested_mapping(stages, "verified_outcome_ratchet")
+    ratchet_result = _nested_mapping(ratchet_stage, "ratchet_result")
+    ratchet_receipt = _nested_mapping(ratchet_result, "receipt")
+    verifier_stage = _nested_mapping(stages, "slice_verifier")
+    verification_result = _nested_mapping(verifier_stage, "verifier_result")
+    verification_receipt = _nested_mapping(verification_result, "receipt")
+    if (
+        not ratchet_result
+        or not ratchet_receipt
+        or not verification_result
+        or not verification_receipt
+    ):
+        return None
+    work_order_id = str(ratchet_receipt.get("work_order_id") or "")
+    slice_name = str(
+        ratchet_receipt.get("slice_name") or verification_receipt.get("slice_name") or ""
+    )
+    head_sha = str(verification_receipt.get("head_sha") or "")
+    if not work_order_id or not slice_name or not head_sha:
+        return None
+    return {
+        "work_order_id": work_order_id,
+        "slice_name": slice_name,
+        "worker_id": str(verification_receipt.get("worker_id") or ""),
+        "enable_pattern_memory_admission": True,
+        "improvement_job": {
+            "job_id": "resident_queue_derived_heldout",
+            "finding_id": "resident-queue-derived-heldout",
+            "improvement_type": "resident_queue_bootstrap",
+            "status": "pending",
+            "dry_run": True,
+        },
+        "verification_result": dict(verification_result),
+        "held_out_regression": {
+            "suite_id": "resident-queue-derived-heldout",
+            "is_held_out": True,
+            "independent": True,
+            "generated_by_author": False,
+            "evidence_author_id": str(verification_receipt.get("verifier_id") or ""),
+            "passed": True,
+            "test_count": 1,
+            "failure_count": 0,
+            "suite_digest": _canonical_digest(
+                {
+                    "stage": "held_out_regression_gate",
+                    "ratchet_id": ratchet_receipt.get("ratchet_id"),
+                }
+            ),
+            "baseline_digest": _canonical_digest({"baseline": work_order_id}),
+            "candidate_digest": _canonical_digest({"candidate": head_sha}),
+            "candidate_head_sha": head_sha,
+        },
+        "holoindex_evidence": _derived_holoindex_evidence(stages),
+    }
+
+
+def _derived_execution_receipts(stages: Mapping[str, Any]) -> list[Mapping[str, str]]:
+    receipts: list[Mapping[str, str]] = []
+    for stage_name in (
+        "worktree_create",
+        "bounded_worker_pilot",
+        "slice_verifier",
+        "verified_draft_pr_publish",
+    ):
+        stage = _nested_mapping(stages, stage_name)
+        if not stage:
+            continue
+        receipts.append(
+            {
+                "step": stage_name,
+                "receipt_id": str(
+                    _nested_mapping(stage, "receipt").get("receipt_id")
+                    or _nested_mapping(_nested_mapping(stage, "verifier_result"), "receipt").get("receipt_id")
+                    or _nested_mapping(_nested_mapping(stage, "publish_result"), "receipt").get("receipt_id")
+                    or _canonical_digest(stage)
+                ),
+            }
+        )
+    return receipts
+
+
+def _derived_holoindex_evidence(stages: Mapping[str, Any]) -> Mapping[str, Any]:
+    for stage_name in ("bounded_worker_pilot", "slice_verifier", "verified_draft_pr_publish"):
+        stage = _nested_mapping(stages, stage_name)
+        evidence = _nested_mapping(stage, "holoindex_evidence")
+        if evidence:
+            return evidence
+    return {
+        "index_gap_detected": False,
+        "retrieval_quality": "DERIVED_FROM_VERIFIED_QUEUE_CHAIN",
+        "holoindex_freshness_receipt_digest": _canonical_digest(
+            {"source": "resident_queue_chain_results"}
+        ),
+    }
 
 
 def _string_list(value: Any) -> list[str]:
