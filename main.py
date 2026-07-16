@@ -1577,6 +1577,14 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
     return True
 
 
+def _reddog_env_sequence(name: str) -> tuple[str, ...]:
+    raw = os.getenv(name, "")
+    if not raw.strip():
+        return ()
+    normalized = raw.replace("\n", ";").replace(",", ";")
+    return tuple(item.strip() for item in normalized.split(";") if item.strip())
+
+
 def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
     """
     Optionally promote a backend architect FIX determination into the resident queue.
@@ -1602,6 +1610,18 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_GITHUB_REPO_FULL_NAME                         GitHub repo full name for permission probe
         REDDOG_AUTHORITY_FOUNDUP_ID                          FoundUp scope for principal authority record
         REDDOG_PRINCIPAL_PUBLIC_KEY                          Principal public key, required; never inferred
+        REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY=0               Materialize authority seed from resident receipts
+        REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_ENFORCED=0      Block startup if seed supply fails
+        REDDOG_REDDOG_ID                                     Delegated RedDog id for authority seed
+        REDDOG_REDDOG_PUBLIC_KEY                             RedDog public key for authority seed
+        REDDOG_AUTHORITY_REQUESTED_OPERATION                  Authority operation, default feature_slice
+        REDDOG_AUTHORITY_ALLOWED_PATHS                        ; or , separated path allowlist
+        REDDOG_AUTHORITY_DENIED_PATHS                         ; or , separated path denylist
+        REDDOG_AUTHORITY_REQUIRED_TESTS                       ; or , separated required tests
+        REDDOG_AUTHORITY_REQUIRED_POLICY_GATES                ; or , separated policy gates
+        REDDOG_AUTHORITY_CONSENSUS_RECEIPT_DIGEST             Required for high-authority operations
+        REDDOG_AUTHORITY_SOVEREIGN_AUTHORIZATION_DIGEST       Required for high-authority operations
+        REDDOG_AUTHORITY_PROFILE_SEED_NOW_EPOCH               Deterministic seed issue time for tests
         REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY=0    Materialize authority source from seed/principal/snapshot
         REDDOG_AUTHORITY_PROFILE_SEED_PATH                   Outside-repo authority seed input JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH               Outside-repo principal authority record JSON
@@ -1638,6 +1658,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         os.environ,
         repo_root,
         "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH",
+    )
+    authority_profile_seed_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_AUTHORITY_PROFILE_SEED_PATH",
     )
     authority_profile_path = resident_queue_runtime_file_path(
         os.environ,
@@ -1798,6 +1823,67 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             )
             return False
 
+    seed_supply_requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY",
+    )
+    seed_supply_enforced = os.getenv("REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_ENFORCED", "0") != "0"
+    if seed_supply_requested:
+        try:
+            from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supply_bootstrap import (
+                run_reddog_authority_profile_seed_supply_bootstrap,
+            )
+
+            raw_now = os.getenv("REDDOG_AUTHORITY_PROFILE_SEED_NOW_EPOCH", "").strip()
+            identity_ttl_raw = os.getenv("REDDOG_AUTHORITY_IDENTITY_TTL_SECONDS", "").strip()
+            work_ttl_raw = os.getenv("REDDOG_AUTHORITY_WORK_TTL_SECONDS", "").strip()
+            seed_supply = run_reddog_authority_profile_seed_supply_bootstrap(
+                repo_root=repo_root,
+                architect_determination_path=architect_determination_path,
+                model_selection_receipt_path=model_selection_receipt_path,
+                memex_supply_receipt_path=memex_supply_receipt_path,
+                principal_authority_record_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH", "") or None,
+                permission_snapshot_path=os.getenv("REDDOG_PERMISSION_SNAPSHOT_PATH", "") or None,
+                output_path=authority_profile_seed_path,
+                reddog_id=os.getenv("REDDOG_REDDOG_ID", "reddog:architect"),
+                reddog_public_key=os.getenv("REDDOG_REDDOG_PUBLIC_KEY", ""),
+                now_epoch=(int(raw_now) if raw_now else None),
+                foundup_id=os.getenv("REDDOG_AUTHORITY_FOUNDUP_ID", "") or None,
+                requested_operation=os.getenv("REDDOG_AUTHORITY_REQUESTED_OPERATION", "feature_slice"),
+                allowed_paths=_reddog_env_sequence("REDDOG_AUTHORITY_ALLOWED_PATHS"),
+                denied_paths=_reddog_env_sequence("REDDOG_AUTHORITY_DENIED_PATHS"),
+                valve_state_required=os.getenv("REDDOG_AUTHORITY_VALVE_STATE_REQUIRED", ""),
+                key_epoch=os.getenv("REDDOG_AUTHORITY_KEY_EPOCH", "epoch-1"),
+                required_tests=_reddog_env_sequence("REDDOG_AUTHORITY_REQUIRED_TESTS"),
+                required_policy_gates=_reddog_env_sequence("REDDOG_AUTHORITY_REQUIRED_POLICY_GATES"),
+                consensus_receipt_digest=os.getenv("REDDOG_AUTHORITY_CONSENSUS_RECEIPT_DIGEST", "") or None,
+                sovereign_authorization_digest=(
+                    os.getenv("REDDOG_AUTHORITY_SOVEREIGN_AUTHORIZATION_DIGEST", "") or None
+                ),
+                identity_ttl_seconds=(int(identity_ttl_raw) if identity_ttl_raw else 3600),
+                work_authority_ttl_seconds=(int(work_ttl_raw) if work_ttl_raw else 900),
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-AUTHORITY-SEED] Startup seed supply failed: {exc}")
+            if seed_supply_enforced:
+                print(f"[REDDOG-AUTHORITY-SEED] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-AUTHORITY-SEED] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        seed_status = "PASS" if seed_supply.accepted else "WARN"
+        seed_reasons = ",".join(seed_supply.rejection_reasons) if seed_supply.rejection_reasons else "(none)"
+        print(
+            f"[REDDOG-AUTHORITY-SEED] preflight={seed_status} status={seed_supply.status} "
+            f"receipt={seed_supply.seed_supply_receipt_id or '(none)'} reasons={seed_reasons}"
+        )
+        if seed_supply.accepted and seed_supply.output_path:
+            authority_profile_seed_path = seed_supply.output_path
+            os.environ["REDDOG_AUTHORITY_PROFILE_SEED_PATH"] = authority_profile_seed_path
+        elif seed_supply_enforced:
+            print("[REDDOG-AUTHORITY-SEED] Startup blocked by REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_ENFORCED=1")
+            return False
+
     authority_supply_requested = resident_queue_runtime_flag_enabled(
         os.environ,
         "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY",
@@ -1812,7 +1898,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             raw_now = os.getenv("REDDOG_AUTHORITY_PROFILE_SOURCE_NOW_EPOCH", "").strip()
             authority_supply = run_reddog_authority_profile_source_artifact_supply_bootstrap(
                 repo_root=repo_root,
-                authority_seed_path=os.getenv("REDDOG_AUTHORITY_PROFILE_SEED_PATH", "") or None,
+                authority_seed_path=authority_profile_seed_path or None,
                 principal_authority_record_path=os.getenv("REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH", "") or None,
                 permission_snapshot_path=os.getenv("REDDOG_PERMISSION_SNAPSHOT_PATH", "") or None,
                 output_path=authority_profile_source_path,
