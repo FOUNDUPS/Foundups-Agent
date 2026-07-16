@@ -36,6 +36,19 @@ from typing import Any, Callable, Deque, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
+READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT = "READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT"
+READONLY_AUDIT_OPENCLAW_CLAIM_IDLE = "READONLY_AUDIT_OPENCLAW_CLAIM_IDLE"
+READONLY_AUDIT_OPENCLAW_CLAIM_REJECT = "READONLY_AUDIT_OPENCLAW_CLAIM_REJECT"
+
+
+class ReadOnlyAuditOpenClawClaimReason:
+    NO_PENDING_TASK = "NO_PENDING_REDDOG_READONLY_AUDIT_TASK"
+    CLAIM_RACE_LOST = "REJECT_REDDOG_READONLY_AUDIT_CLAIM_RACE_LOST"
+    MALFORMED_CONTEXT = "REJECT_REDDOG_READONLY_AUDIT_MALFORMED_CONTEXT"
+    TASK_EXECUTION_REJECTED = "REJECT_REDDOG_READONLY_AUDIT_TASK_EXECUTION_REJECTED"
+    REPORT_PERSIST_REJECTED = "REJECT_REDDOG_READONLY_AUDIT_REPORT_PERSIST_REJECTED"
+    AGENTDB_FAILURE = "REJECT_REDDOG_READONLY_AUDIT_AGENTDB_FAILURE"
+
 
 @dataclass
 class SupervisorMetrics:
@@ -87,6 +100,215 @@ def _normalize_ai_analysis(analysis: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def claim_reddog_readonly_audit_task_once(
+    *,
+    repo_root: Path,
+    agent_id: str = "openclaw_supervisor",
+    agent_db_factory: Optional[Callable[[], Any]] = None,
+    report_store: Any | None = None,
+    audit_model_runner: Any | None = None,
+    holoindex_adapter: Any | None = None,
+    codeindex_adapter: Any | None = None,
+    external_research_retriever: Any | None = None,
+    timeout_seconds: int = 60,
+) -> Dict[str, Any]:
+    """Claim and execute one RedDog read-only audit AgentDB task.
+
+    This is the OpenClaw-owned execution seam for resident RedDog cycles. It
+    atomically claims a pending RedDog read-only audit task from AgentDB, runs
+    the existing read-only task executor, persists the report, and marks the
+    AgentDB task complete. It does not run shell commands, mutate repo files,
+    create worktrees, dispatch Hermes, create PRs, or re-index HoloIndex.
+    """
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
+            READONLY_AUDIT_TASK_SOURCE,
+        )
+        from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
+            AgentDbReadOnlyAuditReportStore,
+            persist_reddog_readonly_audit_task_report,
+        )
+        from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
+            execute_reddog_readonly_audit_task,
+        )
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        factory = agent_db_factory or AgentDB
+        db = factory()
+        task = _claim_pending_reddog_readonly_audit_task(
+            db=db,
+            agent_id=agent_id,
+            source=READONLY_AUDIT_TASK_SOURCE,
+        )
+    except Exception as exc:
+        return _readonly_claim_result(
+            accepted=False,
+            status=READONLY_AUDIT_OPENCLAW_CLAIM_REJECT,
+            rejection_reasons=(ReadOnlyAuditOpenClawClaimReason.AGENTDB_FAILURE,),
+            detail=str(exc)[:300],
+        )
+
+    if task is None:
+        return _readonly_claim_result(
+            accepted=False,
+            status=READONLY_AUDIT_OPENCLAW_CLAIM_IDLE,
+            rejection_reasons=(ReadOnlyAuditOpenClawClaimReason.NO_PENDING_TASK,),
+        )
+    if task.get("claim_race_lost"):
+        return _readonly_claim_result(
+            accepted=False,
+            status=READONLY_AUDIT_OPENCLAW_CLAIM_REJECT,
+            task_id=str(task.get("task_id") or ""),
+            rejection_reasons=(ReadOnlyAuditOpenClawClaimReason.CLAIM_RACE_LOST,),
+        )
+
+    task_id = str(task.get("task_id") or "")
+    context = task.get("context")
+    if not isinstance(context, dict):
+        _mark_reddog_readonly_audit_task_failed(db, task_id)
+        return _readonly_claim_result(
+            accepted=False,
+            status=READONLY_AUDIT_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            rejection_reasons=(ReadOnlyAuditOpenClawClaimReason.MALFORMED_CONTEXT,),
+        )
+
+    run_result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=repo_root,
+        task_id=task_id,
+        model_runner=audit_model_runner,
+        holoindex_adapter=holoindex_adapter,
+        codeindex_adapter=codeindex_adapter,
+        external_research_retriever=external_research_retriever,
+        timeout_seconds=timeout_seconds,
+    )
+    if not run_result.accepted:
+        _mark_reddog_readonly_audit_task_failed(db, task_id)
+        return _readonly_claim_result(
+            accepted=False,
+            status=READONLY_AUDIT_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            assignment_id=_readonly_assignment_id(context),
+            rejection_reasons=(
+                ReadOnlyAuditOpenClawClaimReason.TASK_EXECUTION_REJECTED,
+                *run_result.rejection_reasons,
+            ),
+        )
+
+    store = report_store or AgentDbReadOnlyAuditReportStore(agent_db_factory=factory)
+    persist_result = persist_reddog_readonly_audit_task_report(
+        task_id=task_id,
+        task_context=context,
+        task_result={
+            "ok": True,
+            "executor": "openclaw_supervisor:reddog_readonly_audit",
+            "structured_result": run_result.to_dict(),
+        },
+        store=store,
+    )
+    if not persist_result.accepted:
+        _mark_reddog_readonly_audit_task_failed(db, task_id)
+        return _readonly_claim_result(
+            accepted=False,
+            status=READONLY_AUDIT_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            assignment_id=_readonly_assignment_id(context),
+            rejection_reasons=(
+                ReadOnlyAuditOpenClawClaimReason.REPORT_PERSIST_REJECTED,
+                *persist_result.rejection_reasons,
+            ),
+        )
+
+    db.complete_autonomous_task(task_id)
+    report = run_result.report if isinstance(run_result.report, dict) else {}
+    return _readonly_claim_result(
+        accepted=True,
+        status=READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT,
+        task_id=task_id,
+        assignment_id=_readonly_assignment_id(context),
+        report_digest=str(report.get("report_digest") or ""),
+    )
+
+
+def _claim_pending_reddog_readonly_audit_task(*, db: Any, agent_id: str, source: str) -> Optional[Dict[str, Any]]:
+    with db.db.get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT task_id, context FROM agents_autonomous_tasks
+            WHERE status = 'pending' AND discovered_by = ?
+            ORDER BY priority_score DESC, discovered_at ASC
+            LIMIT 1
+            """,
+            (source,),
+        ).fetchone()
+        if not row:
+            return None
+        task_id = row["task_id"] if hasattr(row, "keys") else row[0]
+        updated = conn.execute(
+            """
+            UPDATE agents_autonomous_tasks
+            SET assigned_to = ?, assigned_at = CURRENT_TIMESTAMP, status = 'assigned'
+            WHERE task_id = ? AND status = 'pending' AND discovered_by = ?
+            """,
+            (agent_id, task_id, source),
+        ).rowcount
+        if updated != 1:
+            return {"task_id": task_id, "claim_race_lost": True}
+        raw_context = row["context"] if hasattr(row, "keys") else row[1]
+    try:
+        context = json.loads(raw_context) if isinstance(raw_context, str) else raw_context
+    except Exception:
+        context = None
+    return {"task_id": task_id, "context": context}
+
+
+def _mark_reddog_readonly_audit_task_failed(db: Any, task_id: str) -> None:
+    if not task_id:
+        return
+    try:
+        db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET status = 'failed', completed_at = CURRENT_TIMESTAMP WHERE task_id = ?",
+            (task_id,),
+        )
+    except Exception:
+        logger.debug("[SUPERVISOR] Failed to mark RedDog readonly audit task failed", exc_info=True)
+
+
+def _readonly_assignment_id(context: Dict[str, Any]) -> str:
+    assignment = context.get("assignment") if isinstance(context, dict) else {}
+    return str(assignment.get("assignment_id") or "") if isinstance(assignment, dict) else ""
+
+
+def _readonly_claim_result(
+    *,
+    accepted: bool,
+    status: str,
+    task_id: str | None = None,
+    assignment_id: str | None = None,
+    report_digest: str | None = None,
+    rejection_reasons=(),
+    detail: str = "",
+) -> Dict[str, Any]:
+    return {
+        "accepted": accepted,
+        "status": status,
+        "task_id": task_id,
+        "assignment_id": assignment_id,
+        "report_digest": report_digest,
+        "rejection_reasons": tuple(dict.fromkeys(str(reason) for reason in rejection_reasons if str(reason))),
+        "detail": detail,
+        "no_shell_command_executed": True,
+        "no_repo_mutation_performed": True,
+        "no_holoindex_reindex_performed": True,
+        "no_hermes_dispatch_performed": True,
+        "no_worktree_operation_performed": True,
+        "no_pr_created": True,
+        "no_live_foundup_enqueue_performed": True,
+    }
+
+
 class OpenClawSupervisor:
     """
     Canonical 0102 supervisor for the resident OpenClaw runtime.
@@ -130,6 +352,31 @@ class OpenClawSupervisor:
         self._libido_monitor: Any | None = None
         self._triage_queue: List[Dict[str, Any]] = []
         self._execution_results: List[Dict[str, Any]] = []
+
+    def claim_reddog_readonly_audit_task_once(
+        self,
+        *,
+        agent_db_factory: Optional[Callable[[], Any]] = None,
+        report_store: Any | None = None,
+        audit_model_runner: Any | None = None,
+        holoindex_adapter: Any | None = None,
+        codeindex_adapter: Any | None = None,
+        external_research_retriever: Any | None = None,
+        timeout_seconds: int = 60,
+    ) -> Dict[str, Any]:
+        """Claim one RedDog read-only audit task through OpenClaw."""
+
+        return claim_reddog_readonly_audit_task_once(
+            repo_root=self.repo_root,
+            agent_id="openclaw_supervisor",
+            agent_db_factory=agent_db_factory,
+            report_store=report_store,
+            audit_model_runner=audit_model_runner,
+            holoindex_adapter=holoindex_adapter,
+            codeindex_adapter=codeindex_adapter,
+            external_research_retriever=external_research_retriever,
+            timeout_seconds=timeout_seconds,
+        )
 
     def stop(self) -> None:
         self._stop_event.set()
