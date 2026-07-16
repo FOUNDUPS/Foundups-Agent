@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an authority-runtime resolver artifact supplier that converts singular
+  principal/permission runtime artifacts into the plural resolver stores
+  consumed by the resident queue authority runtime dependency bundle.
+- Wired the resident profile startup path so resolver stores and authority
+  runtime state paths can be derived under the runtime root before the serial
+  queue loop runs.
+- Boundary remains constrained: no signing, signature verification, signer
+  state mutation, authority runtime invocation, worker spawn, worktree, shell
+  execution, OpenClaw enqueue, Hermes dispatch, work-state mutation,
+  repository mutation, PatternMemory write, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
