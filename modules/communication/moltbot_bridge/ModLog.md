@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: WRE_INDEPENDENT_EVIDENCE_PRODUCER_QUEUE_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Wired the resident queue `slice_verifier` stage to optionally produce
+  independent machine-derived diff/test evidence from the assigned isolated
+  worktree before invoking the existing queue-authorized autonomous slice
+  verifier.
+- Preserved the existing prebuilt verifier-request path. The new evidence path
+  requires an explicit evidence-producer request and an explicitly injected
+  command runner; default startup behavior remains unchanged.
+- Added `main.py` preflight environment plumbing for
+  `REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH` and
+  `REDDOG_EVIDENCE_COMMAND_RUNNER_MODE`.
+- Boundary remains bounded and fail-closed: no GitHub call, draft PR publish,
+  merge, PatternMemory write, reward settlement, HoloIndex re-index, OpenClaw
+  enqueue, or Hermes dispatch.
+
 ## 2026-07-16: REDDOG_MAIN_READONLY_E2E_RUNTIME_CONSUMPTION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97

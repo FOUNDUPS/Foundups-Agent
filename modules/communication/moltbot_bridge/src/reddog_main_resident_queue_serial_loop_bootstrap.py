@@ -131,6 +131,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     artifact_contents_path: Path | str | None = None,
     holoindex_evidence_path: Path | str | None = None,
     verifier_request_path: Path | str | None = None,
+    evidence_producer_request_path: Path | str | None = None,
     publish_request_path: Path | str | None = None,
     ratchet_request_path: Path | str | None = None,
     outcome_ratchet_store_path: Path | str | None = None,
@@ -147,6 +148,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     worktree_runner: Any = None,
     worktree_runner_mode: str | None = None,
     worktree_runner_timeout_s: int = 120,
+    evidence_command_runner: Any = None,
+    evidence_command_runner_mode: str | None = None,
     draft_pr_runner: Any = None,
     outcome_ratchet_store: Any = None,
     explicit_pattern_memory_write_requested: bool = False,
@@ -270,6 +273,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if verifier_request_reasons:
         return _not_ready(verifier_request_reasons, chain_results_path=None)
 
+    evidence_producer_request, evidence_producer_request_reasons = _read_json_outside_repo(
+        root,
+        evidence_producer_request_path,
+        missing_reason="missing_evidence_producer_request_path",
+        inside_reason="evidence_producer_request_path_inside_repo",
+        unreadable_reason="malformed_evidence_producer_request",
+        required=False,
+    )
+    if evidence_producer_request_reasons:
+        return _not_ready(evidence_producer_request_reasons, chain_results_path=None)
+
     publish_request, publish_request_reasons = _read_json_outside_repo(
         root,
         publish_request_path,
@@ -331,6 +345,13 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if runner_reasons:
         return _not_ready(runner_reasons, chain_results_path=None)
 
+    resolved_evidence_command_runner, evidence_runner_reasons = _build_evidence_command_runner(
+        injected_runner=evidence_command_runner,
+        mode=evidence_command_runner_mode,
+    )
+    if evidence_runner_reasons:
+        return _not_ready(evidence_runner_reasons, chain_results_path=None)
+
     dependency_bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=root,
         authority_state_path=authority_state_path,
@@ -378,6 +399,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         artifact_contents=artifact_contents,
         holoindex_evidence=holoindex_evidence,
         verifier_request=verifier_request,
+        evidence_producer_request=evidence_producer_request,
+        evidence_command_runner=resolved_evidence_command_runner,
         publish_request=publish_request,
         draft_pr_runner=draft_pr_runner,
         ratchet_request=ratchet_request,
@@ -908,6 +931,25 @@ def _build_worktree_runner(
     )
 
     return RealRedDogWorktreeRunner(repo_root, timeout_s=int(timeout_s)), ()
+
+
+def _build_evidence_command_runner(
+    *,
+    injected_runner: Any,
+    mode: str | None,
+) -> tuple[Any, tuple[str, ...]]:
+    if injected_runner is not None:
+        return injected_runner, ()
+    normalized = str(mode or "").strip().lower()
+    if not normalized:
+        return None, ()
+    if normalized not in {"real", "subprocess"}:
+        return None, ("unsupported_evidence_command_runner_mode",)
+    from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
+        SubprocessEvidenceCommandRunner,
+    )
+
+    return SubprocessEvidenceCommandRunner(), ()
 
 
 def _build_outcome_ratchet_store(

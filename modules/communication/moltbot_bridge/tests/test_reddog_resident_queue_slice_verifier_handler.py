@@ -24,6 +24,8 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifi
     FAIL_BOUNDED_WORKER_PILOT_STAGE_MISSING,
     FAIL_DISPATCH_NEXT_ACTION_MISMATCH,
     FAIL_DISPATCH_STAGE_MISMATCH,
+    FAIL_EVIDENCE_COMMAND_RUNNER_MISSING,
+    FAIL_EVIDENCE_PRODUCER_REJECTED,
     FAIL_VERIFIER_REQUEST_MISSING,
     SLICE_VERIFIER_STAGE_KEY,
     build_reddog_resident_queue_slice_verifier_stage_handler,
@@ -68,6 +70,11 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 )
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
+)
+from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
+    CommandResult,
+    EVIDENCE_PRODUCER_ACCEPT,
+    FAIL_HOLOINDEX_EVIDENCE,
 )
 
 
@@ -142,11 +149,63 @@ def _handler(
     *,
     chain_store: InMemoryResidentQueueChainResultsStore,
     verifier_request: dict[str, object] | None = None,
+    evidence_producer_request: dict[str, object] | None = None,
+    evidence_command_runner: object | None = None,
 ):
     return build_reddog_resident_queue_slice_verifier_stage_handler(
         chain_results_store=chain_store,
         verifier_request=verifier_request if verifier_request is not None else _verifier_request(),
+        evidence_producer_request=evidence_producer_request,
+        evidence_command_runner=evidence_command_runner,
     )
+
+
+class _FakeEvidenceRunner:
+    def __init__(self, *, head: str = "a" * 40) -> None:
+        self.head = head
+        self.calls: list[tuple[str, ...]] = []
+
+    def run(self, argv, *, cwd: Path, timeout_s: int) -> CommandResult:
+        _ = (cwd, timeout_s)
+        argv_tuple = tuple(argv)
+        self.calls.append(argv_tuple)
+        if argv_tuple == ("git", "rev-parse", "HEAD"):
+            return CommandResult(returncode=0, stdout=self.head + "\n")
+        if argv_tuple[:3] == ("git", "diff", "--name-only"):
+            return CommandResult(returncode=0, stdout=ARTIFACT + "\n")
+        if argv_tuple[:3] == ("git", "diff", "--unified=0"):
+            return CommandResult(
+                returncode=0,
+                stdout=(
+                    f"diff --git a/{ARTIFACT} b/{ARTIFACT}\n"
+                    f"+++ b/{ARTIFACT}\n"
+                    "+resident queue produced evidence\n"
+                ),
+            )
+        return CommandResult(returncode=0, stdout="ok\n")
+
+
+def _evidence_producer_request(tmp_path: Path, **overrides: object) -> dict[str, object]:
+    repo = tmp_path / "repo"
+    worktree = tmp_path / "worktree"
+    repo.mkdir(exist_ok=True)
+    worktree.mkdir(exist_ok=True)
+    payload = {
+        **_verifier_request(),
+        "explicit_evidence_production_requested": True,
+        "repo_root": str(repo),
+        "worktree_path": str(worktree),
+        "operation_cwd": str(worktree),
+        "required_checks": [
+            {
+                "name": "pytest",
+                "argv": ["python", "-m", "pytest", "modules/communication/moltbot_bridge/tests", "-q"],
+                "timeout_s": 30,
+            }
+        ],
+    }
+    payload.update(overrides)
+    return payload
 
 
 def test_dispatcher_records_slice_verifier_and_advances_to_draft_pr_publish() -> None:
@@ -211,6 +270,98 @@ def test_missing_verifier_request_rejects_direct_handler_call() -> None:
 
     assert result["decision"] == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT
     assert FAIL_VERIFIER_REQUEST_MISSING in result["rejection_reasons"]
+
+
+def test_dispatcher_produces_independent_evidence_before_slice_verifier(tmp_path: Path) -> None:
+    chain_store = _seeded_store()
+    runner = _FakeEvidenceRunner()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            SLICE_VERIFIER_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                verifier_request={},
+                evidence_producer_request=_evidence_producer_request(tmp_path),
+                evidence_command_runner=runner,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is True
+    assert result.dispatched_stage == SLICE_VERIFIER_STAGE_KEY
+    stage = chain_store.load()["stage_results"][SLICE_VERIFIER_STAGE_KEY]
+    assert stage["decision"] == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT
+    assert stage["evidence_producer_result"]["decision"] == EVIDENCE_PRODUCER_ACCEPT
+    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
+    assert stage["verifier_result"]["receipt"]["changed_paths"] == [ARTIFACT]
+    assert stage["bounded_evidence_command_execution_performed"] is True
+    assert stage["no_command_execution_performed"] is False
+    assert stage["no_shell_command_executed"] is True
+    assert stage["no_github_call_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_pattern_memory_write_performed"] is True
+    assert stage["no_reward_settlement_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+    assert ("git", "rev-parse", "HEAD") in runner.calls
+
+
+def test_rejected_evidence_producer_blocks_verifier(tmp_path: Path) -> None:
+    handler = _handler(
+        chain_store=_seeded_store(),
+        verifier_request={},
+        evidence_producer_request=_evidence_producer_request(
+            tmp_path,
+            holoindex_evidence={
+                "index_gap_detected": True,
+                "holoindex_freshness_receipt_digest": "sha256:" + "b" * 64,
+            },
+        ),
+        evidence_command_runner=_FakeEvidenceRunner(),
+    )
+    request = ResidentQueueStageDispatchRequest(
+        stage_key=SLICE_VERIFIER_STAGE_KEY,
+        next_action=NEXT_QUEUE_SLICE_VERIFIER_INVOKE,
+        queue_item_id="queue-1",
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        plan_id="plan-1",
+        accepted_stages=(),
+    )
+
+    result = dict(handler(request))
+
+    assert result["decision"] == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT
+    assert FAIL_EVIDENCE_PRODUCER_REJECTED in result["rejection_reasons"]
+    assert FAIL_HOLOINDEX_EVIDENCE in result["rejection_reasons"]
+    assert result["verifier_result"] is None
+    assert result["evidence_producer_result"]["accepted"] is False
+
+
+def test_evidence_producer_request_requires_explicit_runner(tmp_path: Path) -> None:
+    handler = _handler(
+        chain_store=_seeded_store(),
+        verifier_request={},
+        evidence_producer_request=_evidence_producer_request(tmp_path),
+        evidence_command_runner=None,
+    )
+    request = ResidentQueueStageDispatchRequest(
+        stage_key=SLICE_VERIFIER_STAGE_KEY,
+        next_action=NEXT_QUEUE_SLICE_VERIFIER_INVOKE,
+        queue_item_id="queue-1",
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        plan_id="plan-1",
+        accepted_stages=(),
+    )
+
+    result = dict(handler(request))
+
+    assert result["decision"] == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT
+    assert FAIL_EVIDENCE_COMMAND_RUNNER_MISSING in result["rejection_reasons"]
+    assert result["verifier_result"] is None
 
 
 def test_wrong_stage_rejects_direct_handler_call() -> None:

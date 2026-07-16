@@ -62,6 +62,10 @@ from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime i
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
     verify_autonomous_slice_runtime,
 )
+from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
+    CommandResult,
+    EVIDENCE_PRODUCER_ACCEPT,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -446,6 +450,30 @@ def _slice_verifier_request() -> dict[str, object]:
     }
 
 
+def _evidence_producer_request(repo: Path, worktree: Path) -> dict[str, object]:
+    return {
+        **_slice_verifier_request(),
+        "explicit_evidence_production_requested": True,
+        "repo_root": str(repo),
+        "worktree_path": str(worktree),
+        "operation_cwd": str(worktree),
+        "required_checks": [
+            {
+                "name": "pytest",
+                "argv": [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "modules/communication/moltbot_bridge/tests/"
+                    "test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+                    "-q",
+                ],
+                "timeout_s": 30,
+            }
+        ],
+    }
+
+
 def _draft_pr_publish_request(worktree_path: Path) -> dict[str, object]:
     return {
         "work_order_id": WORK_ORDER_ID,
@@ -644,6 +672,31 @@ class _FakeWorktreeRunner:
     def cleanup_worktree(self, *, worktree_path: Path):
         self.calls.append(("cleanup_worktree", str(worktree_path), None, None))
         return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
+
+
+class _FakeEvidenceRunner:
+    def __init__(self, *, head: str = "a" * 40) -> None:
+        self.head = head
+        self.calls: list[tuple[str, ...]] = []
+
+    def run(self, argv, *, cwd: Path, timeout_s: int) -> CommandResult:
+        _ = (cwd, timeout_s)
+        argv_tuple = tuple(argv)
+        self.calls.append(argv_tuple)
+        if argv_tuple == ("git", "rev-parse", "HEAD"):
+            return CommandResult(returncode=0, stdout=self.head + "\n")
+        if argv_tuple[:3] == ("git", "diff", "--name-only"):
+            return CommandResult(returncode=0, stdout=PILOT_ARTIFACT + "\n")
+        if argv_tuple[:3] == ("git", "diff", "--unified=0"):
+            return CommandResult(
+                returncode=0,
+                stdout=(
+                    f"diff --git a/{PILOT_ARTIFACT} b/{PILOT_ARTIFACT}\n"
+                    f"+++ b/{PILOT_ARTIFACT}\n"
+                    "+resident queue produced independent evidence\n"
+                ),
+            )
+        return CommandResult(returncode=0, stdout="ok\n")
 
 
 class _FakePatternMemoryAdmissionSink:
@@ -1519,6 +1572,115 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
     assert stage["no_pattern_memory_write_performed"] is True
     assert stage["no_reward_settlement_performed"] is True
     assert stage["no_holoindex_reindex_performed"] is True
+    assert (worktree / PILOT_ARTIFACT).exists()
+    assert not (repo / PILOT_ARTIFACT).exists()
+    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+
+
+def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    evidence_runner = _FakeEvidenceRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+    evidence_request = _write_runtime_json(
+        tmp_path,
+        "evidence_producer_request.json",
+        _evidence_producer_request(repo, worktree),
+    )
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        generic_writer_dryrun_result_path=generic_writer,
+        governed_shell_dryrun_result_path=governed_shell,
+        artifact_contents_path=artifacts,
+        holoindex_evidence_path=holoindex,
+        evidence_producer_request_path=evidence_request,
+        evidence_command_runner=evidence_runner,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worktree_runner=worktree_runner,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=10,
+    )
+
+    assert result.accepted is True
+    assert result.steps_run == 10
+    assert result.dispatched_stages[-1] == "slice_verifier"
+    assert result.no_slice_verification_performed is False
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["slice_verifier"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT"
+    assert stage["evidence_producer_result"]["decision"] == EVIDENCE_PRODUCER_ACCEPT
+    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
+    assert stage["verifier_result"]["receipt"]["changed_paths"] == [PILOT_ARTIFACT]
+    assert stage["bounded_evidence_command_execution_performed"] is True
+    assert stage["no_command_execution_performed"] is False
+    assert stage["no_shell_command_executed"] is True
+    assert stage["no_github_call_performed"] is True
+    assert stage["no_pr_publish_performed"] is True
+    assert stage["no_merge_performed"] is True
+    assert stage["no_holoindex_reindex_performed"] is True
+    assert ("git", "rev-parse", "HEAD") in evidence_runner.calls
     assert (worktree / PILOT_ARTIFACT).exists()
     assert not (repo / PILOT_ARTIFACT).exists()
     assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
@@ -2422,6 +2584,24 @@ def test_bootstrap_rejects_unsupported_worktree_runner_mode(tmp_path: Path) -> N
     assert "unsupported_worktree_runner_mode" in result.rejection_reasons
 
 
+def test_bootstrap_rejects_unsupported_evidence_command_runner_mode(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=tmp_path / "runtime" / "chain_results.json",
+        authority_profile_path=profile,
+        evidence_command_runner_mode="shell",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "unsupported_evidence_command_runner_mode" in result.rejection_reasons
+
+
 def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
     tmp_path: Path,
 ) -> None:
@@ -2811,6 +2991,10 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_ARTIFACT_CONTENTS_PATH": str(tmp_path / "artifact_contents.json"),
                 "REDDOG_HOLOINDEX_EVIDENCE_PATH": str(tmp_path / "holoindex_evidence.json"),
                 "REDDOG_SLICE_VERIFIER_REQUEST_PATH": str(tmp_path / "verifier_request.json"),
+                "REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH": str(
+                    tmp_path / "evidence_producer_request.json"
+                ),
+                "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE": "real",
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(tmp_path / "publish_request.json"),
                 "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
@@ -2860,6 +3044,10 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["verifier_request_path"] == str(
         tmp_path / "verifier_request.json"
     )
+    assert mocked.call_args.kwargs["evidence_producer_request_path"] == str(
+        tmp_path / "evidence_producer_request.json"
+    )
+    assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
     assert mocked.call_args.kwargs["publish_request_path"] == str(
         tmp_path / "publish_request.json"
     )

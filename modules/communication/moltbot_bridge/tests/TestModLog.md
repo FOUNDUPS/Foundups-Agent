@@ -1,3 +1,21 @@
+## 2026-07-16: WRE_INDEPENDENT_EVIDENCE_PRODUCER_QUEUE_BINDING_PHASE1
+
+**Files**: `test_reddog_resident_queue_slice_verifier_handler.py`,
+`test_reddog_resident_queue_stage_handler_registry.py`,
+`test_reddog_main_resident_queue_serial_loop_bootstrap.py` (UPDATED)
+
+**Slice**: `WRE_INDEPENDENT_EVIDENCE_PRODUCER_QUEUE_BINDING_PHASE1` |
+**Predecessor**: #1119 independent evidence producer runtime
+
+Resident queue slice verifier can now either consume a prebuilt verifier
+request or explicitly produce diff/test evidence from the isolated worktree
+using an injected evidence command runner. Tests prove producer acceptance feeds
+the existing autonomous verifier, producer rejection blocks verification,
+registry dependencies fail closed, startup env plumbing forwards the request and
+runner mode, and unsupported evidence runner modes reject.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py modules/infrastructure/wre_core/tests/test_wre_independent_evidence_producer_runtime.py -q`
+
 ## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_WRITER_ADAPTER_PHASE1
 
 **File**: `test_reddog_openclaw_live_enqueue_writer.py` (NEW - 6 tests)

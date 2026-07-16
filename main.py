@@ -1603,6 +1603,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_ARTIFACT_CONTENTS_PATH                        Outside-repo artifact contents JSON
         REDDOG_HOLOINDEX_EVIDENCE_PATH                       Outside-repo HoloIndex evidence JSON
         REDDOG_SLICE_VERIFIER_REQUEST_PATH                   Outside-repo slice verifier request JSON
+        REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH                Outside-repo evidence producer request JSON
+        REDDOG_EVIDENCE_COMMAND_RUNNER_MODE                  Optional `real` evidence command runner mode
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -1692,6 +1694,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             artifact_contents_path=os.getenv("REDDOG_ARTIFACT_CONTENTS_PATH", "") or None,
             holoindex_evidence_path=os.getenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", "") or None,
             verifier_request_path=os.getenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", "") or None,
+            evidence_producer_request_path=os.getenv("REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH", "") or None,
             publish_request_path=os.getenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", "") or None,
             ratchet_request_path=os.getenv("REDDOG_OUTCOME_RATCHET_REQUEST_PATH", "") or None,
             outcome_ratchet_store_path=os.getenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", "") or None,
@@ -1706,6 +1709,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             signature_verifier_backend=os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND", "") or None,
             worktree_runner_mode=os.getenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE", "") or None,
             worktree_runner_timeout_s=worktree_runner_timeout_s,
+            evidence_command_runner_mode=os.getenv("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE", "") or None,
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
