@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_BOUNDED_ARTIFACT_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an end-to-end regression proving an AgentDB signed OpenClaw
+  `candidate_queue_review` task can be claimed, routed through the real
+  environment-bound queue-loop runner, and advance an already authorized queue
+  item into bounded artifact materialization in an isolated worktree.
+- Refined the queue-loop runner safety check: isolated worktree creation and
+  bounded file materialization are allowed only after the upstream queue gates
+  accept; shell execution, OpenClaw enqueue, Hermes dispatch, HoloIndex
+  re-index, PR creation, PatternMemory writes, and reward settlement remain
+  fail-closed.
+- Boundary remains explicit: the proof performs no source checkout write, no
+  shell command, no live model call, no PR publication, no HoloIndex mutation,
+  no PatternMemory admission, and no reward settlement.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_OPENCLAW_QUEUE_LOOP_RUNTIME_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

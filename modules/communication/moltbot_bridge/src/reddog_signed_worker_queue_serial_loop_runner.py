@@ -141,10 +141,7 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
                 ],
                 bootstrap_result=payload,
             )
-        if (
-            payload.get("no_repo_mutation_performed") is not True
-            or payload.get("no_shell_command_executed") is not True
-        ):
+        if _unsafe_bootstrap_effect_detected(payload):
             return _reject(
                 task_id,
                 [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE],
@@ -202,6 +199,28 @@ def _receipt_id(task_id: str, queue_item_id: str, bootstrap_result: Mapping[str,
             "next_action": bootstrap_result.get("next_action"),
         }
     ).removeprefix("sha256:")[:16]
+
+
+def _unsafe_bootstrap_effect_detected(payload: Mapping[str, Any]) -> bool:
+    """Reject effects outside the signed queue-loop boundary.
+
+    The serial-loop bootstrap is allowed to create an isolated worktree and
+    materialize bounded artifacts there after the upstream valve and writer
+    gates accept. That makes ``no_repo_mutation_performed`` false by design.
+    The runner still fails closed for side effects that are not permitted in
+    this OpenClaw queue-review handoff.
+    """
+
+    guarded_true_flags = (
+        "no_shell_command_executed",
+        "no_openclaw_enqueue_performed",
+        "no_hermes_dispatch_performed",
+        "no_holoindex_reindex_performed",
+        "no_pr_created",
+        "no_pattern_memory_write_performed",
+        "no_reward_settlement_performed",
+    )
+    return any(payload.get(flag) is not True for flag in guarded_true_flags)
 
 
 def _reject(
