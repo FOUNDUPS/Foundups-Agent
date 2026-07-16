@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MAIN_READONLY_E2E_RUNTIME_CONSUMPTION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
+
+- Added an explicit `main.py` startup flag,
+  `REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED`, that runs one
+  read-only audit -> research -> backend architect determination cycle through
+  the #1115 E2E runtime.
+- Kept the existing bootstrap/menu behavior unchanged by default. Rejected E2E
+  runs remain warning-only unless
+  `REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=1`.
+- Startup output now reports E2E task count, persisted report count,
+  architect action/next slice, queue-candidate count, and the no-mutation
+  attestation fields needed to verify this is not a coding worker path.
+
 ## 2026-07-16: REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 50, 97
