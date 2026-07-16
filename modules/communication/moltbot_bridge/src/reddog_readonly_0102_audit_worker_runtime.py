@@ -38,6 +38,9 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_typed_evidence_citation_policy import (
+    validate_typed_evidence_citations,
+)
 from holo_index.query_receipt import (
     SOURCE_CLASS_CODEINDEX,
     SOURCE_CLASS_HOLOINDEX,
@@ -535,7 +538,11 @@ def execute_model_backed_repo_code_audit(
         return _reject(reasons)
 
     parsed = _parse_model_output(model_result.content)
-    output_reasons = _validate_repo_audit_model_output(parsed, allowed_evidence_refs=evidence_refs)
+    output_reasons = _validate_repo_audit_model_output(
+        parsed,
+        allowed_evidence_refs=evidence_refs,
+        allowed_memex_evidence_refs=_memex_evidence_refs(memex_evidence_bundle),
+    )
     if output_reasons:
         return _reject(output_reasons)
 
@@ -977,6 +984,7 @@ def _build_repo_audit_model_prompt(
             "Use only supplied evidence_refs.",
             "Every finding must cite at least one supplied file evidence_ref.",
             "Memex evidence is historical memory context, not current repository proof; do not cite it as file evidence.",
+            "Memex evidence_refs may supplement file evidence_refs but may never be the only citation for a finding.",
             "Use exactly the allowed enum strings; do not invent synonyms such as high, medium, proceed, or mitigate.",
             "If evidence is insufficient, report an OBSERVED gap instead of inventing facts.",
             "Do not claim repo mutation, shell execution, OpenClaw enqueue, Hermes dispatch, or re-indexing.",
@@ -1054,6 +1062,7 @@ def _validate_repo_audit_model_output(
     output: Mapping[str, Any],
     *,
     allowed_evidence_refs: Sequence[str],
+    allowed_memex_evidence_refs: Sequence[str] = (),
 ) -> tuple[str, ...]:
     reasons: list[str] = []
     if not output:
@@ -1066,9 +1075,13 @@ def _validate_repo_audit_model_output(
     findings = output.get("findings")
     if not summary or not evidence_refs or not isinstance(findings, list) or not findings:
         reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE)
-    allowed = set(allowed_evidence_refs)
-    if evidence_refs and not set(evidence_refs).issubset(allowed):
-        reasons.append(ReadOnlyAuditTaskRejectReason.UNKNOWN_EVIDENCE_REF)
+    top_policy = validate_typed_evidence_citations(
+        refs=evidence_refs,
+        allowed_file_refs=allowed_evidence_refs,
+        allowed_memex_refs=allowed_memex_evidence_refs,
+    )
+    if not top_policy.accepted:
+        reasons.extend(_citation_policy_reasons(top_policy.rejection_reasons, prefix="top"))
     for index, finding in enumerate(findings if isinstance(findings, list) else []):
         if not isinstance(finding, Mapping):
             reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:{index}")
@@ -1097,9 +1110,39 @@ def _validate_repo_audit_model_output(
             reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:missing_next_slice:{index}")
         if action == "STOP" and next_slice:
             reasons.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:stop_next_slice:{index}")
-        if refs and not set(refs).issubset(allowed):
-            reasons.append(f"{ReadOnlyAuditTaskRejectReason.UNKNOWN_EVIDENCE_REF}:{index}")
+        citation_policy = validate_typed_evidence_citations(
+            refs=refs,
+            allowed_file_refs=allowed_evidence_refs,
+            allowed_memex_refs=allowed_memex_evidence_refs,
+        )
+        if not citation_policy.accepted:
+            reasons.extend(_citation_policy_reasons(citation_policy.rejection_reasons, prefix=str(index)))
     return tuple(dict.fromkeys(reasons))
+
+
+def _citation_policy_reasons(reasons: Sequence[str], *, prefix: str) -> tuple[str, ...]:
+    mapped: list[str] = []
+    for reason in reasons:
+        if reason.startswith("unknown_"):
+            mapped.append(f"{ReadOnlyAuditTaskRejectReason.UNKNOWN_EVIDENCE_REF}:{prefix}:{reason}")
+        else:
+            mapped.append(f"{ReadOnlyAuditTaskRejectReason.MODEL_SCHEMA_FAILURE}:{prefix}:{reason}")
+    return tuple(mapped)
+
+
+def _memex_evidence_refs(bundle: Mapping[str, Any] | None) -> tuple[str, ...]:
+    if not isinstance(bundle, Mapping):
+        return ()
+    records = bundle.get("records")
+    if isinstance(records, (str, bytes)) or not isinstance(records, Sequence):
+        return ()
+    refs = []
+    for record in records:
+        if isinstance(record, Mapping):
+            ref = str(record.get("evidence_ref") or "").strip()
+            if ref:
+                refs.append(ref)
+    return tuple(dict.fromkeys(refs))
 
 
 def _build_model_report(

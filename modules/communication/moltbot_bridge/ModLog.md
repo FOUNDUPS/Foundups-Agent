@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_TYPED_EVIDENCE_CITATION_POLICY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
+
+- Added a typed citation policy for read-only RedDog audit output.
+- Repository `file:` evidence can support current implementation claims.
+  `memex:` evidence is allowed only as supplemental historical memory context
+  beside at least one current repository file evidence ref.
+- Wired the policy into model-backed repo-audit output validation so unknown
+  file refs, unknown Memex refs, and Memex-only findings fail closed.
+- Updated the model prompt rules to state that Memex evidence cannot replace
+  file evidence for repo-audit findings.
+- Boundary remains read-only: no authority promotion, worker spawn, OpenClaw
+  enqueue, Hermes dispatch, repo mutation, HoloIndex re-index, or PatternMemory
+  promotion.
+
 ## 2026-07-16: REDDOG_MEMEX_CONTENT_BEARING_EVIDENCE_BUNDLE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
