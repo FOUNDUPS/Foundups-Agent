@@ -295,6 +295,44 @@ def test_main_queue_consumer_preflight_passes_when_bootstrap_ready(tmp_path: Pat
     assert mocked.call_args.kwargs["work_state_path"] == str(tmp_path / "state.json")
 
 
+def test_main_queue_consumer_preflight_profile_derives_work_state_path(tmp_path: Path) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_wre_queue_consumer_bootstrap.run_reddog_main_wre_queue_consumer_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "ready": True,
+                "status": REDDOG_WRE_QUEUE_BOOTSTRAP_READY,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_SAMPLE_SLICE_PHASE1",
+                "next_required_gate": consumer.NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
+                "execution_ready": False,
+                "rejection_reasons": (),
+                "receipt_id": "receipt-1",
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_WRE_QUEUE_CONSUMER_DRYRUN": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_wre_queue_consumer_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["work_state_path"] == str(
+        runtime_root / "authoritative_work_state.json"
+    )
+    assert not runtime_root.exists()
+
+
 def test_main_queue_consumer_preflight_blocks_when_enforced() -> None:
     import main
 
