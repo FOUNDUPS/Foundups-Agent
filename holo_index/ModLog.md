@@ -1,5 +1,28 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] HOLOINDEX_MEMEX_PROJECTION_INTEGRITY_AND_REHYDRATION_GATE_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 60, 97
+
+- ADD `holo_index/memex_projection_integrity.py`: read-only rehydration gate
+  for serialized Memex projections. It recomputes record content digests,
+  record ids, content-manifest digest, projection receipt id, schema/version
+  bindings, record counts, and FoundUp/snapshot/policy/generation consistency
+  before returning a typed `MemexProjectionResult`.
+- UPDATE `holo_index/memex_query_routing.py`: Memex query receipts now consume
+  only rehydrated projections and never trust serialized `accepted: true`.
+- ADD runtime hardening: runtime mode rejects placeholder access-policy
+  digests, replayed receipts, revoked snapshots, expired projections, and
+  caller/assignment binding mismatches.
+- TEST `tests/test_holoindex_memex_projection_integrity.py`: tampered record
+  text, digest, manifest, receipt id, schema, verification, mixed bindings,
+  expiry, replay/revocation, placeholder policy, valid round-trip
+  serialization, and AST no-write/no-exec guards.
+- Boundary: no Memex write, no HoloIndex write, no Brain/Breadcrumb write, no
+  external retrieval, no runtime re-index, and no content-bearing citation
+  policy. Snapshot supply and Memex citation/verdict policy remain downstream.
+
 ## [2026-07-16] HOLOINDEX_MEMEX_QUERY_RECEIPT_ROUTING_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice

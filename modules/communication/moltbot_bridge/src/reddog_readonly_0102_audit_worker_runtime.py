@@ -45,6 +45,7 @@ from holo_index.query_receipt import (
     load_generation_binding,
 )
 from holo_index.memex_query_routing import build_memex_projection_query_receipt
+from holo_index.memex_projection_integrity import verify_and_rehydrate_memex_projection
 
 
 READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA = "readonly_0102_audit_worker_receipt.v1"
@@ -597,7 +598,23 @@ def _optional_memex_query_receipt(
     if projection is None:
         return None
     try:
-        return build_memex_projection_query_receipt(query=query, projection=projection)
+        gate = verify_and_rehydrate_memex_projection(projection, runtime_mode=True)
+        if not gate.accepted or gate.projection is None:
+            return build_query_receipt(
+                source="memex_projection",
+                source_class="memex",
+                query=query,
+                result={
+                    "ok": False,
+                    "query": query,
+                    "freshness": "UNKNOWN",
+                    "hits": [],
+                    "error": "memex_projection_integrity_failed:"
+                    + ",".join(gate.rejection_reasons),
+                },
+                require_generation=False,
+            )
+        return build_memex_projection_query_receipt(query=query, projection=gate.projection)
     except Exception as exc:
         return build_query_receipt(
             source="memex_projection",

@@ -287,6 +287,7 @@ def _memex_projection() -> dict:
         source_scope="foundup:foundups-agent",
         source_revision="abc123",
         allowed_foundup_ids=("foundups-agent",),
+        access_policy_digest="sha256:" + "2" * 64,
         holoindex_generation_id="sha256:memex-generation",
         now_iso="2026-07-16T00:00:00+00:00",
     )
@@ -510,6 +511,28 @@ def test_model_backed_rejects_invalid_supplied_memex_projection_before_model(tmp
     runner = _EchoEvidenceModelRunner()
     context = _model_context()
     context["memex_projection"] = {"accepted": True, "records": [], "receipt": None}
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.INDEX_QUERY_FAILED in result.rejection_reasons
+    assert not runner.calls
+
+
+def test_model_backed_rejects_tampered_memex_projection_before_model(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    projection = _memex_projection()
+    projection["records"][0]["text"] = projection["records"][0]["text"] + " tampered"
+    context["memex_projection"] = projection
 
     result = execute_reddog_readonly_audit_task(
         task_context=context,

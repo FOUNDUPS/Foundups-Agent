@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: HOLOINDEX_MEMEX_PROJECTION_INTEGRITY_AND_REHYDRATION_GATE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
+
+- Updated `reddog_readonly_0102_audit_worker_runtime.py` so optional Memex
+  projections are verified through the HoloIndex integrity/rehydration gate in
+  runtime mode before any Memex query receipt is built.
+- Runtime mode rejects placeholder access-policy digests and any tampered,
+  expired, replayed, revoked, or binding-mismatched serialized projection
+  before the RedDog/Fusion model call.
+- Added a regression proving a tampered Memex record body rejects before the
+  model runner is called. Existing no-Memex behavior remains optional and
+  unchanged.
+- No Memex supplier, content-bearing citation policy, worker spawn, OpenClaw
+  enqueue, Hermes dispatch, repo mutation, shell command, HoloIndex re-index,
+  or authority promotion is added.
+
 ## 2026-07-16: REDDOG_MEMEX_QUERY_RECEIPT_RUNTIME_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 97
