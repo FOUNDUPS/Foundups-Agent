@@ -41,6 +41,9 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 from modules.communication.moltbot_bridge.src.reddog_typed_evidence_citation_policy import (
     validate_typed_evidence_citations,
 )
+from modules.communication.moltbot_bridge.src.reddog_memex_snapshot_projection_supplier import (
+    supply_assignment_bound_memex_projection,
+)
 from holo_index.query_receipt import (
     SOURCE_CLASS_CODEINDEX,
     SOURCE_CLASS_HOLOINDEX,
@@ -609,7 +612,10 @@ def _optional_memex_query_artifacts(
     projection = task_context.get("memex_projection")
     if projection is None:
         projection = assignment.get("memex_projection")
-    if projection is None:
+    memex_view = task_context.get("memex_view")
+    if memex_view is None:
+        memex_view = assignment.get("memex_view")
+    if projection is None and memex_view is None:
         return None
     try:
         expected_foundup_id = _first_text(task_context, assignment, "foundup_id")
@@ -650,6 +656,54 @@ def _optional_memex_query_artifacts(
         policy_receipt = task_context.get("memex_access_policy_receipt")
         if policy_receipt is None:
             policy_receipt = assignment.get("memex_access_policy_receipt")
+        if projection is None:
+            supplier_issued_at = (
+                _first_text(task_context, assignment, "memex_policy_issued_at")
+                or now_iso
+            )
+            supplier_expires_at = _first_text(task_context, assignment, "memex_policy_expires_at")
+            supplier_missing = [
+                name
+                for name, value in (
+                    ("memex_source_revision", expected_source_revision),
+                    ("memex_policy_issued_at", supplier_issued_at),
+                    ("memex_policy_expires_at", supplier_expires_at),
+                )
+                if not value
+            ]
+            if supplier_missing:
+                return (
+                    _memex_error_receipt(
+                        query=query,
+                        error="memex_projection_supplier_failed:missing_"
+                        + ",".join(supplier_missing),
+                    ),
+                    None,
+                )
+            supplier = supply_assignment_bound_memex_projection(
+                memex_view=memex_view,
+                foundup_id=expected_foundup_id,
+                principal_id=expected_principal_id,
+                work_order_id=expected_work_order_id,
+                source_scope=expected_source_scope,
+                source_revision=expected_source_revision,
+                snapshot_receipt_id=expected_snapshot_id,
+                snapshot_content_digest=expected_snapshot_digest,
+                holoindex_generation_id=expected_generation_id,
+                issued_at=supplier_issued_at,
+                expires_at=supplier_expires_at,
+            )
+            if not supplier.accepted or supplier.projection is None or supplier.access_policy_receipt is None:
+                return (
+                    _memex_error_receipt(
+                        query=query,
+                        error="memex_projection_supplier_failed:"
+                        + ",".join(supplier.rejection_reasons),
+                    ),
+                    None,
+                )
+            projection = supplier.projection
+            policy_receipt = supplier.access_policy_receipt.to_dict()
         if policy_receipt is None:
             return (_memex_error_receipt(query=query, error="memex_access_policy_missing"), None)
 
