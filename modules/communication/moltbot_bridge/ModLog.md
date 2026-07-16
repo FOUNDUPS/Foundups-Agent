@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_PATTERN_MEMORY_ADMISSION_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added PatternMemory admission sink construction to the signed OpenClaw
+  queue-loop environment binding using the existing explicit outside-repo
+  `REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH` adapter.
+- Refined the signed queue-loop safety classifier so a PatternMemory write is
+  accepted only when the dispatched stage is `pattern_memory_admission`;
+  unexpected memory writes remain fail-closed.
+- Added an end-to-end regression proving an AgentDB signed OpenClaw task can
+  advance from an accepted held-out gate into PatternMemory admission and write
+  exactly one verified outcome record to an outside-repo SQLite database.
+- Boundary remains explicit: no shell execution, PR publish, ready-for-review,
+  merge, HoloIndex re-index, or reward settlement is performed by this slice.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_HELD_OUT_REGRESSION_GATE_E2E_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

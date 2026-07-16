@@ -49,6 +49,9 @@ class SignedWorkerOpenClawQueueLoopBindingReason:
     DRAFT_PR_RUNNER_TIMEOUT_INVALID = (
         "REJECT_SIGNED_WORKER_QUEUE_LOOP_DRAFT_PR_RUNNER_TIMEOUT_INVALID"
     )
+    PATTERN_MEMORY_ADMISSION_DB_PATH_INVALID = (
+        "REJECT_SIGNED_WORKER_QUEUE_LOOP_PATTERN_MEMORY_ADMISSION_DB_PATH_INVALID"
+    )
 
 
 @dataclass(frozen=True)
@@ -142,6 +145,11 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         env=env,
     )
     reasons.extend(draft_pr_reasons)
+    pattern_memory_admission_sink, pattern_memory_reasons = _build_pattern_memory_admission_sink(
+        repo_root=repo_root,
+        env=env,
+    )
+    reasons.extend(pattern_memory_reasons)
 
     if reasons:
         return SignedWorkerOpenClawQueueLoopBindingResult(
@@ -159,6 +167,8 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
     bootstrap_kwargs = _bootstrap_kwargs(env)
     if draft_pr_runner is not None:
         bootstrap_kwargs["draft_pr_runner"] = draft_pr_runner
+    if pattern_memory_admission_sink is not None:
+        bootstrap_kwargs["pattern_memory_admission_sink"] = pattern_memory_admission_sink
     config = SignedWorkerQueueSerialLoopRunnerConfig(
         work_state_path=str(work_state_path),
         chain_results_path=str(chain_results_path),
@@ -252,6 +262,31 @@ def _build_draft_pr_runner(
         repo_root=Path(repo_root).resolve(),
         timeout_s=timeout_s,
     ), ()
+
+
+def _build_pattern_memory_admission_sink(
+    *,
+    repo_root: Path | str,
+    env: Mapping[str, str],
+) -> tuple[Any, tuple[str, ...]]:
+    db_path = _stripped(env.get("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH"))
+    if not db_path:
+        return None, ()
+
+    from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+        PatternMemorySinkConfigurationError,
+        build_reddog_verified_pattern_memory_sink,
+    )
+
+    try:
+        return build_reddog_verified_pattern_memory_sink(
+            repo_root=repo_root,
+            db_path=db_path,
+        ), ()
+    except PatternMemorySinkConfigurationError:
+        return None, (
+            SignedWorkerOpenClawQueueLoopBindingReason.PATTERN_MEMORY_ADMISSION_DB_PATH_INVALID,
+        )
 
 
 def _stripped(value: Any) -> str:
