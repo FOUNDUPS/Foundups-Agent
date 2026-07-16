@@ -16,7 +16,6 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
     ModelPromotionEvidenceReceipt,
     build_model_benchmark_evidence_receipt,
     build_model_promotion_evidence_receipt,
-    production_evidence_for_selection,
 )
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     ModelTaskRequirements,
@@ -30,6 +29,8 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
     ModelRuntimeBindingPolicy,
     bind_reddog_runtime_models,
 )
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import VerifiedModelProductionEvidence
+from model_signed_evidence_test_helpers import make_verified_production_evidence
 
 
 TASK = "architecture"
@@ -77,11 +78,36 @@ def _promotion(benchmark: ModelBenchmarkEvidenceReceipt) -> ModelPromotionEviden
     )
 
 
-def _evidence_map(*pairs: tuple[ModelBenchmarkEvidenceReceipt, ModelPromotionEvidenceReceipt]):
-    evidence: dict[str, dict] = {}
+def _verified_evidence(
+    *,
+    snapshot_id: str,
+    selection_receipt_id: str = "model_selection_receipt:pending",
+    pairs: tuple[tuple[ModelBenchmarkEvidenceReceipt, ModelPromotionEvidenceReceipt], ...],
+) -> VerifiedModelProductionEvidence:
+    entries = []
     for benchmark, promotion in pairs:
-        evidence.update(production_evidence_for_selection(benchmark, promotion))
-    return evidence
+        entries.extend(
+            make_verified_production_evidence(
+                benchmark,
+                promotion,
+                catalog_snapshot_id=snapshot_id,
+                selection_receipt_id=selection_receipt_id,
+            ).entries
+        )
+    return VerifiedModelProductionEvidence(entries=tuple(entries))
+
+
+def _production_selection(snapshot, requirements, *pairs):
+    provisional = _verified_evidence(snapshot_id=snapshot.snapshot_id, pairs=tuple(pairs))
+    first = select_models_for_task(snapshot, requirements, production_evidence=provisional)
+    verified = _verified_evidence(
+        snapshot_id=snapshot.snapshot_id,
+        selection_receipt_id=first.receipt_id,
+        pairs=tuple(pairs),
+    )
+    second = select_models_for_task(snapshot, requirements, production_evidence=verified)
+    assert second.receipt_id == first.receipt_id
+    return second, verified
 
 
 def _policy(**overrides) -> ModelRuntimeBindingPolicy:
@@ -104,14 +130,14 @@ def test_single_model_runtime_binding_requires_receipt_bound_evidence():
     snapshot = build_model_catalog_snapshot((card,), generated_at="2026-07-16T00:00:00+00:00")
     benchmark = _benchmark("provider/champion")
     promotion = _promotion(benchmark)
-    selection = select_models_for_task(
+    selection, verified_evidence = _production_selection(
         snapshot,
         ModelTaskRequirements(
             task_family=TASK,
             purpose=SelectionPurpose.PRODUCTION,
             min_verifier_pass_rate=0.9,
         ),
-        production_evidence=_evidence_map((benchmark, promotion)),
+        (benchmark, promotion),
     )
 
     receipt = bind_reddog_runtime_models(
@@ -120,6 +146,7 @@ def test_single_model_runtime_binding_requires_receipt_bound_evidence():
         benchmark_evidence_receipts=(benchmark,),
         promotion_evidence_receipts=(promotion,),
         policy=_policy(),
+        verified_production_evidence=verified_evidence,
     )
 
     assert selection.decision == SelectionDecision.SELECTED
@@ -192,14 +219,14 @@ def test_runtime_binding_rejects_mismatched_receipts_and_policy():
     snapshot = build_model_catalog_snapshot((card,), generated_at="2026-07-16T00:00:00+00:00")
     benchmark = _benchmark("provider/champion")
     promotion = _promotion(benchmark)
-    selection = select_models_for_task(
+    selection, verified_evidence = _production_selection(
         snapshot,
         ModelTaskRequirements(
             task_family=TASK,
             purpose=SelectionPurpose.PRODUCTION,
             min_verifier_pass_rate=0.9,
         ),
-        production_evidence=_evidence_map((benchmark, promotion)),
+        (benchmark, promotion),
     )
 
     receipt = bind_reddog_runtime_models(
@@ -208,6 +235,7 @@ def test_runtime_binding_rejects_mismatched_receipts_and_policy():
         benchmark_evidence_receipts=(benchmark,),
         promotion_evidence_receipts=(promotion,),
         policy=_policy(required_task_set_digest="sha256:other", required_verifier_digest="sha256:other"),
+        verified_production_evidence=verified_evidence,
     )
 
     assert receipt.decision == ModelRuntimeBindingDecision.REJECTED
@@ -215,7 +243,7 @@ def test_runtime_binding_rejects_mismatched_receipts_and_policy():
     assert "verifier_digest_mismatch" in receipt.rejection_reasons
 
 
-def test_panel_runtime_binding_uses_role_topology_and_keeps_verifier_outside_panel():
+def test_panel_runtime_binding_remains_deferred_even_with_role_topology():
     cards = (
         _card("provider/principal", provider="a"),
         _card("provider/researcher", provider="b"),
@@ -224,7 +252,7 @@ def test_panel_runtime_binding_uses_role_topology_and_keeps_verifier_outside_pan
     snapshot = build_model_catalog_snapshot(cards, generated_at="2026-07-16T00:00:00+00:00")
     benchmarks = tuple(_benchmark(card.canonical_model_id, topology=TOPOLOGY) for card in cards)
     promotions = tuple(_promotion(benchmark) for benchmark in benchmarks)
-    selection = select_models_for_task(
+    selection, verified_evidence = _production_selection(
         snapshot,
         ModelTaskRequirements(
             task_family=TASK,
@@ -235,7 +263,7 @@ def test_panel_runtime_binding_uses_role_topology_and_keeps_verifier_outside_pan
             panel_roles=("principal", "researcher", "critic"),
             panel_topology_digest=TOPOLOGY,
         ),
-        production_evidence=_evidence_map(*zip(benchmarks, promotions)),
+        *zip(benchmarks, promotions),
     )
 
     receipt = bind_reddog_runtime_models(
@@ -244,17 +272,19 @@ def test_panel_runtime_binding_uses_role_topology_and_keeps_verifier_outside_pan
         benchmark_evidence_receipts=benchmarks,
         promotion_evidence_receipts=promotions,
         policy=_policy(required_panel_topology_digest=TOPOLOGY),
+        verified_production_evidence=verified_evidence,
     )
 
     assert selection.decision == SelectionDecision.SELECTED
-    assert receipt.decision == ModelRuntimeBindingDecision.BOUND
-    assert receipt.principal_model == "provider/principal"
-    assert receipt.panel_models == ("provider/researcher", "provider/critic")
-    assert [binding.role for binding in receipt.role_bindings] == ["principal", "researcher", "critic"]
-    assert "verifier" not in {binding.role for binding in receipt.role_bindings}
-    payload = receipt.to_reddog_bridge_payload()
-    assert payload["lead_model"] == "provider/principal"
-    assert payload["panel_models"] == ["provider/researcher", "provider/critic"]
+    assert receipt.decision == ModelRuntimeBindingDecision.REJECTED
+    assert "panel_runtime_binding_deferred" in receipt.rejection_reasons
+    assert receipt.principal_model is None
+    try:
+        receipt.to_reddog_bridge_payload()
+    except ValueError as exc:
+        assert str(exc) == "runtime_binding_not_bound"
+    else:
+        raise AssertionError("deferred panel binding must not produce a bridge payload")
 
 
 def test_panel_runtime_binding_rejects_topology_mismatch():
@@ -262,7 +292,7 @@ def test_panel_runtime_binding_rejects_topology_mismatch():
     snapshot = build_model_catalog_snapshot(cards, generated_at="2026-07-16T00:00:00+00:00")
     benchmarks = tuple(_benchmark(card.canonical_model_id, topology=TOPOLOGY) for card in cards)
     promotions = tuple(_promotion(benchmark) for benchmark in benchmarks)
-    selection = select_models_for_task(
+    selection, verified_evidence = _production_selection(
         snapshot,
         ModelTaskRequirements(
             task_family=TASK,
@@ -273,7 +303,7 @@ def test_panel_runtime_binding_rejects_topology_mismatch():
             panel_roles=("principal", "researcher"),
             panel_topology_digest=TOPOLOGY,
         ),
-        production_evidence=_evidence_map(*zip(benchmarks, promotions)),
+        *zip(benchmarks, promotions),
     )
 
     receipt = bind_reddog_runtime_models(
@@ -282,6 +312,7 @@ def test_panel_runtime_binding_rejects_topology_mismatch():
         benchmark_evidence_receipts=benchmarks,
         promotion_evidence_receipts=promotions,
         policy=_policy(required_panel_topology_digest="sha256:wrong"),
+        verified_production_evidence=verified_evidence,
     )
 
     assert receipt.decision == ModelRuntimeBindingDecision.REJECTED
@@ -293,14 +324,14 @@ def test_runtime_binding_rejects_duplicate_evidence_receipts():
     promotion = _promotion(benchmark)
     card = _card("provider/champion")
     snapshot = build_model_catalog_snapshot((card,), generated_at="2026-07-16T00:00:00+00:00")
-    selection = select_models_for_task(
+    selection, verified_evidence = _production_selection(
         snapshot,
         ModelTaskRequirements(
             task_family=TASK,
             purpose=SelectionPurpose.PRODUCTION,
             min_verifier_pass_rate=0.9,
         ),
-        production_evidence=_evidence_map((benchmark, promotion)),
+        (benchmark, promotion),
     )
 
     try:
@@ -310,6 +341,7 @@ def test_runtime_binding_rejects_duplicate_evidence_receipts():
             benchmark_evidence_receipts=(benchmark, benchmark),
             promotion_evidence_receipts=(promotion,),
             policy=_policy(),
+            verified_production_evidence=verified_evidence,
         )
     except ValueError as exc:
         assert str(exc) == "duplicate_benchmark_receipt_for_model"

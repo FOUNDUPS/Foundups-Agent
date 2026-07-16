@@ -26,6 +26,7 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
     SelectionPurpose,
     select_models_for_task,
 )
+from model_signed_evidence_test_helpers import make_verified_production_evidence
 
 
 def _selected_receipt():
@@ -133,7 +134,58 @@ def test_promotion_evidence_requires_signed_authority_and_threshold():
         raise AssertionError("expected missing signature rejection")
 
 
-def test_production_evidence_map_feeds_hardened_selection():
+def test_verified_production_evidence_feeds_hardened_selection():
+    benchmark = build_model_benchmark_evidence_receipt(
+        model_id="provider/model",
+        task_family="architecture",
+        task_set_digest="sha256:taskset",
+        held_out_split_digest="sha256:heldout",
+        prompt_topology_digest="sha256:topology",
+        verifier_digest="sha256:verifier",
+        verifier_receipt_id="verifier:1",
+        sample_count=10,
+        accepted_count=9,
+    )
+    promotion = build_model_promotion_evidence_receipt(
+        benchmark_receipt=benchmark,
+        promotion_state=PromotionState.CHAMPION,
+        promotion_authority_receipt_id="authority:1",
+        signed_promotion_receipt_id="signature:1",
+        min_verifier_pass_rate=0.9,
+    )
+    snapshot = build_model_catalog_snapshot(
+        (
+            ModelCapabilityCard(
+                provider="provider",
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                source="test",
+                promotion_state=PromotionState.CHAMPION,
+                task_families=("architecture",),
+            ).normalized(),
+        ),
+        generated_at="2026-07-16T00:00:00+00:00",
+    )
+
+    verified_evidence = make_verified_production_evidence(
+        benchmark,
+        promotion,
+        catalog_snapshot_id=snapshot.snapshot_id,
+    )
+    receipt = select_models_for_task(
+        snapshot,
+        ModelTaskRequirements(
+            task_family="architecture",
+            purpose=SelectionPurpose.PRODUCTION,
+            min_verifier_pass_rate=0.9,
+        ),
+        production_evidence=verified_evidence,
+    )
+
+    assert receipt.selected_model_ids == ("provider/model",)
+
+
+def test_legacy_production_evidence_map_is_rejected_by_selection():
     benchmark = build_model_benchmark_evidence_receipt(
         model_id="provider/model",
         task_family="architecture",
@@ -176,7 +228,8 @@ def test_production_evidence_map_feeds_hardened_selection():
         production_evidence=production_evidence_for_selection(benchmark, promotion),
     )
 
-    assert receipt.selected_model_ids == ("provider/model",)
+    assert receipt.selected_model_ids == ()
+    assert "production_evidence_not_authenticated:1" in receipt.rejection_reasons
 
 
 def test_outcome_receipt_accepts_only_verified_complete_results():
