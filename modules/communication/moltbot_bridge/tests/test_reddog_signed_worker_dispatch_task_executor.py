@@ -85,6 +85,22 @@ class _FakeRunner:
         }
 
 
+class _FakeBinding:
+    def __init__(self, runner) -> None:
+        self.accepted = True
+        self.requested = True
+        self.runner = runner
+        self.rejection_reasons = ()
+
+    def to_dict(self):
+        return {
+            "accepted": self.accepted,
+            "requested": self.requested,
+            "runner": "FakeRunner",
+            "rejection_reasons": list(self.rejection_reasons),
+        }
+
+
 class _CollectingWriter:
     def enqueue_signed_worker_dispatch_tasks(self, tasks, receipt):
         return {
@@ -202,10 +218,12 @@ def _task_context():
     return dict(task.context)
 
 
-def _publish_agentdb_task() -> str:
+def _publish_agentdb_task(**intent_overrides) -> str:
+    allocation = _allocation()
+    intent = _intent(allocation, **intent_overrides)
     result = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=_dryrun_result(),
-        work_state_snapshot=_snapshot(),
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+        work_state_snapshot=_snapshot(allocation),
         queue_item_id="queue-1",
         writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
     )
@@ -309,6 +327,36 @@ def test_run_task_rejects_signed_worker_without_runner_instead_of_wre_fallback(
     assert db.get_autonomous_task_by_id(task_id)["status"] == "failed"
 
 
+def test_run_task_uses_env_bound_queue_loop_runner_when_enabled(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_openclaw_queue_loop_runtime_binding as binding_module,
+    )
+
+    runner = _FakeRunner()
+    monkeypatch.setattr(
+        binding_module,
+        "build_reddog_signed_worker_queue_loop_runner_from_env",
+        lambda *, repo_root, env: _FakeBinding(runner),
+    )
+
+    result = execute_task(task_id, repo_root=tmp_path)
+
+    assert result["ok"] is True
+    assert result["executor"] == "reddog:signed_worker_dispatch"
+    assert result["structured_result"]["accepted"] is True
+    assert runner.calls[0]["task_id"] == task_id
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+
 def test_openclaw_claims_signed_worker_task_once_and_completes_it(tmp_path: Path) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
@@ -324,6 +372,26 @@ def test_openclaw_claims_signed_worker_task_once_and_completes_it(tmp_path: Path
     assert result["worker_runtime"] == "openclaw"
     assert result["receipt_id"]
     assert db.get_autonomous_task_by_id(task_id)["status"] == "completed"
+
+
+def test_openclaw_claim_ignores_non_openclaw_signed_worker_task(tmp_path: Path) -> None:
+    task_id = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_hermes_candidate",
+        role="hermes_candidate",
+        worker_runtime="hermes",
+        capability="bounded_code_change",
+    )
+    db = AgentDB()
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+    )
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
+    assert SignedWorkerOpenClawClaimReason.NO_PENDING_TASK in result["rejection_reasons"]
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "pending"
 
 
 def test_openclaw_supervisor_instance_claims_signed_worker_task(tmp_path: Path) -> None:

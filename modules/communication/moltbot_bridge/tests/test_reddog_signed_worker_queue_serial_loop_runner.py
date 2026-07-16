@@ -16,6 +16,12 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task
     SignedWorkerDispatchTaskExecutorReason,
     execute_reddog_signed_worker_dispatch_task,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+    SIGNED_WORKER_QUEUE_LOOP_BINDING_READY,
+    SignedWorkerOpenClawQueueLoopBindingReason,
+    build_reddog_signed_worker_queue_loop_runner_from_env,
+    is_openclaw_candidate_signed_worker_context,
+)
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_loop_runner import (
     RedDogSignedWorkerQueueSerialLoopRunner,
     SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT,
@@ -33,6 +39,14 @@ MODULE_PATH = (
     / "moltbot_bridge"
     / "src"
     / "reddog_signed_worker_queue_serial_loop_runner.py"
+)
+BINDING_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "src"
+    / "reddog_signed_worker_openclaw_queue_loop_runtime_binding.py"
 )
 
 
@@ -184,6 +198,71 @@ def _bootstrap_payload(**overrides):
     return payload
 
 
+def test_openclaw_candidate_context_filter_accepts_only_target_capability() -> None:
+    assert is_openclaw_candidate_signed_worker_context(_context()) is True
+    assert (
+        is_openclaw_candidate_signed_worker_context(
+            _context(worker_runtime="hermes", capability="candidate_queue_review")
+        )
+        is False
+    )
+    assert (
+        is_openclaw_candidate_signed_worker_context(
+            _context(worker_runtime="openclaw", capability="coding_worker")
+        )
+        is False
+    )
+
+
+def test_runtime_binding_builds_runner_from_explicit_env(tmp_path: Path) -> None:
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "authority_profile",
+        "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
+        "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=tmp_path,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.status == SIGNED_WORKER_QUEUE_LOOP_BINDING_READY
+    assert binding.runner is not None
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path,
+    )
+
+    assert result["accepted"] is True
+    assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
+    assert bootstrap.calls[0]["requested_queue_item_id"] == "queue-1"
+    assert bootstrap.calls[0]["work_order_materializer_mode"] == "authority_profile"
+
+
+def test_runtime_binding_rejects_missing_required_paths(tmp_path: Path) -> None:
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=tmp_path,
+        env={"REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1"},
+        bootstrap=_FakeBootstrap(),
+    )
+
+    assert binding.accepted is False
+    assert binding.requested is True
+    assert SignedWorkerOpenClawQueueLoopBindingReason.WORK_STATE_PATH_MISSING in binding.rejection_reasons
+    assert SignedWorkerOpenClawQueueLoopBindingReason.CHAIN_RESULTS_PATH_MISSING in binding.rejection_reasons
+    assert SignedWorkerOpenClawQueueLoopBindingReason.AUTHORITY_PROFILE_PATH_MISSING in binding.rejection_reasons
+
+
 def test_queue_serial_loop_runner_accepts_openclaw_candidate(tmp_path: Path) -> None:
     bootstrap = _FakeBootstrap()
     runner = RedDogSignedWorkerQueueSerialLoopRunner(_config(tmp_path), bootstrap=bootstrap)
@@ -317,39 +396,40 @@ def test_signed_worker_executor_rejects_unsupported_queue_runner_target(tmp_path
 
 
 def test_queue_serial_loop_runner_ast_has_no_shell_network_or_mutation_calls() -> None:
-    source = MODULE_PATH.read_text(encoding="utf-8")
-    tree = ast.parse(source)
     forbidden_text = (
         "subprocess",
         "requests",
-        "socket",
         "holo_index.py --index",
         "create_autonomous_task",
         "complete_autonomous_task",
         "git push",
         "gh pr",
     )
-    for token in forbidden_text:
-        assert token not in source
+    for path in (MODULE_PATH, BINDING_PATH):
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        for token in forbidden_text:
+            assert token not in source
 
-    imported = set()
-    calls = set()
-    attrs = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            imported.update(alias.name.split(".")[0] for alias in node.names)
-        elif isinstance(node, ast.ImportFrom):
-            imported.add((node.module or "").split(".")[0])
-        elif isinstance(node, ast.Call):
-            func = node.func
-            if isinstance(func, ast.Name):
-                calls.add(func.id)
-            elif isinstance(func, ast.Attribute):
-                attrs.add(func.attr)
+        imported = set()
+        calls = set()
+        attrs = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imported.update(alias.name.split(".")[0] for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                imported.add((node.module or "").split(".")[0])
+            elif isinstance(node, ast.Call):
+                func = node.func
+                if isinstance(func, ast.Name):
+                    calls.add(func.id)
+                elif isinstance(func, ast.Attribute):
+                    attrs.add(func.attr)
 
-    assert "subprocess" not in imported
-    assert "requests" not in imported
-    assert "eval" not in calls
-    assert "exec" not in calls
-    assert "system" not in attrs
-    assert "popen" not in attrs
+        assert "subprocess" not in imported
+        assert "requests" not in imported
+        assert "socket" not in imported
+        assert "eval" not in calls
+        assert "exec" not in calls
+        assert "system" not in attrs
+        assert "popen" not in attrs

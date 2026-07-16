@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_OPENCLAW_QUEUE_LOOP_RUNTIME_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an explicit runtime binding that builds the OpenClaw signed-worker
+  queue-loop runner from environment-provided outside-repo artifacts.
+- Wired `run_task.execute_task()` to use the bound runner when
+  `REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER=1`, preserving the default
+  fail-closed `RUNNER_MISSING` behavior when the binding is not requested.
+- Hardened the OpenClaw signed-worker claim seam so it only claims
+  `openclaw` / `candidate_queue_review` tasks; Hermes and 0102 signed-worker
+  tasks remain pending for future dedicated consumers instead of being failed
+  by the wrong runner.
+- Boundary remains non-mutating: no shell command, source repo mutation,
+  worktree creation, PR, Hermes dispatch, PatternMemory write, HoloIndex
+  re-index, or reward settlement is introduced by this slice.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

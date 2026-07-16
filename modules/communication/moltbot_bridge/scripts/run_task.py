@@ -259,11 +259,23 @@ def _try_reddog_signed_worker_dispatch(
         return None
 
     try:
+        effective_runner = signed_worker_runner
+        if effective_runner is None:
+            binding_result = _build_signed_worker_queue_loop_runner(repo_root)
+            if binding_result is not None:
+                if getattr(binding_result, "accepted", False) is True:
+                    effective_runner = getattr(binding_result, "runner", None)
+                elif getattr(binding_result, "requested", False) is True:
+                    return {
+                        "ok": False,
+                        "detail": json.dumps(binding_result.to_dict(), default=str)[:1000],
+                        "executor": "reddog:signed_worker_dispatch",
+                    }
         execution = execute_reddog_signed_worker_dispatch_task(
             task_context=context,
             task_id=task_id,
             repo_root=repo_root,
-            runner=signed_worker_runner,
+            runner=effective_runner,
         )
         payload = execution.to_dict()
         return {
@@ -347,6 +359,23 @@ def _try_wre_dispatch(
         return {"ok": False, "detail": f"wre_error: {e}", "executor": "wre"}
 
     return None
+
+
+def _build_signed_worker_queue_loop_runner(repo_root: Path) -> Any | None:
+    """Build an explicitly enabled OpenClaw signed-worker queue-loop runner."""
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+            build_reddog_signed_worker_queue_loop_runner_from_env,
+        )
+    except ImportError as e:
+        logger.debug("[RUN_TASK] RedDog signed-worker queue-loop binding unavailable: %s", e)
+        return None
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=repo_root,
+        env=os.environ,
+    )
+    return binding
 
 
 def _try_self_audit_dispatch(repo_root: Path, context: dict) -> Dict[str, Any] | None:
