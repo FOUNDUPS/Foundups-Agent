@@ -189,6 +189,8 @@ def _bootstrap_payload(**overrides):
         "rejection_reasons": (),
         "no_repo_mutation_performed": True,
         "no_shell_command_executed": True,
+        "no_openclaw_enqueue_performed": True,
+        "no_hermes_dispatch_performed": True,
         "no_holoindex_reindex_performed": True,
         "no_pr_created": True,
         "no_pattern_memory_write_performed": True,
@@ -360,6 +362,36 @@ def test_queue_serial_loop_runner_rejects_failed_or_unsafe_bootstrap(tmp_path: P
     assert "missing_work_order" in rejected["rejection_reasons"]
     assert unsafe["accepted"] is False
     assert SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE in unsafe["rejection_reasons"]
+
+
+def test_queue_serial_loop_runner_allows_bounded_isolated_worktree_progress(
+    tmp_path: Path,
+) -> None:
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(
+        _config(tmp_path),
+        bootstrap=_FakeBootstrap(
+            _bootstrap_payload(
+                no_repo_mutation_performed=False,
+                no_worktree_created=False,
+                no_bounded_task_execution_performed=False,
+                no_bounded_file_edit_performed=False,
+            )
+        ),
+    )
+    context = _context()
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is True
+    assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
+    assert result["no_source_repo_mutation_performed"] is True
+    assert result["no_shell_command_executed"] is True
 
 
 def test_signed_worker_executor_accepts_queue_serial_loop_runner(tmp_path: Path) -> None:
