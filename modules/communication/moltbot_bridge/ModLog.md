@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_AUTHORITATIVE_WORK_STATE_SOURCE_RECORD_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a bounded source-record supplier that materializes GitHub PR records
+  and W10 report records outside the repository for the existing
+  authoritative work-state refresh runtime.
+- Wired the `signed_0102_bounded_code` resident profile to derive source
+  record paths and optionally run the supplier before work-state refresh,
+  preserving explicit environment overrides (`0` still disables profile
+  default source supply).
+- Boundary remains constrained: no work-state commit, worker spawn, shell
+  execution, OpenClaw enqueue, Hermes dispatch, source mutation, merge, reward
+  settlement, PatternMemory write, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_RESIDENT_PROFILE_ARTIFACT_SUPPLY_DEFAULTS_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
