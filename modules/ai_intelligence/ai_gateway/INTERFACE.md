@@ -136,6 +136,22 @@ benchmark projections return `REJECT`.
 This API does not mutate model catalogs, write champion ledgers, call providers,
 or bind runtime RedDog model defaults.
 
+#### Champion/Challenger AutoResearch Planner
+
+```python
+plan_model_champion_challenger_autoresearch(...) -> ModelAutoResearchPlanReceipt
+```
+
+The planner consumes promotion-gate receipts, a candidate pool, and
+`ModelAutoResearchPolicy`. It emits a digest-bound plan containing
+`BENCHMARK_NEW_CANDIDATE`, `REBENCHMARK_CHALLENGER`, or `STOP` items.
+
+The policy binds task family, catalog snapshot ID, maximum campaign items,
+optional verifier digest, and a required cost-budget receipt. Missing source gate
+receipts, verifier mismatch, or missing budget evidence fails closed. The planner
+does not execute benchmarks, call providers, write PatternMemory, mutate
+catalogs, or bind runtime defaults.
+
 ## Configuration
 
 ### Environment Variables
