@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_OPENCLAW_SIGNED_WORKER_REQUEUE_DRAIN_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an end-to-end OpenClaw signed-worker claim-loop regression proving one
+  AgentDB task can be requeued across non-terminal resident queue stages and
+  complete only after `STOP_QUEUE_CHAIN_COMPLETE`.
+- Added opt-in resident queue request bindings for outcome-ratchet and held-out
+  gate stages. The bindings derive requests from already-recorded chain results
+  so the requeued worker loop does not need operator-edited JSON between
+  claims.
+- Extended the signed-worker queue-loop environment binding with
+  `REDDOG_OUTCOME_RATCHET_REQUEST_BINDING=1` and
+  `REDDOG_HELD_OUT_GATE_REQUEST_BINDING=1`.
+- Boundary remains explicit: no new worker authority, no shell execution, no
+  source-repo mutation, no Hermes dispatch, no HoloIndex re-index, no merge
+  authority, and no reward settlement are added.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_QUEUE_LOOP_INCOMPLETE_REQUEUE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

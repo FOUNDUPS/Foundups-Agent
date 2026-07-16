@@ -243,6 +243,8 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
         ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
         ("slice_verifier_request_binding_enabled", "REDDOG_SLICE_VERIFIER_REQUEST_BINDING"),
         ("draft_pr_publish_request_binding_enabled", "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING"),
+        ("outcome_ratchet_request_binding_enabled", "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING"),
+        ("held_out_gate_request_binding_enabled", "REDDOG_HELD_OUT_GATE_REQUEST_BINDING"),
     ):
         if _stripped(env.get(env_name)) == "1":
             payload[key] = True
