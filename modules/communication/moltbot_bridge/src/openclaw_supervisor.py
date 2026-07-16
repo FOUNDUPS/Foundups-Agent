@@ -791,7 +791,11 @@ def _signed_0102_bounded_code_stage_ready_from_env(
         return False
     if str(env.get("REDDOG_ARTIFACT_GENERATOR_MODE") or "").strip() != "foundups_fusion":
         return False
-    if not str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH") or "").strip():
+    artifact_request_ready = bool(
+        str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH") or "").strip()
+        or str(env.get("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING") or "").strip() == "1"
+    )
+    if not artifact_request_ready:
         return False
     if str(env.get("REDDOG_ARTIFACT_CONTENTS_PATH") or "").strip():
         return False

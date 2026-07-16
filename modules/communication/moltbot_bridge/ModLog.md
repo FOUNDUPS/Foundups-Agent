@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_OPENCLAW_BOUNDED_CODE_ARTIFACT_BINDING_STAGE_READY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Updated OpenClaw signed 0102 bounded-code stage readiness so
+  `REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING=1` can satisfy the artifact
+  request-source check without hand-authored request JSON.
+- Preserved fail-closed behavior: `foundups_fusion` artifact generator mode is
+  still required, static artifact contents still block 0102 bounded-code
+  claims, and the resident queue must already be at `bounded_worker_pilot`.
+- Added claim-path tests proving binding-based claim acceptance and rejection
+  when neither explicit request JSON nor derived request binding is present.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_BOUNDED_CODE_ARTIFACT_REQUEST_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
