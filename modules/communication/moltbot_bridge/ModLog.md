@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_FUSION_WORKTREE_PROFILE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code_fusion_worktree`
+  as a higher-authority resident profile that defaults the isolated worktree
+  runner mode to `real`.
+- Preserved explicit `REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE` override
+  behavior and kept the lower profiles non-worktree.
+- Boundary remains constrained: this profile enables only the existing
+  isolated worktree materializer after signed queue-loop, model artifact, and
+  bounded-code stage gates pass; it does not enable shell execution, draft PR
+  publishing, PatternMemory writes, HoloIndex re-index, merge authority, or
+  rewards.
+
 ## 2026-07-16: REDDOG_RESIDENT_FUSION_ARTIFACT_PROFILE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

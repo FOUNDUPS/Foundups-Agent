@@ -27,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     resident_queue_binding_enabled,
     resident_queue_materializer_mode,
     resident_queue_runtime_flag_enabled,
+    resident_queue_worktree_runner_mode,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_loop_runner import (
     RedDogSignedWorkerQueueSerialLoopRunner,
@@ -220,6 +221,7 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
 def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
     materializer_mode = resident_queue_materializer_mode(env)
     artifact_generator_mode = resident_queue_artifact_generator_mode(env)
+    worktree_runner_mode = resident_queue_worktree_runner_mode(env)
     pairs = {
         "work_orders_path": "REDDOG_WORK_ORDERS_PATH",
         "valve_environment_path": "REDDOG_EXECUTION_VALVE_ENV_PATH",
@@ -253,6 +255,8 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
             payload[key] = value
     if artifact_generator_mode:
         payload["artifact_generator_mode"] = artifact_generator_mode
+    if worktree_runner_mode:
+        payload["worktree_runner_mode"] = worktree_runner_mode
     for key, env_name in (
         ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
         (

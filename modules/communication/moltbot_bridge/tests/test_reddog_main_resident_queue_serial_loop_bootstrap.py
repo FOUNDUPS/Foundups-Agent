@@ -3756,6 +3756,49 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["max_steps"] == 1
 
 
+def test_main_serial_loop_preflight_worktree_profile_derives_model_and_worktree_modes(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("bounded_worker_pilot",),
+                "next_action": "STOP_QUEUE_CHAIN_COMPLETE",
+                "chain_results_path": str(tmp_path / "chain.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree",
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    assert mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
+    assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
+    assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
+
+
 def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
     import main
 
