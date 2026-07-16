@@ -1,5 +1,40 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - RedDog Model Selection Artifact Supply Main Preflight
+
+**Who:** 0102 Codex
+**Type:** Runtime Artifact Bridge
+**Slice:** REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**What:** Added an optional `main.py` startup adapter that materializes the
+production `ModelSelectionReceipt` path from outside-repo catalog, signed
+evidence, requirements, and trusted public-key JSON inputs.
+
+**Why:** The resident RedDog architect FIX promotion path should not require a
+manual model-selection receipt when the signed benchmark/promotion evidence is
+already available. The bridge still must fail closed instead of trusting catalog
+champion fields or raw evidence mappings.
+
+**Files:**
+- `src/model_selection_artifact_supply_bootstrap.py` - outside-repo input
+  loader, trusted model-evidence key resolver construction, public signature
+  verifier selection, and supplier invocation.
+- `tests/test_model_selection_artifact_supply_bootstrap.py` - positive
+  materialization and missing-key/output/backend/AST boundary tests.
+- `README.md` and `INTERFACE.md` - API and startup-boundary notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: explicit main-startup model-selection artifact supply.
+- IMPLEMENTED: trusted public keys and signed evidence are required before
+  production selection.
+- NOT IMPLEMENTED: provider calls, benchmark execution, runtime model default
+  binding, telemetry persistence, worker dispatch, source mutation,
+  PatternMemory writes, or HoloIndex re-indexing.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - RedDog Model Selection Artifact Supply
 
 **Who:** 0102 Codex

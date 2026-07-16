@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Wired `main.py` to optionally run the AI Gateway model-selection artifact
+  supplier before architect-FIX promotion when
+  `REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=1` is set.
+- The preflight consumes outside-repo catalog snapshot, signed production
+  evidence bundle, selection requirements, and trusted public-key files, then
+  feeds the resulting model-selection receipt path into the existing promotion
+  bridge.
+- Boundary remains constrained: no model/provider call, benchmark execution,
+  runtime model default binding, worker spawn, shell, worktree, source
+  mutation, PatternMemory write, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

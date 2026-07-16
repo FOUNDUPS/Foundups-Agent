@@ -221,6 +221,82 @@ def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_pro
     assert promote_kwargs["authority_profile_output_path"] == str(runtime_root / "authority_profile.json")
 
 
+def test_main_preflight_model_selection_supply_runs_before_promotion(tmp_path: Path) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    work_state = _write_json(tmp_path, "authoritative_work_state.json", _work_state())
+    determination = _write_json(tmp_path, "architect_determination.json", _determination())
+    memex = _write_json(tmp_path, "memex_supply_receipt.json", _memex_supply())
+    authority_source = _write_json(tmp_path, "authority_profile_source.json", _authority_profile())
+    model_supply_result = type(
+        "ModelSupplyResult",
+        (),
+        {
+            "accepted": True,
+            "status": "MODEL_SELECTION_ARTIFACT_BOOTSTRAP_APPLIED",
+            "model_selection_receipt_id": "model_selection_receipt:runtime",
+            "output_path": str(runtime_root / "model_selection_receipt.json"),
+            "rejection_reasons": (),
+        },
+    )()
+    promotion_result = type(
+        "PromotionResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
+            "promotion_receipt_id": "sha256:promotion",
+            "queue_item_id": "queue-1",
+            "claim_id": "claim-1",
+            "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "committed_revision": "sha256:revision",
+            "rejection_reasons": (),
+        },
+    )()
+
+    with patch(
+        "modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply_bootstrap.run_reddog_model_selection_artifact_supply_bootstrap",
+        return_value=model_supply_result,
+    ) as model_supply:
+        with patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
+            return_value=promotion_result,
+        ) as promote:
+            with patch.dict(
+                "os.environ",
+                {
+                    "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "1",
+                    "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                    "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
+                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH": str(tmp_path / "catalog.json"),
+                    "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH": str(tmp_path / "evidence.json"),
+                    "REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH": str(tmp_path / "requirements.json"),
+                    "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH": str(tmp_path / "keys.json"),
+                    "REDDOG_MODEL_SELECTION_EVIDENCE_NOW_EPOCH": "1800000000",
+                },
+                clear=True,
+            ):
+                assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+                assert main.os.environ["REDDOG_MODEL_SELECTION_RECEIPT_PATH"] == str(
+                    runtime_root / "model_selection_receipt.json"
+                )
+
+    model_supply.assert_called_once()
+    model_kwargs = model_supply.call_args.kwargs
+    assert model_kwargs["output_path"] == str(runtime_root / "model_selection_receipt.json")
+    assert model_kwargs["now_epoch"] == 1_800_000_000
+    promote.assert_called_once()
+    promote_kwargs = promote.call_args.kwargs
+    assert promote_kwargs["model_selection_receipt_path"] == str(runtime_root / "model_selection_receipt.json")
+
+
 def test_main_preflight_disabled_without_requested_or_complete_inputs() -> None:
     import main
 

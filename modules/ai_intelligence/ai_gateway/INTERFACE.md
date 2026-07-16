@@ -226,6 +226,16 @@ repository-internal output paths fail closed. The API does not call providers,
 run benchmarks, execute commands, persist telemetry, re-index HoloIndex, bind
 runtime defaults, mutate the extension, dispatch workers, or write PatternMemory.
 
+```python
+run_reddog_model_selection_artifact_supply_bootstrap(...) -> ModelSelectionArtifactBootstrapResult
+```
+
+The bootstrap adapter is the explicit `main.py` preflight surface. It reads
+outside-repo catalog/evidence/requirements/key JSON inputs, constructs a trusted
+public-key resolver, uses the configured public signature verifier, and delegates
+receipt creation to `run_reddog_model_selection_artifact_supply`. It is disabled
+unless `REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=1`.
+
 ## Configuration
 
 ### Environment Variables
