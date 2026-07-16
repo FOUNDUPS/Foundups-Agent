@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_FULL_RECURSIVE_PROFILE_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added an end-to-end `main.py` preflight regression proving the highest
+  resident profile can advance an already verified chain through
+  PatternMemory admission using the profile-derived outside-repo sink.
+- The test starts from an accepted held-out regression gate, runs the actual
+  resident bootstrap through `main.run_reddog_resident_queue_serial_loop_preflight`,
+  records the verified outcome in the derived `.reddog/pattern_memory/<repo>`
+  SQLite DB, and asserts the source repo does not receive a `.reddog` write.
+- Boundary remains constrained: this is a deterministic regression proof only;
+  no new production authority, shell execution, HoloIndex re-index, merge,
+  reward settlement, or Hermes dispatch was added.
+
 ## 2026-07-16: REDDOG_RESIDENT_PATTERN_MEMORY_ADMISSION_PROFILE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
