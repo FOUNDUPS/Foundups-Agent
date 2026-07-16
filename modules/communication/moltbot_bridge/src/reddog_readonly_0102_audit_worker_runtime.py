@@ -1314,16 +1314,7 @@ def _build_repo_audit_model_context(
     external_research_evidence_bundle: Mapping[str, Any] | None = None,
 ) -> str:
     payload = {
-        "untrusted_repository_evidence": [
-            {
-                "evidence_ref": _evidence_ref(item.evidence),
-                "path": item.evidence.path,
-                "digest": item.evidence.digest,
-                "truncated": item.evidence.truncated,
-                "text": item.text,
-            }
-            for item in snapshots
-        ],
+        "untrusted_repository_evidence": _bounded_repository_evidence(snapshots),
         "holoindex_query_receipt": holo_receipt,
         "codeindex_query_receipt": code_receipt,
         "index_query_errors": list(index_query_errors),
@@ -1338,6 +1329,29 @@ def _build_repo_audit_model_context(
     if external_research_evidence_bundle is not None:
         payload["untrusted_external_research_evidence"] = external_research_evidence_bundle
     return _budgeted_json(payload, MAX_MODEL_CONTEXT_CHARS)
+
+
+def _bounded_repository_evidence(
+    snapshots: Sequence[_ReadOnlyTargetSnapshot],
+) -> list[Mapping[str, Any]]:
+    """Pack repository evidence without dropping refs or exceeding context."""
+
+    count = max(1, len(snapshots))
+    text_budget = max(1200, min(6000, 24_000 // count))
+    packed: list[Mapping[str, Any]] = []
+    for item in snapshots:
+        text = _bound_text(item.text, text_budget)
+        packed.append(
+            {
+                "evidence_ref": _evidence_ref(item.evidence),
+                "path": item.evidence.path,
+                "digest": item.evidence.digest,
+                "truncated": item.evidence.truncated or len(text) < len(item.text),
+                "text_chars": len(text),
+                "text": text,
+            }
+        )
+    return packed
 
 
 def _parse_model_output(content: str) -> Mapping[str, Any]:
