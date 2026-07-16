@@ -2,8 +2,39 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
+
+from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_serial_loop_bootstrap import (
+    NOW as BOOTSTRAP_NOW,
+    PILOT_ARTIFACT,
+    PILOT_OPERATION,
+    REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+    _ed25519_signing_material,
+    _FakeWorkerDispatchTaskWriter,
+    _FakeWorktreeRunner,
+    _pilot_allowed_paths,
+    _pilot_path_overrides,
+    _pilot_payloads,
+    _pilot_worktree_path,
+    _principals,
+    _profile as _bootstrap_profile,
+    _repo,
+    _snapshot as _bootstrap_snapshot,
+    _snapshots,
+    _valve_environment,
+    _work_order,
+    _write_runtime_json,
+    run_reddog_main_resident_queue_serial_loop_bootstrap,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispatch_task_executor import (
+    _publish_agentdb_task,
+)
+from modules.infrastructure.database.src.agent_db import AgentDB
+from modules.infrastructure.database.src.db_manager import DatabaseManager
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -11,6 +42,14 @@ CLAIM_LOOP = (
     "modules.communication.moltbot_bridge.src.openclaw_supervisor."
     "claim_reddog_signed_worker_dispatch_tasks_until_idle"
 )
+
+
+@pytest.fixture(autouse=True)
+def isolated_agent_db(tmp_path, monkeypatch):
+    monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
+    DatabaseManager.reset_for_tests()
+    yield
+    DatabaseManager.reset_for_tests()
 
 
 def test_main_openclaw_signed_worker_claim_loop_disabled_by_default() -> None:
@@ -146,3 +185,126 @@ def test_main_openclaw_signed_worker_claim_loop_exception_is_nonblocking_by_defa
             clear=True,
         ):
             assert main.run_reddog_openclaw_signed_worker_claim_loop_preflight(REPO_ROOT) is True
+
+
+def test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _bootstrap_profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    work_order = _work_order(**pilot_overrides)
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {str(work_order["work_order_id"]): work_order}},
+    )
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    worktree_runner = _FakeWorktreeRunner()
+    worktree = _pilot_worktree_path(repo, work_order)
+
+    seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_orders_path=work_orders,
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=worktree_runner,
+        now_iso=BOOTSTRAP_NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=9,
+    )
+    assert seed.accepted is True
+    assert seed.dispatched_stages[-1] == "worktree_create"
+    assert worktree.exists()
+    assert not (worktree / PILOT_ARTIFACT).exists()
+
+    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
+    generic_writer = _write_runtime_json(
+        tmp_path,
+        "generic_writer.json",
+        pilot_payloads["generic_writer_dryrun_result"],
+    )
+    governed_shell = _write_runtime_json(
+        tmp_path,
+        "governed_shell.json",
+        pilot_payloads["governed_shell_dryrun_result"],
+    )
+    artifacts = _write_runtime_json(
+        tmp_path,
+        "artifact_contents.json",
+        pilot_payloads["artifact_contents"],
+    )
+    holoindex = _write_runtime_json(
+        tmp_path,
+        "holoindex_evidence.json",
+        pilot_payloads["holoindex_evidence"],
+    )
+
+    task_id = _publish_agentdb_task()
+    monkeypatch.setenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "1")
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
+    monkeypatch.setenv("REDDOG_WORK_ORDERS_PATH", str(work_orders))
+    monkeypatch.setenv("REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH", str(generic_writer))
+    monkeypatch.setenv("REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH", str(governed_shell))
+    monkeypatch.setenv("REDDOG_ARTIFACT_CONTENTS_PATH", str(artifacts))
+    monkeypatch.setenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", str(holoindex))
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+
+    assert main.run_reddog_openclaw_signed_worker_claim_loop_preflight(repo) is True
+
+    captured = capsys.readouterr().out
+    assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
+    assert "status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT" in captured
+    assert "claimed_count=1" in captured
+    assert f"requeued={task_id}" in captured
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage = stored["stage_results"]["bounded_worker_pilot"]
+    assert stage["decision"] == "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
+    assert stage["bounded_task_execution_performed"] is True
+    assert stage["bounded_file_edit_performed"] is True
+    assert stage["shell_command_executed"] is False
+    assert stage["openclaw_enqueue_performed"] is False
+    assert stage["hermes_dispatch_performed"] is False
+    assert stage["holoindex_reindex_performed"] is False
+    assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith(
+        "# Resident Queue Pilot"
+    )
+    assert not (repo / PILOT_ARTIFACT).exists()

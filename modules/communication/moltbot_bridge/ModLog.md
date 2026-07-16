@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MAIN_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_E2E_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a `main.py` startup-preflight regression proving the RedDog OpenClaw
+  signed-worker claim loop can consume a real AgentDB task through the
+  env-bound signed-worker queue runner and advance the bounded worker pilot.
+- Boundary remains constrained: no source repo mutation, no shell execution, no
+  Hermes dispatch, no live OpenClaw enqueue, no PR publishing, no reward
+  settlement, no PatternMemory promotion, and no HoloIndex re-indexing was
+  added.
+
 ## 2026-07-16: REDDOG_AUTHORITY_RUNTIME_SOCKET_E2E_PILOT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
