@@ -332,6 +332,67 @@ def test_runtime_binding_rejects_unsupported_draft_pr_runner_mode(tmp_path: Path
     )
 
 
+def test_runtime_binding_builds_pattern_memory_admission_sink_from_outside_repo_db(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(tmp_path / "pattern_memory.db"),
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=repo,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.runner is not None
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=repo,
+    )
+
+    assert result["accepted"] is True
+    sink = bootstrap.calls[0]["pattern_memory_admission_sink"]
+    assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
+    assert sink.db_path == (tmp_path / "pattern_memory.db").resolve()
+
+
+def test_runtime_binding_rejects_pattern_memory_admission_db_inside_repo(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=repo,
+        env={
+            "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
+            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+            "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(repo / "pattern_memory.db"),
+        },
+        bootstrap=_FakeBootstrap(),
+    )
+
+    assert binding.accepted is False
+    assert binding.requested is True
+    assert (
+        SignedWorkerOpenClawQueueLoopBindingReason.PATTERN_MEMORY_ADMISSION_DB_PATH_INVALID
+        in binding.rejection_reasons
+    )
+
+
 def test_queue_serial_loop_runner_accepts_openclaw_candidate(tmp_path: Path) -> None:
     bootstrap = _FakeBootstrap()
     runner = RedDogSignedWorkerQueueSerialLoopRunner(_config(tmp_path), bootstrap=bootstrap)
@@ -497,6 +558,62 @@ def test_queue_serial_loop_runner_rejects_unexpected_pr_creation(tmp_path: Path)
             _bootstrap_payload(
                 dispatched_stages=("slice_verifier",),
                 no_pr_created=False,
+            )
+        ),
+    )
+    context = _context()
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is False
+    assert SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE in result["rejection_reasons"]
+
+
+def test_queue_serial_loop_runner_allows_pattern_memory_admission_progress(
+    tmp_path: Path,
+) -> None:
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(
+        _config(tmp_path),
+        bootstrap=_FakeBootstrap(
+            _bootstrap_payload(
+                dispatched_stages=("pattern_memory_admission",),
+                no_pattern_memory_write_performed=False,
+                next_action="STOP_QUEUE_CHAIN_COMPLETE",
+            )
+        ),
+    )
+    context = _context()
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is True
+    assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
+    assert result["no_pattern_memory_write_performed"] is False
+    assert result["no_reward_settlement_performed"] is True
+    assert result["no_holoindex_reindex_performed"] is True
+
+
+def test_queue_serial_loop_runner_rejects_unexpected_pattern_memory_write(
+    tmp_path: Path,
+) -> None:
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(
+        _config(tmp_path),
+        bootstrap=_FakeBootstrap(
+            _bootstrap_payload(
+                dispatched_stages=("held_out_regression_gate",),
+                no_pattern_memory_write_performed=False,
             )
         ),
     )
