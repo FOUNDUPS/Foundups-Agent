@@ -1,5 +1,22 @@
 # HoloIndex Package ModLog
 
+## [2026-07-16] REDDOG_MEMEX_CONTENT_BEARING_EVIDENCE_BUNDLE_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 60, 97
+
+- ADD `holo_index/memex_evidence_bundle.py`: deterministic read-only
+  content-bearing evidence bundle for Memex query hits from a verified
+  projection.
+- Bundle records include Memex evidence refs, source class, snapshot/record
+  ids, section, digest, bounded text, truncation flag, and the explicit trust
+  boundary `memex_memory_not_current_code_proof`.
+- TEST `tests/test_holoindex_memex_evidence_bundle.py`: content inclusion,
+  bounded truncation, query/projection receipt mismatch, hit-not-in-projection,
+  and AST no-write/no-exec guard.
+- Boundary: this makes memory content available as historical evidence only.
+  Typed citation policy and current-code proof rules remain downstream.
+
 ## [2026-07-16] FOUNDUP_MEMEX_MULTI_FOUNDUP_SCOPE_HARDENING_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
