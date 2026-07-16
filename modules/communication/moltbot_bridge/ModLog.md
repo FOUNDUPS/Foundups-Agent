@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_AUTHORITY_RUNTIME_SOCKET_E2E_PILOT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a resident queue regression proving the serial-loop authority runtime
+  can sign through the actual one-shot isolated signer socket service and then
+  verify the resulting Ed25519 delegated authority.
+- Kept the boundary test-only and runtime-safe: no signer process spawn, no
+  vault resolution, no private-key loading by the queue loop, no worker spawn,
+  no worktree, no shell, no OpenClaw enqueue, no Hermes dispatch, no repository
+  mutation, no PatternMemory write, and no HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_SIGNER_SOCKET_PROFILE_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
