@@ -39,6 +39,9 @@ logger = logging.getLogger(__name__)
 READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT = "READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT"
 READONLY_AUDIT_OPENCLAW_CLAIM_IDLE = "READONLY_AUDIT_OPENCLAW_CLAIM_IDLE"
 READONLY_AUDIT_OPENCLAW_CLAIM_REJECT = "READONLY_AUDIT_OPENCLAW_CLAIM_REJECT"
+SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT = "SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT"
+SIGNED_WORKER_OPENCLAW_CLAIM_IDLE = "SIGNED_WORKER_OPENCLAW_CLAIM_IDLE"
+SIGNED_WORKER_OPENCLAW_CLAIM_REJECT = "SIGNED_WORKER_OPENCLAW_CLAIM_REJECT"
 
 
 class ReadOnlyAuditOpenClawClaimReason:
@@ -48,6 +51,14 @@ class ReadOnlyAuditOpenClawClaimReason:
     TASK_EXECUTION_REJECTED = "REJECT_REDDOG_READONLY_AUDIT_TASK_EXECUTION_REJECTED"
     REPORT_PERSIST_REJECTED = "REJECT_REDDOG_READONLY_AUDIT_REPORT_PERSIST_REJECTED"
     AGENTDB_FAILURE = "REJECT_REDDOG_READONLY_AUDIT_AGENTDB_FAILURE"
+
+
+class SignedWorkerOpenClawClaimReason:
+    NO_PENDING_TASK = "NO_PENDING_REDDOG_SIGNED_WORKER_TASK"
+    CLAIM_RACE_LOST = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_RACE_LOST"
+    MALFORMED_CONTEXT = "REJECT_REDDOG_SIGNED_WORKER_MALFORMED_CONTEXT"
+    TASK_EXECUTION_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_TASK_EXECUTION_REJECTED"
+    AGENTDB_FAILURE = "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_FAILURE"
 
 
 @dataclass
@@ -232,7 +243,141 @@ def claim_reddog_readonly_audit_task_once(
     )
 
 
+def claim_reddog_signed_worker_dispatch_task_once(
+    *,
+    repo_root: Path,
+    agent_id: str = "openclaw_supervisor",
+    agent_db_factory: Optional[Callable[[], Any]] = None,
+    signed_worker_runner: Any | None = None,
+) -> Dict[str, Any]:
+    """Claim and execute one signed RedDog worker-dispatch AgentDB task.
+
+    This is the OpenClaw-owned consumer for tasks published by the signed
+    worker-dispatch runtime. The task is claimed atomically from AgentDB and
+    then validated by the signed-worker task executor. A real worker runner
+    must be injected; no default runner is created here.
+    """
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+            SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        )
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
+            execute_reddog_signed_worker_dispatch_task,
+        )
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        factory = agent_db_factory or AgentDB
+        db = factory()
+        task = _claim_pending_reddog_signed_worker_dispatch_task(
+            db=db,
+            agent_id=agent_id,
+            source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        )
+    except Exception as exc:
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            rejection_reasons=(SignedWorkerOpenClawClaimReason.AGENTDB_FAILURE,),
+            detail=str(exc)[:300],
+        )
+
+    if task is None:
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_IDLE,
+            rejection_reasons=(SignedWorkerOpenClawClaimReason.NO_PENDING_TASK,),
+        )
+    if task.get("claim_race_lost"):
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            task_id=str(task.get("task_id") or ""),
+            rejection_reasons=(SignedWorkerOpenClawClaimReason.CLAIM_RACE_LOST,),
+        )
+
+    task_id = str(task.get("task_id") or "")
+    context = task.get("context")
+    if not isinstance(context, dict):
+        _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            rejection_reasons=(SignedWorkerOpenClawClaimReason.MALFORMED_CONTEXT,),
+        )
+
+    run_result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id=task_id,
+        repo_root=repo_root,
+        runner=signed_worker_runner,
+    )
+    if not run_result.accepted:
+        _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            worker_role=run_result.worker_role,
+            worker_runtime=run_result.worker_runtime,
+            capability=run_result.capability,
+            rejection_reasons=(
+                SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,
+                *run_result.rejection_reasons,
+            ),
+        )
+
+    db.complete_autonomous_task(task_id)
+    return _signed_worker_claim_result(
+        accepted=True,
+        status=SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT,
+        task_id=task_id,
+        worker_role=run_result.worker_role,
+        worker_runtime=run_result.worker_runtime,
+        capability=run_result.capability,
+        receipt_id=run_result.receipt_id,
+    )
+
+
 def _claim_pending_reddog_readonly_audit_task(*, db: Any, agent_id: str, source: str) -> Optional[Dict[str, Any]]:
+    with db.db.get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT task_id, context FROM agents_autonomous_tasks
+            WHERE status = 'pending' AND discovered_by = ?
+            ORDER BY priority_score DESC, discovered_at ASC
+            LIMIT 1
+            """,
+            (source,),
+        ).fetchone()
+        if not row:
+            return None
+        task_id = row["task_id"] if hasattr(row, "keys") else row[0]
+        updated = conn.execute(
+            """
+            UPDATE agents_autonomous_tasks
+            SET assigned_to = ?, assigned_at = CURRENT_TIMESTAMP, status = 'assigned'
+            WHERE task_id = ? AND status = 'pending' AND discovered_by = ?
+            """,
+            (agent_id, task_id, source),
+        ).rowcount
+        if updated != 1:
+            return {"task_id": task_id, "claim_race_lost": True}
+        raw_context = row["context"] if hasattr(row, "keys") else row[1]
+    try:
+        context = json.loads(raw_context) if isinstance(raw_context, str) else raw_context
+    except Exception:
+        context = None
+    return {"task_id": task_id, "context": context}
+
+
+def _claim_pending_reddog_signed_worker_dispatch_task(
+    *,
+    db: Any,
+    agent_id: str,
+    source: str,
+) -> Optional[Dict[str, Any]]:
     with db.db.get_connection() as conn:
         row = conn.execute(
             """
@@ -276,6 +421,18 @@ def _mark_reddog_readonly_audit_task_failed(db: Any, task_id: str) -> None:
         logger.debug("[SUPERVISOR] Failed to mark RedDog readonly audit task failed", exc_info=True)
 
 
+def _mark_reddog_signed_worker_dispatch_task_failed(db: Any, task_id: str) -> None:
+    if not task_id:
+        return
+    try:
+        db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET status = 'failed', completed_at = CURRENT_TIMESTAMP WHERE task_id = ?",
+            (task_id,),
+        )
+    except Exception:
+        logger.debug("[SUPERVISOR] Failed to mark RedDog signed-worker task failed", exc_info=True)
+
+
 def _readonly_assignment_id(context: Dict[str, Any]) -> str:
     assignment = context.get("assignment") if isinstance(context, dict) else {}
     return str(assignment.get("assignment_id") or "") if isinstance(assignment, dict) else ""
@@ -306,6 +463,40 @@ def _readonly_claim_result(
         "no_worktree_operation_performed": True,
         "no_pr_created": True,
         "no_live_foundup_enqueue_performed": True,
+    }
+
+
+def _signed_worker_claim_result(
+    *,
+    accepted: bool,
+    status: str,
+    task_id: str | None = None,
+    worker_role: str | None = None,
+    worker_runtime: str | None = None,
+    capability: str | None = None,
+    receipt_id: str | None = None,
+    rejection_reasons=(),
+    detail: str = "",
+) -> Dict[str, Any]:
+    return {
+        "accepted": accepted,
+        "status": status,
+        "task_id": task_id,
+        "worker_role": worker_role,
+        "worker_runtime": worker_runtime,
+        "capability": capability,
+        "receipt_id": receipt_id,
+        "rejection_reasons": tuple(dict.fromkeys(str(reason) for reason in rejection_reasons if str(reason))),
+        "detail": detail,
+        "no_shell_command_executed": True,
+        "no_repo_mutation_performed": True,
+        "no_holoindex_reindex_performed": True,
+        "no_hermes_dispatch_performed": True,
+        "no_worktree_operation_performed": True,
+        "no_pr_created": True,
+        "no_live_foundup_enqueue_performed": True,
+        "no_pattern_memory_write_performed": True,
+        "no_reward_settlement_performed": True,
     }
 
 
@@ -376,6 +567,21 @@ class OpenClawSupervisor:
             codeindex_adapter=codeindex_adapter,
             external_research_retriever=external_research_retriever,
             timeout_seconds=timeout_seconds,
+        )
+
+    def claim_reddog_signed_worker_dispatch_task_once(
+        self,
+        *,
+        agent_db_factory: Optional[Callable[[], Any]] = None,
+        signed_worker_runner: Any | None = None,
+    ) -> Dict[str, Any]:
+        """Claim one signed RedDog worker-dispatch task through OpenClaw."""
+
+        return claim_reddog_signed_worker_dispatch_task_once(
+            repo_root=self.repo_root,
+            agent_id="openclaw_supervisor",
+            agent_db_factory=agent_db_factory,
+            signed_worker_runner=signed_worker_runner,
         )
 
     def stop(self) -> None:
