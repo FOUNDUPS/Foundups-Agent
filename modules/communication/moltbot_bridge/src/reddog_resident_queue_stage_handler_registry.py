@@ -201,6 +201,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     governed_shell_dryrun_result: Optional[Mapping[str, Any]] = None,
     artifact_contents: Optional[Mapping[str, Any]] = None,
     artifact_generation_request: Optional[Mapping[str, Any]] = None,
+    artifact_generation_request_binding_enabled: bool = False,
     artifact_generator: Any = None,
     operation_cwd: Optional[Path] = None,
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
@@ -372,6 +373,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             governed_shell_dryrun_result=governed_shell_dryrun_result,
             artifact_contents=artifact_contents,
             artifact_generation_request=artifact_generation_request,
+            artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
             artifact_generator=artifact_generator,
             pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
             repo_root=root,
@@ -386,6 +388,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             operation_cwd=operation_cwd,
             holoindex_evidence=holoindex_evidence,
             artifact_generation_request=artifact_generation_request,
+            artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
             artifact_generator=artifact_generator,
         ),
     )
@@ -478,6 +481,7 @@ def _bounded_worker_pilot_missing(
     governed_shell_dryrun_result: Optional[Mapping[str, Any]],
     artifact_contents: Optional[Mapping[str, Any]],
     artifact_generation_request: Optional[Mapping[str, Any]],
+    artifact_generation_request_binding_enabled: bool,
     artifact_generator: Any,
     pilot_dryrun_binding_enabled: bool,
     repo_root: Optional[Path],
@@ -498,6 +502,8 @@ def _bounded_worker_pilot_missing(
     if artifact_contents:
         return tuple(reasons)
     if artifact_generation_request and artifact_generator is not None:
+        return tuple(reasons)
+    if artifact_generation_request_binding_enabled and artifact_generator is not None:
         return tuple(reasons)
     if not artifact_contents:
         reasons.append("missing_dependency:artifact_contents")

@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING=1` for resident queue
+  runs. When explicit artifact contents and explicit artifact-generation
+  request JSON are both absent, the bootstrap can derive a bounded artifact
+  generation request from the signed work order and verified queue chain state.
+- Wired the binding through both `main.py` resident preflight and the OpenClaw
+  signed-worker queue-loop runtime adapter.
+- Existing `REDDOG_ARTIFACT_CONTENTS_PATH` and
+  `REDDOG_ARTIFACT_GENERATION_REQUEST_PATH` remain authoritative when provided;
+  the derived request is opt-in and fail-closed.
+- Boundary remains explicit: the slice derives a request only. Model execution
+  still requires the existing explicit artifact generator configuration; no
+  shell execution, source-repo mutation, Hermes dispatch, HoloIndex re-index,
+  merge authority, or reward settlement is added.
+
 ## 2026-07-16: REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

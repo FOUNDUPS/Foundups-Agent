@@ -241,6 +241,10 @@ def _bootstrap_kwargs(env: Mapping[str, str]) -> dict[str, Any]:
             payload[key] = value
     for key, env_name in (
         ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
+        (
+            "artifact_generation_request_binding_enabled",
+            "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING",
+        ),
         ("slice_verifier_request_binding_enabled", "REDDOG_SLICE_VERIFIER_REQUEST_BINDING"),
         ("draft_pr_publish_request_binding_enabled", "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING"),
         ("outcome_ratchet_request_binding_enabled", "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING"),

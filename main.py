@@ -1603,6 +1603,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH             Outside-repo governed shell dry-run JSON
         REDDOG_ARTIFACT_CONTENTS_PATH                        Outside-repo artifact contents JSON
         REDDOG_ARTIFACT_GENERATION_REQUEST_PATH              Outside-repo artifact generation request JSON
+        REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING           Derive artifact generation request from queue chain state
         REDDOG_ARTIFACT_GENERATOR_MODE                       Optional `foundups_fusion` generator mode
         REDDOG_HOLOINDEX_EVIDENCE_PATH                       Outside-repo HoloIndex evidence JSON
         REDDOG_SLICE_VERIFIER_REQUEST_PATH                   Outside-repo slice verifier request JSON
@@ -1702,6 +1703,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             or None,
             artifact_contents_path=os.getenv("REDDOG_ARTIFACT_CONTENTS_PATH", "") or None,
             artifact_generation_request_path=os.getenv("REDDOG_ARTIFACT_GENERATION_REQUEST_PATH", "") or None,
+            artifact_generation_request_binding_enabled=os.getenv(
+                "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "0"
+            )
+            != "0",
             holoindex_evidence_path=os.getenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", "") or None,
             verifier_request_path=os.getenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", "") or None,
             evidence_producer_request_path=os.getenv("REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH", "") or None,

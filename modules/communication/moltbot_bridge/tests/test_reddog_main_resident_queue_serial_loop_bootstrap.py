@@ -1998,7 +1998,10 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
     principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _work_order(**pilot_overrides)
+    work_order = _work_order(
+        **pilot_overrides,
+        bounded_worker_plan=_pilot_bounded_worker_plan(),
+    )
     work_orders = _write_runtime_json(
         tmp_path,
         "work_orders.json",
@@ -2022,11 +2025,6 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
         "governed_shell.json",
         pilot_payloads["governed_shell_dryrun_result"],
     )
-    artifact_request = _write_runtime_json(
-        tmp_path,
-        "artifact_generation_request.json",
-        _artifact_generation_request(worktree),
-    )
     holoindex = _write_runtime_json(
         tmp_path,
         "holoindex_evidence.json",
@@ -2042,7 +2040,7 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
         valve_environment_path=valve_env,
         generic_writer_dryrun_result_path=generic_writer,
         governed_shell_dryrun_result_path=governed_shell,
-        artifact_generation_request_path=artifact_request,
+        artifact_generation_request_binding_enabled=True,
         holoindex_evidence_path=holoindex,
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
@@ -2059,9 +2057,12 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
         max_steps=10,
     )
 
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     assert result.dispatched_stages[-1] == "bounded_worker_pilot"
     assert artifact_generator.calls
+    assert artifact_generator.calls[0]["binding"]["work_order_id"] == WORK_ORDER_ID
+    context = json.loads(str(artifact_generator.calls[0]["context"]))
+    assert context["holoindex_evidence"]["retrieval_quality"] == "HIGH"
     stored = json.loads(chain.read_text(encoding="utf-8"))
     stage = stored["stage_results"]["bounded_worker_pilot"]
     assert stage["decision"] == "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
@@ -3649,6 +3650,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH": str(
                     tmp_path / "artifact_generation_request.json"
                 ),
+                "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "1",
                 "REDDOG_ARTIFACT_GENERATOR_MODE": "foundups_fusion",
                 "REDDOG_HOLOINDEX_EVIDENCE_PATH": str(tmp_path / "holoindex_evidence.json"),
                 "REDDOG_SLICE_VERIFIER_REQUEST_PATH": str(tmp_path / "verifier_request.json"),
@@ -3708,6 +3710,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["artifact_generation_request_path"] == str(
         tmp_path / "artifact_generation_request.json"
     )
+    assert mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["holoindex_evidence_path"] == str(
         tmp_path / "holoindex_evidence.json"

@@ -130,6 +130,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     governed_shell_dryrun_result_path: Path | str | None = None,
     artifact_contents_path: Path | str | None = None,
     artifact_generation_request_path: Path | str | None = None,
+    artifact_generation_request_binding_enabled: bool = False,
     holoindex_evidence_path: Path | str | None = None,
     verifier_request_path: Path | str | None = None,
     evidence_producer_request_path: Path | str | None = None,
@@ -350,6 +351,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(admission_request_reasons, chain_results_path=None)
 
     chain_state = _read_existing_chain_state(chain_path)
+    if (
+        artifact_generation_request_binding_enabled
+        and artifact_contents is None
+        and artifact_generation_request is None
+    ):
+        artifact_generation_request = _derive_artifact_generation_request_from_chain(
+            chain_state=chain_state,
+            work_orders=work_orders,
+            repo_root=root,
+            holoindex_evidence=holoindex_evidence,
+        )
     if outcome_ratchet_request_binding_enabled and ratchet_request is None:
         ratchet_request = _derive_outcome_ratchet_request_from_chain(chain_state)
     if held_out_gate_request_binding_enabled and held_out_gate_request is None:
@@ -435,6 +447,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         governed_shell_dryrun_result=governed_shell_dryrun_result,
         artifact_contents=artifact_contents,
         artifact_generation_request=artifact_generation_request,
+        artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
         artifact_generator=resolved_artifact_generator,
         holoindex_evidence=holoindex_evidence,
         verifier_request=verifier_request,
@@ -716,6 +729,86 @@ def _read_existing_chain_state(chain_path: Path | None) -> Mapping[str, Any]:
 def _chain_stage_results(chain_state: Mapping[str, Any]) -> Mapping[str, Any]:
     stages = chain_state.get("stage_results")
     return stages if isinstance(stages, Mapping) else {}
+
+
+def _derive_artifact_generation_request_from_chain(
+    *,
+    chain_state: Mapping[str, Any],
+    work_orders: Mapping[str, Mapping[str, Any]] | None,
+    repo_root: Path,
+    holoindex_evidence: Mapping[str, Any] | None,
+) -> Mapping[str, Any] | None:
+    if not work_orders:
+        return None
+    stages = _chain_stage_results(chain_state)
+    worktree_stage = _nested_mapping(stages, "worktree_create")
+    worktree_result = _nested_mapping(worktree_stage, "worktree_create_result")
+    work_order_id = str(worktree_result.get("work_order_id") or "")
+    worktree_path = str(worktree_result.get("worktree_path") or "")
+    if not work_order_id or not worktree_path:
+        return None
+    work_order = JsonResidentQueueWorkOrderResolver(work_orders).resolve(
+        work_order_id=work_order_id,
+        queue_item_id=None,
+        selected_slice=None,
+    )
+    plan = _nested_mapping(work_order, "bounded_worker_plan")
+    planned_artifacts = _string_list(plan.get("planned_artifacts"))
+    signed_receipt_chain = _nested_mapping(plan, "signed_receipt_chain")
+    authority_stage = _nested_mapping(stages, "authority_runtime")
+    authority_result = _nested_mapping(authority_stage, "authority_result")
+    work_authority = _nested_mapping(authority_result, "work_authority")
+    authority_receipt = _nested_mapping(authority_result, "receipt")
+    if (
+        not plan
+        or not planned_artifacts
+        or not signed_receipt_chain
+        or authority_result.get("accepted") is not True
+        or not work_authority
+    ):
+        return None
+    evidence = (
+        (holoindex_evidence if isinstance(holoindex_evidence, Mapping) else {})
+        or _nested_mapping(work_order, "holoindex_evidence")
+        or _derived_holoindex_evidence(stages)
+    )
+    task_summary = str(work_order.get("task_summary") or "")
+    if not task_summary:
+        return None
+    signed_authority = {
+        **dict(work_authority),
+        "accepted": True,
+        "signature_gate_digest": str(
+            authority_receipt.get("work_authority_digest")
+            or authority_receipt.get("receipt_id")
+            or ""
+        ),
+    }
+    return {
+        "explicit_artifact_generation_requested": True,
+        "work_order_id": work_order_id,
+        "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
+        "task_summary": task_summary,
+        "planned_artifacts": planned_artifacts,
+        "evidence_context": json.dumps(
+            {
+                "task_summary": task_summary,
+                "holoindex_evidence": dict(evidence),
+                "holoindex_evidence_refs": _string_list(
+                    work_order.get("holoindex_evidence_refs")
+                ),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ),
+        "repo_root": str(repo_root),
+        "worktree_path": worktree_path,
+        "holoindex_evidence": dict(evidence),
+        "signed_authority": signed_authority,
+        "signed_receipt_chain": dict(signed_receipt_chain),
+        "timeout_seconds": 30,
+    }
 
 
 def _derive_outcome_ratchet_request_from_chain(

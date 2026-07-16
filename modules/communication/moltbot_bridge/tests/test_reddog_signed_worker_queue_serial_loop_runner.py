@@ -435,6 +435,7 @@ def test_runtime_binding_builds_pattern_memory_admission_sink_from_outside_repo_
         "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
         "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
         "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "1",
         "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(tmp_path / "pattern_memory.db"),
     }
 
@@ -455,6 +456,7 @@ def test_runtime_binding_builds_pattern_memory_admission_sink_from_outside_repo_
     )
 
     assert result["accepted"] is True
+    assert bootstrap.calls[0]["artifact_generation_request_binding_enabled"] is True
     sink = bootstrap.calls[0]["pattern_memory_admission_sink"]
     assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
     assert sink.db_path == (tmp_path / "pattern_memory.db").resolve()
