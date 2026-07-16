@@ -16,7 +16,8 @@ or re-index HoloIndex.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Mapping
+from pathlib import Path
+from typing import Any, Mapping, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     ResidentQueueChainResultsStore,
@@ -26,6 +27,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_SLICE_VERIFIER_INVOKE,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifier_request_binding import (
+    build_resident_queue_slice_verifier_request,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_slice_verifier_invoke import (
     QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT,
@@ -45,6 +49,22 @@ FAIL_BOUNDED_WORKER_PILOT_STAGE_MISSING = "FAIL_BOUNDED_WORKER_PILOT_STAGE_MISSI
 FAIL_VERIFIER_REQUEST_MISSING = "FAIL_VERIFIER_REQUEST_MISSING"
 FAIL_EVIDENCE_COMMAND_RUNNER_MISSING = "FAIL_EVIDENCE_COMMAND_RUNNER_MISSING"
 FAIL_EVIDENCE_PRODUCER_REJECTED = "FAIL_EVIDENCE_PRODUCER_REJECTED"
+FAIL_WORK_ORDER_ID_MISSING = "FAIL_WORK_ORDER_ID_MISSING"
+FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
+FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED = "FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED"
+
+
+class ResidentQueueSliceVerifierWorkOrderResolver(Protocol):
+    """Injected resolver for the work order bound to the bounded pilot."""
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: Optional[str],
+        selected_slice: Optional[str],
+    ) -> Mapping[str, Any]:
+        """Return the queue-bound work order mapping."""
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -65,6 +85,12 @@ def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
     if not isinstance(raw, Mapping):
         return {}
     return {str(key): value for key, value in raw.items() if isinstance(value, Mapping)}
+
+
+def _work_order_id_from_bounded_worker_pilot(bounded_worker_pilot: Mapping[str, Any]) -> str:
+    pilot = _mapping(bounded_worker_pilot.get("pilot_result"))
+    receipt = _mapping(pilot.get("receipt"))
+    return str(receipt.get("work_order_id") or "").strip()
 
 
 def _reject(*reasons: str) -> dict[str, Any]:
@@ -91,6 +117,10 @@ class ResidentQueueSliceVerifierStageHandler:
     verifier_request: Mapping[str, Any] | None = None
     evidence_producer_request: Mapping[str, Any] | None = None
     evidence_command_runner: Any = None
+    work_order_resolver: ResidentQueueSliceVerifierWorkOrderResolver | None = None
+    repo_root: Path | None = None
+    slice_verifier_request_binding_enabled: bool = False
+    holoindex_evidence: Mapping[str, Any] | None = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != SLICE_VERIFIER_STAGE_KEY:
@@ -112,9 +142,48 @@ class ResidentQueueSliceVerifierStageHandler:
             return _reject(FAIL_BOUNDED_WORKER_PILOT_STAGE_MISSING)
 
         verifier_request = _mapping(self.verifier_request)
+        evidence_producer_request = _mapping(self.evidence_producer_request)
         evidence_producer_result: Mapping[str, Any] | None = None
+        slice_verifier_request_binding_result: Mapping[str, Any] | None = None
+        if (
+            not verifier_request
+            and not evidence_producer_request
+            and self.slice_verifier_request_binding_enabled
+        ):
+            if self.work_order_resolver is None:
+                return _reject(FAIL_WORK_ORDER_MISSING, "missing_dependency:work_order_resolver")
+            if self.repo_root is None:
+                return _reject(FAIL_WORK_ORDER_MISSING, "missing_dependency:repo_root")
+            work_order_id = _work_order_id_from_bounded_worker_pilot(bounded_worker_pilot)
+            if not work_order_id:
+                return _reject(FAIL_WORK_ORDER_ID_MISSING)
+            work_order = _mapping(
+                self.work_order_resolver.resolve(
+                    work_order_id=work_order_id,
+                    queue_item_id=request.queue_item_id,
+                    selected_slice=request.selected_slice,
+                )
+            )
+            if not work_order:
+                return _reject(FAIL_WORK_ORDER_MISSING, f"work_order_id:{work_order_id}")
+            bound = build_resident_queue_slice_verifier_request(
+                work_order=work_order,
+                stage_results=stage_results,
+                repo_root=self.repo_root,
+                holoindex_evidence=self.holoindex_evidence,
+            )
+            slice_verifier_request_binding_result = bound.to_dict()
+            if bound.accepted is not True:
+                rejected = _reject(
+                    FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED,
+                    *bound.rejection_reasons,
+                )
+                rejected["slice_verifier_request_binding_result"] = (
+                    slice_verifier_request_binding_result
+                )
+                return rejected
+            evidence_producer_request = bound.evidence_producer_request
         if not verifier_request:
-            evidence_producer_request = _mapping(self.evidence_producer_request)
             if not evidence_producer_request:
                 return _reject(FAIL_VERIFIER_REQUEST_MISSING)
             if self.evidence_command_runner is None:
@@ -147,6 +216,8 @@ class ResidentQueueSliceVerifierStageHandler:
             result["bounded_evidence_command_execution_performed"] = bool(command_results)
             result["no_command_execution_performed"] = False
             result["no_shell_command_executed"] = True
+        if slice_verifier_request_binding_result is not None:
+            result["slice_verifier_request_binding_result"] = slice_verifier_request_binding_result
         return result
 
 
@@ -170,6 +241,10 @@ def _verifier_request_from_evidence(
         "test_evidence": dict(test_evidence),
         "signed_authority": dict(_mapping(request.get("signed_authority"))),
         "signed_receipt_chain": dict(_mapping(request.get("signed_receipt_chain"))),
+        "worktree_receipt": dict(_mapping(request.get("worktree_receipt"))),
+        "bounded_worker_pilot_receipt": dict(
+            _mapping(request.get("bounded_worker_pilot_receipt"))
+        ),
         "holoindex_evidence": dict(_mapping(request.get("holoindex_evidence"))),
         "pattern_memory_write_performed": bool(request.get("pattern_memory_write_performed")),
         "draft_pr_published": bool(request.get("draft_pr_published")),
@@ -187,6 +262,10 @@ def build_reddog_resident_queue_slice_verifier_stage_handler(
     verifier_request: Mapping[str, Any] | None = None,
     evidence_producer_request: Mapping[str, Any] | None = None,
     evidence_command_runner: Any = None,
+    work_order_resolver: ResidentQueueSliceVerifierWorkOrderResolver | None = None,
+    repo_root: Path | None = None,
+    slice_verifier_request_binding_enabled: bool = False,
+    holoindex_evidence: Mapping[str, Any] | None = None,
 ) -> ResidentQueueSliceVerifierStageHandler:
     """Build the injected slice-verifier handler for the dispatcher."""
 
@@ -195,6 +274,10 @@ def build_reddog_resident_queue_slice_verifier_stage_handler(
         verifier_request=verifier_request,
         evidence_producer_request=evidence_producer_request,
         evidence_command_runner=evidence_command_runner,
+        work_order_resolver=work_order_resolver,
+        repo_root=repo_root,
+        slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
+        holoindex_evidence=holoindex_evidence,
     )
 
 
@@ -205,8 +288,12 @@ __all__ = [
     "FAIL_DISPATCH_STAGE_MISMATCH",
     "FAIL_EVIDENCE_COMMAND_RUNNER_MISSING",
     "FAIL_EVIDENCE_PRODUCER_REJECTED",
+    "FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED",
     "FAIL_VERIFIER_REQUEST_MISSING",
+    "FAIL_WORK_ORDER_ID_MISSING",
+    "FAIL_WORK_ORDER_MISSING",
     "ResidentQueueSliceVerifierStageHandler",
+    "ResidentQueueSliceVerifierWorkOrderResolver",
     "SLICE_VERIFIER_STAGE_KEY",
     "build_reddog_resident_queue_slice_verifier_stage_handler",
 ]

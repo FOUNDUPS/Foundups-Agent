@@ -1,3 +1,23 @@
+## 2026-07-16: REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_REQUEST_BINDING_PHASE1
+
+**Files**: `test_reddog_resident_queue_slice_verifier_request_binding.py`
+(NEW), `test_reddog_resident_queue_slice_verifier_handler.py`,
+`test_reddog_resident_queue_stage_handler_registry.py`,
+`test_reddog_main_resident_queue_serial_loop_bootstrap.py` (UPDATED)
+
+**Slice**: `REDDOG_RESIDENT_QUEUE_SLICE_VERIFIER_REQUEST_BINDING_PHASE1` |
+**Predecessor**: #1122 resident queue pilot dry-run binding
+
+Resident queue slice verifier can now derive its independent
+evidence-producer request from the queue-bound work order's
+`slice_verifier_plan` and recorded authority/runtime/worktree/bounded-pilot
+chain receipts. Tests prove accepted derivation, missing-plan rejection,
+rejected bounded-pilot rejection, missing signed receipt-chain rejection,
+registry opt-in behavior, startup env forwarding, and a full bootstrap path
+with no external verifier or evidence-request JSON.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_request_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py -q`
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_PILOT_DRYRUN_BINDING_PHASE1
 
 **Files**: `test_reddog_resident_queue_pilot_dryrun_binding.py` (NEW),
