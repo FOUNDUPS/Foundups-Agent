@@ -1611,6 +1611,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_EVIDENCE_COMMAND_RUNNER_MODE                  Optional `real` evidence command runner mode
         REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH                 Outside-repo draft PR publish request JSON
         REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING              Derive draft PR publish request from queue chain state
+        REDDOG_OUTCOME_RATCHET_REQUEST_BINDING               Derive outcome-ratchet request from queue chain state
+        REDDOG_HELD_OUT_GATE_REQUEST_BINDING                 Derive held-out gate request from queue chain state
+        REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING      Derive PatternMemory admission request from queue chain state
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -1725,6 +1728,18 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             evidence_command_runner_mode=os.getenv("REDDOG_EVIDENCE_COMMAND_RUNNER_MODE", "") or None,
             draft_pr_publish_request_binding_enabled=os.getenv(
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING", "0"
+            )
+            != "0",
+            outcome_ratchet_request_binding_enabled=os.getenv(
+                "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING", "0"
+            )
+            != "0",
+            held_out_gate_request_binding_enabled=os.getenv(
+                "REDDOG_HELD_OUT_GATE_REQUEST_BINDING", "0"
+            )
+            != "0",
+            pattern_memory_admission_request_binding_enabled=os.getenv(
+                "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING", "0"
             )
             != "0",
             draft_pr_runner=draft_pr_runner,

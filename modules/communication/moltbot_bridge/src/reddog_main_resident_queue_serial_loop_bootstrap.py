@@ -158,6 +158,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     draft_pr_publish_request_binding_enabled: bool = False,
     outcome_ratchet_request_binding_enabled: bool = False,
     held_out_gate_request_binding_enabled: bool = False,
+    pattern_memory_admission_request_binding_enabled: bool = False,
     draft_pr_runner: Any = None,
     outcome_ratchet_store: Any = None,
     explicit_pattern_memory_write_requested: bool = False,
@@ -353,6 +354,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         ratchet_request = _derive_outcome_ratchet_request_from_chain(chain_state)
     if held_out_gate_request_binding_enabled and held_out_gate_request is None:
         held_out_gate_request = _derive_held_out_gate_request_from_chain(chain_state)
+    if pattern_memory_admission_request_binding_enabled and admission_request is None:
+        admission_request = _derive_pattern_memory_admission_request_from_chain(chain_state)
 
     resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
         root,
@@ -823,6 +826,37 @@ def _derive_held_out_gate_request_from_chain(
             "candidate_head_sha": head_sha,
         },
         "holoindex_evidence": _derived_holoindex_evidence(stages),
+    }
+
+
+def _derive_pattern_memory_admission_request_from_chain(
+    chain_state: Mapping[str, Any],
+) -> Mapping[str, Any] | None:
+    stages = _chain_stage_results(chain_state)
+    held_out_stage = _nested_mapping(stages, "held_out_regression_gate")
+    gate_result = _nested_mapping(held_out_stage, "gate_result")
+    gate_receipt = _nested_mapping(gate_result, "receipt")
+    if (
+        not gate_result
+        or not gate_receipt
+        or gate_result.get("accepted") is not True
+        or gate_receipt.get("pattern_memory_admission_allowed") is not True
+    ):
+        return None
+    work_order_id = str(gate_receipt.get("work_order_id") or "")
+    if not work_order_id:
+        return None
+    return {
+        "work_order_id": work_order_id,
+        "admission_metadata": {
+            "source": "resident_queue_derived_pattern_memory_admission",
+            "gate_id": str(gate_receipt.get("gate_id") or ""),
+            "ratchet_id": str(gate_receipt.get("ratchet_id") or ""),
+            "verifier_receipt_id": str(gate_receipt.get("verifier_receipt_id") or ""),
+            "held_out_suite_id": str(gate_receipt.get("held_out_suite_id") or ""),
+            "held_out_suite_digest": str(gate_receipt.get("held_out_suite_digest") or ""),
+            "candidate_head_sha": str(gate_receipt.get("candidate_head_sha") or ""),
+        },
     }
 
 

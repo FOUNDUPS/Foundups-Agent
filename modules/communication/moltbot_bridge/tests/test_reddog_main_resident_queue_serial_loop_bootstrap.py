@@ -3660,11 +3660,14 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(tmp_path / "publish_request.json"),
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING": "1",
                 "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
+                "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING": "1",
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
                 "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(tmp_path / "held_out_gate_request.json"),
+                "REDDOG_HELD_OUT_GATE_REQUEST_BINDING": "1",
                 "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(
                     tmp_path / "pattern_memory_admission_request.json"
                 ),
+                "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING": "1",
                 "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(
                     tmp_path / "pattern_memory.db"
                 ),
@@ -3727,12 +3730,15 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
         tmp_path / "ratchet.jsonl"
     )
+    assert mocked.call_args.kwargs["outcome_ratchet_request_binding_enabled"] is True
     assert mocked.call_args.kwargs["held_out_gate_request_path"] == str(
         tmp_path / "held_out_gate_request.json"
     )
+    assert mocked.call_args.kwargs["held_out_gate_request_binding_enabled"] is True
     assert mocked.call_args.kwargs["admission_request_path"] == str(
         tmp_path / "pattern_memory_admission_request.json"
     )
+    assert mocked.call_args.kwargs["pattern_memory_admission_request_binding_enabled"] is True
     assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is not None
     assert str(mocked.call_args.kwargs["pattern_memory_admission_sink"].db_path) == str(
         tmp_path / "pattern_memory.db"
