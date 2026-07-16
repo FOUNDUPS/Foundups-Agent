@@ -13,10 +13,12 @@ from __future__ import annotations
 
 import fnmatch
 import hashlib
+import importlib.util
 import json
 import os
 import time
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Protocol, Sequence
 
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
@@ -132,9 +134,7 @@ class FoundupsFusionArtifactGenerationRunner:
             "bridge_meta": {"artifact_generation_binding": dict(binding)},
         }
         try:
-            from scripts.advisory_model_once import _run_foundups_fusion
-
-            result = _run_foundups_fusion(api_key, user_payload, [], payload)
+            result = _load_foundups_fusion_runner()(api_key, user_payload, [], payload)
         except TimeoutError:
             return _model_reject(FAIL_MODEL_TIMEOUT, started=started)
         except Exception:
@@ -391,6 +391,24 @@ def _extract_json_mapping(text: str) -> Mapping[str, Any]:
     except Exception:
         return {}
     return parsed if isinstance(parsed, Mapping) else {}
+
+
+def _load_foundups_fusion_runner():
+    try:
+        from scripts.advisory_model_once import _run_foundups_fusion
+
+        return _run_foundups_fusion
+    except Exception:
+        script_path = Path(__file__).resolve().parents[4] / "scripts" / "advisory_model_once.py"
+        spec = importlib.util.spec_from_file_location(
+            "reddog_artifact_generation_advisory_model_once",
+            script_path,
+        )
+        if spec is None or spec.loader is None:
+            raise ImportError("advisory_model_once bridge unavailable")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return getattr(module, "_run_foundups_fusion")
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
