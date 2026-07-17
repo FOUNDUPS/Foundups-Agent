@@ -1596,6 +1596,19 @@ def _reddog_positive_int_env(name: str, default: int) -> int:
     return value if value > 0 else default
 
 
+def _reddog_truthy_env_value(value: str | None) -> bool:
+    raw = str(value or "").strip().lower()
+    return raw not in {"", "0", "false", "off", "no"}
+
+
+def _reddog_resident_architect_cycle_requested() -> bool:
+    explicit = os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE")
+    if explicit is not None and str(explicit).strip():
+        return _reddog_truthy_env_value(explicit)
+    product_mode = os.getenv("REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE", "1")
+    return _reddog_truthy_env_value(product_mode)
+
+
 class _RedDogConfiguredExternalResearchRetriever:
     """File-backed approved external research snapshot retriever for resident preflight."""
 
@@ -1683,7 +1696,8 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
     or live FoundUp enqueue.
 
     Env:
-        REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE=0          Enable resident cycle
+        REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE=1           Auto-run resident cycle when low-level flag unset
+        REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE            Explicit enable/disable override
         REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=0 Block startup if rejected
         REDDOG_RESIDENT_ARCHITECT_INTENT_ID                Optional stable intent ID
         REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS               Work focus submitted to RedDog
@@ -1701,7 +1715,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         HOLOINDEX_SSD_PATH                                 HoloIndex SSD path
     """
 
-    if os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "0") == "0":
+    if not _reddog_resident_architect_cycle_requested():
         logger.info("[REDDOG-RESIDENT-CYCLE] Startup preflight disabled")
         return True
 

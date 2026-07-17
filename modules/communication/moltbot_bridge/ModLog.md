@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MAIN_RESIDENT_PRODUCT_MODE_ACTIVATION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a product-mode activation policy for the durable resident RedDog
+  architect cycle in `main.py`.
+- When `REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE` is unset, resident RedDog now
+  defaults to running one read-only architect cycle at startup via
+  `REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE=1`.
+- Explicit `REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE=0` remains a hard opt-out,
+  and `REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE=0` disables the product default
+  without blocking explicit low-level enablement.
+- Boundary remains constrained: this does not add shell execution, repository
+  mutation, worktree operations, PR creation, HoloIndex re-index, Hermes
+  dispatch, live FoundUp enqueue, PatternMemory promotion, reward settlement, or
+  merge authority.
+
 ## 2026-07-17: REDDOG_RESIDENT_EXTERNAL_RESEARCH_NOOP_RETRIEVER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
