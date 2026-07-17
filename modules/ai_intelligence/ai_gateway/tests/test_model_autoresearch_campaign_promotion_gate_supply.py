@@ -9,6 +9,11 @@ from pathlib import Path
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution import (
     rehydrate_model_autoresearch_campaign_execution_receipt,
 )
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution_artifact_supply_bootstrap import (
+    MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+    MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
+    run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap,
+)
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_promotion_gate_supply import (
     MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ACCEPT,
     MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_REJECT,
@@ -23,6 +28,9 @@ from modules.ai_intelligence.ai_gateway.tests.test_model_autoresearch_campaign_e
     REPO_ROOT,
     _execution_payload,
 )
+from modules.ai_intelligence.ai_gateway.tests.test_model_autoresearch_campaign_execution_artifact_supply_bootstrap import (
+    _configured_semantic_inputs,
+)
 
 
 MODULE_PATH = (
@@ -35,7 +43,12 @@ MODULE_PATH = (
 )
 
 
-def _policies(execution_payload: dict, *, min_pass_rate: float = 0.9) -> tuple[dict, ...]:
+def _policies(
+    execution_payload: dict,
+    *,
+    min_pass_rate: float = 0.9,
+    min_sample_count: int = 2,
+) -> tuple[dict, ...]:
     execution = rehydrate_model_autoresearch_campaign_execution_receipt(execution_payload)
     benchmark = execution.benchmark_run_receipt
     return tuple(
@@ -43,7 +56,7 @@ def _policies(execution_payload: dict, *, min_pass_rate: float = 0.9) -> tuple[d
             task_family=benchmark.task_family,
             candidate_id=candidate_id,
             min_verifier_pass_rate=min_pass_rate,
-            min_sample_count=2,
+            min_sample_count=min_sample_count,
             required_task_set_digest=benchmark.task_set_digest,
             required_held_out_split_digest=benchmark.held_out_split_digest,
             required_verifier_digest=benchmark.verifier_digest,
@@ -77,6 +90,80 @@ def test_campaign_promotion_gate_supply_emits_rehydratable_gate_receipts(tmp_pat
         ModelPromotionGateDecision.PROMOTE_CHAMPION,
     ]
     assert all(gate.promotion_evidence_receipt is not None for gate in receipt.promotion_gate_receipts)
+
+
+def _semantic_execution_payload(tmp_path: Path, *, contains: str = "configured;gateway;answer") -> dict:
+    files, gateway = _configured_semantic_inputs(tmp_path)
+    tasks_payload = json.loads(files["tasks"].read_text(encoding="utf-8"))
+    tasks_payload["tasks"][0]["metadata"] = {"expected_answer_contains": contains}
+    files["tasks"].write_text(json.dumps(tasks_payload, sort_keys=True), encoding="utf-8")
+    result = run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=files["plan"],
+        candidate_pool_path=files["candidates"],
+        tasks_path=files["tasks"],
+        prompt_records_path=files["prompts"],
+        output_evidence_path=files["evidence"],
+        output_path=files["output"],
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        runner_mode=MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
+        runner_allowed_providers="provider",
+        runner_max_prompt_chars=2000,
+        runner_max_calls_per_sample=1,
+        runner_max_cost_estimate_usd_per_sample=1.0,
+        gateway=gateway,
+    )
+    assert result.accepted is True
+    return json.loads(files["output"].read_text(encoding="utf-8"))
+
+
+def test_semantic_verified_configured_gateway_campaign_can_promote(tmp_path: Path) -> None:
+    execution = _semantic_execution_payload(tmp_path)
+    output = tmp_path / "runtime" / "semantic_promotion_gates.json"
+
+    result = run_reddog_model_autoresearch_campaign_promotion_gate_supply(
+        repo_root=REPO_ROOT,
+        campaign_execution_receipt=execution,
+        promotion_policies=_policies(execution, min_pass_rate=1.0, min_sample_count=1),
+        promotion_authority_receipt_id="authority:semantic",
+        signed_promotion_receipt_id="signed:semantic",
+        output_path=output,
+    )
+
+    assert result.accepted is True
+    receipt = rehydrate_model_autoresearch_campaign_promotion_gate_supply_receipt(
+        json.loads(output.read_text(encoding="utf-8"))
+    )
+    assert len(receipt.promotion_gate_receipts) == 1
+    gate = receipt.promotion_gate_receipts[0]
+    assert gate.decision == ModelPromotionGateDecision.PROMOTE_CHAMPION
+    assert gate.promotion_evidence_receipt is not None
+    assert gate.promotion_evidence_receipt.signed_promotion_receipt_id == "signed:semantic"
+
+
+def test_semantic_rejected_configured_gateway_campaign_cannot_promote(tmp_path: Path) -> None:
+    execution = _semantic_execution_payload(tmp_path, contains="missing-term")
+    output = tmp_path / "runtime" / "semantic_rejected_promotion_gates.json"
+
+    result = run_reddog_model_autoresearch_campaign_promotion_gate_supply(
+        repo_root=REPO_ROOT,
+        campaign_execution_receipt=execution,
+        promotion_policies=_policies(execution, min_pass_rate=1.0, min_sample_count=1),
+        promotion_authority_receipt_id="authority:semantic",
+        signed_promotion_receipt_id="signed:semantic",
+        output_path=output,
+    )
+
+    assert result.accepted is True
+    receipt = rehydrate_model_autoresearch_campaign_promotion_gate_supply_receipt(
+        json.loads(output.read_text(encoding="utf-8"))
+    )
+    gate = receipt.promotion_gate_receipts[0]
+    assert gate.decision == ModelPromotionGateDecision.KEEP_CHALLENGER
+    assert gate.promotion_evidence_receipt is None
+    assert "verifier_pass_rate_below_champion_threshold" in gate.rejection_reasons
 
 
 def test_campaign_promotion_gate_supply_without_signed_authority_does_not_promote(tmp_path: Path) -> None:

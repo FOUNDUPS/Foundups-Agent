@@ -1,5 +1,35 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Semantic Verifier Promotion Chain Regression
+
+**Who:** 0102 Codex
+**Type:** Runtime Chain Regression
+**Slice:** MODEL_AUTORESEARCH_SEMANTIC_PROMOTION_CHAIN_REGRESSION_PHASE1
+
+**What:** Added promotion-gate supply regression coverage proving a configured
+gateway campaign verified by `output_evidence_semantic` can feed promotion-gate
+receipts, and that semantically rejected samples cannot promote.
+
+**Why:** The evidence bundle and semantic verifier are useful only if their
+accepted/rejected benchmark receipts are honored by the downstream
+champion/challenger gate.
+
+**Files:**
+- `tests/test_model_autoresearch_campaign_promotion_gate_supply.py` - adds the
+  configured-gateway semantic campaign -> promotion-gate acceptance and
+  rejection regressions.
+
+**Truth Boundary:**
+- IMPLEMENTED: regression proof for semantic verifier evidence flowing into
+  promotion-gate supply.
+- NOT IMPLEMENTED: free-form LLM verifier, model catalog mutation, runtime
+  model binding, PatternMemory writes, HoloIndex re-indexing, worker spawn,
+  shell execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Output Evidence Semantic Verifier
 
 **Who:** 0102 Codex
