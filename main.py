@@ -33,8 +33,10 @@ import sys
 import logging
 import io
 import atexit
+import hashlib
+import json
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Mapping
 
 # Load environment variables for DAEs (API keys, ports, feature flags).
 # Managed mode builds `.env.managed` from `.env` (last duplicate wins) for
@@ -1583,6 +1585,178 @@ def _reddog_env_sequence(name: str) -> tuple[str, ...]:
         return ()
     normalized = raw.replace("\n", ";").replace(",", ";")
     return tuple(item.strip() for item in normalized.split(";") if item.strip())
+
+
+def _reddog_positive_int_env(name: str, default: int) -> int:
+    raw = os.getenv(name, str(default))
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return default
+    return value if value > 0 else default
+
+
+class _RedDogConfiguredExternalResearchRetriever:
+    """File-backed approved external research snapshot retriever for resident preflight."""
+
+    def __init__(self, snapshot_path: Path) -> None:
+        self.snapshot_path = snapshot_path
+
+    def fetch(self, target: Mapping[str, Any]) -> Mapping[str, Any]:
+        try:
+            payload = json.loads(self.snapshot_path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+        if isinstance(payload, dict) and isinstance(payload.get("snapshots"), list):
+            url = str(target.get("url") or target.get("target") or "")
+            for item in payload["snapshots"]:
+                if isinstance(item, dict) and str(item.get("source_url") or item.get("url") or "") == url:
+                    return item
+        return payload if isinstance(payload, dict) else {}
+
+
+def _reddog_external_research_retriever_from_env() -> Any | None:
+    raw_path = os.getenv("REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH", "").strip()
+    if not raw_path:
+        return None
+    path = Path(raw_path)
+    return _RedDogConfiguredExternalResearchRetriever(path) if path.is_file() else None
+
+
+def _reddog_resident_architect_intent_id(
+    *,
+    principal_ref: str,
+    foundup_id: str,
+    work_focus: str,
+) -> str:
+    explicit = os.getenv("REDDOG_RESIDENT_ARCHITECT_INTENT_ID", "").strip()
+    if explicit:
+        return explicit
+    payload = {
+        "foundup_id": foundup_id,
+        "principal_ref": principal_ref,
+        "work_focus": work_focus,
+    }
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return f"sha256:{digest}"
+
+
+def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bool:
+    """
+    Optionally run one durable AgentDB resident RedDog architect cycle.
+
+    This is the resident RedDog runtime bridge for main.py. It submits a
+    reddog_intent.v1 request to the durable AgentDB cycle, lets OpenClaw claim
+    read-only audit/research tasks, persists the backend architect
+    determination, and exposes the intent ID for the downstream FIX promotion
+    handoff. It performs no source mutation, shell work, worktree operations,
+    PR creation, HoloIndex re-index, Hermes dispatch, PatternMemory promotion,
+    or live FoundUp enqueue.
+
+    Env:
+        REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE=0          Enable resident cycle
+        REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=0 Block startup if rejected
+        REDDOG_RESIDENT_ARCHITECT_INTENT_ID                Optional stable intent ID
+        REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS               Work focus submitted to RedDog
+        REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF            Principal reference, default 012
+        REDDOG_RESIDENT_ARCHITECT_FOUNDUP_ID               FoundUp scope, default foundups_agent
+        REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS               Max OpenClaw claims, default 8
+        REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS          Cycle timeout, default 60
+        REDDOG_RESIDENT_ARCHITECT_RETRY=0                  Retry failed/cancelled cycle
+        REDDOG_RESIDENT_ARCHITECT_CANCEL=0                 Cancel running cycle
+        REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH             Approved external snapshot JSON
+        REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Existing work-state JSON
+        HOLOINDEX_FRESHNESS_RECEIPT                        Existing HoloIndex receipt
+        HOLOINDEX_SSD_PATH                                 HoloIndex SSD path
+    """
+
+    if os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "0") == "0":
+        logger.info("[REDDOG-RESIDENT-CYCLE] Startup preflight disabled")
+        return True
+
+    enforced = os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "0") != "0"
+    principal_ref = os.getenv("REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF", "012").strip() or "012"
+    foundup_id = os.getenv("REDDOG_RESIDENT_ARCHITECT_FOUNDUP_ID", "foundups_agent").strip() or "foundups_agent"
+    work_focus = (
+        os.getenv("REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS", "").strip()
+        or "main.py resident RedDog architect cycle"
+    )
+    intent_id = _reddog_resident_architect_intent_id(
+        principal_ref=principal_ref,
+        foundup_id=foundup_id,
+        work_focus=work_focus,
+    )
+    red_dog_intent = {
+        "schema_version": "reddog_intent.v1",
+        "intent_id": intent_id,
+        "principal_ref": principal_ref,
+        "foundup_id": foundup_id,
+        "work_focus": work_focus,
+        "requested_authority": "read_only_audit",
+        "origin": "main.py",
+        "submits_executable_authority": False,
+    }
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
+            run_reddog_resident_architect_durable_agentdb_cycle,
+        )
+
+        result = run_reddog_resident_architect_durable_agentdb_cycle(
+            repo_root=repo_root,
+            red_dog_intent=red_dog_intent,
+            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
+            holoindex_receipt_path=os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", ""),
+            holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
+            requested_operation="main_resident_architect_cycle",
+            prompt_text=work_focus,
+            external_research_retriever=_reddog_external_research_retriever_from_env(),
+            max_claims=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS", 8),
+            timeout_seconds=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS", 60),
+            cancel_requested=os.getenv("REDDOG_RESIDENT_ARCHITECT_CANCEL", "0") != "0",
+            retry_requested=os.getenv("REDDOG_RESIDENT_ARCHITECT_RETRY", "0") != "0",
+        )
+    except Exception as exc:
+        logger.error(f"[REDDOG-RESIDENT-CYCLE] Startup runtime failed: {exc}")
+        if enforced:
+            print(f"[REDDOG-RESIDENT-CYCLE] preflight=FAIL error={type(exc).__name__}")
+            return False
+        print(f"[REDDOG-RESIDENT-CYCLE] preflight=WARN error={type(exc).__name__}")
+        return True
+
+    status = "PASS" if result.accepted else "WARN"
+    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    completed = int(result.task_status_counts.get("completed", 0))
+    print(
+        f"[REDDOG-RESIDENT-CYCLE] preflight={status} status={result.status} "
+        f"intent={result.intent_id} cycle={result.cycle_id} snapshot={result.snapshot_id or '(none)'} "
+        f"swarm={result.swarm_id or '(none)'} tasks={len(result.task_ids)} completed={completed} "
+        f"claims={len(result.openclaw_claims)} recovered={result.recovered_existing_cycle} "
+        f"duplicate={result.duplicate_intent_reused} architect_action={result.architect_action or '(none)'} "
+        f"architect_next_slice={result.architect_next_slice or '(none)'} "
+        f"architect_determination={result.architect_determination_id or '(none)'} "
+        f"queue_candidates={result.queue_candidate_count} reasons={reasons}"
+    )
+    print(
+        "[REDDOG-RESIDENT-CYCLE] "
+        f"read_only_authority={result.read_only_authority_only} "
+        f"no_shell={result.no_shell_command_executed} "
+        f"no_repo_mutation={result.no_repo_mutation_performed} "
+        f"no_holoindex_reindex={result.no_holoindex_reindex_performed} "
+        f"no_hermes_dispatch={result.no_hermes_dispatch_performed} "
+        f"no_worktree={result.no_worktree_operation_performed} "
+        f"no_pr={result.no_pr_created} "
+        f"no_pattern_memory={result.no_pattern_memory_promotion_performed} "
+        f"no_live_foundup_enqueue={result.no_live_foundup_enqueue_performed}"
+    )
+    if result.accepted:
+        os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] = result.intent_id
+        return True
+
+    if enforced:
+        print("[REDDOG-RESIDENT-CYCLE] Startup blocked by REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=1")
+        return False
+    return True
 
 
 def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
@@ -3313,6 +3487,8 @@ def main():
     if not run_git_main_merge_sentinel_preflight(repo_root):
         return
     if not run_reddog_authoritative_work_state_refresh_preflight(repo_root):
+        return
+    if not run_reddog_resident_architect_durable_cycle_preflight(repo_root):
         return
     if not run_reddog_architect_fix_promotion_preflight(repo_root):
         return

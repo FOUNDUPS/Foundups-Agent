@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -943,6 +944,161 @@ def test_main_preflight_e2e_runtime_reject_blocks_when_enforced(capsys) -> None:
     output = capsys.readouterr().out
     assert "[REDDOG-BOOTSTRAP-E2E] preflight=WARN" in output
     assert "Startup blocked by REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=1" in output
+
+
+def _resident_cycle_result(*, accepted: bool = True):
+    return SimpleNamespace(
+        accepted=accepted,
+        status="DETERMINED" if accepted else "REJECT",
+        intent_id="sha256:intent-main-resident",
+        cycle_id="sha256:cycle-main-resident",
+        snapshot_id="sha256:snapshot-main-resident" if accepted else None,
+        determination_id="sha256:determination-main-resident" if accepted else None,
+        swarm_id="sha256:swarm-main-resident" if accepted else None,
+        task_ids=("task-1", "task-2") if accepted else (),
+        task_status_counts={"completed": 2} if accepted else {},
+        openclaw_claims=({"task_id": "task-1"}, {"task_id": "task-2"}) if accepted else (),
+        final_bootstrap=None,
+        architect_action="FIX" if accepted else None,
+        architect_next_slice="REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1" if accepted else None,
+        architect_determination_id="sha256:architect-main-resident" if accepted else None,
+        queue_candidate_count=1 if accepted else 0,
+        duplicate_intent_reused=False,
+        recovered_existing_cycle=False,
+        retry_count=0,
+        rejection_reasons=() if accepted else ("external_research_retriever_missing",),
+        no_shell_command_executed=True,
+        no_repo_mutation_performed=True,
+        no_holoindex_reindex_performed=True,
+        no_hermes_dispatch_performed=True,
+        no_worktree_operation_performed=True,
+        no_pr_created=True,
+        no_pattern_memory_promotion_performed=True,
+        no_live_foundup_enqueue_performed=True,
+        read_only_authority_only=True,
+    )
+
+
+def test_main_preflight_durable_resident_cycle_disabled_is_inert() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {"REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "0"},
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    mocked.assert_not_called()
+
+
+def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_path, capsys) -> None:
+    import main
+
+    external_snapshot = tmp_path / "external_research_snapshot.json"
+    external_snapshot.write_text(json.dumps({"snapshots": []}), encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "0",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS": "resident main cycle",
+                "REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF": "012",
+                "REDDOG_RESIDENT_ARCHITECT_FOUNDUP_ID": "foundups_agent",
+                "REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS": "2",
+                "REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS": "30",
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "O:/state/work_state.json",
+                "HOLOINDEX_FRESHNESS_RECEIPT": "O:/state/holo_receipt.json",
+                "HOLOINDEX_SSD_PATH": "E:/HoloIndex",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] == "sha256:intent-main-resident"
+
+    kwargs = mocked.call_args.kwargs
+    assert kwargs["repo_root"] == REPO_ROOT
+    assert kwargs["work_state_path"] == "O:/state/work_state.json"
+    assert kwargs["holoindex_receipt_path"] == "O:/state/holo_receipt.json"
+    assert kwargs["holoindex_ssd_path"] == "E:/HoloIndex"
+    assert kwargs["requested_operation"] == "main_resident_architect_cycle"
+    assert kwargs["prompt_text"] == "resident main cycle"
+    assert kwargs["max_claims"] == 2
+    assert kwargs["timeout_seconds"] == 30
+    assert kwargs["external_research_retriever"] is not None
+    intent = kwargs["red_dog_intent"]
+    assert intent["schema_version"] == "reddog_intent.v1"
+    assert intent["intent_id"] == "sha256:intent-main-resident"
+    assert intent["submits_executable_authority"] is False
+    assert intent["requested_authority"] == "read_only_audit"
+    output = capsys.readouterr().out
+    assert "[REDDOG-RESIDENT-CYCLE] preflight=PASS" in output
+    assert "tasks=2" in output
+    assert "completed=2" in output
+    assert "architect_action=FIX" in output
+    assert "queue_candidates=1" in output
+    assert "read_only_authority=True" in output
+    assert "no_repo_mutation=True" in output
+    assert "no_holoindex_reindex=True" in output
+
+
+def test_main_preflight_resident_cycle_reject_is_nonblocking_by_default(capsys) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(accepted=False),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "0",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    output = capsys.readouterr().out
+    assert "[REDDOG-RESIDENT-CYCLE] preflight=WARN" in output
+    assert "reasons=external_research_retriever_missing" in output
+
+
+def test_main_preflight_resident_cycle_reject_blocks_when_enforced(capsys) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(accepted=False),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is False
+
+    output = capsys.readouterr().out
+    assert "[REDDOG-RESIDENT-CYCLE] preflight=WARN" in output
+    assert "Startup blocked by REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=1" in output
 
 
 def test_main_preflight_enables_enqueue_when_openclaw_auto_tasks_enabled() -> None:
