@@ -1,8 +1,10 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.3",
+    "version": "1.4",
     "status": "active",
+    "mantra_stage_count": 7,
+    "operator_action_count": 9,
     "core_mantra": "HoloIndex -> Research -> Hard Think -> Dialectic Sweep -> First Principles -> Build -> Follow WSP",
     "canonical_operator_meaning": "follow wsp := retrieve wsp -> retrieve evidence -> research -> micro pass -> macro pass -> hard think -> dialectic sweep -> first principles -> execute",
     "protocol_identity": "agentic activation protocol",
@@ -12,16 +14,25 @@
       "out_of_the_box_scope",
       "execute_after_gates_pass"
     ],
-    "execution_steps": [
+    "mantra_stages": [
       "HoloIndex",
+      "Research",
+      "Hard Think",
+      "Dialectic Sweep",
+      "First Principles",
+      "Build",
+      "Follow WSP"
+    ],
+    "operator_actions": [
+      "Retrieve WSPs",
+      "Retrieve Evidence",
       "Research",
       "Micro Pass",
       "Macro Pass",
       "Hard Think",
       "Dialectic Sweep",
       "First Principles",
-      "Build",
-      "Follow WSP"
+      "Execute"
     ],
     "rubik_context": "Rubik = MVP DAE. Currently 'Cubes' (modules) need Qwen/Gemma enhancement to become fully agentic Progressive Web Apps (PWAs) that connect ubiquitously to any blockchain via FoundUp MCPs."
   },

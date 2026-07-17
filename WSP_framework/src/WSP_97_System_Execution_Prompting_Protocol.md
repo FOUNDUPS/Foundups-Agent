@@ -85,14 +85,16 @@ WSP 97 assumes the agent should activate in a disciplined way once enough eviden
 HoloIndex -> Research -> Hard Think -> Dialectic Sweep -> First Principles -> Build -> Follow WSP
 ```
 
-**Definition**: Every agent operation follows this 7-step cycle:
+**Definition**: Every agent operation follows this 7-stage mantra:
 - **HoloIndex**: Query knowledge base for context and patterns
 - **Research**: Gather relevant information and precedents
-- **Hard Think**: Apply critical analysis and first principles
+- **Hard Think**: Apply critical analysis to the retrieved evidence
 - **Dialectic Sweep**: Challenge assumptions, compare alternatives, search for the better move
 - **First Principles**: Break down to fundamental truths (Occam's Razor)
 - **Build**: Execute with minimal complexity
 - **Follow WSP**: Ensure protocol compliance throughout
+
+The stage count and operator-action count are intentionally different. The mantra has **7 stages**. The default operator sequence in Section 1.2 expands retrieval, research, and scope analysis into **9 auditable actions**; it is not a separate 9-stage mantra.
 
 ### 1.1 CoT/CoR Verification Gates (v1.3)
 
@@ -296,6 +298,7 @@ MCP_RUBIK_INTEGRATION = {
         "HoloIndex: Query current MCP integration status",
         "Research: Analyze existing manifest and agent capabilities",
         "Hard Think: Apply Occam's Razor to collaboration patterns",
+        "Dialectic Sweep: Compare alternatives and challenge assumptions",
         "First Principles: Minimal viable MCP integration per Rubik",
         "Build: Implement gateway policies and server mappings",
         "Follow WSP: Ensure WSP 77/80/96 compliance"
@@ -349,7 +352,9 @@ def detect_and_route_mission(query: str) -> dict:
     }
 ```
 
-### 3. Recursive Execution Validation
+### 3. Recursive Execution Validation Contract
+
+The following is contract pseudocode for future implementation at the WSP core boundary. Until that runtime validator lands, it MUST NOT be reported as active enforcement.
 
 ```python
 def validate_execution_compliance(execution_result: dict) -> bool:
@@ -357,7 +362,7 @@ def validate_execution_compliance(execution_result: dict) -> bool:
     Ensure execution follows WSP 97 mantra
     """
     required_steps = ["holoindex_query", "research_gathering",
-                     "hard_think_analysis", "first_principles",
+                     "hard_think_analysis", "dialectic_sweep", "first_principles",
                      "build_execution", "wsp_compliance"]
 
     completed_steps = execution_result.get("execution_steps", [])
@@ -445,7 +450,7 @@ Always reference WSP 97 in your validation tasks and optimize for minimal, preci
 
 ### Testing & Validation
 
-- **Mantra Compliance**: All agent outputs must demonstrate the 6-step execution cycle
+- **Mantra Compliance**: Execution receipts must index evidence for all 7 mantra stages
 - **Profile Adherence**: Agents must stay within their defined capabilities and output modes
 - **Mission Success**: All mission templates must achieve defined success criteria
 - **Recursive Validation**: Agents validate their own compliance with WSP 97
