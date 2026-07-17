@@ -293,6 +293,7 @@ def claim_reddog_signed_worker_dispatch_task_once(
             include_0102_bounded_code=_signed_0102_bounded_code_tasks_enabled_from_env(),
             include_queue_stage_progress=_openclaw_queue_stage_tasks_enabled_from_env(),
             env=os.environ,
+            repo_root=repo_root,
         )
     except Exception as exc:
         return _signed_worker_claim_result(
@@ -540,6 +541,7 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
     include_0102_bounded_code: bool = False,
     include_queue_stage_progress: bool = False,
     env: Mapping[str, str] | None = None,
+    repo_root: Path | str | None = None,
 ) -> Optional[Dict[str, Any]]:
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
         is_0102_bounded_code_change_signed_worker_context,
@@ -580,12 +582,20 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
                 or (
                     include_0102_bounded_code
                     and is_0102_bounded_code_change_signed_worker_context(candidate_context)
-                    and _signed_0102_bounded_code_stage_ready_from_env(candidate_context, env or os.environ)
+                    and _signed_0102_bounded_code_stage_ready_from_env(
+                        candidate_context,
+                        env or os.environ,
+                        repo_root=repo_root,
+                    )
                 )
                 or (
                     include_queue_stage_progress
                     and is_openclaw_queue_stage_progress_signed_worker_context(candidate_context)
-                    and _openclaw_queue_stage_progress_ready_from_env(candidate_context, env or os.environ)
+                    and _openclaw_queue_stage_progress_ready_from_env(
+                        candidate_context,
+                        env or os.environ,
+                        repo_root=repo_root,
+                    )
                 )
             ):
                 row = candidate
