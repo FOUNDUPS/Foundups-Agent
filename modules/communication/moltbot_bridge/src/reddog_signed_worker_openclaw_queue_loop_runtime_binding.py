@@ -281,7 +281,7 @@ def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[
     if materializer_mode:
         payload["work_order_materializer_mode"] = materializer_mode
     for key, env_name in pairs.items():
-        value = _stripped(env.get(env_name))
+        value = _optional_runtime_file_path(env, repo_root=repo_root, env_name=env_name)
         if value:
             payload[key] = value
     if artifact_generator_mode:
@@ -369,6 +369,21 @@ def _build_pattern_memory_admission_sink(
 
 def _stripped(value: Any) -> str:
     return str(value or "").strip()
+
+
+def _optional_runtime_file_path(
+    env: Mapping[str, str],
+    *,
+    repo_root: Path | str,
+    env_name: str,
+) -> str:
+    explicit = _stripped(env.get(env_name))
+    if explicit:
+        return explicit
+    value = _stripped(resident_queue_runtime_file_path(env, repo_root, env_name))
+    if value and Path(value).exists():
+        return value
+    return ""
 
 
 __all__ = [

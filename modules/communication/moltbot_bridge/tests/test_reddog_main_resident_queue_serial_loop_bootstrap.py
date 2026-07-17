@@ -4178,9 +4178,52 @@ def test_main_serial_loop_preflight_profile_derives_mandatory_runtime_paths(
     assert mocked.call_args.kwargs["authority_profile_path"] == str(
         runtime_root / "authority_profile.json"
     )
+    assert mocked.call_args.kwargs["valve_environment_path"] is None
     assert mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
     assert mocked.call_args.kwargs["artifact_generator_mode"] is None
     assert not runtime_root.exists()
+
+
+def test_main_serial_loop_preflight_profile_derives_existing_valve_environment_path(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "resident-runtime"
+    runtime_root.mkdir(parents=True)
+    valve_env = runtime_root / "execution_valve_env.json"
+    valve_env.write_text("{}", encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=type(
+            "Result",
+            (),
+            {
+                "accepted": True,
+                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
+                "queue_item_id": "queue-1",
+                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+                "steps_run": 1,
+                "dispatched_stages": ("execution_valve",),
+                "next_action": "RUN_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE",
+                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "store_revision": "sha256:revision",
+                "rejection_reasons": (),
+            },
+        )(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+
+    assert mocked.call_args.kwargs["valve_environment_path"] == str(valve_env)
 
 
 def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(

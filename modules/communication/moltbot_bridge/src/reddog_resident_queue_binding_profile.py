@@ -102,6 +102,7 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_PERMISSION_SNAPSHOT_PATH": "permission_snapshot.json",
     "REDDOG_AUTHORITY_PROFILE_SEED_PATH": "authority_profile_seed.json",
     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": "authority_profile_source.json",
+    "REDDOG_EXECUTION_VALVE_ENV_PATH": "execution_valve_env.json",
     "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": "authority_runtime_state.json",
     "REDDOG_PERMISSION_SNAPSHOTS_PATH": "permission_snapshots.json",
     "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": "principal_authority_records.json",

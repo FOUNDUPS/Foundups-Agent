@@ -2371,6 +2371,20 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         if signer_socket_path and not signature_verifier_backend:
             signature_verifier_backend = "ed25519"
 
+        explicit_valve_environment_path = str(
+            os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH") or ""
+        ).strip()
+        profile_valve_environment_path = resident_queue_runtime_file_path(
+            os.environ,
+            repo_root,
+            "REDDOG_EXECUTION_VALVE_ENV_PATH",
+        )
+        valve_environment_path = explicit_valve_environment_path
+        if not valve_environment_path and profile_valve_environment_path:
+            candidate_valve_path = Path(profile_valve_environment_path)
+            if candidate_valve_path.exists():
+                valve_environment_path = profile_valve_environment_path
+
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             work_state_path=resident_queue_runtime_file_path(
@@ -2392,7 +2406,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             or None,
             work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
             work_order_materializer_mode=resident_queue_materializer_mode(os.environ) or None,
-            valve_environment_path=os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH", "") or None,
+            valve_environment_path=valve_environment_path or None,
             generic_writer_dryrun_result_path=os.getenv(
                 "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH", ""
             )
