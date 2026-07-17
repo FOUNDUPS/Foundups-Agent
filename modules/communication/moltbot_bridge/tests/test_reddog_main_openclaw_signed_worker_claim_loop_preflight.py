@@ -44,6 +44,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispat
     _publish_agentdb_task,
     _publish_agentdb_task_with_allocation,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+    resident_queue_materializer_mode,
+)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -53,6 +56,25 @@ CLAIM_LOOP = (
     "modules.communication.moltbot_bridge.src.openclaw_supervisor."
     "claim_reddog_signed_worker_dispatch_tasks_until_idle"
 )
+
+
+def test_profile_materializer_default_does_not_conflict_with_explicit_work_orders() -> None:
+    env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+        "REDDOG_WORK_ORDERS_PATH": "O:/runtime/work_orders.json",
+    }
+
+    assert resident_queue_materializer_mode(env) == ""
+
+
+def test_explicit_blank_materializer_mode_preserves_profile_default() -> None:
+    env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+        "REDDOG_WORK_ORDERS_PATH": "O:/runtime/work_orders.json",
+        "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "",
+    }
+
+    assert resident_queue_materializer_mode(env) == "authority_profile"
 
 
 @pytest.fixture(autouse=True)

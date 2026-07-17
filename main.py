@@ -98,7 +98,8 @@ _original_stderr = sys.stderr
 # Solution: Set env flag, modules should check before wrapping
 os.environ['FOUNDUPS_UTF8_WRAPPED'] = '1'
 
-if sys.platform.startswith('win'):
+# Do not replace pytest's capture streams when tests import this entrypoint as a module.
+if sys.platform.startswith('win') and "pytest" not in sys.modules:
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 
@@ -3563,6 +3564,68 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
     return True
 
 
+def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
+    """
+    Drive the resident queue through bounded serial/claim rounds.
+
+    Env:
+        REDDOG_RESIDENT_QUEUE_CONTROL_LOOP                 Enable bounded alternation (profile may default ON)
+        REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS=8    Max serial/claim rounds
+        REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED=0      Block startup if a round fails
+
+    This function creates no authority, tasks, worktrees, shell commands,
+    source mutations, PRs, PatternMemory writes, rewards, or HoloIndex re-index.
+    It only repeats the already-governed serial-loop and OpenClaw signed-worker
+    claim-loop preflights so one resident startup can advance more than one
+    queue stage without requiring 012 to restart the host.
+    """
+
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP",
+    )
+    if not requested:
+        if not run_reddog_resident_queue_serial_loop_preflight(repo_root):
+            return False
+        return run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+
+    enforced = os.getenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED", "0") != "0"
+    raw_rounds = os.getenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "8").strip()
+    try:
+        max_rounds = int(raw_rounds or "8")
+    except ValueError:
+        max_rounds = 0
+    if max_rounds < 1:
+        print("[REDDOG-QUEUE-CONTROL] preflight=FAIL error=invalid_max_rounds")
+        return not enforced
+
+    completed_rounds = 0
+    for round_index in range(1, max_rounds + 1):
+        if not run_reddog_resident_queue_serial_loop_preflight(repo_root):
+            print(
+                f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
+                "stage=serial_loop"
+            )
+            return not enforced
+        if not run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root):
+            print(
+                f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
+                "stage=openclaw_claim_loop"
+            )
+            return not enforced
+        completed_rounds = round_index
+
+    print(
+        f"[REDDOG-QUEUE-CONTROL] preflight=PASS rounds={completed_rounds} "
+        f"max_rounds={max_rounds}"
+    )
+    return True
+
+
 def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> bool:
     """
     Optionally let OpenClaw claim signed RedDog worker-dispatch AgentDB tasks.
@@ -3869,9 +3932,7 @@ def main():
         return
     if not run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root):
         return
-    if not run_reddog_resident_queue_serial_loop_preflight(repo_root):
-        return
-    if not run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root):
+    if not run_reddog_resident_queue_control_loop_preflight(repo_root):
         return
     if not run_reddog_readonly_operational_bootstrap_preflight(repo_root):
         return
