@@ -422,6 +422,22 @@ def _publish_agentdb_task_with_allocation(allocation, **intent_overrides) -> str
     return result.receipt.task_ids[0]
 
 
+def _signed_worker_task_last_result(task_id: str) -> dict[str, object]:
+    task = AgentDB().get_autonomous_task_by_id(task_id)
+    assert task is not None
+    context = task.get("context")
+    assert isinstance(context, dict)
+    receipt = context.get("signed_worker_task_last_result")
+    assert isinstance(receipt, dict)
+    history = context.get("signed_worker_task_result_receipts")
+    assert isinstance(history, list)
+    assert history
+    assert history[-1]["receipt_digest"] == receipt["receipt_digest"]
+    assert receipt["schema_version"] == "reddog_signed_worker_task_result.v1"
+    assert str(receipt["receipt_digest"]).startswith("sha256:")
+    return receipt
+
+
 def _queue_chain_results_through(stage_key: str) -> dict[str, object]:
     values = {
         "authority_request": {"status": "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"},
@@ -837,6 +853,82 @@ def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
     assert result["task_id"] == task_id
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
     assert runner.calls[0]["task_id"] == task_id
+    receipt = _signed_worker_task_last_result(task_id)
+    assert receipt["claim_status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert receipt["accepted"] is True
+    assert receipt["receipt_id"] == result["receipt_id"]
+    assert receipt["worker_runtime"] == "openclaw"
+    assert receipt["capability"] == "candidate_queue_review"
+    assert str(receipt["run_result_digest"]).startswith("sha256:")
+    assert str(receipt["runner_result_digest"]).startswith("sha256:")
+
+
+def test_openclaw_signed_worker_claim_persists_failure_result_receipt(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+    receipt = _signed_worker_task_last_result(task_id)
+    assert receipt["claim_status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert receipt["accepted"] is False
+    assert SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED in receipt[
+        "rejection_reasons"
+    ]
+    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING in receipt[
+        "rejection_reasons"
+    ]
+
+
+def test_openclaw_signed_worker_claim_persists_requeue_result_receipt(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=True),
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
+    receipt = _signed_worker_task_last_result(task_id)
+    assert receipt["claim_status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
+    assert receipt["accepted"] is True
+    summary = receipt["runner_result_summary"]
+    assert isinstance(summary, dict)
+    assert summary["queue_chain_requeue_required"] is True
+
+
+def test_openclaw_signed_worker_claim_rejects_when_result_persistence_fails(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    from modules.communication.moltbot_bridge.src import openclaw_supervisor
+
+    monkeypatch.setattr(
+        openclaw_supervisor,
+        "_persist_reddog_signed_worker_dispatch_task_result",
+        lambda *_, **__: False,
+    )
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+    )
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED in result[
+        "rejection_reasons"
+    ]
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
 
 
 def test_openclaw_claim_executes_0102_readonly_task_when_env_enabled(

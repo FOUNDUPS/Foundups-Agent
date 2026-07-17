@@ -20,6 +20,7 @@ State machine:
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 import os
 import subprocess
@@ -32,7 +33,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Deque, Dict, List, Mapping, Optional
+from typing import Any, Callable, Deque, Dict, List, Mapping, Optional, Sequence
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,7 @@ class SignedWorkerOpenClawClaimReason:
     MALFORMED_CONTEXT = "REJECT_REDDOG_SIGNED_WORKER_MALFORMED_CONTEXT"
     TASK_EXECUTION_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_TASK_EXECUTION_REJECTED"
     SIGNER_HEALTHCHECK_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_SIGNER_HEALTHCHECK_REJECTED"
+    RESULT_PERSISTENCE_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_RESULT_PERSISTENCE_REJECTED"
     AGENTDB_FAILURE = "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_FAILURE"
     MAX_CLAIMS_INVALID = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
     CLAIM_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_CLAIM_REJECTED"
@@ -333,6 +335,13 @@ def claim_reddog_signed_worker_dispatch_task_once(
     task_id = str(task.get("task_id") or "")
     context = task.get("context")
     if not isinstance(context, dict):
+        _persist_reddog_signed_worker_dispatch_task_result(
+            db,
+            task_id,
+            context={},
+            claim_status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            rejection_reasons=(SignedWorkerOpenClawClaimReason.MALFORMED_CONTEXT,),
+        )
         _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
         return _signed_worker_claim_result(
             accepted=False,
@@ -353,6 +362,17 @@ def claim_reddog_signed_worker_dispatch_task_once(
             if binding_result.accepted:
                 effective_runner = binding_result.runner
             elif binding_result.requested:
+                _persist_reddog_signed_worker_dispatch_task_result(
+                    db,
+                    task_id,
+                    context=context,
+                    claim_status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+                    rejection_reasons=(
+                        SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,
+                        *binding_result.rejection_reasons,
+                    ),
+                    runner_result=binding_result.to_dict(),
+                )
                 _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
                 return _signed_worker_claim_result(
                     accepted=False,
@@ -371,6 +391,17 @@ def claim_reddog_signed_worker_dispatch_task_once(
         runner=effective_runner,
     )
     if not run_result.accepted:
+        _persist_reddog_signed_worker_dispatch_task_result(
+            db,
+            task_id,
+            context=context,
+            claim_status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            run_result=run_result.to_dict(),
+            rejection_reasons=(
+                SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,
+                *run_result.rejection_reasons,
+            ),
+        )
         _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
         return _signed_worker_claim_result(
             accepted=False,
@@ -389,6 +420,25 @@ def claim_reddog_signed_worker_dispatch_task_once(
         run_result.runner_result if isinstance(run_result.runner_result, Mapping) else {}
     )
     if runner_result.get("queue_chain_requeue_required") is True:
+        if not _persist_reddog_signed_worker_dispatch_task_result(
+            db,
+            task_id,
+            context=context,
+            claim_status=SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
+            run_result=run_result.to_dict(),
+        ):
+            _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
+            return _signed_worker_claim_result(
+                accepted=False,
+                status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+                task_id=task_id,
+                worker_role=run_result.worker_role,
+                worker_runtime=run_result.worker_runtime,
+                capability=run_result.capability,
+                rejection_reasons=(
+                    SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED,
+                ),
+            )
         _requeue_reddog_signed_worker_dispatch_task(db, task_id)
         return _signed_worker_claim_result(
             accepted=True,
@@ -398,6 +448,26 @@ def claim_reddog_signed_worker_dispatch_task_once(
             worker_runtime=run_result.worker_runtime,
             capability=run_result.capability,
             receipt_id=run_result.receipt_id,
+        )
+
+    if not _persist_reddog_signed_worker_dispatch_task_result(
+        db,
+        task_id,
+        context=context,
+        claim_status=SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT,
+        run_result=run_result.to_dict(),
+    ):
+        _mark_reddog_signed_worker_dispatch_task_failed(db, task_id)
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            worker_role=run_result.worker_role,
+            worker_runtime=run_result.worker_runtime,
+            capability=run_result.capability,
+            rejection_reasons=(
+                SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED,
+            ),
         )
 
     db.complete_autonomous_task(task_id)
@@ -646,6 +716,127 @@ def _mark_reddog_readonly_audit_task_failed(db: Any, task_id: str) -> None:
         )
     except Exception:
         logger.debug("[SUPERVISOR] Failed to mark RedDog readonly audit task failed", exc_info=True)
+
+
+def _persist_reddog_signed_worker_dispatch_task_result(
+    db: Any,
+    task_id: str,
+    *,
+    context: Mapping[str, Any],
+    claim_status: str,
+    run_result: Mapping[str, Any] | None = None,
+    runner_result: Mapping[str, Any] | None = None,
+    rejection_reasons: Sequence[str] = (),
+) -> bool:
+    """Attach a compact signed-worker result receipt to the AgentDB task context."""
+
+    if not task_id:
+        return False
+    try:
+        base_context = dict(context) if isinstance(context, Mapping) else {}
+        result = dict(run_result) if isinstance(run_result, Mapping) else {}
+        runner_payload = (
+            dict(runner_result)
+            if isinstance(runner_result, Mapping)
+            else dict(result.get("runner_result"))
+            if isinstance(result.get("runner_result"), Mapping)
+            else {}
+        )
+        receipt = {
+            "schema_version": "reddog_signed_worker_task_result.v1",
+            "claim_status": str(claim_status or ""),
+            "accepted": bool(result.get("accepted")) if result else False,
+            "decision": str(result.get("decision") or ""),
+            "receipt_id": str(result.get("receipt_id") or ""),
+            "worker_role": str(result.get("worker_role") or base_context.get("worker_role") or ""),
+            "worker_runtime": str(result.get("worker_runtime") or base_context.get("worker_runtime") or ""),
+            "capability": str(result.get("capability") or base_context.get("capability") or ""),
+            "rejection_reasons": _signed_worker_receipt_reasons(
+                tuple(rejection_reasons) or tuple(result.get("rejection_reasons") or ())
+            ),
+            "runner_result_digest": _stable_digest(runner_payload) if runner_payload else "",
+            "run_result_digest": _stable_digest(result) if result else "",
+            "runner_result_summary": _signed_worker_runner_result_summary(runner_payload),
+            "no_shell_command_executed": bool(result.get("no_shell_command_executed", True)),
+            "no_source_repo_mutation_performed": bool(
+                result.get("no_source_repo_mutation_performed", True)
+            ),
+            "no_holoindex_reindex_performed": bool(
+                result.get("no_holoindex_reindex_performed", True)
+            ),
+            "no_pr_created": bool(result.get("no_pr_created", True)),
+            "no_pattern_memory_write_performed": bool(
+                result.get("no_pattern_memory_write_performed", True)
+            ),
+            "no_reward_settlement_performed": bool(
+                result.get("no_reward_settlement_performed", True)
+            ),
+        }
+        receipt["receipt_digest"] = _stable_digest(receipt)
+        history = base_context.get("signed_worker_task_result_receipts")
+        if not isinstance(history, list):
+            history = []
+        history = [
+            item
+            for item in history
+            if isinstance(item, Mapping)
+        ][-9:]
+        history.append(
+            {
+                "claim_status": receipt["claim_status"],
+                "receipt_id": receipt["receipt_id"],
+                "receipt_digest": receipt["receipt_digest"],
+            }
+        )
+        base_context["signed_worker_task_last_result"] = receipt
+        base_context["signed_worker_task_result_receipts"] = history
+        db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET context = ? WHERE task_id = ?",
+            (json.dumps(base_context, sort_keys=True), task_id),
+        )
+        return True
+    except Exception:
+        logger.debug(
+            "[SUPERVISOR] Failed to persist RedDog signed-worker task result",
+            exc_info=True,
+        )
+        return False
+
+
+def _signed_worker_receipt_reasons(values: Sequence[Any]) -> list[str]:
+    return list(dict.fromkeys(str(value) for value in values if str(value or "").strip()))
+
+
+def _signed_worker_runner_result_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
+    if not isinstance(payload, Mapping) or not payload:
+        return {}
+    bootstrap = payload.get("bootstrap_result")
+    if not isinstance(bootstrap, Mapping):
+        bootstrap = {}
+    return {
+        "accepted": bool(payload.get("accepted")),
+        "decision": str(payload.get("decision") or ""),
+        "receipt_id": str(payload.get("receipt_id") or ""),
+        "queue_item_id": str(payload.get("queue_item_id") or ""),
+        "queue_chain_complete": bool(payload.get("queue_chain_complete", False)),
+        "assigned_stage_complete": bool(payload.get("assigned_stage_complete", False)),
+        "queue_chain_requeue_required": bool(
+            payload.get("queue_chain_requeue_required", False)
+        ),
+        "rejection_reasons": _signed_worker_receipt_reasons(
+            tuple(payload.get("rejection_reasons") or ())
+        ),
+        "bootstrap_status": str(bootstrap.get("status") or ""),
+        "bootstrap_next_action": str(bootstrap.get("next_action") or ""),
+        "bootstrap_dispatched_stages": _signed_worker_receipt_reasons(
+            tuple(bootstrap.get("dispatched_stages") or ())
+        ),
+    }
+
+
+def _stable_digest(payload: Any) -> str:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def _mark_reddog_signed_worker_dispatch_task_failed(db: Any, task_id: str) -> None:

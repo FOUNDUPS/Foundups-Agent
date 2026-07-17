@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNED_WORKER_AGENTDB_RESULT_RECEIPT_PERSISTENCE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97
+
+- Persisted compact signed-worker execution result receipts into the AgentDB
+  task context before task completion or requeue.
+- Added digest-bound `reddog_signed_worker_task_result.v1` receipts with
+  runner/result digests, bounded runner summaries, no-effect attestations, and
+  a capped receipt history.
+- Successful and requeued signed-worker claims now fail closed if result
+  persistence fails, preventing status-only success without recoverable
+  execution evidence.
+- Added regressions for completed, failed, requeued, and persistence-failure
+  signed-worker claim paths.
+- HoloIndex query-only pre-commit check did not surface the new receipt
+  persistence slice; recorded as
+  HOLOINDEX_REDDOG_SIGNED_WORKER_AGENTDB_RESULT_RECEIPT_INDEX_GAP.
+
 ## 2026-07-17: REDDOG_OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK_GATE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
