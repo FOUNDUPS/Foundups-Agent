@@ -1,5 +1,15 @@
 # TestModLog - shared tests
 
+## 2026-07-17: RedDog resident autonomous chain proof
+
+- File: `tests/test_main_runtime_bootstrap.py`
+- Slice: `REDDOG_MAIN_RESIDENT_AUTONOMOUS_CHAIN_PROOF_PHASE1`
+- New test:
+  - `test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights` - asserts `main()` runs the resident RedDog preflights in order and carries `REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=1` plus `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code_fusion_worktree_draft_pr` into FIX promotion, queue consumer, queue orchestration, queue dispatch, serial loop, and OpenClaw claim loop before menu start.
+- Scope: all runtime work mocked; no live model, OpenClaw, shell, worktree, PR, HoloIndex re-index, PatternMemory write, or menu interaction.
+
+---
+
 ## 2026-06-07: Headless bootstrap seam (WRE/OpenClaw/Hermes dry-run, W6)
 
 - File: `tests/test_main_runtime_bootstrap.py` (extended: 5 existing + 4 new = 9 tests)

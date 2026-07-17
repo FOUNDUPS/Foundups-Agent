@@ -140,6 +140,118 @@ def test_bootstrap_runtime_dae_launches_registers_and_autostarts_openclaw_superv
     broker.start_dae.assert_called_once_with("openclaw_supervisor", actor_id="0102")
 
 
+def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(monkeypatch):
+    """The resident RedDog main path must be one contiguous startup chain.
+
+    This test proves the product-level seam: after an accepted resident FIX
+    cycle, the same process must carry the safe handoff/profile values into the
+    promotion, queue, serial-loop, and OpenClaw claim preflights before the
+    interactive menu starts. All runtime work is mocked.
+    """
+
+    order: list[str] = []
+    expected_profile = "signed_0102_bounded_code_fusion_worktree_draft_pr"
+
+    monkeypatch.setenv("OPENCLAW_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    monkeypatch.setenv("WSP_FRAMEWORK_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ENABLED", "0")
+    monkeypatch.delenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF", raising=False)
+    monkeypatch.delenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", raising=False)
+
+    def pass_step(name: str):
+        def _step(*_args, **_kwargs):
+            order.append(name)
+            return True
+
+        return _step
+
+    def resident_cycle(*_args, **_kwargs):
+        order.append("resident_cycle")
+        os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] = "1"
+        os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"] = expected_profile
+        return True
+
+    def profile_bound_step(name: str):
+        def _step(*_args, **_kwargs):
+            assert os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] == "1"
+            assert os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"] == expected_profile
+            order.append(name)
+            return True
+
+        return _step
+
+    with patch.object(main, "run_env_hygiene_preflight", pass_step("env_hygiene")), patch.object(
+        main, "run_brain_artifact_preflight", pass_step("brain")
+    ), patch.object(
+        main, "run_ironclaw_runtime_preflight", pass_step("ironclaw")
+    ), patch.object(
+        main, "run_openclaw_security_preflight", pass_step("security")
+    ), patch.object(
+        main, "run_dependency_security_preflight", pass_step("dep_security")
+    ), patch.object(
+        main, "run_wre_dashboard_preflight", pass_step("dashboard")
+    ), patch.object(
+        main, "run_wsp_framework_preflight", pass_step("wsp")
+    ), patch.object(
+        main, "run_git_main_merge_sentinel_preflight", pass_step("merge_sentinel")
+    ), patch.object(
+        main, "run_reddog_authoritative_work_state_refresh_preflight", pass_step("work_state")
+    ), patch.object(
+        main, "run_reddog_resident_architect_durable_cycle_preflight", resident_cycle
+    ), patch.object(
+        main, "run_reddog_architect_fix_promotion_preflight", profile_bound_step("fix_promotion")
+    ), patch.object(
+        main, "run_reddog_wre_queue_consumer_preflight", profile_bound_step("queue_consumer")
+    ), patch.object(
+        main,
+        "run_reddog_resident_queue_orchestration_plan_preflight",
+        profile_bound_step("queue_orchestration"),
+    ), patch.object(
+        main,
+        "run_reddog_resident_queue_next_stage_dispatch_preflight",
+        profile_bound_step("next_stage_dispatch"),
+    ), patch.object(
+        main, "run_reddog_resident_queue_serial_loop_preflight", profile_bound_step("serial_loop")
+    ), patch.object(
+        main,
+        "run_reddog_openclaw_signed_worker_claim_loop_preflight",
+        profile_bound_step("openclaw_claim_loop"),
+    ), patch.object(
+        main, "run_reddog_readonly_operational_bootstrap_preflight", pass_step("readonly_bootstrap")
+    ), patch.object(
+        main, "bootstrap_runtime_dae_launches", pass_step("dae_bootstrap")
+    ), patch(
+        "modules.infrastructure.cli.src.main_menu.run_main_menu",
+        side_effect=lambda **_kwargs: order.append("menu"),
+    ):
+        main.main()
+
+    assert order == [
+        "env_hygiene",
+        "brain",
+        "ironclaw",
+        "security",
+        "dep_security",
+        "dashboard",
+        "wsp",
+        "merge_sentinel",
+        "work_state",
+        "resident_cycle",
+        "fix_promotion",
+        "queue_consumer",
+        "queue_orchestration",
+        "next_stage_dispatch",
+        "serial_loop",
+        "openclaw_claim_loop",
+        "readonly_bootstrap",
+        "dae_bootstrap",
+        "menu",
+    ]
+
+
 # ---------------------------------------------------------------------------
 # Headless bootstrap seam (WRE_OPENCLAW_HERMES_AUTONOMOUS_BUILD_DRYRUN_PHASE1)
 #
