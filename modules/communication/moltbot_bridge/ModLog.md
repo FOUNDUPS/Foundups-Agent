@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MAIN_MISSING_SIGNER_SOCKET_FAIL_CLOSED_PROOF_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a main-level resident control-loop regression proving an enforced
+  signed-worktree profile startup fails closed when the derived signer socket
+  path is unavailable.
+- The proof verifies the OpenClaw claim loop is not reached, no authority state
+  or chain result is written, and the operator-facing output includes
+  `FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE`.
+- Boundary remains constrained: test-only proof, no signer spawn, no private
+  key loading, no source mutation, no OpenClaw enqueue, no Hermes dispatch, no
+  PR publication, no reward settlement, and no HoloIndex re-index.
+
 ## 2026-07-17: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_BOOTSTRAP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
