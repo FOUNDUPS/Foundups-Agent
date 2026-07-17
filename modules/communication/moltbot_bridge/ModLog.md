@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Wired `main.py` to optionally run the AI Gateway runtime-binding artifact
+  supplier before architect-FIX promotion when
+  `REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY=1` is set.
+- The preflight consumes outside-repo catalog, model-selection, benchmark,
+  promotion, signed evidence, policy, and trusted public-key files, then
+  writes a `RedDogModelRuntimeBindingReceipt` path for later resident runtime
+  consumption.
+- Added a profile-derived output path for
+  `REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH` while keeping the supply flag
+  explicit/default-off to avoid breaking existing startup profiles without
+  runtime-binding evidence inputs.
+- Boundary remains constrained: no model/provider call, benchmark execution,
+  runtime model default mutation, worker spawn, shell, worktree, source
+  mutation, PatternMemory write, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_CONSUMPTION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
