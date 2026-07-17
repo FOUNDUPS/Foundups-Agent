@@ -310,6 +310,86 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
     assert work_order["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
 
 
+def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> None:
+    plan = _pilot_bounded_worker_plan()
+    profile = _profile(
+        requested_operation=PILOT_OPERATION,
+        allowed_paths=_pilot_allowed_paths(),
+        bounded_worker_plan=plan,
+    )
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=profile,
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    assert work_orders[WORK_ORDER_ID]["bounded_worker_plan"] == plan
+
+
+def test_authority_profile_materializer_rejects_bounded_worker_plan_outside_scope() -> None:
+    plan = _pilot_bounded_worker_plan()
+    plan["planned_artifacts"] = ["modules/foundups/other_foundup/README.md"]
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=plan,
+        ),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert "work_order_materializer_bounded_worker_plan_artifact_outside_allowed_paths" in reasons
+
+
+def test_authority_profile_materializer_rejects_bounded_worker_plan_domain_mismatch() -> None:
+    plan = _pilot_bounded_worker_plan()
+    plan["domain_id"] = "other_foundup"
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=plan,
+        ),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert "work_order_materializer_bounded_worker_plan_scope_mismatch:domain_id" in reasons
+
+
+def test_authority_profile_materializer_rejects_non_ascii_bounded_worker_plan() -> None:
+    plan = _pilot_bounded_worker_plan()
+    plan["operation"] = "résumé_patch"
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=plan,
+        ),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert (
+        "work_order_materializer_bounded_worker_plan_non_ascii" in reasons
+        or "work_order_materializer_authority:FAIL_PROFILE_NON_ASCII" in reasons
+    )
+
+
 def _work_orders(**overrides: object) -> dict[str, object]:
     order = _work_order(**overrides)
     return {"work_orders": {WORK_ORDER_ID: order}}
@@ -1689,6 +1769,69 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
     assert stage_results["executor_plan"]["decision"] == "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"
     assert stage_results["execution_valve"]["decision"] == "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"
     assert "work_orders.json" not in json.dumps(stored, sort_keys=True)
+
+
+def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_profile(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    principal_public, reddog_public, connector = _ed25519_signing_material()
+    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    profile = _write_runtime_json(
+        tmp_path,
+        "profile.json",
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            bounded_worker_plan=_pilot_bounded_worker_plan(),
+        ),
+    )
+    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
+    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
+    chain = tmp_path / "runtime" / "chain_results.json"
+    authority_state = tmp_path / "runtime" / "authority_state.json"
+    socket_path = tmp_path / "runtime" / "signer.sock"
+    artifact_generator = _FakeArtifactGenerator(content="# generated from profile plan\n")
+
+    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=state,
+        chain_results_path=chain,
+        authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
+        valve_environment_path=valve_env,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshots,
+        principal_authority_records_path=principals,
+        signer_socket_path=socket_path,
+        signer_socket_connector=connector,
+        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worktree_runner=_FakeWorktreeRunner(),
+        pilot_dryrun_binding_enabled=True,
+        artifact_generation_request_binding_enabled=True,
+        artifact_generator=artifact_generator,
+        now_iso=NOW,
+        now_epoch=1000,
+        requested_queue_item_id="queue-1",
+        max_steps=10,
+    )
+
+    assert result.accepted is True
+    assert result.dispatched_stages[-2:] == ("worktree_create", "bounded_worker_pilot")
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE"
+    assert artifact_generator.calls
+
+    stored = json.loads(chain.read_text(encoding="utf-8"))
+    stage_results = stored["stage_results"]
+    assert stage_results["bounded_worker_pilot"]["decision"] == (
+        "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
+    )
+    assert "work_orders.json" not in json.dumps(stored, sort_keys=True)
+    assert artifact_generator.calls[0]["binding"]["work_order_id"] == WORK_ORDER_ID
 
 
 def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
