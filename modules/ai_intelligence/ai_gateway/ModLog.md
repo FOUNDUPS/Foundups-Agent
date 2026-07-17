@@ -1,5 +1,39 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Campaign Execution Receipt Rehydration
+
+**Who:** 0102 Codex
+**Type:** Receipt Integrity
+**Slice:** MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_REHYDRATION_PHASE1
+
+**What:** Added rehydration for serialized
+`ModelAutoResearchCampaignExecutionReceipt` artifacts.
+
+**Why:** Campaign execution now emits a benchmark-run-bearing artifact. Future
+promotion, runtime binding, or feedback ratchet consumers must verify the
+campaign receipt and its embedded benchmark run before trusting the execution
+result.
+
+**Files:**
+- `src/model_autoresearch_campaign_execution.py` - adds campaign execution
+  receipt rehydration, shared canonical execution digest body, embedded
+  benchmark-run rehydration, candidate consistency checks, and constant-time
+  receipt ID comparison.
+- `tests/test_model_autoresearch_campaign_execution.py` - verifies round-trip
+  rehydration, digest-bound tamper rejection, embedded benchmark tamper
+  rejection, and malformed shape rejection.
+
+**Truth Boundary:**
+- IMPLEMENTED: serialized campaign execution receipts can be accepted only
+  after schema, digest, embedded benchmark, and candidate consistency checks.
+- NOT IMPLEMENTED: model promotion, runtime binding, PatternMemory writes,
+  HoloIndex re-indexing, provider calls, or automatic resident campaign
+  execution.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model Benchmark Run Receipt Rehydration
 
 **Who:** 0102 Codex

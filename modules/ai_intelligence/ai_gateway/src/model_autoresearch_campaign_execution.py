@@ -9,6 +9,7 @@ catalogs, write PatternMemory, re-index HoloIndex, or bind runtime defaults.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
 import tempfile
@@ -29,6 +30,7 @@ from .model_combination_benchmark_harness import (
     ModelBenchmarkTask,
     ModelCombinationBenchmarkRunReceipt,
     build_model_benchmark_candidate,
+    rehydrate_model_combination_benchmark_run_receipt,
     run_model_combination_benchmark,
 )
 
@@ -187,6 +189,46 @@ def run_reddog_model_autoresearch_campaign_execution(
     )
 
 
+def rehydrate_model_autoresearch_campaign_execution_receipt(
+    payload: Mapping[str, Any],
+) -> ModelAutoResearchCampaignExecutionReceipt:
+    """Rehydrate a serialized campaign execution receipt and verify its digest."""
+
+    if not isinstance(payload, Mapping):
+        raise ValueError("invalid_autoresearch_campaign_execution_receipt")
+    if payload.get("schema_version") != MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_SCHEMA_VERSION:
+        raise ValueError("invalid_autoresearch_campaign_execution_schema")
+    receipt_id = _required(payload.get("receipt_id"), "receipt_id")
+    source_plan_receipt_id = _required(payload.get("source_plan_receipt_id"), "source_plan_receipt_id")
+    benchmark_run_receipt = rehydrate_model_combination_benchmark_run_receipt(
+        _required_mapping(payload.get("benchmark_run_receipt"), "benchmark_run_receipt")
+    )
+    executed_candidate_ids = _string_tuple(payload.get("executed_candidate_ids"), "executed_candidate_ids")
+    skipped_candidate_ids = _string_tuple(
+        payload.get("skipped_campaign_candidate_ids"),
+        "skipped_campaign_candidate_ids",
+    )
+    benchmark_candidate_ids = tuple(candidate.candidate_id for candidate in benchmark_run_receipt.candidates)
+    if tuple(sorted(executed_candidate_ids)) != tuple(sorted(benchmark_candidate_ids)):
+        raise ValueError("autoresearch_execution_candidate_mismatch")
+    body = _execution_digest_body(
+        source_plan_receipt_id=source_plan_receipt_id,
+        benchmark_run_receipt=benchmark_run_receipt,
+        executed_candidate_ids=executed_candidate_ids,
+        skipped_campaign_candidate_ids=skipped_candidate_ids,
+    )
+    expected = _digest_prefixed("model_autoresearch_campaign_execution", body)
+    if not hmac.compare_digest(receipt_id, expected):
+        raise ValueError("model_autoresearch_campaign_execution_receipt_id_mismatch")
+    return ModelAutoResearchCampaignExecutionReceipt(
+        receipt_id=receipt_id,
+        source_plan_receipt_id=source_plan_receipt_id,
+        benchmark_run_receipt=benchmark_run_receipt,
+        executed_candidate_ids=executed_candidate_ids,
+        skipped_campaign_candidate_ids=skipped_candidate_ids,
+    )
+
+
 def _plan(value: Mapping[str, Any] | ModelAutoResearchPlanReceipt) -> ModelAutoResearchPlanReceipt:
     if isinstance(value, ModelAutoResearchPlanReceipt):
         return value
@@ -309,16 +351,12 @@ def _execution_receipt(
     executed_candidate_ids: tuple[str, ...],
     skipped_campaign_candidate_ids: tuple[str, ...],
 ) -> ModelAutoResearchCampaignExecutionReceipt:
-    body = {
-        "schema_version": MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_SCHEMA_VERSION,
-        "source_plan_receipt_id": plan.receipt_id,
-        "benchmark_run_receipt_id": benchmark.receipt_id,
-        "executed_candidate_ids": list(executed_candidate_ids),
-        "skipped_campaign_candidate_ids": list(skipped_campaign_candidate_ids),
-        "benchmark_evidence_receipt_ids": [
-            receipt.receipt_id for receipt in benchmark.benchmark_evidence_receipts
-        ],
-    }
+    body = _execution_digest_body(
+        source_plan_receipt_id=plan.receipt_id,
+        benchmark_run_receipt=benchmark,
+        executed_candidate_ids=executed_candidate_ids,
+        skipped_campaign_candidate_ids=skipped_campaign_candidate_ids,
+    )
     return ModelAutoResearchCampaignExecutionReceipt(
         receipt_id=_digest_prefixed("model_autoresearch_campaign_execution", body),
         source_plan_receipt_id=plan.receipt_id,
@@ -326,6 +364,25 @@ def _execution_receipt(
         executed_candidate_ids=executed_candidate_ids,
         skipped_campaign_candidate_ids=skipped_campaign_candidate_ids,
     )
+
+
+def _execution_digest_body(
+    *,
+    source_plan_receipt_id: str,
+    benchmark_run_receipt: ModelCombinationBenchmarkRunReceipt,
+    executed_candidate_ids: tuple[str, ...],
+    skipped_campaign_candidate_ids: tuple[str, ...],
+) -> dict[str, Any]:
+    return {
+        "schema_version": MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_SCHEMA_VERSION,
+        "source_plan_receipt_id": source_plan_receipt_id,
+        "benchmark_run_receipt_id": benchmark_run_receipt.receipt_id,
+        "executed_candidate_ids": list(executed_candidate_ids),
+        "skipped_campaign_candidate_ids": list(skipped_campaign_candidate_ids),
+        "benchmark_evidence_receipt_ids": [
+            receipt.receipt_id for receipt in benchmark_run_receipt.benchmark_evidence_receipts
+        ],
+    }
 
 
 def _runtime_output_path(
@@ -367,6 +424,25 @@ def _required(value: Any, name: str) -> str:
     return text
 
 
+def _required_mapping(value: Any, name: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ValueError(name + "_invalid")
+    return value
+
+
+def _required_list(value: Any, name: str) -> list[Any]:
+    if not isinstance(value, list):
+        raise ValueError(name + "_invalid")
+    return value
+
+
+def _string_tuple(value: Any, name: str) -> tuple[str, ...]:
+    records = tuple(_required(item, name) for item in _required_list(value, name))
+    if len(set(records)) != len(records):
+        raise ValueError(name + "_duplicate")
+    return records
+
+
 def _digest_prefixed(prefix: str, value: Mapping[str, Any]) -> str:
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
     return f"{prefix}:{hashlib.sha256(encoded).hexdigest()}"
@@ -397,5 +473,6 @@ __all__ = [
     "ModelAutoResearchCampaignExecutionReason",
     "ModelAutoResearchCampaignExecutionReceipt",
     "ModelAutoResearchCampaignExecutionResult",
+    "rehydrate_model_autoresearch_campaign_execution_receipt",
     "run_reddog_model_autoresearch_campaign_execution",
 ]

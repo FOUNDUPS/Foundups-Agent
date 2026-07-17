@@ -10,6 +10,7 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_executio
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ACCEPT,
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_REJECT,
     ModelAutoResearchCampaignExecutionReason,
+    rehydrate_model_autoresearch_campaign_execution_receipt,
     run_reddog_model_autoresearch_campaign_execution,
 )
 from modules.ai_intelligence.ai_gateway.src.model_champion_challenger_autoresearch import (
@@ -97,6 +98,26 @@ def _plan():
     )
 
 
+def _execution_payload(tmp_path: Path) -> dict:
+    output = tmp_path / "runtime" / "campaign_execution.json"
+    result = run_reddog_model_autoresearch_campaign_execution(
+        repo_root=REPO_ROOT,
+        plan_receipt=_plan().to_dict(),
+        candidate_pool=(
+            _candidate("provider/challenger").to_dict(),
+            _candidate("provider/new").to_dict(),
+        ),
+        tasks=[task.to_dict() for task in _tasks()],
+        runner=_runner,
+        verifier=_verifier,
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        output_path=output,
+    )
+    assert result.accepted is True
+    return json.loads(output.read_text(encoding="utf-8"))
+
+
 def test_campaign_execution_runs_verified_plan_candidates_and_writes_receipt(tmp_path: Path) -> None:
     plan = _plan()
     output = tmp_path / "runtime" / "campaign_execution.json"
@@ -130,6 +151,72 @@ def test_campaign_execution_runs_verified_plan_candidates_and_writes_receipt(tmp
     assert payload["source_plan_receipt_id"] == plan.receipt_id
     assert payload["benchmark_run_receipt"]["task_family"] == "architecture"
     assert len(payload["benchmark_run_receipt"]["benchmark_evidence_receipts"]) == 2
+
+
+def test_campaign_execution_receipt_rehydrates_with_benchmark_consistency(tmp_path: Path) -> None:
+    payload = _execution_payload(tmp_path)
+
+    receipt = rehydrate_model_autoresearch_campaign_execution_receipt(payload)
+
+    assert receipt.to_dict() == payload
+    assert receipt.source_plan_receipt_id == payload["source_plan_receipt_id"]
+    assert receipt.executed_candidate_ids == ("provider/new", "provider/challenger")
+
+
+def test_campaign_execution_receipt_rejects_tampered_digest_bound_fields(tmp_path: Path) -> None:
+    payload = _execution_payload(tmp_path)
+    mutations = []
+
+    source_tamper = dict(payload)
+    source_tamper["source_plan_receipt_id"] = "model_autoresearch_plan:tampered"
+    mutations.append(source_tamper)
+
+    executed_tamper = dict(payload)
+    executed_tamper["executed_candidate_ids"] = ["provider/new"]
+    mutations.append(executed_tamper)
+
+    skipped_tamper = dict(payload)
+    skipped_tamper["skipped_campaign_candidate_ids"] = ["none"]
+    mutations.append(skipped_tamper)
+
+    for item in mutations:
+        try:
+            rehydrate_model_autoresearch_campaign_execution_receipt(item)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("tampered campaign execution receipt was accepted")
+
+
+def test_campaign_execution_receipt_rejects_embedded_benchmark_tamper(tmp_path: Path) -> None:
+    payload = _execution_payload(tmp_path)
+    payload["benchmark_run_receipt"]["samples"][0]["accepted"] = False
+
+    try:
+        rehydrate_model_autoresearch_campaign_execution_receipt(payload)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("tampered embedded benchmark run was accepted")
+
+
+def test_campaign_execution_receipt_rejects_malformed_shape_before_digest_check(tmp_path: Path) -> None:
+    payload = _execution_payload(tmp_path)
+    bad_schema = dict(payload)
+    bad_schema["schema_version"] = "other"
+    bad_ids = dict(payload)
+    bad_ids["executed_candidate_ids"] = "provider/new"
+
+    for item, expected in (
+        (bad_schema, "invalid_autoresearch_campaign_execution_schema"),
+        (bad_ids, "executed_candidate_ids_invalid"),
+    ):
+        try:
+            rehydrate_model_autoresearch_campaign_execution_receipt(item)
+        except ValueError as exc:
+            assert str(exc) == expected
+        else:
+            raise AssertionError(f"expected {expected}")
 
 
 def test_campaign_execution_rejects_tampered_plan_receipt(tmp_path: Path) -> None:
