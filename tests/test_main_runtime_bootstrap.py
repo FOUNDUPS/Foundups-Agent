@@ -252,6 +252,104 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
     ]
 
 
+def test_main_dependency_security_blocker_runs_reddog_diagnostic_before_return(monkeypatch):
+    """A pre-RedDog startup blocker must still give RedDog a read-only diagnostic turn."""
+
+    order: list[str] = []
+
+    def pass_step(name: str):
+        def _step(*_args, **_kwargs):
+            order.append(name)
+            return True
+
+        return _step
+
+    def fail_step(name: str):
+        def _step(*_args, **_kwargs):
+            order.append(name)
+            return False
+
+        return _step
+
+    def diagnostic(*_args, **kwargs):
+        order.append(f"diagnostic:{kwargs['component']}:{kwargs['stage']}")
+
+    monkeypatch.setenv("OPENCLAW_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    monkeypatch.setenv("WSP_FRAMEWORK_PREFLIGHT", "0")
+
+    with patch.object(main, "run_env_hygiene_preflight", pass_step("env_hygiene")), patch.object(
+        main, "run_brain_artifact_preflight", pass_step("brain")
+    ), patch.object(
+        main, "run_ironclaw_runtime_preflight", pass_step("ironclaw")
+    ), patch.object(
+        main, "run_openclaw_security_preflight", pass_step("security")
+    ), patch.object(
+        main, "run_dependency_security_preflight", fail_step("dep_security")
+    ), patch.object(
+        main, "_handle_startup_blocker", side_effect=diagnostic
+    ), patch.object(
+        main, "run_wre_dashboard_preflight", pass_step("dashboard")
+    ), patch.object(
+        main, "bootstrap_runtime_dae_launches", pass_step("dae_bootstrap")
+    ):
+        main.main()
+
+    assert order == [
+        "env_hygiene",
+        "brain",
+        "ironclaw",
+        "security",
+        "dep_security",
+        "diagnostic:dep_security:run_dependency_security_preflight",
+    ]
+
+
+def test_startup_blocker_diagnostic_is_read_only_and_restores_env(monkeypatch):
+    """The startup-blocker diagnostic cannot leak auto handoff/profile into the chain."""
+
+    observed: dict[str, str] = {}
+
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "preexisting_profile")
+    monkeypatch.delenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF", raising=False)
+
+    def resident_cycle(_repo_root):
+        observed["durable_cycle"] = os.environ["REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE"]
+        observed["work_focus"] = os.environ["REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS"]
+        observed["auto_fix"] = os.environ["REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF"]
+        observed["auto_profile"] = os.environ["REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE"]
+        observed["cycle_bucket"] = os.environ["REDDOG_RESIDENT_ARCHITECT_CYCLE_BUCKET"]
+        assert "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" not in os.environ
+        assert "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE" not in os.environ
+        os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] = "1"
+        os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"] = "leaked_profile"
+        return True
+
+    with patch.object(
+        main,
+        "run_reddog_resident_architect_durable_cycle_preflight",
+        side_effect=resident_cycle,
+    ):
+        main._run_reddog_startup_blocker_diagnostic(
+            Path("O:/Foundups-Agent"),
+            component="dep security",
+            stage="run_dependency_security_preflight",
+        )
+
+    assert observed["durable_cycle"] == "1"
+    assert observed["auto_fix"] == "0"
+    assert observed["auto_profile"] == "0"
+    assert observed["cycle_bucket"].startswith("startup_blocker:dep_security:")
+    assert "Diagnose startup blocker dep_security" in observed["work_focus"]
+    assert os.environ["REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF"] == "1"
+    assert os.environ["REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE"] == "1"
+    assert os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"] == "preexisting_profile"
+    assert "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" not in os.environ
+
+
 # ---------------------------------------------------------------------------
 # Headless bootstrap seam (WRE_OPENCLAW_HERMES_AUTONOMOUS_BUILD_DRYRUN_PHASE1)
 #

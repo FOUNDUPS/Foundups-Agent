@@ -351,17 +351,24 @@ def test_main_py_wre_dashboard_critical_alert_blocks_for_explicit_menu_enforceme
         ) as mock_monitor:
             mock_monitor.return_value.is_in_watch_period.return_value = False
             with patch("builtins.print") as mock_print:
-                with patch.dict(
-                    "os.environ",
-                    {
-                        "WRE_DASHBOARD_PREFLIGHT": "1",
-                        "WRE_DASHBOARD_AUTO_ENFORCE": "1",
-                    },
-                    clear=True,
-                ):
-                    result = main.run_wre_dashboard_preflight(Path("."))
+                with patch(
+                    "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+                ) as mock_dispatch:
+                    with patch.dict(
+                        "os.environ",
+                        {
+                            "WRE_DASHBOARD_PREFLIGHT": "1",
+                            "WRE_DASHBOARD_AUTO_ENFORCE": "1",
+                        },
+                        clear=True,
+                    ):
+                        result = main.run_wre_dashboard_preflight(Path("."))
 
     assert result is False
+    mock_dispatch.assert_called_once()
+    assert mock_dispatch.call_args.kwargs["component"] == "wre_dashboard"
+    assert mock_dispatch.call_args.kwargs["severity"] == "critical"
+    assert mock_dispatch.call_args.kwargs["payload"]["automation_candidate"] is True
     printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
     assert "preflight=FAIL (STABLE, ENFORCED)" in printed
     assert "Startup blocked by AUTO enforcement" in printed
@@ -387,17 +394,24 @@ def test_main_py_wre_dashboard_critical_alert_blocks_for_autonomous_24x7_runtime
         ) as mock_monitor:
             mock_monitor.return_value.is_in_watch_period.return_value = False
             with patch("builtins.print") as mock_print:
-                with patch.dict(
-                    "os.environ",
-                    {
-                        "WRE_DASHBOARD_PREFLIGHT": "1",
-                        "OPENCLAW_24X7": "1",
-                    },
-                    clear=True,
-                ):
-                    result = main.run_wre_dashboard_preflight(Path("."), interactive_menu=False)
+                with patch(
+                    "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+                ) as mock_dispatch:
+                    with patch.dict(
+                        "os.environ",
+                        {
+                            "WRE_DASHBOARD_PREFLIGHT": "1",
+                            "OPENCLAW_24X7": "1",
+                        },
+                        clear=True,
+                    ):
+                        result = main.run_wre_dashboard_preflight(Path("."), interactive_menu=False)
 
     assert result is False
+    mock_dispatch.assert_called_once()
+    assert mock_dispatch.call_args.kwargs["component"] == "wre_dashboard"
+    assert mock_dispatch.call_args.kwargs["severity"] == "critical"
+    assert mock_dispatch.call_args.kwargs["payload"]["automation_candidate"] is True
     printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
     assert "preflight=FAIL (STABLE, ENFORCED)" in printed
     assert "Startup blocked by AUTO enforcement" in printed
