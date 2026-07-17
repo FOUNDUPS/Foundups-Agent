@@ -11,6 +11,7 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_clie
     FAIL_SIGNER_SOCKET_PATH_INSIDE_REPO,
     FAIL_SIGNER_SOCKET_PATH_MISSING,
     FAIL_SIGNER_SOCKET_PATH_RELATIVE,
+    FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE,
     REJECT_SIGNER_SOCKET_CONNECT_FAILED,
     REJECT_SIGNER_SOCKET_RESPONSE_INVALID,
     REJECT_SIGNER_SOCKET_RESPONSE_TOO_LARGE,
@@ -101,6 +102,35 @@ def test_build_rejects_missing_relative_inside_repo_and_device_paths(tmp_path: P
     device = build_reddog_isolated_signer_socket_client(repo_root=repo, socket_path="\\\\?\\C:\\tmp\\signer.sock")
     assert device.accepted is False
     assert FAIL_SIGNER_SOCKET_DEVICE_PREFIX in device.rejection_reasons
+
+
+def test_build_rejects_unavailable_production_socket_without_connector(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    socket_path = _socket_path(tmp_path)
+
+    built = build_reddog_isolated_signer_socket_client(
+        repo_root=repo,
+        socket_path=socket_path,
+    )
+
+    assert built.accepted is False
+    assert built.status == SIGNER_SOCKET_CLIENT_REJECT
+    assert FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE in built.rejection_reasons
+
+
+def test_injected_connector_may_own_transport_availability_for_tests(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    socket_path = _socket_path(tmp_path)
+
+    built = build_reddog_isolated_signer_socket_client(
+        repo_root=repo,
+        socket_path=socket_path,
+        connector=lambda *_: _accepted_response(),
+    )
+
+    assert built.accepted is True
+    assert built.status == SIGNER_SOCKET_CLIENT_READY
+    assert built.client is not None
 
 
 def test_client_sends_signing_request_and_returns_attested_response(tmp_path: Path) -> None:

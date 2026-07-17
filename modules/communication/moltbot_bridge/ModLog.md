@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_SOCKET_RUNTIME_AVAILABILITY_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Hardened the isolated signer socket client so production/no-injected-connector
+  runtime configuration requires an existing outside-repo socket path before the
+  resident queue dependency bundle is accepted.
+- Preserved injected-connector behavior for deterministic tests and bounded
+  resident service proofs where the connector owns transport availability.
+- Added regression coverage at both the socket-client and main resident queue
+  dependency-bundle layers so a missing signer socket fails closed before queue
+  authority signing is attempted.
+- Boundary remains constrained: this does not spawn a signer, load private key
+  material, execute shell commands, mutate source, enqueue OpenClaw, dispatch
+  Hermes, publish PRs, settle rewards, or re-index HoloIndex.
+
 ## 2026-07-17: REDDOG_PROFILE_RUNTIME_FULL_QUEUE_CHAIN_PROOF_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
