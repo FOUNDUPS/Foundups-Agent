@@ -1,7 +1,7 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.5",
+    "version": "1.6",
     "status": "active",
     "mantra_stage_count": 7,
     "operator_action_count": 9,
@@ -44,7 +44,8 @@
   },
   "agent_profiles": {
     "0102": {
-      "context_window": "unlimited",
+      "context_window": "runtime_configured",
+      "model_binding": "runtime_receipt_required",
       "output_mode": "verbose_strategic",
       "specialization": "oversight_validation",
       "mantra_emphasis": "Hard Think + Dialectic Sweep + Follow WSP",
@@ -57,7 +58,8 @@
       "system_prompt_reference": "You are 0102, the strategic orchestrator. Reference WSP 97 and maintain the core mantra throughout operations."
     },
     "qwen": {
-      "context_window": "32K_tokens",
+      "context_window": "runtime_configured",
+      "model_binding": "runtime_receipt_required",
       "output_mode": "structured_json",
       "specialization": "planning_coordination",
       "mantra_emphasis": "Research + CoT retrieval + Build",
@@ -67,10 +69,11 @@
         "Coordination Planning",
         "Implementation Guidance"
       ],
-      "system_prompt_reference": "You are Qwen, the operational coordinator. Reference WSP 97 in coordination and optimize for 32K context."
+      "system_prompt_reference": "You are Qwen, the operational coordinator. Reference WSP 97 and stay within the validated runtime context budget."
     },
     "gemma": {
-      "context_window": "8K_tokens",
+      "context_window": "runtime_configured",
+      "model_binding": "runtime_receipt_required",
       "output_mode": "binary_validation",
       "specialization": "validation_execution",
       "mantra_emphasis": "First Principles + validation after CoR sweep",
@@ -116,7 +119,7 @@
         "Follow WSP: Maintain module structure compliance"
       ],
       "success_criteria": [
-        "All 464 orphans dispositioned",
+        "All in-scope orphans have disposition receipts",
         "Codebase health improved",
         "Integration roadmap created",
         "No functionality loss"
@@ -173,7 +176,7 @@
       "wsp_compliance"
     ],
     "profile_adherence": {
-      "context_window_limits": true,
+      "context_window_limits": "runtime_receipt_required",
       "output_mode_compliance": true,
       "specialization_focus": true
     },
@@ -184,10 +187,11 @@
     }
   },
   "performance_metrics": {
+    "measurement_policy": "Runtime-configured targets measured from validated receipts; WSP 97 defines no universal percentage target.",
     "execution_efficiency": {
-      "mantra_cycle_completion_rate": "target_95_percent",
-      "context_window_optimization": "target_90_percent",
-      "mission_success_rate": "target_95_percent"
+      "mantra_cycle_completion_rate": "measure_from_validated_receipts",
+      "context_window_optimization": "measure_from_runtime_binding_receipts",
+      "mission_success_rate": "measure_from_resolved_success_evidence"
     },
     "agent_performance": {
       "specialization_effectiveness": "measured_by_success_rate",
@@ -209,9 +213,9 @@
       "gemma_system_prompt": "pending"
     },
     "mission_templates": {
-      "mcp_rubik": "active",
-      "orphan_archaeology": "active",
-      "code_review": "planned"
+      "mcp_rubik": "template_active_execution_unproved",
+      "orphan_archaeology": "template_active_execution_unproved",
+      "code_review": "template_planned"
     }
   }
 }
