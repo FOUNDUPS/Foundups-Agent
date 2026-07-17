@@ -7,6 +7,7 @@ import hashlib
 import json
 import sqlite3
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -763,6 +764,79 @@ def test_openclaw_claim_ignores_0102_readonly_task_until_env_enabled(
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
+
+
+def test_openclaw_signed_worker_healthcheck_blocks_before_agentdb_claim(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK", "1")
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signer_socket_service_healthcheck as healthcheck_module,
+    )
+
+    monkeypatch.setattr(
+        healthcheck_module,
+        "run_reddog_signer_socket_service_healthcheck",
+        lambda **_: SimpleNamespace(
+            to_dict=lambda: {
+                "accepted": False,
+                "status": "SIGNER_SERVICE_HEALTHCHECK_REJECT",
+                "rejection_reasons": ("signer_healthcheck_client_rejected",),
+            }
+        ),
+    )
+    runner = _FakeRunner()
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+    )
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert SignedWorkerOpenClawClaimReason.SIGNER_HEALTHCHECK_REJECTED in result[
+        "rejection_reasons"
+    ]
+    assert "signer_healthcheck_client_rejected" in result["rejection_reasons"]
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
+    assert runner.calls == []
+
+
+def test_openclaw_signed_worker_healthcheck_accept_allows_claim(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK", "1")
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signer_socket_service_healthcheck as healthcheck_module,
+    )
+
+    monkeypatch.setattr(
+        healthcheck_module,
+        "run_reddog_signer_socket_service_healthcheck",
+        lambda **_: SimpleNamespace(
+            to_dict=lambda: {
+                "accepted": True,
+                "status": "SIGNER_SERVICE_HEALTHCHECK_READY",
+                "rejection_reasons": (),
+            }
+        ),
+    )
+    runner = _FakeRunner()
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+    )
+
+    assert result["accepted"] is True
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    assert result["task_id"] == task_id
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
+    assert runner.calls[0]["task_id"] == task_id
 
 
 def test_openclaw_claim_executes_0102_readonly_task_when_env_enabled(

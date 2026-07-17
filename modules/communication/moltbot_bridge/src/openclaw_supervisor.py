@@ -62,6 +62,7 @@ class SignedWorkerOpenClawClaimReason:
     CLAIM_RACE_LOST = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_RACE_LOST"
     MALFORMED_CONTEXT = "REJECT_REDDOG_SIGNED_WORKER_MALFORMED_CONTEXT"
     TASK_EXECUTION_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_TASK_EXECUTION_REJECTED"
+    SIGNER_HEALTHCHECK_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_SIGNER_HEALTHCHECK_REJECTED"
     AGENTDB_FAILURE = "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_FAILURE"
     MAX_CLAIMS_INVALID = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
     CLAIM_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_CLAIM_REJECTED"
@@ -279,6 +280,18 @@ def claim_reddog_signed_worker_dispatch_task_once(
             is_0102_readonly_signed_worker_context,
         )
         from modules.infrastructure.database.src.agent_db import AgentDB
+
+        healthcheck = _signed_worker_signer_healthcheck_before_claim(repo_root)
+        if healthcheck is not None and healthcheck.get("accepted") is not True:
+            return _signed_worker_claim_result(
+                accepted=False,
+                status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+                rejection_reasons=(
+                    SignedWorkerOpenClawClaimReason.SIGNER_HEALTHCHECK_REJECTED,
+                    *tuple(healthcheck.get("rejection_reasons", ()) or ()),
+                ),
+                detail=str(healthcheck.get("status") or "")[:300],
+            )
 
         factory = agent_db_factory or AgentDB
         db = factory()
@@ -824,6 +837,76 @@ def _openclaw_queue_stage_tasks_enabled_from_env() -> bool:
         os.environ,
         "OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED",
     )
+
+
+def _signed_worker_signer_healthcheck_before_claim(repo_root: Path | str) -> Mapping[str, Any] | None:
+    """Run optional signer healthcheck before claiming a signed-worker task."""
+
+    requested = (
+        os.getenv("OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK", "0") == "1"
+        or os.getenv("REDDOG_SIGNER_SERVICE_HEALTHCHECK", "0") == "1"
+    )
+    if not requested:
+        return None
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_file_path,
+        )
+        from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
+            run_reddog_signer_socket_service_healthcheck,
+        )
+
+        result = run_reddog_signer_socket_service_healthcheck(
+            repo_root=Path(repo_root),
+            run_packet_path=resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH",
+            )
+            or None,
+            requester_principal_id=str(
+                os.getenv("REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID") or ""
+            )
+            or None,
+            signer_profile_id=str(
+                os.getenv("REDDOG_SIGNER_HEALTHCHECK_PROFILE_ID")
+                or "reddog-work-authority"
+            ),
+            timeout_s=_float_env("REDDOG_SIGNER_HEALTHCHECK_TIMEOUT_S", 5.0),
+            max_response_bytes=_positive_int_env(
+                "REDDOG_SIGNER_HEALTHCHECK_MAX_RESPONSE_BYTES",
+                16384,
+            ),
+        )
+        return result.to_dict()
+    except Exception as exc:
+        return {
+            "accepted": False,
+            "status": "SIGNER_HEALTHCHECK_EXCEPTION",
+            "rejection_reasons": (type(exc).__name__,),
+        }
+
+
+def _float_env(name: str, default: float) -> float:
+    raw = os.getenv(name, "")
+    if not raw:
+        return float(default)
+    try:
+        value = float(raw)
+    except ValueError:
+        return 0.0
+    return value if value > 0 else 0.0
+
+
+def _positive_int_env(name: str, default: int) -> int:
+    raw = os.getenv(name, "")
+    if not raw:
+        return int(default)
+    try:
+        value = int(raw)
+    except ValueError:
+        return 0
+    return value if value > 0 else 0
 
 
 def _signed_0102_bounded_code_stage_ready_from_env(
