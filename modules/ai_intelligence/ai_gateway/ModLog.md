@@ -1,5 +1,36 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Feedback Chain Main Preflight
+
+**Who:** 0102 Codex
+**Type:** Runtime Startup Wiring
+**Slice:** MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_MAIN_PREFLIGHT_PHASE1
+
+**What:** Exposed the model AutoResearch cycle feedback chain through the
+main resident preflight as `REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN`.
+
+**Why:** The chain bootstrap must be reachable from startup without requiring
+operators to manually enable three separate post-execution artifact steps.
+
+**Files:**
+- `main.py` - adds disabled-by-default chain flag, enforced mode, startup
+  logging, and environment path propagation.
+- `modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py`
+  - covers successful chain execution before promotion and enforced startup
+  failure.
+
+**Truth Boundary:**
+- IMPLEMENTED: explicit startup wiring for the already-merged post-execution
+  AutoResearch chain.
+- NOT IMPLEMENTED: direct provider calls, benchmark execution, model
+  promotion, catalog mutation, PatternMemory writes, HoloIndex re-indexing,
+  runtime model binding, worker spawn, shell execution, source mutation, or
+  extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Chain Bootstrap
 
 **Who:** 0102 Codex
