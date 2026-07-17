@@ -22,6 +22,7 @@ from modules.ai_intelligence.ai_gateway.src.model_promotion_gate import (
     ModelPromotionGateDecision,
     ModelPromotionPolicy,
     evaluate_model_promotion_gate,
+    rehydrate_model_promotion_gate_receipt,
 )
 
 
@@ -254,6 +255,59 @@ def test_gate_digest_is_stable_and_binds_signed_receipt():
 
     assert first.receipt_id == second.receipt_id
     assert first.receipt_id != changed.receipt_id
+
+
+def test_rehydrate_promotion_gate_receipt_round_trips_champion_and_challenger():
+    champion = evaluate_model_promotion_gate(
+        benchmark_run_receipt=_benchmark(),
+        policy=_policy(_benchmark()),
+        promotion_authority_receipt_id="authority:1",
+        signed_promotion_receipt_id="signed:1",
+    )
+    challenger_run = _benchmark(verifier=_rejecting_verifier)
+    challenger = evaluate_model_promotion_gate(
+        benchmark_run_receipt=challenger_run,
+        policy=_policy(challenger_run),
+        promotion_authority_receipt_id="authority:1",
+        signed_promotion_receipt_id="signed:1",
+    )
+
+    hydrated_champion = rehydrate_model_promotion_gate_receipt(champion.to_dict())
+    hydrated_challenger = rehydrate_model_promotion_gate_receipt(challenger.to_dict())
+
+    assert hydrated_champion.receipt_id == champion.receipt_id
+    assert hydrated_champion.promotion_evidence_receipt is not None
+    assert hydrated_challenger.receipt_id == challenger.receipt_id
+    assert hydrated_challenger.decision == ModelPromotionGateDecision.KEEP_CHALLENGER
+
+
+def test_rehydrate_promotion_gate_rejects_tampering_and_inconsistent_evidence():
+    receipt = evaluate_model_promotion_gate(
+        benchmark_run_receipt=_benchmark(),
+        policy=_policy(_benchmark()),
+        promotion_authority_receipt_id="authority:1",
+        signed_promotion_receipt_id="signed:1",
+    ).to_dict()
+
+    tampered_id = dict(receipt)
+    tampered_id["benchmark_run_receipt_id"] = "model_combination_benchmark_run_projection:tampered"
+    missing_evidence = dict(receipt)
+    missing_evidence["promotion_evidence_receipt"] = None
+    mismatched_evidence = dict(receipt)
+    mismatched_evidence["promotion_evidence_receipt"] = dict(receipt["promotion_evidence_receipt"])
+    mismatched_evidence["promotion_evidence_receipt"]["model_id"] = "provider/other"
+
+    for payload, expected in (
+        (tampered_id, "promotion_gate_receipt_id_mismatch"),
+        (missing_evidence, "promotion_evidence_missing"),
+        (mismatched_evidence, "promotion_evidence_receipt_id_mismatch"),
+    ):
+        try:
+            rehydrate_model_promotion_gate_receipt(payload)
+        except ValueError as exc:
+            assert str(exc) == expected
+        else:
+            raise AssertionError("tampered promotion gate receipt was accepted")
 
 
 def test_promotion_gate_module_has_no_network_command_or_runtime_binding_imports():
