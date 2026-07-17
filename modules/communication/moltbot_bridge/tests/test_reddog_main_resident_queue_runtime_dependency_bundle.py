@@ -382,6 +382,29 @@ def test_bundle_rejects_invalid_signer_socket_without_falling_back(tmp_path: Pat
     assert bundle.signer is None
 
 
+def test_bundle_rejects_unavailable_production_signer_socket_before_queue_runtime(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    authority_state = tmp_path / "runtime" / "authority-state.json"
+    socket_path = tmp_path / "runtime" / "missing-signer.sock"
+    snapshot_path = _write_json(tmp_path, "snapshots.json", _snapshots())
+    principal_path = _write_json(tmp_path, "principals.json", _principals())
+
+    bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
+        repo_root=repo,
+        authority_state_path=authority_state,
+        permission_snapshots_path=snapshot_path,
+        principal_authority_records_path=principal_path,
+        signer_socket_path=socket_path,
+        now_epoch=NOW,
+    )
+
+    assert bundle.accepted is False
+    assert bundle.status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_REJECT
+    assert "FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE" in bundle.rejection_reasons
+    assert bundle.signer is None
+    assert authority_state.exists() is False
+
+
 def test_bundle_has_no_shell_network_holoindex_private_key_or_live_runner_imports() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     banned_import_roots = {
