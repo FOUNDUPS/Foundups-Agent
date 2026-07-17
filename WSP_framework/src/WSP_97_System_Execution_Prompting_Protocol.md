@@ -212,6 +212,10 @@ This is the default micro/macro rhythm:
 3. **Out-of-the-box**: what adjacent path or existing mechanism makes the better move possible?
 4. **Compression**: what is the smallest change that respects the larger truth?
 
+### 1.4 Cross-Module Concatenation
+
+When a slice crosses module boundaries, classify its launch, ingress, continuity, durable-state, execution, and supervision contracts before adding wiring. The derived operational checklist is `WSP_framework/docs/annexes/MODULE_CONCATENATION_GATE.md`. WSP 97 remains canonical; the annex is a non-protocol quick reference and does not create a new execution plane or memory authority.
+
 ### 2. Agent-Specific Execution Profiles
 
 #### 0102 Profile (Strategic Orchestrator)
