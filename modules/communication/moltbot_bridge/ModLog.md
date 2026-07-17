@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_OPENCLAW_SUPERVISOR_CLAIM_RECEIPT_THREADING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97
+
+- Threaded OpenClaw signed-worker claim-loop `receipt_ids` and
+  `requeued_task_ids` into the supervisor top-level action result and verify
+  summary.
+- Added regression coverage so `OpenClawSupervisor.run_cycle()` exposes claim
+  receipt IDs without requiring callers to inspect nested `claim_loop` payloads.
+- No authority, queue, runner, shell, PR, PatternMemory, reward, or HoloIndex
+  behavior changed.
+- HoloIndex query-only check did not surface the new supervisor receipt-threading
+  surface; recorded as
+  HOLOINDEX_REDDOG_OPENCLAW_SUPERVISOR_CLAIM_RECEIPT_THREADING_INDEX_GAP. No
+  runtime reindex performed.
+
 ## 2026-07-17: REDDOG_RESIDENT_CONTROL_LOOP_RECEIPT_PERSISTENCE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97

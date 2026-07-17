@@ -233,7 +233,12 @@ def test_run_cycle_claims_signed_worker_tasks_when_enabled(tmp_path):
             "status": "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT",
             "claimed_count": 2,
             "completed_task_ids": ("task-1", "task-2"),
+            "requeued_task_ids": (),
             "failed_task_ids": (),
+            "receipt_ids": (
+                "signed_worker_task_execution_alpha",
+                "signed_worker_task_execution_beta",
+            ),
             "rejection_reasons": (),
         }
     )
@@ -265,8 +270,16 @@ def test_run_cycle_claims_signed_worker_tasks_when_enabled(tmp_path):
     )
     assert result["action_result"]["ok"] is True
     assert result["action_result"]["claimed_count"] == 2
+    assert result["action_result"]["receipt_ids"] == (
+        "signed_worker_task_execution_alpha",
+        "signed_worker_task_execution_beta",
+    )
     assert result["verify"]["ok"] is True
     assert result["verify"]["completed_task_ids"] == ("task-1", "task-2")
+    assert result["verify"]["receipt_ids"] == (
+        "signed_worker_task_execution_alpha",
+        "signed_worker_task_execution_beta",
+    )
     assert any(event[0] == "supervisor_execute" for event in events)
 
 
