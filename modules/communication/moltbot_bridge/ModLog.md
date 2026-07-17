@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_DEFAULT_INPUT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Updated the RedDog model AutoResearch plan startup hook to use the existing
+  outside-repo cycle feedback ledger as the default feedback input when
+  `REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH` is not explicitly set.
+- Explicit feedback paths still take precedence, and a missing cycle feedback
+  ledger remains optional so startup does not fail closed on absent feedback.
+- Added main-preflight coverage for default feedback path selection and
+  explicit override behavior.
+- Boundary remains constrained: no provider call, benchmark execution,
+  HoloIndex re-index, PatternMemory write, model promotion, runtime binding,
+  worker spawn, source mutation, PR publication, reward settlement, shell
+  execution, or merge authority was added.
+
+## 2026-07-17: MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CONTEXT_BINDING_PHASE1
+
 ## 2026-07-17: MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CONTEXT_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
