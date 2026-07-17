@@ -117,6 +117,22 @@ def _policy():
     )
 
 
+def _feedback_record(model_id: str, *, suffix: str = "1") -> dict:
+    return {
+        "record_type": "model_selection_outcome_feedback",
+        "schema_version": "model_feedback_ledger_record.v1",
+        "feedback_record_id": f"model_feedback_{suffix}",
+        "outcome_receipt_id": f"model_selection_outcome_receipt:{suffix}",
+        "selection_receipt_id": f"model_selection_receipt:{suffix}",
+        "catalog_snapshot_id": "model_catalog_snapshot:1",
+        "task_family": "architecture",
+        "selected_model_ids": [model_id],
+        "verification_receipt_ids": [f"verify:{suffix}"],
+        "source_ratchet_id": f"outcome_ratchet_{suffix}",
+        "source_ratchet_digest": "sha256:" + suffix[0].rjust(64, "0"),
+    }
+
+
 def test_autoresearch_plans_new_candidate_and_rebenchmark_challenger():
     champion_gate = _gate("provider/champion", pass_all=True)
     challenger_gate = _gate("provider/challenger", pass_all=False)
@@ -140,6 +156,69 @@ def test_autoresearch_plans_new_candidate_and_rebenchmark_challenger():
         "provider/new",
     ]
     assert all(item.requires_independent_verifier for item in receipt.campaign_items)
+
+
+def test_autoresearch_uses_feedback_records_as_bounded_priority_signal():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+    feedback = _feedback_record("provider/new", suffix="2")
+
+    receipt = plan_model_champion_challenger_autoresearch(
+        promotion_gate_receipts=(challenger_gate,),
+        candidate_pool=(
+            _candidate("provider/challenger"),
+            _candidate("provider/new"),
+        ),
+        policy=_policy(),
+        feedback_records=(feedback,),
+    )
+
+    assert receipt.rejection_reasons == ()
+    assert receipt.source_feedback_record_ids == ("model_feedback_2",)
+    assert receipt.feedback_ledger_digest.startswith("model_autoresearch_feedback_ledger:")
+    assert [item.candidate_id for item in receipt.campaign_items] == [
+        "provider/new",
+        "provider/challenger",
+    ]
+    assert receipt.campaign_items[0].priority == "P0"
+    assert receipt.campaign_items[0].reason == "verified_runtime_feedback_unbenchmarked_candidate"
+
+
+def test_autoresearch_rejects_malformed_or_mismatched_feedback_records():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+    malformed = _feedback_record("provider/new")
+    malformed["source_ratchet_digest"] = "not-a-digest"
+    mismatched = _feedback_record("provider/new")
+    mismatched["task_family"] = "security"
+
+    for record, expected in (
+        (malformed, "feedback_source_ratchet_digest_invalid"),
+        (mismatched, "feedback_task_family_mismatch"),
+    ):
+        try:
+            plan_model_champion_challenger_autoresearch(
+                promotion_gate_receipts=(challenger_gate,),
+                candidate_pool=(_candidate("provider/new"),),
+                policy=_policy(),
+                feedback_records=(record,),
+            )
+        except ValueError as exc:
+            assert str(exc) == expected
+        else:
+            raise AssertionError("feedback record was accepted")
+
+
+def test_autoresearch_feedback_cannot_invent_candidate():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+
+    receipt = plan_model_champion_challenger_autoresearch(
+        promotion_gate_receipts=(challenger_gate,),
+        candidate_pool=(_candidate("provider/challenger"),),
+        policy=_policy(),
+        feedback_records=(_feedback_record("provider/unlisted"),),
+    )
+
+    assert [item.candidate_id for item in receipt.campaign_items] == ["provider/challenger"]
+    assert all(item.candidate_id != "provider/unlisted" for item in receipt.campaign_items)
 
 
 def test_autoresearch_stops_when_no_candidates_need_work():

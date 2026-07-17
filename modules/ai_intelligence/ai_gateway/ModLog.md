@@ -1,5 +1,40 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model Feedback Ledger AutoResearch Signal
+
+**Who:** 0102 Codex
+**Type:** Recursive Learning Signal
+**Slice:** MODEL_FEEDBACK_LEDGER_AUTORESEARCH_SIGNAL_PHASE1
+
+**What:** Extended the champion/challenger AutoResearch planner to accept
+validated model-feedback ledger records as bounded planning signals.
+
+**Why:** RedDog now admits independently verified model-selection outcomes into
+the model-feedback ledger. The AutoResearch planner needs to cite and digest
+those outcomes so verified runtime evidence can influence future benchmark
+campaign priority without promoting models or trusting raw claims.
+
+**Files:**
+- `src/model_champion_challenger_autoresearch.py` - validates same-task,
+  same-catalog feedback records, binds their IDs/digest into the plan receipt,
+  and uses them only to reprioritize known candidates.
+- `tests/test_model_champion_challenger_autoresearch.py` - verifies feedback
+  priority, malformed/mismatched feedback rejection, and no candidate invention.
+
+**Truth Boundary:**
+- IMPLEMENTED: feedback records can raise priority for existing benchmark
+  candidates and are digest-bound into AutoResearch plan receipts.
+- IMPLEMENTED: feedback records must be same task family, same catalog snapshot,
+  have valid source-ratchet digest and verification receipts, and cannot create
+  candidates outside the supplied candidate pool.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  catalog mutation, PatternMemory writes, HoloIndex re-indexing, or runtime model
+  default binding.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Model Feedback Ledger Admission
 
 **Who:** 0102 Codex
