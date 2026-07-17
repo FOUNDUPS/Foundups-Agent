@@ -9,6 +9,7 @@
 - **Security-First Design**: Pattern-based filtering blocks sensitive data (passwords, keys, tokens)
 - **Controlled Access**: Whitelist approach for allowed environment variables
 - **.env File Support**: Secure reading of environment configuration files
+- **WSP 71 op:// Resolution**: Optional 1Password CLI-backed runtime resolver for `op://vault/item/field` references
 - **Zero Token Cost**: Local processing prevents expensive AI calls
 - **WSP Compliance**: Follows WSP 77 (Agent Coordination) and WSP 90 (UTF-8 Enforcement)
 
@@ -59,6 +60,24 @@ The server integrates with the Qwen/Gemma intelligent routing system:
 3. **check_env_var_exists**: Check variable existence without revealing value
 4. **read_env_file**: Read .env files with security filtering
 5. **get_project_env_info**: Get project environment setup information
+
+### WSP 71 Vault Resolver
+
+`OpCliSecretResolver` resolves `op://` secret references at runtime through the
+1Password CLI:
+
+```python
+from modules.infrastructure.secrets_mcp.src.op_cli_secret_resolver import OpCliSecretResolver
+
+resolver = OpCliSecretResolver()
+result = resolver.resolve("op://foundups-secrets/reddog-signing/private", "signer:reddog")
+secret = result.get_value() if result.success else None
+```
+
+The resolver calls `op read <reference> --no-newline` as a shell-free argv list.
+It records only audit-safe hashes/status metadata. It does not store secrets,
+print secret stdout/stderr, mutate the repository, invoke OpenClaw/Hermes, or
+re-index HoloIndex.
 
 ## Integration Points
 
