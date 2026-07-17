@@ -75,7 +75,7 @@ Core protocols that establish the fundamental architecture and principles.
 | WSP 11 | WRE Standard Command Protocol | Active | Interface definition and command standards | WSP 1, WSP 49 | API design, interface specification |
 | WSP 12 | Dependency Management | Active | Module dependency declaration and management | WSP 11, WSP 13 | Package management, dependencies |
 | WSP 13 | AGENTIC SYSTEM | Active | **CANONICAL FOUNDATION** for ALL agentic protocols - unifies WSP 27/36/38/39/54/73/74/76/77/80 | WSP 27, 36, 38, 39, 54, 73, 74, 76, 77, 80 | Master agentic foundation tying all agent WSPs together |
-| WSP 14 | Modular Audit Protocol | Active | Module auditing and compliance checking | WSP 4, WSP 47 | Compliance checking, audit processes |
+| WSP 14 | Modular Audit Protocol | Deprecated | Superseded by WSP 4; retained only as a historical redirect | WSP 4 | Do not invoke; use WSP 4 for structural compliance and audit processes |
 | WSP 15 | Module Prioritization Scoring System | Active | MPS 4-question methodology derived from WSP 25/44 semantic state foundation | WSP 25, WSP 8, WSP 37 | Priority assessment within unified consciousness framework |
 | WSP 16 | Test Audit Coverage | Deprecated -> Superseded by WSP 6 | Historical reference only; use WSP 6 for comprehensive test audit | WSP 5, WSP 6 | Do not use for new workflows |
 | WSP 17 | Pattern Registry Protocol | Active | Extension of WSP 84 preventing pattern duplication across modules through mandatory pattern registries | WSP 84, WSP 50 | Pattern discovery, architectural memory |
@@ -120,7 +120,7 @@ Advanced protocols for complex system behaviors and architectural concerns.
 | WSP 44 | Semantic State Engine Protocol | Active | Semantic state management | WSP 25, WSP 56 | State management, semantics |
 | WSP 45 | Behavioral Coherence Protocol | Active | Behavioral consistency and coherence | WSP 40, WSP 56 | Behavior validation, coherence |
 | WSP 46 | Windsurf Recursive Engine Protocol | Active | WRE core architecture and operation | WSP 13, WSP 36, WSP 54 | Engine architecture, core systems, autonomous operations |
-| WSP 47 | Module Violation Tracking Protocol | Active | Module violation tracking and management | WSP 4, WSP 14, WSP 47 | Violation tracking, compliance, framework vs module issues |
+| WSP 47 | Module Violation Tracking Protocol | Active | Module violation tracking and management | WSP 4, WSP 47 | Violation tracking, compliance, framework vs module issues |
 | WSP 48 | Recursive Self-Improvement Protocol | Active | System self-improvement and evolution | WSP 25, WSP 48 | Self-improvement, evolution, recursive enhancement |
 | WSP 49 | Module Directory Structure Standardization | Active | Module structure standardization | WSP 1, WSP 3, WSP 40 | Structure standards, organization, 3-level architecture |
 | WSP 50 | Pre-Action Verification Protocol | Active | Pre-action verification and validation | WSP 32, WSP 50 | Verification, validation, certainty protocols |
@@ -219,7 +219,7 @@ WSP 13: AGENTIC SYSTEM (Canonical Foundation)
 ### Core Dependencies:
 - **WSP 1** -> Referenced by all other WSPs (Foundation)
 - **WSP 3** -> WSP 49, WSP 40, WSP 60, WSP 22, WSP 34 (Domain Architecture + Module Independence)
-- **WSP 4** -> WSP 5, WSP 6, WSP 14, WSP 57 (Audit Chain + Naming Coherence)
+- **WSP 4** -> WSP 5, WSP 6, WSP 57 (Audit Chain + Naming Coherence)
 - **WSP 13** -> WSP 27, 36, 38, 39, 54, 73, 74, 76, 77, 80 (Master Agentic Foundation)
 - **WSP 23** -> WSP 24 (rESP Chain)
 - **WSP 46** -> WSP 54, WSP 41 (WRE Chain)
