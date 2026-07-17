@@ -1249,6 +1249,106 @@ def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_pat
     assert "no_holoindex_reindex=True" in output
 
 
+def test_main_preflight_durable_resident_cycle_supplies_memory_context(tmp_path, capsys) -> None:
+    import main
+
+    brain_state = tmp_path / "brain_artifact_state.json"
+    brain_state.write_text(
+        json.dumps(
+            {
+                "updated_at": "2026-07-17T00:00:00+00:00",
+                "signature": {"conversation_count": 7, "revision_files": 11},
+                "summary": {"total_artifacts": 13},
+                "conversations": 7,
+            }
+        ),
+        encoding="utf-8",
+    )
+    breadcrumbs = tmp_path / "breadcrumbs.json"
+    breadcrumbs.write_text(
+        json.dumps(
+            {
+                "breadcrumbs": [
+                    {"breadcrumb_id": "crumb-1", "continuity_id": "foundups_agent", "task_id": "task-1"},
+                    {"breadcrumb_id": "crumb-2", "continuity_id": "foundups_agent", "task_id": "task-2"},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    workspace_notes = tmp_path / "workspace_memory.json"
+    workspace_notes.write_text(
+        json.dumps({"notes": [{"note_id": "note-1", "topic": "resident RedDog"}]}),
+        encoding="utf-8",
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_BRAIN_STATE_PATH": str(brain_state),
+                "REDDOG_RESIDENT_BREADCRUMBS_PATH": str(breadcrumbs),
+                "REDDOG_RESIDENT_WORKSPACE_MEMORY_NOTES_PATH": str(workspace_notes),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    kwargs = mocked.call_args.kwargs
+    assert kwargs["brain_state"]["record_count"] == 7
+    assert kwargs["brain_state"]["signature_digest"].startswith("sha256:")
+    assert len(kwargs["breadcrumbs"]) == 2
+    assert kwargs["breadcrumbs"][0]["breadcrumb_id"] == "crumb-1"
+    assert len(kwargs["workspace_memory_notes"]) == 1
+    assert kwargs["workspace_memory_notes"][0]["note_id"] == "note-1"
+    intent_memory = kwargs["red_dog_intent"]["memory_context"]
+    assert intent_memory["brain_available"] is True
+    assert intent_memory["brain_record_count"] == 7
+    assert intent_memory["breadcrumbs_count"] == 2
+    assert intent_memory["workspace_memory_notes_count"] == 1
+    assert intent_memory["memory_context_digest"].startswith("sha256:")
+    output = capsys.readouterr().out
+    assert "brain_records=7" in output
+    assert "breadcrumbs=2" in output
+    assert "workspace_memory=1" in output
+
+
+def test_main_preflight_durable_resident_cycle_memory_context_can_be_disabled() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_BRAIN_CONTEXT": "0",
+                "REDDOG_RESIDENT_BREADCRUMBS_CONTEXT": "0",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    kwargs = mocked.call_args.kwargs
+    assert kwargs["brain_state"] is None
+    assert kwargs["breadcrumbs"] == ()
+    assert kwargs["workspace_memory_notes"] == ()
+    intent_memory = kwargs["red_dog_intent"]["memory_context"]
+    assert intent_memory["brain_available"] is False
+    assert intent_memory["breadcrumbs_count"] == 0
+    assert intent_memory["workspace_memory_notes_count"] == 0
+
+
 def test_main_preflight_resident_cycle_respects_explicit_queue_profile(tmp_path) -> None:
     import main
 

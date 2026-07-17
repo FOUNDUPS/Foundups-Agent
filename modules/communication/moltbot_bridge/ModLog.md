@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MAIN_RESIDENT_MEMORY_CONTEXT_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Wired `main.py` resident RedDog startup to supply bounded read-only Brain,
+  Breadcrumb, and workspace-memory metadata into the existing durable resident
+  architect cycle.
+- Brain state is loaded from the existing extracted Brain artifact state unless
+  explicitly overridden or disabled; Breadcrumbs come from AgentDB search or an
+  explicit JSON fixture; workspace memory remains explicit JSON-only for this
+  slice.
+- Added intent-level memory context counts/digest plus startup telemetry so the
+  resident cycle can prove whether historical memory was available without
+  treating it as authority.
+- Boundary remains constrained: this does not add shell execution, repository
+  mutation, worktree operations, PR creation, HoloIndex re-index, Hermes
+  dispatch, live FoundUp enqueue, PatternMemory promotion, reward settlement, or
+  merge authority.
+
 ## 2026-07-17: REDDOG_RESIDENT_ARCHITECT_CADENCE_INTENT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
