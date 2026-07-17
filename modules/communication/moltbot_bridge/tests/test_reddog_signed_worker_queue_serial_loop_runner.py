@@ -825,6 +825,9 @@ def test_runtime_binding_profile_defaults_derivation_flags(tmp_path: Path) -> No
     assert call["outcome_ratchet_request_binding_enabled"] is True
     assert call["held_out_gate_request_binding_enabled"] is True
     assert call["pattern_memory_admission_request_binding_enabled"] is True
+    assert call["worker_dispatch_writer"].__class__.__name__ == (
+        "AgentDbSignedWorkerDispatchTaskWriter"
+    )
     assert "artifact_generator_mode" not in call
     assert "draft_pr_runner" not in call
 
@@ -930,6 +933,7 @@ def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Pat
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
         "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "0",
+        "REDDOG_WORKER_DISPATCH_AGENTDB_WRITER": "0",
         "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
         "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
         "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
@@ -952,6 +956,7 @@ def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Pat
 
     assert result["accepted"] is True
     assert "artifact_generation_request_binding_enabled" not in bootstrap.calls[0]
+    assert "worker_dispatch_writer" not in bootstrap.calls[0]
 
 
 def test_runtime_binding_rejects_pattern_memory_admission_db_inside_repo(

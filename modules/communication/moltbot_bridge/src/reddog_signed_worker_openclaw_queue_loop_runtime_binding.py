@@ -221,6 +221,9 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         bootstrap_kwargs["draft_pr_runner"] = draft_pr_runner
     if pattern_memory_admission_sink is not None:
         bootstrap_kwargs["pattern_memory_admission_sink"] = pattern_memory_admission_sink
+    worker_dispatch_writer = _build_worker_dispatch_writer(env)
+    if worker_dispatch_writer is not None:
+        bootstrap_kwargs["worker_dispatch_writer"] = worker_dispatch_writer
     config = SignedWorkerQueueSerialLoopRunnerConfig(
         work_state_path=str(work_state_path),
         chain_results_path=str(chain_results_path),
@@ -372,6 +375,21 @@ def _build_pattern_memory_admission_sink(
         return None, (
             SignedWorkerOpenClawQueueLoopBindingReason.PATTERN_MEMORY_ADMISSION_DB_PATH_INVALID,
         )
+
+
+def _build_worker_dispatch_writer(env: Mapping[str, str]) -> Any:
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    if not resident_queue_runtime_flag_enabled(env, "REDDOG_WORKER_DISPATCH_AGENTDB_WRITER"):
+        return None
+
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        AgentDbSignedWorkerDispatchTaskWriter,
+    )
+
+    return AgentDbSignedWorkerDispatchTaskWriter()
 
 
 def _stripped(value: Any) -> str:

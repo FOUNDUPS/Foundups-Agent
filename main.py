@@ -3431,6 +3431,17 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         if signer_socket_path and not signature_verifier_backend:
             signature_verifier_backend = "ed25519"
 
+        worker_dispatch_writer = None
+        if resident_queue_runtime_flag_enabled(
+            os.environ,
+            "REDDOG_WORKER_DISPATCH_AGENTDB_WRITER",
+        ):
+            from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+                AgentDbSignedWorkerDispatchTaskWriter,
+            )
+
+            worker_dispatch_writer = AgentDbSignedWorkerDispatchTaskWriter()
+
         explicit_valve_environment_path = str(
             os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH") or ""
         ).strip()
@@ -3536,6 +3547,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             ),
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
+            worker_dispatch_writer=worker_dispatch_writer,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
             max_steps=max_steps,
