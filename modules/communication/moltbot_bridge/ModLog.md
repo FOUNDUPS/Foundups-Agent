@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MAIN_RESIDENT_ARCHITECT_DURABLE_CYCLE_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Wired `main.py` to optionally run one durable AgentDB-backed resident RedDog
+  architect cycle after authoritative work-state refresh and before FIX
+  promotion.
+- The preflight submits `reddog_intent.v1`, lets the existing OpenClaw resident
+  cycle claim read-only audit/research work, persists the architect
+  determination, and exposes `REDDOG_RESIDENT_ARCHITECT_INTENT_ID` for the
+  downstream handoff path.
+- The hook is disabled by default, warning-only unless explicitly enforced,
+  and requires the already-governed external-research snapshot retriever path.
+- Boundary remains constrained: no shell command, repo mutation, HoloIndex
+  re-index, Hermes dispatch, worktree operation, PR creation, PatternMemory
+  promotion, live FoundUp enqueue, merge authority, or coding-worker execution
+  was added.
+
 ## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_DEFAULT_INPUT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
