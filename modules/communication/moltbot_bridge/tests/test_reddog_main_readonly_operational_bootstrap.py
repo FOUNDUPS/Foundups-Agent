@@ -1026,6 +1026,7 @@ def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_pat
         ):
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
             assert os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] == "sha256:intent-main-resident"
+            assert os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] == "1"
 
     kwargs = mocked.call_args.kwargs
     assert kwargs["repo_root"] == REPO_ROOT
@@ -1048,9 +1049,58 @@ def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_pat
     assert "completed=2" in output
     assert "architect_action=FIX" in output
     assert "queue_candidates=1" in output
+    assert "auto_fix_handoff=True" in output
     assert "read_only_authority=True" in output
     assert "no_repo_mutation=True" in output
     assert "no_holoindex_reindex=True" in output
+
+
+def test_main_preflight_resident_cycle_respects_auto_fix_handoff_opt_out(tmp_path) -> None:
+    import main
+
+    external_snapshot = tmp_path / "external_research_snapshot.json"
+    external_snapshot.write_text(json.dumps({"snapshots": []}), encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF": "0",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" not in os.environ
+
+
+def test_main_preflight_resident_cycle_does_not_override_explicit_fix_handoff(tmp_path) -> None:
+    import main
+
+    external_snapshot = tmp_path / "external_research_snapshot.json"
+    external_snapshot.write_text(json.dumps({"snapshots": []}), encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] == "0"
 
 
 def test_main_preflight_resident_cycle_reject_is_nonblocking_by_default(capsys) -> None:
