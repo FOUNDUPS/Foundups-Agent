@@ -1,5 +1,48 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - RedDog Runtime Binding Artifact Supply
+
+**Who:** 0102 Codex
+**Type:** Runtime Artifact Bridge
+**Slice:** REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY_PHASE1
+
+**What:** Added a bounded supplier and startup adapter that materialize a
+`RedDogModelRuntimeBindingReceipt` JSON artifact from an existing production
+model-selection receipt, benchmark evidence, promotion evidence, signed
+production evidence, and explicit runtime binding policy.
+
+**Why:** After RedDog runtime paths learned to consume runtime-binding receipts,
+the resident runtime needs a receipt artifact producer. This bridge supplies the
+artifact without hard-coding model defaults or trusting catalog-only champion
+fields.
+
+**Files:**
+- `src/model_runtime_binding_artifact_supply.py` - rehydrates source receipts,
+  verifies signed production evidence, binds runtime models, and atomically
+  writes one receipt outside the repository.
+- `src/model_runtime_binding_artifact_supply_bootstrap.py` - outside-repo JSON
+  input loader, trusted model-evidence key resolver construction, public
+  signature verifier selection, and supplier invocation.
+- `tests/test_model_runtime_binding_artifact_supply.py` - serialized and typed
+  evidence acceptance, missing signature-gate rejection, policy-mismatch
+  rejection, repository-output rejection, and AST boundary tests.
+- `tests/test_model_runtime_binding_artifact_supply_bootstrap.py` - positive
+  materialization and missing-key/output/AST boundary tests.
+- `README.md` and `INTERFACE.md` - API and truth-boundary notes.
+
+**Truth Boundary:**
+- IMPLEMENTED: production runtime-binding receipt artifact supply.
+- IMPLEMENTED: serialized evidence requires key resolution and signature
+  verification before runtime binding.
+- IMPLEMENTED: receipt output must live outside the repository.
+- NOT IMPLEMENTED: provider calls, benchmark execution, telemetry persistence,
+  HoloIndex re-indexing, extension runtime default mutation, worker dispatch,
+  PatternMemory writes, or panel runtime promotion.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - RedDog Model Selection Artifact Supply Main Preflight
 
 **Who:** 0102 Codex
