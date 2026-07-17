@@ -1,6 +1,7 @@
 import importlib.util
 import os
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 _MAIN_PATH = Path(__file__).resolve().parents[1] / "main.py"
@@ -337,6 +338,41 @@ def test_reddog_queue_control_loop_invalid_rounds_fail_closed_when_enforced(monk
 
     serial.assert_not_called()
     claim.assert_not_called()
+
+
+def test_reddog_serial_loop_profile_passes_agentdb_worker_dispatch_writer(monkeypatch):
+    observed: dict[str, object] = {}
+
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
+        "signed_0102_bounded_code",
+    )
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", "O:/runtime/reddog")
+
+    def fake_bootstrap(**kwargs):
+        observed.update(kwargs)
+        return SimpleNamespace(
+            accepted=True,
+            status="REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED",
+            queue_item_id="queue-1",
+            selected_slice="REDDOG_TEST_SLICE_PHASE1",
+            steps_run=1,
+            dispatched_stages=("worker_dispatch_runtime",),
+            next_action="COMPLETE",
+            chain_results_path="O:/runtime/reddog/resident_queue_chain_results.json",
+            store_revision="rev-1",
+            rejection_reasons=(),
+        )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
+        side_effect=fake_bootstrap,
+    ):
+        assert main.run_reddog_resident_queue_serial_loop_preflight(Path("O:/Foundups-Agent")) is True
+
+    writer = observed.get("worker_dispatch_writer")
+    assert writer is not None
+    assert writer.__class__.__name__ == "AgentDbSignedWorkerDispatchTaskWriter"
 
 
 def test_main_dependency_security_blocker_runs_reddog_diagnostic_before_return(monkeypatch):
