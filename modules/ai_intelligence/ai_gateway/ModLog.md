@@ -1,5 +1,42 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Plan Artifact Supply
+
+**Who:** 0102 Codex
+**Type:** Artifact Supply
+**Slice:** MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_PHASE1
+
+**What:** Added an artifact supplier that materializes a
+`ModelAutoResearchPlanReceipt` from serialized promotion-gate receipts,
+benchmark candidates, policy, and optional model-feedback records.
+
+**Why:** Verified model feedback now reaches the AutoResearch planner, but the
+resident runtime needs an outside-repo artifact seam before future benchmark
+campaign execution can consume it. This supplier validates serialized evidence
+and writes a single plan receipt without running benchmarks or mutating runtime
+defaults.
+
+**Files:**
+- `src/model_autoresearch_plan_artifact_supply.py` - rehydrates promotion-gate
+  receipts, validates candidate topology, consumes optional feedback records,
+  and writes an outside-repo plan JSON atomically.
+- `tests/test_model_autoresearch_plan_artifact_supply.py` - validates accepted
+  supply, inside-repo output rejection, tampered gate/candidate rejection,
+  malformed feedback rejection, and no provider/network/runtime imports.
+
+**Truth Boundary:**
+- IMPLEMENTED: serialized promotion-gate receipts and benchmark candidates can
+  produce a digest-bound AutoResearch plan artifact.
+- IMPLEMENTED: output is denied inside the repository and feedback records
+  remain planner-only signals.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  catalog mutation, PatternMemory writes, HoloIndex re-indexing, runtime model
+  default binding, or resident `main.py` preflight wiring.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model Promotion Gate Receipt Rehydration
 
 **Who:** 0102 Codex
