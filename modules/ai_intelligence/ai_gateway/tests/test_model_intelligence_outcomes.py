@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 from pathlib import Path
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
@@ -46,6 +48,49 @@ def _selected_receipt():
     receipt = select_models_for_task(snapshot, ModelTaskRequirements(task_family="architecture"))
     assert receipt.decision == SelectionDecision.SELECTED
     return receipt
+
+
+def _digest(value) -> str:
+    return "sha256:" + hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+    ).hexdigest()
+
+
+def _runtime_binding_receipt(selection):
+    return {
+        "schema_version": "reddog_model_runtime_binding_receipt.v1",
+        "receipt_id": "reddog_model_runtime_binding:test",
+        "decision": "bound",
+        "runtime_surface": "backend_architect",
+        "catalog_snapshot_id": selection.catalog_snapshot_id,
+        "selection_receipt_id": selection.receipt_id,
+        "task_family": selection.requirements.task_family,
+        "principal_model": selection.selected_model_ids[0],
+        "panel_models": [],
+        "role_bindings": [
+            {
+                "role": "principal",
+                "model_id": selection.selected_model_ids[0],
+                "provider": "provider",
+            }
+        ],
+        "benchmark_evidence_receipt_ids": ["model_benchmark_evidence:test"],
+        "promotion_evidence_receipt_ids": ["model_promotion_evidence:test"],
+        "signed_promotion_receipt_ids": ["signature:test"],
+        "policy": {
+            "schema_version": "reddog_model_runtime_binding_policy.v1",
+            "task_family": selection.requirements.task_family,
+            "runtime_surface": "backend_architect",
+            "min_verifier_pass_rate": 0.9,
+            "required_task_set_digest": "sha256:taskset",
+            "required_held_out_split_digest": "sha256:heldout",
+            "required_verifier_digest": "sha256:verifier",
+            "max_panel_models": 4,
+            "required_panel_topology_digest": None,
+            "authority_receipt_id": "authority:test",
+        },
+        "rejection_reasons": [],
+    }
 
 
 def test_benchmark_evidence_binds_held_out_task_set_verifier_topology_and_metrics():
@@ -245,7 +290,59 @@ def test_outcome_receipt_accepts_only_verified_complete_results():
 
     assert receipt.outcome_decision == OutcomeDecision.ACCEPTED
     assert receipt.feedback_eligible is True
-    assert outcome_feedback_record(receipt)["outcome_receipt_id"] == receipt.receipt_id
+    feedback = outcome_feedback_record(receipt)
+    assert feedback["outcome_receipt_id"] == receipt.receipt_id
+    assert feedback["model_runtime_binding_receipt_id"] is None
+    assert feedback["model_runtime_binding_digest"] == ""
+
+
+def test_outcome_feedback_record_carries_runtime_binding_receipt_digest():
+    selection = _selected_receipt()
+    runtime_binding = _runtime_binding_receipt(selection)
+    receipt = build_model_selection_outcome_receipt(
+        selection,
+        model_runtime_binding_receipt=runtime_binding,
+        verifier_decision=VerifierDecision.ACCEPT,
+        verification_receipt_ids=("verify:1",),
+        task_completed=True,
+        evidence_correct=True,
+    )
+
+    assert receipt.feedback_eligible is True
+    assert receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:test"
+    assert receipt.model_runtime_binding_digest == _digest(runtime_binding)
+    feedback = outcome_feedback_record(receipt)
+    assert feedback["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:test"
+    assert feedback["model_runtime_binding_digest"] == _digest(runtime_binding)
+
+
+def test_outcome_receipt_rejects_forged_runtime_binding_receipts():
+    selection = _selected_receipt()
+    valid = _runtime_binding_receipt(selection)
+    cases = [
+        ("selection_receipt_id", "other", "model_runtime_binding_selection_mismatch"),
+        ("catalog_snapshot_id", "other", "model_runtime_binding_catalog_mismatch"),
+        ("task_family", "other", "model_runtime_binding_task_family_mismatch"),
+        ("decision", "rejected", "model_runtime_binding_not_bound"),
+        ("receipt_id", "model_runtime_binding:test", "invalid_model_runtime_binding_receipt_id"),
+    ]
+
+    for key, value, reason in cases:
+        forged = dict(valid)
+        forged[key] = value
+        try:
+            build_model_selection_outcome_receipt(
+                selection,
+                model_runtime_binding_receipt=forged,
+                verifier_decision=VerifierDecision.ACCEPT,
+                verification_receipt_ids=("verify:1",),
+                task_completed=True,
+                evidence_correct=True,
+            )
+        except ValueError as exc:
+            assert str(exc) == reason
+        else:
+            raise AssertionError(f"expected {reason}")
 
 
 def test_outcome_receipt_rejects_unverified_or_regressed_results():
