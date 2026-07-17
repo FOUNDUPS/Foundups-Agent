@@ -1607,6 +1607,8 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY=0 Execute deterministic campaign fixture
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY=0 Materialize campaign promotion-gate receipts
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED=0 Block startup if rejected
         REDDOG_MODEL_CATALOG_SNAPSHOT_PATH                   Outside-repo model catalog snapshot JSON
         REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
         REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
@@ -1624,6 +1626,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID Held-out split ID for benchmark receipt
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE       deterministic_fixture only
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE     deterministic_fixture only
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_POLICIES_PATH Outside-repo promotion policies JSON
+        REDDOG_MODEL_AUTORESEARCH_PROMOTION_AUTHORITY_RECEIPT_ID Optional promotion authority receipt ID
+        REDDOG_MODEL_AUTORESEARCH_SIGNED_PROMOTION_RECEIPT_ID Optional signed promotion receipt ID
         REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
         REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY=0 Materialize principal/snapshot from GitHub probe
         REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED=0 Block startup if rejected
@@ -1679,10 +1684,20 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         repo_root,
         "REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH",
     )
+    model_autoresearch_promotion_gate_receipts_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH",
+    )
     model_autoresearch_campaign_execution_receipt_path = resident_queue_runtime_file_path(
         os.environ,
         repo_root,
         "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_PATH",
+    )
+    model_autoresearch_campaign_promotion_policies_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_POLICIES_PATH",
     )
     model_runtime_binding_receipt_path_supplied = bool(
         os.getenv("REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH", "").strip()
@@ -1877,11 +1892,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
 
             autoresearch_supply = run_reddog_model_autoresearch_plan_artifact_supply_bootstrap(
                 repo_root=repo_root,
-                promotion_gate_receipts_path=os.getenv(
-                    "REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH",
-                    "",
-                )
-                or None,
+                promotion_gate_receipts_path=model_autoresearch_promotion_gate_receipts_path or None,
                 candidate_pool_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH", "") or None,
                 policy_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_POLICY_PATH", "") or None,
                 feedback_records_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH", "") or None,
@@ -1980,6 +1991,70 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             print(
                 "[REDDOG-MODEL-AUTORESEARCH-CAMPAIGN] Startup blocked by "
                 "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED=1"
+            )
+            return False
+
+    autoresearch_campaign_gate_requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY",
+    )
+    autoresearch_campaign_gate_enforced = (
+        os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED", "0") != "0"
+    )
+    if autoresearch_campaign_gate_requested:
+        try:
+            from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_promotion_gate_supply_bootstrap import (
+                run_reddog_model_autoresearch_campaign_promotion_gate_supply_bootstrap,
+            )
+
+            autoresearch_campaign_gate = (
+                run_reddog_model_autoresearch_campaign_promotion_gate_supply_bootstrap(
+                    repo_root=repo_root,
+                    campaign_execution_receipt_path=model_autoresearch_campaign_execution_receipt_path,
+                    promotion_policies_path=model_autoresearch_campaign_promotion_policies_path or None,
+                    output_path=model_autoresearch_promotion_gate_receipts_path,
+                    promotion_authority_receipt_id=os.getenv(
+                        "REDDOG_MODEL_AUTORESEARCH_PROMOTION_AUTHORITY_RECEIPT_ID",
+                        "",
+                    )
+                    or None,
+                    signed_promotion_receipt_id=os.getenv(
+                        "REDDOG_MODEL_AUTORESEARCH_SIGNED_PROMOTION_RECEIPT_ID",
+                        "",
+                    )
+                    or None,
+                )
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-MODEL-AUTORESEARCH-GATE] Startup artifact supply failed: {exc}")
+            if autoresearch_campaign_gate_enforced:
+                print(f"[REDDOG-MODEL-AUTORESEARCH-GATE] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-MODEL-AUTORESEARCH-GATE] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        gate_status = "PASS" if autoresearch_campaign_gate.accepted else "WARN"
+        gate_reasons = (
+            ",".join(autoresearch_campaign_gate.rejection_reasons)
+            if autoresearch_campaign_gate.rejection_reasons
+            else "(none)"
+        )
+        print(
+            f"[REDDOG-MODEL-AUTORESEARCH-GATE] preflight={gate_status} "
+            f"status={autoresearch_campaign_gate.status} "
+            f"receipt={autoresearch_campaign_gate.supply_receipt_id or '(none)'} "
+            f"gates={len(autoresearch_campaign_gate.promotion_gate_receipt_ids)} "
+            f"reasons={gate_reasons}"
+        )
+        if autoresearch_campaign_gate.accepted and autoresearch_campaign_gate.output_path:
+            model_autoresearch_promotion_gate_receipts_path = autoresearch_campaign_gate.output_path
+            os.environ["REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH"] = (
+                model_autoresearch_promotion_gate_receipts_path
+            )
+        elif autoresearch_campaign_gate_enforced:
+            print(
+                "[REDDOG-MODEL-AUTORESEARCH-GATE] Startup blocked by "
+                "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED=1"
             )
             return False
 

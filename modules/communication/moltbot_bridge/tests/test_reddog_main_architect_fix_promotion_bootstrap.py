@@ -705,6 +705,133 @@ def test_main_preflight_enforced_model_autoresearch_campaign_execution_blocks_st
             assert main.run_reddog_architect_fix_promotion_preflight(repo) is False
 
 
+def test_main_preflight_model_autoresearch_campaign_gate_supply_runs_before_promotion(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    work_state = _write_json(tmp_path, "authoritative_work_state.json", _work_state())
+    determination = _write_json(tmp_path, "architect_determination.json", _determination())
+    memex = _write_json(tmp_path, "memex_supply_receipt.json", _memex_supply())
+    authority_source = _write_json(tmp_path, "authority_profile_source.json", _authority_profile())
+    gate_result = type(
+        "AutoResearchCampaignGateResult",
+        (),
+        {
+            "accepted": True,
+            "status": "MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_BOOTSTRAP_APPLIED",
+            "supply_receipt_id": "model_autoresearch_campaign_promotion_gate_supply:runtime",
+            "source_execution_receipt_id": "model_autoresearch_campaign_execution:runtime",
+            "output_path": str(runtime_root / "model_autoresearch_promotion_gate_receipts.json"),
+            "promotion_gate_receipt_ids": ("model_promotion_gate:1",),
+            "rejection_reasons": (),
+        },
+    )()
+    promotion_result = type(
+        "PromotionResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
+            "promotion_receipt_id": "sha256:promotion",
+            "queue_item_id": "queue-1",
+            "claim_id": "claim-1",
+            "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "committed_revision": "sha256:revision",
+            "rejection_reasons": (),
+        },
+    )()
+
+    with patch(
+        "modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_promotion_gate_supply_bootstrap.run_reddog_model_autoresearch_campaign_promotion_gate_supply_bootstrap",
+        return_value=gate_result,
+    ) as gate_supply:
+        with patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
+            return_value=promotion_result,
+        ) as promote:
+            with patch.dict(
+                "os.environ",
+                {
+                    "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY": "1",
+                    "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                    "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
+                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                    "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_PROMOTION_AUTHORITY_RECEIPT_ID": "authority:1",
+                    "REDDOG_MODEL_AUTORESEARCH_SIGNED_PROMOTION_RECEIPT_ID": "signed:1",
+                },
+                clear=True,
+            ):
+                assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+                assert main.os.environ["REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH"] == str(
+                    runtime_root / "model_autoresearch_promotion_gate_receipts.json"
+                )
+
+    gate_supply.assert_called_once()
+    gate_kwargs = gate_supply.call_args.kwargs
+    assert gate_kwargs["campaign_execution_receipt_path"] == str(
+        runtime_root / "model_autoresearch_campaign_execution_receipt.json"
+    )
+    assert gate_kwargs["promotion_policies_path"] == str(
+        runtime_root / "model_autoresearch_campaign_promotion_policies.json"
+    )
+    assert gate_kwargs["output_path"] == str(runtime_root / "model_autoresearch_promotion_gate_receipts.json")
+    assert gate_kwargs["promotion_authority_receipt_id"] == "authority:1"
+    assert gate_kwargs["signed_promotion_receipt_id"] == "signed:1"
+    promote.assert_called_once()
+
+
+def test_main_preflight_enforced_model_autoresearch_campaign_gate_supply_blocks_startup(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    gate_result = type(
+        "AutoResearchCampaignGateResult",
+        (),
+        {
+            "accepted": False,
+            "status": "MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_BOOTSTRAP_NOT_READY",
+            "supply_receipt_id": None,
+            "source_execution_receipt_id": None,
+            "output_path": None,
+            "promotion_gate_receipt_ids": (),
+            "rejection_reasons": ("missing_model_autoresearch_campaign_promotion_policies_path",),
+        },
+    )()
+
+    with patch(
+        "modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_promotion_gate_supply_bootstrap.run_reddog_model_autoresearch_campaign_promotion_gate_supply_bootstrap",
+        return_value=gate_result,
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY": "1",
+                "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_architect_fix_promotion_preflight(repo) is False
+
+
 def test_main_preflight_enforced_model_runtime_binding_supply_blocks_promotion(
     tmp_path: Path,
 ) -> None:
