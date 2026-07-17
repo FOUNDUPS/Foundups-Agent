@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_MODEL_FEEDBACK_LEDGER_PROFILE_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH` as the resident runtime path
+  for queue-stage model-feedback ledger admission.
+- Draft-PR-and-higher resident profiles now derive an outside-repo JSONL path
+  under `.reddog/model_feedback/<repo>/model_feedback.jsonl`.
+- `main.py` and the signed OpenClaw queue-loop runner now pass that path into
+  the resident serial-loop bootstrap so the `model_feedback_admission` stage can
+  admit verified model-selection outcomes without manual injection.
+- Boundary remains constrained: no provider call, benchmark execution, model
+  promotion, command execution, PatternMemory write, OpenClaw/Hermes dispatch,
+  source mutation, PR publication, reward settlement, or HoloIndex re-indexing
+  was added.
+
 ## 2026-07-17: REDDOG_RESIDENT_QUEUE_MODEL_FEEDBACK_LEDGER_ADMISSION_STAGE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

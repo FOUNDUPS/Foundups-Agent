@@ -2337,6 +2337,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_draft_pr_runner_mode,
             resident_queue_evidence_command_runner_mode,
             resident_queue_materializer_mode,
+            resident_queue_model_feedback_ledger_store_path,
             resident_queue_outcome_ratchet_store_path,
             resident_queue_pattern_memory_admission_db_path,
             resident_queue_runtime_file_path,
@@ -2515,6 +2516,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             publish_request_path=os.getenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", "") or None,
             ratchet_request_path=os.getenv("REDDOG_OUTCOME_RATCHET_REQUEST_PATH", "") or None,
             outcome_ratchet_store_path=resident_queue_outcome_ratchet_store_path(
+                os.environ,
+                repo_root,
+            )
+            or None,
+            model_feedback_ledger_store_path=resident_queue_model_feedback_ledger_store_path(
                 os.environ,
                 repo_root,
             )
