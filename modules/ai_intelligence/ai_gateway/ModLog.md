@@ -1,5 +1,38 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Feedback Planner Input
+
+**Who:** 0102 Codex
+**Type:** Planner Feedback Integration
+**Slice:** MODEL_AUTORESEARCH_CYCLE_FEEDBACK_PLANNER_INPUT_PHASE1
+
+**What:** Extended the model champion/challenger AutoResearch planner to accept
+context-bound `model_autoresearch_cycle_feedback_record.v1` records as bounded
+feedback input.
+
+**Why:** Completed AutoResearch cycles now need to influence the next
+benchmark plan without trusting unbound ledger records or changing runtime
+model bindings.
+
+**Files:**
+- `src/model_champion_challenger_autoresearch.py` - normalizes cycle feedback
+  only when source-plan context, task family, catalog snapshot, source-plan
+  digest, executed candidates, and promotion-gate receipts are present.
+- `tests/test_model_champion_challenger_autoresearch.py` - verifies bounded
+  priority influence plus fail-closed rejection for unbound, mismatched, and
+  incomplete cycle feedback records.
+
+**Truth Boundary:**
+- IMPLEMENTED: planner consumption of context-bound cycle feedback as a
+  priority signal for existing candidates.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, worker spawn,
+  shell execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Context Binding
 
 **Who:** 0102 Codex

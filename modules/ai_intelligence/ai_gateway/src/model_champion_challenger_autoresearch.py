@@ -20,6 +20,10 @@ from .model_promotion_gate import ModelPromotionGateDecision, ModelPromotionGate
 
 AUTORESEARCH_SCHEMA_VERSION = "model_champion_challenger_autoresearch_plan.v1"
 AUTORESEARCH_POLICY_SCHEMA_VERSION = "model_autoresearch_policy.v1"
+MODEL_SELECTION_FEEDBACK_RECORD_TYPE = "model_selection_outcome_feedback"
+MODEL_SELECTION_FEEDBACK_RECORD_SCHEMA = "model_feedback_ledger_record.v1"
+MODEL_AUTORESEARCH_CYCLE_FEEDBACK_RECORD_TYPE = "model_autoresearch_cycle_feedback"
+MODEL_AUTORESEARCH_CYCLE_FEEDBACK_RECORD_SCHEMA = "model_autoresearch_cycle_feedback_record.v1"
 
 
 class ModelAutoResearchAction(str, Enum):
@@ -377,53 +381,112 @@ def _normalize_feedback_records(
         if not isinstance(record, Mapping):
             raise ValueError("invalid_feedback_record")
         candidate = dict(record)
-        if candidate.get("record_type") != "model_selection_outcome_feedback":
+        record_type = candidate.get("record_type")
+        if record_type == MODEL_SELECTION_FEEDBACK_RECORD_TYPE:
+            normalized_record = _normalize_model_selection_feedback_record(candidate, policy)
+        elif record_type == MODEL_AUTORESEARCH_CYCLE_FEEDBACK_RECORD_TYPE:
+            normalized_record = _normalize_autoresearch_cycle_feedback_record(candidate, policy)
+        else:
             raise ValueError("invalid_feedback_record_type")
-        if candidate.get("schema_version") != "model_feedback_ledger_record.v1":
-            raise ValueError("invalid_feedback_record_schema")
-        record_id = _required("feedback_record_id", candidate.get("feedback_record_id"))
-        if not record_id.startswith("model_feedback_"):
-            raise ValueError("invalid_feedback_record_id")
-        for field in (
-            "outcome_receipt_id",
-            "selection_receipt_id",
-            "catalog_snapshot_id",
-            "task_family",
-            "source_ratchet_id",
-            "source_ratchet_digest",
-        ):
-            _required(field, candidate.get(field))
-        if candidate["task_family"] != policy.task_family:
-            raise ValueError("feedback_task_family_mismatch")
-        if candidate["catalog_snapshot_id"] != policy.catalog_snapshot_id:
-            raise ValueError("feedback_catalog_snapshot_mismatch")
-        selected_model_ids = tuple(str(value).strip() for value in candidate.get("selected_model_ids") or ())
-        if not selected_model_ids or any(not value for value in selected_model_ids):
-            raise ValueError("feedback_selected_model_ids_missing")
-        verification_receipt_ids = tuple(
-            str(value).strip() for value in candidate.get("verification_receipt_ids") or ()
-        )
-        if not verification_receipt_ids or any(not value for value in verification_receipt_ids):
-            raise ValueError("feedback_verification_receipts_missing")
-        if not _is_digest(candidate.get("source_ratchet_digest")):
-            raise ValueError("feedback_source_ratchet_digest_invalid")
-        normalized.append(
-            {
-                "feedback_record_id": record_id,
-                "outcome_receipt_id": str(candidate["outcome_receipt_id"]),
-                "selection_receipt_id": str(candidate["selection_receipt_id"]),
-                "catalog_snapshot_id": str(candidate["catalog_snapshot_id"]),
-                "task_family": str(candidate["task_family"]),
-                "selected_model_ids": list(selected_model_ids),
-                "verification_receipt_ids": list(verification_receipt_ids),
-                "source_ratchet_id": str(candidate["source_ratchet_id"]),
-                "source_ratchet_digest": str(candidate["source_ratchet_digest"]),
-            }
-        )
+        normalized.append(normalized_record)
+        record_id = str(normalized_record["feedback_record_id"])
         record_ids.append(record_id)
     if len(set(record_ids)) != len(record_ids):
         raise ValueError("duplicate_feedback_record_ids")
     return tuple(sorted(normalized, key=lambda item: item["feedback_record_id"]))
+
+
+def _normalize_model_selection_feedback_record(
+    candidate: Mapping[str, Any],
+    policy: ModelAutoResearchPolicy,
+) -> dict[str, Any]:
+    if candidate.get("schema_version") != MODEL_SELECTION_FEEDBACK_RECORD_SCHEMA:
+        raise ValueError("invalid_feedback_record_schema")
+    record_id = _required("feedback_record_id", candidate.get("feedback_record_id"))
+    if not record_id.startswith("model_feedback_"):
+        raise ValueError("invalid_feedback_record_id")
+    for field in (
+        "outcome_receipt_id",
+        "selection_receipt_id",
+        "catalog_snapshot_id",
+        "task_family",
+        "source_ratchet_id",
+        "source_ratchet_digest",
+    ):
+        _required(field, candidate.get(field))
+    if candidate["task_family"] != policy.task_family:
+        raise ValueError("feedback_task_family_mismatch")
+    if candidate["catalog_snapshot_id"] != policy.catalog_snapshot_id:
+        raise ValueError("feedback_catalog_snapshot_mismatch")
+    selected_model_ids = _nonempty_string_tuple("selected_model_ids", candidate.get("selected_model_ids"))
+    verification_receipt_ids = _nonempty_string_tuple(
+        "verification_receipt_ids",
+        candidate.get("verification_receipt_ids"),
+    )
+    if not _is_digest(candidate.get("source_ratchet_digest")):
+        raise ValueError("feedback_source_ratchet_digest_invalid")
+    return {
+        "feedback_record_id": record_id,
+        "record_type": MODEL_SELECTION_FEEDBACK_RECORD_TYPE,
+        "schema_version": MODEL_SELECTION_FEEDBACK_RECORD_SCHEMA,
+        "outcome_receipt_id": str(candidate["outcome_receipt_id"]),
+        "selection_receipt_id": str(candidate["selection_receipt_id"]),
+        "catalog_snapshot_id": str(candidate["catalog_snapshot_id"]),
+        "task_family": str(candidate["task_family"]),
+        "selected_model_ids": list(selected_model_ids),
+        "verification_receipt_ids": list(verification_receipt_ids),
+        "source_ratchet_id": str(candidate["source_ratchet_id"]),
+        "source_ratchet_digest": str(candidate["source_ratchet_digest"]),
+    }
+
+
+def _normalize_autoresearch_cycle_feedback_record(
+    candidate: Mapping[str, Any],
+    policy: ModelAutoResearchPolicy,
+) -> dict[str, Any]:
+    if candidate.get("schema_version") != MODEL_AUTORESEARCH_CYCLE_FEEDBACK_RECORD_SCHEMA:
+        raise ValueError("invalid_feedback_record_schema")
+    record_id = _required("feedback_record_id", candidate.get("feedback_record_id"))
+    if not record_id.startswith("model_autoresearch_cycle_feedback_"):
+        raise ValueError("invalid_feedback_record_id")
+    if candidate.get("source_plan_context_bound") is not True:
+        raise ValueError("feedback_source_plan_context_unbound")
+    for field in (
+        "cycle_receipt_id",
+        "source_plan_receipt_id",
+        "campaign_execution_receipt_id",
+        "promotion_gate_supply_receipt_id",
+        "catalog_snapshot_id",
+        "task_family",
+        "source_plan_receipt_digest",
+    ):
+        _required(field, candidate.get(field))
+    if candidate["task_family"] != policy.task_family:
+        raise ValueError("feedback_task_family_mismatch")
+    if candidate["catalog_snapshot_id"] != policy.catalog_snapshot_id:
+        raise ValueError("feedback_catalog_snapshot_mismatch")
+    executed_candidate_ids = _nonempty_string_tuple("executed_candidate_ids", candidate.get("executed_candidate_ids"))
+    promotion_gate_receipt_ids = _nonempty_string_tuple(
+        "promotion_gate_receipt_ids",
+        candidate.get("promotion_gate_receipt_ids"),
+    )
+    if not _is_digest(candidate.get("source_plan_receipt_digest")):
+        raise ValueError("feedback_source_plan_receipt_digest_invalid")
+    return {
+        "feedback_record_id": record_id,
+        "record_type": MODEL_AUTORESEARCH_CYCLE_FEEDBACK_RECORD_TYPE,
+        "schema_version": MODEL_AUTORESEARCH_CYCLE_FEEDBACK_RECORD_SCHEMA,
+        "cycle_receipt_id": str(candidate["cycle_receipt_id"]),
+        "source_plan_receipt_id": str(candidate["source_plan_receipt_id"]),
+        "source_plan_context_bound": True,
+        "campaign_execution_receipt_id": str(candidate["campaign_execution_receipt_id"]),
+        "promotion_gate_supply_receipt_id": str(candidate["promotion_gate_supply_receipt_id"]),
+        "catalog_snapshot_id": str(candidate["catalog_snapshot_id"]),
+        "task_family": str(candidate["task_family"]),
+        "selected_model_ids": list(executed_candidate_ids),
+        "verification_receipt_ids": list(promotion_gate_receipt_ids),
+        "source_plan_receipt_digest": str(candidate["source_plan_receipt_digest"]),
+    }
 
 
 def _feedback_model_ids(feedback_records: tuple[dict[str, Any], ...]) -> set[str]:
@@ -461,6 +524,13 @@ def _string_tuple(name: str, value: Any) -> tuple[str, ...]:
     records = tuple(_required(name, item) for item in raw)
     if len(set(records)) != len(records):
         raise ValueError(f"duplicate_{name}")
+    return records
+
+
+def _nonempty_string_tuple(name: str, value: Any) -> tuple[str, ...]:
+    records = _string_tuple(name, value)
+    if not records:
+        raise ValueError(f"invalid_{name}")
     return records
 
 
