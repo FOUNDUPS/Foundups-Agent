@@ -74,6 +74,21 @@ run and which promotion-gate receipts resulted. It does not call providers, run
 benchmarks, promote models, write PatternMemory, mutate HoloIndex, or change
 RedDog runtime model defaults.
 
+## Model AutoResearch Configured Gateway Runner
+
+`src/model_autoresearch_configured_gateway_runner.py` adapts a configured model
+gateway and digest-bound prompt source into the existing benchmark runner
+contract. It verifies the held-out prompt digest before any model call, targets
+the exact provider/model role assignment in the candidate, supports panel role
+calls, and returns only digest-bound output and runner receipts to the benchmark
+harness.
+
+This creates a real provider-call seam for AutoResearch benchmarks without
+turning it on at resident startup. It does not choose candidates, verify model
+answers, promote models, mutate catalogs, write PatternMemory, re-index
+HoloIndex, execute commands, mutate the repository, or bind RedDog runtime
+defaults.
+
 ## Model Combination Benchmark Harness
 
 `src/model_combination_benchmark_harness.py` runs deterministic held-out

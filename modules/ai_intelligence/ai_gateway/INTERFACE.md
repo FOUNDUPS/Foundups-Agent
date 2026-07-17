@@ -134,6 +134,25 @@ The default in-memory and JSONL stores are append-only adapters. The API is
 explicit-invoke only and does not call providers, run benchmarks, promote
 models, write PatternMemory, mutate HoloIndex, or bind RedDog runtime defaults.
 
+#### Model AutoResearch Configured Gateway Runner
+
+```python
+build_configured_gateway_benchmark_runner(...) -> BenchmarkRunner
+AIGatewayConfiguredModelCaller(gateway).call_model(...)
+```
+
+The configured runner consumes a digest-bound prompt source and an explicit
+provider/model gateway caller, then produces `ModelBenchmarkTaskOutput` records
+for the benchmark harness. It verifies `ModelBenchmarkTask.prompt_digest`
+against the supplied prompt before any call and emits only content digests,
+runner receipt IDs, and bounded metrics.
+
+The `AIGatewayConfiguredModelCaller` adapter reuses the existing `AIGateway`
+provider registry to target the candidate's exact role assignment. It is not
+enabled automatically by `main.py` and does not perform verification, promotion,
+PatternMemory writes, HoloIndex mutation, runtime binding, command execution, or
+repository mutation.
+
 #### Model Combination Benchmark Harness
 
 ```python

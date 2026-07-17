@@ -1,5 +1,37 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Configured Gateway Runner
+
+**Who:** 0102 Codex
+**Type:** Runtime Benchmark Runner Seam
+**Slice:** MODEL_AUTORESEARCH_CONFIGURED_GATEWAY_RUNNER_PHASE1
+
+**What:** Added a configured gateway benchmark runner adapter that verifies
+held-out prompt digests before provider calls and targets candidate
+provider/model role assignments through an injected gateway seam.
+
+**Why:** The AutoResearch campaign executor could run only deterministic
+fixtures. RedDog needs a real, governed benchmark-call seam before the model
+improvement loop can measure current providers and fusion panels.
+
+**Files:**
+- `src/model_autoresearch_configured_gateway_runner.py` - configured caller,
+  prompt-source, policy, and benchmark-runner adapter.
+- `tests/test_model_autoresearch_configured_gateway_runner.py` - verifies
+  digest-bound prompts, explicit provider/model routing, panel role calls,
+  cost/provider fail-closed paths, and AST no-network/no-command boundaries.
+
+**Truth Boundary:**
+- IMPLEMENTED: reusable configured gateway runner seam for benchmark campaigns.
+- NOT IMPLEMENTED: startup auto-enable, independent verifier runtime, model
+  promotion, PatternMemory writes, HoloIndex re-indexing, RedDog runtime model
+  binding, worker spawn, shell execution, source mutation, or extension
+  mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Plan Supply Regression
 
 **Who:** 0102 Codex
