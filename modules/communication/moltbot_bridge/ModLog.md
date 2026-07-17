@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RATCHET_MODEL_FEEDBACK_RECEIPT_BRIDGE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- The queue-authorized verified-outcome ratchet invoke can now emit an optional
+  `ModelSelectionOutcomeReceipt` when the ratchet request includes
+  content-bearing model-selection and runtime-binding receipts.
+- The bridge rehydrates and verifies serialized model receipts before the
+  ratchet store write, so malformed model-feedback evidence fails closed without
+  recording a verified outcome.
+- The resident serial-loop bootstrap now derives model-selection and
+  runtime-binding receipts from the bound work order into the derived ratchet
+  request when outcome-ratchet request binding is enabled.
+- Boundary remains constrained: no model/provider call, benchmark execution,
+  model promotion, PatternMemory write, OpenClaw/Hermes dispatch, source
+  mutation, PR publication, reward settlement, or HoloIndex re-indexing was
+  added.
+
 ## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_RECURSIVE_RETENTION_CARRY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

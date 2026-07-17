@@ -18,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
     _canonical_digest,
+    _derive_outcome_ratchet_request_from_chain,
     _materialize_work_orders_from_authority_profile,
     _operational_context_binding,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
@@ -78,6 +79,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized
     FakeDraftPrRunner,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_selection_and_runtime_binding_receipts,
     model_runtime_binding_receipt,
 )
 from modules.infrastructure.wre_core.src import reddog_verified_outcome_ratchet as ratchet
@@ -311,6 +313,55 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
 def _work_orders(**overrides: object) -> dict[str, object]:
     order = _work_order(**overrides)
     return {"work_orders": {WORK_ORDER_ID: order}}
+
+
+def test_derived_outcome_ratchet_request_carries_model_feedback_receipts() -> None:
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+    )
+    chain_state = {
+        "schema_version": "reddog_resident_queue_chain_results.v1",
+        "stage_results": {
+            "slice_verifier": {
+                "verifier_result": {
+                    "accepted": True,
+                    "decision": AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
+                    "receipt": {
+                        "receipt_id": "wre_slice_verify_1234",
+                        "work_order_id": WORK_ORDER_ID,
+                        "slice_name": "REDDOG_TEST_SLICE_PHASE1",
+                        "worker_id": "worker:author",
+                    },
+                }
+            },
+            "verified_draft_pr_publish": {
+                "publish_result": {
+                    "accepted": True,
+                    "decision": "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT",
+                    "receipt": {
+                        "receipt_id": "verified_draft_pr_1234",
+                        "work_order_id": WORK_ORDER_ID,
+                    },
+                }
+            },
+        },
+    }
+    work_orders = _work_orders(
+        model_selection_receipt=selection,
+        model_runtime_binding_receipt=runtime_binding,
+    )
+
+    request = _derive_outcome_ratchet_request_from_chain(
+        chain_state,
+        work_orders=work_orders,
+    )
+
+    assert request is not None
+    assert request["model_selection_receipt"]["receipt_id"] == selection["receipt_id"]
+    assert (
+        request["model_runtime_binding_receipt"]["receipt_id"]
+        == runtime_binding["receipt_id"]
+    )
 
 
 def _valve_environment(**overrides: object) -> dict[str, object]:

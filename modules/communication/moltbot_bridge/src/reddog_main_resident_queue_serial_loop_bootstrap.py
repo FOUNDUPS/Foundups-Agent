@@ -363,7 +363,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             holoindex_evidence=holoindex_evidence,
         )
     if outcome_ratchet_request_binding_enabled and ratchet_request is None:
-        ratchet_request = _derive_outcome_ratchet_request_from_chain(chain_state)
+        ratchet_request = _derive_outcome_ratchet_request_from_chain(
+            chain_state,
+            work_orders=work_orders,
+        )
     if held_out_gate_request_binding_enabled and held_out_gate_request is None:
         held_out_gate_request = _derive_held_out_gate_request_from_chain(chain_state)
     if pattern_memory_admission_request_binding_enabled and admission_request is None:
@@ -828,6 +831,7 @@ def _derive_artifact_generation_request_from_chain(
 
 def _derive_outcome_ratchet_request_from_chain(
     chain_state: Mapping[str, Any],
+    work_orders: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any] | None:
     stages = _chain_stage_results(chain_state)
     verifier_stage = _nested_mapping(stages, "slice_verifier")
@@ -841,7 +845,7 @@ def _derive_outcome_ratchet_request_from_chain(
     slice_name = str(verification_receipt.get("slice_name") or "")
     if not work_order_id or not slice_name:
         return None
-    return {
+    request: dict[str, Any] = {
         "work_order_id": work_order_id,
         "slice_name": slice_name,
         "outcome_status": "accepted",
@@ -875,6 +879,14 @@ def _derive_outcome_ratchet_request_from_chain(
         "holoindex_evidence": _derived_holoindex_evidence(stages),
         "enable_pattern_memory_write": False,
     }
+    work_order = _work_order_from_runtime_mapping(work_orders, work_order_id)
+    model_selection = _nested_mapping(work_order, "model_selection_receipt")
+    if model_selection:
+        request["model_selection_receipt"] = dict(model_selection)
+    model_runtime_binding = _nested_mapping(work_order, "model_runtime_binding_receipt")
+    if model_runtime_binding:
+        request["model_runtime_binding_receipt"] = dict(model_runtime_binding)
+    return request
 
 
 def _derive_held_out_gate_request_from_chain(
@@ -1042,6 +1054,18 @@ def _queue_item(*, snapshot: Mapping[str, Any], queue_item_id: str) -> Mapping[s
         if isinstance(item, Mapping) and str(item.get("queue_item_id") or "") == queue_item_id:
             return item
     return {}
+
+
+def _work_order_from_runtime_mapping(
+    work_orders: Mapping[str, Any] | None,
+    work_order_id: str,
+) -> Mapping[str, Any]:
+    if not work_orders or not work_order_id:
+        return {}
+    orders = _nested_mapping(work_orders, "work_orders")
+    if orders:
+        return _nested_mapping(orders, work_order_id)
+    return _nested_mapping(work_orders, work_order_id)
 
 
 def _slug(value: str) -> str:

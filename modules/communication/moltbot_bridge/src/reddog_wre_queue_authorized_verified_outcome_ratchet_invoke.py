@@ -17,6 +17,15 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verified_draft_pr_publish_invoke import (
     QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT,
 )
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
+    ModelOutcomeMetrics,
+    VerifierDecision,
+    build_model_selection_outcome_receipt,
+)
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
+    rehydrate_model_selection_receipt,
+)
 from modules.infrastructure.wre_core.src.reddog_verified_draft_pr_publish import (
     VERIFIED_DRAFT_PR_PUBLISH_ACCEPT,
 )
@@ -49,6 +58,7 @@ class QueueAuthorizedVerifiedOutcomeRatchetInvokeReason:
     WORK_ORDER_ID_MISMATCH = "REJECT_WORK_ORDER_ID_MISMATCH"
     PATTERN_MEMORY_EXPLICIT_MISSING = "REJECT_PATTERN_MEMORY_EXPLICIT_MISSING"
     PATTERN_MEMORY_SINK_REQUIRED = "REJECT_PATTERN_MEMORY_SINK_REQUIRED"
+    MODEL_FEEDBACK_RECEIPT_INVALID = "REJECT_MODEL_FEEDBACK_RECEIPT_INVALID"
     RATCHET_NOT_ACCEPTED = "REJECT_VERIFIED_OUTCOME_RATCHET_NOT_ACCEPTED"
 
 
@@ -57,6 +67,7 @@ class QueueAuthorizedVerifiedOutcomeRatchetInvokeResult:
     decision: str
     rejection_reasons: List[str] = field(default_factory=list)
     ratchet_result: Optional[VerifiedOutcomeRatchetResult] = None
+    model_selection_outcome_receipt: Optional[Dict[str, Any]] = None
     explicit_queue_authorized_verified_outcome_ratchet_requested: bool = False
     explicit_pattern_memory_write_requested: bool = False
     no_command_execution_performed: bool = True
@@ -104,6 +115,43 @@ def _reject(
 def _same_nonempty(left: Any, right: Any) -> bool:
     left_text = str(left or "")
     return bool(left_text) and left_text == str(right or "")
+
+
+def _model_feedback_receipt(request: Mapping[str, Any]) -> Optional[Dict[str, Any]]:
+    selection_raw = _mapping(request.get("model_selection_receipt"))
+    runtime_raw = _mapping(request.get("model_runtime_binding_receipt"))
+    if not selection_raw and not runtime_raw:
+        return None
+    selection = rehydrate_model_selection_receipt(selection_raw)
+    runtime_binding = None
+    if runtime_raw:
+        runtime_binding = rehydrate_model_runtime_binding_receipt(runtime_raw).to_dict()
+    verifier_result = _mapping(request.get("verification_result"))
+    verifier_receipt = _mapping(verifier_result.get("receipt"))
+    publish_result = _mapping(request.get("publish_result"))
+    publish_receipt = _mapping(publish_result.get("receipt"))
+    latency = _mapping(request.get("latency_receipt"))
+    cost = _mapping(request.get("cost_receipt"))
+    receipt = build_model_selection_outcome_receipt(
+        selection,
+        model_runtime_binding_receipt=runtime_binding,
+        verifier_decision=VerifierDecision.ACCEPT,
+        verification_receipt_ids=(str(verifier_receipt.get("receipt_id") or ""),),
+        task_completed=True,
+        evidence_correct=True,
+        unauthorized_changes_detected=False,
+        regression_detected=False,
+        metrics=ModelOutcomeMetrics(
+            latency_ms=int(latency.get("wall_time_ms") or 0),
+            input_tokens=int(cost.get("total_tokens") or 0),
+            cost_estimate_usd=float(cost.get("estimated_cost_usd") or 0),
+        ),
+        evidence_receipt_ids=(
+            str(verifier_receipt.get("receipt_id") or ""),
+            str(publish_receipt.get("receipt_id") or ""),
+        ),
+    )
+    return receipt.to_dict()
 
 
 def _enrich_ratchet_request(
@@ -202,12 +250,26 @@ def invoke_reddog_wre_queue_authorized_verified_outcome_ratchet(
             explicit_pattern_requested=explicit_pattern_memory_write_requested,
         )
 
+    enriched_request = _enrich_ratchet_request(
+        request,
+        publish_payload,
+        enable_pattern_memory_write=pattern_requested_by_request,
+    )
+    model_feedback_receipt: Optional[Dict[str, Any]] = None
+    try:
+        model_feedback_receipt = _model_feedback_receipt(enriched_request)
+    except Exception as exc:
+        return _reject(
+            [
+                QueueAuthorizedVerifiedOutcomeRatchetInvokeReason.MODEL_FEEDBACK_RECEIPT_INVALID,
+                f"model_feedback_error:{type(exc).__name__}",
+            ],
+            explicit_requested=True,
+            explicit_pattern_requested=explicit_pattern_memory_write_requested,
+        )
+
     ratcheted = ratchet_verified_outcome(
-        _enrich_ratchet_request(
-            request,
-            publish_payload,
-            enable_pattern_memory_write=pattern_requested_by_request,
-        ),
+        enriched_request,
         store=store,
         pattern_memory_sink=pattern_memory_sink,
     )
@@ -226,6 +288,7 @@ def invoke_reddog_wre_queue_authorized_verified_outcome_ratchet(
         decision=QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT,
         rejection_reasons=[],
         ratchet_result=ratcheted,
+        model_selection_outcome_receipt=model_feedback_receipt,
         explicit_queue_authorized_verified_outcome_ratchet_requested=True,
         explicit_pattern_memory_write_requested=explicit_pattern_memory_write_requested,
     )
