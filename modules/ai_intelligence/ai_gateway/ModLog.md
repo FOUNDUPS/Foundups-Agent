@@ -1,5 +1,43 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Campaign Execution
+
+**Who:** 0102 Codex
+**Type:** Bounded Benchmark Execution
+**Slice:** MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_PHASE1
+
+**What:** Added a bounded AutoResearch campaign executor that consumes a
+rehydrated `ModelAutoResearchPlanReceipt`, validates candidate-pool digest and
+verifier requirements, and runs selected candidates through injected benchmark
+runner/verifier seams.
+
+**Why:** The resident model-intelligence lane can now plan benchmark campaigns,
+but future recursive improvement needs a verified execution receipt before any
+promotion or PatternMemory step. This layer produces that receipt without
+direct provider imports or runtime binding.
+
+**Files:**
+- `src/model_autoresearch_campaign_execution.py` - validates plans,
+  candidates, held-out tasks, verifier digests, and outside-repo output before
+  running the existing benchmark harness.
+- `tests/test_model_autoresearch_campaign_execution.py` - verifies successful
+  execution, tampered plan rejection, candidate-pool mismatch rejection,
+  verifier mismatch rejection, STOP/no-op rejection, inside-repo output denial,
+  and no provider/network/runtime imports.
+
+**Truth Boundary:**
+- IMPLEMENTED: verified AutoResearch plans can produce digest-bound campaign
+  execution receipts through injected runner/verifier seams.
+- IMPLEMENTED: serialized plans, candidate topology, candidate-pool digest,
+  task set, verifier digest, and output path are fail-closed before execution.
+- NOT IMPLEMENTED: live provider calls, model promotion, catalog mutation,
+  PatternMemory writes, HoloIndex re-indexing, RedDog runtime binding, or
+  automatic resident campaign execution.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Plan Receipt Rehydration
 
 **Who:** 0102 Codex
