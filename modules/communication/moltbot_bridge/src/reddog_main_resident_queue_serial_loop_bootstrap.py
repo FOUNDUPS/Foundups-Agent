@@ -21,6 +21,7 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
@@ -663,6 +664,14 @@ def _materialize_work_orders_from_authority_profile(
     if holo_reasons:
         return None, holo_reasons
 
+    bounded_worker_plan, bounded_worker_plan_reasons = _bounded_worker_plan_from_authority_profile(
+        authority_profile=authority_profile,
+        allowed_paths=_string_list(request.get("allowed_paths")),
+        foundup_id=str(request.get("foundup_id") or authority_profile.get("foundup_id") or ""),
+    )
+    if bounded_worker_plan_reasons:
+        return None, bounded_worker_plan_reasons
+
     evidence_seed = {
         "queue_receipt": queue_receipt,
         "delegated_authority_request": request,
@@ -734,7 +743,107 @@ def _materialize_work_orders_from_authority_profile(
         ),
         "model_runtime_binding_digest": str(authority_profile.get("model_runtime_binding_digest") or ""),
     }
+    if bounded_worker_plan:
+        work_order["bounded_worker_plan"] = bounded_worker_plan
     return {work_order_id: work_order}, ()
+
+
+def _bounded_worker_plan_from_authority_profile(
+    *,
+    authority_profile: Mapping[str, Any],
+    allowed_paths: tuple[str, ...],
+    foundup_id: str,
+) -> tuple[dict[str, Any], tuple[str, ...]]:
+    raw_plan = authority_profile.get("bounded_worker_plan")
+    if raw_plan is not None and not isinstance(raw_plan, Mapping):
+        return {}, ("work_order_materializer_bounded_worker_plan_invalid:type",)
+    plan = _nested_mapping(authority_profile, "bounded_worker_plan")
+    if not plan:
+        return {}, ()
+    if not _is_ascii_json_safe(plan):
+        return {}, ("work_order_materializer_bounded_worker_plan_non_ascii",)
+
+    reasons: list[str] = []
+    required_fields = (
+        "operation",
+        "domain_id",
+        "domain_profile",
+        "planned_artifacts",
+        "shell_profile",
+        "shell_argv",
+        "selection_receipt",
+        "signed_receipt_chain",
+    )
+    for field_name in required_fields:
+        if field_name not in plan or plan.get(field_name) in (None, "", (), [], {}):
+            reasons.append(f"work_order_materializer_bounded_worker_plan_missing:{field_name}")
+
+    domain_id = str(plan.get("domain_id") or "").strip()
+    if foundup_id and domain_id and domain_id != foundup_id:
+        reasons.append("work_order_materializer_bounded_worker_plan_scope_mismatch:domain_id")
+
+    planned_artifacts = _string_list(plan.get("planned_artifacts"))
+    if not planned_artifacts:
+        reasons.append("work_order_materializer_bounded_worker_plan_invalid:planned_artifacts")
+    for artifact in planned_artifacts:
+        if not _relative_repo_path(artifact):
+            reasons.append("work_order_materializer_bounded_worker_plan_invalid_artifact_path")
+            continue
+        if not _path_allowed_by_patterns(artifact, allowed_paths):
+            reasons.append("work_order_materializer_bounded_worker_plan_artifact_outside_allowed_paths")
+
+    requested_allowed_paths = _string_list(plan.get("requested_allowed_paths"))
+    for requested in requested_allowed_paths:
+        if not _relative_repo_path(requested.rstrip("*")):
+            reasons.append("work_order_materializer_bounded_worker_plan_invalid_requested_allowed_path")
+            continue
+        if not _pattern_within_allowed_paths(requested, allowed_paths):
+            reasons.append("work_order_materializer_bounded_worker_plan_requested_path_outside_allowed_paths")
+
+    if not _string_list(plan.get("shell_argv")):
+        reasons.append("work_order_materializer_bounded_worker_plan_invalid:shell_argv")
+    for mapping_field in ("domain_profile", "shell_profile", "selection_receipt", "signed_receipt_chain"):
+        if not _nested_mapping(plan, mapping_field):
+            reasons.append(f"work_order_materializer_bounded_worker_plan_invalid:{mapping_field}")
+
+    if reasons:
+        return {}, tuple(dict.fromkeys(reasons))
+    return dict(plan), ()
+
+
+def _is_ascii_json_safe(value: Any) -> bool:
+    try:
+        json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("ascii")
+    except (TypeError, UnicodeEncodeError, ValueError):
+        return False
+    return True
+
+
+def _relative_repo_path(value: str) -> bool:
+    raw = str(value or "").replace("\\", "/").strip()
+    if not raw or raw.startswith("/") or raw.startswith("../") or "/../" in raw or raw == "..":
+        return False
+    if ":" in raw:
+        return False
+    return True
+
+
+def _path_allowed_by_patterns(path: str, allowed_paths: tuple[str, ...]) -> bool:
+    normalized = str(path or "").replace("\\", "/").strip()
+    return any(fnmatchcase(normalized, pattern.replace("\\", "/")) for pattern in allowed_paths)
+
+
+def _pattern_within_allowed_paths(pattern: str, allowed_paths: tuple[str, ...]) -> bool:
+    normalized = str(pattern or "").replace("\\", "/").strip()
+    for allowed in allowed_paths:
+        allowed_normalized = allowed.replace("\\", "/").strip()
+        if normalized == allowed_normalized:
+            return True
+        if allowed_normalized.endswith("/**"):
+            root = allowed_normalized[:-3].rstrip("/")
+            if normalized == root or normalized.startswith(root + "/"):
+                return True
+    return False
 
 
 def _canonical_digest(payload: Any) -> str:
