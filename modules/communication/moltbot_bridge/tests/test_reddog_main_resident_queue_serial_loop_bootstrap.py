@@ -4099,6 +4099,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(tmp_path / "publish_request.json"),
                 "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
+                "REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH": str(
+                    tmp_path / "model_feedback.jsonl"
+                ),
                 "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(tmp_path / "held_out_gate_request.json"),
                 "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(
                     tmp_path / "pattern_memory_admission_request.json"
@@ -4165,6 +4168,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     )
     assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
         tmp_path / "ratchet.jsonl"
+    )
+    assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
+        tmp_path / "model_feedback.jsonl"
     )
     assert mocked.call_args.kwargs["outcome_ratchet_request_binding_enabled"] is True
     assert mocked.call_args.kwargs["held_out_gate_request_path"] == str(
@@ -4381,6 +4387,13 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
         / REPO_ROOT.resolve().name
         / "verified_outcomes.jsonl"
     )
+    assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
+        REPO_ROOT.resolve().parent
+        / ".reddog"
+        / "model_feedback"
+        / REPO_ROOT.resolve().name
+        / "model_feedback.jsonl"
+    )
     assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is None
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 91
@@ -4435,6 +4448,13 @@ def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
         / "outcome_ratchet"
         / REPO_ROOT.resolve().name
         / "verified_outcomes.jsonl"
+    )
+    assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
+        REPO_ROOT.resolve().parent
+        / ".reddog"
+        / "model_feedback"
+        / REPO_ROOT.resolve().name
+        / "model_feedback.jsonl"
     )
     sink = mocked.call_args.kwargs["pattern_memory_admission_sink"]
     assert sink is not None

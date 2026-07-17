@@ -254,6 +254,27 @@ def resident_queue_outcome_ratchet_store_path(
     )
 
 
+def resident_queue_model_feedback_ledger_store_path(
+    env: Mapping[str, str],
+    repo_root: Path | str,
+) -> str:
+    """Return explicit/default model-feedback ledger store path."""
+
+    raw = str(env.get("REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH") or "").strip()
+    if raw:
+        return raw
+    if resident_queue_binding_profile(env) not in _DRAFT_PR_OR_HIGHER_PROFILES:
+        return ""
+    root = Path(repo_root).resolve()
+    return str(
+        root.parent
+        / ".reddog"
+        / "model_feedback"
+        / _repo_slug(root)
+        / "model_feedback.jsonl"
+    )
+
+
 def resident_queue_pattern_memory_admission_db_path(
     env: Mapping[str, str],
     repo_root: Path | str,
@@ -312,6 +333,7 @@ __all__ = [
     "resident_queue_draft_pr_runner_mode",
     "resident_queue_evidence_command_runner_mode",
     "resident_queue_materializer_mode",
+    "resident_queue_model_feedback_ledger_store_path",
     "resident_queue_outcome_ratchet_store_path",
     "resident_queue_pattern_memory_admission_db_path",
     "resident_queue_runtime_file_path",

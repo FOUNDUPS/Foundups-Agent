@@ -29,6 +29,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     resident_queue_draft_pr_runner_mode,
     resident_queue_evidence_command_runner_mode,
     resident_queue_materializer_mode,
+    resident_queue_model_feedback_ledger_store_path,
     resident_queue_outcome_ratchet_store_path,
     resident_queue_pattern_memory_admission_db_path,
     resident_queue_runtime_file_path,
@@ -253,6 +254,10 @@ def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[
         env,
         repo_root,
     )
+    model_feedback_ledger_store_path = resident_queue_model_feedback_ledger_store_path(
+        env,
+        repo_root,
+    )
     pairs = {
         "work_orders_path": "REDDOG_WORK_ORDERS_PATH",
         "valve_environment_path": "REDDOG_EXECUTION_VALVE_ENV_PATH",
@@ -292,6 +297,8 @@ def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[
         payload["evidence_command_runner_mode"] = evidence_command_runner_mode
     if outcome_ratchet_store_path:
         payload["outcome_ratchet_store_path"] = outcome_ratchet_store_path
+    if model_feedback_ledger_store_path:
+        payload["model_feedback_ledger_store_path"] = model_feedback_ledger_store_path
     for key, env_name in (
         ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
         (

@@ -647,6 +647,13 @@ def test_runtime_binding_draft_pr_profile_supplies_verified_draft_runner(
         / tmp_path.resolve().name
         / "verified_outcomes.jsonl"
     )
+    assert bootstrap.calls[0]["model_feedback_ledger_store_path"] == str(
+        tmp_path.resolve().parent
+        / ".reddog"
+        / "model_feedback"
+        / tmp_path.resolve().name
+        / "model_feedback.jsonl"
+    )
     assert "pattern_memory_admission_sink" not in bootstrap.calls[0]
     draft_runner = bootstrap.calls[0]["draft_pr_runner"]
     assert draft_runner.__class__.__name__ == "_FakeDraftPrRunner"
@@ -698,6 +705,13 @@ def test_runtime_binding_pattern_memory_profile_derives_outside_repo_sink(
         / "outcome_ratchet"
         / tmp_path.resolve().name
         / "verified_outcomes.jsonl"
+    )
+    assert bootstrap.calls[0]["model_feedback_ledger_store_path"] == str(
+        tmp_path.resolve().parent
+        / ".reddog"
+        / "model_feedback"
+        / tmp_path.resolve().name
+        / "model_feedback.jsonl"
     )
     sink = bootstrap.calls[0]["pattern_memory_admission_sink"]
     assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
