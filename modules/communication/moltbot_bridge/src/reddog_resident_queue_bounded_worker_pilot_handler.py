@@ -293,6 +293,11 @@ def _derive_artifact_generation_request(
         or _mapping(work_order.get("model_selection_receipt"))
         or _mapping(_mapping(work_order.get("operational_context_binding")).get("model_selection_receipt"))
     )
+    model_runtime_binding_receipt = (
+        _mapping(plan.get("model_runtime_binding_receipt"))
+        or _mapping(work_order.get("model_runtime_binding_receipt"))
+        or _mapping(_mapping(work_order.get("operational_context_binding")).get("model_runtime_binding_receipt"))
+    )
     planned_artifacts = _list(plan.get("planned_artifacts"))
     task_summary = str(work_order.get("task_summary") or "")
     if (
@@ -319,7 +324,7 @@ def _derive_artifact_generation_request(
             or ""
         ),
     }
-    return {
+    request = {
         "explicit_artifact_generation_requested": True,
         "work_order_id": str(work_order.get("work_order_id") or ""),
         "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
@@ -343,6 +348,9 @@ def _derive_artifact_generation_request(
         "model_selection_receipt": dict(model_selection_receipt),
         "timeout_seconds": 30,
     }
+    if model_runtime_binding_receipt:
+        request["model_runtime_binding_receipt"] = dict(model_runtime_binding_receipt)
+    return request
 
 
 __all__ = [
