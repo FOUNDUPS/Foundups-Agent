@@ -37,6 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     FAIL_SIGNER_RUNTIME_CONFIG_INVALID,
+    FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,
     FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
     FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID,
     FAIL_SIGNER_RUNTIME_PROFILE_INVALID,
@@ -269,6 +270,89 @@ def test_runtime_wiring_accepts_wsp71_permissioned_provider_mode_without_test_ov
         ("op://test-vault/reddog-signing/private", "signer:reddog-authority"),
         ("op://test-vault/reddog-audit/mac", "signer:reddog-authority"),
     ]
+
+
+def test_runtime_wiring_routes_multiple_wsp71_permissioned_profiles() -> None:
+    principal_key = _private_key()
+    reddog_key = _private_key()
+    principal_public = _public_text(principal_key)
+    reddog_public = _public_text(reddog_key)
+    resolver = FakeResolver(
+        {
+            "op://test-vault/principal/private": _private_key_secret(principal_key),
+            "op://test-vault/principal/audit": _audit_secret(b"principal-audit-key-000000000"),
+            "op://test-vault/reddog/private": _private_key_secret(reddog_key),
+            "op://test-vault/reddog/audit": _audit_secret(b"reddog-audit-key-000000000000"),
+        }
+    )
+    service = CapturingBoundedService()
+    principal_profile = _profile(
+        principal_public,
+        signer_profile_id="principal-profile",
+        signer_agent_id="signer:principal",
+        signing_key_ref="op://test-vault/principal/private",
+        audit_mac_key_ref="op://test-vault/principal/audit",
+    )
+    reddog_profile = _profile(
+        reddog_public,
+        signer_profile_id="reddog-profile",
+        signer_agent_id="signer:reddog",
+        signing_key_ref="op://test-vault/reddog/private",
+        audit_mac_key_ref="op://test-vault/reddog/audit",
+    )
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            principal_public,
+            key_provider_profile=None,
+            key_provider_profiles=(principal_profile, reddog_profile),
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+            permission_snapshot_fresh=True,
+        ),
+        resolver,
+        serve_bounded=service,
+    )
+
+    assert result.accepted is True
+    assert result.status == SIGNER_SOCKET_RUNTIME_WIRING_SERVED
+    assert result.key_provider_receipt["ok"] is True
+    assert result.key_provider_receipt["profile_count"] == 2
+    backend = service.calls[0]["backend"]
+    for public_key in (principal_public, reddog_public):
+        request = _request(public_key)
+        response = backend.sign(request, _peer())
+        assert response.accepted is True
+        assert Ed25519SignatureVerifier().verify(public_key, request.signing_input, response.signature) is True
+    unknown = _request(_public_text(_private_key()))
+    assert backend.sign(unknown, _peer()).accepted is False
+    assert resolver.calls == [
+        ("op://test-vault/principal/private", "signer:principal"),
+        ("op://test-vault/principal/audit", "signer:principal"),
+        ("op://test-vault/reddog/private", "signer:reddog"),
+        ("op://test-vault/reddog/audit", "signer:reddog"),
+    ]
+
+
+def test_runtime_wiring_rejects_duplicate_multi_profile_public_key() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    service = CapturingBoundedService()
+    profile = _profile(public_key)
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            key_provider_profile=None,
+            key_provider_profiles=(profile, profile),
+        ),
+        _resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE in result.rejection_reasons
+    assert service.calls == []
 
 
 def test_mapping_config_normalizes_profile_and_peer_policy() -> None:
