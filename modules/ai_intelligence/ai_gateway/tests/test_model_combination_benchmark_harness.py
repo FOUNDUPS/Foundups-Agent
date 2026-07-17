@@ -11,6 +11,7 @@ from modules.ai_intelligence.ai_gateway.src.model_combination_benchmark_harness 
     ModelBenchmarkTaskOutput,
     ModelBenchmarkVerifierResult,
     build_model_benchmark_candidate,
+    rehydrate_model_combination_benchmark_run_receipt,
     run_model_combination_benchmark,
 )
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
@@ -86,6 +87,104 @@ def test_single_model_benchmark_produces_evidence_receipt_bound_to_held_out_task
     assert evidence.prompt_topology_digest == candidate.topology_digest
     assert evidence.metrics.input_tokens == 20
     assert evidence.metrics.output_tokens == 10
+
+
+def test_benchmark_run_receipt_rehydrates_with_digest_and_evidence_consistency():
+    candidate = _single_candidate()
+    receipt = run_model_combination_benchmark(
+        tasks=_tasks(),
+        candidates=(candidate,),
+        runner=_accepting_runner,
+        verifier=_accepting_verifier,
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+    )
+
+    assert rehydrate_model_combination_benchmark_run_receipt(receipt.to_dict()) == receipt
+
+
+def test_benchmark_run_receipt_rejects_tampered_digest_bound_fields():
+    candidate = _single_candidate()
+    receipt = run_model_combination_benchmark(
+        tasks=_tasks(),
+        candidates=(candidate,),
+        runner=_accepting_runner,
+        verifier=_accepting_verifier,
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+    )
+    mutations = []
+
+    task_family_tamper = receipt.to_dict()
+    task_family_tamper["task_family"] = "security"
+    mutations.append(task_family_tamper)
+
+    candidate_tamper = receipt.to_dict()
+    candidate_tamper["candidates"][0]["candidate_id"] = "provider/tampered"
+    mutations.append(candidate_tamper)
+
+    sample_tamper = receipt.to_dict()
+    sample_tamper["samples"][0]["accepted"] = False
+    mutations.append(sample_tamper)
+
+    for payload in mutations:
+        try:
+            rehydrate_model_combination_benchmark_run_receipt(payload)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("tampered benchmark run receipt was accepted")
+
+
+def test_benchmark_run_receipt_rejects_self_consistent_evidence_mismatch():
+    candidate = _single_candidate()
+    receipt = run_model_combination_benchmark(
+        tasks=_tasks(),
+        candidates=(candidate,),
+        runner=_accepting_runner,
+        verifier=_accepting_verifier,
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+    )
+    payload = receipt.to_dict()
+    payload["benchmark_evidence_receipts"][0]["accepted_count"] = 1
+
+    try:
+        rehydrate_model_combination_benchmark_run_receipt(payload)
+    except ValueError as exc:
+        assert str(exc) in {
+            "benchmark_receipt_id_mismatch",
+            "benchmark_evidence_accepted_count_mismatch",
+        }
+    else:
+        raise AssertionError("tampered benchmark evidence was accepted")
+
+
+def test_benchmark_run_receipt_rejects_malformed_shape_before_digest_check():
+    candidate = _single_candidate()
+    receipt = run_model_combination_benchmark(
+        tasks=_tasks(),
+        candidates=(candidate,),
+        runner=_accepting_runner,
+        verifier=_accepting_verifier,
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+    )
+    bad_schema = receipt.to_dict()
+    bad_schema["schema_version"] = "other"
+    bad_bool = receipt.to_dict()
+    bad_bool["samples"][0]["accepted"] = "true"
+
+    for payload, expected in (
+        (bad_schema, "invalid_benchmark_run_schema"),
+        (bad_bool, "invalid_accepted"),
+    ):
+        try:
+            rehydrate_model_combination_benchmark_run_receipt(payload)
+        except ValueError as exc:
+            assert str(exc) == expected
+        else:
+            raise AssertionError(f"expected {expected}")
 
 
 def test_panel_candidate_binds_role_topology_and_is_not_direct_model_id():
