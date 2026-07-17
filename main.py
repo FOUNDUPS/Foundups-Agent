@@ -1607,6 +1607,8 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY=0 Execute campaign fixture or configured gateway
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
+        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN=0 Run gate->cycle->feedback chain
+        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_ENFORCED=0 Block startup if chain rejected
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY=0 Materialize campaign promotion-gate receipts
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED=0 Block startup if rejected
         REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY=0 Materialize campaign cycle receipt
@@ -2042,6 +2044,82 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             print(
                 "[REDDOG-MODEL-AUTORESEARCH-CAMPAIGN] Startup blocked by "
                 "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED=1"
+            )
+            return False
+
+    autoresearch_chain_requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN",
+    )
+    autoresearch_chain_enforced = (
+        os.getenv("REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_ENFORCED", "0") != "0"
+    )
+    if autoresearch_chain_requested:
+        try:
+            from modules.ai_intelligence.ai_gateway.src.model_autoresearch_cycle_feedback_chain_bootstrap import (
+                run_reddog_model_autoresearch_cycle_feedback_chain_bootstrap,
+            )
+
+            autoresearch_chain = run_reddog_model_autoresearch_cycle_feedback_chain_bootstrap(
+                repo_root=repo_root,
+                plan_receipt_path=model_autoresearch_plan_receipt_path,
+                campaign_execution_receipt_path=model_autoresearch_campaign_execution_receipt_path,
+                promotion_policies_path=model_autoresearch_campaign_promotion_policies_path or None,
+                promotion_gate_output_path=model_autoresearch_promotion_gate_receipts_path,
+                cycle_receipt_output_path=model_autoresearch_cycle_receipt_path,
+                feedback_ledger_output_path=model_autoresearch_cycle_feedback_ledger_path,
+                promotion_authority_receipt_id=os.getenv(
+                    "REDDOG_MODEL_AUTORESEARCH_PROMOTION_AUTHORITY_RECEIPT_ID",
+                    "",
+                )
+                or None,
+                signed_promotion_receipt_id=os.getenv(
+                    "REDDOG_MODEL_AUTORESEARCH_SIGNED_PROMOTION_RECEIPT_ID",
+                    "",
+                )
+                or None,
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-MODEL-AUTORESEARCH-CHAIN] Startup chain failed: {exc}")
+            if autoresearch_chain_enforced:
+                print(f"[REDDOG-MODEL-AUTORESEARCH-CHAIN] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-MODEL-AUTORESEARCH-CHAIN] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        chain_status = "PASS" if autoresearch_chain.accepted else "WARN"
+        chain_reasons = (
+            ",".join(autoresearch_chain.rejection_reasons)
+            if autoresearch_chain.rejection_reasons
+            else "(none)"
+        )
+        print(
+            f"[REDDOG-MODEL-AUTORESEARCH-CHAIN] preflight={chain_status} "
+            f"status={autoresearch_chain.status} "
+            f"gate={autoresearch_chain.promotion_gate_supply_receipt_id or '(none)'} "
+            f"cycle={autoresearch_chain.cycle_receipt_id or '(none)'} "
+            f"admission={autoresearch_chain.feedback_admission_id or '(none)'} "
+            f"record={autoresearch_chain.feedback_record_id or '(none)'} "
+            f"reasons={chain_reasons}"
+        )
+        if autoresearch_chain.accepted:
+            if autoresearch_chain.promotion_gate_output_path:
+                model_autoresearch_promotion_gate_receipts_path = autoresearch_chain.promotion_gate_output_path
+                os.environ["REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH"] = (
+                    model_autoresearch_promotion_gate_receipts_path
+                )
+            if autoresearch_chain.cycle_receipt_output_path:
+                model_autoresearch_cycle_receipt_path = autoresearch_chain.cycle_receipt_output_path
+                os.environ["REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH"] = model_autoresearch_cycle_receipt_path
+            if autoresearch_chain.feedback_ledger_output_path:
+                model_autoresearch_cycle_feedback_ledger_path = autoresearch_chain.feedback_ledger_output_path
+                os.environ["REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_PATH"] = (
+                    model_autoresearch_cycle_feedback_ledger_path
+                )
+        elif autoresearch_chain_enforced:
+            print(
+                "[REDDOG-MODEL-AUTORESEARCH-CHAIN] Startup blocked by "
+                "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_ENFORCED=1"
             )
             return False
 
