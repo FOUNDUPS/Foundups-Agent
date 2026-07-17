@@ -136,6 +136,28 @@ selection receipt path consumed by RedDog FIX promotion. The adapter defaults to
 the existing Ed25519 public verifier and fails closed when trusted keys or
 signed evidence are absent.
 
+## RedDog Runtime Binding Artifact Supply
+
+`src/model_runtime_binding_artifact_supply.py` materializes a
+`RedDogModelRuntimeBindingReceipt` JSON artifact from the production
+`ModelSelectionReceipt`, matching benchmark evidence, matching promotion
+evidence, signed verified production evidence, and an explicit runtime binding
+policy.
+
+This closes the handoff after model selection: resident RedDog can now consume a
+receipt-bound runtime model topology instead of hard-coded GLM/DeepSeek/Kimi
+defaults. The supplier rehydrates and digest-checks every source receipt before
+binding, rejects mismatched policy evidence, and refuses to write artifacts
+inside the repository. It does not call providers, run benchmarks, execute
+commands, mutate catalogs, persist telemetry, re-index HoloIndex, mutate
+`extension.js`, dispatch workers, or write PatternMemory.
+
+`src/model_runtime_binding_artifact_supply_bootstrap.py` is the optional
+`main.py` startup adapter for that supplier. It reads outside-repo catalog,
+selection, benchmark, promotion, signed-evidence, policy and trusted-key JSON
+inputs, then writes the runtime-binding receipt path for later resident runtime
+consumption. It remains disabled unless explicitly configured.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway

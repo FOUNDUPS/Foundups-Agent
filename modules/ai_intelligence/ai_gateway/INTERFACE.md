@@ -236,6 +236,41 @@ public-key resolver, uses the configured public signature verifier, and delegate
 receipt creation to `run_reddog_model_selection_artifact_supply`. It is disabled
 unless `REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=1`.
 
+#### RedDog Runtime Binding Artifact Supply
+
+```python
+run_reddog_model_runtime_binding_artifact_supply(...) -> ModelRuntimeBindingArtifactSupplyResult
+```
+
+The supplier rehydrates a catalog snapshot, a production model-selection
+receipt, benchmark evidence receipts, promotion evidence receipts, signed
+production-evidence proof, and a runtime binding policy. It then calls
+`bind_reddog_runtime_models` and atomically writes one
+`RedDogModelRuntimeBindingReceipt` JSON artifact outside the repository.
+
+Serialized signed evidence requires a trusted public-key resolver and signature
+verifier before runtime binding. A binding is emitted only when the production
+selection, benchmark evidence, promotion evidence, verified signed evidence and
+runtime policy agree. Policy mismatches, missing signature verification,
+rejected runtime binding, missing output paths and repository-internal output
+paths fail closed.
+
+```python
+run_reddog_model_runtime_binding_artifact_supply_bootstrap(...) -> ModelRuntimeBindingArtifactBootstrapResult
+```
+
+The bootstrap adapter is the explicit `main.py` preflight surface for runtime
+binding artifacts. It reads outside-repo catalog, selection, benchmark,
+promotion, evidence-bundle, policy and trusted-key JSON inputs, constructs a
+trusted public-key resolver, uses the configured public signature verifier, and
+delegates receipt creation to
+`run_reddog_model_runtime_binding_artifact_supply`.
+
+This API does not call providers, run benchmarks, execute shell commands,
+persist telemetry, mutate extension runtime defaults, dispatch workers, write
+PatternMemory, or re-index HoloIndex. It supplies a receipt artifact only; later
+resident runtime code must explicitly consume that receipt.
+
 ## Configuration
 
 ### Environment Variables
