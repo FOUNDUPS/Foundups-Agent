@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_WIRING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added `src/reddog_signer_socket_service_runtime_wiring.py`: dependency-injected
+  runtime wiring that composes the test-only signer key provider, kernel
+  peer-credential attestor, and bounded resident signer socket service.
+- Added `tests/test_reddog_signer_socket_service_runtime_wiring.py`: acceptance,
+  mapping normalization, provider/service rejection, no-secret serialization,
+  and AST no-env/no-file/no-shell/no-OpenClaw/no-Hermes/no-HoloIndex coverage.
+- Boundary remains constrained: this does not parse env, read files, spawn a
+  process, load production vault secrets, mutate source, enqueue OpenClaw,
+  dispatch Hermes, publish PRs, settle rewards, or re-index HoloIndex.
+
 ## 2026-07-17: REDDOG_MAIN_RESIDENT_MEMORY_CONTEXT_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
