@@ -1,5 +1,41 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Feedback Chain Bootstrap
+
+**Who:** 0102 Codex
+**Type:** Runtime Evidence Chain
+**Slice:** MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_BOOTSTRAP_PHASE1
+
+**What:** Added an outside-repo bootstrap that chains existing model
+AutoResearch artifacts from campaign execution through promotion-gate supply,
+cycle receipt creation, and cycle feedback ledger admission.
+
+**Why:** The model AutoResearch loop now has content-bearing semantic
+verification, promotion-gate supply, and feedback admission primitives. This
+slice proves they can be composed as one configured runtime chain without
+manual artifact stitching.
+
+**Files:**
+- `src/model_autoresearch_cycle_feedback_chain_bootstrap.py` - orchestrates
+  promotion-gate supply, cycle receipt supply, and feedback ledger admission
+  from outside-repo runtime artifacts.
+- `tests/test_model_autoresearch_cycle_feedback_chain_bootstrap.py` - covers
+  semantic-accepted and semantic-rejected configured gateway campaigns,
+  inside-repo path rejection, malformed policy rejection, duplicate output
+  path rejection, and AST authority boundaries.
+
+**Truth Boundary:**
+- IMPLEMENTED: one configured post-execution chain from semantic campaign
+  output to feedback ledger admission.
+- NOT IMPLEMENTED: direct provider calls, benchmark execution, model
+  promotion, catalog mutation, PatternMemory writes, HoloIndex re-indexing,
+  runtime model binding, worker spawn, shell execution, source mutation, or
+  extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Semantic Verifier Promotion Chain Regression
 
 **Who:** 0102 Codex
