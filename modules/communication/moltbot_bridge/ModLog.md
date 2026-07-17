@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_WRE_QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a queue-authorized explicit invoke guard that consumes an accepted
+  verified-outcome ratchet result and admits its emitted
+  `ModelSelectionOutcomeReceipt` into an injected model-feedback ledger store.
+- The guard fails closed when explicit invocation, the injected store, accepted
+  ratchet payload, ratchet receipt, or model outcome receipt is missing.
+- Reuses the AI gateway model-feedback admission layer, so serialized outcome
+  receipts are rehydrated, source-ratchet verifier/runtime-binding consistency
+  is checked, and secret-bearing feedback records are rejected before store
+  writes.
+- Boundary remains constrained: no model/provider call, benchmark execution,
+  model promotion, PatternMemory write, OpenClaw/Hermes dispatch, source
+  mutation, PR publication, reward settlement, or HoloIndex re-indexing was
+  added.
+
+## 2026-07-17: REDDOG_RATCHET_MODEL_FEEDBACK_RECEIPT_BRIDGE_PHASE1
+
 ## 2026-07-17: REDDOG_RATCHET_MODEL_FEEDBACK_RECEIPT_BRIDGE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
