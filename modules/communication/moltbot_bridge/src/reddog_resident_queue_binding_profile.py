@@ -89,6 +89,7 @@ PROFILE_RUNTIME_FLAGS = frozenset(
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER",
         "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP",
         "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP",
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE",
     }
 )
 
@@ -129,6 +130,9 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_SIGNER_SOCKET_PATH": "reddog_signer.sock",
     "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": "resident_queue_chain_results.json",
     "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": "authority_profile.json",
+    "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPTS_PATH": (
+        "resident_queue_control_loop_receipts.jsonl"
+    ),
 }
 
 

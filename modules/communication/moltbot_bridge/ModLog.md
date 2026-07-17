@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_CONTROL_LOOP_RECEIPT_PERSISTENCE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97
+
+- Added an append-only resident control-loop receipt store for compact JSONL
+  summaries of completed control-loop runs.
+- Added profile-derived `REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE`
+  and `REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPTS_PATH` wiring so resident
+  profiles can persist control receipts under the outside-repo runtime root.
+- Wired `main.py` to persist accepted control-loop summaries and fail closed if
+  configured receipt persistence rejects.
+- Added regressions proving persisted control receipts bind the signed-worker
+  task receipt IDs surfaced by the OpenClaw claim loop.
+- HoloIndex query-only check did not surface the new control-loop receipt store;
+  recorded as HOLOINDEX_REDDOG_RESIDENT_CONTROL_LOOP_RECEIPT_PERSISTENCE_INDEX_GAP.
+  No runtime reindex performed.
+
 ## 2026-07-17: REDDOG_RESIDENT_CONTROL_LOOP_RECEIPT_SUMMARY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97
