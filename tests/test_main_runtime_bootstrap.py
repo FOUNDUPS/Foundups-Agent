@@ -272,6 +272,38 @@ def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch)
     assert calls == ["serial", "claim", "serial", "claim", "serial", "claim"]
 
 
+def test_reddog_queue_control_loop_stops_after_idle_round(monkeypatch):
+    calls: list[str] = []
+
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
+        "signed_0102_bounded_code_fusion_worktree_draft_pr",
+    )
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "5")
+
+    with patch.object(main, "run_reddog_resident_queue_serial_loop_preflight") as serial, patch.object(
+        main,
+        "run_reddog_openclaw_signed_worker_claim_loop_preflight",
+    ) as claim:
+
+        def serial_side_effect(_repo_root):
+            calls.append("serial")
+            serial.last_result = {"progress_count": 0, "status": "COMPLETE"}
+            return True
+
+        def claim_side_effect(_repo_root):
+            calls.append("claim")
+            claim.last_result = {"progress_count": 0, "status": "IDLE"}
+            return True
+
+        serial.side_effect = serial_side_effect
+        claim.side_effect = claim_side_effect
+
+        assert main.run_reddog_resident_queue_control_loop_preflight(Path("O:/Foundups-Agent")) is True
+
+    assert calls == ["serial", "claim"]
+
+
 def test_reddog_queue_control_loop_without_profile_preserves_legacy_single_pass(monkeypatch):
     calls: list[str] = []
 
