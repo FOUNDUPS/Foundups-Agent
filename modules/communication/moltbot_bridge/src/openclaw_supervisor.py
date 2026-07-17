@@ -2068,7 +2068,9 @@ class OpenClawSupervisor:
                 "status": result.get("status", "unknown"),
                 "claimed_count": result.get("claimed_count", 0),
                 "completed_task_ids": result.get("completed_task_ids", ()),
+                "requeued_task_ids": result.get("requeued_task_ids", ()),
                 "failed_task_ids": result.get("failed_task_ids", ()),
+                "receipt_ids": result.get("receipt_ids", ()),
                 "rejection_reasons": result.get("rejection_reasons", ()),
                 "claim_loop": result,
             }
@@ -2266,7 +2268,9 @@ class OpenClawSupervisor:
                 "status": action_result,
                 "claimed_count": action_result.get("claimed_count", 0),
                 "completed_task_ids": action_result.get("completed_task_ids", ()),
+                "requeued_task_ids": action_result.get("requeued_task_ids", ()),
                 "failed_task_ids": action_result.get("failed_task_ids", ()),
+                "receipt_ids": action_result.get("receipt_ids", ()),
                 "error": "" if ok else ",".join(str(reason) for reason in reasons),
                 "fidelity": 0.85,
             }
