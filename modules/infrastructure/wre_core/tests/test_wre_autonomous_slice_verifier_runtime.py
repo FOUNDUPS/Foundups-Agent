@@ -110,9 +110,47 @@ def test_accepts_complete_machine_derived_slice_packet() -> None:
     assert result.receipt.receipt_chain_terminal_hash == _digest("4")
     assert result.receipt.worktree_receipt_digest == _digest("5")
     assert result.receipt.holoindex_freshness_receipt_digest == _digest("6")
+    assert result.receipt.model_runtime_binding_receipt_id is None
+    assert result.receipt.model_runtime_binding_digest == ""
     assert result.receipt.no_command_execution_performed is True
     assert result.receipt.no_pr_publish_performed is True
     assert result.receipt.no_pattern_memory_write_performed is True
+
+
+def test_carries_model_runtime_binding_from_signed_authority() -> None:
+    req = valid_request()
+    req["signed_authority"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["signed_authority"]["model_runtime_binding_digest"] = _digest("7")
+
+    result = verifier.verify_autonomous_slice_runtime(req)
+
+    assert result.accepted is True
+    assert (
+        result.receipt.model_runtime_binding_receipt_id
+        == "reddog_model_runtime_binding:test"
+    )
+    assert result.receipt.model_runtime_binding_digest == _digest("7")
+
+
+def test_rejects_conflicting_or_one_sided_model_runtime_binding() -> None:
+    req = valid_request()
+    req["signed_authority"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    assert_reject(req, verifier.FAIL_MODEL_RUNTIME_BINDING)
+
+    req = valid_request()
+    req["signed_authority"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["signed_authority"]["model_runtime_binding_digest"] = _digest("7")
+    req["artifact_generation_receipt"] = {
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:test",
+        "model_runtime_binding_digest": _digest("8"),
+    }
+    assert_reject(req, verifier.FAIL_MODEL_RUNTIME_BINDING)
 
 
 def test_rejects_missing_identity_and_self_verification() -> None:

@@ -32,6 +32,7 @@ FAIL_SIGNED_AUTHORITY = "FAIL_SIGNED_AUTHORITY"
 FAIL_RECEIPT_CHAIN = "FAIL_RECEIPT_CHAIN"
 FAIL_WORKTREE_RECEIPT = "FAIL_WORKTREE_RECEIPT"
 FAIL_HOLOINDEX_EVIDENCE = "FAIL_HOLOINDEX_EVIDENCE"
+FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
 FAIL_PATTERN_MEMORY_WRITE = "FAIL_PATTERN_MEMORY_WRITE"
 FAIL_PR_OR_MERGE_ALREADY_PERFORMED = "FAIL_PR_OR_MERGE_ALREADY_PERFORMED"
 
@@ -86,6 +87,8 @@ class AutonomousSliceVerifierReceipt:
     receipt_chain_terminal_hash: str
     worktree_receipt_digest: str
     holoindex_freshness_receipt_digest: str
+    model_runtime_binding_receipt_id: Optional[str]
+    model_runtime_binding_digest: str
     rejection_reasons: List[str]
     accepted: bool
     no_command_execution_performed: bool = True
@@ -287,6 +290,55 @@ def _holoindex_evidence_ok(holoindex_evidence: Mapping[str, Any]) -> bool:
     return _is_digest(holoindex_evidence.get("holoindex_freshness_receipt_digest"))
 
 
+def _runtime_binding_pair(value: Mapping[str, Any]) -> tuple[str, str]:
+    receipt_id = str(
+        value.get("model_runtime_binding_receipt_id")
+        or value.get("runtime_binding_receipt_id")
+        or ""
+    )
+    digest = str(value.get("model_runtime_binding_digest") or "")
+    return receipt_id, digest
+
+
+def _runtime_binding_sources(req: Mapping[str, Any]) -> List[tuple[str, str]]:
+    sources: List[tuple[str, str]] = []
+    signed_authority = _mapping(req.get("signed_authority"))
+    candidates = [
+        req,
+        signed_authority,
+        _mapping(signed_authority.get("work_authority")),
+        _mapping(signed_authority.get("authority")),
+        _mapping(signed_authority.get("payload")),
+        _mapping(req.get("artifact_generation_receipt")),
+        _mapping(_mapping(req.get("artifact_generation_result")).get("receipt")),
+        _mapping(req.get("bounded_worker_pilot_receipt")),
+    ]
+    for candidate in candidates:
+        pair = _runtime_binding_pair(candidate)
+        if pair[0] or pair[1]:
+            sources.append(pair)
+    return sources
+
+
+def _runtime_binding_ok(req: Mapping[str, Any]) -> tuple[bool, Optional[str], str]:
+    pairs = _runtime_binding_sources(req)
+    if not pairs:
+        return True, None, ""
+
+    normalized: List[tuple[str, str]] = []
+    for receipt_id, digest in pairs:
+        if not receipt_id or not digest:
+            return False, receipt_id or None, digest
+        if not receipt_id.startswith("reddog_model_runtime_binding:") or not _is_digest(digest):
+            return False, receipt_id, digest
+        normalized.append((receipt_id, digest))
+
+    first = normalized[0]
+    if any(pair != first for pair in normalized[1:]):
+        return False, first[0], first[1]
+    return True, first[0], first[1]
+
+
 def _all_paths_in_scope(paths: Sequence[str], req: Mapping[str, Any]) -> bool:
     allowed_patterns = [str(item) for item in _list(req.get("allowed_path_patterns"))]
     forbidden_patterns = [str(item) for item in _list(req.get("forbidden_path_patterns"))]
@@ -319,6 +371,7 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
     worktree_receipt = _mapping(req.get("worktree_receipt"))
     pilot_receipt = _mapping(req.get("bounded_worker_pilot_receipt"))
     holoindex_evidence = _mapping(req.get("holoindex_evidence"))
+    runtime_binding_ok, runtime_binding_id, runtime_binding_digest = _runtime_binding_ok(req)
 
     work_order_id = str(req.get("work_order_id") or "")
     slice_name = str(req.get("slice_name") or "")
@@ -365,6 +418,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         reasons.append(FAIL_WORKTREE_RECEIPT)
     if not _holoindex_evidence_ok(holoindex_evidence):
         reasons.append(FAIL_HOLOINDEX_EVIDENCE)
+    if not runtime_binding_ok:
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING)
     if req.get("pattern_memory_write_performed") is True:
         reasons.append(FAIL_PATTERN_MEMORY_WRITE)
     if req.get("draft_pr_published") is True or req.get("merge_performed") is True:
@@ -402,6 +457,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         "holoindex_freshness_receipt_digest": str(
             holoindex_evidence.get("holoindex_freshness_receipt_digest") or ""
         ),
+        "model_runtime_binding_receipt_id": runtime_binding_id or "",
+        "model_runtime_binding_digest": runtime_binding_digest,
         "rejection_reasons": deduped,
     }
     receipt = AutonomousSliceVerifierReceipt(
@@ -421,6 +478,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         holoindex_freshness_receipt_digest=str(
             holoindex_evidence.get("holoindex_freshness_receipt_digest") or ""
         ),
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
         rejection_reasons=deduped,
         accepted=accepted,
     )
@@ -444,6 +503,7 @@ __all__ = [
     "FAIL_DIFF_EVIDENCE",
     "FAIL_HEAD_SHA",
     "FAIL_HOLOINDEX_EVIDENCE",
+    "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_PATTERN_MEMORY_WRITE",
     "FAIL_PR_OR_MERGE_ALREADY_PERFORMED",
     "FAIL_PROTECTED_SURFACE",

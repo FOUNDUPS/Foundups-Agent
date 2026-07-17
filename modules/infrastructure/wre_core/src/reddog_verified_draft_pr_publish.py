@@ -30,6 +30,7 @@ FAIL_BRANCH_POLICY = "FAIL_BRANCH_POLICY"
 FAIL_DRAFT_ONLY = "FAIL_DRAFT_ONLY"
 FAIL_PR_METADATA = "FAIL_PR_METADATA"
 FAIL_SECRET_IN_PR_METADATA = "FAIL_SECRET_IN_PR_METADATA"
+FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
 FAIL_PUSH_BRANCH = "FAIL_PUSH_BRANCH"
 FAIL_CREATE_DRAFT_PR = "FAIL_CREATE_DRAFT_PR"
 FAIL_PR_URL = "FAIL_PR_URL"
@@ -74,6 +75,8 @@ class VerifiedDraftPrPublishReceipt:
     verified_head_sha: str
     draft_pr_url: str
     changed_paths: List[str]
+    model_runtime_binding_receipt_id: Optional[str]
+    model_runtime_binding_digest: str
     rejection_reasons: List[str]
     accepted: bool
     no_ready_performed: bool = True
@@ -149,6 +152,52 @@ def _draft_url_ok(url: str) -> bool:
     return url.startswith("https://github.com/") and "/pull/" in url
 
 
+def _is_digest(value: Any) -> bool:
+    text = str(value or "")
+    return (
+        text.startswith("sha256:")
+        and len(text) == 71
+        and all(ch in "0123456789abcdef" for ch in text.removeprefix("sha256:"))
+    )
+
+
+def _runtime_binding_pair(value: Mapping[str, Any]) -> tuple[str, str]:
+    receipt_id = str(
+        value.get("model_runtime_binding_receipt_id")
+        or value.get("runtime_binding_receipt_id")
+        or ""
+    )
+    digest = str(value.get("model_runtime_binding_digest") or "")
+    return receipt_id, digest
+
+
+def _runtime_binding_ok(
+    verifier_receipt: Mapping[str, Any],
+    request: Mapping[str, Any],
+) -> tuple[bool, Optional[str], str]:
+    pairs = [
+        pair
+        for pair in (
+            _runtime_binding_pair(verifier_receipt),
+            _runtime_binding_pair(request),
+        )
+        if pair[0] or pair[1]
+    ]
+    if not pairs:
+        return True, None, ""
+    normalized: List[tuple[str, str]] = []
+    for receipt_id, digest in pairs:
+        if not receipt_id or not digest:
+            return False, receipt_id or None, digest
+        if not receipt_id.startswith("reddog_model_runtime_binding:") or not _is_digest(digest):
+            return False, receipt_id, digest
+        normalized.append((receipt_id, digest))
+    first = normalized[0]
+    if any(pair != first for pair in normalized[1:]):
+        return False, first[0], first[1]
+    return True, first[0], first[1]
+
+
 def _receipt_seed(
     *,
     work_order_id: str,
@@ -159,6 +208,8 @@ def _receipt_seed(
     verified_head_sha: str,
     draft_pr_url: str,
     changed_paths: List[str],
+    model_runtime_binding_receipt_id: str,
+    model_runtime_binding_digest: str,
     rejection_reasons: List[str],
 ) -> Dict[str, Any]:
     return {
@@ -170,6 +221,8 @@ def _receipt_seed(
         "verified_head_sha": verified_head_sha,
         "draft_pr_url": draft_pr_url,
         "changed_paths": changed_paths,
+        "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": model_runtime_binding_digest,
         "rejection_reasons": rejection_reasons,
     }
 
@@ -186,6 +239,8 @@ def _result(
     verified_head_sha: str,
     draft_pr_url: str,
     changed_paths: List[str],
+    model_runtime_binding_receipt_id: Optional[str] = None,
+    model_runtime_binding_digest: str = "",
     push_result: Mapping[str, Any] | None = None,
 ) -> VerifiedDraftPrPublishResult:
     deduped = _dedupe(reasons)
@@ -198,6 +253,8 @@ def _result(
         verified_head_sha=verified_head_sha,
         draft_pr_url=draft_pr_url,
         changed_paths=changed_paths,
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or "",
+        model_runtime_binding_digest=model_runtime_binding_digest,
         rejection_reasons=deduped,
     )
     receipt = VerifiedDraftPrPublishReceipt(
@@ -210,6 +267,8 @@ def _result(
         verified_head_sha=verified_head_sha,
         draft_pr_url=draft_pr_url,
         changed_paths=changed_paths,
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+        model_runtime_binding_digest=model_runtime_binding_digest,
         rejection_reasons=deduped,
         accepted=accepted,
     )
@@ -251,6 +310,10 @@ def publish_verified_draft_pr(
     body = str(req.get("pr_body") or "")
     worktree_path = Path(str(req.get("worktree_path") or ""))
     reasons: List[str] = []
+    runtime_binding_ok, runtime_binding_id, runtime_binding_digest = _runtime_binding_ok(
+        verifier_receipt,
+        req,
+    )
 
     if (
         verifier_result.get("accepted") is not True
@@ -272,6 +335,8 @@ def publish_verified_draft_pr(
         reasons.append(FAIL_PR_METADATA)
     if _contains_secret({"title": title, "body": body}):
         reasons.append(FAIL_SECRET_IN_PR_METADATA)
+    if not runtime_binding_ok:
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING)
 
     if reasons:
         return _result(
@@ -285,6 +350,8 @@ def publish_verified_draft_pr(
             verified_head_sha=verified_head_sha,
             draft_pr_url="",
             changed_paths=changed_paths,
+            model_runtime_binding_receipt_id=runtime_binding_id,
+            model_runtime_binding_digest=runtime_binding_digest,
         )
 
     push_result = dict(runner.push_branch(worktree_path=worktree_path, branch_name=branch_name))
@@ -300,6 +367,8 @@ def publish_verified_draft_pr(
             verified_head_sha=verified_head_sha,
             draft_pr_url="",
             changed_paths=changed_paths,
+            model_runtime_binding_receipt_id=runtime_binding_id,
+            model_runtime_binding_digest=runtime_binding_digest,
             push_result=push_result,
         )
 
@@ -322,6 +391,8 @@ def publish_verified_draft_pr(
             verified_head_sha=verified_head_sha,
             draft_pr_url="",
             changed_paths=changed_paths,
+            model_runtime_binding_receipt_id=runtime_binding_id,
+            model_runtime_binding_digest=runtime_binding_digest,
             push_result=push_result,
         )
 
@@ -337,6 +408,8 @@ def publish_verified_draft_pr(
             verified_head_sha=verified_head_sha,
             draft_pr_url=str(draft_pr_url or ""),
             changed_paths=changed_paths,
+            model_runtime_binding_receipt_id=runtime_binding_id,
+            model_runtime_binding_digest=runtime_binding_digest,
             push_result=push_result,
         )
 
@@ -351,6 +424,8 @@ def publish_verified_draft_pr(
         verified_head_sha=verified_head_sha,
         draft_pr_url=str(draft_pr_url),
         changed_paths=changed_paths,
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
         push_result=push_result,
     )
 
@@ -360,6 +435,7 @@ __all__ = [
     "FAIL_CREATE_DRAFT_PR",
     "FAIL_DRAFT_ONLY",
     "FAIL_HEAD_MISMATCH",
+    "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_PR_METADATA",
     "FAIL_PR_URL",
     "FAIL_PUSH_BRANCH",
