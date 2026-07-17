@@ -908,6 +908,7 @@ def _openclaw_queue_stage_progress_ready_from_env(
             "slice_verifier",
             "verified_draft_pr_publish",
             "verified_outcome_ratchet",
+            "model_feedback_admission",
             "held_out_regression_gate",
             "pattern_memory_admission",
         }

@@ -49,6 +49,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
 )
+from modules.ai_intelligence.ai_gateway.src.model_feedback_ledger import (
+    JsonlModelFeedbackLedgerStore,
+)
 from modules.infrastructure.wre_core.src.reddog_verified_outcome_ratchet import (
     JsonlOutcomeRatchetStore,
 )
@@ -84,6 +87,7 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_slice_verification_performed: bool = True
     no_verified_draft_pr_publish_performed: bool = True
     no_verified_outcome_ratchet_performed: bool = True
+    no_model_feedback_ledger_admission_performed: bool = True
     no_held_out_regression_gate_performed: bool = True
     no_pattern_memory_admission_performed: bool = True
     no_pattern_memory_write_performed: bool = True
@@ -137,6 +141,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     publish_request_path: Path | str | None = None,
     ratchet_request_path: Path | str | None = None,
     outcome_ratchet_store_path: Path | str | None = None,
+    model_feedback_ledger_store_path: Path | str | None = None,
     held_out_gate_request_path: Path | str | None = None,
     admission_request_path: Path | str | None = None,
     authority_state_path: Path | str | None = None,
@@ -162,6 +167,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     pattern_memory_admission_request_binding_enabled: bool = False,
     draft_pr_runner: Any = None,
     outcome_ratchet_store: Any = None,
+    model_feedback_ledger_store: Any = None,
     explicit_pattern_memory_write_requested: bool = False,
     ratchet_pattern_memory_sink: Any = None,
     pattern_memory_admission_sink: Any = None,
@@ -380,6 +386,14 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if ratchet_store_reasons:
         return _not_ready(ratchet_store_reasons, chain_results_path=None)
 
+    resolved_model_feedback_store, model_feedback_store_reasons = _build_model_feedback_ledger_store(
+        root,
+        injected_store=model_feedback_ledger_store,
+        store_path=model_feedback_ledger_store_path,
+    )
+    if model_feedback_store_reasons:
+        return _not_ready(model_feedback_store_reasons, chain_results_path=None)
+
     resolved_worktree_runner, runner_reasons = _build_worktree_runner(
         root,
         injected_runner=worktree_runner,
@@ -462,6 +476,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         draft_pr_runner=draft_pr_runner,
         ratchet_request=ratchet_request,
         outcome_ratchet_store=resolved_outcome_ratchet_store,
+        model_feedback_ledger_store=resolved_model_feedback_store,
         held_out_gate_request=held_out_gate_request,
         explicit_pattern_memory_write_requested=explicit_pattern_memory_write_requested,
         ratchet_pattern_memory_sink=ratchet_pattern_memory_sink,
@@ -1370,6 +1385,28 @@ def _build_outcome_ratchet_store(
     return JsonlOutcomeRatchetStore(path), ()
 
 
+def _build_model_feedback_ledger_store(
+    repo_root: Path,
+    *,
+    injected_store: Any,
+    store_path: Path | str | None,
+) -> tuple[Any, tuple[str, ...]]:
+    if injected_store is not None:
+        return injected_store, ()
+    if not store_path:
+        return None, ()
+    path, reasons = _resolve_output_outside_repo(
+        repo_root,
+        store_path,
+        missing_reason="missing_model_feedback_ledger_store_path",
+        inside_reason="model_feedback_ledger_store_path_inside_repo",
+    )
+    if reasons:
+        return None, reasons
+    assert path is not None
+    return JsonlModelFeedbackLedgerStore(path), ()
+
+
 def _resolve_output_outside_repo(
     repo_root: Path,
     value: Path | str | None,
@@ -1466,6 +1503,9 @@ def _from_loop(
         ),
         no_verified_outcome_ratchet_performed=(
             "verified_outcome_ratchet" not in loop.dispatched_stages
+        ),
+        no_model_feedback_ledger_admission_performed=(
+            "model_feedback_admission" not in loop.dispatched_stages
         ),
         no_held_out_regression_gate_performed=(
             "held_out_regression_gate" not in loop.dispatched_stages

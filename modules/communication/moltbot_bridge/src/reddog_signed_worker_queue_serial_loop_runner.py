@@ -76,6 +76,7 @@ _POST_BOUNDED_QUEUE_STAGES = frozenset(
         "slice_verifier",
         "verified_draft_pr_publish",
         "verified_outcome_ratchet",
+        "model_feedback_admission",
         "held_out_regression_gate",
         "pattern_memory_admission",
     }

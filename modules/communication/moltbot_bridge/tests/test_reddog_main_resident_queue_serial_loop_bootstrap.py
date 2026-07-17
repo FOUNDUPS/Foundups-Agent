@@ -1236,10 +1236,14 @@ def _run_bootstrap_to_held_out_regression_gate(tmp_path: Path) -> dict[str, obje
         held_out_gate_request_path=held_out_request,
         now_iso=NOW,
         requested_queue_item_id="queue-1",
-        max_steps=1,
+        max_steps=2,
     )
     assert gate_run.accepted is True
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
+    assert stored["stage_results"]["model_feedback_admission"]["decision"] == (
+        "QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT"
+    )
+    assert stored["stage_results"]["model_feedback_admission"]["model_feedback_write_performed"] is False
     assert stored["stage_results"]["held_out_regression_gate"]["decision"] == (
         "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
     )
@@ -2864,9 +2868,10 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         "verified_draft_pr_publish",
         "verified_outcome_ratchet",
     )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE"
+    assert result.next_action == "RUN_QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE"
     assert result.no_verified_draft_pr_publish_performed is False
     assert result.no_verified_outcome_ratchet_performed is False
+    assert result.no_model_feedback_ledger_admission_performed is True
     assert result.no_pr_created is False
     assert result.no_pattern_memory_client_created is True
     assert result.no_reward_settlement_performed is True
@@ -2916,13 +2921,14 @@ def test_bootstrap_serial_loop_reaches_held_out_regression_gate_with_request(
         held_out_gate_request_path=held_out_request,
         now_iso=NOW,
         requested_queue_item_id="queue-1",
-        max_steps=1,
+        max_steps=2,
     )
 
     assert result.accepted is True
-    assert result.steps_run == 1
-    assert result.dispatched_stages == ("held_out_regression_gate",)
+    assert result.steps_run == 2
+    assert result.dispatched_stages == ("model_feedback_admission", "held_out_regression_gate")
     assert result.next_action == "RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE"
+    assert result.no_model_feedback_ledger_admission_performed is False
     assert result.no_held_out_regression_gate_performed is False
     assert result.no_verified_outcome_ratchet_performed is True
     assert result.no_pattern_memory_client_created is True
@@ -2958,15 +2964,16 @@ def test_bootstrap_serial_loop_fails_closed_at_held_out_without_gate_request(
         authority_profile_path=ctx["profile"],
         now_iso=NOW,
         requested_queue_item_id="queue-1",
-        max_steps=1,
+        max_steps=2,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 0
-    assert result.dispatched_stages == ()
+    assert result.steps_run == 1
+    assert result.dispatched_stages == ("model_feedback_admission",)
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
     assert "stage:held_out_regression_gate" in result.rejection_reasons
+    assert result.no_model_feedback_ledger_admission_performed is False
     assert result.no_held_out_regression_gate_performed is True
     assert result.no_pattern_memory_client_created is True
 

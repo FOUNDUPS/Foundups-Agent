@@ -113,6 +113,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "verified_outcome_ratchet": {
             "decision": "QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT",
         },
+        "model_feedback_admission": {
+            "decision": "QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT",
+        },
         "held_out_regression_gate": {
             "decision": "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT",
         },

@@ -47,6 +47,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_held_out_reg
     HELD_OUT_REGRESSION_GATE_STAGE_KEY,
     build_reddog_resident_queue_held_out_regression_gate_stage_handler,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_model_feedback_ledger_admission_handler import (
+    MODEL_FEEDBACK_ADMISSION_STAGE_KEY,
+    build_reddog_resident_queue_model_feedback_ledger_admission_stage_handler,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     ResidentQueueStageHandler,
 )
@@ -216,6 +220,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     outcome_ratchet_store: Any = None,
     explicit_pattern_memory_write_requested: bool = False,
     ratchet_pattern_memory_sink: Any = None,
+    model_feedback_ledger_store: Any = None,
     held_out_gate_request: Optional[Mapping[str, Any]] = None,
     admission_request: Optional[Mapping[str, Any]] = None,
     pattern_memory_admission_sink: Any = None,
@@ -444,6 +449,16 @@ def build_reddog_resident_queue_stage_handler_registry(
             store=outcome_ratchet_store,
             explicit_pattern_memory_write_requested=explicit_pattern_memory_write_requested,
             pattern_memory_sink=ratchet_pattern_memory_sink,
+        ),
+    )
+    _add_if_ready(
+        handlers,
+        missing,
+        MODEL_FEEDBACK_ADMISSION_STAGE_KEY,
+        (),
+        lambda: build_reddog_resident_queue_model_feedback_ledger_admission_stage_handler(
+            chain_results_store=chain_results_store,
+            store=model_feedback_ledger_store,
         ),
     )
     _add_if_ready(
