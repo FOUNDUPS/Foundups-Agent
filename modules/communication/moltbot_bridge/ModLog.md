@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added a signer service config supplier that materializes an outside-repo
+  JSON config from an existing promoted authority profile, explicit WSP71
+  `op://` references, and a signer peer policy.
+- Added an explicit main preflight switch for config supply; it prints an
+  audit-safe receipt and never starts the signer, resolves secrets, binds a
+  socket, enqueues OpenClaw, dispatches Hermes, publishes PRs, settles rewards,
+  or re-indexes HoloIndex.
+- Registered the signer service config as a resident runtime artifact path
+  while keeping the supply step explicit rather than profile-defaulted.
+- Added focused tests for config shape, invalid profile/ref/policy/path
+  rejection, main enforced failure, no implicit socket consumption, and no
+  secret-resolution/spawn/runtime-authority surface.
+
 ## 2026-07-17: REDDOG_SIGNER_MULTI_PROFILE_MAIN_CLI_PROOF_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
