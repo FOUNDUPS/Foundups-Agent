@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added profile-derived runtime paths for
+  `REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH` and
+  `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_POLICIES_PATH`.
+- Wired `main.py` to optionally run campaign promotion-gate artifact supply
+  after campaign execution supply and before FIX promotion.
+- Successful supply updates `REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH`
+  so a later AutoResearch planning cycle can consume the fresh gate receipts.
+- The hook is disabled by default and only consumes outside-repo execution and
+  policy artifacts.
+- Boundary remains constrained: no provider call, benchmark execution,
+  HoloIndex re-index, PatternMemory write, model promotion, runtime binding,
+  worker spawn, source mutation, PR publication, reward settlement, or merge
+  authority was added.
+
 ## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

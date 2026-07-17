@@ -1,5 +1,39 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Campaign Promotion Gate Supply Bootstrap
+
+**Who:** 0102 Codex
+**Type:** Runtime Preflight Adapter
+**Slice:** REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**What:** Added a disabled-by-default bootstrap for materializing promotion-gate
+receipts from outside-repo AutoResearch campaign execution and promotion-policy
+artifacts.
+
+**Why:** The campaign execution bridge can now produce promotion-gate receipts,
+but resident startup needs an explicit, outside-repo artifact pathway to persist
+those receipts for the next planning cycle.
+
+**Files:**
+- `src/model_autoresearch_campaign_promotion_gate_supply_bootstrap.py` - reads
+  outside-repo campaign execution and promotion policy JSON, invokes the
+  promotion-gate supply bridge, and writes an outside-repo gate supply receipt.
+- `tests/test_model_autoresearch_campaign_promotion_gate_supply_bootstrap.py`
+  - verifies successful materialization, inside-repo path rejection, malformed
+  policy rejection, candidate mismatch rejection, and AST import/call denylist
+  controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: opt-in campaign promotion-gate artifact supply from outside-repo
+  receipts and policies.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, worker spawn,
+  shell execution, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Campaign Promotion Gate Supply
 
 **Who:** 0102 Codex
