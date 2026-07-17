@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_CONSUMPTION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added optional runtime-binding receipt consumption to the backend architect,
+  bounded artifact generation, and model-backed read-only audit worker runtime
+  surfaces.
+- Runtime-binding receipts now fail closed when malformed, unbound, or supplied
+  for the wrong runtime surface; valid receipts provide the lead/panel topology
+  and are persisted on runtime receipts alongside legacy model-selection ids.
+- Preserved backward-compatible model-selection receipt behavior when no
+  runtime-binding receipt is supplied; no provider calls, shell execution,
+  HoloIndex re-indexing, repo mutation, OpenClaw enqueue, Hermes dispatch, or
+  PatternMemory promotion was added.
+
 ## 2026-07-16: REDDOG_READONLY_AUDIT_WORKER_MODEL_SELECTION_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

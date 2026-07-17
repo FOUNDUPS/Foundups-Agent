@@ -29,7 +29,9 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
     SelectionDecision,
     SelectionPurpose,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import ModelRuntimeBindingDecision
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
 
@@ -55,6 +57,8 @@ FAIL_RECEIPT_CHAIN = "FAIL_ARTIFACT_GENERATION_RECEIPT_CHAIN"
 FAIL_REDACTION_BLOCKED = "FAIL_ARTIFACT_GENERATION_REDACTION_BLOCKED"
 FAIL_RUNTIME_MODE = "FAIL_ARTIFACT_GENERATION_RUNTIME_MODE"
 FAIL_MODEL_SELECTION_RECEIPT = "FAIL_ARTIFACT_GENERATION_MODEL_SELECTION_RECEIPT"
+FAIL_MODEL_RUNTIME_BINDING_RECEIPT = "FAIL_ARTIFACT_GENERATION_MODEL_RUNTIME_BINDING_RECEIPT"
+RUNTIME_SURFACE_ARTIFACT_GENERATION = "reddog_artifact_generation"
 
 MAX_ARTIFACTS = 8
 MAX_FILE_BYTES = 64 * 1024
@@ -147,6 +151,7 @@ class FoundupsFusionArtifactGenerationRunner:
             "bridge_meta": {
                 "artifact_generation_binding": dict(binding),
                 "model_selection_receipt_id": model_topology["model_selection_receipt_id"],
+                "model_runtime_binding_receipt_id": model_topology["model_runtime_binding_receipt_id"],
             },
         }
         try:
@@ -189,6 +194,8 @@ class BoundedArtifactGenerationReceipt:
     accepted: bool
     model_selection_receipt_id: Optional[str] = None
     model_selection_digest: str = ""
+    model_runtime_binding_receipt_id: Optional[str] = None
+    model_runtime_binding_digest: str = ""
     no_file_write_performed: bool = True
     no_shell_command_executed: bool = True
     no_worktree_created: bool = True
@@ -257,7 +264,13 @@ def generate_bounded_artifact_contents(
         reasons.append(FAIL_AUTHORITY)
     if _mapping(req.get("signed_receipt_chain")).get("accepted") is not True:
         reasons.append(FAIL_RECEIPT_CHAIN)
-    model_selection = _model_selection_binding(req.get("model_selection_receipt"), reasons)
+    model_selection = _model_runtime_binding(
+        req.get("model_runtime_binding_receipt"),
+        reasons,
+        expected_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+    )
+    if not model_selection:
+        model_selection = _model_selection_binding(req.get("model_selection_receipt"), reasons)
 
     model_result: ArtifactGenerationModelResult | None = None
     artifacts: Dict[str, str] = {}
@@ -292,6 +305,8 @@ def generate_bounded_artifact_contents(
                 "model_result_digest": model_result.model_result_digest if model_result else "",
                 "model_selection_receipt_id": model_selection.get("receipt_id"),
                 "model_selection_digest": model_selection.get("digest", ""),
+                "model_runtime_binding_receipt_id": model_selection.get("model_runtime_binding_receipt_id"),
+                "model_runtime_binding_digest": model_selection.get("model_runtime_binding_digest", ""),
                 "rejection_reasons": deduped,
             }
         ).removeprefix("sha256:")[:16],
@@ -305,6 +320,8 @@ def generate_bounded_artifact_contents(
         accepted=accepted,
         model_selection_receipt_id=model_selection.get("receipt_id"),
         model_selection_digest=model_selection.get("digest", ""),
+        model_runtime_binding_receipt_id=model_selection.get("model_runtime_binding_receipt_id"),
+        model_runtime_binding_digest=model_selection.get("model_runtime_binding_digest", ""),
     )
     return BoundedArtifactGenerationResult(
         decision=ARTIFACT_GENERATION_ACCEPT if accepted else ARTIFACT_GENERATION_REJECT,
@@ -398,6 +415,48 @@ def _model_selection_binding(value: Any, reasons: List[str]) -> Dict[str, Any]:
     }
 
 
+def _model_runtime_binding(
+    value: Any,
+    reasons: List[str],
+    *,
+    expected_surface: str,
+) -> Dict[str, Any]:
+    if value is None:
+        return {}
+    binding = _json_compatible_mapping(_mapping(value))
+    if not binding:
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    try:
+        receipt = rehydrate_model_runtime_binding_receipt(binding)
+    except Exception:
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    if (
+        receipt.decision != ModelRuntimeBindingDecision.BOUND
+        or not receipt.principal_model
+        or receipt.runtime_surface != expected_surface
+    ):
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    payload = receipt.to_reddog_bridge_payload()
+    return {
+        "receipt_id": receipt.selection_receipt_id,
+        "digest": _digest(binding),
+        "catalog_snapshot_id": receipt.catalog_snapshot_id,
+        "task_family": receipt.task_family,
+        "purpose": SelectionPurpose.PRODUCTION.value,
+        "selected_model_ids": [receipt.principal_model, *receipt.panel_models],
+        "role_assignments": list(payload.get("model_role_bindings") or ()),
+        "panel_topology_digest": "",
+        "lead_model": str(payload.get("lead_model") or ""),
+        "panel_models": [str(item) for item in payload.get("panel_models") or ()],
+        "model_runtime_binding_receipt_id": receipt.receipt_id,
+        "model_runtime_binding_digest": _digest(binding),
+        "runtime_surface": receipt.runtime_surface,
+    }
+
+
 def _json_compatible_mapping(value: Mapping[str, Any]) -> Dict[str, Any]:
     if not value:
         return {}
@@ -422,6 +481,7 @@ def _runtime_model_topology(
         "lead_model": lead,
         "panel_models": tuple(item for item in panel if item),
         "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
+        "model_runtime_binding_receipt_id": str(selection.get("model_runtime_binding_receipt_id") or ""),
     }
 
 

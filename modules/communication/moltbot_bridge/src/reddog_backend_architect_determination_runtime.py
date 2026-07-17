@@ -42,7 +42,9 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
     SelectionDecision,
     SelectionPurpose,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import ModelRuntimeBindingDecision
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
 
@@ -61,6 +63,7 @@ ALLOWED_ACTIONS = (ACTION_FIX, ACTION_RESEARCH_MORE, ACTION_REVISE, ACTION_STOP)
 ENV_ARCHITECT_RUNTIME_MODE = "REDDOG_BACKEND_ARCHITECT_RUNTIME_MODE"
 RUNTIME_MODE_FOUNDUPS_FUSION = "foundups_fusion"
 DEFAULT_MAX_PROMPT_CHARS = 24_000
+RUNTIME_SURFACE_BACKEND_ARCHITECT = "reddog_backend_architect"
 
 
 class ArchitectDeterminationReason:
@@ -89,6 +92,7 @@ class ArchitectDeterminationReason:
     STORE_REJECTED = "REJECT_ARCHITECT_DETERMINATION_STORE_REJECTED"
     PROMPT_BUDGET_EXCEEDED = "REJECT_ARCHITECT_DETERMINATION_PROMPT_BUDGET_EXCEEDED"
     MODEL_SELECTION_RECEIPT = "REJECT_ARCHITECT_DETERMINATION_MODEL_SELECTION_RECEIPT"
+    MODEL_RUNTIME_BINDING_RECEIPT = "REJECT_ARCHITECT_DETERMINATION_MODEL_RUNTIME_BINDING_RECEIPT"
 
 
 @dataclass(frozen=True)
@@ -180,6 +184,7 @@ class FoundupsFusionArchitectModelRunner:
             "bridge_meta": {
                 "architect_binding": dict(binding),
                 "model_selection_receipt_id": model_topology["model_selection_receipt_id"],
+                "model_runtime_binding_receipt_id": model_topology["model_runtime_binding_receipt_id"],
             },
         }
         try:
@@ -250,6 +255,8 @@ class ArchitectDeterminationReceipt:
     model_receipt_id: Optional[str]
     model_selection_receipt_id: Optional[str]
     model_selection_digest: Optional[str]
+    model_runtime_binding_receipt_id: Optional[str]
+    model_runtime_binding_digest: Optional[str]
     fusion_quorum_passed: bool
     wsp15_allocation_receipt_id: Optional[str]
     wsp15_allocation_digest: Optional[str]
@@ -477,6 +484,7 @@ def run_reddog_backend_architect_determination_runtime(
     store: ArchitectDeterminationStore | None = None,
     model_runner: ArchitectModelRunner | None = None,
     model_selection_receipt: Mapping[str, Any] | None = None,
+    model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     now_iso: str | None = None,
     timeout_seconds: int = 60,
 ) -> BackendArchitectDeterminationResult:
@@ -501,9 +509,21 @@ def run_reddog_backend_architect_determination_runtime(
     report_digests = _report_digests(reports)
     allocation_receipt_id = str(wsp15_allocation_receipt.get("receipt_id") or "").strip() or None
     allocation_digest = _digest(wsp15_allocation_receipt) if isinstance(wsp15_allocation_receipt, Mapping) else None
-    model_selection = _model_selection_binding(model_selection_receipt, reasons)
+    model_selection = _model_runtime_binding(
+        model_runtime_binding_receipt,
+        reasons,
+        expected_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+    )
+    if not model_selection:
+        model_selection = _model_selection_binding(model_selection_receipt, reasons)
     model_selection_receipt_id = str(model_selection.get("receipt_id") or "").strip() or None
     model_selection_digest = str(model_selection.get("digest") or "").strip() or None
+    model_runtime_binding_receipt_id = (
+        str(model_selection.get("model_runtime_binding_receipt_id") or "").strip() or None
+    )
+    model_runtime_binding_digest = (
+        str(model_selection.get("model_runtime_binding_digest") or "").strip() or None
+    )
     cycle_id = _cycle_id(
         snapshot=snapshot,
         report_bundle_id=report_bundle_id,
@@ -539,6 +559,8 @@ def run_reddog_backend_architect_determination_runtime(
             rejection_reasons=_dedupe(reasons),
             model_selection_receipt_id=model_selection_receipt_id,
             model_selection_digest=model_selection_digest,
+            model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+            model_runtime_binding_digest=model_runtime_binding_digest,
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
@@ -582,6 +604,8 @@ def run_reddog_backend_architect_determination_runtime(
             rejection_reasons=(ArchitectDeterminationReason.PROMPT_BUDGET_EXCEEDED,),
             model_selection_receipt_id=model_selection_receipt_id,
             model_selection_digest=model_selection_digest,
+            model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+            model_runtime_binding_digest=model_runtime_binding_digest,
         )
         return _result(receipt=receipt, persist_result=_persist_rejected(receipt))
     binding = fusion_gate.determination_binding.to_dict() if fusion_gate.determination_binding else {}
@@ -621,6 +645,8 @@ def run_reddog_backend_architect_determination_runtime(
             rejection_reasons=_dedupe(reasons),
             model_selection_receipt_id=model_selection_receipt_id,
             model_selection_digest=model_selection_digest,
+            model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+            model_runtime_binding_digest=model_runtime_binding_digest,
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
@@ -660,6 +686,8 @@ def run_reddog_backend_architect_determination_runtime(
             rejection_reasons=_dedupe(reasons),
             model_selection_receipt_id=model_selection_receipt_id,
             model_selection_digest=model_selection_digest,
+            model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+            model_runtime_binding_digest=model_runtime_binding_digest,
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
@@ -706,6 +734,8 @@ def run_reddog_backend_architect_determination_runtime(
         rejection_reasons=(),
         model_selection_receipt_id=model_selection_receipt_id,
         model_selection_digest=model_selection_digest,
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+        model_runtime_binding_digest=model_runtime_binding_digest,
         queue_candidate=queue_candidate,
         determination_receipt_id=receipt_stub_id,
     )
@@ -730,6 +760,8 @@ def run_reddog_backend_architect_determination_runtime(
             rejection_reasons=(ArchitectDeterminationReason.STORE_REJECTED, *persist_result.rejection_reasons),
             model_selection_receipt_id=model_selection_receipt_id,
             model_selection_digest=model_selection_digest,
+            model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+            model_runtime_binding_digest=model_runtime_binding_digest,
         )
         return _result(receipt=failed, persist_result=persist_result)
     return _result(receipt=receipt, persist_result=persist_result)
@@ -853,6 +885,51 @@ def _model_selection_binding(value: Any, reasons: list[str]) -> Mapping[str, Any
     }
 
 
+def _model_runtime_binding(
+    value: Any,
+    reasons: list[str],
+    *,
+    expected_surface: str,
+) -> Mapping[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, Mapping):
+        reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    binding = _json_compatible_mapping(value)
+    if not binding:
+        reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    try:
+        receipt = rehydrate_model_runtime_binding_receipt(binding)
+    except Exception:
+        reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    if (
+        receipt.decision != ModelRuntimeBindingDecision.BOUND
+        or not receipt.principal_model
+        or receipt.runtime_surface != expected_surface
+    ):
+        reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    payload = receipt.to_reddog_bridge_payload()
+    return {
+        "receipt_id": receipt.selection_receipt_id,
+        "digest": _digest(binding),
+        "catalog_snapshot_id": receipt.catalog_snapshot_id,
+        "task_family": receipt.task_family,
+        "purpose": SelectionPurpose.PRODUCTION.value,
+        "selected_model_ids": [receipt.principal_model, *receipt.panel_models],
+        "role_assignments": list(payload.get("model_role_bindings") or ()),
+        "panel_topology_digest": "",
+        "lead_model": str(payload.get("lead_model") or ""),
+        "panel_models": [str(item) for item in payload.get("panel_models") or ()],
+        "model_runtime_binding_receipt_id": receipt.receipt_id,
+        "model_runtime_binding_digest": _digest(binding),
+        "runtime_surface": receipt.runtime_surface,
+    }
+
+
 def _json_compatible_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
     try:
         normalized = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
@@ -876,6 +953,7 @@ def _runtime_model_topology(
         "lead_model": lead,
         "panel_models": tuple(item for item in panel if item),
         "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
+        "model_runtime_binding_receipt_id": str(selection.get("model_runtime_binding_receipt_id") or ""),
     }
 
 
@@ -1060,6 +1138,8 @@ def _receipt(
     rejection_reasons: Sequence[str],
     model_selection_receipt_id: Optional[str] = None,
     model_selection_digest: Optional[str] = None,
+    model_runtime_binding_receipt_id: Optional[str] = None,
+    model_runtime_binding_digest: Optional[str] = None,
     queue_candidate: ArchitectQueueCandidate | None = None,
     determination_receipt_id: Optional[str] = None,
 ) -> ArchitectDeterminationReceipt:
@@ -1080,6 +1160,8 @@ def _receipt(
         "model_receipt_id": model_result.model_receipt_id if model_result else None,
         "model_selection_receipt_id": model_selection_receipt_id,
         "model_selection_digest": model_selection_digest,
+        "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": model_runtime_binding_digest,
         "fusion_quorum_passed": _fusion_quorum_passed(model_result.review_packet) if model_result else False,
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
@@ -1108,6 +1190,8 @@ def _receipt(
         model_receipt_id=model_result.model_receipt_id if model_result else None,
         model_selection_receipt_id=model_selection_receipt_id,
         model_selection_digest=model_selection_digest,
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+        model_runtime_binding_digest=model_runtime_binding_digest,
         fusion_quorum_passed=_fusion_quorum_passed(model_result.review_packet) if model_result else False,
         wsp15_allocation_receipt_id=allocation_receipt_id,
         wsp15_allocation_digest=allocation_digest,

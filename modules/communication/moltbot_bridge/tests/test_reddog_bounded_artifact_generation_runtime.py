@@ -37,6 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation
     FAIL_CONTENT_INVALID,
     FAIL_EXPLICIT_REQUEST,
     FAIL_HOLOINDEX_EVIDENCE,
+    FAIL_MODEL_RUNTIME_BINDING_RECEIPT,
     FAIL_MODEL_SELECTION_RECEIPT,
     FAIL_PLANNED_ARTIFACTS,
     FAIL_RECEIPT_CHAIN,
@@ -44,9 +45,13 @@ from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation
     FAIL_RUNNER_REJECTED,
     FAIL_SECRET_IN_CONTENT,
     ArtifactGenerationModelResult,
+    RUNTIME_SURFACE_ARTIFACT_GENERATION,
     generate_bounded_artifact_contents,
 )
 from modules.communication.moltbot_bridge.src import reddog_bounded_artifact_generation_runtime
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -224,6 +229,37 @@ def test_model_selection_receipt_is_bound_into_runner_call() -> None:
     assert binding["receipt_id"] == selection["receipt_id"]
     assert binding["lead_model"] == "openai/gpt-5.6-code"
     assert binding["purpose"] == "production"
+
+
+def test_model_runtime_binding_receipt_is_bound_into_artifact_runner_call() -> None:
+    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION)
+    runner = FakeRunner()
+
+    result = generate_bounded_artifact_contents(
+        _request(model_runtime_binding_receipt=runtime_binding),
+        runner=runner,
+    )
+
+    assert result.accepted is True
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert result.receipt.model_runtime_binding_receipt_id == runtime_binding["receipt_id"]
+    assert result.receipt.model_runtime_binding_digest
+
+
+def test_mismatched_model_runtime_binding_receipt_rejects_before_artifact_runner() -> None:
+    runtime_binding = model_runtime_binding_receipt(runtime_surface="wrong_surface")
+    runner = FakeRunner()
+
+    result = generate_bounded_artifact_contents(
+        _request(model_runtime_binding_receipt=runtime_binding),
+        runner=runner,
+    )
+
+    assert result.decision == ARTIFACT_GENERATION_REJECT
+    assert FAIL_MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_tampered_model_selection_receipt_rejects_before_runner() -> None:

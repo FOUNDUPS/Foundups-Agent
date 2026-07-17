@@ -52,7 +52,9 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
     SelectionDecision,
     SelectionPurpose,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import ModelRuntimeBindingDecision
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
 from holo_index.query_receipt import (
@@ -73,6 +75,7 @@ EXTERNAL_RESEARCH_AUDIT_LANE = "external_research_audit"
 MODEL_WORKER_MODE = "model_backed_0102"
 ENV_READONLY_AUDIT_RUNTIME_MODE = "REDDOG_READONLY_AUDIT_RUNTIME_MODE"
 RUNTIME_MODE_FOUNDUPS_FUSION = "foundups_fusion"
+RUNTIME_SURFACE_READONLY_AUDIT = "reddog_readonly_audit_worker"
 
 MAX_MODEL_PROMPT_CHARS = 24_000
 MAX_MODEL_CONTEXT_CHARS = 36_000
@@ -354,6 +357,10 @@ class FoundupsFusionRepoAuditModelRunner:
         bridge_meta = {"readonly_repo_audit_binding": dict(binding)}
         if model_topology["model_selection_receipt_id"]:
             bridge_meta["model_selection_receipt_id"] = model_topology["model_selection_receipt_id"]
+        if model_topology["model_runtime_binding_receipt_id"]:
+            bridge_meta["model_runtime_binding_receipt_id"] = model_topology[
+                "model_runtime_binding_receipt_id"
+            ]
         bridge_payload = {
             "mode": "foundups_fusion",
             "lead_model": lead_model,
@@ -475,10 +482,16 @@ def execute_model_backed_repo_code_audit(
     if binding_reasons:
         return _reject(binding_reasons)
     model_selection_reasons: list[str] = []
-    model_selection = _model_selection_binding(
-        task_context.get("model_selection_receipt") or assignment.get("model_selection_receipt"),
+    model_selection = _model_runtime_binding(
+        task_context.get("model_runtime_binding_receipt") or assignment.get("model_runtime_binding_receipt"),
         model_selection_reasons,
+        expected_surface=RUNTIME_SURFACE_READONLY_AUDIT,
     )
+    if not model_selection:
+        model_selection = _model_selection_binding(
+            task_context.get("model_selection_receipt") or assignment.get("model_selection_receipt"),
+            model_selection_reasons,
+        )
     if model_selection_reasons:
         return _reject(model_selection_reasons)
     worker_plan = allocation.get("worker_plan") if isinstance(allocation.get("worker_plan"), Mapping) else {}
@@ -1287,6 +1300,51 @@ def _model_selection_binding(value: Any, reasons: list[str]) -> Mapping[str, Any
     }
 
 
+def _model_runtime_binding(
+    value: Any,
+    reasons: list[str],
+    *,
+    expected_surface: str,
+) -> Mapping[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, Mapping):
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    binding = _json_compatible_mapping(value)
+    if not binding:
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    try:
+        receipt = rehydrate_model_runtime_binding_receipt(binding)
+    except Exception:
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    if (
+        receipt.decision != ModelRuntimeBindingDecision.BOUND
+        or not receipt.principal_model
+        or receipt.runtime_surface != expected_surface
+    ):
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
+        return {}
+    payload = receipt.to_reddog_bridge_payload()
+    return {
+        "receipt_id": receipt.selection_receipt_id,
+        "digest": _digest(binding),
+        "catalog_snapshot_id": receipt.catalog_snapshot_id,
+        "task_family": receipt.task_family,
+        "purpose": SelectionPurpose.PRODUCTION.value,
+        "selected_model_ids": [receipt.principal_model, *receipt.panel_models],
+        "role_assignments": list(payload.get("model_role_bindings") or ()),
+        "panel_topology_digest": "",
+        "lead_model": str(payload.get("lead_model") or ""),
+        "panel_models": [str(item) for item in payload.get("panel_models") or ()],
+        "model_runtime_binding_receipt_id": receipt.receipt_id,
+        "model_runtime_binding_digest": _digest(binding),
+        "runtime_surface": receipt.runtime_surface,
+    }
+
+
 def _json_compatible_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
     try:
         normalized = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
@@ -1344,6 +1402,8 @@ def _model_binding(
         payload["model_selection"] = dict(model_selection)
         payload["model_selection_receipt_id"] = model_selection.get("receipt_id")
         payload["model_selection_digest"] = model_selection.get("digest")
+        payload["model_runtime_binding_receipt_id"] = model_selection.get("model_runtime_binding_receipt_id")
+        payload["model_runtime_binding_digest"] = model_selection.get("model_runtime_binding_digest")
     return payload
 
 
@@ -1722,6 +1782,8 @@ def _build_model_report(
     if model_selection:
         receipt_payload["model_selection_receipt_id"] = model_selection.get("receipt_id")
         receipt_payload["model_selection_digest"] = model_selection.get("digest")
+        receipt_payload["model_runtime_binding_receipt_id"] = model_selection.get("model_runtime_binding_receipt_id")
+        receipt_payload["model_runtime_binding_digest"] = model_selection.get("model_runtime_binding_digest")
     receipt = {**receipt_payload, "receipt_id": "sha256:" + _digest(receipt_payload)}
     report = {
         "assignment_id": str(assignment.get("assignment_id") or ""),
@@ -1845,6 +1907,8 @@ def _runtime_model_topology(
         "panel_models": tuple(item for item in panel if item),
         "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
         "model_selection_digest": str(selection.get("digest") or ""),
+        "model_runtime_binding_receipt_id": str(selection.get("model_runtime_binding_receipt_id") or ""),
+        "model_runtime_binding_digest": str(selection.get("model_runtime_binding_digest") or ""),
     }
 
 
@@ -1867,6 +1931,8 @@ def _model_route_receipt(
         "panel_models": [str(item) for item in panel_models],
         "model_selection_receipt_id": str(model_selection.get("receipt_id") or ""),
         "model_selection_digest": str(model_selection.get("digest") or ""),
+        "model_runtime_binding_receipt_id": str(model_selection.get("model_runtime_binding_receipt_id") or ""),
+        "model_runtime_binding_digest": str(model_selection.get("model_runtime_binding_digest") or ""),
         "reasoning_tier": str(binding.get("wsp15_reasoning_tier") or ""),
         "wsp15_priority": str(binding.get("wsp15_priority") or ""),
         "timeout_seconds": int(timeout_seconds or 0),
@@ -1896,6 +1962,8 @@ def _normalized_model_route_receipt(
         "panel_models": [],
         "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
         "model_selection_digest": str(selection.get("digest") or ""),
+        "model_runtime_binding_receipt_id": str(selection.get("model_runtime_binding_receipt_id") or ""),
+        "model_runtime_binding_digest": str(selection.get("model_runtime_binding_digest") or ""),
         "reasoning_tier": str(allocation.get("reasoning_tier") or ""),
         "wsp15_priority": str(allocation.get("priority") or ""),
         "timeout_seconds": 0,

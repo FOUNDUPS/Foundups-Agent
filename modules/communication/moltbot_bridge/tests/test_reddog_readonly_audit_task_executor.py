@@ -18,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     MODEL_WORKER_MODE,
     REPO_CODE_AUDIT_LANE,
+    RUNTIME_SURFACE_READONLY_AUDIT,
     FoundupsFusionRepoAuditModelRunner,
     CodeIndexReadOnlyQueryAdapter,
     HoloIndexReadOnlyQueryAdapter,
@@ -38,6 +39,9 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _model_selection,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
 )
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
@@ -477,6 +481,62 @@ def test_model_selection_receipt_is_bound_to_readonly_audit_runner(tmp_path: Pat
     route_receipt = worker_receipt["model_route_receipt"]
     assert route_receipt["model_selection_receipt_id"] == selection["receipt_id"]
     assert route_receipt["model_selection_digest"] == worker_receipt["model_selection_digest"]
+
+
+def test_model_runtime_binding_receipt_is_bound_to_readonly_audit_runner(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT)
+    context = _model_context()
+    context["model_runtime_binding_receipt"] = runtime_binding
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert result.report is not None
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    worker_receipt = result.report["worker_receipt"]
+    assert worker_receipt["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert worker_receipt["model_runtime_binding_digest"]
+    route_receipt = worker_receipt["model_route_receipt"]
+    assert route_receipt["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+
+
+def test_mismatched_model_runtime_binding_receipt_rejects_before_readonly_model_call(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    runtime_binding = model_runtime_binding_receipt(runtime_surface="wrong_surface")
+    context = _model_context()
+    context["model_runtime_binding_receipt"] = runtime_binding
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert result.no_model_call_performed is True
+    assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
 
 
 def test_tampered_model_selection_receipt_rejects_before_readonly_model_call(tmp_path: Path) -> None:
