@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CONTEXT_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Updated the RedDog model AutoResearch cycle-feedback startup hook to pass the
+  outside-repo plan receipt into feedback admission.
+- The feedback bootstrap now fails closed if the source plan receipt is missing,
+  malformed, inside the repo, tampered, or mismatched with the cycle receipt.
+- This binds task-family and catalog-snapshot context into the cycle feedback
+  record before any later planner-consumption work.
+- Boundary remains constrained: no provider call, benchmark execution,
+  HoloIndex re-index, PatternMemory write, model promotion, runtime binding,
+  worker spawn, source mutation, PR publication, reward settlement, shell
+  execution, or merge authority was added.
+
 ## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_MAIN_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

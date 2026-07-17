@@ -18,6 +18,10 @@ from .model_autoresearch_cycle_receipt import (
     ModelAutoResearchCycleReceipt,
     rehydrate_model_autoresearch_cycle_receipt,
 )
+from .model_champion_challenger_autoresearch import (
+    ModelAutoResearchPlanReceipt,
+    rehydrate_model_autoresearch_plan_receipt,
+)
 
 
 MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_ACCEPT = (
@@ -48,6 +52,8 @@ class ModelAutoResearchCycleFeedbackLedgerAdmissionReason:
     EXPLICIT_INVOKE_MISSING = "REJECT_EXPLICIT_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_MISSING"
     STORE_REQUIRED = "REJECT_INJECTED_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_STORE_REQUIRED"
     CYCLE_RECEIPT_INVALID = "REJECT_AUTORESEARCH_CYCLE_RECEIPT_INVALID"
+    SOURCE_PLAN_RECEIPT_INVALID = "REJECT_AUTORESEARCH_CYCLE_SOURCE_PLAN_RECEIPT_INVALID"
+    SOURCE_PLAN_RECEIPT_MISMATCH = "REJECT_AUTORESEARCH_CYCLE_SOURCE_PLAN_RECEIPT_MISMATCH"
     CYCLE_NOT_FEEDBACK_ELIGIBLE = "REJECT_AUTORESEARCH_CYCLE_NOT_FEEDBACK_ELIGIBLE"
     SECRET_IN_RECORD = "REJECT_SECRET_IN_AUTORESEARCH_CYCLE_FEEDBACK_RECORD"
     STORE_WRITE_FAILED = "REJECT_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_STORE_WRITE_FAILED"
@@ -91,6 +97,9 @@ class ModelAutoResearchCycleFeedbackLedgerAdmissionReceipt:
     source_plan_receipt_id: str
     campaign_execution_receipt_id: str
     promotion_gate_supply_receipt_id: str
+    task_family: Optional[str]
+    catalog_snapshot_id: Optional[str]
+    source_plan_receipt_digest: str
     executed_candidate_ids: List[str]
     promotion_gate_receipt_ids: List[str]
     feedback_record_id: Optional[str]
@@ -134,6 +143,7 @@ def admit_model_autoresearch_cycle_feedback(
     explicit_autoresearch_cycle_feedback_ledger_admission_requested: bool,
     cycle_receipt: ModelAutoResearchCycleReceipt | Mapping[str, Any],
     store: Optional[ModelAutoResearchCycleFeedbackLedgerStore],
+    source_plan_receipt: ModelAutoResearchPlanReceipt | Mapping[str, Any] | None = None,
 ) -> ModelAutoResearchCycleFeedbackLedgerAdmissionResult:
     """Admit one verified AutoResearch cycle receipt into an injected ledger."""
 
@@ -158,13 +168,38 @@ def admit_model_autoresearch_cycle_feedback(
             ],
             explicit_requested=True,
         )
+    plan: Optional[ModelAutoResearchPlanReceipt] = None
+    if source_plan_receipt is not None:
+        try:
+            plan = _plan_receipt(source_plan_receipt)
+        except Exception as exc:
+            return _reject(
+                [
+                    ModelAutoResearchCycleFeedbackLedgerAdmissionReason.SOURCE_PLAN_RECEIPT_INVALID,
+                    f"plan_error:{type(exc).__name__}",
+                ],
+                explicit_requested=True,
+            )
+        if plan.receipt_id != cycle.source_plan_receipt_id:
+            receipt = _admission_receipt(
+                cycle=cycle,
+                plan=plan,
+                record={},
+                record_id=None,
+                reasons=[ModelAutoResearchCycleFeedbackLedgerAdmissionReason.SOURCE_PLAN_RECEIPT_MISMATCH],
+            )
+            return _reject(
+                [ModelAutoResearchCycleFeedbackLedgerAdmissionReason.SOURCE_PLAN_RECEIPT_MISMATCH],
+                explicit_requested=True,
+                receipt=receipt,
+            )
 
     record: Dict[str, Any] = {}
     reasons: List[str] = []
     if not cycle.executed_candidate_ids or not cycle.promotion_gate_receipt_ids:
         reasons.append(ModelAutoResearchCycleFeedbackLedgerAdmissionReason.CYCLE_NOT_FEEDBACK_ELIGIBLE)
     if not reasons:
-        record = _feedback_record(cycle)
+        record = _feedback_record(cycle, plan)
         if _contains_secret(record):
             reasons.append(ModelAutoResearchCycleFeedbackLedgerAdmissionReason.SECRET_IN_RECORD)
     if reasons:
@@ -206,17 +241,35 @@ def _cycle_receipt(
     raise ValueError("invalid_autoresearch_cycle_receipt")
 
 
-def _feedback_record(cycle: ModelAutoResearchCycleReceipt) -> Dict[str, Any]:
+def _plan_receipt(
+    value: ModelAutoResearchPlanReceipt | Mapping[str, Any],
+) -> ModelAutoResearchPlanReceipt:
+    if isinstance(value, ModelAutoResearchPlanReceipt):
+        return value
+    if isinstance(value, Mapping):
+        return rehydrate_model_autoresearch_plan_receipt(value)
+    raise ValueError("invalid_autoresearch_plan_receipt")
+
+
+def _feedback_record(
+    cycle: ModelAutoResearchCycleReceipt,
+    plan: Optional[ModelAutoResearchPlanReceipt],
+) -> Dict[str, Any]:
     record = {
         "record_type": MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_RECORD_TYPE,
         "schema_version": MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_RECORD_SCHEMA,
         "cycle_receipt_id": cycle.receipt_id,
         "source_plan_receipt_id": cycle.source_plan_receipt_id,
+        "source_plan_context_bound": plan is not None,
         "campaign_execution_receipt_id": cycle.campaign_execution_receipt_id,
         "promotion_gate_supply_receipt_id": cycle.promotion_gate_supply_receipt_id,
         "executed_candidate_ids": list(cycle.executed_candidate_ids),
         "promotion_gate_receipt_ids": list(cycle.promotion_gate_receipt_ids),
     }
+    if plan is not None:
+        record["task_family"] = plan.policy.task_family
+        record["catalog_snapshot_id"] = plan.policy.catalog_snapshot_id
+        record["source_plan_receipt_digest"] = _digest(plan.to_dict())
     record["feedback_record_id"] = "model_autoresearch_cycle_feedback_" + _digest(record).removeprefix("sha256:")[:16]
     return record
 
@@ -224,6 +277,7 @@ def _feedback_record(cycle: ModelAutoResearchCycleReceipt) -> Dict[str, Any]:
 def _admission_receipt(
     *,
     cycle: ModelAutoResearchCycleReceipt,
+    plan: Optional[ModelAutoResearchPlanReceipt] = None,
     record: Mapping[str, Any],
     record_id: Optional[str],
     reasons: Sequence[str],
@@ -241,6 +295,9 @@ def _admission_receipt(
         source_plan_receipt_id=cycle.source_plan_receipt_id,
         campaign_execution_receipt_id=cycle.campaign_execution_receipt_id,
         promotion_gate_supply_receipt_id=cycle.promotion_gate_supply_receipt_id,
+        task_family=plan.policy.task_family if plan is not None else None,
+        catalog_snapshot_id=plan.policy.catalog_snapshot_id if plan is not None else None,
+        source_plan_receipt_digest=_digest(plan.to_dict()) if plan is not None else "",
         executed_candidate_ids=list(cycle.executed_candidate_ids),
         promotion_gate_receipt_ids=list(cycle.promotion_gate_receipt_ids),
         feedback_record_id=record_id,

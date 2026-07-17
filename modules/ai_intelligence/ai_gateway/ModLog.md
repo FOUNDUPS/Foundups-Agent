@@ -1,5 +1,39 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Feedback Context Binding
+
+**Who:** 0102 Codex
+**Type:** Feedback Ledger Hardening
+**Slice:** MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CONTEXT_BINDING_PHASE1
+
+**What:** Hardened AutoResearch cycle feedback admission so a supplied source
+plan receipt is rehydrated, matched to the cycle receipt, and bound into the
+feedback record.
+
+**Why:** Cycle feedback records need task-family and catalog-snapshot context
+before any later planner-consumption slice can safely use them as recursive
+model-improvement input.
+
+**Files:**
+- `src/model_autoresearch_cycle_feedback_ledger.py` - accepts optional source
+  plan receipts, rejects tampered/mismatched plans, and records bound plan
+  context.
+- `src/model_autoresearch_cycle_feedback_ledger_admission_bootstrap.py` -
+  requires the outside-repo plan receipt path and passes it into admission.
+- Tests updated for context-bound records, plan tamper rejection, and main
+  preflight argument binding.
+
+**Truth Boundary:**
+- IMPLEMENTED: context-bound cycle feedback records.
+- NOT IMPLEMENTED: planner consumption of cycle feedback records, provider
+  calls, benchmark execution, model promotion, PatternMemory writes, HoloIndex
+  re-indexing, runtime binding, worker spawn, shell execution, source mutation,
+  or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Ledger Admission Bootstrap
 
 **Who:** 0102 Codex

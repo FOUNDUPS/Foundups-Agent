@@ -2143,6 +2143,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             autoresearch_cycle_feedback = (
                 run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
                     repo_root=repo_root,
+                    plan_receipt_path=model_autoresearch_plan_receipt_path,
                     cycle_receipt_path=model_autoresearch_cycle_receipt_path,
                     output_path=model_autoresearch_cycle_feedback_ledger_path,
                 )
