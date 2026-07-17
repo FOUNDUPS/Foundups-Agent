@@ -1,5 +1,37 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Receipt
+
+**Who:** 0102 Codex
+**Type:** Receipt Integrity
+**Slice:** MODEL_AUTORESEARCH_CYCLE_RECEIPT_PHASE1
+
+**What:** Added a digest-bound cycle receipt that binds one AutoResearch plan,
+campaign execution, and promotion-gate supply artifact.
+
+**Why:** Recursive model improvement needs a single evidence object proving
+which plan was executed and which promotion-gate receipts resulted before a
+later queue stage or feedback ledger consumes the cycle output.
+
+**Files:**
+- `src/model_autoresearch_cycle_receipt.py` - rehydrates and binds plan,
+  execution, and gate-supply receipts; rejects plan/execution, execution/gate,
+  and candidate coverage mismatches; supports rehydration of the cycle receipt.
+- `tests/test_model_autoresearch_cycle_receipt.py` - verifies successful
+  binding, each mismatch rejection, receipt tamper rejection, and AST
+  import/call denylist controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: receipt-bound proof for plan -> execution -> promotion-gate
+  supply continuity.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, worker spawn,
+  shell execution, file output, or main.py preflight wiring.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Campaign Promotion Gate Supply Bootstrap
 
 **Who:** 0102 Codex
