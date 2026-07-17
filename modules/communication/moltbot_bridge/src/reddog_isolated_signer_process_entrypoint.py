@@ -25,7 +25,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
     SignerKeyProviderProfile,
     SignerKeyResolver,
-    build_test_only_signer_backend_from_provider,
+    build_signer_backend_from_provider,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     KernelPeerCredentialAttestor,
@@ -115,7 +115,7 @@ def run_reddog_isolated_signer_process_once(
     if not _peer_policy_valid(config.peer_policy):
         return _reject(FAIL_SIGNER_PROCESS_PEER_POLICY_INVALID)
 
-    key_result = build_test_only_signer_backend_from_provider(
+    key_result = build_signer_backend_from_provider(
         config.key_provider_profile,
         resolver,
         provider_mode=config.provider_mode,

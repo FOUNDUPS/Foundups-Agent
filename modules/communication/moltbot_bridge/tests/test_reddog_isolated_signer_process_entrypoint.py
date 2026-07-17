@@ -35,6 +35,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     AUDIT_KEY_PREFIX,
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
+    PROVIDER_MODE_WSP71_PERMISSIONED,
     SIGNING_KEY_PREFIX,
     SignerKeyProviderProfile,
 )
@@ -217,6 +218,28 @@ def test_entrypoint_composes_key_provider_attestor_and_service() -> None:
     response = backend.sign(_request(public_key), service.calls[0]["peer_attestor"].attest(_FakePeerCredSocket()))
     assert response.accepted is True
     assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+
+
+def test_entrypoint_accepts_wsp71_permissioned_provider_mode_without_test_override() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    service = CapturingService()
+
+    result = run_reddog_isolated_signer_process_once(
+        _config(
+            public_key,
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+            permission_snapshot_fresh=True,
+        ),
+        _resolver(private_key),
+        serve_once=service,
+    )
+
+    assert result.accepted is True
+    assert result.status == SIGNER_PROCESS_ENTRYPOINT_SERVED
+    assert result.key_provider_receipt["ok"] is True
+    assert len(service.calls) == 1
 
 
 class _FakePeerCredSocket:

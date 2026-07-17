@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_KEY_PROVIDER_WSP71_RUNTIME_MODE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added an explicit `WSP71_PERMISSIONED` signer key-provider mode alongside the
+  existing `TEST_ONLY_DRYRUN` mode.
+- Preserved default fail-closed behavior while allowing signer-owned runtime
+  wiring to accept an injected non-mock WSP-71-like resolver with a fresh
+  permission snapshot and no test-only override.
+- Rejected mock vault resolver use in `WSP71_PERMISSIONED` mode so the PoC
+  resolver cannot become a production credential authority.
+- Updated signer process and bounded signer service runtime wiring to call the
+  production-capable provider entrypoint name while keeping the old dry-run
+  function as a compatibility wrapper.
+- Boundary remains constrained: this does not configure a real vault, read
+  environment variables, load files, spawn a process, mutate source, enqueue
+  OpenClaw, dispatch Hermes, publish PRs, settle rewards, or re-index HoloIndex.
+
 ## 2026-07-17: REDDOG_SIGNER_SOCKET_RUNTIME_AVAILABILITY_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

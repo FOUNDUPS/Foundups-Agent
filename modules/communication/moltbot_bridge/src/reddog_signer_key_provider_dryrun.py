@@ -1,11 +1,11 @@
-"""Test-only RedDog signer key provider dry-run boundary.
+"""RedDog signer key provider boundary.
 
 Slice: REDDOG_SIGNER_KEY_PROVIDER_DRYRUN_PHASE1
 
-This module validates the signer key-provider contract with injected test-only
-resolver output. It can construct an ``Ed25519SignerBackend`` only when the
-caller explicitly enables the test-only dry-run mode and supplies a fresh
-permission snapshot. It does not connect to a real vault, read environment
+This module validates the signer key-provider contract with an injected
+WSP-71-like resolver. It can construct an ``Ed25519SignerBackend`` only when
+the caller explicitly selects a supported provider mode and supplies a fresh
+permission snapshot. It does not connect to a vault by itself, read environment
 variables, load files, bind sockets, spawn processes, mutate repository state,
 enqueue OpenClaw, dispatch Hermes, or re-index HoloIndex.
 """
@@ -41,6 +41,7 @@ from modules.infrastructure.secrets_mcp.src.vault_resolver import (
 
 
 PROVIDER_MODE_TEST_ONLY_DRYRUN = "TEST_ONLY_DRYRUN"
+PROVIDER_MODE_WSP71_PERMISSIONED = "WSP71_PERMISSIONED"
 
 FAIL_PROVIDER_PROFILE_INVALID = "FAIL_PROVIDER_PROFILE_INVALID"
 FAIL_PROVIDER_PERMISSION_DENIED = "FAIL_PROVIDER_PERMISSION_DENIED"
@@ -143,17 +144,22 @@ def build_test_only_signer_backend_from_provider(
     allow_test_only_key_material: bool = False,
     permission_snapshot_fresh: bool = False,
 ) -> SignerKeyProviderDryRunResult:
-    """Validate a signer profile and build a test-only Ed25519 signer backend.
+    """Validate a signer profile and build an Ed25519 signer backend.
 
     The default path rejects. A caller must explicitly opt into
-    ``TEST_ONLY_DRYRUN`` and provide a fresh permission snapshot. This prevents
-    accidental production use while allowing contract-driven tests to prove the
-    existing signer backend can be supplied from an injected resolver boundary.
+    ``TEST_ONLY_DRYRUN`` or ``WSP71_PERMISSIONED`` and provide a fresh
+    permission snapshot. ``TEST_ONLY_DRYRUN`` additionally requires
+    ``allow_test_only_key_material``. ``WSP71_PERMISSIONED`` rejects the mock
+    vault resolver and any test-only override flag.
     """
 
     if not isinstance(profile, SignerKeyProviderProfile):
         return _reject(FAIL_PROVIDER_PROFILE_INVALID)
-    if provider_mode != PROVIDER_MODE_TEST_ONLY_DRYRUN or not allow_test_only_key_material:
+    if not _provider_mode_authorized(
+        provider_mode,
+        allow_test_only_key_material=allow_test_only_key_material,
+        resolver=resolver,
+    ):
         return _reject(FAIL_PROVIDER_MOCK_IN_PRODUCTION, profile=profile)
     if not _profile_ascii_and_complete(profile):
         return _reject(FAIL_PROVIDER_PROFILE_INVALID, profile=profile)
@@ -209,6 +215,45 @@ def build_test_only_signer_backend_from_provider(
             audit_mac_builder=_HmacAuditMacBuilder(audit_key),
         ),
     )
+
+
+def build_signer_backend_from_provider(
+    profile: SignerKeyProviderProfile,
+    resolver: SignerKeyResolver,
+    *,
+    provider_mode: str = "",
+    allow_test_only_key_material: bool = False,
+    permission_snapshot_fresh: bool = False,
+) -> SignerKeyProviderDryRunResult:
+    """Compatibility wrapper with the production-capable boundary name."""
+
+    return build_test_only_signer_backend_from_provider(
+        profile,
+        resolver,
+        provider_mode=provider_mode,
+        allow_test_only_key_material=allow_test_only_key_material,
+        permission_snapshot_fresh=permission_snapshot_fresh,
+    )
+
+
+def _provider_mode_authorized(
+    provider_mode: str,
+    *,
+    allow_test_only_key_material: bool,
+    resolver: SignerKeyResolver,
+) -> bool:
+    if provider_mode == PROVIDER_MODE_TEST_ONLY_DRYRUN:
+        return bool(allow_test_only_key_material)
+    if provider_mode == PROVIDER_MODE_WSP71_PERMISSIONED:
+        if allow_test_only_key_material:
+            return False
+        return not _resolver_is_mock_vault(resolver)
+    return False
+
+
+def _resolver_is_mock_vault(resolver: object) -> bool:
+    cls = resolver.__class__
+    return cls.__name__ == "MockVaultResolver" or cls.__module__.endswith("vault_resolver")
 
 
 def _resolve(reference: str, requester_id: str, resolver: SignerKeyResolver) -> ResolveResult:
@@ -374,8 +419,10 @@ __all__ = [
     "FAIL_PROVIDER_RESOLVER_UNAVAILABLE",
     "FAIL_PROVIDER_TTL_EXPIRED",
     "PROVIDER_MODE_TEST_ONLY_DRYRUN",
+    "PROVIDER_MODE_WSP71_PERMISSIONED",
     "SIGNING_KEY_PREFIX",
     "SignerKeyProviderDryRunResult",
     "SignerKeyProviderProfile",
+    "build_signer_backend_from_provider",
     "build_test_only_signer_backend_from_provider",
 ]

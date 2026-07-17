@@ -34,11 +34,14 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     FAIL_PROVIDER_RESOLVER_UNAVAILABLE,
     FAIL_PROVIDER_TTL_EXPIRED,
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
+    PROVIDER_MODE_WSP71_PERMISSIONED,
     SIGNING_KEY_PREFIX,
     SignerKeyProviderProfile,
+    build_signer_backend_from_provider,
     build_test_only_signer_backend_from_provider,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import (
+    MockVaultResolver,
     ResolveErrorCode,
     ResolveResult,
     hash_reference,
@@ -196,6 +199,53 @@ def test_default_path_rejects_without_explicit_test_only_mode() -> None:
     assert result.ok is False
     assert result.rejection_code == FAIL_PROVIDER_MOCK_IN_PRODUCTION
     assert result.backend is None
+
+
+def test_wsp71_permissioned_mode_accepts_injected_non_mock_resolver_without_test_only_override() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    resolver = _resolver(private_key)
+
+    result = build_signer_backend_from_provider(
+        _profile(public_key),
+        resolver,
+        provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=False,
+        permission_snapshot_fresh=True,
+    )
+
+    assert result.ok is True
+    assert result.backend is not None
+    assert result.rejection_code is None
+    assert resolver.calls == [
+        ("op://test-vault/reddog-signing/private", "signer:reddog-authority"),
+        ("op://test-vault/reddog-audit/mac", "signer:reddog-authority"),
+    ]
+
+
+def test_wsp71_permissioned_mode_rejects_test_override_and_mock_vault_resolver() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+
+    test_override = build_signer_backend_from_provider(
+        _profile(public_key),
+        _resolver(private_key),
+        provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=True,
+        permission_snapshot_fresh=True,
+    )
+    mock_vault = build_signer_backend_from_provider(
+        _profile(public_key),
+        MockVaultResolver(),
+        provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=False,
+        permission_snapshot_fresh=True,
+    )
+
+    assert test_override.ok is False
+    assert test_override.rejection_code == FAIL_PROVIDER_MOCK_IN_PRODUCTION
+    assert mock_vault.ok is False
+    assert mock_vault.rejection_code == FAIL_PROVIDER_MOCK_IN_PRODUCTION
 
 
 def test_acceptance_builds_backend_and_receipt_excludes_secret_values() -> None:
