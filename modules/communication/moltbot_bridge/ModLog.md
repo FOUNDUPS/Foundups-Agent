@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_SIGNED_WORKER_QUEUE_STAGE_PUBLICATION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Specialized signed worker dispatch dry-run output for code-bearing resident
+  queue plans: `openclaw_candidate/candidate_queue_review` is no longer
+  emitted for coding chains; the planner emits
+  `queue_stage_worker/openclaw/queue_stage_progress` instead.
+- Preserved the legacy OpenClaw candidate-review task for non-code worker
+  plans so advisory/review-only flows remain compatible.
+- Strengthened the resident queue bootstrap regression to prove
+  `worker_dispatch_runtime` publishes the queue-stage worker directly from the
+  WSP_15 worker plan, without manually seeding a second AgentDB task.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_STAGE_OWNERSHIP_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
