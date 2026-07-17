@@ -172,6 +172,126 @@ def test_run_cycle_claims_signed_worker_tasks_when_enabled(tmp_path):
     assert any(event[0] == "supervisor_execute" for event in events)
 
 
+def test_run_cycle_claims_signed_worker_tasks_when_profile_enables_supervisor_loop(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 10,
+        "latest_sequence_id": 10,
+    }
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock(
+        return_value={
+            "accepted": True,
+            "status": "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT",
+            "claimed_count": 1,
+            "completed_task_ids": ("task-profile",),
+            "failed_task_ids": (),
+            "rejection_reasons": (),
+        }
+    )
+    pending_task = {
+        "task_id": "task-profile",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "context": {
+            "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            "worker_runtime": "openclaw",
+            "capability": "candidate_queue_review",
+        },
+    }
+
+    with patch.dict(
+        os.environ,
+        {
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+            "OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS": "3",
+        },
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        result = supervisor.run_cycle()
+
+    assert result["plan"]["action"] == "claim_signed_worker_tasks_until_idle"
+    assert result["plan"]["max_claims"] == 3
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_called_once_with(
+        max_claims=3
+    )
+    assert result["verify"]["ok"] is True
+
+
+def test_run_cycle_explicit_zero_disables_profile_signed_worker_loop(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 10,
+        "latest_sequence_id": 10,
+    }
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock()
+    pending_task = {
+        "task_id": "task-profile-disabled",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "context": {
+            "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            "worker_runtime": "openclaw",
+            "capability": "candidate_queue_review",
+        },
+    }
+
+    with patch.dict(
+        os.environ,
+        {
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+            "OPENCLAW_SIGNED_WORKER_TASKS_ENABLED": "0",
+            "OPENCLAW_AUTO_TASKS_ENABLED": "0",
+        },
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        result = supervisor.run_cycle()
+
+    assert result["triage"]["kind"] == "idle"
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_not_called()
+
+
 def test_run_cycle_claims_signed_0102_readonly_tasks_when_readonly_gate_enabled(tmp_path):
     from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
         SIGNED_WORKER_DISPATCH_TASK_SOURCE,
