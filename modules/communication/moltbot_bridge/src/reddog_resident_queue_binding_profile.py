@@ -109,6 +109,9 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
         "model_autoresearch_campaign_promotion_policies.json"
     ),
     "REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH": "model_autoresearch_cycle_receipt.json",
+    "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_PATH": (
+        "model_autoresearch_cycle_feedback.jsonl"
+    ),
     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": "memex_supply_receipt.json",
     "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": "principal_authority_record.json",
     "REDDOG_PERMISSION_SNAPSHOT_PATH": "permission_snapshot.json",
