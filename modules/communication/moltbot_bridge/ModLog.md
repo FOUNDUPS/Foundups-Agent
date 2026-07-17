@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_PATH` as a
+  profile-derived resident runtime path.
+- Wired `main.py` to optionally run the model AutoResearch campaign execution
+  artifact-supply bootstrap after plan artifact supply and before FIX
+  promotion.
+- The hook is disabled by default and uses only the deterministic fixture
+  runner/verifier mode exposed by the AI gateway bootstrap.
+- Enforced mode can block startup when the campaign execution artifact cannot
+  be materialized.
+- Boundary remains constrained: no RedDog extension runtime, provider call,
+  shell execution, HoloIndex re-index, PatternMemory write, model promotion,
+  worker spawn, source mutation, PR publication, reward settlement, or merge
+  authority was added.
+
 ## 2026-07-17: REDDOG_RESIDENT_MODEL_FEEDBACK_LEDGER_PROFILE_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

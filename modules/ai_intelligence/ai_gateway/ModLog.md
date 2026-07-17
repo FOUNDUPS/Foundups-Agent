@@ -1,5 +1,40 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Campaign Execution Artifact Supply Bootstrap
+
+**Who:** 0102 Codex
+**Type:** Runtime Preflight Adapter
+**Slice:** REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**What:** Added a disabled-by-default bootstrap for materializing
+`ModelAutoResearchCampaignExecutionReceipt` artifacts from outside-repo runtime
+inputs.
+
+**Why:** The model AutoResearch lane needs a governed way to advance from a
+verified campaign plan to a receipt-bearing benchmark execution artifact before
+any promotion, runtime model binding, or PatternMemory feedback can trust it.
+
+**Files:**
+- `src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py` -
+  reads outside-repo plan, candidate pool, and held-out task JSON; runs the
+  bounded campaign executor with deterministic fixture seams; writes only an
+  outside-repo execution receipt.
+- `tests/test_model_autoresearch_campaign_execution_artifact_supply_bootstrap.py`
+  - verifies successful receipt materialization, rehydration, fail-closed path
+  handling, verifier mismatch rejection, unsupported mode rejection, and AST
+  import/call denylist controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: opt-in campaign execution artifact supply using deterministic
+  fixture runner/verifier seams and outside-repo receipt output.
+- NOT IMPLEMENTED: provider calls, network research, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime model binding, worker
+  spawn, shell execution, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Campaign Execution Receipt Rehydration
 
 **Who:** 0102 Codex
