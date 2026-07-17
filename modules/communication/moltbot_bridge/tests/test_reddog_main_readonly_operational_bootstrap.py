@@ -946,7 +946,14 @@ def test_main_preflight_e2e_runtime_reject_blocks_when_enforced(capsys) -> None:
     assert "Startup blocked by REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED=1" in output
 
 
-def _resident_cycle_result(*, accepted: bool = True):
+def _resident_cycle_result(
+    *,
+    accepted: bool = True,
+    architect_action: str | None = None,
+    queue_candidate_count: int | None = None,
+):
+    action = architect_action if architect_action is not None else ("FIX" if accepted else None)
+    candidates = queue_candidate_count if queue_candidate_count is not None else (1 if accepted else 0)
     return SimpleNamespace(
         accepted=accepted,
         status="DETERMINED" if accepted else "REJECT",
@@ -959,10 +966,10 @@ def _resident_cycle_result(*, accepted: bool = True):
         task_status_counts={"completed": 2} if accepted else {},
         openclaw_claims=({"task_id": "task-1"}, {"task_id": "task-2"}) if accepted else (),
         final_bootstrap=None,
-        architect_action="FIX" if accepted else None,
+        architect_action=action,
         architect_next_slice="REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1" if accepted else None,
         architect_determination_id="sha256:architect-main-resident" if accepted else None,
-        queue_candidate_count=1 if accepted else 0,
+        queue_candidate_count=candidates,
         duplicate_intent_reused=False,
         recovered_existing_cycle=False,
         retry_count=0,
@@ -1027,6 +1034,10 @@ def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_pat
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
             assert os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] == "sha256:intent-main-resident"
             assert os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] == "1"
+            assert (
+                os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"]
+                == "signed_0102_bounded_code_fusion_worktree_draft_pr"
+            )
 
     kwargs = mocked.call_args.kwargs
     assert kwargs["repo_root"] == REPO_ROOT
@@ -1050,9 +1061,125 @@ def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_pat
     assert "architect_action=FIX" in output
     assert "queue_candidates=1" in output
     assert "auto_fix_handoff=True" in output
+    assert "auto_queue_profile=signed_0102_bounded_code_fusion_worktree_draft_pr" in output
     assert "read_only_authority=True" in output
     assert "no_repo_mutation=True" in output
     assert "no_holoindex_reindex=True" in output
+
+
+def test_main_preflight_resident_cycle_respects_explicit_queue_profile(tmp_path) -> None:
+    import main
+
+    external_snapshot = tmp_path / "external_research_snapshot.json"
+    external_snapshot.write_text(json.dumps({"snapshots": []}), encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"] == "signed_0102_bounded_code"
+
+
+def test_main_preflight_resident_cycle_can_disable_auto_queue_profile(tmp_path) -> None:
+    import main
+
+    external_snapshot = tmp_path / "external_research_snapshot.json"
+    external_snapshot.write_text(json.dumps({"snapshots": []}), encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE": "0",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE" not in os.environ
+
+
+def test_main_preflight_resident_cycle_rejects_invalid_auto_queue_profile(tmp_path, capsys) -> None:
+    import main
+
+    external_snapshot = tmp_path / "external_research_snapshot.json"
+    external_snapshot.write_text(json.dumps({"snapshots": []}), encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE": "unsafe_profile",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE" not in os.environ
+
+    output = capsys.readouterr().out
+    assert "auto_queue_profile=(none)" in output
+
+
+def test_main_preflight_resident_cycle_requires_fix_queue_candidate_for_auto_profile(tmp_path) -> None:
+    import main
+
+    external_snapshot = tmp_path / "external_research_snapshot.json"
+    external_snapshot.write_text(json.dumps({"snapshots": []}), encoding="utf-8")
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(architect_action="STOP", queue_candidate_count=1),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE" not in os.environ
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(architect_action="FIX", queue_candidate_count=0),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE" not in os.environ
 
 
 def test_main_preflight_resident_cycle_respects_auto_fix_handoff_opt_out(tmp_path) -> None:

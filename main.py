@@ -1641,6 +1641,35 @@ def _reddog_resident_architect_intent_id(
     return f"sha256:{digest}"
 
 
+def _reddog_resident_architect_auto_queue_profile(result: Any) -> str:
+    if "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE" in os.environ:
+        return ""
+    if not getattr(result, "accepted", False):
+        return ""
+    if str(getattr(result, "architect_action", "") or "").strip().upper() != "FIX":
+        return ""
+    if int(getattr(result, "queue_candidate_count", 0) or 0) != 1:
+        return ""
+
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
+            RESIDENT_QUEUE_PROFILES,
+        )
+    except Exception:
+        return ""
+
+    raw = os.getenv(
+        "REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE",
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR,
+    ).strip().lower()
+    if raw in {"0", "false", "off", "none"}:
+        return ""
+    if raw in {"", "1"}:
+        raw = PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR
+    return raw if raw in RESIDENT_QUEUE_PROFILES else ""
+
+
 def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bool:
     """
     Optionally run one durable AgentDB resident RedDog architect cycle.
@@ -1665,6 +1694,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         REDDOG_RESIDENT_ARCHITECT_RETRY=0                  Retry failed/cancelled cycle
         REDDOG_RESIDENT_ARCHITECT_CANCEL=0                 Cancel running cycle
         REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF=1        Auto-arm safe FIX handoff after accepted FIX
+        REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE        Optional downstream queue profile, default draft-PR
         REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH             Approved external snapshot JSON
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Existing work-state JSON
         HOLOINDEX_FRESHNESS_RECEIPT                        Existing HoloIndex receipt
@@ -1734,6 +1764,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         and os.getenv("REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF", "1") != "0"
         and "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" not in os.environ
     )
+    auto_queue_profile = _reddog_resident_architect_auto_queue_profile(result)
     print(
         f"[REDDOG-RESIDENT-CYCLE] preflight={status} status={result.status} "
         f"intent={result.intent_id} cycle={result.cycle_id} snapshot={result.snapshot_id or '(none)'} "
@@ -1742,7 +1773,8 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         f"duplicate={result.duplicate_intent_reused} architect_action={result.architect_action or '(none)'} "
         f"architect_next_slice={result.architect_next_slice or '(none)'} "
         f"architect_determination={result.architect_determination_id or '(none)'} "
-        f"queue_candidates={result.queue_candidate_count} auto_fix_handoff={auto_fix_handoff} reasons={reasons}"
+        f"queue_candidates={result.queue_candidate_count} auto_fix_handoff={auto_fix_handoff} "
+        f"auto_queue_profile={auto_queue_profile or '(none)'} reasons={reasons}"
     )
     print(
         "[REDDOG-RESIDENT-CYCLE] "
@@ -1760,6 +1792,8 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] = result.intent_id
         if auto_fix_handoff:
             os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] = "1"
+        if auto_queue_profile:
+            os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"] = auto_queue_profile
         return True
 
     if enforced:

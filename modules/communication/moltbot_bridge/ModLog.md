@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_ARCHITECT_QUEUE_PROFILE_AUTOWIRE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Updated the durable resident RedDog architect preflight to auto-select the
+  existing signed resident queue binding profile after an accepted FIX
+  determination with exactly one queue candidate.
+- Default profile is `signed_0102_bounded_code_fusion_worktree_draft_pr`,
+  which enables the existing bounded code, Fusion artifact, isolated worktree,
+  independent evidence, and verified draft-PR control-plane stages while
+  leaving PatternMemory, merge, shell, reward, HoloIndex re-index, and live
+  enqueue disabled.
+- Explicit `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE` remains authoritative, and
+  `REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE=0` disables auto-selection.
+- Invalid auto-profile values and non-FIX or non-single-candidate outcomes fail
+  closed by leaving the queue profile unset.
+
 ## 2026-07-17: REDDOG_RESIDENT_ARCHITECT_FIX_HANDOFF_AUTOWIRE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
