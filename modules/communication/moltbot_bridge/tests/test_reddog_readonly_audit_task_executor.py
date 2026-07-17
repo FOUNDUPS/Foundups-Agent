@@ -36,6 +36,9 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     allocate_reddog_wsp15_receipt,
     canonical_reddog_wsp15_allocation_digest,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _model_selection,
+)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -444,6 +447,63 @@ def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_p
     assert result.report["worker_receipt"]["model_receipt_id"] == "model-receipt-1"
     assert result.report["worker_receipt"]["model_route_receipt_id"].startswith("sha256:")
     assert result.report["findings"][0]["evidence_refs"][0] in result.report["evidence_refs"]
+
+
+def test_model_selection_receipt_is_bound_to_readonly_audit_runner(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    selection = _model_selection()
+    context = _model_context()
+    context["model_selection_receipt"] = selection
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is True
+    assert result.report is not None
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["receipt_id"] == selection["receipt_id"]
+    assert binding["purpose"] == "production"
+    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    worker_receipt = result.report["worker_receipt"]
+    assert worker_receipt["model_selection_receipt_id"] == selection["receipt_id"]
+    assert worker_receipt["model_selection_digest"]
+    route_receipt = worker_receipt["model_route_receipt"]
+    assert route_receipt["model_selection_receipt_id"] == selection["receipt_id"]
+    assert route_receipt["model_selection_digest"] == worker_receipt["model_selection_digest"]
+
+
+def test_tampered_model_selection_receipt_rejects_before_readonly_model_call(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    selection = _model_selection()
+    selection["selected_model_ids"] = ["attacker/model"]
+    context = _model_context()
+    context["model_selection_receipt"] = selection
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.MODEL_SELECTION_RECEIPT in result.rejection_reasons
+    assert result.no_model_call_performed is True
+    assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
 
 
 def test_model_backed_runtime_freshness_lane_uses_same_guarded_path(tmp_path: Path) -> None:
@@ -1174,6 +1234,48 @@ def test_production_runner_uses_fusion_synthesis_excerpt_for_json(tmp_path: Path
     assert result.report is not None
     assert result.report["summary"] == "Synthesis JSON accepted."
     assert result.report["worker_receipt"]["model_route_receipt"]["made_network_call"] is True
+
+
+def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
+    calls = []
+    monkeypatch.setenv("REDDOG_READONLY_AUDIT_RUNTIME_MODE", "foundups_fusion")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+
+    def fake_fusion(api_key, redacted_prompt, history, payload):  # noqa: ANN001, ARG001
+        calls.append(dict(payload))
+        return {
+            "ok": True,
+            "content": '{"summary":"ok","findings":[],"evidence_refs":[]}',
+            "review_packet": {"receipt_id": "fusion-receipt-1"},
+        }
+
+    monkeypatch.setattr(readonly_worker_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
+
+    result = FoundupsFusionRepoAuditModelRunner(
+        lead_model="legacy/lead",
+        panel_models=("legacy/panel",),
+    ).run_repo_code_audit(
+        prompt="Return strict JSON.",
+        context="Read-only repository evidence.",
+        binding={
+            "wsp15_reasoning_tier": "HIGH",
+            "wsp15_priority": "P1",
+            "model_selection": {
+                "receipt_id": "model_selection_receipt:test",
+                "digest": "sha256:model-selection",
+                "lead_model": "openai/gpt-5.6-code",
+                "panel_models": ["anthropic/claude-opus-5"],
+            },
+        },
+        timeout_seconds=30,
+    )
+
+    assert result.ok is True
+    assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
+    assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
+    assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == "model_selection_receipt:test"
+    assert result.route_receipt["lead_model"] == "openai/gpt-5.6-code"
+    assert result.route_receipt["model_selection_receipt_id"] == "model_selection_receipt:test"
 
 
 def test_model_backed_requires_valid_wsp15_receipt(tmp_path: Path) -> None:

@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 import importlib.util
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
@@ -47,6 +47,13 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_first_external_re
 )
 from modules.communication.moltbot_bridge.src.reddog_memex_snapshot_projection_supplier import (
     supply_assignment_bound_memex_projection,
+)
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
+    SelectionDecision,
+    SelectionPurpose,
+)
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_selection_receipt,
 )
 from holo_index.query_receipt import (
     SOURCE_CLASS_CODEINDEX,
@@ -289,13 +296,20 @@ class FoundupsFusionRepoAuditModelRunner:
         timeout_seconds: int,
     ) -> RepoAuditModelResult:
         started = time.monotonic()
+        model_topology = _runtime_model_topology(
+            binding,
+            default_lead=self.lead_model,
+            default_panel=self.panel_models,
+        )
+        lead_model = str(model_topology["lead_model"])
+        panel_models = tuple(model_topology["panel_models"])
         if os.getenv(ENV_READONLY_AUDIT_RUNTIME_MODE, "").strip() != RUNTIME_MODE_FOUNDUPS_FUSION:
             return _model_reject(
                 "runtime_mode_not_enabled",
                 route_receipt=_model_route_receipt(
                     binding=binding,
-                    lead_model=self.lead_model,
-                    panel_models=self.panel_models,
+                    lead_model=lead_model,
+                    panel_models=panel_models,
                     timeout_seconds=timeout_seconds,
                     max_tokens=self.max_tokens,
                     made_network_call=False,
@@ -309,8 +323,8 @@ class FoundupsFusionRepoAuditModelRunner:
                 "fusion_bridge_unavailable",
                 route_receipt=_model_route_receipt(
                     binding=binding,
-                    lead_model=self.lead_model,
-                    panel_models=self.panel_models,
+                    lead_model=lead_model,
+                    panel_models=panel_models,
                     timeout_seconds=timeout_seconds,
                     max_tokens=self.max_tokens,
                     made_network_call=False,
@@ -325,8 +339,8 @@ class FoundupsFusionRepoAuditModelRunner:
                 "redaction_blocked",
                 route_receipt=_model_route_receipt(
                     binding=binding,
-                    lead_model=self.lead_model,
-                    panel_models=self.panel_models,
+                    lead_model=lead_model,
+                    panel_models=panel_models,
                     timeout_seconds=timeout_seconds,
                     max_tokens=self.max_tokens,
                     made_network_call=False,
@@ -337,16 +351,19 @@ class FoundupsFusionRepoAuditModelRunner:
         user_payload = gate.redacted_prompt
         if gate.redacted_context:
             user_payload = gate.redacted_prompt + "\n\n" + gate.redacted_context
+        bridge_meta = {"readonly_repo_audit_binding": dict(binding)}
+        if model_topology["model_selection_receipt_id"]:
+            bridge_meta["model_selection_receipt_id"] = model_topology["model_selection_receipt_id"]
         bridge_payload = {
             "mode": "foundups_fusion",
-            "lead_model": self.lead_model,
-            "panel_models": list(self.panel_models),
+            "lead_model": lead_model,
+            "panel_models": list(panel_models),
             "max_tokens": self.max_tokens,
             "temperature": self.temperature,
             "timeout": timeout_seconds,
             "response_contract": "strict_json_repo_code_audit.v1",
             "_redacted_evidence_context": gate.redacted_context or "",
-            "bridge_meta": {"readonly_repo_audit_binding": dict(binding)},
+            "bridge_meta": bridge_meta,
         }
         try:
             _run_foundups_fusion = _load_foundups_fusion_runner()
@@ -356,8 +373,8 @@ class FoundupsFusionRepoAuditModelRunner:
                 ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT,
                 route_receipt=_model_route_receipt(
                     binding=binding,
-                    lead_model=self.lead_model,
-                    panel_models=self.panel_models,
+                    lead_model=lead_model,
+                    panel_models=panel_models,
                     timeout_seconds=timeout_seconds,
                     max_tokens=self.max_tokens,
                     made_network_call=False,
@@ -370,8 +387,8 @@ class FoundupsFusionRepoAuditModelRunner:
                 "fusion_bridge_call_failed",
                 route_receipt=_model_route_receipt(
                     binding=binding,
-                    lead_model=self.lead_model,
-                    panel_models=self.panel_models,
+                    lead_model=lead_model,
+                    panel_models=panel_models,
                     timeout_seconds=timeout_seconds,
                     max_tokens=self.max_tokens,
                     made_network_call=False,
@@ -389,8 +406,8 @@ class FoundupsFusionRepoAuditModelRunner:
                 reason,
                 route_receipt=_model_route_receipt(
                     binding=binding,
-                    lead_model=self.lead_model,
-                    panel_models=self.panel_models,
+                    lead_model=lead_model,
+                    panel_models=panel_models,
                     timeout_seconds=timeout_seconds,
                     max_tokens=self.max_tokens,
                     made_network_call=True,
@@ -417,8 +434,8 @@ class FoundupsFusionRepoAuditModelRunner:
             rejection_reasons=(),
             route_receipt=_model_route_receipt(
                 binding=binding,
-                lead_model=self.lead_model,
-                panel_models=self.panel_models,
+                lead_model=lead_model,
+                panel_models=panel_models,
                 timeout_seconds=timeout_seconds,
                 max_tokens=self.max_tokens,
                 made_network_call=True,
@@ -457,6 +474,13 @@ def execute_model_backed_repo_code_audit(
     )
     if binding_reasons:
         return _reject(binding_reasons)
+    model_selection_reasons: list[str] = []
+    model_selection = _model_selection_binding(
+        task_context.get("model_selection_receipt") or assignment.get("model_selection_receipt"),
+        model_selection_reasons,
+    )
+    if model_selection_reasons:
+        return _reject(model_selection_reasons)
     worker_plan = allocation.get("worker_plan") if isinstance(allocation.get("worker_plan"), Mapping) else {}
     if worker_plan.get("fusion_required") is not True:
         return _reject([ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED])
@@ -544,6 +568,7 @@ def execute_model_backed_repo_code_audit(
         memex_evidence_bundle=memex_evidence_bundle,
         external_research_receipt=external_research_receipt,
         external_research_evidence_bundle=external_research_evidence_bundle,
+        model_selection=model_selection,
     )
     try:
         prompt = _build_repo_audit_model_prompt(assignment=assignment, allocation=allocation)
@@ -606,6 +631,7 @@ def execute_model_backed_repo_code_audit(
         memex_evidence_bundle=memex_evidence_bundle,
         external_research_receipt=external_research_receipt,
         external_research_evidence_bundle=external_research_evidence_bundle,
+        model_selection=model_selection,
         task_id=task_id,
         repo_head=_observe_repo_head(repo_root),
     )
@@ -1211,6 +1237,64 @@ def _validate_wsp15_binding(
     return tuple(dict.fromkeys(reasons))
 
 
+def _model_selection_binding(value: Any, reasons: list[str]) -> Mapping[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, Mapping):
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    selection = _json_compatible_mapping(value)
+    if not selection:
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    try:
+        receipt = rehydrate_model_selection_receipt(selection)
+    except Exception:
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    if (
+        receipt.decision != SelectionDecision.SELECTED
+        or not receipt.selected_model_ids
+        or receipt.requirements.purpose != SelectionPurpose.PRODUCTION
+    ):
+        reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    lead_model = ""
+    panel_models: list[str] = []
+    assignments = [asdict(item) for item in receipt.role_assignments]
+    for assignment in assignments:
+        role = str(assignment.get("role") or "")
+        model_id = str(assignment.get("canonical_model_id") or "")
+        if role == "principal" and model_id:
+            lead_model = model_id
+        elif role != "verifier" and model_id:
+            panel_models.append(model_id)
+    if not lead_model:
+        lead_model = str(receipt.selected_model_ids[0])
+        panel_models = [str(item) for item in receipt.selected_model_ids[1:]]
+    return {
+        "receipt_id": receipt.receipt_id,
+        "digest": _digest(selection),
+        "catalog_snapshot_id": receipt.catalog_snapshot_id,
+        "task_family": receipt.requirements.task_family,
+        "selection_mode": receipt.requirements.selection_mode.value,
+        "purpose": receipt.requirements.purpose.value,
+        "selected_model_ids": [str(item) for item in receipt.selected_model_ids],
+        "role_assignments": assignments,
+        "panel_topology_digest": receipt.panel_topology_digest,
+        "lead_model": lead_model,
+        "panel_models": panel_models,
+    }
+
+
+def _json_compatible_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    try:
+        normalized = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+    except (TypeError, ValueError):
+        return {}
+    return normalized if isinstance(normalized, Mapping) else {}
+
+
 def _model_binding(
     *,
     task_context: Mapping[str, Any],
@@ -1226,6 +1310,7 @@ def _model_binding(
     memex_evidence_bundle: Mapping[str, Any] | None = None,
     external_research_receipt: Mapping[str, Any] | None = None,
     external_research_evidence_bundle: Mapping[str, Any] | None = None,
+    model_selection: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any]:
     payload = {
         "schema_version": READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA,
@@ -1255,6 +1340,10 @@ def _model_binding(
         payload["external_research_query_receipt_id"] = external_research_receipt.get("receipt_id")
     if external_research_evidence_bundle is not None:
         payload["external_research_evidence_bundle_id"] = external_research_evidence_bundle.get("bundle_id")
+    if model_selection:
+        payload["model_selection"] = dict(model_selection)
+        payload["model_selection_receipt_id"] = model_selection.get("receipt_id")
+        payload["model_selection_digest"] = model_selection.get("digest")
     return payload
 
 
@@ -1574,6 +1663,7 @@ def _build_model_report(
     memex_evidence_bundle: Mapping[str, Any] | None,
     external_research_receipt: Mapping[str, Any] | None,
     external_research_evidence_bundle: Mapping[str, Any] | None,
+    model_selection: Mapping[str, Any] | None,
     task_id: str | None,
     repo_head: str,
 ) -> Mapping[str, Any]:
@@ -1585,6 +1675,7 @@ def _build_model_report(
         route_receipt=model_result.route_receipt,
         allocation=allocation,
         model_result=model_result,
+        model_selection=model_selection,
     )
     receipt_payload = {
         "schema_version": READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA,
@@ -1628,6 +1719,9 @@ def _build_model_report(
     if external_research_evidence_bundle is not None:
         receipt_payload["external_research_evidence_bundle"] = dict(external_research_evidence_bundle)
         receipt_payload["external_research_evidence_bundle_id"] = external_research_evidence_bundle.get("bundle_id")
+    if model_selection:
+        receipt_payload["model_selection_receipt_id"] = model_selection.get("receipt_id")
+        receipt_payload["model_selection_digest"] = model_selection.get("digest")
     receipt = {**receipt_payload, "receipt_id": "sha256:" + _digest(receipt_payload)}
     report = {
         "assignment_id": str(assignment.get("assignment_id") or ""),
@@ -1732,6 +1826,28 @@ def _load_foundups_fusion_runner() -> Any:
         return getattr(module, "_run_foundups_fusion")
 
 
+def _mapping(value: Any) -> Mapping[str, Any]:
+    return value if isinstance(value, Mapping) else {}
+
+
+def _runtime_model_topology(
+    binding: Mapping[str, Any],
+    *,
+    default_lead: str,
+    default_panel: Sequence[str],
+) -> Mapping[str, Any]:
+    selection = _mapping(binding.get("model_selection"))
+    lead = str(selection.get("lead_model") or default_lead)
+    raw_panel = selection.get("panel_models")
+    panel = [str(item) for item in raw_panel] if isinstance(raw_panel, list) else list(default_panel)
+    return {
+        "lead_model": lead,
+        "panel_models": tuple(item for item in panel if item),
+        "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
+        "model_selection_digest": str(selection.get("digest") or ""),
+    }
+
+
 def _model_route_receipt(
     *,
     binding: Mapping[str, Any],
@@ -1743,11 +1859,14 @@ def _model_route_receipt(
     status: str,
     started: float,
 ) -> Mapping[str, Any]:
+    model_selection = _mapping(binding.get("model_selection"))
     payload = {
         "schema_version": "reddog_readonly_repo_audit_model_route_receipt.v1",
         "mode": "foundups_fusion",
         "lead_model": str(lead_model or ""),
         "panel_models": [str(item) for item in panel_models],
+        "model_selection_receipt_id": str(model_selection.get("receipt_id") or ""),
+        "model_selection_digest": str(model_selection.get("digest") or ""),
         "reasoning_tier": str(binding.get("wsp15_reasoning_tier") or ""),
         "wsp15_priority": str(binding.get("wsp15_priority") or ""),
         "timeout_seconds": int(timeout_seconds or 0),
@@ -1765,14 +1884,18 @@ def _normalized_model_route_receipt(
     route_receipt: Mapping[str, Any],
     allocation: Mapping[str, Any],
     model_result: RepoAuditModelResult,
+    model_selection: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any]:
     if isinstance(route_receipt, Mapping) and str(route_receipt.get("receipt_id") or "").startswith("sha256:"):
         return dict(route_receipt)
+    selection = _mapping(model_selection)
     payload = {
         "schema_version": "reddog_readonly_repo_audit_model_route_receipt.v1",
         "mode": "injected_test_runner",
         "lead_model": "injected",
         "panel_models": [],
+        "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
+        "model_selection_digest": str(selection.get("digest") or ""),
         "reasoning_tier": str(allocation.get("reasoning_tier") or ""),
         "wsp15_priority": str(allocation.get("priority") or ""),
         "timeout_seconds": 0,
