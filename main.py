@@ -3258,6 +3258,13 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
     if not resident_queue_runtime_flag_enabled(os.environ, "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP"):
         logger.info("[REDDOG-QUEUE-LOOP] Startup serial loop disabled")
+        run_reddog_resident_queue_serial_loop_preflight.last_result = {
+            "accepted": True,
+            "status": "DISABLED",
+            "progress_count": 0,
+            "steps_run": 0,
+            "rejection_reasons": (),
+        }
         return True
 
     enforced = os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "0") != "0"
@@ -3535,6 +3542,13 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         )
     except Exception as exc:
         logger.error(f"[REDDOG-QUEUE-LOOP] Startup serial loop failed: {exc}")
+        run_reddog_resident_queue_serial_loop_preflight.last_result = {
+            "accepted": False,
+            "status": "EXCEPTION",
+            "progress_count": 0,
+            "steps_run": 0,
+            "rejection_reasons": (type(exc).__name__,),
+        }
         if enforced:
             print(f"[REDDOG-QUEUE-LOOP] preflight=FAIL error={type(exc).__name__}")
             return False
@@ -3543,6 +3557,16 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
     status = "PASS" if result.accepted else "WARN"
     reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
+    progress_count = int(result.steps_run or 0)
+    run_reddog_resident_queue_serial_loop_preflight.last_result = {
+        "accepted": bool(result.accepted),
+        "status": result.status,
+        "progress_count": progress_count,
+        "steps_run": int(result.steps_run or 0),
+        "dispatched_stages": tuple(result.dispatched_stages or ()),
+        "next_action": result.next_action or "",
+        "rejection_reasons": tuple(result.rejection_reasons or ()),
+    }
     print(
         f"[REDDOG-QUEUE-LOOP] preflight={status} status={result.status} "
         f"queue_item={result.queue_item_id or '(none)'} "
@@ -3562,6 +3586,18 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         print("[REDDOG-QUEUE-LOOP] Startup blocked by REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED=1")
         return False
     return True
+
+
+def _reddog_queue_stage_progress(stage_callable: Any, *, default_progress: int) -> int:
+    """Return the last progress count recorded by a queue control stage."""
+
+    raw = getattr(stage_callable, "last_result", None)
+    if not isinstance(raw, Mapping):
+        return max(int(default_progress), 0)
+    try:
+        return max(int(raw.get("progress_count") or 0), 0)
+    except (TypeError, ValueError):
+        return 0
 
 
 def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
@@ -3604,24 +3640,43 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
         return not enforced
 
     completed_rounds = 0
+    serial_progress_total = 0
+    claim_progress_total = 0
+    stopped_reason = "max_rounds"
     for round_index in range(1, max_rounds + 1):
-        if not run_reddog_resident_queue_serial_loop_preflight(repo_root):
+        serial_ok = run_reddog_resident_queue_serial_loop_preflight(repo_root)
+        serial_progress = _reddog_queue_stage_progress(
+            run_reddog_resident_queue_serial_loop_preflight,
+            default_progress=1 if serial_ok else 0,
+        )
+        serial_progress_total += serial_progress
+        if not serial_ok:
             print(
                 f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
                 "stage=serial_loop"
             )
             return not enforced
-        if not run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root):
+        claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+        claim_progress = _reddog_queue_stage_progress(
+            run_reddog_openclaw_signed_worker_claim_loop_preflight,
+            default_progress=1 if claim_ok else 0,
+        )
+        claim_progress_total += claim_progress
+        if not claim_ok:
             print(
                 f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
                 "stage=openclaw_claim_loop"
             )
             return not enforced
         completed_rounds = round_index
+        if serial_progress == 0 and claim_progress == 0:
+            stopped_reason = "idle"
+            break
 
     print(
         f"[REDDOG-QUEUE-CONTROL] preflight=PASS rounds={completed_rounds} "
-        f"max_rounds={max_rounds}"
+        f"max_rounds={max_rounds} stopped_reason={stopped_reason} "
+        f"serial_progress={serial_progress_total} claim_progress={claim_progress_total}"
     )
     return True
 
@@ -3651,6 +3706,13 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
         "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP",
     ):
         logger.info("[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop disabled")
+        run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
+            "accepted": True,
+            "status": "DISABLED",
+            "progress_count": 0,
+            "claimed_count": 0,
+            "rejection_reasons": (),
+        }
         return True
 
     enforced = os.getenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_ENFORCED", "0") != "0"
@@ -3661,6 +3723,13 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
         max_claims = 0
     if max_claims < 1:
         print("[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=FAIL error=invalid_max_claims")
+        run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
+            "accepted": False,
+            "status": "INVALID_MAX_CLAIMS",
+            "progress_count": 0,
+            "claimed_count": 0,
+            "rejection_reasons": ("invalid_max_claims",),
+        }
         return not enforced
 
     try:
@@ -3674,6 +3743,13 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
         )
     except Exception as exc:
         logger.error(f"[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop failed: {exc}")
+        run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
+            "accepted": False,
+            "status": "EXCEPTION",
+            "progress_count": 0,
+            "claimed_count": 0,
+            "rejection_reasons": (type(exc).__name__,),
+        }
         if enforced:
             print(f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=FAIL error={type(exc).__name__}")
             return False
@@ -3688,6 +3764,15 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
     failed = ",".join(str(item) for item in result.get("failed_task_ids", ()) or ()) or "(none)"
     reasons = ",".join(str(reason) for reason in result.get("rejection_reasons", ()) or ()) or "(none)"
     status_label = "PASS" if accepted else "WARN"
+    run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
+        "accepted": accepted,
+        "status": status,
+        "progress_count": claimed_count,
+        "claimed_count": claimed_count,
+        "idle": bool(result.get("idle")),
+        "max_claims_reached": bool(result.get("max_claims_reached")),
+        "rejection_reasons": tuple(result.get("rejection_reasons", ()) or ()),
+    }
     print(
         f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight={status_label} status={status} "
         f"claimed_count={claimed_count} max_claims={max_claims} "
