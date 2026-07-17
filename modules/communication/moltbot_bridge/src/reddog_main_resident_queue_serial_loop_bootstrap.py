@@ -792,7 +792,7 @@ def _derive_artifact_generation_request_from_chain(
             or ""
         ),
     }
-    return {
+    request = {
         "explicit_artifact_generation_requested": True,
         "work_order_id": work_order_id,
         "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
@@ -817,6 +817,13 @@ def _derive_artifact_generation_request_from_chain(
         "signed_receipt_chain": dict(signed_receipt_chain),
         "timeout_seconds": 30,
     }
+    model_runtime_binding = _nested_mapping(work_order, "model_runtime_binding_receipt")
+    if model_runtime_binding:
+        request["model_runtime_binding_receipt"] = dict(model_runtime_binding)
+    model_selection = _nested_mapping(work_order, "model_selection_receipt")
+    if model_selection:
+        request["model_selection_receipt"] = dict(model_selection)
+    return request
 
 
 def _derive_outcome_ratchet_request_from_chain(

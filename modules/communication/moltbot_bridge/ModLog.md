@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_REQUEST_DERIVATION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Carried content-bearing `model_runtime_binding_receipt` from resident
+  work orders into derived bounded artifact-generation requests.
+- Patched both early bootstrap derivation and the late bounded-worker-pilot
+  handler derivation path, which is the path used by an active serial loop after
+  worktree creation.
+- Added an end-to-end resident bootstrap regression proving the artifact
+  generator receives the runtime-bound model topology before bounded worker
+  materialization.
+- Boundary remains constrained: no model/provider default change, benchmark
+  execution, signing expansion, shell, worktree policy change, source mutation,
+  PatternMemory write, OpenClaw/Hermes dispatch, PR publication, reward
+  settlement, or HoloIndex re-indexing was added.
+
 ## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_WORKER_DISPATCH_CARRY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

@@ -65,6 +65,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 )
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     ArtifactGenerationModelResult,
+    RUNTIME_SURFACE_ARTIFACT_GENERATION,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
     _receipt_chain as _pilot_receipt_chain,
@@ -2203,7 +2204,11 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION)
+    snapshot = _snapshot()
+    snapshot["wre_queue_items"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    snapshot["wre_queue_items"][0]["model_runtime_binding_digest"] = _canonical_digest(runtime_binding)
+    state = _write_runtime_json(tmp_path, "work_state.json", snapshot)
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2213,6 +2218,9 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
             requested_operation=PILOT_OPERATION,
             allowed_paths=_pilot_allowed_paths(),
             denied_paths=pilot_overrides["denied_paths"],
+            model_runtime_binding_receipt=runtime_binding,
+            model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
+            model_runtime_binding_digest=_canonical_digest(runtime_binding),
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
@@ -2220,6 +2228,9 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
     work_order = _work_order(
         **pilot_overrides,
         bounded_worker_plan=_pilot_bounded_worker_plan(),
+        model_runtime_binding_receipt=runtime_binding,
+        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
+        model_runtime_binding_digest=_canonical_digest(runtime_binding),
     )
     work_orders = _write_runtime_json(
         tmp_path,
@@ -2280,6 +2291,9 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
     assert result.dispatched_stages[-1] == "bounded_worker_pilot"
     assert artifact_generator.calls
     assert artifact_generator.calls[0]["binding"]["work_order_id"] == WORK_ORDER_ID
+    assert artifact_generator.calls[0]["binding"]["model_selection"][
+        "model_runtime_binding_receipt_id"
+    ] == runtime_binding["receipt_id"]
     context = json.loads(str(artifact_generator.calls[0]["context"]))
     assert context["holoindex_evidence"]["retrieval_quality"] == "HIGH"
     stored = json.loads(chain.read_text(encoding="utf-8"))
