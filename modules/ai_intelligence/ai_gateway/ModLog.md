@@ -1,5 +1,38 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model Promotion Gate Receipt Rehydration
+
+**Who:** 0102 Codex
+**Type:** Receipt Integrity
+**Slice:** MODEL_PROMOTION_GATE_RECEIPT_REHYDRATION_PHASE1
+
+**What:** Added rehydration helpers for serialized model-promotion policies,
+promotion evidence receipts, and promotion gate receipts.
+
+**Why:** AutoResearch artifact supply must not trust raw serialized promotion
+gate mappings. Before runtime planning can consume promotion gates from
+outside-repo artifacts, the gate receipt ID and embedded promotion evidence must
+be recomputed and checked.
+
+**Files:**
+- `src/model_promotion_gate.py` - rehydrates and recomputes promotion policy,
+  promotion evidence, and gate receipts, including champion evidence checks.
+- `tests/test_model_promotion_gate.py` - verifies champion/challenger
+  round-trip and tampered/missing/mismatched evidence rejection.
+
+**Truth Boundary:**
+- IMPLEMENTED: serialized promotion gate receipts can be rehydrated with
+  deterministic ID checks and embedded promotion-evidence consistency checks.
+- IMPLEMENTED: champion gate receipts require promotion evidence; tampered
+  receipt bodies and forged evidence reject before downstream planning.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  AutoResearch artifact supply, catalog mutation, PatternMemory writes, or
+  HoloIndex re-indexing.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model Feedback Ledger AutoResearch Signal
 
 **Who:** 0102 Codex

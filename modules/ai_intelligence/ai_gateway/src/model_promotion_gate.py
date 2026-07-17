@@ -9,6 +9,7 @@ runtime defaults.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -176,6 +177,139 @@ def evaluate_model_promotion_gate(
     )
 
 
+def rehydrate_model_promotion_policy(data: Mapping[str, Any]) -> ModelPromotionPolicy:
+    """Rehydrate a serialized promotion policy and normalize its fields."""
+
+    if not isinstance(data, Mapping):
+        raise ValueError("invalid_promotion_policy")
+    if data.get("schema_version") != PROMOTION_POLICY_SCHEMA_VERSION:
+        raise ValueError("invalid_promotion_policy_schema")
+    return ModelPromotionPolicy(
+        task_family=_required("task_family", data.get("task_family")),
+        candidate_id=_required("candidate_id", data.get("candidate_id")),
+        min_verifier_pass_rate=float(data.get("min_verifier_pass_rate")),
+        min_sample_count=int(data.get("min_sample_count")),
+        required_task_set_digest=_required("required_task_set_digest", data.get("required_task_set_digest")),
+        required_held_out_split_digest=_required(
+            "required_held_out_split_digest",
+            data.get("required_held_out_split_digest"),
+        ),
+        required_verifier_digest=_required("required_verifier_digest", data.get("required_verifier_digest")),
+        max_latency_ms=_optional_int(data.get("max_latency_ms")),
+        max_cost_estimate_usd=_optional_float(data.get("max_cost_estimate_usd")),
+    ).normalized()
+
+
+def rehydrate_model_promotion_evidence_receipt(
+    data: Mapping[str, Any],
+) -> ModelPromotionEvidenceReceipt:
+    """Rehydrate promotion evidence and recompute its deterministic ID."""
+
+    if not isinstance(data, Mapping):
+        raise ValueError("invalid_promotion_evidence")
+    if data.get("schema_version") != "model_promotion_evidence_receipt.v1":
+        raise ValueError("invalid_promotion_evidence_schema")
+    promotion_state = PromotionState(_required("promotion_state", data.get("promotion_state")))
+    threshold = _threshold(float(data.get("min_verifier_pass_rate")))
+    body = {
+        "schema_version": "model_promotion_evidence_receipt.v1",
+        "model_id": _required("model_id", data.get("model_id")),
+        "task_family": _clean_token(_required("task_family", data.get("task_family"))),
+        "benchmark_evidence_receipt_id": _required(
+            "benchmark_evidence_receipt_id",
+            data.get("benchmark_evidence_receipt_id"),
+        ),
+        "promotion_state": promotion_state.value,
+        "promotion_authority_receipt_id": _required(
+            "promotion_authority_receipt_id",
+            data.get("promotion_authority_receipt_id"),
+        ),
+        "signed_promotion_receipt_id": _required(
+            "signed_promotion_receipt_id",
+            data.get("signed_promotion_receipt_id"),
+        ),
+        "min_verifier_pass_rate": threshold,
+    }
+    receipt_id = _digest_prefixed("model_promotion_evidence", body)
+    if not hmac.compare_digest(receipt_id, _required("receipt_id", data.get("receipt_id"))):
+        raise ValueError("promotion_evidence_receipt_id_mismatch")
+    return ModelPromotionEvidenceReceipt(
+        receipt_id=receipt_id,
+        model_id=body["model_id"],
+        task_family=body["task_family"],
+        benchmark_evidence_receipt_id=body["benchmark_evidence_receipt_id"],
+        promotion_state=promotion_state,
+        promotion_authority_receipt_id=body["promotion_authority_receipt_id"],
+        signed_promotion_receipt_id=body["signed_promotion_receipt_id"],
+        min_verifier_pass_rate=threshold,
+    )
+
+
+def rehydrate_model_promotion_gate_receipt(data: Mapping[str, Any]) -> ModelPromotionGateReceipt:
+    """Rehydrate a serialized promotion gate receipt and recompute its ID."""
+
+    if not isinstance(data, Mapping):
+        raise ValueError("invalid_promotion_gate_receipt")
+    if data.get("schema_version") != PROMOTION_GATE_SCHEMA_VERSION:
+        raise ValueError("invalid_promotion_gate_schema")
+    policy = rehydrate_model_promotion_policy(_mapping(data.get("policy"), "policy"))
+    decision = ModelPromotionGateDecision(_required("decision", data.get("decision")))
+    candidate_id = _required("candidate_id", data.get("candidate_id"))
+    task_family = _clean_token(_required("task_family", data.get("task_family")))
+    benchmark_run_receipt_id = _required(
+        "benchmark_run_receipt_id",
+        data.get("benchmark_run_receipt_id"),
+    )
+    benchmark_evidence_receipt_id = _optional(data.get("benchmark_evidence_receipt_id"))
+    promotion_evidence = None
+    promotion_raw = data.get("promotion_evidence_receipt")
+    if promotion_raw is not None:
+        promotion_evidence = rehydrate_model_promotion_evidence_receipt(
+            _mapping(promotion_raw, "promotion_evidence_receipt")
+        )
+    if decision == ModelPromotionGateDecision.PROMOTE_CHAMPION and promotion_evidence is None:
+        raise ValueError("promotion_evidence_missing")
+    if promotion_evidence is not None:
+        if promotion_evidence.model_id != candidate_id:
+            raise ValueError("promotion_evidence_candidate_mismatch")
+        if promotion_evidence.task_family != task_family:
+            raise ValueError("promotion_evidence_task_family_mismatch")
+        if promotion_evidence.benchmark_evidence_receipt_id != benchmark_evidence_receipt_id:
+            raise ValueError("promotion_evidence_benchmark_mismatch")
+    rejection_reasons = tuple(
+        sorted(
+            _clean_token(reason)
+            for reason in _list(data.get("rejection_reasons", []))
+            if str(reason).strip()
+        )
+    )
+    body = {
+        "schema_version": PROMOTION_GATE_SCHEMA_VERSION,
+        "decision": decision.value,
+        "candidate_id": candidate_id,
+        "task_family": task_family,
+        "benchmark_run_receipt_id": benchmark_run_receipt_id,
+        "benchmark_evidence_receipt_id": benchmark_evidence_receipt_id,
+        "policy": policy.to_dict(),
+        "promotion_evidence_receipt_id": promotion_evidence.receipt_id if promotion_evidence else None,
+        "rejection_reasons": sorted(set(rejection_reasons)),
+    }
+    receipt_id = _digest_prefixed("model_promotion_gate", body)
+    if not hmac.compare_digest(receipt_id, _required("receipt_id", data.get("receipt_id"))):
+        raise ValueError("promotion_gate_receipt_id_mismatch")
+    return ModelPromotionGateReceipt(
+        receipt_id=receipt_id,
+        decision=decision,
+        candidate_id=candidate_id,
+        task_family=task_family,
+        benchmark_run_receipt_id=benchmark_run_receipt_id,
+        benchmark_evidence_receipt_id=benchmark_evidence_receipt_id,
+        policy=policy,
+        promotion_evidence_receipt=promotion_evidence,
+        rejection_reasons=rejection_reasons,
+    )
+
+
 def _find_candidate_evidence(
     benchmark_run_receipt: ModelCombinationBenchmarkRunReceipt,
     candidate_id: str,
@@ -237,11 +371,44 @@ def _benchmark_run_projection(receipt: ModelCombinationBenchmarkRunReceipt) -> d
     }
 
 
+def _mapping(value: Any, name: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{name}_missing")
+    return value
+
+
+def _list(value: Any) -> tuple[Any, ...]:
+    if value is None:
+        return ()
+    if isinstance(value, (list, tuple)):
+        return tuple(value)
+    return (value,)
+
+
 def _required(name: str, value: Any) -> str:
     cleaned = str(value).strip()
     if not cleaned:
         raise ValueError(f"missing_{name}")
     return cleaned
+
+
+def _optional(value: Any) -> str | None:
+    if value is None:
+        return None
+    cleaned = str(value).strip()
+    return cleaned or None
+
+
+def _optional_int(value: Any) -> int | None:
+    if value in (None, ""):
+        return None
+    return int(value)
+
+
+def _optional_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    return float(value)
 
 
 def _threshold(value: float) -> float:
