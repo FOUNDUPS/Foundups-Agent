@@ -39,6 +39,7 @@ FAIL_AUTHOR_GENERATED_SUITE = "FAIL_AUTHOR_GENERATED_SUITE"
 FAIL_REGRESSION_FAILED = "FAIL_REGRESSION_FAILED"
 FAIL_DIGEST_BINDING = "FAIL_DIGEST_BINDING"
 FAIL_HOLOINDEX_EVIDENCE = "FAIL_HOLOINDEX_EVIDENCE"
+FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
 FAIL_PATTERN_MEMORY_ALREADY_WRITTEN = "FAIL_PATTERN_MEMORY_ALREADY_WRITTEN"
 FAIL_SECRET_IN_EVIDENCE = "FAIL_SECRET_IN_EVIDENCE"
 
@@ -69,6 +70,8 @@ class HeldOutRecursiveImprovementRegressionReceipt:
     candidate_digest: str
     candidate_head_sha: str
     holoindex_freshness_receipt_digest: str
+    model_runtime_binding_receipt_id: Optional[str]
+    model_runtime_binding_digest: str
     regression_test_count: int
     pattern_memory_admission_requested: bool
     pattern_memory_admission_allowed: bool
@@ -189,6 +192,45 @@ def _holoindex_ok(holoindex_evidence: Mapping[str, Any]) -> bool:
     return _is_digest(holoindex_evidence.get("holoindex_freshness_receipt_digest"))
 
 
+def _runtime_binding_pair(value: Mapping[str, Any]) -> tuple[str, str]:
+    receipt_id = str(
+        value.get("model_runtime_binding_receipt_id")
+        or value.get("runtime_binding_receipt_id")
+        or ""
+    )
+    digest = str(value.get("model_runtime_binding_digest") or "")
+    return receipt_id, digest
+
+
+def _runtime_binding_ok(request: Mapping[str, Any]) -> tuple[bool, Optional[str], str]:
+    verification_result = _mapping(request.get("verification_result"))
+    verification_receipt = _mapping(verification_result.get("receipt"))
+    ratchet_result = _mapping(request.get("ratchet_result"))
+    ratchet_receipt = _mapping(ratchet_result.get("receipt"))
+    pairs = [
+        pair
+        for pair in (
+            _runtime_binding_pair(request),
+            _runtime_binding_pair(verification_receipt),
+            _runtime_binding_pair(ratchet_receipt),
+        )
+        if pair[0] or pair[1]
+    ]
+    if not pairs:
+        return True, None, ""
+    normalized: List[tuple[str, str]] = []
+    for receipt_id, digest in pairs:
+        if not receipt_id or not digest:
+            return False, receipt_id or None, digest
+        if not receipt_id.startswith("reddog_model_runtime_binding:") or not _is_digest(digest):
+            return False, receipt_id, digest
+        normalized.append((receipt_id, digest))
+    first = normalized[0]
+    if any(pair != first for pair in normalized[1:]):
+        return False, first[0], first[1]
+    return True, first[0], first[1]
+
+
 def _job_is_pending_dry_run(improvement_job: Mapping[str, Any]) -> bool:
     return (
         str(improvement_job.get("job_id") or "").strip() != ""
@@ -278,6 +320,7 @@ def evaluate_held_out_recursive_improvement_regression_gate(
     ratchet_id = str(ratchet_receipt.get("ratchet_id") or "")
     improvement_job_id = str(improvement_job.get("job_id") or "")
     pattern_requested = req.get("enable_pattern_memory_admission") is True
+    runtime_binding_ok, runtime_binding_id, runtime_binding_digest = _runtime_binding_ok(req)
 
     reasons: List[str] = []
     if not all([work_order_id, slice_name, improvement_job_id]):
@@ -302,6 +345,8 @@ def evaluate_held_out_recursive_improvement_regression_gate(
 
     if not _holoindex_ok(holoindex_evidence):
         reasons.append(FAIL_HOLOINDEX_EVIDENCE)
+    if not runtime_binding_ok:
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING)
     if _contains_secret(
         {
             "improvement_job": improvement_job,
@@ -328,6 +373,8 @@ def evaluate_held_out_recursive_improvement_regression_gate(
         "holoindex_freshness_receipt_digest": str(
             holoindex_evidence.get("holoindex_freshness_receipt_digest") or ""
         ),
+        "model_runtime_binding_receipt_id": runtime_binding_id or "",
+        "model_runtime_binding_digest": runtime_binding_digest,
         "pattern_memory_admission_requested": pattern_requested,
         "pattern_memory_admission_allowed": pattern_allowed,
         "rejection_reasons": deduped,
@@ -347,6 +394,8 @@ def evaluate_held_out_recursive_improvement_regression_gate(
         holoindex_freshness_receipt_digest=str(
             holoindex_evidence.get("holoindex_freshness_receipt_digest") or ""
         ),
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
         regression_test_count=_int(held_out_suite.get("test_count")),
         pattern_memory_admission_requested=pattern_requested,
         pattern_memory_admission_allowed=pattern_allowed,
@@ -371,6 +420,7 @@ __all__ = [
     "FAIL_HELD_OUT_SUITE",
     "FAIL_HOLOINDEX_EVIDENCE",
     "FAIL_IMPROVEMENT_JOB_NOT_DRY_RUN_PENDING",
+    "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_PATTERN_MEMORY_ALREADY_WRITTEN",
     "FAIL_RATCHET_RECEIPT",
     "FAIL_REGRESSION_FAILED",

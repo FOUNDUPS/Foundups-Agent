@@ -73,6 +73,14 @@ def _queue_ratchet_result(*, accepted: bool = True, decision: str | None = None)
     }
 
 
+def _queue_ratchet_result_with_runtime_binding() -> dict:
+    result = _queue_ratchet_result()
+    receipt = result["ratchet_result"]["receipt"]
+    receipt["model_runtime_binding_receipt_id"] = "reddog_model_runtime_binding:test"
+    receipt["model_runtime_binding_digest"] = _digest("5")
+    return result
+
+
 def _gate_request() -> dict:
     return {
         "work_order_id": WORK_ORDER_ID,
@@ -127,6 +135,14 @@ def _gate_request() -> dict:
     }
 
 
+def _gate_request_with_runtime_binding() -> dict:
+    request = _gate_request()
+    receipt = request["verification_result"]["receipt"]
+    receipt["model_runtime_binding_receipt_id"] = "reddog_model_runtime_binding:test"
+    receipt["model_runtime_binding_digest"] = _digest("5")
+    return request
+
+
 def _invoke(*, queue_ratchet: dict | None = None, request: dict | None = None):
     return invoke_reddog_wre_queue_authorized_held_out_regression_gate(
         explicit_queue_authorized_held_out_regression_gate_requested=True,
@@ -152,6 +168,21 @@ def test_accepts_held_out_gate_after_queue_outcome_ratchet() -> None:
     assert result.no_merge_performed is True
     assert result.no_reward_settlement_performed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+def test_carries_model_runtime_binding_from_queue_ratchet_to_gate() -> None:
+    result = _invoke(
+        queue_ratchet=_queue_ratchet_result_with_runtime_binding(),
+        request=_gate_request_with_runtime_binding(),
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT
+    assert result.gate_result is not None
+    assert (
+        result.gate_result.receipt.model_runtime_binding_receipt_id
+        == "reddog_model_runtime_binding:test"
+    )
+    assert result.gate_result.receipt.model_runtime_binding_digest == _digest("5")
 
 
 def test_explicit_invoke_missing_rejects() -> None:

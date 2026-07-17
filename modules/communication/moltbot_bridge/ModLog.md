@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_RECURSIVE_RETENTION_CARRY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Carried optional model-runtime binding id/digest from verifier/ratchet
+  receipts into held-out recursive-improvement regression gate receipts.
+- PatternMemory admission records and receipts now preserve the same
+  runtime-binding proof, so verified recursive learning can attribute outcomes
+  to the runtime-selected model topology.
+- Added fail-closed mismatch guards so admission requests cannot override the
+  gate's runtime-binding evidence.
+- Boundary remains constrained: no model/provider default change, benchmark
+  execution, signing expansion, shell, worktree policy change, source mutation,
+  PatternMemory sink instantiation, OpenClaw/Hermes dispatch, PR publication,
+  reward settlement, or HoloIndex re-indexing was added.
+
 ## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_VERIFIER_OUTCOME_CARRY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

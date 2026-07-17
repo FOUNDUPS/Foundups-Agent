@@ -58,6 +58,7 @@ class QueueAuthorizedPatternMemoryAdmissionInvokeReason:
     PATTERN_MEMORY_NOT_ALLOWED = "REJECT_PATTERN_MEMORY_ADMISSION_NOT_ALLOWED"
     ADMISSION_REQUEST_INVALID = "REJECT_PATTERN_MEMORY_ADMISSION_REQUEST_INVALID"
     WORK_ORDER_ID_MISMATCH = "REJECT_WORK_ORDER_ID_MISMATCH"
+    MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_MODEL_RUNTIME_BINDING_MISMATCH"
     SECRET_IN_RECORD = "REJECT_SECRET_IN_PATTERN_MEMORY_RECORD"
     SINK_WRITE_FAILED = "REJECT_PATTERN_MEMORY_ADMISSION_SINK_WRITE_FAILED"
 
@@ -72,6 +73,8 @@ class QueueAuthorizedPatternMemoryAdmissionReceipt:
     verifier_receipt_id: str
     improvement_job_id: str
     held_out_suite_id: str
+    model_runtime_binding_receipt_id: Optional[str]
+    model_runtime_binding_digest: str
     pattern_memory_record_id: Optional[str]
     record_digest: str
     rejection_reasons: List[str]
@@ -138,6 +141,47 @@ def _same_nonempty(left: Any, right: Any) -> bool:
     return bool(left_text) and left_text == str(right or "")
 
 
+def _is_digest(value: Any) -> bool:
+    text = str(value or "")
+    return (
+        text.startswith("sha256:")
+        and len(text) == 71
+        and all(ch in "0123456789abcdef" for ch in text.removeprefix("sha256:"))
+    )
+
+
+def _runtime_binding_pair(value: Mapping[str, Any]) -> tuple[str, str]:
+    receipt_id = str(
+        value.get("model_runtime_binding_receipt_id")
+        or value.get("runtime_binding_receipt_id")
+        or ""
+    )
+    digest = str(value.get("model_runtime_binding_digest") or "")
+    return receipt_id, digest
+
+
+def _runtime_binding_ok(
+    gate_receipt: Mapping[str, Any],
+    admission_request: Mapping[str, Any],
+) -> bool:
+    pairs = [
+        pair
+        for pair in (
+            _runtime_binding_pair(gate_receipt),
+            _runtime_binding_pair(admission_request),
+        )
+        if pair[0] or pair[1]
+    ]
+    if not pairs:
+        return True
+    for receipt_id, digest in pairs:
+        if not receipt_id or not digest:
+            return False
+        if not receipt_id.startswith("reddog_model_runtime_binding:") or not _is_digest(digest):
+            return False
+    return all(pair == pairs[0] for pair in pairs[1:])
+
+
 def _record_from_gate(
     *,
     gate_result: Mapping[str, Any],
@@ -154,6 +198,10 @@ def _record_from_gate(
         "improvement_job_id": str(gate_receipt.get("improvement_job_id") or ""),
         "held_out_suite_id": str(gate_receipt.get("held_out_suite_id") or ""),
         "held_out_suite_digest": str(gate_receipt.get("held_out_suite_digest") or ""),
+        "model_runtime_binding_receipt_id": str(
+            gate_receipt.get("model_runtime_binding_receipt_id") or ""
+        ),
+        "model_runtime_binding_digest": str(gate_receipt.get("model_runtime_binding_digest") or ""),
         "candidate_head_sha": str(gate_receipt.get("candidate_head_sha") or ""),
         "regression_test_count": int(gate_receipt.get("regression_test_count") or 0),
         "pattern_memory_admission_allowed": True,
@@ -183,6 +231,11 @@ def _build_receipt(
         verifier_receipt_id=str(record.get("verifier_receipt_id") or ""),
         improvement_job_id=str(record.get("improvement_job_id") or ""),
         held_out_suite_id=str(record.get("held_out_suite_id") or ""),
+        model_runtime_binding_receipt_id=str(
+            record.get("model_runtime_binding_receipt_id") or ""
+        )
+        or None,
+        model_runtime_binding_digest=str(record.get("model_runtime_binding_digest") or ""),
         pattern_memory_record_id=record_id,
         record_digest=_digest(record),
         rejection_reasons=deduped,
@@ -252,6 +305,10 @@ def invoke_reddog_wre_queue_authorized_pattern_memory_admission(
         gate_receipt.get("work_order_id"),
     ):
         reasons.append(QueueAuthorizedPatternMemoryAdmissionInvokeReason.WORK_ORDER_ID_MISMATCH)
+    elif gate_receipt and request and not _runtime_binding_ok(gate_receipt, request):
+        reasons.append(
+            QueueAuthorizedPatternMemoryAdmissionInvokeReason.MODEL_RUNTIME_BINDING_MISMATCH
+        )
 
     record = (
         _record_from_gate(
