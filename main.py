@@ -3265,6 +3265,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY=0                Materialize signer-owned CLI config from authority profile
         REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED=0       Block startup if signer config supply fails
         REDDOG_SIGNER_SERVICE_CONFIG_PATH                    Outside-repo signer CLI config JSON
+        REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY=0            Materialize signer-owned CLI argv packet
+        REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED=0   Block startup if run-packet supply fails
+        REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH                Outside-repo signer CLI run-packet JSON
         REDDOG_SIGNER_SOCKET_PROFILE_BINDING=0              Derive signer socket path/backend when authority runtime is configured
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -3525,6 +3528,64 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 print(
                     "[REDDOG-SIGNER-CONFIG] Startup blocked by "
                     "REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED=1"
+                )
+                return False
+
+        signer_run_packet_supply_requested = str(
+            os.getenv("REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY") or ""
+        ).strip() == "1"
+        signer_run_packet_supply_enforced = (
+            os.getenv("REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED", "0") != "0"
+        )
+        if signer_run_packet_supply_requested:
+            from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
+                run_reddog_signer_socket_service_run_packet_supply,
+            )
+
+            signer_run_packet = run_reddog_signer_socket_service_run_packet_supply(
+                repo_root=repo_root,
+                config_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_SIGNER_SERVICE_CONFIG_PATH",
+                )
+                or None,
+                output_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH",
+                )
+                or None,
+                op_executable=str(os.getenv("REDDOG_SIGNER_SERVICE_OP_EXECUTABLE") or "op"),
+                op_timeout_s=_reddog_float_env("REDDOG_SIGNER_SERVICE_OP_TIMEOUT_S", 10.0),
+                ttl_seconds=_reddog_positive_int_env("REDDOG_SIGNER_SERVICE_TTL_SECONDS", 300),
+                session_id=str(os.getenv("REDDOG_SIGNER_SERVICE_SESSION_ID") or "op-cli-session"),
+                python_executable=str(os.getenv("REDDOG_SIGNER_SERVICE_PYTHON_EXECUTABLE") or "") or None,
+            )
+            signer_run_packet_status = "PASS" if signer_run_packet.accepted else "WARN"
+            signer_run_packet_reasons = (
+                ",".join(signer_run_packet.rejection_reasons)
+                if signer_run_packet.rejection_reasons
+                else "(none)"
+            )
+            print(
+                f"[REDDOG-SIGNER-RUN-PACKET] preflight={signer_run_packet_status} "
+                f"status={signer_run_packet.status} "
+                f"packet={signer_run_packet.run_packet_id or '(none)'} "
+                f"path={signer_run_packet.run_packet_path or '(none)'} "
+                f"config={signer_run_packet.config_path or '(none)'} "
+                f"socket={signer_run_packet.socket_path or '(none)'} "
+                f"profiles={signer_run_packet.profile_count} reasons={signer_run_packet_reasons}"
+            )
+            if signer_run_packet.accepted:
+                if signer_run_packet.run_packet_path:
+                    os.environ["REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH"] = (
+                        signer_run_packet.run_packet_path
+                    )
+            elif signer_run_packet_supply_enforced:
+                print(
+                    "[REDDOG-SIGNER-RUN-PACKET] Startup blocked by "
+                    "REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED=1"
                 )
                 return False
 
