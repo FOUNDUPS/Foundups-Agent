@@ -1,5 +1,21 @@
 # Secrets MCP Server Module Modification Log
 
+## 2026-07-17: SECRETS_MCP_WSP71_OP_CLI_VAULT_RESOLVER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added `OpCliSecretResolver`, a WSP 71 Annex A `op://` resolver that calls
+  the 1Password CLI as `op read <reference> --no-newline` through an injected
+  command runner.
+- The default runner uses `subprocess.run` with `shell=False`, bounded timeout,
+  bounded stdout, and no stderr/stdout serialization in receipts or errors.
+- Added tests for canonical command shape, invalid references, command failure,
+  timeout, empty output, oversized output, runner exceptions, Windows `op.exe`
+  path handling, and AST no-shell/no-network/no-secret-persistence guards.
+- Boundary remains constrained: no secret storage, no repo mutation, no
+  OpenClaw/Hermes dispatch, no PR creation, no reward settlement, and no
+  HoloIndex re-index.
+
 ## Initial Implementation - Secure Environment Access
 
 **Created secure MCP server for environment variable and .env file access with comprehensive security filtering.**

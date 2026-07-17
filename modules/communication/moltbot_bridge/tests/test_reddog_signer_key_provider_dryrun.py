@@ -46,6 +46,10 @@ from modules.infrastructure.secrets_mcp.src.vault_resolver import (
     ResolveResult,
     hash_reference,
 )
+from modules.infrastructure.secrets_mcp.src.op_cli_secret_resolver import (
+    OpCliCommandResult,
+    OpCliSecretResolver,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -97,6 +101,20 @@ class RaisingResolver:
 class WrongTypeResolver:
     def resolve(self, reference: str, requester_id: str | None = None) -> object:
         return {"success": True}
+
+
+class OpCliFixtureRunner:
+    def __init__(self, values: dict[str, str]) -> None:
+        self.values = values
+        self.calls: list[tuple[str, ...]] = []
+
+    def __call__(self, argv: tuple[str, ...], *, timeout_s: float, max_stdout_chars: int):
+        self.calls.append(argv)
+        reference = argv[2]
+        value = self.values.get(reference)
+        if value is None:
+            return OpCliCommandResult(returncode=1, stdout="")
+        return OpCliCommandResult(returncode=0, stdout=value)
 
 
 def _private_key():
@@ -220,6 +238,33 @@ def test_wsp71_permissioned_mode_accepts_injected_non_mock_resolver_without_test
     assert resolver.calls == [
         ("op://test-vault/reddog-signing/private", "signer:reddog-authority"),
         ("op://test-vault/reddog-audit/mac", "signer:reddog-authority"),
+    ]
+
+
+def test_wsp71_permissioned_mode_accepts_op_cli_secret_resolver() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    runner = OpCliFixtureRunner(
+        {
+            "op://test-vault/reddog-signing/private": _private_key_secret(private_key),
+            "op://test-vault/reddog-audit/mac": _audit_secret(),
+        }
+    )
+    resolver = OpCliSecretResolver(runner=runner, ttl_seconds=60)
+
+    result = build_signer_backend_from_provider(
+        _profile(public_key),
+        resolver,
+        provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=False,
+        permission_snapshot_fresh=True,
+    )
+
+    assert result.ok is True
+    assert result.backend is not None
+    assert [call[0:3] for call in runner.calls] == [
+        ("op", "read", "op://test-vault/reddog-signing/private"),
+        ("op", "read", "op://test-vault/reddog-audit/mac"),
     ]
 
 

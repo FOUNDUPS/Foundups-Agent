@@ -23,6 +23,34 @@ class SecretsMCPServer:
     async def get_project_env_info() -> Dict[str, Any]
 ```
 
+#### `OpCliSecretResolver`
+WSP 71 Annex A `op://` resolver backed by the 1Password CLI.
+
+```python
+class OpCliSecretResolver:
+    def __init__(
+        *,
+        op_executable: str = "op",
+        timeout_s: float = 10.0,
+        ttl_seconds: int = 300,
+        max_secret_chars: int = 65536,
+        session_id: str = "op-cli-session",
+        runner: OpCliCommandRunner | None = None,
+        audit_callback: Callable[[AuditEvent], None] | None = None,
+    )
+    def resolve(reference: str, requester_id: str | None = None) -> ResolveResult
+```
+
+Security boundary:
+- Calls `op read <reference> --no-newline` as argv, never through a shell.
+- Accepts only `op` or an absolute/path-like executable whose basename is
+  `op` or `op.exe`.
+- Returns the resolved secret value only through `ResolveResult.get_value()`.
+- Audit dictionaries contain reference hashes, status, TTL and requester only;
+  stdout/stderr secret content is never serialized.
+- Tests use an injected runner. Production may use the default shell-free
+  subprocess runner when the 1Password CLI is installed and authenticated.
+
 ## Tool Specifications
 
 ### 1. get_environment_variable

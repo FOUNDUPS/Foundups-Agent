@@ -7,6 +7,7 @@ WSP Compliance: WSP 77 (Agent Coordination), WSP 90 (UTF-8 Enforcement)
 """
 
 from .src.secrets_mcp import SecretsMCPServer
+from .src.op_cli_secret_resolver import OpCliSecretResolver
 
 __version__ = "1.0.0"
-__all__ = ['SecretsMCPServer']
+__all__ = ["OpCliSecretResolver", "SecretsMCPServer"]
