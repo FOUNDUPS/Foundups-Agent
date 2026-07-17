@@ -43,6 +43,9 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ArchitectModelResult,
     InMemoryArchitectDeterminationStore,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _model_selection,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -412,6 +415,66 @@ def test_bootstrap_runs_backend_architect_determination_when_enabled() -> None:
     assert len(architect_store.records) == 1
     assert result.no_openclaw_enqueue_performed is True
     assert result.no_queue_mutation_performed is True
+
+
+def test_bootstrap_passes_architect_model_selection_receipt_override_to_backend_runner() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+    architect_store = InMemoryArchitectDeterminationStore()
+    architect_runner = _FakeArchitectRunner()
+    model_selection = _model_selection()
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=report_store,
+        run_backend_architect_determination=True,
+        architect_model_runner=architect_runner,
+        architect_model_selection_receipt_override=model_selection,
+        architect_determination_store=architect_store,
+    )
+
+    assert result.ready is True
+    assert architect_runner.calls[0]["binding"]["model_selection"]["receipt_id"] == model_selection["receipt_id"]
+    assert architect_store.records[0].determination["model_selection_receipt_id"] == model_selection["receipt_id"]
+
+
+def test_bootstrap_requires_architect_model_selection_for_production_runner() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=report_store,
+        run_backend_architect_determination=True,
+        architect_model_runner=None,
+        architect_determination_store=InMemoryArchitectDeterminationStore(),
+    )
+
+    assert result.ready is False
+    assert "missing_architect_model_selection_receipt_path" in result.rejection_reasons
+    assert result.backend_architect_determination_attempted is False
 
 
 def test_bootstrap_fails_closed_when_decision_persistence_rejects() -> None:

@@ -181,10 +181,13 @@ def run_reddog_main_readonly_operational_bootstrap(
     decision_store: ReadOnlyAuditDecisionStore | None = None,
     run_backend_architect_determination: bool = False,
     architect_model_runner: ArchitectModelRunner | None = None,
+    architect_model_selection_receipt_path: Path | str | None = None,
+    architect_model_selection_receipt_override: Mapping[str, Any] | None = None,
     architect_determination_store: ArchitectDeterminationStore | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
 
+    root = Path(repo_root).resolve()
     paths = _normalize_paths(changed_paths)
     targets = _normalize_paths(allowed_read_targets)
     wsp15_allocation_receipt = allocate_reddog_wsp15_receipt(
@@ -194,6 +197,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         allowed_read_targets=targets,
     ).to_dict()
     reasons: list[str] = []
+    architect_model_selection_receipt = architect_model_selection_receipt_override
 
     work_state_snapshot = work_state_snapshot_override
     if work_state_snapshot is None:
@@ -234,7 +238,7 @@ def run_reddog_main_readonly_operational_bootstrap(
         )
 
     assert work_state_snapshot is not None
-    repo_state = dict(repo_state_override) if repo_state_override is not None else observe_repo_state(Path(repo_root))
+    repo_state = dict(repo_state_override) if repo_state_override is not None else observe_repo_state(root)
     snapshot_result = build_operational_context_snapshot(
         repo_state=repo_state,
         work_state_snapshot=work_state_snapshot,
@@ -370,6 +374,46 @@ def run_reddog_main_readonly_operational_bootstrap(
                         architect_result=architect_result,
                     )
             if run_backend_architect_determination:
+                if architect_model_selection_receipt is None:
+                    if architect_model_selection_receipt_path:
+                        architect_model_selection_receipt, model_reasons = _read_json_outside_repo(
+                            root,
+                            architect_model_selection_receipt_path,
+                            missing_reason="missing_architect_model_selection_receipt",
+                            inside_reason="architect_model_selection_receipt_path_inside_repo",
+                            unreadable_reason="malformed_architect_model_selection_receipt",
+                            required=True,
+                        )
+                        if model_reasons:
+                            return _not_ready(
+                                reasons=tuple(model_reasons),
+                                changed_paths=paths,
+                                allowed_read_targets=targets,
+                                wsp15_allocation_receipt=wsp15_allocation_receipt,
+                                snapshot=snapshot,
+                                evidence_bundle=evidence_bundle,
+                                gate=gate,
+                                swarm_plan=plan,
+                                collection_result=collection_result,
+                                decision_result=decision_result,
+                                decision_persist_result=decision_persist_result,
+                                architect_result=architect_result,
+                            )
+                    elif architect_model_runner is None:
+                        return _not_ready(
+                            reasons=("missing_architect_model_selection_receipt_path",),
+                            changed_paths=paths,
+                            allowed_read_targets=targets,
+                            wsp15_allocation_receipt=wsp15_allocation_receipt,
+                            snapshot=snapshot,
+                            evidence_bundle=evidence_bundle,
+                            gate=gate,
+                            swarm_plan=plan,
+                            collection_result=collection_result,
+                            decision_result=decision_result,
+                            decision_persist_result=decision_persist_result,
+                            architect_result=architect_result,
+                        )
                 architect_store = (
                     architect_determination_store
                     if architect_determination_store is not None
@@ -385,6 +429,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                     wsp15_allocation_receipt=wsp15_allocation_receipt,
                     store=architect_store,
                     model_runner=architect_model_runner,
+                    model_selection_receipt=architect_model_selection_receipt,
                     now_iso=now_iso,
                 )
                 if not architect_result.accepted:
@@ -613,6 +658,38 @@ def _resolve_holoindex_receipt_path(
     if ssd_path:
         return freshness_receipt_path(ssd_path)
     return None
+
+
+def _read_json_outside_repo(
+    repo_root: Path,
+    value: Path | str | None,
+    *,
+    missing_reason: str,
+    inside_reason: str,
+    unreadable_reason: str,
+    required: bool = True,
+) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
+    if not value:
+        return None, (missing_reason,) if required else ()
+    path = Path(value)
+    if not path.is_absolute():
+        path = (repo_root / path).resolve()
+    else:
+        path = path.resolve()
+    try:
+        path.relative_to(repo_root)
+        return None, (inside_reason,)
+    except ValueError:
+        pass
+    if not path.exists() or not path.is_file():
+        return None, (missing_reason,)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None, (unreadable_reason,)
+    if not isinstance(payload, Mapping):
+        return None, (unreadable_reason,)
+    return payload, ()
 
 
 def _not_ready(

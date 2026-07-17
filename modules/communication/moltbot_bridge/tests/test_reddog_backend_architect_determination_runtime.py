@@ -40,6 +40,9 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _model_selection,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -326,6 +329,50 @@ def test_research_more_persists_without_queue_candidate() -> None:
     assert result.queue_candidate_count == 0
 
 
+def test_model_selection_receipt_is_bound_to_backend_runner_and_receipt() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    selection = _model_selection()
+    runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref))
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        model_selection_receipt=selection,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.receipt.model_selection_receipt_id == selection["receipt_id"]
+    assert result.receipt.model_selection_digest
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["receipt_id"] == selection["receipt_id"]
+    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert binding["purpose"] == "production"
+
+
+def test_tampered_model_selection_receipt_rejects_before_backend_model_call() -> None:
+    inputs = _build_inputs()
+    selection = _model_selection()
+    selection["selected_model_ids"] = ["attacker/model"]
+    runner = FakeArchitectRunner({})
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        model_selection_receipt=selection,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MODEL_SELECTION_RECEIPT in result.rejection_reasons
+    assert runner.calls == []
+
+
 def test_missing_reports_fail_before_model_call() -> None:
     inputs = _build_inputs(include_reports=False)
     runner = FakeArchitectRunner({})
@@ -548,6 +595,53 @@ def test_production_runner_is_explicit_mode_only_without_network(monkeypatch) ->
     assert result.ok is False
     assert result.made_network_call is False
     assert result.rejection_reasons == ("runtime_mode_not_enabled",)
+
+
+def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
+    calls: list[dict[str, Any]] = []
+
+    def fake_fusion(api_key, user_payload, messages, payload):
+        calls.append(dict(payload))
+        return {
+            "ok": True,
+            "content": json.dumps(
+                {
+                    "action": ACTION_RESEARCH_MORE,
+                    "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1",
+                    "summary": "ok",
+                    "decision_reasons": ["test"],
+                    "evidence_refs": ["file:test.md:1"],
+                    "wsp15_allocation_receipt_id": "wsp15:test",
+                },
+                sort_keys=True,
+            ),
+            "review_packet": {"receipt_id": "fusion-receipt-1"},
+        }
+
+    monkeypatch.setenv("REDDOG_BACKEND_ARCHITECT_RUNTIME_MODE", "foundups_fusion")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(backend_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
+
+    result = FoundupsFusionArchitectModelRunner(
+        lead_model="legacy/lead",
+        panel_models=("legacy/panel",),
+    ).run_architect_determination(
+        prompt="Return JSON.",
+        context="public evidence",
+        binding={
+            "model_selection": {
+                "receipt_id": "model_selection_receipt:test",
+                "lead_model": "openai/gpt-5.6-code",
+                "panel_models": ["anthropic/claude-opus-5"],
+            }
+        },
+        timeout_seconds=1,
+    )
+
+    assert result.ok is True
+    assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
+    assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
+    assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == "model_selection_receipt:test"
 
 
 def test_module_ast_denies_execution_and_mutation_surfaces() -> None:
