@@ -1026,6 +1026,7 @@ def test_main_preflight_durable_resident_cycle_product_mode_runs_by_default(caps
     assert kwargs["external_research_retriever"] is None
     assert kwargs["red_dog_intent"]["requested_authority"] == "read_only_audit"
     assert kwargs["red_dog_intent"]["submits_executable_authority"] is False
+    assert kwargs["red_dog_intent"]["cycle_bucket"].startswith("24h:")
     output = capsys.readouterr().out
     assert "[REDDOG-RESIDENT-CYCLE] preflight=PASS" in output
     assert "no_repo_mutation=True" in output
@@ -1072,6 +1073,116 @@ def test_main_preflight_durable_resident_cycle_explicit_enable_overrides_product
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
 
     mocked.assert_called_once()
+
+
+def test_main_preflight_durable_resident_cycle_uses_stable_cadence_bucket() -> None:
+    import main
+
+    calls = []
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        side_effect=lambda **kwargs: calls.append(kwargs) or _resident_cycle_result(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
+                "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T18:00:00+00:00",
+                "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    first = calls[0]["red_dog_intent"]
+    second = calls[1]["red_dog_intent"]
+    assert first["cycle_bucket"] == second["cycle_bucket"]
+    assert first["intent_id"] == second["intent_id"]
+
+
+def test_main_preflight_durable_resident_cycle_rolls_intent_after_cadence() -> None:
+    import main
+
+    calls = []
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        side_effect=lambda **kwargs: calls.append(kwargs) or _resident_cycle_result(),
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
+                "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-18T09:00:01+00:00",
+                "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    first = calls[0]["red_dog_intent"]
+    second = calls[1]["red_dog_intent"]
+    assert first["cycle_bucket"] != second["cycle_bucket"]
+    assert first["intent_id"] != second["intent_id"]
+
+
+def test_main_preflight_durable_resident_cycle_explicit_intent_disables_cadence_bucket() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:explicit-intent",
+                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    intent = mocked.call_args.kwargs["red_dog_intent"]
+    assert intent["intent_id"] == "sha256:explicit-intent"
+    assert intent["cycle_bucket"] == ""
+
+
+def test_main_preflight_durable_resident_cycle_can_disable_cadence_for_legacy_sticky_intent() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {"REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "0"},
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    intent = mocked.call_args.kwargs["red_dog_intent"]
+    assert intent["cycle_bucket"] == ""
 
 
 def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_path, capsys) -> None:

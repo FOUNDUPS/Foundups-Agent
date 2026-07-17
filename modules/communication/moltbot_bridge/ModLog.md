@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_ARCHITECT_CADENCE_INTENT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added cadence-bound resident RedDog architect intent IDs for the `main.py`
+  product-mode cycle.
+- Default cadence is 24 hours via `REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS`;
+  repeated startups inside the same bucket reuse the same intent, while later
+  buckets create fresh resident architect cycles.
+- Explicit `REDDOG_RESIDENT_ARCHITECT_INTENT_ID` remains authoritative and
+  disables cadence bucketing; `REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS=0`
+  restores the legacy sticky intent behavior.
+- Boundary remains constrained: this changes cycle scheduling identity only and
+  does not add shell execution, repository mutation, worktree operations, PR
+  creation, HoloIndex re-index, Hermes dispatch, live FoundUp enqueue,
+  PatternMemory promotion, reward settlement, or merge authority.
+
 ## 2026-07-17: REDDOG_MAIN_RESIDENT_PRODUCT_MODE_ACTIVATION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
