@@ -354,21 +354,24 @@ def detect_and_route_mission(query: str) -> dict:
 
 ### 3. Recursive Execution Validation Contract
 
-The following is contract pseudocode for future implementation at the WSP core boundary. Until that runtime validator lands, it MUST NOT be reported as active enforcement.
+The active structural validator is `tools/wsp97_execution_validator.py`. It consumes a JSON receipt with:
 
-```python
-def validate_execution_compliance(execution_result: dict) -> bool:
-    """
-    Ensure execution follows WSP 97 mantra
-    """
-    required_steps = ["holoindex_query", "research_gathering",
-                     "hard_think_analysis", "dialectic_sweep", "first_principles",
-                     "build_execution", "wsp_compliance"]
+- `execution_id`: stable slice/run identity;
+- `execution_plane`: the classified local, docs, WRE, or runtime plane;
+- `outcome`: `completed`, `blocked`, or `failed`;
+- `action_evidence`: non-empty evidence-reference lists for all 9 canonical operator actions;
+- `wsps_applied`: a non-empty list that includes `WSP_97`;
+- `compliance_evidence`: non-empty references supporting the WSP declaration.
 
-    completed_steps = execution_result.get("execution_steps", [])
+Run it with:
 
-    return all(step in completed_steps for step in required_steps)
+```bash
+python tools/wsp97_execution_validator.py <receipt.json> --pretty
 ```
+
+Exit code `0` means structurally complete, `1` means non-compliant, and `2` means the receipt or contract could not be read. The validator derives the 7 mantra stages from the 9 action-evidence slots and WSP compliance fields.
+
+**Truth boundary**: validation proves only structural receipt completeness. Evidence references remain opaque; the validator does not prove reasoning quality, resolve evidence, or prove that runtime side effects occurred.
 
 ---
 
