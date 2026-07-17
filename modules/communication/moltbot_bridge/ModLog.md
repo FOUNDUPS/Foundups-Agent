@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_BACKEND_ARCHITECT_MODEL_SELECTION_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Bound backend architect determination to an optional production
+  model-selection receipt, recording the receipt id and digest on persisted
+  architect determination receipts.
+- Routed FoundUps Fusion backend architect calls through receipt-derived
+  lead/panel topology instead of always using the legacy default model panel
+  when a model-selection binding is supplied.
+- Added bootstrap support for outside-repo architect model-selection receipt
+  supply in production mode while preserving injected-runner test paths.
+
 ## 2026-07-16: REDDOG_ARTIFACT_GENERATION_MODEL_SELECTION_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

@@ -15,10 +15,12 @@ PatternMemory, settle rewards, or re-index HoloIndex.
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import os
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
@@ -35,6 +37,13 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     validate_reddog_wsp15_allocation_receipt,
+)
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
+    SelectionDecision,
+    SelectionPurpose,
+)
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_selection_receipt,
 )
 
 
@@ -79,6 +88,7 @@ class ArchitectDeterminationReason:
     WSP15_RECEIPT_MISMATCH = "REJECT_ARCHITECT_DETERMINATION_WSP15_RECEIPT_MISMATCH"
     STORE_REJECTED = "REJECT_ARCHITECT_DETERMINATION_STORE_REJECTED"
     PROMPT_BUDGET_EXCEEDED = "REJECT_ARCHITECT_DETERMINATION_PROMPT_BUDGET_EXCEEDED"
+    MODEL_SELECTION_RECEIPT = "REJECT_ARCHITECT_DETERMINATION_MODEL_SELECTION_RECEIPT"
 
 
 @dataclass(frozen=True)
@@ -140,32 +150,40 @@ class FoundupsFusionArchitectModelRunner:
         if not api_key:
             return _model_result_reject("missing_openrouter_api_key")
         try:
-            from scripts.advisory_model_once import _run_foundups_fusion
             from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
                 REDACTION_GATE_PASSED,
                 evaluate_redaction_gate,
             )
+            run_foundups_fusion = _load_foundups_fusion_runner()
         except Exception:
             return _model_result_reject("fusion_bridge_unavailable")
 
         gate = evaluate_redaction_gate(prompt, context, audit_mode=True)
         if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
             return _model_result_reject("redaction_blocked")
+        model_topology = _runtime_model_topology(
+            binding,
+            default_lead=self.lead_model,
+            default_panel=self.panel_models,
+        )
         redacted_user = gate.redacted_prompt
         if gate.redacted_context:
             redacted_user = gate.redacted_prompt + "\n\n" + gate.redacted_context
         payload = {
             "mode": "foundups_fusion",
-            "lead_model": self.lead_model,
-            "panel_models": list(self.panel_models),
+            "lead_model": model_topology["lead_model"],
+            "panel_models": list(model_topology["panel_models"]),
             "max_tokens": self.max_tokens,
             "temperature": self.temperature,
             "timeout": timeout_seconds,
             "_redacted_evidence_context": gate.redacted_context or "",
-            "bridge_meta": {"architect_binding": dict(binding)},
+            "bridge_meta": {
+                "architect_binding": dict(binding),
+                "model_selection_receipt_id": model_topology["model_selection_receipt_id"],
+            },
         }
         try:
-            result = _run_foundups_fusion(api_key, redacted_user, [], payload)
+            result = run_foundups_fusion(api_key, redacted_user, [], payload)
         except TimeoutError:
             return _model_result_reject(ArchitectDeterminationReason.MODEL_TIMEOUT)
         except Exception:
@@ -230,6 +248,8 @@ class ArchitectDeterminationReceipt:
     audit_report_digests: tuple[str, ...]
     model_result_digest: Optional[str]
     model_receipt_id: Optional[str]
+    model_selection_receipt_id: Optional[str]
+    model_selection_digest: Optional[str]
     fusion_quorum_passed: bool
     wsp15_allocation_receipt_id: Optional[str]
     wsp15_allocation_digest: Optional[str]
@@ -456,6 +476,7 @@ def run_reddog_backend_architect_determination_runtime(
     wsp15_allocation_receipt: Mapping[str, Any],
     store: ArchitectDeterminationStore | None = None,
     model_runner: ArchitectModelRunner | None = None,
+    model_selection_receipt: Mapping[str, Any] | None = None,
     now_iso: str | None = None,
     timeout_seconds: int = 60,
 ) -> BackendArchitectDeterminationResult:
@@ -480,11 +501,15 @@ def run_reddog_backend_architect_determination_runtime(
     report_digests = _report_digests(reports)
     allocation_receipt_id = str(wsp15_allocation_receipt.get("receipt_id") or "").strip() or None
     allocation_digest = _digest(wsp15_allocation_receipt) if isinstance(wsp15_allocation_receipt, Mapping) else None
+    model_selection = _model_selection_binding(model_selection_receipt, reasons)
+    model_selection_receipt_id = str(model_selection.get("receipt_id") or "").strip() or None
+    model_selection_digest = str(model_selection.get("digest") or "").strip() or None
     cycle_id = _cycle_id(
         snapshot=snapshot,
         report_bundle_id=report_bundle_id,
         report_digests=report_digests,
         wsp15_allocation_digest=allocation_digest,
+        model_selection_digest=model_selection_digest,
     )
     writer = store if store is not None else AgentDbArchitectDeterminationStore()
     if cycle_id and not reasons:
@@ -512,6 +537,8 @@ def run_reddog_backend_architect_determination_runtime(
             cycle_id=cycle_id or "sha256:" + "0" * 64,
             decision_reasons=(),
             rejection_reasons=_dedupe(reasons),
+            model_selection_receipt_id=model_selection_receipt_id,
+            model_selection_digest=model_selection_digest,
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
@@ -553,9 +580,13 @@ def run_reddog_backend_architect_determination_runtime(
             cycle_id=cycle_id,
             decision_reasons=(),
             rejection_reasons=(ArchitectDeterminationReason.PROMPT_BUDGET_EXCEEDED,),
+            model_selection_receipt_id=model_selection_receipt_id,
+            model_selection_digest=model_selection_digest,
         )
         return _result(receipt=receipt, persist_result=_persist_rejected(receipt))
     binding = fusion_gate.determination_binding.to_dict() if fusion_gate.determination_binding else {}
+    if model_selection:
+        binding = {**binding, "model_selection": dict(model_selection)}
     try:
         model_result = runner.run_architect_determination(
             prompt=prompt,
@@ -588,6 +619,8 @@ def run_reddog_backend_architect_determination_runtime(
             cycle_id=cycle_id,
             decision_reasons=(),
             rejection_reasons=_dedupe(reasons),
+            model_selection_receipt_id=model_selection_receipt_id,
+            model_selection_digest=model_selection_digest,
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
@@ -625,6 +658,8 @@ def run_reddog_backend_architect_determination_runtime(
             cycle_id=cycle_id,
             decision_reasons=(),
             rejection_reasons=_dedupe(reasons),
+            model_selection_receipt_id=model_selection_receipt_id,
+            model_selection_digest=model_selection_digest,
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
@@ -640,6 +675,7 @@ def run_reddog_backend_architect_determination_runtime(
             "action": action,
             "next_slice_name": next_slice_name,
             "model_result_digest": model_result.model_result_digest,
+            "model_selection_digest": model_selection_digest,
         }
     )
     if action == ACTION_FIX:
@@ -668,6 +704,8 @@ def run_reddog_backend_architect_determination_runtime(
         cycle_id=cycle_id,
         decision_reasons=decision_reasons,
         rejection_reasons=(),
+        model_selection_receipt_id=model_selection_receipt_id,
+        model_selection_digest=model_selection_digest,
         queue_candidate=queue_candidate,
         determination_receipt_id=receipt_stub_id,
     )
@@ -690,6 +728,8 @@ def run_reddog_backend_architect_determination_runtime(
             cycle_id=cycle_id,
             decision_reasons=decision_reasons,
             rejection_reasons=(ArchitectDeterminationReason.STORE_REJECTED, *persist_result.rejection_reasons),
+            model_selection_receipt_id=model_selection_receipt_id,
+            model_selection_digest=model_selection_digest,
         )
         return _result(receipt=failed, persist_result=persist_result)
     return _result(receipt=receipt, persist_result=persist_result)
@@ -761,6 +801,82 @@ def _validate_wsp15_allocation(allocation: Mapping[str, Any], reasons: list[str]
         reasons.append(ArchitectDeterminationReason.MISSING_WSP15_ALLOCATION)
     else:
         reasons.append(ArchitectDeterminationReason.MALFORMED_WSP15_ALLOCATION)
+
+
+def _model_selection_binding(value: Any, reasons: list[str]) -> Mapping[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, Mapping):
+        reasons.append(ArchitectDeterminationReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    selection = _json_compatible_mapping(value)
+    if not selection:
+        reasons.append(ArchitectDeterminationReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    try:
+        receipt = rehydrate_model_selection_receipt(selection)
+    except Exception:
+        reasons.append(ArchitectDeterminationReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    if (
+        receipt.decision != SelectionDecision.SELECTED
+        or not receipt.selected_model_ids
+        or receipt.requirements.purpose != SelectionPurpose.PRODUCTION
+    ):
+        reasons.append(ArchitectDeterminationReason.MODEL_SELECTION_RECEIPT)
+        return {}
+    lead_model = ""
+    panel_models: list[str] = []
+    assignments = [asdict(item) for item in receipt.role_assignments]
+    for assignment in assignments:
+        role = str(assignment.get("role") or "")
+        model_id = str(assignment.get("canonical_model_id") or "")
+        if role == "principal" and model_id:
+            lead_model = model_id
+        elif role != "verifier" and model_id:
+            panel_models.append(model_id)
+    if not lead_model:
+        lead_model = str(receipt.selected_model_ids[0])
+        panel_models = [str(item) for item in receipt.selected_model_ids[1:]]
+    return {
+        "receipt_id": receipt.receipt_id,
+        "digest": _digest(selection),
+        "catalog_snapshot_id": receipt.catalog_snapshot_id,
+        "task_family": receipt.requirements.task_family,
+        "selection_mode": receipt.requirements.selection_mode.value,
+        "purpose": receipt.requirements.purpose.value,
+        "selected_model_ids": [str(item) for item in receipt.selected_model_ids],
+        "role_assignments": assignments,
+        "panel_topology_digest": receipt.panel_topology_digest,
+        "lead_model": lead_model,
+        "panel_models": panel_models,
+    }
+
+
+def _json_compatible_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    try:
+        normalized = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+    except (TypeError, ValueError):
+        return {}
+    return normalized if isinstance(normalized, Mapping) else {}
+
+
+def _runtime_model_topology(
+    binding: Mapping[str, Any],
+    *,
+    default_lead: str,
+    default_panel: Sequence[str],
+) -> Mapping[str, Any]:
+    selection = binding.get("model_selection")
+    selection = selection if isinstance(selection, Mapping) else {}
+    lead = str(selection.get("lead_model") or default_lead)
+    raw_panel = selection.get("panel_models")
+    panel = [str(item) for item in raw_panel] if isinstance(raw_panel, list) else list(default_panel)
+    return {
+        "lead_model": lead,
+        "panel_models": tuple(item for item in panel if item),
+        "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
+    }
 
 
 def _parse_model_output(content: str) -> Mapping[str, Any]:
@@ -942,6 +1058,8 @@ def _receipt(
     cycle_id: str,
     decision_reasons: Sequence[str],
     rejection_reasons: Sequence[str],
+    model_selection_receipt_id: Optional[str] = None,
+    model_selection_digest: Optional[str] = None,
     queue_candidate: ArchitectQueueCandidate | None = None,
     determination_receipt_id: Optional[str] = None,
 ) -> ArchitectDeterminationReceipt:
@@ -960,6 +1078,8 @@ def _receipt(
         "audit_report_digests": tuple(report_digests),
         "model_result_digest": model_result.model_result_digest if model_result else None,
         "model_receipt_id": model_result.model_receipt_id if model_result else None,
+        "model_selection_receipt_id": model_selection_receipt_id,
+        "model_selection_digest": model_selection_digest,
         "fusion_quorum_passed": _fusion_quorum_passed(model_result.review_packet) if model_result else False,
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
@@ -986,6 +1106,8 @@ def _receipt(
         audit_report_digests=tuple(report_digests),
         model_result_digest=model_result.model_result_digest if model_result else None,
         model_receipt_id=model_result.model_receipt_id if model_result else None,
+        model_selection_receipt_id=model_selection_receipt_id,
+        model_selection_digest=model_selection_digest,
         fusion_quorum_passed=_fusion_quorum_passed(model_result.review_packet) if model_result else False,
         wsp15_allocation_receipt_id=allocation_receipt_id,
         wsp15_allocation_digest=allocation_digest,
@@ -1079,12 +1201,31 @@ def _model_result_reject(reason: str) -> ArchitectModelResult:
     )
 
 
+def _load_foundups_fusion_runner():
+    try:
+        from scripts.advisory_model_once import _run_foundups_fusion
+
+        return _run_foundups_fusion
+    except Exception:
+        bridge_path = Path(__file__).resolve().parents[4] / "scripts" / "advisory_model_once.py"
+        spec = importlib.util.spec_from_file_location("reddog_advisory_model_once_backend", bridge_path)
+        if spec is None or spec.loader is None:
+            raise ImportError("advisory_model_once_unavailable")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        runner = getattr(module, "_run_foundups_fusion", None)
+        if not callable(runner):
+            raise ImportError("foundups_fusion_runner_unavailable")
+        return runner
+
+
 def _cycle_id(
     *,
     snapshot: OperationalContextSnapshot | None,
     report_bundle_id: Optional[str],
     report_digests: Sequence[str],
     wsp15_allocation_digest: Optional[str],
+    model_selection_digest: Optional[str],
 ) -> Optional[str]:
     if snapshot is None or not report_bundle_id or not wsp15_allocation_digest:
         return None
@@ -1095,6 +1236,7 @@ def _cycle_id(
             "report_bundle_id": report_bundle_id,
             "report_digests": tuple(report_digests),
             "wsp15_allocation_digest": wsp15_allocation_digest,
+            "model_selection_digest": model_selection_digest,
         }
     )
 
