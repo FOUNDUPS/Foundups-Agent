@@ -3268,6 +3268,12 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY=0            Materialize signer-owned CLI argv packet
         REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED=0   Block startup if run-packet supply fails
         REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH                Outside-repo signer CLI run-packet JSON
+        REDDOG_SIGNER_SERVICE_HEALTHCHECK=0                  Validate signer run packet and probe existing socket
+        REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED=0         Block startup if signer healthcheck fails
+        REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID     Optional requester principal for healthcheck request
+        REDDOG_SIGNER_HEALTHCHECK_PROFILE_ID                 Optional signer profile id for healthcheck request
+        REDDOG_SIGNER_HEALTHCHECK_TIMEOUT_S                  Optional signer healthcheck timeout
+        REDDOG_SIGNER_HEALTHCHECK_MAX_RESPONSE_BYTES         Optional signer healthcheck response cap
         REDDOG_SIGNER_SOCKET_PROFILE_BINDING=0              Derive signer socket path/backend when authority runtime is configured
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -3586,6 +3592,64 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 print(
                     "[REDDOG-SIGNER-RUN-PACKET] Startup blocked by "
                     "REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED=1"
+                )
+                return False
+
+        signer_healthcheck_requested = str(
+            os.getenv("REDDOG_SIGNER_SERVICE_HEALTHCHECK") or ""
+        ).strip() == "1"
+        signer_healthcheck_enforced = (
+            os.getenv("REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED", "0") != "0"
+        )
+        if signer_healthcheck_requested:
+            from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
+                run_reddog_signer_socket_service_healthcheck,
+            )
+
+            signer_healthcheck = run_reddog_signer_socket_service_healthcheck(
+                repo_root=repo_root,
+                run_packet_path=resident_queue_runtime_file_path(
+                    os.environ,
+                    repo_root,
+                    "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH",
+                )
+                or None,
+                requester_principal_id=str(
+                    os.getenv("REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID") or ""
+                )
+                or None,
+                signer_profile_id=str(
+                    os.getenv("REDDOG_SIGNER_HEALTHCHECK_PROFILE_ID")
+                    or "reddog-work-authority"
+                ),
+                timeout_s=_reddog_float_env("REDDOG_SIGNER_HEALTHCHECK_TIMEOUT_S", 5.0),
+                max_response_bytes=_reddog_positive_int_env(
+                    "REDDOG_SIGNER_HEALTHCHECK_MAX_RESPONSE_BYTES",
+                    16384,
+                ),
+            )
+            signer_healthcheck_status = "PASS" if signer_healthcheck.accepted else "WARN"
+            signer_healthcheck_reasons = (
+                ",".join(signer_healthcheck.rejection_reasons)
+                if signer_healthcheck.rejection_reasons
+                else "(none)"
+            )
+            print(
+                f"[REDDOG-SIGNER-HEALTHCHECK] preflight={signer_healthcheck_status} "
+                f"status={signer_healthcheck.status} "
+                f"packet={signer_healthcheck.run_packet_id or '(none)'} "
+                f"path={signer_healthcheck.run_packet_path or '(none)'} "
+                f"socket={signer_healthcheck.socket_path or '(none)'} "
+                f"profile={signer_healthcheck.signer_profile_id or '(none)'} "
+                f"requester={signer_healthcheck.requester_principal_id or '(none)'} "
+                f"request={signer_healthcheck.request_digest or '(none)'} "
+                f"response={signer_healthcheck.response_digest or '(none)'} "
+                f"reasons={signer_healthcheck_reasons}"
+            )
+            if not signer_healthcheck.accepted and signer_healthcheck_enforced:
+                print(
+                    "[REDDOG-SIGNER-HEALTHCHECK] Startup blocked by "
+                    "REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED=1"
                 )
                 return False
 

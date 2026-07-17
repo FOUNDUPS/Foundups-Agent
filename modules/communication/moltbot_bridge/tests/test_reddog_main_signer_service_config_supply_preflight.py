@@ -36,6 +36,12 @@ def clean_signer_supply_env(monkeypatch) -> None:
         "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH",
         "REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY",
         "REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED",
+        "REDDOG_SIGNER_SERVICE_HEALTHCHECK",
+        "REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED",
+        "REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID",
+        "REDDOG_SIGNER_HEALTHCHECK_PROFILE_ID",
+        "REDDOG_SIGNER_HEALTHCHECK_TIMEOUT_S",
+        "REDDOG_SIGNER_HEALTHCHECK_MAX_RESPONSE_BYTES",
         "REDDOG_SIGNER_PRINCIPAL_SIGNING_KEY_REF",
         "REDDOG_SIGNER_PRINCIPAL_AUDIT_MAC_KEY_REF",
         "REDDOG_SIGNER_REDDOG_SIGNING_KEY_REF",
@@ -427,3 +433,94 @@ def test_main_signer_run_packet_supply_enforced_failure_blocks_before_serial_boo
     assert "[REDDOG-SIGNER-RUN-PACKET] preflight=WARN" in captured
     assert "signer_run_packet_config_path_invalid" in captured
     assert "Startup blocked by REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED=1" in captured
+
+
+def test_main_signer_healthcheck_enforced_failure_blocks_before_serial_bootstrap(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", PROFILE_SIGNED_0102_BOUNDED_CODE)
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
+    monkeypatch.setenv("REDDOG_SIGNER_SERVICE_HEALTHCHECK", "1")
+    monkeypatch.setenv("REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED", "1")
+
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_resident_queue_serial_loop_bootstrap."
+        "run_reddog_main_resident_queue_serial_loop_bootstrap",
+        side_effect=AssertionError("serial bootstrap must not run after healthcheck reject"),
+    ):
+        assert main.run_reddog_resident_queue_serial_loop_preflight(repo) is False
+
+    captured = capsys.readouterr().out
+    assert "[REDDOG-SIGNER-HEALTHCHECK] preflight=WARN" in captured
+    assert "signer_healthcheck_run_packet_path_invalid" in captured
+    assert "Startup blocked by REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED=1" in captured
+
+
+def test_main_signer_healthcheck_passes_without_implicit_socket_consumption(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    import main
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
+        SIGNER_SERVICE_HEALTHCHECK_READY,
+        SignerServiceHealthcheckResult,
+    )
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    run_packet_path = runtime_root / "signer_service_run_packet.json"
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", PROFILE_SIGNED_0102_BOUNDED_CODE)
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
+    monkeypatch.setenv("REDDOG_SIGNER_SERVICE_HEALTHCHECK", "1")
+    monkeypatch.setenv("REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED", "1")
+    monkeypatch.setenv("REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID", "github:mjtrout")
+    monkeypatch.setenv("REDDOG_SIGNER_HEALTHCHECK_PROFILE_ID", "reddog-work-authority")
+
+    accepted = SignerServiceHealthcheckResult(
+        accepted=True,
+        status=SIGNER_SERVICE_HEALTHCHECK_READY,
+        run_packet_path=str(run_packet_path),
+        run_packet_id="sha256:packet",
+        config_path=str(runtime_root / "signer_service_config.json"),
+        config_digest="sha256:config",
+        socket_path=str(runtime_root / "reddog_signer.sock"),
+        signer_profile_id="reddog-work-authority",
+        signer_public_key="ed25519-pub-v1:reddog",
+        requester_principal_id="github:mjtrout",
+        request_digest="sha256:request",
+        response_digest="sha256:response",
+        rejection_reasons=(),
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_signer_socket_service_healthcheck."
+        "run_reddog_signer_socket_service_healthcheck",
+        return_value=accepted,
+    ) as mocked_healthcheck, patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_resident_queue_serial_loop_bootstrap."
+        "run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=_serial_loop_result(),
+    ) as mocked_bootstrap:
+        assert main.run_reddog_resident_queue_serial_loop_preflight(repo) is True
+
+    captured = capsys.readouterr().out
+    assert "[REDDOG-SIGNER-HEALTHCHECK] preflight=PASS" in captured
+    assert "response=sha256:response" in captured
+    assert mocked_healthcheck.call_args.kwargs["run_packet_path"] == str(run_packet_path)
+    assert mocked_healthcheck.call_args.kwargs["requester_principal_id"] == "github:mjtrout"
+    assert mocked_healthcheck.call_args.kwargs["signer_profile_id"] == "reddog-work-authority"
+    assert mocked_bootstrap.call_args.kwargs["signer_socket_path"] is None

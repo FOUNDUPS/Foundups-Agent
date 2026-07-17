@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_SERVICE_HEALTHCHECK_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added a signer service healthcheck that validates the outside-repo signer
+  run packet, revalidates the bound signer config, and optionally performs a
+  bounded roundtrip against an already-running signer socket.
+- Added an explicit main preflight switch for signer healthcheck; it can block
+  startup when enforced but does not start the signer, bind sockets, resolve
+  secrets, enqueue OpenClaw, dispatch Hermes, publish PRs, settle rewards, or
+  re-index HoloIndex.
+- Hardened packet validation with run-packet self-digest, no-shell/no-spawn
+  invariants, outside-repo config/socket checks, and audit-safe request/response
+  digests only.
+- Added focused tests for accepted healthcheck receipts, malformed/tampered
+  packet rejection, missing profile rejection, unavailable socket rejection,
+  main enforced blocking, and no spawn/secret/runtime-authority surface.
+
 ## 2026-07-17: REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
