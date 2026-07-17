@@ -707,6 +707,9 @@ def _materialize_work_orders_from_authority_profile(
         "advisory_only_source_packet": _advisory_source_packet(evidence_seed),
         "holoindex_evidence": holoindex_evidence,
         "operational_context_binding": context_binding,
+        "model_selection_receipt": _nested_mapping(authority_profile, "model_selection_receipt"),
+        "model_selection_receipt_id": str(authority_profile.get("model_selection_receipt_id") or ""),
+        "model_selection_digest": str(authority_profile.get("model_selection_digest") or ""),
     }
     return {work_order_id: work_order}, ()
 

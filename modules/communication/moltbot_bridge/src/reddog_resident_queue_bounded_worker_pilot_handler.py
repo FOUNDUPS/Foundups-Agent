@@ -288,6 +288,11 @@ def _derive_artifact_generation_request(
     work_authority = _mapping(authority_result.get("work_authority"))
     authority_receipt = _mapping(authority_result.get("receipt"))
     signed_receipt_chain = _mapping(plan.get("signed_receipt_chain"))
+    model_selection_receipt = (
+        _mapping(plan.get("model_selection_receipt"))
+        or _mapping(work_order.get("model_selection_receipt"))
+        or _mapping(_mapping(work_order.get("operational_context_binding")).get("model_selection_receipt"))
+    )
     planned_artifacts = _list(plan.get("planned_artifacts"))
     task_summary = str(work_order.get("task_summary") or "")
     if (
@@ -335,6 +340,7 @@ def _derive_artifact_generation_request(
         "holoindex_evidence": dict(evidence),
         "signed_authority": signed_authority,
         "signed_receipt_chain": dict(signed_receipt_chain),
+        "model_selection_receipt": dict(model_selection_receipt),
         "timeout_seconds": 30,
     }
 

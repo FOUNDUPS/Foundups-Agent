@@ -25,6 +25,13 @@ from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
     REDACTION_GATE_PASSED,
     evaluate_redaction_gate,
 )
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
+    SelectionDecision,
+    SelectionPurpose,
+)
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_selection_receipt,
+)
 
 ARTIFACT_GENERATION_ACCEPT = "BOUNDED_ARTIFACT_GENERATION_ACCEPT"
 ARTIFACT_GENERATION_REJECT = "BOUNDED_ARTIFACT_GENERATION_REJECT"
@@ -47,6 +54,7 @@ FAIL_AUTHORITY = "FAIL_ARTIFACT_GENERATION_AUTHORITY"
 FAIL_RECEIPT_CHAIN = "FAIL_ARTIFACT_GENERATION_RECEIPT_CHAIN"
 FAIL_REDACTION_BLOCKED = "FAIL_ARTIFACT_GENERATION_REDACTION_BLOCKED"
 FAIL_RUNTIME_MODE = "FAIL_ARTIFACT_GENERATION_RUNTIME_MODE"
+FAIL_MODEL_SELECTION_RECEIPT = "FAIL_ARTIFACT_GENERATION_MODEL_SELECTION_RECEIPT"
 
 MAX_ARTIFACTS = 8
 MAX_FILE_BYTES = 64 * 1024
@@ -119,19 +127,27 @@ class FoundupsFusionArtifactGenerationRunner:
         gate = evaluate_redaction_gate(prompt, context, audit_mode=True)
         if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
             return _model_reject(FAIL_REDACTION_BLOCKED, started=started)
+        model_topology = _runtime_model_topology(
+            binding,
+            default_lead=self.lead_model,
+            default_panel=self.panel_models,
+        )
         user_payload = gate.redacted_prompt
         if gate.redacted_context:
             user_payload = gate.redacted_prompt + "\n\n" + gate.redacted_context
         payload = {
             "mode": "foundups_fusion",
-            "lead_model": self.lead_model,
-            "panel_models": list(self.panel_models),
+            "lead_model": model_topology["lead_model"],
+            "panel_models": list(model_topology["panel_models"]),
             "max_tokens": self.max_tokens,
             "temperature": self.temperature,
             "timeout": timeout_seconds,
             "response_contract": "strict_json_bounded_artifact_contents.v1",
             "_redacted_evidence_context": gate.redacted_context or "",
-            "bridge_meta": {"artifact_generation_binding": dict(binding)},
+            "bridge_meta": {
+                "artifact_generation_binding": dict(binding),
+                "model_selection_receipt_id": model_topology["model_selection_receipt_id"],
+            },
         }
         try:
             result = _load_foundups_fusion_runner()(api_key, user_payload, [], payload)
@@ -171,6 +187,8 @@ class BoundedArtifactGenerationReceipt:
     model_receipt_id: Optional[str]
     rejection_reasons: List[str]
     accepted: bool
+    model_selection_receipt_id: Optional[str] = None
+    model_selection_digest: str = ""
     no_file_write_performed: bool = True
     no_shell_command_executed: bool = True
     no_worktree_created: bool = True
@@ -239,6 +257,7 @@ def generate_bounded_artifact_contents(
         reasons.append(FAIL_AUTHORITY)
     if _mapping(req.get("signed_receipt_chain")).get("accepted") is not True:
         reasons.append(FAIL_RECEIPT_CHAIN)
+    model_selection = _model_selection_binding(req.get("model_selection_receipt"), reasons)
 
     model_result: ArtifactGenerationModelResult | None = None
     artifacts: Dict[str, str] = {}
@@ -251,7 +270,7 @@ def generate_bounded_artifact_contents(
             model_result = runner.generate_artifacts(
                 prompt=prompt,
                 context=context,
-                binding=_binding(req, planned),
+                binding=_binding(req, planned, model_selection),
                 timeout_seconds=_timeout(req.get("timeout_seconds")),
             )
             if model_result.ok is not True:
@@ -271,6 +290,8 @@ def generate_bounded_artifact_contents(
                 "planned_artifacts": planned,
                 "artifact_manifest_digest": manifest,
                 "model_result_digest": model_result.model_result_digest if model_result else "",
+                "model_selection_receipt_id": model_selection.get("receipt_id"),
+                "model_selection_digest": model_selection.get("digest", ""),
                 "rejection_reasons": deduped,
             }
         ).removeprefix("sha256:")[:16],
@@ -282,6 +303,8 @@ def generate_bounded_artifact_contents(
         model_receipt_id=model_result.model_receipt_id if model_result else None,
         rejection_reasons=deduped,
         accepted=accepted,
+        model_selection_receipt_id=model_selection.get("receipt_id"),
+        model_selection_digest=model_selection.get("digest", ""),
     )
     return BoundedArtifactGenerationResult(
         decision=ARTIFACT_GENERATION_ACCEPT if accepted else ARTIFACT_GENERATION_REJECT,
@@ -315,7 +338,11 @@ def _artifact_prompt(req: Mapping[str, Any], planned: Sequence[str]) -> str:
     )
 
 
-def _binding(req: Mapping[str, Any], planned: Sequence[str]) -> Dict[str, Any]:
+def _binding(
+    req: Mapping[str, Any],
+    planned: Sequence[str],
+    model_selection: Mapping[str, Any],
+) -> Dict[str, Any]:
     return {
         "work_order_id": str(req.get("work_order_id") or ""),
         "slice_name": str(req.get("slice_name") or ""),
@@ -323,6 +350,78 @@ def _binding(req: Mapping[str, Any], planned: Sequence[str]) -> Dict[str, Any]:
         "holoindex_evidence_digest": _digest(_mapping(req.get("holoindex_evidence"))),
         "signed_authority_digest": _digest(_mapping(req.get("signed_authority"))),
         "signed_receipt_chain_digest": _digest(_mapping(req.get("signed_receipt_chain"))),
+        "model_selection": dict(model_selection),
+    }
+
+
+def _model_selection_binding(value: Any, reasons: List[str]) -> Dict[str, Any]:
+    selection = _json_compatible_mapping(_mapping(value))
+    if not selection:
+        return {}
+    try:
+        receipt = rehydrate_model_selection_receipt(selection)
+    except Exception:
+        reasons.append(FAIL_MODEL_SELECTION_RECEIPT)
+        return {}
+    if (
+        receipt.decision != SelectionDecision.SELECTED
+        or not receipt.selected_model_ids
+        or receipt.requirements.purpose != SelectionPurpose.PRODUCTION
+    ):
+        reasons.append(FAIL_MODEL_SELECTION_RECEIPT)
+        return {}
+    lead_model = ""
+    panel_models: list[str] = []
+    assignments = [asdict(item) for item in receipt.role_assignments]
+    for assignment in assignments:
+        role = str(assignment.get("role") or "")
+        model_id = str(assignment.get("canonical_model_id") or "")
+        if role == "principal" and model_id:
+            lead_model = model_id
+        elif role != "verifier" and model_id:
+            panel_models.append(model_id)
+    if not lead_model:
+        lead_model = str(receipt.selected_model_ids[0])
+        panel_models = [str(item) for item in receipt.selected_model_ids[1:]]
+    return {
+        "receipt_id": receipt.receipt_id,
+        "digest": _digest(selection),
+        "catalog_snapshot_id": receipt.catalog_snapshot_id,
+        "task_family": receipt.requirements.task_family,
+        "selection_mode": receipt.requirements.selection_mode.value,
+        "purpose": receipt.requirements.purpose.value,
+        "selected_model_ids": [str(item) for item in receipt.selected_model_ids],
+        "role_assignments": assignments,
+        "panel_topology_digest": receipt.panel_topology_digest,
+        "lead_model": lead_model,
+        "panel_models": panel_models,
+    }
+
+
+def _json_compatible_mapping(value: Mapping[str, Any]) -> Dict[str, Any]:
+    if not value:
+        return {}
+    try:
+        normalized = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+    except (TypeError, ValueError):
+        return {}
+    return normalized if isinstance(normalized, dict) else {}
+
+
+def _runtime_model_topology(
+    binding: Mapping[str, Any],
+    *,
+    default_lead: str,
+    default_panel: Sequence[str],
+) -> Dict[str, Any]:
+    selection = _mapping(binding.get("model_selection"))
+    lead = str(selection.get("lead_model") or default_lead)
+    raw_panel = selection.get("panel_models")
+    panel = [str(item) for item in raw_panel] if isinstance(raw_panel, list) else list(default_panel)
+    return {
+        "lead_model": lead,
+        "panel_models": tuple(item for item in panel if item),
+        "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
     }
 
 
@@ -469,6 +568,7 @@ __all__ = [
     "ArtifactGenerationModelResult",
     "BoundedArtifactGenerationResult",
     "BoundedArtifactGenerationRunner",
+    "FAIL_MODEL_SELECTION_RECEIPT",
     "FoundupsFusionArtifactGenerationRunner",
     "generate_bounded_artifact_contents",
 ]

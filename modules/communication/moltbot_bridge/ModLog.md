@@ -1,5 +1,18 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_ARTIFACT_GENERATION_MODEL_SELECTION_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Bound resident bounded-artifact generation to the production
+  model-selection receipt carried by the signed FIX promotion authority profile
+  and materialized work order.
+- Preserved backward-compatible defaults when no model-selection receipt is
+  supplied, but fail closed on malformed, tampered, or non-production receipts.
+- Added focused regressions proving model topology reaches the FoundUps Fusion
+  payload without adding model calls, HoloIndex re-indexing, shell execution, or
+  repo mutation.
+
 ## 2026-07-16: REDDOG_RESIDENT_PROFILE_OPTIONAL_RUNTIME_PATHS_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
