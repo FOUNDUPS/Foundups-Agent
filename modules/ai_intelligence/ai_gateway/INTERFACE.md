@@ -153,6 +153,11 @@ enabled automatically by `main.py` and does not perform verification, promotion,
 PatternMemory writes, HoloIndex mutation, runtime binding, command execution, or
 repository mutation.
 
+The campaign execution bootstrap accepts this runner only through the explicit
+`configured_gateway` mode, an outside-repo prompt-record file, an explicit
+provider allowlist, and the `exact_output_digest` verifier mode. Default startup
+behavior remains `deterministic_fixture`.
+
 #### Model Combination Benchmark Harness
 
 ```python

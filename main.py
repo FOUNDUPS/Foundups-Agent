@@ -1605,7 +1605,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY=0       Materialize runtime binding receipt from signed evidence
         REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY=0     Materialize model AutoResearch plan from verified receipts
         REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY=0 Execute deterministic campaign fixture
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY=0 Execute campaign fixture or configured gateway
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY=0 Materialize campaign promotion-gate receipts
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED=0 Block startup if rejected
@@ -1625,11 +1625,16 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH      Optional outside-repo feedback JSON/JSONL
         REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH          Outside-repo AutoResearch plan output JSON
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_TASKS_PATH        Outside-repo held-out campaign tasks JSON
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMPTS_PATH      Outside-repo held-out prompt records JSON
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_PATH Outside-repo campaign execution output JSON
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST   Verifier digest required by plan policy
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID Held-out split ID for benchmark receipt
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE       deterministic_fixture only
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE     deterministic_fixture only
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE       deterministic_fixture or configured_gateway
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE     deterministic_fixture or exact_output_digest
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_ALLOWED_PROVIDERS ; or , separated allowlist
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS Optional positive int
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE Optional positive int
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE Optional positive float
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_POLICIES_PATH Outside-repo promotion policies JSON
         REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH         Outside-repo AutoResearch cycle receipt JSON
         REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_PATH Outside-repo AutoResearch cycle feedback JSONL
@@ -1971,6 +1976,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
                     plan_receipt_path=model_autoresearch_plan_receipt_path,
                     candidate_pool_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH", "") or None,
                     tasks_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_TASKS_PATH", "") or None,
+                    prompt_records_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMPTS_PATH", "") or None,
                     output_path=model_autoresearch_campaign_execution_receipt_path,
                     verifier_digest=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST", ""),
                     held_out_split_id=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID", ""),
@@ -1981,6 +1987,22 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
                     verifier_mode=os.getenv(
                         "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE",
                         "deterministic_fixture",
+                    ),
+                    runner_allowed_providers=os.getenv(
+                        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_ALLOWED_PROVIDERS",
+                        "",
+                    ),
+                    runner_max_prompt_chars=os.getenv(
+                        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS",
+                        "20000",
+                    ),
+                    runner_max_calls_per_sample=os.getenv(
+                        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE",
+                        "4",
+                    ),
+                    runner_max_cost_estimate_usd_per_sample=os.getenv(
+                        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE",
+                        "1.0",
                     ),
                 )
             )
