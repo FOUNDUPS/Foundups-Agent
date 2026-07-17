@@ -105,8 +105,11 @@ benchmarking untested candidates or rebenchmarking challengers, but it does not
 execute those campaigns.
 
 The planner requires source promotion-gate receipts and a cost-budget receipt.
-It does not call providers, run benchmarks, mutate catalogs, write
-PatternMemory, or bind RedDog runtime defaults.
+It can use verified selection-outcome feedback and context-bound AutoResearch
+cycle feedback as bounded priority signals for existing candidates. Cycle
+feedback must be source-plan-bound and policy-matched before it can influence
+the next campaign. It does not call providers, run benchmarks, mutate catalogs,
+write PatternMemory, or bind RedDog runtime defaults.
 
 ## RedDog Runtime Model Binding
 

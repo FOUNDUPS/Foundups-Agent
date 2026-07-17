@@ -184,6 +184,11 @@ The planner consumes promotion-gate receipts, a candidate pool, and
 The policy binds task family, catalog snapshot ID, maximum campaign items,
 optional verifier digest, and a required cost-budget receipt. Missing source gate
 receipts, verifier mismatch, or missing budget evidence fails closed. The planner
+may consume verified selection-outcome feedback records and context-bound
+AutoResearch cycle feedback records as bounded priority signals. Cycle feedback
+is accepted only when its source plan context is bound, task family and catalog
+snapshot match the policy, source-plan digest is present, and executed
+candidates plus promotion-gate receipt IDs are nonempty. The planner
 does not execute benchmarks, call providers, write PatternMemory, mutate
 catalogs, or bind runtime defaults.
 

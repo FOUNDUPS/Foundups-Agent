@@ -135,6 +135,24 @@ def _feedback_record(model_id: str, *, suffix: str = "1") -> dict:
     }
 
 
+def _cycle_feedback_record(model_id: str, *, suffix: str = "1") -> dict:
+    return {
+        "record_type": "model_autoresearch_cycle_feedback",
+        "schema_version": "model_autoresearch_cycle_feedback_record.v1",
+        "feedback_record_id": f"model_autoresearch_cycle_feedback_{suffix}",
+        "cycle_receipt_id": f"model_autoresearch_cycle:{suffix}",
+        "source_plan_receipt_id": f"model_autoresearch_plan:{suffix}",
+        "source_plan_context_bound": True,
+        "campaign_execution_receipt_id": f"model_autoresearch_campaign_execution:{suffix}",
+        "promotion_gate_supply_receipt_id": f"model_autoresearch_promotion_gate_supply:{suffix}",
+        "catalog_snapshot_id": "model_catalog_snapshot:1",
+        "task_family": "architecture",
+        "executed_candidate_ids": [model_id],
+        "promotion_gate_receipt_ids": [f"model_promotion_gate:{suffix}"],
+        "source_plan_receipt_digest": "sha256:" + suffix[0].rjust(64, "0"),
+    }
+
+
 def test_autoresearch_plans_new_candidate_and_rebenchmark_challenger():
     champion_gate = _gate("provider/champion", pass_all=True)
     challenger_gate = _gate("provider/challenger", pass_all=False)
@@ -177,6 +195,30 @@ def test_autoresearch_uses_feedback_records_as_bounded_priority_signal():
     assert receipt.rejection_reasons == ()
     assert receipt.source_feedback_record_ids == ("model_feedback_2",)
     assert receipt.feedback_ledger_digest.startswith("model_autoresearch_feedback_ledger:")
+    assert [item.candidate_id for item in receipt.campaign_items] == [
+        "provider/new",
+        "provider/challenger",
+    ]
+    assert receipt.campaign_items[0].priority == "P0"
+    assert receipt.campaign_items[0].reason == "verified_runtime_feedback_unbenchmarked_candidate"
+
+
+def test_autoresearch_uses_context_bound_cycle_feedback_as_bounded_priority_signal():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+    feedback = _cycle_feedback_record("provider/new", suffix="3")
+
+    receipt = plan_model_champion_challenger_autoresearch(
+        promotion_gate_receipts=(challenger_gate,),
+        candidate_pool=(
+            _candidate("provider/challenger"),
+            _candidate("provider/new"),
+        ),
+        policy=_policy(),
+        feedback_records=(feedback,),
+    )
+
+    assert receipt.rejection_reasons == ()
+    assert receipt.source_feedback_record_ids == ("model_autoresearch_cycle_feedback_3",)
     assert [item.candidate_id for item in receipt.campaign_items] == [
         "provider/new",
         "provider/challenger",
@@ -297,6 +339,60 @@ def test_autoresearch_rejects_malformed_or_mismatched_feedback_records():
             assert str(exc) == expected
         else:
             raise AssertionError("feedback record was accepted")
+
+
+def test_autoresearch_rejects_unbound_or_mismatched_cycle_feedback_records():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+    unbound = _cycle_feedback_record("provider/new")
+    unbound["source_plan_context_bound"] = False
+    mismatched_task = _cycle_feedback_record("provider/new", suffix="2")
+    mismatched_task["task_family"] = "security"
+    mismatched_catalog = _cycle_feedback_record("provider/new", suffix="3")
+    mismatched_catalog["catalog_snapshot_id"] = "model_catalog_snapshot:other"
+    bad_digest = _cycle_feedback_record("provider/new", suffix="4")
+    bad_digest["source_plan_receipt_digest"] = "not-a-digest"
+
+    for record, expected in (
+        (unbound, "feedback_source_plan_context_unbound"),
+        (mismatched_task, "feedback_task_family_mismatch"),
+        (mismatched_catalog, "feedback_catalog_snapshot_mismatch"),
+        (bad_digest, "feedback_source_plan_receipt_digest_invalid"),
+    ):
+        try:
+            plan_model_champion_challenger_autoresearch(
+                promotion_gate_receipts=(challenger_gate,),
+                candidate_pool=(_candidate("provider/new"),),
+                policy=_policy(),
+                feedback_records=(record,),
+            )
+        except ValueError as exc:
+            assert str(exc) == expected
+        else:
+            raise AssertionError("cycle feedback record was accepted")
+
+
+def test_autoresearch_rejects_cycle_feedback_missing_candidates_or_gate_receipts():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+    missing_candidates = _cycle_feedback_record("provider/new")
+    missing_candidates["executed_candidate_ids"] = []
+    missing_gates = _cycle_feedback_record("provider/new", suffix="2")
+    missing_gates["promotion_gate_receipt_ids"] = []
+
+    for record, expected in (
+        (missing_candidates, "invalid_executed_candidate_ids"),
+        (missing_gates, "invalid_promotion_gate_receipt_ids"),
+    ):
+        try:
+            plan_model_champion_challenger_autoresearch(
+                promotion_gate_receipts=(challenger_gate,),
+                candidate_pool=(_candidate("provider/new"),),
+                policy=_policy(),
+                feedback_records=(record,),
+            )
+        except ValueError as exc:
+            assert str(exc) == expected
+        else:
+            raise AssertionError("cycle feedback record was accepted")
 
 
 def test_autoresearch_feedback_cannot_invent_candidate():
