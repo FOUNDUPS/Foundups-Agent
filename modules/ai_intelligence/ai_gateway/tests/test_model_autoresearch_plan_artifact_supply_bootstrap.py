@@ -14,6 +14,7 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_plan_artifact_sup
 from modules.ai_intelligence.ai_gateway.tests.test_model_autoresearch_plan_artifact_supply import (
     REPO_ROOT,
     _candidate,
+    _cycle_feedback_record,
     _feedback_record,
     _gate,
     _policy,
@@ -97,6 +98,33 @@ def test_bootstrap_materializes_autoresearch_plan_with_jsonl_feedback(tmp_path: 
         item["reason"] == "verified_runtime_feedback_unbenchmarked_candidate"
         for item in payload["campaign_items"]
     )
+
+
+def test_bootstrap_materializes_autoresearch_plan_with_cycle_feedback_jsonl(tmp_path: Path) -> None:
+    files = _inputs(tmp_path)
+    cycle_feedback = _write_jsonl(
+        tmp_path / "runtime",
+        "cycle_feedback.jsonl",
+        (_cycle_feedback_record("provider/new"),),
+    )
+
+    result = run_reddog_model_autoresearch_plan_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        promotion_gate_receipts_path=files["gates"],
+        candidate_pool_path=files["candidates"],
+        policy_path=files["policy"],
+        feedback_records_path=cycle_feedback,
+        output_path=files["output"],
+    )
+
+    assert result.accepted is True
+    assert result.status == MODEL_AUTORESEARCH_PLAN_ARTIFACT_BOOTSTRAP_APPLIED
+    assert result.source_feedback_record_ids == ("model_autoresearch_cycle_feedback_runtime",)
+    payload = json.loads(files["output"].read_text(encoding="utf-8"))
+    assert payload["source_feedback_record_ids"] == ["model_autoresearch_cycle_feedback_runtime"]
+    assert payload["campaign_items"][0]["candidate_id"] == "provider/new"
+    assert payload["campaign_items"][0]["priority"] == "P0"
+    assert payload["campaign_items"][0]["reason"] == "verified_runtime_feedback_unbenchmarked_candidate"
 
 
 def test_bootstrap_accepts_missing_optional_feedback_path(tmp_path: Path) -> None:
