@@ -154,15 +154,28 @@ def _runtime_config(
     payload: dict[str, Any],
 ) -> Optional[SignerSocketServiceRuntimeWiringConfig]:
     try:
-        key_profile = payload["key_provider_profile"]
         peer_policy = payload["peer_policy"]
-        if not isinstance(key_profile, dict) or not isinstance(peer_policy, dict):
+        key_profile = payload.get("key_provider_profile")
+        key_profiles = payload.get("key_provider_profiles") or ()
+        if not isinstance(peer_policy, dict):
+            return None
+        if key_profile is not None and key_profiles:
+            return None
+        if key_profile is not None and not isinstance(key_profile, dict):
+            return None
+        if key_profiles:
+            if not isinstance(key_profiles, list) or not all(
+                isinstance(item, dict) for item in key_profiles
+            ):
+                return None
+            key_profiles = tuple(key_profiles)
+        if key_profile is None and not key_profiles:
             return None
         return SignerSocketServiceRuntimeWiringConfig(
             repo_root=repo_root,
             socket_path=payload.get("socket_path"),
-            key_provider_profile=key_profile,
             peer_policy=peer_policy,
+            key_provider_profile=key_profile,
             provider_mode=str(payload.get("provider_mode") or ""),
             allow_test_only_key_material=payload.get("allow_test_only_key_material") is True,
             permission_snapshot_fresh=payload.get("permission_snapshot_fresh") is True,
@@ -170,6 +183,7 @@ def _runtime_config(
             timeout_s=float(payload.get("timeout_s") or 0),
             max_request_bytes=int(payload.get("max_request_bytes") or 0),
             max_response_bytes=int(payload.get("max_response_bytes") or 0),
+            key_provider_profiles=key_profiles,
         )
     except Exception:
         return None

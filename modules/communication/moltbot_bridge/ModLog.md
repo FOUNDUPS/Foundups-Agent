@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_MULTI_PROFILE_MAIN_CLI_PROOF_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added explicit multi-profile signer socket runtime wiring so one bounded
+  signer service can route principal-identity and RedDog work-authority signing
+  requests by requested public key.
+- Preserved the legacy single-profile config and receipt fields while adding
+  profile-count/profile-receipt telemetry and duplicate-public-key rejection.
+- Extended the outside-repo signer bootstrap to accept either one
+  `key_provider_profile` or a bounded `key_provider_profiles` list.
+- Added a main-level proof that the resident queue control loop can consume a
+  signer socket started by the signer-owned CLI with two WSP71 profiles.
+- Boundary remains constrained: no `main.py` signer spawn, no model-output
+  invocation, no OpenClaw/Hermes authorization expansion, no PR publication, no
+  reward settlement, and no HoloIndex re-index.
+
 ## 2026-07-17: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_CLI_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97

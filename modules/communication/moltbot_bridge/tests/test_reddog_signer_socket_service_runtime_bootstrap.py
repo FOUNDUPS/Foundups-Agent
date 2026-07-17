@@ -206,6 +206,72 @@ def test_bootstrap_reads_outside_repo_config_and_runs_runtime_wiring(tmp_path: P
     assert result.no_holoindex_reindex_performed is True
 
 
+def test_bootstrap_accepts_multi_profile_config_without_secret_return(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    principal_key = _private_key()
+    reddog_key = _private_key()
+    principal_public = _public_text(principal_key)
+    reddog_public = _public_text(reddog_key)
+    payload = _config(principal_public, socket_path=runtime / "signer.sock")
+    principal_profile = dict(payload["key_provider_profile"])
+    principal_profile.update(
+        {
+            "signer_profile_id": "principal-profile",
+            "signer_agent_id": "signer:principal",
+            "signing_key_ref": "op://prod-vault/principal/private",
+            "audit_mac_key_ref": "op://prod-vault/principal/audit",
+            "expected_public_key": principal_public,
+            "expected_key_fingerprint": public_key_fingerprint(principal_public),
+        }
+    )
+    reddog_profile = dict(payload["key_provider_profile"])
+    reddog_profile.update(
+        {
+            "signer_profile_id": "reddog-profile",
+            "signer_agent_id": "signer:reddog",
+            "signing_key_ref": "op://prod-vault/reddog/private",
+            "audit_mac_key_ref": "op://prod-vault/reddog/audit",
+            "expected_public_key": reddog_public,
+            "expected_key_fingerprint": public_key_fingerprint(reddog_public),
+        }
+    )
+    payload.pop("key_provider_profile")
+    payload["key_provider_profiles"] = [principal_profile, reddog_profile]
+    config_path = _write_json(runtime / "signer-service.json", payload)
+    resolver = FakeResolver(
+        {
+            "op://prod-vault/principal/private": _private_key_secret(principal_key),
+            "op://prod-vault/principal/audit": _audit_secret(b"principal-audit-key-000000000"),
+            "op://prod-vault/reddog/private": _private_key_secret(reddog_key),
+            "op://prod-vault/reddog/audit": _audit_secret(b"reddog-audit-key-000000000000"),
+        }
+    )
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=config_path,
+        resolver=resolver,
+        serve_bounded=service,
+    )
+
+    assert result.accepted is True
+    assert result.status == SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED
+    assert result.runtime_result is not None
+    receipt = result.runtime_result["key_provider_receipt"]
+    assert receipt["ok"] is True
+    assert receipt["profile_count"] == 2
+    assert receipt["secret_values_returned"] is False
+    assert sorted(receipt["public_keys"]) == sorted([principal_public, reddog_public])
+    assert resolver.calls == [
+        ("op://prod-vault/principal/private", "signer:principal"),
+        ("op://prod-vault/principal/audit", "signer:principal"),
+        ("op://prod-vault/reddog/private", "signer:reddog"),
+        ("op://prod-vault/reddog/audit", "signer:reddog"),
+    ]
+
+
 def test_bootstrap_rejects_missing_relative_inside_and_unreadable_config(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     inside = _write_json(repo / "signer-service.json", {})

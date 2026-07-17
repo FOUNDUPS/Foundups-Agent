@@ -15,6 +15,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
+    IsolatedSignerBackend,
+    SignerPeerAttestation,
+)
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
     DEFAULT_SIGNER_SOCKET_RESIDENT_MAX_REQUESTS,
     SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
@@ -34,6 +38,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     SignerKeyResolver,
     build_signer_backend_from_provider,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    RuntimeRejectCode,
+    SigningRequest,
+    SigningResponse,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     KernelPeerCredentialAttestor,
     PeerCredentialPolicy,
@@ -47,6 +56,8 @@ FAIL_SIGNER_RUNTIME_CONFIG_INVALID = "FAIL_SIGNER_RUNTIME_CONFIG_INVALID"
 FAIL_SIGNER_RUNTIME_PROFILE_INVALID = "FAIL_SIGNER_RUNTIME_PROFILE_INVALID"
 FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID = "FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID"
 FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED = "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED"
+FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE = "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE"
+FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID = "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID"
 FAIL_SIGNER_RUNTIME_SERVICE_REJECTED = "FAIL_SIGNER_RUNTIME_SERVICE_REJECTED"
 FAIL_SIGNER_RUNTIME_SERVICE_INVALID = "FAIL_SIGNER_RUNTIME_SERVICE_INVALID"
 
@@ -60,8 +71,8 @@ class SignerSocketServiceRuntimeWiringConfig:
 
     repo_root: Path | str
     socket_path: Path | str | None
-    key_provider_profile: SignerKeyProviderProfile | Mapping[str, Any]
     peer_policy: PeerCredentialPolicy | Mapping[str, Any]
+    key_provider_profile: SignerKeyProviderProfile | Mapping[str, Any] | None = None
     provider_mode: str = PROVIDER_MODE_TEST_ONLY_DRYRUN
     allow_test_only_key_material: bool = False
     permission_snapshot_fresh: bool = False
@@ -69,6 +80,7 @@ class SignerSocketServiceRuntimeWiringConfig:
     timeout_s: float = DEFAULT_SIGNER_SOCKET_SERVICE_TIMEOUT_S
     max_request_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_REQUEST_BYTES
     max_response_bytes: int = DEFAULT_SIGNER_SOCKET_SERVICE_MAX_RESPONSE_BYTES
+    key_provider_profiles: tuple[SignerKeyProviderProfile | Mapping[str, Any], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -107,33 +119,28 @@ def run_reddog_signer_socket_service_runtime_wiring(
 
     if not isinstance(config, SignerSocketServiceRuntimeWiringConfig):
         return _reject(FAIL_SIGNER_RUNTIME_CONFIG_INVALID)
-    profile = _profile(config.key_provider_profile)
-    if profile is None:
-        return _reject(FAIL_SIGNER_RUNTIME_PROFILE_INVALID)
+    profiles, profile_reasons = _profiles(config)
+    if profile_reasons:
+        return _reject(*profile_reasons)
     policy = _peer_policy(config.peer_policy)
     if policy is None or not _peer_policy_valid(policy):
         return _reject(FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID)
 
-    key_result = build_signer_backend_from_provider(
-        profile,
+    backend, key_receipt, key_reasons = _build_backend(
+        profiles,
         resolver,
         provider_mode=config.provider_mode,
         allow_test_only_key_material=config.allow_test_only_key_material,
         permission_snapshot_fresh=config.permission_snapshot_fresh,
     )
-    key_receipt = key_result.to_receipt()
-    if not key_result.ok or key_result.backend is None:
-        return _reject(
-            FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
-            key_provider_receipt=key_receipt,
-            max_requests=config.max_requests,
-        )
+    if key_reasons:
+        return _reject(*key_reasons, key_provider_receipt=key_receipt, max_requests=config.max_requests)
 
     try:
         service = serve_bounded(
             repo_root=config.repo_root,
             socket_path=config.socket_path,
-            backend=key_result.backend,
+            backend=backend,
             peer_attestor=KernelPeerCredentialAttestor(policy),
             max_requests=config.max_requests,
             timeout_s=config.timeout_s,
@@ -170,6 +177,97 @@ def run_reddog_signer_socket_service_runtime_wiring(
         service_result=service_receipt,
         max_requests=config.max_requests,
     )
+
+
+@dataclass(frozen=True)
+class _RoutingSignerBackend(IsolatedSignerBackend):
+    backends: Mapping[str, IsolatedSignerBackend]
+
+    def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
+        backend = self.backends.get(request.signer_public_key)
+        if backend is None:
+            return SigningResponse(
+                accepted=False,
+                rejection_code=RuntimeRejectCode.SIGNER_NOT_CONFIGURED,
+                no_secret_material_returned=True,
+            )
+        return backend.sign(request, peer)
+
+
+def _profiles(
+    config: SignerSocketServiceRuntimeWiringConfig,
+) -> tuple[list[SignerKeyProviderProfile], tuple[str, ...]]:
+    if config.key_provider_profile is not None and config.key_provider_profiles:
+        return [], (FAIL_SIGNER_RUNTIME_PROFILE_INVALID,)
+    raw_profiles: tuple[SignerKeyProviderProfile | Mapping[str, Any], ...]
+    if config.key_provider_profiles:
+        raw_profiles = tuple(config.key_provider_profiles)
+    elif config.key_provider_profile is not None:
+        raw_profiles = (config.key_provider_profile,)
+    else:
+        return [], (FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID,)
+    if len(raw_profiles) < 1 or len(raw_profiles) > 8:
+        return [], (FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID,)
+
+    profiles: list[SignerKeyProviderProfile] = []
+    for raw in raw_profiles:
+        profile = _profile(raw)
+        if profile is None:
+            return [], (FAIL_SIGNER_RUNTIME_PROFILE_INVALID,)
+        profiles.append(profile)
+    return profiles, ()
+
+
+def _build_backend(
+    profiles: list[SignerKeyProviderProfile],
+    resolver: SignerKeyResolver,
+    *,
+    provider_mode: str,
+    allow_test_only_key_material: bool,
+    permission_snapshot_fresh: bool,
+) -> tuple[Optional[IsolatedSignerBackend], dict[str, Any], tuple[str, ...]]:
+    receipts: list[dict[str, Any]] = []
+    backends: dict[str, IsolatedSignerBackend] = {}
+    for profile in profiles:
+        key_result = build_signer_backend_from_provider(
+            profile,
+            resolver,
+            provider_mode=provider_mode,
+            allow_test_only_key_material=allow_test_only_key_material,
+            permission_snapshot_fresh=permission_snapshot_fresh,
+        )
+        receipt = key_result.to_receipt()
+        receipts.append(receipt)
+        if not key_result.ok or key_result.backend is None:
+            return None, _key_provider_receipt(False, receipts), (
+                FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
+            )
+        public_key = str(key_result.public_key or "")
+        if public_key in backends:
+            return None, _key_provider_receipt(False, receipts), (
+                FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,
+            )
+        backends[public_key] = key_result.backend
+
+    if len(backends) == 1:
+        backend = next(iter(backends.values()))
+    else:
+        backend = _RoutingSignerBackend(backends)
+    return backend, _key_provider_receipt(True, receipts), ()
+
+
+def _key_provider_receipt(ok: bool, receipts: list[dict[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = dict(receipts[0]) if len(receipts) == 1 else {"ok": ok}
+    payload["ok"] = ok
+    payload["profile_count"] = len(receipts)
+    payload["profile_receipts"] = receipts
+    payload["public_keys"] = [
+        str(receipt.get("public_key") or "")
+        for receipt in receipts
+        if receipt.get("public_key")
+    ]
+    payload["secret_values_returned"] = False
+    return payload
 
 
 def _profile(value: SignerKeyProviderProfile | Mapping[str, Any]) -> SignerKeyProviderProfile | None:
@@ -241,6 +339,8 @@ def _reject(
 
 __all__ = [
     "FAIL_SIGNER_RUNTIME_CONFIG_INVALID",
+    "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID",
+    "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE",
     "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED",
     "FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID",
     "FAIL_SIGNER_RUNTIME_PROFILE_INVALID",
