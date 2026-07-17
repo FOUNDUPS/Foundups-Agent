@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_PROFILE_RUNTIME_FULL_QUEUE_CHAIN_PROOF_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Upgraded the resident control-loop integration proof so the
+  `signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory` profile
+  completes the full signed worker queue chain without `REDDOG_WORK_ORDERS_PATH`.
+- The proof covers profile-derived authority-profile work-order
+  materialization, signer socket signing, AgentDB worker claims, bounded
+  artifact generation, slice verification, verified draft-PR publication,
+  outcome ratchet, held-out gate, and PatternMemory admission.
+- Boundary remains constrained: no production code path was expanded, no shell
+  command is executed by the test fake, no real PR is opened, no HoloIndex
+  re-index occurs, and no merge/reward authority is added.
+
 ## 2026-07-17: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_WIRING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97

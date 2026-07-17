@@ -57,6 +57,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispat
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+    PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
     resident_queue_materializer_mode,
     resident_queue_runtime_file_path,
 )
@@ -88,6 +89,15 @@ class _FakeProfileWorktreeRunner:
     def cleanup_worktree(self, *, worktree_path: Path):
         self.calls.append(("cleanup_worktree", str(worktree_path), None, None))
         return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
+
+    def push_branch(self, *, worktree_path: Path, branch_name: str):
+        self.calls.append(("push_branch", str(worktree_path), branch_name, None))
+        return {"ok": True, "branch_name": branch_name}
+
+    def create_draft_pr(self, *, branch_name: str, base_branch: str, title: str, body: str):
+        self.calls.append(("create_draft_pr", branch_name, base_branch, title))
+        _ = body
+        return "https://github.com/FOUNDUPS/Foundups-Agent/pull/4242"
 
 
 def test_profile_materializer_default_does_not_conflict_with_explicit_work_orders() -> None:
@@ -752,7 +762,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
 
 
 @pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="AF_UNIX required")
-def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_without_work_orders(
+def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queue_chain_without_work_orders(
     tmp_path: Path,
     monkeypatch,
     capsys,
@@ -766,7 +776,9 @@ def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_
     runtime_root = tmp_path / "resident-runtime"
     runtime_root.mkdir(parents=True)
     profile_env = {
-        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": (
+            PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY
+        ),
         "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
     }
     principal_public, reddog_public, signer_backend = _ed25519_signing_material_with_socket_backend()
@@ -821,6 +833,22 @@ def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_
         resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITY_RUNTIME_STATE_PATH")
     )
     socket_path = Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_SIGNER_SOCKET_PATH"))
+    materialized_work_order = _work_order(
+        **pilot_overrides,
+        bounded_worker_plan=_pilot_bounded_worker_plan(),
+        nonce="work-order:workauth-nonce-0001",
+    )
+    worktree = _pilot_worktree_path(repo, materialized_work_order)
+    verifier_request = _write_json(
+        runtime_root / "slice_verifier_request.json",
+        _slice_verifier_request(),
+    )
+    publish_request = _write_json(
+        runtime_root / "draft_pr_publish_request.json",
+        _draft_pr_publish_request(worktree),
+    )
+    outcome_store = runtime_root / "outcomes" / "signed-worker-ratchet.jsonl"
+    pattern_memory_db = runtime_root / "pattern_memory.db"
     assert not socket_path.exists()
 
     ready = threading.Event()
@@ -842,18 +870,21 @@ def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_
     assert ready.wait(5)
 
     calls = _patch_fusion_artifact_generator(monkeypatch)
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE)
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+    )
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "9")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
-    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "1")
-    monkeypatch.setenv("OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED", "0")
+    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "7")
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "1000")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S", "77")
+    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "88")
     monkeypatch.setenv("REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY", "0")
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
@@ -861,6 +892,10 @@ def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_
     monkeypatch.setenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", str(principals))
     monkeypatch.setenv("REDDOG_EXECUTION_VALVE_ENV_PATH", str(valve_env))
     monkeypatch.setenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", str(authority_state))
+    monkeypatch.setenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", str(verifier_request))
+    monkeypatch.setenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", str(publish_request))
+    monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", str(outcome_store))
+    monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
     monkeypatch.delenv("REDDOG_WORK_ORDERS_PATH", raising=False)
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
 
@@ -879,7 +914,7 @@ def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_
     assert "[REDDOG-QUEUE-CONTROL] preflight=PASS" in captured
     assert "[REDDOG-QUEUE-LOOP] preflight=PASS" in captured
     assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
-    assert "claimed_count=1" in captured
+    assert "claimed_count=7" in captured
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
 
     pending = [
@@ -887,23 +922,32 @@ def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_
         for task in AgentDB().get_autonomous_tasks(status="pending", limit=10)
         if task.get("discovered_by") == runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE
     ]
-    assert len(pending) == 1
-    assert pending[0]["context"]["worker_runtime"] == "openclaw"
+    assert pending == []
     completed = [
         task
         for task in AgentDB().get_autonomous_tasks(status="completed", limit=10)
         if task.get("discovered_by") == runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE
     ]
-    assert {task["context"]["worker_runtime"] for task in completed} == {"0102"}
+    assert {task["context"]["worker_runtime"] for task in completed} == {"0102", "openclaw"}
     assert calls
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
-    assert "worker_dispatch_runtime" in stored["stage_results"]
-    assert "worktree_create" in stored["stage_results"]
-    assert "bounded_worker_pilot" in stored["stage_results"]
+    for stage_name in (
+        "worker_dispatch_runtime",
+        "worktree_create",
+        "bounded_worker_pilot",
+        "slice_verifier",
+        "verified_draft_pr_publish",
+        "verified_outcome_ratchet",
+        "model_feedback_admission",
+        "held_out_regression_gate",
+        "pattern_memory_admission",
+    ):
+        assert stage_name in stored["stage_results"]
     generation = stored["stage_results"]["bounded_worker_pilot"]["artifact_generation_result"]
     assert generation["accepted"] is True
     assert generation["receipt"]["model_receipt_id"] == "fusion-artifact-receipt-1"
+    assert stored["receipts"][-1]["next_action"] == "STOP_QUEUE_CHAIN_COMPLETE"
     worktree_calls = [
         call
         for instance in _FakeProfileWorktreeRunner.instances
@@ -916,3 +960,15 @@ def test_main_resident_control_loop_profile_runtime_claims_socket_signed_worker_
         "# Generated By Fusion"
     )
     assert not (repo / PILOT_ARTIFACT).exists()
+    draft_pr_calls = [
+        call[0]
+        for instance in _FakeProfileWorktreeRunner.instances
+        for call in instance.calls
+        if call[0] in {"push_branch", "create_draft_pr"}
+    ]
+    assert draft_pr_calls == ["push_branch", "create_draft_pr"]
+    assert outcome_store.exists()
+    with sqlite3.connect(pattern_memory_db) as conn:
+        count = conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0]
+    assert count == 1
+    assert not (repo / "runtime" / "pattern_memory.db").exists()
