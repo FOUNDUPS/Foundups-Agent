@@ -28,6 +28,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     AUDIT_KEY_PREFIX,
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
+    PROVIDER_MODE_WSP71_PERMISSIONED,
     SIGNING_KEY_PREFIX,
     SignerKeyProviderProfile,
 )
@@ -241,6 +242,33 @@ def test_runtime_wiring_composes_provider_attestor_and_bounded_service() -> None
     response = backend.sign(_request(public_key), _peer())
     assert response.accepted is True
     assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+
+
+def test_runtime_wiring_accepts_wsp71_permissioned_provider_mode_without_test_override() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    resolver = _resolver(private_key)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+            permission_snapshot_fresh=True,
+        ),
+        resolver,
+        serve_bounded=service,
+    )
+
+    assert result.accepted is True
+    assert result.status == SIGNER_SOCKET_RUNTIME_WIRING_SERVED
+    assert result.key_provider_receipt["ok"] is True
+    assert len(service.calls) == 1
+    assert resolver.calls == [
+        ("op://test-vault/reddog-signing/private", "signer:reddog-authority"),
+        ("op://test-vault/reddog-audit/mac", "signer:reddog-authority"),
+    ]
 
 
 def test_mapping_config_normalizes_profile_and_peer_policy() -> None:
