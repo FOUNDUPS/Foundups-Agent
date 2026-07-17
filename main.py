@@ -1659,6 +1659,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         repo_root,
         "REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH",
     )
+    model_runtime_binding_receipt_path_supplied = bool(
+        os.getenv("REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH", "").strip()
+    )
     memex_supply_receipt_path = resident_queue_runtime_file_path(
         os.environ,
         repo_root,
@@ -1825,6 +1828,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         )
         if runtime_binding_supply.accepted and runtime_binding_supply.output_path:
             model_runtime_binding_receipt_path = runtime_binding_supply.output_path
+            model_runtime_binding_receipt_path_supplied = True
             os.environ["REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH"] = model_runtime_binding_receipt_path
         elif runtime_binding_supply_enforced:
             print(
@@ -2039,6 +2043,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             work_state_path=work_state_path,
             architect_determination_path=architect_determination_path,
             model_selection_receipt_path=model_selection_receipt_path,
+            model_runtime_binding_receipt_path=(
+                model_runtime_binding_receipt_path if model_runtime_binding_receipt_path_supplied else None
+            ),
             memex_supply_receipt_path=memex_supply_receipt_path,
             authority_profile_source_path=authority_profile_source_path,
             authority_profile_output_path=authority_profile_path,

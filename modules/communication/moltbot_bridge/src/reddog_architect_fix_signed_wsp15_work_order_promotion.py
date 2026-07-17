@@ -25,7 +25,11 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
     SelectionDecision,
     SelectionPurpose,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
+    ModelRuntimeBindingDecision,
+)
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
@@ -63,6 +67,9 @@ class ArchitectFixPromotionReason:
     MODEL_SELECTION_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_SELECTION_MISSING"
     MODEL_SELECTION_INVALID = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_SELECTION_INVALID"
     MODEL_SELECTION_NOT_PRODUCTION = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_SELECTION_NOT_PRODUCTION"
+    MODEL_RUNTIME_BINDING_INVALID = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_RUNTIME_BINDING_INVALID"
+    MODEL_RUNTIME_BINDING_NOT_BOUND = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_RUNTIME_BINDING_NOT_BOUND"
+    MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_RUNTIME_BINDING_MISMATCH"
     MEMEX_SUPPLY_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_MEMEX_SUPPLY_MISSING"
     MEMEX_SUPPLY_INVALID = "REJECT_ARCHITECT_FIX_PROMOTION_MEMEX_SUPPLY_INVALID"
     AUTHORITY_PROFILE_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_MISSING"
@@ -116,6 +123,8 @@ class ArchitectFixPromotionReceipt:
     memex_supply_receipt_id: str
     memex_supply_digest: str
     committed_revision: Optional[str]
+    model_runtime_binding_receipt_id: Optional[str] = None
+    model_runtime_binding_digest: Optional[str] = None
     no_signing_performed: bool = True
     no_worker_spawn_performed: bool = True
     no_worktree_created: bool = True
@@ -177,6 +186,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     authority_profile: Mapping[str, Any],
     model_selection_receipt: Mapping[str, Any],
     memex_supply_receipt: Mapping[str, Any],
+    model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     worker_id: str,
     now_iso: str,
     claim_ttl_seconds: int = 3600,
@@ -217,6 +227,11 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         reasons.append(ArchitectFixPromotionReason.WSP15_ALLOCATION_MISMATCH)
 
     selection_payload = _validate_model_selection(model_selection_receipt, reasons)
+    runtime_binding_payload = _validate_model_runtime_binding(
+        model_runtime_binding_receipt,
+        selection_payload,
+        reasons,
+    )
     memex_payload = _validate_memex_supply(memex_supply_receipt, determination, reasons)
     profile_reasons = _validate_authority_profile(authority_profile)
     reasons.extend(profile_reasons)
@@ -238,6 +253,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     now = _parse_iso(now_iso)
     expires_at = (now + timedelta(seconds=int(claim_ttl_seconds))).isoformat()
     model_selection_digest = _digest(model_selection_receipt)
+    model_runtime_binding_digest = _digest(model_runtime_binding_receipt) if runtime_binding_payload else None
     memex_supply_digest = _digest(memex_supply_receipt)
     allocation_digest = canonical_reddog_wsp15_allocation_digest(allocation)
 
@@ -245,6 +261,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         "selected_slice": selected_slice,
         "determination_receipt_id": determination_id,
         "model_selection_receipt_id": selection_payload["receipt_id"],
+        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
         "memex_supply_receipt_id": memex_payload["receipt_id"],
         "worker_id": worker_id,
         "claimed_at": now_iso,
@@ -259,6 +276,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         "determination_receipt_id": determination_id,
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "model_selection_receipt_id": selection_payload["receipt_id"],
+        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
         "memex_supply_receipt_id": memex_payload["receipt_id"],
     }
     queue_item_id = _digest(queue_seed)
@@ -275,6 +293,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         "status": "ACTIVE",
         "source_determination_receipt_id": determination_id,
         "model_selection_receipt_id": selection_payload["receipt_id"],
+        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
         "memex_supply_receipt_id": memex_payload["receipt_id"],
     }
     evidence_refs = tuple(
@@ -285,6 +304,11 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
                 f"wsp15_allocation:{allocation['receipt_id']}",
                 f"architect_determination:{determination_id}",
                 f"model_selection:{selection_payload['receipt_id']}",
+                *(
+                    [f"model_runtime_binding:{runtime_binding_payload['receipt_id']}"]
+                    if runtime_binding_payload
+                    else []
+                ),
                 f"memex_supply:{memex_payload['receipt_id']}",
                 *[str(ref) for ref in candidate.get("evidence_refs") or ()],
             ]
@@ -304,6 +328,8 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         "model_catalog_snapshot_id": selection_payload["catalog_snapshot_id"],
         "model_selection_receipt_id": selection_payload["receipt_id"],
         "model_selection_digest": model_selection_digest,
+        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
+        "model_runtime_binding_digest": model_runtime_binding_digest or "",
         "memex_supply_receipt_id": memex_payload["receipt_id"],
         "memex_supply_digest": memex_supply_digest,
         "no_execution_performed": True,
@@ -325,6 +351,9 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         model_selection_receipt=model_selection_receipt,
         model_selection=selection_payload,
         model_selection_digest=model_selection_digest,
+        model_runtime_binding_receipt=model_runtime_binding_receipt,
+        model_runtime_binding=runtime_binding_payload,
+        model_runtime_binding_digest=model_runtime_binding_digest,
         memex_supply=memex_payload,
         memex_supply_digest=memex_supply_digest,
         queue_item_id=queue_item_id,
@@ -342,6 +371,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             "queue_item_id": queue_item_id,
             "claim_id": claim_id,
             "model_selection_receipt_id": selection_payload["receipt_id"],
+            "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
             "memex_supply_receipt_id": memex_payload["receipt_id"],
             "created_at": now_iso,
         },
@@ -358,6 +388,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         "queue_item_id": queue_item_id,
         "claim_id": claim_id,
         "model_selection_receipt_id": selection_payload["receipt_id"],
+        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
         "memex_supply_receipt_id": memex_payload["receipt_id"],
         "committed_revision": committed_revision,
     }
@@ -377,6 +408,8 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         model_catalog_snapshot_id=selection_payload["catalog_snapshot_id"],
         model_selection_receipt_id=selection_payload["receipt_id"],
         model_selection_digest=model_selection_digest,
+        model_runtime_binding_receipt_id=runtime_binding_payload.get("receipt_id") or None,
+        model_runtime_binding_digest=model_runtime_binding_digest,
         memex_supply_receipt_id=memex_payload["receipt_id"],
         memex_supply_digest=memex_supply_digest,
         committed_revision=committed_revision,
@@ -482,6 +515,40 @@ def _validate_model_selection(selection: Mapping[str, Any], reasons: list[str]) 
     }
 
 
+def _validate_model_runtime_binding(
+    binding: Mapping[str, Any] | None,
+    model_selection: Mapping[str, Any],
+    reasons: list[str],
+) -> Mapping[str, Any]:
+    if not binding:
+        return {}
+    try:
+        receipt = rehydrate_model_runtime_binding_receipt(binding)
+    except Exception:
+        reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID)
+        return {}
+    if receipt.decision != ModelRuntimeBindingDecision.BOUND:
+        reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_NOT_BOUND)
+    if not model_selection:
+        reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    elif (
+        receipt.selection_receipt_id != str(model_selection.get("receipt_id") or "")
+        or receipt.catalog_snapshot_id != str(model_selection.get("catalog_snapshot_id") or "")
+        or receipt.task_family != str(model_selection.get("task_family") or "")
+    ):
+        reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    return {
+        "receipt_id": receipt.receipt_id,
+        "selection_receipt_id": receipt.selection_receipt_id,
+        "catalog_snapshot_id": receipt.catalog_snapshot_id,
+        "task_family": receipt.task_family,
+        "runtime_surface": receipt.runtime_surface,
+        "principal_model": receipt.principal_model or "",
+        "panel_models": tuple(receipt.panel_models),
+        "role_bindings": tuple(binding.to_dict() for binding in receipt.role_bindings),
+    }
+
+
 def _validate_memex_supply(
     memex_supply: Mapping[str, Any],
     determination: Mapping[str, Any],
@@ -540,6 +607,9 @@ def _promoted_authority_profile(
     model_selection_receipt: Mapping[str, Any],
     model_selection: Mapping[str, Any],
     model_selection_digest: str,
+    model_runtime_binding_receipt: Mapping[str, Any] | None,
+    model_runtime_binding: Mapping[str, Any],
+    model_runtime_binding_digest: str | None,
     memex_supply: Mapping[str, Any],
     memex_supply_digest: str,
     queue_item_id: str,
@@ -562,10 +632,22 @@ def _promoted_authority_profile(
         "model_selection_receipt_id": model_selection["receipt_id"],
         "model_selection_digest": model_selection_digest,
         "model_selection_receipt": dict(model_selection_receipt),
+        "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
+        "model_runtime_binding_digest": model_runtime_binding_digest or "",
         "memex_supply_receipt_id": memex_supply["receipt_id"],
         "memex_supply_digest": memex_supply_digest,
         "holoindex_evidence": dict(holoindex_evidence),
     }
+    if model_runtime_binding:
+        binding.update(
+            {
+                "model_runtime_binding_receipt": dict(model_runtime_binding_receipt or {}),
+                "model_runtime_binding_runtime_surface": model_runtime_binding["runtime_surface"],
+                "model_runtime_binding_principal_model": model_runtime_binding["principal_model"],
+                "model_runtime_binding_panel_models": list(model_runtime_binding["panel_models"]),
+                "model_runtime_binding_role_bindings": list(model_runtime_binding["role_bindings"]),
+            }
+        )
     profile.update(
         {
             "work_order_id": str(profile.get("work_order_id") or _work_order_id(queue_item_id)),
@@ -583,12 +665,20 @@ def _promoted_authority_profile(
             "model_selection_receipt_id": model_selection["receipt_id"],
             "model_selection_digest": model_selection_digest,
             "model_selection_receipt": dict(model_selection_receipt),
+            "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
+            "model_runtime_binding_digest": model_runtime_binding_digest or "",
             "memex_supply_receipt_id": memex_supply["receipt_id"],
             "memex_supply_digest": memex_supply_digest,
             "operational_context_binding": binding,
             "holoindex_evidence": dict(holoindex_evidence),
         }
     )
+    if model_runtime_binding:
+        profile["model_runtime_binding_receipt"] = dict(model_runtime_binding_receipt or {})
+        profile["model_runtime_binding_runtime_surface"] = model_runtime_binding["runtime_surface"]
+        profile["model_runtime_binding_principal_model"] = model_runtime_binding["principal_model"]
+        profile["model_runtime_binding_panel_models"] = list(model_runtime_binding["panel_models"])
+        profile["model_runtime_binding_role_bindings"] = list(model_runtime_binding["role_bindings"])
     return profile
 
 

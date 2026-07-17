@@ -17,6 +17,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
     _determination,
     _memex_supply,
     _model_selection,
+    _runtime_binding,
     _work_state,
 )
 
@@ -47,10 +48,16 @@ def _write_json(tmp_path: Path, name: str, payload: object) -> Path:
 
 
 def _runtime_files(tmp_path: Path) -> dict[str, Path]:
+    model_selection = _model_selection()
     return {
         "work_state": _write_json(tmp_path, "authoritative_work_state.json", _work_state()),
         "determination": _write_json(tmp_path, "architect_determination.json", _determination()),
-        "model_selection": _write_json(tmp_path, "model_selection.json", _model_selection()),
+        "model_selection": _write_json(tmp_path, "model_selection.json", model_selection),
+        "model_runtime_binding": _write_json(
+            tmp_path,
+            "model_runtime_binding.json",
+            _runtime_binding(model_selection),
+        ),
         "memex_supply": _write_json(tmp_path, "memex_supply.json", _memex_supply()),
         "authority_profile_source": _write_json(
             tmp_path,
@@ -95,6 +102,32 @@ def test_bootstrap_promotes_fix_and_writes_authority_profile(tmp_path: Path) -> 
     assert work_state["wre_queue_items"][0]["queue_item_id"] == result.queue_item_id
     assert work_state["worker_claims"][0]["claim_id"] == result.claim_id
     assert not (repo / ".reddog").exists()
+
+
+def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+
+    result = run_reddog_main_architect_fix_promotion_bootstrap(
+        repo_root=repo,
+        work_state_path=files["work_state"],
+        architect_determination_path=files["determination"],
+        model_selection_receipt_path=files["model_selection"],
+        model_runtime_binding_receipt_path=files["model_runtime_binding"],
+        memex_supply_receipt_path=files["memex_supply"],
+        authority_profile_source_path=files["authority_profile_source"],
+        authority_profile_output_path=files["authority_profile_output"],
+        worker_id="reddog-main-test",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    promoted_profile = json.loads(files["authority_profile_output"].read_text(encoding="utf-8"))
+    runtime_binding = json.loads(files["model_runtime_binding"].read_text(encoding="utf-8"))
+    assert promoted_profile["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert promoted_profile["operational_context_binding"]["model_runtime_binding_receipt_id"] == (
+        runtime_binding["receipt_id"]
+    )
 
 
 def test_bootstrap_rejects_authority_profile_output_inside_repo(tmp_path: Path) -> None:
@@ -305,6 +338,7 @@ def test_main_preflight_model_selection_supply_runs_before_promotion(tmp_path: P
     promote.assert_called_once()
     promote_kwargs = promote.call_args.kwargs
     assert promote_kwargs["model_selection_receipt_path"] == str(runtime_root / "model_selection_receipt.json")
+    assert promote_kwargs["model_runtime_binding_receipt_path"] is None
 
 
 def test_main_preflight_model_runtime_binding_supply_runs_after_model_selection(
@@ -410,6 +444,9 @@ def test_main_preflight_model_runtime_binding_supply_runs_after_model_selection(
     promote.assert_called_once()
     promote_kwargs = promote.call_args.kwargs
     assert promote_kwargs["model_selection_receipt_path"] == str(runtime_root / "model_selection_receipt.json")
+    assert promote_kwargs["model_runtime_binding_receipt_path"] == str(
+        runtime_root / "model_runtime_binding_receipt.json"
+    )
 
 
 def test_main_preflight_enforced_model_runtime_binding_supply_blocks_promotion(
