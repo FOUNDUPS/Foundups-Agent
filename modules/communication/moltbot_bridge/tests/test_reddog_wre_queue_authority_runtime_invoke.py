@@ -124,6 +124,8 @@ def _queue_result():
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
+        "model_runtime_binding_digest": "sha256:model-runtime-binding",
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
         "no_queue_mutation_performed": True,
@@ -162,6 +164,8 @@ def _profile(**overrides):
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
+        "model_runtime_binding_digest": "sha256:model-runtime-binding",
     }
     profile.update(overrides)
     return profile
@@ -272,6 +276,10 @@ def test_invokes_injected_signer_and_issues_authority_without_execution() -> Non
     assert result.authority_result.receipt.no_execution_performed is True
     assert result.authority_result.receipt.no_worker_spawn_performed is True
     assert result.authority_result.receipt.no_openclaw_enqueue_performed is True
+    assert result.authority_result.work_authority is not None
+    assert result.authority_result.work_authority["model_runtime_binding_receipt_id"] == (
+        "reddog_model_runtime_binding:abc123"
+    )
     assert len(signer.requests) == 2
     state = store.load()
     assert state["issued_authorities"]
@@ -308,6 +316,8 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         wsp15_priority=str(request["wsp15_priority"]),
         wsp15_mps_total=int(request["wsp15_mps_total"]),
         wsp15_reasoning_tier=str(request["wsp15_reasoning_tier"]),
+        model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
+        model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),
         identity_nonce=str(request["identity_nonce"]),
         work_authority_nonce=str(request["work_authority_nonce"]),
         issued_at=int(request["issued_at"]),

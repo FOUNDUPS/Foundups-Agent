@@ -89,6 +89,8 @@ def _snapshot(**overrides):
                     f"wsp15_allocation:{allocation['receipt_id']}",
                 ],
                 "wsp15_allocation_receipt": allocation,
+                "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
+                "model_runtime_binding_digest": "sha256:model-runtime-binding",
                 "no_execution_performed": True,
             }
         ],
@@ -115,6 +117,8 @@ def test_accepts_one_fresh_queued_item_without_execution() -> None:
     assert result.receipt.wsp15_priority == "P0"
     assert result.receipt.wsp15_mps_total == 18
     assert result.receipt.reasoning_tier == "ULTRA"
+    assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
+    assert result.receipt.model_runtime_binding_digest == "sha256:model-runtime-binding"
     assert result.receipt.no_queue_mutation_performed is True
     assert result.receipt.no_worker_spawn_performed is True
     assert result.receipt.no_worktree_created is True

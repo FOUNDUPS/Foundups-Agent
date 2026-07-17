@@ -109,6 +109,16 @@ def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRunti
         wsp15_priority=str(payload["wsp15_priority"]),
         wsp15_mps_total=int(payload["wsp15_mps_total"]),
         wsp15_reasoning_tier=str(payload["wsp15_reasoning_tier"]),
+        model_runtime_binding_receipt_id=(
+            str(payload["model_runtime_binding_receipt_id"])
+            if payload.get("model_runtime_binding_receipt_id")
+            else None
+        ),
+        model_runtime_binding_digest=(
+            str(payload["model_runtime_binding_digest"])
+            if payload.get("model_runtime_binding_digest")
+            else None
+        ),
         identity_nonce=str(payload["identity_nonce"]),
         work_authority_nonce=str(payload["work_authority_nonce"]),
         issued_at=int(payload["issued_at"]),

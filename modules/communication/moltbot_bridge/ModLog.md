@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_SIGNED_AUTHORITY_CHAIN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Carried optional model runtime-binding receipt id/digest from validated WRE
+  queue items through the queue-authority dry-run planner into
+  `DelegatedAuthorityRuntimeRequest`.
+- The signer runtime now validates optional runtime-binding fields and includes
+  them in the signed work-authority payload and issued-authority store record.
+- The work-order verifier rejects malformed one-sided runtime-binding fields
+  and signature verification rejects any post-signing runtime-binding tamper.
+- Boundary remains constrained: no model/provider call, benchmark execution,
+  worker spawn, shell, worktree, OpenClaw/Hermes dispatch, source mutation,
+  PatternMemory write, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_AUTHORITY_CARRY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
