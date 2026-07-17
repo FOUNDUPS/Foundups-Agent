@@ -1024,6 +1024,30 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
         )
 
         if critical_count > 0 and enforced:
+            try:
+                from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                    on_preflight_fail,
+                )
+
+                on_preflight_fail(
+                    component="wre_dashboard",
+                    severity="critical",
+                    payload={
+                        "critical": critical_count,
+                        "warnings": warning_count,
+                        "samples": total_executions,
+                        "min_samples": min_samples,
+                        "healthy": healthy,
+                        "in_watch": in_watch,
+                        "auto_enforced": auto_enforced,
+                        "manual_enforced": manual_enforced,
+                        "enforced": enforced,
+                        "automation_candidate": True,
+                    },
+                    source="main:run_wre_dashboard_preflight",
+                )
+            except Exception as dispatch_exc:
+                logger.debug(f"[WRE-DASHBOARD] dispatch skipped: {dispatch_exc}")
             enforce_source = "AUTO" if auto_enforced else "MANUAL"
             print(f"[WRE-DASHBOARD] Startup blocked by {enforce_source} enforcement")
             return False
@@ -1988,6 +2012,82 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         print("[REDDOG-RESIDENT-CYCLE] Startup blocked by REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=1")
         return False
     return True
+
+
+def _reddog_startup_blocker_token(value: str) -> str:
+    cleaned = "".join(ch if ch.isalnum() or ch in {"_", "-", "."} else "_" for ch in value.strip())
+    return (cleaned or "unknown")[:64]
+
+
+def _run_reddog_startup_blocker_diagnostic(repo_root: Path, *, component: str, stage: str) -> None:
+    """
+    Best-effort resident RedDog diagnostic for startup blockers.
+
+    The blocker still blocks. This bridge only gives the resident architect a
+    read-only opportunity to inspect preflight artifacts and queue a future
+    governed repair path, with FIX handoff and queue profile disabled so a
+    blocker diagnostic cannot advance the execution chain by itself.
+    """
+    if not _reddog_truthy_env_value(os.getenv("REDDOG_STARTUP_BLOCKER_DIAGNOSTIC", "1")):
+        return
+    if _reddog_truthy_env_value(os.getenv("REDDOG_STARTUP_BLOCKER_DIAGNOSTIC_ACTIVE", "0")):
+        return
+
+    component_token = _reddog_startup_blocker_token(component)
+    stage_token = _reddog_startup_blocker_token(stage)
+    work_focus = (
+        f"Diagnose startup blocker {component_token} from {stage_token}. "
+        "Read current alerts/preflight artifacts, Brain, Breadcrumbs, HoloIndex freshness, "
+        "and authoritative work state. Apply WSP_15 and WSP_97. Recommend the next safe "
+        "repair slice only. Do not mutate source, run shell commands, reindex HoloIndex, "
+        "dispatch Hermes, create a worktree, open a PR, or enqueue live work."
+    )
+
+    override_keys = (
+        "REDDOG_STARTUP_BLOCKER_DIAGNOSTIC_ACTIVE",
+        "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE",
+        "REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS",
+        "REDDOG_RESIDENT_ARCHITECT_INTENT_ID",
+        "REDDOG_RESIDENT_ARCHITECT_CYCLE_BUCKET",
+        "REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF",
+        "REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE",
+        "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF",
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
+    )
+    previous = {key: os.environ.get(key) for key in override_keys}
+    try:
+        os.environ["REDDOG_STARTUP_BLOCKER_DIAGNOSTIC_ACTIVE"] = "1"
+        os.environ["REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE"] = "1"
+        os.environ["REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS"] = work_focus
+        os.environ["REDDOG_RESIDENT_ARCHITECT_CYCLE_BUCKET"] = (
+            f"startup_blocker:{component_token}:{stage_token}"
+        )
+        os.environ["REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF"] = "0"
+        os.environ["REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE"] = "0"
+        os.environ.pop("REDDOG_RESIDENT_ARCHITECT_INTENT_ID", None)
+        os.environ.pop("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF", None)
+        os.environ.pop("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", None)
+        result = run_reddog_resident_architect_durable_cycle_preflight(repo_root)
+        print(
+            "[REDDOG-STARTUP-BLOCKER] "
+            f"diagnostic={'PASS' if result else 'WARN'} component={component_token} stage={stage_token}"
+        )
+    except Exception as exc:
+        logger.debug(f"[REDDOG-STARTUP-BLOCKER] diagnostic skipped: {exc}")
+        print(
+            "[REDDOG-STARTUP-BLOCKER] "
+            f"diagnostic=WARN component={component_token} stage={stage_token} error={type(exc).__name__}"
+        )
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+def _handle_startup_blocker(repo_root: Path, *, component: str, stage: str) -> None:
+    _run_reddog_startup_blocker_diagnostic(repo_root, component=component, stage=stage)
 
 
 def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
@@ -3702,20 +3802,60 @@ def main():
             logger.error(f"[PREFLIGHT] Failed to initialize AI Overseer: {exc}")
 
     if not run_env_hygiene_preflight(repo_root):
+        _handle_startup_blocker(
+            repo_root,
+            component="env_hygiene",
+            stage="run_env_hygiene_preflight",
+        )
         return
     if not run_brain_artifact_preflight(repo_root):
+        _handle_startup_blocker(
+            repo_root,
+            component="brain_artifact",
+            stage="run_brain_artifact_preflight",
+        )
         return
     if not run_ironclaw_runtime_preflight(repo_root):
+        _handle_startup_blocker(
+            repo_root,
+            component="ironclaw_runtime",
+            stage="run_ironclaw_runtime_preflight",
+        )
         return
     if not run_openclaw_security_preflight(repo_root, overseer=overseer):
+        _handle_startup_blocker(
+            repo_root,
+            component="openclaw_security",
+            stage="run_openclaw_security_preflight",
+        )
         return
     if not run_dependency_security_preflight(repo_root):
+        _handle_startup_blocker(
+            repo_root,
+            component="dep_security",
+            stage="run_dependency_security_preflight",
+        )
         return
     if not run_wre_dashboard_preflight(repo_root):
+        _handle_startup_blocker(
+            repo_root,
+            component="wre_dashboard",
+            stage="run_wre_dashboard_preflight",
+        )
         return
     if not run_wsp_framework_preflight(repo_root, overseer=overseer):
+        _handle_startup_blocker(
+            repo_root,
+            component="wsp_framework",
+            stage="run_wsp_framework_preflight",
+        )
         return
     if not run_git_main_merge_sentinel_preflight(repo_root):
+        _handle_startup_blocker(
+            repo_root,
+            component="git_main_merge_sentinel",
+            stage="run_git_main_merge_sentinel_preflight",
+        )
         return
     if not run_reddog_authoritative_work_state_refresh_preflight(repo_root):
         return
