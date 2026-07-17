@@ -37,7 +37,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Dict, Any, Mapping
+from typing import Optional, Dict, Any, Mapping, Sequence
 
 # Load environment variables for DAEs (API keys, ports, feature flags).
 # Managed mode builds `.env.managed` from `.env` (last duplicate wins) for
@@ -1602,6 +1602,119 @@ def _reddog_truthy_env_value(value: str | None) -> bool:
     return raw not in {"", "0", "false", "off", "no"}
 
 
+def _reddog_digest_payload(payload: Any) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+    return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+def _reddog_bounded_json_file(path: Path, *, max_bytes: int = 262_144) -> Any | None:
+    try:
+        if not path.is_file() or path.stat().st_size > max_bytes:
+            return None
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _reddog_mapping_sequence(payload: Any, keys: Sequence[str], *, limit: int) -> tuple[Mapping[str, Any], ...]:
+    source: Any = payload
+    if isinstance(payload, Mapping):
+        for key in keys:
+            candidate = payload.get(key)
+            if isinstance(candidate, list):
+                source = candidate
+                break
+    if not isinstance(source, list):
+        return ()
+    records: list[Mapping[str, Any]] = []
+    for item in source:
+        if isinstance(item, Mapping):
+            records.append(dict(item))
+            if len(records) >= limit:
+                break
+    return tuple(records)
+
+
+def _reddog_resident_memory_limit() -> int:
+    return _reddog_positive_int_env("REDDOG_RESIDENT_MEMORY_MAX_RECORDS", 20)
+
+
+def _reddog_resident_brain_state_from_artifacts() -> Mapping[str, Any] | None:
+    if not _reddog_truthy_env_value(os.getenv("REDDOG_RESIDENT_BRAIN_CONTEXT", "1")):
+        return None
+
+    raw_path = os.getenv("REDDOG_RESIDENT_BRAIN_STATE_PATH", "").strip()
+    if raw_path:
+        path = Path(raw_path)
+    else:
+        try:
+            from modules.infrastructure.wre_core.scripts.extract_brain_artifacts import (
+                DEFAULT_OUTPUT_DIR,
+                DEFAULT_STATE_FILE,
+            )
+
+            path = DEFAULT_OUTPUT_DIR / DEFAULT_STATE_FILE
+        except Exception:
+            return None
+
+    payload = _reddog_bounded_json_file(path)
+    if not isinstance(payload, Mapping):
+        return None
+
+    signature = payload.get("signature") if isinstance(payload.get("signature"), Mapping) else {}
+    summary = payload.get("summary") if isinstance(payload.get("summary"), Mapping) else {}
+    record_count = (
+        payload.get("conversations")
+        or signature.get("conversation_count", 0)
+        or summary.get("total_artifacts", 0)
+        or 0
+    )
+    try:
+        normalized_count = int(record_count)
+    except (TypeError, ValueError):
+        normalized_count = 0
+
+    return {
+        "available": True,
+        "signature_digest": _reddog_digest_payload(signature),
+        "summary_digest": _reddog_digest_payload(summary),
+        "record_count": normalized_count,
+        "source": "brain_artifact_state",
+        "updated_at": str(payload.get("updated_at", "")),
+    }
+
+
+def _reddog_resident_breadcrumbs_from_runtime(*, work_focus: str, foundup_id: str) -> tuple[Mapping[str, Any], ...]:
+    if not _reddog_truthy_env_value(os.getenv("REDDOG_RESIDENT_BREADCRUMBS_CONTEXT", "1")):
+        return ()
+
+    limit = _reddog_resident_memory_limit()
+    raw_path = os.getenv("REDDOG_RESIDENT_BREADCRUMBS_PATH", "").strip()
+    if raw_path:
+        payload = _reddog_bounded_json_file(Path(raw_path))
+        return _reddog_mapping_sequence(payload, ("breadcrumbs", "records", "items"), limit=limit)
+
+    try:
+        from modules.communication.moltbot_bridge.src.openclaw_memory_queries import search_breadcrumbs
+
+        topic = os.getenv("REDDOG_RESIDENT_MEMORY_QUERY", "").strip() or work_focus or foundup_id
+        return tuple(dict(item) for item in search_breadcrumbs(topic, limit=limit) if isinstance(item, Mapping))
+    except Exception:
+        return ()
+
+
+def _reddog_resident_workspace_memory_notes_from_env() -> tuple[Mapping[str, Any], ...]:
+    raw_path = os.getenv("REDDOG_RESIDENT_WORKSPACE_MEMORY_NOTES_PATH", "").strip()
+    if not raw_path:
+        return ()
+    payload = _reddog_bounded_json_file(Path(raw_path))
+    return _reddog_mapping_sequence(
+        payload,
+        ("workspace_memory_notes", "notes", "records", "items"),
+        limit=_reddog_resident_memory_limit(),
+    )
+
+
 def _reddog_resident_architect_cycle_requested() -> bool:
     explicit = os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE")
     if explicit is not None and str(explicit).strip():
@@ -1743,6 +1856,12 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         REDDOG_RESIDENT_ARCHITECT_CANCEL=0                 Cancel running cycle
         REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF=1        Auto-arm safe FIX handoff after accepted FIX
         REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE        Optional downstream queue profile, default draft-PR
+        REDDOG_RESIDENT_BRAIN_CONTEXT=1                     Attach read-only Brain artifact state metadata
+        REDDOG_RESIDENT_BRAIN_STATE_PATH                    Optional Brain artifact state JSON override
+        REDDOG_RESIDENT_BREADCRUMBS_CONTEXT=1               Attach read-only AgentDB breadcrumb metadata
+        REDDOG_RESIDENT_BREADCRUMBS_PATH                    Optional breadcrumb JSON override
+        REDDOG_RESIDENT_WORKSPACE_MEMORY_NOTES_PATH         Optional workspace memory note JSON
+        REDDOG_RESIDENT_MEMORY_MAX_RECORDS=20               Max breadcrumb/workspace records supplied
         REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH             Approved external snapshot JSON
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Existing work-state JSON
         HOLOINDEX_FRESHNESS_RECEIPT                        Existing HoloIndex receipt
@@ -1768,6 +1887,16 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         work_focus=work_focus,
         cycle_bucket=cycle_bucket,
     )
+    brain_state = _reddog_resident_brain_state_from_artifacts()
+    breadcrumbs = _reddog_resident_breadcrumbs_from_runtime(work_focus=work_focus, foundup_id=foundup_id)
+    workspace_memory_notes = _reddog_resident_workspace_memory_notes_from_env()
+    memory_context = {
+        "brain_available": bool(brain_state),
+        "brain_record_count": int(brain_state.get("record_count", 0)) if brain_state else 0,
+        "breadcrumbs_count": len(breadcrumbs),
+        "workspace_memory_notes_count": len(workspace_memory_notes),
+    }
+    memory_context["memory_context_digest"] = _reddog_digest_payload(memory_context)
     red_dog_intent = {
         "schema_version": "reddog_intent.v1",
         "intent_id": intent_id,
@@ -1778,6 +1907,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         "requested_authority": "read_only_audit",
         "origin": "main.py",
         "submits_executable_authority": False,
+        "memory_context": memory_context,
     }
 
     try:
@@ -1793,6 +1923,9 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
             holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
             requested_operation="main_resident_architect_cycle",
             prompt_text=work_focus,
+            breadcrumbs=breadcrumbs,
+            brain_state=brain_state,
+            workspace_memory_notes=workspace_memory_notes,
             external_research_retriever=_reddog_external_research_retriever_from_env(),
             max_claims=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS", 8),
             timeout_seconds=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS", 60),
@@ -1826,7 +1959,10 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         f"architect_next_slice={result.architect_next_slice or '(none)'} "
         f"architect_determination={result.architect_determination_id or '(none)'} "
         f"queue_candidates={result.queue_candidate_count} auto_fix_handoff={auto_fix_handoff} "
-        f"auto_queue_profile={auto_queue_profile or '(none)'} reasons={reasons}"
+        f"auto_queue_profile={auto_queue_profile or '(none)'} "
+        f"brain_records={memory_context['brain_record_count']} "
+        f"breadcrumbs={memory_context['breadcrumbs_count']} "
+        f"workspace_memory={memory_context['workspace_memory_notes_count']} reasons={reasons}"
     )
     print(
         "[REDDOG-RESIDENT-CYCLE] "
