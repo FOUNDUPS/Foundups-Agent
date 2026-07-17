@@ -1906,12 +1906,19 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
                 run_reddog_model_autoresearch_plan_artifact_supply_bootstrap,
             )
 
+            configured_feedback_path = os.getenv("REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH", "").strip()
+            model_autoresearch_feedback_records_path = configured_feedback_path or None
+            if model_autoresearch_feedback_records_path is None:
+                cycle_feedback_path = Path(model_autoresearch_cycle_feedback_ledger_path)
+                if cycle_feedback_path.exists() and cycle_feedback_path.is_file():
+                    model_autoresearch_feedback_records_path = str(cycle_feedback_path)
+
             autoresearch_supply = run_reddog_model_autoresearch_plan_artifact_supply_bootstrap(
                 repo_root=repo_root,
                 promotion_gate_receipts_path=model_autoresearch_promotion_gate_receipts_path or None,
                 candidate_pool_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH", "") or None,
                 policy_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_POLICY_PATH", "") or None,
-                feedback_records_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH", "") or None,
+                feedback_records_path=model_autoresearch_feedback_records_path,
                 output_path=model_autoresearch_plan_receipt_path,
             )
         except Exception as exc:
