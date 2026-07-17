@@ -220,10 +220,15 @@ When a slice crosses module boundaries, classify its launch, ingress, continuity
 
 ### 2. Agent-Specific Execution Profiles
 
+These are role-behavior templates, not model bindings. Model name, version,
+context budget, and availability come from runtime configuration and require a
+runtime binding receipt before execution may claim them.
+
 #### 0102 Profile (Strategic Orchestrator)
 ```
 EXECUTION_PROFILE = {
-    "context_window": "unlimited",
+    "context_window": "runtime_configured",
+    "model_binding": "runtime_receipt_required",
     "output_mode": "verbose_strategic",
     "specialization": "oversight_validation",
     "mantra_emphasis": "Hard Think + Dialectic Sweep + Follow WSP"
@@ -239,7 +244,8 @@ EXECUTION_PROFILE = {
 #### Qwen Profile (Operational Coordinator)
 ```
 EXECUTION_PROFILE = {
-    "context_window": "32K_tokens",
+    "context_window": "runtime_configured",
+    "model_binding": "runtime_receipt_required",
     "output_mode": "structured_json",
     "specialization": "planning_coordination",
     "mantra_emphasis": "Research + CoT retrieval + Build"
@@ -255,7 +261,8 @@ EXECUTION_PROFILE = {
 #### Gemma Profile (Focused Executor)
 ```
 EXECUTION_PROFILE = {
-    "context_window": "8K_tokens",
+    "context_window": "runtime_configured",
+    "model_binding": "runtime_receipt_required",
     "output_mode": "binary_validation",
     "specialization": "validation_execution",
     "mantra_emphasis": "First Principles + validation after CoR sweep"
@@ -314,6 +321,10 @@ MCP_RUBIK_INTEGRATION = {
 }
 ```
 
+Mission-template success criteria are desired acceptance conditions. Their
+presence does not prove runtime availability or completion; each satisfied
+criterion requires resolvable evidence in the execution receipt.
+
 ---
 
 ## Implementation Requirements
@@ -337,7 +348,7 @@ Mission template: {CURRENT_MISSION_TEMPLATE}
 ```python
 def detect_and_route_mission(query: str) -> dict:
     """
-    FIRST PRINCIPLES: Automatic mission detection and agent routing
+    FIRST PRINCIPLES: Mission detection and coordination-plan selection
     """
     mission_type = detect_mission_type(query)
     agent_profile = get_agent_profile()
@@ -351,6 +362,9 @@ def detect_and_route_mission(query: str) -> dict:
         "routing_decision": routing_decision
     }
 ```
+
+This function shape selects a plan. It does not invoke a model, dispatch a
+worker, or prove execution; WSP 77 owns the governed handoff boundary.
 
 ### 3. Recursive Execution Validation Contract
 
@@ -414,7 +428,8 @@ EXECUTION PATTERN:
 3. Create detailed coordination and implementation plans
 4. Provide structured, actionable execution guidance
 
-Always reference WSP 97 in your coordination and optimize output for 32K context window.
+Always reference WSP 97 in your coordination and stay within the context budget
+supplied by the validated runtime binding.
 ```
 
 ### Gemma System Prompt Integration
@@ -432,7 +447,7 @@ EXECUTION PATTERN:
 1. Perform binary classification and pattern matching
 2. Execute focused validation and quality checks
 3. Provide clear success/failure signals
-4. Maintain operational efficiency within 8K context
+4. Stay within the context budget supplied by the validated runtime binding
 
 Always reference WSP 97 in your validation tasks and optimize for minimal, precise output.
 ```
@@ -454,9 +469,12 @@ Always reference WSP 97 in your validation tasks and optimize for minimal, preci
 ### Testing & Validation
 
 - **Mantra Compliance**: Execution receipts must index evidence for all 7 mantra stages
-- **Profile Adherence**: Agents must stay within their defined capabilities and output modes
-- **Mission Success**: All mission templates must achieve defined success criteria
-- **Recursive Validation**: Agents validate their own compliance with WSP 97
+- **Profile Adherence**: Runtime receipts must identify the actual model binding
+  and budget used; role labels alone are not evidence
+- **Mission Success**: Template criteria are targets and count as satisfied only
+  when resolvable execution evidence proves them
+- **Recursive Validation**: Agents may emit structural receipts, but self-issued
+  receipts do not authenticate their own contents
 
 ### Operational CLI Hook: Connect WRE
 
@@ -483,7 +501,7 @@ to confirm WRE preflight state and current enforcement behavior.
 ### 1. Consistent Execution Quality
 - **Standardized Approach**: All agents follow the same fundamental process
 - **Quality Assurance**: Built-in validation at each step
-- **Predictable Outcomes**: Consistent execution patterns across missions
+- **Comparable Evidence**: Consistent receipt structure across missions
 
 ### 2. Agent Optimization
 - **Context Efficiency**: Optimized output for each agent's capabilities
@@ -516,7 +534,8 @@ to confirm WRE preflight state and current enforcement behavior.
 
 ---
 
-**Protocol Status**: ACTIVE - Ready for agent integration
+**Protocol Status**: ACTIVE - execution/receipt contract; runtime readiness and
+model availability remain evidence-dependent
 
 **Next Step**: Integrate WSP 97 references into all agent system prompts
 
