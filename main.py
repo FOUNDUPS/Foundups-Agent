@@ -3612,6 +3612,13 @@ def _reddog_queue_stage_progress(stage_callable: Any, *, default_progress: int) 
         return 0
 
 
+def _reddog_queue_stage_rejected(stage_callable: Any) -> bool:
+    """Return whether a queue control stage recorded an accepted-false result."""
+
+    raw = getattr(stage_callable, "last_result", None)
+    return isinstance(raw, Mapping) and raw.get("accepted") is False
+
+
 def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
     """
     Drive the resident queue through bounded serial/claim rounds.
@@ -3662,7 +3669,9 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
             default_progress=1 if serial_ok else 0,
         )
         serial_progress_total += serial_progress
-        if not serial_ok:
+        if not serial_ok or _reddog_queue_stage_rejected(
+            run_reddog_resident_queue_serial_loop_preflight
+        ):
             print(
                 f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
                 "stage=serial_loop"
@@ -3674,7 +3683,9 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
             default_progress=1 if claim_ok else 0,
         )
         claim_progress_total += claim_progress
-        if not claim_ok:
+        if not claim_ok or _reddog_queue_stage_rejected(
+            run_reddog_openclaw_signed_worker_claim_loop_preflight
+        ):
             print(
                 f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
                 "stage=openclaw_claim_loop"

@@ -203,6 +203,107 @@ def test_main_openclaw_signed_worker_claim_loop_disabled_by_default() -> None:
             assert main.run_reddog_openclaw_signed_worker_claim_loop_preflight(REPO_ROOT) is True
 
 
+def test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "resident-runtime"
+    runtime_root.mkdir(parents=True)
+    principal_public, reddog_public, _connector = _ed25519_signing_material()
+    pilot_overrides = _pilot_path_overrides()
+    profile_env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+    }
+    state_payload = _bootstrap_snapshot()
+    state_payload["worker_claims"][0]["expires_at"] = "2099-01-01T00:00:00+00:00"
+    state = _write_json(
+        Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH")),
+        state_payload,
+    )
+    profile = _write_json(
+        Path(
+            resident_queue_runtime_file_path(
+                profile_env,
+                repo,
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+            )
+        ),
+        _bootstrap_profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=_pilot_allowed_paths(),
+            denied_paths=pilot_overrides["denied_paths"],
+            bounded_worker_plan=_pilot_bounded_worker_plan(),
+        ),
+    )
+    snapshots = _write_json(
+        Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_PERMISSION_SNAPSHOTS_PATH")),
+        _snapshots(),
+    )
+    principals = _write_json(
+        Path(
+            resident_queue_runtime_file_path(
+                profile_env,
+                repo,
+                "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
+            )
+        ),
+        _principals(principal_public),
+    )
+    authority_state = Path(
+        resident_queue_runtime_file_path(profile_env, repo, "REDDOG_AUTHORITY_RUNTIME_STATE_PATH")
+    )
+    valve_env = _write_json(
+        Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_EXECUTION_VALVE_ENV_PATH")),
+        _valve_environment(),
+    )
+    socket_path = Path(resident_queue_runtime_file_path(profile_env, repo, "REDDOG_SIGNER_SOCKET_PATH"))
+    chain = Path(
+        resident_queue_runtime_file_path(
+            profile_env,
+            repo,
+            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+        )
+    )
+    assert not socket_path.exists()
+
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
+        PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
+    )
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "1000")
+    monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
+    monkeypatch.setenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", str(snapshots))
+    monkeypatch.setenv("REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH", str(principals))
+    monkeypatch.setenv("REDDOG_EXECUTION_VALVE_ENV_PATH", str(valve_env))
+    monkeypatch.setenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", str(authority_state))
+    monkeypatch.setenv("REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY", "0")
+    monkeypatch.delenv("REDDOG_WORK_ORDERS_PATH", raising=False)
+
+    with patch(CLAIM_LOOP, side_effect=AssertionError("claim loop must not run after signer reject")):
+        assert main.run_reddog_resident_queue_control_loop_preflight(repo) is False
+
+    captured = capsys.readouterr().out
+    assert "FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE" in captured
+    assert "[REDDOG-QUEUE-CONTROL] preflight=FAIL" in captured
+    assert main.run_reddog_resident_queue_serial_loop_preflight.last_result["accepted"] is False
+    assert authority_state.exists() is False
+    assert chain.exists() is False
+
+
 def test_main_openclaw_signed_worker_claim_loop_passes_when_idle(capsys) -> None:
     import main
 
