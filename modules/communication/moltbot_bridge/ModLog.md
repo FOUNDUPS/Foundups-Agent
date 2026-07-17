@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_WORKER_DISPATCH_CARRY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Carried signed model runtime-binding receipt id/digest from issued
+  work-authority into signed worker-dispatch dry-run intents, dispatch runtime
+  receipts, and AgentDB task context.
+- The worker-dispatch runtime and claimed-task executor now fail closed when
+  queue item, dispatch receipt, intent, or task context disagree on runtime
+  model-binding id/digest.
+- Resident work-order materialization now carries the content-bearing
+  `model_runtime_binding_receipt` from the authority profile so readonly 0102
+  audit workers can consume the runtime-selected model topology.
+- Boundary remains constrained: no model/provider call, benchmark execution,
+  signing expansion, worker spawn, shell, worktree, source mutation,
+  PatternMemory write, OpenClaw/Hermes dispatch, or HoloIndex re-indexing was
+  added.
+
 ## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_SIGNED_AUTHORITY_CHAIN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

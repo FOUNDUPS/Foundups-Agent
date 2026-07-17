@@ -48,6 +48,7 @@ class SignedAuthorityWorkerDispatchDryRunReason:
     WSP15_PRIORITY_MISMATCH = "REJECT_WSP15_PRIORITY_MISMATCH"
     WSP15_MPS_TOTAL_MISMATCH = "REJECT_WSP15_MPS_TOTAL_MISMATCH"
     WSP15_REASONING_TIER_MISMATCH = "REJECT_WSP15_REASONING_TIER_MISMATCH"
+    MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_MODEL_RUNTIME_BINDING_MISMATCH"
     QUEUE_MUTATION_NOT_ALLOWED = "REJECT_QUEUE_MUTATION_NOT_ALLOWED"
     HERMES_EXECUTION_NOT_ALLOWED = "REJECT_HERMES_EXECUTION_NOT_ALLOWED"
     WORKER_PLAN_EMPTY = "REJECT_WORKER_PLAN_EMPTY"
@@ -66,6 +67,8 @@ class WorkerDispatchIntent:
     requested_operation: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
+    model_runtime_binding_receipt_id: str = ""
+    model_runtime_binding_digest: str = ""
     dry_run_only: bool = True
     no_worker_spawn_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -86,6 +89,8 @@ class SignedAuthorityWorkerDispatchDryRunReceipt:
     wsp15_priority: str
     wsp15_mps_total: int
     wsp15_reasoning_tier: str
+    model_runtime_binding_receipt_id: str
+    model_runtime_binding_digest: str
     dispatch_intent_count: int
     dispatch_intents: Tuple[WorkerDispatchIntent, ...]
     no_worker_spawn_performed: bool = True
@@ -206,6 +211,8 @@ def _build_intents(
         "requested_operation": str(work_authority["requested_operation"]),
         "wsp15_allocation_receipt_id": str(allocation["receipt_id"]),
         "wsp15_allocation_digest": _digest(allocation),
+        "model_runtime_binding_receipt_id": str(work_authority.get("model_runtime_binding_receipt_id") or ""),
+        "model_runtime_binding_digest": str(work_authority.get("model_runtime_binding_digest") or ""),
     }
 
     roles: List[tuple[str, str, str]] = []
@@ -300,6 +307,15 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_MPS_TOTAL_MISMATCH)
     if str(work_authority.get("wsp15_reasoning_tier") or "") != str(allocation["reasoning_tier"]):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_REASONING_TIER_MISMATCH)
+    runtime_binding_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
+    runtime_binding_digest = str(work_authority.get("model_runtime_binding_digest") or "")
+    if bool(runtime_binding_id) != bool(runtime_binding_digest):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    if runtime_binding_id and (
+        not runtime_binding_id.startswith("reddog_model_runtime_binding:")
+        or not runtime_binding_digest.startswith("sha256:")
+    ):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
     if reasons:
         return _reject(reasons, explicit_requested=True)
 
@@ -314,6 +330,8 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         "work_order_id": work_authority["work_order_id"],
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
+        "model_runtime_binding_receipt_id": runtime_binding_id,
+        "model_runtime_binding_digest": runtime_binding_digest,
         "dispatch_intent_ids": [intent.intent_id for intent in intents],
     }
     receipt = SignedAuthorityWorkerDispatchDryRunReceipt(
@@ -326,6 +344,8 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         wsp15_priority=str(allocation["priority"]),
         wsp15_mps_total=int(allocation["mps_total"]),
         wsp15_reasoning_tier=str(allocation["reasoning_tier"]),
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
         dispatch_intent_count=len(intents),
         dispatch_intents=intents,
     )
