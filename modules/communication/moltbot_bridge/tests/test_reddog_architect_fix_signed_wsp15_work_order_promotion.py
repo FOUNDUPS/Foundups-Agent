@@ -24,6 +24,11 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
     SelectionPurpose,
     select_models_for_task,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
+    ModelRuntimeBindingPolicy,
+    RUNTIME_BINDING_SCHEMA_VERSION,
+    _digest_prefixed,
+)
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     ModelEvidenceSignerRole,
     ModelEvidenceSubjectType,
@@ -306,6 +311,50 @@ def _model_selection(*, purpose: SelectionPurpose = SelectionPurpose.PRODUCTION)
     return json.loads(json.dumps(receipt.to_dict(), sort_keys=True))
 
 
+def _runtime_binding(
+    model_selection: Mapping[str, Any] | None = None,
+    **overrides: Any,
+) -> dict[str, Any]:
+    selection = dict(model_selection or _model_selection())
+    requirements = dict(selection["requirements"])
+    selected_models = tuple(str(model_id) for model_id in selection["selected_model_ids"])
+    principal_model = selected_models[0]
+    policy = ModelRuntimeBindingPolicy(
+        task_family=str(requirements["task_family"]),
+        runtime_surface="reddog_fusion",
+        min_verifier_pass_rate=0.8,
+        required_task_set_digest="sha256:task-set",
+        required_held_out_split_digest="sha256:held-out",
+        required_verifier_digest="sha256:verifier",
+        authority_receipt_id="runtime-authority:architect-fix",
+    ).to_dict()
+    body = {
+        "schema_version": RUNTIME_BINDING_SCHEMA_VERSION,
+        "decision": "bound",
+        "runtime_surface": policy["runtime_surface"],
+        "catalog_snapshot_id": str(selection["catalog_snapshot_id"]),
+        "selection_receipt_id": str(selection["receipt_id"]),
+        "task_family": str(requirements["task_family"]),
+        "principal_model": principal_model,
+        "panel_models": [],
+        "role_bindings": [
+            {
+                "role": "principal",
+                "model_id": principal_model,
+                "provider": principal_model.split("/", 1)[0],
+            }
+        ],
+        "benchmark_evidence_receipt_ids": ["model_benchmark_evidence:architect-fix"],
+        "promotion_evidence_receipt_ids": ["model_promotion_evidence:architect-fix"],
+        "signed_promotion_receipt_ids": ["signature:promotion"],
+        "policy": policy,
+        "rejection_reasons": [],
+    }
+    body.update(overrides)
+    body["receipt_id"] = _digest_prefixed("reddog_model_runtime_binding", body)
+    return json.loads(json.dumps(body, sort_keys=True))
+
+
 def _promote(**overrides: Any):
     store = overrides.pop("store", InMemoryAuthoritativeWorkStateStore(_work_state()))
     args = {
@@ -354,6 +403,82 @@ def test_promotes_fix_determination_to_queue_item_and_authority_profile() -> Non
     assert queue_result.accepted is True
     assert queue_result.status == WRE_QUEUE_CONSUMER_DRYRUN_READY
     assert queue_result.selected_slice == "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+
+
+def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> None:
+    model_selection = _model_selection()
+    runtime_binding = _runtime_binding(model_selection)
+
+    result, store = _promote(
+        model_selection_receipt=model_selection,
+        model_runtime_binding_receipt=runtime_binding,
+    )
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.receipt.model_runtime_binding_receipt_id == runtime_binding["receipt_id"]
+    assert result.receipt.model_runtime_binding_digest == promotion._digest(runtime_binding)
+    assert result.authority_profile is not None
+    assert result.authority_profile["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert result.authority_profile["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
+    assert result.authority_profile["model_runtime_binding_principal_model"] == runtime_binding["principal_model"]
+    assert result.authority_profile["operational_context_binding"]["model_runtime_binding_receipt_id"] == (
+        runtime_binding["receipt_id"]
+    )
+    assert result.authority_profile["operational_context_binding"]["model_runtime_binding_receipt"][
+        "receipt_id"
+    ] == runtime_binding["receipt_id"]
+
+    snapshot = store.load()
+    claim = snapshot["worker_claims"][0]
+    queue_item = snapshot["wre_queue_items"][0]
+    promotion_record = snapshot["architect_fix_promotions"][0]
+    assert claim["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert queue_item["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert queue_item["model_runtime_binding_digest"] == promotion._digest(runtime_binding)
+    assert f"model_runtime_binding:{runtime_binding['receipt_id']}" in queue_item["evidence_refs"]
+    assert promotion_record["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+
+
+def test_rejects_runtime_binding_for_different_model_selection_without_store_mutation() -> None:
+    model_selection = _model_selection()
+    runtime_binding = _runtime_binding(
+        model_selection,
+        selection_receipt_id="model_selection_receipt:different",
+    )
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        model_selection_receipt=model_selection,
+        model_runtime_binding_receipt=runtime_binding,
+    )
+
+    assert result.accepted is False
+    assert promotion.ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_MISMATCH in result.rejection_reasons
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_unbound_runtime_binding_without_store_mutation() -> None:
+    model_selection = _model_selection()
+    runtime_binding = _runtime_binding(
+        model_selection,
+        decision="rejected",
+        principal_model=None,
+        role_bindings=[],
+        rejection_reasons=["missing_verified_production_evidence"],
+    )
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        model_selection_receipt=model_selection,
+        model_runtime_binding_receipt=runtime_binding,
+    )
+
+    assert result.accepted is False
+    assert promotion.ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_NOT_BOUND in result.rejection_reasons
+    assert store.load()["wre_queue_items"] == []
 
 
 def test_rejects_non_fix_determination_without_store_mutation() -> None:

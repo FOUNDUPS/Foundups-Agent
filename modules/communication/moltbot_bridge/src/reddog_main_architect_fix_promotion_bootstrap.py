@@ -77,6 +77,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     memex_supply_receipt_path: Path | str | None,
     authority_profile_source_path: Path | str | None,
     authority_profile_output_path: Path | str | None,
+    model_runtime_binding_receipt_path: Path | str | None = None,
     worker_id: str = "reddog-main-architect-fix-promotion",
     now_iso: str | None = None,
 ) -> RedDogMainArchitectFixPromotionBootstrapResult:
@@ -108,6 +109,13 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
         unreadable_reason="malformed_model_selection_receipt",
     )
     reasons.extend(model_reasons)
+    model_runtime_binding, runtime_binding_reasons = _read_optional_json_outside_repo(
+        root,
+        model_runtime_binding_receipt_path,
+        inside_reason="model_runtime_binding_receipt_path_inside_repo",
+        unreadable_reason="malformed_model_runtime_binding_receipt",
+    )
+    reasons.extend(runtime_binding_reasons)
     memex_supply, memex_reasons = _read_json_outside_repo(
         root,
         memex_supply_receipt_path,
@@ -152,6 +160,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
         work_state_store=store,
         authority_profile=authority_profile,
         model_selection_receipt=model_selection,
+        model_runtime_binding_receipt=model_runtime_binding,
         memex_supply_receipt=memex_supply,
         worker_id=worker_id,
         now_iso=now_iso or datetime.now(timezone.utc).isoformat(),
@@ -191,6 +200,33 @@ def _read_json_outside_repo(
         repo_root,
         value,
         missing_reason=missing_reason,
+        inside_reason=inside_reason,
+    )
+    if reasons:
+        return None, reasons
+    assert path is not None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None, [unreadable_reason]
+    if not isinstance(payload, Mapping):
+        return None, [unreadable_reason]
+    return payload, []
+
+
+def _read_optional_json_outside_repo(
+    repo_root: Path,
+    value: Path | str | None,
+    *,
+    inside_reason: str,
+    unreadable_reason: str,
+) -> tuple[Optional[Mapping[str, Any]], list[str]]:
+    if not value:
+        return None, []
+    path, reasons = _resolve_existing_file_outside_repo(
+        repo_root,
+        value,
+        missing_reason=unreadable_reason,
         inside_reason=inside_reason,
     )
     if reasons:

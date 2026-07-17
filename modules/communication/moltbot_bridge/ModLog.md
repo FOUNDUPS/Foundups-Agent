@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_AUTHORITY_CARRY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Carried optional `RedDogModelRuntimeBindingReceipt` evidence from `main.py`
+  startup preflight into architect-FIX promotion.
+- Promotion now rehydrates and digest-checks supplied runtime-binding receipts,
+  rejects unbound or selection/catalog/task-family mismatches, and records the
+  accepted receipt id/digest on the claim, WRE queue item, promotion record,
+  promotion receipt, and promoted authority profile.
+- Preserved existing flows when no runtime-binding receipt is explicitly
+  supplied or generated; profile-derived default paths no longer accidentally
+  make runtime-binding evidence mandatory.
+- Boundary remains constrained: no model/provider call, benchmark execution,
+  signing, worker spawn, shell, worktree, source mutation, PatternMemory write,
+  OpenClaw/Hermes dispatch, or HoloIndex re-indexing was added.
+
 ## 2026-07-16: REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
