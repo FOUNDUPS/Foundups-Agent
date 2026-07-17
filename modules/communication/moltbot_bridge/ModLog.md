@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_BOOTSTRAP_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added a signer-owned runtime bootstrap that reads a single outside-repo JSON
+  config and composes the existing bounded signer socket service runtime wiring
+  with an injected resolver.
+- The bootstrap binds an audit-safe config digest, rejects missing, relative,
+  inside-repo, unreadable, malformed, or runtime-rejected configs, and returns
+  the runtime wiring receipt without secret values.
+- Added focused tests for WSP71-permissioned config execution, unsafe config
+  rejection, runtime rejection propagation, and no-env/no-shell/no-OpenClaw/
+  no-Hermes/no-HoloIndex static surface.
+- Boundary remains constrained: this does not parse environment variables,
+  spawn a process, load secret files, mutate source, enqueue OpenClaw, dispatch
+  Hermes, publish PRs, settle rewards, or re-index HoloIndex.
+
 ## 2026-07-17: REDDOG_SIGNER_KEY_PROVIDER_WSP71_RUNTIME_MODE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
