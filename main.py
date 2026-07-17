@@ -1603,12 +1603,19 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
         REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=0             Materialize model selection receipt from signed evidence
         REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY=0       Materialize runtime binding receipt from signed evidence
+        REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY=0     Materialize model AutoResearch plan from verified receipts
+        REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
         REDDOG_MODEL_CATALOG_SNAPSHOT_PATH                   Outside-repo model catalog snapshot JSON
         REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
         REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
         REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH        Outside-repo benchmark evidence receipts JSON
         REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH        Outside-repo promotion evidence receipts JSON
         REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH             Outside-repo runtime binding policy JSON
+        REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH Outside-repo promotion gate receipts JSON
+        REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH        Outside-repo benchmark candidate pool JSON
+        REDDOG_MODEL_AUTORESEARCH_POLICY_PATH                Outside-repo AutoResearch policy JSON
+        REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH      Optional outside-repo feedback JSON/JSONL
+        REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH          Outside-repo AutoResearch plan output JSON
         REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
         REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY=0 Materialize principal/snapshot from GitHub probe
         REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED=0 Block startup if rejected
@@ -1658,6 +1665,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         os.environ,
         repo_root,
         "REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH",
+    )
+    model_autoresearch_plan_receipt_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH",
     )
     model_runtime_binding_receipt_path_supplied = bool(
         os.getenv("REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH", "").strip()
@@ -1834,6 +1846,62 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             print(
                 "[REDDOG-MODEL-RUNTIME-BINDING] Startup blocked by "
                 "REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY_ENFORCED=1"
+            )
+            return False
+
+    autoresearch_supply_requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY",
+    )
+    autoresearch_supply_enforced = (
+        os.getenv("REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
+    )
+    if autoresearch_supply_requested:
+        try:
+            from modules.ai_intelligence.ai_gateway.src.model_autoresearch_plan_artifact_supply_bootstrap import (
+                run_reddog_model_autoresearch_plan_artifact_supply_bootstrap,
+            )
+
+            autoresearch_supply = run_reddog_model_autoresearch_plan_artifact_supply_bootstrap(
+                repo_root=repo_root,
+                promotion_gate_receipts_path=os.getenv(
+                    "REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH",
+                    "",
+                )
+                or None,
+                candidate_pool_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH", "") or None,
+                policy_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_POLICY_PATH", "") or None,
+                feedback_records_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH", "") or None,
+                output_path=model_autoresearch_plan_receipt_path,
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-MODEL-AUTORESEARCH] Startup artifact supply failed: {exc}")
+            if autoresearch_supply_enforced:
+                print(f"[REDDOG-MODEL-AUTORESEARCH] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-MODEL-AUTORESEARCH] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        autoresearch_status = "PASS" if autoresearch_supply.accepted else "WARN"
+        autoresearch_reasons = (
+            ",".join(autoresearch_supply.rejection_reasons)
+            if autoresearch_supply.rejection_reasons
+            else "(none)"
+        )
+        print(
+            f"[REDDOG-MODEL-AUTORESEARCH] preflight={autoresearch_status} "
+            f"status={autoresearch_supply.status} "
+            f"receipt={autoresearch_supply.plan_receipt_id or '(none)'} "
+            f"campaign_items={autoresearch_supply.campaign_item_count} "
+            f"reasons={autoresearch_reasons}"
+        )
+        if autoresearch_supply.accepted and autoresearch_supply.output_path:
+            model_autoresearch_plan_receipt_path = autoresearch_supply.output_path
+            os.environ["REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH"] = model_autoresearch_plan_receipt_path
+        elif autoresearch_supply_enforced:
+            print(
+                "[REDDOG-MODEL-AUTORESEARCH] Startup blocked by "
+                "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED=1"
             )
             return False
 
