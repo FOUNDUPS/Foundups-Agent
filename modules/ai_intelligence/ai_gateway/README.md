@@ -47,6 +47,19 @@ before production model selection can trust a champion:
 Catalog scalar fields remain useful for evaluation and ranking, but production
 selection rejects `CHAMPION` unless these evidence receipts are supplied.
 
+## Model Feedback Ledger Admission
+
+`src/model_feedback_ledger.py` admits feedback-eligible
+`ModelSelectionOutcomeReceipt` records into an injected model-feedback ledger.
+It rehydrates serialized outcome receipts, recomputes their deterministic IDs,
+checks optional source-ratchet verifier/runtime-binding consistency, scans the
+feedback record for secret markers, and emits a digest-bound admission receipt.
+
+This layer is the bridge from verified RedDog outcomes back into model
+intelligence feedback. It does not call providers, run benchmarks, promote
+models, write PatternMemory, mutate HoloIndex, or change RedDog runtime model
+defaults.
+
 ## Model Combination Benchmark Harness
 
 `src/model_combination_benchmark_harness.py` runs deterministic held-out

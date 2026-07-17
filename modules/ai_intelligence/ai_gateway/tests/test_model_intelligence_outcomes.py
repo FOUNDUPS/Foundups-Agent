@@ -21,6 +21,7 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
     build_model_selection_outcome_receipt,
     outcome_feedback_record,
     production_evidence_for_selection,
+    rehydrate_model_selection_outcome_receipt,
 )
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     ModelTaskRequirements,
@@ -314,6 +315,54 @@ def test_outcome_feedback_record_carries_runtime_binding_receipt_digest():
     feedback = outcome_feedback_record(receipt)
     assert feedback["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:test"
     assert feedback["model_runtime_binding_digest"] == _digest(runtime_binding)
+
+
+def test_rehydrate_outcome_receipt_recomputes_digest_and_preserves_runtime_binding():
+    selection = _selected_receipt()
+    runtime_binding = _runtime_binding_receipt(selection)
+    receipt = build_model_selection_outcome_receipt(
+        selection,
+        model_runtime_binding_receipt=runtime_binding,
+        verifier_decision=VerifierDecision.ACCEPT,
+        verification_receipt_ids=("verify:1",),
+        task_completed=True,
+        evidence_correct=True,
+    )
+
+    rehydrated = rehydrate_model_selection_outcome_receipt(receipt.to_dict())
+
+    assert rehydrated == receipt
+    assert rehydrated.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:test"
+    assert rehydrated.model_runtime_binding_digest == _digest(runtime_binding)
+
+
+def test_rehydrate_outcome_receipt_rejects_tampering_and_inconsistent_feedback_state():
+    selection = _selected_receipt()
+    receipt = build_model_selection_outcome_receipt(
+        selection,
+        verifier_decision=VerifierDecision.ACCEPT,
+        verification_receipt_ids=("verify:1",),
+        task_completed=True,
+        evidence_correct=True,
+    ).to_dict()
+
+    tampered_model = dict(receipt)
+    tampered_model["selected_model_ids"] = ["provider/other"]
+    try:
+        rehydrate_model_selection_outcome_receipt(tampered_model)
+    except ValueError as exc:
+        assert str(exc) == "outcome_receipt_id_mismatch"
+    else:
+        raise AssertionError("expected tampered outcome receipt rejection")
+
+    inconsistent = dict(receipt)
+    inconsistent["feedback_eligible"] = False
+    try:
+        rehydrate_model_selection_outcome_receipt(inconsistent)
+    except ValueError as exc:
+        assert str(exc) == "feedback_eligibility_mismatch"
+    else:
+        raise AssertionError("expected inconsistent feedback state rejection")
 
 
 def test_outcome_receipt_rejects_forged_runtime_binding_receipts():

@@ -11,6 +11,7 @@ by itself, mutates HoloIndex, or executes commands.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -366,6 +367,87 @@ def outcome_feedback_record(receipt: ModelSelectionOutcomeReceipt) -> dict[str, 
     }
 
 
+def rehydrate_model_selection_outcome_receipt(data: Mapping[str, Any]) -> ModelSelectionOutcomeReceipt:
+    """Rehydrate a serialized outcome receipt and recompute its receipt ID."""
+
+    if not isinstance(data, Mapping):
+        raise ValueError("invalid_outcome_receipt")
+    if data.get("schema_version") != OUTCOME_SCHEMA_VERSION:
+        raise ValueError("invalid_outcome_schema")
+    metrics_data = _mapping_value(data.get("metrics"), "metrics")
+    metrics = ModelOutcomeMetrics(
+        latency_ms=metrics_data.get("latency_ms"),
+        input_tokens=metrics_data.get("input_tokens"),
+        output_tokens=metrics_data.get("output_tokens"),
+        cost_estimate_usd=metrics_data.get("cost_estimate_usd"),
+    ).normalized()
+    selected_model_ids = tuple(str(value) for value in _list_value(data.get("selected_model_ids"), "selected_model_ids"))
+    if not selected_model_ids:
+        raise ValueError("missing_selected_model_ids")
+    verifier = _coerce_verifier_decision(_required("verifier_decision", data.get("verifier_decision")))
+    outcome = OutcomeDecision(_required("outcome_decision", data.get("outcome_decision")))
+    verification_receipts = _normalize_receipts(
+        tuple(str(value) for value in _list_value(data.get("verification_receipt_ids"), "verification_receipt_ids"))
+    )
+    evidence_receipts = _normalize_receipts(
+        tuple(str(value) for value in _list_value(data.get("evidence_receipt_ids", []), "evidence_receipt_ids"))
+    )
+    rejection_reasons = tuple(
+        sorted(
+            _clean_reason(reason)
+            for reason in _list_value(data.get("rejection_reasons", []), "rejection_reasons")
+            if str(reason).strip()
+        )
+    )
+    feedback_eligible = _bool_value(data.get("feedback_eligible"), "feedback_eligible")
+    if feedback_eligible != (not rejection_reasons):
+        raise ValueError("feedback_eligibility_mismatch")
+    expected_outcome = OutcomeDecision.ACCEPTED if feedback_eligible else OutcomeDecision.REJECTED
+    if outcome != expected_outcome:
+        raise ValueError("outcome_decision_mismatch")
+    runtime_binding_id = _optional(data.get("model_runtime_binding_receipt_id"))
+    runtime_binding_digest = _optional(data.get("model_runtime_binding_digest"))
+    if bool(runtime_binding_id) != bool(runtime_binding_digest):
+        raise ValueError("runtime_binding_field_mismatch")
+
+    body = {
+        "schema_version": OUTCOME_SCHEMA_VERSION,
+        "selection_receipt_id": _required("selection_receipt_id", data.get("selection_receipt_id")),
+        "catalog_snapshot_id": _required("catalog_snapshot_id", data.get("catalog_snapshot_id")),
+        "task_family": _required("task_family", data.get("task_family")),
+        "selected_model_ids": list(selected_model_ids),
+        "verifier_decision": verifier.value,
+        "verification_receipt_ids": list(verification_receipts),
+        "outcome_decision": outcome.value,
+        "feedback_eligible": feedback_eligible,
+        "metrics": asdict(metrics),
+        "rejection_reasons": list(rejection_reasons),
+        "evidence_receipt_ids": list(evidence_receipts),
+    }
+    if runtime_binding_id:
+        body["model_runtime_binding_receipt_id"] = runtime_binding_id
+        body["model_runtime_binding_digest"] = runtime_binding_digest
+    receipt_id = _digest_prefixed("model_selection_outcome_receipt", body)
+    if not hmac.compare_digest(receipt_id, _required("receipt_id", data.get("receipt_id"))):
+        raise ValueError("outcome_receipt_id_mismatch")
+    return ModelSelectionOutcomeReceipt(
+        receipt_id=receipt_id,
+        selection_receipt_id=body["selection_receipt_id"],
+        model_runtime_binding_receipt_id=runtime_binding_id or None,
+        model_runtime_binding_digest=runtime_binding_digest,
+        catalog_snapshot_id=body["catalog_snapshot_id"],
+        task_family=body["task_family"],
+        selected_model_ids=selected_model_ids,
+        verifier_decision=verifier,
+        verification_receipt_ids=verification_receipts,
+        outcome_decision=outcome,
+        feedback_eligible=feedback_eligible,
+        metrics=metrics,
+        rejection_reasons=rejection_reasons,
+        evidence_receipt_ids=evidence_receipts,
+    )
+
+
 def _runtime_binding_from_receipt(
     value: Mapping[str, Any] | None,
     selection_receipt: ModelSelectionReceipt,
@@ -439,6 +521,28 @@ def _required(name: str, value: Any) -> str:
     if not cleaned:
         raise ValueError(f"missing_{name}")
     return cleaned
+
+
+def _optional(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def _mapping_value(value: Any, name: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"invalid_{name}")
+    return value
+
+
+def _list_value(value: Any, name: str) -> list[Any]:
+    if not isinstance(value, list):
+        raise ValueError(f"invalid_{name}")
+    return value
+
+
+def _bool_value(value: Any, name: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"invalid_{name}")
+    return value
 
 
 def _positive_int(value: int, name: str) -> int:
