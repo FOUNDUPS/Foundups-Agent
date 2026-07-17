@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_READONLY_AUDIT_WORKER_MODEL_SELECTION_BINDING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Bound model-backed RedDog read-only audit worker execution to an optional
+  production model-selection receipt, preserving legacy injected/default
+  behavior when no receipt is supplied.
+- Routed FoundUps Fusion read-only audit calls through receipt-derived
+  lead/panel topology and persisted the selection receipt id/digest on model
+  route and worker receipts.
+- Added fail-closed validation so malformed, tampered, or non-production model
+  selection receipts reject before HoloIndex queries or model calls, without
+  adding shell execution, repo mutation, enqueue, Hermes dispatch, PatternMemory
+  promotion, or HoloIndex re-indexing.
+
 ## 2026-07-16: REDDOG_BACKEND_ARCHITECT_MODEL_SELECTION_BINDING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
