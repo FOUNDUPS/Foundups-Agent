@@ -3,24 +3,41 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 
+from modules.ai_intelligence.ai_gateway.src.ai_gateway import ProviderConfig
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_runner import (
+    AIGatewayConfiguredModelCaller,
+    ConfiguredGatewayRunnerPolicy,
+    MappingPromptSource,
+    build_configured_gateway_benchmark_runner,
+)
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution import (
     rehydrate_model_autoresearch_campaign_execution_receipt,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution_artifact_supply_bootstrap import (
+    MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_BOOTSTRAP_APPLIED,
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_BOOTSTRAP_NOT_READY,
+    MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
     run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap,
+)
+from modules.ai_intelligence.ai_gateway.src.model_champion_challenger_autoresearch import (
+    ModelAutoResearchPolicy,
+    plan_model_champion_challenger_autoresearch,
 )
 from modules.ai_intelligence.ai_gateway.tests.test_model_autoresearch_campaign_execution import (
     REPO_ROOT,
     _plan,
-    _tasks,
 )
 from modules.ai_intelligence.ai_gateway.tests.test_model_champion_challenger_autoresearch import (
     _candidate,
+    _feedback_record,
+    _gate,
+    _tasks,
 )
 
 
@@ -60,6 +77,95 @@ def _inputs(tmp_path: Path) -> dict[str, Path]:
     }
 
 
+def _sha256(text: str) -> str:
+    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+class FakeGateway:
+    def __init__(self) -> None:
+        self.providers = {
+            "provider": ProviderConfig(
+                name="provider",
+                api_key="test-key",
+                base_url="https://example.invalid",
+                models={"quick": "wrong-default"},
+                cost_per_token=0.001,
+                rate_limit=1,
+            )
+        }
+        self.calls: list[dict[str, str]] = []
+
+    def _call_provider(self, provider: ProviderConfig, prompt: str, task_type: str) -> str:
+        self.calls.append(
+            {
+                "provider": provider.name,
+                "model": provider.models[task_type],
+                "prompt": prompt,
+                "task_type": task_type,
+            }
+        )
+        return "configured gateway answer"
+
+
+def _configured_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
+    runtime = tmp_path / "runtime"
+    prompt = "Audit the model AutoResearch gateway path."
+    candidate = _candidate("provider/new")
+    base_task = replace(
+        _tasks()[0],
+        prompt_digest=_sha256(prompt),
+        expected_output_digest="sha256:placeholder",
+    )
+    precompute_gateway = FakeGateway()
+    precompute_runner = build_configured_gateway_benchmark_runner(
+        caller=AIGatewayConfiguredModelCaller(precompute_gateway),
+        prompt_source=MappingPromptSource({base_task.task_id: prompt}),
+        policy=ConfiguredGatewayRunnerPolicy(
+            allowed_providers=("provider",),
+            max_prompt_chars=2000,
+            max_calls_per_sample=1,
+            max_cost_estimate_usd_per_sample=1.0,
+        ),
+    )
+    expected = precompute_runner(base_task, candidate).output_digest
+    task = replace(base_task, expected_output_digest=expected)
+    plan = plan_model_champion_challenger_autoresearch(
+        promotion_gate_receipts=(_gate("provider/challenger", pass_all=False),),
+        candidate_pool=(_candidate("provider/challenger"), candidate),
+        policy=ModelAutoResearchPolicy(
+            task_family="architecture",
+            catalog_snapshot_id="model_catalog_snapshot:1",
+            max_campaign_items=1,
+            required_verifier_digest="sha256:verifier",
+            cost_budget_receipt_id="cost_budget:1",
+        ),
+        feedback_records=(_feedback_record("provider/new", suffix="2"),),
+    )
+    return (
+        {
+            "plan": _write_json(runtime, "autoresearch_plan.json", plan.to_dict()),
+            "candidates": _write_json(
+                runtime,
+                "candidate_pool.json",
+                {
+                    "candidate_pool": [
+                        _candidate("provider/challenger").to_dict(),
+                        candidate.to_dict(),
+                    ]
+                },
+            ),
+            "tasks": _write_json(runtime, "tasks.json", {"tasks": [task.to_dict()]}),
+            "prompts": _write_json(
+                runtime,
+                "prompt_records.json",
+                {"prompts": [{"task_id": task.task_id, "prompt": prompt, "prompt_digest": _sha256(prompt)}]},
+            ),
+            "output": runtime / "campaign_execution.json",
+        },
+        FakeGateway(),
+    )
+
+
 def test_campaign_execution_bootstrap_materializes_rehydratable_receipt(tmp_path: Path) -> None:
     files = _inputs(tmp_path)
 
@@ -84,6 +190,64 @@ def test_campaign_execution_bootstrap_materializes_rehydratable_receipt(tmp_path
     payload = json.loads(files["output"].read_text(encoding="utf-8"))
     receipt = rehydrate_model_autoresearch_campaign_execution_receipt(payload)
     assert receipt.receipt_id == result.execution_receipt_id
+
+
+def test_campaign_execution_bootstrap_configured_gateway_mode_materializes_receipt(tmp_path: Path) -> None:
+    files, gateway = _configured_inputs(tmp_path)
+
+    result = run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=files["plan"],
+        candidate_pool_path=files["candidates"],
+        tasks_path=files["tasks"],
+        prompt_records_path=files["prompts"],
+        output_path=files["output"],
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        runner_mode=MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
+        runner_allowed_providers="provider",
+        runner_max_prompt_chars=2000,
+        runner_max_calls_per_sample=1,
+        runner_max_cost_estimate_usd_per_sample=1.0,
+        gateway=gateway,
+    )
+
+    assert result.accepted is True
+    assert result.status == MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_BOOTSTRAP_APPLIED
+    assert result.executed_candidate_ids == ("provider/new",)
+    assert result.task_count == 1
+    assert result.no_direct_provider_call_performed is False
+    assert len(gateway.calls) == 1
+    assert gateway.calls[0]["provider"] == "provider"
+    assert gateway.calls[0]["model"] == "new"
+    payload = json.loads(files["output"].read_text(encoding="utf-8"))
+    receipt = rehydrate_model_autoresearch_campaign_execution_receipt(payload)
+    assert receipt.receipt_id == result.execution_receipt_id
+    assert receipt.benchmark_run_receipt.samples[0].accepted is True
+
+
+def test_campaign_execution_bootstrap_configured_gateway_requires_prompt_records(tmp_path: Path) -> None:
+    files, gateway = _configured_inputs(tmp_path)
+
+    result = run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=files["plan"],
+        candidate_pool_path=files["candidates"],
+        tasks_path=files["tasks"],
+        output_path=files["output"],
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        runner_mode=MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
+        runner_allowed_providers="provider",
+        gateway=gateway,
+    )
+
+    assert result.accepted is False
+    assert "missing_model_autoresearch_campaign_prompt_records_path" in result.rejection_reasons
+    assert not files["output"].exists()
+    assert gateway.calls == []
 
 
 def test_campaign_execution_bootstrap_rejects_inside_repo_inputs_and_output(tmp_path: Path) -> None:
@@ -169,7 +333,7 @@ def test_campaign_execution_bootstrap_rejects_non_fixture_modes(tmp_path: Path) 
     assert not files["output"].exists()
 
 
-def test_campaign_execution_bootstrap_module_has_no_provider_network_command_runtime_or_holoindex_imports() -> None:
+def test_campaign_execution_bootstrap_module_has_no_direct_network_command_runtime_or_holoindex_imports() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     banned_import_roots = {
         "subprocess",

@@ -89,6 +89,12 @@ answers, promote models, mutate catalogs, write PatternMemory, re-index
 HoloIndex, execute commands, mutate the repository, or bind RedDog runtime
 defaults.
 
+`src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py` can
+use this runner only when `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE` is
+set to `configured_gateway`, prompt records are supplied from outside the repo,
+providers are explicitly allowlisted, and verifier mode is
+`exact_output_digest`. The default remains deterministic fixture execution.
+
 ## Model Combination Benchmark Harness
 
 `src/model_combination_benchmark_harness.py` runs deterministic held-out

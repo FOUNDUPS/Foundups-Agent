@@ -32,6 +32,40 @@ improvement loop can measure current providers and fusion panels.
 
 ---
 
+## [2026-07-17] - Model AutoResearch Configured Gateway Bootstrap
+
+**Who:** 0102 Codex
+**Type:** Runtime Benchmark Bootstrap
+**Slice:** MODEL_AUTORESEARCH_CONFIGURED_GATEWAY_BOOTSTRAP_PHASE1
+
+**What:** Extended campaign execution artifact supply so resident startup can
+explicitly select `configured_gateway` runner mode with outside-repo prompt
+records, provider allowlist, bounded runner policy, and
+`exact_output_digest` verifier mode.
+
+**Why:** The configured runner was reusable but not reachable from the startup
+artifact supply path. RedDog needs an opt-in benchmark execution path that can
+call configured models without weakening the default fixture mode.
+
+**Files:**
+- `src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py` -
+  configured runner mode, prompt-record loading, exact-output verifier, and
+  fail-closed policy parsing.
+- `tests/test_model_autoresearch_campaign_execution_artifact_supply_bootstrap.py`
+  - configured-mode receipt materialization and prompt-record rejection tests.
+- `main.py` and `test_reddog_main_architect_fix_promotion_bootstrap.py` -
+  environment pass-through for configured runner controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: explicit opt-in configured gateway benchmark execution bootstrap.
+- NOT IMPLEMENTED: open-ended semantic verifier, model promotion, PatternMemory
+  writes, HoloIndex re-indexing, runtime model binding, worker spawn, shell
+  execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Plan Supply Regression
 
 **Who:** 0102 Codex
