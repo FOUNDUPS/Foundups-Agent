@@ -779,6 +779,17 @@ def _signed_worker_task_max_claims_from_env() -> tuple[int, str | None]:
     return value, None
 
 
+def _signed_worker_tasks_enabled_from_env() -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_flag_enabled,
+    )
+
+    return resident_queue_runtime_flag_enabled(
+        os.environ,
+        "OPENCLAW_SIGNED_WORKER_TASKS_ENABLED",
+    )
+
+
 def _signed_0102_readonly_tasks_enabled_from_env() -> bool:
     return os.getenv("OPENCLAW_SIGNED_0102_READONLY_TASKS_ENABLED", "0") == "1"
 
@@ -1456,7 +1467,7 @@ class OpenClawSupervisor:
                 "restart_budget": observation.get("restart_budget", {}),
             }
 
-        signed_worker_tasks_enabled = os.getenv("OPENCLAW_SIGNED_WORKER_TASKS_ENABLED", "0") == "1"
+        signed_worker_tasks_enabled = _signed_worker_tasks_enabled_from_env()
         if signed_worker_tasks_enabled:
             max_claims, max_claims_error = _signed_worker_task_max_claims_from_env()
             if max_claims_error:
