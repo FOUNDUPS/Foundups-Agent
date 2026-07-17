@@ -959,6 +959,130 @@ def test_main_preflight_enforced_model_autoresearch_cycle_receipt_supply_blocks_
             assert main.run_reddog_architect_fix_promotion_preflight(repo) is False
 
 
+def test_main_preflight_model_autoresearch_cycle_feedback_admission_runs_before_promotion(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    work_state = _write_json(tmp_path, "authoritative_work_state.json", _work_state())
+    determination = _write_json(tmp_path, "architect_determination.json", _determination())
+    memex = _write_json(tmp_path, "memex_supply_receipt.json", _memex_supply())
+    authority_source = _write_json(tmp_path, "authority_profile_source.json", _authority_profile())
+    cycle_feedback_result = type(
+        "AutoResearchCycleFeedbackResult",
+        (),
+        {
+            "accepted": True,
+            "status": "MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_BOOTSTRAP_APPLIED",
+            "admission_id": "model_autoresearch_cycle_feedback_admission:runtime",
+            "cycle_receipt_id": "model_autoresearch_cycle:runtime",
+            "feedback_record_id": "model_autoresearch_cycle_feedback:runtime",
+            "output_path": str(runtime_root / "model_autoresearch_cycle_feedback.jsonl"),
+            "rejection_reasons": (),
+        },
+    )()
+    promotion_result = type(
+        "PromotionResult",
+        (),
+        {
+            "accepted": True,
+            "status": REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
+            "promotion_receipt_id": "sha256:promotion",
+            "queue_item_id": "queue-1",
+            "claim_id": "claim-1",
+            "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "committed_revision": "sha256:revision",
+            "rejection_reasons": (),
+        },
+    )()
+
+    with patch(
+        "modules.ai_intelligence.ai_gateway.src.model_autoresearch_cycle_feedback_ledger_admission_bootstrap.run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap",
+        return_value=cycle_feedback_result,
+    ) as cycle_feedback:
+        with patch(
+            "modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap.run_reddog_main_architect_fix_promotion_bootstrap",
+            return_value=promotion_result,
+        ) as promote:
+            with patch.dict(
+                "os.environ",
+                {
+                    "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY": "0",
+                    "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION": "1",
+                    "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                    "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
+                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                    "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                    "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
+                    "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
+                },
+                clear=True,
+            ):
+                assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+                assert main.os.environ["REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_PATH"] == str(
+                    runtime_root / "model_autoresearch_cycle_feedback.jsonl"
+                )
+
+    cycle_feedback.assert_called_once()
+    cycle_feedback_kwargs = cycle_feedback.call_args.kwargs
+    assert cycle_feedback_kwargs["cycle_receipt_path"] == str(
+        runtime_root / "model_autoresearch_cycle_receipt.json"
+    )
+    assert cycle_feedback_kwargs["output_path"] == str(
+        runtime_root / "model_autoresearch_cycle_feedback.jsonl"
+    )
+    promote.assert_called_once()
+
+
+def test_main_preflight_enforced_model_autoresearch_cycle_feedback_admission_blocks_startup(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    cycle_feedback_result = type(
+        "AutoResearchCycleFeedbackResult",
+        (),
+        {
+            "accepted": False,
+            "status": "MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_BOOTSTRAP_NOT_READY",
+            "admission_id": None,
+            "cycle_receipt_id": None,
+            "feedback_record_id": None,
+            "output_path": None,
+            "rejection_reasons": ("missing_model_autoresearch_cycle_receipt_path",),
+        },
+    )()
+
+    with patch(
+        "modules.ai_intelligence.ai_gateway.src.model_autoresearch_cycle_feedback_ledger_admission_bootstrap.run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap",
+        return_value=cycle_feedback_result,
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION": "1",
+                "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_ENFORCED": "1",
+                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_architect_fix_promotion_preflight(repo) is False
+
+
 def test_main_preflight_enforced_model_runtime_binding_supply_blocks_promotion(
     tmp_path: Path,
 ) -> None:

@@ -1,5 +1,37 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Feedback Ledger Admission Bootstrap
+
+**Who:** 0102 Codex
+**Type:** Runtime Preflight Adapter
+**Slice:** REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_MAIN_PREFLIGHT_PHASE1
+
+**What:** Added a disabled-by-default bootstrap for admitting an outside-repo
+model AutoResearch cycle receipt into an outside-repo cycle feedback ledger.
+
+**Why:** The model AutoResearch loop can now persist completed cycle evidence
+as durable feedback input without changing runtime model bindings or promoting
+models.
+
+**Files:**
+- `src/model_autoresearch_cycle_feedback_ledger_admission_bootstrap.py` - reads
+  an outside-repo cycle receipt, invokes the cycle feedback admission guard, and
+  appends to an outside-repo JSONL ledger.
+- `tests/test_model_autoresearch_cycle_feedback_ledger_admission_bootstrap.py`
+  - verifies successful append, inside-repo path rejection, tamper rejection,
+  missing output rejection, and AST import/call denylist controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: opt-in AutoResearch cycle feedback ledger admission from an
+  outside-repo cycle receipt.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, queue-stage
+  wiring, worker spawn, shell execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Ledger Admission
 
 **Who:** 0102 Codex
