@@ -219,8 +219,10 @@ def _build_intents(
         roles.append((f"coding_worker_{index + 1}", "0102", "bounded_code_change"))
     if worker_plan.get("independent_verifier_required") is True:
         roles.append(("independent_verifier", "0102", "diff_verification"))
-    if worker_plan.get("openclaw_candidate") is True:
+    if worker_plan.get("openclaw_candidate") is True and coding_count <= 0:
         roles.append(("openclaw_candidate", "openclaw", "candidate_queue_review"))
+    if coding_count > 0:
+        roles.append(("queue_stage_worker", "openclaw", "queue_stage_progress"))
 
     for role, runtime, capability in roles:
         seed = {

@@ -1323,7 +1323,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
@@ -1462,6 +1462,7 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
     socket_path = tmp_path / "runtime" / "signer.sock"
+    worker_dispatch_writer = _FakeWorkerDispatchTaskWriter()
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
@@ -1476,7 +1477,7 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=worker_dispatch_writer,
         now_iso=NOW,
         now_epoch=1000,
         requested_queue_item_id="queue-1",
@@ -1506,9 +1507,20 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
     assert result.no_repo_mutation_performed is True
     assert result.no_holoindex_reindex_performed is True
     assert result.no_pr_created is True
+    assert worker_dispatch_writer.calls
+    published_tasks = worker_dispatch_writer.calls[0]["task_ids"]
+    assert len(published_tasks) == 7
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
     stage_results = stored["stage_results"]
+    dispatch_intents = stage_results["worker_dispatch_dryrun"]["receipt"]["dispatch_intents"]
+    assert any(
+        intent["role"] == "queue_stage_worker"
+        and intent["worker_runtime"] == "openclaw"
+        and intent["capability"] == "queue_stage_progress"
+        for intent in dispatch_intents
+    )
+    assert not any(intent["role"] == "openclaw_candidate" for intent in dispatch_intents)
     assert stage_results["work_order_invocation"]["decision"] == "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
     assert stage_results["executor_plan"]["decision"] == "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"
     valve = stage_results["execution_valve"]

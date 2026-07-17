@@ -110,7 +110,7 @@ def _dryrun_result(allocation=None, intents=None, **overrides):
     intents = intents or (
         _intent("fusion_lead", "0102", "architect_review", allocation),
         _intent("coding_worker_1", "0102", "bounded_code_change", allocation),
-        _intent("openclaw_candidate", "openclaw", "candidate_queue_review", allocation),
+        _intent("queue_stage_worker", "openclaw", "queue_stage_progress", allocation),
     )
     receipt = {
         "receipt_id": "signed_authority_worker_dispatch_abc",

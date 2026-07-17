@@ -143,13 +143,31 @@ def test_accepts_verified_signed_authority_and_emits_wsp15_worker_intents() -> N
         "coding_worker_1",
         "coding_worker_2",
         "independent_verifier",
-        "openclaw_candidate",
+        "queue_stage_worker",
     ]
+    assert result.receipt.dispatch_intents[-1].worker_runtime == "openclaw"
+    assert result.receipt.dispatch_intents[-1].capability == "queue_stage_progress"
     assert {intent.worker_runtime for intent in result.receipt.dispatch_intents} == {"0102", "openclaw"}
     assert result.receipt.wsp15_allocation_digest == _digest(_allocation())
     assert result.receipt.no_worker_spawn_performed is True
     assert result.receipt.no_openclaw_enqueue_performed is True
     assert result.receipt.no_hermes_dispatch_performed is True
+
+
+def test_preserves_legacy_openclaw_candidate_for_non_code_worker_plan() -> None:
+    allocation = _allocation()
+    allocation["worker_plan"] = dict(allocation["worker_plan"], coding_worker_count=0)
+
+    result = _plan(allocation=allocation, queue_authority_runtime_result=_runtime_result(allocation))
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    roles = [intent.role for intent in result.receipt.dispatch_intents]
+    assert "openclaw_candidate" in roles
+    assert "queue_stage_worker" not in roles
+    intent = next(value for value in result.receipt.dispatch_intents if value.role == "openclaw_candidate")
+    assert intent.worker_runtime == "openclaw"
+    assert intent.capability == "candidate_queue_review"
 
 
 def test_explicit_request_is_required() -> None:
