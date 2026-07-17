@@ -8,6 +8,7 @@ bind RedDog runtime defaults.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -195,16 +196,15 @@ def plan_model_champion_challenger_autoresearch(
                     requires_independent_verifier=False,
                 )
             )
-    body = {
-        "schema_version": AUTORESEARCH_SCHEMA_VERSION,
-        "policy": normalized_policy.to_dict(),
-        "source_gate_receipt_ids": list(source_gate_ids),
-        "source_feedback_record_ids": list(source_feedback_record_ids),
-        "candidate_pool_digest": candidate_pool_digest,
-        "feedback_ledger_digest": feedback_ledger_digest,
-        "campaign_items": [item.to_dict() for item in campaign_items],
-        "rejection_reasons": sorted(set(rejection_reasons)),
-    }
+    body = _plan_digest_body(
+        policy=normalized_policy,
+        source_gate_receipt_ids=source_gate_ids,
+        source_feedback_record_ids=source_feedback_record_ids,
+        candidate_pool_digest=candidate_pool_digest,
+        feedback_ledger_digest=feedback_ledger_digest,
+        campaign_items=tuple(campaign_items),
+        rejection_reasons=tuple(sorted(set(rejection_reasons))),
+    )
     return ModelAutoResearchPlanReceipt(
         receipt_id=_digest_prefixed("model_autoresearch_plan", body),
         policy=normalized_policy,
@@ -214,6 +214,117 @@ def plan_model_champion_challenger_autoresearch(
         feedback_ledger_digest=feedback_ledger_digest,
         campaign_items=tuple(campaign_items),
         rejection_reasons=tuple(sorted(set(rejection_reasons))),
+    )
+
+
+def rehydrate_model_autoresearch_policy(payload: Mapping[str, Any]) -> ModelAutoResearchPolicy:
+    """Rehydrate and normalize a serialized AutoResearch policy."""
+
+    if not isinstance(payload, Mapping):
+        raise ValueError("invalid_autoresearch_policy")
+    if payload.get("schema_version") != AUTORESEARCH_POLICY_SCHEMA_VERSION:
+        raise ValueError("invalid_autoresearch_policy_schema")
+    return ModelAutoResearchPolicy(
+        task_family=_required("task_family", payload.get("task_family")),
+        catalog_snapshot_id=_required("catalog_snapshot_id", payload.get("catalog_snapshot_id")),
+        max_campaign_items=int(payload.get("max_campaign_items") or 3),
+        rebenchmark_challengers=bool(payload.get("rebenchmark_challengers", True)),
+        required_verifier_digest=_optional(payload.get("required_verifier_digest")),
+        cost_budget_receipt_id=_optional(payload.get("cost_budget_receipt_id")),
+    ).normalized()
+
+
+def rehydrate_model_autoresearch_plan_receipt(
+    payload: Mapping[str, Any],
+) -> ModelAutoResearchPlanReceipt:
+    """Rehydrate a serialized AutoResearch plan and verify its receipt digest."""
+
+    if not isinstance(payload, Mapping):
+        raise ValueError("invalid_autoresearch_plan")
+    if payload.get("schema_version") != AUTORESEARCH_SCHEMA_VERSION:
+        raise ValueError("invalid_autoresearch_plan_schema")
+    receipt_id = _required("receipt_id", payload.get("receipt_id"))
+    policy = rehydrate_model_autoresearch_policy(_required_mapping("policy", payload.get("policy")))
+    source_gate_receipt_ids = _string_tuple("source_gate_receipt_ids", payload.get("source_gate_receipt_ids"))
+    source_feedback_record_ids = _string_tuple(
+        "source_feedback_record_ids",
+        payload.get("source_feedback_record_ids"),
+    )
+    candidate_pool_digest = _required("candidate_pool_digest", payload.get("candidate_pool_digest"))
+    feedback_ledger_digest = _required("feedback_ledger_digest", payload.get("feedback_ledger_digest"))
+    campaign_items = tuple(
+        _rehydrate_campaign_item(item)
+        for item in _required_list("campaign_items", payload.get("campaign_items"))
+    )
+    rejection_reasons = tuple(
+        sorted(set(_clean_token(item) for item in _required_list("rejection_reasons", payload.get("rejection_reasons"))))
+    )
+    body = _plan_digest_body(
+        policy=policy,
+        source_gate_receipt_ids=source_gate_receipt_ids,
+        source_feedback_record_ids=source_feedback_record_ids,
+        candidate_pool_digest=candidate_pool_digest,
+        feedback_ledger_digest=feedback_ledger_digest,
+        campaign_items=campaign_items,
+        rejection_reasons=rejection_reasons,
+    )
+    expected = _digest_prefixed("model_autoresearch_plan", body)
+    if not hmac.compare_digest(receipt_id, expected):
+        raise ValueError("model_autoresearch_plan_receipt_id_mismatch")
+    return ModelAutoResearchPlanReceipt(
+        receipt_id=receipt_id,
+        policy=policy,
+        source_gate_receipt_ids=source_gate_receipt_ids,
+        source_feedback_record_ids=source_feedback_record_ids,
+        candidate_pool_digest=candidate_pool_digest,
+        feedback_ledger_digest=feedback_ledger_digest,
+        campaign_items=campaign_items,
+        rejection_reasons=rejection_reasons,
+    )
+
+
+def _plan_digest_body(
+    *,
+    policy: ModelAutoResearchPolicy,
+    source_gate_receipt_ids: Sequence[str],
+    source_feedback_record_ids: Sequence[str],
+    candidate_pool_digest: str,
+    feedback_ledger_digest: str,
+    campaign_items: Sequence[ModelAutoResearchCampaignItem],
+    rejection_reasons: Sequence[str],
+) -> dict[str, Any]:
+    return {
+        "schema_version": AUTORESEARCH_SCHEMA_VERSION,
+        "policy": policy.to_dict(),
+        "source_gate_receipt_ids": list(source_gate_receipt_ids),
+        "source_feedback_record_ids": list(source_feedback_record_ids),
+        "candidate_pool_digest": candidate_pool_digest,
+        "feedback_ledger_digest": feedback_ledger_digest,
+        "campaign_items": [item.to_dict() for item in campaign_items],
+        "rejection_reasons": list(rejection_reasons),
+    }
+
+
+def _rehydrate_campaign_item(payload: Any) -> ModelAutoResearchCampaignItem:
+    item = _required_mapping("campaign_item", payload)
+    raw_action = _required("action", item.get("action"))
+    try:
+        action = ModelAutoResearchAction(raw_action)
+    except ValueError as exc:
+        raise ValueError("invalid_autoresearch_campaign_action") from exc
+    priority = _required("priority", item.get("priority"))
+    if priority not in {"P0", "P1", "P2", "P3"}:
+        raise ValueError("invalid_autoresearch_campaign_priority")
+    raw_requires = item.get("requires_independent_verifier")
+    if not isinstance(raw_requires, bool):
+        raise ValueError("invalid_autoresearch_campaign_verifier_flag")
+    return ModelAutoResearchCampaignItem(
+        candidate_id=_required("candidate_id", item.get("candidate_id")),
+        action=action,
+        priority=priority,
+        reason=_clean_token(_required("reason", item.get("reason"))),
+        source_gate_receipt_id=_optional(item.get("source_gate_receipt_id")),
+        requires_independent_verifier=raw_requires,
     )
 
 
@@ -331,6 +442,26 @@ def _required(name: str, value: Any) -> str:
     if not cleaned:
         raise ValueError(f"missing_{name}")
     return cleaned
+
+
+def _required_mapping(name: str, value: Any) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"invalid_{name}")
+    return value
+
+
+def _required_list(name: str, value: Any) -> list[Any]:
+    if not isinstance(value, list):
+        raise ValueError(f"invalid_{name}")
+    return value
+
+
+def _string_tuple(name: str, value: Any) -> tuple[str, ...]:
+    raw = _required_list(name, value)
+    records = tuple(_required(name, item) for item in raw)
+    if len(set(records)) != len(records):
+        raise ValueError(f"duplicate_{name}")
+    return records
 
 
 def _optional(value: str | None) -> str | None:

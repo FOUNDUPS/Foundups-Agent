@@ -1,5 +1,39 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Plan Receipt Rehydration
+
+**Who:** 0102 Codex
+**Type:** Receipt Integrity
+**Slice:** MODEL_AUTORESEARCH_PLAN_RECEIPT_REHYDRATION_PHASE1
+
+**What:** Added rehydration helpers for serialized
+`ModelAutoResearchPolicy` and `ModelAutoResearchPlanReceipt`.
+
+**Why:** Future campaign execution must not trust a serialized AutoResearch
+plan list. Before a runner consumes a plan artifact, the policy, source
+receipts, candidate-pool digest, feedback digest, campaign items, and rejection
+reasons must be recomputed against the original deterministic receipt ID.
+
+**Files:**
+- `src/model_champion_challenger_autoresearch.py` - adds policy and plan
+  rehydration, shared canonical digest body, and constant-time receipt ID
+  comparison.
+- `tests/test_model_champion_challenger_autoresearch.py` - verifies valid
+  round-trip rehydration, digest-bound tamper rejection, and malformed campaign
+  shape rejection.
+
+**Truth Boundary:**
+- IMPLEMENTED: serialized AutoResearch plan receipts can be accepted only after
+  schema and digest rehydration.
+- IMPLEMENTED: policy, source-gate IDs, feedback IDs, pool digest, feedback
+  digest, campaign items, verifier flags, and rejection reasons are covered.
+- NOT IMPLEMENTED: benchmark execution, provider calls, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, or resident campaign execution.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Plan Artifact Supply Bootstrap
 
 **Who:** 0102 Codex

@@ -9,6 +9,8 @@ from modules.ai_intelligence.ai_gateway.src.model_champion_challenger_autoresear
     ModelAutoResearchAction,
     ModelAutoResearchPolicy,
     plan_model_champion_challenger_autoresearch,
+    rehydrate_model_autoresearch_plan_receipt,
+    rehydrate_model_autoresearch_policy,
 )
 from modules.ai_intelligence.ai_gateway.src.model_combination_benchmark_harness import (
     ModelBenchmarkRoleAssignment,
@@ -181,6 +183,96 @@ def test_autoresearch_uses_feedback_records_as_bounded_priority_signal():
     ]
     assert receipt.campaign_items[0].priority == "P0"
     assert receipt.campaign_items[0].reason == "verified_runtime_feedback_unbenchmarked_candidate"
+
+
+def test_autoresearch_plan_receipt_rehydrates_with_digest_verification():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+    feedback = _feedback_record("provider/new", suffix="2")
+    receipt = plan_model_champion_challenger_autoresearch(
+        promotion_gate_receipts=(challenger_gate,),
+        candidate_pool=(
+            _candidate("provider/challenger"),
+            _candidate("provider/new"),
+        ),
+        policy=_policy(),
+        feedback_records=(feedback,),
+    )
+
+    rehydrated = rehydrate_model_autoresearch_plan_receipt(receipt.to_dict())
+
+    assert rehydrated == receipt
+    assert rehydrate_model_autoresearch_policy(receipt.policy.to_dict()) == receipt.policy
+
+
+def test_autoresearch_plan_receipt_rejects_tampered_security_fields():
+    challenger_gate = _gate("provider/challenger", pass_all=False)
+    receipt = plan_model_champion_challenger_autoresearch(
+        promotion_gate_receipts=(challenger_gate,),
+        candidate_pool=(
+            _candidate("provider/challenger"),
+            _candidate("provider/new"),
+        ),
+        policy=_policy(),
+    )
+    mutations = []
+
+    policy_tamper = receipt.to_dict()
+    policy_tamper["policy"]["catalog_snapshot_id"] = "model_catalog_snapshot:tampered"
+    mutations.append(policy_tamper)
+
+    source_gate_tamper = receipt.to_dict()
+    source_gate_tamper["source_gate_receipt_ids"] = ["model_promotion_gate:tampered"]
+    mutations.append(source_gate_tamper)
+
+    pool_tamper = receipt.to_dict()
+    pool_tamper["candidate_pool_digest"] = "model_autoresearch_candidate_pool:tampered"
+    mutations.append(pool_tamper)
+
+    feedback_tamper = receipt.to_dict()
+    feedback_tamper["feedback_ledger_digest"] = "model_autoresearch_feedback_ledger:tampered"
+    mutations.append(feedback_tamper)
+
+    campaign_tamper = receipt.to_dict()
+    campaign_tamper["campaign_items"][0]["candidate_id"] = "provider/tampered"
+    mutations.append(campaign_tamper)
+
+    rejection_tamper = receipt.to_dict()
+    rejection_tamper["rejection_reasons"] = ["invented_reason"]
+    mutations.append(rejection_tamper)
+
+    for payload in mutations:
+        try:
+            rehydrate_model_autoresearch_plan_receipt(payload)
+        except ValueError as exc:
+            assert str(exc) == "model_autoresearch_plan_receipt_id_mismatch"
+        else:
+            raise AssertionError("tampered AutoResearch plan receipt was accepted")
+
+
+def test_autoresearch_plan_receipt_rejects_malformed_shape_before_digest_check():
+    receipt = plan_model_champion_challenger_autoresearch(
+        promotion_gate_receipts=(_gate("provider/challenger", pass_all=False),),
+        candidate_pool=(_candidate("provider/challenger"),),
+        policy=_policy(),
+    )
+    bad_schema = receipt.to_dict()
+    bad_schema["schema_version"] = "other"
+    bad_action = receipt.to_dict()
+    bad_action["campaign_items"][0]["action"] = "run_provider_live"
+    bad_verifier_flag = receipt.to_dict()
+    bad_verifier_flag["campaign_items"][0]["requires_independent_verifier"] = "true"
+
+    for payload, expected in (
+        (bad_schema, "invalid_autoresearch_plan_schema"),
+        (bad_action, "invalid_autoresearch_campaign_action"),
+        (bad_verifier_flag, "invalid_autoresearch_campaign_verifier_flag"),
+    ):
+        try:
+            rehydrate_model_autoresearch_plan_receipt(payload)
+        except ValueError as exc:
+            assert str(exc) == expected
+        else:
+            raise AssertionError(f"expected {expected}")
 
 
 def test_autoresearch_rejects_malformed_or_mismatched_feedback_records():
