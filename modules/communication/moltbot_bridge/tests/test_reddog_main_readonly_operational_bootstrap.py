@@ -1003,6 +1003,77 @@ def test_main_preflight_durable_resident_cycle_disabled_is_inert() -> None:
     mocked.assert_not_called()
 
 
+def test_main_preflight_durable_resident_cycle_product_mode_runs_by_default(capsys) -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ) as mocked:
+        with patch.dict("os.environ", {}, clear=True):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+            assert os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] == "sha256:intent-main-resident"
+            assert os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] == "1"
+            assert (
+                os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"]
+                == "signed_0102_bounded_code_fusion_worktree_draft_pr"
+            )
+
+    kwargs = mocked.call_args.kwargs
+    assert kwargs["requested_operation"] == "main_resident_architect_cycle"
+    assert kwargs["prompt_text"] == "main.py resident RedDog architect cycle"
+    assert kwargs["external_research_retriever"] is None
+    assert kwargs["red_dog_intent"]["requested_authority"] == "read_only_audit"
+    assert kwargs["red_dog_intent"]["submits_executable_authority"] is False
+    output = capsys.readouterr().out
+    assert "[REDDOG-RESIDENT-CYCLE] preflight=PASS" in output
+    assert "no_repo_mutation=True" in output
+    assert "no_holoindex_reindex=True" in output
+    assert "no_hermes_dispatch=True" in output
+    assert "no_worktree=True" in output
+    assert "no_pr=True" in output
+
+
+def test_main_preflight_durable_resident_cycle_product_mode_can_opt_out() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {"REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE": "0"},
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    mocked.assert_not_called()
+
+
+def test_main_preflight_durable_resident_cycle_explicit_enable_overrides_product_mode_off() -> None:
+    import main
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+        return_value=_resident_cycle_result(),
+    ) as mocked:
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE": "0",
+                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+            },
+            clear=True,
+        ):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
+
+    mocked.assert_called_once()
+
+
 def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_path, capsys) -> None:
     import main
 
