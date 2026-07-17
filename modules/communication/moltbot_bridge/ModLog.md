@@ -1,5 +1,19 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_RESIDENT_PROFILE_OPTIONAL_RUNTIME_PATHS_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_EXECUTION_VALVE_ENV_PATH` to the resident binding profile's
+  outside-repo runtime path map so profile-based resident chains can discover
+  the execution-valve environment without hand-setting another path.
+- Hardened optional profile-derived paths: explicit env paths remain strict,
+  but profile defaults are passed to the bootstrap only when the artifact
+  exists, preventing resumed later-stage chains from failing on unused missing
+  optional files.
+- Added focused regressions at both the direct OpenClaw queue-loop binding and
+  `main.py` serial-loop preflight layers.
+
 ## 2026-07-16: REDDOG_MAIN_OPENCLAW_AUTOPUBLISHED_WORKER_COMPLETE_CHAIN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

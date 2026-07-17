@@ -847,7 +847,65 @@ def test_runtime_binding_profile_derives_mandatory_paths_from_runtime_root(
     )
 
     assert result["accepted"] is True
+    assert "valve_environment_path" not in bootstrap.calls[0]
+    assert "authority_state_path" not in bootstrap.calls[0]
+    assert "permission_snapshots_path" not in bootstrap.calls[0]
+    assert "principal_authority_records_path" not in bootstrap.calls[0]
+    assert "signer_socket_path" not in bootstrap.calls[0]
     assert not runtime_root.exists()
+
+
+def test_runtime_binding_profile_derives_existing_optional_runtime_paths(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime_root = tmp_path / "resident-runtime"
+    runtime_root.mkdir(parents=True)
+    for filename in (
+        "execution_valve_env.json",
+        "authority_runtime_state.json",
+        "permission_snapshots.json",
+        "principal_authority_records.json",
+        "reddog_signer.sock",
+    ):
+        (runtime_root / filename).write_text("{}", encoding="utf-8")
+    bootstrap = _FakeBootstrap()
+    env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+    }
+
+    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
+        repo_root=repo,
+        env=env,
+        bootstrap=bootstrap,
+    )
+    assert binding.accepted is True
+    assert binding.runner is not None
+
+    result = binding.runner.run_signed_worker_dispatch_task(
+        task_id="task-1",
+        task_context=_context(),
+        worker_dispatch_intent=_context()["worker_dispatch_intent"],
+        signed_authority_receipt=_context()["signed_authority_worker_dispatch_receipt"],
+        repo_root=repo,
+    )
+
+    assert result["accepted"] is True
+    assert bootstrap.calls[0]["valve_environment_path"] == str(
+        runtime_root / "execution_valve_env.json"
+    )
+    assert bootstrap.calls[0]["authority_state_path"] == str(
+        runtime_root / "authority_runtime_state.json"
+    )
+    assert bootstrap.calls[0]["permission_snapshots_path"] == str(
+        runtime_root / "permission_snapshots.json"
+    )
+    assert bootstrap.calls[0]["principal_authority_records_path"] == str(
+        runtime_root / "principal_authority_records.json"
+    )
+    assert bootstrap.calls[0]["signer_socket_path"] == str(runtime_root / "reddog_signer.sock")
 
 
 def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Path) -> None:
