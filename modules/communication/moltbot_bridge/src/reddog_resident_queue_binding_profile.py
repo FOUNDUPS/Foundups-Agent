@@ -86,6 +86,7 @@ PROFILE_RUNTIME_FLAGS = frozenset(
         "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP",
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER",
         "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP",
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP",
     }
 )
 
@@ -316,9 +317,12 @@ def resident_queue_pattern_memory_admission_db_path(
 def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     """Return explicit/default work-order materializer mode for the profile."""
 
+    has_explicit_mode = "REDDOG_WORK_ORDER_MATERIALIZER_MODE" in env
     raw = str(env.get("REDDOG_WORK_ORDER_MATERIALIZER_MODE") or "").strip()
     if raw:
         return raw
+    if not has_explicit_mode and str(env.get("REDDOG_WORK_ORDERS_PATH") or "").strip():
+        return ""
     if resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES:
         return "authority_profile"
     return ""

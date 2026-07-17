@@ -214,11 +214,9 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
         "run_reddog_resident_queue_next_stage_dispatch_preflight",
         profile_bound_step("next_stage_dispatch"),
     ), patch.object(
-        main, "run_reddog_resident_queue_serial_loop_preflight", profile_bound_step("serial_loop")
-    ), patch.object(
         main,
-        "run_reddog_openclaw_signed_worker_claim_loop_preflight",
-        profile_bound_step("openclaw_claim_loop"),
+        "run_reddog_resident_queue_control_loop_preflight",
+        profile_bound_step("queue_control_loop"),
     ), patch.object(
         main, "run_reddog_readonly_operational_bootstrap_preflight", pass_step("readonly_bootstrap")
     ), patch.object(
@@ -244,12 +242,69 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
         "queue_consumer",
         "queue_orchestration",
         "next_stage_dispatch",
-        "serial_loop",
-        "openclaw_claim_loop",
+        "queue_control_loop",
         "readonly_bootstrap",
         "dae_bootstrap",
         "menu",
     ]
+
+
+def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch):
+    calls: list[str] = []
+
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",
+        "signed_0102_bounded_code_fusion_worktree_draft_pr",
+    )
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "3")
+
+    with patch.object(
+        main,
+        "run_reddog_resident_queue_serial_loop_preflight",
+        side_effect=lambda _repo_root: calls.append("serial") or True,
+    ), patch.object(
+        main,
+        "run_reddog_openclaw_signed_worker_claim_loop_preflight",
+        side_effect=lambda _repo_root: calls.append("claim") or True,
+    ):
+        assert main.run_reddog_resident_queue_control_loop_preflight(Path("O:/Foundups-Agent")) is True
+
+    assert calls == ["serial", "claim", "serial", "claim", "serial", "claim"]
+
+
+def test_reddog_queue_control_loop_without_profile_preserves_legacy_single_pass(monkeypatch):
+    calls: list[str] = []
+
+    monkeypatch.delenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", raising=False)
+    monkeypatch.delenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", raising=False)
+
+    with patch.object(
+        main,
+        "run_reddog_resident_queue_serial_loop_preflight",
+        side_effect=lambda _repo_root: calls.append("serial") or True,
+    ), patch.object(
+        main,
+        "run_reddog_openclaw_signed_worker_claim_loop_preflight",
+        side_effect=lambda _repo_root: calls.append("claim") or True,
+    ):
+        assert main.run_reddog_resident_queue_control_loop_preflight(Path("O:/Foundups-Agent")) is True
+
+    assert calls == ["serial", "claim"]
+
+
+def test_reddog_queue_control_loop_invalid_rounds_fail_closed_when_enforced(monkeypatch):
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "0")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED", "1")
+
+    with patch.object(main, "run_reddog_resident_queue_serial_loop_preflight") as serial, patch.object(
+        main,
+        "run_reddog_openclaw_signed_worker_claim_loop_preflight",
+    ) as claim:
+        assert main.run_reddog_resident_queue_control_loop_preflight(Path("O:/Foundups-Agent")) is False
+
+    serial.assert_not_called()
+    claim.assert_not_called()
 
 
 def test_main_dependency_security_blocker_runs_reddog_diagnostic_before_return(monkeypatch):
