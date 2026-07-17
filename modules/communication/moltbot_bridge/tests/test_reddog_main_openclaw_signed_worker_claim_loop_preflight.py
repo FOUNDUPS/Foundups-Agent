@@ -551,7 +551,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
         now_epoch=1000,
@@ -575,20 +575,24 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     outcome_store = tmp_path / "runtime" / "outcomes" / "signed-worker-ratchet.jsonl"
     pattern_memory_db = tmp_path / "runtime" / "pattern_memory.db"
 
-    allocation = _allocation()
-    coding_task_id = _publish_agentdb_task_with_allocation(
-        allocation,
-        intent_id="worker_dispatch_intent_coding_worker_1",
-        role="coding_worker_1",
-        worker_runtime="0102",
-        capability="bounded_code_change",
+    pending = AgentDB().get_autonomous_tasks(status="pending", limit=10)
+    signed_tasks = [
+        task
+        for task in pending
+        if task.get("discovered_by") == runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE
+    ]
+    assert len(signed_tasks) == 2
+    coding_task_id = next(
+        task["task_id"]
+        for task in signed_tasks
+        if task["context"]["worker_runtime"] == "0102"
+        and task["context"]["capability"] == "bounded_code_change"
     )
-    queue_stage_task_id = _publish_agentdb_task_with_allocation(
-        allocation,
-        intent_id="worker_dispatch_intent_queue_stage_progress",
-        role="queue_stage_worker",
-        worker_runtime="openclaw",
-        capability="queue_stage_progress",
+    queue_stage_task_id = next(
+        task["task_id"]
+        for task in signed_tasks
+        if task["context"]["worker_runtime"] == "openclaw"
+        and task["context"]["capability"] == "queue_stage_progress"
     )
     monkeypatch.setenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP", "1")
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
@@ -624,6 +628,12 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     assert f"completed={coding_task_id},{queue_stage_task_id}" in captured
     assert AgentDB().get_autonomous_task_by_id(coding_task_id)["status"] == "completed"
     assert AgentDB().get_autonomous_task_by_id(queue_stage_task_id)["status"] == "completed"
+    remaining_signed = [
+        task
+        for task in AgentDB().get_autonomous_tasks(status="pending", limit=10)
+        if task.get("discovered_by") == runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE
+    ]
+    assert remaining_signed == []
     assert calls
     assert calls[0]["api_key"] == "test-openrouter-key"
 

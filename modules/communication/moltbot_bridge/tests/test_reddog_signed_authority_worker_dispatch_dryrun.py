@@ -134,17 +134,14 @@ def test_accepts_verified_signed_authority_and_emits_wsp15_worker_intents() -> N
     assert result.accepted is True
     assert result.decision == dispatch.SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT
     assert result.receipt is not None
-    assert result.receipt.dispatch_intent_count == 7
+    assert result.receipt.dispatch_intent_count == 2
     roles = [intent.role for intent in result.receipt.dispatch_intents]
     assert roles == [
-        "fusion_lead",
-        "critic_1",
-        "critic_2",
         "coding_worker_1",
-        "coding_worker_2",
-        "independent_verifier",
         "queue_stage_worker",
     ]
+    assert roles.count("coding_worker_1") == 1
+    assert "coding_worker_2" not in roles
     assert result.receipt.dispatch_intents[-1].worker_runtime == "openclaw"
     assert result.receipt.dispatch_intents[-1].capability == "queue_stage_progress"
     assert {intent.worker_runtime for intent in result.receipt.dispatch_intents} == {"0102", "openclaw"}
