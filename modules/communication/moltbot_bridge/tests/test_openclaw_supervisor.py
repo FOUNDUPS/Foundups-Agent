@@ -1,3 +1,4 @@
+import json
 import os
 from unittest.mock import MagicMock, patch
 
@@ -6,6 +7,9 @@ import pytest
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     OpenClawSupervisor,
     SupervisorState,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
 )
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -16,6 +20,100 @@ def isolated_agent_db(tmp_path, monkeypatch):
     DatabaseManager.reset_for_tests()
     yield
     DatabaseManager.reset_for_tests()
+
+
+def _queue_wsp15_allocation_receipt() -> dict[str, object]:
+    return allocate_reddog_wsp15_receipt(
+        requested_operation="create_foundup",
+        prompt_text="RedDog resident queue runtime authority worktree execution",
+        changed_paths=("modules/communication/moltbot_bridge/src/openclaw_supervisor.py",),
+        allowed_read_targets=("modules/communication/moltbot_bridge/src/openclaw_supervisor.py",),
+    ).to_dict()
+
+
+def _queue_snapshot() -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt()
+    return {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
+        "worker_claims": [
+            {
+                "claim_id": "claim-1",
+                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+                "worker_id": "reddog-0102",
+                "status": "ACTIVE",
+                "expires_at": "2026-07-14T01:00:00+00:00",
+                "freshness_receipt_id": "fresh-1",
+            }
+        ],
+        "wre_queue_items": [
+            {
+                "queue_item_id": "queue-1",
+                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+                "claim_id": "claim-1",
+                "worker_id": "reddog-0102",
+                "status": "QUEUED",
+                "evidence_refs": [
+                    "claim:claim-1",
+                    "freshness:fresh-1",
+                    f"wsp15_allocation:{allocation['receipt_id']}",
+                ],
+                "wsp15_allocation_receipt": allocation,
+                "no_execution_performed": True,
+            }
+        ],
+    }
+
+
+def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
+    values = {
+        "authority_request": {"status": "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"},
+        "authority_runtime": {"decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"},
+        "authority_verification": {"decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"},
+        "worker_dispatch_dryrun": {
+            "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT"
+        },
+        "worker_dispatch_runtime": {
+            "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT"
+        },
+        "work_order_invocation": {
+            "decision": "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
+        },
+        "executor_plan": {"decision": "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"},
+        "execution_valve": {"decision": "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"},
+        "worktree_create": {"decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"},
+        "bounded_worker_pilot": {
+            "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
+        },
+    }
+    ordered: dict[str, dict[str, object]] = {}
+    for key, value in values.items():
+        ordered[key] = value
+        if key == stage_key:
+            break
+    return ordered
+
+
+def _write_runtime_queue_state(
+    runtime_root,
+    *,
+    accepted_through: str,
+) -> None:
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    (runtime_root / "authoritative_work_state.json").write_text(
+        json.dumps(_queue_snapshot(), sort_keys=True),
+        encoding="utf-8",
+    )
+    (runtime_root / "resident_queue_chain_results.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "reddog_resident_queue_chain_results.v1",
+                "stage_results": _accepted_results_through(accepted_through),
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
 
 
 def test_run_cycle_starts_openclaw_when_resident_runtime_is_down(tmp_path):
@@ -236,6 +334,207 @@ def test_run_cycle_claims_signed_worker_tasks_when_profile_enables_supervisor_lo
         max_claims=3
     )
     assert result["verify"]["ok"] is True
+
+
+def test_run_cycle_claims_signed_0102_bounded_code_task_with_profile_runtime_paths(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime_root = tmp_path / "resident-runtime"
+    _write_runtime_queue_state(runtime_root, accepted_through="worktree_create")
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 12,
+        "latest_sequence_id": 12,
+    }
+    supervisor = OpenClawSupervisor(
+        repo_root=repo,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock(
+        return_value={
+            "accepted": True,
+            "status": "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT",
+            "claimed_count": 1,
+            "completed_task_ids": ("task-code",),
+            "failed_task_ids": (),
+            "rejection_reasons": (),
+        }
+    )
+    pending_task = {
+        "task_id": "task-code",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "context": {
+            "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            "worker_runtime": "0102",
+            "capability": "bounded_code_change",
+            "queue_item_id": "queue-1",
+        },
+    }
+
+    with patch.dict(
+        os.environ,
+        {
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
+            "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            "REDDOG_RESIDENT_QUEUE_NOW_ISO": "2026-07-14T00:00:00+00:00",
+        },
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        result = supervisor.run_cycle()
+
+    assert result["plan"]["action"] == "claim_signed_worker_tasks_until_idle"
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_called_once_with(
+        max_claims=1
+    )
+    assert result["verify"]["completed_task_ids"] == ("task-code",)
+
+
+def test_run_cycle_claims_queue_stage_progress_task_with_profile_runtime_paths(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime_root = tmp_path / "resident-runtime"
+    _write_runtime_queue_state(runtime_root, accepted_through="bounded_worker_pilot")
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 13,
+        "latest_sequence_id": 13,
+    }
+    supervisor = OpenClawSupervisor(
+        repo_root=repo,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock(
+        return_value={
+            "accepted": True,
+            "status": "SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT",
+            "claimed_count": 1,
+            "completed_task_ids": ("task-stage",),
+            "failed_task_ids": (),
+            "rejection_reasons": (),
+        }
+    )
+    pending_task = {
+        "task_id": "task-stage",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "context": {
+            "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            "worker_runtime": "openclaw",
+            "capability": "queue_stage_progress",
+            "queue_item_id": "queue-1",
+        },
+    }
+
+    with patch.dict(
+        os.environ,
+        {
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+            "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            "REDDOG_RESIDENT_QUEUE_NOW_ISO": "2026-07-14T00:00:00+00:00",
+        },
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        result = supervisor.run_cycle()
+
+    assert result["plan"]["action"] == "claim_signed_worker_tasks_until_idle"
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_called_once_with(
+        max_claims=1
+    )
+    assert result["verify"]["completed_task_ids"] == ("task-stage",)
+
+
+def test_run_cycle_does_not_claim_queue_stage_task_when_profile_runtime_files_missing(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+        SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+    )
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime_root = tmp_path / "resident-runtime"
+    broker = MagicMock()
+    broker.get_runtime_status.side_effect = lambda dae_id: {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 14,
+        "latest_sequence_id": 14,
+    }
+    supervisor = OpenClawSupervisor(
+        repo_root=repo,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda action, result, details: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+    supervisor._bootstrapped = True
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle = MagicMock()
+    pending_task = {
+        "task_id": "task-stage-missing",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "context": {
+            "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            "worker_runtime": "openclaw",
+            "capability": "queue_stage_progress",
+            "queue_item_id": "queue-1",
+        },
+    }
+
+    with patch.dict(
+        os.environ,
+        {
+            "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
+            "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+            "REDDOG_RESIDENT_QUEUE_NOW_ISO": "2026-07-14T00:00:00+00:00",
+            "OPENCLAW_AUTO_TASKS_ENABLED": "0",
+        },
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        result = supervisor.run_cycle()
+
+    assert result["triage"]["kind"] == "idle"
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_not_called()
 
 
 def test_run_cycle_explicit_zero_disables_profile_signed_worker_loop(tmp_path):

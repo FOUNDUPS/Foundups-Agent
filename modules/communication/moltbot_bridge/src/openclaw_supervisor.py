@@ -819,12 +819,15 @@ def _openclaw_queue_stage_tasks_enabled_from_env() -> bool:
 def _signed_0102_bounded_code_stage_ready_from_env(
     context: Mapping[str, Any] | None,
     env: Mapping[str, str],
+    *,
+    repo_root: Path | str | None = None,
 ) -> bool:
     """Return True only when a coding task may safely drive the artifact stage."""
 
     from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
         resident_queue_artifact_generator_mode,
         resident_queue_binding_enabled,
+        resident_queue_runtime_file_path,
         resident_queue_runtime_flag_enabled,
     )
 
@@ -842,8 +845,18 @@ def _signed_0102_bounded_code_stage_ready_from_env(
         return False
     if str(env.get("REDDOG_ARTIFACT_CONTENTS_PATH") or "").strip():
         return False
-    work_state_path = str(env.get("REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or "").strip()
-    chain_results_path = str(env.get("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH") or "").strip()
+    work_state_path = _resident_queue_runtime_input_path(
+        env,
+        repo_root=repo_root,
+        env_name="REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+        resolver=resident_queue_runtime_file_path,
+    )
+    chain_results_path = _resident_queue_runtime_input_path(
+        env,
+        repo_root=repo_root,
+        env_name="REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+        resolver=resident_queue_runtime_file_path,
+    )
     if not work_state_path or not chain_results_path:
         return False
     queue_item_id = str(context.get("queue_item_id") or "").strip()
@@ -877,10 +890,13 @@ def _signed_0102_bounded_code_stage_ready_from_env(
 def _openclaw_queue_stage_progress_ready_from_env(
     context: Mapping[str, Any] | None,
     env: Mapping[str, str],
+    *,
+    repo_root: Path | str | None = None,
 ) -> bool:
     """Return True only when a queue-stage worker may claim a post-code stage."""
 
     from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_file_path,
         resident_queue_runtime_flag_enabled,
     )
 
@@ -888,8 +904,18 @@ def _openclaw_queue_stage_progress_ready_from_env(
         return False
     if not resident_queue_runtime_flag_enabled(env, "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER"):
         return False
-    work_state_path = str(env.get("REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or "").strip()
-    chain_results_path = str(env.get("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH") or "").strip()
+    work_state_path = _resident_queue_runtime_input_path(
+        env,
+        repo_root=repo_root,
+        env_name="REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+        resolver=resident_queue_runtime_file_path,
+    )
+    chain_results_path = _resident_queue_runtime_input_path(
+        env,
+        repo_root=repo_root,
+        env_name="REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+        resolver=resident_queue_runtime_file_path,
+    )
     if not work_state_path or not chain_results_path:
         return False
     queue_item_id = str(context.get("queue_item_id") or "").strip()
@@ -931,6 +957,26 @@ def _read_json_mapping(path: Path) -> Mapping[str, Any]:
     return payload if isinstance(payload, Mapping) else {}
 
 
+def _resident_queue_runtime_input_path(
+    env: Mapping[str, str],
+    *,
+    repo_root: Path | str | None,
+    env_name: str,
+    resolver: Callable[[Mapping[str, str], Path | str, str], str],
+) -> str:
+    """Return an explicit/profile-derived input path only when it exists."""
+
+    raw = str(env.get(env_name) or "").strip()
+    if raw:
+        return raw
+    if repo_root is None:
+        return ""
+    path = str(resolver(env, repo_root, env_name) or "").strip()
+    if path and Path(path).is_file():
+        return path
+    return ""
+
+
 def _resident_queue_stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
     raw = state.get("stage_results") if state.get("schema_version") == "reddog_resident_queue_chain_results.v1" else state
     if not isinstance(raw, Mapping):
@@ -938,7 +984,11 @@ def _resident_queue_stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapp
     return {str(key): value for key, value in raw.items() if isinstance(value, Mapping)}
 
 
-def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
+def _has_pending_reddog_signed_worker_dispatch_task(
+    limit: int = 50,
+    *,
+    repo_root: Path | str | None = None,
+) -> bool:
     from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
         SIGNED_WORKER_DISPATCH_TASK_SOURCE,
     )
@@ -967,12 +1017,20 @@ def _has_pending_reddog_signed_worker_dispatch_task(limit: int = 50) -> bool:
             or (
                 include_0102_bounded_code
                 and is_0102_bounded_code_change_signed_worker_context(normalized)
-                and _signed_0102_bounded_code_stage_ready_from_env(normalized, os.environ)
+                and _signed_0102_bounded_code_stage_ready_from_env(
+                    normalized,
+                    os.environ,
+                    repo_root=repo_root,
+                )
             )
             or (
                 include_queue_stage_progress
                 and is_openclaw_queue_stage_progress_signed_worker_context(normalized)
-                and _openclaw_queue_stage_progress_ready_from_env(normalized, os.environ)
+                and _openclaw_queue_stage_progress_ready_from_env(
+                    normalized,
+                    os.environ,
+                    repo_root=repo_root,
+                )
             )
         ):
             return True
@@ -1473,7 +1531,7 @@ class OpenClawSupervisor:
             if max_claims_error:
                 return {"kind": "escalate", "reason": max_claims_error}
             try:
-                if _has_pending_reddog_signed_worker_dispatch_task():
+                if _has_pending_reddog_signed_worker_dispatch_task(repo_root=self.repo_root):
                     return {
                         "kind": "action",
                         "reason": "signed_worker_task_pending",
