@@ -93,7 +93,9 @@ class ModelAutoResearchPlanReceipt:
     receipt_id: str
     policy: ModelAutoResearchPolicy
     source_gate_receipt_ids: tuple[str, ...]
+    source_feedback_record_ids: tuple[str, ...]
     candidate_pool_digest: str
+    feedback_ledger_digest: str
     campaign_items: tuple[ModelAutoResearchCampaignItem, ...]
     rejection_reasons: tuple[str, ...] = ()
     schema_version: str = AUTORESEARCH_SCHEMA_VERSION
@@ -104,7 +106,9 @@ class ModelAutoResearchPlanReceipt:
             "receipt_id": self.receipt_id,
             "policy": self.policy.to_dict(),
             "source_gate_receipt_ids": list(self.source_gate_receipt_ids),
+            "source_feedback_record_ids": list(self.source_feedback_record_ids),
             "candidate_pool_digest": self.candidate_pool_digest,
+            "feedback_ledger_digest": self.feedback_ledger_digest,
             "campaign_items": [item.to_dict() for item in self.campaign_items],
             "rejection_reasons": list(self.rejection_reasons),
         }
@@ -115,17 +119,27 @@ def plan_model_champion_challenger_autoresearch(
     promotion_gate_receipts: Sequence[ModelPromotionGateReceipt],
     candidate_pool: Sequence[ModelBenchmarkCandidate],
     policy: ModelAutoResearchPolicy,
+    feedback_records: Sequence[Mapping[str, Any]] = (),
 ) -> ModelAutoResearchPlanReceipt:
     """Plan the next benchmark campaigns from gate receipts and candidates."""
 
     normalized_policy = policy.normalized()
     normalized_candidates = _normalize_candidates(candidate_pool)
     normalized_gates = _normalize_gate_receipts(promotion_gate_receipts, normalized_policy.task_family)
+    normalized_feedback = _normalize_feedback_records(feedback_records, normalized_policy)
+    feedback_model_ids = _feedback_model_ids(normalized_feedback)
     candidate_pool_digest = _digest_prefixed(
         "model_autoresearch_candidate_pool",
         {"candidates": [candidate.to_dict() for candidate in normalized_candidates]},
     )
+    feedback_ledger_digest = _digest_prefixed(
+        "model_autoresearch_feedback_ledger",
+        {"feedback_records": list(normalized_feedback)},
+    )
     source_gate_ids = tuple(sorted(receipt.receipt_id for receipt in normalized_gates))
+    source_feedback_record_ids = tuple(
+        sorted(str(record["feedback_record_id"]) for record in normalized_feedback)
+    )
     rejection_reasons = _policy_rejections(normalized_policy, normalized_gates)
     campaign_items: list[ModelAutoResearchCampaignItem] = []
     seen_gate_candidate_ids = {receipt.candidate_id for receipt in normalized_gates}
@@ -136,25 +150,39 @@ def plan_model_champion_challenger_autoresearch(
                 receipt.decision == ModelPromotionGateDecision.KEEP_CHALLENGER
                 and normalized_policy.rebenchmark_challengers
             ):
+                has_feedback = receipt.candidate_id in feedback_model_ids
                 campaign_items.append(
                     ModelAutoResearchCampaignItem(
                         candidate_id=receipt.candidate_id,
                         action=ModelAutoResearchAction.REBENCHMARK_CHALLENGER,
-                        priority="P2",
-                        reason="challenger_below_champion_threshold",
+                        priority="P1" if has_feedback else "P2",
+                        reason=(
+                            "verified_runtime_feedback_rebenchmark_challenger"
+                            if has_feedback
+                            else "challenger_below_champion_threshold"
+                        ),
                         source_gate_receipt_id=receipt.receipt_id,
                     )
                 )
         for candidate in normalized_candidates:
             if candidate.candidate_id in seen_gate_candidate_ids:
                 continue
+            has_feedback = candidate.candidate_id in feedback_model_ids
             campaign_items.append(
                 ModelAutoResearchCampaignItem(
                     candidate_id=candidate.candidate_id,
                     action=ModelAutoResearchAction.BENCHMARK_NEW_CANDIDATE,
-                    priority="P1",
-                    reason="candidate_not_yet_benchmarked",
+                    priority="P0" if has_feedback else "P1",
+                    reason=(
+                        "verified_runtime_feedback_unbenchmarked_candidate"
+                        if has_feedback
+                        else "candidate_not_yet_benchmarked"
+                    ),
                 )
+            )
+        if normalized_feedback:
+            campaign_items = list(
+                sorted(campaign_items, key=lambda item: (_priority_rank(item.priority), item.candidate_id))
             )
         campaign_items = campaign_items[: normalized_policy.max_campaign_items]
         if not campaign_items:
@@ -171,7 +199,9 @@ def plan_model_champion_challenger_autoresearch(
         "schema_version": AUTORESEARCH_SCHEMA_VERSION,
         "policy": normalized_policy.to_dict(),
         "source_gate_receipt_ids": list(source_gate_ids),
+        "source_feedback_record_ids": list(source_feedback_record_ids),
         "candidate_pool_digest": candidate_pool_digest,
+        "feedback_ledger_digest": feedback_ledger_digest,
         "campaign_items": [item.to_dict() for item in campaign_items],
         "rejection_reasons": sorted(set(rejection_reasons)),
     }
@@ -179,7 +209,9 @@ def plan_model_champion_challenger_autoresearch(
         receipt_id=_digest_prefixed("model_autoresearch_plan", body),
         policy=normalized_policy,
         source_gate_receipt_ids=source_gate_ids,
+        source_feedback_record_ids=source_feedback_record_ids,
         candidate_pool_digest=candidate_pool_digest,
+        feedback_ledger_digest=feedback_ledger_digest,
         campaign_items=tuple(campaign_items),
         rejection_reasons=tuple(sorted(set(rejection_reasons))),
     )
@@ -224,6 +256,76 @@ def _policy_rejections(
     return tuple(sorted(set(reasons)))
 
 
+def _normalize_feedback_records(
+    feedback_records: Sequence[Mapping[str, Any]],
+    policy: ModelAutoResearchPolicy,
+) -> tuple[dict[str, Any], ...]:
+    normalized: list[dict[str, Any]] = []
+    record_ids: list[str] = []
+    for record in feedback_records:
+        if not isinstance(record, Mapping):
+            raise ValueError("invalid_feedback_record")
+        candidate = dict(record)
+        if candidate.get("record_type") != "model_selection_outcome_feedback":
+            raise ValueError("invalid_feedback_record_type")
+        if candidate.get("schema_version") != "model_feedback_ledger_record.v1":
+            raise ValueError("invalid_feedback_record_schema")
+        record_id = _required("feedback_record_id", candidate.get("feedback_record_id"))
+        if not record_id.startswith("model_feedback_"):
+            raise ValueError("invalid_feedback_record_id")
+        for field in (
+            "outcome_receipt_id",
+            "selection_receipt_id",
+            "catalog_snapshot_id",
+            "task_family",
+            "source_ratchet_id",
+            "source_ratchet_digest",
+        ):
+            _required(field, candidate.get(field))
+        if candidate["task_family"] != policy.task_family:
+            raise ValueError("feedback_task_family_mismatch")
+        if candidate["catalog_snapshot_id"] != policy.catalog_snapshot_id:
+            raise ValueError("feedback_catalog_snapshot_mismatch")
+        selected_model_ids = tuple(str(value).strip() for value in candidate.get("selected_model_ids") or ())
+        if not selected_model_ids or any(not value for value in selected_model_ids):
+            raise ValueError("feedback_selected_model_ids_missing")
+        verification_receipt_ids = tuple(
+            str(value).strip() for value in candidate.get("verification_receipt_ids") or ()
+        )
+        if not verification_receipt_ids or any(not value for value in verification_receipt_ids):
+            raise ValueError("feedback_verification_receipts_missing")
+        if not _is_digest(candidate.get("source_ratchet_digest")):
+            raise ValueError("feedback_source_ratchet_digest_invalid")
+        normalized.append(
+            {
+                "feedback_record_id": record_id,
+                "outcome_receipt_id": str(candidate["outcome_receipt_id"]),
+                "selection_receipt_id": str(candidate["selection_receipt_id"]),
+                "catalog_snapshot_id": str(candidate["catalog_snapshot_id"]),
+                "task_family": str(candidate["task_family"]),
+                "selected_model_ids": list(selected_model_ids),
+                "verification_receipt_ids": list(verification_receipt_ids),
+                "source_ratchet_id": str(candidate["source_ratchet_id"]),
+                "source_ratchet_digest": str(candidate["source_ratchet_digest"]),
+            }
+        )
+        record_ids.append(record_id)
+    if len(set(record_ids)) != len(record_ids):
+        raise ValueError("duplicate_feedback_record_ids")
+    return tuple(sorted(normalized, key=lambda item: item["feedback_record_id"]))
+
+
+def _feedback_model_ids(feedback_records: tuple[dict[str, Any], ...]) -> set[str]:
+    model_ids: set[str] = set()
+    for record in feedback_records:
+        model_ids.update(str(value) for value in record["selected_model_ids"])
+    return model_ids
+
+
+def _priority_rank(priority: str) -> int:
+    return {"P0": 0, "P1": 1, "P2": 2, "P3": 3}.get(priority, 9)
+
+
 def _required(name: str, value: Any) -> str:
     cleaned = str(value).strip()
     if not cleaned:
@@ -240,6 +342,15 @@ def _optional(value: str | None) -> str | None:
 
 def _clean_token(value: Any) -> str:
     return str(value).strip().lower().replace(" ", "_")
+
+
+def _is_digest(value: Any) -> bool:
+    text = str(value or "")
+    return (
+        text.startswith("sha256:")
+        and len(text) == 71
+        and all(ch in "0123456789abcdef" for ch in text.removeprefix("sha256:"))
+    )
 
 
 def _digest_prefixed(prefix: str, value: Mapping[str, Any]) -> str:
