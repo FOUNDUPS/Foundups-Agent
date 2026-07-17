@@ -1509,7 +1509,7 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
     assert result.no_pr_created is True
     assert worker_dispatch_writer.calls
     published_tasks = worker_dispatch_writer.calls[0]["task_ids"]
-    assert len(published_tasks) == 7
+    assert len(published_tasks) == 2
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
     stage_results = stored["stage_results"]
@@ -1520,6 +1520,7 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
         and intent["capability"] == "queue_stage_progress"
         for intent in dispatch_intents
     )
+    assert sum(1 for intent in dispatch_intents if intent["capability"] == "bounded_code_change") == 1
     assert not any(intent["role"] == "openclaw_candidate" for intent in dispatch_intents)
     assert stage_results["work_order_invocation"]["decision"] == "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
     assert stage_results["executor_plan"]["decision"] == "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"

@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-16: REDDOG_MAIN_OPENCLAW_AUTOPUBLISHED_WORKER_COMPLETE_CHAIN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Tightened signed worker dispatch planning so resident code chains publish only
+  currently executable AgentDB worker tasks: one `0102/bounded_code_change`
+  materializer and one `openclaw/queue_stage_progress` continuation worker.
+- Preserved the legacy OpenClaw candidate-review task for non-code worker
+  plans, but stopped publishing unclaimable Fusion/critic/verifier task roles
+  into the resident execution queue until those runtimes exist.
+- Converted the `main.py` OpenClaw complete-chain regression from manually
+  seeded worker tasks to tasks created by `worker_dispatch_runtime` through
+  `AgentDbSignedWorkerDispatchTaskWriter`, and proved the generated artifact
+  chain drains with no leftover signed worker tasks.
+
 ## 2026-07-16: REDDOG_SIGNED_WORKER_QUEUE_STAGE_PUBLICATION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

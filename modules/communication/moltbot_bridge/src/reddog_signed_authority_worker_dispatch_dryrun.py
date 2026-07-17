@@ -209,16 +209,10 @@ def _build_intents(
     }
 
     roles: List[tuple[str, str, str]] = []
-    if worker_plan.get("fusion_required") is True:
-        roles.append(("fusion_lead", "0102", "architect_review"))
-    critic_count = int(worker_plan.get("critic_count") or 0)
-    for index in range(max(0, critic_count)):
-        roles.append((f"critic_{index + 1}", "0102", "adversarial_review"))
     coding_count = int(worker_plan.get("coding_worker_count") or 0)
-    for index in range(max(0, coding_count)):
+    active_bounded_code_workers = 1 if coding_count > 0 else 0
+    for index in range(active_bounded_code_workers):
         roles.append((f"coding_worker_{index + 1}", "0102", "bounded_code_change"))
-    if worker_plan.get("independent_verifier_required") is True:
-        roles.append(("independent_verifier", "0102", "diff_verification"))
     if worker_plan.get("openclaw_candidate") is True and coding_count <= 0:
         roles.append(("openclaw_candidate", "openclaw", "candidate_queue_review"))
     if coding_count > 0:

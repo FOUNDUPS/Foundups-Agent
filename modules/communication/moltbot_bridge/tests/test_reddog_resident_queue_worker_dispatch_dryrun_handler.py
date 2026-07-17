@@ -226,7 +226,15 @@ def test_dispatcher_records_worker_dispatch_dryrun_and_advances_to_work_order_in
     stage = store.load()["stage_results"][WORKER_DISPATCH_DRYRUN_STAGE_KEY]
     assert stage["accepted"] is True
     assert stage["decision"] == SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT
-    assert stage["receipt"]["dispatch_intent_count"] == 7
+    assert stage["receipt"]["dispatch_intent_count"] == 2
+    intents = stage["receipt"]["dispatch_intents"]
+    assert sum(1 for intent in intents if intent["capability"] == "bounded_code_change") == 1
+    assert any(
+        intent["role"] == "queue_stage_worker"
+        and intent["worker_runtime"] == "openclaw"
+        and intent["capability"] == "queue_stage_progress"
+        for intent in intents
+    )
     assert stage["receipt"]["no_worker_spawn_performed"] is True
     assert stage["receipt"]["no_openclaw_enqueue_performed"] is True
     assert stage["receipt"]["no_hermes_dispatch_performed"] is True

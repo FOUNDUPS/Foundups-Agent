@@ -108,7 +108,6 @@ def _intent(role: str, runtime_name: str, capability: str, allocation=None, **ov
 def _dryrun_result(allocation=None, intents=None, **overrides):
     allocation = allocation or _allocation()
     intents = intents or (
-        _intent("fusion_lead", "0102", "architect_review", allocation),
         _intent("coding_worker_1", "0102", "bounded_code_change", allocation),
         _intent("queue_stage_worker", "openclaw", "queue_stage_progress", allocation),
     )
@@ -175,8 +174,8 @@ def test_publishes_signed_worker_dispatch_intents_as_pending_tasks() -> None:
     assert result.receipt.agentdb_tasks_enqueued is True
     assert result.receipt.no_worker_process_started is True
     assert result.receipt.no_hermes_execution_performed is True
-    assert len(result.tasks) == 3
-    assert writer.calls and len(writer.calls[0][0]) == 3
+    assert len(result.tasks) == 2
+    assert writer.calls and len(writer.calls[0][0]) == 2
     assert {task.context["worker_runtime"] for task in result.tasks} == {"0102", "openclaw"}
     assert all(task.context["execution_allowed_by_dispatch_runtime"] is False for task in result.tasks)
     assert all(runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL in task.required_skills for task in result.tasks)
@@ -192,7 +191,7 @@ def test_agentdb_writer_publishes_tasks_atomically() -> None:
 
     assert result.accepted is True
     pending = AgentDB().get_autonomous_tasks(status="pending", limit=10)
-    assert len(pending) == 3
+    assert len(pending) == 2
     assert {task["task_id"] for task in pending} == set(result.receipt.task_ids)
     for task in pending:
         assert task["context"]["source"] == runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE
@@ -218,7 +217,7 @@ def test_agentdb_writer_rejects_duplicate_without_second_batch() -> None:
     assert first.accepted is True
     assert second.accepted is False
     assert second.rejection_reasons == (runtime.WorkerDispatchRuntimeReason.WRITER_REJECTED,)
-    assert len(AgentDB().get_autonomous_tasks(status="pending", limit=10)) == 3
+    assert len(AgentDB().get_autonomous_tasks(status="pending", limit=10)) == 2
 
 
 def test_rejects_missing_writer_and_unaccepted_dryrun() -> None:
@@ -278,7 +277,7 @@ def test_rejects_wsp15_queue_binding_mismatch_and_seen_replay() -> None:
         work_state_snapshot=_snapshot(allocation),
         queue_item_id="queue-1",
         writer=_FakeWriter(),
-        seen_intent_ids={"worker_dispatch_intent_fusion_lead"},
+        seen_intent_ids={"worker_dispatch_intent_coding_worker_1"},
     )
 
     assert mismatch.accepted is False
