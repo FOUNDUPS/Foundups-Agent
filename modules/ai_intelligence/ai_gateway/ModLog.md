@@ -1,5 +1,43 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Plan Artifact Supply Bootstrap
+
+**Who:** 0102 Codex
+**Type:** Runtime Artifact Bootstrap
+**Slice:** REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**What:** Added an opt-in main-startup bootstrap for materializing a
+`ModelAutoResearchPlanReceipt` from outside-repo promotion-gate receipts,
+benchmark candidates, AutoResearch policy, and optional model-feedback records.
+
+**Why:** The resident RedDog path can now produce verified model feedback and
+promotion evidence, but future benchmark campaigns need a governed artifact
+handoff before any AutoResearch execution slice runs. This bridges the landed
+planner into preflight while preserving read-only, no-benchmark behavior.
+
+**Files:**
+- `src/model_autoresearch_plan_artifact_supply_bootstrap.py` - reads
+  outside-repo JSON/JSONL inputs, invokes the landed plan supplier, and returns
+  an explicit applied/not-ready bootstrap receipt.
+- `tests/test_model_autoresearch_plan_artifact_supply_bootstrap.py` - verifies
+  JSONL feedback, optional feedback omission, inside-repo rejection, tamper
+  rejection, and no provider/network/runtime imports.
+- `main.py` - adds the opt-in
+  `REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY` preflight hook.
+
+**Truth Boundary:**
+- IMPLEMENTED: configured outside-repo artifacts can materialize a
+  digest-bound AutoResearch plan receipt during startup preflight.
+- IMPLEMENTED: the hook is opt-in, fail-closed when enforced, and propagates
+  only the output receipt path after successful supply.
+- NOT IMPLEMENTED: benchmark execution, model promotion, runtime model binding,
+  PatternMemory writes, HoloIndex re-indexing, provider calls, worker dispatch,
+  or automatic resident campaign execution.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Plan Artifact Supply
 
 **Who:** 0102 Codex
