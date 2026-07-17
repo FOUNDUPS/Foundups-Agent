@@ -3854,6 +3854,30 @@ def _reddog_queue_stage_rejected(stage_callable: Any) -> bool:
     return isinstance(raw, Mapping) and raw.get("accepted") is False
 
 
+def _reddog_queue_stage_receipt_ids(stage_callable: Any) -> tuple[str, ...]:
+    """Return receipt IDs recorded by a queue control stage."""
+
+    raw = getattr(stage_callable, "last_result", None)
+    if not isinstance(raw, Mapping):
+        return ()
+    values = raw.get("receipt_ids")
+    if not isinstance(values, (list, tuple)):
+        return ()
+    return tuple(str(value) for value in values if str(value or "").strip())
+
+
+def _reddog_queue_stage_rejection_reasons(stage_callable: Any) -> tuple[str, ...]:
+    """Return rejection reasons recorded by a queue control stage."""
+
+    raw = getattr(stage_callable, "last_result", None)
+    if not isinstance(raw, Mapping):
+        return ()
+    values = raw.get("rejection_reasons")
+    if not isinstance(values, (list, tuple)):
+        return ()
+    return tuple(str(value) for value in values if str(value or "").strip())
+
+
 def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
     """
     Drive the resident queue through bounded serial/claim rounds.
@@ -3880,8 +3904,46 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
     )
     if not requested:
         if not run_reddog_resident_queue_serial_loop_preflight(repo_root):
+            run_reddog_resident_queue_control_loop_preflight.last_result = {
+                "accepted": False,
+                "status": "SERIAL_LOOP_REJECT",
+                "rounds": 0,
+                "serial_progress": _reddog_queue_stage_progress(
+                    run_reddog_resident_queue_serial_loop_preflight,
+                    default_progress=0,
+                ),
+                "claim_progress": 0,
+                "receipt_ids": (),
+                "rejection_reasons": _reddog_queue_stage_rejection_reasons(
+                    run_reddog_resident_queue_serial_loop_preflight
+                ),
+            }
             return False
-        return run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+        claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+        claim_receipts = _reddog_queue_stage_receipt_ids(
+            run_reddog_openclaw_signed_worker_claim_loop_preflight
+        )
+        run_reddog_resident_queue_control_loop_preflight.last_result = {
+            "accepted": bool(claim_ok)
+            and not _reddog_queue_stage_rejected(
+                run_reddog_openclaw_signed_worker_claim_loop_preflight
+            ),
+            "status": "PASS" if claim_ok else "CLAIM_LOOP_REJECT",
+            "rounds": 1,
+            "serial_progress": _reddog_queue_stage_progress(
+                run_reddog_resident_queue_serial_loop_preflight,
+                default_progress=1,
+            ),
+            "claim_progress": _reddog_queue_stage_progress(
+                run_reddog_openclaw_signed_worker_claim_loop_preflight,
+                default_progress=1 if claim_ok else 0,
+            ),
+            "receipt_ids": claim_receipts,
+            "rejection_reasons": _reddog_queue_stage_rejection_reasons(
+                run_reddog_openclaw_signed_worker_claim_loop_preflight
+            ),
+        }
+        return claim_ok
 
     enforced = os.getenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED", "0") != "0"
     raw_rounds = os.getenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "8").strip()
@@ -3891,11 +3953,21 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
         max_rounds = 0
     if max_rounds < 1:
         print("[REDDOG-QUEUE-CONTROL] preflight=FAIL error=invalid_max_rounds")
+        run_reddog_resident_queue_control_loop_preflight.last_result = {
+            "accepted": False,
+            "status": "INVALID_MAX_ROUNDS",
+            "rounds": 0,
+            "serial_progress": 0,
+            "claim_progress": 0,
+            "receipt_ids": (),
+            "rejection_reasons": ("invalid_max_rounds",),
+        }
         return not enforced
 
     completed_rounds = 0
     serial_progress_total = 0
     claim_progress_total = 0
+    receipt_ids: list[str] = []
     stopped_reason = "max_rounds"
     for round_index in range(1, max_rounds + 1):
         serial_ok = run_reddog_resident_queue_serial_loop_preflight(repo_root)
@@ -3907,6 +3979,17 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
         if not serial_ok or _reddog_queue_stage_rejected(
             run_reddog_resident_queue_serial_loop_preflight
         ):
+            run_reddog_resident_queue_control_loop_preflight.last_result = {
+                "accepted": False,
+                "status": "SERIAL_LOOP_REJECT",
+                "rounds": completed_rounds,
+                "serial_progress": serial_progress_total,
+                "claim_progress": claim_progress_total,
+                "receipt_ids": tuple(receipt_ids),
+                "rejection_reasons": _reddog_queue_stage_rejection_reasons(
+                    run_reddog_resident_queue_serial_loop_preflight
+                ),
+            }
             print(
                 f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
                 "stage=serial_loop"
@@ -3918,9 +4001,25 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
             default_progress=1 if claim_ok else 0,
         )
         claim_progress_total += claim_progress
+        receipt_ids.extend(
+            _reddog_queue_stage_receipt_ids(
+                run_reddog_openclaw_signed_worker_claim_loop_preflight
+            )
+        )
         if not claim_ok or _reddog_queue_stage_rejected(
             run_reddog_openclaw_signed_worker_claim_loop_preflight
         ):
+            run_reddog_resident_queue_control_loop_preflight.last_result = {
+                "accepted": False,
+                "status": "CLAIM_LOOP_REJECT",
+                "rounds": completed_rounds,
+                "serial_progress": serial_progress_total,
+                "claim_progress": claim_progress_total,
+                "receipt_ids": tuple(dict.fromkeys(receipt_ids)),
+                "rejection_reasons": _reddog_queue_stage_rejection_reasons(
+                    run_reddog_openclaw_signed_worker_claim_loop_preflight
+                ),
+            }
             print(
                 f"[REDDOG-QUEUE-CONTROL] preflight=FAIL round={round_index} "
                 "stage=openclaw_claim_loop"
@@ -3931,10 +4030,22 @@ def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
             stopped_reason = "idle"
             break
 
+    receipt_ids_tuple = tuple(dict.fromkeys(receipt_ids))
+    run_reddog_resident_queue_control_loop_preflight.last_result = {
+        "accepted": True,
+        "status": "PASS",
+        "rounds": completed_rounds,
+        "serial_progress": serial_progress_total,
+        "claim_progress": claim_progress_total,
+        "receipt_ids": receipt_ids_tuple,
+        "rejection_reasons": (),
+    }
+    receipts = ",".join(receipt_ids_tuple) or "(none)"
     print(
         f"[REDDOG-QUEUE-CONTROL] preflight=PASS rounds={completed_rounds} "
         f"max_rounds={max_rounds} stopped_reason={stopped_reason} "
-        f"serial_progress={serial_progress_total} claim_progress={claim_progress_total}"
+        f"serial_progress={serial_progress_total} claim_progress={claim_progress_total} "
+        f"receipts={receipts}"
     )
     return True
 
