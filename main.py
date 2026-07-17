@@ -1595,15 +1595,20 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
         REDDOG_ARCHITECT_FIX_DETERMINATION_PATH              Outside-repo determination JSON
         REDDOG_MODEL_SELECTION_RECEIPT_PATH                  Outside-repo model receipt JSON
+        REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH            Outside-repo runtime binding receipt JSON
         REDDOG_MEMEX_SUPPLY_RECEIPT_PATH                     Outside-repo Memex supply JSON
         REDDOG_AUTHORITY_PROFILE_SOURCE_PATH                 Outside-repo authority seed JSON
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo promoted profile JSON
         REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
         REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
         REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=0             Materialize model selection receipt from signed evidence
+        REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY=0       Materialize runtime binding receipt from signed evidence
         REDDOG_MODEL_CATALOG_SNAPSHOT_PATH                   Outside-repo model catalog snapshot JSON
         REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
         REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
+        REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH        Outside-repo benchmark evidence receipts JSON
+        REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH        Outside-repo promotion evidence receipts JSON
+        REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH             Outside-repo runtime binding policy JSON
         REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
         REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY=0 Materialize principal/snapshot from GitHub probe
         REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED=0 Block startup if rejected
@@ -1648,6 +1653,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         os.environ,
         repo_root,
         "REDDOG_MODEL_SELECTION_RECEIPT_PATH",
+    )
+    model_runtime_binding_receipt_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH",
     )
     memex_supply_receipt_path = resident_queue_runtime_file_path(
         os.environ,
@@ -1750,6 +1760,77 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             os.environ["REDDOG_MODEL_SELECTION_RECEIPT_PATH"] = model_selection_receipt_path
         elif model_supply_enforced:
             print("[REDDOG-MODEL-SELECTION] Startup blocked by REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED=1")
+            return False
+
+    runtime_binding_supply_requested = resident_queue_runtime_flag_enabled(
+        os.environ,
+        "REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY",
+    )
+    runtime_binding_supply_enforced = (
+        os.getenv("REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
+    )
+    if runtime_binding_supply_requested:
+        try:
+            from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_artifact_supply_bootstrap import (
+                run_reddog_model_runtime_binding_artifact_supply_bootstrap,
+            )
+
+            raw_now = os.getenv(
+                "REDDOG_MODEL_RUNTIME_BINDING_EVIDENCE_NOW_EPOCH",
+                os.getenv("REDDOG_MODEL_SELECTION_EVIDENCE_NOW_EPOCH", ""),
+            ).strip()
+            runtime_binding_supply = run_reddog_model_runtime_binding_artifact_supply_bootstrap(
+                repo_root=repo_root,
+                catalog_snapshot_path=os.getenv("REDDOG_MODEL_CATALOG_SNAPSHOT_PATH", "") or None,
+                model_selection_receipt_path=model_selection_receipt_path,
+                benchmark_evidence_receipts_path=os.getenv(
+                    "REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH",
+                    "",
+                )
+                or None,
+                promotion_evidence_receipts_path=os.getenv(
+                    "REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH",
+                    "",
+                )
+                or None,
+                evidence_bundle_path=os.getenv("REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH", "") or None,
+                runtime_policy_path=os.getenv("REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH", "") or None,
+                trusted_keys_path=os.getenv("REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH", "") or None,
+                output_path=model_runtime_binding_receipt_path,
+                signature_verifier_backend=os.getenv(
+                    "REDDOG_MODEL_EVIDENCE_SIGNATURE_VERIFIER_BACKEND",
+                    "ed25519",
+                ),
+                now_epoch=(int(raw_now) if raw_now else None),
+            )
+        except Exception as exc:
+            logger.error(f"[REDDOG-MODEL-RUNTIME-BINDING] Startup artifact supply failed: {exc}")
+            if runtime_binding_supply_enforced:
+                print(f"[REDDOG-MODEL-RUNTIME-BINDING] preflight=FAIL error={type(exc).__name__}")
+                return False
+            print(f"[REDDOG-MODEL-RUNTIME-BINDING] preflight=WARN error={type(exc).__name__}")
+            return True
+
+        runtime_binding_status = "PASS" if runtime_binding_supply.accepted else "WARN"
+        runtime_binding_reasons = (
+            ",".join(runtime_binding_supply.rejection_reasons)
+            if runtime_binding_supply.rejection_reasons
+            else "(none)"
+        )
+        print(
+            f"[REDDOG-MODEL-RUNTIME-BINDING] preflight={runtime_binding_status} "
+            f"status={runtime_binding_supply.status} "
+            f"receipt={runtime_binding_supply.runtime_binding_receipt_id or '(none)'} "
+            f"reasons={runtime_binding_reasons}"
+        )
+        if runtime_binding_supply.accepted and runtime_binding_supply.output_path:
+            model_runtime_binding_receipt_path = runtime_binding_supply.output_path
+            os.environ["REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH"] = model_runtime_binding_receipt_path
+        elif runtime_binding_supply_enforced:
+            print(
+                "[REDDOG-MODEL-RUNTIME-BINDING] Startup blocked by "
+                "REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY_ENFORCED=1"
+            )
             return False
 
     principal_snapshot_supply_requested = resident_queue_runtime_flag_enabled(
