@@ -1,0 +1,211 @@
+"""Outside-repo config bootstrap for the RedDog signer socket service.
+
+Slice: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_BOOTSTRAP_PHASE1
+
+This signer-owned bootstrap reads one outside-repo JSON config, builds the
+existing signer socket service runtime wiring config, and invokes that wiring
+with an injected resolver. It does not parse environment variables, spawn a
+process, load secret files, mutate the repository, enqueue OpenClaw, dispatch
+Hermes, publish PRs, settle rewards, or re-index HoloIndex.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Callable, Optional
+
+from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
+    SignerKeyResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
+    ServeSignerSocketBounded,
+    SignerSocketServiceRuntimeWiringConfig,
+    run_reddog_signer_socket_service_runtime_wiring,
+)
+
+
+SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED"
+SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT"
+
+FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING"
+FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE"
+FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO"
+FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE = "FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE"
+FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED = "FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED"
+FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED = "FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED"
+
+
+@dataclass(frozen=True)
+class SignerSocketServiceRuntimeBootstrapResult:
+    """Audit-safe result for signer socket service runtime bootstrap."""
+
+    accepted: bool
+    status: str
+    rejection_reasons: tuple[str, ...]
+    config_path: Optional[str] = None
+    config_digest: Optional[str] = None
+    runtime_result: Optional[dict[str, Any]] = None
+    no_env_parsed: bool = True
+    no_process_spawned: bool = True
+    no_runtime_secret_file_loaded: bool = True
+    no_repo_mutation_performed: bool = True
+    no_openclaw_enqueue_performed: bool = True
+    no_hermes_dispatch_performed: bool = True
+    no_pr_created: bool = True
+    no_reward_settlement_performed: bool = True
+    no_holoindex_reindex_performed: bool = True
+    no_secret_values_returned: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def run_reddog_signer_socket_service_runtime_bootstrap(
+    *,
+    repo_root: Path | str,
+    config_path: Path | str | None,
+    resolver: SignerKeyResolver,
+    serve_bounded: ServeSignerSocketBounded,
+    ready_callback: Optional[Callable[[], None]] = None,
+) -> SignerSocketServiceRuntimeBootstrapResult:
+    """Read a signer-owned outside-repo config and run signer service wiring."""
+
+    root = Path(repo_root).resolve()
+    path, path_reasons = _resolve_config_path(root, config_path)
+    if path_reasons:
+        return _reject(*path_reasons)
+    assert path is not None
+
+    payload, digest, read_reasons = _read_config(path)
+    if read_reasons:
+        return _reject(*read_reasons, config_path=str(path))
+    assert payload is not None
+    assert digest is not None
+
+    config = _runtime_config(root, payload)
+    if config is None:
+        return _reject(
+            FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,
+            config_path=str(path),
+            config_digest=digest,
+        )
+
+    runtime = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        resolver,
+        serve_bounded=serve_bounded,
+        ready_callback=ready_callback,
+    )
+    runtime_receipt = runtime.to_dict()
+    if runtime.accepted is not True:
+        return _reject(
+            FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
+            *runtime.rejection_reasons,
+            config_path=str(path),
+            config_digest=digest,
+            runtime_result=runtime_receipt,
+        )
+
+    return SignerSocketServiceRuntimeBootstrapResult(
+        accepted=True,
+        status=SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
+        rejection_reasons=(),
+        config_path=str(path),
+        config_digest=digest,
+        runtime_result=runtime_receipt,
+    )
+
+
+def _resolve_config_path(
+    repo_root: Path,
+    value: Path | str | None,
+) -> tuple[Optional[Path], tuple[str, ...]]:
+    if not value:
+        return None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING,)
+    path = Path(value)
+    if not path.is_absolute():
+        return None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE,)
+    resolved = path.resolve()
+    if _is_inside(resolved, repo_root):
+        return None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO,)
+    if not resolved.exists() or not resolved.is_file():
+        return None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING,)
+    return resolved, ()
+
+
+def _read_config(path: Path) -> tuple[Optional[dict[str, Any]], Optional[str], tuple[str, ...]]:
+    try:
+        text = path.read_text(encoding="utf-8")
+        payload = json.loads(text)
+    except Exception:
+        return None, None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE,)
+    if not isinstance(payload, dict):
+        return None, None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,)
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    digest = "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return payload, digest, ()
+
+
+def _runtime_config(
+    repo_root: Path,
+    payload: dict[str, Any],
+) -> Optional[SignerSocketServiceRuntimeWiringConfig]:
+    try:
+        key_profile = payload["key_provider_profile"]
+        peer_policy = payload["peer_policy"]
+        if not isinstance(key_profile, dict) or not isinstance(peer_policy, dict):
+            return None
+        return SignerSocketServiceRuntimeWiringConfig(
+            repo_root=repo_root,
+            socket_path=payload.get("socket_path"),
+            key_provider_profile=key_profile,
+            peer_policy=peer_policy,
+            provider_mode=str(payload.get("provider_mode") or ""),
+            allow_test_only_key_material=payload.get("allow_test_only_key_material") is True,
+            permission_snapshot_fresh=payload.get("permission_snapshot_fresh") is True,
+            max_requests=int(payload.get("max_requests") or 0),
+            timeout_s=float(payload.get("timeout_s") or 0),
+            max_request_bytes=int(payload.get("max_request_bytes") or 0),
+            max_response_bytes=int(payload.get("max_response_bytes") or 0),
+        )
+    except Exception:
+        return None
+
+
+def _reject(
+    *reasons: str,
+    config_path: Optional[str] = None,
+    config_digest: Optional[str] = None,
+    runtime_result: Optional[dict[str, Any]] = None,
+) -> SignerSocketServiceRuntimeBootstrapResult:
+    return SignerSocketServiceRuntimeBootstrapResult(
+        accepted=False,
+        status=SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
+        rejection_reasons=tuple(dict.fromkeys(reason for reason in reasons if reason)),
+        config_path=config_path,
+        config_digest=config_digest,
+        runtime_result=runtime_result,
+    )
+
+
+def _is_inside(child: Path, parent: Path) -> bool:
+    child_r = child.resolve()
+    parent_r = parent.resolve()
+    return child_r == parent_r or parent_r in child_r.parents
+
+
+__all__ = [
+    "FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED",
+    "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO",
+    "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING",
+    "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE",
+    "FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE",
+    "FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED",
+    "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT",
+    "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED",
+    "SignerSocketServiceRuntimeBootstrapResult",
+    "run_reddog_signer_socket_service_runtime_bootstrap",
+]
