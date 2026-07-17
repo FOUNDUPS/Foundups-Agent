@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
@@ -33,13 +34,13 @@ from modules.ai_intelligence.ai_gateway.tests.model_signed_evidence_test_helpers
 )
 
 
-def model_runtime_binding_receipt(
+def model_selection_and_runtime_binding_receipts(
     *,
     runtime_surface: str,
     model_id: str = "openai/gpt-5.6-code",
     task_family: str = "reddog_runtime_model_call",
-) -> dict[str, Any]:
-    """Build a valid single-model runtime binding receipt for runtime tests."""
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build matching model-selection and runtime-binding receipts for tests."""
 
     task_set_digest = "sha256:task-set"
     held_out_digest = "sha256:held-out"
@@ -122,4 +123,24 @@ def model_runtime_binding_receipt(
     )
     assert selection.decision == SelectionDecision.SELECTED
     assert receipt.decision == ModelRuntimeBindingDecision.BOUND
-    return receipt.to_dict()
+    return _json_normalized(selection.to_dict()), _json_normalized(receipt.to_dict())
+
+
+def model_runtime_binding_receipt(
+    *,
+    runtime_surface: str,
+    model_id: str = "openai/gpt-5.6-code",
+    task_family: str = "reddog_runtime_model_call",
+) -> dict[str, Any]:
+    """Build a valid single-model runtime binding receipt for runtime tests."""
+
+    _, receipt = model_selection_and_runtime_binding_receipts(
+        runtime_surface=runtime_surface,
+        model_id=model_id,
+        task_family=task_family,
+    )
+    return receipt
+
+
+def _json_normalized(value: dict[str, Any]) -> dict[str, Any]:
+    return json.loads(json.dumps(value, sort_keys=True, default=str))

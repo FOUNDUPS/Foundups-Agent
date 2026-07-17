@@ -16,6 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verifi
     QueueAuthorizedVerifiedOutcomeRatchetInvokeReason,
     invoke_reddog_wre_queue_authorized_verified_outcome_ratchet,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_selection_and_runtime_binding_receipts,
+)
 from modules.infrastructure.wre_core.src import reddog_verified_outcome_ratchet as ratchet
 from modules.infrastructure.wre_core.src.reddog_verified_draft_pr_publish import (
     VERIFIED_DRAFT_PR_PUBLISH_ACCEPT,
@@ -140,6 +143,17 @@ def _ratchet_request() -> dict:
     }
 
 
+def _ratchet_request_with_model_feedback() -> dict:
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface="backend_architect",
+        task_family="reddog_runtime_model_call",
+    )
+    request = _ratchet_request()
+    request["model_selection_receipt"] = selection
+    request["model_runtime_binding_receipt"] = runtime_binding
+    return request
+
+
 def _invoke(
     *,
     queue_publish: dict | None = None,
@@ -178,6 +192,39 @@ def test_records_outcome_from_accepted_queue_publish_result() -> None:
     assert result.no_merge_performed is True
     assert result.no_reward_settlement_performed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+def test_emits_model_selection_outcome_feedback_when_model_receipts_are_bound() -> None:
+    result = _invoke(request=_ratchet_request_with_model_feedback())
+
+    assert result.decision == QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT
+    assert result.model_selection_outcome_receipt is not None
+    feedback = result.model_selection_outcome_receipt
+    assert feedback["feedback_eligible"] is True
+    assert feedback["selection_receipt_id"] == _ratchet_request_with_model_feedback()[
+        "model_selection_receipt"
+    ]["receipt_id"]
+    assert feedback["model_runtime_binding_receipt_id"] == _ratchet_request_with_model_feedback()[
+        "model_runtime_binding_receipt"
+    ]["receipt_id"]
+    assert feedback["verification_receipt_ids"] == [VERIFIER_RECEIPT_ID]
+    assert feedback["evidence_receipt_ids"] == [PUBLISH_RECEIPT_ID, VERIFIER_RECEIPT_ID]
+
+
+def test_invalid_model_feedback_receipt_rejects_before_ratchet_store_write() -> None:
+    request = _ratchet_request_with_model_feedback()
+    request["model_runtime_binding_receipt"] = dict(request["model_runtime_binding_receipt"])
+    request["model_runtime_binding_receipt"]["selection_receipt_id"] = "model_selection_receipt:other"
+    store = ratchet.InMemoryOutcomeRatchetStore()
+
+    result = _invoke(request=request, store=store)
+
+    assert result.decision == QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_REJECT
+    assert (
+        QueueAuthorizedVerifiedOutcomeRatchetInvokeReason.MODEL_FEEDBACK_RECEIPT_INVALID
+        in result.rejection_reasons
+    )
+    assert store.records == []
 
 
 def test_explicit_invoke_missing_rejects_before_store() -> None:
