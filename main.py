@@ -35,6 +35,7 @@ import io
 import atexit
 import hashlib
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, Mapping
 
@@ -1609,6 +1610,33 @@ def _reddog_resident_architect_cycle_requested() -> bool:
     return _reddog_truthy_env_value(product_mode)
 
 
+def _reddog_resident_architect_cycle_bucket() -> str:
+    explicit = os.getenv("REDDOG_RESIDENT_ARCHITECT_CYCLE_BUCKET", "").strip()
+    if explicit:
+        return explicit
+    raw_hours = os.getenv("REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS", "24").strip()
+    try:
+        hours = int(raw_hours)
+    except (TypeError, ValueError):
+        hours = 24
+    if hours <= 0:
+        return ""
+    now = _reddog_resident_architect_now()
+    bucket = int(now.timestamp()) // (hours * 60 * 60)
+    return f"{hours}h:{bucket}"
+
+
+def _reddog_resident_architect_now() -> datetime:
+    raw = os.getenv("REDDOG_RESIDENT_ARCHITECT_NOW_ISO", "").strip()
+    if raw:
+        try:
+            value = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        except ValueError:
+            pass
+    return datetime.now(timezone.utc)
+
+
 class _RedDogConfiguredExternalResearchRetriever:
     """File-backed approved external research snapshot retriever for resident preflight."""
 
@@ -1641,6 +1669,7 @@ def _reddog_resident_architect_intent_id(
     principal_ref: str,
     foundup_id: str,
     work_focus: str,
+    cycle_bucket: str = "",
 ) -> str:
     explicit = os.getenv("REDDOG_RESIDENT_ARCHITECT_INTENT_ID", "").strip()
     if explicit:
@@ -1650,6 +1679,8 @@ def _reddog_resident_architect_intent_id(
         "principal_ref": principal_ref,
         "work_focus": work_focus,
     }
+    if cycle_bucket:
+        payload["cycle_bucket"] = cycle_bucket
     digest = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     return f"sha256:{digest}"
 
@@ -1698,6 +1729,9 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
     Env:
         REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE=1           Auto-run resident cycle when low-level flag unset
         REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE            Explicit enable/disable override
+        REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS=24         New intent cadence; 0 disables cadence
+        REDDOG_RESIDENT_ARCHITECT_CYCLE_BUCKET             Optional explicit cadence bucket
+        REDDOG_RESIDENT_ARCHITECT_NOW_ISO                  Optional deterministic runtime clock
         REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=0 Block startup if rejected
         REDDOG_RESIDENT_ARCHITECT_INTENT_ID                Optional stable intent ID
         REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS               Work focus submitted to RedDog
@@ -1726,10 +1760,13 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         os.getenv("REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS", "").strip()
         or "main.py resident RedDog architect cycle"
     )
+    explicit_intent_id = os.getenv("REDDOG_RESIDENT_ARCHITECT_INTENT_ID", "").strip()
+    cycle_bucket = "" if explicit_intent_id else _reddog_resident_architect_cycle_bucket()
     intent_id = _reddog_resident_architect_intent_id(
         principal_ref=principal_ref,
         foundup_id=foundup_id,
         work_focus=work_focus,
+        cycle_bucket=cycle_bucket,
     )
     red_dog_intent = {
         "schema_version": "reddog_intent.v1",
@@ -1737,6 +1774,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         "principal_ref": principal_ref,
         "foundup_id": foundup_id,
         "work_focus": work_focus,
+        "cycle_bucket": cycle_bucket,
         "requested_authority": "read_only_audit",
         "origin": "main.py",
         "submits_executable_authority": False,
