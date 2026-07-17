@@ -37,23 +37,26 @@ def _write_json(root: Path, name: str, payload: object) -> Path:
     return path
 
 
-def _cycle_payload(tmp_path: Path) -> dict:
+def _cycle_payload(tmp_path: Path) -> tuple[dict, dict]:
     plan, execution, gate_supply = _cycle_sources(tmp_path)
-    return build_model_autoresearch_cycle_receipt(
+    cycle = build_model_autoresearch_cycle_receipt(
         plan_receipt=plan,
         campaign_execution_receipt=execution,
         promotion_gate_supply_receipt=gate_supply,
-    ).to_dict()
+    )
+    return cycle.to_dict(), plan.to_dict()
 
 
 def test_cycle_feedback_bootstrap_appends_cycle_feedback_record(tmp_path: Path) -> None:
     runtime = tmp_path / "runtime"
-    cycle_payload = _cycle_payload(tmp_path)
+    cycle_payload, plan_payload = _cycle_payload(tmp_path)
+    plan_path = _write_json(runtime, "plan_receipt.json", plan_payload)
     cycle_path = _write_json(runtime, "cycle_receipt.json", cycle_payload)
     output_path = runtime / "cycle_feedback.jsonl"
 
     result = run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
         repo_root=REPO_ROOT,
+        plan_receipt_path=plan_path,
         cycle_receipt_path=cycle_path,
         output_path=output_path,
     )
@@ -68,6 +71,8 @@ def test_cycle_feedback_bootstrap_appends_cycle_feedback_record(tmp_path: Path) 
     records = [json.loads(line) for line in output_path.read_text(encoding="utf-8").splitlines()]
     assert len(records) == 1
     assert records[0]["cycle_receipt_id"] == cycle_payload["receipt_id"]
+    assert records[0]["source_plan_context_bound"] is True
+    assert records[0]["task_family"] == plan_payload["policy"]["task_family"]
 
 
 def test_cycle_feedback_bootstrap_rejects_inside_repo_inputs_and_output(tmp_path: Path) -> None:
@@ -77,6 +82,7 @@ def test_cycle_feedback_bootstrap_rejects_inside_repo_inputs_and_output(tmp_path
     try:
         result = run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
             repo_root=REPO_ROOT,
+            plan_receipt_path=repo_cycle,
             cycle_receipt_path=repo_cycle,
             output_path=repo_output,
         )
@@ -86,19 +92,22 @@ def test_cycle_feedback_bootstrap_rejects_inside_repo_inputs_and_output(tmp_path
 
     assert result.accepted is False
     assert result.status == MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_BOOTSTRAP_NOT_READY
+    assert "model_autoresearch_cycle_feedback_plan_receipt_path_inside_repo" in result.rejection_reasons
     assert "model_autoresearch_cycle_receipt_path_inside_repo" in result.rejection_reasons
     assert "model_autoresearch_cycle_feedback_ledger_output_path_invalid" in result.rejection_reasons
 
 
 def test_cycle_feedback_bootstrap_rejects_tampered_cycle_receipt(tmp_path: Path) -> None:
     runtime = tmp_path / "runtime"
-    cycle_payload = _cycle_payload(tmp_path)
+    cycle_payload, plan_payload = _cycle_payload(tmp_path)
+    plan_path = _write_json(runtime, "plan_receipt.json", plan_payload)
     cycle_payload["executed_candidate_ids"] = ["provider/tampered"]
     cycle_path = _write_json(runtime, "tampered_cycle_receipt.json", cycle_payload)
     output_path = runtime / "cycle_feedback.jsonl"
 
     result = run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
         repo_root=REPO_ROOT,
+        plan_receipt_path=plan_path,
         cycle_receipt_path=cycle_path,
         output_path=output_path,
     )
@@ -110,16 +119,39 @@ def test_cycle_feedback_bootstrap_rejects_tampered_cycle_receipt(tmp_path: Path)
 
 def test_cycle_feedback_bootstrap_rejects_missing_output_path(tmp_path: Path) -> None:
     runtime = tmp_path / "runtime"
-    cycle_path = _write_json(runtime, "cycle_receipt.json", _cycle_payload(tmp_path))
+    cycle_payload, plan_payload = _cycle_payload(tmp_path)
+    plan_path = _write_json(runtime, "plan_receipt.json", plan_payload)
+    cycle_path = _write_json(runtime, "cycle_receipt.json", cycle_payload)
 
     result = run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
         repo_root=REPO_ROOT,
+        plan_receipt_path=plan_path,
         cycle_receipt_path=cycle_path,
         output_path=None,
     )
 
     assert result.accepted is False
     assert "model_autoresearch_cycle_feedback_ledger_output_path_invalid" in result.rejection_reasons
+
+
+def test_cycle_feedback_bootstrap_rejects_tampered_plan_receipt(tmp_path: Path) -> None:
+    runtime = tmp_path / "runtime"
+    cycle_payload, plan_payload = _cycle_payload(tmp_path)
+    plan_payload["policy"]["task_family"] = "security"
+    plan_path = _write_json(runtime, "tampered_plan_receipt.json", plan_payload)
+    cycle_path = _write_json(runtime, "cycle_receipt.json", cycle_payload)
+    output_path = runtime / "cycle_feedback.jsonl"
+
+    result = run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=plan_path,
+        cycle_receipt_path=cycle_path,
+        output_path=output_path,
+    )
+
+    assert result.accepted is False
+    assert "REJECT_AUTORESEARCH_CYCLE_SOURCE_PLAN_RECEIPT_INVALID" in result.rejection_reasons
+    assert not output_path.exists()
 
 
 def test_cycle_feedback_bootstrap_module_has_no_provider_network_command_runtime_or_holoindex_imports() -> None:

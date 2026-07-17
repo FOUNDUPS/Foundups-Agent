@@ -16,9 +16,7 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_cycle_feedback_le
     ModelAutoResearchCycleFeedbackLedgerAdmissionReason,
     admit_model_autoresearch_cycle_feedback,
 )
-from modules.ai_intelligence.ai_gateway.src.model_autoresearch_cycle_receipt import (
-    build_model_autoresearch_cycle_receipt,
-)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_cycle_receipt import build_model_autoresearch_cycle_receipt
 from modules.ai_intelligence.ai_gateway.tests.test_model_autoresearch_campaign_execution import REPO_ROOT
 from modules.ai_intelligence.ai_gateway.tests.test_model_autoresearch_cycle_receipt import (
     _cycle_sources,
@@ -49,13 +47,24 @@ def _cycle(tmp_path: Path):
     )
 
 
+def _cycle_with_plan(tmp_path: Path):
+    plan, execution, gate_supply = _cycle_sources(tmp_path)
+    cycle = build_model_autoresearch_cycle_receipt(
+        plan_receipt=plan,
+        campaign_execution_receipt=execution,
+        promotion_gate_supply_receipt=gate_supply,
+    )
+    return cycle, plan
+
+
 def test_admits_autoresearch_cycle_receipt_to_injected_ledger_store(tmp_path: Path) -> None:
-    cycle = _cycle(tmp_path)
+    cycle, plan = _cycle_with_plan(tmp_path)
     store = InMemoryModelAutoResearchCycleFeedbackLedgerStore()
 
     result = admit_model_autoresearch_cycle_feedback(
         explicit_autoresearch_cycle_feedback_ledger_admission_requested=True,
         cycle_receipt=cycle.to_dict(),
+        source_plan_receipt=plan.to_dict(),
         store=store,
     )
 
@@ -71,17 +80,22 @@ def test_admits_autoresearch_cycle_receipt_to_injected_ledger_store(tmp_path: Pa
     assert len(store.records) == 1
     assert store.records[0]["record_type"] == MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_RECORD_TYPE
     assert store.records[0]["cycle_receipt_id"] == cycle.receipt_id
+    assert store.records[0]["source_plan_context_bound"] is True
+    assert store.records[0]["task_family"] == plan.policy.task_family
+    assert store.records[0]["catalog_snapshot_id"] == plan.policy.catalog_snapshot_id
+    assert store.records[0]["source_plan_receipt_digest"].startswith("sha256:")
     assert store.records[0]["executed_candidate_ids"] == list(cycle.executed_candidate_ids)
 
 
 def test_jsonl_store_writes_one_feedback_record(tmp_path: Path) -> None:
-    cycle = _cycle(tmp_path)
+    cycle, plan = _cycle_with_plan(tmp_path)
     path = tmp_path / "cycle_feedback.jsonl"
     store = JsonlModelAutoResearchCycleFeedbackLedgerStore(path)
 
     result = admit_model_autoresearch_cycle_feedback(
         explicit_autoresearch_cycle_feedback_ledger_admission_requested=True,
         cycle_receipt=cycle,
+        source_plan_receipt=plan,
         store=store,
     )
 
@@ -89,20 +103,23 @@ def test_jsonl_store_writes_one_feedback_record(tmp_path: Path) -> None:
     records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
     assert len(records) == 1
     assert records[0]["cycle_receipt_id"] == cycle.receipt_id
+    assert records[0]["source_plan_context_bound"] is True
 
 
 def test_explicit_request_and_store_are_required(tmp_path: Path) -> None:
-    cycle = _cycle(tmp_path)
+    cycle, plan = _cycle_with_plan(tmp_path)
     store = InMemoryModelAutoResearchCycleFeedbackLedgerStore()
 
     missing_request = admit_model_autoresearch_cycle_feedback(
         explicit_autoresearch_cycle_feedback_ledger_admission_requested=False,
         cycle_receipt=cycle.to_dict(),
+        source_plan_receipt=plan.to_dict(),
         store=store,
     )
     missing_store = admit_model_autoresearch_cycle_feedback(
         explicit_autoresearch_cycle_feedback_ledger_admission_requested=True,
         cycle_receipt=cycle.to_dict(),
+        source_plan_receipt=plan.to_dict(),
         store=None,
     )
 
@@ -117,18 +134,59 @@ def test_explicit_request_and_store_are_required(tmp_path: Path) -> None:
 
 
 def test_tampered_serialized_cycle_receipt_rejects_before_store_write(tmp_path: Path) -> None:
-    cycle = _cycle(tmp_path).to_dict()
-    cycle["executed_candidate_ids"] = ["provider/tampered"]
+    cycle, plan = _cycle_with_plan(tmp_path)
+    cycle_payload = cycle.to_dict()
+    cycle_payload["executed_candidate_ids"] = ["provider/tampered"]
     store = InMemoryModelAutoResearchCycleFeedbackLedgerStore()
 
     result = admit_model_autoresearch_cycle_feedback(
         explicit_autoresearch_cycle_feedback_ledger_admission_requested=True,
-        cycle_receipt=cycle,
+        cycle_receipt=cycle_payload,
+        source_plan_receipt=plan.to_dict(),
         store=store,
     )
 
     assert result.decision == MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_REJECT
     assert ModelAutoResearchCycleFeedbackLedgerAdmissionReason.CYCLE_RECEIPT_INVALID in result.rejection_reasons
+    assert store.records == []
+
+
+def test_mismatched_source_plan_rejects_before_store_write(tmp_path: Path) -> None:
+    cycle, plan = _cycle_with_plan(tmp_path)
+    mismatched_plan = plan.to_dict()
+    mismatched_plan["policy"] = {
+        **mismatched_plan["policy"],
+        "task_family": "security",
+    }
+    # Rehydration rejects this as digest tamper before the mismatch check.
+    store = InMemoryModelAutoResearchCycleFeedbackLedgerStore()
+    tampered_result = admit_model_autoresearch_cycle_feedback(
+        explicit_autoresearch_cycle_feedback_ledger_admission_requested=True,
+        cycle_receipt=cycle.to_dict(),
+        source_plan_receipt=mismatched_plan,
+        store=store,
+    )
+    assert tampered_result.decision == MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_REJECT
+    assert (
+        ModelAutoResearchCycleFeedbackLedgerAdmissionReason.SOURCE_PLAN_RECEIPT_INVALID
+        in tampered_result.rejection_reasons
+    )
+
+    other_plan = replace(
+        plan,
+        receipt_id="model_autoresearch_plan:other",
+    )
+    mismatch_result = admit_model_autoresearch_cycle_feedback(
+        explicit_autoresearch_cycle_feedback_ledger_admission_requested=True,
+        cycle_receipt=cycle,
+        source_plan_receipt=other_plan,
+        store=store,
+    )
+    assert mismatch_result.decision == MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_REJECT
+    assert (
+        ModelAutoResearchCycleFeedbackLedgerAdmissionReason.SOURCE_PLAN_RECEIPT_MISMATCH
+        in mismatch_result.rejection_reasons
+    )
     assert store.records == []
 
 

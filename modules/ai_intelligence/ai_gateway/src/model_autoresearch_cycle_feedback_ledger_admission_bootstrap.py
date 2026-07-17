@@ -2,8 +2,9 @@
 
 Slice: REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_MAIN_PREFLIGHT_PHASE1
 
-This adapter reads an outside-repo AutoResearch cycle receipt and appends a
-feedback record to an outside-repo AutoResearch cycle feedback ledger.
+This adapter reads outside-repo AutoResearch plan and cycle receipts, verifies
+their binding, and appends a feedback record to an outside-repo AutoResearch
+cycle feedback ledger.
 
 It does not call providers, run benchmarks, promote models, mutate catalogs,
 write PatternMemory, re-index HoloIndex, bind runtime defaults, spawn workers,
@@ -60,12 +61,20 @@ class ModelAutoResearchCycleFeedbackLedgerBootstrapResult:
 def run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
     *,
     repo_root: Path | str,
+    plan_receipt_path: Path | str | None,
     cycle_receipt_path: Path | str | None,
     output_path: Path | str | None,
 ) -> ModelAutoResearchCycleFeedbackLedgerBootstrapResult:
     """Append a verified AutoResearch cycle receipt into an outside-repo ledger."""
 
     root = Path(repo_root).resolve()
+    plan_payload, plan_reasons = _read_json_outside_repo(
+        root,
+        plan_receipt_path,
+        missing_reason="missing_model_autoresearch_cycle_feedback_plan_receipt_path",
+        inside_reason="model_autoresearch_cycle_feedback_plan_receipt_path_inside_repo",
+        malformed_reason="malformed_model_autoresearch_cycle_feedback_plan_receipt",
+    )
     cycle_payload, cycle_reasons = _read_json_outside_repo(
         root,
         cycle_receipt_path,
@@ -74,14 +83,18 @@ def run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
         malformed_reason="malformed_model_autoresearch_cycle_receipt",
     )
     reasons = [
+        *plan_reasons,
         *cycle_reasons,
         *_output_path_reasons(root, output_path),
     ]
+    if plan_payload is not None and not isinstance(plan_payload, Mapping):
+        reasons.append("malformed_model_autoresearch_cycle_feedback_plan_receipt")
     if cycle_payload is not None and not isinstance(cycle_payload, Mapping):
         reasons.append("malformed_model_autoresearch_cycle_receipt")
     if reasons:
         return _not_ready(reasons)
 
+    assert isinstance(plan_payload, Mapping)
     assert isinstance(cycle_payload, Mapping)
     output = _resolve_output_path(root, output_path)
     assert output is not None
@@ -89,6 +102,7 @@ def run_reddog_model_autoresearch_cycle_feedback_ledger_admission_bootstrap(
         admission = admit_model_autoresearch_cycle_feedback(
             explicit_autoresearch_cycle_feedback_ledger_admission_requested=True,
             cycle_receipt=cycle_payload,
+            source_plan_receipt=plan_payload,
             store=JsonlModelAutoResearchCycleFeedbackLedgerStore(output),
         )
     except Exception as exc:

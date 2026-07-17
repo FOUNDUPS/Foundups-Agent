@@ -1036,6 +1036,7 @@ def test_main_preflight_model_autoresearch_cycle_feedback_admission_runs_before_
 
     cycle_feedback.assert_called_once()
     cycle_feedback_kwargs = cycle_feedback.call_args.kwargs
+    assert cycle_feedback_kwargs["plan_receipt_path"] == str(runtime_root / "model_autoresearch_plan_receipt.json")
     assert cycle_feedback_kwargs["cycle_receipt_path"] == str(
         runtime_root / "model_autoresearch_cycle_receipt.json"
     )
