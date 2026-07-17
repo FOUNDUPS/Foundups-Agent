@@ -1,5 +1,40 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Campaign Promotion Gate Supply
+
+**Who:** 0102 Codex
+**Type:** Feedback Loop Bridge
+**Slice:** MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_PHASE1
+
+**What:** Added a bridge that turns a verified
+`ModelAutoResearchCampaignExecutionReceipt` into promotion-gate receipts for the
+next AutoResearch planning cycle.
+
+**Why:** Campaign execution receipts contain measured benchmark evidence, but
+the planner consumes promotion-gate receipts. This slice closes that internal
+evidence loop without promoting models or mutating runtime defaults.
+
+**Files:**
+- `src/model_autoresearch_campaign_promotion_gate_supply.py` - rehydrates the
+  campaign execution receipt, requires exact candidate-policy coverage,
+  evaluates existing promotion gates, writes an outside-repo supply receipt, and
+  supports rehydration of the supply artifact.
+- `tests/test_model_autoresearch_campaign_promotion_gate_supply.py` - verifies
+  successful gate supply, no-authority no-promotion behavior, policy mismatch
+  rejection, execution tamper rejection, output path rejection, rehydration
+  tamper rejection, and AST import/call denylist controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: receipt-bound promotion-gate supply from verified AutoResearch
+  campaign execution output.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, worker spawn,
+  shell execution, or main.py preflight wiring.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Campaign Execution Artifact Supply Bootstrap
 
 **Who:** 0102 Codex
