@@ -1,5 +1,45 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Model Feedback Ledger Admission
+
+**Who:** 0102 Codex
+**Type:** Feedback Admission
+**Slice:** REDDOG_MODEL_FEEDBACK_LEDGER_ADMISSION_PHASE1
+
+**What:** Added verified model-selection outcome rehydration and an explicit
+model-feedback ledger admission layer.
+
+**Why:** RedDog verified-outcome ratchet can now emit a
+`ModelSelectionOutcomeReceipt`, but no model-feedback ledger admitted that
+receipt. Recursive model intelligence needs a receipt-checked ledger entry
+before any later benchmark, promotion, or PatternMemory feedback can trust the
+outcome.
+
+**Files:**
+- `src/model_intelligence_outcomes.py` - rehydrates serialized outcome receipts
+  and recomputes deterministic IDs before feedback use.
+- `src/model_feedback_ledger.py` - explicit injected-store admission with
+  source-ratchet consistency checks and secret scanning.
+- `tests/test_model_intelligence_outcomes.py` - serialized receipt rehydration
+  and tamper rejection tests.
+- `tests/test_model_feedback_ledger.py` - ledger admission acceptance,
+  fail-closed, mismatch, secret, and AST boundary tests.
+
+**Truth Boundary:**
+- IMPLEMENTED: explicit ledger admission for feedback-eligible model-selection
+  outcome receipts.
+- IMPLEMENTED: serialized outcome receipts are rehydrated and digest-checked
+  before admission.
+- IMPLEMENTED: optional source-ratchet verifier/runtime-binding consistency is
+  checked before ledger writes.
+- NOT IMPLEMENTED: provider calls, benchmark execution, catalog promotion,
+  runtime default binding, PatternMemory writes, HoloIndex re-indexing, or
+  automatic resident-loop model-feedback admission.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - Model Outcome Runtime Binding Feedback Carry
 
 **Who:** 0102 Codex

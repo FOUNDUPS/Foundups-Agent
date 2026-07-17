@@ -100,6 +100,23 @@ receipt to that benchmark evidence. Outcome receipts are feedback-eligible only
 when the independent verifier accepts, task completion is true, evidence is
 verified, and no regression or unauthorized change is detected.
 
+#### Model Feedback Ledger Admission
+
+```python
+rehydrate_model_selection_outcome_receipt(...) -> ModelSelectionOutcomeReceipt
+admit_model_selection_outcome_feedback(...) -> ModelFeedbackLedgerAdmissionResult
+```
+
+The admission layer accepts a serialized or typed
+`ModelSelectionOutcomeReceipt`, recomputes its deterministic receipt ID, requires
+`feedback_eligible == True`, optionally checks the source ratchet verifier and
+runtime-binding fields, and writes a minimal feedback record through an injected
+`ModelFeedbackLedgerStore`.
+
+The default in-memory and JSONL stores are append-only adapters. The API is
+explicit-invoke only and does not call providers, run benchmarks, promote
+models, write PatternMemory, mutate HoloIndex, or bind RedDog runtime defaults.
+
 #### Model Combination Benchmark Harness
 
 ```python
