@@ -26,6 +26,10 @@ from .model_combination_benchmark_harness import (
     ModelBenchmarkTaskOutput,
     build_model_benchmark_candidate,
 )
+from .model_autoresearch_output_evidence_bundle import (
+    ModelAutoResearchOutputEvidenceStore,
+    build_model_autoresearch_output_evidence_record,
+)
 from .model_intelligence_outcomes import ModelOutcomeMetrics
 
 
@@ -193,10 +197,12 @@ def build_configured_gateway_benchmark_runner(
     caller: GatewayModelCaller,
     prompt_source: PromptSource,
     policy: ConfiguredGatewayRunnerPolicy,
+    output_evidence_store: ModelAutoResearchOutputEvidenceStore | None = None,
 ) -> BenchmarkRunner:
     """Build a ``BenchmarkRunner`` backed by an explicit configured gateway."""
 
     normalized_policy = policy.normalized()
+    policy_digest = _policy_digest(normalized_policy)
 
     def _runner(
         task: ModelBenchmarkTask,
@@ -248,18 +254,37 @@ def build_configured_gateway_benchmark_runner(
             if result.provider != provider or result.model != model_name:
                 raise ValueError("configured_gateway_runner_call_route_mismatch")
             response_digest = _content_digest(result.response_text)
-            call_records.append(
-                {
-                    "role": assignment.role,
-                    "provider": result.provider,
-                    "model": result.model,
-                    "response_digest": response_digest,
-                    "latency_ms": result.latency_ms,
-                    "input_tokens": result.input_tokens,
-                    "output_tokens": result.output_tokens,
-                    "cost_estimate_usd": result.cost_estimate_usd,
-                }
-            )
+            evidence_record_id = None
+            if output_evidence_store is not None:
+                evidence = build_model_autoresearch_output_evidence_record(
+                    task_id=normalized_task.task_id,
+                    prompt_digest=normalized_task.prompt_digest,
+                    candidate_id=candidate.candidate_id,
+                    candidate_topology_digest=candidate.topology_digest,
+                    role=assignment.role,
+                    provider=result.provider,
+                    model=result.model,
+                    policy_digest=policy_digest,
+                    response_text=result.response_text,
+                    latency_ms=result.latency_ms,
+                    input_tokens=result.input_tokens,
+                    output_tokens=result.output_tokens,
+                    cost_estimate_usd=result.cost_estimate_usd,
+                )
+                evidence_record_id = output_evidence_store.append(evidence)
+            call_record = {
+                "role": assignment.role,
+                "provider": result.provider,
+                "model": result.model,
+                "response_digest": response_digest,
+                "latency_ms": result.latency_ms,
+                "input_tokens": result.input_tokens,
+                "output_tokens": result.output_tokens,
+                "cost_estimate_usd": result.cost_estimate_usd,
+            }
+            if evidence_record_id:
+                call_record["output_evidence_record_id"] = evidence_record_id
+            call_records.append(call_record)
             total_latency_ms += result.latency_ms
             total_input_tokens += result.input_tokens
             total_output_tokens += result.output_tokens
@@ -272,7 +297,7 @@ def build_configured_gateway_benchmark_runner(
             "prompt_digest": normalized_task.prompt_digest,
             "candidate_id": candidate.candidate_id,
             "candidate_topology_digest": candidate.topology_digest,
-            "policy_digest": _policy_digest(normalized_policy),
+            "policy_digest": policy_digest,
             "calls": call_records,
         }
         return ModelBenchmarkTaskOutput(

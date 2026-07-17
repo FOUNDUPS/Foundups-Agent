@@ -83,6 +83,12 @@ the exact provider/model role assignment in the candidate, supports panel role
 calls, and returns only digest-bound output and runner receipts to the benchmark
 harness.
 
+`src/model_autoresearch_output_evidence_bundle.py` provides the content-bearing
+evidence layer for those configured runs. When an output evidence store is
+injected, each raw model response is written to an outside-repo JSONL record
+whose response digest and record ID can be rehydrated later by an independent
+verifier. Secret-bearing output is rejected before persistence.
+
 This creates a real provider-call seam for AutoResearch benchmarks without
 turning it on at resident startup. It does not choose candidates, verify model
 answers, promote models, mutate catalogs, write PatternMemory, re-index
@@ -92,8 +98,9 @@ defaults.
 `src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py` can
 use this runner only when `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE` is
 set to `configured_gateway`, prompt records are supplied from outside the repo,
-providers are explicitly allowlisted, and verifier mode is
-`exact_output_digest`. The default remains deterministic fixture execution.
+providers are explicitly allowlisted, an outside-repo output evidence path is
+supplied, and verifier mode is `exact_output_digest`. The default remains
+deterministic fixture execution.
 
 ## Model Combination Benchmark Harness
 

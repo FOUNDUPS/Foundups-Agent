@@ -1,5 +1,41 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Output Evidence Bundle
+
+**Who:** 0102 Codex
+**Type:** Runtime Benchmark Evidence
+**Slice:** MODEL_AUTORESEARCH_OUTPUT_EVIDENCE_BUNDLE_PHASE1
+
+**What:** Added content-bearing output evidence records for configured gateway
+AutoResearch benchmark calls and required an outside-repo JSONL evidence path
+when resident startup uses `configured_gateway` mode.
+
+**Why:** The configured runner returned only output digests. An independent
+semantic verifier cannot inspect or cite a model answer if raw output is not
+preserved as governed evidence.
+
+**Files:**
+- `src/model_autoresearch_output_evidence_bundle.py` - digest-bound output
+  evidence records, rehydration, secret scan, and outside-repo JSONL store.
+- `src/model_autoresearch_configured_gateway_runner.py` - optional evidence
+  store injection and evidence-record ID binding into runner receipts.
+- `src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py` -
+  configured-mode output evidence path requirement.
+- `tests/test_model_autoresearch_output_evidence_bundle.py` and adjacent tests
+  - tamper rejection, secret rejection, outside-repo guard, configured runner,
+  bootstrap, and `main.py` pass-through coverage.
+
+**Truth Boundary:**
+- IMPLEMENTED: content-bearing benchmark output evidence, digest rehydration,
+  outside-repo persistence, and configured startup evidence-path enforcement.
+- NOT IMPLEMENTED: semantic answer verification, model promotion, PatternMemory
+  writes, HoloIndex re-indexing, runtime model binding, worker spawn, shell
+  execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Configured Gateway Runner
 
 **Who:** 0102 Codex
