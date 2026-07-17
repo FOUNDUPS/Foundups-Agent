@@ -146,6 +146,24 @@ def _feedback_record(model_id: str) -> dict:
     }
 
 
+def _cycle_feedback_record(model_id: str) -> dict:
+    return {
+        "record_type": "model_autoresearch_cycle_feedback",
+        "schema_version": "model_autoresearch_cycle_feedback_record.v1",
+        "feedback_record_id": "model_autoresearch_cycle_feedback_runtime",
+        "cycle_receipt_id": "model_autoresearch_cycle:runtime",
+        "source_plan_receipt_id": "model_autoresearch_plan:runtime",
+        "source_plan_context_bound": True,
+        "campaign_execution_receipt_id": "model_autoresearch_campaign_execution:runtime",
+        "promotion_gate_supply_receipt_id": "model_autoresearch_promotion_gate_supply:runtime",
+        "catalog_snapshot_id": "model_catalog_snapshot:1",
+        "task_family": "architecture",
+        "executed_candidate_ids": [model_id],
+        "promotion_gate_receipt_ids": ["model_promotion_gate:runtime"],
+        "source_plan_receipt_digest": "sha256:" + "2" * 64,
+    }
+
+
 def test_supplier_writes_plan_from_serialized_inputs_and_feedback(tmp_path: Path):
     challenger = _gate("provider/challenger", pass_all=False)
     output = tmp_path / "runtime" / "autoresearch_plan.json"
@@ -172,6 +190,32 @@ def test_supplier_writes_plan_from_serialized_inputs_and_feedback(tmp_path: Path
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["receipt_id"] == result.plan_receipt_id
     assert payload["campaign_items"][0]["candidate_id"] == "provider/new"
+    assert payload["campaign_items"][0]["reason"] == "verified_runtime_feedback_unbenchmarked_candidate"
+
+
+def test_supplier_writes_plan_from_context_bound_cycle_feedback(tmp_path: Path):
+    challenger = _gate("provider/challenger", pass_all=False)
+    output = tmp_path / "runtime" / "autoresearch_plan.json"
+
+    result = run_reddog_model_autoresearch_plan_artifact_supply(
+        repo_root=REPO_ROOT,
+        promotion_gate_receipts=(challenger.to_dict(),),
+        candidate_pool=(
+            _candidate("provider/challenger").to_dict(),
+            _candidate("provider/new").to_dict(),
+        ),
+        policy=_policy(),
+        feedback_records=(_cycle_feedback_record("provider/new"),),
+        output_path=output,
+    )
+
+    assert result.accepted is True
+    assert result.status == MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ACCEPT
+    assert result.source_feedback_record_ids == ("model_autoresearch_cycle_feedback_runtime",)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["source_feedback_record_ids"] == ["model_autoresearch_cycle_feedback_runtime"]
+    assert payload["campaign_items"][0]["candidate_id"] == "provider/new"
+    assert payload["campaign_items"][0]["priority"] == "P0"
     assert payload["campaign_items"][0]["reason"] == "verified_runtime_feedback_unbenchmarked_candidate"
 
 

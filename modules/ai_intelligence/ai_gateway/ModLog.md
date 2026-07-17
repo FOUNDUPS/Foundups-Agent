@@ -1,5 +1,36 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Feedback Plan Supply Regression
+
+**Who:** 0102 Codex
+**Type:** Runtime Supply Regression
+**Slice:** REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_PLAN_SUPPLY_REGRESSION_PHASE1
+
+**What:** Added direct supplier and startup-bootstrap regression coverage proving
+context-bound cycle feedback JSONL records flow into AutoResearch plan
+artifact supply.
+
+**Why:** The planner can consume cycle feedback and the bootstrap can read JSONL
+feedback, but the runtime boundary needed an explicit proof that cycle feedback
+from the feedback ledger can influence the next benchmark plan.
+
+**Files:**
+- `tests/test_model_autoresearch_plan_artifact_supply.py` - verifies direct
+  supplier priority from cycle feedback.
+- `tests/test_model_autoresearch_plan_artifact_supply_bootstrap.py` - verifies
+  startup JSONL feedback supply with the cycle feedback shape.
+
+**Truth Boundary:**
+- IMPLEMENTED: regression proof that context-bound cycle feedback reaches
+  AutoResearch plan supply through direct and bootstrap paths.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, worker spawn,
+  shell execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Planner Input
 
 **Who:** 0102 Codex
