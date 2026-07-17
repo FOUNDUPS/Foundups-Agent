@@ -23,8 +23,27 @@ WSP_framework/src/     <- Live protocols (0102 writes with 012 approval)
        [U+2195]
 WSP_knowledge/src/     <- Immutable backups (012 can restore)
        [U+2195]
-WSP_knowledge/archive/ <- Historical versions (full audit trail)
+WSP_knowledge/archive/ <- Explicit recovery snapshots when materially useful
 ```
+
+Git commit history and focused pull requests are the canonical historical audit trail. `WSP_knowledge/archive/` supplements that trail for explicit pre-restoration or manually requested snapshots; it is not a mandatory duplicate for every edit.
+
+### 2.3 Governed Backup Unit
+
+The mandatory exact-mirror set is:
+
+1. numbered canonical protocols matching `WSP_framework/src/WSP_[0-9]*.md`;
+2. `WSP_MASTER_INDEX.md` and other documents explicitly cataloged as canonical framework sources;
+3. an annex only when an active numbered WSP explicitly incorporates that annex as normative protocol content.
+
+The following are not automatically mirrored to `WSP_knowledge/src/`:
+
+- unnumbered operational or derived annexes;
+- quick-reference documents under `WSP_framework/docs/annexes/`;
+- reports, audits, examples, and implementation notes;
+- a file that claims a parent WSP when the parent does not reciprocally attach it.
+
+Location under `WSP_framework/src/` alone does not grant protocol status. Non-protocol annexes SHOULD live under `WSP_framework/docs/annexes/`, declare their canonical source, and be referenced by that source per WSP 83. If canonical and derived content conflict, the numbered WSP controls.
 
 ## 3. Backup Trigger Classification
 
@@ -85,28 +104,35 @@ async def validate_backup_requirement(change_type: str, wsp_id: str) -> BackupDe
 ```
 
 ### 4.2 Backup Execution
+
+For each governed document change:
+
+1. verify the framework and `WSP_knowledge/src/` paths belong to the governed backup unit;
+2. apply the approved content to the framework source and its exact knowledge mirror in the same focused change;
+3. verify byte or normalized-content equality before commit;
+4. record the change, approval class, base commit, validation, and recovery method in the framework ModLog and pull request;
+5. create a filesystem-safe timestamped `WSP_knowledge/archive/` snapshot only for pre-restoration evidence, a manually requested snapshot, or another documented material recovery need.
+
+The commit and pull request provide the immutable historical version. An archive file MUST NOT be created merely to duplicate Git history, and a derived annex MUST NOT be copied into `WSP_knowledge/src/` unless Section 2.3 makes it part of the governed unit.
+
+The following is contract pseudocode, not a claim that a central backup service is currently implemented:
+
 ```python
-async def execute_backup(wsp_id: str, content: str, metadata: Dict) -> bool:
-    """
-    WSP 81: Execute backup with full audit trail
-    """
-    # Create timestamped backup
-    timestamp = datetime.now().isoformat()
-    
-    # Primary backup to WSP_knowledge/src/
-    primary_backup = Path(f"WSP_knowledge/src/{wsp_id}.md")
-    
-    # Archive with timestamp
-    archive_backup = Path(f"WSP_knowledge/archive/{wsp_id}_{timestamp}.md")
-    
-    # Write both backups
-    primary_backup.write_text(content)
-    archive_backup.write_text(content)
-    
-    # Log in ModLog with WSP 22 compliance
-    log_backup_operation(wsp_id, timestamp, metadata)
-    
-    return True
+async def execute_backup(wsp_id: str, content: str, metadata: Dict) -> BackupReceipt:
+    if not is_governed_backup_unit(wsp_id):
+        return BackupReceipt(status="derived_not_mirrored", wsp_id=wsp_id)
+
+    primary_backup = Path("WSP_knowledge/src") / f"{wsp_id}.md"
+    primary_backup.write_text(content, encoding="utf-8")
+
+    archive_path = None
+    if metadata.get("archive_required", False):
+        safe_timestamp = filesystem_safe_utc_timestamp()
+        archive_path = Path("WSP_knowledge/archive") / f"{wsp_id}_{safe_timestamp}.md"
+        archive_path.write_text(content, encoding="utf-8")
+
+    log_backup_operation(wsp_id, metadata, archive_path)
+    return BackupReceipt(status="mirrored", wsp_id=wsp_id, archive_path=archive_path)
 ```
 
 ## 5. 012 Notification System
