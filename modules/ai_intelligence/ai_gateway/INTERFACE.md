@@ -117,6 +117,23 @@ The default in-memory and JSONL stores are append-only adapters. The API is
 explicit-invoke only and does not call providers, run benchmarks, promote
 models, write PatternMemory, mutate HoloIndex, or bind RedDog runtime defaults.
 
+#### Model AutoResearch Cycle Feedback Ledger Admission
+
+```python
+rehydrate_model_autoresearch_cycle_receipt(...) -> ModelAutoResearchCycleReceipt
+admit_model_autoresearch_cycle_feedback(...) -> ModelAutoResearchCycleFeedbackLedgerAdmissionResult
+```
+
+The admission layer accepts a serialized or typed
+`ModelAutoResearchCycleReceipt`, recomputes its deterministic receipt ID,
+requires executed candidate and promotion-gate evidence, and writes a minimal
+cycle feedback record through an injected
+`ModelAutoResearchCycleFeedbackLedgerStore`.
+
+The default in-memory and JSONL stores are append-only adapters. The API is
+explicit-invoke only and does not call providers, run benchmarks, promote
+models, write PatternMemory, mutate HoloIndex, or bind RedDog runtime defaults.
+
 #### Model Combination Benchmark Harness
 
 ```python

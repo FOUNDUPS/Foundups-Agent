@@ -1,5 +1,37 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Feedback Ledger Admission
+
+**Who:** 0102 Codex
+**Type:** Feedback Ledger Admission
+**Slice:** MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_PHASE1
+
+**What:** Added an explicit-invoke admission guard for verified model
+AutoResearch cycle receipts.
+
+**Why:** The recursive model-improvement loop needs to retain completed
+AutoResearch cycles as durable learning input without promoting models or
+changing runtime bindings.
+
+**Files:**
+- `src/model_autoresearch_cycle_feedback_ledger.py` - rehydrates cycle
+  receipts, builds minimal cycle feedback records, writes through an injected
+  store, and emits a digest-bound admission receipt.
+- `tests/test_model_autoresearch_cycle_feedback_ledger.py` - verifies admission,
+  JSONL output, explicit invoke/store requirements, tamper rejection,
+  eligibility checks, secret-marker rejection, store-failure handling, JSON
+  serialization, and AST import/call denylist controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: explicit-invoke AutoResearch cycle feedback ledger admission.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, queue-stage
+  wiring, worker spawn, shell execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Receipt Supply Bootstrap
 
 **Who:** 0102 Codex
