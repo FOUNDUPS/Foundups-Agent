@@ -60,6 +60,20 @@ intelligence feedback. It does not call providers, run benchmarks, promote
 models, write PatternMemory, mutate HoloIndex, or change RedDog runtime model
 defaults.
 
+## Model AutoResearch Cycle Feedback Ledger Admission
+
+`src/model_autoresearch_cycle_feedback_ledger.py` admits verified
+`ModelAutoResearchCycleReceipt` records into an injected AutoResearch cycle
+feedback ledger. It rehydrates serialized cycle receipts, recomputes their
+deterministic IDs, verifies that the cycle contains executed candidates and
+promotion-gate receipts, scans the feedback record for secret markers, and emits
+a digest-bound admission receipt.
+
+This layer lets the recursive model-improvement loop retain which campaign was
+run and which promotion-gate receipts resulted. It does not call providers, run
+benchmarks, promote models, write PatternMemory, mutate HoloIndex, or change
+RedDog runtime model defaults.
+
 ## Model Combination Benchmark Harness
 
 `src/model_combination_benchmark_harness.py` runs deterministic held-out
