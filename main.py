@@ -3948,6 +3948,7 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
         REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional `signed_0102_bounded_code`
         REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_ENFORCED=0  Block startup on reject
         OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS=1             Bounded claims
+        OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK=0          Validate signer before claiming tasks
 
     This preflight does not create tasks, sign authority, create worktrees,
     execute shell commands, publish PRs, dispatch Hermes, write PatternMemory,

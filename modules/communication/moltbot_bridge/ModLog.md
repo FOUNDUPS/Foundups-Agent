@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK_GATE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added an optional OpenClaw signed-worker pre-claim signer healthcheck gate.
+- The gate validates the existing signer service run packet/socket before
+  AgentDB claim, so an unavailable signer leaves signed-worker tasks pending
+  instead of consuming and failing them.
+- Reused the signer service healthcheck module and kept the boundary unchanged:
+  no signer start, no secret resolution, no shell command, no repository
+  mutation, no Hermes dispatch, no PR publication, no reward settlement, and no
+  HoloIndex re-index.
+- Added regressions proving healthcheck rejection blocks before claim while a
+  passing healthcheck allows the existing signed-worker runner to proceed.
+- HoloIndex query-only pre-commit check did not surface the new gate; recorded
+  as HOLOINDEX_REDDOG_OPENCLAW_SIGNED_WORKER_SIGNER_HEALTHCHECK_INDEX_GAP.
+
 ## 2026-07-17: REDDOG_SIGNER_SERVICE_HEALTHCHECK_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
