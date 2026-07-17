@@ -1626,6 +1626,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH          Outside-repo AutoResearch plan output JSON
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_TASKS_PATH        Outside-repo held-out campaign tasks JSON
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMPTS_PATH      Outside-repo held-out prompt records JSON
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_PATH Outside-repo raw output evidence JSONL for configured_gateway
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_PATH Outside-repo campaign execution output JSON
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST   Verifier digest required by plan policy
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID Held-out split ID for benchmark receipt
@@ -1977,6 +1978,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
                     candidate_pool_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH", "") or None,
                     tasks_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_TASKS_PATH", "") or None,
                     prompt_records_path=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMPTS_PATH", "") or None,
+                    output_evidence_path=os.getenv(
+                        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_PATH",
+                        "",
+                    )
+                    or None,
                     output_path=model_autoresearch_campaign_execution_receipt_path,
                     verifier_digest=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST", ""),
                     held_out_split_id=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID", ""),

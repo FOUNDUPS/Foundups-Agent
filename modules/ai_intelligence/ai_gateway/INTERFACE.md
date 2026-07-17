@@ -139,6 +139,7 @@ models, write PatternMemory, mutate HoloIndex, or bind RedDog runtime defaults.
 ```python
 build_configured_gateway_benchmark_runner(...) -> BenchmarkRunner
 AIGatewayConfiguredModelCaller(gateway).call_model(...)
+JsonlModelAutoResearchOutputEvidenceStore(path, repo_root=...)
 ```
 
 The configured runner consumes a digest-bound prompt source and an explicit
@@ -146,6 +147,13 @@ provider/model gateway caller, then produces `ModelBenchmarkTaskOutput` records
 for the benchmark harness. It verifies `ModelBenchmarkTask.prompt_digest`
 against the supplied prompt before any call and emits only content digests,
 runner receipt IDs, and bounded metrics.
+
+When supplied with a `ModelAutoResearchOutputEvidenceStore`, the runner writes
+each raw role response as a digest-bound
+`ModelAutoResearchOutputEvidenceRecord` and binds the evidence record ID into
+the runner receipt. JSONL evidence stores must resolve outside the repository
+because they contain raw model output. Records rehydrate by recomputing response
+digests and record IDs, and secret-bearing output is rejected before append.
 
 The `AIGatewayConfiguredModelCaller` adapter reuses the existing `AIGateway`
 provider registry to target the candidate's exact role assignment. It is not
@@ -155,8 +163,9 @@ repository mutation.
 
 The campaign execution bootstrap accepts this runner only through the explicit
 `configured_gateway` mode, an outside-repo prompt-record file, an explicit
-provider allowlist, and the `exact_output_digest` verifier mode. Default startup
-behavior remains `deterministic_fixture`.
+provider allowlist, an outside-repo output-evidence JSONL path, and the
+`exact_output_digest` verifier mode. Default startup behavior remains
+`deterministic_fixture`.
 
 #### Model Combination Benchmark Harness
 

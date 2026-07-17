@@ -15,6 +15,10 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gatewa
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
 )
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
+    InMemoryModelAutoResearchOutputEvidenceStore,
+    read_model_autoresearch_output_evidence_jsonl,
+)
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution import (
     rehydrate_model_autoresearch_campaign_execution_receipt,
 )
@@ -126,6 +130,7 @@ def _configured_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
             max_calls_per_sample=1,
             max_cost_estimate_usd_per_sample=1.0,
         ),
+        output_evidence_store=InMemoryModelAutoResearchOutputEvidenceStore(),
     )
     expected = precompute_runner(base_task, candidate).output_digest
     task = replace(base_task, expected_output_digest=expected)
@@ -160,6 +165,7 @@ def _configured_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
                 "prompt_records.json",
                 {"prompts": [{"task_id": task.task_id, "prompt": prompt, "prompt_digest": _sha256(prompt)}]},
             ),
+            "evidence": runtime / "output_evidence.jsonl",
             "output": runtime / "campaign_execution.json",
         },
         FakeGateway(),
@@ -201,6 +207,7 @@ def test_campaign_execution_bootstrap_configured_gateway_mode_materializes_recei
         candidate_pool_path=files["candidates"],
         tasks_path=files["tasks"],
         prompt_records_path=files["prompts"],
+        output_evidence_path=files["evidence"],
         output_path=files["output"],
         verifier_digest="sha256:verifier",
         held_out_split_id="heldout-v1",
@@ -218,6 +225,7 @@ def test_campaign_execution_bootstrap_configured_gateway_mode_materializes_recei
     assert result.executed_candidate_ids == ("provider/new",)
     assert result.task_count == 1
     assert result.no_direct_provider_call_performed is False
+    assert result.output_evidence_path == str(files["evidence"].resolve())
     assert len(gateway.calls) == 1
     assert gateway.calls[0]["provider"] == "provider"
     assert gateway.calls[0]["model"] == "new"
@@ -225,6 +233,13 @@ def test_campaign_execution_bootstrap_configured_gateway_mode_materializes_recei
     receipt = rehydrate_model_autoresearch_campaign_execution_receipt(payload)
     assert receipt.receipt_id == result.execution_receipt_id
     assert receipt.benchmark_run_receipt.samples[0].accepted is True
+    evidence_records = read_model_autoresearch_output_evidence_jsonl(
+        files["evidence"],
+        repo_root=REPO_ROOT,
+    )
+    assert len(evidence_records) == 1
+    assert evidence_records[0].response_text == "configured gateway answer"
+    assert evidence_records[0].task_id == receipt.benchmark_run_receipt.samples[0].task_id
 
 
 def test_campaign_execution_bootstrap_configured_gateway_requires_prompt_records(tmp_path: Path) -> None:
@@ -246,7 +261,62 @@ def test_campaign_execution_bootstrap_configured_gateway_requires_prompt_records
 
     assert result.accepted is False
     assert "missing_model_autoresearch_campaign_prompt_records_path" in result.rejection_reasons
+    assert "missing_model_autoresearch_campaign_output_evidence_path" in result.rejection_reasons
     assert not files["output"].exists()
+    assert gateway.calls == []
+
+
+def test_campaign_execution_bootstrap_configured_gateway_requires_output_evidence_path(tmp_path: Path) -> None:
+    files, gateway = _configured_inputs(tmp_path)
+
+    result = run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=files["plan"],
+        candidate_pool_path=files["candidates"],
+        tasks_path=files["tasks"],
+        prompt_records_path=files["prompts"],
+        output_path=files["output"],
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        runner_mode=MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
+        runner_allowed_providers="provider",
+        gateway=gateway,
+    )
+
+    assert result.accepted is False
+    assert "missing_model_autoresearch_campaign_output_evidence_path" in result.rejection_reasons
+    assert not files["output"].exists()
+    assert not files["evidence"].exists()
+    assert gateway.calls == []
+
+
+def test_campaign_execution_bootstrap_configured_gateway_rejects_inside_repo_output_evidence(
+    tmp_path: Path,
+) -> None:
+    files, gateway = _configured_inputs(tmp_path)
+    inside = REPO_ROOT / "model_autoresearch_output_evidence.jsonl"
+
+    result = run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=files["plan"],
+        candidate_pool_path=files["candidates"],
+        tasks_path=files["tasks"],
+        prompt_records_path=files["prompts"],
+        output_evidence_path=inside,
+        output_path=files["output"],
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        runner_mode=MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
+        runner_allowed_providers="provider",
+        gateway=gateway,
+    )
+
+    assert result.accepted is False
+    assert "model_autoresearch_campaign_output_evidence_path_inside_repo" in result.rejection_reasons
+    assert not files["output"].exists()
+    assert not inside.exists()
     assert gateway.calls == []
 
 

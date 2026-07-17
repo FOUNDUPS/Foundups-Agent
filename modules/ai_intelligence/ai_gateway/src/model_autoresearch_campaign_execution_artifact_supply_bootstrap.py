@@ -29,6 +29,9 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gatewa
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
 )
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
+    JsonlModelAutoResearchOutputEvidenceStore,
+)
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution import (
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ACCEPT,
     run_reddog_model_autoresearch_campaign_execution,
@@ -65,6 +68,7 @@ class ModelAutoResearchCampaignExecutionBootstrapResult:
     source_plan_receipt_id: Optional[str]
     benchmark_run_receipt_id: Optional[str]
     output_path: Optional[str]
+    output_evidence_path: Optional[str]
     executed_candidate_ids: tuple[str, ...]
     task_count: int
     rejection_reasons: tuple[str, ...]
@@ -95,6 +99,7 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
     runner_mode: str = MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_RUNNER,
     verifier_mode: str = MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_VERIFIER,
     prompt_records_path: Path | str | None = None,
+    output_evidence_path: Path | str | None = None,
     runner_allowed_providers: str | Sequence[str] | None = None,
     runner_max_prompt_chars: int | str = 20000,
     runner_max_calls_per_sample: int | str = 4,
@@ -143,6 +148,11 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
         *task_reasons,
         *prompt_reasons,
         *_output_path_reasons(root, output_path),
+        *_configured_output_evidence_path_reasons(
+            root,
+            output_evidence_path,
+            runner_mode=runner_mode_text,
+        ),
         *_mode_reasons(runner_mode_text, verifier_mode_text),
     ]
     verifier_text = str(verifier_digest or "").strip()
@@ -182,13 +192,20 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
     runner = _fixture_runner
     verifier = _fixture_verifier
     no_provider_call = True
+    resolved_output_evidence_path: Optional[str] = None
     if runner_mode_text == MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
         assert prompts is not None
         assert policy is not None
+        evidence_path = _runtime_path(root, output_evidence_path)
+        resolved_output_evidence_path = str(evidence_path)
         runner = build_configured_gateway_benchmark_runner(
             caller=AIGatewayConfiguredModelCaller(gateway or AIGateway()),
             prompt_source=MappingPromptSource(prompts),
             policy=policy,
+            output_evidence_store=JsonlModelAutoResearchOutputEvidenceStore(
+                evidence_path,
+                repo_root=root,
+            ),
         )
         verifier = _exact_output_digest_verifier
         no_provider_call = False
@@ -214,6 +231,7 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
         source_plan_receipt_id=execution.source_plan_receipt_id,
         benchmark_run_receipt_id=execution.benchmark_run_receipt_id,
         output_path=execution.output_path,
+        output_evidence_path=resolved_output_evidence_path,
         executed_candidate_ids=execution.executed_candidate_ids,
         task_count=execution.task_count,
         rejection_reasons=(),
@@ -383,6 +401,29 @@ def _output_path_reasons(repo_root: Path, value: Path | str | None) -> tuple[str
     return ()
 
 
+def _configured_output_evidence_path_reasons(
+    repo_root: Path,
+    value: Path | str | None,
+    *,
+    runner_mode: str,
+) -> tuple[str, ...]:
+    if runner_mode != MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
+        return ()
+    if not value:
+        return ("missing_model_autoresearch_campaign_output_evidence_path",)
+    resolved = _runtime_path(repo_root, value)
+    if _is_inside(resolved, repo_root):
+        return ("model_autoresearch_campaign_output_evidence_path_inside_repo",)
+    return ()
+
+
+def _runtime_path(repo_root: Path, value: Path | str | None) -> Path:
+    path = Path(value or "")
+    if not path.is_absolute():
+        path = repo_root.parent / path
+    return path.resolve()
+
+
 def _mode_reasons(runner_mode: str, verifier_mode: str) -> tuple[str, ...]:
     reasons: list[str] = []
     runner = str(runner_mode or "").strip()
@@ -504,6 +545,7 @@ def _not_ready(
         source_plan_receipt_id=None,
         benchmark_run_receipt_id=None,
         output_path=None,
+        output_evidence_path=None,
         executed_candidate_ids=(),
         task_count=0,
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason))),

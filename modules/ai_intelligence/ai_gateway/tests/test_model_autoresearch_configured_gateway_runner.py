@@ -15,6 +15,9 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gatewa
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
 )
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
+    InMemoryModelAutoResearchOutputEvidenceStore,
+)
 from modules.ai_intelligence.ai_gateway.src.model_combination_benchmark_harness import (
     ModelBenchmarkRoleAssignment,
     ModelBenchmarkTask,
@@ -83,6 +86,7 @@ def _runner(
     prompt: str = "Audit the bounded RedDog runtime path.",
     caller: FakeConfiguredCaller | None = None,
     policy: ConfiguredGatewayRunnerPolicy | None = None,
+    output_evidence_store=None,
 ):
     return build_configured_gateway_benchmark_runner(
         caller=caller or FakeConfiguredCaller(),
@@ -92,6 +96,7 @@ def _runner(
             allowed_providers=("openai", "anthropic"),
             max_cost_estimate_usd_per_sample=1.0,
         ),
+        output_evidence_store=output_evidence_store,
     )
 
 
@@ -120,6 +125,50 @@ def test_configured_runner_calls_explicit_provider_model_and_returns_digest_only
     assert output.metrics.cost_estimate_usd == 0.01
     assert prompt not in output.output_digest
     assert "This answer is bounded." not in output.runner_receipt_id
+
+
+def test_configured_runner_writes_output_evidence_when_store_injected():
+    prompt = "Audit the bounded RedDog runtime path."
+    caller = FakeConfiguredCaller(response="Evidence-bearing answer.")
+    store = InMemoryModelAutoResearchOutputEvidenceStore()
+    runner = _runner(prompt=prompt, caller=caller, output_evidence_store=store)
+
+    output = runner(_task(prompt), _candidate("openai/gpt-5.2"))
+
+    assert len(store.records) == 1
+    record = store.records[0]
+    assert record["response_text"] == "Evidence-bearing answer."
+    assert record["task_id"] == "task-001"
+    assert record["candidate_id"] == "openai/gpt-5.2"
+    assert record["role"] == "principal"
+    assert record["provider"] == "openai"
+    assert record["model"] == "gpt-5.2"
+    digest_only_output = _runner(
+        prompt=prompt,
+        caller=FakeConfiguredCaller(response="Evidence-bearing answer."),
+    )(_task(prompt), _candidate("openai/gpt-5.2"))
+    assert output.output_digest != digest_only_output.output_digest
+    assert output.output_digest.startswith("configured_gateway_benchmark_output:")
+    assert record["record_id"] not in output.output_digest
+    assert record["record_id"] not in output.runner_receipt_id
+    assert "Evidence-bearing answer." not in output.output_digest
+    assert "Evidence-bearing answer." not in output.runner_receipt_id
+
+
+def test_configured_runner_secret_output_fails_before_evidence_store_write():
+    prompt = "Audit the bounded RedDog runtime path."
+    caller = FakeConfiguredCaller(response="token=abc123")
+    store = InMemoryModelAutoResearchOutputEvidenceStore()
+    runner = _runner(prompt=prompt, caller=caller, output_evidence_store=store)
+
+    try:
+        runner(_task(prompt), _candidate("openai/gpt-5.2"))
+    except ValueError as exc:
+        assert str(exc) == "model_autoresearch_output_evidence_secret_detected"
+    else:
+        raise AssertionError("expected secret output rejection")
+
+    assert store.records == []
 
 
 def test_configured_runner_integrates_with_combination_benchmark_harness():

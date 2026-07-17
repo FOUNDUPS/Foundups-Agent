@@ -808,6 +808,9 @@ def test_main_preflight_model_autoresearch_campaign_execution_supply_runs_before
                     "REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH": str(tmp_path / "candidates.json"),
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_TASKS_PATH": str(tmp_path / "tasks.json"),
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMPTS_PATH": str(tmp_path / "prompts.json"),
+                    "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_PATH": str(
+                        tmp_path / "output_evidence.jsonl"
+                    ),
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST": "sha256:verifier",
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID": "heldout-v1",
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE": "configured_gateway",
@@ -830,6 +833,7 @@ def test_main_preflight_model_autoresearch_campaign_execution_supply_runs_before
     assert campaign_kwargs["candidate_pool_path"] == str(tmp_path / "candidates.json")
     assert campaign_kwargs["tasks_path"] == str(tmp_path / "tasks.json")
     assert campaign_kwargs["prompt_records_path"] == str(tmp_path / "prompts.json")
+    assert campaign_kwargs["output_evidence_path"] == str(tmp_path / "output_evidence.jsonl")
     assert campaign_kwargs["output_path"] == str(runtime_root / "model_autoresearch_campaign_execution_receipt.json")
     assert campaign_kwargs["verifier_digest"] == "sha256:verifier"
     assert campaign_kwargs["held_out_split_id"] == "heldout-v1"
