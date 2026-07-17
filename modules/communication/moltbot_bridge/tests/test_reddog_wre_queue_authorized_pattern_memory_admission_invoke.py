@@ -89,6 +89,14 @@ def _queue_gate_result(*, accepted: bool = True, decision: str | None = None) ->
     }
 
 
+def _queue_gate_result_with_runtime_binding() -> dict:
+    result = _queue_gate_result()
+    receipt = result["gate_result"]["receipt"]
+    receipt["model_runtime_binding_receipt_id"] = "reddog_model_runtime_binding:test"
+    receipt["model_runtime_binding_digest"] = _digest("5")
+    return result
+
+
 def _admission_request() -> dict:
     return {
         "work_order_id": WORK_ORDER_ID,
@@ -125,6 +133,8 @@ def test_admits_verified_held_out_outcome_to_injected_sink() -> None:
     assert result.receipt.pattern_memory_record_id == "pattern-memory-record-1"
     assert result.receipt.gate_id == GATE_ID
     assert result.receipt.ratchet_id == RATCHET_ID
+    assert result.receipt.model_runtime_binding_receipt_id is None
+    assert result.receipt.model_runtime_binding_digest == ""
     assert result.receipt.no_command_execution_performed is True
     assert result.receipt.no_pr_publish_performed is True
     assert result.receipt.no_merge_performed is True
@@ -133,6 +143,45 @@ def test_admits_verified_held_out_outcome_to_injected_sink() -> None:
     assert len(sink.records) == 1
     assert sink.records[0]["record_type"] == "reddog_verified_recursive_improvement_outcome"
     assert sink.records[0]["work_order_id"] == WORK_ORDER_ID
+
+
+def test_admission_record_carries_model_runtime_binding_from_gate() -> None:
+    sink = FakePatternMemorySink()
+
+    result = _invoke(queue_gate=_queue_gate_result_with_runtime_binding(), sink=sink)
+
+    assert result.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT
+    assert result.receipt is not None
+    assert (
+        result.receipt.model_runtime_binding_receipt_id
+        == "reddog_model_runtime_binding:test"
+    )
+    assert result.receipt.model_runtime_binding_digest == _digest("5")
+    assert (
+        sink.records[0]["model_runtime_binding_receipt_id"]
+        == "reddog_model_runtime_binding:test"
+    )
+    assert sink.records[0]["model_runtime_binding_digest"] == _digest("5")
+
+
+def test_admission_request_cannot_override_model_runtime_binding() -> None:
+    request = _admission_request()
+    request["model_runtime_binding_receipt_id"] = "reddog_model_runtime_binding:test"
+    request["model_runtime_binding_digest"] = _digest("6")
+    sink = FakePatternMemorySink()
+
+    result = _invoke(
+        queue_gate=_queue_gate_result_with_runtime_binding(),
+        request=request,
+        sink=sink,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT
+    assert (
+        QueueAuthorizedPatternMemoryAdmissionInvokeReason.MODEL_RUNTIME_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+    assert sink.records == []
 
 
 def test_explicit_invoke_missing_rejects_before_sink() -> None:

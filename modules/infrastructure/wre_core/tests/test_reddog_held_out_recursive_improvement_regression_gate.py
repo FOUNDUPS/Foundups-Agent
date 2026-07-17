@@ -106,8 +106,45 @@ def test_accepts_independent_held_out_regression_after_verifier_and_ratchet() ->
     assert result.receipt.pattern_memory_admission_allowed is True
     assert result.receipt.pattern_memory_admission_requested is True
     assert result.receipt.regression_test_count == 12
+    assert result.receipt.model_runtime_binding_receipt_id is None
+    assert result.receipt.model_runtime_binding_digest == ""
     assert result.receipt.no_pattern_memory_write_performed is True
     assert result.receipt.no_test_execution_performed is True
+
+
+def test_carries_model_runtime_binding_from_verifier_and_ratchet_receipts() -> None:
+    req = valid_request()
+    req["verification_result"]["receipt"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["verification_result"]["receipt"]["model_runtime_binding_digest"] = _digest("5")
+    req["ratchet_result"]["receipt"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["ratchet_result"]["receipt"]["model_runtime_binding_digest"] = _digest("5")
+
+    result = gate.evaluate_held_out_recursive_improvement_regression_gate(req)
+
+    assert result.accepted is True
+    assert (
+        result.receipt.model_runtime_binding_receipt_id
+        == "reddog_model_runtime_binding:test"
+    )
+    assert result.receipt.model_runtime_binding_digest == _digest("5")
+
+
+def test_rejects_model_runtime_binding_mismatch() -> None:
+    req = valid_request()
+    req["verification_result"]["receipt"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["verification_result"]["receipt"]["model_runtime_binding_digest"] = _digest("5")
+    req["ratchet_result"]["receipt"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["ratchet_result"]["receipt"]["model_runtime_binding_digest"] = _digest("6")
+
+    assert_reject(req, gate.FAIL_MODEL_RUNTIME_BINDING)
 
 
 def test_pattern_memory_admission_not_allowed_unless_requested() -> None:
