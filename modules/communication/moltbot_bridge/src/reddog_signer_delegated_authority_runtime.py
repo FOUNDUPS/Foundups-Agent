@@ -297,6 +297,8 @@ class DelegatedAuthorityRuntimeRequest:
     key_epoch: str
     consensus_receipt_digest: Optional[str] = None
     sovereign_authorization_digest: Optional[str] = None
+    model_runtime_binding_receipt_id: Optional[str] = None
+    model_runtime_binding_digest: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -473,6 +475,13 @@ def _commit_issued_authority(
         "wsp15_allocation_digest": request.wsp15_allocation_digest,
         "status": AUTHORITY_ISSUED,
     }
+    if request.model_runtime_binding_receipt_id or request.model_runtime_binding_digest:
+        issued_next[request.work_order_id]["model_runtime_binding_receipt_id"] = str(
+            request.model_runtime_binding_receipt_id or ""
+        )
+        issued_next[request.work_order_id]["model_runtime_binding_digest"] = str(
+            request.model_runtime_binding_digest or ""
+        )
     next_state["issued_authorities"] = issued_next
     return store.commit(next_state, expected_revision=expected_revision)
 
@@ -537,6 +546,12 @@ def issue_delegated_authority_runtime(
         or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
         or type(request.wsp15_mps_total) is not int
         or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
+    ):
+        return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
+    has_runtime_binding = bool(request.model_runtime_binding_receipt_id or request.model_runtime_binding_digest)
+    if has_runtime_binding and not (
+        str(request.model_runtime_binding_receipt_id or "").startswith("reddog_model_runtime_binding:")
+        and str(request.model_runtime_binding_digest or "").startswith("sha256:")
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
 
@@ -646,6 +661,9 @@ def issue_delegated_authority_runtime(
         "sovereign_authorization_digest": request.sovereign_authorization_digest,
         "receipt_chain": [],
     }
+    if has_runtime_binding:
+        work_authority["model_runtime_binding_receipt_id"] = str(request.model_runtime_binding_receipt_id)
+        work_authority["model_runtime_binding_digest"] = str(request.model_runtime_binding_digest)
     workauth_input = canonical_signing_input(work_authority, PREFIX_WORKAUTH)
     workauth_sign = signer_client.sign(
         SigningRequest(

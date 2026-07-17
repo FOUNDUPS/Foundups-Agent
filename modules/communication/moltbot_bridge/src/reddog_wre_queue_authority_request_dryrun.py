@@ -39,6 +39,7 @@ FAIL_DENIED_PATH_SCOPE = "FAIL_DENIED_PATH_SCOPE"
 FAIL_HIGH_AUTHORITY_COSIGN = "FAIL_HIGH_AUTHORITY_COSIGN"
 FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY = "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY"
 FAIL_WSP15_ALLOCATION_BINDING = "FAIL_WSP15_ALLOCATION_BINDING"
+FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
 
 _REQUIRED_PROFILE_FIELDS = (
     "principal_id",
@@ -77,6 +78,8 @@ class QueueAuthorityRequestDryRunReceipt:
     wsp15_priority: str
     wsp15_mps_total: int
     reasoning_tier: str
+    model_runtime_binding_receipt_id: Optional[str]
+    model_runtime_binding_digest: Optional[str]
     delegated_authority_request_digest: str
     signer_invoked: bool = False
     signature_verified: bool = False
@@ -198,6 +201,38 @@ def _valid_queue_wsp15_binding(queue_receipt: Mapping[str, Any], profile: Mappin
     return True
 
 
+def _profile_runtime_binding(profile: Mapping[str, Any]) -> tuple[str, str]:
+    binding = _mapping(profile.get("operational_context_binding"))
+    receipt_id = str(
+        profile.get("model_runtime_binding_receipt_id")
+        or binding.get("model_runtime_binding_receipt_id")
+        or ""
+    )
+    digest = str(
+        profile.get("model_runtime_binding_digest")
+        or binding.get("model_runtime_binding_digest")
+        or ""
+    )
+    return receipt_id, digest
+
+
+def _valid_model_runtime_binding(queue_receipt: Mapping[str, Any], profile: Mapping[str, Any]) -> bool:
+    queue_receipt_id = str(queue_receipt.get("model_runtime_binding_receipt_id") or "")
+    queue_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
+    profile_receipt_id, profile_digest = _profile_runtime_binding(profile)
+    any_binding = any((queue_receipt_id, queue_digest, profile_receipt_id, profile_digest))
+    if not any_binding:
+        return True
+    if not (
+        queue_receipt_id.startswith("reddog_model_runtime_binding:")
+        and queue_digest.startswith("sha256:")
+        and profile_receipt_id == queue_receipt_id
+        and profile_digest == queue_digest
+    ):
+        return False
+    return True
+
+
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
     if not path or "\\" in path or ":" in path or path.startswith("/") or "\x00" in path:
         return False
@@ -252,6 +287,8 @@ def plan_reddog_wre_queue_authority_request_dry_run(
 
     if queue_receipt and profile and not _valid_queue_wsp15_binding(queue_receipt, profile):
         reasons.append(FAIL_WSP15_ALLOCATION_BINDING)
+    if queue_receipt and profile and not _valid_model_runtime_binding(queue_receipt, profile):
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING)
 
     missing = [field for field in _REQUIRED_PROFILE_FIELDS if field not in profile or profile.get(field) in (None, "", ())]
     if missing:
@@ -278,6 +315,8 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         return _reject(deduped)
 
     queue_item_id = str(queue_receipt.get("queue_item_id") or queue.get("selected_queue_item_id") or "")
+    model_runtime_binding_receipt_id = str(queue_receipt.get("model_runtime_binding_receipt_id") or "")
+    model_runtime_binding_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
     request = DelegatedAuthorityRuntimeRequest(
         work_order_id=str(profile.get("work_order_id") or _work_order_id(queue_item_id)),
         principal_id=str(profile["principal_id"]),
@@ -296,6 +335,8 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
         wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
         wsp15_reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or None,
+        model_runtime_binding_digest=model_runtime_binding_digest or None,
         identity_nonce=str(profile["identity_nonce"]),
         work_authority_nonce=str(profile["work_authority_nonce"]),
         issued_at=int(profile["issued_at"]),
@@ -332,6 +373,8 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
         wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
         reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or None,
+        model_runtime_binding_digest=model_runtime_binding_digest or None,
         delegated_authority_request_digest=request_digest,
     )
     return QueueAuthorityRequestDryRunResult(
@@ -352,6 +395,7 @@ __all__ = [
     "FAIL_PROFILE_NON_ASCII",
     "FAIL_QUEUE_CONSUMER_NOT_READY",
     "FAIL_REQUIRED_FIELD",
+    "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY",
     "FAIL_WSP15_ALLOCATION_BINDING",
     "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT",

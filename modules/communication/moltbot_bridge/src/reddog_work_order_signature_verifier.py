@@ -346,6 +346,13 @@ def verify_delegated_work_authority(
         or str(work_authority.get("wsp15_reasoning_tier") or "") not in {"REGULAR", "HIGH", "ULTRA"}
     ):
         return reject(ReasonCode.MALFORMED_PAYLOAD)
+    runtime_binding_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
+    runtime_binding_digest = str(work_authority.get("model_runtime_binding_digest") or "")
+    if (runtime_binding_id or runtime_binding_digest) and not (
+        runtime_binding_id.startswith("reddog_model_runtime_binding:")
+        and runtime_binding_digest.startswith("sha256:")
+    ):
+        return reject(ReasonCode.MALFORMED_PAYLOAD)
 
     principal_id = str(identity["principal_id"])
     reddog_id = str(identity["reddog_id"])
