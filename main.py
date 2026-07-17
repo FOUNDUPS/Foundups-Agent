@@ -1664,6 +1664,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS          Cycle timeout, default 60
         REDDOG_RESIDENT_ARCHITECT_RETRY=0                  Retry failed/cancelled cycle
         REDDOG_RESIDENT_ARCHITECT_CANCEL=0                 Cancel running cycle
+        REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF=1        Auto-arm safe FIX handoff after accepted FIX
         REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH             Approved external snapshot JSON
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Existing work-state JSON
         HOLOINDEX_FRESHNESS_RECEIPT                        Existing HoloIndex receipt
@@ -1727,6 +1728,12 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
     status = "PASS" if result.accepted else "WARN"
     reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
     completed = int(result.task_status_counts.get("completed", 0))
+    auto_fix_handoff = (
+        result.accepted
+        and str(result.architect_action or "").strip().upper() == "FIX"
+        and os.getenv("REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF", "1") != "0"
+        and "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" not in os.environ
+    )
     print(
         f"[REDDOG-RESIDENT-CYCLE] preflight={status} status={result.status} "
         f"intent={result.intent_id} cycle={result.cycle_id} snapshot={result.snapshot_id or '(none)'} "
@@ -1735,7 +1742,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         f"duplicate={result.duplicate_intent_reused} architect_action={result.architect_action or '(none)'} "
         f"architect_next_slice={result.architect_next_slice or '(none)'} "
         f"architect_determination={result.architect_determination_id or '(none)'} "
-        f"queue_candidates={result.queue_candidate_count} reasons={reasons}"
+        f"queue_candidates={result.queue_candidate_count} auto_fix_handoff={auto_fix_handoff} reasons={reasons}"
     )
     print(
         "[REDDOG-RESIDENT-CYCLE] "
@@ -1751,6 +1758,8 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
     )
     if result.accepted:
         os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] = result.intent_id
+        if auto_fix_handoff:
+            os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] = "1"
         return True
 
     if enforced:

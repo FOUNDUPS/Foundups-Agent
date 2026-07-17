@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_ARCHITECT_FIX_HANDOFF_AUTOWIRE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Updated the durable resident RedDog architect preflight to auto-arm the
+  existing resident FIX promotion handoff when the cycle accepts a FIX
+  determination.
+- The bridge sets `REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=1` only when it was not
+  explicitly provided and `REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF` is not
+  disabled.
+- This removes a manual toggle between the resident determination and the
+  already-gated promotion preflight while preserving downstream rejection and
+  enforcement behavior.
+- Boundary remains constrained: no signing, worker spawn, shell command, repo
+  mutation, worktree operation, PR creation, HoloIndex re-index, PatternMemory
+  promotion, Hermes dispatch, live FoundUp enqueue, reward settlement, or merge
+  authority was added.
+
 ## 2026-07-17: REDDOG_MAIN_RESIDENT_ARCHITECT_DURABLE_CYCLE_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
