@@ -1,5 +1,41 @@
 # AI Gateway Module Change Log
 
+## [2026-07-16] - Model Outcome Runtime Binding Feedback Carry
+
+**Who:** 0102 Codex
+**Type:** Receipt Hardening
+**Slice:** MODEL_SELECTION_OUTCOME_RUNTIME_BINDING_FEEDBACK_PHASE1
+
+**What:** Added optional runtime-binding proof fields to
+`ModelSelectionOutcomeReceipt` and feedback records.
+
+**Why:** Verified RedDog execution now carries model-runtime binding proof
+through verifier, publish, ratchet, held-out, and PatternMemory admission. The
+model-intelligence feedback receipt also needs to cite the model runtime binding
+that actually produced an accepted outcome, so recursive model learning does not
+collapse back to selection-only evidence.
+
+**Files:**
+- `src/model_intelligence_outcomes.py` - validates a supplied
+  `RedDogModelRuntimeBindingReceipt`, recomputes its digest, checks selection,
+  catalog, task-family, decision, and receipt-prefix invariants, and carries the
+  binding into accepted feedback records.
+- `tests/test_model_intelligence_outcomes.py` - runtime-binding carry and
+  forged/mismatched binding rejection tests.
+
+**Truth Boundary:**
+- IMPLEMENTED: optional runtime-binding evidence carry for model selection
+  outcome feedback.
+- IMPLEMENTED: supplied runtime-binding receipts are rehashed and cross-checked
+  before feedback eligibility can cite them.
+- NOT IMPLEMENTED: provider calls, benchmark execution, catalog promotion,
+  PatternMemory writes, HoloIndex re-indexing, or RedDog runtime default
+  mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-16] - RedDog Runtime Binding Artifact Supply
 
 **Who:** 0102 Codex

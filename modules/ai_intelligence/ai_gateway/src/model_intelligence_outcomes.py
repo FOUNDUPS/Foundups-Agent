@@ -129,6 +129,8 @@ class ModelSelectionOutcomeReceipt:
 
     receipt_id: str
     selection_receipt_id: str
+    model_runtime_binding_receipt_id: str | None
+    model_runtime_binding_digest: str
     catalog_snapshot_id: str
     task_family: str
     selected_model_ids: tuple[str, ...]
@@ -146,6 +148,8 @@ class ModelSelectionOutcomeReceipt:
             "schema_version": self.schema_version,
             "receipt_id": self.receipt_id,
             "selection_receipt_id": self.selection_receipt_id,
+            "model_runtime_binding_receipt_id": self.model_runtime_binding_receipt_id,
+            "model_runtime_binding_digest": self.model_runtime_binding_digest,
             "catalog_snapshot_id": self.catalog_snapshot_id,
             "task_family": self.task_family,
             "selected_model_ids": list(self.selected_model_ids),
@@ -275,6 +279,7 @@ def production_evidence_for_selection(
 def build_model_selection_outcome_receipt(
     selection_receipt: ModelSelectionReceipt,
     *,
+    model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     verifier_decision: VerifierDecision | str,
     verification_receipt_ids: tuple[str, ...] = (),
     task_completed: bool = False,
@@ -290,6 +295,10 @@ def build_model_selection_outcome_receipt(
     verifier = _coerce_verifier_decision(verifier_decision)
     normalized_verification_receipts = _normalize_receipts(verification_receipt_ids)
     normalized_evidence_receipts = _normalize_receipts(evidence_receipt_ids)
+    runtime_binding_id, runtime_binding_digest = _runtime_binding_from_receipt(
+        model_runtime_binding_receipt,
+        selection_receipt,
+    )
     normalized_rejections = tuple(sorted(_clean_reason(reason) for reason in rejection_reasons if str(reason).strip()))
     metrics_value = (metrics or ModelOutcomeMetrics()).normalized()
     automatic_rejections = _automatic_rejection_reasons(
@@ -318,9 +327,14 @@ def build_model_selection_outcome_receipt(
         "rejection_reasons": list(all_rejections),
         "evidence_receipt_ids": list(normalized_evidence_receipts),
     }
+    if runtime_binding_id:
+        body["model_runtime_binding_receipt_id"] = runtime_binding_id
+        body["model_runtime_binding_digest"] = runtime_binding_digest
     return ModelSelectionOutcomeReceipt(
         receipt_id=_digest_prefixed("model_selection_outcome_receipt", body),
         selection_receipt_id=selection_receipt.receipt_id,
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
         catalog_snapshot_id=selection_receipt.catalog_snapshot_id,
         task_family=selection_receipt.requirements.task_family,
         selected_model_ids=selection_receipt.selected_model_ids,
@@ -342,12 +356,36 @@ def outcome_feedback_record(receipt: ModelSelectionOutcomeReceipt) -> dict[str, 
     return {
         "outcome_receipt_id": receipt.receipt_id,
         "selection_receipt_id": receipt.selection_receipt_id,
+        "model_runtime_binding_receipt_id": receipt.model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": receipt.model_runtime_binding_digest,
         "catalog_snapshot_id": receipt.catalog_snapshot_id,
         "task_family": receipt.task_family,
         "selected_model_ids": list(receipt.selected_model_ids),
         "verification_receipt_ids": list(receipt.verification_receipt_ids),
         "metrics": asdict(receipt.metrics.normalized()),
     }
+
+
+def _runtime_binding_from_receipt(
+    value: Mapping[str, Any] | None,
+    selection_receipt: ModelSelectionReceipt,
+) -> tuple[str | None, str]:
+    if value is None:
+        return None, ""
+    if not isinstance(value, Mapping):
+        raise ValueError("invalid_model_runtime_binding_receipt")
+    receipt_id = _required("model_runtime_binding_receipt_id", value.get("receipt_id"))
+    if not receipt_id.startswith("reddog_model_runtime_binding:"):
+        raise ValueError("invalid_model_runtime_binding_receipt_id")
+    if str(value.get("decision") or "").strip().lower() != "bound":
+        raise ValueError("model_runtime_binding_not_bound")
+    if str(value.get("selection_receipt_id") or "").strip() != selection_receipt.receipt_id:
+        raise ValueError("model_runtime_binding_selection_mismatch")
+    if str(value.get("catalog_snapshot_id") or "").strip() != selection_receipt.catalog_snapshot_id:
+        raise ValueError("model_runtime_binding_catalog_mismatch")
+    if str(value.get("task_family") or "").strip() != selection_receipt.requirements.task_family:
+        raise ValueError("model_runtime_binding_task_family_mismatch")
+    return receipt_id, _sha256_digest(value)
 
 
 def _automatic_rejection_reasons(
@@ -448,6 +486,11 @@ def _non_negative_float_or_none(value: float | None) -> float | None:
     if parsed < 0:
         raise ValueError("negative_metric")
     return parsed
+
+
+def _sha256_digest(value: Mapping[str, Any]) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
 def _digest_prefixed(prefix: str, value: Mapping[str, Any]) -> str:
