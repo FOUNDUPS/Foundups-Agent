@@ -140,6 +140,7 @@ models, write PatternMemory, mutate HoloIndex, or bind RedDog runtime defaults.
 build_configured_gateway_benchmark_runner(...) -> BenchmarkRunner
 AIGatewayConfiguredModelCaller(gateway).call_model(...)
 JsonlModelAutoResearchOutputEvidenceStore(path, repo_root=...)
+build_model_autoresearch_output_evidence_semantic_verifier(...) -> BenchmarkVerifier
 ```
 
 The configured runner consumes a digest-bound prompt source and an explicit
@@ -164,8 +165,12 @@ repository mutation.
 The campaign execution bootstrap accepts this runner only through the explicit
 `configured_gateway` mode, an outside-repo prompt-record file, an explicit
 provider allowlist, an outside-repo output-evidence JSONL path, and the
-`exact_output_digest` verifier mode. Default startup behavior remains
-`deterministic_fixture`.
+`exact_output_digest` or `output_evidence_semantic` verifier mode. The semantic
+mode is deterministic: it rehydrates output-evidence records, recomputes runner
+output/receipt digests, and checks explicit task metadata keys
+`expected_answer_contains` and `expected_answer_excludes`. It fails closed when
+required terms are absent or no semantic requirements are supplied. Default
+startup behavior remains `deterministic_fixture`.
 
 #### Model Combination Benchmark Harness
 

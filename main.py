@@ -1631,7 +1631,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST   Verifier digest required by plan policy
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID Held-out split ID for benchmark receipt
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE       deterministic_fixture or configured_gateway
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE     deterministic_fixture or exact_output_digest
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE     deterministic_fixture, exact_output_digest, or output_evidence_semantic
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_ALLOWED_PROVIDERS ; or , separated allowlist
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS Optional positive int
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE Optional positive int

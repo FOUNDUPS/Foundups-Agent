@@ -27,12 +27,14 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_executio
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_BOOTSTRAP_APPLIED,
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_BOOTSTRAP_NOT_READY,
     MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
+    MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
     run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap,
 )
 from modules.ai_intelligence.ai_gateway.src.model_champion_challenger_autoresearch import (
     ModelAutoResearchPolicy,
     plan_model_champion_challenger_autoresearch,
 )
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import VerifierDecision
 from modules.ai_intelligence.ai_gateway.tests.test_model_autoresearch_campaign_execution import (
     REPO_ROOT,
     _plan,
@@ -172,6 +174,15 @@ def _configured_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
     )
 
 
+def _configured_semantic_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
+    files, gateway = _configured_inputs(tmp_path)
+    tasks_payload = json.loads(files["tasks"].read_text(encoding="utf-8"))
+    tasks_payload["tasks"][0]["expected_output_digest"] = "sha256:not-used-by-semantic-verifier"
+    tasks_payload["tasks"][0]["metadata"] = {"expected_answer_contains": "configured;gateway;answer"}
+    files["tasks"].write_text(json.dumps(tasks_payload, sort_keys=True), encoding="utf-8")
+    return files, gateway
+
+
 def test_campaign_execution_bootstrap_materializes_rehydratable_receipt(tmp_path: Path) -> None:
     files = _inputs(tmp_path)
 
@@ -240,6 +251,75 @@ def test_campaign_execution_bootstrap_configured_gateway_mode_materializes_recei
     assert len(evidence_records) == 1
     assert evidence_records[0].response_text == "configured gateway answer"
     assert evidence_records[0].task_id == receipt.benchmark_run_receipt.samples[0].task_id
+
+
+def test_campaign_execution_bootstrap_configured_gateway_semantic_verifier_accepts(
+    tmp_path: Path,
+) -> None:
+    files, gateway = _configured_semantic_inputs(tmp_path)
+
+    result = run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=files["plan"],
+        candidate_pool_path=files["candidates"],
+        tasks_path=files["tasks"],
+        prompt_records_path=files["prompts"],
+        output_evidence_path=files["evidence"],
+        output_path=files["output"],
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        runner_mode=MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
+        runner_allowed_providers="provider",
+        runner_max_prompt_chars=2000,
+        runner_max_calls_per_sample=1,
+        runner_max_cost_estimate_usd_per_sample=1.0,
+        gateway=gateway,
+    )
+
+    assert result.accepted is True
+    payload = json.loads(files["output"].read_text(encoding="utf-8"))
+    receipt = rehydrate_model_autoresearch_campaign_execution_receipt(payload)
+    sample = receipt.benchmark_run_receipt.samples[0]
+    assert sample.accepted is True
+    assert sample.verifier_receipt_id
+    assert sample.verifier_receipt_id.startswith("model_autoresearch_semantic_verifier:")
+
+
+def test_campaign_execution_bootstrap_configured_gateway_semantic_verifier_rejects(
+    tmp_path: Path,
+) -> None:
+    files, gateway = _configured_semantic_inputs(tmp_path)
+    tasks_payload = json.loads(files["tasks"].read_text(encoding="utf-8"))
+    tasks_payload["tasks"][0]["metadata"] = {"expected_answer_contains": "missing-term"}
+    files["tasks"].write_text(json.dumps(tasks_payload, sort_keys=True), encoding="utf-8")
+
+    result = run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
+        repo_root=REPO_ROOT,
+        plan_receipt_path=files["plan"],
+        candidate_pool_path=files["candidates"],
+        tasks_path=files["tasks"],
+        prompt_records_path=files["prompts"],
+        output_evidence_path=files["evidence"],
+        output_path=files["output"],
+        verifier_digest="sha256:verifier",
+        held_out_split_id="heldout-v1",
+        runner_mode=MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
+        runner_allowed_providers="provider",
+        runner_max_prompt_chars=2000,
+        runner_max_calls_per_sample=1,
+        runner_max_cost_estimate_usd_per_sample=1.0,
+        gateway=gateway,
+    )
+
+    assert result.accepted is True
+    payload = json.loads(files["output"].read_text(encoding="utf-8"))
+    receipt = rehydrate_model_autoresearch_campaign_execution_receipt(payload)
+    sample = receipt.benchmark_run_receipt.samples[0]
+    assert sample.accepted is False
+    assert sample.decision == VerifierDecision.REJECT
+    assert "semantic_verifier_required_term_missing:missing-term" in sample.rejection_reasons
 
 
 def test_campaign_execution_bootstrap_configured_gateway_requires_prompt_records(tmp_path: Path) -> None:

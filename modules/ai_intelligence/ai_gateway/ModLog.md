@@ -1,5 +1,41 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Output Evidence Semantic Verifier
+
+**Who:** 0102 Codex
+**Type:** Runtime Benchmark Verifier
+**Slice:** MODEL_AUTORESEARCH_CONFIGURED_GATEWAY_SEMANTIC_VERIFIER_PHASE1
+
+**What:** Added a deterministic verifier over configured-gateway output
+evidence records and exposed it through the campaign execution bootstrap as
+`output_evidence_semantic` verifier mode.
+
+**Why:** The benchmark path can now preserve raw model output, but promotion
+still needs a verifier that checks actual content rather than output digest
+shape alone.
+
+**Files:**
+- `src/model_autoresearch_semantic_verifier.py` - rehydrates output evidence,
+  recomputes configured-runner output/receipt digests, and checks task-declared
+  required/forbidden answer terms.
+- `src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py` -
+  adds `output_evidence_semantic` as an explicit configured-gateway verifier
+  mode.
+- `tests/test_model_autoresearch_semantic_verifier.py` and bootstrap tests -
+  acceptance, missing evidence, missing requirements, forbidden term, digest
+  mismatch, panel-role evidence, and startup coverage.
+
+**Truth Boundary:**
+- IMPLEMENTED: deterministic output-evidence verifier for task-declared
+  semantic requirements.
+- NOT IMPLEMENTED: free-form LLM verifier, model promotion, PatternMemory
+  writes, HoloIndex re-indexing, runtime model binding, worker spawn, shell
+  execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Output Evidence Bundle
 
 **Who:** 0102 Codex
