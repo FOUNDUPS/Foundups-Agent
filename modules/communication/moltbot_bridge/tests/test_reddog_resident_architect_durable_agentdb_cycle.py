@@ -26,6 +26,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_
     STATUS_DETERMINED,
     STATUS_TIMED_OUT,
     AgentDbResidentArchitectCycleStore,
+    NoopExternalResearchRetriever,
     ResidentCycleReason,
     run_reddog_resident_architect_durable_agentdb_cycle,
 )
@@ -361,15 +362,41 @@ def test_duplicate_intent_reconnects_to_persisted_cycle_without_new_claims() -> 
     assert AgentDB().get_autonomous_tasks(status="completed", limit=20)
 
 
-def test_missing_external_research_retriever_fails_before_agentdb_enqueue() -> None:
+def test_missing_external_research_retriever_uses_noop_receipt_instead_of_blocking_cycle() -> None:
+    audit_runner = _AuditModelRunner()
     result = run_reddog_resident_architect_durable_agentdb_cycle(
-        **_runtime_kwargs(external_research_retriever=None)
+        **_runtime_kwargs(
+            audit_model_runner=audit_runner,
+            external_research_retriever=None,
+        )
     )
 
-    assert result.accepted is False
-    assert result.decision == REDDOG_RESIDENT_CYCLE_REJECT
-    assert ResidentCycleReason.EXTERNAL_RESEARCH_RETRIEVER_MISSING in result.rejection_reasons
+    assert result.accepted is True
+    assert result.decision == REDDOG_RESIDENT_CYCLE_ACCEPT
+    assert result.status == STATUS_DETERMINED
+    assert result.task_status_counts == {"completed": 5}
+    assert ResidentCycleReason.EXTERNAL_RESEARCH_RETRIEVER_MISSING not in result.rejection_reasons
+    external_contexts = [
+        json.loads(call["context"])
+        for call in audit_runner.calls
+        if json.loads(call["prompt"])["assignment"]["lane_id"] == "external_research_audit"
+    ]
+    assert len(external_contexts) == 1
+    assert "external_research_query_receipt" not in external_contexts[0]
+    assert "untrusted_external_research_evidence" not in external_contexts[0]
     assert AgentDB().get_autonomous_tasks(status="pending", limit=10) == []
+
+
+def test_noop_external_research_retriever_returns_no_content_bearing_evidence() -> None:
+    payload = NoopExternalResearchRetriever().fetch(
+        {"url": "https://github.com/FOUNDUPS/Foundups-Agent"}
+    )
+
+    assert payload["source_type"] == "unconfigured"
+    assert payload["finding_status"] == "missing"
+    assert payload.get("content_text") in (None, "")
+    assert payload.get("content_sha256") in (None, "")
+    assert "approved_external_research_retriever_not_configured" in payload["rejection_reasons"]
 
 
 def test_timeout_when_openclaw_does_not_claim_tasks() -> None:

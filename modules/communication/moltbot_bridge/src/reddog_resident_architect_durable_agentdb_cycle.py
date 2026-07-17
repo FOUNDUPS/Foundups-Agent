@@ -105,6 +105,24 @@ class ResidentArchitectCycleStore(Protocol):
     def delete_cycle_tasks(self, task_ids: Sequence[str]) -> None: ...
 
 
+class NoopExternalResearchRetriever:
+    """Fail-closed external retriever used when no approved source is configured.
+
+    The resident cycle still needs an object implementing the retriever
+    protocol so the external-research worker can emit an explicit missing
+    evidence receipt. This retriever performs no network I/O and returns no
+    content-bearing evidence.
+    """
+
+    def fetch(self, target: Mapping[str, Any]) -> Mapping[str, Any]:
+        return {
+            "source_url": str(target.get("url") or target.get("target") or ""),
+            "source_type": "unconfigured",
+            "finding_status": "missing",
+            "rejection_reasons": ["approved_external_research_retriever_not_configured"],
+        }
+
+
 @dataclass(frozen=True)
 class RedDogResidentArchitectCycleResult:
     accepted: bool
@@ -352,7 +370,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
     if reasons:
         return _reject(red_dog_intent, reasons)
     if external_research_retriever is None:
-        return _reject(red_dog_intent, (ResidentCycleReason.EXTERNAL_RESEARCH_RETRIEVER_MISSING,))
+        external_research_retriever = NoopExternalResearchRetriever()
 
     if retry_requested:
         retry_count = int(existing.get("retry_count", 0)) + 1 if existing else 1
@@ -672,6 +690,7 @@ def _now_iso() -> str:
 
 __all__ = [
     "AgentDbResidentArchitectCycleStore",
+    "NoopExternalResearchRetriever",
     "REDDOG_RESIDENT_CYCLE_ACCEPT",
     "REDDOG_RESIDENT_CYCLE_REJECT",
     "RedDogResidentArchitectCycleResult",

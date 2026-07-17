@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_EXTERNAL_RESEARCH_NOOP_RETRIEVER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added a no-op external research retriever for durable resident RedDog cycles
+  when no approved external snapshot/retriever is configured.
+- The resident cycle no longer rejects before AgentDB enqueue solely because
+  the optional external retriever object is missing; it can still run repository,
+  HoloIndex, Brain/Breadcrumb, Memex, and work-state audits.
+- The no-op retriever performs no network I/O, returns no content-bearing
+  evidence, and marks external research as unconfigured/missing so workers
+  cannot mistake it for fresh external proof.
+- Boundary remains constrained: this does not add live web research, source
+  mutation, shell execution, worktree operations, PR creation, HoloIndex
+  re-index, PatternMemory promotion, live enqueue, reward settlement, or merge
+  authority.
+
 ## 2026-07-17: REDDOG_RESIDENT_ARCHITECT_QUEUE_PROFILE_AUTOWIRE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
