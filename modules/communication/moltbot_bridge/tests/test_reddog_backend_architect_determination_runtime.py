@@ -17,6 +17,7 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ArchitectModelResult,
     FoundupsFusionArchitectModelRunner,
     InMemoryArchitectDeterminationStore,
+    RUNTIME_SURFACE_BACKEND_ARCHITECT,
     run_reddog_backend_architect_determination_runtime,
 )
 from modules.communication.moltbot_bridge.src import reddog_backend_architect_determination_runtime as backend_runtime
@@ -42,6 +43,9 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _model_selection,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
 )
 
 
@@ -351,6 +355,48 @@ def test_model_selection_receipt_is_bound_to_backend_runner_and_receipt() -> Non
     assert binding["receipt_id"] == selection["receipt_id"]
     assert binding["lead_model"] == "openai/gpt-5.6-code"
     assert binding["purpose"] == "production"
+
+
+def test_model_runtime_binding_receipt_is_bound_to_backend_runner_and_receipt() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT)
+    runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref))
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        model_runtime_binding_receipt=runtime_binding,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.receipt.model_runtime_binding_receipt_id == runtime_binding["receipt_id"]
+    assert result.receipt.model_runtime_binding_digest
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert binding["lead_model"] == "openai/gpt-5.6-code"
+
+
+def test_mismatched_model_runtime_binding_receipt_rejects_before_backend_model_call() -> None:
+    inputs = _build_inputs()
+    runtime_binding = model_runtime_binding_receipt(runtime_surface="wrong_surface")
+    runner = FakeArchitectRunner({})
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=runner,
+        model_runtime_binding_receipt=runtime_binding,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_tampered_model_selection_receipt_rejects_before_backend_model_call() -> None:
