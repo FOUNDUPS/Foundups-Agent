@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_CLI_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added a signer-owned CLI adapter for starting the bounded isolated signer
+  socket service from an outside-repo JSON config.
+- The CLI composes the existing runtime bootstrap with the WSP71
+  `OpCliSecretResolver`, emits only audit-safe JSON receipts, and returns
+  nonzero on bootstrap rejection.
+- Added tests for successful WSP71 resolver/service execution, unsafe config
+  rejection before service call, no secret serialization, and AST no-main/
+  no-OpenClaw/no-Hermes/no-HoloIndex/no-repo-mutation surface.
+- Boundary remains constrained: no `main.py` wiring, no RedDog model-output
+  invocation, no OpenClaw enqueue, no Hermes dispatch, no PR publication, no
+  reward settlement, and no HoloIndex re-index.
+
 ## 2026-07-17: REDDOG_MAIN_MISSING_SIGNER_SOCKET_FAIL_CLOSED_PROOF_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
