@@ -31,6 +31,10 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gatewa
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
     JsonlModelAutoResearchOutputEvidenceStore,
+    read_model_autoresearch_output_evidence_jsonl,
+)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_semantic_verifier import (
+    build_model_autoresearch_output_evidence_semantic_verifier,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution import (
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ACCEPT,
@@ -58,6 +62,7 @@ MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_RUNNER = "deterministic_fixture"
 MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_VERIFIER = "deterministic_fixture"
 MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER = "configured_gateway"
 MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER = "exact_output_digest"
+MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER = "output_evidence_semantic"
 
 
 @dataclass(frozen=True)
@@ -207,7 +212,15 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
                 repo_root=root,
             ),
         )
-        verifier = _exact_output_digest_verifier
+        if verifier_mode_text == MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER:
+            verifier = build_model_autoresearch_output_evidence_semantic_verifier(
+                evidence_records=lambda: read_model_autoresearch_output_evidence_jsonl(
+                    evidence_path,
+                    repo_root=root,
+                )
+            )
+        else:
+            verifier = _exact_output_digest_verifier
         no_provider_call = False
     execution = run_reddog_model_autoresearch_campaign_execution(
         repo_root=root,
@@ -434,6 +447,10 @@ def _mode_reasons(runner_mode: str, verifier_mode: str) -> tuple[str, ...]:
             MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
             MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
         ),
+        (
+            MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER,
+            MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
+        ),
     }
     if runner not in {
         MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_RUNNER,
@@ -443,6 +460,7 @@ def _mode_reasons(runner_mode: str, verifier_mode: str) -> tuple[str, ...]:
     if verifier not in {
         MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_VERIFIER,
         MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
+        MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
     }:
         reasons.append("unsupported_model_autoresearch_campaign_verifier_mode")
     if not reasons and (runner, verifier) not in valid_pairs:
@@ -559,6 +577,7 @@ __all__ = [
     "MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER",
     "MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_RUNNER",
     "MODEL_AUTORESEARCH_CAMPAIGN_FIXTURE_VERIFIER",
+    "MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER",
     "ModelAutoResearchCampaignExecutionBootstrapResult",
     "run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap",
 ]

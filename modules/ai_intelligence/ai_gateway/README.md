@@ -89,6 +89,13 @@ injected, each raw model response is written to an outside-repo JSONL record
 whose response digest and record ID can be rehydrated later by an independent
 verifier. Secret-bearing output is rejected before persistence.
 
+`src/model_autoresearch_semantic_verifier.py` is the first deterministic
+content verifier over those evidence records. It does not call a model; it
+rehydrates the output evidence, recomputes the configured-runner output and
+receipt digests, then checks explicit task metadata requirements:
+`expected_answer_contains` and `expected_answer_excludes`. Missing requirements
+fail closed.
+
 This creates a real provider-call seam for AutoResearch benchmarks without
 turning it on at resident startup. It does not choose candidates, verify model
 answers, promote models, mutate catalogs, write PatternMemory, re-index
@@ -99,8 +106,8 @@ defaults.
 use this runner only when `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE` is
 set to `configured_gateway`, prompt records are supplied from outside the repo,
 providers are explicitly allowlisted, an outside-repo output evidence path is
-supplied, and verifier mode is `exact_output_digest`. The default remains
-deterministic fixture execution.
+supplied, and verifier mode is `exact_output_digest` or
+`output_evidence_semantic`. The default remains deterministic fixture execution.
 
 ## Model Combination Benchmark Harness
 
