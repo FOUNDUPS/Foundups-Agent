@@ -655,6 +655,12 @@ def test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage(
     assert "status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT" in captured
     assert "claimed_count=1" in captured
     assert f"requeued={task_id}" in captured
+    assert "receipts=signed_worker_task_execution_" in captured
+    assert str(
+        main.run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result[
+            "receipt_ids"
+        ][0]
+    ).startswith("signed_worker_task_execution_")
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
@@ -771,6 +777,12 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     assert "claimed_count=1" in captured
     assert f"completed={task_id}" in captured
     assert "requeued=(none)" in captured
+    assert "receipts=signed_worker_task_execution_" in captured
+    assert str(
+        main.run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result[
+            "receipt_ids"
+        ][0]
+    ).startswith("signed_worker_task_execution_")
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "completed"
     assert calls
     assert calls[0]["api_key"] == "test-openrouter-key"

@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_RECEIPT_TELEMETRY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97
+
+- Surfaced signed-worker execution receipt IDs through the OpenClaw claim-loop
+  aggregate result and `main.py` preflight output.
+- Threaded `receipt_ids` into `run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result`
+  so resident queue control can correlate claimed tasks to durable AgentDB
+  result receipts without direct task-row inspection.
+- Added regressions for completed and requeued signed-worker claims.
+- HoloIndex query-only check did not surface the new claim-loop receipt
+  telemetry surfaces; recorded as
+  HOLOINDEX_REDDOG_OPENCLAW_CLAIM_RECEIPT_TELEMETRY_INDEX_GAP. No runtime
+  reindex performed.
+
 ## 2026-07-17: REDDOG_SIGNED_WORKER_AGENTDB_RESULT_RECEIPT_PERSISTENCE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97

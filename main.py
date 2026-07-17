@@ -4021,6 +4021,7 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
     completed = ",".join(str(item) for item in result.get("completed_task_ids", ()) or ()) or "(none)"
     requeued = ",".join(str(item) for item in result.get("requeued_task_ids", ()) or ()) or "(none)"
     failed = ",".join(str(item) for item in result.get("failed_task_ids", ()) or ()) or "(none)"
+    receipts = ",".join(str(item) for item in result.get("receipt_ids", ()) or ()) or "(none)"
     reasons = ",".join(str(reason) for reason in result.get("rejection_reasons", ()) or ()) or "(none)"
     status_label = "PASS" if accepted else "WARN"
     run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
@@ -4030,12 +4031,14 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
         "claimed_count": claimed_count,
         "idle": bool(result.get("idle")),
         "max_claims_reached": bool(result.get("max_claims_reached")),
+        "receipt_ids": tuple(result.get("receipt_ids", ()) or ()),
         "rejection_reasons": tuple(result.get("rejection_reasons", ()) or ()),
     }
     print(
         f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight={status_label} status={status} "
         f"claimed_count={claimed_count} max_claims={max_claims} "
-        f"completed={completed} requeued={requeued} failed={failed} reasons={reasons}"
+        f"completed={completed} requeued={requeued} failed={failed} "
+        f"receipts={receipts} reasons={reasons}"
     )
     if accepted:
         return True

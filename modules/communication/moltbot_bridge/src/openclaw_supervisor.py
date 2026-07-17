@@ -963,6 +963,11 @@ def _signed_worker_claim_loop_result(
         key: all(bool(result.get(key, True)) for result in results)
         for key in no_fields
     }
+    receipt_ids = tuple(
+        str(result.get("receipt_id") or "")
+        for result in results
+        if str(result.get("receipt_id") or "").strip()
+    )
     return {
         "accepted": accepted,
         "status": status,
@@ -975,6 +980,7 @@ def _signed_worker_claim_loop_result(
         "idle": idle,
         "max_claims_reached": max_claims_reached,
         "claim_results": results,
+        "receipt_ids": receipt_ids,
         "rejection_reasons": tuple(
             dict.fromkeys(str(reason) for reason in rejection_reasons if str(reason))
         ),
