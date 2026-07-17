@@ -624,7 +624,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     captured = capsys.readouterr().out
     assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
     assert "status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT" in captured
-    assert "claimed_count=6" in captured
+    assert "claimed_count=7" in captured
     assert f"completed={coding_task_id},{queue_stage_task_id}" in captured
     assert AgentDB().get_autonomous_task_by_id(coding_task_id)["status"] == "completed"
     assert AgentDB().get_autonomous_task_by_id(queue_stage_task_id)["status"] == "completed"
@@ -643,6 +643,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
         "slice_verifier",
         "verified_draft_pr_publish",
         "verified_outcome_ratchet",
+        "model_feedback_admission",
         "held_out_regression_gate",
         "pattern_memory_admission",
     ):

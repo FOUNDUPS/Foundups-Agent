@@ -51,6 +51,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_held_o
     QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_REJECT,
     QueueAuthorizedHeldOutRegressionGateInvokeReason,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_model_feedback_ledger_admission_invoke import (
+    QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_slice_verifier_invoke import (
     QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT,
 )
@@ -147,6 +150,23 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "slice_verifier": _queue_verifier_result(),
         "verified_draft_pr_publish": _queue_publish_result(),
         VERIFIED_OUTCOME_RATCHET_STAGE_KEY: _queue_ratchet_result(),
+        "model_feedback_admission": {
+            "decision": QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT,
+            "rejection_reasons": [],
+            "model_feedback_admission_result": None,
+            "explicit_queue_authorized_model_feedback_ledger_admission_requested": True,
+            "model_feedback_write_performed": False,
+            "model_feedback_noop_reason": "no_model_selection_outcome_receipt",
+            "no_provider_call_performed": True,
+            "no_benchmark_execution_performed": True,
+            "no_model_promotion_performed": True,
+            "no_command_execution_performed": True,
+            "no_pr_publish_performed": True,
+            "no_merge_performed": True,
+            "no_pattern_memory_write_performed": True,
+            "no_reward_settlement_performed": True,
+            "no_holoindex_reindex_performed": True,
+        },
     }
     stage_results.update(stage_overrides)
     return InMemoryResidentQueueChainResultsStore(

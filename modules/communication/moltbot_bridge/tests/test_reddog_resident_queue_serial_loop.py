@@ -51,6 +51,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execut
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_held_out_regression_gate_invoke import (
     QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_model_feedback_ledger_admission_invoke import (
+    QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_pattern_memory_admission_invoke import (
     QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT,
 )
@@ -99,6 +102,7 @@ STAGE_ACCEPT_VALUES = {
     "slice_verifier": ("decision", QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT),
     "verified_draft_pr_publish": ("decision", QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT),
     "verified_outcome_ratchet": ("decision", QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT),
+    "model_feedback_admission": ("decision", QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT),
     "held_out_regression_gate": ("decision", QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT),
     "pattern_memory_admission": ("decision", QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT),
 }

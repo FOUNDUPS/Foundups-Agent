@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_QUEUE_MODEL_FEEDBACK_LEDGER_ADMISSION_STAGE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Inserted `model_feedback_admission` into the resident queue chain after
+  `verified_outcome_ratchet` and before held-out regression / PatternMemory.
+- Added a resident stage handler that consumes the verified-outcome ratchet
+  stage result and calls the queue-authorized model-feedback ledger admission
+  guard only when a `ModelSelectionOutcomeReceipt` exists.
+- Non-model-feedback chains record an accepted no-op, preserving existing
+  resident queue progress without requiring a model-feedback ledger store.
+- The bootstrap can build an outside-repo JSONL model-feedback ledger store
+  when configured, and OpenClaw queue-stage readiness recognizes the inserted
+  stage.
+- Boundary remains constrained: no provider call, benchmark execution, model
+  promotion, command execution, PatternMemory write, OpenClaw/Hermes dispatch,
+  source mutation, PR publication, reward settlement, or HoloIndex re-indexing
+  was added.
+
 ## 2026-07-17: REDDOG_WRE_QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

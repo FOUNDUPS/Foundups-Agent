@@ -38,6 +38,7 @@ ALL_STAGE_KEYS = (
     "slice_verifier",
     "verified_draft_pr_publish",
     "verified_outcome_ratchet",
+    "model_feedback_admission",
     "held_out_regression_gate",
     "pattern_memory_admission",
 )
@@ -76,11 +77,16 @@ def test_registry_registers_only_dependency_free_stages_with_default_bootstrap_d
     )
 
     assert registry.status == RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_READY
-    assert registry.registered_stage_keys == ("authority_request", "worker_dispatch_dryrun")
-    assert registry.registered_stage_count == 2
+    assert registry.registered_stage_keys == (
+        "authority_request",
+        "worker_dispatch_dryrun",
+        "model_feedback_admission",
+    )
+    assert registry.registered_stage_count == 3
     assert set(registry.missing_stage_reasons) == set(ALL_STAGE_KEYS) - {
         "authority_request",
         "worker_dispatch_dryrun",
+        "model_feedback_admission",
     }
     assert "missing_dependency:signer" in registry.missing_stage_reasons["authority_runtime"]
     assert registry.no_default_signer_created is True
@@ -139,7 +145,11 @@ def test_registry_to_dict_omits_callable_handlers(tmp_path: Path) -> None:
 
     assert "handlers" not in payload
     assert payload["status"] == RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_READY
-    assert payload["registered_stage_keys"] == ("authority_request", "worker_dispatch_dryrun")
+    assert payload["registered_stage_keys"] == (
+        "authority_request",
+        "worker_dispatch_dryrun",
+        "model_feedback_admission",
+    )
     assert payload["no_repo_mutation_performed"] is True
 
 
@@ -159,7 +169,10 @@ def test_registry_rejects_empty_mapping_dependencies() -> None:
         now_iso=NOW_ISO,
     )
 
-    assert registry.registered_stage_keys == ("worker_dispatch_dryrun",)
+    assert registry.registered_stage_keys == (
+        "worker_dispatch_dryrun",
+        "model_feedback_admission",
+    )
     assert "missing_dependency:authority_profile" in registry.missing_stage_reasons["authority_request"]
     assert "missing_dependency:worker_dispatch_writer" in (
         registry.missing_stage_reasons["worker_dispatch_runtime"]

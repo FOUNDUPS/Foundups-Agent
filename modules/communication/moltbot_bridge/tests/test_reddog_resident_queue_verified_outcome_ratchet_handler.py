@@ -16,7 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
     invoke_reddog_resident_queue_next_stage_dispatch,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
-    NEXT_QUEUE_HELD_OUT_REGRESSION_GATE_INVOKE,
+    NEXT_QUEUE_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE,
     NEXT_QUEUE_VERIFIED_OUTCOME_RATCHET_INVOKE,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_verified_outcome_ratchet_handler import (
@@ -165,7 +165,7 @@ def _handler(
     )
 
 
-def test_dispatcher_records_outcome_ratchet_and_advances_to_held_out_regression() -> None:
+def test_dispatcher_records_outcome_ratchet_and_advances_to_model_feedback_admission() -> None:
     chain_store = _seeded_store()
     outcome_store = ratchet.InMemoryOutcomeRatchetStore()
 
@@ -185,7 +185,7 @@ def test_dispatcher_records_outcome_ratchet_and_advances_to_held_out_regression(
     assert result.accepted is True
     assert result.decision == RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT
     assert result.dispatched_stage == VERIFIED_OUTCOME_RATCHET_STAGE_KEY
-    assert result.next_action == NEXT_QUEUE_HELD_OUT_REGRESSION_GATE_INVOKE
+    assert result.next_action == NEXT_QUEUE_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE
     stage = chain_store.load()["stage_results"][VERIFIED_OUTCOME_RATCHET_STAGE_KEY]
     assert stage["decision"] == QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT
     assert stage["ratchet_result"]["decision"] == ratchet.OUTCOME_RATCHET_RECORDED
