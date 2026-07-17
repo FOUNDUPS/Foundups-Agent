@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_VERIFIER_OUTCOME_CARRY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Carried optional model-runtime binding id/digest from signed authority and
+  bounded artifact-generation receipts into independent verifier receipts.
+- Draft-PR publish and verified-outcome ratchet receipts now preserve the same
+  runtime-binding proof and fail closed if a downstream request tries to
+  override it.
+- The queue-authorized verifier wrapper now enriches verifier requests from the
+  bounded artifact-generation receipt so model runtime evidence is not lost
+  between artifact synthesis and independent verification.
+- Boundary remains constrained: no model/provider default change, benchmark
+  execution, signing expansion, shell, worktree policy change, source mutation,
+  PatternMemory write, OpenClaw/Hermes dispatch, PR publication, reward
+  settlement, or HoloIndex re-indexing was added.
+
 ## 2026-07-17: REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_REQUEST_DERIVATION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97

@@ -33,6 +33,7 @@ FAIL_PUBLISH_RECEIPT = "FAIL_PUBLISH_RECEIPT"
 FAIL_RECEIPT_SET = "FAIL_RECEIPT_SET"
 FAIL_COST_LATENCY = "FAIL_COST_LATENCY"
 FAIL_HOLOINDEX_EVIDENCE = "FAIL_HOLOINDEX_EVIDENCE"
+FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
 FAIL_SECRET_IN_RECEIPT = "FAIL_SECRET_IN_RECEIPT"
 FAIL_PATTERN_MEMORY_UNVERIFIED = "FAIL_PATTERN_MEMORY_UNVERIFIED"
 FAIL_STORE_WRITE = "FAIL_STORE_WRITE"
@@ -103,6 +104,8 @@ class VerifiedOutcomeRatchetReceipt:
     acceptance_receipt_digest: str
     failure_receipt_digest: Optional[str]
     holoindex_freshness_receipt_digest: str
+    model_runtime_binding_receipt_id: Optional[str]
+    model_runtime_binding_digest: str
     pattern_memory_eligible: bool
     pattern_memory_write_performed: bool
     pattern_memory_record_id: Optional[str]
@@ -205,6 +208,54 @@ def _holoindex_ok(holoindex_evidence: Mapping[str, Any]) -> bool:
     return bool(str(holoindex_evidence.get("holoindex_freshness_receipt_digest") or ""))
 
 
+def _is_digest(value: Any) -> bool:
+    text = str(value or "")
+    return (
+        text.startswith("sha256:")
+        and len(text) == 71
+        and all(ch in "0123456789abcdef" for ch in text.removeprefix("sha256:"))
+    )
+
+
+def _runtime_binding_pair(value: Mapping[str, Any]) -> tuple[str, str]:
+    receipt_id = str(
+        value.get("model_runtime_binding_receipt_id")
+        or value.get("runtime_binding_receipt_id")
+        or ""
+    )
+    digest = str(value.get("model_runtime_binding_digest") or "")
+    return receipt_id, digest
+
+
+def _runtime_binding_ok(request: Mapping[str, Any]) -> tuple[bool, Optional[str], str]:
+    verification_result = _mapping(request.get("verification_result"))
+    verification_receipt = _mapping(verification_result.get("receipt"))
+    publish_result = _mapping(request.get("publish_result"))
+    publish_receipt = _mapping(publish_result.get("receipt"))
+    pairs = [
+        pair
+        for pair in (
+            _runtime_binding_pair(request),
+            _runtime_binding_pair(verification_receipt),
+            _runtime_binding_pair(publish_receipt),
+        )
+        if pair[0] or pair[1]
+    ]
+    if not pairs:
+        return True, None, ""
+    normalized: List[tuple[str, str]] = []
+    for receipt_id, digest in pairs:
+        if not receipt_id or not digest:
+            return False, receipt_id or None, digest
+        if not receipt_id.startswith("reddog_model_runtime_binding:") or not _is_digest(digest):
+            return False, receipt_id, digest
+        normalized.append((receipt_id, digest))
+    first = normalized[0]
+    if any(pair != first for pair in normalized[1:]):
+        return False, first[0], first[1]
+    return True, first[0], first[1]
+
+
 def _cost_latency_ok(cost: Mapping[str, Any], latency: Mapping[str, Any]) -> bool:
     for key in ("total_tokens", "estimated_cost_usd"):
         if key not in cost:
@@ -237,6 +288,7 @@ def _build_receipt(
     failure = _mapping(request.get("failure_receipt"))
     holoindex = _mapping(request.get("holoindex_evidence"))
     execution_receipts = _list(request.get("execution_receipts"))
+    _, runtime_binding_id, runtime_binding_digest = _runtime_binding_ok(request)
     work_order_id = str(
         request.get("work_order_id") or verification_receipt.get("work_order_id") or ""
     )
@@ -255,6 +307,8 @@ def _build_receipt(
         "verification_digest": _receipt_digest(verification_result),
         "acceptance_receipt_digest": _receipt_digest(acceptance),
         "failure_receipt_digest": _receipt_digest(failure) if failure else None,
+        "model_runtime_binding_receipt_id": runtime_binding_id or "",
+        "model_runtime_binding_digest": runtime_binding_digest,
         "rejection_reasons": reasons,
     }
     return VerifiedOutcomeRatchetReceipt(
@@ -274,6 +328,8 @@ def _build_receipt(
         holoindex_freshness_receipt_digest=str(
             holoindex.get("holoindex_freshness_receipt_digest") or ""
         ),
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
         pattern_memory_eligible=pattern_memory_eligible,
         pattern_memory_write_performed=pattern_memory_write_performed,
         pattern_memory_record_id=pattern_memory_record_id,
@@ -298,6 +354,7 @@ def ratchet_verified_outcome(
     failure = _mapping(req.get("failure_receipt"))
     holoindex = _mapping(req.get("holoindex_evidence"))
     outcome_status = str(req.get("outcome_status") or "")
+    runtime_binding_ok, _, _ = _runtime_binding_ok(req)
     reasons: List[str] = []
 
     if (
@@ -319,6 +376,8 @@ def ratchet_verified_outcome(
         reasons.append(FAIL_COST_LATENCY)
     if not _holoindex_ok(holoindex):
         reasons.append(FAIL_HOLOINDEX_EVIDENCE)
+    if not runtime_binding_ok:
+        reasons.append(FAIL_MODEL_RUNTIME_BINDING)
     if _contains_secret(
         {
             "request": req.get("request_receipt"),
@@ -410,6 +469,7 @@ def ratchet_verified_outcome(
 __all__ = [
     "FAIL_COST_LATENCY",
     "FAIL_HOLOINDEX_EVIDENCE",
+    "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_PATTERN_MEMORY_UNVERIFIED",
     "FAIL_PATTERN_MEMORY_WRITE",
     "FAIL_PUBLISH_RECEIPT",

@@ -89,6 +89,19 @@ def valid_request() -> dict:
     }
 
 
+def request_with_runtime_binding() -> dict:
+    req = valid_request()
+    req["verification_result"]["receipt"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["verification_result"]["receipt"]["model_runtime_binding_digest"] = _digest("3")
+    req["publish_result"]["receipt"]["model_runtime_binding_receipt_id"] = (
+        "reddog_model_runtime_binding:test"
+    )
+    req["publish_result"]["receipt"]["model_runtime_binding_digest"] = _digest("3")
+    return req
+
+
 def assert_reject(req: dict, code: str) -> ratchet.VerifiedOutcomeRatchetResult:
     store = ratchet.InMemoryOutcomeRatchetStore()
     result = ratchet.ratchet_verified_outcome(req, store=store)
@@ -112,9 +125,35 @@ def test_records_verified_outcome_without_pattern_memory_by_default() -> None:
     assert result.receipt.pattern_memory_eligible is True
     assert result.receipt.pattern_memory_write_performed is False
     assert result.receipt.pattern_memory_record_id is None
+    assert result.receipt.model_runtime_binding_receipt_id is None
+    assert result.receipt.model_runtime_binding_digest == ""
     assert result.store_record_id == result.receipt.ratchet_id
     assert len(store.records) == 1
     assert store.records[0]["ratchet_receipt"]["ratchet_id"] == result.receipt.ratchet_id
+
+
+def test_ratchet_receipt_carries_model_runtime_binding_from_verification_chain() -> None:
+    store = ratchet.InMemoryOutcomeRatchetStore()
+
+    result = ratchet.ratchet_verified_outcome(request_with_runtime_binding(), store=store)
+
+    assert result.accepted is True
+    assert (
+        result.receipt.model_runtime_binding_receipt_id
+        == "reddog_model_runtime_binding:test"
+    )
+    assert result.receipt.model_runtime_binding_digest == _digest("3")
+    assert (
+        store.records[0]["ratchet_receipt"]["model_runtime_binding_receipt_id"]
+        == "reddog_model_runtime_binding:test"
+    )
+
+
+def test_ratchet_rejects_model_runtime_binding_mismatch() -> None:
+    req = request_with_runtime_binding()
+    req["publish_result"]["receipt"]["model_runtime_binding_digest"] = _digest("4")
+
+    assert_reject(req, ratchet.FAIL_MODEL_RUNTIME_BINDING)
 
 
 def test_pattern_memory_sink_receives_only_verified_accepted_outcome() -> None:

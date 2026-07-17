@@ -162,6 +162,28 @@ def test_invokes_autonomous_verifier_from_accepted_bounded_pilot() -> None:
     assert result.no_holoindex_reindex_performed is True
 
 
+def test_carries_artifact_generation_model_runtime_binding_into_verifier() -> None:
+    queue_pilot = _queue_pilot_result()
+    queue_pilot["artifact_generation_result"] = {
+        "accepted": True,
+        "receipt": {
+            "receipt_id": "bounded_artifacts_1234",
+            "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:test",
+            "model_runtime_binding_digest": _digest("c"),
+        },
+    }
+
+    result = _invoke(queue_pilot=queue_pilot)
+
+    assert result.decision == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT
+    assert result.verifier_result is not None
+    assert (
+        result.verifier_result.receipt.model_runtime_binding_receipt_id
+        == "reddog_model_runtime_binding:test"
+    )
+    assert result.verifier_result.receipt.model_runtime_binding_digest == _digest("c")
+
+
 def test_explicit_invoke_missing_rejects_before_verifier() -> None:
     result = invoke_reddog_wre_queue_authorized_slice_verifier(
         explicit_queue_authorized_slice_verifier_requested=False,

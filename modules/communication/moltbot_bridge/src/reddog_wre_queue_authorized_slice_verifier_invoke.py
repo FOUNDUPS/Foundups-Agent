@@ -129,6 +129,7 @@ def _pilot_flags_ok(queue_pilot: Mapping[str, Any], pilot_payload: Mapping[str, 
 def _enrich_verifier_request(
     verifier_request: Mapping[str, Any],
     pilot_receipt: Mapping[str, Any],
+    artifact_generation_receipt: Mapping[str, Any],
 ) -> Dict[str, Any]:
     enriched = dict(verifier_request)
     enriched["worktree_receipt"] = {
@@ -139,6 +140,8 @@ def _enrich_verifier_request(
         "accepted": True,
         **dict(pilot_receipt),
     }
+    if artifact_generation_receipt:
+        enriched["artifact_generation_receipt"] = dict(artifact_generation_receipt)
     return enriched
 
 
@@ -170,6 +173,9 @@ def invoke_reddog_wre_queue_authorized_slice_verifier(
     pilot_receipt = _mapping(pilot_payload.get("receipt"))
     if not pilot_receipt:
         reasons.append(QueueAuthorizedSliceVerifierInvokeReason.PILOT_RECEIPT_MISSING)
+    artifact_generation_receipt = _mapping(
+        _mapping(queue_pilot.get("artifact_generation_result")).get("receipt")
+    )
 
     if pilot_payload and not _pilot_flags_ok(queue_pilot, pilot_payload):
         reasons.append(QueueAuthorizedSliceVerifierInvokeReason.PILOT_SIDE_EFFECT_FLAGS_INVALID)
@@ -187,7 +193,13 @@ def invoke_reddog_wre_queue_authorized_slice_verifier(
     if reasons:
         return _reject(reasons, explicit_requested=True)
 
-    verifier = verify_autonomous_slice_runtime(_enrich_verifier_request(verifier_payload, pilot_receipt))
+    verifier = verify_autonomous_slice_runtime(
+        _enrich_verifier_request(
+            verifier_payload,
+            pilot_receipt,
+            artifact_generation_receipt,
+        )
+    )
     if verifier.decision != AUTONOMOUS_SLICE_VERIFIER_ACCEPT:
         return _reject(
             [

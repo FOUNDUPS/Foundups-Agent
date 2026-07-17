@@ -50,6 +50,13 @@ def _verifier_result(*, accepted: bool = True) -> dict:
     }
 
 
+def _verifier_result_with_runtime_binding() -> dict:
+    result = _verifier_result()
+    result["receipt"]["model_runtime_binding_receipt_id"] = "reddog_model_runtime_binding:test"
+    result["receipt"]["model_runtime_binding_digest"] = "sha256:" + ("1" * 64)
+    return result
+
+
 def valid_request() -> dict:
     return {
         "verifier_result": _verifier_result(),
@@ -88,10 +95,40 @@ def test_publishes_draft_pr_only_after_accepted_verifier_result() -> None:
     assert result.receipt.draft_pr_url.endswith("/pull/1000")
     assert result.receipt.verified_head_sha == HEAD_SHA
     assert result.receipt.changed_paths == [PATH]
+    assert result.receipt.model_runtime_binding_receipt_id is None
+    assert result.receipt.model_runtime_binding_digest == ""
     assert result.receipt.no_ready_performed is True
     assert result.receipt.no_merge_performed is True
     assert result.receipt.no_pattern_memory_write_performed is True
     assert [call[0] for call in runner.calls] == ["push_branch", "create_draft_pr"]
+
+
+def test_publish_receipt_carries_verifier_model_runtime_binding() -> None:
+    req = valid_request()
+    req["verifier_result"] = _verifier_result_with_runtime_binding()
+
+    result = publish.publish_verified_draft_pr(req, runner=FakeRunner())
+
+    assert result.accepted is True
+    assert (
+        result.receipt.model_runtime_binding_receipt_id
+        == "reddog_model_runtime_binding:test"
+    )
+    assert result.receipt.model_runtime_binding_digest == "sha256:" + ("1" * 64)
+
+
+def test_rejects_publish_runtime_binding_override() -> None:
+    req = valid_request()
+    req["verifier_result"] = _verifier_result_with_runtime_binding()
+    req["model_runtime_binding_receipt_id"] = "reddog_model_runtime_binding:test"
+    req["model_runtime_binding_digest"] = "sha256:" + ("2" * 64)
+    runner = FakeRunner()
+
+    result = publish.publish_verified_draft_pr(req, runner=runner)
+
+    assert result.accepted is False
+    assert publish.FAIL_MODEL_RUNTIME_BINDING in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_rejects_unaccepted_or_malformed_verifier_result_before_runner() -> None:
