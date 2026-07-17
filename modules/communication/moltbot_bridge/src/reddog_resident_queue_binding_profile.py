@@ -99,6 +99,9 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_MODEL_SELECTION_RECEIPT_PATH": "model_selection_receipt.json",
     "REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH": "model_runtime_binding_receipt.json",
     "REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH": "model_autoresearch_plan_receipt.json",
+    "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_PATH": (
+        "model_autoresearch_campaign_execution_receipt.json"
+    ),
     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": "memex_supply_receipt.json",
     "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": "principal_authority_record.json",
     "REDDOG_PERMISSION_SNAPSHOT_PATH": "permission_snapshot.json",
