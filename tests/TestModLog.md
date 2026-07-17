@@ -1,5 +1,14 @@
 # TestModLog - shared tests
 
+## 2026-07-17: WSP 97 structural execution receipt validator
+
+- File: `tests/test_wsp97_execution_validator.py`
+- Slice: `WSP97_EXECUTION_RECEIPT_VALIDATOR_PHASE1`
+- Covers complete seven-stage derivation, missing action evidence, invalid scalar evidence, blocked outcomes, WSP/compliance requirements, contract count drift, active validator metadata, and CLI non-compliance exit behavior.
+- Truth boundary: structural receipt validation only; tests do not claim thought inspection, evidence resolution, or runtime side effects.
+
+---
+
 ## 2026-07-17: RedDog resident autonomous chain proof
 
 - File: `tests/test_main_runtime_bootstrap.py`

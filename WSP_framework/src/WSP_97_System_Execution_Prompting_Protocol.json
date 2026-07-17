@@ -1,7 +1,7 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.4",
+    "version": "1.5",
     "status": "active",
     "mantra_stage_count": 7,
     "operator_action_count": 9,
@@ -34,6 +34,12 @@
       "First Principles",
       "Execute"
     ],
+    "validator": {
+      "status": "active_structural_validation",
+      "entrypoint": "tools/wsp97_execution_validator.py",
+      "receipt_schema_version": "1.0",
+      "truth_boundary": "Structural receipt completeness only; evidence references are not resolved and no reasoning quality or runtime side effect is proven."
+    },
     "rubik_context": "Rubik = MVP DAE. Currently 'Cubes' (modules) need Qwen/Gemma enhancement to become fully agentic Progressive Web Apps (PWAs) that connect ubiquitously to any blockchain via FoundUp MCPs."
   },
   "agent_profiles": {
