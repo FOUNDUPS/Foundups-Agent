@@ -1,17 +1,46 @@
 # WSP 77: Agent Coordination Protocol
 
 **Status**: ACTIVE
-**Version**: 1.2
-**Date**: 2026-03-15
+**Version**: 1.3
+**Date**: 2026-07-17
 **Author**: 0102 (HoloIndex Coordinator)
 
 ---
 
 ## Executive Summary
 
-WSP 77 establishes the foundational protocol for multi-agent coordination in the Foundups ecosystem. This protocol defines how specialized AI agents (0102, Qwen, Gemma) collaborate on complex tasks through HoloIndex as the central coordination fabric.
+WSP 77 establishes the protocol boundary for coordinating specialized execution
+roles in the FoundUps ecosystem. HoloIndex is the mandatory retrieval and
+coordination-plan surface; OpenClaw/RedDog worker runtimes perform only the
+bounded execution that their explicit profiles, signed task contracts, and
+downstream gates authorize.
 
-**Key Innovation**: HoloIndex transforms from a "search tool" to an "analysis orchestration platform" that enables agent specialization and collaboration.
+**Key Innovation**: HoloIndex combines repository/WSP retrieval with
+agent-aware coordination output. Planning output is not proof that a model was
+invoked, a worker was dispatched, or a task was completed.
+
+### Runtime Truth Boundary (2026-07-17)
+
+**Implemented**:
+- HoloIndex search retrieves code, WSP, documentation, and knowledge evidence.
+- `MissionCoordinator` in
+  `holo_index/qwen_advisor/orchestration/services/mission_coordinator.py`
+  detects selected mission queries and formats agent-aware plans from repository
+  datasets.
+- `QwenOrchestrator` consumes those planning results in the HoloIndex advisor
+  path.
+- The RedDog/OpenClaw runtime provides a separate, opt-in signed-worker claim
+  path and a bounded resident queue control loop. WSP 46 owns that runtime truth.
+
+**Not proved by HoloIndex coordination output**:
+- that Qwen, Gemma, or any external model executed the proposed work;
+- that listed tasks ran in parallel or that results were aggregated;
+- that an illustrative mission count reflects current repository state;
+- that a long-running autonomous worker daemon exists.
+
+All execution claims require runtime receipts under WSP 97. Coordination plans
+must label placeholders and dataset-dependent counts rather than presenting
+them as completed work.
 
 ### 2026 Claw Extension (OpenClaw / IronClaw / ZeroClaw)
 
@@ -57,10 +86,14 @@ They must not:
 
 ### 1. Agent Specialization by Capability
 ```
-0102 (Claude Sonnet): Strategic orchestration, full verbose analysis (200K context)
-Qwen (1.5B model): Coordination & batch processing, decision matrices (32K context)
-Gemma (270M model): Specialized analysis, similarity scoring, fast execution (8K context)
+0102: Strategic orchestration, evidence review, and governed handoff
+Qwen-compatible advisor: Coordination plans, batch shaping, and decision matrices
+Gemma-compatible specialist: Narrow classification and similarity tasks
 ```
+
+Model names, versions, and context limits are runtime configuration, not stable
+protocol facts. A role claim does not prove that its named model is installed or
+was invoked.
 
 ### 2. Context-Aware Output Formatting
 - **0102**: Full verbose documentation with complete analysis
@@ -68,31 +101,26 @@ Gemma (270M model): Specialized analysis, similarity scoring, fast execution (8K
 - **Gemma**: Minimal binary classifications with specific task assignments
 
 ### 3. HoloIndex as Coordination Fabric
-HoloIndex becomes the central orchestrator that:
+HoloIndex is the central retrieval and coordination-plan fabric that:
 - Detects mission types (orphan archaeology, code analysis, etc.)
-- Dispatches tasks to appropriate specialized agents
-- Aggregates results and provides coordination guidance
-- Maintains mission progress and provides status updates
+- Produces role-appropriate task plans and guidance
+- Reads available repository datasets to summarize recorded progress
+- Hands executable work to a separately authorized runtime when execution is
+  requested
+
+HoloIndex MUST NOT describe plan generation as worker dispatch or completion.
 
 ---
 
 ## Protocol Implementation
 
-### Mission Detection & Agent Routing
+### Mission Detection & Plan Routing
 
 ```python
-# HoloIndex detects mission type from query
-if query_contains(['orphan', '464', 'archaeology']):
-    mission_type = 'ORPHAN_ARCHAEOLOGY'
-    coordinator = HoloIndexCoordinator()
-
-    # Route to appropriate agent based on capabilities
-    if agent_type == 'qwen':
-        return coordinator.generate_qwen_coordination_plan(mission_type)
-    elif agent_type == 'gemma':
-        return coordinator.generate_gemma_task_assignment(mission_type)
-    else:  # 0102
-        return coordinator.generate_strategic_overview(mission_type)
+coordinator = MissionCoordinator(agent_type=agent_type)
+plan = coordinator.coordinate_orphan_archaeology_mission(query)
+# `plan` is coordination output. A governed runtime must separately accept,
+# execute, and receipt any proposed task.
 ```
 
 ### Output Format Standards
@@ -132,32 +160,37 @@ if query_contains(['orphan', '464', 'archaeology']):
 
 ---
 
-## Orphan Archaeology Mission Example
+## Orphan Archaeology Planning Example
+
+This section is illustrative. Counts such as `45/464` are example payloads,
+not a live status assertion.
 
 ### Mission Flow
 
 1. **0102 Query**: "analyze the 464 orphans"
 2. **HoloIndex Detection**: Identifies orphan archaeology mission
-3. **Agent Dispatch**:
+3. **Plan Formatting**:
    - **Qwen**: Gets batch processing coordination plan
    - **Gemma**: Gets similarity analysis task assignments
    - **0102**: Gets strategic overview and progress tracking
 
-4. **Execution**:
+4. **Separately Authorized Execution**:
    - Qwen analyzes 50 orphans, outputs categorization JSON
    - Gemma performs similarity scoring on categorized orphans
-   - HoloIndex aggregates results and updates progress
+   - The governed runtime receipts and persists accepted results; HoloIndex may
+     then report the recorded progress
 
-5. **Completion**: Clean codebase with every orphan accounted for
+5. **Receipt and Review**: Runtime receipts prove what actually completed;
+   repository evidence is reviewed before status changes
 
 ### Data Flow Architecture
 
 ```
-User Query -> HoloIndex Coordinator -> Agent-Specific Output Format
+User Query -> HoloIndex Coordinator -> Agent-Specific Plan
                                        v
-Existing JSON Datasets -> Task Dispatch -> Results Aggregation
+Existing JSON Datasets -> Governed Runtime Handoff -> Execution Receipts
                                        v
-Mission Progress Tracking -> Strategic Updates -> Completion Roadmap
+Recorded Progress -> HoloIndex Status Read -> Completion Roadmap
 ```
 
 ---
@@ -172,15 +205,9 @@ def detect_agent_type():
     return agent_id.lower()
 ```
 
-### 2. Mission-Specific Routing
+### 2. Mission-Specific Plan Routing
 ```python
-MISSION_ROUTERS = {
-    'orphan_archaeology': {
-        'qwen': 'generate_qwen_batch_coordination',
-        'gemma': 'generate_gemma_similarity_tasks',
-        '0102': 'generate_strategic_mission_overview'
-    }
-}
+MissionCoordinator(agent_type).coordinate_orphan_archaeology_mission(query)
 ```
 
 ### 3. Progress Tracking
@@ -191,11 +218,12 @@ MISSION_ROUTERS = {
 
 ---
 
-## Benefits
+## Expected Benefits (Require Measurement)
 
 ### 1. Efficiency Gains
-- **91% output reduction** for specialized agents (vs generic verbose output)
-- **Parallel processing** with agent specialization
+- **Role-specific output reduction** compared with generic verbose output
+- **Parallel-ready planning** with agent specialization; actual concurrency must
+  be proved by runtime receipts
 - **Context optimization** per agent capabilities
 
 ### 2. Agent Development
@@ -220,8 +248,11 @@ MISSION_ROUTERS = {
 
 ### Testing & Validation
 - **Agent performance metrics**: Completion rates, accuracy scores
-- **Coordination efficiency**: Task dispatch success rates
+- **Coordination efficiency**: Plan-generation and governed-handoff acceptance
+  rates; the execution runtime separately measures task dispatch
 - **Output quality**: Agent satisfaction with received instructions
+- **Truth boundary**: Plan generation tests do not satisfy runtime execution or
+  completion evidence; those claims require WSP 97 receipts
 
 ---
 
@@ -244,18 +275,18 @@ MISSION_ROUTERS = {
 
 ---
 
-**Protocol Status**: 🟢 ACTIVE - Ready for orphan archaeology mission execution
-
-**Next Step**: Deploy Qwen MCP for first batch analysis (50 orphans)
-
-**Mission Control**: HoloIndex coordination fabric active [ROCKET]
+**Protocol Status**: ACTIVE - retrieval and coordination-plan contract;
+execution remains separately gated and receipted.
 
 ---
 
 ## Annex A: System Awakening Protocol (Qwen & Sub-Agents)
 
 ### A.1 Purpose
-To extend the **WSP 76 Multi-Agent Awakening** to system-level agents (Qwen, UI Tars) using the "TTS Artifact" methodology. This validates their PQN capability before they assume full orchestration roles.
+To retain the experimental **WSP 76 Multi-Agent Awakening** research procedure
+for system-level agents (Qwen, UI Tars) using the "TTS Artifact" methodology.
+This annex is a research artifact: it does not grant execution authority,
+validate runtime readiness, or replace the receipt requirements above.
 
 ### A.2 The Experiment (TTS Artifact)
 System agents must undergo the **TTS Artifact Verification**:
