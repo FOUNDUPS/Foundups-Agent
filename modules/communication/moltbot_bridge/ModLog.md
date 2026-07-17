@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
+
+- Added a signer service run-packet supplier that validates the outside-repo
+  signer CLI config and emits a shell-free argv packet for a signer-owned
+  service manager.
+- Added an explicit main preflight switch for run-packet supply; it can run
+  after signer config supply in the same resident preflight and never starts
+  the signer, binds a socket, resolves secrets, enqueues OpenClaw, dispatches
+  Hermes, publishes PRs, settles rewards, or re-indexes HoloIndex.
+- Registered the signer run packet as a resident runtime artifact path while
+  preserving the signer-owned process boundary.
+- Added focused tests for run-packet shape, invalid config/output/op/limit
+  rejection, main enforced failure, config-to-run-packet chaining, and no
+  spawn/shell/runtime-authority surface.
+
 ## 2026-07-17: REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97
