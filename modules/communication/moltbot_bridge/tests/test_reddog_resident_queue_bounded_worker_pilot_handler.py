@@ -5,6 +5,9 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src import (
+    reddog_resident_queue_bounded_worker_pilot_handler as pilot_handler_module,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_worker_pilot_handler import (
     BOUNDED_WORKER_PILOT_STAGE_KEY,
     FAIL_ARTIFACT_GENERATION_REJECTED,
@@ -457,6 +460,29 @@ def test_dispatcher_derives_pilot_dryruns_from_chain_state(tmp_path: Path) -> No
     assert stage["hermes_dispatch_performed"] is False
     assert (bundle["worktree"] / ARTIFACT).exists()
     assert not (bundle["repo_root"] / ARTIFACT).exists()
+
+
+def test_derived_artifact_generation_request_carries_model_selection_receipt(tmp_path: Path) -> None:
+    bundle = _valid_bundle(tmp_path)
+    work_order = _work_order_with_plan(bundle)
+    model_selection = {
+        "receipt_id": "model_selection_receipt:test",
+        "selected_model_ids": ["openai/gpt-5.6-code"],
+    }
+    work_order["task_summary"] = "Generate the bounded pilot artifact contents."
+    work_order["model_selection_receipt"] = dict(model_selection)
+    stage_results = _seeded_store(bundle, **_binding_stage_overrides()).load()["stage_results"]
+
+    request = pilot_handler_module._derive_artifact_generation_request(
+        work_order=work_order,
+        stage_results=stage_results,
+        repo_root=bundle["repo_root"],
+        holoindex_evidence=None,
+    )
+
+    assert request["model_selection_receipt"] == model_selection
+    assert request["work_order_id"] == WORK_ORDER_ID
+    assert request["planned_artifacts"] == [ARTIFACT]
 
 
 def test_dispatcher_rejects_missing_pilot_plan_before_write(tmp_path: Path) -> None:

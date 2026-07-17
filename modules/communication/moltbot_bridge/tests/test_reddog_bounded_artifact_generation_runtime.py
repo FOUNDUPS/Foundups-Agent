@@ -5,6 +5,30 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
+    Availability,
+    ModelCapabilityCard,
+    PromotionState,
+    build_model_catalog_snapshot,
+)
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
+    build_model_benchmark_evidence_receipt,
+    build_model_promotion_evidence_receipt,
+)
+from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
+    ModelTaskRequirements,
+    SelectionMode,
+    SelectionPurpose,
+    select_models_for_task,
+)
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    VerifiedModelProductionEvidence,
+)
+from modules.ai_intelligence.ai_gateway.tests.model_signed_evidence_test_helpers import (
+    make_verified_production_evidence,
+)
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     ARTIFACT_GENERATION_ACCEPT,
     ARTIFACT_GENERATION_REJECT,
@@ -13,6 +37,7 @@ from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation
     FAIL_CONTENT_INVALID,
     FAIL_EXPLICIT_REQUEST,
     FAIL_HOLOINDEX_EVIDENCE,
+    FAIL_MODEL_SELECTION_RECEIPT,
     FAIL_PLANNED_ARTIFACTS,
     FAIL_RECEIPT_CHAIN,
     FAIL_RUNNER_MISSING,
@@ -34,6 +59,7 @@ MODULE_PATH = (
     / "reddog_bounded_artifact_generation_runtime.py"
 )
 ARTIFACT = "modules/foundups/paccess_001/README.md"
+TASK_FAMILY = "artifact_generation"
 
 
 class FakeRunner:
@@ -97,6 +123,75 @@ def _request(**overrides: object) -> dict[str, object]:
     return payload
 
 
+def _model_selection_receipt(
+    *,
+    selection_mode: SelectionMode = SelectionMode.SINGLE,
+    model_ids: tuple[str, ...] = ("openai/gpt-5.6-code",),
+) -> dict[str, object]:
+    entries = []
+    snapshot = build_model_catalog_snapshot(
+        tuple(
+            ModelCapabilityCard(
+                provider=model_id.split("/", 1)[0],
+                model_id=model_id,
+                canonical_model_id=model_id,
+                source="test",
+                availability=Availability.AVAILABLE,
+                promotion_state=PromotionState.CHAMPION,
+                task_families=(TASK_FAMILY,),
+                supports_structured_output=True,
+                supports_reasoning=True,
+                verifier_pass_rate=1.0,
+                benchmark_scores={TASK_FAMILY: 1.0 - (index * 0.1)},
+            ).normalized()
+            for index, model_id in enumerate(model_ids)
+        ),
+        generated_at="2026-07-16T00:00:00+00:00",
+    )
+    for index, model_id in enumerate(model_ids):
+        benchmark = build_model_benchmark_evidence_receipt(
+            model_id=model_id,
+            task_family=TASK_FAMILY,
+            task_set_digest=f"sha256:task-set-{index}",
+            held_out_split_digest=f"sha256:held-out-{index}",
+            prompt_topology_digest=f"sha256:topology-{index}",
+            verifier_digest=f"sha256:verifier-{index}",
+            verifier_receipt_id=f"sha256:verifier-receipt-{index}",
+            sample_count=10,
+            accepted_count=10,
+        )
+        promotion = build_model_promotion_evidence_receipt(
+            benchmark_receipt=benchmark,
+            promotion_state=PromotionState.CHAMPION,
+            promotion_authority_receipt_id=f"sha256:promotion-authority-{index}",
+            signed_promotion_receipt_id=f"signature:promotion-{index}",
+            min_verifier_pass_rate=0.8,
+        )
+        entries.extend(
+            make_verified_production_evidence(
+                benchmark,
+                promotion,
+                catalog_snapshot_id=snapshot.snapshot_id,
+            ).entries
+        )
+    receipt = select_models_for_task(
+        snapshot,
+        ModelTaskRequirements(
+            task_family=TASK_FAMILY,
+            purpose=SelectionPurpose.PRODUCTION,
+            selection_mode=selection_mode,
+            max_candidates=len(model_ids),
+            require_structured_output=True,
+            require_reasoning=True,
+            min_verifier_pass_rate=0.8,
+            panel_roles=("principal", "critic", "implementer", "researcher"),
+        ),
+        production_evidence=VerifiedModelProductionEvidence(entries=tuple(entries)),
+    )
+    assert receipt.selected_model_ids
+    return receipt.to_dict()
+
+
 def test_valid_generation_returns_exact_bounded_artifacts() -> None:
     runner = FakeRunner()
 
@@ -114,11 +209,85 @@ def test_valid_generation_returns_exact_bounded_artifacts() -> None:
     assert runner.calls[0]["binding"]["work_order_id"] == "work-order-1"
 
 
+def test_model_selection_receipt_is_bound_into_runner_call() -> None:
+    selection = _model_selection_receipt()
+    runner = FakeRunner()
+
+    result = generate_bounded_artifact_contents(
+        _request(model_selection_receipt=selection),
+        runner=runner,
+    )
+
+    assert result.accepted is True
+    assert result.receipt.model_selection_receipt_id == selection["receipt_id"]
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["receipt_id"] == selection["receipt_id"]
+    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert binding["purpose"] == "production"
+
+
+def test_tampered_model_selection_receipt_rejects_before_runner() -> None:
+    selection = _model_selection_receipt()
+    selection["selected_model_ids"] = ["attacker/model"]
+    runner = FakeRunner()
+
+    result = generate_bounded_artifact_contents(
+        _request(model_selection_receipt=selection),
+        runner=runner,
+    )
+
+    assert result.decision == ARTIFACT_GENERATION_REJECT
+    assert FAIL_MODEL_SELECTION_RECEIPT in result.rejection_reasons
+    assert runner.calls == []
+
+
 def test_foundups_fusion_runner_loader_resolves_repo_bridge() -> None:
     runner = reddog_bounded_artifact_generation_runtime._load_foundups_fusion_runner()
 
     assert callable(runner)
     assert runner.__name__ == "_run_foundups_fusion"
+
+
+def test_foundups_fusion_runner_uses_model_selection_topology(monkeypatch: pytest.MonkeyPatch) -> None:
+    selection = _model_selection_receipt(
+        selection_mode=SelectionMode.PANEL,
+        model_ids=("openai/gpt-5.6-code", "anthropic/claude-opus-5"),
+    )
+    runner = FakeRunner()
+    gate = generate_bounded_artifact_contents(
+        _request(model_selection_receipt=selection),
+        runner=runner,
+    )
+    binding = runner.calls[0]["binding"]
+    calls: list[dict[str, object]] = []
+
+    def fake_fusion(api_key, user_payload, messages, payload):
+        calls.append(dict(payload))
+        return {
+            "ok": True,
+            "content": '{"artifact_contents":{"modules/foundups/paccess_001/README.md":"# pAccess\\n"}}',
+            "review_packet": {"receipt_id": "fusion-receipt-1"},
+        }
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
+
+    model_result = reddog_bounded_artifact_generation_runtime.FoundupsFusionArtifactGenerationRunner(
+        runtime_mode="foundups_fusion",
+        lead_model="legacy/lead",
+        panel_models=("legacy/panel",),
+    ).generate_artifacts(
+        prompt="Produce the requested artifact.",
+        context="governance evidence",
+        binding=binding,
+        timeout_seconds=30,
+    )
+
+    assert gate.accepted is True
+    assert model_result.ok is True
+    assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
+    assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
+    assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == selection["receipt_id"]
 
 
 def test_missing_explicit_request_rejects_before_runner() -> None:

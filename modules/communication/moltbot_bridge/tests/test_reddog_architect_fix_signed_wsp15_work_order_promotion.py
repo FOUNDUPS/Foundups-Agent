@@ -331,7 +331,13 @@ def test_promotes_fix_determination_to_queue_item_and_authority_profile() -> Non
     assert result.receipt.memex_supply_receipt_id == "sha256:memex-supply"
     assert result.authority_profile is not None
     assert result.authority_profile["wsp15_allocation_receipt"]["receipt_id"] == _allocation()["receipt_id"]
+    assert result.authority_profile["model_selection_receipt"]["receipt_id"] == (
+        result.receipt.model_selection_receipt_id
+    )
     assert result.authority_profile["operational_context_binding"]["model_selection_receipt_id"] == (
+        result.receipt.model_selection_receipt_id
+    )
+    assert result.authority_profile["operational_context_binding"]["model_selection_receipt"]["receipt_id"] == (
         result.receipt.model_selection_receipt_id
     )
     assert result.authority_profile["operational_context_binding"]["memex_supply_receipt_id"] == (
