@@ -1139,6 +1139,12 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     assert "[REDDOG-QUEUE-LOOP] preflight=PASS" in captured
     assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
     assert "claimed_count=7" in captured
+    assert "receipts=signed_worker_task_execution_" in captured
+    assert str(
+        main.run_reddog_resident_queue_control_loop_preflight.last_result[
+            "receipt_ids"
+        ][0]
+    ).startswith("signed_worker_task_execution_")
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
 
     pending = [
@@ -1429,6 +1435,12 @@ def test_main_resident_control_loop_consumes_signer_socket_started_by_runtime_cl
     assert "[REDDOG-QUEUE-CONTROL] preflight=PASS" in captured
     assert "[REDDOG-QUEUE-LOOP] preflight=PASS" in captured
     assert "[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=PASS" in captured
+    assert "receipts=signed_worker_task_execution_" in captured
+    assert str(
+        main.run_reddog_resident_queue_control_loop_preflight.last_result[
+            "receipt_ids"
+        ][0]
+    ).startswith("signed_worker_task_execution_")
     assert calls
     stored = json.loads(chain.read_text(encoding="utf-8"))
     assert stored["stage_results"]["worker_dispatch_runtime"]["accepted"] is True

@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_RESIDENT_CONTROL_LOOP_RECEIPT_SUMMARY_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97
+
+- Surfaced signed-worker execution receipt IDs through the outer resident queue
+  control-loop summary and `run_reddog_resident_queue_control_loop_preflight.last_result`.
+- Added fail-closed control-loop `last_result` summaries for invalid rounds and
+  serial/claim-loop rejection paths.
+- Added regressions proving full resident control-loop runs expose durable
+  signed-worker task receipt IDs without changing authority, queue, runner,
+  shell, PR, PatternMemory, reward, or HoloIndex behavior.
+- HoloIndex query-only check did not surface the new resident control-loop
+  receipt summary surface; recorded as
+  HOLOINDEX_REDDOG_RESIDENT_CONTROL_LOOP_RECEIPT_SUMMARY_INDEX_GAP. No runtime
+  reindex performed.
+
 ## 2026-07-17: REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_RECEIPT_TELEMETRY_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97
