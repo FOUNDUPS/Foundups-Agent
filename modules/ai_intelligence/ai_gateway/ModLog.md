@@ -1,5 +1,38 @@
 # AI Gateway Module Change Log
 
+## [2026-07-17] - Model AutoResearch Cycle Receipt Supply Bootstrap
+
+**Who:** 0102 Codex
+**Type:** Runtime Preflight Adapter
+**Slice:** REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**What:** Added a disabled-by-default bootstrap for materializing a model
+AutoResearch cycle receipt from outside-repo plan, campaign execution, and
+promotion-gate supply artifacts.
+
+**Why:** The resident startup loop can now carry one digest-bound evidence
+object proving that the plan, execution, and gate supply belong to the same
+AutoResearch cycle before later feedback or planning stages consume it.
+
+**Files:**
+- `src/model_autoresearch_cycle_receipt_supply_bootstrap.py` - reads
+  outside-repo artifacts, invokes the cycle receipt builder, and writes the
+  cycle receipt outside the repository.
+- `tests/test_model_autoresearch_cycle_receipt_supply_bootstrap.py` - verifies
+  successful materialization, inside-repo path rejection, tamper rejection,
+  malformed execution rejection, and AST import/call denylist controls.
+
+**Truth Boundary:**
+- IMPLEMENTED: opt-in AutoResearch cycle receipt artifact supply from
+  outside-repo receipts.
+- NOT IMPLEMENTED: provider calls, benchmark execution, model promotion,
+  PatternMemory writes, HoloIndex re-indexing, runtime binding, worker spawn,
+  shell execution, source mutation, or extension mutation.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 97.
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Receipt
 
 **Who:** 0102 Codex

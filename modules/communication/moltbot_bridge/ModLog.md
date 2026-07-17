@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY_MAIN_PREFLIGHT_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
+
+- Added `REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH` as a profile-derived
+  resident runtime path.
+- Wired `main.py` to optionally run model AutoResearch cycle receipt supply
+  after plan, campaign execution, and promotion-gate supply artifacts exist.
+- Successful supply updates `REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH` so
+  later resident planning or feedback stages can consume the single cycle
+  evidence object.
+- The hook is disabled by default and only consumes outside-repo receipts.
+- Boundary remains constrained: no provider call, benchmark execution,
+  HoloIndex re-index, PatternMemory write, model promotion, runtime binding,
+  worker spawn, source mutation, PR publication, reward settlement, shell
+  execution, or merge authority was added.
+
 ## 2026-07-17: REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_MAIN_PREFLIGHT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 97
