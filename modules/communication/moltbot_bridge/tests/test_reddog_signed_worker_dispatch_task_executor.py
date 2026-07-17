@@ -41,6 +41,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_0102_readonly
     Signed0102ReadOnlyReviewRunner,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
+    RUNTIME_SURFACE_READONLY_AUDIT,
     RepoAuditModelResult,
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
@@ -74,6 +75,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _work_order,
     _write_runtime_json,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
 )
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
@@ -316,6 +320,8 @@ def _dryrun_result(allocation=None, intent=None):
         "wsp15_priority": allocation["priority"],
         "wsp15_mps_total": allocation["mps_total"],
         "wsp15_reasoning_tier": allocation["reasoning_tier"],
+        "model_runtime_binding_receipt_id": str(intent.get("model_runtime_binding_receipt_id") or ""),
+        "model_runtime_binding_digest": str(intent.get("model_runtime_binding_digest") or ""),
         "dispatch_intent_count": 1,
         "dispatch_intents": [intent],
         "no_worker_spawn_performed": True,
@@ -335,18 +341,18 @@ def _dryrun_result(allocation=None, intent=None):
     }
 
 
-def _snapshot(allocation=None):
+def _snapshot(allocation=None, **queue_overrides):
     allocation = allocation or _allocation()
+    queue_item = {
+        "queue_item_id": "queue-1",
+        "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+        "status": "QUEUED",
+        "wsp15_allocation_receipt": allocation,
+    }
+    queue_item.update(queue_overrides)
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-                "status": "QUEUED",
-                "wsp15_allocation_receipt": allocation,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -360,6 +366,28 @@ def _task_context():
     assert result.accepted is True
     task = result.tasks[0]
     return dict(task.context)
+
+
+def _task_context_with_model_runtime_binding(runtime_binding=None):
+    runtime_binding = runtime_binding or model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT
+    )
+    allocation = _allocation()
+    binding_refs = {
+        "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+        "model_runtime_binding_digest": _digest(runtime_binding),
+    }
+    intent = _intent(allocation, **binding_refs)
+    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+        work_state_snapshot=_snapshot(allocation, **binding_refs),
+        queue_item_id="queue-1",
+        writer=_CollectingWriter(),
+    )
+    assert result.accepted is True
+    context = dict(result.tasks[0].context)
+    context["model_runtime_binding_receipt"] = runtime_binding
+    return context, runtime_binding
 
 
 def _publish_agentdb_task(**intent_overrides) -> str:
@@ -439,6 +467,51 @@ def test_signed_worker_executor_accepts_valid_task_with_injected_runner(tmp_path
     assert runner.calls[0]["worker_dispatch_intent"]["intent_id"] == "worker_dispatch_intent_openclaw_candidate"
 
 
+def test_signed_worker_executor_preserves_signed_model_runtime_binding_metadata(
+    tmp_path: Path,
+) -> None:
+    context, runtime_binding = _task_context_with_model_runtime_binding()
+    runner = _FakeRunner()
+
+    result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-1",
+        repo_root=tmp_path,
+        runner=runner,
+    )
+
+    assert result.accepted is True
+    task_context = runner.calls[0]["task_context"]
+    assert task_context["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert task_context["model_runtime_binding_digest"] == _digest(runtime_binding)
+    assert task_context["worker_dispatch_intent"]["model_runtime_binding_receipt_id"] == (
+        runtime_binding["receipt_id"]
+    )
+    assert task_context["signed_authority_worker_dispatch_receipt"][
+        "model_runtime_binding_receipt_id"
+    ] == runtime_binding["receipt_id"]
+
+
+def test_signed_worker_executor_rejects_tampered_model_runtime_binding_context(
+    tmp_path: Path,
+) -> None:
+    context, _ = _task_context_with_model_runtime_binding()
+    context["model_runtime_binding_digest"] = "sha256:tampered"
+
+    result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-1",
+        repo_root=tmp_path,
+        runner=_FakeRunner(),
+    )
+
+    assert result.accepted is False
+    assert (
+        SignedWorkerDispatchTaskExecutorReason.MODEL_RUNTIME_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+
+
 def test_signed_0102_readonly_runner_executes_architect_review_with_bound_targets(
     tmp_path: Path,
 ) -> None:
@@ -483,6 +556,52 @@ def test_signed_0102_readonly_runner_executes_architect_review_with_bound_target
     assert model_runner.calls[0]["binding"]["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
     assert result.no_source_repo_mutation_performed is True
     assert result.no_shell_command_executed is True
+
+
+def test_signed_0102_readonly_runner_receives_model_runtime_binding_receipt(
+    tmp_path: Path,
+) -> None:
+    repo = _repo_with_readonly_target(tmp_path)
+    allocation = _valid_readonly_allocation()
+    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT)
+    binding_refs = {
+        "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+        "model_runtime_binding_digest": _digest(runtime_binding),
+    }
+    intent = _intent(
+        allocation,
+        intent_id="worker_dispatch_intent_fusion_lead",
+        role="fusion_lead",
+        worker_runtime="0102",
+        capability="architect_review",
+        **binding_refs,
+    )
+    context = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+        work_state_snapshot=_snapshot(allocation, **binding_refs),
+        queue_item_id="queue-1",
+        writer=_CollectingWriter(),
+    ).tasks[0].context
+    context = dict(context)
+    context["model_runtime_binding_receipt"] = runtime_binding
+    model_runner = _EchoEvidenceModelRunner()
+
+    result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-0102-runtime-binding",
+        repo_root=repo,
+        runner=Signed0102ReadOnlyReviewRunner(
+            model_runner=model_runner,
+            holoindex_adapter=_FakeQueryAdapter(),
+            codeindex_adapter=_FakeQueryAdapter(),
+        ),
+    )
+
+    assert result.accepted is True
+    binding = model_runner.calls[0]["binding"]["model_selection"]
+    assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    worker_receipt = result.runner_result["readonly_result"]["report"]["worker_receipt"]
+    assert worker_receipt["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
 
 
 def test_signed_0102_readonly_runner_rejects_bounded_code_change(tmp_path: Path) -> None:

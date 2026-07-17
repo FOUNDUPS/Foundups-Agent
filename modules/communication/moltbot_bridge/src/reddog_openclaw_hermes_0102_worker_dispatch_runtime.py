@@ -60,6 +60,7 @@ class WorkerDispatchRuntimeReason:
     INTENT_UNSAFE = "REJECT_WORKER_DISPATCH_INTENT_UNSAFE"
     QUEUE_ITEM_MISSING = "REJECT_WORKER_DISPATCH_QUEUE_ITEM_MISSING"
     WSP15_BINDING_MISMATCH = "REJECT_WORKER_DISPATCH_WSP15_BINDING_MISMATCH"
+    MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_WORKER_DISPATCH_MODEL_RUNTIME_BINDING_MISMATCH"
     WRITER_MISSING = "REJECT_WORKER_DISPATCH_WRITER_MISSING"
     WRITER_REJECTED = "REJECT_WORKER_DISPATCH_WRITER_REJECTED"
     IDEMPOTENCY_REPLAY = "REJECT_WORKER_DISPATCH_IDEMPOTENCY_REPLAY"
@@ -98,6 +99,8 @@ class SignedWorkerDispatchRuntimeReceipt:
     requested_operation: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
+    model_runtime_binding_receipt_id: str
+    model_runtime_binding_digest: str
     task_ids: tuple[str, ...]
     intent_ids: tuple[str, ...]
     worker_runtimes: tuple[str, ...]
@@ -264,6 +267,8 @@ def publish_reddog_signed_worker_dispatch_runtime(
         reasons.append(WorkerDispatchRuntimeReason.WRITER_MISSING)
     if not _wsp15_matches_queue_item(receipt, queue_item):
         reasons.append(WorkerDispatchRuntimeReason.WSP15_BINDING_MISMATCH)
+    if not _model_runtime_binding_matches_queue_item(receipt, queue_item):
+        reasons.append(WorkerDispatchRuntimeReason.MODEL_RUNTIME_BINDING_MISMATCH)
 
     if seen_intent_ids is not None:
         for intent in intents:
@@ -360,6 +365,8 @@ def _receipt(
         requested_operation=str(receipt.get("requested_operation") or ""),
         wsp15_allocation_receipt_id=str(receipt.get("wsp15_allocation_receipt_id") or ""),
         wsp15_allocation_digest=str(receipt.get("wsp15_allocation_digest") or ""),
+        model_runtime_binding_receipt_id=str(receipt.get("model_runtime_binding_receipt_id") or ""),
+        model_runtime_binding_digest=str(receipt.get("model_runtime_binding_digest") or ""),
         task_ids=tuple(task.task_id for task in tasks),
         intent_ids=intent_ids,
         worker_runtimes=tuple(sorted({str(_mapping(intent).get("worker_runtime") or "") for intent in _list(receipt.get("dispatch_intents"))})),
@@ -396,6 +403,8 @@ def _build_task(
         "signed_authority_worker_dispatch_receipt": dict(dryrun_receipt),
         "worker_dispatch_intent": dict(intent),
         "wsp15_allocation_receipt": dict(_mapping(queue_item.get("wsp15_allocation_receipt"))),
+        "model_runtime_binding_receipt_id": str(dryrun_receipt.get("model_runtime_binding_receipt_id") or ""),
+        "model_runtime_binding_digest": str(dryrun_receipt.get("model_runtime_binding_digest") or ""),
         "execution_allowed_by_dispatch_runtime": False,
         "requires_downstream_stages": [
             "work_order_invocation",
@@ -455,6 +464,9 @@ def _intent_safe(intent: Mapping[str, Any], receipt: Mapping[str, Any]) -> bool:
     ):
         if str(intent.get(key) or "") != str(receipt.get(key) or ""):
             return False
+    for key in ("model_runtime_binding_receipt_id", "model_runtime_binding_digest"):
+        if str(intent.get(key) or "") != str(receipt.get(key) or ""):
+            return False
     return True
 
 
@@ -467,6 +479,25 @@ def _wsp15_matches_queue_item(receipt: Mapping[str, Any], queue_item: Mapping[st
     return (
         str(receipt.get("wsp15_allocation_receipt_id") or "") == str(allocation.get("receipt_id") or "")
         and str(receipt.get("wsp15_allocation_digest") or "") == _digest(allocation)
+    )
+
+
+def _model_runtime_binding_matches_queue_item(receipt: Mapping[str, Any], queue_item: Mapping[str, Any]) -> bool:
+    receipt_id = str(receipt.get("model_runtime_binding_receipt_id") or "")
+    receipt_digest = str(receipt.get("model_runtime_binding_digest") or "")
+    queue_id = str(queue_item.get("model_runtime_binding_receipt_id") or "")
+    queue_digest = str(queue_item.get("model_runtime_binding_digest") or "")
+    if bool(receipt_id) != bool(receipt_digest):
+        return False
+    if bool(queue_id) != bool(queue_digest):
+        return False
+    if not receipt_id and not queue_id:
+        return True
+    return (
+        receipt_id == queue_id
+        and receipt_digest == queue_digest
+        and receipt_id.startswith("reddog_model_runtime_binding:")
+        and receipt_digest.startswith("sha256:")
     )
 
 

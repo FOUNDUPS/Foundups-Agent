@@ -175,6 +175,19 @@ def build_readonly_0102_context_from_signed_worker(
     work_order_id = str(signed_authority_receipt.get("work_order_id") or worker_dispatch_intent.get("work_order_id") or "")
     foundup_id = str(signed_authority_receipt.get("foundup_id") or worker_dispatch_intent.get("foundup_id") or "")
     principal_id = str(signed_authority_receipt.get("principal_id") or worker_dispatch_intent.get("principal_id") or "")
+    model_runtime_binding_receipt = _mapping(task_context.get("model_runtime_binding_receipt"))
+    model_runtime_binding_receipt_id = str(
+        task_context.get("model_runtime_binding_receipt_id")
+        or worker_dispatch_intent.get("model_runtime_binding_receipt_id")
+        or signed_authority_receipt.get("model_runtime_binding_receipt_id")
+        or ""
+    )
+    model_runtime_binding_digest = str(
+        task_context.get("model_runtime_binding_digest")
+        or worker_dispatch_intent.get("model_runtime_binding_digest")
+        or signed_authority_receipt.get("model_runtime_binding_digest")
+        or ""
+    )
     assignment = {
         "assignment_id": "signed-0102-review-" + _digest(
             {
@@ -196,7 +209,11 @@ def build_readonly_0102_context_from_signed_worker(
         "signed_worker_capability": str(task_context.get("capability") or ""),
         "wsp15_allocation_receipt_id": str(allocation.get("receipt_id") or ""),
         "wsp15_allocation_digest": allocation_digest,
+        "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": model_runtime_binding_digest,
     }
+    if model_runtime_binding_receipt:
+        assignment["model_runtime_binding_receipt"] = dict(model_runtime_binding_receipt)
     return {
         "source": READONLY_AUDIT_TASK_SOURCE,
         "worker_mode": MODEL_WORKER_MODE,
@@ -206,6 +223,13 @@ def build_readonly_0102_context_from_signed_worker(
         "wsp15_allocation_receipt": dict(allocation),
         "wsp15_allocation_receipt_id": str(allocation.get("receipt_id") or ""),
         "wsp15_allocation_digest": allocation_digest,
+        "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": model_runtime_binding_digest,
+        **(
+            {"model_runtime_binding_receipt": dict(model_runtime_binding_receipt)}
+            if model_runtime_binding_receipt
+            else {}
+        ),
         "swarm_receipt": {
             "swarm_id": "signed-worker-dispatch",
             "signed_worker_task_id": str(task_id),
@@ -230,6 +254,8 @@ def build_readonly_0102_context_from_signed_worker(
             "capability": str(task_context.get("capability") or ""),
             "intent_id": str(worker_dispatch_intent.get("intent_id") or ""),
             "signed_authority_receipt_id": str(signed_authority_receipt.get("receipt_id") or ""),
+            "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
+            "model_runtime_binding_digest": model_runtime_binding_digest,
         },
     }
 

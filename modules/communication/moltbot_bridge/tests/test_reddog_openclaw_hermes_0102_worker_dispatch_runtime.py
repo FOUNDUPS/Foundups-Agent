@@ -142,18 +142,25 @@ def _dryrun_result(allocation=None, intents=None, **overrides):
     return payload
 
 
-def _snapshot(allocation=None):
+def _runtime_binding_refs():
+    return {
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
+        "model_runtime_binding_digest": "sha256:model-runtime-binding",
+    }
+
+
+def _snapshot(allocation=None, **queue_overrides):
     allocation = allocation or _allocation()
+    queue_item = {
+        "queue_item_id": "queue-1",
+        "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+        "status": "QUEUED",
+        "wsp15_allocation_receipt": allocation,
+    }
+    queue_item.update(queue_overrides)
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-                "status": "QUEUED",
-                "wsp15_allocation_receipt": allocation,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -179,6 +186,71 @@ def test_publishes_signed_worker_dispatch_intents_as_pending_tasks() -> None:
     assert {task.context["worker_runtime"] for task in result.tasks} == {"0102", "openclaw"}
     assert all(task.context["execution_allowed_by_dispatch_runtime"] is False for task in result.tasks)
     assert all(runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL in task.required_skills for task in result.tasks)
+
+
+def test_carries_signed_model_runtime_binding_into_agentdb_task_context() -> None:
+    allocation = _allocation()
+    refs = _runtime_binding_refs()
+    intents = (
+        _intent("coding_worker_1", "0102", "bounded_code_change", allocation, **refs),
+    )
+    dryrun = _dryrun_result(
+        allocation=allocation,
+        intents=intents,
+        receipt={
+            **_dryrun_result(allocation=allocation, intents=intents)["receipt"],
+            **refs,
+        },
+    )
+    writer = _FakeWriter()
+
+    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=dryrun,
+        work_state_snapshot=_snapshot(allocation, **refs),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.receipt.model_runtime_binding_receipt_id == refs["model_runtime_binding_receipt_id"]
+    assert result.receipt.model_runtime_binding_digest == refs["model_runtime_binding_digest"]
+    assert result.tasks[0].context["model_runtime_binding_receipt_id"] == refs[
+        "model_runtime_binding_receipt_id"
+    ]
+    assert result.tasks[0].context["model_runtime_binding_digest"] == refs[
+        "model_runtime_binding_digest"
+    ]
+
+
+def test_rejects_model_runtime_binding_conflict_between_signed_receipt_and_queue() -> None:
+    allocation = _allocation()
+    refs = _runtime_binding_refs()
+    intents = (
+        _intent("coding_worker_1", "0102", "bounded_code_change", allocation, **refs),
+    )
+    dryrun = _dryrun_result(
+        allocation=allocation,
+        intents=intents,
+        receipt={
+            **_dryrun_result(allocation=allocation, intents=intents)["receipt"],
+            **refs,
+        },
+    )
+
+    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=dryrun,
+        work_state_snapshot=_snapshot(
+            allocation,
+            model_runtime_binding_receipt_id="reddog_model_runtime_binding:other",
+            model_runtime_binding_digest=refs["model_runtime_binding_digest"],
+        ),
+        queue_item_id="queue-1",
+        writer=_FakeWriter(),
+    )
+
+    assert result.accepted is False
+    assert runtime.WorkerDispatchRuntimeReason.MODEL_RUNTIME_BINDING_MISMATCH in result.rejection_reasons
 
 
 def test_agentdb_writer_publishes_tasks_atomically() -> None:

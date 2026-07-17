@@ -17,8 +17,13 @@ import pytest
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
+    _canonical_digest,
+    _materialize_work_orders_from_authority_profile,
     _operational_context_binding,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
+)
+from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
+    RUNTIME_SURFACE_READONLY_AUDIT,
 )
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
@@ -70,6 +75,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_verified_draft_pr_publish_invoke import (
     FakeDraftPrRunner,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
 )
 from modules.infrastructure.wre_core.src import reddog_verified_outcome_ratchet as ratchet
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
@@ -270,6 +278,33 @@ def _work_order(**overrides: object) -> dict[str, object]:
     }
     payload.update(overrides)
     return payload
+
+
+def test_authority_profile_materializer_carries_model_runtime_binding_receipt() -> None:
+    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT)
+    snapshot = _snapshot()
+    queue_item = snapshot["wre_queue_items"][0]
+    queue_item["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    queue_item["model_runtime_binding_digest"] = _canonical_digest(runtime_binding)
+    profile = _profile(
+        model_runtime_binding_receipt=runtime_binding,
+        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
+        model_runtime_binding_digest=_canonical_digest(runtime_binding),
+    )
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=snapshot,
+        authority_profile=profile,
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    work_order = work_orders[WORK_ORDER_ID]
+    assert work_order["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert work_order["model_runtime_binding_digest"] == _canonical_digest(runtime_binding)
+    assert work_order["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
 
 
 def _work_orders(**overrides: object) -> dict[str, object]:

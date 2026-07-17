@@ -151,6 +151,61 @@ def test_accepts_verified_signed_authority_and_emits_wsp15_worker_intents() -> N
     assert result.receipt.no_hermes_dispatch_performed is True
 
 
+def test_carries_model_runtime_binding_from_signed_authority() -> None:
+    allocation = _allocation()
+    runtime = _runtime_result(
+        allocation,
+        authority_result={
+            "accepted": True,
+            "receipt": {"status": AUTHORITY_ISSUED, "receipt_id": "auth-1"},
+            "work_authority": _work_authority(
+                allocation,
+                model_runtime_binding_receipt_id="reddog_model_runtime_binding:abc123",
+                model_runtime_binding_digest="sha256:model-runtime-binding",
+            ),
+        },
+    )
+
+    result = _plan(allocation=allocation, queue_authority_runtime_result=runtime)
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
+    assert result.receipt.model_runtime_binding_digest == "sha256:model-runtime-binding"
+    assert {
+        intent.model_runtime_binding_receipt_id
+        for intent in result.receipt.dispatch_intents
+    } == {"reddog_model_runtime_binding:abc123"}
+    assert {
+        intent.model_runtime_binding_digest
+        for intent in result.receipt.dispatch_intents
+    } == {"sha256:model-runtime-binding"}
+
+
+def test_rejects_one_sided_model_runtime_binding_in_signed_authority() -> None:
+    allocation = _allocation()
+    runtime = _runtime_result(
+        allocation,
+        authority_result={
+            "accepted": True,
+            "receipt": {"status": AUTHORITY_ISSUED, "receipt_id": "auth-1"},
+            "work_authority": _work_authority(
+                allocation,
+                model_runtime_binding_receipt_id="reddog_model_runtime_binding:abc123",
+                model_runtime_binding_digest="",
+            ),
+        },
+    )
+
+    result = _plan(allocation=allocation, queue_authority_runtime_result=runtime)
+
+    assert result.accepted is False
+    assert (
+        dispatch.SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+
+
 def test_preserves_legacy_openclaw_candidate_for_non_code_worker_plan() -> None:
     allocation = _allocation()
     allocation["worker_plan"] = dict(allocation["worker_plan"], coding_worker_count=0)

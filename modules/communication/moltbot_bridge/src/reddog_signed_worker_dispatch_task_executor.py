@@ -36,6 +36,7 @@ class SignedWorkerDispatchTaskExecutorReason:
     INTENT_NOT_IN_RECEIPT = "REJECT_SIGNED_WORKER_INTENT_NOT_IN_RECEIPT"
     CONTEXT_INTENT_MISMATCH = "REJECT_SIGNED_WORKER_CONTEXT_INTENT_MISMATCH"
     WSP15_MISMATCH = "REJECT_SIGNED_WORKER_WSP15_MISMATCH"
+    MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_SIGNED_WORKER_MODEL_RUNTIME_BINDING_MISMATCH"
     REPORT_CONTRACT_MISMATCH = "REJECT_SIGNED_WORKER_REPORT_CONTRACT_MISMATCH"
     EXECUTION_FLAG_MISMATCH = "REJECT_SIGNED_WORKER_EXECUTION_FLAG_MISMATCH"
     RUNNER_MISSING = "REJECT_SIGNED_WORKER_RUNNER_MISSING"
@@ -134,6 +135,9 @@ def execute_reddog_signed_worker_dispatch_task(
             reasons.append(SignedWorkerDispatchTaskExecutorReason.WSP15_MISMATCH)
         if str(intent.get("wsp15_allocation_digest") or "") != _digest(allocation):
             reasons.append(SignedWorkerDispatchTaskExecutorReason.WSP15_MISMATCH)
+
+    model_binding_reasons = _model_runtime_binding_reasons(context=context, intent=intent, receipt=receipt)
+    reasons.extend(model_binding_reasons)
 
     if context.get("execution_allowed_by_dispatch_runtime") is not False:
         reasons.append(SignedWorkerDispatchTaskExecutorReason.EXECUTION_FLAG_MISMATCH)
@@ -265,6 +269,37 @@ def _receipt_contains_intent(receipt: Mapping[str, Any], intent: Mapping[str, An
         str(_mapping(value).get("intent_id") or "")
         for value in _list(receipt.get("dispatch_intents"))
     }
+
+
+def _model_runtime_binding_reasons(
+    *,
+    context: Mapping[str, Any],
+    intent: Mapping[str, Any],
+    receipt: Mapping[str, Any],
+) -> list[str]:
+    context_id = str(context.get("model_runtime_binding_receipt_id") or "")
+    context_digest = str(context.get("model_runtime_binding_digest") or "")
+    intent_id = str(intent.get("model_runtime_binding_receipt_id") or "")
+    intent_digest = str(intent.get("model_runtime_binding_digest") or "")
+    receipt_id = str(receipt.get("model_runtime_binding_receipt_id") or "")
+    receipt_digest = str(receipt.get("model_runtime_binding_digest") or "")
+    pairs = ((context_id, context_digest), (intent_id, intent_digest), (receipt_id, receipt_digest))
+    if any(bool(item_id) != bool(item_digest) for item_id, item_digest in pairs):
+        return [SignedWorkerDispatchTaskExecutorReason.MODEL_RUNTIME_BINDING_MISMATCH]
+    if not context_id and not intent_id and not receipt_id:
+        return []
+    if not (
+        context_id
+        == intent_id
+        == receipt_id
+        and context_digest
+        == intent_digest
+        == receipt_digest
+        and receipt_id.startswith("reddog_model_runtime_binding:")
+        and receipt_digest.startswith("sha256:")
+    ):
+        return [SignedWorkerDispatchTaskExecutorReason.MODEL_RUNTIME_BINDING_MISMATCH]
+    return []
 
 
 __all__ = [
