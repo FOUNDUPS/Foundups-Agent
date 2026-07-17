@@ -124,6 +124,7 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": "authority_runtime_state.json",
     "REDDOG_PERMISSION_SNAPSHOTS_PATH": "permission_snapshots.json",
     "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": "principal_authority_records.json",
+    "REDDOG_SIGNER_SERVICE_CONFIG_PATH": "signer_service_config.json",
     "REDDOG_SIGNER_SOCKET_PATH": "reddog_signer.sock",
     "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": "resident_queue_chain_results.json",
     "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": "authority_profile.json",

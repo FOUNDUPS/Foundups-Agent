@@ -1622,6 +1622,15 @@ def _reddog_positive_int_env(name: str, default: int) -> int:
     return value if value > 0 else default
 
 
+def _reddog_float_env(name: str, default: float) -> float:
+    raw = os.getenv(name, str(default))
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return default
+    return value if value > 0 else default
+
+
 def _reddog_truthy_env_value(value: str | None) -> bool:
     raw = str(value or "").strip().lower()
     return raw not in {"", "0", "false", "off", "no"}
@@ -1637,6 +1646,16 @@ def _reddog_bounded_json_file(path: Path, *, max_bytes: int = 262_144) -> Any | 
         if not path.is_file() or path.stat().st_size > max_bytes:
             return None
         return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _reddog_bounded_json_env(name: str, *, max_chars: int = 16384) -> Any | None:
+    raw = os.getenv(name, "")
+    if not raw.strip() or len(raw) > max_chars:
+        return None
+    try:
+        return json.loads(raw)
     except Exception:
         return None
 
@@ -3243,6 +3262,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_AUTHORITY_RUNTIME_STATE_PATH                  Outside-repo authority runtime state JSON
         REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission resolver JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal resolver JSON
+        REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY=0                Materialize signer-owned CLI config from authority profile
+        REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED=0       Block startup if signer config supply fails
+        REDDOG_SIGNER_SERVICE_CONFIG_PATH                    Outside-repo signer CLI config JSON
         REDDOG_SIGNER_SOCKET_PROFILE_BINDING=0              Derive signer socket path/backend when authority runtime is configured
         REDDOG_SIGNER_SOCKET_PATH                            Optional outside-repo isolated signer socket
         REDDOG_SIGNATURE_VERIFIER_BACKEND                    Optional verifier backend (`ed25519`)
@@ -3347,6 +3369,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         signer_socket_path = explicit_signer_socket_path
         explicit_signature_verifier_backend = str(os.getenv("REDDOG_SIGNATURE_VERIFIER_BACKEND") or "").strip()
         signature_verifier_backend = explicit_signature_verifier_backend
+        authority_profile_path = resident_queue_runtime_file_path(
+            os.environ,
+            repo_root,
+            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+        )
         resolver_permission_snapshots_output_path = resident_queue_runtime_file_path(
             os.environ,
             repo_root,
@@ -3415,6 +3442,89 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 print(
                     "[REDDOG-AUTHORITY-RESOLVERS] Startup blocked by "
                     "REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY_ENFORCED=1"
+                )
+                return False
+
+        signer_config_supply_requested = str(
+            os.getenv("REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY") or ""
+        ).strip() == "1"
+        signer_config_supply_enforced = (
+            os.getenv("REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED", "0") != "0"
+        )
+        if signer_config_supply_requested:
+            from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
+                run_reddog_signer_socket_service_config_supply,
+            )
+
+            authority_profile_payload = None
+            if authority_profile_path:
+                authority_profile_payload = _reddog_bounded_json_file(Path(authority_profile_path))
+            peer_uid_to_principal = _reddog_bounded_json_env("REDDOG_SIGNER_PEER_UID_TO_PRINCIPAL")
+            config_output_path = resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_SIGNER_SERVICE_CONFIG_PATH",
+            )
+            config_socket_path = signer_socket_path or resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_SIGNER_SOCKET_PATH",
+            )
+            signer_config = run_reddog_signer_socket_service_config_supply(
+                repo_root=repo_root,
+                authority_profile=(
+                    authority_profile_payload
+                    if isinstance(authority_profile_payload, Mapping)
+                    else None
+                ),
+                output_path=config_output_path or None,
+                socket_path=config_socket_path or None,
+                principal_signing_key_ref=str(
+                    os.getenv("REDDOG_SIGNER_PRINCIPAL_SIGNING_KEY_REF") or ""
+                ),
+                principal_audit_mac_key_ref=str(
+                    os.getenv("REDDOG_SIGNER_PRINCIPAL_AUDIT_MAC_KEY_REF") or ""
+                ),
+                reddog_signing_key_ref=str(os.getenv("REDDOG_SIGNER_REDDOG_SIGNING_KEY_REF") or ""),
+                reddog_audit_mac_key_ref=str(
+                    os.getenv("REDDOG_SIGNER_REDDOG_AUDIT_MAC_KEY_REF") or ""
+                ),
+                peer_uid_to_principal=(
+                    peer_uid_to_principal if isinstance(peer_uid_to_principal, Mapping) else {}
+                ),
+                allowed_gids=_reddog_env_sequence("REDDOG_SIGNER_ALLOWED_GIDS"),
+                max_requests=_reddog_positive_int_env("REDDOG_SIGNER_CONFIG_MAX_REQUESTS", 16),
+                timeout_s=_reddog_float_env("REDDOG_SIGNER_CONFIG_TIMEOUT_S", 5.0),
+                max_request_bytes=_reddog_positive_int_env(
+                    "REDDOG_SIGNER_CONFIG_MAX_REQUEST_BYTES",
+                    16384,
+                ),
+                max_response_bytes=_reddog_positive_int_env(
+                    "REDDOG_SIGNER_CONFIG_MAX_RESPONSE_BYTES",
+                    16384,
+                ),
+            )
+            signer_config_status = "PASS" if signer_config.accepted else "WARN"
+            signer_config_reasons = (
+                ",".join(signer_config.rejection_reasons)
+                if signer_config.rejection_reasons
+                else "(none)"
+            )
+            print(
+                f"[REDDOG-SIGNER-CONFIG] preflight={signer_config_status} "
+                f"status={signer_config.status} "
+                f"receipt={signer_config.config_supply_receipt_id or '(none)'} "
+                f"config={signer_config.config_path or '(none)'} "
+                f"socket={signer_config.socket_path or '(none)'} "
+                f"profiles={signer_config.profile_count} reasons={signer_config_reasons}"
+            )
+            if signer_config.accepted:
+                if signer_config.config_path:
+                    os.environ["REDDOG_SIGNER_SERVICE_CONFIG_PATH"] = signer_config.config_path
+            elif signer_config_supply_enforced:
+                print(
+                    "[REDDOG-SIGNER-CONFIG] Startup blocked by "
+                    "REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED=1"
                 )
                 return False
 
