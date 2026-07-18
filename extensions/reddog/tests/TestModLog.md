@@ -1,5 +1,17 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-19 - REDDOG_BROAD_SEMANTIC_GROUNDING_NONVACUITY_PHASE1
+
+- Proved `Audit pfmall.` derives one semantic target and no invented repository path, while the extension source contains no hardcoded `pfmall` literal.
+- Proved a content-bearing HoloIndex hit for the requested subject passes and an unrelated hit fails per-target semantic coverage.
+- Proved one topical hit and a path-only hit cannot certify a broad audit; distinct implementation plus test/docs evidence is required.
+- Proved a single bounded expanded HoloIndex query preserves the original query, records its strategy, remains read-only, and never adds indexing or direct-read flags.
+- Proved test, symbol, and knowledge HoloIndex buckets reach semantic evidence coverage.
+- Proved `Audit it.` fails before Fusion with `grounding_target_universe_empty` instead of passing an empty target universe.
+- Proved simple identity and pasted operational-diagnostic prompts retain their local exemptions and the grounding seam contains no runtime reindex path.
+- Proved implementation requests containing diagnostic logs do not inherit the diagnostic exemption, and mixed repo-plus-architecture prompts retain both grounding obligations.
+- Re-ran the complete Node extension contract and JavaScript syntax check.
+
 ## 2026-07-18 - REDDOG_EXPLICIT_EMPTY_FUSION_PANEL_FAIL_CLOSED_PHASE1
 
 - Proved omitted/non-list panel input still selects compatibility defaults while explicit empty and invalid-only lists remain empty.

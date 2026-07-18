@@ -3,8 +3,9 @@ const cp = require('child_process');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+const semanticGroundingPolicy = require('./semantic_grounding_policy');
 
-const EXTENSION_VERSION = '0.4.2';
+const EXTENSION_VERSION = '0.4.3';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1419,6 +1420,12 @@ function removeQuotedReferenceBlocks(taskText) {
   return kept.join('\n');
 }
 
+function isSubstantiveGroundingRequest(taskText) {
+  const text = removeQuotedReferenceBlocks(taskText);
+  return semanticGroundingPolicy.SEMANTIC_WORK_ACTION_PATTERN.test(text)
+    && !isRunTraceAssessmentRequest(taskText) && !isDaemonOutputAssessmentRequest(taskText);
+}
+
 function extractSemanticTargets(taskText, repoTargets, externalTargets) {
   const text = removeQuotedReferenceBlocks(taskText);
   const repoSet = new Set((repoTargets || []).map((t) => String(t || '').toLowerCase()));
@@ -1439,6 +1446,8 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
     targets.push(value);
   };
   const lines = text.split(/\r?\n/);
+  const hasExplicitSemanticTarget = lines.some((line) => semanticHeaderBody(line.trim()) !== null);
+  const allowBroadActionFallback = repoSet.size === 0 && externalSet.size === 0 && !hasExplicitSemanticTarget;
   for (const line of lines) {
     const stripped = line.trim();
     if (!stripped || stripped.startsWith('- ') || stripped.startsWith('* ')) {
@@ -1454,8 +1463,10 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
       }
       continue;
     }
-    if (lineHasAnyLowerPhrase(stripped, ['audit', 'evaluate', 'assess', 'compare', 'research', 'investigate'])
-        && lineHasAnyLowerPhrase(stripped, ['architecture', 'workflow', 'orchestration', 'grounding', 'authority', 'selection', 'pipeline', 'concept', 'paper', 'repo'])) {
+    const legacyActionTarget = lineHasAnyLowerPhrase(stripped, ['audit', 'evaluate', 'assess', 'compare', 'research', 'investigate'])
+      && lineHasAnyLowerPhrase(stripped, ['architecture', 'workflow', 'orchestration', 'grounding', 'authority', 'selection', 'pipeline', 'concept', 'paper', 'repo']);
+    if ((legacyActionTarget || allowBroadActionFallback) && semanticGroundingPolicy.SEMANTIC_WORK_ACTION_PATTERN.test(stripped)
+        && semanticGroundingPolicy.hasSubstantiveSemanticSubject(stripped)) {
       add(stripped);
     }
   }
@@ -1509,28 +1520,6 @@ function numberFromScorecard(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
-const SEMANTIC_GROUNDING_STOPWORDS = new Set([
-  'about', 'after', 'against', 'agent', 'audit', 'based', 'before', 'build', 'code',
-  'compare', 'concept', 'current', 'does', 'evaluate', 'foundups', 'from', 'governance',
-  'grounding', 'implementation', 'into', 'mapping', 'module', 'need', 'needs', 'paper',
-  'pipeline', 'question', 'read', 'repo', 'research', 'review', 'selection', 'should',
-  'system', 'that', 'the', 'this', 'through', 'topic', 'using', 'whether', 'with',
-  'workflow', 'wsp'
-]);
-
-function normalizeSemanticQuery(value) {
-  return collapseAsciiWhitespace(String(value || '')
-    .toLowerCase()
-    .replace(/[`"'()[\]{}<>]/g, ' ')
-    .replace(/[_./\\:-]+/g, ' '));
-}
-
-function tokenizeSemanticQuery(value) {
-  const normalized = normalizeSemanticQuery(value);
-  const tokens = normalized.match(/[a-z0-9]+/g) || [];
-  return uniqueStrings(tokens.filter((token) => token.length >= 3 && !SEMANTIC_GROUNDING_STOPWORDS.has(token)));
-}
-
 function semanticEvidenceRef(hit) {
   const h = hit && typeof hit === 'object' ? hit : {};
   const raw = h.evidence_ref || h.ref || h.location || h.path || h.file || h.uri || h.id;
@@ -1538,25 +1527,7 @@ function semanticEvidenceRef(hit) {
 }
 
 function semanticHitText(hit) {
-  if (!hit || typeof hit !== 'object') {
-    return String(hit || '');
-  }
-  const fields = [
-    hit.need,
-    hit.title,
-    hit.summary,
-    hit.preview,
-    hit.snippet,
-    hit.content,
-    hit.text,
-    hit.location,
-    hit.path,
-    hit.file,
-    hit.module,
-    hit.kind,
-    hit.type
-  ];
-  return fields.map((field) => String(field || '')).join(' ');
+  return semanticGroundingPolicy.semanticEvidenceText(hit);
 }
 
 function normalizeSemanticEvidenceHit(hit, index, bucket) {
@@ -1593,14 +1564,20 @@ function semanticEvidenceHitsFromBundleData(data) {
     ? data.task_retrieval
     : {};
   appendSemanticEvidenceHits(out, task.code_hits, 'code');
+  appendSemanticEvidenceHits(out, task.test_hits, 'test');
+  appendSemanticEvidenceHits(out, task.symbol_hits, 'symbol');
   appendSemanticEvidenceHits(out, task.wsp_hits, 'wsp');
   appendSemanticEvidenceHits(out, task.doc_hits, 'docs');
   appendSemanticEvidenceHits(out, task.docs_hits, 'docs');
   appendSemanticEvidenceHits(out, task.skill_hits, 'skill');
+  appendSemanticEvidenceHits(out, task.knowledge_hits, 'knowledge');
   appendSemanticEvidenceHits(out, data && data.code_hits, 'code');
+  appendSemanticEvidenceHits(out, data && data.test_hits, 'test');
+  appendSemanticEvidenceHits(out, data && data.symbol_hits, 'symbol');
   appendSemanticEvidenceHits(out, data && data.wsp_hits, 'wsp');
   appendSemanticEvidenceHits(out, data && data.docs_hits, 'docs');
   appendSemanticEvidenceHits(out, data && data.skill_hits, 'skill');
+  appendSemanticEvidenceHits(out, data && data.knowledge_hits, 'knowledge');
   return out;
 }
 
@@ -1627,7 +1604,7 @@ function collectSemanticEvidenceHits(contextPacket, scorecard) {
 }
 
 function semanticBackendErrorForTarget(target, contextPacket, scorecard) {
-  const normalized = normalizeSemanticQuery(target);
+  const normalized = semanticGroundingPolicy.normalizeSemanticQuery(target);
   const candidates = [
     contextPacket && contextPacket.semantic_target_errors,
     contextPacket && contextPacket.semantic_grounding_errors,
@@ -1639,14 +1616,14 @@ function semanticBackendErrorForTarget(target, contextPacket, scorecard) {
       continue;
     }
     if (Array.isArray(item)) {
-      if (item.some((value) => normalizeSemanticQuery(value) === normalized)) {
+      if (item.some((value) => semanticGroundingPolicy.normalizeSemanticQuery(value) === normalized)) {
         return true;
       }
       continue;
     }
     if (typeof item === 'object') {
       for (const key of Object.keys(item)) {
-        if (normalizeSemanticQuery(key) === normalized && item[key]) {
+        if (semanticGroundingPolicy.normalizeSemanticQuery(key) === normalized && item[key]) {
           return true;
         }
       }
@@ -1656,7 +1633,7 @@ function semanticBackendErrorForTarget(target, contextPacket, scorecard) {
 }
 
 function semanticHitSupportsTarget(hit, targetTokens, normalizedQuery) {
-  const normalizedText = normalizeSemanticQuery(hit && hit.text);
+  const normalizedText = semanticGroundingPolicy.normalizeSemanticQuery(hit && hit.text);
   if (!normalizedText) {
     return null;
   }
@@ -1685,8 +1662,8 @@ function buildSemanticTargetCoverage(targets, contextMode, contextPacket, scorec
   const hasHolo = !!(contextMode && String(contextMode).includes('holo'));
   const evidenceHits = collectSemanticEvidenceHits(contextPacket, scorecard);
   return semanticTargets.map((target) => {
-    const normalizedQuery = normalizeSemanticQuery(target);
-    const tokens = tokenizeSemanticQuery(target);
+    const normalizedQuery = semanticGroundingPolicy.normalizeSemanticQuery(target);
+    const tokens = semanticGroundingPolicy.tokenizeSemanticQuery(target);
     const rejectionReasons = [];
     const contentBearingHits = [];
     const evidenceRefs = [];
@@ -1712,22 +1689,29 @@ function buildSemanticTargetCoverage(targets, contextMode, contextPacket, scorec
         contentBearingHits.push({
           evidence_ref: hit.evidence_ref,
           bucket: hit.bucket,
+          evidence_category: semanticGroundingPolicy.semanticEvidenceCategory(hit),
           matched_tokens: support.matched_tokens,
           exact_phrase: support.exact_phrase === true
         });
       }
     }
-    if (!evidenceRefs.length) {
+    const uniqueEvidenceRefs = uniqueStrings(evidenceRefs);
+    const uniqueContentBearingHits = contentBearingHits.filter((hit, index) => uniqueEvidenceRefs.indexOf(hit.evidence_ref) !== -1
+      && contentBearingHits.findIndex((other) => other.evidence_ref === hit.evidence_ref) === index);
+    const evidenceQuality = semanticGroundingPolicy.assessBroadAuditEvidence(target, uniqueContentBearingHits);
+    if (!uniqueEvidenceRefs.length) {
       rejectionReasons.push('semantic_target_evidence_missing');
     }
-    const uniqueEvidenceRefs = uniqueStrings(evidenceRefs);
+    if (evidenceQuality.required && !evidenceQuality.passed) {
+      rejectionReasons.push('broad_audit_evidence_insufficient');
+    }
     return {
       target: String(target || ''),
       normalized_query: normalizedQuery,
       verdict: rejectionReasons.length === 0 ? 'SUFFICIENT' : 'UNSAFE_TO_ACT',
       evidence_refs: uniqueEvidenceRefs,
-      content_bearing_hits: contentBearingHits.filter((hit, index) => uniqueEvidenceRefs.indexOf(hit.evidence_ref) !== -1
-        && contentBearingHits.findIndex((other) => other.evidence_ref === hit.evidence_ref) === index),
+      content_bearing_hits: uniqueContentBearingHits,
+      evidence_quality: evidenceQuality,
       rejection_reasons: uniqueStrings(rejectionReasons)
     };
   });
@@ -1748,6 +1732,12 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   const semantic = typedTargets.semantic_targets;
   const external = typedTargets.external_research_targets;
   const quoted = typedTargets.quoted_reference_blocks;
+  const targetUniverseEmpty = repoFiles.length === 0 && semantic.length === 0 && external.length === 0;
+  const targetUniverseRequired = isSubstantiveGroundingRequest(taskText);
+
+  if (targetUniverseRequired && targetUniverseEmpty) {
+    rejectionReasons.push('grounding_target_universe_empty');
+  }
 
   if (repoFiles.length) {
     if (!scorecard || scorecard.target_recall_ok !== true) {
@@ -1786,8 +1776,11 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     semantic_targets_missing: semanticMissing,
     semantic_target_coverage: semanticCoverage,
     semantic_target_coverage_digest: semanticTargetCoverageDigest(semanticCoverage),
+    semantic_index_gap_detected: semanticMissing.length > 0,
     external_research_targets_count: external.length,
     quoted_reference_blocks_count: quoted.length,
+    grounding_target_universe_required: targetUniverseRequired,
+    grounding_target_universe_empty: targetUniverseEmpty,
     direct_read_required: repoFiles.length > 0,
     semantic_grounding_required: semantic.length > 0,
     external_research_required: external.length > 0,
@@ -2020,6 +2013,9 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     retrieval_mode: meta.retrieval_mode || 'unknown',
     embedding_backend: meta.embedding_backend || 'unknown',
     routing_active: meta.routing_active !== undefined ? meta.routing_active : 'unknown',
+    original_query: meta.original_query || 'unknown',
+    effective_query: meta.effective_query || 'unknown',
+    query_expansion_strategy: meta.expansion_strategy || 'unknown',
     code_hits_count: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
     wsp_hits: meta.wsp_hits !== undefined ? meta.wsp_hits : 'unknown',
     code_hits: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
@@ -2102,6 +2098,9 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- retrieval_mode: ' + scorecard.retrieval_mode,
     '- embedding_backend: ' + scorecard.embedding_backend,
     '- routing_active: ' + scorecard.routing_active,
+    '- holoindex_original_query: ' + scorecard.original_query,
+    '- holoindex_effective_query: ' + scorecard.effective_query,
+    '- holoindex_query_expansion_strategy: ' + scorecard.query_expansion_strategy,
     '- code_hits_count: ' + scorecard.code_hits_count,
     '- wsp_hits: ' + scorecard.wsp_hits,
     '- skill_hits: ' + scorecard.skill_hits,
@@ -5139,7 +5138,7 @@ function activate(context) {
   const installState = detectRedDogInstallState(context);
   if (installState.stale_install_detected) {
     vscode.window.showWarningMessage(
-      'RedDog 0.4.2 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
+      'RedDog 0.4.3 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
     );
   }
   context.subscriptions.push(
@@ -5367,6 +5366,9 @@ function wireFusionWebview(context, webview, worker, state) {
         ? groundingPreflight.semantic_target_coverage.slice()
         : [];
       holoScorecard.semantic_target_coverage_digest = groundingPreflight.semantic_target_coverage_digest;
+      if (groundingPreflight.semantic_index_gap_detected === true) {
+        holoScorecard.index_gap_detected = true;
+      }
       holoScorecard.external_research_targets_count = groundingPreflight.external_research_targets_count;
       holoScorecard.quoted_reference_blocks_count = groundingPreflight.quoted_reference_blocks_count;
     }
@@ -7092,7 +7094,9 @@ function classifyDirectReadFetchError(err) {
 }
 
 function holoIndexOutput(root, taskText, maxChars) {
-  const query = String(taskText || '').replace(/\s+/g, ' ').trim().slice(0, 500) || 'FoundUps RedDog WSP_00 WSP_97 WSP_15 current task';
+  const typedTargets = extractTypedTargets(taskText);
+  const queryPlan = semanticGroundingPolicy.buildEffectiveHoloQuery(taskText, typedTargets.semantic_targets);
+  const query = queryPlan.effective_query;
   const moduleHint = moduleHintFromActive(root);
   const requestedMode = resolveHoloRetrievalMode(process.env);
   const env = buildHoloQueryEnv(process.env, requestedMode);
@@ -7173,6 +7177,7 @@ function holoIndexOutput(root, taskText, maxChars) {
       meta.direct_read_fetch_arg_count = fetchTelemetry.direct_read_fetch_arg_count;
       meta.direct_read_fetch_timeout_ms = fetchTelemetry.direct_read_fetch_timeout_ms;
     }
+    Object.assign(meta, queryPlan);
     const directReadSection = buildDirectReadContentSection(output);
     return {
       output: String(output || '').slice(0, maxChars),
@@ -7191,8 +7196,9 @@ function holoIndexOutput(root, taskText, maxChars) {
         maxBuffer: Math.max(maxChars * 4, 65536),
         windowsHide: true
       });
-      const meta = holoIndexMetaFromBundle(output, true, query);
+      const meta = holoIndexMetaFromBundle(output, true, taskText);
       meta.requested_retrieval_mode = requestedMode;
+      Object.assign(meta, queryPlan);
       return {
         output: String(output || '').slice(0, maxChars),
         quality: 'HoloIndex bundle-json failed; offline lexical fallback used. Treat protocol coverage as NEEDS_VERIFICATION and propose re-index/bundle repair if WSP hits are missing.',
@@ -7202,7 +7208,7 @@ function holoIndexOutput(root, taskText, maxChars) {
       return {
         output: '[HoloIndex unavailable: ' + (offlineErr && offlineErr.message ? offlineErr.message.slice(0, 180) : 'unknown') + ']',
         quality: 'HoloIndex unavailable. Use supplied editor/git evidence only; propose HoloIndex recovery as a fix when retrieval affects the decision.',
-        meta: holoIndexMetaFromBundle('', false)
+        meta: Object.assign(holoIndexMetaFromBundle('', false, taskText), queryPlan)
       };
     }
   }

@@ -2,6 +2,16 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-19 - REDDOG_BROAD_SEMANTIC_GROUNDING_NONVACUITY_PHASE1 (0.4.3)
+
+- Replaced the hardcoded semantic-domain noun gate with a generic, bounded action-and-subject derivation rule, so short repository audits such as `Audit <FoundUp>` create a semantic target without embedding FoundUp-specific names or paths in the extension.
+- Kept explicit repo paths, external sources, and explicit semantic headers authoritative; generic fallback does not add duplicate `Determine` or prose targets when those stronger channels are present.
+- Added a fail-closed `grounding_target_universe_empty` decision for substantive audit, implementation, verification, and research requests that still produce no actionable target. Fusion is not called after this rejection.
+- Broad audit targets now use one bounded generic query expansion and require two distinct evidence references spanning implementation/authority plus verification/authority categories. Matching filenames without descriptive content no longer count as evidence.
+- Added HoloIndex test, symbol, and knowledge buckets to semantic evidence projection and surfaced original/effective query plus expansion strategy in Run Trace telemetry.
+- Preserved local identity and operational-diagnostic fast paths, per-target content-bearing HoloIndex evidence, query-only runtime behavior, and the existing no-runtime-reindex boundary.
+- Version 0.4.2 -> 0.4.3. WSP_15: Complexity 2 + Importance 5 + Deferability 5 + Impact 5 = 17 (P0).
+
 ## 2026-07-18 - REDDOG_EXPLICIT_EMPTY_FUSION_PANEL_FAIL_CLOSED_PHASE1 (0.4.2 unchanged)
 
 - Made an explicitly supplied Fusion panel list authoritative at both extension ingress and the Python bridge: `[]` and invalid-only lists remain empty instead of silently restoring `DEFAULT_PANEL_MODELS`; omitted/non-list inputs retain compatibility defaults.
