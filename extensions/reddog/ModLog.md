@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-18 - REDDOG_FUSION_KIMI_K3_PHASE1 (OpenRouter critic integration, 0.4.1)
+
+- Added the verified OpenRouter slug `moonshotai/kimi-k3` to the default manual Fusion panel while retaining Kimi K2.7 Code for implementation comparison and capacity fallback.
+- Kimi K3 requests use its published mandatory `max` reasoning contract, omit the unsupported temperature field, and use a receipt-recorded 4096-token critic budget validated by the live compatibility smoke.
+- Review packets continue to bind the exact requested panel model IDs; no mutable `kimi-latest` alias is used.
+- Version 0.4.0 -> 0.4.1 (package.json + EXTENSION_VERSION + README + interface + contract tests).
+- WSP_15: Complexity 3 + Importance 4 + Deferability 4 + Impact 4 = 15 (P1).
+
 ## 2026-07-16 - REDDOG_PRODUCT_IDENTITY_AND_THIN_CLIENT_0_4_0 (product identity migration, 0.4.0)
 
 - Renamed the extension folder and product identity from the legacy Foundups Fusion Worker / Foundups(R)Agent surface to RedDog.

@@ -198,8 +198,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.0', 'package version must be 0.4.0');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.0'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.1', 'package version must be 0.4.1');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.1'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -219,7 +219,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.0', 'README version mismatch');
+includes(readme, 'Version: 0.4.1', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -270,6 +270,10 @@ includes(bridgePy, 'messages = [{"role": "system", "content": _system_prompt(pay
 includes(bridgePy, 'base_system = _system_prompt(payload)', 'manual panel system prompt missing');
 includes(bridgePy, 'GLM_PRINCIPAL_MODEL = "z-ai/glm-5.2"', 'bridge GLM principal missing');
 includes(bridgePy, 'DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"', 'bridge DeepSeek V4 critic missing');
+includes(bridgePy, 'KIMI_PANEL_MODEL = "moonshotai/kimi-k3"', 'bridge Kimi K3 critic missing');
+includes(bridgePy, 'KIMI_K3_PANEL_MAX_TOKENS = 4096', 'Kimi K3 critic budget missing');
+includes(bridgePy, 'body["reasoning"] = {"effort": "max"}', 'Kimi K3 max-reasoning request contract missing');
+includes(bridgePy, '"panel_max_tokens": panel_max_tokens', 'Kimi K3 actual panel budget receipt missing');
 
 includes(iface, 'SPECIFIED_NOT_IMPLEMENTED', 'interface truth boundary missing');
 includes(iface, 'WSP_15 Priority', 'interface priority contract missing');
@@ -408,6 +412,7 @@ includes(iface, '012 Work Focus to 0102 WSP Task Prompt', 'INTERFACE work focus 
 includes(roadmap, 'REDDOG_BRIDGE_HARDENING_PHASE1', 'bridge hardening roadmap slice missing');
 includes(extensionJs, 'Routing: Auto via WSP_15', 'auto routing label missing');
 includes(extensionJs, 'deepseek/deepseek-v4-pro', 'DeepSeek V4 Pro critic default missing');
+includes(extensionJs, 'moonshotai/kimi-k3', 'Kimi K3 critic default missing');
 includes(extensionJs, 'z-ai/glm-5.2', 'GLM 5.2 principal default missing');
 includes(extensionJs, 'openrouter_fusion_alias', 'OpenRouter Fusion alias path must remain implemented');
 assert(!extensionJs.includes('<select id="mode"'), 'Mode must not be a 012-facing dropdown');
@@ -1087,7 +1092,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.0', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.1', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2579,7 +2584,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.0'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.1'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2593,7 +2598,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.0'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.1'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2605,7 +2610,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.0'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.1'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -3484,7 +3489,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.0' } }
+      ? { id, packageJSON: { version: '0.4.1' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
@@ -3502,7 +3507,7 @@ includes(extensionJs, "reddogConfigValue('enableResidentArchitectSession'", 'RAS
 includes(extensionJs, 'function runResidentArchitectSessionBridge', 'RAS-001: resident session extension bridge missing');
 includes(extensionJs, 'resident_architect_session_result', 'RAS-001: resident session result must attach to review packet');
 includes(extensionJs, 'buildResidentArchitectSessionSection', 'RAS-001: Copy MD resident session section missing');
-includes(residentArchitectBridgePy, 'run_reddog_readonly_audit_research_decision_e2e', 'RAS-002: bridge must delegate to resident E2E runtime');
+includes(residentArchitectBridgePy, 'run_reddog_resident_architect_durable_agentdb_cycle', 'RAS-002: bridge must delegate to resident durable runtime');
 includes(residentArchitectBridgePy, 'explicit_resident_architect_session_requested', 'RAS-002: bridge must require explicit request');
 includes(residentArchitectBridgePy, 'no_holoindex_reindex_performed', 'RAS-002: bridge must surface no-reindex attestation');
 includes(residentArchitectBridgePy, 'no_repo_mutation_performed', 'RAS-002: bridge must surface no-repo-mutation attestation');

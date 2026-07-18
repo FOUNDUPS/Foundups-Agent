@@ -58,6 +58,33 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertTrue(truncated)
         self.assertEqual(len(models), bridge.MAX_PANEL_MODELS)
 
+    def test_default_panel_keeps_kimi_code_and_adds_kimi_k3(self) -> None:
+        self.assertIn("moonshotai/kimi-k2.7-code", bridge.DEFAULT_PANEL_MODELS)
+        self.assertIn("moonshotai/kimi-k3", bridge.DEFAULT_PANEL_MODELS)
+        self.assertEqual(bridge.KIMI_K3_PANEL_MAX_TOKENS, 4096)
+
+    def test_kimi_k3_completion_uses_mandatory_max_reasoning_without_temperature(self) -> None:
+        post = mock.Mock(
+            return_value=(
+                {"choices": [{"message": {"content": "ok"}}]},
+                {"retry_count": 0, "final_retry_reason": None},
+            )
+        )
+        with mock.patch.object(bridge, "_post_openrouter", post):
+            content, _meta = bridge._chat_completion(
+                "key",
+                "moonshotai/kimi-k3",
+                [{"role": "user", "content": "test"}],
+                max_tokens=256,
+                temperature=0.2,
+                timeout=30,
+            )
+
+        self.assertEqual(content, "ok")
+        body = post.call_args.args[1]
+        self.assertEqual(body["reasoning"], {"effort": "max"})
+        self.assertNotIn("temperature", body)
+
     def test_retry_429_then_success(self) -> None:
         calls: list[dict] = []
         responses = [
@@ -384,6 +411,43 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         quorum = result["review_packet"]["fusion_panel_quorum"]
         self.assertTrue(quorum["passed"])
         self.assertEqual(quorum["challenging_critics"], ["critic-a"])
+
+    def test_fusion_kimi_k3_uses_and_records_4096_token_critic_budget(self) -> None:
+        calls: list[tuple[str, int]] = []
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            calls.append((model, kwargs["max_tokens"]))
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return (
+                    "Challenge: the evidence claim is unsupported and the WSP_15 "
+                    "priority sequence needs verification.",
+                    {"retry_count": 0},
+                )
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["moonshotai/kimi-k3"],
+                    "max_tokens": 1600,
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertIn(("moonshotai/kimi-k3", 4096), calls)
+        self.assertEqual(
+            result["review_packet"]["panel_max_tokens"],
+            {"moonshotai/kimi-k3": 4096},
+        )
 
     def test_fusion_strict_json_contract_reaches_lead_and_synthesis_prompts(self) -> None:
         systems: list[str] = []

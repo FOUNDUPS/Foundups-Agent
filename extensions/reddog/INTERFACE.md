@@ -307,6 +307,7 @@ Model and context routing:
 - Principal/synthesis default: `z-ai/glm-5.2`.
 - Adversarial critic default: `deepseek/deepseek-v4-pro`.
 - Implementation critic default: `moonshotai/kimi-k2.7-code`.
+- Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token critic budget.
 - REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and `wsp_holo` HoloIndex grounding (no Fusion panel, Skillz, or git).
 - Context is not a 012-facing selector; it is resolved from WSP_15 tier.
 - Skillz/Wardrobe/Rolodex/OpenClaw/Hermes discovery is context only. RedDog may recommend a governed handoff, but this extension cannot execute it.

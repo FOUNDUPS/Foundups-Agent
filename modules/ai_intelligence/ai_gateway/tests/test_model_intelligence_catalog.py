@@ -47,11 +47,11 @@ def test_openrouter_catalog_normalizes_capability_and_pricing_evidence():
         {
             "data": [
                 {
-                    "id": "moonshotai/kimi-k2.7-code",
-                    "context_length": 262144,
-                    "pricing": {"prompt": "0.0000006", "completion": "0.0000025"},
+                    "id": "moonshotai/kimi-k3",
+                    "context_length": 1048576,
+                    "pricing": {"prompt": "0.000003", "completion": "0.000015"},
                     "architecture": {
-                        "input_modalities": ["text"],
+                        "input_modalities": ["text", "image"],
                         "output_modalities": ["text"],
                     },
                     "supported_parameters": ["tools", "response_format", "reasoning"],
@@ -64,15 +64,29 @@ def test_openrouter_catalog_normalizes_capability_and_pricing_evidence():
     assert len(cards) == 1
     card = cards[0]
     assert card.provider == "moonshotai"
-    assert card.canonical_model_id == "moonshotai/kimi-k2.7-code"
+    assert card.canonical_model_id == "moonshotai/kimi-k3"
     assert card.availability == Availability.AVAILABLE
     assert card.promotion_state == PromotionState.CANDIDATE
-    assert card.context_window == 262144
-    assert card.input_cost_per_million == 0.6
-    assert card.output_cost_per_million == 2.5
+    assert card.context_window == 1048576
+    assert card.input_cost_per_million == 3.0
+    assert card.output_cost_per_million == 15.0
+    assert card.modalities == ("image", "text")
     assert card.supports_tools is True
     assert card.supports_structured_output is True
     assert card.supports_reasoning is True
+
+
+def test_static_registry_exposes_kimi_k3_as_unpromoted_autoresearch_candidate():
+    cards = normalize_static_registry_cards()
+    by_id = {card.canonical_model_id: card for card in cards}
+
+    kimi = by_id["moonshotai/kimi-k3"]
+    assert kimi.provider == "openrouter"
+    assert kimi.availability == Availability.UNKNOWN
+    assert kimi.promotion_state == PromotionState.CANDIDATE
+    assert {"coding", "code_review", "reasoning", "research", "analysis"}.issubset(
+        set(kimi.task_families)
+    )
 
 
 def test_openrouter_catalog_rejects_malformed_records_fail_closed():

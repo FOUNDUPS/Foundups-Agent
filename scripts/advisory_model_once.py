@@ -33,9 +33,11 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 ENV_API_KEY = "OPENROUTER_API_KEY"
 GLM_PRINCIPAL_MODEL = "z-ai/glm-5.2"
 DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"
-KIMI_PANEL_MODEL = "moonshotai/kimi-k2.7-code"
+KIMI_CODE_PANEL_MODEL = "moonshotai/kimi-k2.7-code"
+KIMI_PANEL_MODEL = "moonshotai/kimi-k3"
+KIMI_K3_PANEL_MAX_TOKENS = 4096
 DEFAULT_LEAD_MODEL = GLM_PRINCIPAL_MODEL
-DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_PANEL_MODEL)
+DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_CODE_PANEL_MODEL, KIMI_PANEL_MODEL)
 MAX_PANEL_MODELS = 6
 RETRYABLE_HTTP_STATUS = frozenset({429, 502, 503})
 MAX_HTTP_RETRIES = 2
@@ -133,13 +135,19 @@ def _chat_completion(
     temperature: float,
     timeout: int,
 ) -> tuple[str, dict[str, Any]]:
-    body = {
+    body: dict[str, Any] = {
         "model": model,
         "messages": messages,
         "max_tokens": max_tokens,
-        "temperature": temperature,
         "stream": False,
     }
+    if model == KIMI_PANEL_MODEL:
+        # Kimi K3 exposes mandatory max reasoning through OpenRouter and does
+        # not advertise temperature support. Keep the request inside the
+        # provider's published parameter contract.
+        body["reasoning"] = {"effort": "max"}
+    else:
+        body["temperature"] = temperature
     data, retry_meta = _post_openrouter(api_key, body, timeout)
     content = data["choices"][0]["message"]["content"]
     return str(content), retry_meta
@@ -275,6 +283,7 @@ def _fusion_quorum_packet(
     lead_model: str,
     panel_models: list[str],
     panel_models_truncated: bool,
+    panel_max_tokens: dict[str, int] | None = None,
     missing_required_evidence: list[str] | None = None,
     challenging_critics: list[str] | None = None,
 ) -> dict[str, Any]:
@@ -298,6 +307,7 @@ def _fusion_quorum_packet(
             "lead_model": lead_model,
             "panel_models": panel_models,
             "panel_models_truncated": panel_models_truncated,
+            "panel_max_tokens": dict(panel_max_tokens or {}),
             "fusion_panel_quorum": quorum,
         },
     }
@@ -373,6 +383,10 @@ def _run_foundups_fusion(
     temperature = _bounded_temperature(payload.get("temperature"), 0.2)
     lead_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
     panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
+    panel_max_tokens = {
+        model: (max(max_tokens, KIMI_K3_PANEL_MAX_TOKENS) if model == KIMI_PANEL_MODEL else max_tokens)
+        for model in panel_models
+    }
     base_system = _system_prompt(payload)
     response_contract = str(payload.get("response_contract") or "")
     strict_json_contract = response_contract.startswith("strict_json")
@@ -387,6 +401,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            panel_max_tokens=panel_max_tokens,
             missing_required_evidence=missing_evidence,
         )
 
@@ -424,6 +439,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            panel_max_tokens=panel_max_tokens,
         )
 
     _progress("lead_done", "Lead response received: " + lead_model)
@@ -445,7 +461,7 @@ def _run_foundups_fusion(
                 api_key,
                 model,
                 critic_messages,
-                max_tokens=max_tokens,
+                max_tokens=panel_max_tokens[model],
                 temperature=temperature,
                 timeout=timeout,
             ): model
@@ -476,6 +492,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            panel_max_tokens=panel_max_tokens,
             challenging_critics=[],
         )
 
@@ -521,6 +538,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            panel_max_tokens=panel_max_tokens,
             challenging_critics=challenging_critics,
         )
 
@@ -543,6 +561,7 @@ def _run_foundups_fusion(
             "lead_model": lead_model,
             "panel_models": panel_models,
             "panel_models_truncated": panel_models_truncated,
+            "panel_max_tokens": panel_max_tokens,
             "redacted_prompt": redacted_prompt,
             "lead_excerpt": lead_text[:4000],
             "panel_excerpts": {model: text[:3000] for model, text in panel_results.items()},

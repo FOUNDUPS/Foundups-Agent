@@ -180,15 +180,20 @@ class AIGatewayConfiguredModelCaller:
         started = time.monotonic()
         response = str(call_provider(routed_config, prompt, task_name) or "")
         latency_ms = int(round((time.monotonic() - started) * 1000))
+        input_tokens = _token_count(prompt)
+        output_tokens = _token_count(response)
         return GatewayModelCallResult(
             success=bool(response.strip()),
             provider=provider_name,
             model=model_name,
             response_text=response,
             latency_ms=latency_ms,
-            input_tokens=_token_count(prompt),
-            output_tokens=_token_count(response),
-            cost_estimate_usd=float(_token_count(prompt)) * float(getattr(provider_config, "cost_per_token", 0.0)),
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            cost_estimate_usd=(
+                float(input_tokens) * float(getattr(provider_config, "cost_per_token", 0.0))
+                + float(output_tokens) * float(getattr(provider_config, "output_cost_per_token", 0.0))
+            ),
         ).normalized()
 
 

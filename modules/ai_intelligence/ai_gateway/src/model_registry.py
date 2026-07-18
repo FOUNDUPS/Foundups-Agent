@@ -3,7 +3,7 @@
 UPDATE THIS FILE when providers release new models.
 All other modules should import from here, not hardcode model IDs.
 
-Last Updated: 2026-02-22
+Last Updated: 2026-07-18
 """
 
 from dataclasses import dataclass
@@ -297,6 +297,19 @@ GROK_MODELS: Dict[str, ModelInfo] = {
 }
 
 # =============================================================================
+# OPENROUTER MODELS (explicit AutoResearch / RedDog evaluation)
+# =============================================================================
+OPENROUTER_MODELS: Dict[str, ModelInfo] = {
+    "moonshotai/kimi-k3": ModelInfo(
+        model_id="moonshotai/kimi-k3",
+        provider="openrouter",
+        status=ModelStatus.CURRENT,
+        release_date=date(2026, 7, 16),
+        notes="Kimi K3 multimodal reasoning model; explicit evaluation candidate, not automatic fallback",
+    ),
+}
+
+# =============================================================================
 # LOCAL MODELS (LM Studio / Ollama / llama.cpp)
 # =============================================================================
 LOCAL_MODELS: Dict[str, ModelInfo] = {
@@ -346,6 +359,7 @@ ALL_MODELS: Dict[str, ModelInfo] = {
     **ANTHROPIC_MODELS,
     **GEMINI_MODELS,
     **GROK_MODELS,
+    **OPENROUTER_MODELS,
     **LOCAL_MODELS,
 }
 
@@ -354,14 +368,14 @@ ALL_MODELS: Dict[str, ModelInfo] = {
 # =============================================================================
 RECOMMENDED_MODELS = {
     # 012's activity routing matrix (primary task types) — Feb 2026 current
-    "coding": ["claude-opus-4-6", "gpt-5.2-codex", "grok-code-fast-1", "gemini-2.5-pro"],
+    "coding": ["claude-opus-4-6", "gpt-5.2-codex", "grok-code-fast-1", "gemini-2.5-pro", "moonshotai/kimi-k3"],
     "math": ["o3", "o4-mini", "gemini-2.5-pro", "claude-opus-4-6"],
-    "reasoning": ["o3-pro", "gpt-5.2", "claude-opus-4-6", "gemini-2.5-pro"],
+    "reasoning": ["o3-pro", "gpt-5.2", "claude-opus-4-6", "gemini-2.5-pro", "moonshotai/kimi-k3"],
     "social": ["grok-4", "gpt-5", "claude-sonnet-4-5-20250929"],
-    "research": ["gemini-2.5-pro", "gpt-5.2", "claude-sonnet-4-5-20250929"],
+    "research": ["gemini-2.5-pro", "gpt-5.2", "claude-sonnet-4-5-20250929", "moonshotai/kimi-k3"],
     # Secondary task types
-    "code_review": ["claude-opus-4-6", "gpt-5.2-codex", "gemini-2.5-pro"],
-    "analysis": ["gpt-5.2", "claude-sonnet-4-5-20250929", "o3"],
+    "code_review": ["claude-opus-4-6", "gpt-5.2-codex", "gemini-2.5-pro", "moonshotai/kimi-k3"],
+    "analysis": ["gpt-5.2", "claude-sonnet-4-5-20250929", "o3", "moonshotai/kimi-k3"],
     "creative": ["claude-sonnet-4-5-20250929", "gpt-5", "gemini-2.5-flash"],
     "quick": ["grok-4-fast", "gpt-5", "claude-haiku-4-5-20251001", "gemini-2.5-flash"],
     # Local models

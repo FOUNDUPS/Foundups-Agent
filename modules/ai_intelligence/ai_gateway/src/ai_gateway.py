@@ -61,6 +61,8 @@ class ProviderConfig:
     cost_per_token: float
     rate_limit: int  # requests per minute
     timeout: int = 30
+    output_cost_per_token: float = 0.0
+    automatic_routing_enabled: bool = True
 
 
 class AIGateway:
@@ -68,7 +70,8 @@ class AIGateway:
     AI Gateway for unified access to multiple AI providers.
 
     Provides intelligent routing, automatic fallback, and cost optimization
-    across OpenAI, Anthropic, Grok, and Google Gemini.
+    across OpenAI, Anthropic, Grok, Google Gemini, and explicitly selected
+    OpenRouter models used by governed AutoResearch campaigns.
     """
 
     def __init__(self, gateway_key: Optional[str] = None):
@@ -211,6 +214,30 @@ class AIGateway:
                 },
                 cost_per_token=0.0005,
                 rate_limit=60
+            ),
+
+            # OpenRouter is intentionally absent from the ordinary fallback
+            # order. It is available for exact provider/model assignments from
+            # the governed AutoResearch configured-gateway runner.
+            'openrouter': ProviderConfig(
+                name='openrouter',
+                api_key=os.getenv('OPENROUTER_API_KEY'),
+                base_url='https://openrouter.ai/api/v1',
+                models={
+                    'coding': 'moonshotai/kimi-k3',
+                    'code_review': 'moonshotai/kimi-k3',
+                    'math': 'moonshotai/kimi-k3',
+                    'reasoning': 'moonshotai/kimi-k3',
+                    'research': 'moonshotai/kimi-k3',
+                    'analysis': 'moonshotai/kimi-k3',
+                    'creative': 'moonshotai/kimi-k3',
+                    'quick': 'moonshotai/kimi-k3',
+                },
+                cost_per_token=0.000003,
+                rate_limit=30,
+                timeout=120,
+                output_cost_per_token=0.000015,
+                automatic_routing_enabled=False,
             )
         }
 
@@ -290,7 +317,7 @@ class AIGateway:
         # Sort providers by cost for this task
         available_providers = [
             (name, config) for name, config in self.providers.items()
-            if config.api_key
+            if config.api_key and config.automatic_routing_enabled
         ]
 
         # Sort by cost_per_token ascending (cheapest first)
@@ -384,7 +411,7 @@ class AIGateway:
 
         model = provider.models.get(task_type, provider.models.get('quick', 'default'))
 
-        if provider.name == 'openai':
+        if provider.name in {'openai', 'openrouter'}:
             return self._call_openai(provider, prompt, model)
         elif provider.name == 'anthropic':
             return self._call_anthropic(provider, prompt, model)
@@ -397,7 +424,8 @@ class AIGateway:
 
     def _call_openai(self, provider: ProviderConfig, prompt: str, model: str) -> str:
         """Call OpenAI API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
+        default_max_tokens = 4096 if provider.name == 'openrouter' and model == 'moonshotai/kimi-k3' else 1000
+        max_tokens = self._get_provider_max_tokens(provider.name, default_max_tokens)
         temperature = self._get_provider_temperature(provider.name, 0.7)
         headers = {
             'Authorization': f'Bearer {provider.api_key}',
@@ -408,8 +436,13 @@ class AIGateway:
             'model': model,
             'messages': [{'role': 'user', 'content': prompt}],
             'max_tokens': max_tokens,
-            'temperature': temperature
         }
+        if provider.name == 'openrouter' and model == 'moonshotai/kimi-k3':
+            # OpenRouter lists Kimi K3 with mandatory max reasoning and without
+            # temperature support. Preserve the published request contract.
+            data['reasoning'] = {'effort': 'max'}
+        else:
+            data['temperature'] = temperature
 
         response = requests.post(
             f"{provider.base_url}/chat/completions",
