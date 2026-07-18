@@ -2,7 +2,7 @@
 
 ## Status
 
-Phase: RedDog 0.4.1 resident architect thin-client surface.
+Phase: RedDog 0.4.2 resident architect thin-client surface.
 
 Current implementation:
 
@@ -10,7 +10,7 @@ Current implementation:
 - Bottom-composer webview with scrollback output.
 - OpenRouter bridge with redaction gate.
 - WSP_00/WSP_97/WSP_15 operating prompt.
-- HoloIndex bundle-json recall with offline fallback.
+- HoloIndex semantic-first bundle-json recall with truthful mode/backend receipts and an operational offline lexical fallback.
 - Manual lead+panel mode for review-packet traceability.
 - REDDOG_FUSION_ORCHESTRATOR_PHASE1: internal task classifier, auto effort, schema validator, one repair pass.
 - REDDOG_UX_PACKET_POLISH_PHASE1 (v0.3.19): Working Tail above controls; 0102 Role label; Copy MD Run Trace; mojibake flag; validation-failure packet semantics.

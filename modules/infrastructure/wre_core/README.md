@@ -38,13 +38,16 @@ wre_core/
 ### Memory Preflight Guard (WSP_CORE Enforcement)
 The `memory_preflight.py` module enforces the WSP_CORE Memory System by:
 - Running tiered retrieval (Tier 0 -> 1 -> 2) before code-changing operations
+- Running HoloIndex semantic retrieval by default, while preserving an operator-set offline/network boundary, and receipting the requested mode, actual mode, embedding backend, routing state, and semantic requirement verdict
 - Blocking if Tier-0 artifacts (README.md, INTERFACE.md) are missing
+- Blocking when semantic retrieval was requested but degraded, unless degraded operation was explicitly authorized
 - Auto-stubbing missing Tier-0 artifacts when `WRE_MEMORY_AUTOSTUB_TIER0=true`
 
 Environment flags:
 - `WRE_MEMORY_PREFLIGHT_ENABLED` (default: true)
 - `WRE_MEMORY_AUTOSTUB_TIER0` (default: false)
 - `WRE_MEMORY_ALLOW_DEGRADED` (default: false)
+- `WRE_HOLO_RETRIEVAL_MODE` (`semantic` by default; explicit `lexical` opt-down)
 
 ### Skills Entry Point (First Principles)
 **Problem (Observed):**

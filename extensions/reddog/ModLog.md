@@ -2,6 +2,16 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-18 - REDDOG_HOLO_SEMANTIC_FIRST_PHASE1 (semantic retrieval recovery, 0.4.2)
+
+- Proved the local HoloIndex embedding stack healthy (`sentence_transformers`, cached `all-MiniLM-L6-v2`) and measured a real semantic bundle at 15.6 seconds with five code and five WSP hits.
+- Removed RedDog's unconditional `HOLO_SKIP_MODEL=1` production policy. The default read-only bundle clears inherited model-skip state, preserves an operator-set `HOLO_OFFLINE` network boundary, and requires the returned receipt to report `retrieval_mode=semantic`.
+- Added explicit `REDDOG_HOLO_RETRIEVAL_MODE=lexical` opt-down for deterministic tests or emergency compute conservation; lexical results are labelled as lexical and never promoted to semantic evidence.
+- Fixed the emergency fallback's block-scope defect: the fallback previously referenced `env` outside the `try` block where it was declared, so a primary bundle exception could collapse into `HoloIndex unavailable` instead of running lexical recovery.
+- Added requested/actual retrieval mode, embedding backend, and routing state to RedDog HoloIndex metadata, scorecards, and bundle summaries.
+- Version 0.4.1 -> 0.4.2 (package.json + EXTENSION_VERSION + README + interface + roadmap + contract tests).
+- WSP_15: Complexity 3 + Importance 4 + Deferability 4 + Impact 4 = 15 (P1).
+
 ## 2026-07-18 - REDDOG_FUSION_KIMI_K3_PHASE1 (OpenRouter critic integration, 0.4.1)
 
 - Added the verified OpenRouter slug `moonshotai/kimi-k3` to the default manual Fusion panel while retaining Kimi K2.7 Code for implementation comparison and capacity fallback.

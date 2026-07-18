@@ -45,7 +45,7 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 |---|---|---|
 | Advisory model review | YES | OpenRouter request after Fusion redaction gate passes |
 | Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by WSP_15 tier and sends it through redaction gate |
-| HoloIndex recall | YES | `HOLO_SKIP_MODEL=1 --bundle-json` first; offline lexical fallback only if bundle recall fails |
+| HoloIndex recall | YES | Read-only semantic `--bundle-json` first; actual retrieval mode/backend are receipted; offline lexical fallback only if semantic retrieval fails. Explicit opt-down: `REDDOG_HOLO_RETRIEVAL_MODE=lexical`. |
 | WSP_00/WSP_97/WSP_15 prompting | YES | System prompt requires role lock, truth labels, proposed fixes, and MPS priority |
 | Repo edits | NO | No write tool exposed to model |
 | Shell execution by model | NO | Extension host runs only bounded local context/bridge commands; model cannot execute Skillz/OpenClaw/Hermes |

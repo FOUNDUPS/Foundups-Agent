@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-18 - REDDOG_HOLO_SEMANTIC_FIRST_PHASE1
+
+- Asserted semantic is the production default and lexical retrieval requires explicit `REDDOG_HOLO_RETRIEVAL_MODE=lexical` opt-down.
+- Asserted semantic mode removes inherited `HOLO_SKIP_MODEL`, preserves an operator-set `HOLO_OFFLINE` network boundary, and keeps the read-only query guard.
+- Asserted requested mode, actual retrieval mode, embedding backend, and routing state reach RedDog metadata, scorecards, and summaries.
+- Simulated primary semantic failure and proved exactly one offline lexical fallback receives a valid scoped environment, closing the previous `env` block-scope failure.
+- The exhaustive contract suite opts down to lexical for deterministic runtime; a separate live smoke proves the production semantic path and `sentence_transformers` receipt.
+
 ## 2026-07-18 - REDDOG_FUSION_KIMI_K3_PHASE1
 
 - Asserted the 0.4.1 package/runtime version lock and default Kimi K3 panel membership.
