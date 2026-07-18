@@ -1,0 +1,18 @@
+exemptions:
+  - file: "extension.js"
+    reason: >-
+      Legacy RedDog thin-client integration boundary. This focused security
+      slice changes only bounded panel configuration ingress and exports the
+      existing stdin bridge seam for contract testing; decomposing unrelated
+      UI, retrieval, work-order, and receipt flows would expand the reviewed
+      surface beyond the empty-panel truth fix.
+    threshold_override: 7900
+    function_threshold_override: 180
+    functions:
+      - "callFusion"
+    temporary: true
+    owner: "RedDog Maintainers"
+    expires_on: "2026-09-30"
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "extensions/reddog/ROADMAP.md#reddog-extensionjs-wsp_62-decomposition"

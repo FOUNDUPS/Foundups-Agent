@@ -3822,6 +3822,8 @@ function appendValidationFailureContent(content, validationState) {
     + '- note: Output is advisory and incomplete.\n\n'
     + VALIDATION_FAILED_FOOTER;
 }
+const FUSION_PANEL_RUNTIME_LIMIT = 6;
+const FUSION_PANEL_FORWARD_LIMIT = FUSION_PANEL_RUNTIME_LIMIT + 1;
 const DEFAULT_FUSION_WORKER = {
   title: 'RedDog',
   lead: 'z-ai/glm-5.2',
@@ -5230,12 +5232,12 @@ function fusionWorkerFromConfig() {
   const lead = cleanModel(reddogConfigValue('leadModel', DEFAULT_FUSION_WORKER.lead), DEFAULT_FUSION_WORKER.lead);
   const configuredPanel = reddogConfigValue('panelModels', DEFAULT_FUSION_WORKER.panel);
   const panel = Array.isArray(configuredPanel)
-    ? configuredPanel.map((item) => cleanModel(item, '')).filter(Boolean).slice(0, 4)
+    ? configuredPanel.map((item) => cleanModel(item, '')).filter(Boolean).slice(0, FUSION_PANEL_FORWARD_LIMIT)
     : DEFAULT_FUSION_WORKER.panel;
   return {
     title: DEFAULT_FUSION_WORKER.title,
     lead,
-    panel: panel.length ? panel : DEFAULT_FUSION_WORKER.panel
+    panel
   };
 }
 
@@ -7756,6 +7758,10 @@ module.exports = {
   redactedDigest,
   resolvePythonInterpreter,
   buildBridgePythonEnv,
+  fusionWorkerFromConfig,
+  callFusion,
+  FUSION_PANEL_RUNTIME_LIMIT,
+  FUSION_PANEL_FORWARD_LIMIT,
   applyBridgeContextBudget,
   killBridgeChild,
   bridgeStreamCapExceeded,

@@ -34,19 +34,22 @@ def _passed_gate(*, prompt: str = "redacted-prompt", context: str | None = None)
     )
 
 
+def _invoke_bridge_main(payload: dict, *, api_key: str = "test-key") -> tuple[int, dict]:
+    stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    stdin_buffer = io.BytesIO(stdin_bytes)
+    stdout = io.StringIO()
+    fake_stdin = mock.Mock()
+    fake_stdin.buffer = stdin_buffer
+    with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
+        os.environ, {bridge.ENV_API_KEY: api_key}, clear=False
+    ):
+        rc = bridge.main()
+    return rc, json.loads(stdout.getvalue())
+
+
 class AdvisoryBridgeHardeningTests(unittest.TestCase):
     def _invoke_main(self, payload: dict, *, api_key: str = "test-key") -> tuple[int, dict]:
-        stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        stdin_buffer = io.BytesIO(stdin_bytes)
-        stdout = io.StringIO()
-        env = {bridge.ENV_API_KEY: api_key}
-        fake_stdin = mock.Mock()
-        fake_stdin.buffer = stdin_buffer
-        with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
-            os.environ, env, clear=False
-        ):
-            rc = bridge.main()
-        return rc, json.loads(stdout.getvalue())
+        return _invoke_bridge_main(payload, api_key=api_key)
 
     def test_panel_models_capped_at_six(self) -> None:
         models = bridge._panel_models(["m" + str(i) for i in range(12)])

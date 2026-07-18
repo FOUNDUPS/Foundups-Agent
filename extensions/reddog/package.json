@@ -71,10 +71,11 @@
             "moonshotai/kimi-k2.7-code",
             "moonshotai/kimi-k3"
           ],
+          "maxItems": 7,
           "items": {
             "type": "string"
           },
-          "description": "OpenRouter model slugs for panel critics. The extension uses up to four."
+          "description": "OpenRouter model slugs for panel critics. The extension forwards at most seven so the Python bridge can run up to six and receipt over-cap truncation."
         },
         "reddog.enableResidentArchitectSession": {
           "type": "boolean",
@@ -98,10 +99,11 @@
             "moonshotai/kimi-k2.7-code",
             "moonshotai/kimi-k3"
           ],
+          "maxItems": 7,
           "items": {
             "type": "string"
           },
-          "description": "Legacy alias for reddog.panelModels. Retained for the 0.4.0 migration."
+          "description": "Legacy alias for reddog.panelModels. Retained for the 0.4.0 migration with the same seven-item forwarding bound."
         },
         "foundupsFusion.enableResidentArchitectSession": {
           "type": "boolean",
