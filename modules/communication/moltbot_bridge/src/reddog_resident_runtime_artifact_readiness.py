@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -88,7 +89,8 @@ def validate_reddog_resident_runtime_artifacts(
 ) -> ResidentRuntimeArtifactReadiness:
     """Load exact canonical paths and cross-validate one resident queue lineage."""
 
-    root, runtime = Path(repo_root).resolve(), Path(runtime_root).resolve()
+    root = Path(repo_root).resolve()
+    runtime = Path(os.path.abspath(Path(runtime_root).expanduser()))
     payloads, load_reasons = _load_artifacts(root, runtime)
     reasons = {name: list(load_reasons.get(name, ())) for name in REQUIRED_RUNTIME_ARTIFACTS}
     if not any(reasons.values()):

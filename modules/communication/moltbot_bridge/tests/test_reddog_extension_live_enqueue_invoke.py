@@ -154,7 +154,11 @@ def _admission_registry() -> InMemoryLiveEnqueueAdmissionRegistry:
         work_order_id="wo-extension-live-enqueue-001",
         evidence=evidence,
         signed_authority_reverified=True,
-        authoritative_use_lease=AuthoritativeUseLease(lambda: True),
+        authoritative_use_lease=AuthoritativeUseLease(
+            lambda: True,
+            expires_at_epoch=2_000_000_000,
+            trusted_now_epoch=lambda: 1_000_000_000,
+        ),
     )
     return registry
 

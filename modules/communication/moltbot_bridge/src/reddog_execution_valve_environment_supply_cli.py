@@ -15,6 +15,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", required=True)
+    parser.add_argument("--runtime-root", required=True)
     parser.add_argument("--work-state", required=True)
     parser.add_argument("--authority-profile", required=True)
     parser.add_argument("--permission-snapshots", required=True)
@@ -27,6 +28,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     result = run_reddog_execution_valve_environment_supply_bootstrap(
         repo_root=args.repo_root,
+        runtime_allowed_root=args.runtime_root,
         work_state_path=args.work_state,
         authority_profile_path=args.authority_profile,
         permission_snapshots_path=args.permission_snapshots,

@@ -405,7 +405,10 @@ def _stage_results(repo: Path, runtime: Path) -> dict[str, dict[str, object]]:
 
 
 def _write_pre_state(repo: Path, runtime: Path) -> dict[str, object]:
-    store = AtomicJsonResidentQueueChainResultsStore(runtime / "resident_queue_chain_results.json")
+    store = AtomicJsonResidentQueueChainResultsStore(
+        runtime / "resident_queue_chain_results.json",
+        allowed_root=runtime,
+    )
     for stage_key, stage_result in _stage_results(repo, runtime).items():
         result = record_resident_queue_stage_result(
             work_state_snapshot=_snapshot(), store=store, stage_key=stage_key,
@@ -516,7 +519,10 @@ def _runner(
     pattern_db_mutator=None,
 ):
     def run(_: Path) -> dict[str, object]:
-        store = AtomicJsonResidentQueueChainResultsStore(runtime / "resident_queue_chain_results.json")
+        store = AtomicJsonResidentQueueChainResultsStore(
+            runtime / "resident_queue_chain_results.json",
+            allowed_root=runtime,
+        )
         chain = dict(store.load())
         held = chain["stage_results"]["held_out_regression_gate"]
         sink = build_reddog_verified_pattern_memory_sink(repo_root=repo, db_path=runtime / "pattern_memory.db")

@@ -136,8 +136,12 @@ def test_accepts_one_fresh_queued_item_without_execution() -> None:
     assert result.receipt.wsp15_priority == "P0"
     assert result.receipt.wsp15_mps_total == 18
     assert result.receipt.reasoning_tier == "ULTRA"
+    assert result.receipt.model_selection_receipt_id == "sha256:model-selection"
+    assert result.receipt.model_selection_digest == "sha256:model-selection"
     assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
     assert result.receipt.model_runtime_binding_digest == "sha256:model-runtime-binding"
+    assert result.receipt.memex_supply_receipt_id == "sha256:memex-supply"
+    assert result.receipt.memex_supply_digest == "sha256:memex-supply"
     assert result.receipt.no_queue_mutation_performed is True
     assert result.receipt.no_worker_spawn_performed is True
     assert result.receipt.no_worktree_created is True

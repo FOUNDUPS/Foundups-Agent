@@ -8,6 +8,12 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_effect_commit_outcome import (
+    EFFECT_COMMITTED,
+    EFFECT_INDETERMINATE,
+    EFFECT_NOT_COMMITTED,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_work_order_receipt import (
     RedDogWorkOrderReceiptStore,
 )
@@ -38,13 +44,23 @@ _TOKEN = "SOVEREIGN-WORKTREE-CREATE-TEST"
 
 
 class FakeRunner:
-    def __init__(self, *, ok: bool = True, raises: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        ok: bool = True,
+        raises: bool = False,
+        commit_then_raise: bool = False,
+    ) -> None:
         self.ok = ok
         self.raises = raises
+        self.commit_then_raise = commit_then_raise
         self.calls: list[tuple] = []
 
     def create_worktree(self, *, worktree_path, branch_name, base_ref):
         self.calls.append(("create_worktree", str(worktree_path), branch_name, base_ref))
+        if self.commit_then_raise:
+            Path(worktree_path).mkdir(parents=True, exist_ok=True)
+            raise RuntimeError("simulated post-commit transport failure")
         if self.raises:
             raise RuntimeError("simulated create failure")
         Path(worktree_path).mkdir(parents=True, exist_ok=True)
@@ -205,6 +221,9 @@ class TestWorktreeCreateAccept:
             admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_ACCEPT
+        assert result.effect_commit_state == EFFECT_COMMITTED
+        assert result.effect_attempt_key.startswith("worktree-attempt-")
+        assert result.reconciliation_required is False
         assert result.no_task_execution_performed is True
         assert result.no_file_edit_performed is True
         assert result.no_pr_created is True
@@ -338,7 +357,29 @@ class TestWorktreeCreateReject:
         )
         assert result.decision == WORKTREE_CREATE_REJECT
         assert "worktree_create_failed" in result.rejection_reasons
+        assert result.effect_commit_state == EFFECT_NOT_COMMITTED
         assert [call[0] for call in runner.calls] == ["create_worktree", "cleanup_worktree"]
+
+    def test_commit_then_throw_is_indeterminate(self, tmp_path: Path):
+        order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
+        runner = FakeRunner(commit_then_raise=True)
+        result = create_reddog_wre_worktree(
+            order,
+            executor.to_dict(),
+            valve.to_dict(),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+            admission_consumer=lambda: True,
+        )
+
+        assert result.decision == WORKTREE_CREATE_REJECT
+        assert result.effect_commit_state == EFFECT_INDETERMINATE
+        assert result.reconciliation_required is True
+        assert result.reconciliation_data["next_action"] == (
+            "inspect_worktree_registry_path_and_branch"
+        )
+        assert result.effect_attempt_key.startswith("worktree-attempt-")
 
 
 class TestWorktreeCreateBoundaries:
@@ -359,7 +400,7 @@ class TestWorktreeCreateBoundaries:
             "git worktree",
             "worktree add",
             "gh pr",
-            "commit",
+            "git commit",
             "push_branch",
             "create_draft_pr",
             "shell=True",

@@ -30,6 +30,12 @@ from typing import Any, Callable, Iterator, Mapping, Optional, Sequence
 from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_environment import (
     build_live_canary_environment,
 )
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
 )
@@ -246,16 +252,18 @@ def _invoke_canary(
         blockers.append("explicit_execution_confirmation_missing")
     chain_path = context.runtime_root / "resident_queue_chain_results.json"
     control_path = context.runtime_root / "resident_queue_control_loop_receipts.jsonl"
-    pre_chain_state = _read_json_mapping(chain_path)
+    pre_chain_state = _read_json_mapping(chain_path, allowed_root=context.runtime_root)
     previous_revision = _text(pre_chain_state.get("revision"))
     pre_chain_ids = chain_receipt_ids(pre_chain_state)
-    pre_control_receipts = _read_control_receipt_stream(control_path, blockers)
+    pre_control_receipts = _read_control_receipt_stream(
+        control_path, blockers, allowed_root=context.runtime_root
+    )
     _verify_control_receipts(context, pre_control_receipts, blockers)
     invoked = execute and confirmed and not blockers
     result = _invoke_control_runner(
         context, runner, queue_item_id, max_rounds, invoked
     )
-    chain_state = _read_json_mapping(chain_path)
+    chain_state = _read_json_mapping(chain_path, allowed_root=context.runtime_root)
     control_receipt_id = _text(result.get("receipt_id"))
     post_control_receipts = _verified_post_control_receipts(
         context, control_path, pre_control_receipts, blockers
@@ -275,7 +283,10 @@ def _invoke_canary(
         control_receipt_id=control_receipt_id,
         control_receipt=control_receipt,
         pre_chain_receipt_ids=pre_chain_ids,
-        work_state=_read_json_mapping(context.runtime_root / "authoritative_work_state.json"),
+        work_state=_read_json_mapping(
+            context.runtime_root / "authoritative_work_state.json",
+            allowed_root=context.runtime_root,
+        ),
         chain_state=chain_state,
     )
 
@@ -300,15 +311,21 @@ def _verified_post_control_receipts(
     pre_receipts: tuple[Mapping[str, Any], ...],
     blockers: list[str],
 ) -> tuple[Mapping[str, Any], ...]:
-    post_receipts = _read_control_receipt_stream(path, blockers)
+    post_receipts = _read_control_receipt_stream(
+        path, blockers, allowed_root=context.runtime_root
+    )
     if len(post_receipts) < len(pre_receipts) or post_receipts[
         : len(pre_receipts)
     ] != pre_receipts:
         blockers.append("control_receipt_stream_not_append_only")
     try:
-        profile = _read_json_mapping(context.runtime_root / "authority_profile.json")
+        profile = _read_json_mapping(
+            context.runtime_root / "authority_profile.json",
+            allowed_root=context.runtime_root,
+        )
         source = _read_json_mapping(
-            context.runtime_root / "authority_profile_source.json"
+            context.runtime_root / "authority_profile_source.json",
+            allowed_root=context.runtime_root,
         )
         verify_live_canary_control_prestate(
             runtime_root=context.runtime_root,
@@ -332,9 +349,13 @@ def _verify_control_receipts(
     blockers: list[str],
 ) -> None:
     try:
-        profile = _read_json_mapping(context.runtime_root / "authority_profile.json")
+        profile = _read_json_mapping(
+            context.runtime_root / "authority_profile.json",
+            allowed_root=context.runtime_root,
+        )
         source = _read_json_mapping(
-            context.runtime_root / "authority_profile_source.json"
+            context.runtime_root / "authority_profile_source.json",
+            allowed_root=context.runtime_root,
         )
         expected_source = str(
             context.environ.get("REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID") or ""
@@ -352,7 +373,10 @@ def _verify_control_receipts(
 
 
 def _signer_anchor_path(context: _CanaryContext) -> Path:
-    config = _read_json_mapping(context.runtime_root / "signer_service_config.json")
+    config = _read_json_mapping(
+        context.runtime_root / "signer_service_config.json",
+        allowed_root=context.runtime_root,
+    )
     value = str(config.get("control_loop_anchor_path") or "").strip()
     if not value:
         raise ValueError("signer_control_loop_anchor_path_missing")
@@ -365,9 +389,11 @@ def _signer_anchor_path(context: _CanaryContext) -> Path:
 def _read_control_receipt_stream(
     path: Path,
     blockers: list[str],
+    *,
+    allowed_root: Path,
 ) -> tuple[Mapping[str, Any], ...]:
     try:
-        return read_control_receipts(path)
+        return read_control_receipts(path, allowed_root=allowed_root)
     except ValueError:
         blockers.append("control_receipt_stream_invalid")
         return ()
@@ -408,7 +434,10 @@ def _readiness_checks(
         _check("openrouter_key_reference", bool(str(environ.get("OPENROUTER_API_KEY") or "")), "openrouter_api_key_missing"),
     ]
     for filename in REQUIRED_JSON_ARTIFACTS:
-        valid = _valid_json_mapping(runtime_root / filename)
+        valid = _valid_json_mapping(
+            runtime_root / filename,
+            allowed_root=runtime_root,
+        )
         checks.append(_check(f"artifact:{filename}", valid, f"missing_or_malformed:{filename}"))
     semantic = validate_reddog_resident_runtime_artifacts(
         repo_root=repo_root, runtime_root=runtime_root,
@@ -519,7 +548,10 @@ def _receipt_seed(
 
 
 def _canary_authorization_binding(runtime_root: Path) -> dict[str, Optional[str]]:
-    payload = _read_json_mapping(runtime_root / "execution_valve_env.json")
+    payload = _read_json_mapping(
+        runtime_root / "execution_valve_env.json",
+        allowed_root=runtime_root,
+    )
     mode = _text(payload.get("authorization_mode"))
     digest = _text(payload.get("authorization_binding_digest"))
     return {
@@ -569,16 +601,20 @@ def _write_json_atomic(
             os.unlink(temporary)
 
 
-def _valid_json_mapping(path: Path) -> bool:
-    return bool(_read_json_mapping(path))
+def _valid_json_mapping(path: Path, *, allowed_root: Path) -> bool:
+    return bool(_read_json_mapping(path, allowed_root=allowed_root))
 
 
-def _read_json_mapping(path: Path) -> Mapping[str, Any]:
+def _read_json_mapping(path: Path, *, allowed_root: Path) -> Mapping[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        with runtime_operation_lock(str(path) + ".operation"):
+            payload = read_reddog_runtime_json_mapping(
+                path,
+                allowed_root=allowed_root,
+            )
     except Exception:
         return {}
-    return payload if isinstance(payload, Mapping) else {}
+    return payload
 
 
 def _is_unix_socket(path: Path) -> bool:

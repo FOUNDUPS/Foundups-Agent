@@ -408,7 +408,7 @@ def test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_so
         assert main.run_reddog_resident_queue_control_loop_preflight(repo) is False
 
     captured = capsys.readouterr().out
-    assert "FAIL_SIGNER_SOCKET_PATH_UNAVAILABLE" in captured
+    assert "governed_execution_valve_environment_required" in captured
     assert "[REDDOG-QUEUE-CONTROL] preflight=FAIL" in captured
     assert main.run_reddog_resident_queue_serial_loop_preflight.last_result["accepted"] is False
     assert authority_state.exists() is False
@@ -588,6 +588,7 @@ def test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage(
 
     seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
@@ -637,6 +638,7 @@ def test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage(
     monkeypatch.setenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP", "1")
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))
@@ -724,6 +726,7 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
 
     seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
@@ -758,6 +761,7 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     monkeypatch.setenv("REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP", "1")
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
     monkeypatch.setenv("REDDOG_PILOT_DRYRUN_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
@@ -855,6 +859,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
 
     seed = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
@@ -915,6 +920,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS", "7")
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(profile))

@@ -198,6 +198,8 @@ def _test_governed_environment(
 def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
     """Exercise downstream stages with an explicitly injected governed resolution."""
 
+    if "runtime_allowed_root" not in kwargs and kwargs.get("work_state_path"):
+        kwargs["runtime_allowed_root"] = Path(kwargs["work_state_path"]).parent
     valve_path = kwargs.get("valve_environment_path")
     if valve_path:
         work_order = _work_order()
@@ -228,7 +230,11 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
                 permission_expires_at=EXPIRES,
                 rejection_reasons=(),
                 signed_authority_reverified=True,
-                authoritative_use_lease=AuthoritativeUseLease(lambda: True),
+                authoritative_use_lease=AuthoritativeUseLease(
+                    lambda: True,
+                    expires_at_epoch=2_000_000_000,
+                    trusted_now_epoch=lambda: 1_000_000_000,
+                ),
             )
         )
         with patch(
@@ -1803,6 +1809,7 @@ def test_bootstrap_rejects_legacy_token_environment_before_execution_valve(
 
     result = _run_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
@@ -4165,6 +4172,7 @@ def test_bootstrap_rejects_inputs_inside_repo(tmp_path: Path) -> None:
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=inside_state,
         chain_results_path=tmp_path / "runtime" / "chain_results.json",
         authority_profile_path=tmp_path / "runtime" / "profile.json",
@@ -4665,18 +4673,10 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
     assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "outcome_ratchet"
-        / REPO_ROOT.resolve().name
-        / "verified_outcomes.jsonl"
+        tmp_path / "outcome_ratchet" / "verified_outcomes.jsonl"
     )
     assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "model_feedback"
-        / REPO_ROOT.resolve().name
-        / "model_feedback.jsonl"
+        tmp_path / "model_feedback" / "model_feedback.jsonl"
     )
     assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is None
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
@@ -4728,28 +4728,16 @@ def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
     assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "outcome_ratchet"
-        / REPO_ROOT.resolve().name
-        / "verified_outcomes.jsonl"
+        tmp_path / "outcome_ratchet" / "verified_outcomes.jsonl"
     )
     assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "model_feedback"
-        / REPO_ROOT.resolve().name
-        / "model_feedback.jsonl"
+        tmp_path / "model_feedback" / "model_feedback.jsonl"
     )
     sink = mocked.call_args.kwargs["pattern_memory_admission_sink"]
     assert sink is not None
     assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
     assert str(sink.db_path) == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "pattern_memory"
-        / REPO_ROOT.resolve().name
-        / "pattern_memory.db"
+        tmp_path / "pattern_memory" / "pattern_memory.db"
     )
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 92
@@ -4803,13 +4791,7 @@ def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_d
     assert stage["no_holoindex_reindex_performed"] is True
     assert stage["no_reward_settlement_performed"] is True
 
-    db_path = (
-        Path(ctx["repo"]).resolve().parent
-        / ".reddog"
-        / "pattern_memory"
-        / Path(ctx["repo"]).resolve().name
-        / "pattern_memory.db"
-    )
+    db_path = tmp_path / "runtime" / "pattern_memory" / "pattern_memory.db"
     assert db_path.exists()
     assert not (Path(ctx["repo"]) / ".reddog").exists()
     with sqlite3.connect(db_path) as conn:

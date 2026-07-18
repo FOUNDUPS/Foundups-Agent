@@ -1591,11 +1591,12 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
             run_reddog_main_wre_queue_consumer_bootstrap,
         )
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
-            resident_queue_runtime_file_path,
+            resident_queue_runtime_file_path, resident_queue_runtime_root_path,
         )
 
         result = run_reddog_main_wre_queue_consumer_bootstrap(
             repo_root=repo_root,
+            runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
             work_state_path=resident_queue_runtime_file_path(
                 os.environ,
                 repo_root,
@@ -3199,10 +3200,12 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         )
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
             resident_queue_runtime_file_path,
+            resident_queue_runtime_root_path,
         )
 
         result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
             repo_root=repo_root,
+            runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
             work_state_path=resident_queue_runtime_file_path(
                 os.environ,
                 repo_root,
@@ -3371,6 +3374,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_outcome_ratchet_store_path,
             resident_queue_pattern_memory_admission_db_path,
             resident_queue_runtime_file_path,
+            resident_queue_runtime_root_path,
             resident_queue_worktree_runner_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
@@ -3724,6 +3728,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
+            runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
             work_state_path=resident_queue_runtime_file_path(
                 os.environ,
                 repo_root,

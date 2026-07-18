@@ -20,7 +20,11 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_au
 
 def _digest(value: Mapping[str, Any]) -> str:
     raw = json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
     )
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
@@ -32,8 +36,10 @@ class WorktreeAdmissionCapability:
     queue_item_id: str
     selected_slice: str
     work_order_id: str
+    work_order_digest: str
     executor_plan_digest: str
     valve_decision_digest: str
+    expires_at_epoch: int
     _authoritative_use_lease: AuthoritativeUseLease
     _seal: object
 
@@ -68,8 +74,10 @@ class InMemoryWorktreeAdmissionRegistry:
             queue_item_id=queue_id,
             selected_slice=slice_id,
             work_order_id=work_order_id,
+            work_order_digest=_digest(work_order),
             executor_plan_digest=_digest(executor_plan_result),
             valve_decision_digest=_digest(valve_decision),
+            expires_at_epoch=authoritative_use_lease.expires_at_epoch,
             _authoritative_use_lease=authoritative_use_lease,
             _seal=self._seal,
         )
@@ -94,6 +102,7 @@ class InMemoryWorktreeAdmissionRegistry:
             return None
         expected = (
             capability.selected_slice == str(selected_slice or "").strip()
+            and capability.work_order_digest == _digest(work_order)
             and capability.executor_plan_digest == _digest(executor_plan_result)
             and capability.valve_decision_digest == _digest(valve_decision)
         )

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -56,6 +57,8 @@ INCOMPLETE_TRUST_ANCHOR_REASONS = (
     "canonical_sovereign_authorization_verifier_missing",
     "canonical_principal_subject_key_attestation_missing",
     "canonical_model_signed_evidence_trust_anchor_incomplete",
+    "canonical_model_selection_signed_evidence_verifier_missing",
+    "canonical_memex_supply_signed_evidence_verifier_missing",
     "canonical_signer_client_peer_handshake_verifier_missing",
 )
 
@@ -74,8 +77,16 @@ class GovernedValveUseTimeResolution:
 class AuthoritativeUseLease:
     """Opaque one-shot verifier callback consumed only at the side-effect boundary."""
 
-    def __init__(self, consumer: Callable[[], bool]) -> None:
+    def __init__(
+        self,
+        consumer: Callable[[], bool],
+        *,
+        expires_at_epoch: int,
+        trusted_now_epoch: Callable[[], int],
+    ) -> None:
         self._consumer = consumer
+        self.expires_at_epoch = int(expires_at_epoch)
+        self._trusted_now_epoch = trusted_now_epoch
         self._lock = threading.Lock()
         self._used = False
 
@@ -84,6 +95,11 @@ class AuthoritativeUseLease:
             if self._used:
                 return False
             self._used = True
+        try:
+            if int(self._trusted_now_epoch()) >= self.expires_at_epoch:
+                return False
+        except Exception:
+            return False
         return self._consumer() is True
 
 
@@ -95,6 +111,7 @@ class GovernedValveUseTimeAuthorityResolver:
     permission_snapshots_path: Optional[Path]
     principal_authority_records_path: Optional[Path]
     valve_environment_path: Optional[Path]
+    runtime_allowed_root: Path
     signature_verifier: Any
     principal_key_resolver: Any
     nonce_store: Any
@@ -102,6 +119,7 @@ class GovernedValveUseTimeAuthorityResolver:
     revocation_oracle: Any
     now_epoch: int
     required_valve_state: str
+    trusted_now_epoch: Callable[[], int]
     forbidden_operations: tuple[str, ...] = ()
     revoked_key_epochs: tuple[str, ...] = ()
     leeway_s: int = 60
@@ -118,7 +136,7 @@ class GovernedValveUseTimeAuthorityResolver:
         if not _chain_snapshot_is_canonical(chain_state):
             reasons.append("canonical_chain_results_revision_invalid")
 
-        artifacts, read_reasons = self._read_runtime_artifacts()
+        artifacts, read_reasons = _read_runtime_artifacts(self)
         reasons.extend(read_reasons)
         environment = _governed_environment(artifacts.get("valve_environment"), reasons)
         expected = self._resolve_expected(artifacts, queue_item_id, reasons)
@@ -145,7 +163,9 @@ class GovernedValveUseTimeAuthorityResolver:
                 lambda: self._consume_authoritative_nonce(
                     identity=identity,
                     work_authority=work_authority,
-                )
+                ),
+                expires_at_epoch=_integer(work_authority.get("expires_at")) or 0,
+                trusted_now_epoch=self.trusted_now_epoch,
             )
 
         expiry_epoch = _integer(work_authority.get("expires_at")) or self.now_epoch
@@ -255,27 +275,6 @@ class GovernedValveUseTimeAuthorityResolver:
             return {}
         return result.receipt.to_dict()
 
-    def _read_runtime_artifacts(self) -> tuple[dict[str, Mapping[str, Any]], list[str]]:
-        paths = {
-            "work_state": self.work_state_path,
-            "authority_profile": self.authority_profile_path,
-            "permission_snapshots": self.permission_snapshots_path,
-            "principal_authority_records": self.principal_authority_records_path,
-            "valve_environment": self.valve_environment_path,
-        }
-        payloads: dict[str, Mapping[str, Any]] = {}
-        reasons: list[str] = []
-        for name, path in paths.items():
-            if path is None:
-                reasons.append(f"canonical_use_time_artifact_path_missing:{name}")
-                continue
-            payload, reason = _read_json_no_follow(self.repo_root, path)
-            if reason:
-                reasons.append(f"canonical_use_time_artifact_invalid:{name}:{reason}")
-            elif payload is not None:
-                payloads[name] = payload
-        return payloads, reasons
-
     @staticmethod
     def _resolve_expected(
         artifacts: Mapping[str, Mapping[str, Any]],
@@ -302,20 +301,46 @@ class GovernedValveUseTimeAuthorityResolver:
         return expected or {}
 
 
+def _read_runtime_artifacts(
+    resolver: GovernedValveUseTimeAuthorityResolver,
+) -> tuple[dict[str, Mapping[str, Any]], list[str]]:
+    paths = {
+        "work_state": resolver.work_state_path,
+        "authority_profile": resolver.authority_profile_path,
+        "permission_snapshots": resolver.permission_snapshots_path,
+        "principal_authority_records": resolver.principal_authority_records_path,
+        "valve_environment": resolver.valve_environment_path,
+    }
+    payloads: dict[str, Mapping[str, Any]] = {}
+    reasons: list[str] = []
+    for name, path in paths.items():
+        if path is None:
+            reasons.append(f"canonical_use_time_artifact_path_missing:{name}")
+            continue
+        payload, reason = _read_json_no_follow(
+            resolver.repo_root, path, resolver.runtime_allowed_root
+        )
+        if reason:
+            reasons.append(f"canonical_use_time_artifact_invalid:{name}:{reason}")
+        elif payload is not None:
+            payloads[name] = payload
+    return payloads, reasons
+
+
 def _read_json_no_follow(
-    repo_root: Path, path: Path
+    repo_root: Path,
+    path: Path,
+    allowed_root: Path,
 ) -> tuple[Optional[Mapping[str, Any]], Optional[str]]:
     root = repo_root.resolve()
-    candidate = Path(path).absolute()
+    candidate = Path(os.path.abspath(Path(path).expanduser()))
     try:
-        if candidate.is_symlink():
-            return None, "symlink"
-        resolved = candidate.resolve(strict=True)
-        if resolved == root or root in resolved.parents:
+        resolved_for_repo_check = candidate.resolve(strict=True)
+        if resolved_for_repo_check == root or root in resolved_for_repo_check.parents:
             return None, "inside_repo"
         raw, _ = secure_read_confined_bytes(
-            resolved,
-            allowed_root=resolved.parent,
+            candidate,
+            allowed_root=allowed_root,
             max_bytes=1024 * 1024,
         )
         if len(raw) >= 1024 * 1024:
@@ -422,8 +447,12 @@ def _signed_binding_reasons(
         "wsp15_priority": work_order.get("wsp15_priority"),
         "wsp15_mps_total": work_order.get("wsp15_mps_total"),
         "wsp15_reasoning_tier": work_order.get("wsp15_reasoning_tier"),
+        "model_selection_receipt_id": work_order.get("model_selection_receipt_id"),
+        "model_selection_digest": work_order.get("model_selection_digest"),
         "model_runtime_binding_receipt_id": work_order.get("model_runtime_binding_receipt_id"),
         "model_runtime_binding_digest": work_order.get("model_runtime_binding_digest"),
+        "memex_supply_receipt_id": work_order.get("memex_supply_receipt_id"),
+        "memex_supply_digest": work_order.get("memex_supply_digest"),
     }
     reasons = [
         f"canonical_signed_work_order_binding_mismatch:{field}"
@@ -442,8 +471,12 @@ def _signed_binding_reasons(
         "permission_snapshot_digest",
         "wsp15_allocation_receipt_id",
         "wsp15_allocation_digest",
+        "model_selection_receipt_id",
+        "model_selection_digest",
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
+        "memex_supply_receipt_id",
+        "memex_supply_digest",
         "consensus_receipt_digest",
         "sovereign_authorization_digest",
     ):
@@ -482,6 +515,19 @@ def _queue_receipt_binding_reasons(
         "model_runtime_binding_digest": (
             receipt.get("model_runtime_binding_digest"),
             authority.get("model_runtime_binding_digest"),
+        ),
+        "model_selection_receipt_id": (
+            receipt.get("model_selection_receipt_id"),
+            authority.get("model_selection_receipt_id"),
+        ),
+        "model_selection_digest": (
+            receipt.get("model_selection_digest"), authority.get("model_selection_digest")
+        ),
+        "memex_supply_receipt_id": (
+            receipt.get("memex_supply_receipt_id"), authority.get("memex_supply_receipt_id")
+        ),
+        "memex_supply_digest": (
+            receipt.get("memex_supply_digest"), authority.get("memex_supply_digest")
         ),
     }
     return [

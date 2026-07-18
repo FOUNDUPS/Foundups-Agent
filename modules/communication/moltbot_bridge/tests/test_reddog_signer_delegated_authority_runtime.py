@@ -160,8 +160,12 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "wsp15_reasoning_tier": "ULTRA",
+        "model_selection_receipt_id": "sha256:model-selection",
+        "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "memex_supply_receipt_id": "sha256:memex-supply",
+        "memex_supply_digest": "sha256:memex-supply-digest",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
         "issued_at": _NOW - 5,
@@ -217,6 +221,10 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
     assert result.work_authority["wsp15_allocation_digest"] == "sha256:wsp15-allocation-digest"
     assert result.work_authority["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"
     assert result.work_authority["model_runtime_binding_digest"] == "sha256:model-runtime-binding"
+    assert result.work_authority["model_selection_receipt_id"] == "sha256:model-selection"
+    assert result.work_authority["model_selection_digest"] == "sha256:model-selection-digest"
+    assert result.work_authority["memex_supply_receipt_id"] == "sha256:memex-supply"
+    assert result.work_authority["memex_supply_digest"] == "sha256:memex-supply-digest"
 
     verified = verify_delegated_work_authority(
         work_authority=result.work_authority,
@@ -455,7 +463,7 @@ def test_json_store_commits_authority_receipt(tmp_path) -> None:
     path = tmp_path / "authority-state.json"
     result = issue_delegated_authority_runtime(
         request=request,
-        store=AtomicJsonAuthorityRuntimeStore(path),
+        store=AtomicJsonAuthorityRuntimeStore(path, allowed_root=tmp_path),
         signer=_MockSigner(),
         principal_resolver=_PrincipalResolver(_principal()),
         snapshot_resolver=_SnapshotResolver({request.permission_snapshot_digest: _snapshot()}),
@@ -523,7 +531,23 @@ def test_json_store_load_rejects_symlink_state_file(tmp_path: Path) -> None:
         pytest.skip(f"symlink creation unavailable: {exc}")
 
     with pytest.raises(ValueError, match="symlink_forbidden|path_link_rejected"):
-        AtomicJsonAuthorityRuntimeStore(link).load()
+        AtomicJsonAuthorityRuntimeStore(link, allowed_root=tmp_path).load()
+
+
+def test_json_store_load_rejects_linked_parent_state_file(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    (target / "authority.json").write_text("{}", encoding="utf-8")
+    linked = tmp_path / "linked"
+    try:
+        linked.symlink_to(target, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises((OSError, ValueError)):
+        AtomicJsonAuthorityRuntimeStore(
+            linked / "authority.json", allowed_root=tmp_path
+        ).load()
 
 
 def test_result_contains_no_secret_or_signing_material_labels() -> None:

@@ -117,6 +117,7 @@ def test_bootstrap_dispatches_authority_request_and_writes_outside_repo_chain_st
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
@@ -146,6 +147,7 @@ def test_bootstrap_rejects_missing_authority_profile(tmp_path: Path) -> None:
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=tmp_path / "runtime" / "chain_results.json",
         authority_profile_path=None,
@@ -164,6 +166,7 @@ def test_bootstrap_rejects_inputs_inside_repo(tmp_path: Path) -> None:
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=inside_state,
         chain_results_path=tmp_path / "runtime" / "chain_results.json",
         authority_profile_path=tmp_path / "runtime" / "profile.json",
@@ -181,6 +184,7 @@ def test_bootstrap_rejects_chain_output_inside_repo(tmp_path: Path) -> None:
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=repo / "chain_results.json",
         authority_profile_path=profile,
@@ -199,6 +203,7 @@ def test_bootstrap_rejects_invalid_profile_without_store_write(tmp_path: Path) -
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,

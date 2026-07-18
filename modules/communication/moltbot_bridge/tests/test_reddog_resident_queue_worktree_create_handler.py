@@ -344,7 +344,11 @@ def _handler(
             executor_plan_result=stage_results[EXECUTOR_PLAN_STAGE_KEY],
             valve_decision=stage_results[EXECUTION_VALVE_STAGE_KEY]["valve_decision"],
             signed_authority_reverified=True,
-            authoritative_use_lease=AuthoritativeUseLease(lambda: True),
+            authoritative_use_lease=AuthoritativeUseLease(
+                lambda: True,
+                expires_at_epoch=2_000_000_000,
+                trusted_now_epoch=lambda: 1_000_000_000,
+            ),
         )
     return build_reddog_resident_queue_worktree_create_stage_handler(
         chain_results_store=chain_store,

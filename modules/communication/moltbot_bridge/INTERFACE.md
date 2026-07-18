@@ -37,6 +37,8 @@ API. Authority verification has two typed phases. Queue and canonical use-time
 preflight use `PREFLIGHT_NON_CONSUMING`. Only after all non-mutating gates pass
 does the resolver issue an opaque process-local lease; the final effect boundary
 invokes `AUTHORITATIVE_USE` and transactionally consumes the nonce exactly once.
+That boundary reads a fresh trusted clock first; expiry or clock failure returns
+without consuming the nonce or invoking the effect.
 Persisted stage mappings are audit evidence and cannot recreate that lease.
 Use-time validation reuses the strict queue consumer and binds the promoted
 claim, determination/model/Memex receipts, signed identity/work authority,
@@ -45,8 +47,19 @@ FoundUp scope, and complete WSP 15 allocation lineage.
 Worktree creation and live OpenClaw enqueue additionally require digest-bound,
 one-shot in-memory admissions. Fabricated, replayed, restarted, or spliced
 serialized acceptance chains fail before the injected runner/writer is called.
-Runtime JSON dependency and authority-store reads are locked, bounded, and
-reject any symlink, junction, or reparse component before resolution.
+The admission digest covers the complete work order, plan, and valve. Runtime
+JSON dependency, authority-store, canary, and evidence reads use an independently
+configured allowed root, are locked and bounded, and reject any symlink,
+junction, or reparse component before resolution. Caller paths remain raw;
+neither a resolved path nor the file's own parent becomes a trust root.
+
+Effect results expose `COMMITTED`, `NOT_COMMITTED`, or `INDETERMINATE`, plus a
+stable attempt key and reconciliation data. A writer/runner exception after an
+attempt is `INDETERMINATE`; callers must query the external system by attempt
+key and cannot treat it as proof that no effect occurred. Model-selection and
+Memex ID/digest pairs are propagated into signed delegated work authority, but
+production remains closed because independent signed-evidence verifiers for
+those pairs and the other named trust anchors are absent.
 
 ### RedDog HoloIndex Query Adapter
 

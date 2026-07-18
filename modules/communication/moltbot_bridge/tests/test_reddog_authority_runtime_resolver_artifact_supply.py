@@ -64,6 +64,7 @@ def test_supply_writes_runtime_dependency_bundle_resolver_inputs(tmp_path: Path)
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=REPO_ROOT,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=tmp_path / "runtime" / "authority_state.json",
         permission_snapshots_path=result.permission_snapshots_path,
         principal_authority_records_path=result.principal_records_path,

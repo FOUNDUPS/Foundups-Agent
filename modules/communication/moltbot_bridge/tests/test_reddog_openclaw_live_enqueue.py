@@ -6,6 +6,12 @@ import ast
 from datetime import datetime, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_effect_commit_outcome import (
+    EFFECT_COMMITTED,
+    EFFECT_INDETERMINATE,
+    EFFECT_NOT_COMMITTED,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_openclaw_live_enqueue import (
     LIVE_ENQUEUE_ACCEPT,
     LIVE_ENQUEUE_REJECT,
@@ -37,12 +43,15 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 
 
 class _FakeWriter:
-    def __init__(self, ok=True) -> None:
+    def __init__(self, ok=True, commit_then_raise=False) -> None:
         self.ok = ok
+        self.commit_then_raise = commit_then_raise
         self.calls = []
 
     def enqueue_foundup_job(self, intake, receipt):
         self.calls.append(("foundup_job", dict(intake), dict(receipt)))
+        if self.commit_then_raise:
+            raise RuntimeError("simulated post-commit transport failure")
         if not self.ok:
             return {"ok": False}
         return {"ok": True, "openclaw_queue_item_id": intake["proposed_job_id"], "agentdb_task_id": None}
@@ -146,6 +155,8 @@ def test_live_enqueue_foundup_job_calls_injected_writer_only():
 
     assert result.decision == LIVE_ENQUEUE_ACCEPT
     assert result.live_enqueue_performed is True
+    assert result.effect_commit_state == EFFECT_COMMITTED
+    assert result.effect_attempt_key.startswith("live-enqueue-attempt-")
     assert result.no_execution_performed is True
     assert result.no_reward_settlement_performed is True
     assert result.receipt is not None
@@ -260,6 +271,29 @@ def test_rejects_writer_missing_or_writer_rejected():
     assert LiveEnqueueReason.WRITER_MISSING in missing.rejection_reasons
     assert rejected.decision == LIVE_ENQUEUE_REJECT
     assert rejected.rejection_reasons == [LiveEnqueueReason.WRITER_REJECTED]
+    assert rejected.effect_commit_state == EFFECT_NOT_COMMITTED
+
+
+def test_commit_then_throw_is_indeterminate_and_never_false() -> None:
+    writer = _FakeWriter(commit_then_raise=True)
+    result = perform_reddog_openclaw_live_enqueue(
+        _adapter(),
+        _policy(),
+        _chain(),
+        _valve(),
+        writer=writer,
+        admission_consumer=lambda: True,
+    )
+
+    assert result.decision == LIVE_ENQUEUE_REJECT
+    assert result.effect_commit_state == EFFECT_INDETERMINATE
+    assert result.live_enqueue_performed is None
+    assert result.reconciliation_required is True
+    assert result.reconciliation_data["next_action"] == (
+        "query_openclaw_queue_by_effect_attempt_key"
+    )
+    assert result.effect_attempt_key.startswith("live-enqueue-attempt-")
+    assert writer.calls[0][2]["live_enqueue_performed"] is None
 
 
 def test_ast_boundary_no_direct_execution_or_queue_imports():

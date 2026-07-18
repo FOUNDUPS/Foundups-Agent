@@ -21,6 +21,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
+
 
 SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT = (
     "SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT"
@@ -52,6 +59,7 @@ BootstrapCallable = Callable[..., Any]
 _RESERVED_BOOTSTRAP_KWARGS = frozenset(
     {
         "repo_root",
+        "runtime_allowed_root",
         "work_state_path",
         "chain_results_path",
         "authority_profile_path",
@@ -90,6 +98,7 @@ class SignedWorkerQueueSerialLoopRunnerConfig:
     work_state_path: Path | str
     chain_results_path: Path | str
     authority_profile_path: Path | str
+    runtime_allowed_root: Path | str
     repo_root: Optional[Path | str] = None
     now_iso: Optional[str] = None
     now_epoch: Optional[int] = None
@@ -143,7 +152,12 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
         queue_item_id = str(context.get("queue_item_id") or "").strip()
         if not queue_item_id:
             reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_ITEM_MISSING)
-        if not self.config.work_state_path or not self.config.chain_results_path or not self.config.authority_profile_path:
+        if (
+            not self.config.runtime_allowed_root
+            or not self.config.work_state_path
+            or not self.config.chain_results_path
+            or not self.config.authority_profile_path
+        ):
             reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CONFIG_MISSING)
         if any(key in _RESERVED_BOOTSTRAP_KWARGS for key in self.config.bootstrap_kwargs):
             reasons.append(SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_KWARG_CONFLICT)
@@ -158,6 +172,7 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
         try:
             result = bootstrap(
                 repo_root=Path(self.config.repo_root or repo_root),
+                runtime_allowed_root=self.config.runtime_allowed_root,
                 work_state_path=self.config.work_state_path,
                 chain_results_path=self.config.chain_results_path,
                 authority_profile_path=self.config.authority_profile_path,
@@ -405,8 +420,14 @@ def _read_current_plan(
     queue_item_id: str,
 ) -> Mapping[str, Any]:
     try:
-        work_state = _read_json_mapping(Path(config.work_state_path))
-        chain = _read_json_mapping(Path(config.chain_results_path))
+        work_state = _read_json_mapping(
+            Path(config.work_state_path),
+            allowed_root=config.runtime_allowed_root,
+        )
+        chain = _read_json_mapping(
+            Path(config.chain_results_path),
+            allowed_root=config.runtime_allowed_root,
+        )
     except Exception:
         return {}
     if not work_state:
@@ -427,9 +448,13 @@ def _read_current_plan(
     return plan.to_dict()
 
 
-def _read_json_mapping(path: Path) -> Mapping[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    return payload if isinstance(payload, Mapping) else {}
+def _read_json_mapping(
+    path: Path,
+    *,
+    allowed_root: Path | str,
+) -> Mapping[str, Any]:
+    with runtime_operation_lock(str(path) + ".operation"):
+        return read_reddog_runtime_json_mapping(path, allowed_root=allowed_root)
 
 
 def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:

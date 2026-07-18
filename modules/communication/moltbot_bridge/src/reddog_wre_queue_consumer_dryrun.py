@@ -56,8 +56,12 @@ class WREQueueConsumerDryRunReceipt:
     wsp15_mps_total: int
     reasoning_tier: str
     next_required_gate: str
+    model_selection_receipt_id: Optional[str] = None
+    model_selection_digest: Optional[str] = None
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    memex_supply_receipt_id: Optional[str] = None
+    memex_supply_digest: Optional[str] = None
     execution_ready: bool = False
     no_queue_mutation_performed: bool = True
     no_worker_spawn_performed: bool = True
@@ -292,8 +296,12 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "wsp15_priority": allocation_priority,
         "wsp15_mps_total": allocation_total,
         "reasoning_tier": allocation_tier,
+        "model_selection_receipt_id": str(selected.get("model_selection_receipt_id") or ""),
+        "model_selection_digest": str(selected.get("model_selection_digest") or ""),
         "model_runtime_binding_receipt_id": str(selected.get("model_runtime_binding_receipt_id") or ""),
         "model_runtime_binding_digest": str(selected.get("model_runtime_binding_digest") or ""),
+        "memex_supply_receipt_id": str(selected.get("memex_supply_receipt_id") or ""),
+        "memex_supply_digest": str(selected.get("memex_supply_digest") or ""),
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     }
     receipt = WREQueueConsumerDryRunReceipt(
@@ -308,8 +316,12 @@ def plan_reddog_wre_queue_consumer_dry_run(
         wsp15_priority=allocation_priority,
         wsp15_mps_total=allocation_total,
         reasoning_tier=allocation_tier,
+        model_selection_receipt_id=str(selected.get("model_selection_receipt_id") or "") or None,
+        model_selection_digest=str(selected.get("model_selection_digest") or "") or None,
         model_runtime_binding_receipt_id=str(selected.get("model_runtime_binding_receipt_id") or "") or None,
         model_runtime_binding_digest=str(selected.get("model_runtime_binding_digest") or "") or None,
+        memex_supply_receipt_id=str(selected.get("memex_supply_receipt_id") or "") or None,
+        memex_supply_digest=str(selected.get("memex_supply_digest") or "") or None,
         next_required_gate=NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     )
     return WREQueueConsumerDryRunResult(

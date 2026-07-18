@@ -107,3 +107,20 @@ These remain deferred until the FoundUp Memex POC and MVP contracts are proven.
 
 These items are an explicit WSP_62 remediation register; no global compliance
 claim is made while historical monolith debt remains.
+
+## RedDog execution-valve trust-boundary decomposition
+
+- Split the resident serial bootstrap into runtime-input loading, dependency
+  assembly, handler construction, and bounded-loop coordination without
+  changing canonical receipts.
+- Extract delegated-authority request validation and signed model/Memex
+  lineage assembly from the signer transaction boundary.
+- Split worktree and OpenClaw effect transactions into preflight, effect
+  attempt, reconciliation, and receipt modules while preserving stable attempt
+  keys and truthful indeterminate outcomes.
+- Decompose inherited end-to-end startup suites by stage contract. Temporary
+  WSP_62 exemptions expire on 2026-09-30 and their exact no-growth ceilings are
+  enforced by AST tests.
+- Production remains `VALVE_CLOSED` until independent signed model-selection,
+  Memex, runtime-artifact manifest, consensus, sovereign, principal-subject,
+  and signer peer-handshake anchors are implemented and adversarially verified.

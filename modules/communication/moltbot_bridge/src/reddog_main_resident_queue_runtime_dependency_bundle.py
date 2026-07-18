@@ -17,6 +17,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AtomicJsonAuthorityRuntimeStore,
     AuthorityRuntimeStore,
@@ -166,6 +171,7 @@ class RedDogMainResidentQueueRuntimeDependencyBundle:
 def load_reddog_main_resident_queue_runtime_dependency_bundle(
     *,
     repo_root: Path | str,
+    runtime_allowed_root: Path | str | None = None,
     authority_state_path: Path | str | None,
     permission_snapshots_path: Path | str | None = None,
     principal_authority_records_path: Path | str | None = None,
@@ -195,8 +201,17 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
             rejection_reasons=(),
         )
 
+    if runtime_allowed_root is None:
+        return _reject("missing_runtime_artifact_root")
+    runtime_root = Path(os.path.abspath(Path(runtime_allowed_root).expanduser()))
+    try:
+        validate_runtime_root_path(runtime_root, repo_root=root)
+    except ValueError:
+        return _reject("invalid_runtime_artifact_root")
+
     authority_path, authority_reasons = _resolve_path_outside_repo(
         root,
+        runtime_root,
         authority_state_path,
         missing_reason="missing_authority_runtime_state_path",
         inside_reason="authority_runtime_state_path_inside_repo",
@@ -206,23 +221,42 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
         return _reject(*authority_reasons)
     assert authority_path is not None
 
-    snapshots, snapshot_reasons = _load_permission_snapshots(root, permission_snapshots_path)
+    snapshots, snapshot_reasons = _load_permission_snapshots(
+        root, runtime_root, permission_snapshots_path
+    )
     if snapshot_reasons:
         return _reject(*snapshot_reasons)
 
-    principals, principal_reasons = _load_principal_records(root, principal_authority_records_path)
+    principals, principal_reasons = _load_principal_records(
+        root, runtime_root, principal_authority_records_path
+    )
     if principal_reasons:
         return _reject(*principal_reasons)
 
-    authority_store = AtomicJsonAuthorityRuntimeStore(authority_path)
+    authority_store = AtomicJsonAuthorityRuntimeStore(
+        authority_path, allowed_root=runtime_root
+    )
     signer = FailClosedSignerClient()
     signer_mode = "fail_closed"
     signer_socket_resolved: Optional[str] = None
     no_real_signer_configured = True
     if signer_socket_path:
+        signer_candidate = Path(signer_socket_path)
+        if not signer_candidate.is_absolute():
+            signer_candidate = Path(os.path.abspath(root / signer_candidate))
+        if _is_inside(signer_candidate, root):
+            return _reject("FAIL_SIGNER_SOCKET_PATH_INSIDE_REPO")
+        try:
+            signer_path = validate_runtime_artifact_path(
+                signer_candidate,
+                repo_root=root,
+                allowed_root=runtime_root,
+            )
+        except ValueError:
+            return _reject("signer_socket_path_outside_runtime_root")
         signer_result = build_reddog_isolated_signer_socket_client(
             repo_root=root,
-            socket_path=signer_socket_path,
+            socket_path=signer_path,
             timeout_s=signer_socket_timeout_s,
             max_response_bytes=signer_socket_max_response_bytes,
             connector=signer_socket_connector,
@@ -290,6 +324,7 @@ def _reject(*reasons: str) -> RedDogMainResidentQueueRuntimeDependencyBundle:
 
 def _resolve_path_outside_repo(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
     *,
     missing_reason: str,
@@ -306,6 +341,14 @@ def _resolve_path_outside_repo(
     resolved = path.resolve()
     if _is_inside(resolved, repo_root):
         return None, (inside_reason,)
+    try:
+        validate_runtime_artifact_path(
+            path,
+            repo_root=repo_root,
+            allowed_root=allowed_root,
+        )
+    except ValueError:
+        return None, ("runtime_dependency_path_outside_allowed_root",)
     if must_exist and (not path.exists() or not path.is_file()):
         return None, (missing_reason,)
     return path, ()
@@ -313,6 +356,7 @@ def _resolve_path_outside_repo(
 
 def _read_json_mapping(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
     *,
     missing_reason: str,
@@ -321,6 +365,7 @@ def _read_json_mapping(
 ) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
     path, reasons = _resolve_path_outside_repo(
         repo_root,
+        allowed_root,
         value,
         missing_reason=missing_reason,
         inside_reason=inside_reason,
@@ -333,7 +378,7 @@ def _read_json_mapping(
     try:
         payload = read_reddog_runtime_json_mapping(
             path,
-            allowed_root=path.parent,
+            allowed_root=allowed_root,
         )
     except Exception:
         return None, (malformed_reason,)
@@ -344,10 +389,12 @@ def _read_json_mapping(
 
 def _load_permission_snapshots(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
 ) -> tuple[dict[str, PermissionSnapshot], tuple[str, ...]]:
     payload, reasons = _read_json_mapping(
         repo_root,
+        allowed_root,
         value,
         missing_reason="missing_permission_snapshots_path",
         inside_reason="permission_snapshots_path_inside_repo",
@@ -380,10 +427,12 @@ def _load_permission_snapshots(
 
 def _load_principal_records(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
 ) -> tuple[dict[str, PrincipalAuthorityRecord], tuple[str, ...]]:
     payload, reasons = _read_json_mapping(
         repo_root,
+        allowed_root,
         value,
         missing_reason="missing_principal_authority_records_path",
         inside_reason="principal_authority_records_path_inside_repo",

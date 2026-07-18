@@ -52,6 +52,20 @@ BINDING_PATH = (
 )
 
 
+def _binding_runtime_root(tmp_path: Path) -> Path:
+    return tmp_path.parent / f"{tmp_path.name}-runtime"
+
+
+def _binding_runtime_paths(tmp_path: Path) -> dict[str, str]:
+    runtime_root = _binding_runtime_root(tmp_path)
+    return {
+        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(runtime_root / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(runtime_root / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(runtime_root / "profile.json"),
+    }
+
+
 class _FakeBootstrapResult:
     def __init__(self, payload):
         self._payload = dict(payload)
@@ -188,6 +202,7 @@ def _config(
 ) -> SignedWorkerQueueSerialLoopRunnerConfig:
     return SignedWorkerQueueSerialLoopRunnerConfig(
         repo_root=tmp_path / "repo",
+        runtime_allowed_root=tmp_path,
         work_state_path=tmp_path / "work_state.json",
         chain_results_path=tmp_path / "chain_results.json",
         authority_profile_path=tmp_path / "authority_profile.json",
@@ -633,17 +648,13 @@ def test_runtime_binding_draft_pr_profile_supplies_verified_draft_runner(
     assert bootstrap.calls[0]["worktree_runner_mode"] == "real"
     assert bootstrap.calls[0]["evidence_command_runner_mode"] == "real"
     assert bootstrap.calls[0]["outcome_ratchet_store_path"] == str(
-        tmp_path.resolve().parent
-        / ".reddog"
+        _binding_runtime_root(tmp_path)
         / "outcome_ratchet"
-        / tmp_path.resolve().name
         / "verified_outcomes.jsonl"
     )
     assert bootstrap.calls[0]["model_feedback_ledger_store_path"] == str(
-        tmp_path.resolve().parent
-        / ".reddog"
+        _binding_runtime_root(tmp_path)
         / "model_feedback"
-        / tmp_path.resolve().name
         / "model_feedback.jsonl"
     )
     assert "pattern_memory_admission_sink" not in bootstrap.calls[0]
@@ -690,26 +701,20 @@ def test_runtime_binding_pattern_memory_profile_derives_outside_repo_sink(
     assert bootstrap.calls[0]["worktree_runner_mode"] == "real"
     assert bootstrap.calls[0]["evidence_command_runner_mode"] == "real"
     assert bootstrap.calls[0]["outcome_ratchet_store_path"] == str(
-        tmp_path.resolve().parent
-        / ".reddog"
+        _binding_runtime_root(tmp_path)
         / "outcome_ratchet"
-        / tmp_path.resolve().name
         / "verified_outcomes.jsonl"
     )
     assert bootstrap.calls[0]["model_feedback_ledger_store_path"] == str(
-        tmp_path.resolve().parent
-        / ".reddog"
+        _binding_runtime_root(tmp_path)
         / "model_feedback"
-        / tmp_path.resolve().name
         / "model_feedback.jsonl"
     )
     sink = bootstrap.calls[0]["pattern_memory_admission_sink"]
     assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
     assert sink.db_path == (
-        tmp_path.resolve().parent
-        / ".reddog"
+        _binding_runtime_root(tmp_path)
         / "pattern_memory"
-        / tmp_path.resolve().name
         / "pattern_memory.db"
     )
     draft_runner = bootstrap.calls[0]["draft_pr_runner"]
@@ -723,7 +728,7 @@ def test_runtime_binding_rejects_unsupported_draft_pr_runner_mode(tmp_path: Path
         repo_root=tmp_path,
         env={
             "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
-            **_runtime_paths_env(tmp_path),
+        **_runtime_paths_env(tmp_path),
             "REDDOG_DRAFT_PR_RUNNER_MODE": "unsafe",
         },
         bootstrap=_FakeBootstrap(),
@@ -747,7 +752,9 @@ def test_runtime_binding_builds_pattern_memory_admission_sink_from_outside_repo_
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
         **_runtime_paths_env(tmp_path),
         "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "1",
-        "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(tmp_path / "pattern_memory.db"),
+        "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(
+            _binding_runtime_root(tmp_path) / "pattern_memory.db"
+        ),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -770,7 +777,7 @@ def test_runtime_binding_builds_pattern_memory_admission_sink_from_outside_repo_
     assert bootstrap.calls[0]["artifact_generation_request_binding_enabled"] is True
     sink = bootstrap.calls[0]["pattern_memory_admission_sink"]
     assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
-    assert sink.db_path == (tmp_path / "pattern_memory.db").resolve()
+    assert sink.db_path == (_binding_runtime_root(tmp_path) / "pattern_memory.db").resolve()
 
 
 def test_runtime_binding_profile_defaults_derivation_flags(tmp_path: Path) -> None:
@@ -950,7 +957,7 @@ def test_runtime_binding_rejects_pattern_memory_admission_db_inside_repo(
         repo_root=repo,
         env={
             "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
-            **_runtime_paths_env(tmp_path),
+        **_runtime_paths_env(tmp_path),
             "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(repo / "pattern_memory.db"),
         },
         bootstrap=_FakeBootstrap(),
@@ -1060,6 +1067,7 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_without_generation_s
     config = _write_queue_stage_files(tmp_path, through_stage="worktree_create")
     config = SignedWorkerQueueSerialLoopRunnerConfig(
         repo_root=config.repo_root,
+        runtime_allowed_root=config.runtime_allowed_root,
         work_state_path=config.work_state_path,
         chain_results_path=config.chain_results_path,
         authority_profile_path=config.authority_profile_path,
@@ -1110,6 +1118,7 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_static_artifacts(tmp
     config = _write_queue_stage_files(tmp_path, through_stage="worktree_create")
     config = SignedWorkerQueueSerialLoopRunnerConfig(
         repo_root=config.repo_root,
+        runtime_allowed_root=config.runtime_allowed_root,
         work_state_path=config.work_state_path,
         chain_results_path=config.chain_results_path,
         authority_profile_path=config.authority_profile_path,
@@ -1203,6 +1212,7 @@ def test_queue_serial_loop_runner_accepts_queue_stage_worker_after_bounded_stage
 def test_queue_serial_loop_runner_rejects_bootstrap_kwarg_override(tmp_path: Path) -> None:
     config = SignedWorkerQueueSerialLoopRunnerConfig(
         repo_root=tmp_path / "repo",
+        runtime_allowed_root=tmp_path,
         work_state_path=tmp_path / "work_state.json",
         chain_results_path=tmp_path / "chain_results.json",
         authority_profile_path=tmp_path / "authority_profile.json",

@@ -29,6 +29,11 @@ from typing import Any, Callable, Dict, List, Mapping, MutableSet, Optional
 from modules.communication.moltbot_bridge.src.reddog_governed_work_order_dryrun import (
     PROTECTED_BASE_REFS,
 )
+from modules.communication.moltbot_bridge.src.reddog_effect_commit_outcome import (
+    EFFECT_COMMITTED,
+    EFFECT_INDETERMINATE,
+    EFFECT_NOT_COMMITTED,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_cwd_guard import (
     validate_wre_worker_operation_cwd,
 )
@@ -77,6 +82,10 @@ class RedDogWorktreeCreateResult:
     merge_performed: bool
     main_checkout_untouched: bool
     cleanup_plan: Dict[str, Any]
+    effect_commit_state: str
+    effect_attempt_key: str
+    reconciliation_required: bool
+    reconciliation_data: Dict[str, Any]
     result_digest: str
 
     def to_dict(self) -> Dict[str, Any]:
@@ -97,6 +106,20 @@ def _iso8601(dt: datetime) -> str:
 def _canonical_digest(payload: Mapping[str, Any]) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _worktree_attempt_key(
+    *,
+    work_order: Mapping[str, Any],
+    plan: Mapping[str, Any],
+    valve_decision: Mapping[str, Any],
+) -> str:
+    evidence = {
+        "work_order": dict(work_order),
+        "plan": dict(plan),
+        "valve_decision": dict(valve_decision),
+    }
+    return "worktree-attempt-" + _canonical_digest(evidence)[:24]
 
 
 def _work_order_id(work_order: Mapping[str, Any]) -> str:
@@ -159,10 +182,15 @@ def _reject(
     valve_decision_digest: str = "",
     phase_receipts: Optional[List[WorktreeCreateReceipt]] = None,
     cleanup_plan: Optional[Mapping[str, Any]] = None,
+    effect_attempt_key: str = "",
+    effect_commit_state: str = EFFECT_NOT_COMMITTED,
+    reconciliation_required: bool = False,
+    reconciliation_data: Optional[Mapping[str, Any]] = None,
 ) -> RedDogWorktreeCreateResult:
     deduped = list(dict.fromkeys(reasons))
     receipts = list(phase_receipts or [])
     cleanup = dict(cleanup_plan or {"status": "no_worktree_created"})
+    reconciliation = dict(reconciliation_data or {"effect_attempted": False})
     body = {
         "decision": WORKTREE_CREATE_REJECT,
         "work_order_id": work_order_id,
@@ -170,6 +198,10 @@ def _reject(
         "created_at": created_at,
         "plan_id": plan_id,
         "valve_decision_digest": valve_decision_digest,
+        "effect_commit_state": effect_commit_state,
+        "effect_attempt_key": effect_attempt_key,
+        "reconciliation_required": reconciliation_required,
+        "reconciliation_data": reconciliation,
     }
     return RedDogWorktreeCreateResult(
         decision=WORKTREE_CREATE_REJECT,
@@ -187,6 +219,10 @@ def _reject(
         merge_performed=False,
         main_checkout_untouched=True,
         cleanup_plan=cleanup,
+        effect_commit_state=effect_commit_state,
+        effect_attempt_key=effect_attempt_key,
+        reconciliation_required=reconciliation_required,
+        reconciliation_data=reconciliation,
         result_digest=_canonical_digest(body),
     )
 
@@ -312,6 +348,11 @@ def create_reddog_wre_worktree(
     plan_digest = str(plan.get("plan_digest") or "")
     valve_digest = str(valve_decision.get("decision_digest") or "")
     cleanup_plan = dict(plan.get("cleanup_plan") or {"status": "no_plan_cleanup"})
+    effect_attempt_key = _worktree_attempt_key(
+        work_order=work_order,
+        plan=plan,
+        valve_decision=valve_decision,
+    )
 
     phase_receipts: List[WorktreeCreateReceipt] = []
     reasons: List[str] = []
@@ -339,6 +380,7 @@ def create_reddog_wre_worktree(
             valve_decision_digest=valve_digest,
             phase_receipts=phase_receipts,
             cleanup_plan={"status": "no_worktree_created", **cleanup_plan},
+            effect_attempt_key=effect_attempt_key,
         )
 
     if not _consume_admission(admission_consumer):
@@ -352,6 +394,7 @@ def create_reddog_wre_worktree(
             plan_digest=plan_digest,
             valve_decision_digest=valve_digest,
             cleanup_plan={"status": "no_worktree_created", **cleanup_plan},
+            effect_attempt_key=effect_attempt_key,
         )
 
     phase_receipts.append(
@@ -378,21 +421,22 @@ def create_reddog_wre_worktree(
     if locks is not None:
         locks.add(work_order_id)
 
-    created = False
+    attempted = False
+    create_exception = False
     try:
+        attempted = True
         create_result = runner.create_worktree(
             worktree_path=worktree_path,
             branch_name=branch_name,
             base_ref=str(work_order.get("base_ref") or "main"),
         )
-        created = True
     except Exception as exc:
-        created = True
+        create_exception = True
         create_result = {"ok": False, "error": type(exc).__name__}
 
     if not isinstance(create_result, Mapping) or create_result.get("ok") is not True:
         cleanup_result: Mapping[str, Any] = {"status": "not_attempted"}
-        if created:
+        if attempted:
             try:
                 cleanup_result = runner.cleanup_worktree(worktree_path=worktree_path)
             except Exception as exc:
@@ -403,7 +447,7 @@ def create_reddog_wre_worktree(
             _receipt(
                 PHASE_WORKTREE_CLEANUP_PLANNED,
                 work_order_id,
-                {"cleanup_attempted": bool(created), "cleanup_digest": _canonical_digest(cleanup_result)},
+                {"cleanup_attempted": attempted, "cleanup_digest": _canonical_digest(cleanup_result)},
                 created_at,
             )
         )
@@ -418,6 +462,24 @@ def create_reddog_wre_worktree(
             valve_decision_digest=valve_digest,
             phase_receipts=phase_receipts,
             cleanup_plan={"status": "cleanup_planned_after_create_failure", **cleanup_plan},
+            effect_attempt_key=effect_attempt_key,
+            effect_commit_state=(
+                EFFECT_INDETERMINATE if create_exception else EFFECT_NOT_COMMITTED
+            ),
+            reconciliation_required=create_exception,
+            reconciliation_data={
+                "effect_attempted": attempted,
+                "worktree_path": worktree_path_text,
+                "branch_name": branch_name,
+                "base_ref": str(work_order.get("base_ref") or "main"),
+                "runner_result_digest": _canonical_digest(create_result),
+                "cleanup_result_digest": _canonical_digest(cleanup_result),
+                "next_action": (
+                    "inspect_worktree_registry_path_and_branch"
+                    if create_exception
+                    else "none"
+                ),
+            },
         )
 
     phase_receipts.append(
@@ -455,6 +517,8 @@ def create_reddog_wre_worktree(
         "no_pr_created": True,
         "merge_performed": False,
         "main_checkout_untouched": True,
+        "effect_commit_state": EFFECT_COMMITTED,
+        "effect_attempt_key": effect_attempt_key,
     }
     return RedDogWorktreeCreateResult(
         decision=WORKTREE_CREATE_ACCEPT,
@@ -472,6 +536,17 @@ def create_reddog_wre_worktree(
         merge_performed=False,
         main_checkout_untouched=True,
         cleanup_plan=cleanup_plan,
+        effect_commit_state=EFFECT_COMMITTED,
+        effect_attempt_key=effect_attempt_key,
+        reconciliation_required=False,
+        reconciliation_data={
+            "effect_attempted": True,
+            "worktree_path": worktree_path_text,
+            "branch_name": branch_name,
+            "base_ref": str(work_order.get("base_ref") or "main"),
+            "runner_result_digest": _canonical_digest(create_result),
+            "next_action": "none",
+        },
         result_digest=_canonical_digest(body),
     )
 

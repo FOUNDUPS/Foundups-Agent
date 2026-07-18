@@ -237,7 +237,7 @@ def test_commit_failure_fails_closed() -> None:
 
 def test_atomic_json_store_writes_schema_for_bootstrap(tmp_path: Path) -> None:
     path = tmp_path / "runtime" / "chain_results.json"
-    store = AtomicJsonResidentQueueChainResultsStore(path)
+    store = AtomicJsonResidentQueueChainResultsStore(path, allowed_root=tmp_path)
 
     result = record_resident_queue_stage_result(
         work_state_snapshot=_snapshot(),
@@ -258,6 +258,23 @@ def test_atomic_json_store_writes_schema_for_bootstrap(tmp_path: Path) -> None:
     assert not list(path.parent.glob("*.tmp"))
 
 
+def test_atomic_json_store_rejects_linked_parent_on_load(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    (target / "chain_results.json").write_text("{}", encoding="utf-8")
+    linked = tmp_path / "linked"
+    try:
+        linked.symlink_to(target, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    store = AtomicJsonResidentQueueChainResultsStore(
+        linked / "chain_results.json", allowed_root=tmp_path
+    )
+    with pytest.raises((OSError, ValueError)):
+        store.load()
+
+
 def test_bootstrap_reads_chain_results_store_schema(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -265,7 +282,10 @@ def test_bootstrap_reads_chain_results_store_schema(tmp_path: Path) -> None:
     state_path.parent.mkdir(parents=True, exist_ok=True)
     state_path.write_text(json.dumps(_snapshot(), sort_keys=True), encoding="utf-8")
     chain_path = tmp_path / "runtime" / "chain_results.json"
-    store = AtomicJsonResidentQueueChainResultsStore(chain_path)
+    store = AtomicJsonResidentQueueChainResultsStore(
+        chain_path,
+        allowed_root=tmp_path,
+    )
     record_resident_queue_stage_result(
         work_state_snapshot=_snapshot(),
         store=store,

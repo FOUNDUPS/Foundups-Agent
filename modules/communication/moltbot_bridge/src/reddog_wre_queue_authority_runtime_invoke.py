@@ -109,16 +109,14 @@ def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRunti
         wsp15_priority=str(payload["wsp15_priority"]),
         wsp15_mps_total=int(payload["wsp15_mps_total"]),
         wsp15_reasoning_tier=str(payload["wsp15_reasoning_tier"]),
-        model_runtime_binding_receipt_id=(
-            str(payload["model_runtime_binding_receipt_id"])
-            if payload.get("model_runtime_binding_receipt_id")
-            else None
+        model_selection_receipt_id=_optional_text(payload, "model_selection_receipt_id"),
+        model_selection_digest=_optional_text(payload, "model_selection_digest"),
+        model_runtime_binding_receipt_id=_optional_text(
+            payload, "model_runtime_binding_receipt_id"
         ),
-        model_runtime_binding_digest=(
-            str(payload["model_runtime_binding_digest"])
-            if payload.get("model_runtime_binding_digest")
-            else None
-        ),
+        model_runtime_binding_digest=_optional_text(payload, "model_runtime_binding_digest"),
+        memex_supply_receipt_id=_optional_text(payload, "memex_supply_receipt_id"),
+        memex_supply_digest=_optional_text(payload, "memex_supply_digest"),
         identity_nonce=str(payload["identity_nonce"]),
         work_authority_nonce=str(payload["work_authority_nonce"]),
         issued_at=int(payload["issued_at"]),
@@ -126,17 +124,16 @@ def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRunti
         work_authority_expires_at=int(payload["work_authority_expires_at"]),
         valve_state_required=str(payload["valve_state_required"]),
         key_epoch=str(payload["key_epoch"]),
-        consensus_receipt_digest=(
-            str(payload["consensus_receipt_digest"])
-            if payload.get("consensus_receipt_digest")
-            else None
-        ),
-        sovereign_authorization_digest=(
-            str(payload["sovereign_authorization_digest"])
-            if payload.get("sovereign_authorization_digest")
-            else None
+        consensus_receipt_digest=_optional_text(payload, "consensus_receipt_digest"),
+        sovereign_authorization_digest=_optional_text(
+            payload, "sovereign_authorization_digest"
         ),
     )
+
+
+def _optional_text(payload: Mapping[str, Any], field: str) -> Optional[str]:
+    value = payload.get(field)
+    return str(value) if value else None
 
 
 def invoke_reddog_wre_queue_authority_runtime(

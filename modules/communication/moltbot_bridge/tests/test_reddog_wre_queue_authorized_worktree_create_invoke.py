@@ -8,6 +8,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable
 
+import pytest
+
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
     AuthoritativeUseLease,
 )
@@ -212,6 +214,8 @@ def _admission_registry(
     executor: dict | None = None,
     valve: dict | None = None,
     consume: Callable[[], bool] = lambda: True,
+    expires_at_epoch: int = 2_000_000_000,
+    trusted_now_epoch: Callable[[], int] = lambda: 1_000_000_000,
 ) -> InMemoryWorktreeAdmissionRegistry:
     registry = InMemoryWorktreeAdmissionRegistry()
     queue_executor = executor or _queue_executor_result(repo_root)
@@ -223,7 +227,11 @@ def _admission_registry(
         executor_plan_result=queue_executor,
         valve_decision=queue_valve["valve_decision"],
         signed_authority_reverified=True,
-        authoritative_use_lease=AuthoritativeUseLease(consume),
+        authoritative_use_lease=AuthoritativeUseLease(
+            consume,
+            expires_at_epoch=expires_at_epoch,
+            trusted_now_epoch=trusted_now_epoch,
+        ),
     )
     return registry
 
@@ -485,6 +493,113 @@ def test_spliced_plan_does_not_consume_nonce_or_call_runner(tmp_path: Path) -> N
         explicit_queue_authorized_worktree_create_requested=True,
         queue_executor_plan_result=spliced,
         queue_execution_valve_result=_queue_valve_result(),
+        work_order=_work_order(),
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=registry,
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert consumed == []
+    assert runner.calls == []
+
+
+def _spliced_value(value):
+    if isinstance(value, bool):
+        return not value
+    if isinstance(value, int):
+        return value + 1
+    if isinstance(value, str):
+        return value + "-spliced"
+    if isinstance(value, list):
+        return [*value, "spliced"]
+    if isinstance(value, dict):
+        return {**value, "spliced": True}
+    return "spliced"
+
+
+@pytest.mark.parametrize("field", tuple(_work_order().keys()))
+def test_every_work_order_field_splice_rejects_before_nonce_and_runner(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    repo_root = _repo_root(tmp_path)
+    consumed: list[str] = []
+    registry = _admission_registry(
+        repo_root,
+        consume=lambda: not consumed.append("nonce"),
+    )
+    spliced = _work_order()
+    spliced[field] = _spliced_value(spliced[field])
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=_queue_executor_result(repo_root),
+        queue_execution_valve_result=_queue_valve_result(),
+        work_order=spliced,
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=registry,
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert consumed == []
+    assert runner.calls == []
+
+
+def test_expired_admission_uses_fresh_clock_without_burning_nonce(
+    tmp_path: Path,
+) -> None:
+    repo_root = _repo_root(tmp_path)
+    clock = [100]
+    consumed: list[str] = []
+    registry = _admission_registry(
+        repo_root,
+        consume=lambda: not consumed.append("nonce"),
+        expires_at_epoch=101,
+        trusted_now_epoch=lambda: clock[0],
+    )
+    clock[0] = 102
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=_queue_executor_result(repo_root),
+        queue_execution_valve_result=_queue_valve_result(),
+        work_order=_work_order(),
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=registry,
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert consumed == []
+    assert runner.calls == []
+
+
+def test_spliced_valve_does_not_consume_nonce_or_call_runner(tmp_path: Path) -> None:
+    repo_root = _repo_root(tmp_path)
+    consumed: list[str] = []
+    registry = _admission_registry(
+        repo_root,
+        consume=lambda: not consumed.append("nonce"),
+    )
+    valve = _queue_valve_result()
+    valve["valve_decision"] = dict(valve["valve_decision"])
+    valve["valve_decision"]["decision_digest"] = "sha256:" + ("8" * 64)
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=_queue_executor_result(repo_root),
+        queue_execution_valve_result=valve,
         work_order=_work_order(),
         runner=runner,
         repo_root=repo_root,

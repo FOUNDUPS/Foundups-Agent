@@ -41,8 +41,12 @@ def _queue_result(**overrides):
         "wsp15_priority": "P0",
         "wsp15_mps_total": 18,
         "reasoning_tier": "ULTRA",
+        "model_selection_receipt_id": "sha256:model-selection",
+        "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "memex_supply_receipt_id": "sha256:memex-supply",
+        "memex_supply_digest": "sha256:memex-supply-digest",
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
         "no_queue_mutation_performed": True,
@@ -131,15 +135,23 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["wsp15_priority"] == "P0"
     assert request["wsp15_mps_total"] == 18
     assert request["wsp15_reasoning_tier"] == "ULTRA"
+    assert request["model_selection_receipt_id"] == "sha256:model-selection"
+    assert request["model_selection_digest"] == "sha256:model-selection-digest"
     assert request["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"
     assert request["model_runtime_binding_digest"] == "sha256:model-runtime-binding"
+    assert request["memex_supply_receipt_id"] == "sha256:memex-supply"
+    assert request["memex_supply_digest"] == "sha256:memex-supply-digest"
     assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
     assert result.receipt.wsp15_allocation_digest == "sha256:wsp15-allocation-digest"
     assert result.receipt.wsp15_priority == "P0"
     assert result.receipt.wsp15_mps_total == 18
     assert result.receipt.reasoning_tier == "ULTRA"
+    assert result.receipt.model_selection_receipt_id == "sha256:model-selection"
+    assert result.receipt.model_selection_digest == "sha256:model-selection-digest"
     assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
     assert result.receipt.model_runtime_binding_digest == "sha256:model-runtime-binding"
+    assert result.receipt.memex_supply_receipt_id == "sha256:memex-supply"
+    assert result.receipt.memex_supply_digest == "sha256:memex-supply-digest"
     assert result.receipt.delegated_authority_request_digest.startswith("sha256:")
 
 

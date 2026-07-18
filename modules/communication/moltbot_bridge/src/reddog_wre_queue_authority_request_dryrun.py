@@ -78,8 +78,12 @@ class QueueAuthorityRequestDryRunReceipt:
     wsp15_priority: str
     wsp15_mps_total: int
     reasoning_tier: str
+    model_selection_receipt_id: Optional[str]
+    model_selection_digest: Optional[str]
     model_runtime_binding_receipt_id: Optional[str]
     model_runtime_binding_digest: Optional[str]
+    memex_supply_receipt_id: Optional[str]
+    memex_supply_digest: Optional[str]
     delegated_authority_request_digest: str
     signer_invoked: bool = False
     signature_verified: bool = False
@@ -315,8 +319,12 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         return _reject(deduped)
 
     queue_item_id = str(queue_receipt.get("queue_item_id") or queue.get("selected_queue_item_id") or "")
+    model_selection_receipt_id = str(queue_receipt.get("model_selection_receipt_id") or "")
+    model_selection_digest = str(queue_receipt.get("model_selection_digest") or "")
     model_runtime_binding_receipt_id = str(queue_receipt.get("model_runtime_binding_receipt_id") or "")
     model_runtime_binding_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
+    memex_supply_receipt_id = str(queue_receipt.get("memex_supply_receipt_id") or "")
+    memex_supply_digest = str(queue_receipt.get("memex_supply_digest") or "")
     request = DelegatedAuthorityRuntimeRequest(
         work_order_id=str(profile.get("work_order_id") or _work_order_id(queue_item_id)),
         principal_id=str(profile["principal_id"]),
@@ -335,8 +343,12 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
         wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
         wsp15_reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
+        model_selection_receipt_id=model_selection_receipt_id or None,
+        model_selection_digest=model_selection_digest or None,
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or None,
         model_runtime_binding_digest=model_runtime_binding_digest or None,
+        memex_supply_receipt_id=memex_supply_receipt_id or None,
+        memex_supply_digest=memex_supply_digest or None,
         identity_nonce=str(profile["identity_nonce"]),
         work_authority_nonce=str(profile["work_authority_nonce"]),
         issued_at=int(profile["issued_at"]),
@@ -373,8 +385,12 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
         wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
         reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
+        model_selection_receipt_id=model_selection_receipt_id or None,
+        model_selection_digest=model_selection_digest or None,
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or None,
         model_runtime_binding_digest=model_runtime_binding_digest or None,
+        memex_supply_receipt_id=memex_supply_receipt_id or None,
+        memex_supply_digest=memex_supply_digest or None,
         delegated_authority_request_digest=request_digest,
     )
     return QueueAuthorityRequestDryRunResult(

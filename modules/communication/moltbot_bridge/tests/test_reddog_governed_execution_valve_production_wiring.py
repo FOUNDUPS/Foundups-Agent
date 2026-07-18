@@ -98,6 +98,7 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         authority_profile_path=runtime / "authority_profile.json",
         work_orders_path=work_orders_path,
         valve_environment_path=runtime / "execution_valve_env.json",
+        runtime_allowed_root=runtime,
         authority_state_path=runtime / "authority_state.json",
         permission_snapshots_path=runtime / "permission_snapshots.json",
         principal_authority_records_path=runtime / "principal_authority_records.json",
@@ -197,6 +198,7 @@ def test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage(
         authority_profile_path=runtime / "authority_profile.json",
         work_orders_path=work_orders_path,
         valve_environment_path=legacy_path,
+        runtime_allowed_root=runtime,
         requested_queue_item_id=QUEUE_ID,
         now_iso=NOW,
         max_steps=1,
@@ -255,6 +257,7 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
         authority_profile_path=runtime / "authority_profile.json",
         work_order_materializer_mode="authority_profile",
         valve_environment_path=link,
+        runtime_allowed_root=runtime,
         requested_queue_item_id=QUEUE_ID,
         now_iso=NOW,
         max_steps=1,
@@ -322,8 +325,9 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         work_state_path=runtime / "authoritative_work_state.json",
         authority_profile_path=runtime / "authority_profile.json",
         permission_snapshots_path=runtime / "permission_snapshots.json",
-        principal_authority_records_path=runtime / "principal_authority_records.json",
-        valve_environment_path=runtime / "execution_valve_env.json",
+            principal_authority_records_path=runtime / "principal_authority_records.json",
+            valve_environment_path=runtime / "execution_valve_env.json",
+            runtime_allowed_root=runtime,
         signature_verifier=object(),
         principal_key_resolver=object(),
         nonce_store=object(),
@@ -331,6 +335,7 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         revocation_oracle=object(),
         now_epoch=1_784_006_400,
         required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
+        trusted_now_epoch=lambda: 1_784_006_400,
     )
 
     result = resolver.resolve(
@@ -350,3 +355,5 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
     assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in result.rejection_reasons
     assert "canonical_consensus_receipt_verifier_missing" in result.rejection_reasons
     assert "canonical_sovereign_authorization_verifier_missing" in result.rejection_reasons
+    assert "canonical_model_selection_signed_evidence_verifier_missing" in result.rejection_reasons
+    assert "canonical_memex_supply_signed_evidence_verifier_missing" in result.rejection_reasons

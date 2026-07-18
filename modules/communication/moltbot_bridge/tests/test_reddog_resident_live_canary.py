@@ -23,6 +23,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_live_canary import
     LIVE_CANARY_READY,
     REQUIRED_JSON_ARTIFACTS,
     run_reddog_resident_live_canary,
+    _read_json_mapping,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import (
+    read_control_receipts,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
     PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
@@ -499,6 +503,25 @@ def test_canonical_receipt_symlink_collision_is_rejected(tmp_path: Path) -> None
     with pytest.raises(ValueError, match="receipt_path_reserved_or_collision"):
         run_reddog_resident_live_canary(**_kwargs(repo, runtime))
     assert target.read_text(encoding="utf-8") == "preserve"
+
+
+def test_canary_and_evidence_reads_reject_linked_parent(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    target.mkdir()
+    (target / "artifact.json").write_text("{}", encoding="utf-8")
+    (target / "receipts.jsonl").write_text("{}\n", encoding="utf-8")
+    linked = tmp_path / "linked"
+    try:
+        linked.symlink_to(target, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    assert _read_json_mapping(
+        linked / "artifact.json", allowed_root=tmp_path
+    ) == {}
+    assert read_control_receipts(
+        linked / "receipts.jsonl", allowed_root=tmp_path
+    ) == ()
 
 
 def test_receipt_path_inside_repo_is_rejected(tmp_path: Path) -> None:

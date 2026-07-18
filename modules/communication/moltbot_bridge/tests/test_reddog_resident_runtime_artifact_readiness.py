@@ -63,6 +63,20 @@ def test_unsigned_seven_artifact_pack_is_not_execution_authority(tmp_path: Path)
     assert result.authorization_binding_digest and result.authorization_binding_digest.startswith("sha256:")
 
 
+def test_linked_runtime_root_cannot_supply_artifacts(tmp_path: Path) -> None:
+    repo, runtime = _roots(tmp_path)
+    linked = tmp_path / "linked-runtime"
+    try:
+        linked.symlink_to(runtime, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    result = _validate(repo, linked)
+
+    assert result.accepted is False
+    assert all(check.accepted is False for check in result.checks)
+
+
 @pytest.mark.parametrize(
     ("filename", "mutation"),
     [

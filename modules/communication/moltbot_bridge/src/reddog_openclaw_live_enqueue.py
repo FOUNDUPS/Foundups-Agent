@@ -17,6 +17,12 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Mapping, Optional, Protocol, Sequence, Union
 
+from modules.communication.moltbot_bridge.src.reddog_effect_commit_outcome import (
+    EFFECT_COMMITTED,
+    EFFECT_INDETERMINATE,
+    EFFECT_NOT_COMMITTED,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_openclaw_adapter_dryrun import (
     ADAPTER_DRYRUN_ACCEPT,
     TARGET_AUTONOMOUS_TASK,
@@ -79,6 +85,8 @@ class RedDogOpenClawLiveEnqueueReceipt:
     no_execution_performed: bool
     no_reward_settlement_performed: bool
     created_at: str
+    effect_commit_state: str
+    effect_attempt_key: str
     receipt_digest: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
@@ -92,7 +100,11 @@ class RedDogOpenClawLiveEnqueueResult:
     target_type: str
     rejection_reasons: List[str] = field(default_factory=list)
     receipt: Optional[RedDogOpenClawLiveEnqueueReceipt] = None
-    live_enqueue_performed: bool = False
+    live_enqueue_performed: Optional[bool] = False
+    effect_commit_state: str = EFFECT_NOT_COMMITTED
+    effect_attempt_key: str = ""
+    reconciliation_required: bool = False
+    reconciliation_data: Dict[str, Any] = field(default_factory=dict)
     no_execution_performed: bool = True
     no_reward_settlement_performed: bool = True
 
@@ -147,13 +159,46 @@ def _live_enqueue_key(work_order_id: str, adapter_receipt_digest: str) -> str:
     return f"{work_order_id}:{adapter_receipt_digest}"
 
 
-def _reject(work_order_id: str, target_type: str, reasons: Sequence[str]) -> RedDogOpenClawLiveEnqueueResult:
+def _live_enqueue_attempt_key(
+    *,
+    work_order_id: str,
+    target_type: str,
+    adapter_digest: str,
+    intake: Mapping[str, Any],
+) -> str:
+    evidence = {
+        "work_order_id": work_order_id,
+        "target_type": target_type,
+        "adapter_digest": adapter_digest,
+        "proposed_intake_digest": _canonical_digest(dict(intake)),
+    }
+    return "live-enqueue-attempt-" + _canonical_digest(evidence)[:24]
+
+
+def _reject(
+    work_order_id: str,
+    target_type: str,
+    reasons: Sequence[str],
+    *,
+    effect_attempt_key: str = "",
+    effect_commit_state: str = EFFECT_NOT_COMMITTED,
+    reconciliation_required: bool = False,
+    reconciliation_data: Optional[Mapping[str, Any]] = None,
+) -> RedDogOpenClawLiveEnqueueResult:
     return RedDogOpenClawLiveEnqueueResult(
         decision=LIVE_ENQUEUE_REJECT,
         work_order_id=work_order_id or "unknown",
         target_type=target_type or "",
         rejection_reasons=list(dict.fromkeys(reasons)),
-        live_enqueue_performed=False,
+        live_enqueue_performed=(
+            None if effect_commit_state == EFFECT_INDETERMINATE else False
+        ),
+        effect_commit_state=effect_commit_state,
+        effect_attempt_key=effect_attempt_key,
+        reconciliation_required=reconciliation_required,
+        reconciliation_data=dict(
+            reconciliation_data or {"effect_attempted": False, "next_action": "none"}
+        ),
         no_execution_performed=True,
         no_reward_settlement_performed=True,
     )
@@ -201,6 +246,7 @@ def _receipt_seed(
     chain: Mapping[str, Any],
     valve: Mapping[str, Any],
     checked_at: str,
+    effect_attempt_key: str,
 ) -> Dict[str, Any]:
     return {
         "work_order_id": work_order_id,
@@ -212,6 +258,7 @@ def _receipt_seed(
         "signed_receipt_chain_terminal_hash": chain.get("terminal_receipt_hash"),
         "valve_decision_digest": str(valve.get("decision_digest") or ""),
         "created_at": checked_at,
+        "effect_attempt_key": effect_attempt_key,
     }
 
 
@@ -221,15 +268,17 @@ def _call_writer(
     target_type: str,
     intake: Mapping[str, Any],
     provisional_receipt: Mapping[str, Any],
-) -> Optional[Mapping[str, Any]]:
+) -> tuple[str, Optional[Mapping[str, Any]], str]:
     try:
         if target_type == TARGET_AUTONOMOUS_TASK:
             result = writer.enqueue_autonomous_task(dict(intake), provisional_receipt)
         else:
             result = writer.enqueue_foundup_job(dict(intake), provisional_receipt)
-    except Exception:
-        return None
-    return result if isinstance(result, Mapping) and result.get("ok") is True else None
+    except Exception as exc:
+        return EFFECT_INDETERMINATE, None, type(exc).__name__
+    if isinstance(result, Mapping) and result.get("ok") is True:
+        return EFFECT_COMMITTED, result, ""
+    return EFFECT_NOT_COMMITTED, None, "writer_rejected"
 
 
 def _accepted_live_enqueue_result(
@@ -262,6 +311,8 @@ def _accepted_live_enqueue_result(
         no_execution_performed=True,
         no_reward_settlement_performed=True,
         created_at=str(seed["created_at"]),
+        effect_commit_state=EFFECT_COMMITTED,
+        effect_attempt_key=str(seed["effect_attempt_key"]),
     )
     receipt.receipt_digest = _canonical_digest(
         {key: value for key, value in receipt.to_dict().items() if key != "receipt_digest"}
@@ -272,6 +323,16 @@ def _accepted_live_enqueue_result(
         target_type=receipt.target_type,
         receipt=receipt,
         live_enqueue_performed=True,
+        effect_commit_state=EFFECT_COMMITTED,
+        effect_attempt_key=receipt.effect_attempt_key,
+        reconciliation_required=False,
+        reconciliation_data={
+            "effect_attempted": True,
+            "live_enqueue_id": receipt.live_enqueue_id,
+            "openclaw_queue_item_id": receipt.openclaw_queue_item_id,
+            "agentdb_task_id": receipt.agentdb_task_id,
+            "next_action": "none",
+        },
     )
 
 
@@ -295,16 +356,27 @@ def perform_reddog_openclaw_live_enqueue(
     adapter_receipt = _adapter_receipt_mapping(adapter)
     work_order_id = str(adapter.get("work_order_id") or intake.get("work_order_id") or "unknown")
     target_type = str(intake.get("target_type") or adapter_receipt.get("target_type") or "")
+    adapter_digest = str(adapter_receipt.get("adapter_receipt_digest") or "")
+    effect_attempt_key = _live_enqueue_attempt_key(
+        work_order_id=work_order_id,
+        target_type=target_type,
+        adapter_digest=adapter_digest,
+        intake=intake,
+    )
     reasons = _validate_inputs(adapter, policy, chain, valve, intake)
     if writer is None:
         reasons.append(LiveEnqueueReason.WRITER_MISSING)
-    adapter_digest = str(adapter_receipt.get("adapter_receipt_digest") or "")
     replay_key = _live_enqueue_key(work_order_id, adapter_digest)
     if seen_live_enqueue_keys is not None and replay_key in seen_live_enqueue_keys:
         reasons.append(LiveEnqueueReason.IDEMPOTENCY_REPLAY)
     deduped = list(dict.fromkeys(reasons))
     if deduped:
-        return _reject(work_order_id, target_type, deduped)
+        return _reject(
+            work_order_id,
+            target_type,
+            deduped,
+            effect_attempt_key=effect_attempt_key,
+        )
     assert writer is not None
     receipt_seed = _receipt_seed(
         work_order_id=work_order_id,
@@ -315,11 +387,14 @@ def perform_reddog_openclaw_live_enqueue(
         chain=chain,
         valve=valve,
         checked_at=_iso8601(_utc_now(now)),
+        effect_attempt_key=effect_attempt_key,
     )
     provisional_receipt = {
         **receipt_seed,
         "live_enqueue_id": "live-enqueue-" + _canonical_digest(receipt_seed)[:16],
-        "live_enqueue_performed": False,
+        "live_enqueue_performed": None,
+        "effect_commit_state": EFFECT_INDETERMINATE,
+        "reconciliation_required": True,
         "no_execution_performed": True,
         "no_reward_settlement_performed": True,
     }
@@ -332,16 +407,35 @@ def perform_reddog_openclaw_live_enqueue(
             work_order_id,
             target_type,
             [LiveEnqueueReason.AUTHORITATIVE_ADMISSION_MISSING],
+            effect_attempt_key=effect_attempt_key,
         )
 
-    write_result = _call_writer(
+    commit_state, write_result, writer_error = _call_writer(
         writer,
         target_type=target_type,
         intake=intake,
         provisional_receipt=provisional_receipt,
     )
-    if write_result is None:
-        return _reject(work_order_id, target_type, [LiveEnqueueReason.WRITER_REJECTED])
+    if commit_state != EFFECT_COMMITTED or write_result is None:
+        return _reject(
+            work_order_id,
+            target_type,
+            [LiveEnqueueReason.WRITER_REJECTED],
+            effect_attempt_key=effect_attempt_key,
+            effect_commit_state=commit_state,
+            reconciliation_required=commit_state == EFFECT_INDETERMINATE,
+            reconciliation_data={
+                "effect_attempted": True,
+                "target_type": target_type,
+                "work_order_id": work_order_id,
+                "writer_error_type": writer_error,
+                "next_action": (
+                    "query_openclaw_queue_by_effect_attempt_key"
+                    if commit_state == EFFECT_INDETERMINATE
+                    else "none"
+                ),
+            },
+        )
 
     if seen_live_enqueue_keys is not None:
         seen_live_enqueue_keys.add(replay_key)

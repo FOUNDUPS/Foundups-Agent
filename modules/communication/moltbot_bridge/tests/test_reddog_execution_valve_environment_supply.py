@@ -238,6 +238,7 @@ def test_bootstrap_reads_distinct_outside_repo_inputs(tmp_path: Path) -> None:
     work_state = json.loads(paths["work_state"].read_text(encoding="utf-8"))
     result = run_reddog_execution_valve_environment_supply_bootstrap(
         repo_root=Path(__file__).resolve().parents[4],
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=paths["work_state"],
         authority_profile_path=paths["authority_profile"],
         permission_snapshots_path=paths["permission_snapshots"],
@@ -256,6 +257,7 @@ def test_bootstrap_rejects_input_output_collision(tmp_path: Path) -> None:
     paths = _bootstrap_paths(tmp_path)
     result = run_reddog_execution_valve_environment_supply_bootstrap(
         repo_root=Path(__file__).resolve().parents[4],
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=paths["work_state"],
         authority_profile_path=paths["authority_profile"],
         permission_snapshots_path=paths["permission_snapshots"],
@@ -275,6 +277,7 @@ def test_cli_supplies_canonical_environment(tmp_path: Path, capsys) -> None:
 
     exit_code = supply_cli_main([
         "--repo-root", str(Path(__file__).resolve().parents[4]),
+        "--runtime-root", str(tmp_path / "runtime"),
         "--work-state", str(paths["work_state"]),
         "--authority-profile", str(paths["authority_profile"]),
         "--permission-snapshots", str(paths["permission_snapshots"]),

@@ -181,7 +181,11 @@ def test_accepts_only_explicit_sovereign_worktree_selection_and_calls_runner(tmp
         repo_root=repo_root,
         now=fixed,
         locks=set(),
-        authoritative_use_lease=AuthoritativeUseLease(lambda: True),
+        authoritative_use_lease=AuthoritativeUseLease(
+            lambda: True,
+            expires_at_epoch=2_000_000_000,
+            trusted_now_epoch=lambda: int(fixed.timestamp()),
+        ),
     )
 
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT
@@ -395,7 +399,11 @@ def test_sovereign_token_is_not_emitted(tmp_path: Path) -> None:
         repo_root=repo_root,
         now=fixed,
         locks=set(),
-        authoritative_use_lease=AuthoritativeUseLease(lambda: True),
+        authoritative_use_lease=AuthoritativeUseLease(
+            lambda: True,
+            expires_at_epoch=2_000_000_000,
+            trusted_now_epoch=lambda: int(fixed.timestamp()),
+        ),
     )
 
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT

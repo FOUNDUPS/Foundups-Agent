@@ -285,14 +285,8 @@ def resident_queue_outcome_ratchet_store_path(
         return raw
     if resident_queue_binding_profile(env) not in _DRAFT_PR_OR_HIGHER_PROFILES:
         return ""
-    root = Path(repo_root).resolve()
-    return str(
-        root.parent
-        / ".reddog"
-        / "outcome_ratchet"
-        / _repo_slug(root)
-        / "verified_outcomes.jsonl"
-    )
+    runtime_root = resident_queue_runtime_root_path(env, repo_root)
+    return str(Path(runtime_root) / "outcome_ratchet" / "verified_outcomes.jsonl")
 
 
 def resident_queue_model_feedback_ledger_store_path(
@@ -306,14 +300,8 @@ def resident_queue_model_feedback_ledger_store_path(
         return raw
     if resident_queue_binding_profile(env) not in _DRAFT_PR_OR_HIGHER_PROFILES:
         return ""
-    root = Path(repo_root).resolve()
-    return str(
-        root.parent
-        / ".reddog"
-        / "model_feedback"
-        / _repo_slug(root)
-        / "model_feedback.jsonl"
-    )
+    runtime_root = resident_queue_runtime_root_path(env, repo_root)
+    return str(Path(runtime_root) / "model_feedback" / "model_feedback.jsonl")
 
 
 def resident_queue_pattern_memory_admission_db_path(
@@ -330,14 +318,8 @@ def resident_queue_pattern_memory_admission_db_path(
         != PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY
     ):
         return ""
-    root = Path(repo_root).resolve()
-    return str(
-        root.parent
-        / ".reddog"
-        / "pattern_memory"
-        / _repo_slug(root)
-        / "pattern_memory.db"
-    )
+    runtime_root = resident_queue_runtime_root_path(env, repo_root)
+    return str(Path(runtime_root) / "pattern_memory" / "pattern_memory.db")
 
 
 def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
