@@ -17,6 +17,8 @@
   closed before Holo-dependent worker execution.
 - Corrected incremental, malformed-registry, scoped/capped source, linked
   worktree, direct-adapter, and downstream freshness truth boundaries.
+- Replaced caller-controlled HoloIndex timeout/exception log text with stable
+  redacted codes after the PR CodeQL gate identified two high-severity flows.
 - Added the WSP_97 high-risk assumption audit, WSP_15 P0 record, module
   ROADMAP/TestModLogs, operator runbook, and machine contract.
 
@@ -31,8 +33,8 @@ build/repair recursion, not a claim of unrestricted production autonomy.
 **WSP Compliance**: Work was isolated from concurrent lanes in a dedicated Git
 worktree and focused branch; no framework WSP or knowledge mirror changed.
 MODULE_CONCATENATION_GATE.md remains correctly unmirrored because it is a
-non-protocol quick reference. The final HoloIndex matrix passed 345 tests, the
-final non-overlapping focused matrices passed 744 tests, the independent
+non-protocol quick reference. The final HoloIndex matrix passed 346 tests, the
+final non-overlapping focused matrices passed 745 tests, the independent
 boundary/security review passed 289 tests, all 81 changed or added Python files
 compiled, WSP_00 remained green, and the WSP_97 structural receipt validated.
 PR evidence and clean-main post-merge activation remain pending.

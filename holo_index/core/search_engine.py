@@ -869,7 +869,7 @@ def _search_collection(
             lambda: model.encode(query, show_progress_bar=False).tolist(),
             timeout_sec=HOLO_ENCODE_TIMEOUT,
             default=None,
-            error_msg=f"model.encode() timed out for query '{query[:50]}'",
+            error_msg="model.encode() timed out",
         )
     if embedding is None:
         if _strict_semantic_owner(holo):

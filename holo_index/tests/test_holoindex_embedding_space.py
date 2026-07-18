@@ -114,6 +114,36 @@ def test_timeout_returns_without_waiting_for_running_worker() -> None:
     assert elapsed < 0.15
 
 
+def test_timeout_wrapper_never_logs_caller_or_exception_text(caplog) -> None:
+    secret = "sentinel-secret-query-material"
+
+    def fail_with_secret() -> None:
+        raise RuntimeError(secret)
+
+    caplog.set_level("WARNING")
+    result = _run_with_timeout(
+        fail_with_secret,
+        timeout_sec=0.1,
+        default="failed",
+        error_msg=secret,
+        missing_dep_hint=secret,
+    )
+    assert result == "failed"
+    assert secret not in caplog.text
+    assert "HOLOINDEX_OPERATION_FAILED (RuntimeError)" in caplog.text
+
+    caplog.clear()
+    result = _run_with_timeout(
+        lambda: time.sleep(0.1),
+        timeout_sec=0.01,
+        default="timed-out",
+        error_msg=secret,
+    )
+    assert result == "timed-out"
+    assert secret not in caplog.text
+    assert "HOLOINDEX_OPERATION_TIMEOUT" in caplog.text
+
+
 class _Collection:
     name = "navigation_code"
 

@@ -27,8 +27,8 @@
       "holo_index/tests/test_holoindex_embedding_space.py"
     ],
     "macro_pass": [
-      "Final no-overlap focused validation: 744 passed across HoloIndex, infrastructure owner, RedDog query/downstream, and idle-maintenance matrices.",
-      "Final HoloIndex validation: 345 passed across storage/source/CLI/embedding, freshness/maintenance, incremental/work-ledger, and machine-contract matrices.",
+      "Final no-overlap focused validation: 745 passed across HoloIndex, infrastructure owner, RedDog query/downstream, and idle-maintenance matrices.",
+      "Final HoloIndex validation: 346 passed across storage/source/CLI/embedding, freshness/maintenance, incremental/work-ledger, and machine-contract matrices.",
       "Independent owner/client/maintenance/security validation: 289 passed.",
       "All 81 changed or added Python files compiled without writing bytecode."
     ],

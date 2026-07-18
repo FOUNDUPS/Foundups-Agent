@@ -106,10 +106,10 @@ def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "
     Execute a function with a hard timeout using ThreadPoolExecutor.
     Returns default value on timeout or exception instead of hanging.
 
-    Distinguishes between:
-    - Actual timeout (FuturesTimeoutError): Log as timeout with remediation hints
-    - Missing dependency (ImportError/ModuleNotFoundError): Log with install hint
-    - Other exceptions: Log with original error message
+    Distinguishes timeouts, missing dependencies, and other exceptions while
+    emitting stable diagnostics only. error_msg and missing_dep_hint remain
+    for call compatibility but are never logged because callers may derive
+    them from repository content, queries, paths, or secrets.
 
     WSP 97: Prevents indefinite hangs in HoloIndex operations.
     """
@@ -122,17 +122,20 @@ def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "
         return future.result(timeout=timeout_sec)
     except FuturesTimeoutError:
         logger.warning(
-            f"{error_msg} (>{timeout_sec}s). "
-            f"Semantic search will be unavailable. "
-            f"Raise HOLO_MODEL_IMPORT_TIMEOUT/HOLO_MODEL_LOAD_TIMEOUT or rerun after model warmup."
+            "HOLOINDEX_OPERATION_TIMEOUT (>%.3fs); semantic search unavailable. "
+            "Raise the bounded model timeout or rerun after model warmup.",
+            timeout_sec,
         )
         return default
     except (ImportError, ModuleNotFoundError) as e:
-        hint = missing_dep_hint or "pip install -r holo_index/requirements.txt"
-        logger.warning(f"Missing dependency: {e}. Fix: {hint}")
+        logger.warning(
+            "HOLOINDEX_DEPENDENCY_UNAVAILABLE (%s); install the declared "
+            "HoloIndex requirements or use explicit lexical diagnostics.",
+            type(e).__name__,
+        )
         return default
     except Exception as e:
-        logger.warning(f"{error_msg}: {e}")
+        logger.warning("HOLOINDEX_OPERATION_FAILED (%s)", type(e).__name__)
         return default
     finally:
         # A context manager waits for a running worker during __exit__, which

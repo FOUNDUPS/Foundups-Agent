@@ -3,7 +3,7 @@
 ## [2026-07-18] HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1
 
 **WSP Protocol**: WSP 00, 05, 06, 15, 22, 34, 50, 62, 64, 84, 87, 96, 97
-**Phase**: POC implementation; focused validation/PR evidence pending
+**Phase**: POC implementation complete; focused validation green; PR checks pending
 **Agent**: 0102 architect for 012 with delegated audit/test workers
 
 **Changes**:
@@ -28,6 +28,9 @@
 - FIX offline Hugging Face snapshot discovery (models--.../snapshots/<rev>)
   with refs/main selection and complete-artifact checks. Model/import timeout
   helpers now return promptly instead of waiting during executor shutdown.
+- REDACT timeout/dependency/failure diagnostics to stable codes and exception
+  class names; caller-controlled query, path, hint, and exception text is never
+  written to the timeout-wrapper log.
 - HARDEN the resident RedDog owner by forcing fp32 routing, disabling the
   generation-unbound SearchCache, comparing all seven live/reported
   collection_embedding_space_map values, and poisoning a backend that sees a
@@ -53,10 +56,10 @@ direct-store consumers remain outside that claim. Malformed, narrowed, capped,
 lexical, dirty, raced, and snapshot-only paths cannot claim operational
 freshness through the migrated boundary.
 
-**WSP Compliance**: Newly extracted helpers are kept focused where verified;
-focused WSP_62 results and any architect exemptions will be recorded after the
-gate runs. Historical monolith debt is recorded rather than hidden. The WSP_97
-assumption audit and WSP_15 P0 score are in the cross-module audit.
+**WSP Compliance**: New helpers meet focused WSP_62 thresholds; exact temporary
+exemptions and ROADMAP remediation cover inherited monolith debt. The final
+HoloIndex matrix passed 346 tests, changed Python compiled, and the WSP_97
+assumption audit and WSP_15 P0 score are recorded in the cross-module audit.
 
 ## [2026-07-16] HOLOINDEX_MEMEX_PER_TARGET_RETRIEVAL_VERDICT_PHASE1
 

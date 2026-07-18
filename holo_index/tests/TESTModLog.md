@@ -25,9 +25,11 @@
   runtime map mismatch, cache-disable, and resident generation-pin regressions.
 - Added strict-owner collection-count and blocking-encode regressions proving
   swallowed errors or lexical fallback cannot produce CURRENT.
-- Final HoloIndex evidence: storage/source/CLI/embedding/backend 87 passed;
+- Added a CodeQL regression proving caller-controlled diagnostic and exception
+  text cannot leak through timeout-wrapper logs.
+- Final HoloIndex evidence: storage/source/CLI/embedding/backend 88 passed;
   freshness/maintenance 143 passed; incremental/work-ledger 109 passed; and
-  machine-contract validation 6 passed (345 total, no failures or skips).
+  machine-contract validation 6 passed (346 total, no failures or skips).
 - Independent owner/client/maintenance/security evidence: 289 passed. These are
   scoped matrices, not a whole-repository claim.
 
