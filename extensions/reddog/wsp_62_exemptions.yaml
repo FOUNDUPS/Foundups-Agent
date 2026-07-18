@@ -1,11 +1,10 @@
 exemptions:
   - file: "extension.js"
     reason: >-
-      Legacy RedDog thin-client integration boundary. This focused security
-      slice changes only bounded panel configuration ingress and exports the
-      existing stdin bridge seam for contract testing; decomposing unrelated
-      UI, retrieval, work-order, and receipt flows would expand the reviewed
-      surface beyond the empty-panel truth fix.
+      Legacy RedDog thin-client integration boundary. Focused slices may change
+      bounded UI, retrieval, work-order, or receipt seams only when they remain
+      within this ceiling and carry focused contract coverage. Decomposing the
+      unrelated integration surfaces is tracked by the owned roadmap item.
     threshold_override: 7900
     function_threshold_override: 180
     functions:

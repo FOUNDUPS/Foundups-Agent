@@ -1,6 +1,6 @@
 # RedDog
 
-Version: 0.4.2
+Version: 0.4.3
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
 
@@ -65,6 +65,7 @@ The extension is a bounded 0102 advisory surface:
 - Operational-output target guard (v0.3.64): browser/DAEmon diagnostic payloads with URLs, timing values, screenshot filenames, and status ratios are routed to local assessment and suppressed from repo/external target extraction so log fragments cannot block typed grounding.
 - Prompt-authoring override (v0.3.65): requests for worker/slice/M2M prompts override the DAEmon/log local diagnostic fast path, so pasted logs can be used as context for governed prompt generation instead of being answered instantly as non-actionable diagnostics.
 - Semantic grounding per-target proof (v0.3.66): semantic targets now require independent content-bearing HoloIndex evidence refs before Fusion or wardrobe selection may proceed. Aggregate `code_hits` / `wsp_hits` no longer satisfy unrelated semantic targets; missing, errored, or ref-less semantic evidence fails closed and is surfaced through `semantic_targets_required`, `semantic_targets_grounded`, `semantic_targets_missing`, and `semantic_target_coverage_digest` telemetry.
+- Broad semantic grounding non-vacuity (v0.4.3): substantive audit/research/implementation verbs derive a generic semantic subject when no stronger repo, external, or explicit semantic target exists. Broad audits use one bounded generic query expansion and require distinct implementation/authority plus verification/authority evidence; path-only hits are insufficient. An empty target universe fails before Fusion with `grounding_target_universe_empty`; local identity and operational diagnostics remain exempt. HoloIndex remains query-only at runtime.
 - OpenClaw live-enqueue runtime binding (v0.3.67): after grounding, fusion quorum, output validation, wardrobe selection, and runtime-consumption gates pass, the extension may call the one-shot explicit live-enqueue invoke bridge for `live_enqueue` authority requests. This slice keeps `enableConcreteWriter=false`, so the editor subprocess can prove the guarded path is reachable but cannot perform a durable OpenClaw queue write.
 - Resident architect session bridge (v0.3.68): when `reddog.enableResidentArchitectSession=true` and local runtime-consumption gates pass, the extension may call the resident read-only RedDog audit -> research -> backend architect determination E2E runtime. The bridge returns snapshot/swarm/task/report/architect decision telemetry plus no-mutation attestations. It does not edit files, re-index HoloIndex, dispatch Hermes, create worktrees, enqueue live FoundUps work, create PRs, merge, or promote PatternMemory.
 
@@ -225,6 +226,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.2.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.3.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.
