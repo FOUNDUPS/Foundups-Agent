@@ -35,6 +35,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Deque, Dict, List, Mapping, Optional, Sequence
 
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    redact_runtime_text,
+    redact_runtime_value,
+)
+
 logger = logging.getLogger(__name__)
 
 READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT = "READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT"
@@ -1357,7 +1362,9 @@ class OpenClawSupervisor:
         self._stop_event = threading.Event()
         self._broker = broker
         self._observer = observer
-        self._action_reporter = action_reporter or self._build_daemon_reporter()
+        self._action_reporter = self._redacting_reporter(
+            action_reporter or self._build_daemon_reporter()
+        )
         self._self_audit_factory = self_audit_factory
         self._self_audit_loop: Any | None = None
         self._event_cursor = 0
@@ -1571,18 +1578,31 @@ class OpenClawSupervisor:
             self._remember(observation, plan, action_result, verify)
             self._transition(SupervisorState.IDLE_WATCH, "cycle_complete")
 
-        self.last_cycle = {
+        self.last_cycle = redact_runtime_value({
             "state": self.current_state.value,
             "plan": plan,
             "action_result": action_result,
             "verify": verify,
             "observation": observation,
-        }
+        })
         return self.last_cycle
 
     # ------------------------------------------------------------------ #
     #  Infrastructure helpers                                             #
     # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _redacting_reporter(
+        reporter: Callable[[str, str, Dict[str, Any]], None],
+    ) -> Callable[[str, str, Dict[str, Any]], None]:
+        def safe_reporter(action_type: str, result: str, details: Dict[str, Any]) -> None:
+            reporter(
+                redact_runtime_text(action_type, max_chars=120).text,
+                redact_runtime_text(result, max_chars=200).text,
+                redact_runtime_value(details),
+            )
+
+        return safe_reporter
 
     def _build_daemon_reporter(self) -> Callable[[str, str, Dict[str, Any]], None]:
         from modules.infrastructure.dae_daemon.src.dae_daemon import get_central_daemon
@@ -2211,6 +2231,10 @@ class OpenClawSupervisor:
 
         elif plan["action"] == "execute_self_audit_fix":
             recommended_fix = plan.get("recommended_fix", "")
+            safe_plan = dict(plan)
+            safe_plan["event_signature"] = redact_runtime_text(
+                safe_plan.get("event_signature"), max_chars=240
+            ).text
             result: Dict[str, Any] = {"ok": False, "error": "no_audit_loop"}
             if self._self_audit_loop and hasattr(self._self_audit_loop, "_apply_policy_fix"):
                 try:
@@ -2218,15 +2242,19 @@ class OpenClawSupervisor:
                     result = {
                         "ok": success,
                         "status": "applied" if success else "fix_failed",
-                        "detail": str(detail)[:500],
+                        "detail": redact_runtime_text(detail, max_chars=500).text,
                     }
                 except Exception as exc:
-                    result = {"ok": False, "status": "fix_error", "error": str(exc)[:500]}
+                    result = {
+                        "ok": False,
+                        "status": "fix_error",
+                        "error": redact_runtime_text(exc, max_chars=500).text,
+                    }
 
             self._action_reporter(
                 "supervisor_execute",
                 result.get("status", result.get("error", "unknown")),
-                {"plan": plan, "result": result},
+                {"plan": safe_plan, "result": result},
             )
             if _rt_start is not None:
                 try:
@@ -2427,6 +2455,10 @@ class OpenClawSupervisor:
             if verify.get("ok"):
                 self.metrics.tasks_succeeded += 1
 
+        safe_plan = redact_runtime_value(plan_or_triage)
+        safe_action_result = redact_runtime_value(action_result)
+        safe_verify = redact_runtime_value(verify)
+
         # Report to daemon
         self._action_reporter(
             "supervisor_cycle",
@@ -2434,9 +2466,9 @@ class OpenClawSupervisor:
             {
                 "state": self.current_state.value,
                 "reason": self.last_reason,
-                "plan": plan_or_triage,
-                "action_result": action_result,
-                "verify": verify,
+                "plan": safe_plan,
+                "action_result": safe_action_result,
+                "verify": safe_verify,
                 "git": observation.get("git", {}),
                 "restart_budget": observation.get("restart_budget", {}),
                 "openclaw_follow": observation.get("openclaw_follow", {}),
@@ -2448,21 +2480,21 @@ class OpenClawSupervisor:
             try:
                 from modules.infrastructure.wre_core.src.pattern_memory import SkillOutcome
 
-                skill_name = plan_or_triage.get("action", "unknown")
+                skill_name = safe_plan.get("action", "unknown")
                 fidelity = float(verify.get("fidelity", 0.85))
                 outcome = SkillOutcome(
                     execution_id=f"supervisor_{uuid.uuid4().hex[:12]}",
                     skill_name=skill_name,
                     agent="openclaw_supervisor",
                     timestamp=datetime.now().isoformat(),
-                    input_context=json.dumps(plan_or_triage, default=str)[:2000],
-                    output_result=json.dumps(action_result, default=str)[:2000],
+                    input_context=json.dumps(safe_plan, default=str)[:2000],
+                    output_result=json.dumps(safe_action_result, default=str)[:2000],
                     success=bool(verify.get("ok", False)),
                     pattern_fidelity=fidelity,
                     outcome_quality=1.0 if verify.get("ok") else 0.0,
                     execution_time_ms=int(action_result.get("execution_time_ms", 0)),
                     step_count=1,
-                    notes=f"Supervisor cycle: {plan_or_triage.get('reason', '')}",
+                    notes=f"Supervisor cycle: {safe_plan.get('reason', '')}",
                 )
                 self._pattern_memory.store_outcome(outcome)
                 logger.debug(
@@ -2477,7 +2509,7 @@ class OpenClawSupervisor:
         self._event_cursor = int(follow.get("next_cursor", self._event_cursor) or self._event_cursor)
 
         # Gateway Continuity Layer: Record breadcrumb with continuity metadata
-        self._record_continuity_breadcrumb(plan_or_triage, action_result, verify)
+        self._record_continuity_breadcrumb(safe_plan, safe_action_result, safe_verify)
 
     def _create_continuity_context(self, cycle_id: str, parent_context=None) -> Any:
         """Create continuity context for a supervisor cycle.

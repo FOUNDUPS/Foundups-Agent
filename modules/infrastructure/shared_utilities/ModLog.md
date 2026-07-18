@@ -1,6 +1,13 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-07-18 - Runtime Artifact Safety and Telemetry Redaction
+
+- Added shared fail-closed runtime-root/path validation, descriptor-bound
+  locked append/replacement, and bounded secret redaction helpers.
+- Runtime artifacts reject repository paths, source ancestors, ambiguous
+  Windows names, device/UNC paths, symlinks, junctions, and hardlinks.
+
 ## 2026-05-30 - LM Studio Dependency Boundary Doc + Gate (LM_STUDIO_DEPENDENCY_BOUNDARY_DOC_AND_GATE_PHASE1)
 
 - **Problem**: LM Studio is an optional local dependency, but absence produced a

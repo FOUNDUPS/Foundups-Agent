@@ -6,8 +6,11 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 from modules.infrastructure.wre_core.src.daemon_self_audit_loop import (
     DaemonSelfAuditLoop,
@@ -221,7 +224,7 @@ def test_self_audit_verifies_event_store_when_sequence_error_seen(tmp_path: Path
     assert rows[0]["auto_fix_attempted"] is True
     assert rows[0]["auto_fix_result"] == "event_store_verified"
 
-    report = tmp_path / "modules/infrastructure/wre_core/reports/dae_event_store_health.json"
+    report = loop.runtime_root / "dae_event_store_health.json"
     assert report.exists()
 
 
@@ -373,3 +376,171 @@ def test_self_audit_filters_noise_signatures(tmp_path: Path, monkeypatch):
     assert events == 0
     rows = _read_jsonl(loop.task_log_path)
     assert len(rows) == 0
+
+
+def test_self_audit_runtime_artifacts_default_outside_repository(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.delenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", raising=False)
+    monkeypatch.delenv("REDDOG_RESIDENT_RUNTIME_ROOT", raising=False)
+
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+
+    with pytest.raises(ValueError):
+        loop.runtime_root.relative_to(tmp_path.resolve())
+    assert loop.task_log_path.parent == loop.runtime_root
+    assert loop.state_path.parent == loop.runtime_root
+
+
+def test_self_audit_rejects_runtime_root_inside_repository(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv(
+        "OPENCLAW_SELF_AUDIT_RUNTIME_ROOT",
+        str(tmp_path / "modules" / "runtime"),
+    )
+
+    with pytest.raises(ValueError, match="inside_repo"):
+        DaemonSelfAuditLoop(repo_root=tmp_path)
+
+
+def test_self_audit_redacts_secrets_before_all_runtime_persistence(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    logs = tmp_path / "logs"
+    logs.mkdir(parents=True)
+    log_file = logs / "daemon.log"
+    api_secret = "sk-1234567890abcdefghijkl"
+    bearer_secret = "bearer-secret-value-123456"
+    query_secret = "query-secret-value"
+    log_file.write_text(
+        "[ERROR] api\u200b_key="
+        + api_secret
+        + " Authorization: Bearer "
+        + bearer_secret
+        + " https://example.test/x?access_token="
+        + query_secret
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+    assert loop.scan_once() == 1
+
+    persisted = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in loop.runtime_root.glob("*")
+        if path.is_file()
+    )
+    for secret in (api_secret, bearer_secret, query_secret):
+        assert secret not in persisted
+    assert "[REDACTED]" in persisted
+
+    event = _read_jsonl(loop.task_log_path)[0]
+    assert event["redaction_applied"] is True
+    assert event["redaction_replacements"] >= 3
+    assert not (tmp_path / "modules/infrastructure/wre_core/reports").exists()
+
+
+def test_self_audit_rejects_log_glob_escape_and_external_symlink(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = tmp_path / "repo"
+    outside = tmp_path / "outside"
+    repo.mkdir()
+    outside.mkdir()
+    (outside / "outside.log").write_text("[ERROR] external secret\n", encoding="utf-8")
+
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "../outside/*.log")
+    loop = DaemonSelfAuditLoop(repo_root=repo)
+    assert loop.scan_once() == 0
+
+    link = repo / "linked-logs"
+    try:
+        link.symlink_to(outside, target_is_directory=True)
+    except OSError:
+        return
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "linked-logs/*.log")
+    loop = DaemonSelfAuditLoop(repo_root=repo)
+    assert loop.scan_once() == 0
+
+
+def test_self_audit_redacts_generalized_secret_shapes_in_real_sinks(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    logs = tmp_path / "logs"
+    logs.mkdir(parents=True)
+    secrets = (
+        "openrouter-secret",
+        "aws-secret",
+        "my-password",
+        "query-token",
+        "cookie-one",
+        "cookie-two",
+        "private-key-fragment",
+        "daemon-opaque-token",
+        "daemon-auth-token",
+    )
+    (logs / "daemon.log").write_text(
+        "[ERROR] OPENROUTER_API_KEY=openrouter-secret\n"
+        "[ERROR] AWS_SECRET_ACCESS_KEY=aws-secret MY_PASSWORD=my-password\n"
+        "[ERROR] https://example.test/?token=query-token\n"
+        "[ERROR] Cookie: first=cookie-one; second=cookie-two\n"
+        "[ERROR] token=daemon-opaque-token auth_token=daemon-auth-token\n"
+        "[ERROR] -----BEGIN PRIVATE KEY----- private-key-fragment\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+    assert loop.scan_once() == 6
+
+    persisted = "\n".join(
+        path.read_text(encoding="utf-8", errors="replace")
+        for path in loop.runtime_root.glob("*")
+        if path.is_file()
+    )
+    for secret in secrets:
+        assert secret not in persisted
+    assert "[REDACTED" in persisted
+
+def test_self_audit_serializes_concurrent_scans(tmp_path: Path, monkeypatch) -> None:
+    logs = tmp_path / "logs"
+    logs.mkdir(parents=True)
+    (logs / "daemon.log").write_text("[ERROR] health endpoint unavailable\n", encoding="utf-8")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        counts = list(executor.map(lambda _: loop.scan_once(), range(16)))
+
+    assert sum(counts) == 1
+    assert len(_read_jsonl(loop.task_log_path)) == 1
+
+
+def test_self_audit_serializes_scans_across_loop_instances(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    logs = tmp_path / "logs"
+    logs.mkdir(parents=True)
+    (logs / "daemon.log").write_text("[ERROR] health endpoint unavailable\n", encoding="utf-8")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+
+    loops = [DaemonSelfAuditLoop(repo_root=tmp_path) for _ in range(4)]
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        counts = list(executor.map(lambda loop: loop.scan_once(), loops))
+
+    assert sum(counts) == 1
+    assert len(_read_jsonl(loops[0].task_log_path)) == 1

@@ -204,7 +204,8 @@
       "env_keys": [
         "OPENCLAW_SELF_AUDIT_ENABLED",
         "OPENCLAW_SELF_AUDIT_AUTO_FIX",
-        "OPENCLAW_SELF_AUDIT_INTERVAL_SEC"
+        "OPENCLAW_SELF_AUDIT_INTERVAL_SEC",
+        "OPENCLAW_SELF_AUDIT_RUNTIME_ROOT"
       ],
       "secret_keys": [],
       "external_service": "local_service",
