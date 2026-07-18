@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-18: REDDOG_VALVE_HIGH_AUTHORITY_CLASSIFICATION_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 71, 97
+
+- Classified `VALVE_OPEN_WORKTREE_CREATE` and `VALVE_OPEN_LIVE_ENQUEUE`
+  intent as HIGH authority even when `requested_operation` is otherwise LOW.
+- Normalized the effective default valve state before classification and
+  serialization so empty input cannot emit an unclassified WORKTREE grant.
+- Applied the classification at authority-profile seed, source, and delegated-
+  authority signing boundaries. This fix issues no authority or work itself.
+
 ## 2026-07-18: REDDOG_RESIDENT_LIVE_CANARY_PHASE1
 
 **WSP Protocol**: WSP 00, 06, 15, 22, 46, 62, 71, 97

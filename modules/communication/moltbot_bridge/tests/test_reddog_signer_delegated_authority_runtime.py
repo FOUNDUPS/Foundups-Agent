@@ -314,9 +314,37 @@ def test_high_authority_requires_consensus_and_sovereign_authorization() -> None
     assert RuntimeRejectCode.HIGH_AUTHORITY_NEEDS_COSIGN in result.receipt.rejection_reasons
 
 
+def test_worktree_valve_intent_is_high_authority_even_for_low_operation() -> None:
+    result, _, _, _ = _issue(
+        requested_operation="inspect_repo",
+        consensus_receipt_digest=None,
+        sovereign_authorization_digest=None,
+    )
+    assert result.accepted is False
+    assert RuntimeRejectCode.HIGH_AUTHORITY_NEEDS_COSIGN in result.receipt.rejection_reasons
+
+
+def test_live_enqueue_valve_intent_is_high_authority_even_for_low_operation() -> None:
+    result, _, _, _ = _issue(
+        requested_operation="inspect_repo",
+        valve_state_required="VALVE_OPEN_LIVE_ENQUEUE",
+        consensus_receipt_digest=None,
+        sovereign_authorization_digest=None,
+    )
+    assert result.accepted is False
+    assert RuntimeRejectCode.HIGH_AUTHORITY_NEEDS_COSIGN in result.receipt.rejection_reasons
+
+
+def test_high_authority_rejects_consensus_without_sovereign_authorization() -> None:
+    result, _, _, _ = _issue(sovereign_authorization_digest=None)
+    assert result.accepted is False
+    assert RuntimeRejectCode.HIGH_AUTHORITY_NEEDS_COSIGN in result.receipt.rejection_reasons
+
+
 def test_low_authority_can_issue_without_cosign() -> None:
     result, _, _, _ = _issue(
         requested_operation="inspect_repo",
+        valve_state_required="VALVE_OPEN_DRYRUN_ONLY",
         consensus_receipt_digest=None,
         sovereign_authorization_digest=None,
     )

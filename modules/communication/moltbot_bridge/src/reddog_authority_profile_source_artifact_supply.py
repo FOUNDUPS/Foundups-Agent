@@ -25,6 +25,7 @@ from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
+    HIGH_AUTHORITY_VALVE_STATES,
     PrincipalAuthorityRecord,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
@@ -223,7 +224,11 @@ def _seed_policy_reasons(seed: Mapping[str, Any], *, now_epoch: int, leeway_s: i
     if not denied_paths or not all(_path_within_foundup(path, foundup_id) for path in denied_paths):
         reasons.append(AuthorityProfileSourceSupplyReason.PATH_SCOPE)
     operation = str(seed.get("requested_operation") or "")
-    if operation in HIGH_AUTHORITY_OPERATIONS and not (
+    high_authority = (
+        operation in HIGH_AUTHORITY_OPERATIONS
+        or str(seed.get("valve_state_required") or "") in HIGH_AUTHORITY_VALVE_STATES
+    )
+    if high_authority and not (
         seed.get("consensus_receipt_digest") and seed.get("sovereign_authorization_digest")
     ):
         reasons.append(AuthorityProfileSourceSupplyReason.HIGH_AUTHORITY_COSIGN)

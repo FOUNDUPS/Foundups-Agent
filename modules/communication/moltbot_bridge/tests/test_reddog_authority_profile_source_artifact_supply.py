@@ -211,6 +211,62 @@ def test_supplier_rejects_high_authority_without_cosign(tmp_path: Path) -> None:
     assert AuthorityProfileSourceSupplyReason.HIGH_AUTHORITY_COSIGN in result.rejection_reasons
 
 
+def test_supplier_rejects_worktree_intent_for_low_operation_without_cosign(tmp_path: Path) -> None:
+    seed = _seed(requested_operation="inspect_repo")
+    seed.pop("consensus_receipt_digest")
+    seed.pop("sovereign_authorization_digest")
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=seed,
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=tmp_path / "runtime" / "authority_profile_source.json",
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSourceSupplyReason.HIGH_AUTHORITY_COSIGN in result.rejection_reasons
+
+
+def test_supplier_rejects_live_enqueue_intent_without_cosign(tmp_path: Path) -> None:
+    seed = _seed(
+        requested_operation="inspect_repo",
+        valve_state_required="VALVE_OPEN_LIVE_ENQUEUE",
+    )
+    seed.pop("consensus_receipt_digest")
+    seed.pop("sovereign_authorization_digest")
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=seed,
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=tmp_path / "runtime" / "authority_profile_source.json",
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSourceSupplyReason.HIGH_AUTHORITY_COSIGN in result.rejection_reasons
+
+
+def test_supplier_rejects_consensus_without_sovereign_authorization(tmp_path: Path) -> None:
+    seed = _seed()
+    seed.pop("sovereign_authorization_digest")
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=seed,
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=tmp_path / "runtime" / "authority_profile_source.json",
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSourceSupplyReason.HIGH_AUTHORITY_COSIGN in result.rejection_reasons
+
+
 def test_supplier_rejects_holoindex_gap_authority(tmp_path: Path) -> None:
     evidence = dict(_seed()["holoindex_evidence"])
     evidence["index_gap_detected"] = True

@@ -26,6 +26,7 @@ from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
+    HIGH_AUTHORITY_VALVE_STATES,
     PrincipalAuthorityRecord,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
@@ -187,7 +188,12 @@ def run_reddog_authority_profile_seed_supply(
     if not fid or not allow or not deny or not all(_path_within_foundup(path, fid) for path in (*allow, *deny)):
         reasons.append(AuthorityProfileSeedSupplyReason.PATH_SCOPE_INVALID)
     operation = str(requested_operation or "").strip()
-    if operation in HIGH_AUTHORITY_OPERATIONS and not (
+    effective_valve_state = str(valve_state_required or VALVE_OPEN_WORKTREE_CREATE)
+    high_authority = (
+        operation in HIGH_AUTHORITY_OPERATIONS
+        or effective_valve_state in HIGH_AUTHORITY_VALVE_STATES
+    )
+    if high_authority and not (
         consensus_receipt_digest and sovereign_authorization_digest
     ):
         reasons.append(AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING)
@@ -221,7 +227,7 @@ def run_reddog_authority_profile_seed_supply(
         requested_operation=operation,
         allowed_paths=allow,
         denied_paths=deny,
-        valve_state_required=str(valve_state_required or VALVE_OPEN_WORKTREE_CREATE),
+        valve_state_required=effective_valve_state,
         key_epoch=str(key_epoch or "epoch-1"),
         required_tests=tuple(_strings(required_tests)) or _DEFAULT_REQUIRED_TESTS,
         required_policy_gates=tuple(_strings(required_policy_gates)) or _DEFAULT_REQUIRED_POLICY_GATES,

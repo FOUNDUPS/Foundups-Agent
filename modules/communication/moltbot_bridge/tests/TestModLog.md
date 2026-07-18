@@ -1,3 +1,11 @@
+## 2026-07-18: REDDOG_VALVE_HIGH_AUTHORITY_CLASSIFICATION_PHASE1
+
+- Added signer, authority-seed, and authority-source regressions proving both
+  WORKTREE and LIVE_ENQUEUE intent require consensus plus sovereign evidence.
+- Added LOW-operation, consensus-only, and empty/None default normalization
+  adversaries while retaining a positive LOW dry-run-only issuance case.
+- Focused result: 45 tests passed across the three authority suites.
+
 ## 2026-07-18: REDDOG_RESIDENT_LIVE_CANARY_PHASE1
 
 **Files**: `test_reddog_resident_live_canary.py` (NEW)
