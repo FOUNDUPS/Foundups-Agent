@@ -16,6 +16,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    secure_append_runtime_text,
+)
+
 
 CONTROL_LOOP_RECEIPT_SCHEMA_VERSION = "reddog_resident_control_loop_receipt.v1"
 
@@ -59,13 +63,15 @@ def build_resident_control_loop_receipt(
     payload = {
         "schema_version": CONTROL_LOOP_RECEIPT_SCHEMA_VERSION,
         "accepted": bool(result.get("accepted")),
-        "status": str(result.get("status") or ""),
+        "status": _bounded_text(result.get("status"), 80),
         "rounds": _int(result.get("rounds")),
         "serial_progress": _int(result.get("serial_progress")),
         "claim_progress": _int(result.get("claim_progress")),
-        "receipt_ids": _string_tuple(result.get("receipt_ids")),
-        "rejection_reasons": _string_tuple(result.get("rejection_reasons")),
-        "created_at": str(created_at or ""),
+        "receipt_ids": _string_tuple(result.get("receipt_ids"), max_chars=256),
+        "rejection_reasons": _string_tuple(
+            result.get("rejection_reasons"), max_chars=512
+        ),
+        "created_at": _bounded_text(created_at, 80),
         "repo_root_digest": _digest(str(Path(repo_root).resolve())),
         "control_lock_acquired": result.get("control_lock_acquired") is True,
         "no_authority_issued": True,
@@ -93,18 +99,50 @@ def append_resident_control_loop_receipt(
         repo_root=repo_root,
         created_at=created_at,
     )
-    target = Path(path)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    with target.open("a", encoding="utf-8", newline="\n") as handle:
-        handle.write(json.dumps(receipt.to_dict(), sort_keys=True, separators=(",", ":")))
-        handle.write("\n")
+    line = json.dumps(receipt.to_dict(), sort_keys=True, separators=(",", ":")) + "\n"
+    if len(line.encode("utf-8")) > 64 * 1024:
+        raise ValueError("resident_control_loop_receipt_too_large")
+    secure_append_runtime_text(
+        path,
+        line,
+        repo_root=repo_root,
+        validate_existing=_validate_existing_receipts,
+    )
     return receipt
 
 
-def _string_tuple(value: Any) -> tuple[str, ...]:
+def _string_tuple(value: Any, *, max_chars: int) -> tuple[str, ...]:
     if not isinstance(value, (list, tuple)):
         return ()
-    return tuple(str(item) for item in value if str(item or "").strip())
+    return tuple(
+        _bounded_text(item, max_chars)
+        for item in value[:128]
+        if str(item or "").strip()
+    )
+
+
+def _bounded_text(value: Any, max_chars: int) -> str:
+    return str(value or "").strip()[:max_chars]
+
+
+def _validate_existing_receipts(existing: str) -> None:
+    for line_number, raw in enumerate(existing.splitlines(), start=1):
+        if not raw.strip():
+            continue
+        if len(raw.encode("utf-8")) > 64 * 1024:
+            raise ValueError(f"resident_control_loop_receipt_line_too_large:{line_number}")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                f"resident_control_loop_receipt_chain_invalid_json:{line_number}"
+            ) from exc
+        if not isinstance(payload, dict):
+            raise ValueError(f"resident_control_loop_receipt_chain_invalid:{line_number}")
+        if payload.get("schema_version") != CONTROL_LOOP_RECEIPT_SCHEMA_VERSION:
+            raise ValueError(f"resident_control_loop_receipt_schema_invalid:{line_number}")
+        if not str(payload.get("receipt_id") or "").strip():
+            raise ValueError(f"resident_control_loop_receipt_id_missing:{line_number}")
 
 
 def _int(value: Any) -> int:

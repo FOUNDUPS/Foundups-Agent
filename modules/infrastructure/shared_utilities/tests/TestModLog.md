@@ -1,5 +1,10 @@
 # TestModLog
 
+## 2026-07-18 - Runtime Artifact Safety
+
+- Added adversarial path, symlink, hardlink, device-name, root-ancestry,
+  Unicode-obfuscated secret, and bounded-redaction coverage.
+
 ====================================================================
 ## 2026-05-30 - LM Studio Dependency Boundary Gate Coverage
 - Command:

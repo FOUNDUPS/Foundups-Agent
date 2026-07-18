@@ -39,6 +39,14 @@ signer was started and no production draft PR was created by this slice; the
 live proof remains blocked until WSL receives the required outside-repo
 authority/signer artifacts and an already-running isolated signer.
 
+## 2026-07-18: REDDOG_RUNTIME_ARTIFACT_PATH_DAEMON_REDACTION_PHASE1
+
+- Confined resident runtime paths outside the repository and beneath the
+  configured runtime root.
+- Hardened resident control receipts with bounded fields, existing-chain
+  validation, locked append, descriptor revalidation, and fsync.
+- Redacted DAEmon fix details before supervisor action reporting.
+
 ## 2026-07-18: REDDOG_HOLOINDEX_QUERY_OWNER_BOUNDARY_POC_PHASE1
 
 **WSP Protocol**: WSP 00, 05, 06, 15, 22, 50, 62, 87, 96, 97

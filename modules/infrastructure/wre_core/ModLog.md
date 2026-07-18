@@ -2,6 +2,14 @@
 
 ## Chronological Change Log
 
+### [2026-07-18] - REDDOG_RUNTIME_ARTIFACT_PATH_DAEMON_REDACTION_PHASE1
+
+- Moved DAEmon self-audit tasks, proposals, escalations, state, and diagnostic
+  reports to a validated outside-repository runtime root.
+- Redacted and bounded untrusted log text before proposal, receipt, state,
+  escalation, supervisor, or feedback use.
+- Rejected escaping log globs and serialized concurrent scan cycles.
+
 ### [2026-07-18] - WRE_HOLO_SEMANTIC_PREFLIGHT_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15

@@ -39,6 +39,11 @@
 **Truth boundary**: Tests use injected probes and do not perform live side
 effects. The production live canary remains unexecuted.
 
+## 2026-07-18: Runtime Artifact Confinement
+
+- Added source-path, runtime-root escape, malformed-chain, and concurrent
+  receipt append regression tests.
+
 ## 2026-07-18: REDDOG_HOLOINDEX_QUERY_OWNER_BOUNDARY_POC_PHASE1
 
 **Files**: test_reddog_holoindex_query_boundary.py (NEW),

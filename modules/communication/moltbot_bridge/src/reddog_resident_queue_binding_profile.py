@@ -18,6 +18,11 @@ import re
 from pathlib import Path
 from typing import Mapping
 
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
+)
+
 
 ENV_REDDOG_RESIDENT_QUEUE_BINDING_PROFILE = "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"
 PROFILE_SIGNED_0102_BOUNDED_CODE = "signed_0102_bounded_code"
@@ -187,10 +192,11 @@ def resident_queue_runtime_root_path(env: Mapping[str, str], repo_root: Path | s
         path = Path(raw)
         if not path.is_absolute():
             path = root.parent / path
-        return str(path.resolve())
+        return str(validate_runtime_root_path(path, repo_root=root))
     if resident_queue_binding_profile(env) not in RESIDENT_QUEUE_PROFILES:
         return ""
-    return str(root.parent / ".reddog" / "resident" / _repo_slug(root))
+    runtime_root = root.parent / ".reddog" / "resident" / _repo_slug(root)
+    return str(validate_runtime_root_path(runtime_root, repo_root=root))
 
 
 def resident_queue_runtime_file_path(
@@ -198,18 +204,30 @@ def resident_queue_runtime_file_path(
     repo_root: Path | str,
     env_name: str,
 ) -> str:
-    """Return an explicit env path or a profile-derived runtime file path."""
+    """Return a confined explicit or profile-derived runtime file path."""
 
-    raw = str(env.get(env_name) or "").strip()
-    if raw:
-        return raw
     filename = PROFILE_RUNTIME_PATH_FILENAMES.get(env_name)
     if not filename:
         return ""
-    root = resident_queue_runtime_root_path(env, repo_root)
-    if not root:
+    raw = str(env.get(env_name) or "").strip()
+    runtime_root = resident_queue_runtime_root_path(env, repo_root)
+    if raw:
+        return str(
+            validate_runtime_artifact_path(
+                raw,
+                repo_root=repo_root,
+                allowed_root=runtime_root or None,
+            )
+        )
+    if not runtime_root:
         return ""
-    return str(Path(root) / filename)
+    return str(
+        validate_runtime_artifact_path(
+            Path(runtime_root) / filename,
+            repo_root=repo_root,
+            allowed_root=runtime_root,
+        )
+    )
 
 
 def resident_queue_artifact_generator_mode(env: Mapping[str, str]) -> str:

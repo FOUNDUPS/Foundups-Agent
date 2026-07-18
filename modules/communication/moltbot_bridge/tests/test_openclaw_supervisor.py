@@ -1609,3 +1609,68 @@ def test_maintenance_loop_e2e_self_audit_via_agentdb(tmp_path, monkeypatch):
     assert result["plan"]["task"]["family"] == "self_audit_fix"
     assert result["action_result"]["ok"] is True
     assert "self_audit" in result["action_result"]["executor"]
+
+
+def test_supervisor_action_reporter_recursively_redacts_nested_secrets(tmp_path):
+    reports = []
+    supervisor = OpenClawSupervisor(
+        tmp_path,
+        action_reporter=lambda action, result, details: reports.append(
+            (action, result, details)
+        ),
+    )
+    secrets = (
+        "openrouter-secret-value",
+        "bearer-secret-value",
+        "query-secret-value",
+        "opaque-token-value",
+    )
+
+    supervisor._action_reporter(
+        "supervisor_test",
+        "Authorization: Bearer bearer-secret-value",
+        {
+            "OPENROUTER_API_KEY": secrets[0],
+            "nested": {
+                "header": "Authorization: Bearer bearer-secret-value",
+                "url": "https://example.test/?token=query-secret-value",
+                "token": "opaque-token-value",
+            },
+        },
+    )
+
+    serialized = json.dumps(reports, default=str)
+    for secret in secrets:
+        assert secret not in serialized
+    assert "[REDACTED]" in serialized
+
+
+def test_supervisor_pattern_memory_receives_redacted_context_only(tmp_path):
+    class _Memory:
+        def __init__(self):
+            self.outcomes = []
+
+        def store_outcome(self, outcome):
+            self.outcomes.append(outcome)
+
+    supervisor = OpenClawSupervisor(tmp_path, action_reporter=lambda *_: None)
+    memory = _Memory()
+    supervisor._pattern_memory = memory
+    with patch.object(supervisor, "_record_continuity_breadcrumb"):
+        supervisor._remember(
+            {},
+            {"action": "test", "detail": "AWS_SECRET_ACCESS_KEY=aws-secret-value"},
+            {
+                "ok": True,
+                "detail": "Cookie: session=second-cookie-secret",
+                "token": "pattern-memory-token",
+            },
+            {"ok": True, "fidelity": 1.0},
+        )
+
+    assert len(memory.outcomes) == 1
+    serialized = json.dumps(memory.outcomes[0].__dict__, default=str)
+    assert "aws-secret-value" not in serialized
+    assert "second-cookie-secret" not in serialized
+    assert "pattern-memory-token" not in serialized
+    assert "[REDACTED]" in serialized

@@ -26,6 +26,14 @@ from modules.infrastructure.wre_core.src.improvement_job_contract import (
     create_improvement_job,
 )
 from modules.infrastructure.wre_core.src.reddog_direction import RedDogDirector
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    redact_runtime_text,
+    runtime_operation_lock,
+    secure_append_runtime_text,
+    secure_read_confined_bytes,
+    secure_replace_runtime_text,
+    validate_runtime_root_path,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +49,9 @@ class SelfAuditEvent:
     auto_fix_result: str
     improvement_job_id: str = ""
     improvement_direction: str = ""
+    redaction_applied: bool = False
+    redaction_replacements: int = 0
+    line_truncated: bool = False
 
 
 @dataclass
@@ -124,22 +135,13 @@ class DaemonSelfAuditLoop:
             os.getenv("OPENCLAW_SELF_AUDIT_ESCALATE_ALLOW_SHELL_CMD", "0").strip() == "1"
         )
 
-        self.task_log_path = (
-            self.repo_root
-            / "modules/infrastructure/wre_core/reports/daemon_self_audit_tasks.jsonl"
-        )
+        self.runtime_root = self._resolve_runtime_root()
+        self.task_log_path = self.runtime_root / "daemon_self_audit_tasks.jsonl"
         self.improvement_job_log_path = (
-            self.repo_root
-            / "modules/infrastructure/wre_core/reports/daemon_self_audit_improvement_jobs.jsonl"
+            self.runtime_root / "daemon_self_audit_improvement_jobs.jsonl"
         )
-        self.escalation_log_path = (
-            self.repo_root
-            / "modules/infrastructure/wre_core/reports/daemon_self_audit_escalations.jsonl"
-        )
-        self.state_path = (
-            self.repo_root
-            / "modules/infrastructure/wre_core/reports/daemon_self_audit_state.json"
-        )
+        self.escalation_log_path = self.runtime_root / "daemon_self_audit_escalations.jsonl"
+        self.state_path = self.runtime_root / "daemon_self_audit_state.json"
         self._offsets: Dict[str, int] = {}
         self._seen: Dict[str, float] = {}
         self._last_fix_at: Dict[str, float] = {}
@@ -149,6 +151,8 @@ class DaemonSelfAuditLoop:
         self._pattern_memory: Any = None
         self._thread: Optional[threading.Thread] = None
         self._stop = threading.Event()
+        self._scan_lock = threading.Lock()
+        self._state_loaded_mtime_ns = 0
         self._load_state()
 
     def start(self) -> None:
@@ -166,22 +170,38 @@ class DaemonSelfAuditLoop:
 
     def scan_once(self) -> int:
         """Run one scan cycle. Returns number of events opened."""
+        with self._scan_lock:
+            return self._scan_once_locked()
+
+    def _scan_once_locked(self) -> int:
+        with runtime_operation_lock(self.runtime_root / "daemon_self_audit.scan"):
+            self._refresh_state_if_changed()
+            return self._scan_once_with_lease()
+
+    def _scan_once_with_lease(self) -> int:
         events = 0
         for log_file in self._resolve_log_files():
             lines = self._tail_new_lines(log_file)
             for line in lines:
-                line = line.strip()
-                if not line:
+                redacted = redact_runtime_text(line, max_chars=4096)
+                safe_line = redacted.text.strip()
+                if not safe_line:
                     continue
-                if not self._is_error_line(line):
+                if not self._is_error_line(safe_line):
                     continue
-                signature = self._normalize_signature(line)
+                signature = self._normalize_signature(safe_line)
                 if self._is_noise_signature(signature):
                     continue
                 if self._is_duplicate(signature):
                     continue
                 self._seen[signature] = time.time()
-                event = self._open_fix_task(log_file, signature, line)
+                event = self._open_fix_task(
+                    log_file,
+                    signature,
+                    safe_line,
+                    redaction_replacements=redacted.replacements,
+                    line_truncated=redacted.truncated,
+                )
                 self._persist_event(event)
                 self._increment_counter("self_audit_events_total")
                 self._record_signature_event(event)
@@ -207,9 +227,31 @@ class DaemonSelfAuditLoop:
         globs = [part.strip() for part in re.split(r"[;,\n]+", raw) if part.strip()]
         files: List[Path] = []
         for pattern in globs:
+            if not self._valid_log_glob(pattern):
+                continue
             files.extend(self.repo_root.glob(pattern))
         # stable ordering for deterministic state writes
-        return sorted({p.resolve() for p in files if p.is_file()})
+        resolved: set[Path] = set()
+        for path in files:
+            try:
+                candidate = path.resolve()
+                candidate.relative_to(self.repo_root)
+            except (OSError, ValueError):
+                continue
+            if candidate.is_file():
+                resolved.add(candidate)
+        return sorted(resolved)
+
+    @staticmethod
+    def _valid_log_glob(pattern: str) -> bool:
+        if not pattern or "\x00" in pattern:
+            return False
+        normalized = pattern.replace("\\", "/")
+        if normalized.startswith(("/", "//?/", "//./")):
+            return False
+        if re.match(r"^[a-zA-Z]:", normalized):
+            return False
+        return ".." not in Path(normalized).parts
 
     def _tail_new_lines(self, path: Path) -> List[str]:
         key = str(path)
@@ -223,11 +265,15 @@ class DaemonSelfAuditLoop:
             offset = 0
         read_from = max(0, size - self.max_read_bytes) if offset == 0 else offset
         try:
-            with path.open("r", encoding="utf-8", errors="replace") as handle:
-                handle.seek(read_from)
-                text = handle.read()
-                self._offsets[key] = handle.tell()
-        except Exception:
+            raw, next_offset = secure_read_confined_bytes(
+                path,
+                allowed_root=self.repo_root,
+                offset=read_from,
+                max_bytes=self.max_read_bytes,
+            )
+            text = raw.decode("utf-8", errors="replace")
+            self._offsets[key] = next_offset
+        except (OSError, ValueError):
             return []
         return text.splitlines()
 
@@ -236,7 +282,8 @@ class DaemonSelfAuditLoop:
 
     @staticmethod
     def _normalize_signature(line: str) -> str:
-        stripped = re.sub(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[,.\d]*", "", line)
+        safe = redact_runtime_text(line, max_chars=4096).text
+        stripped = re.sub(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[,.\d]*", "", safe)
         stripped = re.sub(r"\b[0-9a-f]{8,}\b", "<hex>", stripped, flags=re.IGNORECASE)
         stripped = re.sub(r"\s+", " ", stripped).strip().lower()
         return stripped[:240]
@@ -284,7 +331,18 @@ class DaemonSelfAuditLoop:
         allow_bonus = 0.2 if fix_name in self.allowed_fixes else 0.0
         return success_rate - (failure_rate * 0.5) + allow_bonus
 
-    def _open_fix_task(self, source_file: Path, signature: str, line: str) -> SelfAuditEvent:
+    def _open_fix_task(
+        self,
+        source_file: Path,
+        signature: str,
+        line: str,
+        *,
+        redaction_replacements: int = 0,
+        line_truncated: bool = False,
+    ) -> SelfAuditEvent:
+        safe_signature = self._normalize_signature(signature)
+        safe_line_result = redact_runtime_text(line, max_chars=600)
+        safe_line = safe_line_result.text
         recommended = self._recommend_fix(signature)
         attempted = False
         result = "not_attempted"
@@ -293,8 +351,8 @@ class DaemonSelfAuditLoop:
         if self.improvement_proposals_enabled:
             improvement_job_id, improvement_direction = self._emit_improvement_proposal(
                 source_file=source_file,
-                signature=signature,
-                line=line,
+                signature=safe_signature,
+                line=safe_line,
                 recommended_fix=recommended,
             )
             if improvement_job_id:
@@ -306,17 +364,23 @@ class DaemonSelfAuditLoop:
                 self._increment_counter("self_audit_auto_fix_success")
             elif attempted:
                 self._increment_counter("self_audit_auto_fix_fail")
-        self._record_fix_feedback(recommended, attempted, result)
+        safe_result = redact_runtime_text(result, max_chars=600).text
+        self._record_fix_feedback(recommended, attempted, safe_result)
         return SelfAuditEvent(
             timestamp=time.time(),
             source_file=str(source_file),
-            signature=signature,
-            line=line[:600],
+            signature=safe_signature,
+            line=safe_line,
             recommended_fix=recommended,
             auto_fix_attempted=attempted,
-            auto_fix_result=result,
+            auto_fix_result=safe_result,
             improvement_job_id=improvement_job_id,
             improvement_direction=improvement_direction,
+            redaction_applied=(redaction_replacements + safe_line_result.replacements) > 0,
+            redaction_replacements=(
+                redaction_replacements + safe_line_result.replacements
+            ),
+            line_truncated=line_truncated or safe_line_result.truncated,
         )
 
     def _emit_improvement_proposal(
@@ -327,6 +391,8 @@ class DaemonSelfAuditLoop:
         line: str,
         recommended_fix: str,
     ) -> Tuple[str, str]:
+        signature = self._normalize_signature(signature)
+        line = redact_runtime_text(line, max_chars=600).text
         rel_source = self._relative_source_path(source_file)
         improvement_type = self._improvement_type_for_fix(recommended_fix)
         scope = ImprovementScope(
@@ -359,9 +425,13 @@ class DaemonSelfAuditLoop:
             "no_queue_mutation_performed": True,
             "no_pattern_memory_write_performed": True,
         }
-        self.improvement_job_log_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.improvement_job_log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(row, ensure_ascii=True, default=str) + "\n")
+        secure_append_runtime_text(
+            self.improvement_job_log_path,
+            json.dumps(row, ensure_ascii=True, default=str) + "\n",
+            repo_root=self.repo_root,
+            allowed_root=self.runtime_root,
+            validate_existing=_validate_jsonl,
+        )
         return job.job_id, directed.direction.value
 
     def _relative_source_path(self, source_file: Path) -> str:
@@ -586,9 +656,7 @@ class DaemonSelfAuditLoop:
             return False, f"health_error:{exc.__class__.__name__}"
 
     def _diagnose_microphone_device(self) -> Tuple[bool, str]:
-        report_path = (
-            self.repo_root / "modules/infrastructure/wre_core/reports/microphone_diagnostics.json"
-        )
+        report_path = self.runtime_root / "microphone_diagnostics.json"
         payload: Dict[str, Any] = {"timestamp": time.time(), "status": "unknown"}
         try:
             import sounddevice as sd  # type: ignore
@@ -612,13 +680,23 @@ class DaemonSelfAuditLoop:
                 }
             )
         except Exception as exc:
-            payload.update({"status": "error", "error": str(exc)})
-            report_path.parent.mkdir(parents=True, exist_ok=True)
-            report_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+            payload.update(
+                {"status": "error", "error": redact_runtime_text(exc, max_chars=600).text}
+            )
+            secure_replace_runtime_text(
+                report_path,
+                json.dumps(payload, indent=2),
+                repo_root=self.repo_root,
+                allowed_root=self.runtime_root,
+            )
             return False, "microphone_diagnostics_failed"
 
-        report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        secure_replace_runtime_text(
+            report_path,
+            json.dumps(payload, indent=2),
+            repo_root=self.repo_root,
+            allowed_root=self.runtime_root,
+        )
         return True, "microphone_diagnostics_written"
 
     def _verify_dae_event_store(self) -> Tuple[bool, str]:
@@ -630,9 +708,7 @@ class DaemonSelfAuditLoop:
         if db_path is None:
             return False, "dae_event_store_not_found"
 
-        report_path = (
-            self.repo_root / "modules/infrastructure/wre_core/reports/dae_event_store_health.json"
-        )
+        report_path = self.runtime_root / "dae_event_store_health.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             with sqlite3.connect(str(db_path)) as conn:
@@ -656,7 +732,12 @@ class DaemonSelfAuditLoop:
                 "max_sequence_id": max_seq,
                 "duplicate_sequence_rows": dupes,
             }
-            report_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+            secure_replace_runtime_text(
+                report_path,
+                json.dumps(payload, indent=2),
+                repo_root=self.repo_root,
+                allowed_root=self.runtime_root,
+            )
             if integrity != "ok" or int(dupes) > 0:
                 return False, "event_store_integrity_failed"
             return True, "event_store_verified"
@@ -664,9 +745,14 @@ class DaemonSelfAuditLoop:
             payload = {
                 "timestamp": time.time(),
                 "db_path": str(db_path),
-                "error": str(exc),
+                "error": redact_runtime_text(exc, max_chars=600).text,
             }
-            report_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+            secure_replace_runtime_text(
+                report_path,
+                json.dumps(payload, indent=2),
+                repo_root=self.repo_root,
+                allowed_root=self.runtime_root,
+            )
             return False, "event_store_verify_exception"
 
     def _get_pattern_memory(self) -> Any:
@@ -693,28 +779,43 @@ class DaemonSelfAuditLoop:
             logger.debug("[SELF-AUDIT] counter increment failed (%s): %s", counter_name, exc)
 
     def _persist_event(self, event: SelfAuditEvent) -> None:
-        self.task_log_path.parent.mkdir(parents=True, exist_ok=True)
         row = asdict(event)
-        with self.task_log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(row, ensure_ascii=True) + "\n")
+        for field in ("signature", "line", "auto_fix_result", "improvement_direction"):
+            row[field] = redact_runtime_text(row.get(field), max_chars=600).text
+        secure_append_runtime_text(
+            self.task_log_path,
+            json.dumps(row, ensure_ascii=True) + "\n",
+            repo_root=self.repo_root,
+            allowed_root=self.runtime_root,
+            validate_existing=_validate_jsonl,
+        )
 
     def _persist_escalation(self, escalation: SelfAuditEscalation) -> None:
-        self.escalation_log_path.parent.mkdir(parents=True, exist_ok=True)
         row = {
             "timestamp": escalation.timestamp,
-            "signature": escalation.signature,
+            "signature": redact_runtime_text(escalation.signature, max_chars=240).text,
             "source_file": escalation.source_file,
             "event_count": escalation.event_count,
             "recommended_fix": escalation.recommended_fix,
-            "last_fix_result": escalation.last_fix_result,
+            "last_fix_result": redact_runtime_text(
+                escalation.last_fix_result, max_chars=600
+            ).text,
             "dispatch_attempted": escalation.dispatch_attempted,
-            "dispatch_result": escalation.dispatch_result,
+            "dispatch_result": redact_runtime_text(
+                escalation.dispatch_result, max_chars=600
+            ).text,
         }
-        with self.escalation_log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+        secure_append_runtime_text(
+            self.escalation_log_path,
+            json.dumps(row, ensure_ascii=True) + "\n",
+            repo_root=self.repo_root,
+            allowed_root=self.runtime_root,
+            validate_existing=_validate_jsonl,
+        )
 
     def _load_state(self) -> None:
         if not self.state_path.exists():
+            self._state_loaded_mtime_ns = 0
             return
         try:
             payload = json.loads(self.state_path.read_text(encoding="utf-8"))
@@ -728,6 +829,7 @@ class DaemonSelfAuditLoop:
             self._last_escalation_at = {
                 k: float(v) for k, v in (payload.get("last_escalation_at", {}) or {}).items()
             }
+            self._state_loaded_mtime_ns = self.state_path.stat().st_mtime_ns
         except Exception:
             self._offsets = {}
             self._seen = {}
@@ -735,6 +837,14 @@ class DaemonSelfAuditLoop:
             self._fix_stats = {}
             self._signature_stats = {}
             self._last_escalation_at = {}
+
+    def _refresh_state_if_changed(self) -> None:
+        try:
+            current_mtime = self.state_path.stat().st_mtime_ns
+        except OSError:
+            current_mtime = 0
+        if current_mtime > self._state_loaded_mtime_ns:
+            self._load_state()
 
     def _save_state(self) -> None:
         payload = {
@@ -745,5 +855,45 @@ class DaemonSelfAuditLoop:
             "signature_stats": self._signature_stats,
             "last_escalation_at": self._last_escalation_at,
         }
-        self.state_path.parent.mkdir(parents=True, exist_ok=True)
-        self.state_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        secure_replace_runtime_text(
+            self.state_path,
+            json.dumps(payload, indent=2),
+            repo_root=self.repo_root,
+            allowed_root=self.runtime_root,
+        )
+        self._state_loaded_mtime_ns = self.state_path.stat().st_mtime_ns
+
+    def _resolve_runtime_root(self) -> Path:
+        explicit = os.getenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", "").strip()
+        resident_root = os.getenv("REDDOG_RESIDENT_RUNTIME_ROOT", "").strip()
+        if explicit:
+            candidate = Path(explicit)
+            if not candidate.is_absolute():
+                candidate = self.repo_root.parent / candidate
+        elif resident_root:
+            base = Path(resident_root)
+            if not base.is_absolute():
+                base = self.repo_root.parent / base
+            candidate = base / "daemon_self_audit"
+        else:
+            slug = re.sub(r"[^a-zA-Z0-9._-]+", "-", self.repo_root.name).strip("-_")
+            candidate = (
+                self.repo_root.parent
+                / ".reddog"
+                / "resident"
+                / (slug or "repository")
+                / "daemon_self_audit"
+            )
+        return validate_runtime_root_path(candidate, repo_root=self.repo_root)
+
+
+def _validate_jsonl(existing: str) -> None:
+    for line_number, raw in enumerate(existing.splitlines(), start=1):
+        if not raw.strip():
+            continue
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"daemon_self_audit_jsonl_invalid:{line_number}") from exc
+        if not isinstance(payload, dict):
+            raise ValueError(f"daemon_self_audit_jsonl_not_object:{line_number}")

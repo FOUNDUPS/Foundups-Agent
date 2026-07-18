@@ -36,6 +36,7 @@
 | OPENCLAW_DEP_SECURITY_NODE_LOCK_SCOPE | all | Node lockfile coverage (`all` or `root`) |
 | OPENCLAW_DEP_SECURITY_CHECK_RUST | 1 | Enable Rust CVE checks when Cargo.lock exists |
 | OPENCLAW_SELF_AUDIT_ENABLED | 1 | Start 0102 daemon self-audit loop at startup |
+| OPENCLAW_SELF_AUDIT_RUNTIME_ROOT | (outside repo default) | External root for redacted self-audit receipts, state, and diagnostics |
 | OPENCLAW_SELF_AUDIT_AUTO_FIX | 1 | Enable policy-bound automatic remediations |
 | OPENCLAW_SELF_AUDIT_ALLOWED_FIXES | start_ironclaw_gateway,diagnose_microphone_device,verify_dae_event_store | Allowlisted auto-fix handlers |
 | OPENCLAW_SELF_AUDIT_ALLOW_SHELL_START_CMD | 0 | Keep startup command dispatch on `shell=False` by default |
