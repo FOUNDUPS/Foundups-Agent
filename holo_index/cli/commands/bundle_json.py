@@ -723,6 +723,37 @@ def _lexical_task_retrieval(repo_root, task: str, limit: int, ssd_path: str, mod
     }
 
 
+def _merge_direct_read_telemetry(primary, secondary):
+    """Merge independently governed read receipts without losing rejections."""
+    if not primary:
+        return secondary
+    if not secondary:
+        return primary
+    merged = dict(primary)
+    for key in ("direct_read_paths", "direct_read_rejected", "direct_read_truncated"):
+        merged[key] = list(primary.get(key) or []) + list(secondary.get(key) or [])
+    merged["direct_read_bytes"] = int(primary.get("direct_read_bytes") or 0) + int(secondary.get("direct_read_bytes") or 0)
+    merged["direct_read_fallback_used"] = bool(
+        primary.get("direct_read_fallback_used") or secondary.get("direct_read_fallback_used")
+    )
+    return merged
+
+
+def _apply_repo_audit_grounding(repo_root, task, search_payload):
+    """Attach governed audit evidence after normal HoloIndex retrieval."""
+    from holo_index.cli.repo_audit_discovery import build_repo_audit_grounding
+
+    audit = build_repo_audit_grounding(repo_root, task, search_payload)
+    if audit["hits"]:
+        search_payload["code_hits"] = audit["hits"] + list(search_payload.get("code_hits") or [])
+        search_payload["code"] = search_payload["code_hits"]
+        meta = search_payload.get("metadata")
+        if isinstance(meta, dict):
+            meta["code_count"] = len(search_payload["code_hits"])
+            meta["repo_audit_grounding_applied"] = True
+    return audit["receipt"], audit["telemetry"]
+
+
 def handle_bundle_json(args):
     """Handle --bundle-json command. Returns True if handled, False otherwise."""
     if not getattr(args, "bundle_json", False):
@@ -785,6 +816,10 @@ def handle_bundle_json(args):
     if module_dir is not None:
         structured_memory = _artifact_snapshot(module_dir)
 
+    # HoloIndex evidence is evaluated first.  Audit prompts with insufficient
+    # source + independent evidence receive a fixed-policy, read-only fallback.
+    repo_audit_grounding, direct_read = _apply_repo_audit_grounding(repo_root, task, search_payload)
+
     # REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3): governed direct-read.
     # When the extension names must-include target paths (from an explicit
     # "Required direct-read targets" prompt list) that the semantic bundle did
@@ -799,7 +834,6 @@ def handle_bundle_json(args):
         else:
             must_include.extend([p for p in str(must_include_raw).split(",") if p.strip()])
 
-    direct_read = None
     if must_include:
         existing_locations = set()
         try:
@@ -810,7 +844,7 @@ def handle_bundle_json(args):
         except Exception:
             existing_locations = set()
         fetched = _direct_read_fetch(repo_root, must_include, seen_locations=existing_locations)
-        direct_read = fetched["telemetry"]
+        direct_read = _merge_direct_read_telemetry(direct_read, fetched["telemetry"])
         if fetched["hits"]:
             try:
                 # Prepend direct-read hits (highest priority) so recall + display
@@ -834,6 +868,7 @@ def handle_bundle_json(args):
         "structured_memory": structured_memory,
         "task_retrieval": search_payload,
         "direct_read": direct_read,
+        "repo_audit_grounding": repo_audit_grounding,
     }
 
     sys.stdout.write(_json.dumps(bundle, ensure_ascii=True) + "\n")

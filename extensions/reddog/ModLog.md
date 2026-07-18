@@ -2,6 +2,13 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-20 - REDDOG_REPO_AUDIT_GROUNDING_FALLBACK_PHASE1 (0.4.10 unchanged)
+
+- Added entity-to-path repository/module audit grounding without replacing the generation-bound semantic owner, focused deep-dive selection, progress, usage, or signed Fusion panel behavior already present in 0.4.10.
+- Structured Holo candidates must yield readable implementation source plus independent test/contract evidence; incomplete evidence activates bounded deterministic discovery and final protected packing, then fails locally if source/test non-vacuity does not survive context assembly.
+- Preserved the primary Fusion `review_packet` across schema repair, records repair separately, and treats empty/`None` critics as abstentions under defensive cybersecurity wording.
+- No provider/model call, HoloIndex re-index, repository mutation, live enqueue, Hermes dispatch, PR, or merge authority was added.
+
 ## 2026-07-20 - REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1 (0.4.10)
 
 - Added digest-bound, hash-chained Fusion progress events and per-call OpenRouter usage/routing receipts.

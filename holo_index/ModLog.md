@@ -1,5 +1,12 @@
 # HoloIndex Package ModLog
 
+## [2026-07-20] HOLOINDEX_REDDOG_REPO_AUDIT_GROUNDING_FALLBACK_PHASE1
+
+- Added read-only `repo_audit_grounding.v1` generation after the existing bundle retrieval path. Generation-bound semantic ownership is unchanged; the structured bundle supplies only bounded candidate/direct-read evidence.
+- Strong coverage requires successfully secure-read implementation source plus independent test/contract evidence. Missing, stale, or denied candidates activate deterministic discovery and merged/deduplicated selection.
+- Final evidence is capped at 12 paths, 12KB per file, and 96KB total; candidate scans are separately capped at 4KB per file and 512KB total. Fixed private/tool-state roots, unsafe paths, secrets, binaries, oversize files, links/reparse points, and identity races fail closed.
+- Added focused offline tests; no semantic model call, network access, re-index, or write authority is introduced.
+
 ## [2026-07-19] HOLOINDEX_VERIFIED_UNCHANGED_COLLECTION_CARRY_FORWARD_PHASE1
 
 - Added maintenance-time proof for unchanged baseline collections during a

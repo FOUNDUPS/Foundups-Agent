@@ -14,6 +14,7 @@ const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
+const repoAuditGrounding = require('./repo_audit_grounding');
 const EXTENSION_VERSION = '0.4.10';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
@@ -306,6 +307,22 @@ function buildRuntimeConsumptionGate(result, validationState, mode, substantiveT
     requires_judgment_verification: judgment && judgment.applied === true,
     requires_fusion_quorum: mode === 'foundups_fusion'
   };
+}
+
+function mergeSuccessfulSchemaRepair(primaryResult, repairResult, mergedContent, mode) {
+  const primary = primaryResult && typeof primaryResult === 'object' ? primaryResult : {};
+  const repair = repairResult && typeof repairResult === 'object' ? repairResult : {};
+  return Object.assign({}, primary, {
+    content: String(mergedContent || ''),
+    mode: mode,
+    schema_repair_telemetry: {
+      applied: true,
+      ok: repair.ok === true,
+      mode: repair.mode || 'openrouter_single',
+      lead_model: repair.lead_model || null,
+      made_network_call: repair.made_network_call !== false
+    }
+  });
 }
 
 function formatJudgmentVerificationLines(validationState) {
@@ -1733,10 +1750,13 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   const scorecard = (contextPacket && contextPacket.holoindex_scorecard)
     || extractHoloIndexScorecard(contextMode, contextPacket && contextPacket.holoindex_meta);
   const rejectionReasons = [];
+  const repoAuditCoverage = repoAuditGrounding.evaluateRepoAuditContext(taskText, contextPacket);
   const discoveredRepoFiles = scorecard && Array.isArray(scorecard.repo_deep_dive_targets)
     ? scorecard.repo_deep_dive_targets
     : [];
-  const repoFiles = uniqueStrings(typedTargets.repo_file_targets.concat(discoveredRepoFiles));
+  const repoFiles = repoAuditCoverage.applied
+    ? repoAuditCoverage.effective_repo_file_targets
+    : uniqueStrings(typedTargets.repo_file_targets.concat(discoveredRepoFiles));
   const explicitSemanticTarget = removeQuotedReferenceBlocks(taskText)
     .split(/\r?\n/)
     .some((line) => semanticHeaderBody(line.trim()) !== null);
@@ -1769,6 +1789,13 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     if (scorecard && Array.isArray(scorecard.required_targets_missing) && scorecard.required_targets_missing.length) {
       rejectionReasons.push('repo_file_targets_missing');
     }
+  }
+  if (repoAuditCoverage.applied && !repoAuditCoverage.passed) {
+    rejectionReasons.push('codebase_audit_evidence_incomplete');
+    rejectionReasons.push.apply(rejectionReasons, repoAuditCoverage.rejection_reasons || []);
+  } else if (repoAuditGrounding.detectRepoAuditIntent(taskText).audit_intent && !repoAuditCoverage.applied) {
+    rejectionReasons.push('codebase_audit_evidence_incomplete');
+    rejectionReasons.push('repo_audit_grounding_receipt_missing');
   }
 
   if (isRepoDeepDiveRequest(taskText) && (!scorecard || scorecard.repo_deep_dive_gate_passed !== true)) {
@@ -1815,6 +1842,9 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     semantic_grounding_required: semantic.length > 0,
     external_research_required: external.length > 0,
     quoted_blocks_context_only: quoted.length > 0,
+    repo_audit_grounding_applied: repoAuditCoverage.applied === true,
+    repo_audit_grounding_passed: repoAuditCoverage.passed === true,
+    repo_audit_entity: repoAuditCoverage.entity || null,
     no_model_call_when_failed: rejectionReasons.length > 0,
     typed_targets: Object.assign({}, typedTargets, {
       semantic_targets: semantic.slice()
@@ -1827,9 +1857,11 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
 
 function buildGroundingPreflightBlockedResult(preflight) {
   const p = preflight && typeof preflight === 'object' ? preflight : {};
+  const auditIncomplete = Array.isArray(p.rejection_reasons)
+    && p.rejection_reasons.includes('codebase_audit_evidence_incomplete');
   return {
     ok: false,
-    reason: 'grounding_preflight_blocked',
+    reason: auditIncomplete ? 'codebase_audit_evidence_incomplete' : 'grounding_preflight_blocked',
     detail: (Array.isArray(p.rejection_reasons) && p.rejection_reasons.length)
       ? p.rejection_reasons.join(',')
       : 'grounding_preflight_failed',
@@ -2112,6 +2144,16 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     semantic_evidence_hits: Array.isArray(meta.semantic_evidence_hits) ? meta.semantic_evidence_hits : [],
     external_research_targets_count: meta.external_research_targets_count !== undefined ? meta.external_research_targets_count : 'unknown',
     quoted_reference_blocks_count: meta.quoted_reference_blocks_count !== undefined ? meta.quoted_reference_blocks_count : 'unknown',
+    repo_audit_grounding: meta.repo_audit_grounding && typeof meta.repo_audit_grounding === 'object'
+      ? meta.repo_audit_grounding
+      : null,
+    repo_audit_grounding_applied: !!(meta.repo_audit_grounding && meta.repo_audit_grounding.applied === true),
+    repo_audit_entity: meta.repo_audit_grounding && meta.repo_audit_grounding.entity
+      ? meta.repo_audit_grounding.entity
+      : null,
+    repo_audit_coverage_verdict: meta.repo_audit_grounding && meta.repo_audit_grounding.coverage
+      ? meta.repo_audit_grounding.coverage.verdict
+      : 'not_applicable',
     grounding_preflight_applied: meta.grounding_preflight_applied !== undefined ? meta.grounding_preflight_applied : 'unknown',
     grounding_preflight_passed: meta.grounding_preflight_passed !== undefined ? meta.grounding_preflight_passed : 'unknown',
     grounding_preflight_rejection_reasons: Array.isArray(meta.grounding_preflight_rejection_reasons) ? meta.grounding_preflight_rejection_reasons : 'unknown',
@@ -2221,6 +2263,9 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- semantic_target_coverage_digest: ' + scorecard.semantic_target_coverage_digest,
     '- external_research_targets_count: ' + scorecard.external_research_targets_count,
     '- quoted_reference_blocks_count: ' + scorecard.quoted_reference_blocks_count,
+    '- repo_audit_grounding_applied: ' + scorecard.repo_audit_grounding_applied,
+    '- repo_audit_entity: ' + (scorecard.repo_audit_entity || 'none'),
+    '- repo_audit_coverage_verdict: ' + scorecard.repo_audit_coverage_verdict,
     '- grounding_preflight_applied: ' + scorecard.grounding_preflight_applied,
     '- grounding_preflight_passed: ' + scorecard.grounding_preflight_passed,
     '- grounding_preflight_rejection_reasons: ' + (Array.isArray(scorecard.grounding_preflight_rejection_reasons) ? (scorecard.grounding_preflight_rejection_reasons.length ? scorecard.grounding_preflight_rejection_reasons.join(', ') : '(none)') : scorecard.grounding_preflight_rejection_reasons),
@@ -4706,7 +4751,7 @@ function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, re
     return 'Explicit Fusion alias path: black-box synthesis; critic transcripts not exposed.';
   }
   if (tier === 'ULTRA') {
-    return 'Fusion manual panel: ULTRA-tier security/runtime/auth/public-surface work needs adversarial critics; context=' + resolvedContextMode + ' includes git + Skillz/Rolodex handoff candidates.';
+    return 'Fusion manual panel: ULTRA-tier security/runtime/auth/public-surface work needs critical review; context=' + resolvedContextMode + ' includes git + Skillz/Rolodex handoff candidates.';
   }
   return 'Fusion manual panel: HIGH-tier WSP/architecture/operational work; auditable lead+critic+synthesis trail; context=' + resolvedContextMode + ' includes Skillz/Rolodex discovery for governed handoff only.';
 }
@@ -5238,7 +5283,7 @@ const EFFORT_GUIDANCE = {
   auto: 'Effort: AUTO. Classify risk from supplied context. Use high rigor for WSP/security/architecture, normal rigor for simple smoke checks.',
   regular: 'Effort: REGULAR. Keep concise, verify core claims, avoid broad architecture unless needed.',
   high: 'Effort: HIGH. Run micro/macro reasoning over supplied context, compare alternatives, and include specific tests.',
-  ultra: 'Effort: ULTRA. Treat as adversarial architecture review: include competing interpretations, non-vacuity checks, and failure-mode analysis.'
+  ultra: 'Effort: ULTRA. Critically review the architecture: include competing interpretations, non-vacuity checks, and failure-mode analysis.'
 };
 
 function activate(context) {
@@ -5651,7 +5696,7 @@ function wireFusionWebview(context, webview, worker, state) {
               ? repairValidation.missingSections
               : mergeResult.stillMissing;
             if (repairValidation.valid) {
-              result = Object.assign({}, repairResult, { content: mergeResult.text, mode: mode });
+              result = mergeSuccessfulSchemaRepair(result, repairResult, mergeResult.text, mode);
               validationState.validated = true;
               validationState.missing_sections = [];
               workTrail.push('repair_complete', 'schema_repair_pass');
@@ -6152,7 +6197,8 @@ function buildSystemPrompt(workerType, effort, retrievalQuality) {
   const worker = WORKER_TYPES[cleanWorkerType(workerType)];
   const effortText = EFFORT_GUIDANCE[cleanEffort(effort)];
   const qualityText = retrievalQuality ? 'Retrieval quality note: ' + retrievalQuality : '';
-  return [worker.prompt, effortText, qualityText, 'Always end with a WSP_15 Priority block and one Next safest step.'].filter(Boolean).join('\n\n');
+  const defensiveSecurity = repoAuditGrounding.defensiveSecurityInstruction(workerType);
+  return [worker.prompt, effortText, defensiveSecurity, qualityText, 'Always end with a WSP_15 Priority block and one Next safest step.'].filter(Boolean).join('\n\n');
 }
 
 // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: break any literal occurrence of
@@ -6439,6 +6485,7 @@ function buildBoundedRepoContext(mode, taskText) {
   // derived target that was direct-read is also packed into the protected block and proven present.
   const typedTargetsForContext = extractTypedTargets(taskText);
   let requiredTargets = typedTargetsForContext.repo_file_targets.slice();
+  let repoAuditProjection = null;
   let directReadSection = null;
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
@@ -6447,6 +6494,12 @@ function buildBoundedRepoContext(mode, taskText) {
     }
     quality = holo.quality;
     holoindex_meta = holo.meta || null;
+    repoAuditProjection = holoindex_meta && holoindex_meta.repo_audit_projection
+      ? holoindex_meta.repo_audit_projection
+      : null;
+    if (repoAuditProjection && repoAuditProjection.applied) {
+      requiredTargets = repoAuditProjection.effective_repo_file_targets.slice();
+    }
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
     // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize any
     // literal required-target marker embedded in the HoloIndex recall JSON blob so a recall payload
@@ -6585,6 +6638,10 @@ function buildBoundedRepoContext(mode, taskText) {
     holoindex_scorecard,
     audit_context,
     required_targets_authoritative_paths: authoritativePacked,
+    repo_audit_grounding: holoindex_meta && holoindex_meta.repo_audit_grounding
+      ? holoindex_meta.repo_audit_grounding
+      : null,
+    repo_audit_projection: repoAuditProjection,
     direct_read_hits: directReadSection && Array.isArray(directReadSection.hits)
       ? directReadSection.hits.slice()
       : []
@@ -7329,11 +7386,32 @@ function moduleHintFromActive(root, taskText) {
 }
 
 function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
-  return holoGenerationBoundQuery.buildMetaFromBundle(output, usedOfflineFallback, taskText, {
+  const meta = holoGenerationBoundQuery.buildMetaFromBundle(output, usedOfflineFallback, taskText, {
     evaluateTargetRecall,
     semanticEvidenceHitsFromBundleData,
     semanticTargetCoverageDigest
   });
+  try {
+    const data = JSON.parse(String(output || '{}'));
+    const projection = repoAuditGrounding.projectRepoAuditGrounding(taskText, data, []);
+    meta.repo_audit_grounding = projection.receipt || null;
+    meta.repo_audit_projection = projection;
+    if (projection.applied) {
+      meta.repo_file_targets_count = projection.effective_repo_file_targets.length;
+      meta.required_targets_total = projection.effective_repo_file_targets.length;
+      meta.required_targets_recalled = projection.selected_content_paths.length;
+      const contentPaths = new Set(projection.selected_content_paths.map((item) => item.toLowerCase()));
+      meta.required_targets_missing = projection.effective_repo_file_targets
+        .filter((item) => !contentPaths.has(item.toLowerCase()));
+      meta.target_recall_ok = projection.passed_before_context_pack === true
+        && meta.required_targets_missing.length === 0;
+      meta.index_gap_detected = meta.target_recall_ok !== true;
+    }
+  } catch (err) {
+    meta.repo_audit_grounding = null;
+    meta.repo_audit_projection = repoAuditGrounding.projectRepoAuditGrounding(taskText, {}, []);
+  }
+  return meta;
 }
 
 // REDDOG_HOLO_SEMANTIC_FIRST_PHASE1: semantic retrieval is the production
@@ -7448,7 +7526,8 @@ function holoIndexOutput(root, taskText, maxChars) {
   const typedTargets = extractTypedTargets(taskText);
   const queryPlan = semanticGroundingPolicy.buildEffectiveHoloQuery(taskText, typedTargets.semantic_targets);
   const query = queryPlan.effective_query;
-  const moduleHint = moduleHintFromActive(root, taskText);
+  const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(taskText);
+  const moduleHint = repoAuditGrounding.moduleHintForRepoAudit(taskText, moduleHintFromActive(root, taskText));
   const repoDeepDiveRequested = isRepoDeepDiveRequest(taskText);
   const requestedMode = resolveHoloRetrievalMode(process.env);
   // The owner is the sole semantic authority. The legacy bundle contributes
@@ -7474,7 +7553,7 @@ function holoIndexOutput(root, taskText, maxChars) {
       env: bundleEnv,
       encoding: 'utf8',
       timeout: requestedMode === 'semantic' ? 60000 : 25000,
-      maxBuffer: Math.max(maxChars * 4, 65536),
+      maxBuffer: repoAuditIntent.audit_intent ? 8 * 1024 * 1024 : Math.max(maxChars * 4, 65536),
       windowsHide: true
     });
     if (requestedMode === 'semantic') {
@@ -8261,6 +8340,7 @@ module.exports = {
   buildRedactionGateReport,
   buildRedactionGateReportSection,
   buildRuntimeConsumptionGate,
+  mergeSuccessfulSchemaRepair,
   buildGovernedHandoffRecommendation,
   buildGovernedHandoffSection,
   buildRedDogGovernedWorkOrderCandidate,

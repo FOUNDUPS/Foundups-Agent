@@ -422,7 +422,12 @@ def _synthesis_user_prompt(
 def _none_like_model_text(value: object) -> bool:
     text = str(value or "").strip()
     lowered = text.lower()
-    return not text or lowered in {"none", "null", "n/a", "na"} or lowered.startswith("[blocked:")
+    return (
+        not text
+        or lowered in {"none", "null", "n/a", "na"}
+        or lowered.startswith("[blocked:")
+        or lowered.startswith("[abstained:")
+    )
 
 
 def _missing_required_evidence(required_paths: object, evidence_context: object) -> list[str]:
@@ -486,6 +491,7 @@ def _fusion_quorum_packet(
     panel_max_tokens: dict[str, int] | None = None,
     missing_required_evidence: list[str] | None = None,
     challenging_critics: list[str] | None = None,
+    abstaining_critics: list[str] | None = None,
 ) -> dict[str, Any]:
     quorum = {
         "applied": True,
@@ -493,6 +499,7 @@ def _fusion_quorum_packet(
         "reason": reason,
         "missing_required_evidence": list(missing_required_evidence or []),
         "challenging_critics": list(challenging_critics or []),
+        "abstaining_critics": list(abstaining_critics or []),
         "lead_required": True,
         "synthesis_requires_quorum": True,
     }
@@ -633,6 +640,47 @@ def _openrouter_fusion_alias(
     )
 
 
+def _collect_panel_results(
+    api_key: str,
+    panel_models: list[str],
+    critic_messages: list[dict[str, str]],
+    panel_max_tokens: dict[str, int],
+    temperature: float,
+    timeout: int,
+) -> tuple[dict[str, str], list[str]]:
+    panel_results: dict[str, str] = {}
+    abstaining_critics: list[str] = []
+    with ThreadPoolExecutor(max_workers=len(panel_models)) as executor:
+        futures = {
+            executor.submit(
+                _chat_completion, api_key, model, critic_messages,
+                max_tokens=panel_max_tokens[model], temperature=temperature,
+                timeout=timeout, role="critic",
+            ): model for model in panel_models
+        }
+        for future in as_completed(futures):
+            model = futures[future]
+            try:
+                panel_text, _panel_retry = future.result()
+                if _none_like_model_text(panel_text):
+                    panel_results[model] = "[abstained: empty_or_none]"
+                    abstaining_critics.append(model)
+                    _progress("panel_blocked", "Panel abstained: " + model, role="critic", model=model)
+                else:
+                    panel_results[model] = panel_text
+                    _progress("panel_done", "Panel response received: " + model, role="critic", model=model)
+            except urllib.error.HTTPError as exc:
+                panel_results[model] = "[blocked: http_error " + str(getattr(exc, "code", "")) + "]"
+                _progress("panel_blocked", "Panel blocked: " + model, role="critic", model=model)
+            except (urllib.error.URLError, TimeoutError):
+                panel_results[model] = "[blocked: timeout]"
+                _progress("panel_blocked", "Panel network error: " + model, role="critic", model=model)
+            except (KeyError, IndexError, TypeError, json.JSONDecodeError):
+                panel_results[model] = "[blocked: malformed_response]"
+                _progress("panel_blocked", "Panel malformed response: " + model, role="critic", model=model)
+    return panel_results, abstaining_critics
+
+
 def _run_foundups_fusion_core(
     api_key: str,
     redacted_prompt: str,
@@ -708,43 +756,17 @@ def _run_foundups_fusion_core(
     _progress("lead_done", "Lead response received: " + lead_model, role="lead", model=lead_model)
     critic_system = (
         base_system
-        + "\n\nPanel critic pass: attack the lead answer for missing WSP_97 truth labels, missing WSP_15 scoring, unsupported evidence, weak HoloIndex retrieval, and fixes that are not actionable. Start with `Challenge:` when any evidence, claim, framing, scope, or WSP_15 priority issue exists, and explicitly mention the WSP_15 priority. Start with `No material challenge:` only when the lead framing, evidence, and priority are all sound. Do not claim authority."
+        + "\n\nPanel critic pass: critically review the lead answer for missing WSP_97 truth labels, missing WSP_15 scoring, unsupported evidence, weak HoloIndex retrieval, and fixes that are not actionable. For cybersecurity work, focus on identifying, preventing, or remediating issues and omit exploit details unnecessary to that defensive outcome. Start with `Challenge:` when any evidence, claim, framing, scope, or WSP_15 priority issue exists, and explicitly mention the WSP_15 priority. Start with `No material challenge:` only when the lead framing, evidence, and priority are all sound. Do not claim authority."
     )
     critic_user = "Original task:\n" + redacted_prompt + "\n\nLead answer:\n" + lead_text[:16000]
     critic_messages = [
         {"role": "system", "content": critic_system},
         {"role": "user", "content": critic_user},
     ]
-    panel_results: dict[str, str] = {}
     _progress("panel_start", "Panel requests started: " + ", ".join(panel_models), role="panel")
-    with ThreadPoolExecutor(max_workers=len(panel_models)) as executor:
-        futures = {
-            executor.submit(
-                _chat_completion,
-                api_key,
-                model,
-                critic_messages,
-                max_tokens=panel_max_tokens[model],
-                temperature=temperature,
-                timeout=timeout,
-                role="critic",
-            ): model
-            for model in panel_models
-        }
-        for future in as_completed(futures):
-            model = futures[future]
-            try:
-                panel_results[model], _panel_retry = future.result()
-                _progress("panel_done", "Panel response received: " + model, role="critic", model=model)
-            except urllib.error.HTTPError as exc:
-                panel_results[model] = "[blocked: http_error " + str(getattr(exc, "code", "")) + "]"
-                _progress("panel_blocked", "Panel blocked: " + model, role="critic", model=model)
-            except (urllib.error.URLError, TimeoutError):
-                panel_results[model] = "[blocked: timeout]"
-                _progress("panel_blocked", "Panel network error: " + model, role="critic", model=model)
-            except (KeyError, IndexError, TypeError, json.JSONDecodeError):
-                panel_results[model] = "[blocked: malformed_response]"
-                _progress("panel_blocked", "Panel malformed response: " + model, role="critic", model=model)
+    panel_results, abstaining_critics = _collect_panel_results(
+        api_key, panel_models, critic_messages, panel_max_tokens, temperature, timeout
+    )
 
     challenging_critics = [
         model for model, text in panel_results.items() if _critic_challenges_framing_and_priority(text)
@@ -759,6 +781,7 @@ def _run_foundups_fusion_core(
             role_max_tokens=role_max_tokens,
             panel_max_tokens=panel_max_tokens,
             challenging_critics=[],
+            abstaining_critics=abstaining_critics,
         )
 
     if strict_json_contract:
@@ -796,6 +819,7 @@ def _run_foundups_fusion_core(
             role_max_tokens=role_max_tokens,
             panel_max_tokens=panel_max_tokens,
             challenging_critics=challenging_critics,
+            abstaining_critics=abstaining_critics,
         )
 
     _progress("synthesis_done", "Synthesis complete.", role="synthesis", model=lead_model)
@@ -830,6 +854,7 @@ def _run_foundups_fusion_core(
                 "reason": "fusion_quorum_passed",
                 "missing_required_evidence": [],
                 "challenging_critics": challenging_critics,
+                "abstaining_critics": abstaining_critics,
                 "lead_required": True,
                 "synthesis_requires_quorum": True,
             },
