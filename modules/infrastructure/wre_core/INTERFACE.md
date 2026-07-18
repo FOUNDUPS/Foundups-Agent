@@ -936,6 +936,11 @@ class MemoryBundle:
     tier0_complete: bool
     preflight_passed: bool
     stubs_created: List[str]
+    requested_retrieval_mode: str
+    retrieval_mode: str
+    embedding_backend: str
+    routing_active: bool
+    semantic_requirement_met: bool
 
 class MemoryPreflightGuard:
     """
@@ -949,6 +954,7 @@ class MemoryPreflightGuard:
         WRE_MEMORY_PREFLIGHT_ENABLED: Enable preflight (default: true)
         WRE_MEMORY_AUTOSTUB_TIER0: Auto-create stubs (default: false)
         WRE_MEMORY_ALLOW_DEGRADED: Allow with warnings (default: false)
+        WRE_HOLO_RETRIEVAL_MODE: semantic (default) or explicit lexical opt-down
     """
 
     def __init__(self, project_root: Optional[Path] = None) -> None:
@@ -971,7 +977,7 @@ class MemoryPreflightGuard:
             MemoryBundle with retrieval results
 
         Raises:
-            MemoryPreflightError: If Tier-0 missing and autostub disabled
+            MemoryPreflightError: If Tier-0 is missing or required semantic retrieval degraded
         """
 
 class MemoryPreflightError(Exception):

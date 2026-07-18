@@ -2,6 +2,21 @@
 
 ## Chronological Change Log
 
+### [2026-07-18] - WRE_HOLO_SEMANTIC_PREFLIGHT_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15
+(Priority), WSP 50 (Pre-Action), WSP 87 (HoloIndex), WSP 97 (Truth
+Boundary), WSP 22 (ModLog)
+
+**Deliverable**:
+- Replaced the canonical memory preflight's unconditional `HOLO_SKIP_MODEL=1` policy with semantic-first read-only bundle retrieval; operator-set `HOLO_OFFLINE` remains intact so semantic use of cached models never broadens network authority.
+- Added explicit `WRE_HOLO_RETRIEVAL_MODE=lexical` opt-down for bounded degraded/test operation.
+- Added requested/actual retrieval mode, embedding backend, routing state, and semantic requirement verdict to `MemoryBundle` and serialized telemetry.
+- Preflight now fails closed when semantic retrieval was requested but degraded, unless `WRE_MEMORY_ALLOW_DEGRADED=true` explicitly authorizes the truth-labelled degraded path.
+- No HoloIndex mutation, reindex, worker dispatch, repo write, PR, merge, or PatternMemory promotion is added.
+
+**WSP_15**: 3 + 4 + 4 + 4 = 15 (P1).
+
 ### [2026-07-16] - WRE_INDEPENDENT_EVIDENCE_PRODUCER_RUNTIME_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15

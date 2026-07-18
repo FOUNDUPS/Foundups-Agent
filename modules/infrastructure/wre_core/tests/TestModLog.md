@@ -1,5 +1,13 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-18: WRE_HOLO_SEMANTIC_PREFLIGHT_PHASE1
+
+**New** `test_memory_preflight_semantic_retrieval.py`:
+- Proves semantic is the default, inherited model-skip is removed, and an operator-set offline/network boundary is preserved.
+- Proves explicit lexical opt-down remains read-only and sets `HOLO_SKIP_MODEL=1`.
+- Proves Holo bundle mode/backend truth reaches `MemoryBundle` serialization.
+- Proves a requested semantic retrieval that degrades to lexical fails closed unless `WRE_MEMORY_ALLOW_DEGRADED` is explicitly active.
+
 ## 2026-07-16: WRE_INDEPENDENT_EVIDENCE_PRODUCER_RUNTIME_PHASE1
 
 **Slice**: `WRE_INDEPENDENT_EVIDENCE_PRODUCER_RUNTIME_PHASE1`

@@ -4,6 +4,11 @@ const assert = require('assert');
 const cp = require('child_process');
 const Module = require('module');
 
+// Keep the exhaustive contract suite fast and deterministic. Production has
+// no such override and therefore exercises RedDog's semantic-first default;
+// a dedicated live semantic smoke runs separately from this suite.
+process.env.REDDOG_HOLO_RETRIEVAL_MODE = 'lexical';
+
 const fixtures = require('./fixtures');
 
 const root = path.resolve(__dirname, '..', '..', '..');
@@ -198,8 +203,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.1', 'package version must be 0.4.1');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.1'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.2', 'package version must be 0.4.2');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.2'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -219,7 +224,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.1', 'README version mismatch');
+includes(readme, 'Version: 0.4.2', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -259,6 +264,8 @@ includes(extensionJs, 'WSP_15', 'WSP_15 requirement missing');
 includes(extensionJs, 'WSP_97', 'WSP_97 requirement missing');
 includes(extensionJs, 'Every finding must include a proposed fix', 'proposed-fix contract missing');
 includes(extensionJs, 'HOLO_SKIP_MODEL', 'HoloIndex fastpath env missing');
+includes(extensionJs, 'REDDOG_HOLO_RETRIEVAL_MODE', 'HoloIndex explicit lexical opt-down missing');
+includes(extensionJs, "delete env.HOLO_SKIP_MODEL", 'semantic-first path must clear inherited lexical override');
 includes(extensionJs, '--bundle-json', 'bundle-json retrieval missing');
 includes(extensionJs, '--offline', 'offline fallback missing');
 includes(extensionJs, 'Skillz/Wardrobe/Rolodex discovery', 'Skillz/Rolodex discovery context missing');
@@ -449,6 +456,72 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 
 const orchestrator = require(path.join(extDir, 'extension.js'));
 Module._resolveFilename = originalResolve;
+
+// REDDOG_HOLO_SEMANTIC_FIRST_PHASE1: mode selection and truth receipts.
+assert.strictEqual(orchestrator.resolveHoloRetrievalMode({}), 'semantic', 'HSF-001: production default must be semantic');
+assert.strictEqual(orchestrator.resolveHoloRetrievalMode({ REDDOG_HOLO_RETRIEVAL_MODE: 'lexical' }), 'lexical', 'HSF-001: lexical mode must require explicit opt-down');
+assert.strictEqual(orchestrator.resolveHoloRetrievalMode({ REDDOG_HOLO_RETRIEVAL_MODE: 'unexpected' }), 'semantic', 'HSF-001: invalid modes must fail to semantic');
+const hsfSemanticEnv = orchestrator.buildHoloQueryEnv({ HOLO_SKIP_MODEL: '1', HOLO_OFFLINE: '1', KEEP_ME: 'yes' }, 'semantic');
+assert.strictEqual(hsfSemanticEnv.HOLO_SKIP_MODEL, undefined, 'HSF-002: semantic mode must clear inherited HOLO_SKIP_MODEL');
+assert.strictEqual(hsfSemanticEnv.HOLO_OFFLINE, '1', 'HSF-002: semantic mode must preserve the operator offline/network boundary');
+assert.strictEqual(hsfSemanticEnv.HOLOINDEX_QUERY_READONLY, '1', 'HSF-002: semantic queries remain read-only');
+assert.strictEqual(hsfSemanticEnv.KEEP_ME, 'yes', 'HSF-002: unrelated environment must survive');
+const hsfLexicalEnv = orchestrator.buildHoloQueryEnv({}, 'lexical');
+assert.strictEqual(hsfLexicalEnv.HOLO_SKIP_MODEL, '1', 'HSF-003: explicit lexical opt-down must set HOLO_SKIP_MODEL');
+assert.strictEqual(hsfLexicalEnv.HOLOINDEX_QUERY_READONLY, '1', 'HSF-003: lexical queries remain read-only');
+
+const hsfSemanticBundle = JSON.stringify({
+  task_retrieval: {
+    code_hits: [],
+    metadata: {
+      retrieval_mode: 'semantic',
+      embedding_backend: 'sentence_transformers',
+      routing_active: false,
+      code_count: 3,
+      wsp_count: 2
+    }
+  }
+});
+const hsfMeta = orchestrator.holoIndexMetaFromBundle(hsfSemanticBundle, false, 'semantic audit');
+assert.strictEqual(hsfMeta.retrieval_mode, 'semantic', 'HSF-004: actual retrieval mode must enter RedDog telemetry');
+assert.strictEqual(hsfMeta.embedding_backend, 'sentence_transformers', 'HSF-004: actual embedding backend must enter RedDog telemetry');
+assert.strictEqual(hsfMeta.routing_active, false, 'HSF-004: routing truth must enter RedDog telemetry');
+const hsfScorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', hsfMeta);
+const hsfLines = orchestrator.formatHoloIndexScorecardLines(hsfScorecard).join('\n');
+includes(hsfLines, '- retrieval_mode: semantic', 'HSF-004: scorecard must expose semantic retrieval truth');
+includes(hsfLines, '- embedding_backend: sentence_transformers', 'HSF-004: scorecard must expose backend truth');
+const hsfSummary = orchestrator.summarizeHoloBundle(hsfSemanticBundle);
+includes(hsfSummary, 'mode=semantic', 'HSF-005: bundle summary must expose semantic mode');
+includes(hsfSummary, 'backend=sentence_transformers', 'HSF-005: bundle summary must expose backend');
+
+// HSF-006: prove the pre-existing block-scope defect is closed. A failed
+// bundle must reach the lexical fallback with a valid read-only environment.
+const hsfOriginalExecFileSync = cp.execFileSync;
+const hsfOriginalMode = process.env.REDDOG_HOLO_RETRIEVAL_MODE;
+let hsfExecCalls = 0;
+try {
+  process.env.REDDOG_HOLO_RETRIEVAL_MODE = 'semantic';
+  cp.execFileSync = function(_exe, args, options) {
+    hsfExecCalls += 1;
+    if (hsfExecCalls === 1) {
+      const err = new Error('simulated semantic bundle failure');
+      err.code = 'SIMULATED';
+      throw err;
+    }
+    assert(args.includes('--offline'), 'HSF-006: second call must be the offline lexical fallback');
+    assert.strictEqual(options.env.HOLO_SKIP_MODEL, '1', 'HSF-006: fallback must receive a valid lexical environment');
+    assert.strictEqual(options.env.HOLOINDEX_QUERY_READONLY, '1', 'HSF-006: fallback must remain read-only');
+    return '[OFFLINE] simulated lexical result';
+  };
+  const hsfFallback = orchestrator.holoIndexOutput(root, 'semantic fallback contract', 18000);
+  assert.strictEqual(hsfExecCalls, 2, 'HSF-006: semantic failure must invoke exactly one lexical fallback');
+  assert.strictEqual(hsfFallback.meta.holoindex_status, 'offline_fallback', 'HSF-006: fallback status must be truthful');
+  assert.strictEqual(hsfFallback.meta.requested_retrieval_mode, 'semantic', 'HSF-006: receipt must retain the requested mode');
+  assert.strictEqual(hsfFallback.meta.retrieval_mode, 'lexical', 'HSF-006: receipt must expose actual lexical behavior');
+} finally {
+  cp.execFileSync = hsfOriginalExecFileSync;
+  process.env.REDDOG_HOLO_RETRIEVAL_MODE = hsfOriginalMode;
+}
 
 const ultra = orchestrator.classifyTaskForRedDog('Audit OAuth auth secrets on live runtime deploy path', 'auto', 'reddog_architect');
 assert.strictEqual(ultra.tier, 'ULTRA', 'security/auth prompts must classify ULTRA');
@@ -1092,7 +1165,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.1', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.2', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2584,7 +2657,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.1'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.2'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2598,7 +2671,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.1'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.2'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2610,7 +2683,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.1'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.2'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -3489,7 +3562,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.1' } }
+      ? { id, packageJSON: { version: '0.4.2' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.4.1';
+const EXTENSION_VERSION = '0.4.2';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2016,6 +2016,10 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
   const meta = holoMeta && typeof holoMeta === 'object' ? holoMeta : {};
   return {
     holoindex_status: meta.holoindex_status || 'unknown',
+    requested_retrieval_mode: meta.requested_retrieval_mode || 'unknown',
+    retrieval_mode: meta.retrieval_mode || 'unknown',
+    embedding_backend: meta.embedding_backend || 'unknown',
+    routing_active: meta.routing_active !== undefined ? meta.routing_active : 'unknown',
     code_hits_count: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
     wsp_hits: meta.wsp_hits !== undefined ? meta.wsp_hits : 'unknown',
     code_hits: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
@@ -2094,6 +2098,10 @@ function formatHoloIndexScorecardLines(scorecard) {
   }
   return [
     '- holoindex_status: ' + scorecard.holoindex_status,
+    '- requested_retrieval_mode: ' + scorecard.requested_retrieval_mode,
+    '- retrieval_mode: ' + scorecard.retrieval_mode,
+    '- embedding_backend: ' + scorecard.embedding_backend,
+    '- routing_active: ' + scorecard.routing_active,
     '- code_hits_count: ' + scorecard.code_hits_count,
     '- wsp_hits: ' + scorecard.wsp_hits,
     '- skill_hits: ' + scorecard.skill_hits,
@@ -5129,7 +5137,7 @@ function activate(context) {
   const installState = detectRedDogInstallState(context);
   if (installState.stale_install_detected) {
     vscode.window.showWarningMessage(
-      'RedDog 0.4.1 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
+      'RedDog 0.4.2 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
     );
   }
   context.subscriptions.push(
@@ -6321,7 +6329,7 @@ function buildBoundedRepoContext(mode, taskText) {
     // literal required-target marker embedded in the HoloIndex recall JSON blob so a recall payload
     // whose text echoes "### Required direct-read target: <path>" cannot reach the Python isolation
     // splitter as a real marker section. Dedup in Python is the robust closure; this is belt-and-braces.
-    lowerSections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + neutralizeRequiredTargetMarker(holo.output || '(no HoloIndex output)') + '\n```');
+    lowerSections.push('### HoloIndex recall (WSP_00 semantic bundle first; lexical fallback only if needed)\n```text\n' + neutralizeRequiredTargetMarker(holo.output || '(no HoloIndex output)') + '\n```');
     directReadSection = holo.direct_read_section || null;
     // REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1: preserve audit_context from slice-3
     // direct-read section so the bridge can run audit-mode redaction on egress.
@@ -6903,6 +6911,10 @@ function moduleHintFromActive(root) {
 function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
   const meta = {
     holoindex_status: usedOfflineFallback ? 'offline_fallback' : 'unknown',
+    requested_retrieval_mode: usedOfflineFallback ? 'semantic' : 'unknown',
+    retrieval_mode: usedOfflineFallback ? 'lexical' : 'unknown',
+    embedding_backend: usedOfflineFallback ? 'none' : 'unknown',
+    routing_active: false,
     wsp_hits: 'unknown',
     code_hits: 'unknown',
     skill_hits: 'unknown',
@@ -6946,6 +6958,13 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     const bundleMeta = data.task_retrieval && data.task_retrieval.metadata ? data.task_retrieval.metadata : {};
     const recall = evaluateTargetRecall(taskText, data);
     meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'bundle_json_ok';
+    meta.retrieval_mode = usedOfflineFallback
+      ? 'lexical'
+      : String(bundleMeta.retrieval_mode || bundleMeta.mode || 'unknown');
+    meta.embedding_backend = usedOfflineFallback
+      ? 'none'
+      : String(bundleMeta.embedding_backend || 'unknown');
+    meta.routing_active = usedOfflineFallback ? false : bundleMeta.routing_active === true;
     meta.wsp_hits = Number(bundleMeta.wsp_count || 0);
     meta.code_hits = Number(bundleMeta.code_count || 0);
     meta.skill_hits = bundleMeta.skill_count !== undefined ? Number(bundleMeta.skill_count) : 'unknown';
@@ -6986,6 +7005,30 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'parse_error';
   }
   return meta;
+}
+
+// REDDOG_HOLO_SEMANTIC_FIRST_PHASE1: semantic retrieval is the production
+// default. Lexical retrieval remains an explicit compute-saving opt-down for
+// tests/emergency operation, never an implicit claim of semantic coverage.
+function resolveHoloRetrievalMode(envLike) {
+  const source = envLike && typeof envLike === 'object' ? envLike : process.env;
+  const requested = String(source.REDDOG_HOLO_RETRIEVAL_MODE || 'semantic').trim().toLowerCase();
+  return requested === 'lexical' ? 'lexical' : 'semantic';
+}
+
+function buildHoloQueryEnv(envLike, retrievalMode) {
+  const env = Object.assign({}, envLike && typeof envLike === 'object' ? envLike : process.env, {
+    HOLOINDEX_QUERY_READONLY: '1'
+  });
+  if (retrievalMode === 'lexical') {
+    env.HOLO_SKIP_MODEL = '1';
+  } else {
+    // A parent-shell model-skip knob must not silently downgrade a semantic-first
+    // RedDog audit. Preserve HOLO_OFFLINE when the operator set it: cached models
+    // can still run semantically, while a missing cache degrades without network I/O.
+    delete env.HOLO_SKIP_MODEL;
+  }
+  return env;
 }
 
 // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3): when slice-1's
@@ -7049,18 +7092,25 @@ function classifyDirectReadFetchError(err) {
 function holoIndexOutput(root, taskText, maxChars) {
   const query = String(taskText || '').replace(/\s+/g, ' ').trim().slice(0, 500) || 'FoundUps RedDog WSP_00 WSP_97 WSP_15 current task';
   const moduleHint = moduleHintFromActive(root);
+  const requestedMode = resolveHoloRetrievalMode(process.env);
+  const env = buildHoloQueryEnv(process.env, requestedMode);
   try {
-    const env = Object.assign({}, process.env, { HOLO_SKIP_MODEL: '1', HOLOINDEX_QUERY_READONLY: '1' });
     const baseArgs = ['-B', 'holo_index.py', '--bundle-json', '--search', query, '--bundle-module-hint', moduleHint, '--limit', '5', '--quiet-root-alerts'];
     let output = cp.execFileSync('python', baseArgs, {
       cwd: root,
       env,
       encoding: 'utf8',
-      timeout: 25000,
+      timeout: requestedMode === 'semantic' ? 60000 : 25000,
       maxBuffer: Math.max(maxChars * 4, 65536),
       windowsHide: true
     });
     let meta = holoIndexMetaFromBundle(output, false, taskText);
+    meta.requested_retrieval_mode = requestedMode;
+    if (requestedMode === 'semantic' && meta.retrieval_mode !== 'semantic') {
+      const semanticError = new Error('HoloIndex semantic retrieval unavailable');
+      semanticError.code = 'HOLO_SEMANTIC_UNAVAILABLE';
+      throw semanticError;
+    }
     // Direct-read fallback: if a required-target list was present and any target
     // is missing from the semantic bundle, re-run once asking the Python layer
     // to fetch exactly those paths, then re-evaluate recall on the enriched bundle.
@@ -7100,6 +7150,12 @@ function holoIndexOutput(root, taskText, maxChars) {
           });
           output = enriched;
           meta = holoIndexMetaFromBundle(enriched, false, taskText);
+          meta.requested_retrieval_mode = requestedMode;
+          if (requestedMode === 'semantic' && meta.retrieval_mode !== 'semantic') {
+            const semanticError = new Error('HoloIndex semantic retrieval unavailable after enriched fetch');
+            semanticError.code = 'HOLO_SEMANTIC_UNAVAILABLE';
+            throw semanticError;
+          }
         } catch (fetchErr) {
           // Fetch failure must not abort recall; keep the pre-fetch bundle+meta,
           // but classify + surface the cause so it is never silent again.
@@ -7124,15 +7180,17 @@ function holoIndexOutput(root, taskText, maxChars) {
     };
   } catch (bundleErr) {
     try {
+      const fallbackEnv = buildHoloQueryEnv(process.env, 'lexical');
       const output = cp.execFileSync('python', ['-B', 'holo_index.py', '--offline', '--search', query, '--limit', '5'], {
         cwd: root,
-        env,
+        env: fallbackEnv,
         encoding: 'utf8',
         timeout: 20000,
         maxBuffer: Math.max(maxChars * 4, 65536),
         windowsHide: true
       });
       const meta = holoIndexMetaFromBundle(output, true, query);
+      meta.requested_retrieval_mode = requestedMode;
       return {
         output: String(output || '').slice(0, maxChars),
         quality: 'HoloIndex bundle-json failed; offline lexical fallback used. Treat protocol coverage as NEEDS_VERIFICATION and propose re-index/bundle repair if WSP hits are missing.',
@@ -7214,10 +7272,21 @@ function summarizeHoloBundle(output) {
     const meta = data.task_retrieval && data.task_retrieval.metadata ? data.task_retrieval.metadata : {};
     const wspCount = Number(meta.wsp_count || 0);
     const codeCount = Number(meta.code_count || 0);
+    const retrievalMode = String(meta.retrieval_mode || meta.mode || 'unknown');
+    const embeddingBackend = String(meta.embedding_backend || 'unknown');
     const missing = data.structured_memory && Array.isArray(data.structured_memory.missing_required)
       ? data.structured_memory.missing_required
       : [];
-    const parts = ['HoloIndex bundle-json ok', 'wsp=' + wspCount, 'code=' + codeCount];
+    const parts = [
+      'HoloIndex bundle-json ok',
+      'mode=' + retrievalMode,
+      'backend=' + embeddingBackend,
+      'wsp=' + wspCount,
+      'code=' + codeCount
+    ];
+    if (retrievalMode !== 'semantic') {
+      parts.push('Semantic retrieval was not used; treat intent/role coverage as NEEDS_VERIFICATION.');
+    }
     if (missing.length) {
       parts.push('missing_required=' + missing.join(','));
     }
@@ -7777,6 +7846,9 @@ module.exports = {
   extractTargetTokensFromLine,
   holoIndexMetaFromBundle,
   holoIndexOutput,
+  resolveHoloRetrievalMode,
+  buildHoloQueryEnv,
+  summarizeHoloBundle,
   buildMustIncludeArgs,
   classifyDirectReadFetchError,
   buildDirectReadContentSection,
