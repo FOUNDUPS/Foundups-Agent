@@ -1159,6 +1159,8 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         == main.run_reddog_resident_queue_control_loop_preflight.last_result["receipt_id"]
     )
     assert control_receipt["receipt_ids"][0].startswith("signed_worker_task_execution_")
+    assert control_receipt["control_lock_acquired"] is True
+    assert main.run_reddog_resident_queue_control_loop_preflight.last_result["control_lock_acquired"] is True
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
 
     pending = [
@@ -1469,6 +1471,8 @@ def test_main_resident_control_loop_consumes_signer_socket_started_by_runtime_cl
         == main.run_reddog_resident_queue_control_loop_preflight.last_result["receipt_id"]
     )
     assert control_receipt["receipt_ids"][0].startswith("signed_worker_task_execution_")
+    assert control_receipt["control_lock_acquired"] is True
+    assert main.run_reddog_resident_queue_control_loop_preflight.last_result["control_lock_acquired"] is True
     assert calls
     stored = json.loads(chain.read_text(encoding="utf-8"))
     assert stored["stage_results"]["worker_dispatch_runtime"]["accepted"] is True

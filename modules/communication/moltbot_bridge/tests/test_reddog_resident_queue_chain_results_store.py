@@ -18,6 +18,8 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_result
     AtomicJsonResidentQueueChainResultsStore,
     InMemoryResidentQueueChainResultsStore,
     record_resident_queue_stage_result,
+    resident_queue_chain_snapshot_is_canonical,
+    resident_queue_chain_snapshot_revision,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_AUTHORITY_RUNTIME_INVOKE,
@@ -231,6 +233,10 @@ def test_atomic_json_store_writes_schema_for_bootstrap(tmp_path: Path) -> None:
     assert result.accepted is True
     data = json.loads(path.read_text(encoding="utf-8"))
     assert data["revision"] == result.receipt.store_revision
+    assert data["receipts"][-1]["store_revision"] == data["revision"]
+    assert resident_queue_chain_snapshot_revision(data) == data["revision"]
+    assert resident_queue_chain_snapshot_is_canonical(data) is True
+    assert store.load() == data
     assert data["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
     assert not list(path.parent.glob("*.tmp"))
 

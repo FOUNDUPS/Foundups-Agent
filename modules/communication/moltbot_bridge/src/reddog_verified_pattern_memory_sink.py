@@ -70,6 +70,12 @@ def _record_id(record: Mapping[str, Any]) -> str:
     return "reddog_verified_outcome_" + _digest(record).removeprefix("sha256:")[:16]
 
 
+def reddog_verified_pattern_memory_record_digest(record: Mapping[str, Any]) -> str:
+    """Return the canonical digest used by admission receipts."""
+
+    return _digest(record)
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
@@ -129,6 +135,34 @@ class RedDogVerifiedPatternMemorySink:
         finally:
             memory.close()
 
+    def load_verified_outcome(self, record_id: str) -> Optional[Dict[str, Any]]:
+        """Read back one canonical RedDog outcome through PatternMemory schema."""
+
+        if not self.db_path.is_file() or not str(record_id or "").strip():
+            return None
+        memory = PatternMemory(db_path=self.db_path)
+        try:
+            cursor = memory.conn.cursor()
+            cursor.execute(
+                "SELECT execution_id, agent, success, output_result "
+                "FROM skill_outcomes WHERE execution_id = ? LIMIT 1",
+                (record_id,),
+            )
+            row = cursor.fetchone()
+        finally:
+            memory.close()
+        if row is None or row["agent"] != self.agent or row["success"] != 1:
+            return None
+        try:
+            payload = json.loads(row["output_result"])
+        except (json.JSONDecodeError, TypeError):
+            return None
+        if not isinstance(payload, dict) or _record_id(payload) != record_id:
+            return None
+        if payload.get("record_type") != "reddog_verified_recursive_improvement_outcome":
+            return None
+        return payload
+
 
 def build_reddog_verified_pattern_memory_sink(
     *,
@@ -156,4 +190,5 @@ __all__ = [
     "REDDOG_VERIFIED_PATTERN_MEMORY_SINK_READY",
     "RedDogVerifiedPatternMemorySink",
     "build_reddog_verified_pattern_memory_sink",
+    "reddog_verified_pattern_memory_record_digest",
 ]

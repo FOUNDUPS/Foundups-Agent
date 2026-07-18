@@ -202,6 +202,38 @@ Supervisor repair policy:
 - exhausted restart budget escalates instead of looping forever
 - every cycle advances a DAEmon follow cursor so repair decisions stay tied to observed runtime history
 
+### Resident RedDog live canary
+
+`reddog_resident_live_canary` is the operator admission surface for one run of
+the existing highest guarded resident profile. Run it on Linux/WSL first
+without `--execute`; readiness never invokes the control loop:
+
+```bash
+python -m modules.communication.moltbot_bridge.src.reddog_resident_live_canary \
+  --repo-root /mnt/o/Foundups-Agent \
+  --runtime-root /mnt/o/.reddog/resident/Foundups-Agent
+```
+
+Execution additionally requires `--execute --confirm
+REDDOG_RESIDENT_LIVE_CANARY_PHASE1`. The runtime root must be outside the
+repository and already contain the authority, permission, execution-valve,
+signer config/run-packet, and live signer socket artifacts named by the CLI
+receipt. The harness never starts the signer or resolves secret values.
+
+`READY_FOR_EXECUTION` is only static readiness. Every main control-loop caller
+uses one shared OS advisory lock. `LIVE_PROOF_COMPLETE` requires the matching
+new v1 control receipt to prove lock ownership, accepted PASS, repository
+binding, and positive serial progress; changed pre/post chain revisions; an
+exact completed chain envelope with a new final-revision store receipt;
+work-order/slice/head lineage; accepted draft-only PR evidence; an external
+Git worktree registered by the repository with matching `HEAD`; and
+PatternMemory identities recomputed from the canonical SQLite record. The
+chain revision is non-circular: the store normalizes the newest receipt witness
+for hashing, then persists the same revision in the envelope and that receipt.
+It never marks a PR ready or merges it. Inside the runtime root, receipt output
+is reserved to canonical `live_canary_receipt.json`; other outputs must be
+outside both the runtime root and repository.
+
 PQN runtime examples:
 - `run pqn simulation`
 - `status pqn simulation`

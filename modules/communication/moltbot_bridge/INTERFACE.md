@@ -489,6 +489,17 @@ Resident OpenClaw contract:
   - `tail <dae>` = recent window
   - `watch|follow <dae> since <sequence>` = incremental follow with returned `next_cursor`
 
+Resident RedDog live-canary contract:
+- Entry point: `python -m modules.communication.moltbot_bridge.src.reddog_resident_live_canary`
+- Default mode performs readiness checks only and writes an audit-safe receipt outside the repository.
+- Live invocation requires Linux, `--execute`, and exact confirmation token `REDDOG_RESIDENT_LIVE_CANARY_PHASE1`.
+- The selected profile is fixed to `signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory`.
+- The harness delegates to `main.run_reddog_resident_queue_control_loop_preflight`; it does not duplicate queue stages.
+- `LIVE_PROOF_COMPLETE` requires a shared-lock-proven, newly persisted `reddog_resident_control_loop_receipt.v1` with accepted PASS, matching repository digest, and positive serial progress; changed pre/post chain revisions; a canonically recomputable chain revision and new persisted final-revision receipt witness; matching queue/slice and work-order/slice/head lineage; accepted verified draft-PR evidence; an external Git worktree present in the repository worktree registry with accepted invoke/create decisions and matching `HEAD`; and PatternMemory admission/record/digest identities recomputed from the canonical SQLite row.
+- `--receipt-path` may name only canonical `live_canary_receipt.json` inside the runtime root. Any alternate receipt must resolve outside both repository and runtime roots; reserved runtime artifacts and nested collisions fail before execution.
+- `READY_FOR_EXECUTION` does not claim that a live canary ran. Missing authority artifacts, signer socket, Git/GitHub readiness, or OpenRouter key presence returns `BLOCKED` without exposing values.
+- The surface has no signer launch, secret resolution, PR-ready, merge, reward, or HoloIndex re-index authority.
+
 ### OpenClaw Supervisor Contract
 
 Canonical 0102 lifecycle owner:

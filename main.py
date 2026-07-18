@@ -35,9 +35,10 @@ import io
 import atexit
 import hashlib
 import json
+from functools import wraps
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Dict, Any, Mapping, Sequence
+from typing import Optional, Dict, Any, Callable, Mapping, Sequence
 
 # Load environment variables for DAEs (API keys, ports, feature flags).
 # Managed mode builds `.env.managed` from `.env` (last duplicate wins) for
@@ -3904,8 +3905,7 @@ def _reddog_queue_stage_rejection_reasons(stage_callable: Any) -> tuple[str, ...
 
 def _reddog_record_queue_control_result(repo_root: Path, result: Mapping[str, Any]) -> Dict[str, Any]:
     """Record and expose one resident queue control-loop result."""
-
-    recorded = dict(result)
+    recorded = _reddog_control_lock_annotated_result(result)
     try:
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
             resident_queue_runtime_file_path,
@@ -3955,6 +3955,49 @@ def _reddog_record_queue_control_result(repo_root: Path, result: Mapping[str, An
     return recorded
 
 
+def _reddog_control_lock_annotated_result(result: Mapping[str, Any]) -> Dict[str, Any]:
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_control_lock import (
+        resident_queue_control_lock_held,
+    )
+
+    recorded = dict(result)
+    recorded["control_lock_acquired"] = resident_queue_control_lock_held()
+    return recorded
+
+
+def _with_reddog_queue_control_lock(control_loop: Callable[[Path], bool]) -> Callable[[Path], bool]:
+    """Decorate every control-loop call with the shared non-blocking lock."""
+
+    @wraps(control_loop)
+    def locked(repo_root: Path) -> bool:
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_control_lock import (
+            acquire_resident_queue_control_lock,
+        )
+
+        with acquire_resident_queue_control_lock(repo_root) as lock:
+            if not lock.acquired:
+                locked.last_result = _reddog_locked_control_result(lock.reason, lock.path)
+                return False
+            return control_loop(repo_root)
+
+    return locked
+
+
+def _reddog_locked_control_result(reason: str, lock_path: Path) -> Dict[str, Any]:
+    return {
+        "accepted": False,
+        "status": "CONTROL_LOOP_LOCKED",
+        "rounds": 0,
+        "serial_progress": 0,
+        "claim_progress": 0,
+        "receipt_ids": (),
+        "rejection_reasons": (reason,),
+        "control_lock_path": str(lock_path),
+        "control_lock_acquired": False,
+    }
+
+
+@_with_reddog_queue_control_lock
 def run_reddog_resident_queue_control_loop_preflight(repo_root: Path) -> bool:
     """
     Drive the resident queue through bounded serial/claim rounds.

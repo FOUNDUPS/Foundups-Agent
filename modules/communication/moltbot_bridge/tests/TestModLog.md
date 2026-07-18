@@ -1,3 +1,44 @@
+## 2026-07-18: REDDOG_RESIDENT_LIVE_CANARY_PHASE1
+
+**Files**: `test_reddog_resident_live_canary.py` (NEW)
+
+**Coverage**:
+
+- Readiness-only mode never invokes the control loop and never serializes the
+  supplied secret value.
+- Linux, outside-repo state/receipt, required JSON artifacts, signer socket,
+  Git/GitHub readiness, OpenRouter key presence, and exact execution
+  confirmation fail closed.
+- Real v1 control receipts and exact chain envelopes are used in the positive
+  proof fixture; false schema, acceptance, status, lock, repository, progress,
+  revision, envelope, new-receipt, and lineage fixtures fail closed.
+- Accepted worktree invoke/create decisions plus an existing external Git
+  worktree and all durable PatternMemory IDs are required.
+- The positive proof now advances the atomic chain store through the real
+  planner, creates a registered Git worktree, uses production draft/gate
+  builders, and performs a real PatternMemory SQLite admission/readback.
+- Store round-trip tests prove the persisted newest receipt witness equals the
+  canonically recomputable envelope revision; forged witnesses fail closed.
+- Exact terminal-receipt adversaries replace the nonempty stage, previous/final
+  plan IDs, and stop action; completion now requires the canonical PatternMemory
+  terminal transition and receipt ID.
+- Registered/unregistered worktrees, invalid gitdirs, HEAD mismatches, missing
+  PatternMemory rows, and forged admission identities are adversarial cases.
+- Digest-valid PatternMemory rows with a wrong work order, selected slice, or
+  candidate HEAD fail direct DB-to-plan/draft/registered-worktree binding.
+- Split canonical integration support from the focused test module; WSP 62
+  enforces the 675-line ceiling on both test files and all canary production
+  files, plus the 50-line production-function ceiling.
+- Same-process and second-process tests prove the shared non-blocking control
+  lock prevents a competing main loop from reaching queue stages.
+- Reserved runtime receipt collisions and inside-repository paths fail before
+  execution; canonical and external paths remain accepted.
+- AST coverage enforces both WSP 62's 675-line communication file limit and
+  50-line production-function limit across the split canary modules.
+
+**Truth boundary**: Tests use injected probes and do not perform live side
+effects. The production live canary remains unexecuted.
+
 ## 2026-07-18: REDDOG_HOLOINDEX_QUERY_OWNER_BOUNDARY_POC_PHASE1
 
 **Files**: test_reddog_holoindex_query_boundary.py (NEW),

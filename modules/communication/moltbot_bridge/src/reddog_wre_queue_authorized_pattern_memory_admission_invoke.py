@@ -242,6 +242,16 @@ def _build_receipt(
     )
 
 
+def canonical_pattern_memory_admission_identity(
+    record: Mapping[str, Any],
+    record_id: str,
+) -> tuple[str, str]:
+    """Return the admission ID and record digest for a persisted outcome."""
+
+    receipt = _build_receipt(record=record, record_id=record_id, reasons=[])
+    return receipt.admission_id, receipt.record_digest
+
+
 def _reject(
     reasons: Sequence[str],
     *,
@@ -352,6 +362,7 @@ def invoke_reddog_wre_queue_authorized_pattern_memory_admission(
 
 __all__ = [
     "PatternMemoryAdmissionSink",
+    "canonical_pattern_memory_admission_identity",
     "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT",
     "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_REJECT",
     "QueueAuthorizedPatternMemoryAdmissionInvokeReason",
