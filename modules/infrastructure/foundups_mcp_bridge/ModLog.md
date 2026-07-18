@@ -1,5 +1,60 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-18 - HoloIndex private query owner and host supervisor POC
+
+**WSP Protocol**: WSP 00, 05, 06, 15, 22, 49, 50, 62, 87, 96, 97
+**Phase**: POC implementation; focused validation/PR evidence pending
+**Agent**: 0102 architect for 012 with delegated audit/test workers
+
+**Changes**:
+
+- Added a query/health-only HoloIndex owner with bearer authentication,
+  literal-127.0.0.1 binding, bounded payloads/results/timeouts, serialized semantic
+  backend access, exact clean-HEAD proof, and complete baseline freshness
+  validation.
+- Added stdlib HTTP transport with optional FastAPI adapter; neither surface
+  exposes indexing.
+- Added fail-closed maintenance probing and permanent owner poisoning after a
+  backend timeout.
+- Added HoloQueryServiceSupervisor: hidden argv-only owner process, ephemeral
+  48-byte token, authenticated semantic readiness, bounded termination/kill,
+  child environment handoff, and secret-free errors.
+- Added the host bootstrap boundary, process-private authenticated handoff,
+  poisoned-owner replacement, and operator runbook. Automatic credentials are
+  never written to the parent environment.
+- Added a trusted-host semantic maintenance handshake: clean exact HEAD, owned-owner
+  stop policy, sanitized argv-only index-all, complete canonical seven-scope
+  proof, recheck, and generation-bound restart.
+- Health now requires repository/generation binding and a non-empty semantic
+  canary; query success re-proves repository state after backend return.
+- Bound CURRENT to an exact per-collection embedding-space fingerprint for all
+  seven baseline collections. Blank legacy fingerprints now require canonical
+  maintenance, and owner semantic proof compares receipt, runtime, and response
+  maps.
+- Forced the resident owner to authoritative sentence_transformers, added
+  complete Hugging Face snapshot-cache discovery, and disabled the
+  generation-unbound legacy SearchCache.
+- Separated the first-health 270-second cold warmup, <=30-second owner queries,
+  and 300-second supervisor startup. Response-body reads have an absolute
+  deadline; stdlib connect/header progress retains the documented
+  trusted/cooperative-loopback POC assumption.
+- Model-backed cross-lane direct reads now receive clean exact-HEAD proof after
+  reading and again immediately before report acceptance.
+
+**Impact**: The infrastructure module supplies one supervised query process and
+one separately authorized trusted-host maintenance handshake for the migrated
+RedDog operational consumers. The supported adapter has no write surface, but
+this is not proof of OS privilege isolation or migration of legacy
+`src/holo_tools.py` direct-store access. Full refresh still assumes an
+exclusive writer window, and abrupt host death can orphan the owner.
+The HTTP boundary also assumes no hostile same-user loopback port squatter or
+deliberate header trickle; connect/header parsing is inactivity-bounded even
+though owner work and response-body reads are deadline-bounded.
+
+**WSP Compliance**: Focused infrastructure thresholds and split-test gates will
+be recorded after validation, including any architect exemptions. ROADMAP.md
+records historical WSP_62 debt; no global compliance claim is made.
+
 ## 2026-05-08 - S64: S1 / S2 federation-scope request parity
 
 **Author**: 0102 (Worker W1)

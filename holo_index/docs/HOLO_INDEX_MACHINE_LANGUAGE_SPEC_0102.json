@@ -1,6 +1,6 @@
 {
   "spec_id": "holo_index.machine_language.v1",
-  "version": "2026-02-18",
+  "version": "2026-07-18",
   "scope": "runtime architecture, contracts, and scoring semantics",
   "source_of_truth_policy": {
     "authoritative_machine_contract": "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json",
@@ -8,7 +8,7 @@
     "operator_menu_atlas_non_normative": "holo_index/CLI_REFERENCE.md"
   },
   "entrypoints": {
-    "cli_module": "holo_index/cli.py::main",
+    "cli_module": "holo_index/_cli_main.py::main",
     "core_class": "holo_index/core/holo_index.py::HoloIndex",
     "python_package_entry": "holo_index/__init__.py::main",
     "legacy_wrapper": "holo_index.py"
@@ -22,134 +22,101 @@
     {
       "name": "cli_orchestration",
       "responsibility": "command routing, index refresh, output rendering, bundle export",
-      "primary_file": "holo_index/cli.py"
+      "primary_file": "holo_index/_cli_main.py"
     },
     {
       "name": "intent_orchestration",
       "responsibility": "intent classification, component routing, output composition",
-      "primary_files": [
-        "holo_index/intent_classifier.py",
-        "holo_index/qwen_advisor/orchestration/qwen_orchestrator.py",
-        "holo_index/output_composer.py"
-      ]
+      "primary_files": ["holo_index/intent_classifier.py", "holo_index/qwen_advisor/orchestration/qwen_orchestrator.py", "holo_index/output_composer.py"]
     },
     {
       "name": "adaptive_memory",
       "responsibility": "feedback learning, breadcrumb tracing, history telemetry",
-      "primary_files": [
-        "holo_index/feedback_learner.py",
-        "holo_index/adaptive_learning/breadcrumb_tracer.py",
-        "holo_index/output/agentic_output_throttler.py"
-      ]
+      "primary_files": ["holo_index/feedback_learner.py", "holo_index/adaptive_learning/breadcrumb_tracer.py", "holo_index/output/agentic_output_throttler.py"]
     }
   ],
   "state_machine": {
-    "states": [
-      "BOOTSTRAP",
-      "INDEX_READY",
-      "SEARCH_EXECUTING",
-      "RESULT_FOUND",
-      "RESULT_MISSING",
-      "ERROR"
-    ],
+    "states": ["BOOTSTRAP", "INDEX_READY", "SEARCH_EXECUTING", "RESULT_FOUND", "RESULT_MISSING", "ERROR"],
     "transitions": [
-      {
-        "from": "BOOTSTRAP",
-        "event": "init_success",
-        "to": "INDEX_READY"
-      },
-      {
-        "from": "INDEX_READY",
-        "event": "search(query)",
-        "to": "SEARCH_EXECUTING"
-      },
-      {
-        "from": "SEARCH_EXECUTING",
-        "event": "hits_total > 0",
-        "to": "RESULT_FOUND"
-      },
-      {
-        "from": "SEARCH_EXECUTING",
-        "event": "hits_total == 0",
-        "to": "RESULT_MISSING"
-      },
-      {
-        "from": "SEARCH_EXECUTING",
-        "event": "exception",
-        "to": "ERROR"
-      }
+      {"from": "BOOTSTRAP", "event": "init_success", "to": "INDEX_READY"},
+      {"from": "INDEX_READY", "event": "search(query)", "to": "SEARCH_EXECUTING"},
+      {"from": "SEARCH_EXECUTING", "event": "hits_total > 0", "to": "RESULT_FOUND"},
+      {"from": "SEARCH_EXECUTING", "event": "hits_total == 0", "to": "RESULT_MISSING"},
+      {"from": "SEARCH_EXECUTING", "event": "exception", "to": "ERROR"}
     ]
   },
+  "baseline_full_refresh_collections": [
+    "navigation_code",
+    "navigation_symbols",
+    "navigation_wsp",
+    "navigation_tests",
+    "navigation_skills",
+    "navigation_docs",
+    "navigation_knowledge"
+  ],
+  "optional_collections": [
+    "navigation_work_ledger",
+    "navigation_vocabulary"
+  ],
   "collections": [
     {
       "name": "navigation_code",
+      "source_scope_id": "holoindex.navigation_code.navigation-plus-tracked-public.v1",
       "source_domains": [
-        "NAVIGATION.py NEED_TO map",
-        "web assets from HOLO_WEB_INDEX_ROOTS"
+        "Git-tracked NAVIGATION.py NEED_TO map",
+        "Git-tracked public web assets under the canonical root"
       ],
-      "key_metadata": [
-        "need",
-        "type",
-        "source",
-        "path",
-        "keywords",
-        "priority",
-        "cube"
-      ]
+      "key_metadata": ["need", "type", "source", "path", "keywords", "priority", "cube"]
     },
     {
       "name": "navigation_symbols",
+      "source_scope_id": "holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
       "source_domains": [
-        "python AST function/class extraction"
+        "Git-tracked Python AST function/class extraction from modules, scripts, and holo_index"
       ],
-      "key_metadata": [
-        "symbol",
-        "path",
-        "line",
-        "type"
-      ]
+      "key_metadata": ["symbol", "path", "line", "type"]
     },
     {
       "name": "navigation_wsp",
-      "source_domains": [
-        "WSP_framework and configured markdown/yaml corpora"
-      ],
-      "key_metadata": [
-        "wsp",
-        "title",
-        "path",
-        "summary",
-        "type",
-        "priority",
-        "cube"
-      ]
+      "source_scope_id": "holoindex.navigation_wsp.tracked-framework-src.v1",
+      "source_domains": ["Git-tracked WSP_framework/src protocols"],
+      "key_metadata": ["wsp", "title", "path", "summary", "type", "priority", "cube"]
     },
     {
       "name": "navigation_tests",
-      "source_domains": [
-        "WSP_knowledge/WSP_Test_Registry.json"
-      ],
-      "key_metadata": [
-        "test_id",
-        "path",
-        "description",
-        "capabilities",
-        "priority"
-      ]
+      "source_scope_id": "holoindex.navigation_tests.canonical-registry.v1",
+      "source_domains": ["WSP_knowledge/WSP_Test_Registry.json"],
+      "key_metadata": ["test_id", "path", "description", "capabilities", "priority"]
     },
     {
       "name": "navigation_skills",
-      "source_domains": [
-        "SKILLz.md frontmatter and content"
-      ],
-      "key_metadata": [
-        "skill_name",
-        "primary_agent",
-        "intent_type",
-        "promotion_state",
-        "path",
-        "priority"
-      ]
+      "source_scope_id": "holoindex.navigation_skills.tracked-skillz-patterns.v1",
+      "source_domains": ["Git-tracked SKILLz.md frontmatter and content"],
+      "key_metadata": ["skill_name", "primary_agent", "intent_type", "promotion_state", "path", "priority"]
+    },
+    {
+      "name": "navigation_docs",
+      "source_scope_id": "holoindex.navigation_docs.tracked-document-roots.v1",
+      "source_domains": ["Git-tracked module and repository documentation roots"],
+      "key_metadata": ["title", "path", "doc_type", "module", "priority"]
+    },
+    {
+      "name": "navigation_knowledge",
+      "source_scope_id": "holoindex.navigation_knowledge.tracked-papers.v1",
+      "source_domains": ["Git-tracked canonical papers and research roots"],
+      "key_metadata": ["title", "path", "source_type", "priority"]
+    },
+    {
+      "name": "navigation_work_ledger",
+      "source_scope_id": "",
+      "source_domains": ["Opt-in FoundUp work-ledger records"],
+      "key_metadata": ["slice_id", "foundup_id", "path", "status"]
+    },
+    {
+      "name": "navigation_vocabulary",
+      "source_scope_id": "",
+      "source_domains": ["Opt-in vocabulary registry"],
+      "key_metadata": ["term", "definition", "source"]
     }
   ],
   "search_math": {
@@ -158,11 +125,7 @@
     "hybrid_rank_formula": "rank = 0.5*priority + 0.3*similarity + 0.2*keyword_score",
     "skill_rank_formula": "rank = 0.6*priority + 0.3*similarity + 0.1*keyword_score",
     "lexical_similarity_formula": "similarity = min(1.0, keyword_score / (max(1, token_count * 2.5)))",
-    "symbol_fallbacks": [
-      "symbol collection semantic query",
-      "collection lexical scan",
-      "ripgrep exact fallback via _rg_symbol_search"
-    ]
+    "symbol_fallbacks": ["symbol collection semantic query", "collection lexical scan", "ripgrep exact fallback via _rg_symbol_search"]
   },
   "contracts": {
     "search_request": {
@@ -170,69 +133,43 @@
       "limit": "integer",
       "doc_type_filter": "all|code|test|wsp_protocol|module_readme|interface|documentation|roadmap|modlog"
     },
-    "search_response_required_keys": [
-      "code_hits",
-      "wsp_hits",
-      "test_hits",
-      "code",
-      "wsps",
-      "tests",
-      "skills",
-      "skill_hits",
-      "metadata"
-    ],
-    "search_metadata_keys": [
-      "query",
-      "code_count",
-      "wsp_count",
-      "test_count",
-      "skill_count",
-      "symbol_count",
-      "timestamp",
-      "cached"
-    ],
+    "search_response_required_keys": ["code_hits", "wsp_hits", "test_hits", "code", "wsps", "tests", "skills", "skill_hits", "symbol_hits", "docs_hits", "knowledge_hits", "docs", "knowledge", "work_ledger_hits", "work_ledger", "metadata"],
+    "search_metadata_keys": ["query", "code_count", "wsp_count", "test_count", "skill_count", "symbol_count", "docs_count", "knowledge_count", "work_ledger_count", "timestamp", "cached", "retrieval_mode", "embedding_backend", "backend_quality", "quality_gate", "routing_active", "collection_backend_map", "collection_embedding_space_map"],
     "bundle_json_schema_id": "wsp_memory_bundle_v1",
-    "bundle_json_top_keys": [
-      "schema_version",
-      "generated_at",
-      "ok",
-      "task",
-      "module_hint",
-      "module_path",
-      "structured_memory",
-      "task_retrieval"
-    ]
+    "bundle_json_top_keys": ["schema_version", "generated_at", "ok", "task", "module_hint", "module_path", "structured_memory", "task_retrieval"]
   },
   "orchestration": {
-    "intent_types": [
-      "doc_lookup",
-      "code_location",
-      "module_health",
-      "research",
-      "general"
-    ],
-    "component_execution_surface": [
-      "health_analysis",
-      "vibecoding_analysis",
-      "file_size_monitor",
-      "module_analysis",
-      "pattern_coach",
-      "orphan_analysis",
-      "wsp_documentation_guardian"
-    ],
+    "intent_types": ["doc_lookup", "code_location", "module_health", "research", "general"],
+    "component_execution_surface": ["health_analysis", "vibecoding_analysis", "file_size_monitor", "module_analysis", "pattern_coach", "orphan_analysis", "wsp_documentation_guardian"],
     "mcp_research_gate": "MCP tools are invoked only when intent == research"
   },
   "durability": {
-    "vector_store_default": "E:/HoloIndex/vectors (or custom --ssd path)",
-    "wsp_summary_cache": "E:/HoloIndex/indexes/wsp_summary.json",
+    "storage_resolution": "explicit --ssd > HOLOINDEX_SSD_PATH > legacy HOLO_SSD_PATH > platform-safe absolute default",
+    "vector_store_default_windows": "E:/HoloIndex/vectors",
+    "ssd_root_default_posix": "$XDG_DATA_HOME/foundups/holoindex; fallback ~/.local/share/foundups/holoindex",
+    "wsp_summary_cache": "<resolved_ssd_path>/indexes/wsp_summary.json",
+    "freshness_receipt": "<resolved_ssd_path>/indexes/holoindex_freshness_receipt.json",
+    "partial_refresh_rule": "only successfully refreshed collections receive the new repository SHA; untouched proof is preserved or marked UNVERIFIED",
+    "maintenance_lease": "<resolved_ssd_path>/indexes/holoindex_maintenance.lock; migrated mutation owners hold an exclusive cross-process lease from invalidation through final receipt; unleased legacy writers remain a Phase-1 limitation",
+    "maintenance_source_gate": "pre/post proof requires the same clean exact Git HEAD; Phase 1 additionally requires an exclusive repository-writer window because transient edit/revert cannot be mechanically excluded",
+    "atomic_receipt_rule": "publish IN_PROGRESS invalidation before collection access; publish PASS with fsync plus atomic replace only after the exact declared collection plan succeeds",
+    "embedding_space_rule": "each PASS collection binds sentence_transformers, its logical model, and a deterministic local-artifact fingerprint; the owner disables routing/cache and must match all seven fingerprints",
+    "canonical_source_rule": "CURRENT baseline proof requires each collection's stable source_scope_id, all eligible Git-tracked sources, a full raw-content manifest, and zero recorded source-read, cap, or Python-AST failures; no blanket all-parser guarantee is made",
+    "restricted_worker_boundary": "migrated RedDog operational consumers query an authenticated owner at literal 127.0.0.1; this supported API boundary is not an OS privilege boundary, and legacy foundups_mcp_bridge holo_tools remains outside the Phase-1 migration",
+    "stable_storage_errors": ["HOLOINDEX_STORAGE_UNAVAILABLE", "HOLOINDEX_STORAGE_NOT_WRITABLE", "HOLOINDEX_STORAGE_PATH_MISMATCH", "HOLOINDEX_COLLECTION_UNAVAILABLE"],
     "output_history_default": "holo_index/output/holo_output_history.jsonl",
-    "agent_activity_log": "holo_index/logs/agent_activity.log"
+    "agent_activity_log": "holo_index/logs/agent_activity.log (disabled in HOLOINDEX_QUERY_READONLY mode)"
   },
   "invariants": [
     "search() always returns legacy keys code/wsps for compatibility",
     "if embedding model is unavailable, retrieval falls back to lexical scan",
     "default output path is tri-state: ERROR | FOUND | MISSING",
-    "symbol queries must attempt exact-fallback search to reduce NAVIGATION blind spots"
+    "symbol queries must attempt exact-fallback search to reduce NAVIGATION blind spots",
+    "CURRENT semantic freshness requires exact repository SHA, verified manifests, and matching embedding-space fingerprints for all baseline query collections",
+    "--index and --index-all select the same baseline: code, symbols, WSP, tests, skills, docs, and knowledge",
+    "query owners probe the maintenance lease before and after freshness and semantic retrieval",
+    "owner strict-semantic mode rejects collection, model, encoding, or query failures and never substitutes lexical or symbol fallback evidence",
+    "partial, raced, dirty-worktree, lexical, or receipt-write failures cannot publish CURRENT"
   ],
   "current_drift_and_status": [
     {

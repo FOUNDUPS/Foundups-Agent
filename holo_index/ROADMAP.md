@@ -1,5 +1,30 @@
 # HoloIndex Development Roadmap
 
+## [2026-07-18] Operational Truth Boundary and WSP_62 Remediation
+
+**Current P0:** Land the canonical storage, exact-HEAD maintenance, complete
+source-scope receipt, semantic-only owner, and RedDog query boundary. Activate
+the live store only after a post-merge seven-collection refresh at the merge
+SHA and an authenticated semantic smoke.
+
+**Concrete WSP_62 decomposition queue:**
+
+- Extract _cli_main.main into argument normalization, command-plan selection,
+  trusted maintenance execution, targeted diagnostics, and query rendering.
+- Split core/indexing_engine.py into source discovery, canonical manifest
+  construction, document transformation, and per-collection publishing.
+- Extract HoloIndex initialization into storage binding, backend selection,
+  collection binding, and read-only startup helpers.
+- Keep freshness receipt coercion, collection-proof construction, generation
+  publication, and evaluation as independent functions below 75 lines.
+- Split the remaining legacy incremental plan, execution-transaction, and
+  query-receipt assembly functions to the 50-line Python threshold.
+- Split large historical HoloIndex test modules by collection and contract.
+
+This POC extracts the newly introduced proof/maintenance responsibilities where
+practical. It does not claim repository-wide WSP_62 compliance while the
+legacy monoliths remain above their domain thresholds.
+
 ## [ALERT] ARCHITECTURAL REVOLUTION (2025-09-25)
 
 HoloIndex has undergone a **fundamental transformation** from a search tool into the **autonomous intelligence foundation** for the entire FoundUps ecosystem.

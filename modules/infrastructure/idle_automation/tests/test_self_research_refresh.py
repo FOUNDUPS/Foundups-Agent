@@ -3,10 +3,14 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 from modules.infrastructure.idle_automation.src.self_research_refresh import (
     SelfResearchRefresher,
     group_wsp_violations,
+)
+from modules.infrastructure.foundups_mcp_bridge.src import (
+    reddog_holoindex_maintenance_handshake as handshake,
 )
 
 
@@ -41,6 +45,50 @@ def test_group_wsp_violations_aggregates_and_orders_by_severity():
     assert grouped[0]["count"] == 2
     assert grouped[0]["issue_type"] == "SIZE_VIOLATION"
     assert grouped[0]["affected_files"] == ["modules/b/src.py", "modules/c/src.py"]
+
+
+def test_holo_refresh_uses_exact_head_operational_handshake(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    calls: list[dict] = []
+    monkeypatch.setattr(
+        handshake,
+        "ensure_reddog_holoindex_operational",
+        lambda **kwargs: calls.append(kwargs)
+        or SimpleNamespace(
+            ready=True,
+            refreshed=True,
+            status="REFRESHED",
+            error="",
+            generation_id="sha256:generation",
+        ),
+    )
+    refresher = SelfResearchRefresher(repo_root=tmp_path)
+    result = refresher.refresh_holo_index()
+    assert result["refresh_success"] is True
+    assert result["freshness_generation_id"] == "sha256:generation"
+    assert calls[0]["auto_maintenance"] is True
+
+
+def test_holo_refresh_never_converts_handshake_rejection_to_success(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        handshake,
+        "ensure_reddog_holoindex_operational",
+        lambda **_kwargs: SimpleNamespace(
+            ready=False,
+            refreshed=False,
+            status="FAILED",
+            error="HOLOINDEX_MAINTENANCE_REPOSITORY_DIRTY",
+            generation_id="",
+        ),
+    )
+    result = SelfResearchRefresher(repo_root=tmp_path).refresh_holo_index()
+    assert result["refresh_success"] is False
+    assert result["code_stale"] is True
 
 
 def test_build_update_candidates_ranks_holo_failure_above_watchlist_noise(tmp_path: Path):
@@ -173,6 +221,36 @@ def test_run_reuses_cached_compliance_section(tmp_path: Path, monkeypatch):
     assert report["wsp_compliance"]["violation_count"] == 1
 
 
+def _stub_self_research_dependencies(
+    refresher: SelfResearchRefresher,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
+    monkeypatch.setattr(
+        refresher,
+        "scan_wsp_compliance",
+        lambda: {"top_violation_groups": []},
+    )
+    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
+    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(
+        refresher,
+        "refresh_pqn_research_watchlist",
+        lambda: {"status": {}},
+    )
+    monkeypatch.setattr(
+        refresher,
+        "refresh_openclaw_ecosystem_watchlist",
+        lambda: {"status": {}},
+    )
+    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
+    monkeypatch.setattr(
+        refresher,
+        "remember_outcome",
+        lambda report, duration_ms: None,
+    )
+
+
 def test_run_emits_memory_nudges_when_high_value_events_detected(tmp_path: Path, monkeypatch):
     """Verify runtime wiring: emit_nudges=True calls memory nudge engine."""
     report_path = tmp_path / "reports" / "openclaw_self_research_status.json"
@@ -203,14 +281,7 @@ def test_run_emits_memory_nudges_when_high_value_events_detected(tmp_path: Path,
     refresher.repo_root = tmp_path
 
     # Stub out all scan methods to skip external dependencies
-    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
-    monkeypatch.setattr(refresher, "scan_wsp_compliance", lambda: {"top_violation_groups": []})
-    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
-    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_pqn_research_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_openclaw_ecosystem_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
-    monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
+    _stub_self_research_dependencies(refresher, monkeypatch)
 
     report = refresher.run(
         write_tasks=False,
@@ -240,14 +311,7 @@ def test_run_skips_nudges_when_emit_nudges_false(tmp_path: Path, monkeypatch):
     refresher = SelfResearchRefresher(report_path=report_path)
 
     # Stub out all scan methods
-    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
-    monkeypatch.setattr(refresher, "scan_wsp_compliance", lambda: {"top_violation_groups": []})
-    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
-    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_pqn_research_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "refresh_openclaw_ecosystem_watchlist", lambda: {"status": {}})
-    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
-    monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
+    _stub_self_research_dependencies(refresher, monkeypatch)
 
     report = refresher.run(
         write_tasks=False,

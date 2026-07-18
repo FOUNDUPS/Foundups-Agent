@@ -1,5 +1,44 @@
 # FoundUps Agent - Development Log
 
+## [2026-07-18] HoloIndex / RedDog Operational Truth Boundary POC Phase 1
+
+**WSP Protocol**: WSP 00, 05, 06, 15, 22, 34, 50, 62, 64, 81, 84, 87, 96, 97
+**Phase**: Cross-module POC implementation complete; publication pending
+**Agent**: 0102 architect for 012 with delegated audit/test workers
+
+**Changes**:
+
+- Established one canonical HoloIndex storage, maintenance-lease, invalidation,
+  exact-HEAD receipt, and seven-collection complete source-scope contract.
+- Added semantic-only trusted full maintenance and a literal-127.0.0.1 bearer query
+  owner with process-private handoff, authenticated health canary, generation
+  binding, and timeout poisoning.
+- Wired interactive/headless RedDog and startup maintenance dispatch to fail
+  closed before Holo-dependent worker execution.
+- Corrected incremental, malformed-registry, scoped/capped source, linked
+  worktree, direct-adapter, and downstream freshness truth boundaries.
+- Replaced caller-controlled HoloIndex timeout/exception log text with stable
+  redacted codes after the PR CodeQL gate identified two high-severity flows.
+- Added the WSP_97 high-risk assumption audit, WSP_15 P0 record, module
+  ROADMAP/TestModLogs, operator runbook, and machine contract.
+
+**Impact**: The migrated RedDog POC consumers can consume generation-bound
+semantic repository evidence without opening Chroma through the supported
+adapter. HoloIndex writes remain a separate trusted-host authority; startup may
+route maintenance requests through governed WRE dispatch. OS privilege
+isolation and the legacy foundups_mcp_bridge `holo_tools.py` direct-store path
+remain outside this claim. This is a prerequisite for governed FoundUp
+build/repair recursion, not a claim of unrestricted production autonomy.
+
+**WSP Compliance**: Work was isolated from concurrent lanes in a dedicated Git
+worktree and focused branch; no framework WSP or knowledge mirror changed.
+MODULE_CONCATENATION_GATE.md remains correctly unmirrored because it is a
+non-protocol quick reference. The final HoloIndex matrix passed 346 tests, the
+final non-overlapping focused matrices passed 745 tests, the independent
+boundary/security review passed 289 tests, all 81 changed or added Python files
+compiled, WSP_00 remained green, and the WSP_97 structural receipt validated.
+PR evidence and clean-main post-merge activation remain pending.
+
 ## [2026-07-04] docs(audit): RedDog FoundUp creation path audit + WSP_109 slice ordering (0102 architect, WSP_97)
 
 **Change Type**: DECISION_ONLY_DOCS — audit record and slice specs; no runtime mutation.

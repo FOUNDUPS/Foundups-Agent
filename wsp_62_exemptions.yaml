@@ -1,0 +1,53 @@
+exemptions:
+  - file: "main.py"
+    reason: >-
+      Legacy application entrypoint and RedDog preflight integration boundary.
+      This focused POC changes only the HoloIndex owner preflight call path;
+      decomposing unrelated startup and queue control flows here would expand
+      the security review surface.
+    threshold_override: 5000
+    function_threshold_override: 1000
+    functions:
+      - "monitor_youtube"
+      - "run_ironclaw_runtime_preflight"
+      - "run_dependency_security_preflight"
+      - "run_env_hygiene_preflight"
+      - "run_brain_artifact_preflight"
+      - "run_connect_wre"
+      - "run_wre_dashboard_preflight"
+      - "run_wsp_framework_preflight"
+      - "run_git_main_merge_sentinel_preflight"
+      - "run_reddog_readonly_operational_bootstrap_preflight"
+      - "run_reddog_authoritative_work_state_refresh_preflight"
+      - "run_reddog_wre_queue_consumer_preflight"
+      - "run_reddog_resident_architect_durable_cycle_preflight"
+      - "_run_reddog_startup_blocker_diagnostic"
+      - "run_reddog_architect_fix_promotion_preflight"
+      - "run_reddog_resident_queue_orchestration_plan_preflight"
+      - "run_reddog_resident_queue_next_stage_dispatch_preflight"
+      - "run_reddog_resident_queue_serial_loop_preflight"
+      - "_reddog_record_queue_control_result"
+      - "run_reddog_resident_queue_control_loop_preflight"
+      - "run_reddog_openclaw_signed_worker_claim_loop_preflight"
+      - "bootstrap_runtime_dae_launches"
+      - "main"
+      - "run_headless"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: >-
+      ROADMAP.md#terminal-entrypoint-mainpy-roadmap and
+      modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups
+
+  - file: "ModLog.md"
+    reason: >-
+      Legacy root WSP_22 reverse-chronological journal. This slice appends one
+      bounded entry; rewriting or splitting historical traceability would be a
+      separate governed archive operation.
+    threshold_override: 58000
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: >-
+      Archive historical journal epochs only through a dedicated WSP_22
+      traceability-maintenance slice that preserves reverse chronology.

@@ -41,12 +41,25 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import asdict
-from holo_index.freshness_receipt import (
-    build_freshness_receipt,
-    freshness_receipt_path,
-    write_freshness_receipt,
+from holo_index.maintenance_session import (
+    MAINTENANCE_FAILURE_EXIT_CODE,
+    MaintenanceSession,
+    MaintenanceSessionError,
+)
+from holo_index.cli_index_plan import (
+    BASELINE_INDEX_COLLECTIONS,
+    _INDEX_FLAG_ATTRS,
+    _baseline_source_scope_violations,
+    _effective_index_collections,
+    _indexing_flags_requested,
+    _selected_index_collections,
 )
 from holo_index.utils.helpers import safe_print
+from holo_index.storage_contract import (
+    HoloIndexStorageError,
+    READONLY_QUERY_ENV,
+    resolve_holoindex_ssd_path,
+)
 # WSP 97: Lazy import codeindex_reporter (4s+ startup cost) - only needed for --code-index-report
 CodeIndexReporter = None  # Lazy loaded
 resolve_module_paths = None  # Lazy loaded
@@ -112,24 +125,8 @@ if "--fast-search" in sys.argv:
 def _env_truthy(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "y", "on")
 
-READONLY_QUERY_ENV = "HOLOINDEX_QUERY_READONLY"
 READONLY_GUARD_CODE = "HOLOINDEX_READONLY_QUERY_GUARD"
-_INDEX_FLAG_ATTRS = (
-    "index",
-    "index_all",
-    "index_code",
-    "index_wsp",
-    "index_symbols",
-    "index_skills",
-    "index_cli",
-    "index_work_ledger",
-    "index_docs",
-    "index_knowledge",
-)
-
-
-def _indexing_flags_requested(args) -> bool:
-    return any(bool(getattr(args, attr, False)) for attr in _INDEX_FLAG_ATTRS)
+STORAGE_ERROR_EXIT_CODE = 3
 
 
 def _query_only_requested(args) -> bool:
@@ -142,7 +139,11 @@ def _readonly_query_env_enabled() -> bool:
 
 def _activate_readonly_query_posture(args) -> None:
     if _query_only_requested(args) and not _indexing_flags_requested(args):
-        os.environ.setdefault(READONLY_QUERY_ENV, "1")
+        # Ordinary retrieval is always read-only, even if a parent process
+        # exported a false value. Explicit auto-refresh is a mutation opt-in;
+        # an externally forced read-only value still overrides that opt-in.
+        if not bool(getattr(args, "allow_auto_refresh", False)):
+            os.environ[READONLY_QUERY_ENV] = "1"
 
 
 def _reject_readonly_indexing(args) -> bool:
@@ -157,6 +158,18 @@ def _reject_readonly_indexing(args) -> bool:
 
 def _auto_refresh_allowed(args) -> bool:
     return bool(getattr(args, "allow_auto_refresh", False)) and not _readonly_query_env_enabled()
+
+
+def _exit_storage_error(exc: HoloIndexStorageError) -> None:
+    """Emit one stable machine-readable failure and stop before query/index work."""
+
+    safe_print(json.dumps(exc.to_dict(), sort_keys=True))
+    raise SystemExit(STORAGE_ERROR_EXIT_CODE)
+
+
+def _exit_maintenance_error(exc: MaintenanceSessionError) -> None:
+    safe_print(json.dumps(exc.to_dict(), sort_keys=True))
+    raise SystemExit(MAINTENANCE_FAILURE_EXIT_CODE)
 
 # 0102 speed knob: allow bundle-json/offline/fast-search fastpath without importing Chroma/model stack.
 _skip_heavy_imports = (
@@ -181,11 +194,6 @@ else:
     HoloIndex = None  # type: ignore
     AgenticOutputThrottler = None  # type: ignore
     print_onboarding = None  # type: ignore
-
-# SSD locations (Phase 1 requirement)
-os.environ.setdefault('CHROMADB_DATA_PATH', 'E:/HoloIndex/vectors')
-os.environ.setdefault('SENTENCE_TRANSFORMERS_HOME', 'E:/HoloIndex/models')
-os.environ.setdefault('HOLO_CACHE_PATH', 'E:/HoloIndex/cache')
 
 # Dependency bootstrap
 # try:
@@ -628,7 +636,44 @@ def _generate_cli_rolodex_sqlite(scan_result, db_path: Path) -> None:
     conn.close()
 
 
-def _run_work_ledger_indexing(holo, args) -> bool:
+def _index_result_successful(result: Any) -> bool:
+    """Return true only for an explicit, complete source-set proof."""
+
+    return result is not None and bool(getattr(result, "complete", False))
+
+
+def _report_work_ledger_result(
+    ledger_result: Any,
+    *,
+    duration: float,
+    proof_sink: dict[str, Any] | None,
+) -> bool:
+    if not _index_result_successful(ledger_result):
+        if ledger_result is None:
+            safe_print("[WORK-LEDGER] WARNING: indexer returned no result")
+            safe_print(f"[WORK-LEDGER] Status: EMPTY ({duration:.2f}s)")
+            return False
+        safe_print(
+            f"[WORK-LEDGER] WARNING: {ledger_result.warning or 'Zero slices indexed'}"
+        )
+        safe_print(
+            f"[WORK-LEDGER] discovered={ledger_result.discovered_count}, "
+            f"indexed={ledger_result.indexed_count}"
+        )
+        safe_print(f"[WORK-LEDGER] Status: EMPTY ({duration:.2f}s)")
+        return False
+    safe_print(f"[WORK-LEDGER] Entries indexed: {ledger_result.indexed_count}")
+    safe_print(f"[WORK-LEDGER] Status: SUCCESS ({duration:.2f}s)")
+    if proof_sink is not None:
+        proof_sink["navigation_work_ledger"] = ledger_result
+    return True
+
+
+def _run_work_ledger_indexing(
+    holo,
+    args,
+    proof_sink: dict[str, Any] | None = None,
+) -> bool:
     """Targeted reindex of navigation_work_ledger collection.
 
     Slice: FOUNDUPS_WORK_LEDGER_TARGETED_REINDEX_CLI_PHASE1
@@ -654,17 +699,11 @@ def _run_work_ledger_indexing(holo, args) -> bool:
     try:
         ledger_result = holo.index_work_ledger_entries()
         duration = time.time() - start_time
-
-        if ledger_result is not None and ledger_result.is_empty:
-            safe_print(f"[WORK-LEDGER] WARNING: {ledger_result.warning or 'Zero slices indexed'}")
-            safe_print(f"[WORK-LEDGER] discovered={ledger_result.discovered_count}, indexed={ledger_result.indexed_count}")
-            safe_print(f"[WORK-LEDGER] Status: EMPTY ({duration:.2f}s)")
-            return False
-
-        indexed_count = ledger_result.indexed_count if ledger_result else 0
-        safe_print(f"[WORK-LEDGER] Entries indexed: {indexed_count}")
-        safe_print(f"[WORK-LEDGER] Status: SUCCESS ({duration:.2f}s)")
-        return True
+        return _report_work_ledger_result(
+            ledger_result,
+            duration=duration,
+            proof_sink=proof_sink,
+        )
     except Exception as exc:
         duration = time.time() - start_time
         safe_print(f"[WORK-LEDGER] Status: FAILURE ({duration:.2f}s) - {exc}")
@@ -705,10 +744,11 @@ def main():
             'bundle. Read-only; hard-denies secrets/traversal/symlink-escape.'
         )
     )
-    parser.add_argument('--index', action='store_true', help='Index both code and WSP (alias for --index-all)')
-    parser.add_argument('--index-all', action='store_true', help='Index both code and WSP')
+    parser.add_argument('--index', action='store_true', help='Alias for --index-all')
+    parser.add_argument('--index-all', action='store_true', help='Index baseline code, symbols, WSP, tests, skills, docs, and knowledge collections')
     parser.add_argument('--index-code', action='store_true', help='Index code (NAVIGATION.py)')
     parser.add_argument('--index-wsp', action='store_true', help='Index WSP documents')
+    parser.add_argument('--index-tests', action='store_true', help='Index WSP Test Registry into navigation_tests')
     parser.add_argument('--index-symbols', action='store_true', help='Index code symbols (functions/classes)')
     parser.add_argument('--symbol-roots', nargs='*', help='Limit symbol indexing to specific roots (relative to repo)')
     parser.add_argument('--index-skillz', dest='index_skills', action='store_true', help='Index SKILLz.md files for agent discovery (preferred)')
@@ -728,7 +768,12 @@ def main():
     parser.add_argument('--code-index-report', type=str, help='Generate CodeIndex report for an alias or module path (e.g., youtube_dae)')
     parser.add_argument('--doc-type', choices=['wsp_protocol', 'module_readme', 'interface', 'documentation', 'roadmap', 'modlog', 'all'], default='all', help='Filter by document type (default: all)')
     parser.add_argument('--benchmark', action='store_true', help='Benchmark SSD performance')
-    parser.add_argument('--ssd', type=str, default='E:/HoloIndex', help='SSD base path (default: E:/HoloIndex)')
+    parser.add_argument(
+        '--ssd',
+        type=str,
+        default=None,
+        help='SSD base path (explicit > HOLOINDEX_SSD_PATH > HOLO_SSD_PATH > platform default)',
+    )
     parser.add_argument('--offline', action='store_true', help='Disable model downloads and pip installs; use offline lexical search if needed')
     parser.add_argument('--fast-search', action='store_true', help='Fast retrieval-only mode (skips heavy advisory/orchestration steps)')
     parser.add_argument('--allow-auto-refresh', action='store_true', help='Explicitly allow search-time index auto-refresh; never used by RedDog query/runtime paths')
@@ -792,13 +837,24 @@ def main():
     parser.add_argument('--collection-health-json', action='store_true', help='Output collection health as JSON')
 
     args = parser.parse_args()
+    # The documented alias must select the exact same deterministic baseline.
+    args.index_all = bool(args.index_all or args.index)
+    args.ssd = str(resolve_holoindex_ssd_path(args.ssd))
+    os.environ.setdefault('CHROMADB_DATA_PATH', str(Path(args.ssd) / 'vectors'))
+    os.environ.setdefault('SENTENCE_TRANSFORMERS_HOME', str(Path(args.ssd) / 'models'))
+    os.environ.setdefault('HOLO_CACHE_PATH', str(Path(args.ssd) / 'cache'))
     _activate_readonly_query_posture(args)
     if _reject_readonly_indexing(args):
         raise SystemExit(2)
 
     # --- Bundle JSON (extracted to holo_index/cli/commands/bundle_json.py) ---
     from holo_index.cli.commands.bundle_json import handle_bundle_json
-    if handle_bundle_json(args):
+    bundle_handled = False
+    try:
+        bundle_handled = handle_bundle_json(args)
+    except HoloIndexStorageError as exc:
+        _exit_storage_error(exc)
+    if bundle_handled:
         return
 
     verbose = bool(getattr(args, 'verbose', False))
@@ -984,12 +1040,84 @@ def main():
         except Exception:
             telemetry_path = None
 
+    selected_collections = _effective_index_collections(args)
+    scope_violations = _baseline_source_scope_violations(args)
+    if scope_violations:
+        _exit_maintenance_error(
+            MaintenanceSessionError(
+                "HOLOINDEX_NONCANONICAL_SOURCE_SCOPE",
+                f"narrowing_knobs={scope_violations}",
+            )
+        )
+    auto_refresh_plan: set[str] = set()
+    auto_refresh_db = None
+    needs_code_refresh = False
+    needs_wsp_refresh = False
+    if not selected_collections and _auto_refresh_allowed(args):
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            auto_refresh_db = AgentDB()
+            needs_code_refresh = auto_refresh_db.should_refresh_index(
+                "code", max_age_hours=1
+            )
+            needs_wsp_refresh = auto_refresh_db.should_refresh_index(
+                "wsp", max_age_hours=1
+            )
+            if needs_code_refresh:
+                auto_refresh_plan.add("navigation_code")
+            if needs_wsp_refresh:
+                auto_refresh_plan.add("navigation_wsp")
+        except Exception as exc:
+            safe_print(f"[WARN] Could not establish automatic refresh plan: {exc}")
+            safe_print("[FALLBACK] Manual refresh: python holo_index.py --index-all")
+    if not selected_collections and not auto_refresh_plan:
+        # Every non-maintenance invocation opens existing collections only.
+        # This also prevents auxiliary CLI commands from creating Chroma state.
+        os.environ[READONLY_QUERY_ENV] = "1"
+
+    maintenance_plan = selected_collections or auto_refresh_plan
+    if auto_refresh_plan and args.organize_docs:
+        _exit_maintenance_error(
+            MaintenanceSessionError(
+                "HOLOINDEX_MAINTENANCE_REPO_MUTATION_FORBIDDEN",
+                "Run DocDAE changes, commit them, then refresh HoloIndex.",
+            )
+        )
+    maintenance_session = None
+    if maintenance_plan:
+        try:
+            maintenance_session = MaintenanceSession.begin(
+                ssd_path=Path(args.ssd),
+                repo_root=project_root,
+                planned_collections=maintenance_plan,
+            )
+        except MaintenanceSessionError as exc:
+            _exit_maintenance_error(exc)
+
     # WSP 97: Handle case when HoloIndex is unavailable (--offline, --fast-search, HOLO_SKIP_MODEL=1)
     if HoloIndex is None:
+        if maintenance_session is not None:
+            maintenance_session.close()
+            _exit_maintenance_error(
+                MaintenanceSessionError("HOLOINDEX_MAINTENANCE_BACKEND_UNAVAILABLE")
+            )
         safe_print("[INFO] HoloIndex unavailable (offline/fast mode) - using lexical search only")
         holo = None
     else:
-        holo = HoloIndex(ssd_path=args.ssd, quiet=not verbose)
+        try:
+            holo = HoloIndex(ssd_path=args.ssd, quiet=not verbose)
+        except HoloIndexStorageError as exc:
+            if maintenance_session is not None:
+                maintenance_session.close()
+            _exit_storage_error(exc)
+        if maintenance_plan and getattr(holo, "retrieval_mode", "") != "semantic":
+            maintenance_session.close()
+            _exit_maintenance_error(
+                MaintenanceSessionError(
+                    "HOLOINDEX_MAINTENANCE_SEMANTIC_BACKEND_REQUIRED",
+                    f"retrieval_mode={getattr(holo, 'retrieval_mode', 'unknown')}",
+                )
+            )
 
     def _safe_count(collection) -> int:
         try:
@@ -997,17 +1125,10 @@ def main():
         except Exception:
             return 0
 
-    def _write_index_state(source: str) -> None:
+    def _write_index_state(source: str) -> bool:
         try:
             state_path = Path(args.ssd) / "indexes" / "index_state.json"
             state_path.parent.mkdir(parents=True, exist_ok=True)
-            receipt_path = freshness_receipt_path(Path(args.ssd))
-            receipt = build_freshness_receipt(
-                holo,
-                ssd_path=Path(args.ssd),
-                repo_root=project_root,
-                source=source,
-            )
             state = {
                 "last_indexed_at": datetime.now(timezone.utc).isoformat(),
                 "ssd_path": str(Path(args.ssd)),
@@ -1016,28 +1137,34 @@ def main():
                 "wsp_count": holo.get_wsp_entry_count(),
                 "test_count": _safe_count(getattr(holo, "test_collection", None)),
                 "skillz_count": _safe_count(getattr(holo, "skill_collection", None)),
-                "freshness_receipt_path": str(receipt_path),
+                "freshness_receipt_path": str(maintenance_session.receipt_path),
             }
             state_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
-            write_freshness_receipt(receipt, receipt_path)
+            return True
         except Exception as e:
             if verbose:
                 safe_print(f"[WARN] Failed to write index state: {e}")
+            return False
 
-    index_code = args.index_code or args.index or args.index_all
-    index_wsp = args.index_wsp or args.index or args.index_all
-    index_symbols = args.index_symbols
+    index_code = "navigation_code" in selected_collections
+    index_wsp = "navigation_wsp" in selected_collections
+    index_symbols = "navigation_symbols" in selected_collections
 
     indexing_awarded = False
+    refreshed_collections: set[str] = set()
+    refresh_proofs: dict[str, Any] = {}
     if index_code:
         start_time = time.time()
         code_result = holo.index_code_entries()
         duration = time.time() - start_time
 
         # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
-        if code_result is not None and code_result.is_empty:
-            safe_print(f"[CODE] WARNING: {code_result.warning or 'Zero code entries indexed'} ({duration:.2f}s)")
-            safe_print(f"[CODE] discovered={code_result.discovered_count}, indexed={code_result.indexed_count}")
+        if not _index_result_successful(code_result):
+            warning = code_result.warning if code_result is not None else "Indexer returned no result"
+            discovered = code_result.discovered_count if code_result is not None else 0
+            indexed = code_result.indexed_count if code_result is not None else 0
+            safe_print(f"[CODE] WARNING: {warning or 'Zero code entries indexed'} ({duration:.2f}s)")
+            safe_print(f"[CODE] discovered={discovered}, indexed={indexed}")
             # indexing_awarded intentionally NOT set to True
         else:
             # Record index refresh in database
@@ -1049,6 +1176,8 @@ def main():
                 print(f"[WARN] Failed to record index refresh: {e}")
 
             indexing_awarded = True
+            refreshed_collections.add("navigation_code")
+            refresh_proofs["navigation_code"] = code_result
         # Auto symbol indexing to keep memory self-maintaining (can disable with HOLO_SYMBOL_AUTO=0)
         auto_symbols = os.getenv("HOLO_SYMBOL_AUTO", "1").lower() in {"1", "true", "yes", "on"}
         if index_symbols or auto_symbols:
@@ -1061,31 +1190,35 @@ def main():
                     candidate = Path("modules") / args.module
                 symbol_roots = [candidate]
             else:
-                env_roots = os.getenv("HOLO_SYMBOL_ROOTS")
-                if env_roots:
-                    symbol_roots = [Path(r.strip()) for r in env_roots.split(";") if r.strip()]
-                else:
-                    symbol_roots = [Path("modules")]
+                # The focused symbol indexer owns canonical/default env
+                # resolution. None means modules + scripts + holo_index.
+                symbol_roots = None
             start_time = time.time()
             symbol_result = holo.index_symbol_entries(roots=symbol_roots)
             duration = time.time() - start_time
-            if symbol_result is not None and symbol_result.is_empty:
-                safe_print(f"[SYMBOLS] WARNING: {symbol_result.warning or 'Zero symbols indexed'} ({duration:.2f}s)")
+            if not _index_result_successful(symbol_result):
+                warning = symbol_result.warning if symbol_result is not None else "Indexer returned no result"
+                safe_print(f"[SYMBOLS] WARNING: {warning or 'Zero symbols indexed'} ({duration:.2f}s)")
             else:
-                indexed_count = symbol_result.indexed_count if symbol_result else 0
+                indexed_count = symbol_result.indexed_count
                 safe_print(f"[SYMBOLS] Indexed {indexed_count} symbols in {duration:.2f}s")
                 indexing_awarded = True
+                refreshed_collections.add("navigation_symbols")
+                refresh_proofs["navigation_symbols"] = symbol_result
     if index_symbols and not index_code:
         start_time = time.time()
         roots = [Path(r) for r in args.symbol_roots] if args.symbol_roots else None
         symbol_result = holo.index_symbol_entries(roots=roots)
         duration = time.time() - start_time
-        if symbol_result is not None and symbol_result.is_empty:
-            safe_print(f"[SYMBOLS] WARNING: {symbol_result.warning or 'Zero symbols indexed'} ({duration:.2f}s)")
+        if not _index_result_successful(symbol_result):
+            warning = symbol_result.warning if symbol_result is not None else "Indexer returned no result"
+            safe_print(f"[SYMBOLS] WARNING: {warning or 'Zero symbols indexed'} ({duration:.2f}s)")
         else:
-            indexed_count = symbol_result.indexed_count if symbol_result else 0
+            indexed_count = symbol_result.indexed_count
             safe_print(f"[SYMBOLS] Indexed {indexed_count} symbols in {duration:.2f}s")
             indexing_awarded = True
+            refreshed_collections.add("navigation_symbols")
+            refresh_proofs["navigation_symbols"] = symbol_result
     if index_wsp:
         start_time = time.time()
         wsp_dirs = [Path(p) for p in args.wsp_path] if args.wsp_path else None
@@ -1093,9 +1226,12 @@ def main():
         duration = time.time() - start_time
 
         # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
-        if wsp_result is not None and wsp_result.is_empty:
-            safe_print(f"[WSP] WARNING: {wsp_result.warning or 'Zero WSP entries indexed'} ({duration:.2f}s)")
-            safe_print(f"[WSP] discovered={wsp_result.discovered_count}, indexed={wsp_result.indexed_count}")
+        if not _index_result_successful(wsp_result):
+            warning = wsp_result.warning if wsp_result is not None else "Indexer returned no result"
+            discovered = wsp_result.discovered_count if wsp_result is not None else 0
+            indexed = wsp_result.indexed_count if wsp_result is not None else 0
+            safe_print(f"[WSP] WARNING: {warning or 'Zero WSP entries indexed'} ({duration:.2f}s)")
+            safe_print(f"[WSP] discovered={discovered}, indexed={indexed}")
             # indexing_awarded intentionally NOT set to True
         else:
             # Record WSP index refresh in database
@@ -1107,55 +1243,86 @@ def main():
                 print(f"[WARN] Failed to record WSP index refresh: {e}")
 
             indexing_awarded = True
+            refreshed_collections.add("navigation_wsp")
+            refresh_proofs["navigation_wsp"] = wsp_result
+
+    # WSP 98: Index the canonical test registry as a first-class collection.
+    index_tests = "navigation_tests" in selected_collections
+    if index_tests:
+        start_time = time.time()
+        test_result = holo.index_test_registry()
+        duration = time.time() - start_time
+        if not _index_result_successful(test_result):
+            warning = test_result.warning if test_result is not None else "Indexer returned no result"
+            discovered = test_result.discovered_count if test_result is not None else 0
+            indexed = test_result.indexed_count if test_result is not None else 0
+            safe_print(f"[TESTS] WARNING: {warning or 'Zero tests indexed'} ({duration:.2f}s)")
+            safe_print(f"[TESTS] discovered={discovered}, indexed={indexed}")
+        else:
+            safe_print(f"[TESTS] Indexed {test_result.indexed_count} registry entries in {duration:.2f}s")
+            indexing_awarded = True
+            refreshed_collections.add("navigation_tests")
+            refresh_proofs["navigation_tests"] = test_result
     
     # CFZ4: Index module/root docs
     # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1: Check IndexResult
     # to avoid awarding reward when zero docs are discovered/indexed.
-    index_docs = getattr(args, 'index_docs', False) or args.index_all
+    index_docs = "navigation_docs" in selected_collections
     if index_docs:
         start_time = time.time()
         docs_result = holo.index_docs_entries()
         duration = time.time() - start_time
-        if docs_result is not None and docs_result.is_empty:
+        if not _index_result_successful(docs_result):
             # Zero docs discovered or indexed — emit warning, DO NOT award reward
-            safe_print(f"[DOCS] WARNING: {docs_result.warning or 'Zero docs indexed'} ({duration:.2f}s)")
-            safe_print(f"[DOCS] discovered={docs_result.discovered_count}, indexed={docs_result.indexed_count}")
+            warning = docs_result.warning if docs_result is not None else "Indexer returned no result"
+            discovered = docs_result.discovered_count if docs_result is not None else 0
+            indexed = docs_result.indexed_count if docs_result is not None else 0
+            safe_print(f"[DOCS] WARNING: {warning or 'Zero docs indexed'} ({duration:.2f}s)")
+            safe_print(f"[DOCS] discovered={discovered}, indexed={indexed}")
             # indexing_awarded intentionally NOT set to True
         else:
-            indexed_count = docs_result.indexed_count if docs_result else 0
+            indexed_count = docs_result.indexed_count
             safe_print(f"[DOCS] Indexed {indexed_count} module/root docs in {duration:.2f}s")
             indexing_awarded = True
+            refreshed_collections.add("navigation_docs")
+            refresh_proofs["navigation_docs"] = docs_result
     
     # CFZ4: Index papers/research
     # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
-    index_knowledge = getattr(args, 'index_knowledge', False) or args.index_all
+    index_knowledge = "navigation_knowledge" in selected_collections
     if index_knowledge:
         start_time = time.time()
         knowledge_result = holo.index_knowledge_entries()
         duration = time.time() - start_time
-        if knowledge_result is not None and knowledge_result.is_empty:
-            safe_print(f"[KNOWLEDGE] WARNING: {knowledge_result.warning or 'Zero knowledge entries indexed'} ({duration:.2f}s)")
+        if not _index_result_successful(knowledge_result):
+            warning = knowledge_result.warning if knowledge_result is not None else "Indexer returned no result"
+            safe_print(f"[KNOWLEDGE] WARNING: {warning or 'Zero knowledge entries indexed'} ({duration:.2f}s)")
         else:
-            indexed_count = knowledge_result.indexed_count if knowledge_result else 0
+            indexed_count = knowledge_result.indexed_count
             safe_print(f"[KNOWLEDGE] Indexed {indexed_count} papers/research in {duration:.2f}s")
             indexing_awarded = True
+            refreshed_collections.add("navigation_knowledge")
+            refresh_proofs["navigation_knowledge"] = knowledge_result
 
     # Index SKILLz for agent discovery (Qwen/Gemma/UITars)
     # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
-    index_skills = args.index_skills or args.index_all
+    index_skills = "navigation_skills" in selected_collections
     if index_skills:
         start_time = time.time()
         skills_result = holo.index_skillz_entries()
         duration = time.time() - start_time
-        if skills_result is not None and skills_result.is_empty:
-            safe_print(f"[SKILLS] WARNING: {skills_result.warning or 'Zero skills indexed'} ({duration:.2f}s)")
+        if not _index_result_successful(skills_result):
+            warning = skills_result.warning if skills_result is not None else "Indexer returned no result"
+            safe_print(f"[SKILLS] WARNING: {warning or 'Zero skills indexed'} ({duration:.2f}s)")
         else:
-            indexed_count = skills_result.indexed_count if skills_result else 0
+            indexed_count = skills_result.indexed_count
             safe_print(f"[SKILLS] Indexed {indexed_count} SKILLz in {duration:.2f}s")
             indexing_awarded = True
+            refreshed_collections.add("navigation_skills")
+            refresh_proofs["navigation_skills"] = skills_result
 
     # Index CLI entrypoints → AGENT_CLI_CATALOG.md (command rolodex)
-    index_cli = getattr(args, 'index_cli', False) or args.index_all
+    index_cli = getattr(args, 'index_cli', False)
     if index_cli:
         start_time = time.time()
         try:
@@ -1185,11 +1352,25 @@ def main():
             safe_print(f"[CLI] Error indexing CLI entrypoints: {e}")
 
     # Targeted work-ledger reindex (FOUNDUPS_WORK_LEDGER_TARGETED_REINDEX_CLI_PHASE1)
-    if _run_work_ledger_indexing(holo, args):
+    if _run_work_ledger_indexing(holo, args, refresh_proofs):
         indexing_awarded = True
+        refreshed_collections.add("navigation_work_ledger")
 
-    if indexing_awarded:
+    if selected_collections:
+        try:
+            maintenance_session.complete(
+                holo,
+                refreshed_collections=refreshed_collections,
+                source="manual_index",
+                refresh_proofs=refresh_proofs,
+            )
+        except MaintenanceSessionError as exc:
+            _exit_maintenance_error(exc)
+        finally:
+            maintenance_session.close()
         _write_index_state("manual_index")
+        add_reward_event('index_refresh', 5, 'Refreshed indexes', {'query': args.search or ''})
+    elif indexing_awarded:
         add_reward_event('index_refresh', 5, 'Refreshed indexes', {'query': args.search or ''})
 
     last_query = args.search or ''
@@ -1198,57 +1379,46 @@ def main():
     # Check if indexes need automatic refresh (only if not explicitly indexing)
     auto_refreshed = False
     # WSP 97: Skip auto-refresh when holo is None (offline/fast mode)
-    if holo is not None and _auto_refresh_allowed(args) and not (index_code or index_wsp or indexing_awarded):
+    auto_refreshed_collections: set[str] = set()
+    auto_refresh_proofs: dict[str, Any] = {}
+    if holo is not None and auto_refresh_plan and not selected_collections:
         try:
-            from modules.infrastructure.database.src.agent_db import AgentDB
-            db = AgentDB()
-
-            needs_code_refresh = db.should_refresh_index("code", max_age_hours=1)
-            needs_wsp_refresh = db.should_refresh_index("wsp", max_age_hours=1)
-
             if needs_code_refresh or needs_wsp_refresh:
                 vprint("[AUTOMATIC] Index refresh needed (last refresh > 1 hour)")
                 vprint(f"[AUTOMATIC] Code index: {'STALE' if needs_code_refresh else 'FRESH'}")
                 vprint(f"[AUTOMATIC] WSP index: {'STALE' if needs_wsp_refresh else 'FRESH'}")
 
-                if args.organize_docs:
-                    vprint("[DOCDAE] Checking documentation organization...")
-                    try:
-                        from modules.infrastructure.doc_dae.src.doc_dae import DocDAE
-                        dae = DocDAE()
-
-                        analysis = dae.analyze_docs_folder()
-                        misplaced_count = analysis['markdown_docs'] + analysis['json_data']
-
-                        if misplaced_count > 0:
-                            vprint(f"[DOCDAE] Found {misplaced_count} misplaced files - organizing...")
-                            result = dae.run_autonomous_organization(dry_run=False)
-                            vprint(f"[DOCDAE] Organized: {result['execution']['moves_completed']} moved, "
-                                   f"{result['execution']['archives_completed']} archived")
-                        else:
-                            vprint("[DOCDAE] Documentation already organized")
-                    except Exception as e:
-                        safe_print(f"[WARN] DocDAE failed: {e} - continuing with indexing")
-                else:
-                    vprint("[DOCDAE] Skipping automatic organization (use --organize-docs to enable)")
-
                 # Automatically refresh stale indexes
                 if needs_code_refresh:
                     vprint("[AUTO-REFRESH] Refreshing code index...")
                     start_time = time.time()
-                    holo.index_code_entries()
+                    code_result = holo.index_code_entries()
                     duration = time.time() - start_time
-                    db.record_index_refresh("code", duration, holo.get_code_entry_count())
-                    vprint(f"[AUTO-REFRESH] Code index refreshed in {duration:.1f}s")
-                    auto_refreshed = True
+                    if _index_result_successful(code_result):
+                        auto_refresh_db.record_index_refresh(
+                            "code", duration, holo.get_code_entry_count()
+                        )
+                        vprint(f"[AUTO-REFRESH] Code index refreshed in {duration:.1f}s")
+                        auto_refreshed = True
+                        auto_refreshed_collections.add("navigation_code")
+                        auto_refresh_proofs["navigation_code"] = code_result
+                    else:
+                        safe_print("[AUTO-REFRESH] Code index returned no indexed entries")
                 if needs_wsp_refresh:
                     vprint("[AUTO-REFRESH] Refreshing WSP index...")
                     start_time = time.time()
-                    holo.index_wsp_entries()
+                    wsp_result = holo.index_wsp_entries()
                     duration = time.time() - start_time
-                    db.record_index_refresh("wsp", duration, holo.get_wsp_entry_count())
-                    vprint(f"[AUTO-REFRESH] WSP index refreshed in {duration:.1f}s")
-                    auto_refreshed = True
+                    if _index_result_successful(wsp_result):
+                        auto_refresh_db.record_index_refresh(
+                            "wsp", duration, holo.get_wsp_entry_count()
+                        )
+                        vprint(f"[AUTO-REFRESH] WSP index refreshed in {duration:.1f}s")
+                        auto_refreshed = True
+                        auto_refreshed_collections.add("navigation_wsp")
+                        auto_refresh_proofs["navigation_wsp"] = wsp_result
+                    else:
+                        safe_print("[AUTO-REFRESH] WSP index returned no indexed entries")
                 vprint("[SUCCESS] Automatic index refresh completed")
             else:
                 vprint("[FRESH] All indexes are up to date (< 1 hour old)")
@@ -1256,7 +1426,18 @@ def main():
         except Exception as e:
             safe_print(f"[WARN] Could not check index freshness: {e}")
             safe_print("[FALLBACK] Manual refresh: python holo_index.py --index-all")
-    if auto_refreshed:
+    if auto_refresh_plan:
+        try:
+            maintenance_session.complete(
+                holo,
+                refreshed_collections=auto_refreshed_collections,
+                source="auto_refresh",
+                refresh_proofs=auto_refresh_proofs,
+            )
+        except MaintenanceSessionError as exc:
+            _exit_maintenance_error(exc)
+        finally:
+            maintenance_session.close()
         _write_index_state("auto_refresh")
 
     # Phase 3: Initialize adaptive learning if available

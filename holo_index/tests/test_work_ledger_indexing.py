@@ -357,6 +357,32 @@ class TestCombinedBoost:
         assert boost == 0.0
 
 
+def _sample_work_ledger() -> Dict[str, Any]:
+    return {
+        "schema_version": "1.0.0",
+        "last_updated": "2026-05-21T12:00:00Z",
+        "slices": [
+            {
+                "slice_id": "TEST_SLICE_001",
+                "title": "Test Slice",
+                "lane": "W9",
+                "priority": "P1",
+                "status": "IN_PROGRESS",
+                "owner_worker": "W9",
+                "source": "audit",
+                "branch": "test/branch",
+                "pr_number": 123,
+                "related_foundup_id": "gotjunk_001",
+                "related_wsp": ["WSP 97"],
+                "blocked_by": [],
+                "next_slice": "TEST_SLICE_002",
+                "created_at": "2026-05-21T10:00:00Z",
+                "last_verified_at": "2026-05-21T12:00:00Z",
+            }
+        ],
+    }
+
+
 class TestWorkLedgerIndexing:
     """Test end-to-end work ledger indexing."""
 
@@ -364,42 +390,16 @@ class TestWorkLedgerIndexing:
         """index_work_ledger_entries extracts all required metadata fields."""
         from holo_index.core.indexing_engine import index_work_ledger_entries
 
-        # Create mock HoloIndex
         mock_holo = MagicMock()
         mock_holo._get_embedding = MagicMock(return_value=[0.1] * 384)
         mock_holo._reset_collection = MagicMock(return_value=MagicMock())
         mock_holo._log_agent_action = MagicMock()
 
-        # Create temp work ledger
-        ledger_data = {
-            "schema_version": "1.0.0",
-            "last_updated": "2026-05-21T12:00:00Z",
-            "slices": [
-                {
-                    "slice_id": "TEST_SLICE_001",
-                    "title": "Test Slice",
-                    "lane": "W9",
-                    "priority": "P1",
-                    "status": "IN_PROGRESS",
-                    "owner_worker": "W9",
-                    "source": "audit",
-                    "branch": "test/branch",
-                    "pr_number": 123,
-                    "related_foundup_id": "gotjunk_001",
-                    "related_wsp": ["WSP 97"],
-                    "blocked_by": [],
-                    "next_slice": "TEST_SLICE_002",
-                    "created_at": "2026-05-21T10:00:00Z",
-                    "last_verified_at": "2026-05-21T12:00:00Z",
-                }
-            ],
-        }
-
         with tempfile.TemporaryDirectory() as tmpdir:
             ledger_path = Path(tmpdir) / "docs" / "0102_session_briefings"
             ledger_path.mkdir(parents=True)
             (ledger_path / "work_ledger.example.json").write_text(
-                json.dumps(ledger_data), encoding="utf-8"
+                json.dumps(_sample_work_ledger()), encoding="utf-8"
             )
 
             mock_holo.project_root = Path(tmpdir)
@@ -758,6 +758,8 @@ class TestCLITargetedReindex:
             indexed_count=7,
             collection_name="navigation_work_ledger",
             warning=None,
+            processed_count=7,
+            source_manifest_digest="sha256:" + ("a" * 64),
         )
 
         result = _run_work_ledger_indexing(holo, self._make_args(index_work_ledger=True))

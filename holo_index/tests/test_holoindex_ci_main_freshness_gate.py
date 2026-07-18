@@ -52,6 +52,7 @@ def _write_receipt(tmp_path: Path, *, head: str = HEAD) -> Path:
                 removed_paths_digest=DIGEST,
                 embedding_backend="ci-test",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             )
         ],
     )

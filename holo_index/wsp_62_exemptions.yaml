@@ -1,0 +1,126 @@
+exemptions:
+  - file: "_cli_main.py"
+    reason: >-
+      Legacy multi-command CLI integration boundary. New maintenance planning,
+      source-proof, and receipt helpers are already extracted; the remaining
+      command router requires a dedicated compatibility slice.
+    threshold_override: 2000
+    function_threshold_override: 1200
+    functions:
+      - "_run_codeindex_report"
+      - "_generate_cli_catalog"
+      - "_generate_cli_rolodex_json"
+      - "_generate_cli_rolodex_sqlite"
+      - "main"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "holo_index/ROADMAP.md#2026-07-18-operational-truth-boundary-and-wsp_62-remediation"
+
+  - file: "core/indexing_engine.py"
+    reason: >-
+      Legacy per-collection indexing engine. Canonical source discovery was
+      extracted in this POC; collection transformation and publication remain
+      coupled and need an isolated migration with parity tests.
+    threshold_override: 2000
+    function_threshold_override: 175
+    functions:
+      - "index_code_entries"
+      - "index_wsp_entries"
+      - "index_docs_entries"
+      - "index_knowledge_entries"
+      - "index_skillz_entries"
+      - "index_work_ledger_entries"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "holo_index/ROADMAP.md#2026-07-18-operational-truth-boundary-and-wsp_62-remediation"
+
+  - file: "core/holo_index.py"
+    reason: >-
+      HoloIndex initialization is a legacy storage, backend, and collection
+      binding integration point. Its new read-only storage contract is covered
+      by focused tests; constructor decomposition is separately queued.
+    threshold_override: 1200
+    function_threshold_override: 300
+    class_threshold_override: 600
+    functions:
+      - "HoloIndex.__init__"
+    classes:
+      - "HoloIndex"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "holo_index/ROADMAP.md#2026-07-18-operational-truth-boundary-and-wsp_62-remediation"
+
+  - file: "core/search_engine.py"
+    reason: >-
+      Legacy semantic and lexical search integration boundary. This POC adds
+      embedding-space fail-closed checks only; decomposing ranking, fallback,
+      formatting, and collection search requires a dedicated parity slice.
+    threshold_override: 1500
+    function_threshold_override: 225
+    functions:
+      - "_rg_symbol_search"
+      - "_search_collection"
+      - "_lexical_search_collection"
+      - "_format_hit"
+      - "execute_search"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "holo_index/ROADMAP.md#2026-07-18-operational-truth-boundary-and-wsp_62-remediation"
+
+  - file: "incremental_foundup_index.py"
+    reason: >-
+      Legacy FoundUp plan construction predates this slice. The Phase-1 path
+      corrections preserve its public transaction shape while focused
+      decomposition remains queued.
+    threshold_override: 1200
+    function_threshold_override: 75
+    functions:
+      - "plan_incremental_foundup_index"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "holo_index/ROADMAP.md#2026-07-18-operational-truth-boundary-and-wsp_62-remediation"
+
+  - file: "incremental_index_executor.py"
+    reason: >-
+      Legacy incremental execution transaction remains above the function
+      threshold after record preparation and final-proof helpers were
+      extracted; no new helper requires exemption.
+    threshold_override: 1200
+    function_threshold_override: 75
+    functions:
+      - "execute_incremental_foundup_index_plan"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "holo_index/ROADMAP.md#2026-07-18-operational-truth-boundary-and-wsp_62-remediation"
+
+  - file: "query_receipt.py"
+    reason: >-
+      Legacy query-receipt assembly remains narrowly above the function
+      threshold; normalization introduced in this slice is independently
+      focused and receives no exemption.
+    threshold_override: 1200
+    function_threshold_override: 60
+    functions:
+      - "build_query_receipt"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "holo_index/ROADMAP.md#2026-07-18-operational-truth-boundary-and-wsp_62-remediation"
+
+  - file: "ModLog.md"
+    reason: >-
+      Legacy HoloIndex WSP_22 reverse-chronological journal. This focused slice
+      appends current evidence without rewriting historical module traceability.
+    threshold_override: 8700
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: >-
+      Archive historical journal epochs only in a dedicated WSP_22-preserving
+      HoloIndex documentation-maintenance slice.

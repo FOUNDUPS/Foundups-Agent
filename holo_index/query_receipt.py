@@ -165,6 +165,90 @@ def normalize_query_hits(value: Any, *, source_class: str, limit: int = 8) -> li
     return hits
 
 
+def _result_binding(
+    result: Mapping[str, Any],
+    generation_binding: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    binding = dict(generation_binding or {})
+    if binding:
+        return binding
+    return {
+        "freshness_generation_id": str(
+            result.get("freshness_generation_id") or ""
+        ),
+        "freshness_receipt_digest": str(
+            result.get("freshness_receipt_digest") or ""
+        ),
+        "freshness_receipt_path": str(
+            result.get("freshness_receipt_path") or ""
+        ),
+        "repo_head_sha": str(result.get("repo_head_sha") or ""),
+    }
+
+
+def _result_stale_reasons(result: Mapping[str, Any]) -> list[str]:
+    raw_reasons = result.get("stale_reasons")
+    if isinstance(raw_reasons, (str, bytes)) or not isinstance(
+        raw_reasons,
+        Sequence,
+    ):
+        return []
+    reasons: list[str] = []
+    for value in raw_reasons:
+        reason = str(value or "").strip()
+        if reason and reason not in reasons:
+            reasons.append(reason)
+    return reasons
+
+
+def _enforce_generation_binding(
+    *,
+    binding: Mapping[str, Any],
+    require_generation: bool,
+    ok: bool,
+    freshness: str,
+    error: str,
+    stale_reasons: list[str],
+) -> tuple[str, str]:
+    if not (require_generation and ok and freshness in FRESHNESS_STATES):
+        return freshness, error
+    missing_generation = "missing_holoindex_generation_id"
+    if not str(binding.get("freshness_generation_id") or ""):
+        stale_reasons.append(missing_generation)
+        return "UNKNOWN", error or missing_generation
+    missing_digest = "missing_holoindex_freshness_receipt_digest"
+    if not str(binding.get("freshness_receipt_digest") or ""):
+        stale_reasons.append(missing_digest)
+        return "UNKNOWN", error or missing_digest
+    return freshness, error
+
+
+def _per_target_verdicts(value: Any) -> list[dict[str, Any]] | None:
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
+        return None
+    return [
+        {
+            "target": str(item.get("target") or ""),
+            "source_class": str(item.get("source_class") or ""),
+            "verdict": str(item.get("verdict") or ""),
+            "matched_evidence_refs": [
+                str(ref)
+                for ref in (
+                    item.get("matched_evidence_refs")
+                    if not isinstance(
+                        item.get("matched_evidence_refs"),
+                        (str, bytes),
+                    )
+                    and isinstance(item.get("matched_evidence_refs"), Sequence)
+                    else ()
+                )
+            ],
+        }
+        for item in value
+        if isinstance(item, Mapping)
+    ]
+
+
 def build_query_receipt(
     *,
     source: str,
@@ -180,32 +264,20 @@ def build_query_receipt(
     generation id is downgraded to UNKNOWN and marked as an INDEX_GAP.
     """
 
-    binding = dict(generation_binding or {})
-    if not binding:
-        binding = {
-            "freshness_generation_id": str(result.get("freshness_generation_id") or ""),
-            "freshness_receipt_digest": str(result.get("freshness_receipt_digest") or ""),
-            "freshness_receipt_path": str(result.get("freshness_receipt_path") or ""),
-            "repo_head_sha": str(result.get("repo_head_sha") or ""),
-        }
+    binding = _result_binding(result, generation_binding)
     freshness = str(result.get("freshness") or "UNKNOWN").upper()
     ok = result.get("ok") is True
     error = str(result.get("error") or "")
-    stale_reasons: list[str] = []
+    stale_reasons = _result_stale_reasons(result)
+    freshness, error = _enforce_generation_binding(
+        binding=binding,
+        require_generation=require_generation,
+        ok=ok,
+        freshness=freshness,
+        error=error,
+        stale_reasons=stale_reasons,
+    )
     generation_id = str(binding.get("freshness_generation_id") or "")
-    if require_generation and ok and freshness in FRESHNESS_STATES and not generation_id:
-        freshness = "UNKNOWN"
-        stale_reasons.append("missing_holoindex_generation_id")
-        error = error or "missing_holoindex_generation_id"
-    if (
-        require_generation
-        and ok
-        and freshness in FRESHNESS_STATES
-        and not str(binding.get("freshness_receipt_digest") or "")
-    ):
-        freshness = "UNKNOWN"
-        stale_reasons.append("missing_holoindex_freshness_receipt_digest")
-        error = error or "missing_holoindex_freshness_receipt_digest"
     hits = normalize_query_hits(result.get("hits"), source_class=source_class)
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -220,33 +292,20 @@ def build_query_receipt(
         "freshness_receipt_digest": str(binding.get("freshness_receipt_digest") or ""),
         "freshness_receipt_path": str(binding.get("freshness_receipt_path") or ""),
         "repo_head_sha": str(binding.get("repo_head_sha") or ""),
-        "index_gap_detected": bool(stale_reasons or result.get("index_gap_detected") is True),
+        "index_gap_detected": bool(
+            stale_reasons
+            or result.get("index_gap_detected") is True
+            or (require_generation and ok and freshness not in FRESHNESS_STATES)
+        ),
         "stale_reasons": stale_reasons,
         "no_holoindex_reindex_performed": True,
     }
     retrieval_verdict = str(result.get("retrieval_verdict") or "").strip()
     if retrieval_verdict:
         payload["retrieval_verdict"] = retrieval_verdict
-    per_target = result.get("per_target_retrieval_verdicts")
-    if not isinstance(per_target, (str, bytes)) and isinstance(per_target, Sequence):
-        payload["per_target_retrieval_verdicts"] = [
-            {
-                "target": str(item.get("target") or ""),
-                "source_class": str(item.get("source_class") or ""),
-                "verdict": str(item.get("verdict") or ""),
-                "matched_evidence_refs": [
-                    str(ref)
-                    for ref in (
-                        item.get("matched_evidence_refs")
-                        if not isinstance(item.get("matched_evidence_refs"), (str, bytes))
-                        and isinstance(item.get("matched_evidence_refs"), Sequence)
-                        else ()
-                    )
-                ],
-            }
-            for item in per_target
-            if isinstance(item, Mapping)
-        ]
+    per_target = _per_target_verdicts(result.get("per_target_retrieval_verdicts"))
+    if per_target is not None:
+        payload["per_target_retrieval_verdicts"] = per_target
     return {**payload, "receipt_id": digest_json(payload)}
 
 

@@ -48,6 +48,185 @@ Get bridge status and capabilities.
 
 ---
 
+### HoloIndexQueryOwnerService
+
+Supported private owner for the RedDog operational consumers migrated in this
+POC:
+
+    from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
+        HoloIndexQueryOwnerService,
+        create_holo_query_app,
+        create_stdlib_server,
+    )
+
+HTTP surface:
+
+- POST /holoindex/v1/query
+- GET /holoindex/v1/health
+
+Both routes require Authorization: Bearer using
+HOLOINDEX_QUERY_SERVICE_TOKEN. The supported Phase-1 bind is literal
+`127.0.0.1`; hostnames, alternate `127/8` literals, and IPv6 are rejected.
+Requests are size-, query-, result-, and
+timeout-bounded. The service serializes one cached semantic backend and has no
+indexing API.
+
+The first authenticated health canary has a separate 270-second cold-model
+warmup budget. Once warm, health and query work use the ordinary owner budget
+(15 seconds by default, never more than 30); the supervising process has a
+300-second total startup budget. These are owner/work lifecycle bounds. The
+RedDog client enforces a monotonic absolute deadline for repository proof and
+response-body reads, but stdlib HTTP connect/header parsing remains
+socket-inactivity-bounded under the explicit trusted/cooperative-loopback and
+no-hostile-same-user-port-squatter POC assumption.
+
+The query request requires query and expected_repo_head_sha; limit and
+doc_type_filter are optional. A successful response proves semantic retrieval,
+the exact repository SHA, a stable generation/receipt digest, and verified
+manifests for the seven baseline collections on both sides of the query. Every
+collection must also have a canonical embedding-space fingerprint exactly
+equal in the receipt, the resident backend map, and response metadata. Blank
+legacy fingerprints fail closed and cause trusted preflight maintenance.
+Lexical fallback, missing proof, stale proof, generation change, and backend
+failure all fail closed.
+
+The resident owner forces authoritative sentence_transformers, disables
+TurboQuant routing, and sets the generation-unbound legacy SearchCache to
+None. Offline model discovery accepts complete flat SentenceTransformer
+caches and Hugging Face models--.../snapshots/<revision> caches selected by
+refs/main (or by a sole complete snapshot when no ref exists); incomplete or
+ambiguous caches are unavailable.
+
+Launch:
+
+    python -m modules.infrastructure.foundups_mcp_bridge.src.holo_query_service --host 127.0.0.1 --port 8127
+
+### HoloQueryServiceSupervisor
+
+Trusted host bootstraps use this lifecycle API instead of distributing a
+manually selected bearer token:
+
+    from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (
+        HoloQueryServiceSupervisor,
+        HoloQueryServiceSupervisorError,
+    )
+
+    with HoloQueryServiceSupervisor(
+        repo_root="O:/Foundups-Agent",
+        ssd_path="E:/HoloIndex",
+    ) as owner:
+        child_environment = owner.environment_for_child()
+
+start() returns only after an authenticated loopback health probe proves the
+owner ready and semantic. environment_for_child() returns a new mapping with
+HOLOINDEX_QUERY_SERVICE_URL and the per-process
+HOLOINDEX_QUERY_SERVICE_TOKEN; it never mutates the host environment. stop()
+invalidates the handoff, terminates the owner, and kills it after a bounded
+grace period. Startup failures raise HoloQueryServiceSupervisorError with a
+stable secret-free code. This supported adapter boundary does not itself
+remove OS filesystem/process privileges from a child; the trusted host must
+configure those permissions separately.
+
+The host bootstrap must retain the supervisor for the RedDog consumer's
+lifetime. A private-adapter QUERY_OWNER_POISONED response replaces the owned
+process and retries once; explicitly configured external owners are never
+restarted here. See
+[HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
+
+### RedDog HoloIndex Owner Bootstrap
+
+main.py uses the process-lifetime policy API:
+
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_bootstrap import (
+        cleanup_reddog_holoindex_owner,
+        ensure_reddog_holoindex_owner,
+        resolve_reddog_holoindex_owner_handoff,
+    )
+
+    result = ensure_reddog_holoindex_owner(
+        repo_root=repo_root,
+        requested=holo_dependent_work_requested,
+    )
+
+The result contains only ready, status, and a stable error code. It never
+contains the URL or bearer token. For requested work, the policy respects an
+existing literal-127.0.0.1 HTTP URL/token, honors
+REDDOG_HOLOINDEX_OWNER_AUTO_START=0, otherwise resolves the canonical
+HOLOINDEX_SSD_PATH and starts one retained supervisor.
+
+Successful automatic startup stores the URL/token only in a process-private
+handoff; it does not modify os.environ. In-process RedDog adapters call
+resolve_reddog_holoindex_owner_handoff(), which checks the retained supervisor
+process rather than health-probing before every query. It replaces a dead
+owned process once before returning either the private tuple or None. Poison
+replacement is triggered by the actual query response. Explicit environment
+configuration remains the boundary for an independently supervised owner.
+
+Configured-service acceptance requires a token of at least 32 characters, an
+HTTP URL using literal `127.0.0.1` at the root or
+/holoindex/v1/query path, and the exact
+authenticated semantic health response. When expected values are supplied,
+health must also match the exact repository SHA, freshness generation, and
+freshness-receipt digest.
+Invalid or unready explicit configuration returns a stable failure without
+overwriting either value.
+
+cleanup_reddog_holoindex_owner() is the explicit test and controlled-shutdown
+seam. It stops the auto-owned process and erases the private handoff. The
+restore_environment parameter remains compatibility-only because auto-start
+never edits the environment.
+
+### RedDog HoloIndex Trusted Maintenance Handshake
+
+Interactive/headless operational preflights and startup maintenance dispatch
+use:
+
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_handshake import (
+        ensure_reddog_holoindex_operational,
+    )
+
+    result = ensure_reddog_holoindex_operational(
+        repo_root=repo_root,
+        requested=holo_dependent_work_requested,
+    )
+
+The default REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1 permits the trusted host path
+to refresh a stale canonical store. It requires a clean exact Git HEAD, stops
+only an auto-owned owner, runs one bounded argv-only index-all command with
+semantic bypass/source narrowing removed, validates complete canonical source
+scope for all seven baseline collections, rechecks HEAD, and then starts the
+owner bound to the resulting generation. Startup may route the maintenance
+request through governed WRE dispatch, but the trusted host remains the
+maintenance authority.
+
+Phase 1 requires an exclusive repository-writer window during full refresh.
+The canonical lease coordinates migrated writers; it does not constrain an
+unleased legacy collection writer or eliminate the transient edit/revert
+TOCTOU risk. A successful refresh can leave a valid CURRENT receipt even if
+subsequent owner startup/health fails; in that case this operational result is
+still false.
+
+For model-backed cross-lane audits, HoloIndex supplies candidate discovery and
+an exact receipt HEAD while the worker directly reads only its allowlisted
+paths. The worker re-proves that clean exact HEAD after the direct reads and a
+second time immediately before accepting the report. Either proof failure
+returns REJECT_REPOSITORY_STATE_CHANGED.
+
+A stale externally configured owner returns
+HOLOINDEX_MAINTENANCE_EXTERNAL_OWNER_UNSUPPORTED and is never terminated by
+this process. Any semantic, source-completeness, repository-race, receipt, or
+restart failure remains non-operational. See
+[HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
+
+Scope note: this owner is wired for the listed RedDog operational consumers.
+The legacy `src/holo_tools.py` MCP surface still opens the HoloIndex store
+directly and remains a registered migration item; Phase 1 does not claim that
+all repository consumers cross this boundary. Normal cleanup is bounded, but
+an abrupt host death can orphan the child until OS/supervisor cleanup and token
+rotation.
+
+---
+
 ## Tool Reference
 
 ### Repo Perception

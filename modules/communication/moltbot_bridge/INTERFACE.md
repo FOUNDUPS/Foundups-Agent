@@ -2,6 +2,40 @@
 
 ## Public API
 
+### RedDog HoloIndex Query Adapter
+
+    from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter import (
+        HoloIndexReadOnlyQueryAdapter,
+        holoindex_hits,
+    )
+
+HoloIndexReadOnlyQueryAdapter.query accepts a query, allowed-path evidence, and
+a bounded result limit. Explicit constructor values or
+HOLOINDEX_QUERY_SERVICE_URL/token select an externally supervised owner.
+Otherwise the adapter resolves the host bootstrap's authenticated
+process-private handoff. The supported owner URL uses literal `127.0.0.1`.
+The adapter never exports that handoff, opens Chroma, or indexes. Each request
+sends the exact clean local repository HEAD. The adapter
+preserves canonical WSP, docs, knowledge, tests, skills, work-ledger, code, and
+symbol buckets before normalizing hits.
+
+The returned freshness field is CURRENT only for semantic retrieval with an
+exact SHA, non-empty generation and receipt digest, and complete seven-
+collection proof. Any missing, stale, lexical, or changed-generation condition
+is an explicit index gap; RedDog's audit executor blocks model invocation on
+that evidence. Active or unprovable maintenance fails with a stable error
+code. The owner's authenticated health gate also requires a non-empty semantic
+canary and repository/generation binding.
+
+Passing an explicit SSD/receipt enables a diagnostic-only direct adapter. It
+always returns a non-operational freshness state and can never satisfy CURRENT.
+Only the trusted host maintenance handshake may refresh the canonical store;
+startup may route the request through governed WRE dispatch, and the RedDog
+adapter has no index-write surface. This is not an OS privilege boundary:
+filesystem/process isolation remains a deployment responsibility. Phase 1 is
+limited to the wired RedDog operational consumers; legacy
+foundups_mcp_bridge `holo_tools.py` remains a direct-store path.
+
 ### FusionAdapter (advisory Fusion worker-panel, CONTRACT-ONLY)
 
 ```python

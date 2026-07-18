@@ -52,9 +52,11 @@ def _fresh_holo_receipt():
                 source_manifest_digest="sha256:work-ledger-manifest",
                 indexed_paths_digest="sha256:work-ledger-paths",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
             CollectionFreshness(
                 name="navigation_symbols",
+                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
                 count=3,
                 status="indexed",
                 source="ci_targeted_reindex",
@@ -63,6 +65,7 @@ def _fresh_holo_receipt():
                 source_manifest_digest="sha256:symbols-manifest",
                 indexed_paths_digest="sha256:symbols-paths",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
         ],
     )

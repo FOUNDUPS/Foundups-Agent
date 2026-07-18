@@ -4,21 +4,35 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import sys
 from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 from holo_index.freshness_receipt import (
     ALL_COLLECTIONS,
     SCHEMA_VERSION,
     build_freshness_receipt,
+    build_maintenance_invalidation,
     collections_for_changed_paths,
     evaluate_freshness_for_paths,
     freshness_receipt_path,
     load_freshness_receipt,
+    publish_maintenance_invalidation,
     write_freshness_receipt,
 )
+from holo_index.maintenance_lock import (
+    MaintenanceLeaseBusy,
+    acquire_maintenance_lease,
+    maintenance_lock_path,
+    probe_maintenance_lock,
+)
+from holo_index.source_scope import canonical_source_scope_id
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+SPACE_FINGERPRINT = "sha256:" + ("1" * 64)
 
 
 class CountCollection:
@@ -33,7 +47,11 @@ class SnapshotCollection:
     def __init__(self, name: str, count: int):
         self.name = name
         self._count = count
-        self.metadata = {"embedding_backend": "test-embedding"}
+        self.metadata = {
+            "embedding_backend": "test-embedding",
+            "embedding_model": "test-model",
+            "embedding_space_fingerprint": SPACE_FINGERPRINT,
+        }
 
     def count(self) -> int:
         return self._count
@@ -63,7 +81,12 @@ def _holo(**counts: int):
     values = {}
     for collection_name, attr_name in attr_map.items():
         values[attr_name] = SnapshotCollection(collection_name, counts.get(collection_name, 3))
-    return SimpleNamespace(**values)
+    return SimpleNamespace(
+        **values,
+        index_embedding_backend="test-embedding",
+        index_embedding_model_id="test-model",
+        index_embedding_space_fingerprint=SPACE_FINGERPRINT,
+    )
 
 
 def _count_only_holo(**counts: int):
@@ -106,6 +129,11 @@ def test_receipt_contains_all_expected_collections(tmp_path: Path) -> None:
     assert all(entry.status == "indexed" for entry in receipt.collections)
     assert all(entry.verification == "PASS" for entry in receipt.collections)
     assert all(entry.embedding_backend == "test-embedding" for entry in receipt.collections)
+    assert all(entry.embedding_model == "test-model" for entry in receipt.collections)
+    assert all(
+        entry.embedding_space_fingerprint == SPACE_FINGERPRINT
+        for entry in receipt.collections
+    )
     for entry in receipt.collections:
         _assert_sha256_digest(entry.source_manifest_digest)
         _assert_sha256_digest(entry.indexed_paths_digest)
@@ -316,6 +344,128 @@ def test_generation_id_changes_when_collection_manifest_changes(tmp_path: Path) 
     assert first.generation_id != second.generation_id
 
 
+def _assert_scoped_refresh_truth(refreshed) -> None:
+    wsp_check = evaluate_freshness_for_paths(
+        refreshed,
+        ["WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"],
+        expected_repo_head_sha="sha-b",
+    )
+    knowledge_check = evaluate_freshness_for_paths(
+        refreshed,
+        ["WSP_knowledge/docs/Papers/PQN_Deep_Dive.md"],
+        expected_repo_head_sha="sha-b",
+    )
+    test_check = evaluate_freshness_for_paths(
+        refreshed,
+        ["modules/example/tests/test_example.py"],
+        expected_repo_head_sha="sha-b",
+    )
+    assert "stale_collection_sha:navigation_wsp" in wsp_check.reasons
+    assert "stale_collection_sha:navigation_knowledge" in knowledge_check.reasons
+    assert test_check.ok is True
+
+
+def test_test_only_refresh_preserves_prior_wsp_and_knowledge_entries(
+    tmp_path: Path,
+) -> None:
+    base = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="full_refresh",
+        generated_at="2026-07-12T00:00:00+00:00",
+        repo_head_sha="sha-a",
+    )
+
+    refreshed = build_freshness_receipt(
+        _holo(**{"navigation_tests": 4}),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="test_only_refresh",
+        generated_at="2026-07-13T00:00:00+00:00",
+        repo_head_sha="sha-b",
+        refreshed_collections={"navigation_tests"},
+        base_receipt=base,
+        refresh_source_manifests={
+            "navigation_tests": "sha256:" + ("a" * 64),
+        },
+        refresh_source_scopes={
+            "navigation_tests": canonical_source_scope_id("navigation_tests"),
+        },
+    )
+
+    before = {entry.name: entry for entry in base.collections}
+    after = {entry.name: entry for entry in refreshed.collections}
+    assert after["navigation_tests"].repo_head_sha == "sha-b"
+    assert after["navigation_wsp"] == before["navigation_wsp"]
+    assert after["navigation_knowledge"] == before["navigation_knowledge"]
+    assert refreshed.base_generation_id == base.generation_id
+
+    _assert_scoped_refresh_truth(refreshed)
+
+
+def test_complete_manifest_without_canonical_scope_fails_closed(
+    tmp_path: Path,
+) -> None:
+    receipt = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="test_refresh",
+        repo_head_sha="sha-b",
+        refreshed_collections={"navigation_tests"},
+        refresh_source_manifests={
+            "navigation_tests": "sha256:" + ("a" * 64),
+        },
+        refresh_source_scopes={
+            "navigation_tests": "holoindex.navigation_tests.narrowed.v1",
+        },
+    )
+
+    check = evaluate_freshness_for_paths(
+        receipt,
+        ["modules/example/tests/test_example.py"],
+        expected_repo_head_sha="sha-b",
+    )
+
+    assert check.ok is False
+    assert "collection_source_scope_mismatch:navigation_tests" in check.reasons
+
+
+def test_partial_refresh_without_base_marks_untouched_collections_unverified(
+    tmp_path: Path,
+) -> None:
+    receipt = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="test_only_refresh",
+        repo_head_sha="sha-b",
+        refreshed_collections={"navigation_tests"},
+    )
+
+    entries = {entry.name: entry for entry in receipt.collections}
+    assert entries["navigation_tests"].verification == "PASS"
+    assert entries["navigation_wsp"].status == "unverified"
+    assert entries["navigation_wsp"].repo_head_sha == ""
+    assert entries["navigation_wsp"].verification == "UNVERIFIED"
+
+
+def test_partial_refresh_rejects_unknown_collection_name(tmp_path: Path) -> None:
+    try:
+        build_freshness_receipt(
+            _holo(),
+            ssd_path=tmp_path,
+            repo_root=REPO_ROOT,
+            source="bad_refresh",
+            refreshed_collections={"navigation_typo"},
+        )
+    except ValueError as exc:
+        assert "navigation_typo" in str(exc)
+    else:
+        raise AssertionError("unknown collection must fail closed")
+
+
 def test_code_refresh_does_not_mark_skill_collection_fresh_without_skill_manifest(
     tmp_path: Path,
 ) -> None:
@@ -347,9 +497,200 @@ def test_code_refresh_does_not_mark_skill_collection_fresh_without_skill_manifes
 
 
 def test_cli_index_state_writer_emits_freshness_receipt_contract() -> None:
-    source = (REPO_ROOT / "holo_index" / "_cli_main.py").read_text(encoding="utf-8")
+    cli_source = (REPO_ROOT / "holo_index" / "_cli_main.py").read_text(
+        encoding="utf-8"
+    )
+    session_source = (
+        REPO_ROOT / "holo_index" / "maintenance_session.py"
+    ).read_text(encoding="utf-8")
 
-    assert "build_freshness_receipt(" in source
-    assert "write_freshness_receipt(receipt, receipt_path)" in source
-    assert '"freshness_receipt_path": str(receipt_path)' in source
-    assert "HOLOINDEX_QUERY_READONLY" in source
+    assert cli_source.index("MaintenanceSession.begin(") < cli_source.index(
+        "holo = HoloIndex("
+    )
+    assert "maintenance_session.complete(" in cli_source
+    assert (
+        '"freshness_receipt_path": str(maintenance_session.receipt_path)'
+        in cli_source
+    )
+    assert "publish_maintenance_invalidation(" in session_source
+    assert "build_freshness_receipt(" in session_source
+    assert "write_freshness_receipt(receipt, session.receipt_path)" in session_source
+    assert "HOLOINDEX_QUERY_READONLY" in cli_source
+
+
+def test_read_only_lock_probe_does_not_create_absent_path(tmp_path: Path) -> None:
+    lock_path = maintenance_lock_path(tmp_path / "never-created")
+
+    probe = probe_maintenance_lock(lock_path)
+
+    assert probe.status == "absent"
+    assert probe.clear is True
+    assert lock_path.exists() is False
+    assert lock_path.parent.exists() is False
+
+
+def test_lock_probe_fails_closed_for_invalid_sentinel(tmp_path: Path) -> None:
+    lock_path = maintenance_lock_path(tmp_path)
+    lock_path.parent.mkdir(parents=True)
+    lock_path.touch()
+
+    probe = probe_maintenance_lock(lock_path)
+
+    assert probe.status == "error"
+    assert probe.clear is False
+    assert probe.reason == "lock_file_invalid"
+
+
+def test_maintenance_lease_is_exclusive_across_processes(tmp_path: Path) -> None:
+    lock_path = maintenance_lock_path(tmp_path)
+    child_source = (
+        "import sys\n"
+        "from holo_index.maintenance_lock import acquire_maintenance_lease\n"
+        "with acquire_maintenance_lease(sys.argv[1]):\n"
+        "    print('locked', flush=True)\n"
+        "    sys.stdin.readline()\n"
+    )
+    process = subprocess.Popen(
+        [sys.executable, "-B", "-c", child_source, str(lock_path)],
+        cwd=REPO_ROOT,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert process.stdout is not None
+        assert process.stdout.readline().strip() == "locked"
+        probe = probe_maintenance_lock(lock_path)
+        assert probe.status == "held"
+        assert probe.clear is False
+        assert probe.reason == "maintenance_in_progress"
+        with pytest.raises(MaintenanceLeaseBusy):
+            acquire_maintenance_lease(lock_path)
+    finally:
+        if process.stdin is not None:
+            process.stdin.write("release\n")
+            process.stdin.flush()
+            process.stdin.close()
+        return_code = process.wait(timeout=10)
+        stderr = process.stderr.read() if process.stderr is not None else ""
+        assert return_code == 0, stderr
+
+    assert probe_maintenance_lock(lock_path).status == "idle"
+
+
+def test_acquiring_lease_does_not_rewrite_freshness_receipt(tmp_path: Path) -> None:
+    receipt = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="full_refresh",
+        repo_head_sha="sha-a",
+    )
+    receipt_path = freshness_receipt_path(tmp_path)
+    write_freshness_receipt(receipt, receipt_path)
+    before = receipt_path.read_bytes()
+
+    with acquire_maintenance_lease(maintenance_lock_path(tmp_path)):
+        assert receipt_path.read_bytes() == before
+
+    assert receipt_path.read_bytes() == before
+
+
+def test_maintenance_invalidation_preserves_only_unplanned_proof(
+    tmp_path: Path,
+) -> None:
+    base = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="full_refresh",
+        generated_at="2026-07-12T00:00:00+00:00",
+        repo_head_sha="sha-a",
+    )
+    receipt_path = freshness_receipt_path(tmp_path)
+
+    published = publish_maintenance_invalidation(
+        receipt_path,
+        {"navigation_symbols", "navigation_tests"},
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        base_receipt=base,
+        generated_at="2026-07-13T00:00:00+00:00",
+        repo_head_sha="sha-a",
+    )
+    loaded = load_freshness_receipt(receipt_path)
+
+    assert loaded == published
+    assert loaded.base_generation_id == base.generation_id
+    assert loaded.generation_id != base.generation_id
+    before = {entry.name: entry for entry in base.collections}
+    after = {entry.name: entry for entry in loaded.collections}
+    for name in ("navigation_symbols", "navigation_tests"):
+        entry = after[name]
+        assert entry.status == "maintenance_in_progress"
+        assert entry.verification == "IN_PROGRESS"
+        assert entry.count == 0
+        assert entry.repo_head_sha == ""
+        assert entry.source_manifest_digest == ""
+        assert entry.indexed_paths_digest == ""
+    assert after["navigation_wsp"] == before["navigation_wsp"]
+    assert after["navigation_knowledge"] == before["navigation_knowledge"]
+
+    check = evaluate_freshness_for_paths(
+        loaded,
+        ["modules/example/tests/test_example.py"],
+        expected_repo_head_sha="sha-a",
+    )
+    assert check.ok is False
+    assert check.stale_collections == ["navigation_tests"]
+    assert "collection_not_indexed:navigation_tests" in check.reasons
+
+
+def test_maintenance_invalidation_without_base_is_fully_fail_closed(
+    tmp_path: Path,
+) -> None:
+    receipt = build_maintenance_invalidation(
+        {"navigation_tests"},
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        base_receipt=None,
+        repo_head_sha="sha-a",
+    )
+    entries = {entry.name: entry for entry in receipt.collections}
+
+    assert entries["navigation_tests"].verification == "IN_PROGRESS"
+    assert entries["navigation_wsp"].verification == "UNVERIFIED"
+    assert entries["navigation_wsp"].status == "unverified"
+
+
+def test_atomic_receipt_failure_keeps_previous_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    first = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="first",
+        repo_head_sha="sha-a",
+    )
+    second = build_freshness_receipt(
+        _holo(**{"navigation_tests": 4}),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="second",
+        repo_head_sha="sha-b",
+    )
+    receipt_path = freshness_receipt_path(tmp_path)
+    write_freshness_receipt(first, receipt_path)
+
+    def fail_replace(source: object, destination: object) -> None:
+        raise OSError("injected replace failure")
+
+    monkeypatch.setattr("holo_index.freshness_receipt.os.replace", fail_replace)
+    with pytest.raises(OSError, match="injected replace failure"):
+        write_freshness_receipt(second, receipt_path)
+
+    assert load_freshness_receipt(receipt_path) == first
+    assert list(receipt_path.parent.glob(f".{receipt_path.name}.*.tmp")) == []

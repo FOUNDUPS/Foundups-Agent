@@ -96,6 +96,82 @@ The bridge allows 0102 (ChatGPT) to:
 
 ## Usage
 
+### Private HoloIndex Query Owner
+
+The RedDog operational consumers migrated in this POC use this module's owner
+at literal `127.0.0.1` instead of opening Chroma directly. Trusted host
+bootstraps own its lifecycle
+through HoloQueryServiceSupervisor, which generates an ephemeral token, proves
+authenticated semantic readiness, can supply a trusted child environment, and
+cleans up the process. Automatic in-process startup keeps the URL/token in a
+private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
+exports the generated secret to the parent environment. See
+[HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
+
+The RedDog read-only operational preflight now calls the process-lifetime
+bootstrap automatically for E2E, report collection, audit enqueue, and
+OPENCLAW_AUTO_TASKS_ENABLED paths. Set
+REDDOG_HOLOINDEX_OWNER_AUTO_START=0 to opt out. An already configured HTTP
+service URL using literal `127.0.0.1` and a strong token bypass process creation only after its
+authenticated health endpoint proves semantic readiness and the expected
+repository/generation/receipt-digest binding plus exact embedding-space
+fingerprints for all seven baseline collections.
+
+Trusted interactive/headless preflight also defaults
+REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1. A stale canonical receipt causes one
+bounded semantic index-all refresh only after a clean exact-HEAD proof. The
+handshake strips source-narrowing and cap controls, requires complete
+canonical manifests for all seven baseline collections, re-proves HEAD, and
+starts the private owner against that exact generation. Startup may route the
+request through governed WRE dispatch, while maintenance authority remains
+with the trusted host. It never stops a stale externally configured owner.
+A legacy blank embedding-space fingerprint is not accepted as historical
+compatibility: it makes the receipt stale and triggers this maintenance path.
+
+For manual diagnostics only, set a strong shared token outside the repository,
+then launch the host-owned process:
+
+    $env:HOLOINDEX_QUERY_SERVICE_TOKEN = "<outside-repo secret>"
+    $env:HOLOINDEX_SSD_PATH = "E:/HoloIndex"
+    python -m modules.infrastructure.foundups_mcp_bridge.src.holo_query_service --host 127.0.0.1 --port 8127
+
+Configure the RedDog worker with:
+
+    $env:HOLOINDEX_QUERY_SERVICE_URL = "http://127.0.0.1:8127"
+    $env:HOLOINDEX_QUERY_SERVICE_TOKEN = "<same outside-repo secret>"
+
+The service exposes only authenticated query and health routes. It never
+indexes. Query success is semantic-only, generation-bound, and CURRENT only
+when all seven baseline collection proofs match the exact caller repository
+HEAD before and after retrieval; health also requires a non-empty semantic
+canary. FastAPI is optional; the same command uses the stdlib HTTP runtime when
+FastAPI is unavailable.
+
+The owner forces the authoritative sentence_transformers backend, discovers
+complete flat and Hugging Face models--.../snapshots/<revision> caches for
+offline startup, and disables the generation-unbound legacy SearchCache. Cold
+semantic initialization is reserved for the first authenticated health canary
+(270-second default warmup); ordinary queries are capped at 30 seconds, and the
+supervisor's total startup budget is 300 seconds.
+
+RedDog response-body reads and owner proof/search work use monotonic absolute
+deadlines. The stdlib HTTP connect/header phase remains socket-inactivity
+bounded. Phase 1 therefore assumes a trusted cooperative literal-loopback peer
+and no hostile same-user port squatter or deliberate header trickle; it is not
+a hostile-local transport security claim. Model-backed cross-lane audits also
+re-prove the clean exact HoloIndex receipt HEAD after direct file reads and
+again immediately before accepting their reports.
+
+This is a supported API boundary, not an OS privilege boundary. Deploy a
+worker identity without store-write/process-control permissions when hard
+isolation is required. The legacy `src/holo_tools.py` MCP surface remains a
+direct-store consumer outside this Phase-1 migration. Full refresh also
+requires an exclusive writer window because unleased legacy writers and a
+transient edit/revert are not excluded by the cooperative maintenance lease.
+After a successful refresh, owner lifecycle failure can leave the receipt
+CURRENT while preflight remains non-operational. Abrupt host death can leave an
+orphan owner until verified process cleanup and token rotation.
+
 ### CLI Testing
 
 ```bash

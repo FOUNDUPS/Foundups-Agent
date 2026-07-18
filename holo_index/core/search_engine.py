@@ -37,6 +37,10 @@ def _tokenize_query(query: str) -> List[str]:
     return [token for token in re.findall(r"[a-z0-9_]+", query.lower()) if token]
 
 
+def _strict_semantic_owner(holo: "HoloIndex") -> bool:
+    return bool(getattr(holo, "strict_semantic_owner", False))
+
+
 # Slice-priority label → numeric weight (used when metadata stores P0/P1/.../P4 strings
 # instead of a numeric priority_num field). Mirrors WSP 15 priority ordering, scaled to the
 # 1-5 range that _format_hit's _sort_key expects.
@@ -815,9 +819,14 @@ def _search_collection(
         return []
 
     try:
-        if collection.count() == 0:
-            return []
+        collection_count = collection.count()
     except Exception:
+        if _strict_semantic_owner(holo):
+            raise RuntimeError("HOLOINDEX_STRICT_COLLECTION_COUNT_FAILED")
+        return []
+    if collection_count == 0:
+        if _strict_semantic_owner(holo):
+            raise RuntimeError("HOLOINDEX_STRICT_COLLECTION_EMPTY")
         return []
 
     # TQ3: select the embedder routed for this specific collection. The
@@ -840,6 +849,8 @@ def _search_collection(
         # Fallback to the legacy single-model attribute (tests monkeypatch it).
         model = getattr(holo, "model", None)
     if model is None:
+        if _strict_semantic_owner(holo):
+            raise RuntimeError("HOLOINDEX_STRICT_EMBEDDING_MODEL_UNAVAILABLE")
         holo._log_agent_action(
             "Embedding model not available - semantic search degraded to lexical. "
             "Knowledge/paper results may be missing. Check HOLO_MODEL_IMPORT_TIMEOUT if cold-process.",
@@ -848,13 +859,21 @@ def _search_collection(
         return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
 
     # WSP 97: Encode with timeout to prevent indefinite hangs
-    embedding = _run_with_timeout(
-        lambda: model.encode(query, show_progress_bar=False).tolist(),
-        timeout_sec=HOLO_ENCODE_TIMEOUT,
-        default=None,
-        error_msg=f"model.encode() timed out for query '{query[:50]}'",
-    )
+    if _strict_semantic_owner(holo):
+        # The owner executor owns the absolute deadline and poisons the process
+        # on timeout. An inner abandoned thread would leave this backend
+        # reusable after an unknown encoder state.
+        embedding = model.encode(query, show_progress_bar=False).tolist()
+    else:
+        embedding = _run_with_timeout(
+            lambda: model.encode(query, show_progress_bar=False).tolist(),
+            timeout_sec=HOLO_ENCODE_TIMEOUT,
+            default=None,
+            error_msg="model.encode() timed out",
+        )
     if embedding is None:
+        if _strict_semantic_owner(holo):
+            raise RuntimeError("HOLOINDEX_STRICT_EMBEDDING_FAILED")
         holo._log_agent_action("Encoding timed out - falling back to lexical search", "WARN")
         return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
 
@@ -1304,6 +1323,8 @@ def execute_search(
             try:
                 skill_hits = _search_collection(holo, skill_collection, query, limit, kind="skill")
             except Exception:
+                if _strict_semantic_owner(holo):
+                    raise
                 skill_hits = []
 
         # CFZ4: Search Docs index (module/root docs)
@@ -1311,6 +1332,8 @@ def execute_search(
             try:
                 docs_hits = _search_collection(holo, docs_collection, query, limit, kind="docs")
             except Exception:
+                if _strict_semantic_owner(holo):
+                    raise
                 docs_hits = []
 
         # CFZ4: Search Knowledge index (papers/research)
@@ -1318,6 +1341,8 @@ def execute_search(
             try:
                 knowledge_hits = _search_collection(holo, knowledge_collection, query, limit, kind="knowledge")
             except Exception:
+                if _strict_semantic_owner(holo):
+                    raise
                 knowledge_hits = []
 
         # Work Ledger: Search slice tracking index (WSP 15/60/70)
@@ -1337,7 +1362,7 @@ def execute_search(
                 work_ledger_hits = []
 
         # Symbol-query fallback: lexical + rg for exact identifiers/paths
-        if symbol_query:
+        if symbol_query and not _strict_semantic_owner(holo):
             if doc_type_filter in ["code", "all"] and code_collection is not None:
                 lexical_code = _lexical_search_collection(holo, code_collection, query, limit, kind="code")
                 if lexical_code:
@@ -1411,6 +1436,9 @@ def execute_search(
                 "routing_active": bool(getattr(holo, "routing_active", False)),
                 "collection_backend_map": dict(
                     getattr(holo, "collection_backend_map", {}) or {}
+                ),
+                "collection_embedding_space_map": dict(
+                    getattr(holo, "collection_embedding_space_map", {}) or {}
                 ),
             },
         }

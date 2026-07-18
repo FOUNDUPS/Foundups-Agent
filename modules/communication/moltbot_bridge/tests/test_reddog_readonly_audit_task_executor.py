@@ -10,6 +10,7 @@ import pytest
 
 from holo_index.memex_access_policy_receipt import build_memex_access_policy_receipt
 from holo_index.memex_projection_adapter import project_foundup_memex_to_holoindex_shadow
+from holo_index.repository_state import RepositoryState
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SKILL,
@@ -25,6 +26,7 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
     RepoAuditModelResult,
 )
 import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
+import modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt as wsp15_allocation
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
     AUTHORITATIVE_WORK_STATE_REFRESH_SLICE,
     READONLY_AUDIT_LANE_ANALYZER_SLICE,
@@ -75,6 +77,15 @@ MEMEX_POLICY_EXPIRES_AT = "2026-07-16T01:00:00+00:00"
 @pytest.fixture(autouse=True)
 def isolated_agent_db(tmp_path, monkeypatch):
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
+    monkeypatch.setattr(
+        readonly_worker_runtime,
+        "read_repository_state",
+        lambda *args, **kwargs: RepositoryState(
+            head_sha="abc123",
+            clean=True,
+            state_digest="sha256:test-clean",
+        ),
+    )
     DatabaseManager.reset_for_tests()
     yield
     DatabaseManager.reset_for_tests()
@@ -740,10 +751,10 @@ def test_model_backed_discovers_index_candidate_before_direct_read(tmp_path: Pat
     assert result.report is not None
     evidence_paths = {item["path"] for item in result.report["target_evidence"]}
     assert "docs/work_ledger.schema.json" in evidence_paths
-    assert "modules/communication/moltbot_bridge/src/sample.py" in evidence_paths
+    assert "modules/communication/moltbot_bridge/src/sample.py" not in evidence_paths
     assert runner.calls
     context_payload = json.loads(runner.calls[0]["context"])
-    assert len(context_payload["untrusted_repository_evidence"]) == 2
+    assert len(context_payload["untrusted_repository_evidence"]) == 1
 
 
 def test_model_backed_repo_code_audit_rejects_unknown_evidence_ref(tmp_path: Path) -> None:
@@ -1144,13 +1155,67 @@ def test_model_backed_rejects_wsp15_binding_digest_mismatch(tmp_path: Path) -> N
     assert ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH in result.rejection_reasons
 
 
+def test_model_backed_rejects_read_scope_outside_wsp15_allocation(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    context = _model_context(
+        allowed_read_targets=("docs/work_ledger.schema.json",)
+    )
+    context["assignment"] = dict(context["assignment"])
+    context["assignment"]["allowed_read_targets"] = [
+        "modules/communication/moltbot_bridge/src/sample.py"
+    ]
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=_EchoEvidenceModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert (
+        ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+
+
 def test_model_backed_rejects_regular_allocation_without_fusion_requirement(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     context = _model_context()
     allocation = allocate_reddog_wsp15_receipt(
         requested_operation="answer_simple_question",
         prompt_text="Say hello.",
+        allowed_read_targets=context["assignment"]["allowed_read_targets"],
     ).to_dict()
+    allocation.update(
+        {
+            "complexity": 2,
+            "importance": 2,
+            "deferability": 2,
+            "impact": 2,
+            "mps_total": 8,
+            "priority": "P3",
+            "reasoning_tier": "REGULAR",
+            "worker_plan": {
+                **allocation["worker_plan"],
+                "fusion_required": False,
+                "reasoning_tier": "REGULAR",
+            },
+        }
+    )
+    allocation["input_digest"] = wsp15_allocation._digest(
+        wsp15_allocation._allocation_input_payload(allocation)
+    )
+    allocation["receipt_id"] = wsp15_allocation._digest(
+        {
+            "receipt": allocation["input_digest"],
+            "type": allocation["schema_version"],
+        }
+    )
     context["wsp15_allocation_receipt"] = allocation
     context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
     context["wsp15_allocation_digest"] = canonical_reddog_wsp15_allocation_digest(allocation)
@@ -1169,6 +1234,81 @@ def test_model_backed_rejects_regular_allocation_without_fusion_requirement(tmp_
 
     assert result.accepted is False
     assert ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED in result.rejection_reasons
+
+
+def test_model_backed_rejects_repo_change_after_direct_reads(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    monkeypatch.setattr(
+        readonly_worker_runtime,
+        "read_repository_state",
+        lambda *args, **kwargs: RepositoryState(
+            head_sha="changed-head",
+            clean=True,
+            state_digest="sha256:changed",
+        ),
+    )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert (
+        ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED
+        in result.rejection_reasons
+    )
+    assert not runner.calls
+
+
+def test_model_backed_rejects_repo_change_before_report_acceptance(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = _repo(tmp_path)
+    states = iter(
+        (
+            RepositoryState(
+                head_sha="abc123",
+                clean=True,
+                state_digest="sha256:first-clean",
+            ),
+            RepositoryState(
+                head_sha="abc123",
+                clean=False,
+                state_digest="sha256:final-dirty",
+                error="HOLOINDEX_REPOSITORY_DIRTY",
+            ),
+        )
+    )
+    monkeypatch.setattr(
+        readonly_worker_runtime,
+        "read_repository_state",
+        lambda *args, **kwargs: next(states),
+    )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=_EchoEvidenceModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert (
+        ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED
+        in result.rejection_reasons
+    )
 
 
 def test_model_backed_rejects_invalid_recommended_action_enum(tmp_path: Path) -> None:

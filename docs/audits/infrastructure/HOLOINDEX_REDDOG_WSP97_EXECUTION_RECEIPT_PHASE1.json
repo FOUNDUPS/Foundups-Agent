@@ -1,0 +1,81 @@
+{
+  "execution_id": "HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1",
+  "execution_plane": "wre_runtime",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "HoloIndex was queried before implementation in offline lexical diagnostic mode; authoritative framework WSP files were then read directly.",
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_62_Large_File_and_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_96_WRE_Skills_Wardrobe_Protocol.md",
+      "WSP_framework/src/WSP_97_WSP_CODING_AGENTS_SYSTEM.md"
+    ],
+    "retrieve_evidence": [
+      "docs/audits/infrastructure/HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1.md",
+      "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json",
+      "modules/infrastructure/foundups_mcp_bridge/HOLO_QUERY_OWNER_RUNBOOK.md"
+    ],
+    "research": [
+      "Audited canonical storage, receipt freshness, semantic backend, linked-worktree HEAD, RedDog startup, and downstream worker paths.",
+      "Verified the cached sentence-transformers artifact loads offline at dimension 384 and bound its content fingerprint to all baseline collections.",
+      "Compared framework WSP authority with knowledge backups; no WSP or backup was modified."
+    ],
+    "micro_pass": [
+      "Focused regressions cover malformed and duplicate receipts, model/runtime fingerprint mismatch, owner poisoning, redirect/proxy denial, response-body timeout, and repository races.",
+      "modules/infrastructure/foundups_mcp_bridge/tests",
+      "holo_index/tests/test_holoindex_embedding_space.py"
+    ],
+    "macro_pass": [
+      "Final no-overlap focused validation: 745 passed across HoloIndex, infrastructure owner, RedDog query/downstream, and idle-maintenance matrices.",
+      "Final HoloIndex validation: 346 passed across storage/source/CLI/embedding, freshness/maintenance, incremental/work-ledger, and machine-contract matrices.",
+      "Independent owner/client/maintenance/security validation: 289 passed.",
+      "All 81 changed or added Python files compiled without writing bytecode."
+    ],
+    "hard_think": [
+      "docs/audits/infrastructure/HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1.md#3-failure-modes",
+      "Separated response-body absolute deadlines from the documented trusted cooperative loopback-header assumption.",
+      "Rejected legacy receipts and stores without generation and embedding-space fingerprints."
+    ],
+    "dialectic_sweep": [
+      "docs/audits/infrastructure/HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1.md#4-alternatives-considered",
+      "Adversarial reviewers tested false-CURRENT paths, stale owner generations, cross-lane repository changes, malformed scope, and duplicate collection entries."
+    ],
+    "first_principles": [
+      "One canonical writer, one serialized semantic owner, exact repository identity, exact seven-collection scope, and fail-closed freshness are the minimum truthful POC boundary.",
+      "docs/audits/infrastructure/HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1.md#5-decision-record"
+    ],
+    "execute": [
+      "holo_index/storage_contract.py",
+      "holo_index/freshness_receipt.py",
+      "holo_index/embedding_space.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_owner_query_client.py"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_05",
+    "WSP_06",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_64",
+    "WSP_81",
+    "WSP_84",
+    "WSP_87",
+    "WSP_96",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "Dedicated worktree and branch: fix/holoindex-reddog-poc-phase1.",
+    "No framework WSP or knowledge-backup file changed.",
+    "MODULE_CONCATENATION_GATE.md remains unmirrored because it is an annex, not a WSP.",
+    "docs/audits/infrastructure/HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1.md",
+    "holo_index/tests/TESTModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "modules/communication/moltbot_bridge/tests/TestModLog.md"
+  ]
+}

@@ -1,5 +1,47 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-18: REDDOG_HOLOINDEX_QUERY_OWNER_BOUNDARY_POC_PHASE1
+
+**WSP Protocol**: WSP 00, 05, 06, 15, 22, 50, 62, 87, 96, 97
+**Phase**: POC implementation; focused validation/PR evidence pending
+**Agent**: 0102 architect for 012 with delegated audit/test workers
+
+**Changes**:
+
+- Added the bounded RedDog HoloIndex owner client and query adapter. The
+  migrated operational path requires the authenticated service at literal
+  `127.0.0.1` and never opens Chroma locally through that adapter.
+- Added authenticated process-private owner handoff resolution; auto-generated
+  tokens are never exported to the parent environment. Direct-store mode is
+  diagnostic-only and can never return CURRENT.
+- Preserved code, WSP, documentation, knowledge, test, skill, work-ledger, and
+  symbol evidence instead of discarding non-code buckets.
+- Enforced clean exact-HEAD, complete seven-collection proof, semantic-only
+  retrieval, stable generation binding, and pre/post maintenance probes.
+- Disabled HTTP redirects before bearer transport, restricted the endpoint
+  path, and downgraded client-rejected CURRENT responses to STALE.
+- Owner timeout now poisons the process permanently; a private adapter replaces
+  its owned process and retries once after QUERY_OWNER_POISONED, while an
+  external supervisor remains responsible for external-owner recovery.
+- Startup dispatch now invokes the trusted exact-HEAD maintenance handshake
+  before generic WRE routing and cannot turn an old age-only refresh result
+  into success.
+- Extracted HoloIndex query normalization from the read-only audit runtime;
+  remaining legacy runtime decomposition is tracked under WSP_62.
+- Boundary: RedDog has no HoloIndex indexing authority and model execution is
+  blocked on stale, lexical, dirty, missing, raced, or unproven evidence.
+
+**Impact**: The migrated RedDog operational paths can preserve and consume
+generation-bound semantic evidence without opening the local persistent store.
+Maintenance remains a trusted-host action that startup may request through
+governed WRE dispatch. This adapter boundary does not prove OS privilege
+isolation or migration of the legacy foundups_mcp_bridge `holo_tools.py` path.
+
+**WSP Compliance**: Boundary tests are split by cohesive responsibility;
+focused gate results will be recorded after validation. Historical
+runtime/ModLog size debt remains explicitly registered and no global WSP_62
+compliance claim is made.
+
 ## 2026-07-17: REDDOG_OPENCLAW_SUPERVISOR_CLAIM_RECEIPT_THREADING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 22, 97

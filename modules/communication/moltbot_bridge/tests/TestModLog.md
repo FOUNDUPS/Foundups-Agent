@@ -1,3 +1,37 @@
+## 2026-07-18: REDDOG_HOLOINDEX_QUERY_OWNER_BOUNDARY_POC_PHASE1
+
+**Files**: test_reddog_holoindex_query_boundary.py (NEW),
+test_reddog_holoindex_owner_client_transport.py (NEW),
+test_reddog_holoindex_direct_query_boundary.py (NEW),
+test_reddog_holoindex_maintenance_dispatch.py (NEW),
+test_reddog_main_readonly_operational_bootstrap.py and
+test_reddog_readonly_audit_task_executor.py (UPDATED)
+
+**WSP Protocol**: WSP 05, 06, 15, 22, 50, 62, 87, 97
+**Phase**: POC implementation complete; focused validation green; PR pending
+**Agent**: 0102 architect with delegated adversarial workers
+
+**Changes**:
+
+- Added owner-client transport, bearer proxy/redirect denial, literal
+  `127.0.0.1`/path checks,
+  local-Chroma denial, typed storage errors, generation binding, baseline
+  freshness, dirty/old HEAD, lexical rejection, and maintenance race coverage.
+- Added process-private handoff, direct-diagnostic-only, canonical
+  source-scope, startup maintenance ordering, false-success denial, semantic
+  preflight, and interactive/headless fail-closed coverage.
+- Split boundary tests by owner-client transport, private handoff/response
+  binding, adapter behavior, and direct diagnostics to stay within WSP_62
+  domain thresholds without a new-file exemption.
+
+**Impact**: The migrated downstream model/audit paths are designed to stop on
+absent, lexical, stale, dirty, raced, narrowed, or unbound HoloIndex evidence.
+
+**WSP Compliance**: Maintenance dispatch precedes generic WRE routing, and the
+supported query adapter exposes no refresh surface; OS privilege isolation is
+separate. The final post-refactor owner/query boundary matrix passed 57 tests,
+and the non-overlapping downstream audit/bootstrap/state matrix passed 200.
+
 ## 2026-07-16: REDDOG_RESIDENT_QUEUE_DRAFT_PR_PUBLISH_REQUEST_BINDING_PHASE1
 
 **Files**: `test_reddog_resident_queue_draft_pr_publish_request_binding.py`

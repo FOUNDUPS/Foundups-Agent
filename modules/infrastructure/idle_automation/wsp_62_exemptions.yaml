@@ -1,0 +1,19 @@
+exemptions:
+  - file: "src/self_research_refresh.py"
+    reason: >-
+      Legacy self-research orchestration boundary. This POC changes only the
+      HoloIndex maintenance handshake dispatch and does not authorize a broad
+      candidate-generation or task-publication rewrite.
+    threshold_override: 1100
+    function_threshold_override: 225
+    class_threshold_override: 800
+    functions:
+      - "SelfResearchRefresher.build_update_candidates"
+      - "SelfResearchRefresher.publish_autonomous_tasks"
+      - "SelfResearchRefresher.run"
+    classes:
+      - "SelfResearchRefresher"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "modules/infrastructure/idle_automation/ROADMAP.md#phase-2-enhancement-in-progress-u1f6a7"

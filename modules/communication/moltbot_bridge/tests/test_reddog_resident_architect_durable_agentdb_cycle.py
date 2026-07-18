@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from holo_index.repository_state import RepositoryState
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ARCHITECT_DETERMINATION_ACCEPT,
     ArchitectModelResult,
@@ -20,6 +21,7 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     RepoAuditModelResult,
 )
+import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
     REDDOG_RESIDENT_CYCLE_ACCEPT,
     REDDOG_RESIDENT_CYCLE_REJECT,
@@ -51,6 +53,15 @@ REVISION = "sha256:resident-work-state"
 @pytest.fixture(autouse=True)
 def isolated_agent_db(tmp_path, monkeypatch):
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
+    monkeypatch.setattr(
+        readonly_worker_runtime,
+        "read_repository_state",
+        lambda *args, **kwargs: RepositoryState(
+            head_sha=HEAD,
+            clean=True,
+            state_digest="sha256:resident-clean",
+        ),
+    )
     DatabaseManager.reset_for_tests()
     yield
     DatabaseManager.reset_for_tests()
@@ -127,9 +138,11 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source_manifest_digest="sha256:work-ledger-manifest",
                 indexed_paths_digest="sha256:work-ledger-paths",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
             CollectionFreshness(
                 name="navigation_symbols",
+                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
                 count=9,
                 status="indexed",
                 source="ci_targeted_reindex",
@@ -138,6 +151,7 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source_manifest_digest="sha256:symbols-manifest",
                 indexed_paths_digest="sha256:symbols-paths",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
         ],
     )

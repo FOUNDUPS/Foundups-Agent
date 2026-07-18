@@ -66,3 +66,25 @@ These remain deferred until the FoundUp Memex POC and MVP contracts are proven.
 - Agents propose learning and roadmap changes; they do not directly rewrite durable cognition.
 - Every Memex view, learning candidate, and roadmap proposal binds to exact `foundup_id` and `snapshot_id` receipts.
 - No CABR, stakeholder, or delegate status grants runtime authority during POC or MVP.
+
+## 2026-07-18: RedDog / HoloIndex Truth Boundary Follow-ups
+
+- Complete post-merge activation at the exact merge SHA before treating the
+  persistent semantic store as CURRENT.
+- Bind resident governed work orders to process-private owner handoffs without
+  adding an indexing surface to the supported query adapter; OS permissions
+  remain a separate deployment control.
+- Split reddog_readonly_0102_audit_worker_runtime.py by evidence acquisition,
+  freshness normalization, model invocation, and receipt composition.
+- Continue extracting main.py RedDog preflight and dispatch policy into
+  cohesive module-owned helpers; do not add new orchestration branches to the
+  root monolith.
+- Keep communication tests below the domain threshold by separating owner
+  client, adapter, direct diagnostics, maintenance dispatch, and downstream
+  operational consumers.
+- Migrate or explicitly retire the legacy foundups_mcp_bridge `holo_tools.py`
+  direct-store consumer; Phase 1 covers only the wired RedDog operational
+  consumers.
+
+These items are an explicit WSP_62 remediation register; no global compliance
+claim is made while historical monolith debt remains.

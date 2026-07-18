@@ -202,7 +202,6 @@ def plan_incremental_foundup_index(
 
     operations: list[IncrementalFoundUpIndexOperation] = []
     target_collections: set[str] = set()
-    delete_where = delete_filter_for_foundup(foundup_id)
     for path, collections in changed_by_path.items():
         for collection in collections:
             target_collections.add(collection)
@@ -213,7 +212,7 @@ def plan_incremental_foundup_index(
                     foundup_id=foundup_id,
                     repo_relative_path=path,
                     stable_id=stable_index_id(collection, path, foundup_id=foundup_id),
-                    delete_where=delete_where,
+                    delete_where={"path": path},
                 )
             )
     for path, collections in removed_by_path.items():
@@ -226,7 +225,7 @@ def plan_incremental_foundup_index(
                     foundup_id=foundup_id,
                     repo_relative_path=path,
                     stable_id=stable_index_id(collection, path, foundup_id=foundup_id),
-                    delete_where=delete_where,
+                    delete_where={"path": path},
                 )
             )
 
