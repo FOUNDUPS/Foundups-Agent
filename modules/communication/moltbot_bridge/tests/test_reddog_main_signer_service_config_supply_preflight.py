@@ -63,8 +63,10 @@ def _authority_profile(**overrides: object) -> dict[str, object]:
         "principal_public_key": "ed25519-pub-v1:principal",
         "reddog_id": "reddog:foundups-agent",
         "reddog_public_key": "ed25519-pub-v1:reddog",
-        "permission_snapshot_digest": "sha256:permission",
+        "permission_snapshot_digest": "sha256:" + "1" * 64,
         "key_epoch": "epoch-1",
+        "consensus_receipt_digest": "sha256:" + "c" * 64,
+        "authority_profile_source_receipt_id": "sha256:" + "a" * 64,
         "identity_ttl_seconds": 600,
         "work_authority_ttl_seconds": 300,
     }

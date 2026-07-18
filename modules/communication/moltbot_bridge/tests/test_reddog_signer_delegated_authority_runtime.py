@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 import hashlib
 import hmac
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src import reddog_signer_delegated_authority_runtime as r
@@ -462,6 +464,51 @@ def test_json_store_commits_authority_receipt(tmp_path) -> None:
     content = path.read_text(encoding="utf-8")
     assert request.work_order_id in content
     assert result.receipt.store_revision
+
+
+def test_json_store_compare_and_swap_is_serialized_across_store_instances(
+    tmp_path,
+) -> None:
+    path = tmp_path / "authority-state.json"
+    barrier = threading.Barrier(2)
+
+    def commit(index: int) -> str:
+        barrier.wait(timeout=5)
+        try:
+            AtomicJsonAuthorityRuntimeStore(path).commit(
+                {"writer": index}, expected_revision=None
+            )
+        except RuntimeError as exc:
+            return str(exc)
+        return "committed"
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        outcomes = list(executor.map(commit, (1, 2)))
+
+    assert sorted(outcomes) == ["committed", "revision_conflict"]
+    assert AtomicJsonAuthorityRuntimeStore(path).load()["writer"] in {1, 2}
+
+
+def test_json_store_fsyncs_parent_directory_after_atomic_replace(
+    tmp_path, monkeypatch
+) -> None:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_authority_runtime_store as store_module,
+    )
+
+    observed = []
+    monkeypatch.setattr(
+        store_module,
+        "_fsync_parent_directory",
+        lambda path: observed.append(path),
+    )
+    target = tmp_path / "authority-state.json"
+
+    AtomicJsonAuthorityRuntimeStore(target).commit(
+        {"writer": 1}, expected_revision=None
+    )
+
+    assert observed == [tmp_path]
 
 
 def test_result_contains_no_secret_or_signing_material_labels() -> None:

@@ -23,10 +23,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
-import tempfile
 from dataclasses import asdict, dataclass, field
-from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
@@ -36,7 +33,14 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PREFIX_WORKAUTH,
     canonical_signing_input,
 )
-
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
+    AtomicJsonAuthorityRuntimeStore,
+    AuthorityRuntimeStore,
+    FailClosedPrincipalAuthorityResolver,
+    InMemoryAuthorityRuntimeStore,
+    PrincipalAuthorityRecord,
+    PrincipalAuthorityResolver,
+)
 
 AUTHORITY_ISSUED = "DELEGATED_AUTHORITY_ISSUED"
 AUTHORITY_REJECTED = "DELEGATED_AUTHORITY_REJECTED"
@@ -131,34 +135,6 @@ def _path_within_foundup(path: str, foundup_id: str) -> bool:
 
 
 @dataclass(frozen=True)
-class PrincipalAuthorityRecord:
-    """Token-verified principal basis supplied by an external resolver."""
-
-    principal_id: str
-    principal_provider: str
-    principal_public_key: str
-    repo_scope: Tuple[str, ...]
-    foundup_scope: Tuple[str, ...]
-    verified_subject_digest: str
-    reward_account: Optional[str] = None
-    owner_dae: Optional[str] = None
-    principal_wallet: Optional[str] = None
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
-
-
-class PrincipalAuthorityResolver(Protocol):
-    def resolve(self, principal_id: str, principal_provider: str) -> Optional[PrincipalAuthorityRecord]:
-        """Return token-verified principal authority, or None to fail closed."""
-
-
-class FailClosedPrincipalAuthorityResolver:
-    def resolve(self, principal_id: str, principal_provider: str) -> Optional[PrincipalAuthorityRecord]:
-        return None
-
-
-@dataclass(frozen=True)
 class SigningRequest:
     """Request sent to an isolated signer. The body id is audit-only."""
 
@@ -187,6 +163,7 @@ class SigningResponse:
     key_fingerprint: str = ""
     key_epoch: str = ""
     audit_mac: str = ""
+    audit_attestation_signature: str = ""
     rejection_code: str = ""
     boundary_attested: bool = False
     requester_identity_attested: bool = False
@@ -209,67 +186,6 @@ class FailClosedSignerClient:
             rejection_code=RuntimeRejectCode.SIGNER_NOT_CONFIGURED,
             no_secret_material_returned=True,
         )
-
-
-class AuthorityRuntimeStore(Protocol):
-    def load(self) -> Dict[str, Any]:
-        """Return the current runtime state snapshot."""
-
-    def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        """Atomically commit snapshot and return the committed revision."""
-
-
-class InMemoryAuthorityRuntimeStore:
-    """In-memory optimistic store for tests and local dry runtime composition."""
-
-    def __init__(self, initial: Optional[Mapping[str, Any]] = None, *, fail_commit: bool = False) -> None:
-        self._state: Dict[str, Any] = dict(initial or {})
-        self.fail_commit = fail_commit
-
-    def load(self) -> Dict[str, Any]:
-        return json.loads(json.dumps(self._state, sort_keys=True))
-
-    def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        if self.fail_commit:
-            raise RuntimeError("commit_failed")
-        if self._state.get("revision") != expected_revision:
-            raise RuntimeError("revision_conflict")
-        committed = json.loads(json.dumps(snapshot, sort_keys=True))
-        revision = _canonical_digest(committed)
-        committed["revision"] = revision
-        self._state = committed
-        return revision
-
-
-class AtomicJsonAuthorityRuntimeStore:
-    """Single-file authority store using atomic replace."""
-
-    def __init__(self, path: str | Path) -> None:
-        self.path = Path(path)
-
-    def load(self) -> Dict[str, Any]:
-        if not self.path.exists():
-            return {}
-        return json.loads(self.path.read_text(encoding="utf-8"))
-
-    def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        current = self.load()
-        if current.get("revision") != expected_revision:
-            raise RuntimeError("revision_conflict")
-        committed = json.loads(json.dumps(snapshot, sort_keys=True))
-        revision = _canonical_digest(committed)
-        committed["revision"] = revision
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        fd, tmp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-                json.dump(committed, handle, sort_keys=True, indent=2)
-                handle.write("\n")
-            os.replace(tmp_name, self.path)
-        finally:
-            if os.path.exists(tmp_name):
-                os.unlink(tmp_name)
-        return revision
 
 
 @dataclass(frozen=True)

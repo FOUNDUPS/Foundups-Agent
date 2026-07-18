@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import os
 from pathlib import Path
 from types import SimpleNamespace
@@ -258,6 +259,7 @@ def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch)
         "signed_0102_bounded_code_fusion_worktree_draft_pr",
     )
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "3")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE", "0")
 
     with patch.object(
         main,
@@ -273,6 +275,101 @@ def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch)
     assert calls == ["serial", "claim", "serial", "claim", "serial", "claim"]
 
 
+def test_reddog_queue_control_receipt_reports_observed_authority_and_worker_effects(
+    monkeypatch, tmp_path
+):
+    from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
+        _SIGNING_CONTEXT,
+    )
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime_root = tmp_path / "runtime"
+    receipt_path = runtime_root / "control-receipts.jsonl"
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPTS_PATH", str(receipt_path)
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_control_loop_signing_context."
+        "build_control_loop_receipt_signing_context",
+        return_value=_SIGNING_CONTEXT,
+    ), patch.object(
+        main, "run_reddog_resident_queue_serial_loop_preflight"
+    ) as serial, patch.object(
+        main, "run_reddog_openclaw_signed_worker_claim_loop_preflight"
+    ) as claim:
+
+        def serial_side_effect(_repo_root):
+            serial.last_result = {
+                "accepted": True,
+                "progress_count": 2,
+                "dispatched_stages": ("authority_runtime", "bounded_worker_pilot"),
+                "rejection_reasons": (),
+            }
+            return True
+
+        def claim_side_effect(_repo_root):
+            from modules.communication.moltbot_bridge.src import openclaw_supervisor
+
+            evidence = openclaw_supervisor._signed_worker_claim_result(
+                accepted=True,
+                status=openclaw_supervisor.SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT,
+                task_id="task-1",
+                receipt_id="signed-worker-receipt-1",
+            )
+            claim.last_result = {
+                "accepted": True,
+                "progress_count": 1,
+                "completed_count": 1,
+                "requeued_count": 0,
+                "failed_count": 0,
+                "receipt_ids": ("signed-worker-receipt-1",),
+                    "worker_execution_count": 0,
+                    "worker_process_spawn_count": 0,
+                    "shell_command_count": 0,
+                    "child_execution_evidence_digests": (
+                        evidence["execution_result_digest"],
+                    ),
+                    "child_execution_outcomes": (
+                        {
+                            "task_id": "task-1",
+                            "status": "completed",
+                            "receipt_id": "signed-worker-receipt-1",
+                            "evidence_digest": evidence[
+                                "execution_result_digest"
+                            ],
+                            "worker_execution_performed": False,
+                            "effect_evidence_complete": True,
+                            "worker_process_spawn_count": 0,
+                            "shell_command_count": 0,
+                        },
+                    ),
+                    "child_execution_evidence": (evidence,),
+                "rejection_reasons": (),
+            }
+            return True
+
+        serial.side_effect = serial_side_effect
+        claim.side_effect = claim_side_effect
+        assert main.run_reddog_resident_queue_control_loop_preflight(repo) is True
+
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8").splitlines()[-1])
+    assert receipt["authority_issued"] is True
+    assert receipt["worker_claim_performed"] is True
+    assert receipt["worker_execution_performed"] is True
+    assert receipt["bounded_file_edit_observed"] is True
+    assert receipt["bounded_file_edit_count"] == 1
+    assert receipt["shell_command_execution_observed"] is False
+    assert receipt["shell_command_count"] == 0
+    assert receipt["worker_process_spawn_observed"] is False
+    assert receipt["worker_process_spawn_count"] == 0
+
+
 def test_reddog_queue_control_loop_stops_after_idle_round(monkeypatch):
     calls: list[str] = []
 
@@ -281,6 +378,7 @@ def test_reddog_queue_control_loop_stops_after_idle_round(monkeypatch):
         "signed_0102_bounded_code_fusion_worktree_draft_pr",
     )
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "5")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE", "0")
 
     with patch.object(main, "run_reddog_resident_queue_serial_loop_preflight") as serial, patch.object(
         main,
@@ -338,6 +436,41 @@ def test_reddog_queue_control_loop_invalid_rounds_fail_closed_when_enforced(monk
 
     serial.assert_not_called()
     claim.assert_not_called()
+
+
+def test_control_receipt_persistence_failure_blocks_even_when_not_enforced(
+    monkeypatch, tmp_path
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED", "0")
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE", "1"
+    )
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPTS_PATH",
+        str(tmp_path / "runtime" / "control.jsonl"),
+    )
+
+    with patch.object(
+        main, "run_reddog_resident_queue_serial_loop_preflight"
+    ) as serial, patch.object(
+        main, "_reddog_persist_queue_control_receipt", side_effect=OSError("disk")
+    ):
+        serial.return_value = False
+        serial.last_result = {
+            "accepted": False,
+            "progress_count": 1,
+            "dispatched_stages": ("authority_runtime",),
+            "rejection_reasons": ("serial_reject",),
+        }
+        assert main.run_reddog_resident_queue_control_loop_preflight(repo) is False
+
+    result = main.run_reddog_resident_queue_control_loop_preflight.last_result
+    assert result["status"] == "CONTROL_LOOP_RECEIPT_PERSISTENCE_REJECT"
+    assert result["accepted"] is False
 
 
 def test_reddog_serial_loop_profile_passes_agentdb_worker_dispatch_writer(monkeypatch):

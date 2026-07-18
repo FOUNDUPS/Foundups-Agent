@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import subprocess
 import sqlite3
 from pathlib import Path
 from types import SimpleNamespace
@@ -25,6 +26,7 @@ from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
     SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
     SignedWorkerOpenClawClaimReason,
+    _signed_worker_claim_loop_result,
     claim_reddog_signed_worker_dispatch_task_once,
     claim_reddog_signed_worker_dispatch_tasks_until_idle,
 )
@@ -117,10 +119,12 @@ class _FakeRunner:
         accepted: bool = True,
         unsafe: bool = False,
         requeue_required: bool = False,
+        result_overrides: dict | None = None,
     ) -> None:
         self.accepted = accepted
         self.unsafe = unsafe
         self.requeue_required = requeue_required
+        self.result_overrides = dict(result_overrides or {})
         self.calls = []
 
     def run_signed_worker_dispatch_task(
@@ -147,14 +151,27 @@ class _FakeRunner:
             "rejection_reasons": [] if self.accepted else ["runner_declined"],
             "no_source_repo_mutation_performed": not self.unsafe,
             "no_shell_command_executed": not self.unsafe,
+            "no_holoindex_reindex_performed": True,
+            "no_hermes_dispatch_performed": True,
+            "no_worktree_operation_performed": True,
+            "no_pr_created": True,
+            "no_live_foundup_enqueue_performed": True,
+            "no_pattern_memory_write_performed": True,
+            "no_reward_settlement_performed": True,
+            "worker_process_spawn_count": 0,
+            "shell_command_count": 0,
         }
         if self.requeue_required:
             result["queue_chain_complete"] = False
             result["queue_chain_requeue_required"] = True
+        result.update(self.result_overrides)
         return result
 
 
 class _FakeQueryAdapter:
+    def __init__(self, repo_head_sha: str = "abc123") -> None:
+        self.repo_head_sha = repo_head_sha
+
     def query(self, *, query: str, allowed_paths, limit: int):
         path = allowed_paths[0] if allowed_paths else "docs/work_ledger.schema.json"
         return {
@@ -174,7 +191,7 @@ class _FakeQueryAdapter:
             "freshness_generation_id": "generation-1",
             "freshness_receipt_digest": "sha256:freshness",
             "freshness_receipt_path": "O:/Foundups-Agent/.holoindex/freshness.json",
-            "repo_head_sha": "abc123",
+            "repo_head_sha": self.repo_head_sha,
         }
 
 
@@ -466,7 +483,29 @@ def _repo_with_readonly_target(tmp_path: Path) -> Path:
     target = root / "docs" / "work_ledger.schema.json"
     target.parent.mkdir(parents=True)
     target.write_text('{"schema": "work-ledger", "version": 1}\n', encoding="utf-8")
+    subprocess.run(["git", "init", str(root)], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(root), "config", "user.email", "test@example.invalid"],
+        check=True, capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(root), "config", "user.name", "RedDog Test"],
+        check=True, capture_output=True,
+    )
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-C", str(root), "commit", "-m", "test: seed readonly target"],
+        check=True, capture_output=True,
+    )
     return root
+
+
+def _repo_head(repo: Path) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True, capture_output=True, text=True,
+    )
+    return result.stdout.strip()
 
 
 def test_signed_worker_executor_accepts_valid_task_with_injected_runner(tmp_path: Path) -> None:
@@ -485,6 +524,9 @@ def test_signed_worker_executor_accepts_valid_task_with_injected_runner(tmp_path
     assert result.capability == "candidate_queue_review"
     assert result.no_shell_command_executed is True
     assert result.no_source_repo_mutation_performed is True
+    assert result.worker_execution_performed is True
+    assert result.worker_process_spawn_count == 0
+    assert result.shell_command_count == 0
     assert runner.calls[0]["worker_dispatch_intent"]["intent_id"] == "worker_dispatch_intent_openclaw_candidate"
 
 
@@ -554,8 +596,8 @@ def test_signed_0102_readonly_runner_executes_architect_review_with_bound_target
     model_runner = _EchoEvidenceModelRunner()
     runner = Signed0102ReadOnlyReviewRunner(
         model_runner=model_runner,
-        holoindex_adapter=_FakeQueryAdapter(),
-        codeindex_adapter=_FakeQueryAdapter(),
+        holoindex_adapter=_FakeQueryAdapter(_repo_head(repo)),
+        codeindex_adapter=_FakeQueryAdapter(_repo_head(repo)),
     )
 
     result = execute_reddog_signed_worker_dispatch_task(
@@ -577,6 +619,7 @@ def test_signed_0102_readonly_runner_executes_architect_review_with_bound_target
     assert model_runner.calls[0]["binding"]["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
     assert result.no_source_repo_mutation_performed is True
     assert result.no_shell_command_executed is True
+    assert result.no_live_foundup_enqueue_performed is True
 
 
 def test_signed_0102_readonly_runner_receives_model_runtime_binding_receipt(
@@ -613,8 +656,8 @@ def test_signed_0102_readonly_runner_receives_model_runtime_binding_receipt(
         repo_root=repo,
         runner=Signed0102ReadOnlyReviewRunner(
             model_runner=model_runner,
-            holoindex_adapter=_FakeQueryAdapter(),
-            codeindex_adapter=_FakeQueryAdapter(),
+            holoindex_adapter=_FakeQueryAdapter(_repo_head(repo)),
+            codeindex_adapter=_FakeQueryAdapter(_repo_head(repo)),
         ),
     )
 
@@ -686,6 +729,7 @@ def test_signed_worker_executor_rejects_tampered_receipt_and_wsp15(tmp_path: Pat
     assert result.accepted is False
     assert SignedWorkerDispatchTaskExecutorReason.INTENT_NOT_IN_RECEIPT in result.rejection_reasons
     assert SignedWorkerDispatchTaskExecutorReason.WSP15_MISMATCH in result.rejection_reasons
+    assert result.worker_execution_performed is False
 
 
 def test_signed_worker_executor_rejects_unsafe_runner(tmp_path: Path) -> None:
@@ -698,6 +742,66 @@ def test_signed_worker_executor_rejects_unsafe_runner(tmp_path: Path) -> None:
 
     assert result.accepted is False
     assert SignedWorkerDispatchTaskExecutorReason.RUNNER_UNSAFE in result.rejection_reasons
+    assert result.no_source_repo_mutation_performed is False
+    assert result.no_shell_command_executed is False
+    assert result.worker_execution_performed is True
+    assert result.shell_command_count == 1
+
+
+def test_signed_worker_executor_counts_rejected_and_raising_runner_execution(
+    tmp_path: Path,
+) -> None:
+    rejected = execute_reddog_signed_worker_dispatch_task(
+        task_context=_task_context(), task_id="task-rejected",
+        repo_root=tmp_path, runner=_FakeRunner(accepted=False),
+    )
+
+    class RaisingRunner:
+        def run_signed_worker_dispatch_task(self, **kwargs):
+            raise RuntimeError("runner failed after invocation")
+
+    raised = execute_reddog_signed_worker_dispatch_task(
+        task_context=_task_context(), task_id="task-raised",
+        repo_root=tmp_path, runner=RaisingRunner(),
+    )
+
+    assert rejected.worker_execution_performed is True
+    assert raised.worker_execution_performed is True
+    assert raised.effect_evidence_complete is False
+    assert raised.no_shell_command_executed is False
+    assert raised.no_source_repo_mutation_performed is False
+    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED in rejected.rejection_reasons
+    assert SignedWorkerDispatchTaskExecutorReason.RUNNER_REJECTED in raised.rejection_reasons
+
+
+def test_signed_worker_executor_rejects_incomplete_or_inconsistent_effect_evidence(
+    tmp_path: Path,
+) -> None:
+    context = _task_context()
+    incomplete = _FakeRunner(result_overrides={"shell_command_count": None})
+    inconsistent = _FakeRunner(result_overrides={"shell_command_count": 1})
+
+    incomplete_result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-incomplete-effects",
+        repo_root=tmp_path,
+        runner=incomplete,
+    )
+    inconsistent_result = execute_reddog_signed_worker_dispatch_task(
+        task_context=context,
+        task_id="task-inconsistent-effects",
+        repo_root=tmp_path,
+        runner=inconsistent,
+    )
+
+    for result in (incomplete_result, inconsistent_result):
+        assert result.accepted is False
+        assert result.effect_evidence_complete is False
+        assert result.no_shell_command_executed is False
+        assert (
+            SignedWorkerDispatchTaskExecutorReason.RUNNER_EFFECT_EVIDENCE_INCOMPLETE
+            in result.rejection_reasons
+        )
 
 
 def test_run_task_routes_signed_worker_before_wre_fallback(tmp_path: Path, monkeypatch) -> None:
@@ -928,7 +1032,65 @@ def test_openclaw_signed_worker_claim_rejects_when_result_persistence_fails(
     assert SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED in result[
         "rejection_reasons"
     ]
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "assigned"
+
+
+@pytest.mark.parametrize(
+    "requeue_required",
+    (False, True),
+)
+def test_openclaw_signed_worker_claim_rejects_when_task_transition_fails(
+    tmp_path: Path,
+    monkeypatch,
+    requeue_required: bool,
+) -> None:
+    _publish_agentdb_task()
+    from modules.communication.moltbot_bridge.src import openclaw_supervisor
+
+    monkeypatch.setattr(
+        openclaw_supervisor,
+        "_commit_signed_worker_task_result",
+        lambda *_, **__: False,
+    )
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=requeue_required),
+    )
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert (
+        SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED
+        in result["rejection_reasons"]
+    )
+
+
+def test_openclaw_signed_worker_rejection_surfaces_failed_failure_transition(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _publish_agentdb_task()
+    from modules.communication.moltbot_bridge.src import openclaw_supervisor
+
+    monkeypatch.setattr(
+        openclaw_supervisor,
+        "_persist_reddog_signed_worker_dispatch_task_result",
+        lambda *_, **__: False,
+    )
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=None,
+    )
+
+    assert result["accepted"] is False
+    assert result["worker_execution_performed"] is False
+    assert result["effect_evidence_complete"] is True
+    assert (
+        SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED
+        in result["rejection_reasons"]
+    )
 
 
 def test_openclaw_claim_executes_0102_readonly_task_when_env_enabled(
@@ -1981,6 +2143,12 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
     assert result["idle"] is True
     assert result["max_claims_reached"] is False
     assert result["claim_results"][-1]["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_IDLE
+    assert len(result["receipt_ids"]) == 7
+    assert len(result["child_execution_evidence_digests"]) == 7
+    assert all(
+        digest.startswith("sha256:")
+        for digest in result["child_execution_evidence_digests"]
+    )
     assert [claim["status"] for claim in result["claim_results"][:-1]] == [
         SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
         SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED,
@@ -2328,6 +2496,7 @@ def test_openclaw_claim_loop_respects_max_claims(tmp_path: Path) -> None:
     assert result["completed_task_ids"] == (task_id_1,)
     assert result["max_claims_reached"] is True
     assert result["idle"] is False
+    assert len(result["child_execution_evidence_digests"]) == 1
     assert db.get_autonomous_task_by_id(task_id_1)["status"] == "completed"
     assert db.get_autonomous_task_by_id(task_id_2)["status"] == "pending"
 
@@ -2401,7 +2570,7 @@ def test_openclaw_claim_loop_stops_after_first_rejected_claim(tmp_path: Path) ->
 
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT
-    assert result["claimed_count"] == 0
+    assert result["claimed_count"] == 1
     assert len(result["failed_task_ids"]) == 1
     assert SignedWorkerOpenClawClaimReason.CLAIM_REJECTED in result["rejection_reasons"]
     statuses = {
@@ -2409,6 +2578,31 @@ def test_openclaw_claim_loop_stops_after_first_rejected_claim(tmp_path: Path) ->
         task_id_2: db.get_autonomous_task_by_id(task_id_2)["status"],
     }
     assert sorted(statuses.values()) == ["failed", "pending"]
+
+
+def test_claim_loop_no_effect_attestations_are_strict_booleans() -> None:
+    result = _signed_worker_claim_loop_result(
+        accepted=True,
+        status=SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_ACCEPT,
+        max_claims=1,
+        claim_results=(
+            {
+                "no_shell_command_executed": "false",
+                "no_repo_mutation_performed": True,
+                "no_holoindex_reindex_performed": True,
+                "no_hermes_dispatch_performed": True,
+                "no_worktree_operation_performed": True,
+                "no_pr_created": True,
+                "no_live_foundup_enqueue_performed": True,
+                "no_pattern_memory_write_performed": True,
+                "no_reward_settlement_performed": True,
+            },
+        ),
+        completed_task_ids=("task-1",),
+    )
+
+    assert result["no_shell_command_executed"] is False
+    assert result["no_repo_mutation_performed"] is True
 
 
 def test_openclaw_claim_loop_rejects_invalid_max_claims(tmp_path: Path) -> None:

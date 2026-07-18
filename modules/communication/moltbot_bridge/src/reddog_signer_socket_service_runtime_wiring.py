@@ -43,6 +43,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningRequest,
     SigningResponse,
 )
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    ControlLoopAuthorityPolicy,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
+    AtomicSignerControlLoopAnchorStore,
+    ControlLoopAnchorStore,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     KernelPeerCredentialAttestor,
     PeerCredentialPolicy,
@@ -60,6 +67,9 @@ FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE = "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_D
 FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID = "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID"
 FAIL_SIGNER_RUNTIME_SERVICE_REJECTED = "FAIL_SIGNER_RUNTIME_SERVICE_REJECTED"
 FAIL_SIGNER_RUNTIME_SERVICE_INVALID = "FAIL_SIGNER_RUNTIME_SERVICE_INVALID"
+FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID = (
+    "FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID"
+)
 
 
 ServeSignerSocketBounded = Callable[..., IsolatedSignerSocketResidentServiceResult]
@@ -81,6 +91,8 @@ class SignerSocketServiceRuntimeWiringConfig:
     max_request_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_REQUEST_BYTES
     max_response_bytes: int = DEFAULT_SIGNER_SOCKET_SERVICE_MAX_RESPONSE_BYTES
     key_provider_profiles: tuple[SignerKeyProviderProfile | Mapping[str, Any], ...] = ()
+    control_loop_anchor_path: Path | str | None = None
+    control_loop_authority_policy: ControlLoopAuthorityPolicy | Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -125,6 +137,14 @@ def run_reddog_signer_socket_service_runtime_wiring(
     policy = _peer_policy(config.peer_policy)
     if policy is None or not _peer_policy_valid(policy):
         return _reject(FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID)
+    anchor_store, anchor_reasons = _control_loop_anchor_store(config)
+    if anchor_reasons:
+        return _reject(*anchor_reasons)
+    control_authority_policy = _control_loop_authority_policy(
+        config.control_loop_authority_policy
+    )
+    if config.control_loop_anchor_path is not None and control_authority_policy is None:
+        return _reject(FAIL_SIGNER_RUNTIME_CONFIG_INVALID)
 
     backend, key_receipt, key_reasons = _build_backend(
         profiles,
@@ -132,6 +152,8 @@ def run_reddog_signer_socket_service_runtime_wiring(
         provider_mode=config.provider_mode,
         allow_test_only_key_material=config.allow_test_only_key_material,
         permission_snapshot_fresh=config.permission_snapshot_fresh,
+        control_loop_anchor_store=anchor_store,
+        control_loop_authority_policy=control_authority_policy,
     )
     if key_reasons:
         return _reject(*key_reasons, key_provider_receipt=key_receipt, max_requests=config.max_requests)
@@ -225,6 +247,8 @@ def _build_backend(
     provider_mode: str,
     allow_test_only_key_material: bool,
     permission_snapshot_fresh: bool,
+    control_loop_anchor_store: ControlLoopAnchorStore | None,
+    control_loop_authority_policy: ControlLoopAuthorityPolicy | None,
 ) -> tuple[Optional[IsolatedSignerBackend], dict[str, Any], tuple[str, ...]]:
     receipts: list[dict[str, Any]] = []
     backends: dict[str, IsolatedSignerBackend] = {}
@@ -235,6 +259,14 @@ def _build_backend(
             provider_mode=provider_mode,
             allow_test_only_key_material=allow_test_only_key_material,
             permission_snapshot_fresh=permission_snapshot_fresh,
+            control_loop_anchor_store=control_loop_anchor_store,
+            control_loop_authority_policy=(
+                control_loop_authority_policy
+                if control_loop_authority_policy is not None
+                and profile.expected_public_key
+                == control_loop_authority_policy.signer_public_key
+                else None
+            ),
         )
         receipt = key_result.to_receipt()
         receipts.append(receipt)
@@ -254,6 +286,62 @@ def _build_backend(
     else:
         backend = _RoutingSignerBackend(backends)
     return backend, _key_provider_receipt(True, receipts), ()
+
+
+def _control_loop_anchor_store(
+    config: SignerSocketServiceRuntimeWiringConfig,
+) -> tuple[ControlLoopAnchorStore | None, tuple[str, ...]]:
+    if config.control_loop_anchor_path is None:
+        return None, ()
+    try:
+        repo_root = Path(config.repo_root).resolve()
+        path = Path(config.control_loop_anchor_path)
+        if not path.is_absolute():
+            return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
+        resolved = path.resolve()
+        if resolved == repo_root or repo_root in resolved.parents:
+            return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
+        return AtomicSignerControlLoopAnchorStore(resolved), ()
+    except Exception:
+        return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
+
+
+def _control_loop_authority_policy(
+    value: ControlLoopAuthorityPolicy | Mapping[str, Any] | None,
+) -> ControlLoopAuthorityPolicy | None:
+    if isinstance(value, ControlLoopAuthorityPolicy):
+        return value
+    if not isinstance(value, Mapping):
+        return None
+    try:
+        policy = ControlLoopAuthorityPolicy(**dict(value))
+    except Exception:
+        return None
+    values = (
+        policy.issuer_principal_id,
+        policy.signer_public_key,
+        policy.key_epoch,
+        policy.consensus_receipt_digest,
+        policy.authority_profile_digest,
+        policy.authority_profile_source_receipt_id,
+    )
+    if any(not item or not _ascii(item) for item in values):
+        return None
+    for digest in (
+        policy.consensus_receipt_digest,
+        policy.authority_profile_digest,
+        policy.authority_profile_source_receipt_id,
+    ):
+        if not _is_sha256_digest(digest):
+            return None
+    return policy
+
+
+def _is_sha256_digest(value: object) -> bool:
+    text = str(value or "")
+    return len(text) == 71 and text.startswith("sha256:") and all(
+        char in "0123456789abcdef" for char in text[7:]
+    )
 
 
 def _key_provider_receipt(ok: bool, receipts: list[dict[str, Any]]) -> dict[str, Any]:
@@ -339,6 +427,7 @@ def _reject(
 
 __all__ = [
     "FAIL_SIGNER_RUNTIME_CONFIG_INVALID",
+    "FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID",
     "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID",
     "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE",
     "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED",

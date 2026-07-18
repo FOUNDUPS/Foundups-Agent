@@ -142,8 +142,11 @@ class Signed0102ReadOnlyReviewRunner:
             "no_hermes_dispatch_performed": True,
             "no_worktree_operation_performed": True,
             "no_pr_created": True,
+            "no_live_foundup_enqueue_performed": True,
             "no_pattern_memory_write_performed": True,
             "no_reward_settlement_performed": True,
+            "worker_process_spawn_count": 0,
+            "shell_command_count": 0,
         }
 
 
@@ -279,8 +282,11 @@ def _runner_reject(
         "no_hermes_dispatch_performed": True,
         "no_worktree_operation_performed": True,
         "no_pr_created": True,
+        "no_live_foundup_enqueue_performed": True,
         "no_pattern_memory_write_performed": True,
         "no_reward_settlement_performed": True,
+        "worker_process_spawn_count": 0,
+        "shell_command_count": 0,
     }
 
 

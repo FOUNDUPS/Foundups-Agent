@@ -213,10 +213,27 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
             "rejection_reasons": [],
             "no_source_repo_mutation_performed": True,
             "no_shell_command_executed": True,
-            "no_holoindex_reindex_performed": bool(payload.get("no_holoindex_reindex_performed", True)),
-            "no_pr_created": bool(payload.get("no_pr_created", True)),
-            "no_pattern_memory_write_performed": bool(payload.get("no_pattern_memory_write_performed", True)),
-            "no_reward_settlement_performed": bool(payload.get("no_reward_settlement_performed", True)),
+            "no_holoindex_reindex_performed": (
+                payload.get("no_holoindex_reindex_performed") is True
+            ),
+            "no_hermes_dispatch_performed": (
+                payload.get("no_hermes_dispatch_performed") is True
+            ),
+            "no_worktree_operation_performed": payload.get("no_worktree_created") is True,
+            "no_pr_created": payload.get("no_pr_created") is True,
+            "no_live_foundup_enqueue_performed": True,
+            "no_pattern_memory_write_performed": (
+                payload.get("no_pattern_memory_write_performed") is True
+            ),
+            "no_reward_settlement_performed": (
+                payload.get("no_reward_settlement_performed") is True
+            ),
+            "worker_process_spawn_count": _nonnegative_count(
+                payload.get("worker_process_spawn_count")
+            ),
+            "shell_command_count": _nonnegative_count(
+                payload.get("shell_command_count")
+            ),
         }
 
 
@@ -303,10 +320,21 @@ def _reject(
         "no_source_repo_mutation_performed": True,
         "no_shell_command_executed": True,
         "no_holoindex_reindex_performed": True,
+        "no_hermes_dispatch_performed": True,
+        "no_worktree_operation_performed": True,
         "no_pr_created": True,
+        "no_live_foundup_enqueue_performed": True,
         "no_pattern_memory_write_performed": True,
         "no_reward_settlement_performed": True,
+        "worker_process_spawn_count": 0,
+        "shell_command_count": 0,
     }
+
+
+def _nonnegative_count(value: Any) -> int:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return 0
+    return max(value, 0)
 
 
 def _target_kind(*, worker_runtime: str, capability: str) -> str | None:

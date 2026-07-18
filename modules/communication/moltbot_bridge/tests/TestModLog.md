@@ -1,3 +1,40 @@
+## 2026-07-18: REDDOG_RESIDENT_CONTROL_RECEIPT_TRUTH_AUTH_CONCURRENCY_PHASE1
+
+**Files**: control-receipt auth/context, signer, canary, chain-store, OpenClaw,
+and `main.py` focused suites.
+
+**Coverage**:
+
+- Signed receipt round-trip, field/signature/key/profile tamper rejection,
+  unsigned-live rejection, duplicate cycle/nonce rejection, and v1-prefix to
+  signed-v2 migration.
+- Dedicated signer operation/domain validation rejects malformed payloads and
+  control-domain confusion.
+- Concurrent thread/process appends preserve valid JSONL; concurrent chain CAS
+  produces one commit and one revision conflict.
+- Distinct signed cycles serialize without lost updates while same-cycle races
+  produce exactly one commit; direct supervisor and resident-main contention
+  is rejected before AgentDB claim.
+- Whole-chain verification rejects unsigned/foreign predecessors, reordered or
+  tampered rows, mutable audit MACs, child-cardinality mismatches, duplicate
+  child receipts/evidence, and signer role/tier/profile-policy violations.
+- Malformed receipt streams block before model/worker invocation; live proof
+  revalidates the exact authority profile and signer epoch.
+- Truth counters distinguish worker execution from observed OS-process spawn,
+  and stage observations replace hardcoded no-effect claims.
+- Updated serial-loop fixtures prove the runtime-artifact root remains outside
+  the synthetic repository without weakening the production confinement gate.
+- Signer-policy tests reject missing/mismatched principal, key epoch,
+  consensus, promoted-profile, or source-receipt bindings; anchor tests reject
+  resident rollback, anchor tamper, and reused child evidence.
+- Complete child evidence tests recompute every digest and reject changed body,
+  execution truth, order, projection, or receipt linkage before parent signing.
+- Regression cases reject caller-inflated parent effect counts, preserve unknown
+  runner effects without safe defaults, fail closed on AgentDB transition loss,
+  and prove directory-fsync invocation after atomic authority-state replacement.
+- WSP 62 tests explicitly cover every modified production entrypoint, including
+  `main.py`, OpenClaw claim loops, the signer backend, and task executor.
+
 ## 2026-07-18: REDDOG_VALVE_HIGH_AUTHORITY_CLASSIFICATION_PHASE1
 
 - Added signer, authority-seed, and authority-source regressions proving both

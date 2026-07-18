@@ -1,5 +1,57 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-18: REDDOG_RESIDENT_CONTROL_RECEIPT_TRUTH_AUTH_CONCURRENCY_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 91, 97
+**Phase**: Runtime truth/auth/concurrency hardening
+**Agent**: 0102 architect with independent adversarial review
+
+- Added signer-domain-validated, predecessor-linked v2 control receipts with
+  cycle/nonce replay rejection and validated legacy-prefix migration.
+- Derived authority, claim, execution, worktree, bounded-edit, verification,
+  draft-PR, PatternMemory, process-spawn, and shell observations from runtime
+  evidence; caller-supplied contradictory claims reject.
+- Required live-canary proof to verify the signature, signer/key epoch,
+  authority-profile digest, consensus digest, repository binding, and complete
+  JSONL stream before accepting a new cycle.
+- Added a cross-process lock around chain-result compare-and-swap and preserved
+  exact OpenClaw outcome counts in `main.py`.
+- Added a second Ed25519 signer attestation over the audit MAC and signing
+  response, then required every v2 predecessor to verify against the same
+  principal, key epoch, authority profile, and consensus receipt.
+- Bound unique child execution receipt IDs and evidence digests to exact
+  completion/requeue/failure cardinality, and made standalone OpenClaw claims
+  contend on the same resident control-loop lock as `main.py`.
+- Reconciled the serial-loop tests with the landed runtime-artifact confinement
+  invariant by placing all positive fixture artifacts under an isolated runtime
+  root outside the synthetic repository.
+- Added signer-owned `ControlLoopAuthorityPolicy` enforcement and a monotonic
+  control-loop anchor outside resident state; self-hashed profile content alone
+  can no longer authorize a control signature or roll the chain backward.
+- Rehydrated complete child claim evidence before parent signing, retained
+  truthful execution/process/shell counts for rejected runners, and rejected
+  retention or durable-head failures before reporting acceptance.
+- Made child evidence the exclusive source for parent process/shell totals;
+  runner exceptions now carry `effect_evidence_complete=false` with no invented
+  negative attestations, and failed AgentDB complete/requeue transitions reject.
+- Extracted authority persistence behind a compatible boundary and fsynced the
+  parent directory after atomic rename on platforms that support it.
+- Decomposed modified `main.py`, OpenClaw claim, receipt, canary, and task-
+  executor paths into focused WSP 62-bounded helpers without changing the
+  configured runtime stages.
+
+**Truth boundary**: v1 and unsigned v2 receipts may be inspected but cannot
+satisfy live proof. The configured isolated signer authenticates the exact
+control authority policy; this does not claim that the profile source JSON is
+independently principal-signed. The v2 receipt records positive observations
+and does not convert an unobserved merge, reward, re-index, process, or shell
+action into a hardcoded negative proof. Detailed stage receipts remain
+authoritative.
+
+**HoloIndex**: read-only retrieval found the new receipt modules by path but no
+focused tests and weak governing-WSP relevance. This is an INDEX_GAP for the
+governed freshness lane; no runtime re-index was performed in this slice.
+
 ## 2026-07-18: REDDOG_VALVE_HIGH_AUTHORITY_CLASSIFICATION_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 71, 97

@@ -1,5 +1,34 @@
 # FoundUps Agent - Development Log
 
+## [2026-07-18] RedDog Resident Control Receipt Truth/Auth Phase 1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 91, 97
+
+- Replaced self-issued resident control summaries with full-digest v2 receipts
+  that derive execution effects, bind child receipt IDs, chain predecessors,
+  reject replay, and require isolated Ed25519 attestation in production.
+- Bound live proof to the exact authority profile, signer key epoch, and
+  consensus receipt; legacy v1 rows remain display-only migration evidence.
+- Serialized chain-store compare-and-swap across processes and retained exact
+  OpenClaw completion, requeue, and failure counts in the control result.
+- Authenticated every v2 predecessor against the pinned authority profile,
+  signed the signer audit attestation separately, and bound exact child
+  execution receipt/evidence cardinality into each control receipt.
+- Unified direct OpenClaw claims and resident-main cycles under the same
+  cross-process operation lock; distinct concurrent cycles now serialize
+  without losing either signed append.
+- Required the isolated signer to match every control receipt against its own
+  configured principal, key epoch, consensus, promoted-profile, and source-
+  receipt policy before signing; a signer-owned monotonic anchor rejects
+  resident-state rollback and cross-cycle child-evidence reuse.
+- Made retention, append, head, and chain-result persistence fail closed, and
+  split the modified resident/OpenClaw paths into WSP 62-bounded helpers.
+- Derived parent process/shell totals exclusively from digest-bound child
+  evidence, recorded runner exceptions as effects-unverified, required durable
+  AgentDB state transitions, and fsynced authority-store directory renames.
+- No authority policy, worker permission, merge authority, reward settlement,
+  HoloIndex write, or extension runtime surface was expanded.
+
 ## [2026-07-18] HoloIndex / RedDog Operational Truth Boundary POC Phase 1
 
 **WSP Protocol**: WSP 00, 05, 06, 15, 22, 34, 50, 62, 64, 81, 84, 87, 96, 97

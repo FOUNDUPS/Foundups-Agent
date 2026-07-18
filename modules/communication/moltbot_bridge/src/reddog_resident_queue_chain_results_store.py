@@ -19,6 +19,10 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Optional, Protocol, Sequence
 
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE,
     RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
@@ -75,7 +79,7 @@ class AtomicJsonResidentQueueChainResultsStore:
     """Single-file JSON store using atomic replace."""
 
     def __init__(self, path: str | Path) -> None:
-        self.path = Path(path)
+        self.path = Path(path).resolve()
 
     def load(self) -> Mapping[str, Any]:
         if not self.path.exists():
@@ -83,21 +87,26 @@ class AtomicJsonResidentQueueChainResultsStore:
         return json.loads(self.path.read_text(encoding="utf-8"))
 
     def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        current = self.load()
-        if current.get("revision") != expected_revision:
-            raise RuntimeError("revision_conflict")
-        committed, revision = _committed_snapshot(snapshot)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        fd, tmp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-                json.dump(committed, handle, sort_keys=True, indent=2)
-                handle.write("\n")
-            os.replace(tmp_name, self.path)
-        finally:
-            if os.path.exists(tmp_name):
-                os.unlink(tmp_name)
-        return revision
+        with runtime_operation_lock(self.path):
+            current = self.load()
+            if current.get("revision") != expected_revision:
+                raise RuntimeError("revision_conflict")
+            committed, revision = _committed_snapshot(snapshot)
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            fd, tmp_name = tempfile.mkstemp(
+                prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent)
+            )
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+                    json.dump(committed, handle, sort_keys=True, indent=2)
+                    handle.write("\n")
+                    handle.flush()
+                    os.fsync(handle.fileno())
+                os.replace(tmp_name, self.path)
+            finally:
+                if os.path.exists(tmp_name):
+                    os.unlink(tmp_name)
+            return revision
 
 
 @dataclass(frozen=True)

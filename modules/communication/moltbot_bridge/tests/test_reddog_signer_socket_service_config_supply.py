@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 
@@ -46,8 +47,10 @@ def _authority_profile(**overrides: object) -> dict[str, object]:
         "principal_public_key": "ed25519-pub-v1:principal",
         "reddog_id": "reddog:foundups-agent",
         "reddog_public_key": "ed25519-pub-v1:reddog",
-        "permission_snapshot_digest": "sha256:permission",
+        "permission_snapshot_digest": "sha256:" + "1" * 64,
         "key_epoch": "epoch-1",
+        "consensus_receipt_digest": "sha256:" + "2" * 64,
+        "authority_profile_source_receipt_id": "sha256:" + "3" * 64,
         "identity_ttl_seconds": 600,
         "work_authority_ttl_seconds": 300,
     }
@@ -95,6 +98,24 @@ def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) ->
     assert payload["allow_test_only_key_material"] is False
     assert payload["permission_snapshot_fresh"] is True
     assert payload["socket_path"] == str((runtime / "reddog-signer.sock").resolve())
+    control_policy = payload["control_loop_authority_policy"]
+    assert control_policy == {
+        "issuer_principal_id": "github:mjtrout",
+        "signer_public_key": "ed25519-pub-v1:reddog",
+        "key_epoch": "epoch-1",
+        "consensus_receipt_digest": "sha256:" + "2" * 64,
+        "authority_profile_digest": control_policy["authority_profile_digest"],
+        "authority_profile_source_receipt_id": "sha256:" + "3" * 64,
+    }
+    expected_profile_digest = "sha256:" + hashlib.sha256(
+        json.dumps(
+            _authority_profile(),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")
+    ).hexdigest()
+    assert control_policy["authority_profile_digest"] == expected_profile_digest
     assert payload["peer_policy"] == {
         "uid_to_principal": {"1001": "github:mjtrout"},
         "allowed_gids": [1002],

@@ -184,6 +184,10 @@ def _runtime_config(
             max_request_bytes=int(payload.get("max_request_bytes") or 0),
             max_response_bytes=int(payload.get("max_response_bytes") or 0),
             key_provider_profiles=key_profiles,
+            control_loop_anchor_path=payload.get("control_loop_anchor_path"),
+            control_loop_authority_policy=payload.get(
+                "control_loop_authority_policy"
+            ),
         )
     except Exception:
         return None

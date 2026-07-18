@@ -3,11 +3,27 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
+    ControlLoopReceiptSigningContext,
     build_resident_control_loop_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    Ed25519SignatureVerifier,
+    encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    ControlLoopAuthorityPolicy,
+    Ed25519SignerBackend,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
+    SignerPeerAttestation,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    SigningRequest,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_live_canary import (
     LIVE_CANARY_CONFIRMATION,
@@ -50,6 +66,162 @@ WORK_ORDER_ID = "work-order-1"
 NOW = "2026-07-14T00:00:00+00:00"
 
 
+def _test_private_key():
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    return Ed25519PrivateKey.generate()
+
+
+def _test_public_key(private_key) -> str:
+    from cryptography.hazmat.primitives import serialization
+
+    return encode_ed25519_public_key(
+        private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+
+
+class _AuditMacBuilder:
+    def build(self, request: SigningRequest, signature: str, peer: SignerPeerAttestation) -> str:
+        return "audit:" + request.nonce + ":" + peer.peer_principal_id
+
+
+class _LocalSignerClient:
+    def __init__(self, backend: Ed25519SignerBackend) -> None:
+        self.backend = backend
+
+    def sign(self, request: SigningRequest):
+        return self.backend.sign(
+            request,
+            SignerPeerAttestation(
+                peer_principal_id="github:mjtrout",
+                transport="test_in_process",
+                credential_source="test_fixture",
+                boundary_attested=True,
+            ),
+        )
+
+
+_PRIVATE_KEY = _test_private_key()
+_PUBLIC_KEY = _test_public_key(_PRIVATE_KEY)
+_AUTHORITY_PROFILE_SOURCE = {
+    "schema_version": "reddog_authority_profile_source.v1",
+    "principal_id": "github:mjtrout",
+    "principal_provider": "github",
+    "principal_public_key": "ed25519-pub-v1:" + "B" * 43,
+    "reddog_id": "reddog:architect",
+    "reddog_public_key": _PUBLIC_KEY,
+    "repo_full_name": "FOUNDUPS/Foundups-Agent",
+    "foundup_id": "paccess_001",
+    "allowed_paths": ["modules/foundups/paccess_001/src/**"],
+    "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
+    "requested_operation": "worktree_create",
+    "permission_snapshot_digest": "sha256:" + "1" * 64,
+    "identity_nonce": "canary-identity-nonce",
+    "work_authority_nonce": "canary-work-nonce",
+    "issued_at": 1_700_000_000,
+    "identity_expires_at": 1_800_000_000,
+    "work_authority_expires_at": 1_800_000_000,
+    "valve_state_required": "VALVE_OPEN_WORKTREE_CREATE",
+    "key_epoch": "epoch-canary-1",
+    "required_tests": ["pytest live-canary"],
+    "required_policy_gates": ["WSP_97"],
+    "consensus_receipt_digest": "sha256:" + "c" * 64,
+    "sovereign_authorization_digest": "sha256:" + "5" * 64,
+    "source_authority_basis": {
+        "principal_verified_subject_digest": "sha256:" + "2" * 64,
+        "principal_repo_scope": ["FOUNDUPS/Foundups-Agent"],
+        "principal_foundup_scope": ["paccess_001"],
+        "permission_snapshot_digest": "sha256:" + "1" * 64,
+        "permission_snapshot_expires_at": 1_800_000_000,
+        "permission_snapshot_can_write": True,
+        "permission_snapshot_can_admin": False,
+    },
+}
+_AUTHORITY_PROFILE_SOURCE["authority_profile_source_receipt_id"] = (
+    "sha256:"
+    + hashlib.sha256(
+        json.dumps(
+            _AUTHORITY_PROFILE_SOURCE,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")
+    ).hexdigest()
+)
+_AUTHORITY_PROFILE = {
+    **_AUTHORITY_PROFILE_SOURCE,
+    "operational_context_binding": {
+        "queue_item_id": QUEUE_ID,
+        "claim_id": "claim-live-canary",
+        "architect_determination_receipt_id": "determination-live-canary",
+        "wsp15_allocation_receipt": {
+            "receipt_id": "sha256:" + "3" * 64
+        },
+    },
+}
+from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_head_store import (
+    build_control_receipt_head,
+    commit_control_receipt_head,
+    load_control_receipt_head,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
+    AtomicSignerControlLoopAnchorStore,
+    ControlLoopAnchorPreparation,
+)
+
+
+class _StatelessTestControlLoopAnchorStore:
+    """Test-only anchor used where persistence is not under test."""
+
+    def prepare(self, payload):
+        return ControlLoopAnchorPreparation(expected_revision=None)
+
+    def commit(self, payload, response, *, expected_revision):
+        return None
+_AUTHORITY_PROFILE_DIGEST = "sha256:" + hashlib.sha256(
+    json.dumps(
+        _AUTHORITY_PROFILE,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    ).encode("utf-8")
+).hexdigest()
+_SIGNING_CONTEXT = ControlLoopReceiptSigningContext(
+    signer=_LocalSignerClient(
+        Ed25519SignerBackend(
+            private_key=_PRIVATE_KEY,
+            public_key=_PUBLIC_KEY,
+            key_epoch="epoch-canary-1",
+            audit_mac_builder=_AuditMacBuilder(),
+            control_loop_anchor_store=_StatelessTestControlLoopAnchorStore(),
+            control_loop_authority_policy=ControlLoopAuthorityPolicy(
+                issuer_principal_id="github:mjtrout",
+                signer_public_key=_PUBLIC_KEY,
+                key_epoch="epoch-canary-1",
+                consensus_receipt_digest="sha256:" + "c" * 64,
+                authority_profile_digest=_AUTHORITY_PROFILE_DIGEST,
+                authority_profile_source_receipt_id=str(
+                    _AUTHORITY_PROFILE["authority_profile_source_receipt_id"]
+                ),
+            ),
+        )
+    ),
+    signature_verifier=Ed25519SignatureVerifier(),
+    issuer_principal_id="github:mjtrout",
+    signer_public_key=_PUBLIC_KEY,
+    key_epoch="epoch-canary-1",
+    authority_tier="HIGH",
+    consensus_receipt_digest="sha256:" + "c" * 64,
+    authority_profile_digest=_AUTHORITY_PROFILE_DIGEST,
+    authority_profile_source_receipt_id=str(
+        _AUTHORITY_PROFILE["authority_profile_source_receipt_id"]
+    ),
+)
+
+
 def _git(cwd: Path, *args: str) -> str:
     result = subprocess.run(
         ["git", "-C", str(cwd), *args], capture_output=True, text=True, check=True
@@ -69,7 +241,22 @@ def _roots(tmp_path: Path) -> tuple[Path, Path]:
     runtime = tmp_path / "runtime"
     runtime.mkdir()
     for filename in REQUIRED_JSON_ARTIFACTS:
-        (runtime / filename).write_text(json.dumps({"kind": filename}), encoding="utf-8")
+        payload = {"kind": filename}
+        if filename == "authority_profile.json":
+            payload = dict(_AUTHORITY_PROFILE)
+        (runtime / filename).write_text(json.dumps(payload), encoding="utf-8")
+    anchor_path = (
+        runtime.parent
+        / f"{runtime.name}-signer-state"
+        / "signer_control_loop_anchor.json"
+    )
+    (runtime / "signer_service_config.json").write_text(
+        json.dumps({"control_loop_anchor_path": str(anchor_path)}),
+        encoding="utf-8",
+    )
+    (runtime / "authority_profile_source.json").write_text(
+        json.dumps(_AUTHORITY_PROFILE_SOURCE), encoding="utf-8"
+    )
     return repo, runtime
 
 
@@ -77,7 +264,12 @@ def _kwargs(repo: Path, runtime: Path) -> dict[str, object]:
     return {
         "repo_root": repo,
         "runtime_root": runtime,
-        "environ": {"OPENROUTER_API_KEY": "must-never-be-serialized"},
+        "environ": {
+            "OPENROUTER_API_KEY": "must-never-be-serialized",
+            "REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID": str(
+                _AUTHORITY_PROFILE["authority_profile_source_receipt_id"]
+            ),
+        },
         "platform_name": "linux",
         "command_resolver": lambda command: f"/usr/bin/{command}",
         "command_probe": lambda argv, cwd: True,
@@ -226,9 +418,56 @@ def _control_receipt(repo: Path, **changes: object) -> dict[str, object]:
         },
         repo_root=repo,
         created_at="2026-07-14T00:00:00Z",
+        cycle_id="canary-cycle-1",
+        nonce="canary-nonce-1",
+        signing_context=_SIGNING_CONTEXT,
     ).to_dict()
     receipt.update(changes)
     return receipt
+
+
+def _write_control_receipt_and_head(
+    runtime: Path, control: dict[str, object]
+) -> None:
+    (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
+        json.dumps(control) + "\n", encoding="utf-8"
+    )
+    store, state, _ = load_control_receipt_head(
+        runtime / "authority_runtime_state.json"
+    )
+    head = build_control_receipt_head(
+        receipt=control,
+        receipt_ids=(str(control["receipt_id"]),),
+        consumed_child_receipt_ids=tuple(
+            str(item) for item in control["child_execution_receipt_ids"]
+        ),
+        consumed_child_evidence_digests=tuple(
+            str(item) for item in control["child_execution_evidence_digests"]
+        ),
+    )
+    commit_control_receipt_head(store=store, state=state, head=head)
+    config = json.loads(
+        (runtime / "signer_service_config.json").read_text(encoding="utf-8")
+    )
+    anchor = AtomicSignerControlLoopAnchorStore(config["control_loop_anchor_path"])
+    unsigned = {
+        key: value
+        for key, value in control.items()
+        if key
+        not in {
+            "signature",
+            "signer_audit_mac",
+            "signer_audit_attestation_signature",
+        }
+    }
+    response = {
+        "signature": control["signature"],
+        "audit_mac": control["signer_audit_mac"],
+        "audit_attestation_signature": control[
+            "signer_audit_attestation_signature"
+        ],
+    }
+    anchor.commit(unsigned, response, expected_revision=None)
 
 
 def _canonicalize_terminal_receipt(chain: dict[str, object]) -> None:
@@ -297,9 +536,7 @@ def _runner(
                     chain["receipts"][-1]["store_revision"] = revision
         (runtime / "resident_queue_chain_results.json").write_text(json.dumps(chain), encoding="utf-8")
         control = _control_receipt(repo, **(receipt_changes or {}))
-        (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
-            json.dumps(control) + "\n", encoding="utf-8"
-        )
+        _write_control_receipt_and_head(runtime, control)
         return {"accepted": True, "status": "PASS", "receipt_id": result_receipt_id or control["receipt_id"]}
 
     return run

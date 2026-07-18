@@ -12,6 +12,7 @@ import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
     CONTROL_LOOP_RECEIPT_SCHEMA_VERSION,
+    append_resident_control_loop_receipt,
     build_resident_control_loop_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_live_canary import (
@@ -77,7 +78,17 @@ PRODUCTION_PATHS = (
     SRC_ROOT / "reddog_resident_live_canary.py",
     SRC_ROOT / "reddog_resident_live_canary_evidence.py",
     SRC_ROOT / "reddog_resident_queue_control_lock.py",
+    SRC_ROOT / "reddog_resident_control_loop_receipt_auth.py",
+    SRC_ROOT / "reddog_resident_control_loop_receipt_chain.py",
     SRC_ROOT / "reddog_resident_control_loop_receipt_store.py",
+    SRC_ROOT / "reddog_resident_control_loop_receipt_validation.py",
+    SRC_ROOT / "reddog_resident_control_loop_signing_context.py",
+    SRC_ROOT / "reddog_resident_control_loop_head_store.py",
+    SRC_ROOT / "reddog_resident_control_loop_chain_state.py",
+    SRC_ROOT / "reddog_resident_control_loop_outcomes.py",
+    SRC_ROOT / "reddog_resident_control_loop_effects.py",
+    SRC_ROOT / "reddog_resident_live_canary_environment.py",
+    SRC_ROOT / "reddog_resident_live_canary_control_preflight.py",
 )
 COMMUNICATION_TEST_PATHS = (
     Path(__file__),
@@ -88,6 +99,7 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test
     NOW,
     QUEUE_ID,
     SLICE_NAME,
+    _SIGNING_CONTEXT,
     _canonicalize_terminal_receipt,
     _control_receipt,
     _execute,
@@ -95,6 +107,7 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test
     _roots,
     _runner,
     _write_pre_state,
+    _write_control_receipt_and_head,
 )
 
 
@@ -158,6 +171,7 @@ def test_false_control_receipts_cannot_complete_proof(
 
     assert receipt.status == LIVE_CANARY_PROOF_INCOMPLETE
     assert blocker in receipt.blockers
+    assert "control_receipt_auth_or_integrity_invalid" in receipt.blockers
 
 
 def test_runner_result_must_match_one_new_persisted_control_receipt(tmp_path: Path) -> None:
@@ -166,6 +180,187 @@ def test_runner_result_must_match_one_new_persisted_control_receipt(tmp_path: Pa
 
     assert receipt.live_proof_complete is False
     assert "new_control_receipt_not_observed" in receipt.blockers
+
+
+def test_malformed_control_receipt_stream_blocks_before_runner(tmp_path: Path) -> None:
+    repo, runtime = _roots(tmp_path)
+    (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
+        "{malformed}\n",
+        encoding="utf-8",
+    )
+    called = False
+
+    def runner(_: Path) -> dict[str, object]:
+        nonlocal called
+        called = True
+        return {"accepted": True}
+
+    receipt = run_reddog_resident_live_canary(
+        **_kwargs(repo, runtime),
+        execute=True,
+        confirmation=LIVE_CANARY_CONFIRMATION,
+        control_loop_runner=runner,
+    )
+
+    assert called is False
+    assert receipt.live_proof_complete is False
+    assert "control_receipt_stream_invalid" in receipt.blockers
+
+
+def test_valid_json_signature_tamper_blocks_before_runner(tmp_path: Path) -> None:
+    repo, runtime = _roots(tmp_path)
+    _write_pre_state(repo, runtime)
+    control = _control_receipt(repo)
+    _write_control_receipt_and_head(runtime, control)
+    control["status"] = "TAMPERED"
+    (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
+        json.dumps(control) + "\n", encoding="utf-8"
+    )
+    called = False
+
+    def runner(_: Path) -> dict[str, object]:
+        nonlocal called
+        called = True
+        return {"accepted": True}
+
+    receipt = run_reddog_resident_live_canary(
+        **_kwargs(repo, runtime), execute=True,
+        confirmation=LIVE_CANARY_CONFIRMATION, control_loop_runner=runner,
+    )
+    assert called is False
+    assert receipt.live_proof_complete is False
+
+
+def test_canary_blocks_when_signer_anchor_is_ahead_of_resident_chain(
+    tmp_path: Path,
+) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
+        AtomicSignerControlLoopAnchorStore,
+    )
+
+    repo, runtime = _roots(tmp_path)
+    first = _control_receipt(repo)
+    _write_control_receipt_and_head(runtime, first)
+    second = build_resident_control_loop_receipt(
+        result={
+            "accepted": True,
+            "status": "PASS",
+            "rounds": 1,
+            "serial_progress": 1,
+            "claim_progress": 0,
+            "control_lock_acquired": True,
+            "receipt_ids": (),
+            "rejection_reasons": (),
+        },
+        repo_root=repo,
+        created_at="2026-07-14T00:00:01Z",
+        sequence_number=2,
+        previous_receipt_id=str(first["receipt_id"]),
+        cycle_id="canary-cycle-2",
+        nonce="canary-nonce-2",
+        signing_context=_SIGNING_CONTEXT,
+    ).to_dict()
+    config = json.loads(
+        (runtime / "signer_service_config.json").read_text(encoding="utf-8")
+    )
+    store = AtomicSignerControlLoopAnchorStore(config["control_loop_anchor_path"])
+    state = store.load()
+    unsigned = {
+        key: value
+        for key, value in second.items()
+        if key
+        not in {
+            "signature",
+            "signer_audit_mac",
+            "signer_audit_attestation_signature",
+        }
+    }
+    response = {
+        "signature": second["signature"],
+        "audit_mac": second["signer_audit_mac"],
+        "audit_attestation_signature": second[
+            "signer_audit_attestation_signature"
+        ],
+    }
+    prepared = store.prepare(unsigned)
+    store.commit(
+        unsigned, response, expected_revision=prepared.expected_revision
+    )
+    assert state["receipt_id"] == first["receipt_id"]
+
+    receipt = run_reddog_resident_live_canary(**_kwargs(repo, runtime))
+    assert receipt.status == LIVE_CANARY_BLOCKED
+    assert "control_receipt_prestate_auth_or_integrity_invalid" in (
+        receipt.blockers
+    )
+    assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
+
+
+def test_signed_chain_suffix_truncation_blocks_before_runner(tmp_path: Path) -> None:
+    repo, runtime = _roots(tmp_path)
+    _write_pre_state(repo, runtime)
+    path = runtime / "resident_queue_control_loop_receipts.jsonl"
+    base_result = {
+        "accepted": True, "status": "PASS", "rounds": 1,
+        "serial_progress": 1, "claim_progress": 0, "receipt_ids": (),
+        "child_execution_receipt_ids": (),
+        "child_execution_evidence_digests": (), "child_execution_outcomes": (),
+        "rejection_reasons": (), "control_lock_acquired": True,
+        "dispatched_stages": (),
+    }
+    for index in (1, 2):
+        append_resident_control_loop_receipt(
+            path=path, result=base_result, repo_root=repo,
+            created_at=f"2026-07-14T00:00:0{index}Z",
+            cycle_id=f"truncate-cycle-{index}", nonce=f"truncate-nonce-{index}",
+            signing_context=_SIGNING_CONTEXT, require_authentication=True,
+            head_state_path=runtime / "authority_runtime_state.json",
+        )
+    first_line = path.read_text(encoding="utf-8").splitlines()[0]
+    path.write_text(first_line + "\n", encoding="utf-8")
+    called = False
+
+    def runner(_: Path) -> dict[str, object]:
+        nonlocal called
+        called = True
+        return {"accepted": True}
+
+    receipt = run_reddog_resident_live_canary(
+        **_kwargs(repo, runtime), execute=True,
+        confirmation=LIVE_CANARY_CONFIRMATION, control_loop_runner=runner,
+    )
+    assert called is False
+    assert receipt.live_proof_complete is False
+    assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
+
+
+def test_head_consumed_evidence_tamper_blocks_before_runner(tmp_path: Path) -> None:
+    repo, runtime = _roots(tmp_path)
+    _write_pre_state(repo, runtime)
+    control = _control_receipt(repo)
+    _write_control_receipt_and_head(runtime, control)
+    state_path = runtime / "authority_runtime_state.json"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["control_receipt_head"]["consumed_child_evidence_digests"] = [
+        "sha256:" + "f" * 64
+    ]
+    state_path.write_text(json.dumps(state), encoding="utf-8")
+    called = False
+
+    def runner(_: Path) -> dict[str, object]:
+        nonlocal called
+        called = True
+        return {"accepted": True}
+
+    receipt = run_reddog_resident_live_canary(
+        **_kwargs(repo, runtime),
+        execute=True,
+        confirmation=LIVE_CANARY_CONFIRMATION,
+        control_loop_runner=runner,
+    )
+
+    assert called is False
+    assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
 
 
 def test_preseeded_complete_chain_cannot_be_relabelled_as_new_live_proof(tmp_path: Path) -> None:
@@ -187,7 +382,55 @@ def test_preseeded_complete_chain_cannot_be_relabelled_as_new_live_proof(tmp_pat
         now=lambda: __import__("datetime").datetime.fromisoformat(NOW),
     )
     assert receipt.live_proof_complete is False
-    assert "new_chain_revision_not_observed" in receipt.blockers
+    assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
+
+
+def test_canary_rejects_control_receipt_stream_replacement(tmp_path: Path) -> None:
+    repo, runtime = _roots(tmp_path)
+    _write_pre_state(repo, runtime)
+
+    def control(cycle: str, nonce: str) -> dict[str, object]:
+        return build_resident_control_loop_receipt(
+            result={
+                "accepted": True,
+                "status": "PASS",
+                "rounds": 1,
+                "serial_progress": 1,
+                "claim_progress": 0,
+                "receipt_ids": (),
+                "rejection_reasons": (),
+                "control_lock_acquired": True,
+                "dispatched_stages": (),
+            },
+            repo_root=repo,
+            created_at=NOW,
+            cycle_id=cycle,
+            nonce=nonce,
+            signing_context=_SIGNING_CONTEXT,
+        ).to_dict()
+
+    original = control("canary-prefix-cycle", "canary-prefix-nonce")
+    replacement = control("canary-replacement-cycle", "canary-replacement-nonce")
+    path = runtime / "resident_queue_control_loop_receipts.jsonl"
+    _write_control_receipt_and_head(runtime, original)
+
+    def runner(_: Path) -> dict[str, object]:
+        path.write_text(json.dumps(replacement) + "\n", encoding="utf-8")
+        return {
+            "accepted": True,
+            "status": "PASS",
+            "receipt_id": replacement["receipt_id"],
+        }
+
+    receipt = run_reddog_resident_live_canary(
+        **_kwargs(repo, runtime), execute=True,
+        confirmation=LIVE_CANARY_CONFIRMATION, queue_item_id=QUEUE_ID,
+        control_loop_runner=runner,
+        now=lambda: __import__("datetime").datetime.fromisoformat(NOW),
+    )
+
+    assert "control_receipt_stream_not_append_only" in receipt.blockers
+    assert receipt.status != LIVE_CANARY_PROOF_COMPLETE
 
 
 def test_live_proof_requires_a_pre_invocation_chain_revision(tmp_path: Path) -> None:
@@ -304,6 +547,21 @@ def test_shared_control_lock_excludes_a_competing_process(tmp_path: Path) -> Non
         ) as competing:
             assert competing.acquired is False
             assert competing.reason == "control_loop_already_running"
+        from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
+            claim_reddog_signed_worker_dispatch_tasks_until_idle,
+        )
+
+        with patch.dict(
+            os.environ,
+            {CONTROL_LOOP_LOCK_PATH_ENV: str(lock_path)},
+            clear=False,
+        ):
+            result = claim_reddog_signed_worker_dispatch_tasks_until_idle(
+                repo_root=repo,
+                agent_db_factory=lambda: pytest.fail("AgentDB must not be opened"),
+            )
+        assert result["accepted"] is False
+        assert "control_loop_already_running" in result["rejection_reasons"]
     finally:
         if child.stdin is not None:
             child.stdin.write("\n")
@@ -327,7 +585,7 @@ def test_actual_resident_chain_schema_and_constants_reach_complete_plan() -> Non
         _snapshot(), chain_results=stages, requested_queue_item_id=QUEUE_ID,
         now_iso="2026-07-14T00:00:00+00:00",
     )
-    assert CONTROL_LOOP_RECEIPT_SCHEMA_VERSION == "reddog_resident_control_loop_receipt.v1"
+    assert CONTROL_LOOP_RECEIPT_SCHEMA_VERSION == "reddog_resident_control_loop_receipt.v2"
     assert CHAIN_RESULTS_SCHEMA_VERSION == "reddog_resident_queue_chain_results.v1"
     assert plan.status == RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE
     assert len(plan.accepted_stages) == len(_CHAIN) + 1
@@ -349,3 +607,57 @@ def test_live_canary_production_files_and_functions_follow_wsp62() -> None:
                     oversized_functions[f"{path.name}:{node.name}"] = lines
     assert oversized_files == {}
     assert oversized_functions == {}
+
+
+def test_modified_control_receipt_helpers_follow_wsp62() -> None:
+    targets = {
+        Path(__file__).resolve().parents[4] / "main.py": {
+            "_reddog_record_queue_control_result",
+            "_reddog_persist_queue_control_receipt",
+            "_reddog_control_receipt_signer_limits",
+            "_reddog_queue_stage_child_execution_outcomes",
+            "run_reddog_resident_queue_control_loop_preflight",
+            "_reddog_run_bounded_control_rounds",
+            "_reddog_run_control_round",
+            "run_reddog_openclaw_signed_worker_claim_loop_preflight",
+        },
+        SRC_ROOT / "openclaw_supervisor.py": {
+            "_claim_reddog_signed_worker_dispatch_task_once_under_control_lock",
+            "_claim_reddog_signed_worker_dispatch_tasks_until_idle_under_control_lock",
+            "_signed_worker_claim_result",
+            "_signed_worker_claim_loop_result",
+            "_signed_worker_effect_attestations",
+            "_signed_worker_loop_evidence",
+            "_signed_worker_child_execution_outcomes",
+            "_persist_reddog_signed_worker_dispatch_task_result",
+        },
+        SRC_ROOT / "reddog_ed25519_signer_backend.py": {
+            "_valid_control_receipt_signing_payload",
+            "_control_authority_policy_matches",
+            "sign",
+        },
+        SRC_ROOT / "reddog_signed_worker_dispatch_task_executor.py": {
+            "execute_reddog_signed_worker_dispatch_task",
+            "_validated_worker_context",
+            "_invoke_signed_worker_runner",
+            "_accepted_execution_result",
+        },
+    }
+    oversized = {}
+    for path, names in targets.items():
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name in names:
+                lines = int(node.end_lineno or node.lineno) - node.lineno + 1
+                if lines > 50:
+                    oversized[f"{path.name}:{node.name}"] = lines
+    assert oversized == {}
+    bounded_modules = (
+        SRC_ROOT / "reddog_signer_delegated_authority_runtime.py",
+        SRC_ROOT / "reddog_authority_runtime_store.py",
+    )
+    assert {
+        path.name: len(path.read_text(encoding="utf-8").splitlines())
+        for path in bounded_modules
+        if len(path.read_text(encoding="utf-8").splitlines()) > 675
+    } == {}
