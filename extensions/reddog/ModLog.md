@@ -2,6 +2,17 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-18 - REDDOG_EXPLICIT_EMPTY_FUSION_PANEL_FAIL_CLOSED_PHASE1 (0.4.2 unchanged)
+
+- Made an explicitly supplied Fusion panel list authoritative at both extension ingress and the Python bridge: `[]` and invalid-only lists remain empty instead of silently restoring `DEFAULT_PANEL_MODELS`; omitted/non-list inputs retain compatibility defaults.
+- Both manual FoundUps Fusion and the OpenRouter Fusion alias now receive the exact filtered panel through stdin, reject an empty explicit panel before any model/provider call, and receipt the exact selection and truncation state. The extension forwards at most seven entries while Python owns the six-model runtime cap, preserving one overflow sentinel instead of hiding truncation behind the former four-model extension slice.
+- Reserved bridge-owned review-packet fields so caller-controlled `bridge_meta` cannot spoof the selected mode, lead, panel, truncation, budgets, excerpts, quorum, or retry truth; non-core extension telemetry still propagates.
+- Extracted focused rejection/success packet builders, reduced `_openrouter_fusion_alias` to 45 lines, and moved manual empty-panel rejection into a compliant public wrapper while preserving the inherited 201-line Fusion core body. Split the new panel matrix into a 239-line focused test file; `_run_foundups_fusion_core` and the 179-line `main` are covered by a temporary exact-function WSP_62 exemption with owned, dated extraction criteria rather than being silently grandfathered.
+- Added temporary exact-scope WSP_62 exemptions for `extension.js` (7,900-line ceiling) and the two inherited Python bridge functions (201-line ceiling), both owned by RedDog Maintainers, expiring 2026-09-30, and bound to staged decomposition/removal criteria in `ROADMAP.md`.
+- HoloIndex was queried first; offline lexical fallback returned the stale legacy extension path rather than canonical `extensions/reddog`, so implementation used direct canonical reads and performed no re-index.
+- Preserved extension version `0.4.2`; package schema now caps both panel settings at the seven-entry forwarding bound, and this remains bridge security hardening with no model promotion, catalog refresh, paid call, Hermes dispatch, or execution authority.
+- WSP_15: Complexity 1 + Importance 5 + Deferability 5 + Impact 5 = 16 (P0).
+
 ## 2026-07-18 - REDDOG_KIMI_K3_ALL_ROLE_RUNTIME_BUDGET_HARDENING_PHASE1 (0.4.2 unchanged)
 
 - Preserved Kimi K3 as the default long-horizon critic while applying its 4096-token floor, mandatory `max` reasoning, and no-temperature contract to every exact `moonshotai/kimi-k3` direct completion call, including explicit single use and receipt-backed principal/synthesis selection.

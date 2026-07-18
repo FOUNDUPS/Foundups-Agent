@@ -1,5 +1,16 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-18 - REDDOG_EXPLICIT_EMPTY_FUSION_PANEL_FAIL_CLOSED_PHASE1
+
+- Proved omitted/non-list panel input still selects compatibility defaults while explicit empty and invalid-only lists remain empty.
+- Proved the extension ingress and `callFusion` stdin payload preserve omitted / non-list / explicit-empty / invalid-only / above-four / above-six panels across both Fusion modes; the focused contract uses a fake local child, removes the provider key, and asserts argv contains only the bridge script.
+- Bound the JavaScript runtime cap to Python's canonical six-model cap, the extension forwarding limit and both package `maxItems` values to seven, and final receipts to `panel_models_truncated=true` when the extension-origin overflow sentinel arrives.
+- Validated the exact-file `extension.js` WSP_62 ceiling and the exact-function Python bridge exemption, including temporary status, owner, 2026-09-30 expiry, named functions, and roadmap remediation anchors.
+- Proved manual FoundUps Fusion and the OpenRouter Fusion alias reject explicit empty panels before `_chat_completion` / `_post_openrouter` can make a provider call.
+- Exercised both Python modes end to end over the same six-case panel matrix and proved hostile `bridge_meta` cannot replace bridge-owned mode, lead, panel, truncation, quorum, or retry truth.
+- Pinned `_openrouter_fusion_alias` to 45 lines after focused rejection/success extraction, moved manual rejection into a compliant public wrapper around the body-preserved Fusion core, split the new Python matrix into `test_advisory_model_panel_input_contract.py` (239 lines), and kept every focused JavaScript contract helper within the 30-line WSP_62 limit.
+- Verification: `python -B -m pytest -q -p no:cacheprovider --tb=short scripts/tests/test_advisory_model_once_hardening.py scripts/tests/test_advisory_model_panel_input_contract.py` (39 passed, 17 subtests), `node extensions/reddog/tests/verify_fusion_panel_input_contract.js` (PASS), and `node --check` for the extension plus both contract runners. The exhaustive Node runner remains managed-sandbox blocked at its internal `spawnSync python` with `EPERM`.
+
 ## 2026-07-18 - REDDOG_KIMI_K3_ALL_ROLE_RUNTIME_BUDGET_HARDENING_PHASE1
 
 - Added exact Kimi K3 and non-K3 `openrouter_single` receipt coverage for requested and provider-effective token budgets.

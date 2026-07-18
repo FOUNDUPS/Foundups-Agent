@@ -304,6 +304,9 @@ Auto effort rules:
 Model and context routing:
 
 - RedDog WSP/security/architecture/runtime work auto-routes to `foundups_fusion` (manual principal + panel).
+- Omitted or non-list `panel_models` inputs retain the compatibility defaults. An explicitly supplied list is authoritative: an empty or invalid-only list remains empty and both Fusion modes reject it before any provider call instead of restoring default critics.
+- The extension filters and forwards at most seven panel entries. Python is the canonical six-model runtime cap; the seventh entry is a bounded overflow sentinel so `panel_models_truncated` remains truthful for over-cap configuration.
+- Fusion review-packet model fields are bridge-owned. Extension-supplied `bridge_meta` may add non-core telemetry but cannot replace the selected mode, lead, critic panel, truncation state, budgets, excerpts, quorum, or retry truth.
 - Principal/synthesis default: `z-ai/glm-5.2`.
 - Adversarial critic default: `deepseek/deepseek-v4-pro`.
 - Implementation critic default: `moonshotai/kimi-k2.7-code`.

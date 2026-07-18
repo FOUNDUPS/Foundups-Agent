@@ -1,4 +1,20 @@
 exemptions:
+  - file: "scripts/advisory_model_once.py"
+    reason: >-
+      Legacy RedDog model bridge integration boundary. The focused empty-panel
+      security slice moves the new fail-closed panel guard into a compliant
+      wrapper and preserves the manual Fusion core body, but that inherited
+      core and the CLI router require a separate parity refactor.
+    threshold_override: 1200
+    function_threshold_override: 201
+    functions: ["_run_foundups_fusion_core", "main"]
+    temporary: true
+    owner: "RedDog Maintainers"
+    expires_on: "2026-09-30"
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "extensions/reddog/ROADMAP.md#reddog-advisory-python-bridge-wsp_62-decomposition"
+
   - file: "main.py"
     reason: >-
       Legacy application entrypoint and RedDog preflight integration boundary.

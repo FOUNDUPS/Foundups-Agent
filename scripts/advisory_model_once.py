@@ -43,6 +43,36 @@ DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_CODE_PANEL_MODEL, KIMI_PANEL
 MAX_PANEL_MODELS = 6
 RETRYABLE_HTTP_STATUS = frozenset({429, 502, 503})
 MAX_HTTP_RETRIES = 2
+REVIEW_PACKET_CORE_FIELDS = frozenset(
+    {
+        "mode",
+        "ok",
+        "reason",
+        "status",
+        "model",
+        "content",
+        "history",
+        "rejection_reasons",
+        "lead_model",
+        "principal_model",
+        "panel_models",
+        "panel_models_truncated",
+        "requested_max_tokens",
+        "effective_max_tokens",
+        "role_max_tokens",
+        "panel_max_tokens",
+        "redacted_prompt",
+        "redacted_prompt_excerpt",
+        "lead_excerpt",
+        "panel_excerpts",
+        "synthesis_excerpt",
+        "fusion_panel_quorum",
+        "trace_boundary",
+        "retry_count",
+        "final_retry_reason",
+        "made_network_call",
+    }
+)
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are 0102 operating as an advisory RedDog Architect worker inside a Cursor extension tab. "
@@ -227,7 +257,19 @@ def _panel_models_with_meta(value: object) -> tuple[list[str], bool]:
         if isinstance(item, str) and item.strip() and len(item.strip()) <= 120:
             models.append(item.strip())
     truncated = len(value) > MAX_PANEL_MODELS
-    return (models or list(DEFAULT_PANEL_MODELS), truncated)
+    return models, truncated
+
+
+def _safe_review_packet_bridge_meta(value: object) -> dict[str, Any]:
+    """Keep extension telemetry from replacing bridge-owned model truth."""
+
+    if not isinstance(value, dict):
+        return {}
+    return {
+        key: item
+        for key, item in value.items()
+        if key not in REVIEW_PACKET_CORE_FIELDS
+    }
 
 
 def _system_prompt(payload: dict[str, Any]) -> str:
@@ -365,6 +407,74 @@ def _fusion_quorum_packet(
     }
 
 
+def _empty_fusion_panel_rejection(
+    mode: str,
+    lead_model: str,
+    panel_models_truncated: bool,
+) -> dict[str, Any]:
+    """Return the fail-closed packet for an explicitly empty Fusion panel."""
+
+    if mode == "foundups_fusion":
+        return _fusion_quorum_packet(
+            ok=False,
+            reason="fusion_quorum_panel_missing",
+            lead_model=lead_model,
+            panel_models=[],
+            panel_models_truncated=panel_models_truncated,
+        )
+    return {
+        "ok": False,
+        "reason": "fusion_alias_panel_missing",
+        "mode": "openrouter_fusion_alias",
+        "lead_model": lead_model,
+        "panel_models": [],
+        "review_packet": {
+            "mode": "openrouter_fusion_alias",
+            "lead_model": lead_model,
+            "panel_models": [],
+            "panel_models_truncated": panel_models_truncated,
+        },
+    }
+
+
+def _fusion_alias_success_packet(
+    *,
+    redacted_prompt: str,
+    history: list[dict[str, str]],
+    judge_model: str,
+    panel_models: list[str],
+    panel_models_truncated: bool,
+    content: str,
+    retry_meta: dict[str, Any],
+) -> dict[str, Any]:
+    """Build the truthful OpenRouter Fusion alias success packet."""
+
+    next_history = history + [
+        {"role": "user", "content": redacted_prompt},
+        {"role": "assistant", "content": content},
+    ]
+    return {
+        "ok": True,
+        "reason": "ok",
+        "mode": "openrouter_fusion_alias",
+        "lead_model": judge_model,
+        "panel_models": panel_models,
+        "content": content,
+        "history": next_history[-20:],
+        "review_packet": {
+            "mode": "openrouter_fusion_alias",
+            "lead_model": judge_model,
+            "panel_models": panel_models,
+            "panel_models_truncated": panel_models_truncated,
+            "redacted_prompt": redacted_prompt,
+            "synthesis_excerpt": content[:4000],
+            "trace_boundary": "OpenRouter Fusion alias does not expose individual critic transcripts.",
+            "retry_count": retry_meta.get("retry_count", 0),
+            "final_retry_reason": retry_meta.get("final_retry_reason"),
+        },
+    }
+
+
 def _openrouter_fusion_alias(
     api_key: str,
     redacted_prompt: str,
@@ -374,6 +484,8 @@ def _openrouter_fusion_alias(
     timeout = _bounded_int(payload.get("timeout"), 120, 1, 240)
     judge_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
     panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
+    if not panel_models:
+        return _empty_fusion_panel_rejection("openrouter_fusion_alias", judge_model, panel_models_truncated)
     messages = [{"role": "system", "content": _system_prompt(payload)}]
     messages.extend(history)
     messages.append({"role": "user", "content": redacted_prompt})
@@ -399,32 +511,18 @@ def _openrouter_fusion_alias(
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return {"ok": False, "reason": "fusion_alias_malformed_response"}
     _progress("fusion_alias_done", "OpenRouter Fusion alias response received.")
-    next_history = history + [
-        {"role": "user", "content": redacted_prompt},
-        {"role": "assistant", "content": content},
-    ]
-    return {
-        "ok": True,
-        "reason": "ok",
-        "mode": "openrouter_fusion_alias",
-        "lead_model": judge_model,
-        "panel_models": panel_models,
-        "content": content,
-        "history": next_history[-20:],
-        "review_packet": {
-            "mode": "openrouter_fusion_alias",
-            "lead_model": judge_model,
-            "panel_models": panel_models,
-            "redacted_prompt": redacted_prompt,
-            "synthesis_excerpt": content[:4000],
-            "trace_boundary": "OpenRouter Fusion alias does not expose individual critic transcripts.",
-            "retry_count": retry_meta.get("retry_count", 0),
-            "final_retry_reason": retry_meta.get("final_retry_reason"),
-        },
-    }
+    return _fusion_alias_success_packet(
+        redacted_prompt=redacted_prompt,
+        history=history,
+        judge_model=judge_model,
+        panel_models=panel_models,
+        panel_models_truncated=panel_models_truncated,
+        content=content,
+        retry_meta=retry_meta,
+    )
 
 
-def _run_foundups_fusion(
+def _run_foundups_fusion_core(
     api_key: str,
     redacted_prompt: str,
     history: list[dict[str, str]],
@@ -627,6 +725,21 @@ def _run_foundups_fusion(
     }
 
 
+def _run_foundups_fusion(
+    api_key: str,
+    redacted_prompt: str,
+    history: list[dict[str, str]],
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Reject an empty panel before entering the legacy Fusion core."""
+
+    panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
+    if not panel_models:
+        lead_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
+        return _empty_fusion_panel_rejection("foundups_fusion", lead_model, panel_models_truncated)
+    return _run_foundups_fusion_core(api_key, redacted_prompt, history, payload)
+
+
 def _read_stdin_json() -> dict[str, Any]:
     """Read bridge payload as UTF-8 bytes (ADDENDUM B: Windows text stdin is not UTF-8-safe)."""
     raw = sys.stdin.buffer.read()
@@ -655,7 +768,7 @@ def main() -> int:
         return _json_result(ok=False, reason="missing_prompt")
     context = payload.get("context")
     context_for_gate = context if isinstance(context, str) and context.strip() else None
-    bridge_meta = payload.get("bridge_meta") if isinstance(payload.get("bridge_meta"), dict) else {}
+    bridge_meta = _safe_review_packet_bridge_meta(payload.get("bridge_meta"))
     audit_context_requested = payload.get("audit_context") is True
     audit_context_applied = audit_context_requested
     # REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: authoritative packed required-target
