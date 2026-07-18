@@ -35,6 +35,8 @@ GLM_PRINCIPAL_MODEL = "z-ai/glm-5.2"
 DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"
 KIMI_CODE_PANEL_MODEL = "moonshotai/kimi-k2.7-code"
 KIMI_PANEL_MODEL = "moonshotai/kimi-k3"
+# Historical constant name retained because the extension contract inspects the
+# bridge as text. The K3 budget applies to every direct completion role.
 KIMI_K3_PANEL_MAX_TOKENS = 4096
 DEFAULT_LEAD_MODEL = GLM_PRINCIPAL_MODEL
 DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_CODE_PANEL_MODEL, KIMI_PANEL_MODEL)
@@ -138,7 +140,7 @@ def _chat_completion(
     body: dict[str, Any] = {
         "model": model,
         "messages": messages,
-        "max_tokens": max_tokens,
+        "max_tokens": _effective_max_tokens(model, max_tokens),
         "stream": False,
     }
     if model == KIMI_PANEL_MODEL:
@@ -151,6 +153,33 @@ def _chat_completion(
     data, retry_meta = _post_openrouter(api_key, body, timeout)
     content = data["choices"][0]["message"]["content"]
     return str(content), retry_meta
+
+
+def _effective_max_tokens(model: str, requested_max_tokens: int) -> int:
+    """Return the provider-compatible output budget for one model call."""
+
+    if model == KIMI_PANEL_MODEL:
+        return max(requested_max_tokens, KIMI_K3_PANEL_MAX_TOKENS)
+    return requested_max_tokens
+
+
+def _fusion_token_budgets(
+    lead_model: str,
+    panel_models: list[str],
+    requested_max_tokens: int,
+) -> tuple[dict[str, Any], dict[str, int]]:
+    """Build truthful effective token budgets for every Fusion role."""
+
+    panel = {
+        model: _effective_max_tokens(model, requested_max_tokens)
+        for model in panel_models
+    }
+    roles: dict[str, Any] = {
+        "lead": _effective_max_tokens(lead_model, requested_max_tokens),
+        "panel": panel,
+        "synthesis": _effective_max_tokens(lead_model, requested_max_tokens),
+    }
+    return roles, panel
 
 
 def _clean_history(value: object) -> list[dict[str, str]]:
@@ -220,6 +249,27 @@ def _format_panel(lead_model: str, lead_text: str, panel_results: dict[str, str]
     return "\n\n".join(parts)
 
 
+def _synthesis_user_prompt(
+    redacted_prompt: str,
+    lead_text: str,
+    panel_results: dict[str, str],
+) -> str:
+    """Assemble the bounded lead and panel evidence for synthesis."""
+
+    panel_text = "\n\n".join(
+        _model_label(model) + " critique:\n" + text[:8000]
+        for model, text in panel_results.items()
+    )
+    return (
+        "Original task:\n"
+        + redacted_prompt
+        + "\n\nLead answer:\n"
+        + lead_text[:12000]
+        + "\n\nPanel critiques:\n"
+        + panel_text
+    )
+
+
 def _none_like_model_text(value: object) -> bool:
     text = str(value or "").strip()
     lowered = text.lower()
@@ -283,6 +333,7 @@ def _fusion_quorum_packet(
     lead_model: str,
     panel_models: list[str],
     panel_models_truncated: bool,
+    role_max_tokens: dict[str, Any] | None = None,
     panel_max_tokens: dict[str, int] | None = None,
     missing_required_evidence: list[str] | None = None,
     challenging_critics: list[str] | None = None,
@@ -307,6 +358,7 @@ def _fusion_quorum_packet(
             "lead_model": lead_model,
             "panel_models": panel_models,
             "panel_models_truncated": panel_models_truncated,
+            "role_max_tokens": dict(role_max_tokens or {}),
             "panel_max_tokens": dict(panel_max_tokens or {}),
             "fusion_panel_quorum": quorum,
         },
@@ -383,10 +435,9 @@ def _run_foundups_fusion(
     temperature = _bounded_temperature(payload.get("temperature"), 0.2)
     lead_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
     panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
-    panel_max_tokens = {
-        model: (max(max_tokens, KIMI_K3_PANEL_MAX_TOKENS) if model == KIMI_PANEL_MODEL else max_tokens)
-        for model in panel_models
-    }
+    role_max_tokens, panel_max_tokens = _fusion_token_budgets(
+        lead_model, panel_models, max_tokens
+    )
     base_system = _system_prompt(payload)
     response_contract = str(payload.get("response_contract") or "")
     strict_json_contract = response_contract.startswith("strict_json")
@@ -401,6 +452,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            role_max_tokens=role_max_tokens,
             panel_max_tokens=panel_max_tokens,
             missing_required_evidence=missing_evidence,
         )
@@ -422,7 +474,7 @@ def _run_foundups_fusion(
             api_key,
             lead_model,
             lead_messages,
-            max_tokens=max_tokens,
+            max_tokens=role_max_tokens["lead"],
             temperature=temperature,
             timeout=timeout,
         )
@@ -439,6 +491,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            role_max_tokens=role_max_tokens,
             panel_max_tokens=panel_max_tokens,
         )
 
@@ -492,6 +545,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            role_max_tokens=role_max_tokens,
             panel_max_tokens=panel_max_tokens,
             challenging_critics=[],
         )
@@ -506,18 +560,7 @@ def _run_foundups_fusion(
             base_system
             + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return the best actionable WSP-compliant recommendation. The final section must be WSP_15 Priority followed by Next safest step."
         )
-    panel_text = "\n\n".join(
-        _model_label(model) + " critique:\n" + text[:8000]
-        for model, text in panel_results.items()
-    )
-    synthesis_user = (
-        "Original task:\n"
-        + redacted_prompt
-        + "\n\nLead answer:\n"
-        + lead_text[:12000]
-        + "\n\nPanel critiques:\n"
-        + panel_text
-    )
+    synthesis_user = _synthesis_user_prompt(redacted_prompt, lead_text, panel_results)
     _progress("synthesis_start", "Synthesis request started: " + lead_model)
     try:
         synthesis, _syn_retry = _chat_completion(
@@ -527,7 +570,7 @@ def _run_foundups_fusion(
                 {"role": "system", "content": synthesis_system},
                 {"role": "user", "content": synthesis_user},
             ],
-            max_tokens=max_tokens,
+            max_tokens=role_max_tokens["synthesis"],
             temperature=temperature,
             timeout=timeout,
         )
@@ -538,6 +581,7 @@ def _run_foundups_fusion(
             lead_model=lead_model,
             panel_models=panel_models,
             panel_models_truncated=panel_models_truncated,
+            role_max_tokens=role_max_tokens,
             panel_max_tokens=panel_max_tokens,
             challenging_critics=challenging_critics,
         )
@@ -561,6 +605,8 @@ def _run_foundups_fusion(
             "lead_model": lead_model,
             "panel_models": panel_models,
             "panel_models_truncated": panel_models_truncated,
+            "requested_max_tokens": max_tokens,
+            "role_max_tokens": role_max_tokens,
             "panel_max_tokens": panel_max_tokens,
             "redacted_prompt": redacted_prompt,
             "lead_excerpt": lead_text[:4000],
@@ -721,6 +767,7 @@ def main() -> int:
         return _json_result(ok=False, reason="missing_model")
 
     max_tokens = _bounded_int(payload.get("max_tokens"), 2048, 1, 4096)
+    effective_max_tokens = _effective_max_tokens(model, max_tokens)
     temperature = _bounded_temperature(payload.get("temperature"), 0.2)
     timeout = _bounded_int(payload.get("timeout"), 60, 1, 120)
 
@@ -759,6 +806,8 @@ def main() -> int:
         review_packet={
             "mode": "openrouter_single",
             "lead_model": model,
+            "requested_max_tokens": max_tokens,
+            "effective_max_tokens": effective_max_tokens,
             "redacted_prompt_excerpt": redacted_user_message[:4000],
             "retry_count": retry_meta.get("retry_count", 0),
             "final_retry_reason": retry_meta.get("final_retry_reason"),

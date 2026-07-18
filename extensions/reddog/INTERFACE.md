@@ -307,7 +307,7 @@ Model and context routing:
 - Principal/synthesis default: `z-ai/glm-5.2`.
 - Adversarial critic default: `deepseek/deepseek-v4-pro`.
 - Implementation critic default: `moonshotai/kimi-k2.7-code`.
-- Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token critic budget.
+- Long-horizon reasoning critic default: `moonshotai/kimi-k3` with mandatory `max` reasoning, no temperature parameter, and a receipt-recorded 4096-token floor for every direct completion call. An explicit direct selection or receipt-backed signed promotion may place K3 in single, principal, or synthesis roles; this bridge does not itself promote a champion, change defaults, open an OpenClaw execution valve, or dispatch Hermes.
 - REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and `wsp_holo` HoloIndex grounding (no Fusion panel, Skillz, or git).
 - Context is not a 012-facing selector; it is resolved from WSP_15 tier.
 - Skillz/Wardrobe/Rolodex/OpenClaw/Hermes discovery is context only. RedDog may recommend a governed handoff, but this extension cannot execute it.
@@ -322,6 +322,7 @@ Review packet additions:
 - `resolved_context`
 - `principal_model`
 - `panel_models`
+- direct `requested_max_tokens` and provider-effective `effective_max_tokens`; manual Fusion `requested_max_tokens`, `role_max_tokens`, and `panel_max_tokens`
 - `mode_selection_reasoning`
 - `work_focus_digest` (`hash`, `excerpt`, `length` - redacted)
 - `wsp_prompt_digest` (`hash`, `excerpt`, `length` - redacted)

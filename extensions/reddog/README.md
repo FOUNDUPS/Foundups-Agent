@@ -197,7 +197,7 @@ The lead is configurable. Use Cursor settings or workspace/user settings:
 }
 ```
 
-The extension uses up to four panel models. RedDog defaults to GLM-5.2 as principal, DeepSeek V4 Pro as adversarial critic, Kimi K2.7 Code as implementation critic, and Kimi K3 as a long-horizon reasoning critic. Kimi K3 uses OpenRouter's explicit `moonshotai/kimi-k3` slug; its request omits unsupported temperature, records mandatory `max` reasoning, and uses a 4096-token critic budget because lower budgets did not produce quorum-usable final output in the live compatibility smoke. The review packet records the actual per-panel token budgets.
+The extension uses up to four panel models. RedDog defaults to GLM-5.2 as principal, DeepSeek V4 Pro as adversarial critic, Kimi K2.7 Code as implementation critic, and Kimi K3 as a long-horizon reasoning critic. Kimi K3 uses OpenRouter's explicit `moonshotai/kimi-k3` slug; every direct completion call omits unsupported temperature, records mandatory `max` reasoning, and applies a 4096-token floor because lower budgets did not produce quorum-usable final output in the live compatibility smoke. This covers its default critic call and, only when an explicit direct selection or receipt-backed signed promotion selects K3, the single, principal, and synthesis roles. Review packets distinguish the requested budget from effective direct and per-role budgets. The bridge does not automatically promote K3 to champion, change RedDog defaults, open an OpenClaw execution valve, or dispatch Hermes.
 
 ## Bounded Repo Context
 
