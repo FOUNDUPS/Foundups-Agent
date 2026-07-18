@@ -202,6 +202,9 @@ def _response_from_mapping(value: object) -> SigningResponse:
         key_fingerprint=str(value["key_fingerprint"]),
         key_epoch=str(value["key_epoch"]),
         audit_mac=str(value["audit_mac"]),
+        audit_attestation_signature=str(
+            value.get("audit_attestation_signature") or ""
+        ),
         boundary_attested=value.get("boundary_attested") is True,
         requester_identity_attested=value.get("requester_identity_attested") is True,
         signer_loads_no_untrusted_code=value.get("signer_loads_no_untrusted_code") is True,

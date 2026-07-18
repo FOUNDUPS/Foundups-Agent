@@ -11,6 +11,7 @@ from typing import Any, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
     CONTROL_LOOP_RECEIPT_SCHEMA_VERSION,
+    verify_resident_control_loop_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     CHAIN_RESULTS_SCHEMA_VERSION,
@@ -65,22 +66,25 @@ class CanaryInvocationEvidence:
 
 
 def read_control_receipts(path: Path) -> tuple[Mapping[str, Any], ...]:
-    """Parse valid JSON-object receipt rows; malformed rows cannot prove a run."""
+    """Parse the complete JSONL stream or reject it fail-closed."""
 
     if not path.is_file():
         return ()
     receipts: list[Mapping[str, Any]] = []
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        return ()
-    for line in lines:
+    except OSError as exc:
+        raise ValueError("control_receipt_stream_unreadable") from exc
+    for line_number, line in enumerate(lines, start=1):
+        if not line.strip():
+            continue
         try:
             payload = json.loads(line)
-        except (json.JSONDecodeError, TypeError):
-            continue
-        if isinstance(payload, Mapping):
-            receipts.append(payload)
+        except (json.JSONDecodeError, TypeError) as exc:
+            raise ValueError(f"control_receipt_stream_invalid_json:{line_number}") from exc
+        if not isinstance(payload, Mapping):
+            raise ValueError(f"control_receipt_stream_invalid_record:{line_number}")
+        receipts.append(payload)
     return tuple(receipts)
 
 
@@ -140,7 +144,7 @@ def evaluate_live_proof(
         worktree,
     )
     blockers = [
-        *_fresh_execution_blockers(invocation, repo_root),
+        *_fresh_execution_blockers(invocation, repo_root, runtime_root),
         *chain_blockers,
         *draft["blockers"],
         *pattern["blockers"],
@@ -165,6 +169,7 @@ def evaluate_live_proof(
 def _fresh_execution_blockers(
     invocation: CanaryInvocationEvidence,
     repo_root: Path,
+    runtime_root: Path,
 ) -> tuple[str, ...]:
     blockers: list[str] = []
     if not invocation.invoked:
@@ -179,13 +184,14 @@ def _fresh_execution_blockers(
         or invocation.observed_revision == invocation.previous_revision
     ):
         blockers.append("new_chain_revision_not_observed")
-    blockers.extend(_control_receipt_blockers(invocation, repo_root))
+    blockers.extend(_control_receipt_blockers(invocation, repo_root, runtime_root))
     return tuple(blockers)
 
 
 def _control_receipt_blockers(
     invocation: CanaryInvocationEvidence,
     repo_root: Path,
+    runtime_root: Path,
 ) -> tuple[str, ...]:
     receipt = invocation.control_receipt
     if not receipt:
@@ -204,7 +210,45 @@ def _control_receipt_blockers(
     progress = receipt.get("serial_progress")
     if isinstance(progress, bool) or not isinstance(progress, int) or progress <= 0:
         blockers.append("control_receipt_serial_progress_missing")
+    try:
+        authority_profile = _runtime_authority_profile(runtime_root)
+        authority_profile_digest = "sha256:" + _digest(authority_profile)
+        verify_resident_control_loop_receipt(
+            receipt,
+            expected_repo_root=repo_root,
+            expected_signer_public_key=str(authority_profile["reddog_public_key"]),
+            expected_key_epoch=str(authority_profile["key_epoch"]),
+            expected_consensus_receipt_digest=str(
+                authority_profile["consensus_receipt_digest"]
+            ),
+            expected_authority_profile_digest=authority_profile_digest,
+            require_authenticated=True,
+        )
+    except (KeyError, TypeError, ValueError):
+        blockers.append("control_receipt_auth_or_integrity_invalid")
     return tuple(blockers)
+
+
+def _runtime_authority_profile(runtime_root: Path) -> Mapping[str, Any]:
+    path = runtime_root / "authority_profile.json"
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 256 * 1024:
+        raise ValueError("authority_profile_invalid")
+    resolved = path.resolve()
+    if not _is_inside(resolved, runtime_root):
+        raise ValueError("authority_profile_outside_runtime_root")
+    payload = json.loads(resolved.read_text(encoding="utf-8"))
+    if not isinstance(payload, Mapping):
+        raise ValueError("authority_profile_invalid")
+    for key in (
+        "principal_id",
+        "reddog_public_key",
+        "key_epoch",
+        "consensus_receipt_digest",
+    ):
+        value = payload.get(key)
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"authority_profile_{key}_missing")
+    return payload
 
 
 def _chain_evidence(

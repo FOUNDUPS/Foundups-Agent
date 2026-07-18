@@ -985,6 +985,90 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     assert not (repo / "runtime" / "pattern_memory.db").exists()
 
 
+def test_private_openclaw_claim_primitives_reject_without_control_lock(
+    tmp_path: Path,
+) -> None:
+    from modules.communication.moltbot_bridge.src import openclaw_supervisor as supervisor
+
+    def forbidden_factory():
+        raise AssertionError("AgentDB must not be opened without the control lock")
+
+    once = supervisor._claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
+        repo_root=tmp_path, agent_db_factory=forbidden_factory
+    )
+    loop = supervisor._claim_reddog_signed_worker_dispatch_tasks_until_idle_under_control_lock(
+        repo_root=tmp_path, agent_db_factory=forbidden_factory, max_claims=1
+    )
+    assert once["accepted"] is False
+    assert loop["accepted"] is False
+    assert "resident_queue_control_lock_required" in once["rejection_reasons"]
+    assert "resident_queue_control_lock_required" in loop["rejection_reasons"]
+
+
+def test_control_lock_reentry_is_bound_to_exact_repository_identity(
+    tmp_path: Path,
+) -> None:
+    from modules.communication.moltbot_bridge.src import openclaw_supervisor as supervisor
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_control_lock import (
+        acquire_resident_queue_control_lock,
+        resident_queue_control_lock_held,
+    )
+
+    repo_a = tmp_path / "repo-a"
+    repo_b = tmp_path / "repo-b"
+    repo_a.mkdir()
+    repo_b.mkdir()
+
+    def forbidden_factory():
+        raise AssertionError("lock A must not authorize AgentDB access for repo B")
+
+    with acquire_resident_queue_control_lock(repo_a) as lock:
+        assert lock.acquired is True
+        assert resident_queue_control_lock_held(repo_a) is True
+        assert resident_queue_control_lock_held(repo_b) is False
+        result = supervisor._claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
+            repo_root=repo_b,
+            agent_db_factory=forbidden_factory,
+        )
+
+    assert result["accepted"] is False
+    assert "resident_queue_control_lock_required" in result["rejection_reasons"]
+
+
+def test_failed_claim_has_digest_bound_exact_child_outcome() -> None:
+    from modules.communication.moltbot_bridge.src import openclaw_supervisor as supervisor
+
+    claim = supervisor._signed_worker_claim_result(
+        accepted=False,
+        status=supervisor.SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+        task_id="task-failed-1",
+        rejection_reasons=("test_failure",),
+    )
+    result = supervisor._signed_worker_claim_loop_result(
+        accepted=False,
+        status=supervisor.SIGNED_WORKER_OPENCLAW_CLAIM_LOOP_REJECT,
+        max_claims=1,
+        claim_results=(claim,),
+        failed_task_ids=("task-failed-1",),
+    )
+    assert claim["execution_result_digest"].startswith("sha256:")
+    assert result["child_execution_evidence_digests"] == (
+        claim["execution_result_digest"],
+    )
+    assert result["child_execution_outcomes"] == (
+        {
+            "task_id": "task-failed-1",
+            "status": "failed",
+                "receipt_id": "",
+                "evidence_digest": claim["execution_result_digest"],
+                "worker_execution_performed": False,
+                "effect_evidence_complete": True,
+                "worker_process_spawn_count": 0,
+                "shell_command_count": 0,
+            },
+    )
+
+
 @pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="AF_UNIX required")
 def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queue_chain_without_work_orders(
     tmp_path: Path,
@@ -1084,7 +1168,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
             socket_path=socket_path,
             backend=signer_backend,
             peer_attestor=_StaticSocketPeerAttestor(),
-            max_requests=2,
+            max_requests=3,
             timeout_s=5,
             ready_callback=ready.set,
         )
@@ -1131,7 +1215,7 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     result = service_result["result"]
     assert result.accepted is True
     assert result.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
-    assert result.requests_handled == 2
+    assert result.requests_handled == 3
     assert not socket_path.exists()
 
     captured = capsys.readouterr().out
@@ -1159,7 +1243,32 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
         == main.run_reddog_resident_queue_control_loop_preflight.last_result["receipt_id"]
     )
     assert control_receipt["receipt_ids"][0].startswith("signed_worker_task_execution_")
+    assert control_receipt["child_execution_receipt_ids"] == control_receipt["receipt_ids"]
+    assert control_receipt["child_execution_evidence_count"] == (
+        control_receipt["worker_completion_count"]
+        + control_receipt["worker_requeue_count"]
+        + control_receipt["worker_failure_count"]
+    )
     assert control_receipt["control_lock_acquired"] is True
+    assert "authority_runtime" in control_receipt["dispatched_stages"]
+    assert "bounded_worker_pilot" in control_receipt["dispatched_stages"]
+    assert control_receipt["authority_issued"] is True
+    assert control_receipt["worker_claim_performed"] is True
+    assert control_receipt["worker_execution_performed"] is True
+    assert control_receipt["worktree_creation_observed"] is True
+    assert control_receipt["bounded_file_edit_observed"] is True
+    assert control_receipt["slice_verification_observed"] is True
+    assert control_receipt["draft_pr_publish_observed"] is True
+    assert control_receipt["pattern_memory_admission_observed"] is True
+    assert control_receipt["shell_command_execution_observed"] is False
+    assert control_receipt["shell_command_count"] == 0
+    assert control_receipt["worker_process_spawn_observed"] is False
+    assert control_receipt["worker_process_spawn_count"] == 0
+    assert control_receipt["authentication_status"] == "AUTHENTICATED"
+    assert control_receipt["signature"].startswith("ed25519-sig-v1:")
+    assert control_receipt["signer_audit_attestation_signature"].startswith(
+        "ed25519-sig-v1:"
+    )
     assert main.run_reddog_resident_queue_control_loop_preflight.last_result["control_lock_acquired"] is True
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ
 
@@ -1331,10 +1440,13 @@ def test_main_resident_control_loop_consumes_signer_socket_started_by_runtime_cl
         runtime_root / "signer-service.json",
         {
             "socket_path": str(socket_path),
+            "control_loop_anchor_path": str(
+                tmp_path / "signer-state" / "control-loop-anchor.json"
+            ),
             "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
             "allow_test_only_key_material": False,
             "permission_snapshot_fresh": True,
-            "max_requests": 2,
+            "max_requests": 3,
             "timeout_s": 5,
             "max_request_bytes": 16384,
             "max_response_bytes": 16384,
@@ -1472,6 +1584,8 @@ def test_main_resident_control_loop_consumes_signer_socket_started_by_runtime_cl
     )
     assert control_receipt["receipt_ids"][0].startswith("signed_worker_task_execution_")
     assert control_receipt["control_lock_acquired"] is True
+    assert control_receipt["authentication_status"] == "AUTHENTICATED"
+    assert control_receipt["signature"].startswith("ed25519-sig-v1:")
     assert main.run_reddog_resident_queue_control_loop_preflight.last_result["control_lock_acquired"] is True
     assert calls
     stored = json.loads(chain.read_text(encoding="utf-8"))

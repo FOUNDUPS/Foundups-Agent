@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import ast
 import json
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
+
+import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_orchestration_plan_bootstrap import (
     run_reddog_main_resident_queue_orchestration_plan_bootstrap,
@@ -41,6 +45,19 @@ MODULE_PATH = (
 )
 NOW = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
+
+
+def _concurrent_commit(args: tuple[str, str]) -> str:
+    path, marker = args
+    store = AtomicJsonResidentQueueChainResultsStore(path)
+    try:
+        store.commit(
+            {"schema_version": "test.v1", "marker": marker, "receipts": []},
+            expected_revision=None,
+        )
+    except RuntimeError as exc:
+        return str(exc)
+    return "committed"
 
 
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:
@@ -287,6 +304,37 @@ def test_multi_stage_recording_keeps_serial_order() -> None:
     assert result.next_plan is not None
     assert result.next_plan.next_action == NEXT_QUEUE_WORKTREE_CREATE_INVOKE
     assert result.next_plan.current_stage == "worktree_create"
+
+
+def test_atomic_store_cross_process_compare_and_swap_allows_one_commit(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "runtime" / "chain-results.json"
+    jobs = [(str(path), "first"), (str(path), "second")]
+
+    with ProcessPoolExecutor(
+        max_workers=2,
+        mp_context=multiprocessing.get_context("spawn"),
+    ) as executor:
+        outcomes = list(executor.map(_concurrent_commit, jobs))
+
+    assert sorted(outcomes) == ["committed", "revision_conflict"]
+    stored = json.loads(path.read_text(encoding="utf-8"))
+    assert stored["marker"] in {"first", "second"}
+
+
+def test_relative_and_absolute_store_paths_share_one_canonical_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    relative = AtomicJsonResidentQueueChainResultsStore("runtime/chain-results.json")
+    absolute = AtomicJsonResidentQueueChainResultsStore(
+        tmp_path / "runtime" / "chain-results.json"
+    )
+    assert relative.path == absolute.path
+    relative.commit({"marker": "first"}, expected_revision=None)
+    with pytest.raises(RuntimeError, match="revision_conflict"):
+        absolute.commit({"marker": "stale"}, expected_revision=None)
 
 
 def test_module_has_no_bridge_invocation_or_reindex_imports() -> None:

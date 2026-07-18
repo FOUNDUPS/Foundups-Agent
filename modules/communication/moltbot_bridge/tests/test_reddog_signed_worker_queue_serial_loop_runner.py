@@ -84,6 +84,16 @@ def _digest(value: object) -> str:
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _runtime_paths_env(tmp_path: Path) -> dict[str, str]:
+    runtime_root = tmp_path.parent / f"{tmp_path.name}-resident-runtime"
+    return {
+        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(runtime_root / "state.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(runtime_root / "chain.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(runtime_root / "profile.json"),
+    }
+
+
 def _allocation():
     return {
         "schema_version": "reddog_wsp15_allocation_receipt.v1",
@@ -357,9 +367,7 @@ def test_runtime_binding_builds_runner_from_explicit_env(tmp_path: Path) -> None
     bootstrap = _FakeBootstrap()
     env = {
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
         "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "authority_profile",
         "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
         "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "1000",
@@ -391,9 +399,7 @@ def test_runtime_binding_builds_runner_from_explicit_env(tmp_path: Path) -> None
 def test_runtime_binding_profile_enables_runner_without_explicit_runner_flag(tmp_path: Path) -> None:
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -411,9 +417,7 @@ def test_runtime_binding_fusion_profile_supplies_artifact_generator_mode(tmp_pat
     bootstrap = _FakeBootstrap()
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -443,9 +447,7 @@ def test_runtime_binding_explicit_artifact_generator_mode_overrides_fusion_profi
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
         "REDDOG_ARTIFACT_GENERATOR_MODE": "unsafe",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -471,9 +473,7 @@ def test_runtime_binding_worktree_profile_supplies_worktree_runner_mode(tmp_path
     bootstrap = _FakeBootstrap()
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -506,9 +506,7 @@ def test_runtime_binding_explicit_worktree_mode_overrides_worktree_profile(
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree",
         "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE": "unsafe",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -534,9 +532,7 @@ def test_runtime_binding_explicit_zero_disables_runner_profile(tmp_path: Path) -
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "0",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -574,9 +570,7 @@ def test_runtime_binding_builds_draft_pr_runner_when_requested(
     bootstrap = _FakeBootstrap()
     env = {
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
         "REDDOG_DRAFT_PR_RUNNER_MODE": "real",
         "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "88",
     }
@@ -614,9 +608,7 @@ def test_runtime_binding_draft_pr_profile_supplies_verified_draft_runner(
     bootstrap = _FakeBootstrap()
     env = {
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
         "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "89",
     }
 
@@ -673,9 +665,7 @@ def test_runtime_binding_pattern_memory_profile_derives_outside_repo_sink(
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": (
             "signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory"
         ),
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
         "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "90",
     }
 
@@ -733,9 +723,7 @@ def test_runtime_binding_rejects_unsupported_draft_pr_runner_mode(tmp_path: Path
         repo_root=tmp_path,
         env={
             "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
-            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+            **_runtime_paths_env(tmp_path),
             "REDDOG_DRAFT_PR_RUNNER_MODE": "unsafe",
         },
         bootstrap=_FakeBootstrap(),
@@ -757,9 +745,7 @@ def test_runtime_binding_builds_pattern_memory_admission_sink_from_outside_repo_
     bootstrap = _FakeBootstrap()
     env = {
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
         "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "1",
         "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(tmp_path / "pattern_memory.db"),
     }
@@ -794,9 +780,7 @@ def test_runtime_binding_profile_defaults_derivation_flags(tmp_path: Path) -> No
     env = {
         "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -934,9 +918,7 @@ def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Pat
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
         "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "0",
         "REDDOG_WORKER_DISPATCH_AGENTDB_WRITER": "0",
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+        **_runtime_paths_env(tmp_path),
     }
 
     binding = build_reddog_signed_worker_queue_loop_runner_from_env(
@@ -968,9 +950,7 @@ def test_runtime_binding_rejects_pattern_memory_admission_db_inside_repo(
         repo_root=repo,
         env={
             "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
-            "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-            "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+            **_runtime_paths_env(tmp_path),
             "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(repo / "pattern_memory.db"),
         },
         bootstrap=_FakeBootstrap(),

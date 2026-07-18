@@ -23,8 +23,12 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
     encode_ed25519_public_key,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    ControlLoopAuthorityPolicy,
     Ed25519SignerBackend,
     SignerAuditMacBuilder,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
+    ControlLoopAnchorStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
@@ -143,6 +147,8 @@ def build_test_only_signer_backend_from_provider(
     provider_mode: str = "",
     allow_test_only_key_material: bool = False,
     permission_snapshot_fresh: bool = False,
+    control_loop_anchor_store: ControlLoopAnchorStore | None = None,
+    control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Validate a signer profile and build an Ed25519 signer backend.
 
@@ -213,6 +219,8 @@ def build_test_only_signer_backend_from_provider(
             public_key=public_key,
             key_epoch=profile.expected_key_epoch,
             audit_mac_builder=_HmacAuditMacBuilder(audit_key),
+            control_loop_anchor_store=control_loop_anchor_store,
+            control_loop_authority_policy=control_loop_authority_policy,
         ),
     )
 
@@ -224,6 +232,8 @@ def build_signer_backend_from_provider(
     provider_mode: str = "",
     allow_test_only_key_material: bool = False,
     permission_snapshot_fresh: bool = False,
+    control_loop_anchor_store: ControlLoopAnchorStore | None = None,
+    control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Compatibility wrapper with the production-capable boundary name."""
 
@@ -233,6 +243,8 @@ def build_signer_backend_from_provider(
         provider_mode=provider_mode,
         allow_test_only_key_material=allow_test_only_key_material,
         permission_snapshot_fresh=permission_snapshot_fresh,
+        control_loop_anchor_store=control_loop_anchor_store,
+        control_loop_authority_policy=control_loop_authority_policy,
     )
 
 

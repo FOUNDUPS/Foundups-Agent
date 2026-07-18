@@ -36,6 +36,9 @@ SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v1"
 FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID = "signer_config_authority_profile_invalid"
 FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID = "signer_config_output_path_invalid"
 FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID = "signer_config_socket_path_invalid"
+FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID = (
+    "signer_config_control_anchor_path_invalid"
+)
 FAIL_SIGNER_CONFIG_OP_REF_INVALID = "signer_config_op_ref_invalid"
 FAIL_SIGNER_CONFIG_OP_REF_REUSED = "signer_config_op_ref_reused"
 FAIL_SIGNER_CONFIG_PEER_POLICY_INVALID = "signer_config_peer_policy_invalid"
@@ -49,6 +52,8 @@ _REQUIRED_AUTHORITY_FIELDS = (
     "reddog_public_key",
     "permission_snapshot_digest",
     "key_epoch",
+    "consensus_receipt_digest",
+    "authority_profile_source_receipt_id",
 )
 
 
@@ -101,6 +106,7 @@ def run_reddog_signer_socket_service_config_supply(
     max_response_bytes: int = 16384,
     principal_signer_agent_id: str = "signer:principal",
     reddog_signer_agent_id: str = "signer:reddog",
+    control_loop_anchor_path: Path | str | None = None,
 ) -> SignerServiceConfigSupplyResult:
     """Write one signer CLI config from existing authority artifacts."""
 
@@ -112,6 +118,17 @@ def run_reddog_signer_socket_service_config_supply(
     reasons.extend(output_reasons)
     sock, socket_reasons = _resolve_socket_path(root, socket_path)
     reasons.extend(socket_reasons)
+    anchor_value = control_loop_anchor_path
+    if anchor_value is None and out is not None:
+        anchor_value = (
+            out.parent.parent
+            / f"{out.parent.name}-signer-state"
+            / "signer_control_loop_anchor.json"
+        )
+    anchor, anchor_reasons = _resolve_outside_repo(
+        root, anchor_value, FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID
+    )
+    reasons.extend(anchor_reasons)
     op_refs = (
         principal_signing_key_ref,
         principal_audit_mac_key_ref,
@@ -129,6 +146,7 @@ def run_reddog_signer_socket_service_config_supply(
 
     assert out is not None
     assert sock is not None
+    assert anchor is not None
     assert peer_policy is not None
     config = _config(
         authority_profile=profile,
@@ -144,6 +162,7 @@ def run_reddog_signer_socket_service_config_supply(
         max_response_bytes=max_response_bytes,
         principal_signer_agent_id=principal_signer_agent_id,
         reddog_signer_agent_id=reddog_signer_agent_id,
+        control_loop_anchor_path=anchor,
     )
     config_digest = _digest(config)
     receipt = {
@@ -151,6 +170,7 @@ def run_reddog_signer_socket_service_config_supply(
         "config_digest": config_digest,
         "config_path": str(out),
         "socket_path": str(sock),
+        "control_loop_anchor_path": str(anchor),
         "principal_id": str(profile["principal_id"]),
         "reddog_id": str(profile["reddog_id"]),
         "profile_count": 2,
@@ -193,6 +213,7 @@ def _config(
     max_response_bytes: int,
     principal_signer_agent_id: str,
     reddog_signer_agent_id: str,
+    control_loop_anchor_path: Path,
 ) -> dict[str, Any]:
     principal_public = str(authority_profile["principal_public_key"])
     reddog_public = str(authority_profile["reddog_public_key"])
@@ -201,9 +222,22 @@ def _config(
     return {
         "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
         "socket_path": str(socket_path),
+        "control_loop_anchor_path": str(control_loop_anchor_path),
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
         "allow_test_only_key_material": False,
         "permission_snapshot_fresh": True,
+        "control_loop_authority_policy": {
+            "issuer_principal_id": str(authority_profile["principal_id"]),
+            "signer_public_key": reddog_public,
+            "key_epoch": key_epoch,
+            "consensus_receipt_digest": str(
+                authority_profile["consensus_receipt_digest"]
+            ),
+            "authority_profile_digest": _digest(authority_profile),
+            "authority_profile_source_receipt_id": str(
+                authority_profile["authority_profile_source_receipt_id"]
+            ),
+        },
         "max_requests": int(max_requests),
         "timeout_s": float(timeout_s),
         "max_request_bytes": int(max_request_bytes),
@@ -244,7 +278,21 @@ def _authority_profile_reasons(profile: Mapping[str, Any]) -> list[str]:
         return [FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":" + field for field in missing]
     if str(profile.get("principal_public_key")) == str(profile.get("reddog_public_key")):
         return [FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":key_reuse"]
+    for field in (
+        "permission_snapshot_digest",
+        "consensus_receipt_digest",
+        "authority_profile_source_receipt_id",
+    ):
+        if not _is_sha256_digest(profile.get(field)):
+            return [FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":" + field]
     return []
+
+
+def _is_sha256_digest(value: object) -> bool:
+    text = str(value or "")
+    return len(text) == 71 and text.startswith("sha256:") and all(
+        char in "0123456789abcdef" for char in text[7:]
+    )
 
 
 def _resolve_output_path(repo_root: Path, value: Path | str | None) -> tuple[Path | None, list[str]]:
@@ -410,6 +458,7 @@ __all__ = [
     "FAIL_SIGNER_CONFIG_OP_REF_INVALID",
     "FAIL_SIGNER_CONFIG_OP_REF_REUSED",
     "FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID",
+    "FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID",
     "FAIL_SIGNER_CONFIG_PEER_POLICY_INVALID",
     "FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID",
     "FAIL_SIGNER_CONFIG_WRITE_FAILED",
