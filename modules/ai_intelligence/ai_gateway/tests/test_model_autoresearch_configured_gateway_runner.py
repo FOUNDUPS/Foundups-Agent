@@ -7,7 +7,7 @@ import hashlib
 from dataclasses import replace
 from pathlib import Path
 
-from modules.ai_intelligence.ai_gateway.src.ai_gateway import ProviderConfig
+from modules.ai_intelligence.ai_gateway.src.ai_gateway import AIGateway, ProviderConfig
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_runner import (
     AIGatewayConfiguredModelCaller,
     ConfiguredGatewayRunnerPolicy,
@@ -339,6 +339,96 @@ def test_aigateway_adapter_targets_exact_provider_and_model_without_fallback():
     assert result.output_tokens == 2
     assert result.cost_estimate_usd == 0.5
     assert len(gateway.calls) == 1
+
+
+def test_aigateway_adapter_targets_kimi_k3_through_openrouter_for_autoresearch():
+    class FakeGateway:
+        def __init__(self) -> None:
+            self.providers = {
+                "openrouter": ProviderConfig(
+                    name="openrouter",
+                    api_key="test-key",
+                    base_url="https://openrouter.ai/api/v1",
+                    models={"quick": "wrong-default"},
+                    cost_per_token=0.000003,
+                    rate_limit=1,
+                    output_cost_per_token=0.000015,
+                )
+            }
+            self.calls: list[tuple[ProviderConfig, str, str]] = []
+
+        def _call_provider(self, provider: ProviderConfig, prompt: str, task_type: str) -> str:
+            self.calls.append((provider, prompt, task_type))
+            assert provider.models[task_type] == "moonshotai/kimi-k3"
+            return "kimi benchmark response"
+
+    gateway = FakeGateway()
+    result = AIGatewayConfiguredModelCaller(gateway).call_model(
+        provider="openrouter",
+        model="moonshotai/kimi-k3",
+        prompt="held out task",
+        task_type="model_autoresearch",
+    )
+
+    assert result.success is True
+    assert result.provider == "openrouter"
+    assert result.model == "moonshotai/kimi-k3"
+    assert round(result.cost_estimate_usd, 8) == 0.000054
+    assert len(gateway.calls) == 1
+
+
+def test_aigateway_kimi_k3_request_uses_openrouter_supported_parameters(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    requests_seen: list[dict[str, object]] = []
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, object]:
+            return {"choices": [{"message": {"content": "ok"}}]}
+
+    def fake_post(url: str, **kwargs: object) -> FakeResponse:
+        requests_seen.append({"url": url, **kwargs})
+        return FakeResponse()
+
+    monkeypatch.setattr(
+        "modules.ai_intelligence.ai_gateway.src.ai_gateway.requests.post",
+        fake_post,
+    )
+    gateway = AIGateway()
+    provider = gateway.providers["openrouter"]
+
+    assert "openrouter" not in gateway._get_provider_priority("coding")
+    assert provider.automatic_routing_enabled is False
+    for name, configured in gateway.providers.items():
+        if name != "openrouter":
+            configured.api_key = None
+    automatic_calls: list[str] = []
+    monkeypatch.setattr(
+        gateway,
+        "_call_provider",
+        lambda *_args, **_kwargs: automatic_calls.append("called") or "unexpected",
+    )
+    assert gateway.call_optimized("must stay explicit", "coding").success is False
+    assert automatic_calls == []
+
+    monkeypatch.undo()
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(
+        "modules.ai_intelligence.ai_gateway.src.ai_gateway.requests.post",
+        fake_post,
+    )
+    gateway = AIGateway()
+    provider = gateway.providers["openrouter"]
+    assert gateway._call_provider(provider, "benchmark prompt", "coding") == "ok"
+    assert requests_seen[0]["url"] == "https://openrouter.ai/api/v1/chat/completions"
+    body = requests_seen[0]["json"]
+    assert isinstance(body, dict)
+    assert body["model"] == "moonshotai/kimi-k3"
+    assert body["max_tokens"] == 4096
+    assert body["reasoning"] == {"effort": "max"}
+    assert "temperature" not in body
 
 
 def test_configured_runner_module_has_no_direct_network_command_runtime_or_holoindex_imports():

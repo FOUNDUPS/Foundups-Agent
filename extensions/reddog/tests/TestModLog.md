@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-18 - REDDOG_FUSION_KIMI_K3_PHASE1
+
+- Asserted the 0.4.1 package/runtime version lock and default Kimi K3 panel membership.
+- Asserted the bridge emits Kimi K3 requests with mandatory `max` reasoning, without temperature, and with the 4096-token panel budget.
+- Retained Kimi K2.7 Code coverage so the default panel can compare the two Kimi generations.
+- Reconciled the stale resident-session contract assertion with the already-shipped durable AgentDB runtime symbol; production resident code was not changed.
+
 ## 2026-07-09 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (WRE-DRY-001..WRE-DRY-010)
 
 | ID | Asserts |

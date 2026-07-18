@@ -102,6 +102,14 @@ answers, promote models, mutate catalogs, write PatternMemory, re-index
 HoloIndex, execute commands, mutate the repository, or bind RedDog runtime
 defaults.
 
+The configured gateway includes an explicit `openrouter` provider for governed
+candidate assignments such as `moonshotai/kimi-k3`. OpenRouter remains absent
+from ordinary AI Gateway fallback routing; an AutoResearch candidate pool and
+provider allowlist must name it explicitly. Kimi K3 is cataloged as a candidate,
+not a champion, until held-out benchmark and promotion receipts prove it.
+Configured-runner cost estimates include its separate input and output token
+rates so the existing per-sample cost gate can reject over-budget results.
+
 `src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py` can
 use this runner only when `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE` is
 set to `configured_gateway`, prompt records are supplied from outside the repo,

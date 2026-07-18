@@ -1,5 +1,32 @@
 # AI Gateway Module Change Log
 
+## [2026-07-18] - Kimi K3 OpenRouter AutoResearch Candidate
+
+**Who:** 0102 Codex
+**Type:** Model Candidate / Configured Gateway Wiring
+**Slice:** MODEL_AUTORESEARCH_OPENROUTER_KIMI_K3_PHASE1
+
+**What:** Added Kimi K3 to the static candidate catalog and enabled the existing
+configured AutoResearch gateway to target exact OpenRouter model assignments.
+
+**Why:** The combination harness and campaign loop were already implemented, but
+`AIGatewayConfiguredModelCaller` could not execute an OpenRouter candidate. This
+prevented governed held-out comparison of Kimi K3 with RedDog's existing panel.
+
+**Truth Boundary:**
+- IMPLEMENTED: explicit `openrouter` provider, exact `moonshotai/kimi-k3`
+  candidate metadata, mandatory-max-reasoning request shape, 4096-token default,
+  separate input/output cost accounting, catalog and caller tests.
+- NOT IMPLEMENTED: automatic fallback to OpenRouter, automatic promotion,
+  implicit candidate-pool mutation, or bypass of benchmark/verifier receipts.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 84, WSP 97.
+
+**WSP_15 Score:** Complexity 3 + Importance 4 + Deferability 4 + Impact 4 =
+15 (P1).
+
+---
+
 ## [2026-07-17] - Model AutoResearch Cycle Feedback Chain Main Preflight
 
 **Who:** 0102 Codex

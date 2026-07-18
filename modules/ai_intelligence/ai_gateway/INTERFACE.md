@@ -162,6 +162,13 @@ enabled automatically by `main.py` and does not perform verification, promotion,
 PatternMemory writes, HoloIndex mutation, runtime binding, command execution, or
 repository mutation.
 
+OpenRouter candidates use provider `openrouter` and an exact model ID such as
+`moonshotai/kimi-k3`. The provider is available only through explicit configured
+gateway assignments and allowlisting; it is not inserted into normal fallback
+routing. Kimi K3 remains an AutoResearch candidate until signed benchmark and
+promotion evidence authorizes a production binding. Its configured provider
+records separate input/output token prices for bounded cost-gate estimates.
+
 The campaign execution bootstrap accepts this runner only through the explicit
 `configured_gateway` mode, an outside-repo prompt-record file, an explicit
 provider allowlist, an outside-repo output-evidence JSONL path, and the

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.4.0';
+const EXTENSION_VERSION = '0.4.1';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3817,7 +3817,7 @@ function appendValidationFailureContent(content, validationState) {
 const DEFAULT_FUSION_WORKER = {
   title: 'RedDog',
   lead: 'z-ai/glm-5.2',
-  panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code']
+  panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code', 'moonshotai/kimi-k3']
 };
 
 const REDDOG_ARCHITECT_SYSTEM_PROMPT = [
@@ -5129,7 +5129,7 @@ function activate(context) {
   const installState = detectRedDogInstallState(context);
   if (installState.stale_install_detected) {
     vscode.window.showWarningMessage(
-      'RedDog 0.4.0 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
+      'RedDog 0.4.1 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
     );
   }
   context.subscriptions.push(
