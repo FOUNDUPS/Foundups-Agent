@@ -53,6 +53,13 @@ Current OpenClaw loop:
 
 `assigned work -> retrieve bounded HoloIndex bundle -> execute -> verify -> emit -> write durable knowledge`
 
+RedDog's production execution valve is governed-only. Legacy sovereign-token
+JSON cannot enter the bootstrap/registry/handler path. Signed-authority queue
+preflight does not consume a nonce; the canonical use-time verifier performs
+the transactional single consumption immediately before valve evaluation.
+Runtime authority artifacts are read through bounded no-follow reads and the
+strict promoted queue/claim/WSP 15 lineage is revalidated at use time.
+
 ### RedDog HoloIndex Query Boundary
 
 The RedDog operational consumers migrated in this POC use an authenticated

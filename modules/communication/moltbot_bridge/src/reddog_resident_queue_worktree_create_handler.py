@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_worktr
     QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT,
     invoke_reddog_wre_queue_authorized_worktree_create,
 )
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    InMemoryWorktreeAdmissionRegistry,
+)
 
 
 EXECUTION_VALVE_STAGE_KEY = "execution_valve"
@@ -110,6 +113,7 @@ class ResidentQueueWorktreeCreateStageHandler:
     repo_root: Path
     now: Optional[datetime] = None
     locks: Optional[MutableSet[str]] = None
+    worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != WORKTREE_CREATE_STAGE_KEY:
@@ -153,6 +157,9 @@ class ResidentQueueWorktreeCreateStageHandler:
             work_order=work_order,
             runner=self.runner,
             repo_root=self.repo_root,
+            admission_registry=self.worktree_admission_registry,
+            queue_item_id=request.queue_item_id,
+            selected_slice=request.selected_slice,
             now=self.now,
             locks=self.locks,
         ).to_dict()
@@ -166,6 +173,7 @@ def build_reddog_resident_queue_worktree_create_stage_handler(
     repo_root: Path,
     now: Optional[datetime] = None,
     locks: Optional[MutableSet[str]] = None,
+    worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
 ) -> ResidentQueueWorktreeCreateStageHandler:
     """Build the injected worktree-create handler for the dispatcher."""
 
@@ -176,6 +184,7 @@ def build_reddog_resident_queue_worktree_create_stage_handler(
         repo_root=repo_root,
         now=now,
         locks=locks,
+        worktree_admission_registry=worktree_admission_registry,
     )
 
 

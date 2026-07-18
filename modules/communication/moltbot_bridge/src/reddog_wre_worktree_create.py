@@ -24,7 +24,7 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, MutableSet, Optional
+from typing import Any, Callable, Dict, List, Mapping, MutableSet, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_governed_work_order_dryrun import (
     PROTECTED_BASE_REFS,
@@ -191,6 +191,13 @@ def _reject(
     )
 
 
+def _consume_admission(consumer: Optional[Callable[[], bool]]) -> bool:
+    try:
+        return consumer is not None and consumer() is True
+    except Exception:
+        return False
+
+
 def _validate_valve(valve_decision: Mapping[str, Any]) -> List[str]:
     reasons: List[str] = []
     if valve_decision.get("valve_state") != VALVE_OPEN_WORKTREE_CREATE:
@@ -291,6 +298,7 @@ def create_reddog_wre_worktree(
     repo_root: Optional[Path] = None,
     now: Optional[datetime] = None,
     locks: Optional[MutableSet[str]] = None,
+    admission_consumer: Optional[Callable[[], bool]] = None,
 ) -> RedDogWorktreeCreateResult:
     """Create the isolated RedDog WRE worktree and stop before task execution."""
     checked = _utc_now(now)
@@ -330,6 +338,19 @@ def create_reddog_wre_worktree(
             plan_digest=plan_digest,
             valve_decision_digest=valve_digest,
             phase_receipts=phase_receipts,
+            cleanup_plan={"status": "no_worktree_created", **cleanup_plan},
+        )
+
+    if not _consume_admission(admission_consumer):
+        return _reject(
+            work_order_id=work_order_id,
+            reasons=["authoritative_worktree_admission_missing"],
+            created_at=created_at,
+            branch_name=branch_name,
+            worktree_path=worktree_path_text,
+            plan_id=plan_id,
+            plan_digest=plan_digest,
+            valve_decision_digest=valve_digest,
             cleanup_plan={"status": "no_worktree_created", **cleanup_plan},
         )
 

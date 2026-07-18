@@ -16,7 +16,7 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, MutableSet, Optional
+from typing import Any, Callable, Dict, List, Mapping, MutableSet, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     INTAKE_FOUNDUP_JOB,
@@ -213,6 +213,7 @@ def run_reddog_wre_worktree_create_spine(
     intake_target: str = INTAKE_FOUNDUP_JOB,
     permission_ttl_seconds: int = 300,
     permission_expires_at: Optional[str] = None,
+    admission_consumer: Optional[Callable[[], bool]] = None,
 ) -> RedDogWREOperationalSpineResult:
     """Run the RedDog worktree-create spine and stop before task execution."""
     checked = _utc_now(now)
@@ -314,6 +315,7 @@ def run_reddog_wre_worktree_create_spine(
         repo_root=repo_root,
         now=checked,
         locks=locks,
+        admission_consumer=admission_consumer,
     )
     worktree_dict = worktree.to_dict()
     if worktree.decision != WORKTREE_CREATE_ACCEPT:

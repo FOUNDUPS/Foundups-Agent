@@ -115,10 +115,11 @@ def test_readiness_is_non_executing_and_does_not_serialize_secret(tmp_path: Path
     repo, runtime = _roots(tmp_path)
     receipt = run_reddog_resident_live_canary(**_kwargs(repo, runtime))
 
-    assert receipt.status == LIVE_CANARY_READY
-    assert receipt.ready_for_execution is True
+    assert receipt.status == LIVE_CANARY_BLOCKED
+    assert receipt.ready_for_execution is False
     assert receipt.execution_invoked is False
     assert receipt.live_proof_complete is False
+    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
     serialized = (runtime / "live_canary_receipt.json").read_text(encoding="utf-8")
     assert "must-never-be-serialized" not in serialized
     assert json.loads(serialized)["secret_values_serialized"] is False
@@ -179,7 +180,7 @@ def test_runner_result_must_match_one_new_persisted_control_receipt(tmp_path: Pa
     receipt = _execute(repo, runtime, result_receipt_id="different-receipt")
 
     assert receipt.live_proof_complete is False
-    assert "new_control_receipt_not_observed" in receipt.blockers
+    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
 
 
 def test_malformed_control_receipt_stream_blocks_before_runner(tmp_path: Path) -> None:
@@ -444,7 +445,7 @@ def test_live_proof_requires_a_pre_invocation_chain_revision(tmp_path: Path) -> 
         now=lambda: __import__("datetime").datetime.fromisoformat(NOW),
     )
     assert receipt.live_proof_complete is False
-    assert "new_chain_revision_not_observed" in receipt.blockers
+    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
 
 
 def test_receipt_path_allows_only_canonical_name_inside_runtime(tmp_path: Path) -> None:
@@ -453,7 +454,7 @@ def test_receipt_path_allows_only_canonical_name_inside_runtime(tmp_path: Path) 
     receipt = run_reddog_resident_live_canary(
         **_kwargs(repo, runtime), receipt_path=canonical
     )
-    assert receipt.status == LIVE_CANARY_READY
+    assert receipt.status == LIVE_CANARY_BLOCKED
     assert canonical.is_file()
 
 
@@ -482,7 +483,7 @@ def test_receipt_path_outside_repo_and_runtime_is_allowed(tmp_path: Path) -> Non
     receipt = run_reddog_resident_live_canary(
         **_kwargs(repo, runtime), receipt_path=external
     )
-    assert receipt.status == LIVE_CANARY_READY
+    assert receipt.status == LIVE_CANARY_BLOCKED
     assert external.is_file()
 
 

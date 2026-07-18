@@ -319,7 +319,7 @@ def test_wrong_valve_state_rejects() -> None:
     assert ReasonCode.VALVE_STATE in result.rejection_reasons
 
 
-def test_nonce_replay_rejects_second_verification() -> None:
+def test_preflight_verification_does_not_consume_nonce() -> None:
     runtime, signer = _runtime_result()
     nonce_store = InMemoryNonceStore()
     first = invoke_reddog_wre_queue_authority_verification(
@@ -346,8 +346,7 @@ def test_nonce_replay_rejects_second_verification() -> None:
     )
 
     assert first.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT
-    assert second.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_REJECT
-    assert ReasonCode.NONCE_REPLAY in second.rejection_reasons
+    assert second.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT
 
 
 def test_module_has_no_shell_network_signing_issue_worktree_or_holoindex_imports() -> None:

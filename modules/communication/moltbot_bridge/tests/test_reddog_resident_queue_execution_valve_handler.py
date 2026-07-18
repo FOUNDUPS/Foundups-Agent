@@ -16,6 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_execution_va
     FAIL_DISPATCH_NEXT_ACTION_MISMATCH,
     FAIL_DISPATCH_STAGE_MISMATCH,
     FAIL_EXECUTOR_PLAN_STAGE_MISSING,
+    FAIL_GOVERNED_EXECUTION_VALVE_ENVIRONMENT_REQUIRED,
     FAIL_WORK_ORDER_INVOCATION_STAGE_MISSING,
     FAIL_WORK_ORDER_MISSING,
     WORK_ORDER_INVOCATION_STAGE_KEY,
@@ -32,9 +33,15 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     NEXT_QUEUE_WORKTREE_CREATE_INVOKE,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    CANONICAL_BINDING_FIELDS,
     VALVE_CLOSED,
     VALVE_OPEN_WORKTREE_CREATE,
     ExecutionValveEnvironment,
+    GovernedExecutionValveEnvironment,
+)
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    GovernedValveUseTimeResolution,
+    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
@@ -60,6 +67,9 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
     WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
     WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
     with_queue_wsp15_allocation,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
+    _roots as _canonical_runtime_roots,
 )
 
 
@@ -291,21 +301,114 @@ def _open_env() -> ExecutionValveEnvironment:
     )
 
 
+def _closed_governed_env() -> GovernedExecutionValveEnvironment:
+    payload = {field: "" for field in CANONICAL_BINDING_FIELDS}
+    payload.update(
+        {
+            "schema_version": "reddog_execution_valve_environment.v1",
+            "authorization_mode": "signed_work_authority_consensus",
+            "authorization_binding_digest": "",
+            "requested_valve_state": VALVE_OPEN_WORKTREE_CREATE,
+            "valve_dryrun_enabled": False,
+            "valve_live_enqueue_enabled": False,
+            "valve_worktree_create_enabled": False,
+            "supply_provenance": {},
+        }
+    )
+    return GovernedExecutionValveEnvironment.from_mapping(payload)
+
+
 def _handler(
     *,
     chain_store: InMemoryResidentQueueChainResultsStore,
     resolver: _Resolver | None = None,
-    valve_environment: ExecutionValveEnvironment | None = None,
+    valve_environment: ExecutionValveEnvironment | GovernedExecutionValveEnvironment | None = None,
+    governed_use_time_authority_resolver=None,
 ):
+    governed = (
+        valve_environment
+        if valve_environment is not None
+        else _closed_governed_env()
+    )
+    use_time_resolver = governed_use_time_authority_resolver
+    if use_time_resolver is None:
+        use_time_resolver = _UseTimeResolver(
+            GovernedValveUseTimeResolution(
+                environment=governed if isinstance(governed, GovernedExecutionValveEnvironment) else None,
+                expected_bindings={},
+                permission_ttl_seconds=300,
+                permission_expires_at=_future_expiry(),
+                rejection_reasons=(SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,),
+                signed_authority_reverified=True,
+            )
+        )
     return build_reddog_resident_queue_execution_valve_stage_handler(
         chain_results_store=chain_store,
         work_order_resolver=resolver or _Resolver(_work_order()),
-        valve_environment=valve_environment or _open_env(),
+        valve_environment=governed,
+        governed_use_time_authority_resolver=use_time_resolver,
         now=NOW,
     )
 
 
-def test_dispatcher_records_execution_valve_and_advances_to_worktree_create() -> None:
+class _UseTimeResolver:
+    def __init__(self, result: GovernedValveUseTimeResolution) -> None:
+        self.result = result
+        self.calls = 0
+
+    def resolve(self, **_: object) -> GovernedValveUseTimeResolution:
+        self.calls += 1
+        return self.result
+
+
+def test_governed_production_handler_invokes_canonical_gate_and_fails_closed(
+    tmp_path: Path,
+) -> None:
+    _, runtime = _canonical_runtime_roots(tmp_path)
+    payload = __import__("json").loads(
+        (runtime / "execution_valve_env.json").read_text(encoding="utf-8")
+    )
+    governed = GovernedExecutionValveEnvironment.from_mapping(payload)
+    expected = {field: payload[field] for field in CANONICAL_BINDING_FIELDS}
+    resolver = _UseTimeResolver(
+        GovernedValveUseTimeResolution(
+            environment=governed,
+            expected_bindings=expected,
+            permission_ttl_seconds=300,
+            permission_expires_at=_future_expiry(),
+            rejection_reasons=(SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,),
+            signed_authority_reverified=True,
+        )
+    )
+    handler = build_reddog_resident_queue_execution_valve_stage_handler(
+        chain_results_store=_seeded_store(),
+        work_order_resolver=_Resolver(_work_order()),
+        valve_environment=governed,
+        governed_use_time_authority_resolver=resolver,
+        now=NOW,
+    )
+
+    result = dict(
+        handler(
+            ResidentQueueStageDispatchRequest(
+                stage_key=EXECUTION_VALVE_STAGE_KEY,
+                next_action=NEXT_QUEUE_EXECUTION_VALVE_INVOKE,
+                queue_item_id="queue-1",
+                selected_slice="REDDOG_TEST_SLICE_PHASE1",
+                plan_id="plan-1",
+                accepted_stages=(),
+            )
+        )
+    )
+
+    assert resolver.calls == 1
+    assert result["decision"] == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_REJECT
+    assert result["valve_decision"]["valve_state"] == VALVE_CLOSED
+    assert result["valve_decision"]["authorization_mode"] == "signed_work_authority_consensus"
+    assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in result["rejection_reasons"]
+
+
+def test_legacy_token_environment_cannot_advance_dispatcher_to_worktree_create() -> None:
     chain_store = _seeded_store()
     resolver = _Resolver(_work_order())
 
@@ -313,28 +416,21 @@ def test_dispatcher_records_execution_valve_and_advances_to_worktree_create() ->
         explicit_resident_queue_stage_dispatch_requested=True,
         work_state_snapshot=_snapshot(),
         store=chain_store,
-        handlers={EXECUTION_VALVE_STAGE_KEY: _handler(chain_store=chain_store, resolver=resolver)},
+        handlers={
+            EXECUTION_VALVE_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                resolver=resolver,
+                valve_environment=_open_env(),
+            )
+        },
         now_iso=NOW_ISO,
     )
 
-    assert result.accepted is True
-    assert result.decision == RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT
-    assert result.dispatched_stage == EXECUTION_VALVE_STAGE_KEY
-    assert result.next_action == NEXT_QUEUE_WORKTREE_CREATE_INVOKE
-    assert resolver.calls == [
-        {
-            "work_order_id": WORK_ORDER_ID,
-            "queue_item_id": "queue-1",
-            "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
-        }
-    ]
-    stage = chain_store.load()["stage_results"][EXECUTION_VALVE_STAGE_KEY]
-    assert stage["decision"] == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT
-    assert stage["valve_decision"]["valve_state"] == VALVE_OPEN_WORKTREE_CREATE
-    assert stage["valve_decision"]["no_execution_performed"] is True
-    assert stage["no_worktree_created"] is True
-    assert stage["no_shell_command_executed"] is True
-    assert stage["no_repo_mutation_performed"] is True
+    assert result.accepted is False
+    assert FAIL_RECORD_REJECTED in result.rejection_reasons
+    assert FAIL_GOVERNED_EXECUTION_VALVE_ENVIRONMENT_REQUIRED in result.rejection_reasons
+    assert resolver.calls == []
+    assert EXECUTION_VALVE_STAGE_KEY not in chain_store.load()["stage_results"]
 
 
 def test_missing_work_order_invocation_stage_rejects_direct_handler_call() -> None:
@@ -441,8 +537,7 @@ def test_closed_valve_rejection_is_not_recorded_by_dispatcher() -> None:
 
     assert result.accepted is False
     assert FAIL_RECORD_REJECTED in result.rejection_reasons
-    assert QueueAuthorizedExecutionValveInvokeReason.VALVE_STATE_NOT_EXPECTED in result.rejection_reasons
-    assert "explicit_valve_flag_missing" in result.rejection_reasons
+    assert FAIL_GOVERNED_EXECUTION_VALVE_ENVIRONMENT_REQUIRED in result.rejection_reasons
     assert EXECUTION_VALVE_STAGE_KEY not in chain_store.load()["stage_results"]
 
 

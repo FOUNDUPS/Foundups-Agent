@@ -12,7 +12,7 @@ files, or re-index HoloIndex.
 
 from __future__ import annotations
 
-import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional
@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_clie
     DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
     SignerSocketConnector,
     build_reddog_isolated_signer_socket_client,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
@@ -81,6 +84,11 @@ class AuthorityRuntimeWorkAuthorityNonceStore:
     def consume(self, nonce: str) -> bool:
         if not isinstance(nonce, str) or not nonce.strip():
             return False
+        atomic_consume = getattr(
+            self._store, "consume_verified_work_authority_nonce", None
+        )
+        if callable(atomic_consume):
+            return bool(atomic_consume(nonce))
         state = self._store.load()
         seen = state.get("verified_work_authority_nonces", [])
         if not isinstance(seen, list):
@@ -89,7 +97,10 @@ class AuthorityRuntimeWorkAuthorityNonceStore:
             return False
         updated = dict(state)
         updated["verified_work_authority_nonces"] = [*seen, nonce]
-        self._store.commit(updated, expected_revision=state.get("revision"))
+        try:
+            self._store.commit(updated, expected_revision=state.get("revision"))
+        except RuntimeError:
+            return False
         return True
 
 
@@ -289,10 +300,11 @@ def _resolve_path_outside_repo(
         return None, ()
     path = Path(value)
     if not path.is_absolute():
-        path = (repo_root / path).resolve()
+        path = Path(os.path.abspath(repo_root / path))
     else:
-        path = path.resolve()
-    if _is_inside(path, repo_root):
+        path = Path(os.path.abspath(path))
+    resolved = path.resolve()
+    if _is_inside(resolved, repo_root):
         return None, (inside_reason,)
     if must_exist and (not path.exists() or not path.is_file()):
         return None, (missing_reason,)
@@ -319,7 +331,10 @@ def _read_json_mapping(
     if path is None:
         return None, ()
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = read_reddog_runtime_json_mapping(
+            path,
+            allowed_root=path.parent,
+        )
     except Exception:
         return None, (malformed_reason,)
     if not isinstance(payload, Mapping):

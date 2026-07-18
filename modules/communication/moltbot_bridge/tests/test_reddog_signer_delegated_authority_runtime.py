@@ -9,6 +9,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+import pytest
+
 from modules.communication.moltbot_bridge.src import reddog_signer_delegated_authority_runtime as r
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
@@ -509,6 +511,19 @@ def test_json_store_fsyncs_parent_directory_after_atomic_replace(
     )
 
     assert observed == [tmp_path]
+
+
+def test_json_store_load_rejects_symlink_state_file(tmp_path: Path) -> None:
+    target = tmp_path / "target.json"
+    target.write_text("{}", encoding="utf-8")
+    link = tmp_path / "authority-state.json"
+    try:
+        link.symlink_to(target)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="symlink_forbidden|path_link_rejected"):
+        AtomicJsonAuthorityRuntimeStore(link).load()
 
 
 def test_result_contains_no_secret_or_signing_material_labels() -> None:

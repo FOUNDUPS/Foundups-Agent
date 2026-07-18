@@ -28,6 +28,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PREFIX_IDENTITY,
     PREFIX_WORKAUTH,
     ReasonCode,
+    WorkAuthorityVerificationPhase,
     canonical_signing_input,
     verify_delegated_work_authority,
 )
@@ -215,6 +216,60 @@ def test_valid_signed_authority_verifies() -> None:
     assert r.accepted is True, r.reason_codes
     assert r.reason_codes == []
     assert r.work_order_id == "wo-1"
+
+
+def test_preflight_reverification_does_not_consume_authoritative_nonce() -> None:
+    _, identity, workauth, ctx = _build()
+
+    first = verify_delegated_work_authority(
+        work_authority=workauth,
+        identity=identity,
+        verification_phase=WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING,
+        **ctx,
+    )
+    second = verify_delegated_work_authority(
+        work_authority=workauth,
+        identity=identity,
+        verification_phase=WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING,
+        **ctx,
+    )
+    authoritative = _run(identity, workauth, ctx)
+    replay = _run(identity, workauth, ctx)
+
+    assert first.accepted is True
+    assert second.accepted is True
+    assert authoritative.accepted is True
+    assert replay.reason_codes == [ReasonCode.NONCE_REPLAY]
+
+
+def test_consumed_nonce_can_be_preflight_checked_but_not_authoritatively_reused() -> None:
+    _, identity, workauth, ctx = _build()
+
+    consumed = _run(identity, workauth, ctx)
+    preflight = verify_delegated_work_authority(
+        work_authority=workauth,
+        identity=identity,
+        verification_phase=WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING,
+        **ctx,
+    )
+    replay = _run(identity, workauth, ctx)
+
+    assert consumed.accepted is True
+    assert preflight.accepted is True
+    assert replay.reason_codes == [ReasonCode.NONCE_REPLAY]
+
+
+def test_nonce_replay_rejects_different_signed_work_order_with_same_nonce() -> None:
+    crypto, identity, first, ctx = _build()
+    second = dict(first)
+    second["work_order_id"] = "wo-2"
+    _resign_wa(crypto, identity, second)
+
+    assert _run(identity, first, ctx).accepted is True
+    replay = _run(identity, second, ctx)
+
+    assert replay.work_order_id == "wo-2"
+    assert replay.reason_codes == [ReasonCode.NONCE_REPLAY]
 
 
 # 2 -------------------------------------------------------------------------- #

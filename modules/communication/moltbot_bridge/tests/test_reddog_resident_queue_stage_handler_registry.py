@@ -12,6 +12,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handle
     RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_READY,
     build_reddog_resident_queue_stage_handler_registry,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    GovernedExecutionValveEnvironment,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -112,7 +115,8 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
         work_order_resolver=dummy,
         worker_dispatch_writer=dummy,
         repo_root=tmp_path,
-        valve_environment={"valve_worktree_create_enabled": True},
+        valve_environment=GovernedExecutionValveEnvironment(values={}),
+        governed_use_time_authority_resolver=dummy,
         worktree_runner=dummy,
         generic_writer_dryrun_result={"accepted": True},
         governed_shell_dryrun_result={"accepted": True},

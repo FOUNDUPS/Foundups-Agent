@@ -44,11 +44,22 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handler_registry import (
     build_reddog_resident_queue_stage_handler_registry,
 )
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    GovernedValveUseTimeAuthorityResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    CANONICAL_ENVIRONMENT_SCHEMA_VERSION,
+    VALVE_OPEN_WORKTREE_CREATE,
+    GovernedExecutionValveEnvironment,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     plan_reddog_wre_queue_authority_request_dry_run,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
 )
 from modules.ai_intelligence.ai_gateway.src.model_feedback_ledger import (
     JsonlModelFeedbackLedgerStore,
@@ -235,6 +246,13 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if valve_reasons:
         return _not_ready(valve_reasons, chain_results_path=None)
+    if valve_environment is not None and (
+        valve_environment.get("schema_version") != CANONICAL_ENVIRONMENT_SCHEMA_VERSION
+    ):
+        return _not_ready(
+            ("governed_execution_valve_environment_required",),
+            chain_results_path=None,
+        )
 
     generic_writer_dryrun_result, generic_writer_reasons = _read_json_outside_repo(
         root,
@@ -438,6 +456,33 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             runtime_dependency_bundle_requested=dependency_bundle.requested,
         )
 
+    governed_environment = None
+    governed_authority_resolver = None
+    if isinstance(valve_environment, Mapping):
+        try:
+            governed_environment = GovernedExecutionValveEnvironment.from_mapping(
+                valve_environment
+            )
+        except ValueError as exc:
+            return _not_ready((str(exc),), chain_results_path=None)
+        governed_authority_resolver = GovernedValveUseTimeAuthorityResolver(
+            repo_root=root,
+            work_state_path=_runtime_input_path(root, work_state_path),
+            authority_profile_path=_runtime_input_path(root, authority_profile_path),
+            permission_snapshots_path=_runtime_input_path(root, permission_snapshots_path),
+            principal_authority_records_path=_runtime_input_path(
+                root, principal_authority_records_path
+            ),
+            valve_environment_path=_runtime_input_path(root, valve_environment_path),
+            signature_verifier=dependency_bundle.signature_verifier,
+            principal_key_resolver=dependency_bundle.principal_key_resolver,
+            nonce_store=dependency_bundle.nonce_store,
+            snapshot_resolver=dependency_bundle.snapshot_resolver,
+            revocation_oracle=dependency_bundle.revocation_oracle,
+            now_epoch=int(dependency_bundle.now_epoch or 0),
+            required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
+        )
+
     store = AtomicJsonResidentQueueChainResultsStore(chain_path)
     run_now = _parse_datetime(now_iso) if now_iso else None
     registry = build_reddog_resident_queue_stage_handler_registry(
@@ -458,7 +503,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             JsonResidentQueueWorkOrderResolver(work_orders) if work_orders is not None else None
         ),
         repo_root=root,
-        valve_environment=valve_environment,
+        valve_environment=governed_environment,
+        governed_use_time_authority_resolver=governed_authority_resolver,
         worktree_runner=resolved_worktree_runner,
         pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
         generic_writer_dryrun_result=generic_writer_dryrun_result,
@@ -531,22 +577,29 @@ def _read_json_outside_repo(
 ) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
     if not value:
         return None, (missing_reason,) if required else ()
-    path = Path(value)
-    if not path.is_absolute():
-        path = (repo_root / path).resolve()
-    else:
-        path = path.resolve()
+    raw_path = Path(value)
+    candidate = raw_path if raw_path.is_absolute() else repo_root / raw_path
+    if candidate.is_symlink():
+        return None, (unreadable_reason,)
+    path = candidate.resolve()
     if _is_inside(path, repo_root):
         return None, (inside_reason,)
     if not path.exists() or not path.is_file():
         return None, (missing_reason,)
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = read_reddog_runtime_json_mapping(path, allowed_root=path.parent)
     except Exception:
         return None, (unreadable_reason,)
     if not isinstance(payload, Mapping):
         return None, (unreadable_reason,)
     return payload, ()
+
+
+def _runtime_input_path(repo_root: Path, value: Path | str | None) -> Optional[Path]:
+    if not value:
+        return None
+    path = Path(value)
+    return path.resolve() if path.is_absolute() else (repo_root / path).resolve()
 
 
 def _load_work_orders(
@@ -618,6 +671,7 @@ def _materialize_work_orders_from_authority_profile(
         snapshot,
         now_iso=now_iso,
         requested_queue_item_id=requested_queue_item_id,
+        require_governed_lineage=True,
     )
     if queue_result.accepted is not True:
         return None, tuple(
@@ -691,6 +745,7 @@ def _materialize_work_orders_from_authority_profile(
         "authenticated_principal": str(request.get("principal_id") or ""),
         "principal_provider": str(request.get("principal_provider") or ""),
         "repo_full_name": str(request.get("repo_full_name") or ""),
+        "foundup_id": str(request.get("foundup_id") or ""),
         "repo_permission_snapshot": {
             "permission_level": str(authority_profile.get("permission_level") or "write"),
             "captured_at": str(authority_profile.get("permission_captured_at") or created_at),
@@ -698,6 +753,7 @@ def _materialize_work_orders_from_authority_profile(
             "digest": str(request.get("permission_snapshot_digest") or ""),
         },
         "requested_operation": str(request.get("requested_operation") or ""),
+        "valve_state_required": str(request.get("valve_state_required") or ""),
         "authority_tier": str(authority_profile.get("authority_tier") or "source"),
         "allowed_paths": _string_list(request.get("allowed_paths")),
         "denied_paths": _string_list(request.get("denied_paths")),
@@ -734,6 +790,12 @@ def _materialize_work_orders_from_authority_profile(
         "advisory_only_source_packet": _advisory_source_packet(evidence_seed),
         "holoindex_evidence": holoindex_evidence,
         "operational_context_binding": context_binding,
+        "wsp15_allocation_receipt": dict(queue_wsp15_allocation),
+        "wsp15_allocation_receipt_id": str(queue_receipt.get("wsp15_allocation_receipt_id") or ""),
+        "wsp15_allocation_digest": str(queue_receipt.get("wsp15_allocation_digest") or ""),
+        "wsp15_priority": str(queue_receipt.get("wsp15_priority") or ""),
+        "wsp15_mps_total": queue_receipt.get("wsp15_mps_total"),
+        "wsp15_reasoning_tier": str(queue_receipt.get("reasoning_tier") or ""),
         "model_selection_receipt": _nested_mapping(authority_profile, "model_selection_receipt"),
         "model_selection_receipt_id": str(authority_profile.get("model_selection_receipt_id") or ""),
         "model_selection_digest": str(authority_profile.get("model_selection_digest") or ""),
@@ -855,7 +917,9 @@ def _read_existing_chain_state(chain_path: Path | None) -> Mapping[str, Any]:
     if chain_path is None or not chain_path.exists():
         return {}
     try:
-        payload = json.loads(chain_path.read_text(encoding="utf-8"))
+        payload = read_reddog_runtime_json_mapping(
+            chain_path, allowed_root=chain_path.parent
+        )
     except Exception:
         return {}
     return payload if isinstance(payload, Mapping) else {}
@@ -1347,7 +1411,7 @@ def _operational_context_binding(
         reasons.append("work_order_materializer_missing_queue_wsp15_allocation_receipt_id")
     if allocation:
         for label, duplicate in duplicate_allocations:
-            if dict(duplicate) != dict(allocation):
+            if _canonical_digest(duplicate) != _canonical_digest(allocation):
                 reasons.append(f"work_order_materializer_conflicting_wsp15_allocation_receipt:{label}")
         receipt_id = str(allocation.get("receipt_id") or "")
         if queue_wsp15_allocation_receipt_id and receipt_id != queue_wsp15_allocation_receipt_id:

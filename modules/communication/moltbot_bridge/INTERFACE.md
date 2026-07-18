@@ -12,6 +12,42 @@ The editor bridge requires host-supplied `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and
 
 `CANCELLED` and `DETERMINED` are permanently terminal. Only `FAILED` and `TIMED_OUT` cycles may enter a revision-checked retry, and each retry appends one immutable prior-attempt summary. Legacy v1 rows are accepted only by the canonical cancellation path; they cannot reconnect, resume, or become authority-bearing v2 records.
 
+### Canonical RedDog execution-valve readiness
+
+`reddog_execution_valve_environment_supply_cli` reads the authoritative work
+state, promoted authority profile, permission snapshots, and principal records
+from absolute outside-repository paths and atomically supplies
+`reddog_execution_valve_environment.v1`. The artifact contains no legacy token
+keys or freshness controls. `GovernedExecutionValveEnvironment` enforces the
+exact allowlist; a trusted caller explicitly selects canonical evaluation and
+provides independently reconstructed bindings and freshness bounds.
+
+`validate_reddog_resident_runtime_artifacts` semantically cross-validates the
+seven live-canary artifacts but never treats the unsigned pack as execution
+authority. It reports the missing signed immutable-manifest producer and signer
+client-handshake verifier. The resident use-time stage now reconstructs the
+binding and re-verifies signed authority, then invokes the canonical evaluator
+and forces it closed while any required trust anchor is absent.
+
+Production bootstrap and the resident registry accept only
+`GovernedExecutionValveEnvironment`; legacy token mappings are rejected before
+the dependency bundle or effectful handlers are constructed. The legacy
+evaluator remains available only as an explicit non-effectful compatibility
+API. Authority verification has two typed phases. Queue and canonical use-time
+preflight use `PREFLIGHT_NON_CONSUMING`. Only after all non-mutating gates pass
+does the resolver issue an opaque process-local lease; the final effect boundary
+invokes `AUTHORITATIVE_USE` and transactionally consumes the nonce exactly once.
+Persisted stage mappings are audit evidence and cannot recreate that lease.
+Use-time validation reuses the strict queue consumer and binds the promoted
+claim, determination/model/Memex receipts, signed identity/work authority,
+FoundUp scope, and complete WSP 15 allocation lineage.
+
+Worktree creation and live OpenClaw enqueue additionally require digest-bound,
+one-shot in-memory admissions. Fabricated, replayed, restarted, or spliced
+serialized acceptance chains fail before the injected runner/writer is called.
+Runtime JSON dependency and authority-store reads are locked, bounded, and
+reject any symlink, junction, or reparse component before resolution.
+
 ### RedDog HoloIndex Query Adapter
 
     from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter import (

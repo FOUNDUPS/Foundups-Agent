@@ -304,14 +304,25 @@ def secure_read_confined_bytes(
 ) -> tuple[bytes, int]:
     """Read a source file only after its descriptor proves root confinement."""
 
-    root = _without_windows_extended_prefix(Path(allowed_root).resolve())
     raw = str(path or "").strip()
     if not raw or "\x00" in raw or raw.startswith(_DEVICE_PATH_PREFIXES):
         raise ValueError("confined_read_path_invalid")
-    expected = Path(raw)
-    if not expected.is_absolute():
-        expected = root / expected
-    expected = _without_windows_extended_prefix(expected.resolve(strict=True))
+    root_candidate = Path(os.path.abspath(Path(allowed_root).expanduser()))
+    expected_candidate = Path(raw).expanduser()
+    if not expected_candidate.is_absolute():
+        expected_candidate = root_candidate / expected_candidate
+    expected_candidate = Path(os.path.abspath(expected_candidate))
+    if not _is_relative_to(expected_candidate, root_candidate):
+        raise ValueError("confined_read_path_outside_root")
+    if _contains_link_component(root_candidate) or _contains_link_component(
+        expected_candidate
+    ):
+        raise ValueError("confined_read_path_link_rejected")
+
+    root = _without_windows_extended_prefix(root_candidate.resolve(strict=True))
+    expected = _without_windows_extended_prefix(
+        expected_candidate.resolve(strict=True)
+    )
     if not _is_relative_to(expected, root):
         raise ValueError("confined_read_path_outside_root")
 
@@ -431,7 +442,16 @@ def _contains_link_component(path: Path) -> bool:
         current = current / component
         if not current.exists():
             continue
-        if current.is_symlink() or bool(getattr(current, "is_junction", lambda: False)()):
+        metadata = os.lstat(current)
+        reparse = bool(
+            getattr(metadata, "st_file_attributes", 0)
+            & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        )
+        if (
+            stat.S_ISLNK(metadata.st_mode)
+            or reparse
+            or bool(getattr(current, "is_junction", lambda: False)())
+        ):
             return True
     return False
 

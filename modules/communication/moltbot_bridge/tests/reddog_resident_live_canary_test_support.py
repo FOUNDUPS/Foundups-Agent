@@ -57,13 +57,16 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verifi
     invoke_reddog_wre_queue_authorized_verified_draft_pr_publish,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import WORKTREE_CREATE_ACCEPT
+from modules.communication.moltbot_bridge.tests.reddog_live_canary_artifact_test_support import (
+    write_live_canary_artifacts,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_serial_loop import _snapshot
 
 
-QUEUE_ID = "queue-1"
 SLICE_NAME = "REDDOG_TEST_SLICE_PHASE1"
 WORK_ORDER_ID = "work-order-1"
 NOW = "2026-07-14T00:00:00+00:00"
+QUEUE_ID = "queue-1"
 
 
 def _test_private_key():
@@ -240,6 +243,12 @@ def _roots(tmp_path: Path) -> tuple[Path, Path]:
     _git(repo, "commit", "-m", "test: seed live canary repo")
     runtime = tmp_path / "runtime"
     runtime.mkdir()
+    write_live_canary_artifacts(
+        repo=repo,
+        runtime=runtime,
+        queue_item_id=QUEUE_ID,
+        now_iso=NOW,
+    )
     for filename in REQUIRED_JSON_ARTIFACTS:
         payload = {"kind": filename}
         if filename == "authority_profile.json":
@@ -396,7 +405,6 @@ def _stage_results(repo: Path, runtime: Path) -> dict[str, dict[str, object]]:
 
 
 def _write_pre_state(repo: Path, runtime: Path) -> dict[str, object]:
-    (runtime / "authoritative_work_state.json").write_text(json.dumps(_snapshot()), encoding="utf-8")
     store = AtomicJsonResidentQueueChainResultsStore(runtime / "resident_queue_chain_results.json")
     for stage_key, stage_result in _stage_results(repo, runtime).items():
         result = record_resident_queue_stage_result(

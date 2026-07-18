@@ -618,60 +618,39 @@ def _promoted_authority_profile(
 ) -> Mapping[str, Any]:
     profile = dict(authority_profile)
     determination_id = str(determination["determination_receipt_id"])
-    binding = {
-        "snapshot_receipt_id": str(determination.get("snapshot_receipt_id") or ""),
-        "context_view_id": str(determination.get("context_view_id") or ""),
-        "evidence_bundle_id": str(determination.get("evidence_bundle_id") or ""),
-        "determination_id": determination_id,
-        "readonly_audit_decision_id": determination_id,
-        "architect_determination_receipt_id": determination_id,
-        "queue_item_id": queue_item_id,
-        "claim_id": claim_id,
-        "wsp15_allocation_receipt": dict(allocation),
-        "model_catalog_snapshot_id": model_selection["catalog_snapshot_id"],
-        "model_selection_receipt_id": model_selection["receipt_id"],
-        "model_selection_digest": model_selection_digest,
-        "model_selection_receipt": dict(model_selection_receipt),
-        "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
-        "model_runtime_binding_digest": model_runtime_binding_digest or "",
-        "memex_supply_receipt_id": memex_supply["receipt_id"],
-        "memex_supply_digest": memex_supply_digest,
-        "holoindex_evidence": dict(holoindex_evidence),
-    }
-    if model_runtime_binding:
-        binding.update(
-            {
-                "model_runtime_binding_receipt": dict(model_runtime_binding_receipt or {}),
-                "model_runtime_binding_runtime_surface": model_runtime_binding["runtime_surface"],
-                "model_runtime_binding_principal_model": model_runtime_binding["principal_model"],
-                "model_runtime_binding_panel_models": list(model_runtime_binding["panel_models"]),
-                "model_runtime_binding_role_bindings": list(model_runtime_binding["role_bindings"]),
-            }
-        )
+    work_order_id = _work_order_id(queue_item_id)
+    binding = _promoted_operational_binding(
+        determination=determination,
+        allocation=allocation,
+        model_selection_receipt=model_selection_receipt,
+        model_selection=model_selection,
+        model_selection_digest=model_selection_digest,
+        model_runtime_binding_receipt=model_runtime_binding_receipt,
+        model_runtime_binding=model_runtime_binding,
+        model_runtime_binding_digest=model_runtime_binding_digest,
+        memex_supply=memex_supply,
+        memex_supply_digest=memex_supply_digest,
+        work_order_id=work_order_id,
+        queue_item_id=queue_item_id,
+        claim_id=claim_id,
+        holoindex_evidence=holoindex_evidence,
+    )
     profile.update(
-        {
-            "work_order_id": str(profile.get("work_order_id") or _work_order_id(queue_item_id)),
-            "task_summary": str(
-                profile.get("task_summary")
-                or f"RedDog architect FIX promotion for {determination.get('next_slice_name')}."
-            ),
-            "wsp15_allocation_receipt": dict(allocation),
-            "snapshot_receipt_id": binding["snapshot_receipt_id"],
-            "context_view_id": binding["context_view_id"],
-            "evidence_bundle_id": binding["evidence_bundle_id"],
-            "readonly_audit_decision_id": determination_id,
-            "determination_id": determination_id,
-            "model_catalog_snapshot_id": model_selection["catalog_snapshot_id"],
-            "model_selection_receipt_id": model_selection["receipt_id"],
-            "model_selection_digest": model_selection_digest,
-            "model_selection_receipt": dict(model_selection_receipt),
-            "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
-            "model_runtime_binding_digest": model_runtime_binding_digest or "",
-            "memex_supply_receipt_id": memex_supply["receipt_id"],
-            "memex_supply_digest": memex_supply_digest,
-            "operational_context_binding": binding,
-            "holoindex_evidence": dict(holoindex_evidence),
-        }
+        _promoted_profile_updates(
+            profile=profile,
+            determination=determination,
+            binding=binding,
+            allocation=allocation,
+            model_selection_receipt=model_selection_receipt,
+            model_selection=model_selection,
+            model_selection_digest=model_selection_digest,
+            model_runtime_binding=model_runtime_binding,
+            model_runtime_binding_digest=model_runtime_binding_digest,
+            memex_supply=memex_supply,
+            memex_supply_digest=memex_supply_digest,
+            work_order_id=work_order_id,
+            holoindex_evidence=holoindex_evidence,
+        )
     )
     if model_runtime_binding:
         profile["model_runtime_binding_receipt"] = dict(model_runtime_binding_receipt or {})
@@ -680,6 +659,79 @@ def _promoted_authority_profile(
         profile["model_runtime_binding_panel_models"] = list(model_runtime_binding["panel_models"])
         profile["model_runtime_binding_role_bindings"] = list(model_runtime_binding["role_bindings"])
     return profile
+
+
+def _promoted_operational_binding(**values: Any) -> dict[str, Any]:
+    determination = values["determination"]
+    model_selection = values["model_selection"]
+    model_runtime_binding = values["model_runtime_binding"]
+    memex_supply = values["memex_supply"]
+    determination_id = str(determination["determination_receipt_id"])
+    binding = {
+        "work_order_id": values["work_order_id"],
+        "snapshot_receipt_id": str(determination.get("snapshot_receipt_id") or ""),
+        "context_view_id": str(determination.get("context_view_id") or ""),
+        "evidence_bundle_id": str(determination.get("evidence_bundle_id") or ""),
+        "determination_id": determination_id,
+        "readonly_audit_decision_id": determination_id,
+        "architect_determination_receipt_id": determination_id,
+        "queue_item_id": values["queue_item_id"],
+        "claim_id": values["claim_id"],
+        "wsp15_allocation_receipt": dict(values["allocation"]),
+        "model_catalog_snapshot_id": model_selection["catalog_snapshot_id"],
+        "model_selection_receipt_id": model_selection["receipt_id"],
+        "model_selection_digest": values["model_selection_digest"],
+        "model_selection_receipt": dict(values["model_selection_receipt"]),
+        "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
+        "model_runtime_binding_digest": values["model_runtime_binding_digest"] or "",
+        "memex_supply_receipt_id": memex_supply["receipt_id"],
+        "memex_supply_digest": values["memex_supply_digest"],
+        "holoindex_evidence": dict(values["holoindex_evidence"]),
+    }
+    if model_runtime_binding:
+        binding.update(
+            {
+                "model_runtime_binding_receipt": dict(values["model_runtime_binding_receipt"] or {}),
+                "model_runtime_binding_runtime_surface": model_runtime_binding["runtime_surface"],
+                "model_runtime_binding_principal_model": model_runtime_binding["principal_model"],
+                "model_runtime_binding_panel_models": list(model_runtime_binding["panel_models"]),
+                "model_runtime_binding_role_bindings": list(model_runtime_binding["role_bindings"]),
+            }
+        )
+    return binding
+
+
+def _promoted_profile_updates(**values: Any) -> dict[str, Any]:
+    profile = values["profile"]
+    determination = values["determination"]
+    binding = values["binding"]
+    model_selection = values["model_selection"]
+    model_runtime_binding = values["model_runtime_binding"]
+    memex_supply = values["memex_supply"]
+    determination_id = str(determination["determination_receipt_id"])
+    return {
+            "work_order_id": values["work_order_id"],
+            "task_summary": str(
+                profile.get("task_summary")
+                or f"RedDog architect FIX promotion for {determination.get('next_slice_name')}."
+            ),
+            "wsp15_allocation_receipt": dict(values["allocation"]),
+            "snapshot_receipt_id": binding["snapshot_receipt_id"],
+            "context_view_id": binding["context_view_id"],
+            "evidence_bundle_id": binding["evidence_bundle_id"],
+            "readonly_audit_decision_id": determination_id,
+            "determination_id": determination_id,
+            "model_catalog_snapshot_id": model_selection["catalog_snapshot_id"],
+            "model_selection_receipt_id": model_selection["receipt_id"],
+            "model_selection_digest": values["model_selection_digest"],
+            "model_selection_receipt": dict(values["model_selection_receipt"]),
+            "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
+            "model_runtime_binding_digest": values["model_runtime_binding_digest"] or "",
+            "memex_supply_receipt_id": memex_supply["receipt_id"],
+            "memex_supply_digest": values["memex_supply_digest"],
+            "operational_context_binding": binding,
+            "holoindex_evidence": dict(values["holoindex_evidence"]),
+    }
 
 
 def _work_order_id(queue_item_id: str) -> str:

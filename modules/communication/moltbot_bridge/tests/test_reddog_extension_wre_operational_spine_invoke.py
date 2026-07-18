@@ -7,6 +7,10 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AuthoritativeUseLease,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_extension_wre_operational_spine_invoke import (
     EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT,
     EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_REJECT,
@@ -177,6 +181,7 @@ def test_accepts_only_explicit_sovereign_worktree_selection_and_calls_runner(tmp
         repo_root=repo_root,
         now=fixed,
         locks=set(),
+        authoritative_use_lease=AuthoritativeUseLease(lambda: True),
     )
 
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT
@@ -192,6 +197,32 @@ def test_accepts_only_explicit_sovereign_worktree_selection_and_calls_runner(tmp
     assert [call[0] for call in runner.calls] == ["create_worktree"]
     assert not _is_inside(Path(runner.calls[0][1]), repo_root)
     assert _is_inside(Path(runner.calls[0][1]), repo_root.parent / ".reddog" / "worktrees" / "repo")
+
+
+def test_serialized_sovereign_selection_without_lease_cannot_call_runner(
+    tmp_path: Path,
+) -> None:
+    fixed = datetime(2026, 7, 12, 12, 1, 0, tzinfo=timezone.utc)
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    order = _base_order(fixed)
+    runner = FakeRunner()
+    result = invoke_reddog_extension_wre_operational_spine_explicit_valve(
+        order,
+        explicit_wre_operational_spine_requested=True,
+        selection_receipt=_selection_receipt(),
+        seen_nonces=set(),
+        valve_environment=_open_worktree_env(),
+        signature_verification_result=_accepted_signature(order),
+        runner=runner,
+        repo_root=repo_root,
+        now=fixed,
+        locks=set(),
+    )
+
+    assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_REJECT
+    assert "authoritative_worktree_admission_missing" in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_rejects_missing_explicit_request_before_runner_call(tmp_path: Path) -> None:
@@ -364,6 +395,7 @@ def test_sovereign_token_is_not_emitted(tmp_path: Path) -> None:
         repo_root=repo_root,
         now=fixed,
         locks=set(),
+        authoritative_use_lease=AuthoritativeUseLease(lambda: True),
     )
 
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT

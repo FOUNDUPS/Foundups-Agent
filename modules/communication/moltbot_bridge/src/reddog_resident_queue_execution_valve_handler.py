@@ -31,9 +31,16 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     INTAKE_FOUNDUP_JOB,
     VALVE_OPEN_WORKTREE_CREATE,
-    ExecutionValveEnvironment,
+    GovernedExecutionValveEnvironment,
+)
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    GovernedValveUseTimeAuthorityResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    InMemoryWorktreeAdmissionRegistry,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
+    QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_REJECT,
     invoke_reddog_wre_queue_authorized_execution_valve,
 )
@@ -49,6 +56,10 @@ FAIL_WORK_ORDER_INVOCATION_STAGE_MISSING = "FAIL_WORK_ORDER_INVOCATION_STAGE_MIS
 FAIL_EXECUTOR_PLAN_STAGE_MISSING = "FAIL_EXECUTOR_PLAN_STAGE_MISSING"
 FAIL_WORK_ORDER_ID_MISSING = "FAIL_WORK_ORDER_ID_MISSING"
 FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
+FAIL_WORKTREE_ADMISSION_NOT_ISSUED = "FAIL_WORKTREE_ADMISSION_NOT_ISSUED"
+FAIL_GOVERNED_EXECUTION_VALVE_ENVIRONMENT_REQUIRED = (
+    "FAIL_GOVERNED_EXECUTION_VALVE_ENVIRONMENT_REQUIRED"
+)
 
 
 class ResidentQueueExecutionValveWorkOrderResolver(Protocol):
@@ -109,7 +120,9 @@ class ResidentQueueExecutionValveStageHandler:
 
     chain_results_store: ResidentQueueChainResultsStore
     work_order_resolver: ResidentQueueExecutionValveWorkOrderResolver
-    valve_environment: ExecutionValveEnvironment | Mapping[str, Any]
+    valve_environment: GovernedExecutionValveEnvironment
+    governed_use_time_authority_resolver: Optional[GovernedValveUseTimeAuthorityResolver] = None
+    worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None
     now: Optional[datetime] = None
     intake_target: str = INTAKE_FOUNDUP_JOB
     expected_valve_state: str = VALVE_OPEN_WORKTREE_CREATE
@@ -127,8 +140,11 @@ class ResidentQueueExecutionValveStageHandler:
                 f"expected:{NEXT_QUEUE_EXECUTION_VALVE_INVOKE}",
                 f"actual:{request.next_action}",
             )
+        if not isinstance(self.valve_environment, GovernedExecutionValveEnvironment):
+            return _reject(FAIL_GOVERNED_EXECUTION_VALVE_ENVIRONMENT_REQUIRED)
 
-        stage_results = _stage_results(_mapping(self.chain_results_store.load()))
+        chain_state = _mapping(self.chain_results_store.load())
+        stage_results = _stage_results(chain_state)
         work_order_invocation = _mapping(stage_results.get(WORK_ORDER_INVOCATION_STAGE_KEY))
         if not work_order_invocation:
             return _reject(FAIL_WORK_ORDER_INVOCATION_STAGE_MISSING)
@@ -149,23 +165,52 @@ class ResidentQueueExecutionValveStageHandler:
         if not work_order:
             return _reject(FAIL_WORK_ORDER_MISSING, f"work_order_id:{work_order_id}")
 
-        return invoke_reddog_wre_queue_authorized_execution_valve(
+        if self.governed_use_time_authority_resolver is None:
+            return _reject("FAIL_GOVERNED_USE_TIME_AUTHORITY_RESOLVER_MISSING")
+        use_time_resolution = self.governed_use_time_authority_resolver.resolve(
+            chain_state=chain_state,
+            work_order=work_order,
+            queue_item_id=request.queue_item_id,
+            selected_slice=request.selected_slice,
+        )
+
+        result = invoke_reddog_wre_queue_authorized_execution_valve(
             explicit_queue_authorized_execution_valve_requested=True,
             queue_work_order_invocation_result=work_order_invocation,
             queue_executor_plan_result=executor_plan,
             work_order=work_order,
             valve_environment=self.valve_environment,
+            governed_use_time_resolution=use_time_resolution,
             now=self.now,
             intake_target=self.intake_target,
             expected_valve_state=self.expected_valve_state,
-        ).to_dict()
+        )
+        if result.decision == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT:
+            issued = (
+                self.worktree_admission_registry is not None
+                and result.valve_decision is not None
+                and self.worktree_admission_registry.issue(
+                    queue_item_id=request.queue_item_id,
+                    selected_slice=request.selected_slice,
+                    work_order=work_order,
+                    executor_plan_result=executor_plan,
+                    valve_decision=result.valve_decision.to_dict(),
+                    signed_authority_reverified=use_time_resolution.signed_authority_reverified,
+                    authoritative_use_lease=use_time_resolution.authoritative_use_lease,
+                )
+            )
+            if not issued:
+                return _reject(FAIL_WORKTREE_ADMISSION_NOT_ISSUED)
+        return result.to_dict()
 
 
 def build_reddog_resident_queue_execution_valve_stage_handler(
     *,
     chain_results_store: ResidentQueueChainResultsStore,
     work_order_resolver: ResidentQueueExecutionValveWorkOrderResolver,
-    valve_environment: ExecutionValveEnvironment | Mapping[str, Any],
+    valve_environment: GovernedExecutionValveEnvironment,
+    governed_use_time_authority_resolver: Optional[GovernedValveUseTimeAuthorityResolver] = None,
+    worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
     now: Optional[datetime] = None,
     intake_target: str = INTAKE_FOUNDUP_JOB,
     expected_valve_state: str = VALVE_OPEN_WORKTREE_CREATE,
@@ -176,6 +221,8 @@ def build_reddog_resident_queue_execution_valve_stage_handler(
         chain_results_store=chain_results_store,
         work_order_resolver=work_order_resolver,
         valve_environment=valve_environment,
+        governed_use_time_authority_resolver=governed_use_time_authority_resolver,
+        worktree_admission_registry=worktree_admission_registry,
         now=now,
         intake_target=intake_target,
         expected_valve_state=expected_valve_state,
@@ -188,9 +235,11 @@ __all__ = [
     "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_STAGE_MISMATCH",
     "FAIL_EXECUTOR_PLAN_STAGE_MISSING",
+    "FAIL_GOVERNED_EXECUTION_VALVE_ENVIRONMENT_REQUIRED",
     "FAIL_WORK_ORDER_ID_MISSING",
     "FAIL_WORK_ORDER_INVOCATION_STAGE_MISSING",
     "FAIL_WORK_ORDER_MISSING",
+    "FAIL_WORKTREE_ADMISSION_NOT_ISSUED",
     "ResidentQueueExecutionValveStageHandler",
     "ResidentQueueExecutionValveWorkOrderResolver",
     "WORK_ORDER_INVOCATION_STAGE_KEY",

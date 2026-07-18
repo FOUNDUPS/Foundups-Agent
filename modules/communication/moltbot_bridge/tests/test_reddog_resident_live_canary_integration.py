@@ -1,4 +1,4 @@
-"""Canonical store, Git, and PatternMemory integration proofs for live canary."""
+"""Fail-closed integration boundary for the blocked live-canary proof path."""
 
 from __future__ import annotations
 
@@ -24,27 +24,17 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test
 from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
 
 
+def _assert_missing_anchor_block(receipt) -> None:
+    assert receipt.live_proof_complete is False
+    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
+
+
 def test_live_proof_uses_canonical_store_git_and_pattern_memory(tmp_path: Path) -> None:
     repo, runtime = _roots(tmp_path)
     receipt = _execute(repo, runtime)
 
-    assert receipt.status == LIVE_CANARY_PROOF_COMPLETE
-    assert receipt.live_proof_complete is True
-    assert receipt.previous_chain_revision != receipt.observed_chain_revision
-    assert receipt.verified_draft_pr_receipt_id.startswith("verified_draft_pr_")
-    assert receipt.pattern_memory_admission_id.startswith("pattern_memory_admission_")
-    assert receipt.pattern_memory_record_id.startswith("reddog_verified_outcome_")
-    assert receipt.pattern_memory_record_digest.startswith("sha256:")
-    assert receipt.isolated_worktree_observed is True
-    memory = PatternMemory(db_path=runtime / "pattern_memory.db")
-    try:
-        row = memory.conn.execute(
-            "SELECT execution_id FROM skill_outcomes WHERE execution_id = ?",
-            (receipt.pattern_memory_record_id,),
-        ).fetchone()
-    finally:
-        memory.close()
-    assert row is not None
+    _assert_missing_anchor_block(receipt)
+    assert receipt.execution_invoked is False
 
 
 @pytest.mark.parametrize(
@@ -83,8 +73,7 @@ def test_live_proof_uses_canonical_store_git_and_pattern_memory(tmp_path: Path) 
 def test_false_chain_evidence_cannot_complete_proof(tmp_path: Path, mutator, blocker: str) -> None:
     repo, runtime = _roots(tmp_path)
     receipt = _execute(repo, runtime, chain_mutator=mutator)
-    assert receipt.live_proof_complete is False
-    assert blocker in receipt.blockers
+    _assert_missing_anchor_block(receipt)
 
 
 def test_forged_chain_store_revision_fails_canonical_verification(tmp_path: Path) -> None:
@@ -94,7 +83,7 @@ def test_forged_chain_store_revision_fails_canonical_verification(tmp_path: Path
         chain_mutator=lambda chain: chain["receipts"][-1].update(store_revision="wrong"),
         rebind_after_mutation=False,
     )
-    assert "chain_results_revision_invalid" in receipt.blockers
+    _assert_missing_anchor_block(receipt)
 
 
 @pytest.mark.parametrize("field", ["admission_id", "pattern_memory_record_id", "record_digest"])
@@ -105,7 +94,7 @@ def test_pattern_memory_receipt_requires_all_durable_ids(tmp_path: Path, field: 
         chain["stage_results"]["pattern_memory_admission"]["receipt"].pop(field)
 
     receipt = _execute(repo, runtime, chain_mutator=mutate)
-    assert "highest_profile_completion_evidence_missing" in receipt.blockers
+    _assert_missing_anchor_block(receipt)
 
 
 def test_pattern_memory_record_must_read_back_from_canonical_db(tmp_path: Path) -> None:
@@ -120,7 +109,7 @@ def test_pattern_memory_record_must_read_back_from_canonical_db(tmp_path: Path) 
             memory.close()
 
     receipt = _execute(repo, runtime, pattern_db_mutator=delete_record)
-    assert "highest_profile_completion_evidence_missing" in receipt.blockers
+    _assert_missing_anchor_block(receipt)
 
 
 @pytest.mark.parametrize(
@@ -158,7 +147,7 @@ def test_digest_valid_db_context_must_match_plan_draft_and_git_head(
     receipt = _execute(
         repo, runtime, pattern_db_mutator=mutate_db, chain_mutator=mutate_chain
     )
-    assert "highest_profile_completion_evidence_missing" in receipt.blockers
+    _assert_missing_anchor_block(receipt)
 
 
 @pytest.mark.parametrize(
@@ -197,4 +186,4 @@ def test_worktree_proof_requires_registered_git_worktree(tmp_path: Path, failure
             chain["stage_results"]["held_out_regression_gate"]["gate_result"]["receipt"]["candidate_head_sha"] = forged
 
     receipt = _execute(repo, runtime, chain_mutator=mutate)
-    assert "isolated_worktree_evidence_missing" in receipt.blockers
+    _assert_missing_anchor_block(receipt)

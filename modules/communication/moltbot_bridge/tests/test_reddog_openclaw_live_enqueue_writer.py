@@ -121,6 +121,7 @@ def test_live_enqueue_seam_with_concrete_writer_appends_queue_item():
         _valve(),
         writer=OpenClawLiveEnqueueWriter(),
         seen_live_enqueue_keys=set(),
+        admission_consumer=lambda: True,
     )
 
     assert result.decision == LIVE_ENQUEUE_ACCEPT

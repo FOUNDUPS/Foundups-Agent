@@ -405,6 +405,17 @@ def test_promotes_fix_determination_to_queue_item_and_authority_profile() -> Non
     assert queue_result.selected_slice == "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
 
 
+def test_promotion_derives_work_order_id_from_queue_and_ignores_caller_value() -> None:
+    result, _ = _promote(authority_profile=_authority_profile(work_order_id="caller-controlled"))
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.authority_profile is not None
+    expected = promotion._work_order_id(result.receipt.queue_item_id)
+    assert result.authority_profile["work_order_id"] == expected
+    assert result.authority_profile["operational_context_binding"]["work_order_id"] == expected
+
+
 def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> None:
     model_selection = _model_selection()
     runtime_binding = _runtime_binding(model_selection)

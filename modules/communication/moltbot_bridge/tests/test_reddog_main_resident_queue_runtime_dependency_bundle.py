@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import ast
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
+    AuthorityRuntimeWorkAuthorityNonceStore,
     JsonPrincipalKeyResolver,
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     JsonPermissionSnapshotResolver,
@@ -17,6 +19,7 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime
     load_reddog_main_resident_queue_runtime_dependency_bundle,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    AtomicJsonAuthorityRuntimeStore,
     RuntimeRejectCode,
     public_key_fingerprint,
 )
@@ -37,6 +40,28 @@ MODULE_PATH = (
 NOW = 1000
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+
+
+def test_atomic_runtime_nonce_consume_allows_exactly_one_concurrent_winner(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "runtime" / "authority_state.json"
+    stores = [
+        AuthorityRuntimeWorkAuthorityNonceStore(AtomicJsonAuthorityRuntimeStore(path))
+        for _ in range(8)
+    ]
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        results = list(
+            executor.map(
+                lambda store: store.consume("authoritative-use-nonce"), stores
+            )
+        )
+
+    assert results.count(True) == 1
+    assert results.count(False) == 7
+    state = AtomicJsonAuthorityRuntimeStore(path).load()
+    assert state["verified_work_authority_nonces"] == ["authoritative-use-nonce"]
 
 
 def _repo(tmp_path: Path) -> Path:

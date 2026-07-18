@@ -202,6 +202,7 @@ class TestWorktreeCreateAccept:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_ACCEPT
         assert result.no_task_execution_performed is True
@@ -233,6 +234,7 @@ class TestWorktreeCreateAccept:
             runner=FakeRunner(),
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         second = create_reddog_wre_worktree(
             order,
@@ -241,6 +243,7 @@ class TestWorktreeCreateAccept:
             runner=FakeRunner(),
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert first.result_digest == second.result_digest
         blob = json.dumps(first.to_dict())
@@ -260,6 +263,7 @@ class TestWorktreeCreateReject:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_REJECT
         assert "execution_valve_not_open_for_worktree_create" in result.rejection_reasons
@@ -277,6 +281,7 @@ class TestWorktreeCreateReject:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_REJECT
         assert "worktree_path_not_absolute" in result.rejection_reasons
@@ -329,6 +334,7 @@ class TestWorktreeCreateReject:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_REJECT
         assert "worktree_create_failed" in result.rejection_reasons

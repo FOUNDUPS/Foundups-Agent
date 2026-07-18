@@ -44,6 +44,7 @@ from __future__ import annotations
 import hmac
 import json
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, List, Mapping, Optional, Protocol, Sequence, runtime_checkable
 
 # Domain-separation prefixes (contract Section 2, frozen).
@@ -57,6 +58,11 @@ PREFIX_RECEIPT = "reddog-receipt.v1"
 _EXCLUDED_FROM_SIGNED = frozenset({"signature", "receipt_chain"})
 
 ALLOWED_PRINCIPAL_PROVIDERS = frozenset({"github", "intake_session", "intake_invite"})
+
+
+class WorkAuthorityVerificationPhase(str, Enum):
+    PREFLIGHT_NON_CONSUMING = "PREFLIGHT_NON_CONSUMING"
+    AUTHORITATIVE_USE = "AUTHORITATIVE_USE"
 
 
 class ReasonCode:
@@ -174,6 +180,7 @@ class InMemoryNonceStore:
             return False
         self._seen.add(nonce)
         return True
+
 
 
 @runtime_checkable
@@ -311,6 +318,9 @@ def verify_delegated_work_authority(
     forbidden_operations: Sequence[str] = (),
     revoked_key_epochs: Sequence[str] = (),
     leeway_s: int = 60,
+    verification_phase: WorkAuthorityVerificationPhase = (
+        WorkAuthorityVerificationPhase.AUTHORITATIVE_USE
+    ),
 ) -> VerificationResult:
     """Verify a signed RedDogDelegatedWorkAuthority. ACCEPT / REJECT with reason codes.
 
@@ -484,8 +494,13 @@ def verify_delegated_work_authority(
     if not constant_time_compare(str(work_authority["valve_state_required"]), str(required_valve_state)):
         return reject(ReasonCode.VALVE_STATE)
 
-    # ---- 9. Nonce consume LAST: burn only on a full ACCEPT (still AFTER signature
-    #         success), so a transient later-gate reject never locks out a valid order.
+    # ---- 9. Nonce consume LAST. A preflight caller may explicitly defer this
+    #         terminal mutation; the authoritative use-time caller must consume it.
+    if verification_phase is WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING:
+        result.accepted = True
+        return result
+    if verification_phase is not WorkAuthorityVerificationPhase.AUTHORITATIVE_USE:
+        return reject(ReasonCode.MALFORMED_PAYLOAD)
     try:
         consumed = nonce_store.consume(str(work_authority["nonce"]))
     except Exception:

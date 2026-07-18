@@ -141,6 +141,7 @@ def test_live_enqueue_foundup_job_calls_injected_writer_only():
         writer=writer,
         seen_live_enqueue_keys=set(),
         now=datetime(2026, 7, 11, tzinfo=timezone.utc),
+        admission_consumer=lambda: True,
     )
 
     assert result.decision == LIVE_ENQUEUE_ACCEPT
@@ -161,6 +162,7 @@ def test_live_enqueue_autonomous_task_calls_task_writer():
         _chain(),
         _valve(),
         writer=writer,
+        admission_consumer=lambda: True,
     )
 
     assert result.decision == LIVE_ENQUEUE_ACCEPT
@@ -241,8 +243,8 @@ def test_rejects_adapter_rejection_and_missing_intake():
 def test_rejects_replay_before_second_writer_call():
     writer = _FakeWriter()
     seen = set()
-    first = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen)
-    second = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen)
+    first = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen, admission_consumer=lambda: True)
+    second = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen, admission_consumer=lambda: True)
 
     assert first.decision == LIVE_ENQUEUE_ACCEPT
     assert second.decision == LIVE_ENQUEUE_REJECT
@@ -252,7 +254,7 @@ def test_rejects_replay_before_second_writer_call():
 
 def test_rejects_writer_missing_or_writer_rejected():
     missing = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=None)
-    rejected = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=_FakeWriter(ok=False))
+    rejected = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=_FakeWriter(ok=False), admission_consumer=lambda: True)
 
     assert missing.decision == LIVE_ENQUEUE_REJECT
     assert LiveEnqueueReason.WRITER_MISSING in missing.rejection_reasons

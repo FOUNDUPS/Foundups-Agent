@@ -35,7 +35,7 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_wre_oper
 
 Focused resident live-canary harness:
 ```powershell
-python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py modules/communication/moltbot_bridge/tests/test_reddog_resident_runtime_artifact_readiness.py -q
 ```
 
 This suite uses injected readiness/control-loop probes, a temporary local Git
@@ -44,3 +44,8 @@ a temporary PatternMemory SQLite database. The draft-PR runner remains an
 injected no-network test double. One bounded Python subprocess proves
 interprocess lock exclusion. It does not start a signer, call OpenRouter, push
 a branch, or create a PR.
+
+Focused canonical execution-valve supplier/evaluator:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py -q
+```

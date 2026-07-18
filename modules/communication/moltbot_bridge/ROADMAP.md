@@ -1,5 +1,20 @@
 # moltbot_bridge Roadmap
 
+## RedDog execution-valve readiness
+
+- Phase 1 safety wiring complete locally: token-free canonical supplier,
+  bootstrap-to-handler canonical routing, secure use-time reload, signed
+  authority re-verification, process-local single-use effect admissions, and
+  fail-closed decision lineage. Persisted results are audit-only. Queue and
+  use-time preflight are non-consuming; after every non-mutating gate passes,
+  the final worktree/live-enqueue boundary consumes the nonce lease exactly once.
+- Operational status is BLOCKED, not READY. Next gates are independently signed
+  descriptor-derived artifact manifests; verified consensus and sovereign
+  receipts; authenticated principal/model trust provenance; a fresh client-side
+  signer handshake. Closed attempts do not consume nonce state.
+- Only after those anchors and adversarial live-path tests are green may an
+  operator run the Linux live canary; merge authority remains unavailable.
+
 ## FoundUps Memex lane
 
 The FoundUp Memex grows from existing RedDog operational context, Brain,

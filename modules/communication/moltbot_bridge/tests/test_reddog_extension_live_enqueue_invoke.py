@@ -5,6 +5,13 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AuthoritativeUseLease,
+)
+from modules.communication.moltbot_bridge.src.reddog_live_enqueue_admission_capability import (
+    InMemoryLiveEnqueueAdmissionRegistry,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_extension_live_enqueue_invoke import (
     EXTENSION_LIVE_ENQUEUE_INVOKE_ACCEPT,
     EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT,
@@ -134,6 +141,24 @@ def _valve(state=VALVE_OPEN_LIVE_ENQUEUE):
     }
 
 
+def _admission_registry() -> InMemoryLiveEnqueueAdmissionRegistry:
+    registry = InMemoryLiveEnqueueAdmissionRegistry()
+    evidence = {
+        "selection_receipt": _selection_receipt(),
+        "adapter_result": _adapter(),
+        "policy_gate_receipt": _policy(),
+        "signed_receipt_chain_result": _chain(),
+        "valve_decision": _valve(),
+    }
+    assert registry.issue(
+        work_order_id="wo-extension-live-enqueue-001",
+        evidence=evidence,
+        signed_authority_reverified=True,
+        authoritative_use_lease=AuthoritativeUseLease(lambda: True),
+    )
+    return registry
+
+
 def test_accepts_only_explicit_sovereign_selection_and_calls_injected_writer() -> None:
     writer = _FakeWriter()
     result = invoke_reddog_extension_live_enqueue_explicit_valve(
@@ -145,6 +170,7 @@ def test_accepts_only_explicit_sovereign_selection_and_calls_injected_writer() -
         valve_decision=_valve(),
         writer=writer,
         seen_live_enqueue_keys=set(),
+        admission_registry=_admission_registry(),
     )
 
     assert result.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_ACCEPT
@@ -254,11 +280,50 @@ def test_lower_live_enqueue_rejection_is_preserved() -> None:
         signed_receipt_chain_result=_chain(),
         valve_decision=_valve(),
         writer=None,
+        admission_registry=_admission_registry(),
     )
 
     assert result.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT
     assert ExtensionLiveEnqueueInvokeReason.LIVE_ENQUEUE_REJECTED in result.rejection_reasons
     assert "REJECT_LIVE_ENQUEUE_WRITER_MISSING" in result.rejection_reasons
+
+
+def test_serialized_acceptance_without_process_admission_cannot_enqueue() -> None:
+    writer = _FakeWriter()
+    result = invoke_reddog_extension_live_enqueue_explicit_valve(
+        explicit_live_enqueue_requested=True,
+        selection_receipt=_selection_receipt(),
+        adapter_result=_adapter(),
+        policy_gate_receipt=_policy(),
+        signed_receipt_chain_result=_chain(),
+        valve_decision=_valve(),
+        writer=writer,
+        admission_registry=InMemoryLiveEnqueueAdmissionRegistry(),
+    )
+
+    assert result.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT
+    assert writer.calls == []
+
+
+def test_process_admission_cannot_be_replayed() -> None:
+    writer = _FakeWriter()
+    registry = _admission_registry()
+    arguments = {
+        "explicit_live_enqueue_requested": True,
+        "selection_receipt": _selection_receipt(),
+        "adapter_result": _adapter(),
+        "policy_gate_receipt": _policy(),
+        "signed_receipt_chain_result": _chain(),
+        "valve_decision": _valve(),
+        "writer": writer,
+        "admission_registry": registry,
+    }
+    first = invoke_reddog_extension_live_enqueue_explicit_valve(**arguments)
+    second = invoke_reddog_extension_live_enqueue_explicit_valve(**arguments)
+
+    assert first.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_ACCEPT
+    assert second.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT
+    assert len(writer.calls) == 1
 
 
 def test_ast_boundary_no_extension_runtime_concrete_writer_or_command_execution() -> None:
