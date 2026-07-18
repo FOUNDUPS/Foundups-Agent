@@ -2,6 +2,17 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-19 - REDDOG_HOLOINDEX_GENERATION_BOUND_QUERY_RUNTIME_PHASE1 (0.4.4)
+
+- Replaced unbound semantic evidence from the extension's direct `holo_index.py --bundle-json` subprocess with an authenticated query through the existing localhost HoloIndex owner service.
+- Added a bounded Python bridge that reuses owner bootstrap/handoff/client code and emits the canonical generation-bound query receipt without exposing the owner token or invoking any indexer.
+- Semantic hits now reach grounding only when owner result and receipt agree on CURRENT freshness, semantic retrieval, clean repository HEAD, generation ID, freshness-receipt digest, no index gap, and no runtime re-index.
+- Preserved governed direct-read bodies for explicit repository targets while preventing those bodies from masking stale semantic-generation telemetry.
+- Extracted generation-bound acceptance, bundle merge, and metadata projection to `holoindex_generation_bound_query.js`, keeping `extension.js` within its temporary WSP_62 ceiling.
+- Added Run Trace fields for owner acceptance, freshness, generation, repository HEAD, query receipt, source, error class, and query-only proof.
+- Fixed the existing owner supervisor's stale-readiness loop: authenticated terminal freshness failures now stop startup immediately instead of being retried until the five-minute startup timeout; transport/auth/malformed failures remain opaque and retry-bounded.
+- Version 0.4.3 -> 0.4.4. WSP_15: Complexity 3 + Importance 5 + Deferability 5 + Impact 5 = 18 (P0).
+
 ## 2026-07-19 - REDDOG_BROAD_SEMANTIC_GROUNDING_NONVACUITY_PHASE1 (0.4.3)
 
 - Replaced the hardcoded semantic-domain noun gate with a generic, bounded action-and-subject derivation rule, so short repository audits such as `Audit <FoundUp>` create a semantic target without embedding FoundUp-specific names or paths in the extension.

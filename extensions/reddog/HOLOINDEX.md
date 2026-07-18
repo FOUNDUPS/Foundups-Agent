@@ -5,11 +5,13 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 ## Source Files (Tier 0 recall targets)
 
 - `extension.js` - main extension entry; Copy MD, Run Trace, Work Trail, redaction handoff
+- `holoindex_generation_bound_query.js` - owner-receipt acceptance, semantic-bucket replacement, and generation metadata
 - `package.json` - Node manifest and version
 
 ## Bridge (cross-path recall)
 
 - `scripts/advisory_model_once.py` - OpenRouter bridge and redaction gate (repo root)
+- `scripts/reddog_holoindex_owner_query_once.py` - authenticated generation-bound owner query bridge (repo root)
 
 ## Documentation
 
@@ -20,3 +22,4 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 ## Symbols (high-value recall)
 
 - `buildCopyMarkdown`, `buildRunTraceSection`, `holoIndexMetaFromBundle`, `evaluateTargetRecall`
+- `isGenerationBoundHoloQueryAccepted`, `mergeGenerationBoundHoloResult`, `buildMetaFromBundle`

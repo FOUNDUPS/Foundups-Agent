@@ -4,8 +4,9 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
+const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 
-const EXTENSION_VERSION = '0.4.3';
+const EXTENSION_VERSION = '0.4.4';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2016,6 +2017,16 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     original_query: meta.original_query || 'unknown',
     effective_query: meta.effective_query || 'unknown',
     query_expansion_strategy: meta.expansion_strategy || 'unknown',
+    holoindex_owner_query_required: meta.holoindex_owner_query_required !== undefined ? meta.holoindex_owner_query_required : 'unknown',
+    holoindex_owner_query_ok: meta.holoindex_owner_query_ok !== undefined ? meta.holoindex_owner_query_ok : 'unknown',
+    holoindex_owner_query_error: meta.holoindex_owner_query_error !== undefined ? meta.holoindex_owner_query_error : 'unknown',
+    holoindex_query_source: meta.holoindex_query_source || 'unknown',
+    holoindex_freshness: meta.holoindex_freshness || 'UNKNOWN',
+    holoindex_generation_id: meta.holoindex_generation_id || '(none)',
+    holoindex_freshness_receipt_digest: meta.holoindex_freshness_receipt_digest || '(none)',
+    holoindex_repo_head_sha: meta.holoindex_repo_head_sha || '(none)',
+    holoindex_query_receipt_id: meta.holoindex_query_receipt_id || '(none)',
+    no_holoindex_reindex_performed: meta.no_holoindex_reindex_performed !== undefined ? meta.no_holoindex_reindex_performed : 'unknown',
     code_hits_count: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
     wsp_hits: meta.wsp_hits !== undefined ? meta.wsp_hits : 'unknown',
     code_hits: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
@@ -2101,6 +2112,16 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- holoindex_original_query: ' + scorecard.original_query,
     '- holoindex_effective_query: ' + scorecard.effective_query,
     '- holoindex_query_expansion_strategy: ' + scorecard.query_expansion_strategy,
+    '- holoindex_owner_query_required: ' + scorecard.holoindex_owner_query_required,
+    '- holoindex_owner_query_ok: ' + scorecard.holoindex_owner_query_ok,
+    '- holoindex_owner_query_error: ' + (scorecard.holoindex_owner_query_error || '(none)'),
+    '- holoindex_query_source: ' + scorecard.holoindex_query_source,
+    '- holoindex_freshness: ' + scorecard.holoindex_freshness,
+    '- holoindex_generation_id: ' + scorecard.holoindex_generation_id,
+    '- holoindex_freshness_receipt_digest: ' + scorecard.holoindex_freshness_receipt_digest,
+    '- holoindex_repo_head_sha: ' + scorecard.holoindex_repo_head_sha,
+    '- holoindex_query_receipt_id: ' + scorecard.holoindex_query_receipt_id,
+    '- no_holoindex_reindex_performed: ' + scorecard.no_holoindex_reindex_performed,
     '- code_hits_count: ' + scorecard.code_hits_count,
     '- wsp_hits: ' + scorecard.wsp_hits,
     '- skill_hits: ' + scorecard.skill_hits,
@@ -5138,7 +5159,7 @@ function activate(context) {
   const installState = detectRedDogInstallState(context);
   if (installState.stale_install_detected) {
     vscode.window.showWarningMessage(
-      'RedDog 0.4.3 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
+      'RedDog 0.4.4 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
     );
   }
   context.subscriptions.push(
@@ -6913,102 +6934,11 @@ function moduleHintFromActive(root) {
 }
 
 function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
-  const meta = {
-    holoindex_status: usedOfflineFallback ? 'offline_fallback' : 'unknown',
-    requested_retrieval_mode: usedOfflineFallback ? 'semantic' : 'unknown',
-    retrieval_mode: usedOfflineFallback ? 'lexical' : 'unknown',
-    embedding_backend: usedOfflineFallback ? 'none' : 'unknown',
-    routing_active: false,
-    wsp_hits: 'unknown',
-    code_hits: 'unknown',
-    skill_hits: 'unknown',
-    target_recall_ok: 'unknown',
-    index_gap_detected: 'unknown',
-    direct_read_fallback_used: usedOfflineFallback ? true : false,
-    required_targets_total: 0,
-    required_targets_recalled: 0,
-    required_targets_missing: [],
-    // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: default provenance (nothing derived yet).
-    work_focus_targets_derived: false,
-    work_focus_target_derivation_sources: [],
-    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: default (no dropped fragments).
-    work_focus_targets_dropped_low_confidence: [],
-    // REDDOG_TYPED_TARGET_EXTRACTION_PHASE1: typed preprocessing defaults.
-    typed_target_extraction_applied: false,
-    repo_file_targets_count: 0,
-    semantic_targets_count: 0,
-    semantic_targets_required: 0,
-    semantic_targets_grounded: 0,
-    semantic_targets_missing: [],
-    semantic_target_coverage: [],
-    semantic_target_coverage_digest: semanticTargetCoverageDigest([]),
-    semantic_evidence_hits: [],
-    external_research_targets_count: 0,
-    quoted_reference_blocks_count: 0,
-    direct_read_paths: [],
-    direct_read_rejected: [],
-    direct_read_bytes: 0,
-    direct_read_truncated: [],
-    // REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1: attempt/error telemetry.
-    // Defaults describe "no enriched fetch attempted"; holoIndexOutput overwrites
-    // these when the index-gap trigger fires (attempted=true, error classified).
-    direct_read_fetch_attempted: false,
-    direct_read_fetch_error: null,
-    direct_read_fetch_arg_count: 0,
-    direct_read_fetch_timeout_ms: 0
-  };
-  try {
-    const data = JSON.parse(String(output || '{}'));
-    const bundleMeta = data.task_retrieval && data.task_retrieval.metadata ? data.task_retrieval.metadata : {};
-    const recall = evaluateTargetRecall(taskText, data);
-    meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'bundle_json_ok';
-    meta.retrieval_mode = usedOfflineFallback
-      ? 'lexical'
-      : String(bundleMeta.retrieval_mode || bundleMeta.mode || 'unknown');
-    meta.embedding_backend = usedOfflineFallback
-      ? 'none'
-      : String(bundleMeta.embedding_backend || 'unknown');
-    meta.routing_active = usedOfflineFallback ? false : bundleMeta.routing_active === true;
-    meta.wsp_hits = Number(bundleMeta.wsp_count || 0);
-    meta.code_hits = Number(bundleMeta.code_count || 0);
-    meta.skill_hits = bundleMeta.skill_count !== undefined ? Number(bundleMeta.skill_count) : 'unknown';
-    meta.target_recall_ok = recall.target_recall_ok;
-    meta.index_gap_detected = recall.index_gap_detected;
-    meta.recall_targets = recall.recall_targets;
-    meta.required_targets_total = recall.required_targets_total;
-    meta.required_targets_recalled = recall.required_targets_recalled;
-    meta.required_targets_missing = recall.required_targets_missing;
-    // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: surface derivation provenance from recall.
-    meta.work_focus_targets_derived = recall.work_focus_targets_derived === true;
-    meta.work_focus_target_derivation_sources = Array.isArray(recall.work_focus_target_derivation_sources)
-      ? recall.work_focus_target_derivation_sources
-      : [];
-    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: surface dropped low-confidence prose.
-    meta.work_focus_targets_dropped_low_confidence = Array.isArray(recall.work_focus_targets_dropped_low_confidence)
-      ? recall.work_focus_targets_dropped_low_confidence
-      : [];
-    meta.typed_target_extraction_applied = recall.typed_target_extraction_applied === true;
-    meta.repo_file_targets_count = Number(recall.repo_file_targets_count || 0);
-    meta.semantic_targets_count = Number(recall.semantic_targets_count || 0);
-    meta.semantic_evidence_hits = semanticEvidenceHitsFromBundleData(data);
-    meta.external_research_targets_count = Number(recall.external_research_targets_count || 0);
-    meta.quoted_reference_blocks_count = Number(recall.quoted_reference_blocks_count || 0);
-    // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the Python-side
-    // governed direct-read telemetry when the bundle carried a fetch.
-    const dr = data.direct_read && typeof data.direct_read === 'object' ? data.direct_read : null;
-    if (dr) {
-      meta.direct_read_fallback_used = !!dr.direct_read_fallback_used;
-      meta.direct_read_paths = Array.isArray(dr.direct_read_paths) ? dr.direct_read_paths : [];
-      meta.direct_read_rejected = Array.isArray(dr.direct_read_rejected) ? dr.direct_read_rejected : [];
-      meta.direct_read_bytes = Number(dr.direct_read_bytes || 0);
-      meta.direct_read_truncated = Array.isArray(dr.direct_read_truncated) ? dr.direct_read_truncated : [];
-    } else {
-      meta.direct_read_fallback_used = !!usedOfflineFallback;
-    }
-  } catch (err) {
-    meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'parse_error';
-  }
-  return meta;
+  return holoGenerationBoundQuery.buildMetaFromBundle(output, usedOfflineFallback, taskText, {
+    evaluateTargetRecall,
+    semanticEvidenceHitsFromBundleData,
+    semanticTargetCoverageDigest
+  });
 }
 
 // REDDOG_HOLO_SEMANTIC_FIRST_PHASE1: semantic retrieval is the production
@@ -7093,23 +7023,67 @@ function classifyDirectReadFetchError(err) {
   return 'unknown';
 }
 
+function isGenerationBoundHoloQueryAccepted(result) {
+  return holoGenerationBoundQuery.isAccepted(result);
+}
+
+function runHoloIndexOwnerQuery(root, query, limit) {
+  try {
+    const configuredPython = reddogConfigValue('pythonPath', 'python');
+    const interpreter = resolvePythonInterpreter(root, configuredPython);
+    return holoGenerationBoundQuery.runOwnerQuery({
+      cp,
+      path,
+      root,
+      query,
+      limit,
+      interpreterPath: interpreter.path,
+      env: buildBridgePythonEnv(process.env)
+    });
+  } catch (err) {
+    return holoGenerationBoundQuery.failureResult('owner_query_bridge_error', query);
+  }
+}
+
+function mergeGenerationBoundHoloResult(bundleOutput, ownerResult) {
+  return holoGenerationBoundQuery.mergeBundle(bundleOutput, ownerResult);
+}
+
 function holoIndexOutput(root, taskText, maxChars) {
   const typedTargets = extractTypedTargets(taskText);
   const queryPlan = semanticGroundingPolicy.buildEffectiveHoloQuery(taskText, typedTargets.semantic_targets);
   const query = queryPlan.effective_query;
   const moduleHint = moduleHintFromActive(root);
   const requestedMode = resolveHoloRetrievalMode(process.env);
-  const env = buildHoloQueryEnv(process.env, requestedMode);
+  // The owner is the sole semantic authority. The legacy bundle contributes
+  // structured memory and governed direct reads, so keep it lexical and avoid
+  // loading a second semantic model whose hits are discarded during merge.
+  const bundleEnv = buildHoloQueryEnv(process.env, 'lexical');
+  const ownerResult = requestedMode === 'semantic'
+    ? runHoloIndexOwnerQuery(root, query, 5)
+    : {
+        ok: false,
+        source: 'holoindex_owner_service',
+        freshness: 'UNKNOWN',
+        raw_result: {},
+        error: 'semantic_owner_not_requested',
+        index_gap_detected: true,
+        stale_reasons: ['semantic_owner_not_requested'],
+        no_holoindex_reindex_performed: true
+      };
   try {
     const baseArgs = ['-B', 'holo_index.py', '--bundle-json', '--search', query, '--bundle-module-hint', moduleHint, '--limit', '5', '--quiet-root-alerts'];
     let output = cp.execFileSync('python', baseArgs, {
       cwd: root,
-      env,
+      env: bundleEnv,
       encoding: 'utf8',
       timeout: requestedMode === 'semantic' ? 60000 : 25000,
       maxBuffer: Math.max(maxChars * 4, 65536),
       windowsHide: true
     });
+    if (requestedMode === 'semantic') {
+      output = mergeGenerationBoundHoloResult(output, ownerResult);
+    }
     let meta = holoIndexMetaFromBundle(output, false, taskText);
     meta.requested_retrieval_mode = requestedMode;
     if (requestedMode === 'semantic' && meta.retrieval_mode !== 'semantic') {
@@ -7146,14 +7120,17 @@ function holoIndexOutput(root, taskText, maxChars) {
         };
         try {
           const enrichedArgs = baseArgs.concat(mustInclude);
-          const enriched = cp.execFileSync('python', enrichedArgs, {
+          let enriched = cp.execFileSync('python', enrichedArgs, {
             cwd: root,
-            env,
+            env: bundleEnv,
             encoding: 'utf8',
             timeout: enrichedTimeoutMs,
             maxBuffer: enrichedMaxBuffer,
             windowsHide: true
           });
+          if (requestedMode === 'semantic') {
+            enriched = mergeGenerationBoundHoloResult(enriched, ownerResult);
+          }
           output = enriched;
           meta = holoIndexMetaFromBundle(enriched, false, taskText);
           meta.requested_retrieval_mode = requestedMode;
@@ -7179,16 +7156,23 @@ function holoIndexOutput(root, taskText, maxChars) {
     }
     Object.assign(meta, queryPlan);
     const directReadSection = buildDirectReadContentSection(output);
+    const generationQuality = requestedMode !== 'semantic'
+      ? summarizeHoloBundle(output) + '; lexical diagnostic mode does not carry generation authority.'
+      : isGenerationBoundHoloQueryAccepted(ownerResult)
+        ? summarizeHoloBundle(output) + '; generation-bound owner receipt accepted.'
+        : summarizeHoloBundle(output) + '; generation-bound owner query failed ('
+          + String((ownerResult && ownerResult.error) || 'unknown')
+          + '). Semantic hits were withheld; WRE/CI index maintenance is required.';
     return {
       output: String(output || '').slice(0, maxChars),
-      quality: summarizeHoloBundle(output),
+      quality: generationQuality,
       meta: meta,
       direct_read_section: directReadSection
     };
   } catch (bundleErr) {
     try {
       const fallbackEnv = buildHoloQueryEnv(process.env, 'lexical');
-      const output = cp.execFileSync('python', ['-B', 'holo_index.py', '--offline', '--search', query, '--limit', '5'], {
+      let output = cp.execFileSync('python', ['-B', 'holo_index.py', '--offline', '--search', query, '--limit', '5'], {
         cwd: root,
         env: fallbackEnv,
         encoding: 'utf8',
@@ -7196,12 +7180,21 @@ function holoIndexOutput(root, taskText, maxChars) {
         maxBuffer: Math.max(maxChars * 4, 65536),
         windowsHide: true
       });
-      const meta = holoIndexMetaFromBundle(output, true, taskText);
+      if (requestedMode === 'semantic') {
+        output = mergeGenerationBoundHoloResult(output, ownerResult);
+      }
+      const ownerAccepted = isGenerationBoundHoloQueryAccepted(ownerResult);
+      const meta = holoIndexMetaFromBundle(output, !ownerAccepted, taskText);
       meta.requested_retrieval_mode = requestedMode;
+      if (requestedMode === 'semantic' && !ownerAccepted) {
+        holoGenerationBoundQuery.applyRejectedOwnerMeta(meta, ownerResult);
+      }
       Object.assign(meta, queryPlan);
       return {
         output: String(output || '').slice(0, maxChars),
-        quality: 'HoloIndex bundle-json failed; offline lexical fallback used. Treat protocol coverage as NEEDS_VERIFICATION and propose re-index/bundle repair if WSP hits are missing.',
+        quality: ownerAccepted
+          ? 'Structured bundle assembly fell back, but semantic evidence remains generation-bound to the HoloIndex owner receipt.'
+          : 'HoloIndex bundle-json failed and no generation-bound semantic owner result was accepted. Treat protocol coverage as NEEDS_VERIFICATION and route the index gap to WRE/CI maintenance.',
         meta: meta
       };
     } catch (offlineErr) {
@@ -7858,6 +7851,9 @@ module.exports = {
   extractTargetTokensFromLine,
   holoIndexMetaFromBundle,
   holoIndexOutput,
+  isGenerationBoundHoloQueryAccepted,
+  runHoloIndexOwnerQuery,
+  mergeGenerationBoundHoloResult,
   resolveHoloRetrievalMode,
   buildHoloQueryEnv,
   summarizeHoloBundle,

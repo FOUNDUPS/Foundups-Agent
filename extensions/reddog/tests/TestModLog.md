@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-19 - REDDOG_HOLOINDEX_GENERATION_BOUND_QUERY_RUNTIME_PHASE1
+
+- Added HGBQ-001..010 to prove the exact generation-bound acceptance predicate, stale/lexical/mismatched/reindex rejection, unbound semantic-hit removal, governed direct-read preservation, and Run Trace generation receipts.
+- Added six Python bridge tests covering process-owned and configured owners, private handoff use, canonical query receipt creation, cleanup, bounded input validation, and secret-free failures.
+- Added owner-supervisor regression tests proving authenticated stale-generation startup stops immediately, while unauthorized, malformed, and non-loopback responses cannot forge a terminal freshness error.
+- Re-ran 69 owner-client, query-boundary, and owner-service tests plus the complete RedDog extension and Fusion ingress contracts.
+
 ## 2026-07-19 - REDDOG_BROAD_SEMANTIC_GROUNDING_NONVACUITY_PHASE1
 
 - Proved `Audit pfmall.` derives one semantic target and no invented repository path, while the extension source contains no hardcoded `pfmall` literal.

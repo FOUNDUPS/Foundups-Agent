@@ -45,7 +45,7 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 |---|---|---|
 | Advisory model review | YES | OpenRouter request after Fusion redaction gate passes |
 | Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by WSP_15 tier and sends it through redaction gate |
-| HoloIndex recall | YES | Read-only semantic `--bundle-json` first; actual retrieval mode/backend are receipted; offline lexical fallback only if semantic retrieval fails. Explicit opt-down: `REDDOG_HOLO_RETRIEVAL_MODE=lexical`. |
+| HoloIndex recall | YES | Semantic evidence comes from the authenticated HoloIndex owner service and requires a current generation-bound query receipt. Legacy `--bundle-json` supplies bounded direct-read/context structure only; its unbound semantic hits are discarded. Explicit lexical opt-down remains diagnostic-only. |
 | WSP_00/WSP_97/WSP_15 prompting | YES | System prompt requires role lock, truth labels, proposed fixes, and MPS priority |
 | Repo edits | NO | No write tool exposed to model |
 | Shell execution by model | NO | Extension host runs only bounded local context/bridge commands; model cannot execute Skillz/OpenClaw/Hermes |
@@ -169,6 +169,8 @@ Copy:
 ## HoloIndex Truth Boundary
 
 The model cannot access the filesystem. It receives only the bounded context packet.
+
+Extension v0.4.4 invokes `scripts/reddog_holoindex_owner_query_once.py`, which reuses the authenticated localhost owner client and emits the canonical `holoindex_query_receipt.v1`. Semantic evidence is accepted only when the owner result and receipt agree on `CURRENT` freshness, semantic mode, clean repository HEAD, generation ID, freshness-receipt digest, and query-only behavior. Missing, stale, lexical, mismatched, or unreceipted owner evidence is withheld and sets `index_gap_detected=true`. Governed direct-read bodies may supplement explicit repository targets, but they never erase a stale semantic-generation finding. RedDog does not re-index HoloIndex during a reasoning run; WRE/CI owns maintenance.
 
 If HoloIndex recall reports zero WSP hits, missing Tier-0 docs, stale/offline fallback, or unavailable output, the answer must treat protocol claims as `NEEDS_VERIFICATION` and propose retrieval/index repair before strong claims.
 

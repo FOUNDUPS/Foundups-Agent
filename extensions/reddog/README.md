@@ -1,8 +1,10 @@
 # RedDog
 
-Version: 0.4.3
+Version: 0.4.4
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
+
+Version 0.4.4 routes semantic evidence through the authenticated HoloIndex owner service and accepts it only with a current generation-bound query receipt. Legacy bundle output remains available for bounded direct-read content, but its unbound semantic hits cannot ground Fusion.
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
@@ -54,7 +56,7 @@ The extension is a bounded 0102 advisory surface:
 - WSP_97: answers must separate observed evidence, inference, and needs-verification.
 - WSP_15: substantive answers must end with a priority block: Complexity, Importance, Deferability, Impact, MPS total, and P0-P4 class.
 - Findings must include proposed fixes or an explicit defer/block reason.
-- HoloIndex recall is semantic-first: RedDog clears inherited `HOLO_SKIP_MODEL`, preserves an operator-set `HOLO_OFFLINE` network boundary, runs the read-only `--bundle-json` path, records `retrieval_mode` and `embedding_backend`, and falls back to offline lexical search only when semantic retrieval fails. `REDDOG_HOLO_RETRIEVAL_MODE=lexical` is an explicit compute-saving opt-down for tests or emergency operation; it must not be described as semantic retrieval.
+- HoloIndex recall is generation-bound: RedDog queries the authenticated read-only owner service and accepts semantic evidence only with a current `holoindex_query_receipt.v1` bound to the clean repository HEAD and freshness generation. Legacy bundle output supplies bounded direct-read/context structure, but its semantic hits are discarded. `REDDOG_HOLO_RETRIEVAL_MODE=lexical` is diagnostic-only and must not be described as semantic retrieval.
 - Free-form target derivation (v0.3.44): repo-relative paths named with read-intent anywhere in the work focus are promoted to required direct-read targets, not only paths under the exact `Required direct-read targets:` header. Recognized read-intent shapes are: the explicit required-targets header, `Read first:` / `READ BEFORE EDITING` blocks, WSP_99 M2M `READ:` arrays, M2M `CTX.FILES` / `CTX: FILES:` arrays, markdown bullet lists of paths, and inline or backticked paths in prose. When a path is named this way it drives the SAME governed direct-read fetch, so it is retrieved even when HoloIndex semantic recall misses. Command/validation fences (```powershell / ```bash with `git diff --check`, `node --check`, `python holo_index.py ...`) and scope-out / "Do NOT touch" sections are excluded, and derivation prefers precision when read-intent is ambiguous.
 - Flowing-prose read-capture tokenization + tiered strictness (v0.3.45): a `Read first:` prompt that names files in flowing PROSE (e.g. `Read first: a.md, b.json, and c.py. Determine ... the breadcrumb/handoff layer`) is now tokenized with the bounded path-token regex, so a path followed by prose (`c.py. Determine ...`) and an embedded-slash English fragment (`breadcrumb/handoff`) no longer corrupt the derived targets. Confidence tiers: FLOWING-PROSE-derived tokens (Read-first prose, inline prose, backtick prose) become required targets ONLY if they have a lowercase file extension (a file shape); a prose token with a slash but no extension is dropped from the required list and reported in the new `work_focus_targets_dropped_low_confidence` telemetry field, so it can never flip `target_recall_ok` to false. The explicit `Required direct-read targets:` header, M2M `READ:` / `CTX.FILES`, and CLEAN BULLETS keep the broader slash-OR-extension behavior (a named directory path is still accepted) -- only flowing prose is stricter. Trailing prose punctuation (`.` `,` `;` `:` `)` `]` `}`) is trimmed from derived paths. The governed direct-read gate (`bundle_json.py`) is unchanged; derived paths still flow through it.
 - Determine-block target derivation guard (v0.3.59): `Determine:` numbered questions are treated as answer/output obligations, not repo-file target intent. Slash-bearing conceptual phrases inside questions (for example `ledger/runtime`) no longer become `repo_file_targets` or block typed grounding. Explicit `Read first:` / required-target sections still drive direct read normally.
@@ -226,6 +228,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.3.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.4.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

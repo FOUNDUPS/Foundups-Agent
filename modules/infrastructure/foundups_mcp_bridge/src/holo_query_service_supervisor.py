@@ -68,7 +68,7 @@ def _read_health_payload(
     )
     response = connection.getresponse()
     body = response.read(MAX_HEALTH_RESPONSE_BYTES + 1)
-    if response.status != 200 or len(body) > MAX_HEALTH_RESPONSE_BYTES:
+    if response.status not in {200, 409} or len(body) > MAX_HEALTH_RESPONSE_BYTES:
         return None
     payload = json.loads(body.decode("utf-8"))
     return payload if isinstance(payload, Mapping) else None
@@ -137,6 +137,42 @@ def _authenticated_health_probe(
         )
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
         return False
+    finally:
+        connection.close()
+
+
+def _health_rejection_code(payload: Mapping[str, object] | None) -> str:
+    """Expose only authenticated, terminal freshness failures during startup."""
+    value = payload if isinstance(payload, Mapping) else {}
+    error = str(value.get("error") or "")
+    terminal = {
+        "MISSING_GENERATION_BINDING",
+        "REPO_HEAD_MISMATCH",
+        "STALE_INDEX",
+        "GENERATION_CHANGED_DURING_QUERY",
+    }
+    valid = (
+        value.get("schema_version") == HEALTH_SCHEMA_VERSION
+        and value.get("ok") is False
+        and value.get("source") == "holoindex"
+        and value.get("loopback_only") is True
+        and value.get("no_holoindex_reindex_performed") is True
+    )
+    return error if valid and error in terminal else ""
+
+
+def _authenticated_health_rejection(
+    *, host: str, port: int, token: str, timeout_seconds: float
+) -> str:
+    if not _probe_target_is_private(host, token):
+        return ""
+    connection = http.client.HTTPConnection(
+        host, int(port), timeout=max(0.01, float(timeout_seconds))
+    )
+    try:
+        return _health_rejection_code(_read_health_payload(connection, token))
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
+        return ""
     finally:
         connection.close()
 
@@ -342,6 +378,14 @@ class HoloQueryServiceSupervisor:
                     self._ready = True
                     self._register_cleanup()
                     return self
+                rejection = _authenticated_health_rejection(
+                    host=OWNER_HOST,
+                    port=self.port,
+                    token=self._token,
+                    timeout_seconds=min(self.probe_timeout_seconds, remaining),
+                )
+                if rejection:
+                    raise HoloQueryServiceSupervisorError(rejection)
                 time.sleep(min(self.probe_interval_seconds, remaining))
         except BaseException:
             self.stop()

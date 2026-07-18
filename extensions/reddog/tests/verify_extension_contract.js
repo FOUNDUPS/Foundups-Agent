@@ -14,7 +14,10 @@ const fixtures = require('./fixtures');
 const root = path.resolve(__dirname, '..', '..', '..');
 const extDir = path.join(root, 'extensions', 'reddog');
 const extensionJs = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8');
+const holoGenerationBoundQueryJs = fs.readFileSync(path.join(extDir, 'holoindex_generation_bound_query.js'), 'utf8');
+const holoGenerationBoundQuery = require(path.join(extDir, 'holoindex_generation_bound_query.js'));
 const bridgePy = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_once.py'), 'utf8');
+const holoOwnerBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_holoindex_owner_query_once.py'), 'utf8');
 const residentArchitectBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_resident_architect_session_once.py'), 'utf8');
 const pkg = JSON.parse(fs.readFileSync(path.join(extDir, 'package.json'), 'utf8'));
 const readme = fs.readFileSync(path.join(extDir, 'README.md'), 'utf8');
@@ -203,8 +206,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.3', 'package version must be 0.4.3');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.3'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.4', 'package version must be 0.4.4');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.4'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -224,7 +227,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.3', 'README version mismatch');
+includes(readme, 'Version: 0.4.4', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -504,7 +507,21 @@ try {
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = 'semantic';
   cp.execFileSync = function(_exe, args, options) {
     hsfExecCalls += 1;
-    if (hsfExecCalls === 1) {
+    if (args.some((arg) => String(arg).endsWith('reddog_holoindex_owner_query_once.py'))) {
+      return JSON.stringify({
+        ok: false,
+        source: 'holoindex_owner_service',
+        freshness: 'UNKNOWN',
+        raw_result: {},
+        error: 'simulated_owner_unavailable',
+        index_gap_detected: true,
+        stale_reasons: ['holoindex_owner_query_failed'],
+        no_holoindex_reindex_performed: true
+      });
+    }
+    if (!args.includes('--offline')) {
+      assert.strictEqual(options.env.HOLO_SKIP_MODEL, '1',
+        'HSF-006: legacy bundle stays lexical because the owner is the sole semantic authority');
       const err = new Error('simulated semantic bundle failure');
       err.code = 'SIMULATED';
       throw err;
@@ -515,8 +532,8 @@ try {
     return '[OFFLINE] simulated lexical result';
   };
   const hsfFallback = orchestrator.holoIndexOutput(root, 'semantic fallback contract', 18000);
-  assert.strictEqual(hsfExecCalls, 2, 'HSF-006: semantic failure must invoke exactly one lexical fallback');
-  assert.strictEqual(hsfFallback.meta.holoindex_status, 'offline_fallback', 'HSF-006: fallback status must be truthful');
+  assert.strictEqual(hsfExecCalls, 3, 'HSF-006: owner proof plus semantic failure must invoke exactly one lexical fallback');
+  assert.strictEqual(hsfFallback.meta.holoindex_status, 'generation_bound_query_failed', 'HSF-006: failed owner proof must outrank the lexical fallback status');
   assert.strictEqual(hsfFallback.meta.requested_retrieval_mode, 'semantic', 'HSF-006: receipt must retain the requested mode');
   assert.strictEqual(hsfFallback.meta.retrieval_mode, 'lexical', 'HSF-006: receipt must expose actual lexical behavior');
 } finally {
@@ -550,6 +567,120 @@ try {
   cp.execFileSync = hsfOriginalExecFileSync;
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = hsfOriginalMode;
 }
+
+// REDDOG_HOLOINDEX_GENERATION_BOUND_QUERY_RUNTIME_PHASE1 (HGBQ-001..010): only the
+// authenticated owner response may supply semantic hit authority. The legacy direct
+// bundle remains useful for structured-memory assembly and governed explicit direct read.
+const hgbqGeneration = 'sha256:' + 'a'.repeat(64);
+const hgbqFreshnessDigest = 'sha256:' + 'b'.repeat(64);
+const hgbqHead = 'c'.repeat(40);
+const hgbqReceipt = {
+  schema_version: 'holoindex_query_receipt.v1',
+  source: 'holoindex_owner_service',
+  source_class: 'holoindex',
+  ok: true,
+  query: 'audit pfmall',
+  freshness: 'CURRENT',
+  hits: [],
+  error: '',
+  freshness_generation_id: hgbqGeneration,
+  freshness_receipt_digest: hgbqFreshnessDigest,
+  freshness_receipt_path: 'E:/HoloIndex/indexes/holoindex_freshness_receipt.json',
+  repo_head_sha: hgbqHead,
+  index_gap_detected: false,
+  stale_reasons: [],
+  no_holoindex_reindex_performed: true
+};
+hgbqReceipt.receipt_id = holoGenerationBoundQuery.queryReceiptId(hgbqReceipt);
+const hgbqReceiptId = hgbqReceipt.receipt_id;
+const hgbqOwner = {
+  ok: true,
+  source: 'holoindex_owner_service',
+  query: 'audit pfmall',
+  requested_query: 'audit pfmall',
+  freshness: 'CURRENT',
+  raw_result: {
+    code_hits: [{ path: 'modules/foundups/pfmall/api.py', preview: 'PFMall implementation API.' }],
+    test_hits: [{ path: 'modules/foundups/pfmall/tests/test_api.py', summary: 'PFMall API verification.' }],
+    metadata: { retrieval_mode: 'semantic', embedding_backend: 'sentence_transformers' }
+  },
+  error: '',
+  index_gap_detected: false,
+  stale_reasons: [],
+  freshness_generation_id: hgbqGeneration,
+  freshness_receipt_digest: hgbqFreshnessDigest,
+  repo_head_sha: hgbqHead,
+  retrieval_mode: 'semantic',
+  no_holoindex_reindex_performed: true,
+  query_receipt: hgbqReceipt
+};
+assert.strictEqual(orchestrator.isGenerationBoundHoloQueryAccepted(hgbqOwner), true,
+  'HGBQ-001: exact generation-bound owner contract is accepted');
+for (const mutation of [
+  { freshness: 'STALE' },
+  { index_gap_detected: true },
+  { retrieval_mode: 'lexical' },
+  { freshness_generation_id: '' },
+  { query_receipt: Object.assign({}, hgbqOwner.query_receipt, { repo_head_sha: 'e'.repeat(40) }) },
+  { query_receipt: Object.assign({}, hgbqOwner.query_receipt, { source_class: 'brain' }) },
+  { requested_query: 'audit another target' },
+  { query_receipt: Object.assign({}, hgbqOwner.query_receipt, { receipt_id: 'sha256:' + 'd'.repeat(64) }) },
+  { no_holoindex_reindex_performed: false }
+]) {
+  assert.strictEqual(orchestrator.isGenerationBoundHoloQueryAccepted(Object.assign({}, hgbqOwner, mutation)), false,
+    'HGBQ-002: stale, unbound, lexical, or mutating owner evidence fails closed');
+}
+const hgbqLegacyBundle = JSON.stringify({
+  task_retrieval: {
+    code_hits: [
+      { path: 'modules/untrusted/stale.py', preview: 'unbound stale semantic result' },
+      { location: 'modules/foundups/pfmall/api.py', content: 'direct read body', direct_read: true }
+    ],
+    wsp_hits: [{ path: 'WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md' }],
+    metadata: { retrieval_mode: 'semantic', embedding_backend: 'sentence_transformers' }
+  },
+  direct_read: { direct_read_fallback_used: true }
+});
+const hgbqMerged = JSON.parse(orchestrator.mergeGenerationBoundHoloResult(hgbqLegacyBundle, hgbqOwner));
+assert.deepStrictEqual(hgbqMerged.task_retrieval.code_hits.map((hit) => hit.path || hit.location), [
+  'modules/foundups/pfmall/api.py',
+  'modules/foundups/pfmall/api.py'
+], 'HGBQ-003: owner semantic hit replaces unbound hit while governed direct-read evidence survives');
+assert.strictEqual(hgbqMerged.task_retrieval.test_hits.length, 1, 'HGBQ-003: owner test evidence survives');
+assert.strictEqual(hgbqMerged.task_retrieval.wsp_hits.length, 0, 'HGBQ-003: unbound legacy WSP hit is removed');
+assert.strictEqual(hgbqMerged.task_retrieval.metadata.owner_query_ok, true, 'HGBQ-004: accepted owner state enters bundle metadata');
+assert.strictEqual(hgbqMerged.task_retrieval.metadata.freshness_generation_id, hgbqGeneration, 'HGBQ-004: generation ID enters bundle metadata');
+assert.strictEqual(hgbqMerged.task_retrieval.metadata.query_receipt_id, hgbqReceiptId, 'HGBQ-004: query receipt enters bundle metadata');
+const hgbqRejected = JSON.parse(orchestrator.mergeGenerationBoundHoloResult(hgbqLegacyBundle, Object.assign({}, hgbqOwner, {
+  ok: false,
+  freshness: 'STALE',
+  index_gap_detected: true,
+  error: 'STALE_INDEX'
+})));
+assert.deepStrictEqual(hgbqRejected.task_retrieval.code_hits.map((hit) => hit.location), [
+  'modules/foundups/pfmall/api.py'
+], 'HGBQ-005: failed owner proof withholds every semantic hit but preserves governed direct read');
+assert.strictEqual(hgbqRejected.task_retrieval.test_hits.length, 0, 'HGBQ-005: failed owner proof withholds test hits');
+assert.strictEqual(hgbqRejected.task_retrieval.metadata.owner_query_ok, false, 'HGBQ-005: failed owner state is explicit');
+const hgbqMeta = orchestrator.holoIndexMetaFromBundle(JSON.stringify(hgbqMerged), false, 'Audit pfmall.');
+assert.strictEqual(hgbqMeta.holoindex_owner_query_ok, true, 'HGBQ-006: meta accepts generation-bound owner proof');
+assert.strictEqual(hgbqMeta.holoindex_generation_id, hgbqGeneration, 'HGBQ-006: meta exposes generation');
+assert.strictEqual(hgbqMeta.holoindex_repo_head_sha, hgbqHead, 'HGBQ-006: meta exposes bound repo HEAD');
+const hgbqLines = orchestrator.formatHoloIndexScorecardLines(
+  orchestrator.extractHoloIndexScorecard('wsp_holo', hgbqMeta)
+).join('\n');
+includes(hgbqLines, '- holoindex_owner_query_ok: true', 'HGBQ-007: Run Trace exposes owner acceptance');
+includes(hgbqLines, '- holoindex_generation_id: ' + hgbqGeneration, 'HGBQ-007: Run Trace exposes generation');
+includes(hgbqLines, '- holoindex_query_receipt_id: ' + hgbqReceiptId, 'HGBQ-007: Run Trace exposes query receipt');
+includes(hgbqLines, '- no_holoindex_reindex_performed: true', 'HGBQ-007: Run Trace proves query-only behavior');
+includes(extensionJs, "require('./holoindex_generation_bound_query')", 'HGBQ-008: extension must load the generation-bound query module');
+includes(holoGenerationBoundQueryJs, 'reddog_holoindex_owner_query_once.py', 'HGBQ-008: generation-bound query module must invoke the owner bridge');
+includes(holoOwnerBridgePy, 'query_holoindex_owner', 'HGBQ-008: bridge must reuse the owner client');
+includes(holoOwnerBridgePy, 'build_query_receipt', 'HGBQ-008: bridge must emit the canonical query receipt');
+assert(!/(?:--index|index_all\s*\(|run_incremental_index)/.test(holoOwnerBridgePy),
+  'HGBQ-009: owner bridge must never invoke an indexer');
+assert(fs.existsSync(path.join(root, 'scripts', 'reddog_holoindex_owner_query_once.py')),
+  'HGBQ-010: generation-bound owner bridge script must exist');
 
 const ultra = orchestrator.classifyTaskForRedDog('Audit OAuth auth secrets on live runtime deploy path', 'auto', 'reddog_architect');
 assert.strictEqual(ultra.tier, 'ULTRA', 'security/auth prompts must classify ULTRA');
@@ -1193,7 +1324,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.3', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.4', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2685,7 +2816,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.3'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.4'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2699,7 +2830,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.3'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.4'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2711,7 +2842,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.3'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.4'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -3718,7 +3849,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.3' } }
+      ? { id, packageJSON: { version: '0.4.4' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
