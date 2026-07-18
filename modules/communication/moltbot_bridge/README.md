@@ -47,6 +47,38 @@ Current OpenClaw loop:
 
 `assigned work -> retrieve bounded HoloIndex bundle -> execute -> verify -> emit -> write durable knowledge`
 
+### RedDog HoloIndex Query Boundary
+
+The RedDog operational consumers migrated in this POC use an authenticated
+owner service at literal `127.0.0.1`.
+An explicit HOLOINDEX_QUERY_SERVICE_URL/token selects an externally supervised
+owner; otherwise the adapter resolves the host bootstrap's authenticated
+process-private handoff. Auto-generated tokens are never exported to the
+parent environment. The worker never indexes or opens Chroma. It preserves
+code, WSP, docs, knowledge, tests, skills, work-ledger, and symbol evidence
+from the owner's raw result.
+
+Freshness is fail-closed: CURRENT means the owner proved the exact worker
+repository HEAD, a stable generation and receipt digest, and all seven
+baseline collection manifests before and after a semantic query. Missing,
+lexical, stale, empty-canary, or changed-generation evidence blocks downstream
+model work as an index gap. If neither an explicit service nor a live
+private handoff exists, the adapter fails with
+HOLOINDEX_QUERY_SERVICE_NOT_CONFIGURED and never opens local Chroma.
+
+An explicit SSD/receipt argument enables direct host diagnostics only. That
+path is always labeled non-operational and can never return CURRENT. Trusted
+interactive/headless host preflight performs any required semantic full
+refresh before worker dispatch; startup may route that request through
+governed WRE dispatch, but the query adapter has no maintenance surface.
+
+This is a supported adapter contract, not an OS privilege boundary. Hard
+isolation requires host-level filesystem/process permissions. Phase-1 coverage
+is limited to the preflight-wired read-only audit/research, report-collection,
+audit-enqueue, and configured auto-task consumers. The legacy
+foundups_mcp_bridge `holo_tools.py` path remains a direct-store consumer and is
+not covered by an all-consumers migration claim.
+
 ## Setup
 
 > ⚠️ **Important**: See [docs/INSTALL_OPENCLAW.md](docs/INSTALL_OPENCLAW.md) for full guide

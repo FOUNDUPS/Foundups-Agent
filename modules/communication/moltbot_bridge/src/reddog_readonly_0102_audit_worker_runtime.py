@@ -48,6 +48,12 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_first_external_re
 from modules.communication.moltbot_bridge.src.reddog_memex_snapshot_projection_supplier import (
     supply_assignment_bound_memex_projection,
 )
+from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter import (
+    HoloIndexReadOnlyQueryAdapter,
+    holoindex_hits as _holoindex_hits,
+    path_is_allowed,
+    paths_from_query_receipt,
+)
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     SelectionDecision,
     SelectionPurpose,
@@ -61,8 +67,8 @@ from holo_index.query_receipt import (
     SOURCE_CLASS_CODEINDEX,
     SOURCE_CLASS_HOLOINDEX,
     build_query_receipt,
-    load_generation_binding,
 )
+from holo_index.repository_state import RepositoryState, read_repository_state
 from holo_index.memex_access_policy_receipt import validate_memex_access_policy_receipt
 from holo_index.memex_evidence_bundle import build_memex_content_evidence_bundle
 from holo_index.memex_query_routing import build_memex_projection_query_receipt
@@ -158,65 +164,14 @@ class UnavailableReadOnlyQueryAdapter:
 @dataclass(frozen=True)
 class _ResearchHoloIndexMemory:
     adapter: ReadOnlyEvidenceQueryAdapter
+    allowed_paths: tuple[str, ...]
 
     def search(self, query: str) -> Mapping[str, Any]:
-        return self.adapter.query(query=query, allowed_paths=(), limit=8)
-
-
-@dataclass(frozen=True)
-class HoloIndexReadOnlyQueryAdapter:
-    """Read-only HoloIndex discovery adapter for repo audit workers."""
-
-    repo_root: Path
-    ssd_path: Path | str | None = None
-    freshness_receipt_path: Path | str | None = None
-
-    def query(self, *, query: str, allowed_paths: Sequence[str], limit: int) -> Mapping[str, Any]:
-        started = time.monotonic()
-        previous_readonly = os.environ.get("HOLOINDEX_QUERY_READONLY")
-        os.environ["HOLOINDEX_QUERY_READONLY"] = "1"
-        ssd_path = Path(self.ssd_path or os.getenv("HOLOINDEX_SSD_PATH") or "E:/HoloIndex")
-        binding = load_generation_binding(ssd_path=ssd_path, receipt_path=self.freshness_receipt_path)
-        try:
-            from holo_index.core.holo_index import HoloIndex
-
-            original_logger = getattr(HoloIndex, "_log_agent_action", None)
-            try:
-                setattr(HoloIndex, "_log_agent_action", lambda *args, **kwargs: None)
-                index = HoloIndex(ssd_path=str(ssd_path), quiet=True)
-                result = index.search(str(query or ""), limit=max(1, min(int(limit or 8), 20)))
-            finally:
-                if original_logger is not None:
-                    setattr(HoloIndex, "_log_agent_action", original_logger)
-        except Exception as exc:
-            return {
-                "ok": False,
-                "source": "holoindex",
-                "query": str(query or ""),
-                "freshness": "UNKNOWN",
-                "hits": [],
-                "error": f"holoindex_query_failed:{type(exc).__name__}",
-                "latency_ms": int((time.monotonic() - started) * 1000),
-                "no_holoindex_reindex_performed": True,
-                **binding,
-            }
-        finally:
-            if previous_readonly is None:
-                os.environ.pop("HOLOINDEX_QUERY_READONLY", None)
-            else:
-                os.environ["HOLOINDEX_QUERY_READONLY"] = previous_readonly
-        hits = _holoindex_hits(result)
-        return {
-            "ok": True,
-            "source": "holoindex",
-            "query": str(query or ""),
-            "freshness": "CURRENT",
-            "hits": hits[: max(1, min(int(limit or 8), 20))],
-            "error": "",
-            "latency_ms": int((time.monotonic() - started) * 1000),
-            "no_holoindex_reindex_performed": True,
-            **binding,
-        }
+        return self.adapter.query(
+            query=query,
+            allowed_paths=self.allowed_paths,
+            limit=8,
+        )
 
 
 @dataclass(frozen=True)
@@ -478,6 +433,7 @@ def execute_model_backed_repo_code_audit(
         assignment=assignment,
         allocation=allocation,
         allocation_digest=allocation_digest,
+        seed_targets=seed_targets,
     )
     if binding_reasons:
         return _reject(binding_reasons)
@@ -499,11 +455,17 @@ def execute_model_backed_repo_code_audit(
         return _reject([ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED])
 
     query = _repo_audit_query(assignment=assignment, seed_targets=seed_targets)
+    discovery_targets = tuple(dict.fromkeys(
+        (
+            *tuple(seed_targets),
+            *tuple(str(value) for value in assignment.get("allowed_read_targets", ())),
+        )
+    ))
     holo_receipt = _query_index(
         adapter=holoindex_adapter or HoloIndexReadOnlyQueryAdapter(repo_root),
         source="holoindex",
         query=query,
-        allowed_paths=(),
+        allowed_paths=discovery_targets,
     )
     holo_reject = _query_rejection_reason(holo_receipt)
     if holo_reject:
@@ -511,7 +473,7 @@ def execute_model_backed_repo_code_audit(
 
     candidate_paths = _candidate_paths(
         seed_targets=seed_targets,
-        discovered_paths=_paths_from_query_receipt(holo_receipt),
+        discovered_paths=paths_from_query_receipt(holo_receipt),
     )
     if not candidate_paths:
         return _reject([ReadOnlyAuditTaskRejectReason.INDEX_QUERY_NO_CANDIDATES])
@@ -519,9 +481,17 @@ def execute_model_backed_repo_code_audit(
         repo_root=repo_root,
         seed_targets=seed_targets,
         candidate_paths=candidate_paths,
+        allowed_targets=discovery_targets,
     )
     if read_reject:
         return _reject([read_reject])
+    repository_state = _repository_state_bound_to_holo_receipt(
+        repo_root=repo_root,
+        holo_receipt=holo_receipt,
+        timeout_seconds=timeout_seconds,
+    )
+    if repository_state is None:
+        return _reject([ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED])
     evidence_refs = tuple(_evidence_ref(item.evidence) for item in snapshots)
     if not evidence_refs:
         return _reject([ReadOnlyAuditTaskRejectReason.REPORT_MISSING_EVIDENCE])
@@ -582,6 +552,7 @@ def execute_model_backed_repo_code_audit(
         external_research_receipt=external_research_receipt,
         external_research_evidence_bundle=external_research_evidence_bundle,
         model_selection=model_selection,
+        repo_head=repository_state.head_sha,
     )
     try:
         prompt = _build_repo_audit_model_prompt(assignment=assignment, allocation=allocation)
@@ -630,6 +601,14 @@ def execute_model_backed_repo_code_audit(
     if output_reasons:
         return _reject(output_reasons)
 
+    final_repository_state = _repository_state_bound_to_holo_receipt(
+        repo_root=repo_root,
+        holo_receipt=holo_receipt,
+        timeout_seconds=timeout_seconds,
+    )
+    if final_repository_state is None:
+        return _reject([ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED])
+
     report = _build_model_report(
         assignment=assignment,
         snapshots=snapshots,
@@ -646,7 +625,7 @@ def execute_model_backed_repo_code_audit(
         external_research_evidence_bundle=external_research_evidence_bundle,
         model_selection=model_selection,
         task_id=task_id,
-        repo_head=_observe_repo_head(repo_root),
+        repo_head=final_repository_state.head_sha,
     )
     return ReadOnlyAuditTaskExecutionResult(
         accepted=True,
@@ -898,7 +877,13 @@ def _optional_external_research_artifacts(
     try:
         result = ground_reddog_holoindex_first_external_research(
             request,
-            holoindex=_ResearchHoloIndexMemory(holoindex_adapter),
+            holoindex=_ResearchHoloIndexMemory(
+                holoindex_adapter,
+                tuple(
+                    str(value)
+                    for value in assignment.get("allowed_read_targets", ())
+                ),
+            ),
             external_retriever=external_research_retriever,
             now_s=_int_context_value(task_context, assignment, "external_research_now_s"),
         )
@@ -1116,67 +1101,6 @@ def _bounded_index_hits(value: Any) -> list[Mapping[str, Any]]:
     return hits
 
 
-def _holoindex_hits(result: Any) -> list[Mapping[str, Any]]:
-    if not isinstance(result, Mapping):
-        return []
-    hits: list[Mapping[str, Any]] = []
-    for key in (
-        "code_hits",
-        "docs_hits",
-        "test_hits",
-        "skill_hits",
-        "work_ledger_hits",
-        "symbol_hits",
-        "code",
-        "docs",
-        "tests",
-        "skills",
-        "work_ledger",
-    ):
-        value = result.get(key)
-        if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
-            continue
-        for item in value:
-            if not isinstance(item, Mapping):
-                continue
-            path = str(item.get("path") or item.get("file") or item.get("location") or "").replace("\\", "/")
-            if ":" in path:
-                maybe_path = path.split(":", 1)[0]
-                if "/" in maybe_path or "." in maybe_path:
-                    path = maybe_path
-            if not path:
-                continue
-            hits.append(
-                {
-                    "path": path,
-                    "title": str(item.get("title") or item.get("name") or key),
-                    "score": item.get("score") or item.get("final_score") or item.get("distance"),
-                    "digest": str(item.get("digest") or item.get("content_digest") or ""),
-                    "evidence_ref": str(item.get("evidence_ref") or ""),
-                }
-            )
-    seen: set[str] = set()
-    deduped: list[Mapping[str, Any]] = []
-    for hit in hits:
-        path = str(hit.get("path") or "").replace("\\", "/").strip()
-        if not path or path in seen:
-            continue
-        seen.add(path)
-        deduped.append(hit)
-    return deduped
-
-
-def _paths_from_query_receipt(receipt: Mapping[str, Any]) -> tuple[str, ...]:
-    paths: list[str] = []
-    for item in receipt.get("hits") or ():
-        if not isinstance(item, Mapping):
-            continue
-        path = str(item.get("path") or "").replace("\\", "/").strip()
-        if path:
-            paths.append(path)
-    return tuple(dict.fromkeys(paths))
-
-
 def _candidate_paths(*, seed_targets: Sequence[str], discovered_paths: Sequence[str]) -> tuple[str, ...]:
     paths: list[str] = []
     for value in (*tuple(seed_targets), *tuple(discovered_paths)):
@@ -1195,10 +1119,15 @@ def _read_candidate_snapshots(
     repo_root: Path,
     seed_targets: Sequence[str],
     candidate_paths: Sequence[str],
+    allowed_targets: Sequence[str],
 ) -> tuple[tuple[_ReadOnlyTargetSnapshot, ...], str]:
     seed_set = {str(item).replace("\\", "/").strip() for item in seed_targets}
     snapshots: list[_ReadOnlyTargetSnapshot] = []
     for path in candidate_paths:
+        if not path_is_allowed(path, allowed_targets):
+            if path in seed_set:
+                return (), ReadOnlyAuditTaskRejectReason.UNSAFE_TARGET
+            continue
         safe_path = _resolve_safe_target(repo_root, path)
         if safe_path is None:
             if path in seed_set:
@@ -1236,6 +1165,7 @@ def _validate_wsp15_binding(
     assignment: Mapping[str, Any],
     allocation: Mapping[str, Any],
     allocation_digest: str,
+    seed_targets: Sequence[str],
 ) -> tuple[str, ...]:
     receipt_id = str(allocation.get("receipt_id") or "")
     reasons: list[str] = []
@@ -1247,7 +1177,37 @@ def _validate_wsp15_binding(
         reasons.append(ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH)
     if context_digest != allocation_digest or assignment_digest != allocation_digest:
         reasons.append(ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH)
+    assignment_targets = _normalized_read_targets(
+        assignment.get("allowed_read_targets")
+    )
+    allocation_targets = _normalized_read_targets(
+        allocation.get("allowed_read_targets")
+    )
+    normalized_seeds = _normalized_read_targets(seed_targets)
+    if (
+        assignment_targets is None
+        or allocation_targets is None
+        or normalized_seeds is None
+        or assignment_targets != allocation_targets
+        or normalized_seeds != allocation_targets
+    ):
+        reasons.append(ReadOnlyAuditTaskRejectReason.WSP15_BINDING_MISMATCH)
     return tuple(dict.fromkeys(reasons))
+
+
+def _normalized_read_targets(value: Any) -> tuple[str, ...] | None:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        return None
+    normalized: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            return None
+        path = item.replace("\\", "/").strip()
+        while path.startswith("./"):
+            path = path[2:]
+        if path and path not in normalized:
+            normalized.append(path)
+    return tuple(normalized)
 
 
 def _model_selection_binding(value: Any, reasons: list[str]) -> Mapping[str, Any]:
@@ -1369,6 +1329,7 @@ def _model_binding(
     external_research_receipt: Mapping[str, Any] | None = None,
     external_research_evidence_bundle: Mapping[str, Any] | None = None,
     model_selection: Mapping[str, Any] | None = None,
+    repo_head: str,
 ) -> Mapping[str, Any]:
     payload = {
         "schema_version": READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA,
@@ -1385,7 +1346,7 @@ def _model_binding(
         "wsp15_reasoning_tier": str(allocation.get("reasoning_tier") or ""),
         "wsp15_priority": str(allocation.get("priority") or ""),
         "wsp15_worker_plan": dict(allocation.get("worker_plan") or {}),
-        "repo_head": _observe_repo_head(repo_root),
+        "repo_head": repo_head,
         "evidence_refs": [_evidence_ref(item.evidence) for item in snapshots],
         "holoindex_query_receipt_id": holo_receipt.get("receipt_id"),
         "codeindex_query_receipt_id": code_receipt.get("receipt_id"),
@@ -1856,21 +1817,23 @@ def _budgeted_json(value: Mapping[str, Any], max_chars: int) -> str:
     return encoded
 
 
-def _observe_repo_head(repo_root: Path) -> str:
-    git_path = repo_root / ".git"
+def _repository_state_bound_to_holo_receipt(
+    *,
+    repo_root: Path,
+    holo_receipt: Mapping[str, Any],
+    timeout_seconds: int | float,
+) -> RepositoryState | None:
+    expected_head = str(holo_receipt.get("repo_head_sha") or "").strip()
+    if not expected_head:
+        return None
     try:
-        if git_path.is_file():
-            text = git_path.read_text(encoding="utf-8", errors="replace").strip()
-            if text.startswith("gitdir:"):
-                git_path = (repo_root / text.split(":", 1)[1].strip()).resolve()
-        head_path = git_path / "HEAD"
-        head = head_path.read_text(encoding="utf-8", errors="replace").strip()
-        if head.startswith("ref:"):
-            ref_path = git_path / head.split(":", 1)[1].strip()
-            return ref_path.read_text(encoding="utf-8", errors="replace").strip()[:64]
-        return head[:64]
-    except Exception:
-        return "unknown"
+        budget = max(0.1, min(float(timeout_seconds), 5.0))
+        state = read_repository_state(repo_root, timeout_seconds=budget)
+    except (OSError, TypeError, ValueError):
+        return None
+    if not state.proven_clean or state.head_sha != expected_head:
+        return None
+    return state
 
 
 def _load_foundups_fusion_runner() -> Any:

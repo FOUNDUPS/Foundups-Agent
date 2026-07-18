@@ -94,6 +94,67 @@ HoloIndex + **HoloDAE** = Complete autonomous code intelligence system:
 - **Offline Mode** ― run `python holo_index.py --offline --search "..."` to avoid model downloads and auto-install; cached model loads if present, otherwise lexical fallback is used.
 - **Fast Search Mode** ― run `python holo_index.py --offline --fast-search --search "..."` (or set `HOLO_FAST_SEARCH=1`) to skip heavy advisor/orchestration steps for low-latency retrieval.
 
+### Operational Storage and Restricted-Worker Queries (2026-07-18)
+
+HoloIndex storage is resolved once by the canonical contract: explicit
+ssd_path or --ssd, then HOLOINDEX_SSD_PATH, then the legacy HOLO_SSD_PATH,
+then a platform-safe absolute default. Query-only mode requires an existing
+vectors/chroma.sqlite3 and does not create directories, collections, or the
+repository activity log.
+
+Chroma PersistentClient can perform internal SQLite writes even during a
+logical query. The supported RedDog operational adapter therefore does not
+open Chroma directly; it uses the authenticated owner at literal
+`127.0.0.1`. This application/API separation is not an operating-system
+privilege boundary: deployments that require hard isolation must also deny the
+worker OS identity write access to the store. An externally supervised
+deployment configures RedDog with
+HOLOINDEX_QUERY_SERVICE_URL/token; automatic startup instead uses a
+process-private authenticated handoff and never exports its generated token to
+the parent environment. The owner accepts semantic queries only and returns
+CURRENT only when the exact repository HEAD and all seven canonical baseline
+source-scope manifests are proven before and after the query. Every collection
+must also carry the same backend/model/artifact fingerprint used by the live
+query encoder. Phase 1 forces fp32 SentenceTransformer queries, disables the
+generation-unbound SearchCache, and requires restart rather than crossing
+generations. Owner strict-semantic mode rejects collection/model/encode/query
+failure instead of presenting lexical or exact-symbol fallback as semantic.
+
+Maintenance is owned by the trusted host. Startup may route a maintenance
+request through governed WRE dispatch, but neither WRE routing nor the query
+adapter grants a worker direct index-write authority. Use --index or
+--index-all for the exact baseline of code, symbols, WSP, tests, skills, docs,
+and knowledge. Partial refresh receipts update only collections that actually
+succeeded; untouched proof is carried forward or marked UNVERIFIED.
+
+The canonical baseline uses Git-tracked sources only, full raw-content
+manifests, fixed versioned source scopes, and zero recorded source-read, cap,
+or Python-AST failures. Other format parsers retain their documented legacy
+behavior and are not covered by a blanket zero-parse-failure claim.
+Symbol/WSP/web root overrides and caps are diagnostic; they cannot replace a
+canonical complete proof. Work ledger and vocabulary remain optional
+collections outside the seven-collection baseline. Maintenance requires a
+canonical fp32 semantic backend before any collection reset. The offline cache
+resolver accepts only a complete referenced Hugging Face snapshot; blank or
+legacy embedding-space proof triggers a governed refresh instead of READY.
+
+Every CLI or incremental maintenance run must begin from a proven-clean Git
+worktree. It acquires the cross-process maintenance lease and atomically
+publishes an IN_PROGRESS receipt before opening mutable collections. Query
+owners probe that lease before and after retrieval. A final PASS receipt is
+published only after the entire declared collection plan succeeds at the same
+Git HEAD; incomplete plans and receipt-write failures leave the invalidation
+in place and return a nonzero/FAILED result. Phase 1 also assumes an exclusive
+repository-writer window during full refresh. The lease coordinates migrated
+writers only; unleased legacy collection writers and a transient edit/revert
+remain cooperative-writer limitations.
+
+This POC scope covers the RedDog operational consumers wired to the owner
+adapter. The legacy `modules/infrastructure/foundups_mcp_bridge/src/holo_tools.py`
+surface still opens the persistent store directly and is registered for a
+separate migration; it is not evidence that every HoloIndex consumer now uses
+the owner.
+
 ### Agentic Output Stream (WSP 87/75/90)
 - **Throttled Sections**: AgenticOutputThrottler now enforces `max_sections` automatically; additional sections are suppressed with an inline hint to re-run with `--verbose`.
 - **ASCII-Only Signals**: Success/error banners are pure ASCII (`[GREEN]`, `[YELLOW]`, `[ERROR]`) so Unicode scrubbers stay dormant by default.
@@ -149,9 +210,13 @@ When 0102 runs a search, HoloDAE executes current features (health checks, vibec
 | `HOLO_SYMBOL_AUTO` | `1` | Auto-index symbols during `--index-code`. Set `0` to skip. |
 | `HOLO_INDEX_WEB` | `1` | Include web assets in code index during `--index-code`. |
 | `HOLO_WEB_INDEX_ROOTS` | `public` | Semicolon-separated roots for web indexing (relative or absolute). |
-| `HOLO_WEB_INDEX_EXTENSIONS` | `.html;.js;.mjs;.cjs;.css` | File extensions indexed as web assets. |
-| `HOLO_WEB_INDEX_MAX_FILES` | `300` | Max web files indexed per refresh. |
+| `HOLO_WEB_INDEX_EXTENSIONS` | `.html;.js;.mjs;.cjs;.jsx;.ts;.tsx;.css` | File extensions indexed as web assets. |
+| `HOLO_WEB_INDEX_MAX_FILES` | `0` | Uncapped by default. A positive cap makes a targeted run diagnostic/incomplete and cannot publish canonical proof. |
 | `HOLO_WEB_INDEX_MAX_CHARS` | `5000` | Max normalized content chars embedded per web file. |
+
+These source-shaping variables apply to targeted diagnostics. Trusted
+--index-all uses the canonical tracked source policy; its manifest always
+hashes full raw file content even when the embedded snippet is bounded.
 
 ### [MEMORY] Retrieval Contract (0102 System)
 HoloIndex is the semantic memory retrieval system. It must be self-maintaining and semantic-first.
@@ -213,7 +278,7 @@ python holo_index.py --index-all
 ## Architecture
 ```
 holo_index/
-+-- cli.py                    # Main CLI interface
++-- _cli_main.py              # Main CLI interface
 +-- qwen_advisor/            # AI advisor system
 [U+2502]   +-- advisor.py          # Multi-source intelligence synthesis
 [U+2502]   +-- wsp_master.py       # WSP protocol intelligence

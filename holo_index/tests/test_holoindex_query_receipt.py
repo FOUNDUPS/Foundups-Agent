@@ -38,6 +38,7 @@ def _freshness_receipt() -> HoloIndexFreshnessReceipt:
                 indexed_paths_digest="sha256:paths",
                 removed_paths_digest="sha256:removed",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             )
         ],
     )
@@ -114,3 +115,52 @@ def test_query_receipt_does_not_claim_reindex_or_command_authority() -> None:
     assert receipt["no_holoindex_reindex_performed"] is True
     assert "command" not in receipt
     assert "subprocess" not in receipt
+
+
+def test_query_receipt_preserves_adapter_stale_reasons() -> None:
+    receipt = build_query_receipt(
+        source="holoindex",
+        source_class=SOURCE_CLASS_HOLOINDEX,
+        query="WSP 97 evidence",
+        result={
+            "ok": True,
+            "freshness": "STALE",
+            "hits": [{"path": "WSP_framework/src/WSP_97_Truth_Boundary_Protocol.md"}],
+            "stale_reasons": [
+                "stale_repo_head_sha",
+                "collection_verification_not_pass:navigation_wsp",
+                "stale_repo_head_sha",
+            ],
+            "freshness_generation_id": "sha256:generation",
+            "freshness_receipt_digest": "sha256:freshness",
+        },
+        require_generation=True,
+    )
+
+    assert receipt["ok"] is True
+    assert receipt["freshness"] == "STALE"
+    assert receipt["stale_reasons"] == [
+        "stale_repo_head_sha",
+        "collection_verification_not_pass:navigation_wsp",
+    ]
+    assert receipt["index_gap_detected"] is True
+
+
+def test_stale_query_receipt_sets_index_gap_with_generation_proof() -> None:
+    receipt = build_query_receipt(
+        source="holoindex",
+        source_class=SOURCE_CLASS_HOLOINDEX,
+        query="research evidence",
+        result={
+            "ok": True,
+            "freshness": "STALE",
+            "hits": [],
+            "freshness_generation_id": "sha256:generation",
+            "freshness_receipt_digest": "sha256:freshness",
+        },
+        require_generation=True,
+    )
+
+    assert receipt["freshness_generation_id"] == "sha256:generation"
+    assert receipt["freshness_receipt_digest"] == "sha256:freshness"
+    assert receipt["index_gap_detected"] is True

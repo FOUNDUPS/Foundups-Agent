@@ -104,9 +104,11 @@ def _fresh_holo_receipt(head: str = HEAD):
                 ),
                 embedding_backend="test-embedding",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
             CollectionFreshness(
                 name="navigation_symbols",
+                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
                 count=4,
                 status="indexed",
                 source="ci_targeted_reindex",
@@ -123,6 +125,7 @@ def _fresh_holo_receipt(head: str = HEAD):
                 ),
                 embedding_backend="test-embedding",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
         ],
     )

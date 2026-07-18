@@ -24,6 +24,7 @@ from holo_index.freshness_receipt import (
     freshness_receipt_path,
     write_freshness_receipt,
 )
+from holo_index.source_scope import CANONICAL_SOURCE_SCOPE_IDS
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -76,6 +77,20 @@ def _holo(**counts: int):
 
 
 def _write_receipt(tmp_path: Path, *, sha: str = "abc123", **counts: int) -> Path:
+    complete_manifests = {
+        name: f"sha256:complete-source:{name}"
+        for name in (
+            "navigation_code",
+            "navigation_wsp",
+            "navigation_tests",
+            "navigation_skills",
+            "navigation_symbols",
+            "navigation_docs",
+            "navigation_knowledge",
+            "navigation_work_ledger",
+            "navigation_vocabulary",
+        )
+    }
     receipt = build_freshness_receipt(
         _holo(**counts),
         ssd_path=tmp_path,
@@ -83,6 +98,8 @@ def _write_receipt(tmp_path: Path, *, sha: str = "abc123", **counts: int) -> Pat
         source="ci_test",
         generated_at="2026-07-12T00:00:00+00:00",
         repo_head_sha=sha,
+        refresh_source_manifests=complete_manifests,
+        refresh_source_scopes=CANONICAL_SOURCE_SCOPE_IDS,
     )
     path = freshness_receipt_path(tmp_path)
     write_freshness_receipt(receipt, path)

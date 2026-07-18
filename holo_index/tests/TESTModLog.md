@@ -1,5 +1,45 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-07-18] HoloIndex / RedDog Operational Truth Boundary POC
+
+**WSP Protocol**: WSP 05, 06, 15, 22, 50, 62, 87, 97
+**Phase**: POC implementation complete; focused validation green; PR pending
+**Agent**: 0102 architect with delegated adversarial workers
+
+**Changes**:
+
+- Added storage precedence/error, read-only no-write, canonical test registry,
+  deterministic CLI selection, clean repository, maintenance lease, atomic
+  receipt, and scoped freshness regressions.
+- Added adversarial incremental tests for legacy ID cleanup, AST symbol schema,
+  exact-path survival, missing/busy maintenance authority, repository races,
+  partial mutation, incomplete collection scope, and final receipt failure.
+- Added source-order coverage proving invalidation begins before mutable
+  HoloIndex initialization and final publication is delegated to the
+  maintenance session.
+- Added canonical source-scope, Git-tracked filtering, full raw web-manifest,
+  cap/read-failure, semantic-preflight, linked-worktree, mixed-registry, and
+  snapshot-only incremental proof regressions.
+- Added embedding artifact/fingerprint, Hugging Face ref and incomplete-cache,
+  prompt timeout return, canonical fp32 maintenance, legacy self-healing,
+  runtime map mismatch, cache-disable, and resident generation-pin regressions.
+- Added strict-owner collection-count and blocking-encode regressions proving
+  swallowed errors or lexical fallback cannot produce CURRENT.
+- Final HoloIndex evidence: storage/source/CLI/embedding/backend 87 passed;
+  freshness/maintenance 143 passed; incremental/work-ledger 109 passed; and
+  machine-contract validation 6 passed (345 total, no failures or skips).
+- Independent owner/client/maintenance/security evidence: 289 passed. These are
+  scoped matrices, not a whole-repository claim.
+
+**Impact**: The test surface is designed to distinguish complete canonical
+maintenance from scoped diagnostics and reject the enumerated false-CURRENT
+paths.
+
+**WSP Compliance**: Assertions require lexical, skipped-source, malformed,
+dirty, raced, and snapshot-only results to remain non-operational. All 81
+changed or added Python files compiled, the machine JSON parsed at exactly 200
+lines, and the WSP_97 execution receipt validated structurally.
+
 ## [2026-04-21] W8 — Core Module Test Coverage Phase 1
 **WSP Protocol**: WSP 5 (Testing Standards), WSP 22 (Documentation)
 

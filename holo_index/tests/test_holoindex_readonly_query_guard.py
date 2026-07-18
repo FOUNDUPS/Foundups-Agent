@@ -26,6 +26,7 @@ def _args(**overrides):
         "index_all": False,
         "index_code": False,
         "index_wsp": False,
+        "index_tests": False,
         "index_symbols": False,
         "index_skills": False,
         "index_cli": False,
@@ -43,6 +44,33 @@ def test_query_mode_sets_readonly_env(monkeypatch) -> None:
     _cli_main._activate_readonly_query_posture(_args(search="RedDog WSP"))
 
     assert os.environ[_cli_main.READONLY_QUERY_ENV] == "1"
+
+
+def test_query_mode_overrides_false_readonly_env(monkeypatch) -> None:
+    monkeypatch.setenv(_cli_main.READONLY_QUERY_ENV, "0")
+
+    _cli_main._activate_readonly_query_posture(_args(search="RedDog WSP"))
+
+    assert os.environ[_cli_main.READONLY_QUERY_ENV] == "1"
+
+
+def test_explicit_auto_refresh_is_not_forced_readonly(monkeypatch) -> None:
+    monkeypatch.delenv(_cli_main.READONLY_QUERY_ENV, raising=False)
+
+    args = _args(search="maintenance query", allow_auto_refresh=True)
+    _cli_main._activate_readonly_query_posture(args)
+
+    assert _cli_main.READONLY_QUERY_ENV not in os.environ
+    assert _cli_main._auto_refresh_allowed(args) is True
+
+
+def test_forced_readonly_still_overrides_auto_refresh(monkeypatch) -> None:
+    monkeypatch.setenv(_cli_main.READONLY_QUERY_ENV, "1")
+
+    args = _args(search="maintenance query", allow_auto_refresh=True)
+    _cli_main._activate_readonly_query_posture(args)
+
+    assert _cli_main._auto_refresh_allowed(args) is False
 
 
 def test_manual_index_without_readonly_env_is_allowed(monkeypatch) -> None:
@@ -107,7 +135,9 @@ def test_cli_help_advertises_auto_refresh_opt_in() -> None:
 
 def test_auto_refresh_branch_is_gated_in_cli_source() -> None:
     source = (REPO_ROOT / "holo_index" / "_cli_main.py").read_text(encoding="utf-8")
-    assert "if holo is not None and _auto_refresh_allowed(args)" in source
+    assert "if not selected_collections and _auto_refresh_allowed(args)" in source
+    assert "if holo is not None and auto_refresh_plan and not selected_collections" in source
+    assert "MaintenanceSession.begin(" in source
     assert "if holo is not None and not (index_code or index_wsp or indexing_awarded)" not in source
 
 

@@ -120,7 +120,11 @@ def test_plan_maps_changed_foundup_paths_to_collections() -> None:
         "navigation_tests",
     ]
     assert {operation.operation for operation in plan.operations} == {OP_UPSERT_PATH}
-    assert all(operation.delete_where == {"foundup_id": "paccess_001"} for operation in plan.operations)
+    assert {
+        operation.delete_where["path"]
+        for operation in plan.operations
+    } == set(plan.changed_paths)
+    assert all("foundup_id" not in operation.delete_where for operation in plan.operations)
     assert all(operation.stable_id.startswith("hidx_") for operation in plan.operations)
     assert plan.no_reindex_performed is True
     assert plan.no_collection_mutation_performed is True
@@ -179,6 +183,10 @@ def test_plan_handles_removed_paths_as_delete_id_operations() -> None:
     assert plan.decision == DECISION_PLANNED
     assert {operation.operation for operation in plan.operations} == {OP_DELETE_PATH_ID}
     assert plan.target_collections == ["navigation_docs", "navigation_symbols"]
+    assert {
+        operation.delete_where["path"]
+        for operation in plan.operations
+    } == set(plan.removed_paths)
 
 
 def test_no_indexable_changes_is_explicit_not_successful_reindex() -> None:

@@ -9,6 +9,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import pytest
+
 from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
 from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
     DEFAULT_BOOTSTRAP_CHANGED_PATHS,
@@ -47,6 +49,9 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _model_selection,
 )
+from modules.infrastructure.foundups_mcp_bridge.src import (
+    reddog_holoindex_owner_bootstrap as owner_bootstrap,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -61,6 +66,20 @@ MODULE_PATH = (
 NOW = "2026-07-14T00:00:00+00:00"
 HEAD = "bd1fe7f6ccb0964107b58d1fb93148f9f6ef7223"
 REVISION = "sha256:work-state-bootstrap"
+OWNER_SERVICE_ENV = {
+    "HOLOINDEX_QUERY_SERVICE_URL": "http://127.0.0.1:8127",
+    "HOLOINDEX_QUERY_SERVICE_TOKEN": "test-owner-service-token-with-strong-length",
+    "REDDOG_HOLOINDEX_AUTO_MAINTENANCE": "0",
+}
+
+
+@pytest.fixture(autouse=True)
+def _configured_owner_health(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        owner_bootstrap,
+        "_configured_owner_health_ready",
+        lambda **_kwargs: True,
+    )
 
 
 def _repo_state() -> dict[str, object]:
@@ -103,9 +122,11 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source_manifest_digest="sha256:work-ledger-manifest",
                 indexed_paths_digest="sha256:work-ledger-paths",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
             CollectionFreshness(
                 name="navigation_symbols",
+                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
                 count=9,
                 status="indexed",
                 source="ci_targeted_reindex",
@@ -114,6 +135,7 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
                 source_manifest_digest="sha256:symbols-manifest",
                 indexed_paths_digest="sha256:symbols-paths",
                 verification="PASS",
+                proof_kind="complete_source_manifest",
             ),
         ],
     )
@@ -876,6 +898,7 @@ def test_main_preflight_runs_explicit_readonly_e2e_runtime(capsys) -> None:
             {
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
                 "REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED": "1",
+                **OWNER_SERVICE_ENV,
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": "O:/state/work_state.json",
                 "HOLOINDEX_FRESHNESS_RECEIPT": "O:/state/holo_receipt.json",
                 "HOLOINDEX_SSD_PATH": "E:/HoloIndex",
@@ -911,6 +934,7 @@ def test_main_preflight_e2e_runtime_reject_is_nonblocking_by_default(capsys) -> 
             {
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
                 "REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED": "1",
+                **OWNER_SERVICE_ENV,
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED": "0",
             },
             clear=True,
@@ -925,16 +949,24 @@ def test_main_preflight_e2e_runtime_reject_is_nonblocking_by_default(capsys) -> 
 def test_main_preflight_e2e_runtime_reject_blocks_when_enforced(capsys) -> None:
     import main
 
-    with patch(
-        "modules.communication.moltbot_bridge.src.reddog_readonly_audit_research_decision_e2e_runtime."
-        "run_reddog_readonly_audit_research_decision_e2e",
-        return_value=_e2e_result(accepted=False),
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src.reddog_readonly_audit_research_decision_e2e_runtime."
+            "run_reddog_readonly_audit_research_decision_e2e",
+            return_value=_e2e_result(accepted=False),
+        ),
+        patch(
+            "modules.infrastructure.foundups_mcp_bridge.src."
+            "reddog_holoindex_main_preflight.run_interactive_owner_preflight",
+            return_value=True,
+        ),
     ):
         with patch.dict(
             "os.environ",
             {
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
                 "REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED": "1",
+                **OWNER_SERVICE_ENV,
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED": "1",
             },
             clear=True,
@@ -1585,6 +1617,7 @@ def test_main_preflight_enables_enqueue_when_openclaw_auto_tasks_enabled() -> No
             {
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
                 "OPENCLAW_AUTO_TASKS_ENABLED": "1",
+                **OWNER_SERVICE_ENV,
             },
             clear=True,
         ):
@@ -1620,6 +1653,7 @@ def test_main_preflight_explicit_enqueue_disable_overrides_openclaw_auto_tasks()
             {
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
                 "OPENCLAW_AUTO_TASKS_ENABLED": "1",
+                **OWNER_SERVICE_ENV,
                 "REDDOG_READONLY_AUDIT_SWARM_ENQUEUE_ENABLED": "0",
             },
             clear=True,
@@ -1656,6 +1690,7 @@ def test_main_preflight_explicit_collection_disable_overrides_openclaw_auto_task
             {
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
                 "OPENCLAW_AUTO_TASKS_ENABLED": "1",
+                **OWNER_SERVICE_ENV,
                 "REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED": "0",
             },
             clear=True,
@@ -1692,6 +1727,7 @@ def test_main_preflight_explicit_decision_persist_disable_overrides_openclaw_aut
             {
                 "REDDOG_READONLY_OPERATIONAL_BOOTSTRAP": "1",
                 "OPENCLAW_AUTO_TASKS_ENABLED": "1",
+                **OWNER_SERVICE_ENV,
                 "REDDOG_READONLY_AUDIT_DECISION_PERSIST_ENABLED": "0",
             },
             clear=True,

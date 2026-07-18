@@ -16,6 +16,7 @@ WSP Compliance: WSP 87 (Size Limits), WSP 72 (Block Independence)
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import logging
 import os
@@ -24,6 +25,16 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+from holo_index.source_scope import (
+    CANONICAL_WEB_EXTENSIONS,
+    CANONICAL_WEB_RELATIVE_ROOTS,
+    CANONICAL_WSP_RELATIVE_ROOTS,
+    CanonicalSourceScopeError,
+    canonical_source_scope_id,
+    filter_git_tracked_files,
+    normalized_relative_roots,
+)
 
 if TYPE_CHECKING:
     from .holo_index import HoloIndex
@@ -50,6 +61,10 @@ class IndexResult:
     indexed_count: int
     collection_name: str
     warning: Optional[str] = None
+    processed_count: Optional[int] = None
+    failed_count: int = 0
+    source_manifest_digest: str = ""
+    source_scope_id: str = ""
 
     @property
     def is_empty(self) -> bool:
@@ -60,6 +75,52 @@ class IndexResult:
     def success(self) -> bool:
         """True if at least one document was indexed."""
         return self.indexed_count > 0
+
+    @property
+    def complete(self) -> bool:
+        """True only when every discovered source was accounted for."""
+        return bool(
+            self.success
+            and self.processed_count == self.discovered_count
+            and self.failed_count == 0
+            and self.source_manifest_digest
+        )
+
+
+def source_manifest_digest(value: Any) -> str:
+    """Return a deterministic digest for an indexer's declared source set."""
+
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        default=str,
+    )
+    return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def source_file_manifest_digest(
+    files: List[Path],
+    *,
+    project_root: Path,
+) -> str:
+    """Hash the complete bytes and normalized path of every declared source."""
+
+    entries = []
+    for path in files:
+        resolved = path.resolve(strict=False)
+        try:
+            normalized = resolved.relative_to(project_root.resolve()).as_posix()
+        except ValueError:
+            normalized = resolved.as_posix()
+        entries.append(
+            {
+                "path": normalized,
+                "content_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+        )
+    return source_manifest_digest(entries)
 
 # ---------------------------------------------------------------------------
 # Federation metadata helpers (HIA Federation Phase 2)
@@ -307,6 +368,19 @@ def _calculate_document_priority(doc_type: str, file_path: Path) -> int:
 # Web asset helpers
 # ---------------------------------------------------------------------------
 
+@dataclass(frozen=True)
+class WebAssetDiscovery:
+    """Web-source discovery plus complete raw-byte evidence."""
+
+    entries: List[Dict[str, str]]
+    discovered_count: int
+    processed_count: int
+    failed_count: int
+    source_manifest_digest: str
+    source_scope_id: str
+    warning: str = ""
+
+
 def _resolve_web_index_roots(holo: "HoloIndex") -> List[Path]:
     """Resolve web asset roots for semantic indexing."""
     roots_env = os.getenv("HOLO_WEB_INDEX_ROOTS", "public")
@@ -322,79 +396,245 @@ def _resolve_web_index_roots(holo: "HoloIndex") -> List[Path]:
     return roots
 
 
-def _collect_web_asset_entries(holo: "HoloIndex") -> List[Dict[str, str]]:
-    """Collect HTML/JS/CSS assets so UI artifacts are semantically retrievable."""
-    enabled = os.getenv("HOLO_INDEX_WEB", "1").lower() in {"1", "true", "yes", "on"}
-    if not enabled:
-        return []
+def _web_index_extensions() -> frozenset[str]:
+    raw = os.getenv(
+        "HOLO_WEB_INDEX_EXTENSIONS",
+        ";".join(sorted(CANONICAL_WEB_EXTENSIONS)),
+    )
+    values = frozenset(ext.strip().lower() for ext in raw.split(";") if ext.strip())
+    return values or CANONICAL_WEB_EXTENSIONS
 
-    roots = _resolve_web_index_roots(holo)
-    if not roots:
-        return []
 
-    extensions_env = os.getenv("HOLO_WEB_INDEX_EXTENSIONS", ".html;.js;.mjs;.cjs;.css")
-    allowed_extensions = {
-        ext.strip().lower() for ext in extensions_env.split(";") if ext.strip()
-    }
-    if not allowed_extensions:
-        allowed_extensions = {".html", ".js", ".mjs", ".cjs", ".css"}
+def _web_index_limit(name: str, default: int) -> tuple[int, bool]:
+    raw = os.getenv(name, str(default)).strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        return default, False
+    return max(0, value), value >= 0
 
-    max_files = int(os.getenv("HOLO_WEB_INDEX_MAX_FILES", "300"))
-    max_chars = int(os.getenv("HOLO_WEB_INDEX_MAX_CHARS", "5000"))
+
+def _discover_web_asset_files(
+    roots: List[Path],
+    allowed_extensions: frozenset[str],
+) -> List[Path]:
     skip_dirs = {
         ".git", "__pycache__", "node_modules", "dist", "build", ".next", "coverage"
     }
-
-    entries: List[Dict[str, str]] = []
+    files: set[Path] = set()
     for root in roots:
-        if len(entries) >= max_files:
-            break
         if not root.exists() or not root.is_dir():
             continue
-
         for file_path in root.rglob("*"):
-            if len(entries) >= max_files:
-                break
-            if not file_path.is_file():
-                continue
-            if file_path.suffix.lower() not in allowed_extensions:
-                continue
-            if any(part in skip_dirs for part in file_path.parts):
-                continue
+            if (
+                file_path.is_file()
+                and file_path.suffix.lower() in allowed_extensions
+                and not any(part in skip_dirs for part in file_path.parts)
+            ):
+                files.add(file_path.resolve(strict=False))
+    return sorted(files, key=lambda path: path.as_posix().casefold())
 
-            try:
-                raw_text = file_path.read_text(encoding="utf-8", errors="ignore")
-            except Exception:
-                continue
-            if not raw_text.strip():
-                continue
 
-            normalized = re.sub(r"\s+", " ", raw_text).strip()
-            snippet = normalized[:max_chars]
-            try:
-                location = str(file_path.relative_to(holo.project_root)).replace("\\", "/")
-            except ValueError:
-                location = str(file_path).replace("\\", "/")
-
-            token_hint = re.sub(r"[_\\-\\.]+", " ", file_path.stem).strip()
-            need = f"web asset {file_path.name}"
-            keyword_excerpt = snippet[:1200]
-            summary = f"{location} ({file_path.suffix.lower()}) {snippet[:240]}"
-            payload = (
-                f"Web asset path: {location}\n"
-                f"Filename: {file_path.name}\n"
-                f"Token hint: {token_hint}\n"
-                f"Content: {snippet}"
+def _web_asset_entry(
+    *,
+    file_path: Path,
+    raw_bytes: bytes,
+    project_root: Path,
+    max_chars: int,
+) -> Dict[str, str] | None:
+    raw_text = raw_bytes.decode("utf-8", errors="ignore")
+    if not raw_text.strip():
+        return None
+    normalized = re.sub(r"\s+", " ", raw_text).strip()
+    snippet = normalized[:max_chars]
+    try:
+        location = file_path.relative_to(project_root).as_posix()
+    except ValueError:
+        location = file_path.as_posix()
+    token_hint = re.sub(r"[_\-\.]+", " ", file_path.stem).strip()
+    return {
+        "need": f"web asset {file_path.name}",
+        "location": location,
+        "summary": f"{location} ({file_path.suffix.lower()}) {snippet[:240]}",
+        "keywords": snippet[:1200],
+        "payload": chr(10).join(
+            (
+                f"Web asset path: {location}",
+                f"Filename: {file_path.name}",
+                f"Token hint: {token_hint}",
+                f"Content: {snippet}",
             )
-            entries.append({
-                "need": need,
-                "location": location,
-                "summary": summary,
-                "keywords": keyword_excerpt,
-                "payload": payload,
-            })
+        ),
+    }
 
-    return entries
+
+def _web_scope_id(
+    holo: "HoloIndex",
+    roots: List[Path],
+    extensions: frozenset[str],
+    *,
+    enabled: bool,
+    max_files: int,
+    max_chars: int,
+    valid_limits: bool,
+) -> str:
+    canonical_roots = tuple(sorted(CANONICAL_WEB_RELATIVE_ROOTS))
+    actual_roots = normalized_relative_roots(holo.project_root, roots)
+    if (
+        enabled
+        and actual_roots == canonical_roots
+        and extensions == CANONICAL_WEB_EXTENSIONS
+        and max_files == 0
+        and max_chars == 5000
+        and valid_limits
+    ):
+        return canonical_source_scope_id("navigation_code")
+    return ""
+
+
+def _tracked_web_files(
+    holo: "HoloIndex",
+    files: List[Path],
+    scope_id: str,
+) -> tuple[List[Path], str, bool]:
+    if not scope_id:
+        return files, scope_id, False
+    try:
+        return filter_git_tracked_files(holo.project_root, files), scope_id, False
+    except CanonicalSourceScopeError:
+        return files, "", True
+
+
+def _scan_web_asset_files(
+    holo: "HoloIndex",
+    files: List[Path],
+    selected: List[Path],
+    *,
+    max_chars: int,
+) -> tuple[List[Dict[str, str]], List[Dict[str, str]], int, int]:
+    entries: List[Dict[str, str]] = []
+    manifest_entries: List[Dict[str, str]] = []
+    read_failed = 0
+    processed = 0
+    selected_keys = {os.path.normcase(str(path)) for path in selected}
+    for file_path in files:
+        try:
+            raw_bytes = file_path.read_bytes()
+        except OSError:
+            read_failed += 1
+            continue
+        try:
+            location = file_path.relative_to(holo.project_root).as_posix()
+        except ValueError:
+            location = file_path.as_posix()
+        manifest_entries.append(
+            {
+                "path": location,
+                "content_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+            }
+        )
+        if os.path.normcase(str(file_path)) not in selected_keys:
+            continue
+        processed += 1
+        entry = _web_asset_entry(
+            file_path=file_path,
+            raw_bytes=raw_bytes,
+            project_root=holo.project_root,
+            max_chars=max_chars,
+        )
+        if entry is not None:
+            entries.append(entry)
+    return entries, manifest_entries, read_failed, processed
+
+
+def _web_discovery_warnings(
+    *,
+    truncated: bool,
+    tracking_failed: bool,
+    read_failed: int,
+    scope_id: str,
+) -> str:
+    warnings = []
+    if truncated:
+        warnings.append("web source file cap truncated the declared source set")
+    if tracking_failed:
+        warnings.append("Git tracking for web sources could not be proven")
+    if read_failed:
+        warnings.append(f"failed to read {read_failed} web source files")
+    if not scope_id:
+        warnings.append("web source policy is not canonical")
+    return "; ".join(warnings)
+
+
+def _discover_web_assets(holo: "HoloIndex") -> WebAssetDiscovery:
+    enabled = os.getenv("HOLO_INDEX_WEB", "1").lower() in {"1", "true", "yes", "on"}
+    roots = _resolve_web_index_roots(holo)
+    extensions = _web_index_extensions()
+    max_files, valid_file_limit = _web_index_limit("HOLO_WEB_INDEX_MAX_FILES", 0)
+    max_chars, valid_char_limit = _web_index_limit("HOLO_WEB_INDEX_MAX_CHARS", 5000)
+    scope_id = _web_scope_id(
+        holo,
+        roots,
+        extensions,
+        enabled=enabled,
+        max_files=max_files,
+        max_chars=max_chars,
+        valid_limits=valid_file_limit and valid_char_limit,
+    )
+    files = _discover_web_asset_files(roots, extensions) if enabled else []
+    files, scope_id, tracking_failed = _tracked_web_files(holo, files, scope_id)
+    selected = files[:max_files] if max_files else files
+    entries, manifest_entries, read_failed, processed = _scan_web_asset_files(
+        holo,
+        files,
+        selected,
+        max_chars=max_chars,
+    )
+    warning = _web_discovery_warnings(
+        truncated=len(selected) != len(files),
+        tracking_failed=tracking_failed,
+        read_failed=read_failed,
+        scope_id=scope_id,
+    )
+    return WebAssetDiscovery(
+        entries=entries,
+        discovered_count=len(files),
+        processed_count=processed,
+        failed_count=read_failed + int(tracking_failed),
+        source_manifest_digest=source_manifest_digest(manifest_entries),
+        source_scope_id=scope_id,
+        warning=warning,
+    )
+
+
+def _navigation_source_evidence(
+    holo: "HoloIndex",
+) -> tuple[str, int, str]:
+    navigation_path = holo.project_root / "NAVIGATION.py"
+    try:
+        tracked = filter_git_tracked_files(
+            holo.project_root,
+            [navigation_path] if navigation_path.is_file() else [],
+        )
+    except CanonicalSourceScopeError:
+        return "", 1, "Git tracking for NAVIGATION.py could not be proven"
+    if tracked != [navigation_path.resolve(strict=False)]:
+        return "", 1, "Canonical NAVIGATION.py is missing or not tracked"
+    try:
+        content_digest = hashlib.sha256(navigation_path.read_bytes()).hexdigest()
+    except OSError:
+        return "", 1, "Canonical NAVIGATION.py could not be read"
+    return source_manifest_digest(
+        {
+            "path": "NAVIGATION.py",
+            "content_sha256": content_digest,
+        }
+    ), 0, ""
+
+
+def _collect_web_asset_entries(holo: "HoloIndex") -> List[Dict[str, str]]:
+    """Collect HTML/JS/CSS assets so UI artifacts are semantically retrievable."""
+    return _discover_web_assets(holo).entries
 
 
 # ---------------------------------------------------------------------------
@@ -408,9 +648,11 @@ def index_code_entries(holo: "HoloIndex") -> IndexResult:
     for CLI observability parity with index_docs_entries().
     """
     collection_name = "navigation_code"
-    nav_entries = list(holo.need_to.items())
-    web_assets = _collect_web_asset_entries(holo)
-    discovered_count = len(nav_entries) + len(web_assets)
+    nav_entries = sorted(holo.need_to.items())
+    web_discovery = _discover_web_assets(holo)
+    nav_manifest, nav_failed, nav_warning = _navigation_source_evidence(holo)
+    web_assets = web_discovery.entries
+    discovered_count = len(nav_entries) + web_discovery.discovered_count
 
     if not nav_entries and not web_assets:
         holo._log_agent_action("No code or web entries to index", "WARN")
@@ -477,146 +719,86 @@ def index_code_entries(holo: "HoloIndex") -> IndexResult:
     holo.code_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
     holo._log_agent_action("Code index refreshed on SSD", "OK")
 
-    # Also index symbols for self-maintaining semantic search (opt-in)
-    if os.getenv("HOLO_INDEX_SYMBOLS", "0").lower() in {"1", "true", "yes", "on"}:
-        try:
-            index_symbol_entries(holo)
-        except Exception as exc:
-            holo._log_agent_action(f"Symbol index skipped: {exc}", "WARN")
-
     return IndexResult(
         discovered_count=discovered_count,
         indexed_count=indexed_count,
         collection_name=collection_name,
+        warning="; ".join(
+            value for value in (web_discovery.warning, nav_warning) if value
+        ) or None,
+        processed_count=len(nav_entries) + web_discovery.processed_count,
+        failed_count=web_discovery.failed_count + nav_failed,
+        source_manifest_digest=source_manifest_digest(
+            {
+                "navigation": nav_entries,
+                "navigation_source_manifest": nav_manifest,
+                "web_asset_source_manifest": web_discovery.source_manifest_digest,
+            }
+        ),
+        source_scope_id=(
+            web_discovery.source_scope_id
+            if nav_failed == 0
+            else ""
+        ),
     )
 
 
 def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) -> IndexResult:
-    """Index Python symbols (functions/classes) for semantic discovery.
+    """Delegate complete symbol maintenance to the focused indexer."""
 
-    HIA6A: Critical infrastructure paths are listed first to ensure they're
-    indexed before the 20,000 entry limit is hit. Order matters because
-    modules/ alone has 2350+ files with many symbols.
+    from holo_index.symbol_indexer import index_symbol_entries as _index_symbols
 
-    HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Returns IndexResult
-    for CLI observability parity with index_docs_entries().
-    """
-    collection_name = "navigation_symbols"
-    env_roots = os.getenv("HOLO_SYMBOL_ROOTS")
-    if env_roots:
-        roots = [holo.project_root / Path(r.strip()) for r in env_roots.split(";") if r.strip()]
-    else:
-        # HIA6A: Priority ordering ensures critical files are indexed first:
-        # - holo_index/core: search_engine.py (core search infrastructure)
-        # - wre_core/src: foundup_job_router.py (job routing)
-        # - Then bulk directories fill remaining slots
-        roots = roots or [
-            holo.project_root / "holo_index" / "core",                      # P1: search infrastructure
-            holo.project_root / "modules" / "infrastructure" / "wre_core" / "src",  # P1: job routing
-            holo.project_root / "modules",                                  # P2: bulk modules
-            holo.project_root / "scripts",                                  # P3: scripts
-            holo.project_root / "holo_index",                               # P3: remaining holo_index
-        ]
+    return _index_symbols(holo, roots)
 
-    max_files = int(os.getenv("HOLO_SYMBOL_MAX_FILES", "5000"))
-    max_entries = int(os.getenv("HOLO_SYMBOL_MAX_ENTRIES", "20000"))
-    skip_dirs = {
-        ".git", ".venv", "venv", "__pycache__", "node_modules",
-        "dist", "build", ".mypy_cache", ".pytest_cache",
-    }
 
-    holo._log_agent_action("Indexing symbol entries (functions/classes)...", "INDEX")
-    holo.symbol_collection = holo._reset_collection("navigation_symbols")
+def _wsp_source_roots(
+    holo: "HoloIndex",
+    paths: Optional[List[Path]],
+) -> List[Path]:
+    values = (
+        [Path(value) for value in CANONICAL_WSP_RELATIVE_ROOTS]
+        if paths is None
+        else [Path(value) for value in paths]
+    )
+    return [
+        value if value.is_absolute() else holo.project_root / value
+        for value in values
+    ]
 
-    ids: List[str] = []
-    embeddings: List[List[float]] = []
-    documents: List[str] = []
-    metadatas: List[Dict[str, Any]] = []
 
-    file_count = 0
-    entry_count = 0
-
+def _wsp_source_set(
+    holo: "HoloIndex",
+    paths: Optional[List[Path]],
+) -> tuple[List[Path], str, str]:
+    roots = _wsp_source_roots(holo, paths)
+    canonical_roots = tuple(sorted(CANONICAL_WSP_RELATIVE_ROOTS))
+    scope_id = (
+        canonical_source_scope_id("navigation_wsp")
+        if normalized_relative_roots(holo.project_root, roots) == canonical_roots
+        else ""
+    )
+    files: List[Path] = []
     for root in roots:
         if not root.exists():
+            holo._log_agent_action(f"WSP path not found: {root}", "WARN")
             continue
-        for path in root.rglob("*.py"):
-            if any(part in skip_dirs for part in path.parts):
-                continue
-            file_count += 1
-            if file_count > max_files:
-                break
-            try:
-                text = path.read_text(encoding="utf-8", errors="ignore")
-                tree = ast.parse(text)
-            except Exception:
-                continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                    name = node.name
-                    if isinstance(node, ast.ClassDef):
-                        symbol = f"class {name}"
-                    else:
-                        args = []
-                        for a in getattr(node, "args", []).args:
-                            if hasattr(a, "arg"):
-                                args.append(a.arg)
-                        sig = ", ".join(args[:8])
-                        symbol = f"{name}({sig})"
-                    doc = ast.get_docstring(node) or ""
-                    line_no = getattr(node, "lineno", None)
-                    doc_text = f"{symbol}\n{doc}\n{path}:{line_no or 1}"
-
-                    sym_fed = resolve_foundup_metadata(path, holo.project_root)
-                    ids.append(f"sym_{len(ids)+1}")
-                    embeddings.append(holo._get_embedding(doc_text))
-                    documents.append(doc_text)
-                    metadatas.append({
-                        "symbol": symbol,
-                        "path": str(path),
-                        "line": int(line_no) if line_no else 1,
-                        "type": "symbol",
-                        "foundup_id": sym_fed["foundup_id"],
-                        "tenant_id": sym_fed["tenant_id"],
-                        "source_scope": sym_fed["source_scope"],
-                        "external_repo": sym_fed["external_repo"],
-                    })
-
-                    entry_count += 1
-                    if entry_count >= max_entries:
-                        break
-                if entry_count >= max_entries:
-                    break
-            if entry_count >= max_entries:
-                break
-        if entry_count >= max_entries:
-            break
-
-    if ids:
-        # ChromaDB has a max batch size (~5000). Batch to avoid InternalError.
-        batch_size = 5000
-        for start in range(0, len(ids), batch_size):
-            end = start + batch_size
-            holo.symbol_collection.add(
-                ids=ids[start:end],
-                embeddings=embeddings[start:end],
-                documents=documents[start:end],
-                metadatas=metadatas[start:end],
-            )
-        holo._log_agent_action(f"Symbol index refreshed: {entry_count} entries", "OK")
-        return IndexResult(
-            discovered_count=file_count,
-            indexed_count=entry_count,
-            collection_name=collection_name,
+        files.extend(sorted(root.glob("WSP_*.md")))
+    files = [
+        path
+        for path in files
+        if not any(
+            _has_dotfile_in_relative_path(path, root)
+            for root in roots
+            if path.is_relative_to(root)
         )
-    else:
-        holo._log_agent_action("Symbol index empty - no entries added", "WARN")
-        return IndexResult(
-            discovered_count=file_count,
-            indexed_count=0,
-            collection_name=collection_name,
-            warning="Symbol index empty — no entries added"
-        )
+        and "_backup" not in str(path).lower()
+    ]
+    if not scope_id:
+        return files, "", ""
+    try:
+        return filter_git_tracked_files(holo.project_root, files), scope_id, ""
+    except CanonicalSourceScopeError as exc:
+        return files, "", str(exc)
 
 
 def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> IndexResult:
@@ -636,25 +818,17 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
         and optional warning message.
     """
     collection_name = "navigation_wsp"
-    # CFZ4: WSP protocols from specified paths or default to WSP_framework/src
-    if paths is None:
-        wsp_roots = [holo.project_root / "WSP_framework" / "src"]
-    else:
-        wsp_roots = [Path(p) if not isinstance(p, Path) else p for p in paths]
-
-    # Collect WSP_*.md files from all roots
-    all_wsp_files: List[Path] = []
-    for wsp_root in wsp_roots:
-        if not wsp_root.exists():
-            holo._log_agent_action(f"WSP path not found: {wsp_root}", "WARN")
-            continue
-        # CFZ4 purity: Only WSP_*.md files, even from custom paths
-        all_wsp_files.extend(sorted(wsp_root.glob("WSP_*.md")))
-    files = [
-        f for f in all_wsp_files
-        if not any(part.startswith('.') for part in f.parts)
-        and '_backup' not in str(f).lower()
-    ]
+    files, scope_id, source_error = _wsp_source_set(holo, paths)
+    if source_error:
+        return IndexResult(
+            discovered_count=len(files),
+            indexed_count=0,
+            collection_name=collection_name,
+            warning=source_error,
+            processed_count=0,
+            failed_count=1,
+            source_scope_id="",
+        )
 
     discovered_count = len(files)
 
@@ -665,6 +839,22 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
             indexed_count=0,
             collection_name=collection_name,
             warning="No WSP documents found to index"
+        )
+
+    try:
+        manifest_digest = source_file_manifest_digest(
+            files,
+            project_root=holo.project_root,
+        )
+    except OSError as exc:
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning=f"WSP source manifest read failed: {exc}",
+            processed_count=0,
+            failed_count=1,
+            source_scope_id=scope_id,
         )
 
     holo._log_agent_action(f"Indexing {len(files)} WSP documents...", "INDEX")
@@ -733,6 +923,9 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
             discovered_count=discovered_count,
             indexed_count=indexed_count,
             collection_name=collection_name,
+            processed_count=discovered_count,
+            source_manifest_digest=manifest_digest,
+            source_scope_id=scope_id,
         )
     else:
         holo._log_agent_action("No WSP entries were indexed (empty content)", "WARN")
@@ -788,6 +981,7 @@ def index_docs_entries(holo: "HoloIndex") -> IndexResult:
                 # because the relative-path check ignores parent directories above base.
             ]
             files.extend(filtered_files)
+    files = filter_git_tracked_files(holo.project_root, files)
 
     discovered_count = len(files)
 
@@ -799,6 +993,11 @@ def index_docs_entries(holo: "HoloIndex") -> IndexResult:
             collection_name=collection_name,
             warning="No docs found to index \u2014 discovery returned zero files"
         )
+
+    manifest_digest = source_file_manifest_digest(
+        files,
+        project_root=holo.project_root,
+    )
 
     holo._log_agent_action(f"Indexing {len(files)} docs into navigation_docs...", "INDEX")
     holo.docs_collection = holo._reset_collection("navigation_docs")
@@ -852,6 +1051,9 @@ def index_docs_entries(holo: "HoloIndex") -> IndexResult:
             discovered_count=discovered_count,
             indexed_count=indexed_count,
             collection_name=collection_name,
+            processed_count=discovered_count,
+            source_manifest_digest=manifest_digest,
+            source_scope_id=canonical_source_scope_id(collection_name),
         )
     else:
         holo._log_agent_action("No docs entries were indexed", "WARN")
@@ -942,11 +1144,12 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
     all_files = sorted(knowledge_path.rglob("*.md"))
     files = [
         f for f in all_files
-        if not any(part.startswith('.') for part in f.parts)
+        if not _has_dotfile_in_relative_path(f, knowledge_path)
         and '_backup' not in str(f).lower()
         and '/archive/' not in str(f).lower()
         and '\\archive\\' not in str(f).lower()
     ]
+    files = filter_git_tracked_files(holo.project_root, files)
 
     discovered_count = len(files)
 
@@ -958,6 +1161,11 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
             collection_name=collection_name,
             warning="No knowledge files found to index"
         )
+
+    manifest_digest = source_file_manifest_digest(
+        files,
+        project_root=holo.project_root,
+    )
 
     holo._log_agent_action(f"Indexing {len(files)} papers into navigation_knowledge...", "INDEX")
     holo.knowledge_collection = holo._reset_collection("navigation_knowledge")
@@ -1036,6 +1244,9 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
             discovered_count=discovered_count,
             indexed_count=indexed_count,
             collection_name=collection_name,
+            processed_count=discovered_count,
+            source_manifest_digest=manifest_digest,
+            source_scope_id=canonical_source_scope_id(collection_name),
         )
     else:
         holo._log_agent_action("No knowledge entries were indexed", "WARN")
@@ -1047,62 +1258,12 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
         )
 
 
-def index_test_registry(holo: "HoloIndex") -> None:
-    """WSP 98: Ingest the WSP Test Registry into ChromaDB for semantic search."""
-    registry_path = holo.project_root / "WSP_knowledge" / "WSP_Test_Registry.json"
+def index_test_registry(holo: "HoloIndex") -> IndexResult:
+    """Delegate canonical registry maintenance to the focused indexer."""
 
-    if not registry_path.exists():
-        holo._log_agent_action("WSP_Test_Registry.json not found", "WARN")
-        return
+    from holo_index.test_registry_indexer import index_test_registry as _index_tests
 
-    try:
-        registry_data = json.loads(registry_path.read_text(encoding='utf-8'))
-    except Exception as e:
-        holo._log_agent_action(f"Failed to load test registry: {e}", "ERROR")
-        return
-
-    if not registry_data:
-        holo._log_agent_action("WSP Test Registry is empty", "WARN")
-        return
-
-    holo._log_agent_action(f"Indexing {len(registry_data)} test entries...", "INDEX")
-    holo.test_collection = holo._reset_collection("navigation_tests")
-
-    ids, embeddings, documents, metadatas = [], [], [], []
-
-    for idx, entry in enumerate(registry_data.values(), start=1):
-        test_id = entry.get('id', f'test_{idx}')
-        path = entry.get('path', '')
-        description = entry.get('description', '')
-        capabilities = ", ".join(entry.get('capabilities', []))
-        execution_type = entry.get('execution_type', 'unknown')
-
-        doc_payload = f"Test: {test_id}\nType: {execution_type}\nCapabilities: {capabilities}\nDescription: {description}"
-
-        ids.append(f"test_{idx}")
-        embeddings.append(holo._get_embedding(doc_payload))
-        documents.append(doc_payload)
-
-        test_path = Path(path) if Path(path).is_absolute() else holo.project_root / path
-        test_fed = resolve_foundup_metadata(test_path, holo.project_root)
-        metadatas.append({
-            "test_id": test_id,
-            "path": path,
-            "description": description[:1000],
-            "capabilities": capabilities,
-            "type": "test",
-            "priority": 8,
-            "foundup_id": test_fed["foundup_id"],
-            "tenant_id": test_fed["tenant_id"],
-            "source_scope": test_fed["source_scope"],
-            "external_repo": test_fed["external_repo"],
-        })
-
-    if embeddings:
-        holo.test_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
-        holo._log_agent_action("Test Registry index refreshed on SSD", "OK")
-    else:
-        holo._log_agent_action("No test entries indexed", "WARN")
+    return _index_tests(holo)
 
 
 def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
@@ -1129,6 +1290,7 @@ def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
     for pattern in skillz_patterns:
         found = glob.glob(pattern, recursive=True)
         files.extend(Path(f) for f in found)
+    files = filter_git_tracked_files(holo.project_root, files)
 
     discovered_count = len(files)
 
@@ -1141,10 +1303,15 @@ def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
             warning="No SKILLz files found to index"
         )
 
+    manifest_digest = source_file_manifest_digest(
+        files,
+        project_root=holo.project_root,
+    )
     holo._log_agent_action(f"Indexing {len(files)} SKILLz files...", "INDEX")
     holo.skill_collection = holo._reset_collection("navigation_skills")
 
     ids, embeddings, documents, metadatas = [], [], [], []
+    failed_count = 0
 
     for idx, file_path in enumerate(files, start=1):
         try:
@@ -1206,6 +1373,7 @@ def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
             metadatas.append(metadata)
 
         except Exception as e:
+            failed_count += 1
             holo._log_agent_action(f"Failed to parse SKILLz {file_path}: {e}", "WARN")
             continue
 
@@ -1234,6 +1402,15 @@ def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
             discovered_count=discovered_count,
             indexed_count=indexed_count,
             collection_name=collection_name,
+            warning=(
+                f"Failed to parse {failed_count} SKILLz sources"
+                if failed_count
+                else None
+            ),
+            processed_count=discovered_count,
+            failed_count=failed_count,
+            source_manifest_digest=manifest_digest,
+            source_scope_id=canonical_source_scope_id(collection_name),
         )
     else:
         holo._log_agent_action("No SKILLz entries were indexed", "WARN")
@@ -1342,6 +1519,7 @@ def index_work_ledger_entries(holo: "HoloIndex") -> IndexResult:
             warning="Work ledger has no slices"
         )
 
+    manifest_digest = source_manifest_digest(ledger_data)
     holo._log_agent_action(f"Indexing {len(slices)} work ledger slices...", "INDEX")
     holo.work_ledger_collection = holo._reset_collection("navigation_work_ledger")
 
@@ -1444,6 +1622,8 @@ def index_work_ledger_entries(holo: "HoloIndex") -> IndexResult:
             discovered_count=discovered_count,
             indexed_count=indexed_count,
             collection_name=collection_name,
+            processed_count=discovered_count,
+            source_manifest_digest=manifest_digest,
         )
     else:
         holo._log_agent_action("No work ledger entries were indexed", "WARN")

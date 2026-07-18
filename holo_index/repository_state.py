@@ -1,0 +1,100 @@
+"""Fail-closed repository-state proof for HoloIndex freshness consumers.
+
+An exact commit SHA binds content only when the worktree has no tracked or
+untracked changes. This helper uses argv-only Git status and returns a compact
+digest; callers never receive or log changed path names.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable, Sequence
+
+from holo_index.freshness_receipt import read_git_head_sha
+
+
+REPOSITORY_DIRTY_CODE = "HOLOINDEX_REPOSITORY_DIRTY"
+REPOSITORY_STATE_UNAVAILABLE_CODE = "HOLOINDEX_REPOSITORY_STATE_UNAVAILABLE"
+
+
+@dataclass(frozen=True)
+class RepositoryState:
+    """Bounded repository state suitable for freshness decisions."""
+
+    head_sha: str
+    clean: bool
+    state_digest: str
+    error: str = ""
+
+    @property
+    def proven_clean(self) -> bool:
+        return self.clean is True and not self.error and self.head_sha != "unknown"
+
+
+def _digest(head_sha: str, status: str) -> str:
+    payload = (head_sha + chr(10) + status).encode("utf-8", errors="replace")
+    return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+
+def _unavailable_state(head_sha: str) -> RepositoryState:
+    return RepositoryState(
+        head_sha=head_sha,
+        clean=False,
+        state_digest=_digest(head_sha, "unavailable"),
+        error=REPOSITORY_STATE_UNAVAILABLE_CODE,
+    )
+
+
+def read_repository_state(
+    repo_root: Path | str,
+    *,
+    timeout_seconds: float = 5.0,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+) -> RepositoryState:
+    """Return exact-HEAD plus clean-worktree proof without shell execution."""
+
+    root = Path(repo_root).resolve(strict=False)
+    head_sha = read_git_head_sha(root)
+    if head_sha == "unknown" or not (root / ".git").exists():
+        return _unavailable_state(head_sha)
+    argv: Sequence[str] = (
+        "git",
+        "-C",
+        str(root),
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=normal",
+    )
+    try:
+        completed = runner(
+            list(argv),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=max(0.1, min(float(timeout_seconds), 15.0)),
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return _unavailable_state(head_sha)
+    if completed.returncode != 0:
+        return _unavailable_state(head_sha)
+    status = str(completed.stdout or "")
+    clean = not status.strip()
+    return RepositoryState(
+        head_sha=head_sha,
+        clean=clean,
+        state_digest=_digest(head_sha, status),
+        error="" if clean else REPOSITORY_DIRTY_CODE,
+    )
+
+
+__all__ = [
+    "REPOSITORY_DIRTY_CODE",
+    "REPOSITORY_STATE_UNAVAILABLE_CODE",
+    "RepositoryState",
+    "read_repository_state",
+]

@@ -8,10 +8,11 @@ It can be called:
   - As a script via python run_task.py --task_id <id>
 
 Dispatch priority:
-  1. WRE execute_skill() if required_skills match a registered skill
-  2. DaemonSelfAuditLoop._apply_policy_fix() for self_audit-sourced tasks
-  3. Grant task dispatch for openclaw-grants tasks (review/stabilize)
-  4. Fail with "no_executor_matched" — never silently complete
+  1. Exact typed routes (read-only audit, signed worker, startup maintenance)
+  2. WRE execute_skill() if required_skills match a registered skill
+  3. DaemonSelfAuditLoop._apply_policy_fix() for self_audit-sourced tasks
+  4. Grant task dispatch for openclaw-grants tasks (review/stabilize)
+  5. Fail with "no_executor_matched" — never silently complete
 """
 
 import argparse
@@ -98,7 +99,19 @@ def execute_task(
         if signed_worker_result is not None:
             result = signed_worker_result
 
-    # Dispatch path 3: WRE skill execution.
+    # Dispatch path 3: exact host-owned startup maintenance.
+    if (
+        not result["ok"]
+        and result["detail"] == "no_executor_matched"
+        and source == "startup_maintenance_gate"
+    ):
+        startup_result = _try_startup_maintenance_dispatch(
+            repo_root, task_id, context
+        )
+        if startup_result is not None:
+            result = startup_result
+
+    # Dispatch path 4: WRE skill execution.
     if required_skills:
         if not result["ok"] and result["detail"] == "no_executor_matched":
             wre_result = _try_wre_dispatch(repo_root, task_id, required_skills, context, description)
@@ -117,12 +130,6 @@ def execute_task(
             grant_result = _try_grant_dispatch(repo_root, task_id, context, description)
             if grant_result is not None:
                 result = grant_result
-
-    # ── Dispatch path 4: Startup maintenance tasks ──
-    if not result["ok"] and result["detail"] == "no_executor_matched" and source == "startup_maintenance_gate":
-        startup_result = _try_startup_maintenance_dispatch(repo_root, task_id, context)
-        if startup_result is not None:
-            result = startup_result
 
     # ── Finalize in AgentDB ──
     elapsed_ms = int((time.monotonic() - start) * 1000)
@@ -462,6 +469,137 @@ def _try_grant_dispatch(
         return None
 
 
+def _dispatch_holoindex_maintenance(repo_root: Path) -> Dict[str, Any]:
+    """Run the trusted exact-HEAD HoloIndex maintenance handshake."""
+    try:
+        from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_handshake import (
+            ensure_reddog_holoindex_operational,
+        )
+
+        result = ensure_reddog_holoindex_operational(
+            repo_root=repo_root,
+            requested=True,
+            auto_maintenance=True,
+        )
+        structured = {
+            "ready": result.ready,
+            "status": result.status,
+            "refreshed": result.refreshed,
+            "error": result.error,
+            "repo_head_sha": result.repo_head_sha,
+            "generation_id": result.generation_id,
+            "freshness_reasons": list(result.freshness_reasons),
+        }
+        return {
+            "ok": result.ready,
+            "detail": json.dumps(structured, default=str)[:1000],
+            "executor": "startup:holo_index",
+            "structured_result": structured,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "detail": f"holo_index_error: {type(exc).__name__}",
+            "executor": "startup:holo_index",
+        }
+
+
+def _run_self_research_refresh(refresher: Any) -> Dict[str, Any]:
+    """Run the bounded startup self-research refresh."""
+    try:
+        result = refresher.run(
+            run_holo_refresh=False,
+            run_compliance=True,
+            run_self_audit=True,
+            run_watchlists=True,
+            write_tasks=True,
+            emit_nudges=True,
+        )
+        success = isinstance(result, dict) and "generated_on" in result
+        return {
+            "ok": success,
+            "detail": json.dumps(result, default=str)[:1000],
+            "executor": "startup:self_research",
+            "structured_result": result,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "detail": f"self_research_error: {exc}",
+            "executor": "startup:self_research",
+        }
+
+
+def _run_model_status_refresh(repo_root: Path) -> Dict[str, Any]:
+    """Refresh model availability and persist the bounded status report."""
+    try:
+        from modules.communication.moltbot_bridge.src.openclaw_runtime_support import (
+            get_model_availability_snapshot,
+        )
+
+        result = get_model_availability_snapshot(dae=None, live_probe=False)
+        try:
+            from modules.infrastructure.dependency_launcher.src.dae_dependencies import (
+                get_dependency_status,
+            )
+
+            result["lm_studio_running"] = get_dependency_status().get(
+                "lm_studio",
+                False,
+            )
+        except Exception:
+            result["lm_studio_running"] = None
+        reports_dir = (
+            repo_root
+            / "modules"
+            / "communication"
+            / "moltbot_bridge"
+            / "workspace"
+            / "reports"
+        )
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        status_path = reports_dir / "local_model_status.json"
+        status_path.write_text(
+            json.dumps(result, indent=2, default=str),
+            encoding="utf-8",
+        )
+        return {
+            "ok": True,
+            "detail": json.dumps(result, default=str)[:1000],
+            "executor": "startup:model_status",
+            "structured_result": result,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "detail": f"model_status_error: {exc}",
+            "executor": "startup:model_status",
+        }
+
+
+def _run_training_batch() -> Dict[str, Any]:
+    """Run one startup pattern-training batch when the DAE is available."""
+    try:
+        import asyncio
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        result = asyncio.run(IdleAutomationDAE()._execute_pattern_training())
+        return {
+            "ok": result.get("success", False),
+            "detail": json.dumps(result, default=str)[:1000],
+            "executor": "startup:training_batch",
+            "structured_result": result,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "detail": f"training_error: {exc}",
+            "executor": "startup:training_batch",
+        }
+
+
 def _try_startup_maintenance_dispatch(
     repo_root: Path, task_id: str, context: dict
 ) -> Dict[str, Any] | None:
@@ -476,6 +614,10 @@ def _try_startup_maintenance_dispatch(
 
     Returns structured result or None if not a recognized startup task.
     """
+    if task_id == "startup_refresh_holo_index":
+        logger.info("[RUN_TASK] Startup dispatch: HoloIndex maintenance handshake")
+        return _dispatch_holoindex_maintenance(repo_root)
+
     try:
         from modules.infrastructure.idle_automation.src.self_research_refresh import (
             SelfResearchRefresher,
@@ -488,97 +630,14 @@ def _try_startup_maintenance_dispatch(
 
     if task_id == "startup_refresh_self_research":
         logger.info("[RUN_TASK] Startup dispatch: self-research refresh")
-        try:
-            # Use actual SelfResearchRefresher.run() signature
-            result = refresher.run(
-                run_holo_refresh=False,
-                run_compliance=True,
-                run_self_audit=True,
-                run_watchlists=True,
-                write_tasks=True,
-                emit_nudges=True,
-            )
-            # Success = report dict with generated_on (means refresh completed)
-            success = isinstance(result, dict) and "generated_on" in result
-            return {
-                "ok": success,
-                "detail": json.dumps(result, default=str)[:1000],
-                "executor": "startup:self_research",
-                "structured_result": result,
-            }
-        except Exception as e:
-            return {"ok": False, "detail": f"self_research_error: {e}", "executor": "startup:self_research"}
-
-    elif task_id == "startup_refresh_holo_index":
-        logger.info("[RUN_TASK] Startup dispatch: HoloIndex refresh")
-        try:
-            result = refresher.refresh_holo_index()
-            success = result.get("refresh_success", False) or not result.get("code_stale", True)
-            return {
-                "ok": success,
-                "detail": json.dumps(result, default=str)[:1000],
-                "executor": "startup:holo_index",
-                "structured_result": result,
-            }
-        except Exception as e:
-            return {"ok": False, "detail": f"holo_index_error: {e}", "executor": "startup:holo_index"}
-
-    elif task_id == "startup_refresh_model_status":
+        return _run_self_research_refresh(refresher)
+    if task_id == "startup_refresh_model_status":
         logger.info("[RUN_TASK] Startup dispatch: model status refresh")
-        try:
-            from modules.communication.moltbot_bridge.src.openclaw_runtime_support import (
-                get_model_availability_snapshot,
-            )
-
-            result = get_model_availability_snapshot(dae=None, live_probe=False)
-
-            # Supplement with LM Studio running status (extra field, does not change shape)
-            try:
-                from modules.infrastructure.dependency_launcher.src.dae_dependencies import (
-                    get_dependency_status,
-                )
-                dep_status = get_dependency_status()
-                result["lm_studio_running"] = dep_status.get("lm_studio", False)
-            except Exception:
-                result["lm_studio_running"] = None
-
-            reports_dir = repo_root / "modules" / "communication" / "moltbot_bridge" / "workspace" / "reports"
-            reports_dir.mkdir(parents=True, exist_ok=True)
-            status_path = reports_dir / "local_model_status.json"
-            status_path.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
-
-            return {
-                "ok": True,
-                "detail": json.dumps(result, default=str)[:1000],
-                "executor": "startup:model_status",
-                "structured_result": result,
-            }
-        except Exception as e:
-            return {"ok": False, "detail": f"model_status_error: {e}", "executor": "startup:model_status"}
-
-    elif task_id == "startup_training_batch":
+        return _run_model_status_refresh(repo_root)
+    if task_id == "startup_training_batch":
         logger.info("[RUN_TASK] Startup dispatch: training batch")
-        try:
-            import asyncio
-            from modules.infrastructure.idle_automation.src.idle_automation_dae import (
-                IdleAutomationDAE,
-            )
-
-            dae = IdleAutomationDAE()
-            result = asyncio.run(dae._execute_pattern_training())
-            success = result.get("success", False)
-            return {
-                "ok": success,
-                "detail": json.dumps(result, default=str)[:1000],
-                "executor": "startup:training_batch",
-                "structured_result": result,
-            }
-        except Exception as e:
-            return {"ok": False, "detail": f"training_error: {e}", "executor": "startup:training_batch"}
-
-    else:
-        # Not a recognized startup task pattern
-        return None
+        return _run_training_batch()
+    return None
 
 
 def main():

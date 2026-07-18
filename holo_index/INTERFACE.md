@@ -32,6 +32,27 @@ holo = HoloIndex(ssd_path="E:/HoloIndex", quiet=True)
 results = holo.search("send chat message", limit=5, doc_type_filter="all")
 ```
 
+Storage resolution is deterministic:
+
+1. explicit ssd_path / --ssd
+2. HOLOINDEX_SSD_PATH
+3. legacy HOLO_SSD_PATH
+4. platform-safe absolute default
+
+HOLOINDEX_QUERY_READONLY=1 requires an existing
+vectors/chroma.sqlite3, never creates directories or collections, and never
+writes the repository activity log. Storage failures raise
+HoloIndexStorageError with one of the stable codes
+HOLOINDEX_STORAGE_UNAVAILABLE, HOLOINDEX_STORAGE_NOT_WRITABLE,
+HOLOINDEX_STORAGE_PATH_MISMATCH, or HOLOINDEX_COLLECTION_UNAVAILABLE.
+ChromaDB itself is not a read-only database client. The supported RedDog
+operational adapter uses the host-owned service at literal `127.0.0.1`, as
+documented by modules/infrastructure/foundups_mcp_bridge/INTERFACE.md. This
+adapter boundary is not an OS privilege boundary; host deployment must enforce
+filesystem/process permissions separately when required. Legacy consumers,
+including foundups_mcp_bridge `holo_tools.py`, remain outside this Phase-1
+migration and may still open the store directly.
+
 Search response contract:
 ```python
 {
@@ -92,6 +113,29 @@ holo.index_test_registry()
 holo.index_skillz_entries()
 ```
 
+Each indexing method returns IndexResult. A zero/invalid test registry does
+not reset navigation_tests. The canonical
+WSP_knowledge/WSP_Test_Registry.json envelope is read from its tests list;
+legacy mapping-only registries remain supported during migration. Any
+malformed row in a mixed registry fails the result before embeddings or reset;
+it cannot be silently filtered from a complete proof.
+
+Scoped maintenance receipts must name only successfully refreshed
+collections. Untouched collection proof is carried forward with its original
+repository SHA, or marked UNVERIFIED when no prior proof exists.
+
+Mutation owners use MaintenanceSession (CLI) or the incremental executor to
+prove a clean Git worktree, acquire the canonical cross-process lease, and
+publish atomic IN_PROGRESS invalidation before collection access. Final PASS
+requires the same clean HEAD, exact declared collection scope, non-empty
+manifests, the canonical source_scope_id for every baseline collection, zero
+recorded source-read, cap, or Python-AST failures, and a durable atomic receipt
+write. Canonical proofs cover Git-tracked sources and full raw source content.
+They do not assert zero failures for every legacy format parser. Query
+consumers fail closed
+with HOLOINDEX_MAINTENANCE_ACTIVE or
+HOLOINDEX_MAINTENANCE_LOCK_UNPROVEN.
+
 ### Module Compliance Helper
 ```python
 status = holo.check_module_exists("modules/communication/livechat")
@@ -125,9 +169,22 @@ python holo_index.py --search "query" --fast-search
 python holo_index.py --index-all
 python holo_index.py --index-code
 python holo_index.py --index-wsp
+python holo_index.py --index-tests
 python holo_index.py --index-symbols --symbol-roots modules/foundups
 python holo_index.py --index-skillz
 ```
+
+--index is an exact alias for --index-all. The baseline set is code, symbols,
+WSP, tests, skills, docs, and knowledge. Work-ledger and CLI-catalog
+generation remain explicit targeted operations and are not implied by
+--index-all.
+
+Canonical --index-all fixes its symbol roots to modules, scripts, and
+holo_index; its WSP root to WSP_framework/src; and its web root/extensions to
+the versioned source-scope contract. Scoped roots, file/entry caps, disabled
+web indexing, or unreadable sources are diagnostic/incomplete and cannot
+publish CURRENT baseline proof. Semantic backend initialization is required
+before any baseline collection reset.
 
 ### Machine Bundle Output
 ```bash
@@ -157,8 +214,14 @@ python holo_index.py --health-check
 - `HOLO_SKIP_MODEL=1`: force lexical retrieval path.
 - `HOLO_MIN_SIMILARITY=0.35`: vector hit floor.
 - `HOLO_FAST_SEARCH=1`: retrieval-only fast path.
-- `HOLO_INDEX_WEB=1`: include web assets during `--index-code`.
+- `HOLO_INDEX_WEB=1`: include web assets during a targeted diagnostic
+  `--index-code`; trusted baseline maintenance uses the canonical tracked web
+  scope and does not accept this override.
 - `HOLO_SYMBOL_AUTO=1`: auto symbol indexing during `--index-code`.
+
+- HOLOINDEX_SSD_PATH: canonical persistent store root.
+- HOLO_SSD_PATH: legacy store-root alias, lower precedence.
+- HOLOINDEX_QUERY_READONLY=1: fail-closed query posture; no HoloIndex maintenance writes.
 
 ## Internal CLI Module Layout
 

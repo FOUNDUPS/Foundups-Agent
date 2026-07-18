@@ -1224,6 +1224,8 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED
                                                             Run one explicit read-only audit/research/decision cycle
         OPENCLAW_AUTO_TASKS_ENABLED                       Enables audit task enqueue if no override
+        REDDOG_HOLOINDEX_OWNER_AUTO_START=1               Auto-start loopback query owner for Holo-dependent work
+        REDDOG_HOLOINDEX_AUTO_MAINTENANCE=1               Refresh exact-HEAD baseline before owner startup
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH              Existing work-state JSON
         HOLOINDEX_FRESHNESS_RECEIPT                       Existing HoloIndex receipt
         HOLOINDEX_SSD_PATH                                Derive receipt path if set
@@ -1234,22 +1236,44 @@ def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool
         return True
 
     enforced = os.getenv("REDDOG_READONLY_OPERATIONAL_BOOTSTRAP_ENFORCED", "0") != "0"
+    auto_tasks_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
     enqueue_override = os.getenv("REDDOG_READONLY_AUDIT_SWARM_ENQUEUE_ENABLED")
     if enqueue_override is None:
-        enqueue_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
+        enqueue_requested = auto_tasks_requested
     else:
         enqueue_requested = enqueue_override != "0"
     collection_override = os.getenv("REDDOG_READONLY_AUDIT_REPORT_COLLECTION_ENABLED")
     if collection_override is None:
-        collection_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
+        collection_requested = auto_tasks_requested
     else:
         collection_requested = collection_override != "0"
     decision_persist_override = os.getenv("REDDOG_READONLY_AUDIT_DECISION_PERSIST_ENABLED")
     if decision_persist_override is None:
-        decision_persist_requested = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") != "0"
+        decision_persist_requested = auto_tasks_requested
     else:
         decision_persist_requested = decision_persist_override != "0"
     e2e_requested = os.getenv("REDDOG_READONLY_AUDIT_RESEARCH_DECISION_E2E_ENABLED", "0") != "0"
+    holo_owner_requested = (
+        e2e_requested
+        or collection_requested
+        or enqueue_requested
+        or auto_tasks_requested
+    )
+    holo_maintenance_requested = (
+        os.getenv("REDDOG_HOLOINDEX_AUTO_MAINTENANCE", "1") != "0"
+    )
+
+    if holo_owner_requested:
+        from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_main_preflight import (
+            run_interactive_owner_preflight,
+        )
+
+        if not run_interactive_owner_preflight(
+            repo_root=repo_root,
+            maintenance_requested=holo_maintenance_requested,
+            enforced=enforced,
+        ):
+            return False
 
     if e2e_requested:
         try:
@@ -4513,6 +4537,15 @@ def main():
             self_audit_loop.stop()
 
 
+def run_reddog_holoindex_headless_preflight(repo_root: Path) -> bool:
+    """Fail closed on the HoloIndex owner needed by autonomous headless work."""
+    from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_main_preflight import (
+        run_headless_owner_preflight,
+    )
+
+    return run_headless_owner_preflight(repo_root)
+
+
 def run_headless() -> int:
     """
     WSP 97: Headless autonomous mode.
@@ -4530,6 +4563,8 @@ def run_headless() -> int:
             f"(readiness={wre_status['readiness']}, "
             f"critical={wre_status['alert_counts']['critical']})"
         )
+        return 1
+    if not run_reddog_holoindex_headless_preflight(repo_root):
         return 1
 
     print(f"[HEADLESS] Starting autonomous mode (WRE={wre_status['readiness']})")

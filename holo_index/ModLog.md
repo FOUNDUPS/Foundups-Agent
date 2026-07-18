@@ -1,5 +1,63 @@
 # HoloIndex Package ModLog
 
+## [2026-07-18] HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1
+
+**WSP Protocol**: WSP 00, 05, 06, 15, 22, 34, 50, 62, 64, 84, 87, 96, 97
+**Phase**: POC implementation; focused validation/PR evidence pending
+**Agent**: 0102 architect for 012 with delegated audit/test workers
+
+**Changes**:
+
+- ADD canonical storage resolution and typed failure codes; read-only
+  initialization no longer creates paths, collections, or repository logs.
+- FIX canonical test-registry indexing and expose --index-tests; --index and
+  --index-all now select the same seven-collection baseline without implicitly
+  generating CLI catalogs or work-ledger state.
+- ADD clean-repository proof, cross-process maintenance lease, atomic
+  IN_PROGRESS invalidation, and same-HEAD final PASS publication. Incomplete
+  CLI plans and receipt failures exit nonzero and leave invalid proof in place.
+- BIND every baseline collection to a versioned canonical source_scope_id.
+  Canonical proof includes Git-tracked sources, full raw-content manifests,
+  and zero recorded source-read, cap, or Python-AST failures; scoped
+  diagnostics cannot publish CURRENT. No blanket all-parser claim is made.
+- REQUIRE semantic backend initialization before baseline collection reset.
+- BIND PASS receipts to each collection's backend, logical model, and
+  deterministic local-artifact embedding_space_fingerprint; canonical
+  maintenance rejects lexical, quantized-only, legacy blank, and mixed-space
+  proof.
+- FIX offline Hugging Face snapshot discovery (models--.../snapshots/<rev>)
+  with refs/main selection and complete-artifact checks. Model/import timeout
+  helpers now return promptly instead of waiting during executor shutdown.
+- HARDEN the resident RedDog owner by forcing fp32 routing, disabling the
+  generation-unbound SearchCache, comparing all seven live/reported
+  collection_embedding_space_map values, and poisoning a backend that sees a
+  different receipt generation.
+- ADD owner-only strict-semantic execution: collection count/query failures,
+  missing models, and encoding failures reject the request; lexical and
+  symbol/rg augmentation remain available only to non-owner diagnostics.
+- FIX scoped freshness so untouched proof retains its original SHA or becomes
+  UNVERIFIED instead of being restamped current.
+- UPGRADE the FoundUp incremental executor to receipt schema v2: exact-path
+  legacy cleanup, deterministic AST symbol records, exact collection scope,
+  partial-mutation truth, and mandatory lease/invalidation. Snapshot-only
+  output now remains invalid and returns proof failure instead of APPLIED.
+- UPDATE machine/human contracts for the supported RedDog owner-adapter
+  boundary, explicitly separate from OS privilege isolation.
+- HoloIndex was queried before implementation in offline lexical mode. The
+  lexical result was retained as an index-gap signal and not claimed as
+  semantic evidence. No WSP framework file or knowledge backup was changed.
+
+**Impact**: Trusted-host maintenance can prove an exact canonical generation
+while the migrated RedDog adapter remains query-only. OS isolation and legacy
+direct-store consumers remain outside that claim. Malformed, narrowed, capped,
+lexical, dirty, raced, and snapshot-only paths cannot claim operational
+freshness through the migrated boundary.
+
+**WSP Compliance**: Newly extracted helpers are kept focused where verified;
+focused WSP_62 results and any architect exemptions will be recorded after the
+gate runs. Historical monolith debt is recorded rather than hidden. The WSP_97
+assumption audit and WSP_15 P0 score are in the cross-module audit.
+
 ## [2026-07-16] HOLOINDEX_MEMEX_PER_TARGET_RETRIEVAL_VERDICT_PHASE1
 
 **Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
