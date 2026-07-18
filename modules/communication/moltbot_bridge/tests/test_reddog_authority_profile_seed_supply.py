@@ -64,7 +64,11 @@ def _supply(tmp_path: Path, **overrides):
 
 
 def test_seed_supply_writes_seed_consumable_by_source_supplier_and_promotion(tmp_path: Path) -> None:
-    seed_result = _supply(tmp_path)
+    seed_result = _supply(
+        tmp_path,
+        consensus_receipt_digest="sha256:consensus",
+        sovereign_authorization_digest="sha256:sovereign",
+    )
 
     assert seed_result.accepted is True
     assert seed_result.status == AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT
@@ -119,6 +123,42 @@ def test_seed_supply_rejects_principal_reddog_key_reuse(tmp_path: Path) -> None:
 
 def test_seed_supply_rejects_high_authority_without_cosign(tmp_path: Path) -> None:
     result = _supply(tmp_path, requested_operation="create_foundup")
+
+    assert result.accepted is False
+    assert AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING in result.rejection_reasons
+
+
+def test_seed_supply_rejects_worktree_intent_for_low_operation_without_cosign(tmp_path: Path) -> None:
+    result = _supply(tmp_path, requested_operation="inspect_repo")
+
+    assert result.accepted is False
+    assert AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING in result.rejection_reasons
+
+
+def test_seed_supply_rejects_live_enqueue_intent_without_cosign(tmp_path: Path) -> None:
+    result = _supply(
+        tmp_path,
+        requested_operation="inspect_repo",
+        valve_state_required="VALVE_OPEN_LIVE_ENQUEUE",
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING in result.rejection_reasons
+
+
+def test_seed_supply_normalizes_empty_worktree_intent_before_classification(tmp_path: Path) -> None:
+    for value in (None, ""):
+        result = _supply(
+            tmp_path,
+            requested_operation="inspect_repo",
+            valve_state_required=value,
+        )
+        assert result.accepted is False
+        assert AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING in result.rejection_reasons
+
+
+def test_seed_supply_rejects_consensus_without_sovereign_authorization(tmp_path: Path) -> None:
+    result = _supply(tmp_path, consensus_receipt_digest="sha256:consensus")
 
     assert result.accepted is False
     assert AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING in result.rejection_reasons

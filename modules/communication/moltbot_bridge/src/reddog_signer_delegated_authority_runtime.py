@@ -60,6 +60,9 @@ HIGH_AUTHORITY_OPERATIONS = frozenset(
         "force_push",
     }
 )
+HIGH_AUTHORITY_VALVE_STATES = frozenset(
+    {"VALVE_OPEN_LIVE_ENQUEUE", "VALVE_OPEN_WORKTREE_CREATE"}
+)
 
 _FOUNDUP_PATH_PREFIX = "modules/foundups/"
 
@@ -562,6 +565,7 @@ def issue_delegated_authority_runtime(
     authority_tier = (
         HIGH_AUTHORITY_TIER
         if request.requested_operation in HIGH_AUTHORITY_OPERATIONS
+        or request.valve_state_required in HIGH_AUTHORITY_VALVE_STATES
         else LOW_AUTHORITY_TIER
     )
     if authority_tier == HIGH_AUTHORITY_TIER and not (
@@ -742,6 +746,7 @@ __all__ = [
     "FailClosedPrincipalAuthorityResolver",
     "FailClosedSignerClient",
     "HIGH_AUTHORITY_OPERATIONS",
+    "HIGH_AUTHORITY_VALVE_STATES",
     "InMemoryAuthorityRuntimeStore",
     "IsolatedSignerClient",
     "PrincipalAuthorityRecord",
