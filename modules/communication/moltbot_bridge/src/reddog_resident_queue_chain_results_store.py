@@ -66,9 +66,7 @@ class InMemoryResidentQueueChainResultsStore:
         current_revision = self._state.get("revision")
         if current_revision != expected_revision:
             raise RuntimeError("revision_conflict")
-        committed = json.loads(json.dumps(snapshot, sort_keys=True))
-        revision = _digest(committed)
-        committed["revision"] = revision
+        committed, revision = _committed_snapshot(snapshot)
         self._state = committed
         return revision
 
@@ -88,9 +86,7 @@ class AtomicJsonResidentQueueChainResultsStore:
         current = self.load()
         if current.get("revision") != expected_revision:
             raise RuntimeError("revision_conflict")
-        committed = json.loads(json.dumps(snapshot, sort_keys=True))
-        revision = _digest(committed)
-        committed["revision"] = revision
+        committed, revision = _committed_snapshot(snapshot)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         fd, tmp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))
         try:
@@ -180,6 +176,62 @@ class ResidentQueueChainResultRecordResult:
 def _digest(payload: Any) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def resident_queue_chain_receipt_id(
+    *,
+    queue_item_id: str,
+    selected_slice: str,
+    recorded_stage: str,
+    previous_plan_id: str,
+    next_plan_id: str,
+) -> str:
+    """Return the canonical ID binding one chain transition receipt."""
+
+    return _digest(
+        {
+            "queue_item_id": queue_item_id,
+            "selected_slice": selected_slice,
+            "recorded_stage": recorded_stage,
+            "previous_plan_id": previous_plan_id,
+            "next_plan_id": next_plan_id,
+        }
+    )
+
+
+def resident_queue_chain_snapshot_revision(snapshot: Mapping[str, Any]) -> str:
+    """Compute the canonical revision while excluding its final receipt witness."""
+
+    payload = json.loads(json.dumps(snapshot, sort_keys=True))
+    payload.pop("revision", None)
+    receipts = payload.get("receipts")
+    if isinstance(receipts, list) and receipts and isinstance(receipts[-1], Mapping):
+        receipts[-1] = {**receipts[-1], "store_revision": None}
+    return _digest(payload)
+
+
+def resident_queue_chain_snapshot_is_canonical(snapshot: Mapping[str, Any]) -> bool:
+    """Verify the envelope revision and newest persisted receipt witness."""
+
+    revision = str(snapshot.get("revision") or "")
+    receipts = snapshot.get("receipts")
+    if not revision or not isinstance(receipts, list) or not receipts:
+        return False
+    newest = _mapping(receipts[-1])
+    return (
+        str(newest.get("store_revision") or "") == revision
+        and resident_queue_chain_snapshot_revision(snapshot) == revision
+    )
+
+
+def _committed_snapshot(snapshot: Mapping[str, Any]) -> tuple[Dict[str, Any], str]:
+    committed = json.loads(json.dumps(snapshot, sort_keys=True))
+    revision = resident_queue_chain_snapshot_revision(committed)
+    committed["revision"] = revision
+    receipts = committed.get("receipts")
+    if isinstance(receipts, list) and receipts and isinstance(receipts[-1], Mapping):
+        receipts[-1] = {**receipts[-1], "store_revision": revision}
+    return committed, revision
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -296,15 +348,14 @@ def record_resident_queue_stage_result(
             next_plan=next_plan,
         )
 
-    receipt_seed = {
-        "queue_item_id": previous_plan.selected_queue_item_id,
-        "selected_slice": previous_plan.selected_slice,
-        "recorded_stage": clean_stage_key,
-        "previous_plan_id": previous_plan.plan_id,
-        "next_plan_id": next_plan.plan_id,
-    }
     receipt = ResidentQueueChainResultReceipt(
-        receipt_id=_digest(receipt_seed),
+        receipt_id=resident_queue_chain_receipt_id(
+            queue_item_id=str(previous_plan.selected_queue_item_id or ""),
+            selected_slice=str(previous_plan.selected_slice or ""),
+            recorded_stage=clean_stage_key,
+            previous_plan_id=previous_plan.plan_id,
+            next_plan_id=next_plan.plan_id,
+        ),
         queue_item_id=str(previous_plan.selected_queue_item_id or ""),
         selected_slice=str(previous_plan.selected_slice or ""),
         recorded_stage=clean_stage_key,
@@ -374,4 +425,7 @@ __all__ = [
     "ResidentQueueChainResultRecordResult",
     "ResidentQueueChainResultsStore",
     "record_resident_queue_stage_result",
+    "resident_queue_chain_receipt_id",
+    "resident_queue_chain_snapshot_is_canonical",
+    "resident_queue_chain_snapshot_revision",
 ]

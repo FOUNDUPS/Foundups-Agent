@@ -1,0 +1,632 @@
+"""Operator harness for one guarded resident RedDog live canary.
+
+Slice: REDDOG_RESIDENT_LIVE_CANARY_PHASE1
+
+This module does not implement queue orchestration.  It validates the operator
+boundary for the existing highest guarded resident profile and, only after an
+explicit confirmation, delegates once to ``main.py``'s bounded resident control
+loop.  A live proof is reported only when that invocation creates both a new
+chain revision and a new control-loop receipt and the existing planner proves
+the complete draft-PR-only chain.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+from contextlib import contextmanager
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Callable, Iterator, Mapping, Optional, Sequence
+
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+    PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_live_canary_evidence import (
+    CanaryInvocationEvidence,
+    chain_receipt_ids,
+    evaluate_live_proof,
+    read_control_receipts,
+    select_new_control_receipt,
+)
+
+
+LIVE_CANARY_SCHEMA_VERSION = "reddog_resident_live_canary_receipt.v1"
+LIVE_CANARY_CONFIRMATION = "REDDOG_RESIDENT_LIVE_CANARY_PHASE1"
+LIVE_CANARY_READY = "READY_FOR_EXECUTION"
+LIVE_CANARY_BLOCKED = "BLOCKED"
+LIVE_CANARY_EXECUTION_FAILED = "EXECUTION_FAILED"
+LIVE_CANARY_PROOF_INCOMPLETE = "LIVE_PROOF_INCOMPLETE"
+LIVE_CANARY_PROOF_COMPLETE = "LIVE_PROOF_COMPLETE"
+
+REQUIRED_JSON_ARTIFACTS = (
+    "authoritative_work_state.json",
+    "authority_profile.json",
+    "execution_valve_env.json",
+    "permission_snapshots.json",
+    "principal_authority_records.json",
+    "signer_service_config.json",
+    "signer_service_run_packet.json",
+)
+
+
+@dataclass(frozen=True)
+class LiveCanaryReadinessCheck:
+    name: str
+    passed: bool
+    reason: str
+
+
+@dataclass(frozen=True)
+class LiveCanaryReceipt:
+    schema_version: str
+    receipt_id: str
+    created_at: str
+    status: str
+    profile: str
+    execution_requested: bool
+    execution_confirmed: bool
+    execution_invoked: bool
+    ready_for_execution: bool
+    control_loop_accepted: bool
+    live_proof_complete: bool
+    readiness_checks: tuple[LiveCanaryReadinessCheck, ...]
+    blockers: tuple[str, ...]
+    control_receipt_id: Optional[str]
+    previous_chain_revision: Optional[str]
+    observed_chain_revision: Optional[str]
+    chain_plan_id: Optional[str]
+    verified_draft_pr_receipt_id: Optional[str]
+    verified_draft_pr_url: Optional[str]
+    pattern_memory_admission_id: Optional[str]
+    pattern_memory_record_id: Optional[str]
+    pattern_memory_record_digest: Optional[str]
+    accepted_stage_count: int
+    repo_root_digest: str
+    runtime_root_digest: str
+    draft_pr_only: bool = True
+    merge_authority_available: bool = False
+    no_merge_performed: bool = True
+    runtime_state_outside_repo: bool = True
+    isolated_worktree_observed: bool = False
+    secret_values_serialized: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["readiness_checks"] = [asdict(item) for item in self.readiness_checks]
+        payload["blockers"] = list(self.blockers)
+        return payload
+
+
+ControlLoopRunner = Callable[[Path], Mapping[str, Any]]
+CommandResolver = Callable[[str], Optional[str]]
+CommandProbe = Callable[[Sequence[str], Path], bool]
+SocketProbe = Callable[[Path], bool]
+
+
+@dataclass(frozen=True)
+class _CanaryContext:
+    repo_root: Path
+    runtime_root: Path
+    receipt_path: Path
+    environ: Mapping[str, str]
+    platform_name: str
+
+
+def run_reddog_resident_live_canary(
+    *,
+    repo_root: Path | str,
+    runtime_root: Path | str,
+    receipt_path: Path | str | None = None,
+    execute: bool = False,
+    confirmation: str = "",
+    queue_item_id: str = "",
+    max_rounds: int = 8,
+    environ: Optional[Mapping[str, str]] = None,
+    platform_name: Optional[str] = None,
+    command_resolver: CommandResolver = shutil.which,
+    command_probe: Optional[CommandProbe] = None,
+    socket_probe: Optional[SocketProbe] = None,
+    control_loop_runner: Optional[ControlLoopRunner] = None,
+    now: Optional[Callable[[], datetime]] = None,
+) -> LiveCanaryReceipt:
+    """Assess readiness and optionally invoke the existing resident control loop."""
+    context = _canary_context(repo_root, runtime_root, receipt_path, environ, platform_name)
+    checks = _readiness_checks(
+        repo_root=context.repo_root,
+        runtime_root=context.runtime_root,
+        receipt_path=context.receipt_path,
+        environ=context.environ,
+        platform_name=context.platform_name,
+        command_resolver=command_resolver,
+        command_probe=command_probe or _command_succeeds,
+        socket_probe=socket_probe or _is_unix_socket,
+        max_rounds=max_rounds,
+    )
+    invocation = _invoke_canary(
+        context=context,
+        checks=checks,
+        execute=execute,
+        confirmation=confirmation,
+        queue_item_id=queue_item_id,
+        max_rounds=max_rounds,
+        runner=control_loop_runner or _run_existing_control_loop,
+    )
+    timestamp = (now or (lambda: datetime.now(timezone.utc)))().astimezone(timezone.utc).isoformat()
+    proof = evaluate_live_proof(
+        repo_root=context.repo_root,
+        runtime_root=context.runtime_root,
+        queue_item_id=queue_item_id,
+        invocation=invocation,
+        now_iso=timestamp,
+    )
+    receipt = _build_live_canary_receipt(context, checks, invocation, proof, execute, timestamp)
+    _persist_receipt(context, receipt)
+    return receipt
+
+
+def _persist_receipt(context: _CanaryContext, receipt: LiveCanaryReceipt) -> None:
+    _write_json_atomic(
+        context.receipt_path,
+        receipt.to_dict(),
+        repo_root=context.repo_root,
+        runtime_root=context.runtime_root,
+    )
+
+
+def _canary_context(
+    repo_root: Path | str,
+    runtime_root: Path | str,
+    receipt_path: Path | str | None,
+    environ: Optional[Mapping[str, str]],
+    platform_name: Optional[str],
+) -> _CanaryContext:
+    root = Path(repo_root).resolve()
+    runtime = Path(runtime_root).resolve()
+    target = _validated_receipt_path(root, runtime, receipt_path)
+    return _CanaryContext(
+        repo_root=root,
+        runtime_root=runtime,
+        receipt_path=target,
+        environ=dict(os.environ if environ is None else environ),
+        platform_name=str(platform_name or sys.platform).lower(),
+    )
+
+
+def _validated_receipt_path(
+    repo_root: Path,
+    runtime_root: Path,
+    receipt_path: Path | str | None,
+) -> Path:
+    canonical_path = runtime_root / "live_canary_receipt.json"
+    if canonical_path.is_symlink():
+        raise ValueError("receipt_path_reserved_or_collision")
+    canonical = canonical_path.resolve()
+    target = Path(receipt_path).resolve() if receipt_path else canonical
+    if _is_inside(target, repo_root):
+        raise ValueError("receipt_path_inside_repo")
+    if _is_inside(target, runtime_root) and target != canonical:
+        raise ValueError("receipt_path_reserved_or_collision")
+    return target
+
+
+def _invoke_canary(
+    *,
+    context: _CanaryContext,
+    checks: Sequence[LiveCanaryReadinessCheck],
+    execute: bool,
+    confirmation: str,
+    queue_item_id: str,
+    max_rounds: int,
+    runner: ControlLoopRunner,
+) -> CanaryInvocationEvidence:
+    blockers = [check.reason for check in checks if not check.passed]
+    confirmed = execute and confirmation == LIVE_CANARY_CONFIRMATION
+    if execute and not confirmed:
+        blockers.append("explicit_execution_confirmation_missing")
+    chain_path = context.runtime_root / "resident_queue_chain_results.json"
+    control_path = context.runtime_root / "resident_queue_control_loop_receipts.jsonl"
+    pre_chain_state = _read_json_mapping(chain_path)
+    previous_revision = _text(pre_chain_state.get("revision"))
+    pre_chain_ids = chain_receipt_ids(pre_chain_state)
+    pre_control_receipts = read_control_receipts(control_path)
+    invoked = execute and confirmed and not blockers
+    result: Mapping[str, Any] = {}
+    if invoked:
+        with _temporary_environment(
+            _canary_environment(context.runtime_root, queue_item_id, max_rounds)
+        ):
+            result = _mapping(runner(context.repo_root))
+    chain_state = _read_json_mapping(chain_path)
+    control_receipt_id = _text(result.get("receipt_id"))
+    control_receipt = select_new_control_receipt(
+        pre_control_receipts,
+        read_control_receipts(control_path),
+        control_receipt_id,
+    )
+    return CanaryInvocationEvidence(
+        confirmed=confirmed,
+        invoked=invoked,
+        blockers=tuple(blockers),
+        control_result=result,
+        previous_revision=previous_revision,
+        observed_revision=_text(chain_state.get("revision")),
+        control_receipt_id=control_receipt_id,
+        control_receipt=control_receipt,
+        pre_chain_receipt_ids=pre_chain_ids,
+        work_state=_read_json_mapping(context.runtime_root / "authoritative_work_state.json"),
+        chain_state=chain_state,
+    )
+
+
+def _readiness_checks(
+    *,
+    repo_root: Path,
+    runtime_root: Path,
+    receipt_path: Path,
+    environ: Mapping[str, str],
+    platform_name: str,
+    command_resolver: CommandResolver,
+    command_probe: CommandProbe,
+    socket_probe: SocketProbe,
+    max_rounds: int,
+) -> list[LiveCanaryReadinessCheck]:
+    checks = [
+        _check("linux_execution_plane", platform_name.startswith("linux"), "linux_execution_plane_required"),
+        _check("repo_root", repo_root.is_dir() and (repo_root / ".git").exists(), "repo_root_invalid"),
+        _check("runtime_root_outside_repo", not _is_inside(runtime_root, repo_root), "runtime_root_inside_repo"),
+        _check("receipt_outside_repo", not _is_inside(receipt_path, repo_root), "receipt_path_inside_repo"),
+        _check("max_rounds", isinstance(max_rounds, int) and 1 <= max_rounds <= 8, "invalid_max_rounds"),
+        _check("git_available", bool(command_resolver("git")), "git_not_available"),
+        _check("gh_available", bool(command_resolver("gh")), "gh_not_available"),
+        _check(
+            "git_worktree_ready",
+            command_probe(("git", "rev-parse", "--is-inside-work-tree"), repo_root),
+            "git_worktree_not_ready",
+        ),
+        _check(
+            "gh_authenticated",
+            command_probe(("gh", "auth", "status"), repo_root),
+            "gh_not_authenticated",
+        ),
+        _check("openrouter_key_reference", bool(str(environ.get("OPENROUTER_API_KEY") or "")), "openrouter_api_key_missing"),
+    ]
+    for filename in REQUIRED_JSON_ARTIFACTS:
+        valid = _valid_json_mapping(runtime_root / filename)
+        checks.append(_check(f"artifact:{filename}", valid, f"missing_or_malformed:{filename}"))
+    socket_path = runtime_root / "reddog_signer.sock"
+    checks.append(_check("signer_socket", socket_probe(socket_path), "signer_socket_not_ready"))
+    return checks
+
+
+def _canary_environment(runtime_root: Path, queue_item_id: str, max_rounds: int) -> dict[str, str]:
+    env = _canary_runtime_paths(runtime_root)
+    env.update(_canary_runtime_modes())
+    env.update(_canary_runtime_controls(max_rounds))
+    env["REDDOG_WRE_QUEUE_ITEM_ID"] = queue_item_id
+    return env
+
+
+def _canary_runtime_paths(runtime_root: Path) -> dict[str, str]:
+    return {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(runtime_root / "authoritative_work_state.json"),
+        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(runtime_root / "authority_profile.json"),
+        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(runtime_root / "resident_queue_chain_results.json"),
+        "REDDOG_EXECUTION_VALVE_ENV_PATH": str(runtime_root / "execution_valve_env.json"),
+        "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(runtime_root / "authority_runtime_state.json"),
+        "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(runtime_root / "permission_snapshots.json"),
+        "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(runtime_root / "principal_authority_records.json"),
+        "REDDOG_SIGNER_SERVICE_CONFIG_PATH": str(runtime_root / "signer_service_config.json"),
+        "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH": str(runtime_root / "signer_service_run_packet.json"),
+        "REDDOG_SIGNER_SOCKET_PATH": str(runtime_root / "reddog_signer.sock"),
+        "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(runtime_root / "verified_outcomes.jsonl"),
+        "REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH": str(runtime_root / "model_feedback.jsonl"),
+        "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(runtime_root / "pattern_memory.db"),
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPTS_PATH": str(runtime_root / "resident_queue_control_loop_receipts.jsonl"),
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_LOCK_PATH": str(runtime_root / "resident_queue_control_loop.lock"),
+    }
+
+
+def _canary_runtime_modes() -> dict[str, str]:
+    return {
+        "REDDOG_SIGNATURE_VERIFIER_BACKEND": "ed25519",
+        "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "authority_profile",
+        "REDDOG_ARTIFACT_GENERATOR_MODE": "foundups_fusion",
+        "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE": "real",
+        "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE": "real",
+        "REDDOG_DRAFT_PR_RUNNER_MODE": "real",
+        "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_TIMEOUT_S": "120",
+        "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "120",
+        "REDDOG_WORK_ORDERS_PATH": "",
+        "REDDOG_ARTIFACT_CONTENTS_PATH": "",
+        "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH": "",
+        "REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY": "0",
+        "REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY": "0",
+        "REDDOG_AUTHORITY_RUNTIME_RESOLVER_ARTIFACT_SUPPLY": "0",
+        "REDDOG_RESIDENT_QUEUE_NOW_EPOCH": "",
+    }
+
+
+def _canary_runtime_controls(max_rounds: int) -> dict[str, str]:
+    return {
+        "REDDOG_SIGNER_SERVICE_HEALTHCHECK": "1",
+        "REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED": "1",
+        "REDDOG_PILOT_DRYRUN_BINDING": "1",
+        "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING": "1",
+        "REDDOG_SLICE_VERIFIER_REQUEST_BINDING": "1",
+        "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING": "1",
+        "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING": "1",
+        "REDDOG_HELD_OUT_GATE_REQUEST_BINDING": "1",
+        "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING": "1",
+        "REDDOG_WORKER_DISPATCH_AGENTDB_WRITER": "1",
+        "OPENCLAW_SIGNED_WORKER_TASKS_ENABLED": "1",
+        "OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED": "1",
+        "OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED": "1",
+        "REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER": "1",
+        "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+        "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED": "1",
+        "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "16",
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP": "1",
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_ENFORCED": "1",
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS": str(max_rounds),
+        "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE": "1",
+        "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP": "1",
+        "REDDOG_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_ENFORCED": "1",
+        "OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS": "1",
+    }
+
+
+def _run_existing_control_loop(repo_root: Path) -> Mapping[str, Any]:
+    import main
+
+    accepted = main.run_reddog_resident_queue_control_loop_preflight(repo_root)
+    result = _mapping(getattr(main.run_reddog_resident_queue_control_loop_preflight, "last_result", {}))
+    if not result:
+        return {"accepted": bool(accepted), "status": "CONTROL_RESULT_MISSING"}
+    return result
+
+
+def _build_live_canary_receipt(
+    context: _CanaryContext,
+    checks: Sequence[LiveCanaryReadinessCheck],
+    invocation: CanaryInvocationEvidence,
+    proof: Mapping[str, Any],
+    execute: bool,
+    created_at: str,
+) -> LiveCanaryReceipt:
+    blockers = list(invocation.blockers)
+    if invocation.invoked:
+        blockers.extend(str(value) for value in proof.get("blockers", ()))
+    blockers = list(dict.fromkeys(blockers))
+    ready = all(check.passed for check in checks)
+    control_accepted = invocation.control_result.get("accepted") is True
+    live_complete = invocation.invoked and proof.get("complete") is True
+    status = _canary_status(invocation.invoked, control_accepted, live_complete, blockers)
+    seed = _receipt_seed(created_at, status, invocation, blockers)
+    return LiveCanaryReceipt(
+        schema_version=LIVE_CANARY_SCHEMA_VERSION,
+        receipt_id="reddog_live_canary_" + _digest(seed)[:16],
+        created_at=created_at,
+        status=status,
+        profile=PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+        execution_requested=bool(execute),
+        execution_confirmed=invocation.confirmed,
+        execution_invoked=invocation.invoked,
+        ready_for_execution=ready,
+        control_loop_accepted=control_accepted,
+        live_proof_complete=live_complete,
+        readiness_checks=tuple(checks),
+        blockers=tuple(blockers),
+        control_receipt_id=invocation.control_receipt_id,
+        previous_chain_revision=invocation.previous_revision,
+        observed_chain_revision=invocation.observed_revision,
+        chain_plan_id=proof.get("plan_id"),
+        verified_draft_pr_receipt_id=proof.get("draft_pr_receipt_id"),
+        verified_draft_pr_url=proof.get("draft_pr_url"),
+        pattern_memory_admission_id=proof.get("pattern_memory_admission_id"),
+        pattern_memory_record_id=proof.get("pattern_memory_record_id"),
+        pattern_memory_record_digest=proof.get("pattern_memory_record_digest"),
+        accepted_stage_count=int(proof.get("accepted_stage_count") or 0),
+        repo_root_digest=_digest(str(context.repo_root)),
+        runtime_root_digest=_digest(str(context.runtime_root)),
+        no_merge_performed=(
+            not invocation.invoked or proof.get("no_merge_performed") is True
+        ),
+        runtime_state_outside_repo=not _is_inside(context.runtime_root, context.repo_root),
+        isolated_worktree_observed=proof.get("isolated_worktree_observed") is True,
+    )
+
+
+def _canary_status(
+    invoked: bool,
+    control_accepted: bool,
+    live_complete: bool,
+    blockers: Sequence[str],
+) -> str:
+    if live_complete:
+        return LIVE_CANARY_PROOF_COMPLETE
+    if invoked and not control_accepted:
+        return LIVE_CANARY_EXECUTION_FAILED
+    if invoked:
+        return LIVE_CANARY_PROOF_INCOMPLETE
+    return LIVE_CANARY_BLOCKED if blockers else LIVE_CANARY_READY
+
+
+def _receipt_seed(
+    created_at: str,
+    status: str,
+    invocation: CanaryInvocationEvidence,
+    blockers: Sequence[str],
+) -> dict[str, Any]:
+    return {
+        "created_at": created_at,
+        "status": status,
+        "profile": PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+        "execution_invoked": invocation.invoked,
+        "control_receipt_id": invocation.control_receipt_id,
+        "observed_chain_revision": invocation.observed_revision,
+        "blockers": list(blockers),
+    }
+
+
+@contextmanager
+def _temporary_environment(values: Mapping[str, str]) -> Iterator[None]:
+    previous = {key: os.environ.get(key) for key in values}
+    os.environ.update(values)
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+    runtime_root: Path,
+) -> None:
+    if path.is_symlink():
+        raise ValueError("receipt_path_reserved_or_collision")
+    resolved = path.resolve()
+    if _is_inside(resolved, repo_root):
+        raise ValueError("receipt_path_inside_repo")
+    canonical = (runtime_root / "live_canary_receipt.json").resolve()
+    if _is_inside(resolved, runtime_root) and resolved != canonical:
+        raise ValueError("receipt_path_reserved_or_collision")
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=f".{resolved.name}.", suffix=".tmp", dir=str(resolved.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+            json.dump(payload, handle, sort_keys=True, indent=2, ensure_ascii=True)
+            handle.write("\n")
+        os.replace(temporary, resolved)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _valid_json_mapping(path: Path) -> bool:
+    return bool(_read_json_mapping(path))
+
+
+def _read_json_mapping(path: Path) -> Mapping[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, Mapping) else {}
+
+
+def _is_unix_socket(path: Path) -> bool:
+    try:
+        return stat.S_ISSOCK(path.stat().st_mode)
+    except OSError:
+        return False
+
+
+def _command_succeeds(argv: Sequence[str], cwd: Path) -> bool:
+    """Run an audit-safe readiness command without returning its output."""
+
+    try:
+        completed = subprocess.run(
+            list(argv),
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return completed.returncode == 0
+
+
+def _check(name: str, passed: bool, failure_reason: str) -> LiveCanaryReadinessCheck:
+    return LiveCanaryReadinessCheck(name=name, passed=bool(passed), reason="ok" if passed else failure_reason)
+
+
+def _mapping(value: Any) -> Mapping[str, Any]:
+    if hasattr(value, "to_dict"):
+        candidate = value.to_dict()
+        return candidate if isinstance(candidate, Mapping) else {}
+    return value if isinstance(value, Mapping) else {}
+
+
+def _text(value: Any) -> Optional[str]:
+    text = str(value or "").strip()
+    return text or None
+
+
+def _digest(value: Any) -> str:
+    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _is_inside(child: Path, parent: Path) -> bool:
+    child_r = child.resolve()
+    parent_r = parent.resolve()
+    return child_r == parent_r or parent_r in child_r.parents
+
+
+def build_reddog_resident_live_canary_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="reddog-resident-live-canary",
+        description="Assess or explicitly execute one highest-profile resident RedDog canary.",
+    )
+    parser.add_argument("--repo-root", required=True)
+    parser.add_argument("--runtime-root", required=True)
+    parser.add_argument("--receipt-path")
+    parser.add_argument("--queue-item-id", default="")
+    parser.add_argument("--max-rounds", type=int, default=8)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--confirm", default="")
+    return parser
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    args = build_reddog_resident_live_canary_parser().parse_args(list(argv) if argv is not None else None)
+    receipt = run_reddog_resident_live_canary(
+        repo_root=args.repo_root,
+        runtime_root=args.runtime_root,
+        receipt_path=args.receipt_path,
+        execute=args.execute,
+        confirmation=args.confirm,
+        queue_item_id=args.queue_item_id,
+        max_rounds=args.max_rounds,
+    )
+    print(json.dumps(receipt.to_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+    return 0 if receipt.status in {LIVE_CANARY_READY, LIVE_CANARY_PROOF_COMPLETE} else 2
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main(sys.argv[1:]))
+
+
+__all__ = [
+    "LIVE_CANARY_BLOCKED",
+    "LIVE_CANARY_CONFIRMATION",
+    "LIVE_CANARY_EXECUTION_FAILED",
+    "LIVE_CANARY_PROOF_COMPLETE",
+    "LIVE_CANARY_PROOF_INCOMPLETE",
+    "LIVE_CANARY_READY",
+    "LiveCanaryReadinessCheck",
+    "LiveCanaryReceipt",
+    "build_reddog_resident_live_canary_parser",
+    "main",
+    "run_reddog_resident_live_canary",
+]

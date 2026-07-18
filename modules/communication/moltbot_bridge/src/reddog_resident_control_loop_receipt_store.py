@@ -33,6 +33,7 @@ class ResidentControlLoopReceipt:
     rejection_reasons: tuple[str, ...]
     created_at: str
     repo_root_digest: str
+    control_lock_acquired: bool
     no_authority_issued: bool = True
     no_worker_spawn_performed: bool = True
     no_shell_command_executed: bool = True
@@ -66,6 +67,7 @@ def build_resident_control_loop_receipt(
         "rejection_reasons": _string_tuple(result.get("rejection_reasons")),
         "created_at": str(created_at or ""),
         "repo_root_digest": _digest(str(Path(repo_root).resolve())),
+        "control_lock_acquired": result.get("control_lock_acquired") is True,
         "no_authority_issued": True,
         "no_worker_spawn_performed": True,
         "no_shell_command_executed": True,

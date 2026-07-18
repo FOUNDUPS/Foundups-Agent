@@ -32,3 +32,15 @@ Focused RedDog WRE operational spine:
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py modules/communication/moltbot_bridge/tests/test_reddog_wre_worktree_create.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_dryrun.py modules/communication/moltbot_bridge/tests/test_reddog_work_order_runtime_invocation.py -q
 ```
+
+Focused resident live-canary harness:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py -q
+```
+
+This suite uses injected readiness/control-loop probes, a temporary local Git
+repository with a registered worktree, the atomic chain store and planner, and
+a temporary PatternMemory SQLite database. The draft-PR runner remains an
+injected no-network test double. One bounded Python subprocess proves
+interprocess lock exclusion. It does not start a signer, call OpenRouter, push
+a branch, or create a PR.

@@ -92,6 +92,29 @@ def test_sink_stores_verified_outcome_in_outside_repo_pattern_memory_db(tmp_path
     assert json.loads(row["output_result"])["record_type"] == (
         "reddog_verified_recursive_improvement_outcome"
     )
+    assert sink.load_verified_outcome(record_id) == _record()
+
+
+def test_sink_readback_rejects_noncanonical_record_id(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    sink = build_reddog_verified_pattern_memory_sink(
+        repo_root=repo,
+        db_path=tmp_path / "runtime" / "pattern_memory.db",
+    )
+    assert sink is not None
+    record_id = sink.store_verified_outcome(_record())
+
+    memory = PatternMemory(db_path=sink.db_path)
+    try:
+        memory.conn.execute(
+            "UPDATE skill_outcomes SET output_result = ? WHERE execution_id = ?",
+            (json.dumps(_record(work_order_id="tampered")), record_id),
+        )
+        memory.conn.commit()
+    finally:
+        memory.close()
+
+    assert sink.load_verified_outcome(record_id) is None
 
 
 def test_sink_is_idempotent_for_same_verified_outcome_record(tmp_path: Path) -> None:

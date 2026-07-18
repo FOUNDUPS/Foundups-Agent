@@ -1,5 +1,44 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-18: REDDOG_RESIDENT_LIVE_CANARY_PHASE1
+
+**WSP Protocol**: WSP 00, 06, 15, 22, 46, 62, 71, 97
+**Phase**: Audit-hardened operator harness; live proof blocked pending operator artifacts
+**Agent**: 0102 focused worker under architect review
+
+**Changes**:
+
+- Added a Linux-only, explicit-confirmation operator surface for one invocation
+  of the existing highest guarded resident queue profile.
+- Reused the existing control loop and planner; no queue stage, signer, Fusion,
+  worktree, verifier, draft-PR, or PatternMemory orchestration was duplicated.
+- Added outside-repo atomic receipts that distinguish static readiness from a
+  completed live proof and serialize only secret/reference presence.
+- Added a shared OS advisory lock around every main resident control-loop call;
+  the persisted v1 control receipt records and proves lock ownership.
+- Required a matching newly persisted control receipt with exact schema,
+  accepted PASS, repo digest, positive serial progress, and changed pre/post
+  chain revisions.
+- Required the exact chain envelope, matching queue/slice, a new chain-store
+  receipt bound to the final revision, and draft/held-out/PatternMemory lineage
+  for one work order, slice, and candidate head.
+- Repaired the chain-store commit witness: its canonical revision normalizes
+  only the newest receipt witness before hashing, then atomically persists that
+  revision in both the envelope and receipt for non-circular readback proof.
+- Required accepted invoke/result worktree decisions plus an existing external
+  Git worktree registered by the repository with matching `rev-parse` HEAD.
+- Required PatternMemory admission/record/digest identities to recompute from
+  the canonical SQLite row read back through the production sink adapter.
+- Restricted runtime-root receipt output to canonical
+  `live_canary_receipt.json`; alternate output must be outside both roots.
+- Split evidence and lock helpers so every live-canary production file is at
+  most 675 lines and every function in those files is at most 50 lines.
+
+**Truth boundary**: Focused tests prove the harness and evidence gates. No live
+signer was started and no production draft PR was created by this slice; the
+live proof remains blocked until WSL receives the required outside-repo
+authority/signer artifacts and an already-running isolated signer.
+
 ## 2026-07-18: REDDOG_HOLOINDEX_QUERY_OWNER_BOUNDARY_POC_PHASE1
 
 **WSP Protocol**: WSP 00, 05, 06, 15, 22, 50, 62, 87, 96, 97
