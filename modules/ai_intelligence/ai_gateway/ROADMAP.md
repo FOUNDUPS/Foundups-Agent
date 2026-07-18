@@ -6,6 +6,24 @@
 - Task-specific routing logic
 - Usage monitoring and statistics
 
+## Dynamic RedDog Model Evidence
+
+- [x] Signed single-model benchmark and promotion evidence admission
+- [x] Signed aggregate PANEL evidence with ordered topology and runtime-context binding
+- [x] PANEL runtime binding fails closed without the verified aggregate
+- [ ] Shared verified runtime-topology resolver for RedDog/Fusion consumers
+- [ ] Outside-repository aggregate artifact supply/bootstrap and durable trust-store integration
+
+### Runtime binder decomposition
+
+- [ ] Extract receipt serialization from inherited `bind_reddog_runtime_models`
+  while preserving byte-for-byte receipt IDs and SINGLE/PANEL parity.
+
+### ModLog archive
+
+- [ ] Move closed historical epochs into a WSP_22-governed archive before the
+  module journal reaches the temporary 1,500-line ceiling.
+
 ## Phase 1: Enhanced Intelligence (Next)
 - **Cost optimization algorithms** - Auto-select cheapest provider
 - **Performance prediction models** - Choose fastest provider

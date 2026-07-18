@@ -250,27 +250,13 @@ def _runtime_binding_rejections(
     policy: ModelRuntimeBindingPolicy,
     verified_production_evidence: Any | None,
 ) -> list[str]:
-    reasons: list[str] = []
+    reasons = _selection_binding_rejections(catalog_snapshot, selection_receipt)
     selected_ids = tuple(selection_receipt.selected_model_ids)
     catalog_ids = {card.canonical_model_id for card in catalog_snapshot.cards}
-    if selection_receipt.catalog_snapshot_id != catalog_snapshot.snapshot_id:
-        reasons.append("catalog_snapshot_mismatch")
-    if selection_receipt.decision != SelectionDecision.SELECTED:
-        reasons.append("selection_not_selected")
-    if selection_receipt.requirements.purpose != SelectionPurpose.PRODUCTION:
-        reasons.append("selection_not_production")
-    if not getattr(verified_production_evidence, "signed_evidence_verified", False):
-        reasons.append("missing_verified_production_evidence")
-    verified_model_ids: set[str] = set()
-    verified_selection_ids: tuple[str, ...] = ()
-    if getattr(verified_production_evidence, "signed_evidence_verified", False):
-        try:
-            verified_model_ids = set(verified_production_evidence.model_ids())
-            verified_selection_ids = tuple(verified_production_evidence.selection_receipt_ids())
-        except Exception:
-            reasons.append("invalid_verified_production_evidence")
-        if verified_selection_ids and verified_selection_ids != (selection_receipt.receipt_id,):
-            reasons.append("signed_evidence_selection_receipt_mismatch")
+    evidence_reasons, verified_model_ids, is_panel = _verified_evidence_context(
+        verified_production_evidence, catalog_snapshot, selection_receipt, policy
+    )
+    reasons.extend(evidence_reasons)
     if selection_receipt.requirements.task_family != policy.task_family:
         reasons.append("task_family_mismatch")
     if not selected_ids:
@@ -279,8 +265,7 @@ def _runtime_binding_rejections(
         reasons.append("selection_verifier_threshold_missing")
     elif selection_receipt.requirements.min_verifier_pass_rate < policy.min_verifier_pass_rate:
         reasons.append("selection_threshold_below_runtime_policy")
-    if selection_receipt.requirements.selection_mode == SelectionMode.PANEL:
-        reasons.append("panel_runtime_binding_deferred")
+    if is_panel:
         if not selection_receipt.panel_topology_digest:
             reasons.append("missing_panel_topology_digest")
         if policy.required_panel_topology_digest and selection_receipt.panel_topology_digest != policy.required_panel_topology_digest:
@@ -304,6 +289,57 @@ def _runtime_binding_rejections(
             continue
         reasons.extend(_evidence_rejections(model_id, benchmark, promotion, policy, selection_receipt))
     return sorted(set(reasons))
+
+
+def _selection_binding_rejections(
+    catalog_snapshot: ModelCatalogSnapshot,
+    selection_receipt: ModelSelectionReceipt,
+) -> list[str]:
+    reasons: list[str] = []
+    if selection_receipt.catalog_snapshot_id != catalog_snapshot.snapshot_id:
+        reasons.append("catalog_snapshot_mismatch")
+    if selection_receipt.decision != SelectionDecision.SELECTED:
+        reasons.append("selection_not_selected")
+    if selection_receipt.requirements.purpose != SelectionPurpose.PRODUCTION:
+        reasons.append("selection_not_production")
+    return reasons
+
+
+def _verified_evidence_context(
+    evidence: Any | None,
+    catalog_snapshot: ModelCatalogSnapshot,
+    selection_receipt: ModelSelectionReceipt,
+    policy: ModelRuntimeBindingPolicy,
+) -> tuple[list[str], set[str], bool]:
+    reasons: list[str] = []
+    is_panel = selection_receipt.requirements.selection_mode == SelectionMode.PANEL
+    if is_panel:
+        try:
+            from .model_panel_signed_evidence import panel_runtime_context_rejections
+
+            reasons.extend(
+                panel_runtime_context_rejections(
+                    evidence,
+                    catalog_snapshot=catalog_snapshot,
+                    selection_receipt=selection_receipt,
+                    runtime_policy=policy,
+                )
+            )
+        except Exception:
+            reasons.append("missing_verified_panel_evidence")
+    elif not getattr(evidence, "signed_evidence_verified", False):
+        reasons.append("missing_verified_production_evidence")
+    model_ids: set[str] = set()
+    selection_ids: tuple[str, ...] = ()
+    if getattr(evidence, "signed_evidence_verified", False):
+        try:
+            model_ids = set(evidence.model_ids())
+            selection_ids = tuple(evidence.selection_receipt_ids())
+        except Exception:
+            reasons.append("invalid_verified_production_evidence")
+        if selection_ids and selection_ids != (selection_receipt.receipt_id,):
+            reasons.append("signed_evidence_selection_receipt_mismatch")
+    return reasons, model_ids, is_panel
 
 
 def _evidence_rejections(

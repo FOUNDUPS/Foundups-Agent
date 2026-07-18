@@ -1,0 +1,28 @@
+exemptions:
+  - file: "src/model_runtime_binding.py"
+    reason: >-
+      The inherited receipt-construction boundary remains 81 lines. This
+      focused PANEL security slice decomposes every changed validation helper
+      to 50 lines or fewer without mixing receipt serialization into the trust
+      gate change.
+    function_threshold_override: 81
+    functions: ["bind_reddog_runtime_models"]
+    temporary: true
+    owner: "AI Gateway Maintainers"
+    expires_on: "2026-09-30"
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "ROADMAP.md#runtime-binder-decomposition"
+
+  - file: "ModLog.md"
+    reason: >-
+      Legacy reverse-chronological WSP_22 module journal. This slice appends a
+      bounded truth record; splitting historical entries requires a dedicated
+      archive operation that preserves traceability.
+    threshold_override: 1500
+    temporary: true
+    owner: "AI Gateway Maintainers"
+    expires_on: "2026-09-30"
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "ROADMAP.md#modlog-archive"
