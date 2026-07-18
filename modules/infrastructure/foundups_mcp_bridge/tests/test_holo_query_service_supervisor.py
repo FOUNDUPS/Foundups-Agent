@@ -197,6 +197,11 @@ def test_startup_timeout_terminates_owner_and_never_exposes_token_in_error(
         lambda **_kwargs: False,
     )
     monkeypatch.setattr(
+        supervisor_module,
+        "_authenticated_health_rejection",
+        lambda **_kwargs: "",
+    )
+    monkeypatch.setattr(
         supervisor_module.secrets,
         "token_urlsafe",
         lambda _bytes: TOKEN,
@@ -225,6 +230,59 @@ def test_startup_timeout_terminates_owner_and_never_exposes_token_in_error(
     assert captured_environment[SERVICE_TOKEN_ENV] == TOKEN
     assert process.terminated is True
     assert owner.is_ready is False
+
+
+def test_startup_stops_immediately_on_authenticated_stale_owner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    process = _FakeProcess()
+    monkeypatch.setattr(
+        supervisor_module.subprocess,
+        "Popen",
+        lambda _command, **_kwargs: process,
+    )
+    monkeypatch.setattr(
+        supervisor_module,
+        "_authenticated_health_probe",
+        lambda **_kwargs: False,
+    )
+    monkeypatch.setattr(
+        supervisor_module,
+        "_authenticated_health_rejection",
+        lambda **_kwargs: "REPO_HEAD_MISMATCH",
+    )
+    monkeypatch.setattr(
+        supervisor_module.secrets,
+        "token_urlsafe",
+        lambda _bytes: TOKEN,
+    )
+    owner = HoloQueryServiceSupervisor(
+        repo_root=tmp_path,
+        startup_timeout_seconds=300.0,
+    )
+
+    with pytest.raises(HoloQueryServiceSupervisorError) as error:
+        owner.start()
+
+    assert error.value.code == "REPO_HEAD_MISMATCH"
+    assert process.terminated is True
+    assert owner.is_ready is False
+
+
+def test_health_rejection_accepts_only_terminal_authenticated_contract() -> None:
+    base = {
+        "schema_version": HEALTH_SCHEMA_VERSION,
+        "ok": False,
+        "source": "holoindex",
+        "loopback_only": True,
+        "no_holoindex_reindex_performed": True,
+        "error": "STALE_INDEX",
+    }
+    assert supervisor_module._health_rejection_code(base) == "STALE_INDEX"
+    assert supervisor_module._health_rejection_code({**base, "error": "UNAUTHORIZED"}) == ""
+    assert supervisor_module._health_rejection_code({**base, "loopback_only": False}) == ""
+    assert supervisor_module._health_rejection_code({**base, "schema_version": "wrong"}) == ""
 
 
 def test_startup_fails_closed_when_spawned_owner_exits(

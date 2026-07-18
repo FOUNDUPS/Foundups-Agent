@@ -2,9 +2,11 @@
 
 ## Status
 
-Phase: RedDog 0.4.3 resident architect thin-client surface.
+Phase: RedDog 0.4.4 resident architect thin-client surface.
 
 Current implementation:
+
+- Semantic HoloIndex grounding is generation-bound to the authenticated owner service. Stale, lexical, unreceipted, or repository-mismatched owner results are withheld and surfaced as an index gap; RedDog never re-indexes during a reasoning run.
 
 - Cursor command: `RedDog: Open`.
 - Bottom-composer webview with scrollback output.
@@ -128,7 +130,7 @@ P2/P3
 
 - **Owner:** RedDog Maintainers.
 - **Temporary exemption expiry:** 2026-09-30 (2026-Q3 technical-architect review).
-- **Current boundary:** `extension.js` is a legacy 7,881-line thin-client integration file. The temporary exact-file threshold is 7,900 lines; this is not permission for further feature growth.
+- **Current boundary:** `extension.js` is a legacy 7,880-line thin-client integration file. The temporary exact-file threshold is 7,900 lines; this is not permission for further feature growth. New generation-bound HoloIndex logic lives in a focused module rather than expanding this file.
 - **Remediation:** extract model configuration plus stdin bridge invocation first, then UI rendering, retrieval/context assembly, and governed work-order receipt composition into separately tested JavaScript modules of at most 400 lines.
 - **Parity gate:** retain the focused Fusion panel ingress/payload contract and exhaustive extension contract across each extraction; preserve no-network, stdin-only model payloads and review-packet truth.
 - **Exit criterion:** remove `extensions/reddog/wsp_62_exemptions.yaml` once `extension.js` and its touched functions comply with WSP_62 limits. If the expiry arrives first, block additional extension feature work and renew only through a new architect-reviewed remediation slice.
