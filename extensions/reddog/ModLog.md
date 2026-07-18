@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-18 - REDDOG_KIMI_K3_ALL_ROLE_RUNTIME_BUDGET_HARDENING_PHASE1 (0.4.2 unchanged)
+
+- Preserved Kimi K3 as the default long-horizon critic while applying its 4096-token floor, mandatory `max` reasoning, and no-temperature contract to every exact `moonshotai/kimi-k3` direct completion call, including explicit single use and receipt-backed principal/synthesis selection.
+- Added truthful direct `requested_max_tokens` / `effective_max_tokens` receipts and retained manual Fusion requested, per-role, and per-panel effective budget receipts; non-K3 budgets remain unchanged.
+- This compatibility hardening does not promote K3 to champion, change RedDog defaults, open an OpenClaw execution valve, or dispatch Hermes. Signed promotion and live runtime binding remain separate evidence-gated responsibilities.
+- Preserved extension version `0.4.2`; this is a bridge correctness amendment, not a product-surface release.
+- WSP_15: Complexity 2 + Importance 4 + Deferability 4 + Impact 3 = 13 (P1).
+
 ## 2026-07-18 - REDDOG_HOLO_SEMANTIC_FIRST_PHASE1 (semantic retrieval recovery, 0.4.2)
 
 - Proved the local HoloIndex embedding stack healthy (`sentence_transformers`, cached `all-MiniLM-L6-v2`) and measured a real semantic bundle at 15.6 seconds with five code and five WSP hits.

@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-18 - REDDOG_KIMI_K3_ALL_ROLE_RUNTIME_BUDGET_HARDENING_PHASE1
+
+- Added exact Kimi K3 and non-K3 `openrouter_single` receipt coverage for requested and provider-effective token budgets.
+- Moved the new K3 all-role budget proofs into the focused `KimiK3RuntimeBudgetTests` class so the oversized legacy hardening class does not grow.
+- Covered K3's 4096-token floor in direct, Fusion principal, and synthesis calls while retaining the existing panel-budget proof and non-K3 behavior.
+- Verification: `python -B -m pytest -q -p no:cacheprovider --tb=short scripts/tests/test_advisory_model_once_hardening.py` and `node extensions/reddog/tests/verify_extension_contract.js`.
+
 ## 2026-07-18 - REDDOG_HOLO_SEMANTIC_FIRST_PHASE1
 
 - Asserted semantic is the production default and lexical retrieval requires explicit `REDDOG_HOLO_RETRIEVAL_MODE=lexical` opt-down.

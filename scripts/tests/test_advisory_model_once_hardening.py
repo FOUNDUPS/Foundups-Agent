@@ -718,5 +718,120 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(kwargs["required_target_paths"], ("real/a.py", "real/b.py"))
 
 
+class KimiK3RuntimeBudgetTests(unittest.TestCase):
+    """Focused coverage for K3 provider budgets and truthful role receipts."""
+
+    def _invoke_main(self, payload: dict) -> tuple[int, dict]:
+        stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        fake_stdin = mock.Mock()
+        fake_stdin.buffer = io.BytesIO(stdin_bytes)
+        stdout = io.StringIO()
+        with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
+            os.environ, {bridge.ENV_API_KEY: "test-key"}, clear=False
+        ):
+            rc = bridge.main()
+        return rc, json.loads(stdout.getvalue())
+
+    def test_kimi_k3_completion_applies_4096_floor(self) -> None:
+        post = mock.Mock(
+            return_value=(
+                {"choices": [{"message": {"content": "ok"}}]},
+                {"retry_count": 0, "final_retry_reason": None},
+            )
+        )
+        with mock.patch.object(bridge, "_post_openrouter", post):
+            bridge._chat_completion(
+                "key",
+                "moonshotai/kimi-k3",
+                [{"role": "user", "content": "test"}],
+                max_tokens=256,
+                temperature=0.2,
+                timeout=30,
+            )
+
+        body = post.call_args.args[1]
+        self.assertEqual(body["max_tokens"], 4096)
+        self.assertEqual(body["reasoning"], {"effort": "max"})
+        self.assertNotIn("temperature", body)
+
+    def test_fusion_kimi_k3_principal_uses_and_records_4096_for_both_passes(self) -> None:
+        calls: list[tuple[str, int]] = []
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            calls.append((model, kwargs["max_tokens"]))
+            system = str(messages[0]["content"])
+            if "Panel critic pass" in system:
+                return (
+                    "Challenge: the evidence framing is unsupported and the WSP_15 "
+                    "priority needs verification.",
+                    {"retry_count": 0},
+                )
+            return "Evidence-backed result with WSP_15 priority.", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt",
+                [],
+                {
+                    "lead_model": "moonshotai/kimi-k3",
+                    "panel_models": ["critic-a"],
+                    "max_tokens": 1200,
+                },
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(calls.count(("moonshotai/kimi-k3", 4096)), 2)
+        self.assertIn(("critic-a", 1200), calls)
+        packet = result["review_packet"]
+        self.assertEqual(packet["requested_max_tokens"], 1200)
+        self.assertEqual(
+            packet["role_max_tokens"],
+            {"lead": 4096, "panel": {"critic-a": 1200}, "synthesis": 4096},
+        )
+
+    def test_single_kimi_k3_receipt_records_requested_and_effective_budget(self) -> None:
+        chat = mock.Mock(return_value=("ok", {"retry_count": 0, "final_retry_reason": None}))
+        with mock.patch.object(bridge, "evaluate_redaction_gate", return_value=_passed_gate()), mock.patch.object(
+            bridge, "_chat_completion", chat
+        ):
+            rc, result = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "test",
+                    "lead_model": "moonshotai/kimi-k3",
+                    "max_tokens": 256,
+                }
+            )
+
+        self.assertEqual(rc, 0)
+        self.assertTrue(result["ok"])
+        self.assertEqual(chat.call_args.kwargs["max_tokens"], 256)
+        packet = result["review_packet"]
+        self.assertEqual(packet["requested_max_tokens"], 256)
+        self.assertEqual(packet["effective_max_tokens"], 4096)
+
+    def test_single_non_kimi_receipt_preserves_requested_budget(self) -> None:
+        chat = mock.Mock(return_value=("ok", {"retry_count": 0, "final_retry_reason": None}))
+        with mock.patch.object(bridge, "evaluate_redaction_gate", return_value=_passed_gate()), mock.patch.object(
+            bridge, "_chat_completion", chat
+        ):
+            rc, result = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "test",
+                    "lead_model": "z-ai/glm-5.2",
+                    "max_tokens": 777,
+                }
+            )
+
+        self.assertEqual(rc, 0)
+        self.assertTrue(result["ok"])
+        self.assertEqual(chat.call_args.kwargs["max_tokens"], 777)
+        packet = result["review_packet"]
+        self.assertEqual(packet["requested_max_tokens"], 777)
+        self.assertEqual(packet["effective_max_tokens"], 777)
+
+
 if __name__ == "__main__":
     unittest.main()
