@@ -14,9 +14,10 @@ runtime surface and explicit synthesizer before aggregate signature and nonce
 admission.
 
 **Truth Boundary:**
-- IMPLEMENTED: typed PANEL aggregate, deterministic rehydration, independent
-  member verification, anti-splice checks, signer trust/revocation/freshness,
-  replay rejection, runtime-binding gate, adversarial tests.
+- IMPLEMENTED: process-local sealed PANEL proof, deterministic rehydration,
+  independent member verification, anti-splice checks, signer trust/revocation/
+  freshness, replay rejection, exact runtime identity/projection gate, and
+  adversarial construction/replacement/copy/pickle tests.
 - NOT IMPLEMENTED: Fusion consumer wiring, provider calls, model discovery or
   ranking, artifact supply/bootstrap, WRE scheduling, OpenClaw/Hermes changes,
   signing/private-key custody, durable nonce/trust stores, live execution.

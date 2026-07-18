@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import ast
+import copy
 import hashlib
 import json
+import pickle
 from dataclasses import replace
 from pathlib import Path
 
@@ -40,6 +42,7 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
 from modules.ai_intelligence.ai_gateway.src.model_panel_signed_evidence import (
     PanelEvidenceSignerRole,
     PanelMemberEvidenceInput,
+    VerifiedModelPanelEvidence,
     build_model_panel_signed_evidence_receipt,
     build_panel_member_evidence_binding,
     build_verified_model_panel_evidence,
@@ -141,6 +144,7 @@ def _panel_resolver(public_key: str = PANEL_PUBLIC_KEY) -> StaticModelEvidenceKe
 
 
 def _signed_panel(case: dict, **overrides):
+    signature_override = overrides.pop("_signature_override", None)
     selection = case["selection"]
     snapshot = case["snapshot"]
     policy = case["policy"]
@@ -172,7 +176,9 @@ def _signed_panel(case: dict, **overrides):
     }
     values.update(overrides)
     placeholder = build_model_panel_signed_evidence_receipt(signature="placeholder", **values)
-    signature = deterministic_signature(PANEL_PUBLIC_KEY, model_panel_signed_evidence_signing_input(placeholder))
+    signature = signature_override or deterministic_signature(
+        values["signer_public_key"], model_panel_signed_evidence_signing_input(placeholder)
+    )
     return build_model_panel_signed_evidence_receipt(signature=signature, **values)
 
 
@@ -447,7 +453,7 @@ def test_rejects_expiry_untrusted_revoked_and_replay():
         _verify(case, panel_key_resolver=_panel_resolver("ed25519-pub-v1:other"))
     with pytest.raises(ValueError, match="panel_key_epoch_revoked"):
         _verify(case, revoked_panel_key_epochs=(KEY_EPOCH,))
-    forged = replace(case["aggregate"], signature="test-sig:forged")
+    forged = _signed_panel(case, _signature_override="test-sig:forged")
     with pytest.raises(ValueError, match="panel_signature_invalid"):
         _verify(case, aggregate=forged)
 
@@ -457,19 +463,85 @@ def test_rejects_expiry_untrusted_revoked_and_replay():
         _verify(case, nonce_store=store, consume_nonce=True)
 
 
-def test_runtime_rechecks_verified_member_projection():
+def test_verified_proof_rejects_construction_copy_replace_pickle_and_mutation():
     case = _case()
     verified = _verify(case)
-    tampered = replace(verified, member_entries=tuple(reversed(verified.member_entries)))
+    with pytest.raises(TypeError, match="factory_required"):
+        VerifiedModelPanelEvidence(case["aggregate"], verified.member_entries)
+    with pytest.raises(TypeError):
+        replace(verified, member_entries=tuple(reversed(verified.member_entries)))
+    with pytest.raises(TypeError, match="copy_forbidden"):
+        copy.copy(verified)
+    with pytest.raises(TypeError, match="copy_forbidden"):
+        copy.deepcopy(verified)
+    with pytest.raises(TypeError, match="pickle_forbidden"):
+        pickle.dumps(verified)
+    with pytest.raises(TypeError, match="is_sealed"):
+        verified.aggregate_receipt = case["aggregate"]
+
+
+def _bind_case(case: dict, evidence):
+    return bind_reddog_runtime_models(
+        catalog_snapshot=case["snapshot"],
+        selection_receipt=case["selection"],
+        benchmark_evidence_receipts=case["benchmarks"],
+        promotion_evidence_receipts=case["promotions"],
+        policy=case["policy"],
+        verified_production_evidence=evidence,
+    )
+
+
+def _unsealed_proof(case: dict, aggregate):
+    proof = object.__new__(VerifiedModelPanelEvidence)
+    object.__setattr__(proof, "_aggregate_receipt", aggregate)
+    object.__setattr__(proof, "_member_entries", _verify(case).member_entries)
+    return proof
+
+
+def test_runtime_rejects_unissued_self_consistent_aggregate_variants():
+    case = _case()
+    variants = (
+        _signed_panel(case, _signature_override="test-sig:forged"),
+        _signed_panel(case, issued_at=NOW - 7200, expires_at=NOW - 3600),
+        _signed_panel(case, signer_public_key="ed25519-pub-v1:untrusted"),
+        _signed_panel(case, synthesizer_model_id="provider/critic", synthesizer_role="principal"),
+        _signed_panel(case, policy_receipt_digest="sha256:other"),
+    )
+    for aggregate in variants:
+        receipt = _bind_case(case, _unsealed_proof(case, aggregate))
+        assert receipt.decision == ModelRuntimeBindingDecision.REJECTED
+        assert "missing_verified_panel_evidence" in receipt.rejection_reasons
+
+
+def test_runtime_seal_rejects_low_level_aggregate_and_synthesizer_replacement():
+    case = _case()
+    verified = _verify(case)
+    changed = _signed_panel(
+        case,
+        synthesizer_model_id="provider/critic",
+        synthesizer_role="principal",
+    )
+    object.__setattr__(verified, "_aggregate_receipt", changed)
+    receipt = _bind_case(case, verified)
+    assert receipt.decision == ModelRuntimeBindingDecision.REJECTED
+    assert "panel_verified_proof_identity_mismatch" in receipt.rejection_reasons
+    assert "panel_signed_evidence_synthesizer_mismatch" in receipt.rejection_reasons
+
+
+def test_runtime_seal_rejects_low_level_member_projection_replacement():
+    case = _case()
+    verified = _verify(case)
+    object.__setattr__(verified, "_member_entries", tuple(reversed(verified.member_entries)))
     receipt = bind_reddog_runtime_models(
         catalog_snapshot=case["snapshot"],
         selection_receipt=case["selection"],
         benchmark_evidence_receipts=case["benchmarks"],
         promotion_evidence_receipts=case["promotions"],
         policy=case["policy"],
-        verified_production_evidence=tampered,
+        verified_production_evidence=verified,
     )
     assert receipt.decision == ModelRuntimeBindingDecision.REJECTED
+    assert "panel_verified_proof_identity_mismatch" in receipt.rejection_reasons
     assert "panel_signed_evidence_member_projection_mismatch" in receipt.rejection_reasons
 
 

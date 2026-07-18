@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import weakref
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping, Sequence
@@ -42,7 +43,6 @@ PANEL_EVIDENCE_SCHEMA_VERSION = "model_panel_signed_evidence_receipt.v1"
 VERIFIED_PANEL_EVIDENCE_SCHEMA_VERSION = "verified_model_panel_evidence.v1"
 PANEL_SIGNING_PREFIX = "reddog-model-panel-evidence.v1"
 PANEL_SUBJECT_TYPE = "panel"
-_VERIFIED_MARKER = object()
 _PANEL_STRING_FIELDS = (
     "synthesizer_model_id",
     "synthesizer_role",
@@ -194,28 +194,83 @@ class ModelPanelSignedEvidenceReceipt:
         return {"receipt_id": self.receipt_id, **self.to_signed_record()}
 
 
-@dataclass(frozen=True)
 class VerifiedModelPanelEvidence:
-    """Opaque factory result accepted by PANEL runtime binding."""
+    """Process-local sealed proof issued only by the verification factory."""
 
-    aggregate_receipt: ModelPanelSignedEvidenceReceipt
-    member_entries: tuple[VerifiedModelEvidenceEntry, ...]
-    _marker: object
-    schema_version: str = VERIFIED_PANEL_EVIDENCE_SCHEMA_VERSION
+    __slots__ = ("_aggregate_receipt", "_member_entries", "__weakref__")
+    __hash__ = object.__hash__
+
+    def __new__(cls, *_args: Any, **_kwargs: Any) -> "VerifiedModelPanelEvidence":
+        raise TypeError("verified_panel_evidence_factory_required")
+
+    def __setattr__(self, _name: str, _value: Any) -> None:
+        raise TypeError("verified_panel_evidence_is_sealed")
+
+    @property
+    def aggregate_receipt(self) -> ModelPanelSignedEvidenceReceipt:
+        return self._aggregate_receipt
+
+    @property
+    def member_entries(self) -> tuple[VerifiedModelEvidenceEntry, ...]:
+        return self._member_entries
+
+    @property
+    def schema_version(self) -> str:
+        return VERIFIED_PANEL_EVIDENCE_SCHEMA_VERSION
 
     @property
     def signed_evidence_verified(self) -> bool:
-        return self._marker is _VERIFIED_MARKER
+        return _verified_panel_seal(self) is not None
 
     @property
     def panel_signed_evidence_verified(self) -> bool:
-        return self._marker is _VERIFIED_MARKER
+        return _verified_panel_seal(self) is not None
 
     def model_ids(self) -> tuple[str, ...]:
         return tuple(member.model_id for member in self.aggregate_receipt.members)
 
     def selection_receipt_ids(self) -> tuple[str, ...]:
         return (self.aggregate_receipt.selection_receipt_id,)
+
+    def __copy__(self) -> "VerifiedModelPanelEvidence":
+        raise TypeError("verified_panel_evidence_copy_forbidden")
+
+    def __deepcopy__(self, _memo: dict[int, Any]) -> "VerifiedModelPanelEvidence":
+        raise TypeError("verified_panel_evidence_copy_forbidden")
+
+    def __reduce_ex__(self, _protocol: int) -> Any:
+        raise TypeError("verified_panel_evidence_pickle_forbidden")
+
+
+@dataclass(frozen=True)
+class _VerifiedPanelSeal:
+    aggregate_receipt: ModelPanelSignedEvidenceReceipt
+    member_entries: tuple[VerifiedModelEvidenceEntry, ...]
+    aggregate_digest: str
+    member_projection_digest: str
+    context_digest: str
+    synthesizer: tuple[str, str]
+
+
+def _build_verified_panel_registry(verifier):
+    registry: weakref.WeakKeyDictionary[VerifiedModelPanelEvidence, _VerifiedPanelSeal] = weakref.WeakKeyDictionary()
+
+    def verify_and_issue(*args: Any, **kwargs: Any) -> VerifiedModelPanelEvidence:
+        receipt, entries = verifier(*args, **kwargs)
+        proof = object.__new__(VerifiedModelPanelEvidence)
+        object.__setattr__(proof, "_aggregate_receipt", receipt)
+        object.__setattr__(proof, "_member_entries", entries)
+        registry[proof] = _panel_seal(receipt, entries)
+        return proof
+
+    def lookup(value: Any) -> _VerifiedPanelSeal | None:
+        try:
+            return registry.get(value) if isinstance(value, VerifiedModelPanelEvidence) else None
+        except Exception:
+            return None
+
+    verify_and_issue.__name__ = "build_verified_model_panel_evidence"
+    return verify_and_issue, lookup
 
 
 def build_panel_member_evidence_binding(
@@ -330,7 +385,7 @@ def rehydrate_model_panel_signed_evidence_receipt(data: Mapping[str, Any]) -> Mo
     return receipt
 
 
-def build_verified_model_panel_evidence(
+def _verify_model_panel_evidence_inputs(
     *,
     catalog_snapshot: ModelCatalogSnapshot, selection_receipt: ModelSelectionReceipt,
     member_inputs: Sequence[PanelMemberEvidenceInput],
@@ -343,14 +398,13 @@ def build_verified_model_panel_evidence(
     nonce_store: NonceStore | None = None, consume_nonce: bool = False,
     revoked_member_key_epochs: Sequence[str] = (), revoked_panel_key_epochs: Sequence[str] = (),
     leeway_s: int = 60,
-) -> VerifiedModelPanelEvidence:
+) -> tuple[ModelPanelSignedEvidenceReceipt, tuple[VerifiedModelEvidenceEntry, ...]]:
     """Verify member chains first, then the aggregate envelope and nonce last."""
-
-    receipt = aggregate_receipt if isinstance(aggregate_receipt, ModelPanelSignedEvidenceReceipt) else rehydrate_model_panel_signed_evidence_receipt(aggregate_receipt)
+    aggregate_record, benchmark_run_receipt_id = _aggregate_record_and_run(aggregate_receipt)
     entries, bindings = _verify_member_inputs(
         catalog_snapshot_id=catalog_snapshot.snapshot_id,
         selection_receipt_id=selection_receipt.receipt_id,
-        benchmark_run_receipt_id=receipt.benchmark_run_receipt_id,
+        benchmark_run_receipt_id=benchmark_run_receipt_id,
         member_inputs=member_inputs,
         key_resolver=member_key_resolver,
         signature_verifier=member_signature_verifier,
@@ -358,6 +412,7 @@ def build_verified_model_panel_evidence(
         revoked_key_epochs=revoked_member_key_epochs,
         leeway_s=leeway_s,
     )
+    receipt = rehydrate_model_panel_signed_evidence_receipt(aggregate_record)
     _assert_panel_context(
         catalog_snapshot=catalog_snapshot,
         selection_receipt=selection_receipt,
@@ -379,7 +434,30 @@ def build_verified_model_panel_evidence(
         leeway_s=leeway_s,
     )
     _consume_panel_nonce(receipt, nonce_store=nonce_store, consume_nonce=consume_nonce)
-    return VerifiedModelPanelEvidence(receipt, entries, _VERIFIED_MARKER)
+    return receipt, entries
+
+
+build_verified_model_panel_evidence, _verified_panel_seal = _build_verified_panel_registry(
+    _verify_model_panel_evidence_inputs
+)
+
+
+def _aggregate_record(
+    aggregate: ModelPanelSignedEvidenceReceipt | Mapping[str, Any],
+) -> Mapping[str, Any]:
+    if isinstance(aggregate, ModelPanelSignedEvidenceReceipt):
+        return aggregate.to_dict()
+    if not isinstance(aggregate, Mapping):
+        raise ValueError("invalid_panel_evidence_record")
+    return aggregate
+
+
+def _aggregate_record_and_run(
+    aggregate: ModelPanelSignedEvidenceReceipt | Mapping[str, Any],
+) -> tuple[Mapping[str, Any], str]:
+    record = _aggregate_record(aggregate)
+    run_id = _required("benchmark_run_receipt_id", record.get("benchmark_run_receipt_id"))
+    return record, run_id
 
 
 def _consume_panel_nonce(
@@ -436,10 +514,11 @@ def panel_runtime_context_rejections(
 ) -> tuple[str, ...]:
     """Recheck immutable aggregate context at the runtime-binding boundary."""
 
-    if not isinstance(evidence, VerifiedModelPanelEvidence) or not evidence.panel_signed_evidence_verified:
+    seal = _verified_panel_seal(evidence)
+    if seal is None:
         return ("missing_verified_panel_evidence",)
     receipt = evidence.aggregate_receipt
-    reasons: list[str] = []
+    reasons = _panel_seal_rejections(evidence, seal)
     try:
         if rehydrate_model_panel_signed_evidence_receipt(receipt.to_dict()) != receipt:
             reasons.append("panel_signed_evidence_receipt_invalid")
@@ -451,6 +530,12 @@ def panel_runtime_context_rejections(
         reasons.append("panel_signed_evidence_member_order_mismatch")
     if receipt.required_roles != tuple(selection_receipt.requirements.panel_roles):
         reasons.append("panel_signed_evidence_required_roles_mismatch")
+    synthesizers = tuple(
+        member for member in receipt.members
+        if member.role == receipt.synthesizer_role and member.model_id == receipt.synthesizer_model_id
+    )
+    if len(synthesizers) != 1 or seal.synthesizer != (receipt.synthesizer_model_id, receipt.synthesizer_role):
+        reasons.append("panel_signed_evidence_synthesizer_mismatch")
     if not _runtime_member_bindings_match(receipt, evidence.member_entries):
         reasons.append("panel_signed_evidence_member_projection_mismatch")
     expected_context = _context_values(catalog_snapshot, selection_receipt, runtime_policy)
@@ -468,6 +553,37 @@ def panel_runtime_context_rejections(
     if receipt.task_receipt_digest != _common_task_digest(evidence.member_entries):
         reasons.append("panel_signed_evidence_task_mismatch")
     return tuple(sorted(set(reasons)))
+
+
+def _panel_seal(
+    receipt: ModelPanelSignedEvidenceReceipt,
+    entries: tuple[VerifiedModelEvidenceEntry, ...],
+) -> _VerifiedPanelSeal:
+    return _VerifiedPanelSeal(
+        aggregate_receipt=receipt,
+        member_entries=entries,
+        aggregate_digest=_content_digest(receipt.to_dict()),
+        member_projection_digest=_content_digest([member.to_dict() for member in receipt.members]),
+        context_digest=_content_digest(_sealed_context_values(receipt)),
+        synthesizer=(receipt.synthesizer_model_id, receipt.synthesizer_role),
+    )
+
+
+def _panel_seal_rejections(
+    evidence: VerifiedModelPanelEvidence,
+    seal: _VerifiedPanelSeal,
+) -> list[str]:
+    receipt = evidence.aggregate_receipt
+    reasons: list[str] = []
+    if receipt is not seal.aggregate_receipt or evidence.member_entries is not seal.member_entries:
+        reasons.append("panel_verified_proof_identity_mismatch")
+    if _content_digest(receipt.to_dict()) != seal.aggregate_digest:
+        reasons.append("panel_verified_proof_aggregate_mismatch")
+    if _content_digest([member.to_dict() for member in receipt.members]) != seal.member_projection_digest:
+        reasons.append("panel_verified_proof_member_mismatch")
+    if _content_digest(_sealed_context_values(receipt)) != seal.context_digest:
+        reasons.append("panel_verified_proof_context_mismatch")
+    return reasons
 
 
 def _runtime_member_bindings_match(
@@ -568,6 +684,20 @@ def _receipt_context_values(receipt: ModelPanelSignedEvidenceReceipt) -> tuple[s
         receipt.topology_receipt_digest,
         receipt.policy_receipt_digest,
         receipt.runtime_surface_receipt_digest,
+    )
+
+
+def _sealed_context_values(receipt: ModelPanelSignedEvidenceReceipt) -> tuple[Any, ...]:
+    return (
+        receipt.panel_subject_id,
+        receipt.catalog_snapshot_id, receipt.catalog_snapshot_digest,
+        receipt.selection_receipt_id, receipt.selection_receipt_digest,
+        receipt.task_receipt_id, receipt.task_receipt_digest,
+        receipt.topology_receipt_id, receipt.topology_receipt_digest,
+        receipt.policy_receipt_id, receipt.policy_receipt_digest,
+        receipt.runtime_surface_receipt_id, receipt.runtime_surface_receipt_digest,
+        receipt.benchmark_run_receipt_id,
+        receipt.required_roles,
     )
 
 

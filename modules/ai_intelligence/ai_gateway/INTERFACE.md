@@ -308,7 +308,10 @@ digests, explicit synthesizer, and exact catalog/selection/task/topology/policy/
 surface ID-and-digest bindings. Only then does it verify the aggregate signer,
 trusted key, key epoch, validity window and signature; optional aggregate nonce
 consumption is last. Runtime binding rejects PANEL selections unless supplied
-this verified aggregate. The API does not sign, choose models, call providers,
+this exact process-local factory-issued aggregate proof. The proof cannot be
+directly constructed, copied, replaced or serialized; runtime rechecks its
+closure-held identity seal and exact aggregate/member/context/synthesizer
+projections. The API does not sign, choose models, call providers,
 wire Fusion consumers, mutate runtime defaults or perform network/file writes.
 
 #### RedDog Model Selection Artifact Supply

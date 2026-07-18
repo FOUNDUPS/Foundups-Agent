@@ -194,7 +194,10 @@ digests, catalog, selection, task, topology, policy and runtime-surface context,
 plus an explicit synthesizer. Aggregate trust, signature, revocation, freshness
 and optional nonce consumption are checked only after all member and anti-splice
 checks pass. This slice enables the runtime-binding receipt to represent a
-verified panel; it does not wire any Fusion consumer or choose panel members.
+verified panel. The returned proof is process-local, sealed, non-copyable and
+non-serializable; runtime binding requires the exact factory-issued identity and
+rechecks its canonical aggregate, member, context and synthesizer projections.
+This slice does not wire any Fusion consumer or choose panel members.
 
 ## RedDog Model Selection Artifact Supply
 
