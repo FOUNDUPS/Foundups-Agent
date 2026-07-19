@@ -21,7 +21,7 @@ import hashlib
 import json
 import os
 import tempfile
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
@@ -36,6 +36,9 @@ from modules.communication.moltbot_bridge.src.reddog_lane_state_reconciler impor
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
 )
 
 
@@ -229,12 +232,20 @@ class AtomicJsonAuthoritativeWorkStateStore:
         self.path = Path(path)
 
     def load(self) -> Dict[str, Any]:
+        with runtime_operation_lock(str(self.path) + ".operation"):
+            return self._load_unlocked()
+
+    def _load_unlocked(self) -> Dict[str, Any]:
         if not self.path.exists():
             return {}
         return json.loads(self.path.read_text(encoding="utf-8"))
 
     def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        current = self.load()
+        with runtime_operation_lock(str(self.path) + ".operation"):
+            return self._commit_unlocked(snapshot, expected_revision=expected_revision)
+
+    def _commit_unlocked(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
+        current = self._load_unlocked()
         if current.get("revision") != expected_revision:
             raise RuntimeError("revision_conflict")
         committed = json.loads(json.dumps(snapshot, sort_keys=True))

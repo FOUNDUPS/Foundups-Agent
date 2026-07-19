@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 SLICE_DATE = date(2026, 7, 18)
 EXPECTED_MODULE_FILES = {
+    "src/reddog_authoritative_work_state_refresh_runtime.py",
     "src/reddog_main_resident_queue_next_stage_dispatch_bootstrap.py",
     "src/reddog_main_resident_queue_runtime_dependency_bundle.py",
     "src/reddog_main_resident_queue_serial_loop_bootstrap.py",

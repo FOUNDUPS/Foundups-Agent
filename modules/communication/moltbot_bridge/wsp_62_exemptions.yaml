@@ -34,6 +34,12 @@ exemptions:
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
   - <<: *reddog_security_repair
+    file: "src/reddog_authoritative_work_state_refresh_runtime.py"
+    reason: "Inherited work-state reconciliation boundary; this repair adds only the shared operation-lock transaction wrapper."
+    threshold_override: 790
+    no_growth_ceiling: {file_lines: 790, functions: {}}
+
+  - <<: *reddog_security_repair
     file: "src/reddog_main_resident_queue_next_stage_dispatch_bootstrap.py"
     reason: "Inherited dispatch transaction boundary; this slice confines all runtime paths."
     threshold_override: 275

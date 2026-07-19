@@ -23,6 +23,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
+
 
 AUTHORITY_RUNTIME_RESOLVER_SUPPLY_ACCEPT = "AUTHORITY_RUNTIME_RESOLVER_SUPPLY_ACCEPT"
 AUTHORITY_RUNTIME_RESOLVER_SUPPLY_REJECT = "AUTHORITY_RUNTIME_RESOLVER_SUPPLY_REJECT"
@@ -185,6 +189,11 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
 
 
 def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+    with runtime_operation_lock(str(path) + ".operation"):
+        _write_json_atomic_unlocked(path, payload)
+
+
+def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
     try:

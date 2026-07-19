@@ -3,16 +3,34 @@
 from __future__ import annotations
 
 import json
-import os
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
 from threading import Event
+from types import ModuleType
 
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
+    reddog_authoritative_work_state_refresh_runtime as work_state_supply,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_authority_profile_source_artifact_supply as profile_source_supply,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_authority_runtime_resolver_artifact_supply as resolver_artifact_supply,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_execution_valve_environment_supply as valve_environment_supply,
+)
+from modules.communication.moltbot_bridge.src import (
     reddog_execution_valve_use_time_authority as use_time,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_github_principal_permission_snapshot_supply as github_artifact_supply,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_main_architect_fix_promotion_bootstrap as promoted_profile_supply,
 )
 from modules.communication.moltbot_bridge.src import (
     reddog_main_resident_queue_runtime_dependency_bundle as dependency_bundle,
@@ -43,6 +61,17 @@ _USE_TIME_ARTIFACTS = (
     ("valve_environment_path", "execution_valve_env.json"),
 )
 
+_PRODUCTION_WRITERS = (
+    ("work_state_store", work_state_supply, "authoritative_work_state.json", "store"),
+    ("profile_source", profile_source_supply, "authority_profile.json", "helper"),
+    ("profile_promoted", promoted_profile_supply, "authority_profile.json", "helper"),
+    ("github_permissions", github_artifact_supply, "permission_snapshots.json", "helper"),
+    ("github_principals", github_artifact_supply, "principal_authority_records.json", "helper"),
+    ("resolver_permissions", resolver_artifact_supply, "permission_snapshots.json", "helper"),
+    ("resolver_principals", resolver_artifact_supply, "principal_authority_records.json", "helper"),
+    ("valve_environment", valve_environment_supply, "execution_valve_env.json", "helper"),
+)
+
 
 def _resolver(repo: Path, runtime: Path) -> GovernedValveUseTimeAuthorityResolver:
     return GovernedValveUseTimeAuthorityResolver(
@@ -62,6 +91,71 @@ def _resolver(repo: Path, runtime: Path) -> GovernedValveUseTimeAuthorityResolve
         required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
         trusted_now_epoch=lambda: 1_784_006_400,
     )
+
+
+def _invoke_production_writer(
+    module: ModuleType,
+    writer_kind: str,
+    target: Path,
+    payload: dict[str, str],
+) -> None:
+    if writer_kind == "store":
+        module.AtomicJsonAuthoritativeWorkStateStore(target).commit(
+            payload,
+            expected_revision=None,
+        )
+        return
+    module._write_json_atomic(target, payload)
+
+
+@pytest.mark.parametrize(
+    ("case", "module", "filename", "writer_kind"),
+    _PRODUCTION_WRITERS,
+    ids=[case[0] for case in _PRODUCTION_WRITERS],
+)
+def test_production_writer_cannot_replace_during_reader_operation_lock(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    case: str,
+    module: ModuleType,
+    filename: str,
+    writer_kind: str,
+) -> None:
+    target = tmp_path / case / filename
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        json.dumps({"generation": "before", "revision": None}),
+        encoding="utf-8",
+    )
+    attempted = Event()
+    lock_identity = str(target) + ".operation"
+
+    @contextmanager
+    def observed_lock(identity: Path | str):
+        if str(identity) == lock_identity:
+            attempted.set()
+        with runtime_operation_lock(identity):
+            yield
+
+    monkeypatch.setattr(module, "runtime_operation_lock", observed_lock)
+    executor = ThreadPoolExecutor(max_workers=1)
+    try:
+        with runtime_operation_lock(lock_identity):
+            future = executor.submit(
+                _invoke_production_writer,
+                module,
+                writer_kind,
+                target,
+                {"generation": "after"},
+            )
+            assert attempted.wait(timeout=2), case
+            assert future.done() is False
+            assert json.loads(target.read_text(encoding="utf-8"))["generation"] == "before"
+        future.result(timeout=5)
+    finally:
+        executor.shutdown(wait=True)
+
+    assert json.loads(target.read_text(encoding="utf-8"))["generation"] == "after"
 
 
 @pytest.mark.parametrize(("attribute", "filename"), _USE_TIME_ARTIFACTS)
@@ -122,12 +216,9 @@ def test_use_time_reload_replacement_fails_closed_without_mixed_snapshot(
 
     def replace_profile() -> None:
         assert first_read.wait(timeout=5)
-        replacement = profile_path.with_suffix(".replacement.json")
         payload = json.loads(profile_path.read_text(encoding="utf-8"))
         payload["work_order_id"] = "attacker-mixed-generation"
-        replacement.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
-        with runtime_operation_lock(str(profile_path) + ".operation"):
-            os.replace(replacement, profile_path)
+        profile_source_supply._write_json_atomic(profile_path, payload)
         replacement_done.set()
 
     monkeypatch.setattr(use_time, "_read_json_no_follow", observed_read)

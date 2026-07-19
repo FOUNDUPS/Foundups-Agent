@@ -38,6 +38,9 @@ from modules.platform_integration.github_integration.src.reddog_github_permissio
     is_snapshot_fresh,
     probe_repo_permission,
 )
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
 
 
 GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ACCEPT = (
@@ -332,6 +335,11 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
 
 
 def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+    with runtime_operation_lock(str(path) + ".operation"):
+        _write_json_atomic_unlocked(path, payload)
+
+
+def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
         "w",

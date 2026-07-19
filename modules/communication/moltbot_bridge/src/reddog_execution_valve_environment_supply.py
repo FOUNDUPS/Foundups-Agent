@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_LIVE_ENQUEUE,
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
 
 
 SCHEMA_VERSION = "reddog_execution_valve_environment.v1"
@@ -390,6 +393,11 @@ def _output_path(value: Path | str | None, repo_root: Path) -> tuple[Path | None
 
 
 def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+    with runtime_operation_lock(str(path) + ".operation"):
+        _write_json_atomic_unlocked(path, payload)
+
+
+def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
     try:

@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_signed_wsp15_
 from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
     AtomicJsonAuthoritativeWorkStateStore,
 )
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
 
 
 REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED = (
@@ -294,6 +297,11 @@ def _probe_atomic_output(path: Path) -> list[str]:
 
 
 def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+    with runtime_operation_lock(str(path) + ".operation"):
+        _write_json_atomic_unlocked(path, payload)
+
+
+def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
     try:
