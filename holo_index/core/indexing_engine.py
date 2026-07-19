@@ -58,6 +58,8 @@ class IndexResult:
         warning: Optional warning message (e.g., zero discovered)
         fallback_count: Sources represented by explicit non-authoritative
             fallback records instead of silently omitted from the collection.
+        reused_count: Existing records whose exact document and embedding space
+            matched, so their embeddings were retained during reconciliation.
     """
     discovered_count: int
     indexed_count: int
@@ -66,6 +68,7 @@ class IndexResult:
     processed_count: Optional[int] = None
     failed_count: int = 0
     fallback_count: int = 0
+    reused_count: int = 0
     source_manifest_digest: str = ""
     source_scope_id: str = ""
 

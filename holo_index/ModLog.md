@@ -20,6 +20,14 @@
 - BATCH symbol embedding and collection writes in bounded chunks. This removes
   the one-model-call-per-symbol behavior observed during the 42,071-record
   canonical refresh while retaining the exact output-count proof.
+- RECONCILE symbols by deterministic repository-relative IDs. An unchanged
+  exact document reuses its existing vector only when backend, model, and
+  embedding-space fingerprint all match. Changed/new documents are re-embedded,
+  stale records are deleted, and the final collection count is re-proven.
+- REMOVE worktree-absolute paths from symbol documents and metadata. Equivalent
+  clean worktrees now produce identical IDs and documents while freshness
+  receipts continue to bind the operational query generation to one exact root
+  and repository HEAD.
 - NORMALIZE heterogeneous SKILLz `agents` lists to scalar strings. Integer WSP
   and agent identifiers no longer abort an otherwise valid canonical Skillz
   source set.
@@ -35,6 +43,9 @@
 - OBSERVED: the post-fix canonical preparation pass accounted for all 3,385
   tracked Python files as 42,484 records, including 88 typed fallbacks, with
   zero source I/O failures and no cap truncation.
+- OBSERVED: the first complete batched symbol migration took 613.55 seconds.
+  That is correct but too expensive for routine refresh, so stable exact-space
+  reuse is required and measured separately before operational promotion.
 - OBSERVED: fallback records are discoverability evidence only. They cannot
   support a symbol-level implementation claim.
 - SPECIFIED_NOT_IMPLEMENTED: routine post-merge incremental maintenance and a

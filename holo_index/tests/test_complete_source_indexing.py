@@ -28,6 +28,90 @@ class _BatchModel:
         return [[float(index), 1.0] for index, _value in enumerate(values)]
 
 
+class _StatefulCollection:
+    def __init__(self, metadata: dict[str, str]) -> None:
+        self.metadata = dict(metadata)
+        self.records: dict[str, dict[str, Any]] = {}
+        self.upsert_calls: list[list[str]] = []
+        self.delete_calls: list[list[str]] = []
+
+    def get(
+        self,
+        *,
+        ids: list[str] | None = None,
+        include: list[str] | None = None,
+    ) -> dict[str, Any]:
+        selected = (
+            list(self.records)
+            if ids is None
+            else [value for value in ids if value in self.records]
+        )
+        return {
+            "ids": selected,
+            "documents": [self.records[value]["document"] for value in selected],
+            "metadatas": [self.records[value]["metadata"] for value in selected],
+        }
+
+    def upsert(self, **kwargs: Any) -> None:
+        self.upsert_calls.append(list(kwargs["ids"]))
+        for item_id, document, metadata, embedding in zip(
+            kwargs["ids"],
+            kwargs["documents"],
+            kwargs["metadatas"],
+            kwargs["embeddings"],
+        ):
+            self.records[item_id] = {
+                "document": document,
+                "metadata": metadata,
+                "embedding": embedding,
+            }
+
+    def add(self, **kwargs: Any) -> None:
+        self.upsert(**kwargs)
+
+    def update(self, *, ids: list[str], metadatas: list[dict[str, Any]]) -> None:
+        for item_id, metadata in zip(ids, metadatas):
+            self.records[item_id]["metadata"] = metadata
+
+    def delete(self, *, ids: list[str]) -> None:
+        self.delete_calls.append(list(ids))
+        for item_id in ids:
+            self.records.pop(item_id, None)
+
+    def count(self) -> int:
+        return len(self.records)
+
+
+class _StatefulHolo:
+    def __init__(self, project_root: Path, model: _BatchModel) -> None:
+        self.project_root = project_root
+        self.model = model
+        self.index_embedding_backend = "sentence_transformers"
+        self.index_embedding_model_id = "test-model"
+        self.index_embedding_space_fingerprint = "sha256:" + ("a" * 64)
+        self.symbol_collection = _StatefulCollection(self.embedding_metadata)
+        self.reset_count = 0
+
+    @property
+    def embedding_metadata(self) -> dict[str, str]:
+        return {
+            "embedding_backend": self.index_embedding_backend,
+            "embedding_model": self.index_embedding_model_id,
+            "embedding_space_fingerprint": self.index_embedding_space_fingerprint,
+        }
+
+    def _reset_collection(self, _name: str) -> _StatefulCollection:
+        self.reset_count += 1
+        self.symbol_collection = _StatefulCollection(self.embedding_metadata)
+        return self.symbol_collection
+
+    def _get_embedding(self, _text: str) -> list[float]:
+        return [0.1, 0.2]
+
+    def _log_agent_action(self, _message: str, _level: str) -> None:
+        return None
+
+
 class _Holo:
     def __init__(self, project_root: Path, *, model: Any | None = None) -> None:
         self.project_root = project_root
@@ -126,6 +210,93 @@ def test_symbol_embeddings_are_bounded_into_collection_batches(tmp_path: Path) -
     assert result.indexed_count == 5001
     assert [len(call) for call in model.calls] == [5000, 1]
     assert [len(call["ids"]) for call in holo.symbol_collection.add_calls] == [5000, 1]
+
+
+def test_unchanged_stable_records_reuse_exact_space_embeddings(tmp_path: Path) -> None:
+    source = tmp_path / "source.py"
+    source.write_text("def stable():\n    return True\n", encoding="utf-8")
+    model = _BatchModel()
+    holo = _StatefulHolo(tmp_path, model)
+
+    first = index_symbol_entries(holo, roots=[tmp_path])
+    first_id = next(iter(holo.symbol_collection.records))
+    model.calls.clear()
+    second = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert first.reused_count == 0
+    assert second.reused_count == 1
+    assert model.calls == []
+    assert next(iter(holo.symbol_collection.records)) == first_id
+    assert holo.reset_count == 0
+
+
+def test_changed_document_reembeds_same_stable_symbol_id(tmp_path: Path) -> None:
+    source = tmp_path / "source.py"
+    source.write_text("def stable():\n    return True\n", encoding="utf-8")
+    model = _BatchModel()
+    holo = _StatefulHolo(tmp_path, model)
+    index_symbol_entries(holo, roots=[tmp_path])
+    first_id = next(iter(holo.symbol_collection.records))
+    model.calls.clear()
+    source.write_text(
+        "def stable():\n    \"\"\"Changed evidence.\"\"\"\n    return True\n",
+        encoding="utf-8",
+    )
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.reused_count == 0
+    assert len(model.calls) == 1
+    assert next(iter(holo.symbol_collection.records)) == first_id
+
+
+def test_stale_stable_record_is_deleted_after_reconciliation(tmp_path: Path) -> None:
+    source = tmp_path / "source.py"
+    source.write_text("def removed():\n    return True\n", encoding="utf-8")
+    holo = _StatefulHolo(tmp_path, _BatchModel())
+    index_symbol_entries(holo, roots=[tmp_path])
+    stale_id = next(iter(holo.symbol_collection.records))
+    source.unlink()
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.indexed_count == 0
+    assert stale_id not in holo.symbol_collection.records
+    assert holo.symbol_collection.delete_calls == [[stale_id]]
+
+
+def test_embedding_space_mismatch_forces_reset_and_reembedding(tmp_path: Path) -> None:
+    source = tmp_path / "source.py"
+    source.write_text("def stable():\n    return True\n", encoding="utf-8")
+    model = _BatchModel()
+    holo = _StatefulHolo(tmp_path, model)
+    index_symbol_entries(holo, roots=[tmp_path])
+    model.calls.clear()
+    holo.symbol_collection.metadata["embedding_space_fingerprint"] = (
+        "sha256:" + ("b" * 64)
+    )
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.reused_count == 0
+    assert len(model.calls) == 1
+    assert holo.reset_count == 1
+
+
+def test_stable_records_are_worktree_path_independent(tmp_path: Path) -> None:
+    roots = [tmp_path / "one", tmp_path / "two"]
+    payloads: list[dict[str, Any]] = []
+    for root in roots:
+        source = root / "modules" / "sample.py"
+        source.parent.mkdir(parents=True)
+        source.write_text("def stable():\n    return True\n", encoding="utf-8")
+        holo = _Holo(root, model=_BatchModel())
+        index_symbol_entries(holo, roots=[root / "modules"])
+        payloads.append(holo.symbol_collection.add_calls[0])
+
+    assert payloads[0]["ids"] == payloads[1]["ids"]
+    assert payloads[0]["documents"] == payloads[1]["documents"]
+    assert payloads[0]["metadatas"] == payloads[1]["metadatas"]
 
 
 def test_true_source_io_failure_remains_incomplete(
