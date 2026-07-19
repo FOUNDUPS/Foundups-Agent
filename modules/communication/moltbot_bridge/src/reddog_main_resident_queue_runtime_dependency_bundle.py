@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Mapping, Optional
 
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
@@ -376,10 +377,11 @@ def _read_json_mapping(
     if path is None:
         return None, ()
     try:
-        payload = read_reddog_runtime_json_mapping(
-            path,
-            allowed_root=allowed_root,
-        )
+        with runtime_operation_lock(str(path) + ".operation"):
+            payload = read_reddog_runtime_json_mapping(
+                path,
+                allowed_root=allowed_root,
+            )
     except Exception:
         return None, (malformed_reason,)
     if not isinstance(payload, Mapping):

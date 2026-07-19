@@ -51,7 +51,11 @@ The admission digest covers the complete work order, plan, and valve. Runtime
 JSON dependency, authority-store, canary, and evidence reads use an independently
 configured allowed root, are locked and bounded, and reject any symlink,
 junction, or reparse component before resolution. Caller paths remain raw;
-neither a resolved path nor the file's own parent becomes a trust root.
+neither a resolved path nor the file's own parent becomes a trust root. The
+use-time authority reload reads every artifact under its exact operation lock
+and verifies a second locked collection before using the snapshot. Any
+replacement observed across the two collections discards the complete set and
+fails closed; a mixed authority set is never returned for valve evaluation.
 
 Effect results expose `COMMITTED`, `NOT_COMMITTED`, or `INDETERMINATE`, plus a
 stable attempt key and reconciliation data. A writer/runner exception after an

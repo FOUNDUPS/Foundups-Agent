@@ -43,11 +43,11 @@ exemptions:
 
   - <<: *reddog_security_repair
     file: "src/reddog_main_resident_queue_runtime_dependency_bundle.py"
-    reason: "Inherited dependency assembly boundary; this slice adds independent runtime-root confinement."
-    threshold_override: 528
+    reason: "Inherited dependency assembly boundary; this slice adds independent runtime-root confinement and locked descriptor reads."
+    threshold_override: 530
     function_threshold_override: 143
     functions: ["load_reddog_main_resident_queue_runtime_dependency_bundle"]
-    no_growth_ceiling: {file_lines: 528, functions: {load_reddog_main_resident_queue_runtime_dependency_bundle: 143}}
+    no_growth_ceiling: {file_lines: 530, functions: {load_reddog_main_resident_queue_runtime_dependency_bundle: 143}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_main_resident_queue_serial_loop_bootstrap.py"

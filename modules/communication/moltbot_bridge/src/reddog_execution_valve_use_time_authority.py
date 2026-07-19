@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
     secure_read_confined_bytes,
 )
 
@@ -311,6 +312,27 @@ def _read_runtime_artifacts(
         "principal_authority_records": resolver.principal_authority_records_path,
         "valve_environment": resolver.valve_environment_path,
     }
+    payloads, reasons = _read_runtime_artifact_pass(resolver, paths)
+    if reasons:
+        return {}, reasons
+    verified_payloads, verify_reasons = _read_runtime_artifact_pass(resolver, paths)
+    if verify_reasons:
+        return {}, verify_reasons
+    changed = [
+        name for name in paths if payloads.get(name) != verified_payloads.get(name)
+    ]
+    if changed:
+        return {}, [
+            f"canonical_use_time_artifact_snapshot_changed:{name}"
+            for name in changed
+        ]
+    return payloads, []
+
+
+def _read_runtime_artifact_pass(
+    resolver: GovernedValveUseTimeAuthorityResolver,
+    paths: Mapping[str, Optional[Path]],
+) -> tuple[dict[str, Mapping[str, Any]], list[str]]:
     payloads: dict[str, Mapping[str, Any]] = {}
     reasons: list[str] = []
     for name, path in paths.items():
@@ -335,14 +357,15 @@ def _read_json_no_follow(
     root = repo_root.resolve()
     candidate = Path(os.path.abspath(Path(path).expanduser()))
     try:
-        resolved_for_repo_check = candidate.resolve(strict=True)
-        if resolved_for_repo_check == root or root in resolved_for_repo_check.parents:
-            return None, "inside_repo"
-        raw, _ = secure_read_confined_bytes(
-            candidate,
-            allowed_root=allowed_root,
-            max_bytes=1024 * 1024,
-        )
+        with runtime_operation_lock(str(candidate) + ".operation"):
+            resolved_for_repo_check = candidate.resolve(strict=True)
+            if resolved_for_repo_check == root or root in resolved_for_repo_check.parents:
+                return None, "inside_repo"
+            raw, _ = secure_read_confined_bytes(
+                candidate,
+                allowed_root=allowed_root,
+                max_bytes=1024 * 1024,
+            )
         if len(raw) >= 1024 * 1024:
             return None, "not_bounded_regular_file"
         payload = json.loads(raw.decode("utf-8"))
