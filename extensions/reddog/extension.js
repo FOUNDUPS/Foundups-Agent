@@ -6,8 +6,9 @@ const fs = require('fs');
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
+const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 
-const EXTENSION_VERSION = '0.4.8';
+const EXTENSION_VERSION = '0.4.9';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2065,10 +2066,19 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     repo_deep_dive_requested: meta.repo_deep_dive_requested !== undefined ? meta.repo_deep_dive_requested : false,
     repo_manifest_generated: meta.repo_manifest_generated !== undefined ? meta.repo_manifest_generated : false,
     repo_manifest_file_count: meta.repo_manifest_file_count !== undefined ? meta.repo_manifest_file_count : 0,
+    repo_manifest_source_count: meta.repo_manifest_source_count !== undefined ? meta.repo_manifest_source_count : 0,
     repo_manifest_truncated: meta.repo_manifest_truncated !== undefined ? meta.repo_manifest_truncated : false,
+    repo_manifest_complete: meta.repo_manifest_complete !== undefined ? meta.repo_manifest_complete : false,
     repo_deep_dive_targets: Array.isArray(meta.repo_deep_dive_targets) ? meta.repo_deep_dive_targets : [],
     repo_deep_dive_targets_count: meta.repo_deep_dive_targets_count !== undefined ? meta.repo_deep_dive_targets_count : 0,
     repo_deep_dive_focus_anchor: meta.repo_deep_dive_focus_anchor || '(none)',
+    repo_deep_dive_focus_anchor_source: meta.repo_deep_dive_focus_anchor_source || 'none',
+    repo_deep_dive_focus_filter_applied: meta.repo_deep_dive_focus_filter_applied !== undefined ? meta.repo_deep_dive_focus_filter_applied : false,
+    repo_deep_dive_focus_candidate_count: meta.repo_deep_dive_focus_candidate_count !== undefined ? meta.repo_deep_dive_focus_candidate_count : 0,
+    repo_deep_dive_focus_match_mode: meta.repo_deep_dive_focus_match_mode || 'none',
+    repo_deep_dive_pool_strategy: meta.repo_deep_dive_pool_strategy || 'unknown',
+    repo_deep_dive_cross_cutting_targets: Array.isArray(meta.repo_deep_dive_cross_cutting_targets) ? meta.repo_deep_dive_cross_cutting_targets : [],
+    repo_deep_dive_fallback_reason: meta.repo_deep_dive_fallback_reason || '(none)',
     repo_deep_dive_focus_coverage: meta.repo_deep_dive_focus_coverage && typeof meta.repo_deep_dive_focus_coverage === 'object'
       ? Object.assign({}, meta.repo_deep_dive_focus_coverage) : {},
     repo_deep_dive_focus_coverage_passed: meta.repo_deep_dive_focus_coverage_passed !== undefined
@@ -2173,10 +2183,19 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- repo_deep_dive_requested: ' + scorecard.repo_deep_dive_requested,
     '- repo_manifest_generated: ' + scorecard.repo_manifest_generated,
     '- repo_manifest_file_count: ' + scorecard.repo_manifest_file_count,
+    '- repo_manifest_source_count: ' + scorecard.repo_manifest_source_count,
     '- repo_manifest_truncated: ' + scorecard.repo_manifest_truncated,
+    '- repo_manifest_complete: ' + scorecard.repo_manifest_complete,
     '- repo_deep_dive_targets_count: ' + scorecard.repo_deep_dive_targets_count,
     '- repo_deep_dive_targets: ' + (Array.isArray(scorecard.repo_deep_dive_targets) && scorecard.repo_deep_dive_targets.length ? scorecard.repo_deep_dive_targets.join(', ') : '(none)'),
     '- repo_deep_dive_focus_anchor: ' + scorecard.repo_deep_dive_focus_anchor,
+    '- repo_deep_dive_focus_anchor_source: ' + scorecard.repo_deep_dive_focus_anchor_source,
+    '- repo_deep_dive_focus_filter_applied: ' + scorecard.repo_deep_dive_focus_filter_applied,
+    '- repo_deep_dive_focus_candidate_count: ' + scorecard.repo_deep_dive_focus_candidate_count,
+    '- repo_deep_dive_focus_match_mode: ' + scorecard.repo_deep_dive_focus_match_mode,
+    '- repo_deep_dive_pool_strategy: ' + scorecard.repo_deep_dive_pool_strategy,
+    '- repo_deep_dive_cross_cutting_targets: ' + (Array.isArray(scorecard.repo_deep_dive_cross_cutting_targets) && scorecard.repo_deep_dive_cross_cutting_targets.length ? scorecard.repo_deep_dive_cross_cutting_targets.join(', ') : '(none)'),
+    '- repo_deep_dive_fallback_reason: ' + scorecard.repo_deep_dive_fallback_reason,
     '- repo_deep_dive_focus_coverage_passed: ' + scorecard.repo_deep_dive_focus_coverage_passed,
     '- repo_deep_dive_gate_applied: ' + scorecard.repo_deep_dive_gate_applied,
     '- repo_deep_dive_gate_passed: ' + scorecard.repo_deep_dive_gate_passed,
@@ -6581,12 +6600,19 @@ function activeEditorContext(root) {
   return '### active editor ' + (selected ? 'selection' : 'file') + ': ' + rel + '\n```' + (doc.languageId || 'text') + '\n' + clipped + '\n```';
 }
 
+const GIT_OUTPUT_TRUNCATED_MARKER = '[REDDOG_GIT_OUTPUT_TRUNCATED]';
+
 function repoFileIndex(root, maxFiles) {
   const gitFiles = gitOutput(root, ['ls-files'], 1000000);
   if (gitFiles && !gitFiles.startsWith('[git context unavailable')) {
-    const files = gitFiles.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const outputTruncated = gitFiles.includes(GIT_OUTPUT_TRUNCATED_MARKER);
+    const files = gitFiles.split(/\r?\n/).map((line) => line.trim())
+      .filter((line) => line && line !== GIT_OUTPUT_TRUNCATED_MARKER);
     if (files.length) {
-      return files.slice(0, maxFiles);
+      const selected = files.slice(0, maxFiles);
+      selected.manifest_truncated = outputTruncated || files.length > maxFiles;
+      selected.manifest_source_count = files.length;
+      return selected;
     }
   }
   const roots = ['modules', 'holo_index', '.claude', 'extensions', 'scripts', 'data'];
@@ -6597,6 +6623,8 @@ function repoFileIndex(root, maxFiles) {
       break;
     }
   }
+  files.manifest_truncated = files.length >= maxFiles;
+  files.manifest_source_count = files.length;
   return files;
 }
 
@@ -6675,58 +6703,6 @@ function repoPathFromEvidenceRef(raw) {
   return normalizeTargetPath(ref);
 }
 
-function repoDeepDiveSemanticPaths(bundleOutput) {
-  let data;
-  try {
-    data = JSON.parse(String(bundleOutput || '{}'));
-  } catch (err) {
-    return [];
-  }
-  return uniqueStrings(semanticEvidenceHitsFromBundleData(data)
-    .map((hit) => repoPathFromEvidenceRef(hit && hit.evidence_ref))
-    .filter(Boolean));
-}
-
-function scoreRepoDeepDivePath(relPath, concepts, semanticSet) {
-  const rel = String(relPath || '').replace(/\\/g, '/');
-  const lower = rel.toLowerCase();
-  const pathSegments = lower.split('/');
-  const searchable = lower.replace(/[^a-z0-9_]+/g, ' ');
-  let score = semanticSet.has(lower) ? 100 : 0;
-  for (let index = 0; index < concepts.length; index++) {
-    const concept = concepts[index];
-    // Earlier concepts are the user's focus terms after instruction/control words
-    // are removed. Weight the first focus term so a generic word such as `runtime`
-    // cannot outrank the named subsystem (the 0.4.7 p.fMALL host regression).
-    const exactWeight = index === 0 ? 40 : index < 3 ? 20 : 14;
-    const tokenWeight = index === 0 ? 24 : index < 3 ? 12 : 8;
-    if (lower.includes(concept)) {
-      score += exactWeight;
-      if (pathSegments.includes(concept)) {
-        score += index === 0 ? 24 : 10;
-      }
-    } else if (searchable.includes(concept)) {
-      score += tokenWeight;
-    }
-  }
-  if (/(?:^|\/)(?:readme|interface|spec|roadmap|modlog)\.md$/i.test(rel)) {
-    score += 4;
-  }
-  if (/(?:^|\/)(?:tests?|test_[^/]+)(?:\/|\.|$)/i.test(rel)) {
-    score += 3;
-  }
-  if (/\.(?:py|js|mjs|ts|tsx|rs|go|java)$/i.test(rel)) {
-    score += 2;
-  }
-  if (/(?:^|\/)__init__\.py$/i.test(rel)) {
-    score -= 8;
-  }
-  if (/^(?:main\.py|holo_index\.py|README\.md)$/i.test(rel)) {
-    score += 1;
-  }
-  return score;
-}
-
 function repoDeepDivePathCategory(file) {
   if (/(?:^|\/)(?:tests?|test_[^/]+)(?:\/|\.|$)/i.test(file)) {
     return 'test';
@@ -6740,7 +6716,7 @@ function repoDeepDivePathCategory(file) {
 function repoDeepDiveFocusCoverage(targets, concepts) {
   const anchor = Array.isArray(concepts) && concepts.length ? String(concepts[0] || '').toLowerCase() : '';
   const focused = Array.isArray(targets)
-    ? targets.filter((file) => anchor && String(file || '').toLowerCase().includes(anchor))
+    ? targets.filter((file) => repoDeepDiveFocusPolicy.hasFocusToken(file, anchor))
     : [];
   const categories = new Set(focused.map(repoDeepDivePathCategory));
   return {
@@ -6753,20 +6729,33 @@ function repoDeepDiveFocusCoverage(targets, concepts) {
 }
 
 function discoverRepoDeepDiveTargets(root, taskText, bundleOutput, maxTargets) {
-  const manifest = repoFileIndex(root, REPO_DEEP_DIVE_MAX_MANIFEST_FILES)
+  const indexedFiles = repoFileIndex(root, REPO_DEEP_DIVE_MAX_MANIFEST_FILES);
+  const manifest = indexedFiles
     .map((file) => String(file || '').replace(/\\/g, '/'))
     .filter(isRepoDeepDiveTextPath);
   const manifestSet = new Set(manifest.map((file) => file.toLowerCase()));
-  const semanticPaths = repoDeepDiveSemanticPaths(bundleOutput)
+  const semanticEntries = repoDeepDiveFocusPolicy.semanticEntries(bundleOutput, semanticEvidenceHitsFromBundleData, repoPathFromEvidenceRef);
+  const semanticPaths = semanticEntries.map((entry) => entry.path)
     .filter((file) => manifestSet.has(file.toLowerCase()));
   const semanticSet = new Set(semanticPaths.map((file) => file.toLowerCase()));
-  const concepts = repoDeepDiveConcepts(taskText);
-  const ranked = manifest
-    .map((file) => ({ file, score: scoreRepoDeepDivePath(file, concepts, semanticSet) }))
+  const rawConcepts = repoDeepDiveConcepts(taskText);
+  const focus = repoDeepDiveFocusPolicy.deriveFocusAnchor(taskText, rawConcepts);
+  const concepts = focus.anchor ? [focus.anchor].concat(rawConcepts.filter((item) => item !== focus.anchor)) : rawConcepts;
+  const focusAnchor = focus.anchor;
+  const pool = repoDeepDiveFocusPolicy.buildCandidatePool({
+    manifest, manifestSet, semanticEntries, anchor: focusAnchor,
+    isReadable: (file) => isRepoDeepDiveReadableFile(root, file),
+    focusCoverage: (files) => repoDeepDiveFocusCoverage(files, concepts)
+  });
+  const { candidateManifest, crossCuttingCandidates, focusCandidates, focusFilterApplied } = pool;
+  const focusSet = new Set(focusCandidates.map((file) => file.toLowerCase()));
+  const ranked = candidateManifest
+    .map((file) => ({ file, score: repoDeepDiveFocusPolicy.scorePath(file, concepts, semanticSet, focusSet) }))
     .filter((item) => item.score > 0)
-    .filter((item) => isRepoDeepDiveReadableFile(root, item.file))
+    .filter((item) => focusFilterApplied || isRepoDeepDiveReadableFile(root, item.file))
     .sort((a, b) => b.score - a.score || a.file.localeCompare(b.file));
   const limit = Math.max(1, Math.min(Number(maxTargets) || REPO_DEEP_DIVE_MAX_TARGETS, REPO_DEEP_DIVE_MAX_TARGETS));
+  const coreLimit = focusFilterApplied ? Math.max(3, limit - crossCuttingCandidates.length) : limit;
   const selected = [];
   const selectedSet = new Set();
   const addFirst = (predicate) => {
@@ -6786,7 +6775,7 @@ function discoverRepoDeepDiveTargets(root, taskText, bundleOutput, maxTargets) {
   // the bounded packet.
   for (const category of ['implementation', 'test', 'doc']) {
     for (const item of ranked) {
-      if (selected.length >= limit || selected.filter((file) => repoDeepDivePathCategory(file) === category).length >= 4) {
+      if (selected.length >= coreLimit || selected.filter((file) => repoDeepDivePathCategory(file) === category).length >= 4) {
         break;
       }
       const key = item.file.toLowerCase();
@@ -6797,7 +6786,7 @@ function discoverRepoDeepDiveTargets(root, taskText, bundleOutput, maxTargets) {
     }
   }
   for (const item of ranked) {
-    if (selected.length >= limit) {
+    if (selected.length >= coreLimit) {
       break;
     }
     const key = item.file.toLowerCase();
@@ -6806,16 +6795,33 @@ function discoverRepoDeepDiveTargets(root, taskText, bundleOutput, maxTargets) {
       selectedSet.add(key);
     }
   }
+  for (const file of crossCuttingCandidates) {
+    const key = file.toLowerCase();
+    if (selected.length < limit && !selectedSet.has(key)) {
+      selected.push(file);
+      selectedSet.add(key);
+    }
+  }
   const focusCoverage = repoDeepDiveFocusCoverage(selected, concepts);
+  const selectedCrossCutting = selected.filter((file) => crossCuttingCandidates.includes(file));
   return {
     requested: isRepoDeepDiveRequest(taskText),
     manifest_generated: true,
     manifest_file_count: manifest.length,
-    manifest_truncated: manifest.length >= REPO_DEEP_DIVE_MAX_MANIFEST_FILES,
+    manifest_source_count: Number(indexedFiles.manifest_source_count || manifest.length),
+    manifest_truncated: indexedFiles.manifest_truncated === true,
+    manifest_complete: indexedFiles.manifest_truncated !== true,
     concepts,
     semantic_paths: semanticPaths,
     targets: selected,
     focus_anchor: focusCoverage.anchor,
+    focus_anchor_source: focus.source,
+    focus_filter_applied: focusFilterApplied,
+    focus_candidate_count: focusCandidates.length,
+    focus_match_mode: 'token',
+    pool_strategy: focusFilterApplied ? 'focus_core_plus_semantic_cross_cutting' : 'broad_fallback',
+    cross_cutting_targets: selectedCrossCutting,
+    fallback_reason: focusFilterApplied ? '' : 'focus_quorum_incomplete',
     focus_coverage: focusCoverage,
     focus_coverage_passed: focusCoverage.passed
   };
@@ -6836,12 +6842,22 @@ function applyRepoDeepDiveDiscoveryMeta(meta, discovery) {
   target.repo_deep_dive_requested = d.requested === true;
   target.repo_manifest_generated = d.manifest_generated === true;
   target.repo_manifest_file_count = Number(d.manifest_file_count || 0);
+  target.repo_manifest_source_count = Number(d.manifest_source_count || 0);
   target.repo_manifest_truncated = d.manifest_truncated === true;
+  target.repo_manifest_complete = d.manifest_complete === true;
   target.repo_deep_dive_concepts = Array.isArray(d.concepts) ? d.concepts.slice() : [];
   target.repo_deep_dive_semantic_paths = Array.isArray(d.semantic_paths) ? d.semantic_paths.slice() : [];
   target.repo_deep_dive_targets = Array.isArray(d.targets) ? d.targets.slice() : [];
   target.repo_deep_dive_targets_count = target.repo_deep_dive_targets.length;
   target.repo_deep_dive_focus_anchor = String(d.focus_anchor || '');
+  target.repo_deep_dive_focus_anchor_source = String(d.focus_anchor_source || 'none');
+  target.repo_deep_dive_focus_filter_applied = d.focus_filter_applied === true;
+  target.repo_deep_dive_focus_candidate_count = Number(d.focus_candidate_count || 0);
+  target.repo_deep_dive_focus_match_mode = String(d.focus_match_mode || 'none');
+  target.repo_deep_dive_pool_strategy = String(d.pool_strategy || 'unknown');
+  target.repo_deep_dive_cross_cutting_targets = Array.isArray(d.cross_cutting_targets)
+    ? d.cross_cutting_targets.slice() : [];
+  target.repo_deep_dive_fallback_reason = String(d.fallback_reason || '');
   target.repo_deep_dive_focus_coverage = d.focus_coverage && typeof d.focus_coverage === 'object'
     ? Object.assign({}, d.focus_coverage) : {};
   target.repo_deep_dive_focus_coverage_passed = d.focus_coverage_passed === true;
@@ -6860,11 +6876,27 @@ function evaluateRepoDeepDiveGate(meta, directReadSection) {
   if (m.repo_manifest_truncated === true) {
     reasons.push('repository_manifest_truncated');
   }
+  if (m.repo_manifest_complete === false) {
+    reasons.push('repository_manifest_incomplete');
+  }
   if (!Array.isArray(m.repo_deep_dive_targets) || m.repo_deep_dive_targets.length === 0) {
     reasons.push('no_repository_targets');
   }
   if (m.repo_deep_dive_focus_coverage_passed !== true) {
     reasons.push('repository_focus_coverage_incomplete');
+  }
+  if (m.repo_deep_dive_focus_filter_applied === true) {
+    const anchor = String(m.repo_deep_dive_focus_anchor || '').toLowerCase();
+    const targets = Array.isArray(m.repo_deep_dive_targets) ? m.repo_deep_dive_targets : [];
+    const crossCutting = Array.isArray(m.repo_deep_dive_cross_cutting_targets)
+      ? m.repo_deep_dive_cross_cutting_targets : [];
+    const crossSet = new Set(crossCutting.map((file) => String(file || '').toLowerCase()));
+    const invalidCrossCutting = crossCutting.length > 2 || crossCutting.some((file) => !targets.includes(file));
+    const unsupportedTarget = targets.some((file) => !repoDeepDiveFocusPolicy.hasFocusToken(file, anchor)
+      && !crossSet.has(String(file || '').toLowerCase()));
+    if (!anchor || invalidCrossCutting || unsupportedTarget) {
+      reasons.push('repository_focus_filter_violation');
+    }
   }
   if (m.direct_read_fetch_attempted !== true) {
     reasons.push('direct_read_not_attempted');
@@ -7719,7 +7751,8 @@ function gitOutput(root, args, maxChars) {
       maxBuffer: Math.max(maxChars * 4, 65536),
       windowsHide: true
     });
-    return String(output || '').slice(0, maxChars);
+    const text = String(output || '');
+    return text.length > maxChars ? text.slice(0, maxChars) + '\n' + GIT_OUTPUT_TRUNCATED_MARKER : text;
   } catch (err) {
     return '[git context unavailable: ' + (err && err.message ? err.message.slice(0, 180) : 'unknown') + ']';
   }
@@ -8181,6 +8214,7 @@ module.exports = {
   buildBoundedRepoContext,
   isRepoDeepDiveRequest,
   repoDeepDiveConcepts,
+  repoFileIndex,
   discoverRepoDeepDiveTargets,
   taskTextWithDiscoveredRepoTargets,
   evaluateRepoDeepDiveGate,

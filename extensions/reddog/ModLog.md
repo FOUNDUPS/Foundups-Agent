@@ -2,6 +2,16 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-19 - REDDOG_REPO_DEEP_DIVE_FOCUS_BOUND_TARGET_SELECTION_PHASE1 (0.4.9)
+
+- Reserved the repository deep-dive core for token-matched paths under an explicit named focus when readable implementation, test, and document evidence all exist.
+- Retained at most two off-anchor generation-bound semantic dependencies only when their evidence text explicitly names the focus; unrelated semantic hits cannot consume the 12-file budget.
+- Added fail-closed focus-pool integrity checks and Run Trace provenance for anchor source, match mode, strategy, candidate count, cross-cutting targets, and fallback reason.
+- Marked character- or count-truncated tracked-file manifests incomplete so filtering cannot turn partial repository enumeration into a completeness claim.
+- Preserved broad discovery when the focus corpus is incomplete; the existing focus-coverage gate still blocks unsupported deep dives before Fusion.
+- Added regressions for semantic decoys, bounded cross-cutting dependencies, explicit-focus parsing, substring collisions, broad fallback, gate tampering, and scorecard telemetry.
+- Version 0.4.8 -> 0.4.9. No shell, repository mutation, HoloIndex re-index, OpenClaw/Hermes execution, PR, or merge authority was added.
+
 ## 2026-07-19 - REDDOG_DEEP_DIVE_OWNER_FAILURE_DIRECT_READ_CONTINUITY_PHASE1 (0.4.8)
 
 - Preserved locally governed repository direct reads when the generation-bound semantic owner is unavailable; semantic hits remain withheld and explicit semantic obligations still fail closed.

@@ -17,6 +17,7 @@ const extensionJs = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8');
 const holoGenerationBoundQueryJs = fs.readFileSync(path.join(extDir, 'holoindex_generation_bound_query.js'), 'utf8');
 const holoGenerationBoundQuery = require(path.join(extDir, 'holoindex_generation_bound_query.js'));
 const groundedTargetContinuity = require(path.join(extDir, 'grounded_target_continuity.js'));
+const repoDeepDiveFocusPolicy = require(path.join(extDir, 'repo_deep_dive_focus_policy.js'));
 const bridgePy = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_once.py'), 'utf8');
 const holoOwnerBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_holoindex_owner_query_once.py'), 'utf8');
 const residentArchitectBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_resident_architect_session_once.py'), 'utf8');
@@ -207,8 +208,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.8', 'package version must be 0.4.8');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.8'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.9', 'package version must be 0.4.9');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.9'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -228,7 +229,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.8', 'README version mismatch');
+includes(readme, 'Version: 0.4.9', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -583,6 +584,8 @@ assert(rddConcepts.includes('pfmall'), 'RDD-003: dotted product name contributes
 const rddBundle = JSON.stringify({
   task_retrieval: {
     code_hits: [
+      { location: 'public/member/js/shell-bridge-interceptor.js:1', content: 'generic runtime architecture semantic decoy' },
+      { location: 'modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py:1', content: 'cross-cutting p.fMALL runtime router' },
       { location: 'modules/foundups/pfmall/http_api.py:1', content: 'p.fMALL HTTP API runtime' },
       { location: 'modules/foundups/pfmall/tests/test_http_api.py:1', content: 'p.fMALL HTTP API tests' },
       { location: 'modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md:1', content: 'p.fMALL route contract' }
@@ -601,6 +604,27 @@ assert(rddDiscovery.targets.some((p) => /\.md$/i.test(p)), 'RDD-004: contract/do
 assert(!rddDiscovery.targets.some((p) => /extensions\/reddog\/extension\.js$/i.test(p)), 'RDD-004: RedDog self-file cannot satisfy discovery');
 assert.strictEqual(rddDiscovery.focus_coverage_passed, true,
   'RDD-004: selected evidence covers implementation, test, and document for the focus anchor');
+assert.strictEqual(rddDiscovery.focus_filter_applied, true,
+  'RDD-004: a complete p.fMALL corpus activates focus-bound selection');
+assert(rddDiscovery.focus_candidate_count >= 3,
+  'RDD-004: focus-bound selection records its eligible corpus size');
+assert(rddDiscovery.semantic_paths.includes('public/member/js/shell-bridge-interceptor.js'),
+  'RDD-004: the generic semantic decoy is observed before focus filtering');
+assert(!rddDiscovery.targets.includes('public/member/js/shell-bridge-interceptor.js'),
+  'RDD-004: generic semantic decoy cannot consume focused evidence budget');
+assert(rddDiscovery.targets.includes('modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py'),
+  'RDD-004: semantic cross-cutting evidence that names p.fMALL retains a bounded slot');
+assert.deepStrictEqual(rddDiscovery.cross_cutting_targets,
+  ['modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py'],
+  'RDD-004: cross-cutting targets are explicit and bounded');
+assert(rddDiscovery.targets.filter((p) => repoDeepDiveFocusPolicy.hasFocusToken(p, 'pfmall')).length >= 3,
+  'RDD-004: semantic dependencies cannot displace the focused implementation/test/doc core');
+assert.strictEqual(repoDeepDiveFocusPolicy.hasFocusToken('modules/small/runtime.py', 'mall'), false,
+  'RDD-004: focus matching is token-bound, not substring-bound');
+assert.strictEqual(repoDeepDiveFocusPolicy.hasFocusToken('modules/rapid/api.py', 'api'), true,
+  'RDD-004: exact path tokens remain eligible');
+assert.strictEqual(repoDeepDiveFocusPolicy.hasFocusToken('modules/rapid/runtime.py', 'api'), false,
+  'RDD-004: api cannot match rapid');
 const rddHostTyped = orchestrator.extractTypedTargets(rddHostPrompt);
 assert.deepStrictEqual(rddHostTyped.external_research_targets, [],
   'RDD-010: a repository deep dive is not an external-research request');
@@ -619,8 +643,47 @@ assert(rddHostDiscovery.targets.some((p) => /PFMALL.*\.md$/i.test(p)),
 assert.strictEqual(rddHostDiscovery.focus_anchor, 'pfmall', 'RDD-010: p.fMALL is the focus anchor');
 assert.strictEqual(rddHostDiscovery.focus_coverage_passed, true,
   'RDD-010: local evidence quorum is tied to p.fMALL, not generic repository files');
+assert.strictEqual(rddHostDiscovery.focus_filter_applied, true,
+  'RDD-010: host prompt uses only the complete p.fMALL evidence corpus');
+assert.strictEqual(rddHostDiscovery.focus_anchor_source, 'explicit_focus_phrase',
+  'RDD-010: host focus anchor comes from the explicit focusing-on phrase');
+const rddNoisyFocus = orchestrator.discoverRepoDeepDiveTargets(root,
+  'Please audit production runtime in the repository, focusing on p.fMALL.',
+  JSON.stringify({ task_retrieval: { code_hits: [], metadata: { retrieval_mode: 'semantic' } } }), 12);
+assert.strictEqual(rddNoisyFocus.focus_anchor, 'pfmall',
+  'RDD-010: leading prose cannot replace the explicit subsystem focus');
+(function rddManifestCompletenessTruth() {
+  const originalExecFileSync = cp.execFileSync;
+  cp.execFileSync = (file, args, options) => {
+    if (file === 'git' && Array.isArray(args) && args[0] === 'ls-files') {
+      return 'modules/foundups/pfmall/api.py\n' + 'x'.repeat(1000100);
+    }
+    return originalExecFileSync(file, args, options);
+  };
+  try {
+    const indexed = orchestrator.repoFileIndex(root, 20000);
+    assert.strictEqual(indexed.manifest_truncated, true,
+      'RDD-010: character-truncated git manifests cannot claim completeness');
+    assert.strictEqual(indexed.manifest_source_count, 2,
+      'RDD-010: manifest source count remains explicit after character truncation');
+  } finally {
+    cp.execFileSync = originalExecFileSync;
+  }
+})();
 assert(!rddHostDiscovery.targets.some((p) => /(?:livechat|banter|worker_help|help_command)/i.test(p)),
   'RDD-010: unrelated generic runtime/worker files cannot enter the host evidence packet');
+const rddBroadFallback = orchestrator.discoverRepoDeepDiveTargets(root,
+  'Complete deep dive into the FoundUps-Agent repository, focusing on quuxzz runtime architecture.',
+  JSON.stringify({
+    task_retrieval: {
+      code_hits: [{ location: 'main.py:1', content: 'repository runtime entry point' }],
+      metadata: { retrieval_mode: 'semantic' }
+    }
+  }), 12);
+assert.strictEqual(rddBroadFallback.focus_filter_applied, false,
+  'RDD-010: incomplete focus corpora retain the broad fail-closed discovery path');
+assert(rddBroadFallback.targets.includes('main.py'),
+  'RDD-010: broad fallback retains generation-bound semantic candidates');
 const rddAugmented = orchestrator.taskTextWithDiscoveredRepoTargets(rddPrompt, rddDiscovery.targets);
 const rddCollected = orchestrator.collectRequiredTargets(rddAugmented);
 assert.strictEqual(rddCollected.targets.length, rddDiscovery.targets.length, 'RDD-005: discovered paths enter the existing required-target contract');
@@ -661,6 +724,15 @@ assert.strictEqual(rddWrongFocusGate.passed, false,
   'RDD-007: readable but off-focus files cannot satisfy a repository deep dive');
 assert(rddWrongFocusGate.rejection_reasons.includes('repository_focus_coverage_incomplete'),
   'RDD-007: focus-coverage rejection is explicit');
+const rddFilterViolationGate = orchestrator.evaluateRepoDeepDiveGate({
+  repo_deep_dive_requested: true, repo_manifest_generated: true, repo_manifest_file_count: 3,
+  repo_deep_dive_targets: ['modules/foundups/pfmall/api.py', 'modules/other/unrelated.py'],
+  repo_deep_dive_focus_anchor: 'pfmall', repo_deep_dive_focus_filter_applied: true,
+  repo_deep_dive_focus_coverage_passed: true, direct_read_fetch_attempted: true,
+  direct_read_bytes: 1234, target_recall_ok: true
+}, { chars: 1234 });
+assert(rddFilterViolationGate.rejection_reasons.includes('repository_focus_filter_violation'),
+  'RDD-007: focus-filter metadata cannot authorize an off-focus target');
 const rddTruncatedManifestGate = orchestrator.evaluateRepoDeepDiveGate({
   repo_deep_dive_requested: true, repo_manifest_generated: true, repo_manifest_file_count: 18000,
   repo_manifest_truncated: true, repo_deep_dive_targets: rddDiscovery.targets,
@@ -687,10 +759,19 @@ const rddScorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', {
   repo_deep_dive_requested: true,
   repo_manifest_generated: true,
   repo_manifest_file_count: rddDiscovery.manifest_file_count,
+  repo_manifest_source_count: rddDiscovery.manifest_source_count,
   repo_manifest_truncated: false,
+  repo_manifest_complete: true,
   repo_deep_dive_targets: rddDiscovery.targets,
   repo_deep_dive_targets_count: rddDiscovery.targets.length,
   repo_deep_dive_focus_anchor: rddDiscovery.focus_anchor,
+  repo_deep_dive_focus_anchor_source: rddDiscovery.focus_anchor_source,
+  repo_deep_dive_focus_filter_applied: rddDiscovery.focus_filter_applied,
+  repo_deep_dive_focus_candidate_count: rddDiscovery.focus_candidate_count,
+  repo_deep_dive_focus_match_mode: rddDiscovery.focus_match_mode,
+  repo_deep_dive_pool_strategy: rddDiscovery.pool_strategy,
+  repo_deep_dive_cross_cutting_targets: rddDiscovery.cross_cutting_targets,
+  repo_deep_dive_fallback_reason: rddDiscovery.fallback_reason,
   repo_deep_dive_focus_coverage: rddDiscovery.focus_coverage,
   repo_deep_dive_focus_coverage_passed: true,
   repo_deep_dive_gate_applied: true,
@@ -701,7 +782,11 @@ const rddLines = orchestrator.formatHoloIndexScorecardLines(rddScorecard).join('
 includes(rddLines, '- repo_deep_dive_gate_passed: true', 'RDD-008: Run Trace exposes acceptance gate');
 includes(rddLines, '- repo_deep_dive_targets_count: ' + rddDiscovery.targets.length, 'RDD-008: Run Trace exposes target count');
 includes(rddLines, '- repo_manifest_truncated: false', 'RDD-008: Run Trace exposes manifest completeness');
+includes(rddLines, '- repo_manifest_complete: true', 'RDD-008: Run Trace distinguishes complete manifests');
 includes(rddLines, '- repo_deep_dive_focus_coverage_passed: true', 'RDD-008: Run Trace exposes focus coverage');
+includes(rddLines, '- repo_deep_dive_focus_filter_applied: true', 'RDD-008: Run Trace exposes focus filtering');
+includes(rddLines, '- repo_deep_dive_focus_anchor_source: explicit_focus_phrase', 'RDD-008: Run Trace exposes focus provenance');
+includes(rddLines, '- repo_deep_dive_pool_strategy: focus_core_plus_semantic_cross_cutting', 'RDD-008: Run Trace exposes pool strategy');
 
 (function rdd009RealBundleRegression() {
   const result = orchestrator.holoIndexOutput(root, rddPrompt, 18000);
@@ -1583,7 +1668,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.8', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.9', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -3089,7 +3174,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.8'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.9'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -3103,7 +3188,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.8'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.9'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -3115,7 +3200,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.8'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.9'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -4134,7 +4219,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.8' } }
+      ? { id, packageJSON: { version: '0.4.9' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
