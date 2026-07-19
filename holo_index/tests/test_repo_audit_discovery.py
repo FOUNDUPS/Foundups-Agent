@@ -67,6 +67,47 @@ def test_strong_holo_avoids_deterministic_walk(tmp_path, monkeypatch):
     assert receipt["coverage"]["verdict"] == "PASS"
 
 
+@pytest.mark.parametrize("unreadable", ["source", "test"])
+def test_holo_sufficiency_requires_readable_source_and_test(tmp_path, monkeypatch, unreadable):
+    _seed_pfmall(tmp_path)
+    strong = {"code_hits": [
+        {"location": "modules/foundups/pfmall/api.py", "content": "stale cached source"},
+        {"location": "modules/foundups/pfmall/tests/test_api.py", "content": "stale cached test"},
+    ]}
+    blocked = strong["code_hits"][0 if unreadable == "source" else 1]["location"]
+    real_read = discovery.secure_read_repo_file
+    calls = {blocked: 0}
+
+    def deny_holo_read(repo_root, raw_path, **kwargs):
+        if raw_path == blocked and calls[blocked] == 0:
+            calls[blocked] += 1
+            return {"ok": False, "path": raw_path, "reason": "read_error"}
+        return real_read(repo_root, raw_path, **kwargs)
+
+    monkeypatch.setattr(discovery, "secure_read_repo_file", deny_holo_read)
+    receipt = discovery.build_repo_audit_grounding(tmp_path, "audit pfmall codebase", strong)["receipt"]
+    assert receipt["holo_evidence_sufficient"] is False
+    assert receipt["search_mode"] == "holo_then_deterministic"
+    assert receipt["coverage"]["verdict"] == "PASS"
+    assert receipt["deterministic_candidates"]
+
+
+def test_stale_holo_paths_trigger_fallback(tmp_path):
+    _seed_pfmall(tmp_path)
+    stale = {"code_hits": [
+        {"location": "modules/foundups/pfmall/missing.py", "content": "stale source"},
+        {"location": "modules/foundups/pfmall/tests/missing_test.py", "content": "stale test"},
+    ]}
+    receipt = discovery.build_repo_audit_grounding(tmp_path, "audit pfmall codebase", stale)["receipt"]
+    assert receipt["holo_evidence_sufficient"] is False
+    assert receipt["search_mode"] == "holo_then_deterministic"
+    assert receipt["coverage"]["verdict"] == "PASS"
+    assert {item["path"] for item in receipt["selected"]}.issuperset({
+        "modules/foundups/pfmall/api.py",
+        "modules/foundups/pfmall/tests/test_api.py",
+    })
+
+
 def test_receipt_and_digests_are_stable(tmp_path):
     _seed_pfmall(tmp_path)
     first = discovery.build_repo_audit_grounding(tmp_path, "audit p.fMALL codebase", {})["receipt"]
@@ -183,6 +224,45 @@ def test_discovery_prunes_secret_vendor_generated_and_reparse(tmp_path):
     assert not any(path.startswith(("vendor/", "generated/")) for path in selected)
     assert "pfmall_secret.py" not in selected
     assert receipt["exclusion_counts"]["pruned"] >= 2
+
+
+def test_discovery_never_enters_reads_or_selects_private_tool_state_roots(tmp_path, monkeypatch):
+    _seed_pfmall(tmp_path)
+    private_roots = sorted(discovery._PRIVATE_TOOL_STATE_SEGMENTS)
+    for folder in private_roots:
+        path = tmp_path / folder
+        path.mkdir(exist_ok=True)
+        (path / "pfmall_tool_state.py").write_text("pfmall private tool state", encoding="utf-8")
+
+    scanned = []
+    read_paths = []
+    real_scandir = os.scandir
+    real_read = discovery.secure_read_repo_file
+
+    def track_scandir(path):
+        scanned.append(os.path.relpath(os.fspath(path), os.fspath(tmp_path)).replace("\\", "/"))
+        return real_scandir(path)
+
+    def track_read(repo_root, raw_path, **kwargs):
+        read_paths.append(str(raw_path).replace("\\", "/"))
+        return real_read(repo_root, raw_path, **kwargs)
+
+    monkeypatch.setattr(discovery.os, "scandir", track_scandir)
+    monkeypatch.setattr(discovery, "secure_read_repo_file", track_read)
+    private_holo = {"code_hits": [
+        {"location": f"{private_roots[0]}/pfmall_tool_state.py", "content": "source"},
+        {"location": f"{private_roots[-1]}/pfmall_tool_state.py", "content": "test"},
+    ]}
+    receipt = discovery.build_repo_audit_grounding(
+        tmp_path, "audit pfmall codebase", private_holo
+    )["receipt"]
+    selected = [item["path"] for item in receipt["selected"]]
+    for folder in private_roots:
+        prefix = folder.casefold() + "/"
+        assert not any(path.casefold() == folder.casefold() or path.casefold().startswith(prefix) for path in scanned)
+        assert not any(path.casefold().startswith(prefix) for path in read_paths)
+        assert not any(path.casefold().startswith(prefix) for path in selected)
+        assert not any(path.casefold().startswith(prefix) for path in receipt["holo_evidence_refs"])
 
 
 def test_non_audit_zero_target_behavior_is_unchanged(tmp_path):

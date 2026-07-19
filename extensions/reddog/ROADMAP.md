@@ -130,7 +130,7 @@ P2/P3
 
 - **Owner:** RedDog Maintainers.
 - **Temporary exemption expiry:** 2026-09-30 (2026-Q3 technical-architect review).
-- **Current boundary:** `extension.js` is a legacy 8,421-line thin-client integration file. The temporary exact-file threshold is 8,421 lines with `no_growth: true`; this is a hard containment ceiling. Generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`.
+- **Current boundary:** `extension.js` is a legacy 8,428-line thin-client integration file. The temporary exact-file threshold is 8,428 lines with `no_growth: true`; this is a hard containment ceiling. Generation-bound HoloIndex logic remains in its focused module, and repository-audit receipt projection lives in `repo_audit_grounding.js`.
 - **Remediation:** extract model configuration plus stdin bridge invocation first, then UI rendering, retrieval/context assembly, and governed work-order receipt composition into separately tested JavaScript modules of at most 400 lines.
 - **Parity gate:** retain the focused Fusion panel ingress/payload contract and exhaustive extension contract across each extraction; preserve no-network, stdin-only model payloads and review-packet truth.
 - **Exit criterion:** remove `extensions/reddog/wsp_62_exemptions.yaml` once `extension.js` and its touched functions comply with WSP_62 limits. If the expiry arrives first, block additional extension feature work and renew only through a new architect-reviewed remediation slice.

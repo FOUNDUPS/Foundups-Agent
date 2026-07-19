@@ -32,11 +32,15 @@ _GENERIC = _AUDIT_WORDS | _SCOPE_WORDS | frozenset({
         "whole", "working", "work", "recommend", "recommendations", "report", "security", "defensive",
 })
 _QUESTION_OPENERS = frozenset({"how", "if", "what", "whether", "why"})
+_PRIVATE_TOOL_STATE_SEGMENTS = frozenset({
+    ".agent", ".agents", ".claude", ".codex", ".cursor", ".idea", ".m2m",
+    ".memory", ".vscode", ".windsurf", "memory",
+})
 _PRUNE_SEGMENTS = frozenset({
     ".git", ".worktrees", "node_modules", "vendor", "venv", ".venv", "__pycache__",
     ".cache", "cache", "generated", "build", "dist", "logs", "log", "temp", "tmp",
     "archive", "archives", "vector", "vectors", "chroma", ".chroma",
-})
+}) | _PRIVATE_TOOL_STATE_SEGMENTS
 _SECRET_MARKERS = ("secret", "credential", "token", "private_key", "apikey", "api_key")
 _SECRET_BASENAMES = frozenset({".env", "id_rsa", "id_ed25519"})
 _SECRET_SUFFIXES = (".pem", ".key", ".p12", ".pfx", ".keystore", ".vsix")
@@ -344,11 +348,6 @@ def _dedupe_candidates(candidates: Sequence[Dict[str, Any]]) -> List[Dict[str, A
     return sorted(by_path.values(), key=lambda item: (-item["score"], item["path"].casefold()))
 
 
-def _coverage_categories(candidates: Sequence[Dict[str, Any]]) -> Tuple[bool, bool]:
-    categories = {item["category"] for item in candidates}
-    return "implementation_source" in categories, bool(categories & {"test", "contract"})
-
-
 def _content_candidate(
     repo_root: Path, rel_path: str, entity: str, scan_budget: int, exclusions: Dict[str, int]
 ) -> Tuple[Optional[Dict[str, Any]], int]:
@@ -563,15 +562,21 @@ def build_repo_audit_grounding(
         return _empty_audit_result()
     entity = str(intent["entity"])
     holo_candidates, holo_refs = _holo_paths(search_payload or {}, entity)
-    source_ok, independent_ok = _coverage_categories(holo_candidates)
-    holo_sufficient = source_ok and independent_ok
     exclusions: Dict[str, int] = {}
+    holo_selected, holo_hits, holo_rejected = _read_selected(
+        repo_root, _select(holo_candidates), exclusions
+    )
+    holo_verdict, _holo_reasons = _coverage(holo_selected)
+    holo_sufficient = holo_verdict == "PASS"
     deterministic: List[Dict[str, Any]] = []
     candidates = list(holo_candidates)
-    if not holo_sufficient:
+    if holo_sufficient:
+        selected, hits, rejected = holo_selected, holo_hits, holo_rejected
+    else:
         deterministic = _discover(repo_root, entity, exclusions)
         candidates = _dedupe_candidates(candidates + deterministic)
-    selected, hits, rejected = _read_selected(repo_root, _select(candidates), exclusions)
+        selected, hits, rejected = _read_selected(repo_root, _select(candidates), exclusions)
+        rejected = holo_rejected + rejected
     receipt = _build_receipt(
         intent, holo_refs, holo_sufficient, deterministic, selected, exclusions
     )

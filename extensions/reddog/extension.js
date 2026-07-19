@@ -1751,6 +1751,9 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     || extractHoloIndexScorecard(contextMode, contextPacket && contextPacket.holoindex_meta);
   const rejectionReasons = [];
   const repoAuditCoverage = repoAuditGrounding.evaluateRepoAuditContext(taskText, contextPacket);
+  const repoAuditIntent = repoAuditGrounding.detectRepoAuditIntent(taskText);
+  const repoAuditReceiptRequired = repoAuditIntent.audit_intent
+    && /\b(codebase|module|repo|repository|implementation|system)\b/i.test(String(taskText || ''));
   const discoveredRepoFiles = scorecard && Array.isArray(scorecard.repo_deep_dive_targets)
     ? scorecard.repo_deep_dive_targets
     : [];
@@ -1765,12 +1768,13 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     && scorecard.repo_deep_dive_gate_passed === true
     && scorecard.target_recall_ok === true
     && discoveredRepoFiles.length > 0;
+  const repoAuditGrounded = repoAuditCoverage.applied === true && repoAuditCoverage.passed === true;
   // A broad repository deep dive uses its bounded manifest and governed direct-read
   // packet as the evidence contract. The inferred whole-prompt semantic target is a
   // discovery hint, not a second mandatory external dependency once every selected
   // repository target is recalled. Explicit Semantic target:/Research topic: lines
   // remain mandatory and still fail closed without generation-bound evidence.
-  const semantic = repoDeepDiveGrounded && !explicitSemanticTarget
+  const semantic = (repoDeepDiveGrounded || repoAuditGrounded) && !explicitSemanticTarget
     ? []
     : typedTargets.semantic_targets;
   const external = typedTargets.external_research_targets;
@@ -1793,7 +1797,7 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   if (repoAuditCoverage.applied && !repoAuditCoverage.passed) {
     rejectionReasons.push('codebase_audit_evidence_incomplete');
     rejectionReasons.push.apply(rejectionReasons, repoAuditCoverage.rejection_reasons || []);
-  } else if (repoAuditGrounding.detectRepoAuditIntent(taskText).audit_intent && !repoAuditCoverage.applied) {
+  } else if (repoAuditReceiptRequired && !repoAuditCoverage.applied) {
     rejectionReasons.push('codebase_audit_evidence_incomplete');
     rejectionReasons.push('repo_audit_grounding_receipt_missing');
   }
@@ -1850,6 +1854,9 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
       semantic_targets: semantic.slice()
     }),
     inferred_semantic_targets_satisfied_by_repo_deep_dive: repoDeepDiveGrounded && !explicitSemanticTarget
+      ? typedTargets.semantic_targets.length
+      : 0,
+    inferred_semantic_targets_satisfied_by_repo_audit: repoAuditGrounded && !explicitSemanticTarget
       ? typedTargets.semantic_targets.length
       : 0
   };

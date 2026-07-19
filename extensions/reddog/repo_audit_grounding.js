@@ -185,6 +185,9 @@ function evaluateRepoAuditContext(taskText, contextPacket) {
   if (!projection.audit_intent) {
     return { applied: false, passed: true, rejection_reasons: [], effective_repo_file_targets: [] };
   }
+  if (!projection.receipt && !auditWords(taskText).some((word) => SCOPE_WORDS.has(word))) {
+    return { applied: false, passed: true, rejection_reasons: [], effective_repo_file_targets: [] };
+  }
   const reasons = Array.isArray(projection.rejection_reasons) ? projection.rejection_reasons.slice() : [];
   const scorecard = packet.holoindex_scorecard && typeof packet.holoindex_scorecard === 'object'
     ? packet.holoindex_scorecard : {};
