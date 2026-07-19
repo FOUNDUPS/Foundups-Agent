@@ -1,10 +1,10 @@
 # RedDog
 
-Version: 0.4.10
+Version: 0.4.11
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
 
-Version 0.4.10 exposes bounded Fusion stage, model, provider-routing, token, cost-credit, retry, and timing receipts while excluding prompts, outputs, reasoning content, and secrets. Incomplete or retry-ambiguous provider accounting remains visibly incomplete with unknown cost. The receipts provide process-bound observational integrity, not authentication or action authority. Version 0.4.9 reserves the core of a focused repository deep dive for the named subsystem when that subsystem independently supplies readable implementation, test, and document evidence.
+Version 0.4.11 routes editor resident sessions through the canonical host-authenticated client, binds principal and FoundUp scope into the full intent digest, and uses revision-CAS resident records whose cancellation and retry state cannot be silently overwritten. Version 0.4.10 exposes bounded Fusion progress and OpenRouter usage receipts; those receipts remain observational, not authority.
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
@@ -231,6 +231,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.10.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.11.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

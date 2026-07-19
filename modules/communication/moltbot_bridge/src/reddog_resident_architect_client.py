@@ -22,10 +22,13 @@ from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
     AgentDbResidentArchitectCycleStore,
+    RUNTIME_BOUNDARY_FIELDS,
     ResidentArchitectCycleStore,
+    ResidentCycleReason,
     STATUS_CANCELLED,
     STATUS_FAILED,
     STATUS_TIMED_OUT,
+    resident_intent_digest,
     run_reddog_resident_architect_durable_agentdb_cycle,
 )
 
@@ -50,19 +53,6 @@ RESERVED_RUNTIME_KEYS = frozenset(
         "retry_requested",
     }
 )
-RUNTIME_BOUNDARY_FIELDS = (
-    "read_only_authority_only",
-    "no_shell_command_executed",
-    "no_repo_mutation_performed",
-    "no_holoindex_reindex_performed",
-    "no_hermes_dispatch_performed",
-    "no_worktree_operation_performed",
-    "no_pr_created",
-    "no_pattern_memory_promotion_performed",
-    "no_live_foundup_enqueue_performed",
-)
-
-
 class ResidentClientReason:
     REQUEST_INVALID = "REJECT_REDDOG_RESIDENT_CLIENT_REQUEST_INVALID"
     PRINCIPAL_MISMATCH = "REJECT_REDDOG_RESIDENT_CLIENT_PRINCIPAL_MISMATCH"
@@ -90,6 +80,14 @@ class ResidentClientResponse:
     architect_next_slice: str
     task_status_counts: Mapping[str, int]
     rejection_reasons: tuple[str, ...]
+    record_revision: int = 0
+    intent_digest: str = ""
+    swarm_id: str = ""
+    task_ids: tuple[str, ...] = ()
+    openclaw_claim_count: int = 0
+    queue_candidate_count: int = 0
+    recovered_existing_cycle: bool = False
+    duplicate_intent_reused: bool = False
     canonical_resident_cycle_used: bool = True
     read_only_authority_only: bool = True
     client_no_shell_command_executed: bool = True
@@ -163,17 +161,27 @@ class RedDogResidentArchitectClient:
 
     def cancel(self, intent_id: str) -> ResidentClientResponse:
         record, reasons = self._authorized_record(intent_id)
+        legacy_cancel = False
         if reasons:
-            return self._reject("cancel", str(intent_id or ""), reasons)
+            record, legacy_reasons = self._authorized_legacy_cancel_record(intent_id)
+            if legacy_reasons:
+                return self._reject("cancel", str(intent_id or ""), reasons)
+            legacy_cancel = True
         assert record is not None
-        return self._invoke("cancel", _record_intent(record), cancel=True, retry=False)
+        return self._invoke(
+            "cancel",
+            _record_intent(record),
+            cancel=True,
+            retry=False,
+            legacy_cancel=legacy_cancel,
+        )
 
     def resume(self, intent_id: str) -> ResidentClientResponse:
         record, reasons = self._authorized_record(intent_id)
         if reasons:
             return self._reject("resume", str(intent_id or ""), reasons)
         assert record is not None
-        retry = str(record.get("status") or "") in {STATUS_FAILED, STATUS_TIMED_OUT, STATUS_CANCELLED}
+        retry = str(record.get("status") or "") in {STATUS_FAILED, STATUS_TIMED_OUT}
         return self._invoke("resume", _record_intent(record), cancel=False, retry=retry)
 
     def _validate_submitted_intent(self, intent: Mapping[str, Any] | None) -> tuple[str, ...]:
@@ -212,10 +220,37 @@ class RedDogResidentArchitectClient:
         reasons = self._validate_submitted_intent(intent)
         if _intent_id(intent) != value:
             reasons = (*reasons, ResidentClientReason.REQUEST_INVALID)
+        if str(record.get("intent_digest") or "") != resident_intent_digest(intent):
+            reasons = (*reasons, ResidentClientReason.REQUEST_INVALID)
+        if record.get("_store_integrity_valid") is not True:
+            reasons = (*reasons, ResidentClientReason.RUNTIME_FAILED)
         if not _runtime_boundary_is_safe(record):
             reasons = (*reasons, ResidentClientReason.RUNTIME_FAILED)
         reasons = tuple(dict.fromkeys(reasons))
         return (None, reasons) if reasons else (record, ())
+
+    def _authorized_legacy_cancel_record(
+        self,
+        intent_id: str,
+    ) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
+        value = str(intent_id or "").strip()
+        record = self._store.load_cycle_by_intent(value) if value else None
+        if not isinstance(record, Mapping):
+            return None, (ResidentClientReason.CYCLE_NOT_FOUND,)
+        intent = _record_intent(record)
+        reasons = list(self._validate_submitted_intent(intent))
+        if (
+            record.get("schema_version") != "reddog_resident_architect_cycle.v1"
+            or str(record.get("intent_digest") or "")
+            or _intent_id(intent) != value
+            or (
+                str(record.get("status") or "") != STATUS_CANCELLED
+                and "record_revision" in record
+            )
+        ):
+            reasons.append(ResidentClientReason.RUNTIME_FAILED)
+        reasons = list(dict.fromkeys(reasons))
+        return (None, tuple(reasons)) if reasons else (record, ())
 
     def _invoke(
         self,
@@ -224,6 +259,7 @@ class RedDogResidentArchitectClient:
         *,
         cancel: bool,
         retry: bool,
+        legacy_cancel: bool = False,
     ) -> ResidentClientResponse:
         try:
             result = self._runner(
@@ -237,7 +273,12 @@ class RedDogResidentArchitectClient:
         except Exception:
             return self._reject(operation, _intent_id(intent), (ResidentClientReason.RUNTIME_FAILED,))
         data = result.to_dict() if hasattr(result, "to_dict") else dict(result)
-        runtime_boundary_failed = not _runtime_boundary_is_safe(data)
+        legacy_cancelled = bool(
+            legacy_cancel
+            and str(data.get("status") or "") == STATUS_CANCELLED
+            and ResidentCycleReason.CANCELLED in tuple(data.get("rejection_reasons") or ())
+        )
+        runtime_boundary_failed = not _runtime_boundary_is_safe(data) and not legacy_cancelled
         if runtime_boundary_failed:
             data = dict(data)
             data["rejection_reasons"] = [
@@ -248,7 +289,7 @@ class RedDogResidentArchitectClient:
             operation,
             data,
             accepted=bool(data.get("accepted")) and not runtime_boundary_failed,
-            canonical_cycle_used=True,
+            canonical_cycle_used=not legacy_cancel,
         )
 
     def _from_record(
@@ -272,6 +313,14 @@ class RedDogResidentArchitectClient:
             "architect_action": str(record.get("architect_action") or ""),
             "architect_next_slice": str(record.get("architect_next_slice") or ""),
             "task_status_counts": dict(record.get("task_status_counts") or {}),
+            "record_revision": int(record.get("record_revision") or 0),
+            "intent_digest": str(record.get("intent_digest") or ""),
+            "swarm_id": str(record.get("swarm_id") or ""),
+            "task_ids": tuple(str(item) for item in record.get("task_ids", ()) if str(item)),
+            "openclaw_claim_count": len(record.get("openclaw_claims") or ()),
+            "queue_candidate_count": int(record.get("queue_candidate_count") or 0),
+            "recovered_existing_cycle": bool(record.get("recovered_existing_cycle")),
+            "duplicate_intent_reused": bool(record.get("duplicate_intent_reused")),
             "rejection_reasons": tuple(str(item) for item in record.get("rejection_reasons", ()) if str(item)),
         }
         response_id = _digest(

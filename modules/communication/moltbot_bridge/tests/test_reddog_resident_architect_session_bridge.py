@@ -61,40 +61,32 @@ def _grounding_receipt(work_focus: str) -> dict:
 
 
 def _accepted_result():
-    final = SimpleNamespace(
-        status="READY",
-        snapshot_receipt_id="sha256:final",
-        backend_architect_determination_action="FIX",
-        backend_architect_determination_next_slice="REDDOG_NEXT_PHASE1",
-        backend_architect_determination_id="sha256:architect",
-        backend_architect_determination_queue_candidate_count=1,
-    )
     return SimpleNamespace(
         accepted=True,
         status="DETERMINED",
+        canonical_resident_cycle_used=True,
         intent_id="sha256:intent",
         cycle_id="sha256:cycle",
         snapshot_id="sha256:snapshot",
         swarm_id="sha256:swarm",
         task_ids=("task-a", "task-b"),
         task_status_counts={"completed": 2},
-        openclaw_claims=({"accepted": True}, {"accepted": True}),
+        openclaw_claim_count=2,
         duplicate_intent_reused=False,
         recovered_existing_cycle=False,
-        final_bootstrap=final,
         architect_action="FIX",
         architect_next_slice="REDDOG_NEXT_PHASE1",
-        architect_determination_id="sha256:architect",
+        determination_id="sha256:architect",
         queue_candidate_count=1,
+        record_revision=7,
+        intent_digest="sha256:intent-digest",
         rejection_reasons=(),
-        no_shell_command_executed=True,
-        no_repo_mutation_performed=True,
-        no_holoindex_reindex_performed=True,
-        no_hermes_dispatch_performed=True,
-        no_worktree_operation_performed=True,
-        no_pr_created=True,
-        no_pattern_memory_promotion_performed=True,
-        no_live_foundup_enqueue_performed=True,
+        client_no_shell_command_executed=True,
+        client_no_repo_mutation_performed=True,
+        client_no_holoindex_reindex_performed=True,
+        client_no_hermes_execution_performed=True,
+        client_no_worktree_operation_performed=True,
+        client_no_pr_created=True,
     )
 
 
@@ -112,17 +104,27 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
     calls = []
     grounding = _grounding_receipt("audit resident loop")
 
-    def fake_cycle(**kwargs):
-        calls.append(kwargs)
-        return _accepted_result()
+    class _Client:
+        def __init__(self, **kwargs):
+            calls.append({"init": kwargs})
 
-    monkeypatch.setattr(bridge, "run_reddog_resident_architect_durable_agentdb_cycle", fake_cycle)
+        def submit(self, intent):
+            calls.append({"intent": dict(intent)})
+            return _accepted_result()
+
+    monkeypatch.setenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "principal-012")
+    monkeypatch.setenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", "foundups_agent")
+    monkeypatch.setattr(bridge, "RedDogResidentArchitectClient", _Client)
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
             "red_dog_intent": {
                 "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
+                "origin": "extension",
+                "source_surface": "editor_thin_client",
+                "principal_ref": "principal-012",
+                "foundup_id": "foundups_agent",
                 "work_focus": "audit resident loop",
                 "grounding_receipt": grounding,
                 "submits_executable_authority": False,
@@ -145,14 +147,18 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
         }
     )
 
-    assert calls and calls[0]["requested_operation"] == "extension_resident_architect_session"
-    assert calls[0]["red_dog_intent"]["intent_id"] == "sha256:intent"
-    assert calls[0]["prompt_text"] == "audit resident loop"
-    assert calls[0]["timeout_seconds"] == 13
-    assert calls[0]["breadcrumbs"] == ({"breadcrumb_id": "crumb-1"},)
-    assert calls[0]["brain_state"] == {"available": True, "signature_digest": "sha256:brain"}
-    assert calls[0]["workspace_memory_notes"] == ({"note_id": "note-1"},)
-    assert calls[0]["memex_snapshot_supply_config"]["foundup_id"] == "foundups_agent"
+    runtime = calls[0]["init"]["runtime_defaults"]
+    assert calls[0]["init"]["authenticated_principal_id"] == "principal-012"
+    assert calls[0]["init"]["authorized_foundup_ids"] == ("foundups_agent",)
+    assert calls[0]["init"]["transport"] == "editor"
+    assert calls[1]["intent"]["intent_id"] == "sha256:intent"
+    assert runtime["requested_operation"] == "extension_resident_architect_session"
+    assert runtime["prompt_text"] == "audit resident loop"
+    assert runtime["timeout_seconds"] == 13
+    assert runtime["breadcrumbs"] == ({"breadcrumb_id": "crumb-1"},)
+    assert runtime["brain_state"] == {"available": True, "signature_digest": "sha256:brain"}
+    assert runtime["workspace_memory_notes"] == ({"note_id": "note-1"},)
+    assert runtime["memex_snapshot_supply_config"]["foundup_id"] == "foundups_agent"
     assert result["decision"] == bridge.RESIDENT_ARCHITECT_SESSION_ACCEPT
     assert result["accepted"] is True
     assert result["resident_backend_invoked"] is True
@@ -172,10 +178,16 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
 
 
 def test_resident_architect_session_bridge_failure_fails_closed(monkeypatch) -> None:
-    def fail_cycle(**kwargs):
-        raise RuntimeError("boom")
+    class _Client:
+        def __init__(self, **kwargs):
+            pass
 
-    monkeypatch.setattr(bridge, "run_reddog_resident_architect_durable_agentdb_cycle", fail_cycle)
+        def submit(self, intent):
+            raise RuntimeError("boom")
+
+    monkeypatch.setenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "principal-012")
+    monkeypatch.setenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", "foundups_agent")
+    monkeypatch.setattr(bridge, "RedDogResidentArchitectClient", _Client)
     grounding = _grounding_receipt("audit resident loop")
     result = bridge._result(
         {
@@ -183,6 +195,10 @@ def test_resident_architect_session_bridge_failure_fails_closed(monkeypatch) -> 
             "red_dog_intent": {
                 "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
+                "origin": "extension",
+                "source_surface": "editor_thin_client",
+                "principal_ref": "principal-012",
+                "foundup_id": "foundups_agent",
                 "work_focus": "audit resident loop",
                 "grounding_receipt": grounding,
                 "submits_executable_authority": False,
@@ -196,3 +212,32 @@ def test_resident_architect_session_bridge_failure_fails_closed(monkeypatch) -> 
     assert result["resident_backend_invoked"] is True
     assert result["no_repo_mutation_performed"] is True
     assert result["no_holoindex_reindex_performed"] is True
+
+
+def test_resident_architect_session_requires_host_authenticated_scope(monkeypatch) -> None:
+    monkeypatch.delenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", raising=False)
+    monkeypatch.delenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", raising=False)
+    grounding = _grounding_receipt("audit resident loop")
+
+    result = bridge._result(
+        {
+            "explicit_resident_architect_session_requested": True,
+            "red_dog_intent": {
+                "schema_version": "reddog_intent.v2",
+                "intent_id": "sha256:intent",
+                "origin": "extension",
+                "source_surface": "editor_thin_client",
+                "principal_ref": "principal-012",
+                "foundup_id": "foundups_agent",
+                "work_focus": "audit resident loop",
+                "grounding_receipt": grounding,
+                "submits_executable_authority": False,
+            },
+            "grounding_receipt_id": grounding["receipt_id"],
+            "work_focus": "audit resident loop",
+        }
+    )
+
+    assert result["accepted"] is False
+    assert result["resident_backend_invoked"] is False
+    assert result["rejection_reasons"] == ["resident_architect_authenticated_scope_missing"]

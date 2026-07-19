@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-20: REDDOG_RESIDENT_CYCLE_CAS_ATTESTATION_AND_INTENT_BINDING_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97
+
+- Bound each durable cycle to the canonical full intent digest and rejected changed-principal or changed-payload reuse of an existing intent ID.
+- Replaced blind cycle updates with insert-once creation, revision CAS, a store-owned status-transition graph, immutable authority fields, and observational hash-chained transition history.
+- Persisted and enforced all nine process-local read-only runtime self-attestations at this code boundary; they are not externally observed or signer-authenticated effect receipts.
+- Made cancellation terminal across claim and determination checkpoints, preserved monotonic retry history, and bound each persisted state to recomputed internal-integrity transition telemetry.
+- Required canonical revision-zero genesis state and routed the editor session bridge through `RedDogResidentArchitectClient` with host principal and FoundUp scope.
+- Added production AgentDB reconnect, stale-writer, cancellation-race, immutable-field, and `7 -> 8` retry regressions without adding execution authority.
+
 ## 2026-07-20: REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97

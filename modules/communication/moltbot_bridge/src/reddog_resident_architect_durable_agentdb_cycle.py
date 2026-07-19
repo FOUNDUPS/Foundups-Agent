@@ -75,6 +75,60 @@ STATUS_TIMED_OUT = "TIMED_OUT"
 STATUS_CANCELLED = "CANCELLED"
 
 TERMINAL_STATUSES = frozenset({STATUS_DETERMINED, STATUS_FAILED, STATUS_TIMED_OUT, STATUS_CANCELLED})
+RUNTIME_BOUNDARY_FIELDS = (
+    "read_only_authority_only",
+    "no_shell_command_executed",
+    "no_repo_mutation_performed",
+    "no_holoindex_reindex_performed",
+    "no_hermes_dispatch_performed",
+    "no_worktree_operation_performed",
+    "no_pr_created",
+    "no_pattern_memory_promotion_performed",
+    "no_live_foundup_enqueue_performed",
+)
+ALLOWED_STATUS_TRANSITIONS = {
+    STATUS_SUBMITTED: frozenset({STATUS_ENQUEUED, STATUS_FAILED, STATUS_CANCELLED}),
+    STATUS_ENQUEUED: frozenset({STATUS_RUNNING, STATUS_CANCELLED}),
+    STATUS_RUNNING: frozenset(
+        {STATUS_RUNNING, STATUS_DETERMINED, STATUS_FAILED, STATUS_TIMED_OUT, STATUS_CANCELLED}
+    ),
+}
+IMMUTABLE_CYCLE_FIELDS = frozenset(
+    {
+        "schema_version",
+        "intent_id",
+        "intent_digest",
+        "intent",
+        "created_at",
+        "genesis_state_digest",
+        *RUNTIME_BOUNDARY_FIELDS,
+    }
+)
+GENESIS_RECORD_FIELDS = frozenset(
+    {
+        "schema_version",
+        "intent_id",
+        "intent_digest",
+        "cycle_id",
+        "status",
+        "intent",
+        "snapshot_id",
+        "determination_id",
+        "swarm_id",
+        "task_ids",
+        "task_status_counts",
+        "openclaw_claims",
+        "retry_count",
+        "record_revision",
+        "attempt_history",
+        "transition_history",
+        "created_at",
+        "updated_at",
+        "rejection_reasons",
+        "genesis_state_digest",
+        *RUNTIME_BOUNDARY_FIELDS,
+    }
+)
 
 
 class ResidentCycleReason:
@@ -92,14 +146,26 @@ class ResidentCycleReason:
     RETRY_NOT_ALLOWED = "REJECT_RESIDENT_CYCLE_RETRY_NOT_ALLOWED"
     CANCELLED = "REJECT_RESIDENT_CYCLE_CANCELLED"
     STORE_REJECTED = "REJECT_RESIDENT_CYCLE_STORE_REJECTED"
+    INTENT_CONFLICT = "REJECT_RESIDENT_CYCLE_INTENT_CONFLICT"
+    ACTIVE_INTENT = "REJECT_RESIDENT_CYCLE_ACTIVE_INTENT"
+    TRANSITION_CONFLICT = "REJECT_RESIDENT_CYCLE_TRANSITION_CONFLICT"
+    CANCELLATION_CONFLICT = "REJECT_RESIDENT_CYCLE_CANCELLATION_CONFLICT"
 
 
 class ResidentArchitectCycleStore(Protocol):
     def load_cycle_by_intent(self, intent_id: str) -> Optional[Mapping[str, Any]]: ...
 
-    def upsert_cycle(self, record: Mapping[str, Any]) -> Mapping[str, Any]: ...
+    def create_cycle(self, record: Mapping[str, Any]) -> Mapping[str, Any]: ...
 
-    def update_cycle(self, intent_id: str, updates: Mapping[str, Any]) -> Mapping[str, Any]: ...
+    def transition_cycle(
+        self,
+        intent_id: str,
+        *,
+        expected_revision: int,
+        expected_statuses: Sequence[str],
+        updates: Mapping[str, Any],
+        allow_terminal_retry: bool = False,
+    ) -> Mapping[str, Any]: ...
 
     def load_task_ids(self, determination_id: str) -> tuple[str, ...]: ...
 
@@ -147,6 +213,8 @@ class RedDogResidentArchitectCycleResult:
     duplicate_intent_reused: bool
     recovered_existing_cycle: bool
     retry_count: int
+    record_revision: int
+    intent_digest: str
     rejection_reasons: tuple[str, ...]
     no_shell_command_executed: bool = True
     no_repo_mutation_performed: bool = True
@@ -177,51 +245,221 @@ class AgentDbResidentArchitectCycleStore:
         db = self._agent_db()
         self._ensure_table(db)
         rows = db.db.execute_query(
-            "SELECT cycle_json FROM reddog_resident_architect_cycles WHERE intent_id = ?",
+            "SELECT revision, cycle_json FROM reddog_resident_architect_cycles WHERE intent_id = ?",
             (intent_id,),
         )
         if not rows:
             return None
-        value = rows[0]["cycle_json"] if isinstance(rows[0], Mapping) else rows[0][0]
-        return json.loads(value)
+        row = rows[0]
+        try:
+            revision = int(row["revision"] if isinstance(row, Mapping) else row[0])
+            value = row["cycle_json"] if isinstance(row, Mapping) else row[1]
+            record = json.loads(value)
+        except (TypeError, ValueError, json.JSONDecodeError, KeyError, IndexError):
+            return {
+                "intent_id": intent_id,
+                "status": STATUS_FAILED,
+                "_store_revision": -1,
+                "_store_integrity_valid": False,
+            }
+        if not isinstance(record, dict):
+            return {
+                "intent_id": intent_id,
+                "status": STATUS_FAILED,
+                "_store_revision": revision,
+                "_store_integrity_valid": False,
+            }
+        record["_store_revision"] = revision
+        record["_store_integrity_valid"] = (
+            int(record.get("record_revision", -1)) == revision
+            and _transition_history_is_valid(record, revision=revision)
+        )
+        return record
 
-    def upsert_cycle(self, record: Mapping[str, Any]) -> Mapping[str, Any]:
+    def create_cycle(self, record: Mapping[str, Any]) -> Mapping[str, Any]:
         db = self._agent_db()
         self._ensure_table(db)
-        payload = _canonical_json(record)
+        value = dict(record)
+        supplied_revision = _parse_nonnegative_int(value.get("record_revision"))
+        value["record_revision"] = 0
+        intent = value.get("intent")
+        intent_id = str(value.get("intent_id") or "")
+        retry_count = _parse_nonnegative_int(value.get("retry_count"))
+        expected_cycle_id = _digest(
+            {"intent_id": intent_id, "retry_count": 0, "slice": "resident_agentdb_cycle"}
+        )
+        if (
+            value.get("schema_version") != "reddog_resident_architect_cycle.v2"
+            or not isinstance(intent, Mapping)
+            or not intent_id
+            or str(intent.get("intent_id") or "") != intent_id
+            or bool(_validate_intent(intent))
+            or str(value.get("intent_digest") or "") != resident_intent_digest(intent)
+            or any(value.get(field) is not True for field in RUNTIME_BOUNDARY_FIELDS)
+            or frozenset(value) != GENESIS_RECORD_FIELDS
+            or str(value.get("genesis_state_digest") or "") != _genesis_state_digest(value)
+            or value.get("status") != STATUS_SUBMITTED
+            or str(value.get("cycle_id") or "") != expected_cycle_id
+            or retry_count != 0
+            or supplied_revision != 0
+            or value.get("transition_history") != []
+            or value.get("attempt_history") != []
+            or value.get("task_ids") != []
+            or value.get("task_status_counts") != {}
+            or value.get("openclaw_claims") != []
+            or value.get("rejection_reasons") != []
+            or value.get("snapshot_id") is not None
+            or value.get("determination_id") is not None
+            or value.get("swarm_id") is not None
+        ):
+            return {"ok": False, "stored": False, "reason": "invalid_cycle_record", "record": None}
+        payload = _canonical_json(value)
         with db.db.get_connection() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 INSERT INTO reddog_resident_architect_cycles
-                (intent_id, cycle_id, status, snapshot_id, determination_id, cycle_json, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(intent_id) DO UPDATE SET
-                    cycle_id = excluded.cycle_id,
-                    status = excluded.status,
-                    snapshot_id = excluded.snapshot_id,
-                    determination_id = excluded.determination_id,
-                    cycle_json = excluded.cycle_json,
-                    updated_at = excluded.updated_at
+                (intent_id, cycle_id, status, snapshot_id, determination_id, revision, cycle_json, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(intent_id) DO NOTHING
                 """,
                 (
-                    record.get("intent_id"),
-                    record.get("cycle_id"),
-                    record.get("status"),
-                    record.get("snapshot_id"),
-                    record.get("determination_id"),
+                    value.get("intent_id"),
+                    value.get("cycle_id"),
+                    value.get("status"),
+                    value.get("snapshot_id"),
+                    value.get("determination_id"),
+                    0,
                     payload,
                     _now_iso(),
                 ),
             )
-        return {"ok": True, "stored": True}
+        return {
+            "ok": cursor.rowcount == 1,
+            "stored": cursor.rowcount == 1,
+            "reason": "" if cursor.rowcount == 1 else "cycle_exists",
+            "record": value if cursor.rowcount == 1 else None,
+        }
+
+    def transition_cycle(
+        self,
+        intent_id: str,
+        *,
+        expected_revision: int,
+        expected_statuses: Sequence[str],
+        updates: Mapping[str, Any],
+        allow_terminal_retry: bool = False,
+    ) -> Mapping[str, Any]:
+        db = self._agent_db()
+        self._ensure_table(db)
+        allowed = frozenset(str(status) for status in expected_statuses)
+        with db.db.get_connection() as conn:
+            row = conn.execute(
+                """
+                SELECT revision, cycle_json
+                FROM reddog_resident_architect_cycles
+                WHERE intent_id = ?
+                """,
+                (intent_id,),
+            ).fetchone()
+            if row is None:
+                return {"ok": False, "reason": "missing_cycle"}
+            revision = int(row["revision"] if isinstance(row, Mapping) else row[0])
+            current = json.loads(
+                row["cycle_json"] if isinstance(row, Mapping) else row[1]
+            )
+            status = str(current.get("status") or "")
+            next_status = str(updates.get("status") or status)
+            legacy_cancel = bool(
+                next_status == STATUS_CANCELLED
+                and "record_revision" not in current
+                and "intent_digest" not in current
+            )
+            if revision != int(expected_revision) or (
+                int(current.get("record_revision", -1)) != revision and not legacy_cancel
+            ):
+                return {"ok": False, "reason": "revision_conflict"}
+            if not legacy_cancel and not _transition_history_is_valid(current, revision=revision):
+                return {"ok": False, "reason": "transition_history_invalid"}
+            if status not in allowed:
+                return {"ok": False, "reason": "status_conflict"}
+            if status in TERMINAL_STATUSES and not (
+                allow_terminal_retry
+                and status in {STATUS_FAILED, STATUS_TIMED_OUT}
+                and next_status == STATUS_SUBMITTED
+            ):
+                return {"ok": False, "reason": "terminal_status"}
+            if status not in TERMINAL_STATUSES and next_status not in ALLOWED_STATUS_TRANSITIONS.get(status, ()):
+                return {"ok": False, "reason": "invalid_status_transition"}
+            for field in IMMUTABLE_CYCLE_FIELDS:
+                if field in updates and updates.get(field) != current.get(field):
+                    return {"ok": False, "reason": f"immutable_field:{field}"}
+            try:
+                retry_error = _validate_retry_transition(
+                    current=current,
+                    updates=updates,
+                    allow_terminal_retry=allow_terminal_retry,
+                    next_status=next_status,
+                )
+            except (TypeError, ValueError):
+                retry_error = "retry_metadata_invalid"
+            if retry_error:
+                return {"ok": False, "reason": retry_error}
+            merged = dict(current)
+            merged.update(dict(updates))
+            merged.pop("_store_integrity_valid", None)
+            merged.pop("_store_revision", None)
+            merged["record_revision"] = revision + 1
+            history = list(current.get("transition_history") or ())
+            previous_receipt_id = str(history[-1].get("receipt_id") or "") if history else ""
+            transition_receipt = {
+                "schema_version": "reddog_resident_cycle_transition.v1",
+                "intent_id": intent_id,
+                "cycle_id": str(merged.get("cycle_id") or ""),
+                "from_status": status,
+                "to_status": next_status,
+                "from_revision": revision,
+                "to_revision": revision + 1,
+                "updates_digest": _digest(dict(updates)),
+                "previous_receipt_id": previous_receipt_id,
+                "transitioned_at": _now_iso(),
+                "authority": "observational_internal_integrity_only",
+            }
+            state_for_digest = dict(merged)
+            state_for_digest.pop("transition_history", None)
+            transition_receipt["result_state_digest"] = _digest(state_for_digest)
+            transition_receipt["receipt_id"] = _digest(transition_receipt)
+            merged["transition_history"] = [*history, transition_receipt]
+            payload = _canonical_json(merged)
+            cursor = conn.execute(
+                """
+                UPDATE reddog_resident_architect_cycles
+                SET cycle_id = ?, status = ?, snapshot_id = ?, determination_id = ?,
+                    revision = ?, cycle_json = ?, updated_at = ?
+                WHERE intent_id = ? AND revision = ?
+                """,
+                (
+                    merged.get("cycle_id"),
+                    merged.get("status"),
+                    merged.get("snapshot_id"),
+                    merged.get("determination_id"),
+                    revision + 1,
+                    payload,
+                    _now_iso(),
+                    intent_id,
+                    revision,
+                ),
+            )
+        if cursor.rowcount != 1:
+            return {"ok": False, "reason": "revision_conflict"}
+        return {"ok": True, "stored": True, "record": merged}
+
+    def upsert_cycle(self, record: Mapping[str, Any]) -> Mapping[str, Any]:
+        """Compatibility seam: create only; existing rows require explicit CAS."""
+        return self.create_cycle(record)
 
     def update_cycle(self, intent_id: str, updates: Mapping[str, Any]) -> Mapping[str, Any]:
-        current = self.load_cycle_by_intent(intent_id)
-        if current is None:
-            return {"ok": False, "reason": "missing_cycle"}
-        merged = dict(current)
-        merged.update(dict(updates))
-        return self.upsert_cycle(merged)
+        del intent_id, updates
+        return {"ok": False, "reason": "cas_required"}
 
     def load_task_ids(self, determination_id: str) -> tuple[str, ...]:
         if not determination_id:
@@ -289,11 +527,23 @@ class AgentDbResidentArchitectCycleStore:
                     status TEXT NOT NULL,
                     snapshot_id TEXT,
                     determination_id TEXT,
+                    revision INTEGER NOT NULL DEFAULT 0,
                     cycle_json TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 )
                 """
             )
+            columns = {
+                str(row["name"] if isinstance(row, Mapping) else row[1])
+                for row in conn.execute(
+                    "PRAGMA table_info(reddog_resident_architect_cycles)"
+                ).fetchall()
+            }
+            if "revision" not in columns:
+                conn.execute(
+                    "ALTER TABLE reddog_resident_architect_cycles "
+                    "ADD COLUMN revision INTEGER NOT NULL DEFAULT 0"
+                )
             conn.execute(
                 """
                 CREATE INDEX IF NOT EXISTS idx_reddog_resident_architect_cycles_status
@@ -344,47 +594,121 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
     store = cycle_store or AgentDbResidentArchitectCycleStore(agent_db_factory=agent_db_factory)
     reasons = _validate_intent(red_dog_intent)
     intent_id = str(red_dog_intent.get("intent_id") or "").strip()
-    existing = store.load_cycle_by_intent(intent_id) if intent_id and not reasons else None
+    existing = store.load_cycle_by_intent(intent_id) if intent_id else None
+    submitted_intent_digest = resident_intent_digest(red_dog_intent)
 
     if cancel_requested:
-        if existing is not None and str(existing.get("status")) not in TERMINAL_STATUSES:
-            store.update_cycle(intent_id, {"status": STATUS_CANCELLED, "cancelled_at": _now_iso()})
+        if existing is None:
+            if reasons:
+                return _reject(red_dog_intent, reasons)
+            synthetic = _new_record(red_dog_intent, retry_count=0)
+            synthetic.update(
+                {
+                    "status": STATUS_CANCELLED,
+                    "cancelled_at": _now_iso(),
+                    "rejection_reasons": [ResidentCycleReason.CANCELLED],
+                }
+            )
+            return _result_from_record(
+                record=synthetic,
+                accepted=False,
+                rejection_reasons=(ResidentCycleReason.CANCELLED,),
+            )
+        if not _record_matches_cancel_request(existing, submitted_intent_digest):
+            return _result_from_record(
+                record=existing,
+                accepted=False,
+                rejection_reasons=(ResidentCycleReason.INTENT_CONFLICT,),
+            )
+        existing, cancelled = _cancel_cycle_with_retry(store, existing)
         return _result_from_record(
-            record=store.load_cycle_by_intent(intent_id) or existing or _new_record(red_dog_intent, retry_count=0),
+            record=existing,
             accepted=False,
-            rejection_reasons=(ResidentCycleReason.CANCELLED,),
+            rejection_reasons=(
+                ResidentCycleReason.CANCELLED if cancelled else ResidentCycleReason.CANCELLATION_CONFLICT,
+            ),
         )
 
+    if existing is not None and (
+        existing.get("_store_integrity_valid") is not True
+        or str(existing.get("intent_digest") or "") != submitted_intent_digest
+        or any(existing.get(field) is not True for field in RUNTIME_BOUNDARY_FIELDS)
+    ):
+        return _result_from_record(
+            record=existing,
+            accepted=False,
+            rejection_reasons=(ResidentCycleReason.INTENT_CONFLICT,),
+        )
+
+    retry_source: Mapping[str, Any] | None = None
     if existing is not None and retry_requested:
         status = str(existing.get("status") or "")
-        if status not in {STATUS_FAILED, STATUS_TIMED_OUT, STATUS_CANCELLED}:
+        if status not in {STATUS_FAILED, STATUS_TIMED_OUT}:
             return _result_from_record(
                 record=existing,
                 accepted=False,
                 rejection_reasons=(ResidentCycleReason.RETRY_NOT_ALLOWED,),
             )
         old_tasks = tuple(str(task_id) for task_id in existing.get("task_ids", ()) if str(task_id))
+        retry_source = existing
+        retry_count = int(existing.get("retry_count", 0)) + 1
+        retried = _new_record(red_dog_intent, retry_count=retry_count)
+        retried["created_at"] = existing.get("created_at")
+        retried["genesis_state_digest"] = existing.get("genesis_state_digest")
+        retried["attempt_history"] = [
+            *list(existing.get("attempt_history") or ()),
+            _attempt_history_entry(existing),
+        ]
+        transitioned = _transition_record(
+            store,
+            existing,
+            expected_statuses=(STATUS_FAILED, STATUS_TIMED_OUT, STATUS_CANCELLED),
+            updates=retried,
+            allow_terminal_retry=True,
+        )
+        if transitioned is None:
+            return _transition_conflict_result(store, intent_id)
         store.delete_cycle_tasks(old_tasks)
         existing = None
 
     if existing is not None and str(existing.get("status")) == STATUS_DETERMINED:
         return _result_from_record(record=existing, accepted=True, duplicate_intent_reused=True)
 
+    if existing is not None:
+        return _result_from_record(
+            record=existing,
+            accepted=False,
+            rejection_reasons=(ResidentCycleReason.ACTIVE_INTENT,),
+            recovered_existing_cycle=True,
+        )
+
     if reasons:
         return _reject(red_dog_intent, reasons)
     if external_research_retriever is None:
         external_research_retriever = NoopExternalResearchRetriever()
 
-    if retry_requested:
-        retry_count = int(existing.get("retry_count", 0)) + 1 if existing else 1
-    elif existing:
-        retry_count = int(existing.get("retry_count", 0))
-    else:
-        retry_count = 0
-    record = dict(existing) if existing is not None else _new_record(red_dog_intent, retry_count=retry_count)
-    recovered = existing is not None
+    retry_count = int(retry_source.get("retry_count", 0)) + 1 if retry_source else 0
+    record = (
+        dict(store.load_cycle_by_intent(intent_id) or {})
+        if retry_source is not None
+        else _new_record(red_dog_intent, retry_count=retry_count)
+    )
+    recovered = retry_source is not None
 
-    if existing is None:
+    if retry_source is None:
+        created = store.create_cycle(record)
+        if not created.get("ok"):
+            latest = store.load_cycle_by_intent(intent_id)
+            if isinstance(latest, Mapping) and str(latest.get("intent_digest") or "") != submitted_intent_digest:
+                return _result_from_record(
+                    record=latest,
+                    accepted=False,
+                    rejection_reasons=(ResidentCycleReason.INTENT_CONFLICT,),
+                )
+            return _transition_conflict_result(store, intent_id)
+        record = dict(created.get("record") or record)
+
+    if str(record.get("status") or "") == STATUS_SUBMITTED:
         initial = run_reddog_main_readonly_operational_bootstrap(
             repo_root=root,
             work_state_path=work_state_path,
@@ -412,30 +736,50 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
         )
         if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
-            record.update(
-                _failure_updates(
+            transitioned = _transition_record(
+                store,
+                record,
+                expected_statuses=(STATUS_SUBMITTED,),
+                updates=_failure_updates(
                     STATUS_FAILED,
                     (ResidentCycleReason.BOOTSTRAP_REJECTED, *initial.rejection_reasons),
-                )
+                ),
             )
-            store.upsert_cycle(record)
+            if transitioned is None:
+                return _transition_conflict_result(store, intent_id)
+            record = transitioned
             return _result_from_record(record=record, accepted=False)
         if not initial.enqueue_attempted or initial.enqueue_task_count <= 0 or initial.enqueue_rejection_reasons:
-            record.update(
-                _failure_updates(
+            transitioned = _transition_record(
+                store,
+                record,
+                expected_statuses=(STATUS_SUBMITTED,),
+                updates=_failure_updates(
                     STATUS_FAILED,
                     (ResidentCycleReason.TASK_ENQUEUE_REJECTED, *initial.enqueue_rejection_reasons),
-                )
+                ),
             )
-            store.upsert_cycle(record)
+            if transitioned is None:
+                return _transition_conflict_result(store, intent_id)
+            record = transitioned
             return _result_from_record(record=record, accepted=False)
         task_ids = store.load_task_ids(str(initial.determination_id or ""))
         if not task_ids:
-            record.update(_failure_updates(STATUS_FAILED, (ResidentCycleReason.NO_TASK_IDS,)))
-            store.upsert_cycle(record)
+            transitioned = _transition_record(
+                store,
+                record,
+                expected_statuses=(STATUS_SUBMITTED,),
+                updates=_failure_updates(STATUS_FAILED, (ResidentCycleReason.NO_TASK_IDS,)),
+            )
+            if transitioned is None:
+                return _transition_conflict_result(store, intent_id)
+            record = transitioned
             return _result_from_record(record=record, accepted=False)
-        record.update(
-            {
+        transitioned = _transition_record(
+            store,
+            record,
+            expected_statuses=(STATUS_SUBMITTED,),
+            updates={
                 "status": STATUS_ENQUEUED,
                 "snapshot_id": initial.snapshot_receipt_id,
                 "determination_id": initial.determination_id,
@@ -444,14 +788,31 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
                 "task_status_counts": dict(store.load_task_status_counts(task_ids)),
                 "initial_bootstrap": initial.to_dict(),
                 "updated_at": _now_iso(),
-            }
+            },
         )
-        store.upsert_cycle(record)
+        if transitioned is None:
+            return _transition_conflict_result(store, intent_id)
+        record = transitioned
+
+    if str(record.get("status") or "") == STATUS_ENQUEUED:
+        transitioned = _transition_record(
+            store,
+            record,
+            expected_statuses=(STATUS_ENQUEUED,),
+            updates={"status": STATUS_RUNNING, "updated_at": _now_iso()},
+        )
+        if transitioned is None:
+            return _transition_conflict_result(store, intent_id)
+        record = transitioned
 
     task_ids = tuple(str(task_id) for task_id in record.get("task_ids", ()) if str(task_id))
     claims: list[Mapping[str, Any]] = []
     claim_runner = openclaw_claim_runner or claim_reddog_readonly_audit_task_once
     for _ in range(max(0, int(max_claims))):
+        checkpoint = _checkpoint_record(store, record)
+        if checkpoint is None or str(checkpoint.get("status") or "") == STATUS_CANCELLED:
+            return _transition_conflict_result(store, intent_id)
+        record = checkpoint
         counts = dict(store.load_task_status_counts(task_ids))
         if task_ids and counts.get("completed", 0) == len(task_ids):
             break
@@ -468,27 +829,61 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             )
         )
         claims.append(claim)
+        transitioned = _transition_record(
+            store,
+            record,
+            expected_statuses=(STATUS_RUNNING,),
+            updates={
+                "openclaw_claims": [dict(item) for item in claims],
+                "task_status_counts": dict(store.load_task_status_counts(task_ids)),
+                "updated_at": _now_iso(),
+            },
+        )
+        if transitioned is None:
+            return _transition_conflict_result(store, intent_id)
+        record = transitioned
         if claim.get("status") == READONLY_AUDIT_OPENCLAW_CLAIM_IDLE:
             break
         if claim.get("status") != READONLY_AUDIT_OPENCLAW_CLAIM_ACCEPT:
-            record.update(
-                _failure_updates(
+            updates = _failure_updates(
                     STATUS_FAILED,
                     (ResidentCycleReason.OPENCLAW_CLAIM_REJECTED, *claim.get("rejection_reasons", ())),
                 )
+            updates["openclaw_claims"] = [dict(item) for item in claims]
+            updates["task_status_counts"] = dict(store.load_task_status_counts(task_ids))
+            transitioned = _transition_record(
+                store,
+                record,
+                expected_statuses=(STATUS_RUNNING,),
+                updates=updates,
             )
-            record["openclaw_claims"] = [dict(item) for item in claims]
-            record["task_status_counts"] = dict(store.load_task_status_counts(task_ids))
-            store.upsert_cycle(record)
+            if transitioned is None:
+                return _transition_conflict_result(store, intent_id)
+            record = transitioned
             return _result_from_record(record=record, accepted=False, recovered_existing_cycle=recovered)
 
     counts = dict(store.load_task_status_counts(task_ids))
     record["task_status_counts"] = counts
     record["openclaw_claims"] = [dict(item) for item in claims]
     if not task_ids or counts.get("completed", 0) != len(task_ids):
-        record.update(_failure_updates(STATUS_TIMED_OUT, (ResidentCycleReason.TIMEOUT,)))
-        store.upsert_cycle(record)
+        updates = _failure_updates(STATUS_TIMED_OUT, (ResidentCycleReason.TIMEOUT,))
+        updates["task_status_counts"] = counts
+        updates["openclaw_claims"] = [dict(item) for item in claims]
+        transitioned = _transition_record(
+            store,
+            record,
+            expected_statuses=(STATUS_RUNNING,),
+            updates=updates,
+        )
+        if transitioned is None:
+            return _transition_conflict_result(store, intent_id)
+        record = transitioned
         return _result_from_record(record=record, accepted=False, recovered_existing_cycle=recovered)
+
+    checkpoint = _checkpoint_record(store, record)
+    if checkpoint is None or str(checkpoint.get("status") or "") == STATUS_CANCELLED:
+        return _transition_conflict_result(store, intent_id)
+    record = checkpoint
 
     final = run_reddog_main_readonly_operational_bootstrap(
         repo_root=root,
@@ -518,14 +913,20 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         architect_determination_store=architect_determination_store,
     )
     if not final.ready:
-        record.update(
-            _failure_updates(
+        updates = _failure_updates(
                 STATUS_FAILED,
                 (ResidentCycleReason.FINAL_BOOTSTRAP_REJECTED, *final.rejection_reasons),
             )
+        updates["final_bootstrap"] = final.to_dict()
+        transitioned = _transition_record(
+            store,
+            record,
+            expected_statuses=(STATUS_RUNNING,),
+            updates=updates,
         )
-        record["final_bootstrap"] = final.to_dict()
-        store.upsert_cycle(record)
+        if transitioned is None:
+            return _transition_conflict_result(store, intent_id)
+        record = transitioned
         return _result_from_record(
             record=record,
             accepted=False,
@@ -533,9 +934,20 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             recovered_existing_cycle=recovered,
         )
     if not final.backend_architect_determination_id:
-        record.update(_failure_updates(STATUS_FAILED, (ResidentCycleReason.ARCHITECT_DETERMINATION_MISSING,)))
-        record["final_bootstrap"] = final.to_dict()
-        store.upsert_cycle(record)
+        updates = _failure_updates(
+            STATUS_FAILED,
+            (ResidentCycleReason.ARCHITECT_DETERMINATION_MISSING,),
+        )
+        updates["final_bootstrap"] = final.to_dict()
+        transitioned = _transition_record(
+            store,
+            record,
+            expected_statuses=(STATUS_RUNNING,),
+            updates=updates,
+        )
+        if transitioned is None:
+            return _transition_conflict_result(store, intent_id)
+        record = transitioned
         return _result_from_record(
             record=record,
             accepted=False,
@@ -543,8 +955,11 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             recovered_existing_cycle=recovered,
         )
 
-    record.update(
-        {
+    transitioned = _transition_record(
+        store,
+        record,
+        expected_statuses=(STATUS_RUNNING,),
+        updates={
             "status": STATUS_DETERMINED,
             "rejection_reasons": [],
             "final_bootstrap": final.to_dict(),
@@ -553,17 +968,20 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             "architect_determination_id": final.backend_architect_determination_id,
             "queue_candidate_count": final.backend_architect_determination_queue_candidate_count,
             "updated_at": _now_iso(),
-        }
+        },
     )
-    store.upsert_cycle(record)
+    if transitioned is None:
+        return _transition_conflict_result(store, intent_id)
+    record = transitioned
     return _result_from_record(record=record, accepted=True, final_bootstrap=final, recovered_existing_cycle=recovered)
 
 
 def _new_record(intent: Mapping[str, Any], *, retry_count: int) -> dict[str, Any]:
     intent_id = str(intent.get("intent_id") or "").strip()
-    return {
-        "schema_version": "reddog_resident_architect_cycle.v1",
+    record = {
+        "schema_version": "reddog_resident_architect_cycle.v2",
         "intent_id": intent_id,
+        "intent_digest": resident_intent_digest(intent),
         "cycle_id": _digest({"intent_id": intent_id, "retry_count": retry_count, "slice": "resident_agentdb_cycle"}),
         "status": STATUS_SUBMITTED,
         "intent": dict(intent),
@@ -574,11 +992,16 @@ def _new_record(intent: Mapping[str, Any], *, retry_count: int) -> dict[str, Any
         "task_status_counts": {},
         "openclaw_claims": [],
         "retry_count": retry_count,
+        "record_revision": 0,
+        "attempt_history": [],
+        "transition_history": [],
         "created_at": _now_iso(),
         "updated_at": _now_iso(),
         "rejection_reasons": [],
-        "read_only_authority_only": True,
     }
+    record.update({field: True for field in RUNTIME_BOUNDARY_FIELDS})
+    record["genesis_state_digest"] = _genesis_state_digest(record)
+    return record
 
 
 def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
@@ -649,6 +1072,256 @@ def _failure_updates(status: str, reasons: Sequence[str]) -> dict[str, Any]:
     }
 
 
+def resident_intent_digest(intent: Mapping[str, Any]) -> str:
+    return _digest({"schema_version": "reddog_resident_intent_binding.v1", "intent": dict(intent)})
+
+
+def _attempt_history_entry(record: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "cycle_id": str(record.get("cycle_id") or ""),
+        "status": str(record.get("status") or ""),
+        "record_revision": int(record.get("record_revision") or 0),
+        "retry_count": int(record.get("retry_count") or 0),
+        "task_ids": [str(task_id) for task_id in record.get("task_ids", ()) if str(task_id)],
+        "closed_at": _now_iso(),
+    }
+
+
+def _validate_retry_transition(
+    *,
+    current: Mapping[str, Any],
+    updates: Mapping[str, Any],
+    allow_terminal_retry: bool,
+    next_status: str,
+) -> str:
+    current_retry = int(current.get("retry_count") or 0)
+    current_history = list(current.get("attempt_history") or ())
+    is_retry = bool(allow_terminal_retry and next_status == STATUS_SUBMITTED)
+    if not is_retry:
+        if "retry_count" in updates and int(updates.get("retry_count") or 0) != current_retry:
+            return "retry_count_not_monotonic"
+        if "attempt_history" in updates and list(updates.get("attempt_history") or ()) != current_history:
+            return "attempt_history_not_monotonic"
+        return ""
+
+    expected_retry = current_retry + 1
+    if int(updates.get("retry_count") or -1) != expected_retry:
+        return "retry_count_not_monotonic"
+    history = list(updates.get("attempt_history") or ())
+    if len(history) != len(current_history) + 1 or history[:-1] != current_history:
+        return "attempt_history_not_monotonic"
+    entry = history[-1] if isinstance(history[-1], Mapping) else {}
+    expected_entry = {
+        "cycle_id": str(current.get("cycle_id") or ""),
+        "status": str(current.get("status") or ""),
+        "record_revision": int(current.get("record_revision") or 0),
+        "retry_count": current_retry,
+        "task_ids": [str(task_id) for task_id in current.get("task_ids", ()) if str(task_id)],
+    }
+    if any(entry.get(key) != value for key, value in expected_entry.items()) or not str(
+        entry.get("closed_at") or ""
+    ):
+        return "attempt_history_not_monotonic"
+    expected_cycle_id = _digest(
+        {
+            "intent_id": str(current.get("intent_id") or ""),
+            "retry_count": expected_retry,
+            "slice": "resident_agentdb_cycle",
+        }
+    )
+    if str(updates.get("cycle_id") or "") != expected_cycle_id:
+        return "retry_cycle_id_invalid"
+    return ""
+
+
+def _transition_history_is_valid(record: Mapping[str, Any], *, revision: int) -> bool:
+    history = record.get("transition_history")
+    if not isinstance(history, list) or len(history) != revision:
+        return False
+    intent_id = str(record.get("intent_id") or "")
+    retry_count = _parse_nonnegative_int(record.get("retry_count"))
+    if retry_count is None:
+        return False
+    if not history:
+        return bool(
+            revision == 0
+            and frozenset(key for key in record if not str(key).startswith("_store_"))
+            == GENESIS_RECORD_FIELDS
+            and str(record.get("status") or "") == STATUS_SUBMITTED
+            and retry_count == 0
+            and record.get("attempt_history") == []
+            and str(record.get("cycle_id") or "")
+            == _digest({"intent_id": intent_id, "retry_count": 0, "slice": "resident_agentdb_cycle"})
+            and str(record.get("genesis_state_digest") or "") == _genesis_state_digest(record)
+        )
+    previous_receipt_id = ""
+    previous_status = ""
+    retry_edges = 0
+    for index, raw_entry in enumerate(history):
+        if not isinstance(raw_entry, Mapping):
+            return False
+        entry = dict(raw_entry)
+        receipt_id = str(entry.pop("receipt_id", ""))
+        from_revision = _parse_nonnegative_int(entry.get("from_revision"))
+        to_revision = _parse_nonnegative_int(entry.get("to_revision"))
+        if (
+            entry.get("schema_version") != "reddog_resident_cycle_transition.v1"
+            or str(entry.get("intent_id") or "") != str(record.get("intent_id") or "")
+            or from_revision != index
+            or to_revision != index + 1
+            or str(entry.get("previous_receipt_id") or "") != previous_receipt_id
+            or entry.get("authority") != "observational_internal_integrity_only"
+            or receipt_id != _digest(entry)
+        ):
+            return False
+        from_status = str(entry.get("from_status") or "")
+        to_status = str(entry.get("to_status") or "")
+        if index == 0 and from_status != STATUS_SUBMITTED:
+            return False
+        if index and from_status != previous_status:
+            return False
+        if from_status in {STATUS_FAILED, STATUS_TIMED_OUT} and to_status == STATUS_SUBMITTED:
+            retry_edges += 1
+        elif from_status in TERMINAL_STATUSES:
+            return False
+        elif to_status not in ALLOWED_STATUS_TRANSITIONS.get(from_status, ()):
+            return False
+        previous_status = to_status
+        previous_receipt_id = receipt_id
+    state_for_digest = dict(record)
+    state_for_digest.pop("transition_history", None)
+    state_for_digest.pop("_store_integrity_valid", None)
+    state_for_digest.pop("_store_revision", None)
+    final_state_digest = str(history[-1].get("result_state_digest") or "")
+    return (
+        previous_status == str(record.get("status") or "")
+        and retry_edges == retry_count
+        and len(record.get("attempt_history") or ()) == retry_edges
+        and final_state_digest == _digest(state_for_digest)
+    )
+
+
+def _record_matches_cancel_request(record: Mapping[str, Any], submitted_intent_digest: str) -> bool:
+    if (
+        record.get("_store_integrity_valid") is True
+        and str(record.get("intent_digest") or "") == submitted_intent_digest
+        and all(record.get(field) is True for field in RUNTIME_BOUNDARY_FIELDS)
+    ):
+        return True
+    intent = record.get("intent")
+    return bool(
+        (
+            str(record.get("status") or "") not in TERMINAL_STATUSES
+            or str(record.get("status") or "") == STATUS_CANCELLED
+        )
+        and not str(record.get("intent_digest") or "")
+        and isinstance(intent, Mapping)
+        and resident_intent_digest(intent) == submitted_intent_digest
+    )
+
+
+def _parse_nonnegative_int(value: Any) -> Optional[int]:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed >= 0 else None
+
+
+def _genesis_state_digest(record: Mapping[str, Any]) -> str:
+    value = {
+        str(key): item
+        for key, item in record.items()
+        if key != "genesis_state_digest" and not str(key).startswith("_store_")
+    }
+    return _digest({"schema_version": "reddog_resident_cycle_genesis.v1", "record": value})
+
+
+def _cancel_cycle_with_retry(
+    store: ResidentArchitectCycleStore,
+    existing: Mapping[str, Any],
+    *,
+    max_attempts: int = 3,
+) -> tuple[dict[str, Any], bool]:
+    intent_id = str(existing.get("intent_id") or "")
+    current = dict(existing)
+    for _ in range(max(1, int(max_attempts))):
+        status = str(current.get("status") or "")
+        if status == STATUS_CANCELLED:
+            return current, True
+        if status in TERMINAL_STATUSES:
+            return current, False
+        transitioned = _transition_record(
+            store,
+            current,
+            expected_statuses=(STATUS_SUBMITTED, STATUS_ENQUEUED, STATUS_RUNNING),
+            updates={
+                "status": STATUS_CANCELLED,
+                "cancelled_at": _now_iso(),
+                "rejection_reasons": [ResidentCycleReason.CANCELLED],
+                "updated_at": _now_iso(),
+            },
+        )
+        if transitioned is not None:
+            return transitioned, True
+        latest = store.load_cycle_by_intent(intent_id)
+        if not isinstance(latest, Mapping):
+            break
+        current = dict(latest)
+    return current, str(current.get("status") or "") == STATUS_CANCELLED
+
+
+def _transition_record(
+    store: ResidentArchitectCycleStore,
+    record: Mapping[str, Any],
+    *,
+    expected_statuses: Sequence[str],
+    updates: Mapping[str, Any],
+    allow_terminal_retry: bool = False,
+) -> Optional[dict[str, Any]]:
+    transition = getattr(store, "transition_cycle", None)
+    if not callable(transition):
+        return None
+    result = transition(
+        str(record.get("intent_id") or ""),
+        expected_revision=int(record.get("record_revision", record.get("_store_revision", -1))),
+        expected_statuses=tuple(expected_statuses),
+        updates=dict(updates),
+        allow_terminal_retry=allow_terminal_retry,
+    )
+    if not isinstance(result, Mapping):
+        return None
+    value = result.get("record")
+    return dict(value) if result.get("ok") and isinstance(value, Mapping) else None
+
+
+def _checkpoint_record(
+    store: ResidentArchitectCycleStore,
+    record: Mapping[str, Any],
+) -> Optional[dict[str, Any]]:
+    latest = store.load_cycle_by_intent(str(record.get("intent_id") or ""))
+    if not isinstance(latest, Mapping):
+        return None
+    if latest.get("_store_integrity_valid") is not True:
+        return None
+    if int(latest.get("record_revision", -1)) != int(record.get("record_revision", -2)):
+        return dict(latest) if str(latest.get("status") or "") == STATUS_CANCELLED else None
+    return dict(latest)
+
+
+def _transition_conflict_result(
+    store: ResidentArchitectCycleStore,
+    intent_id: str,
+) -> RedDogResidentArchitectCycleResult:
+    latest = store.load_cycle_by_intent(intent_id)
+    record = dict(latest) if isinstance(latest, Mapping) else _new_record({"intent_id": intent_id}, retry_count=0)
+    if str(record.get("status") or "") == STATUS_CANCELLED:
+        reasons = (ResidentCycleReason.CANCELLED,)
+    else:
+        reasons = (ResidentCycleReason.TRANSITION_CONFLICT,)
+    return _result_from_record(record=record, accepted=False, rejection_reasons=reasons)
+
+
 def _reject(intent: Mapping[str, Any], reasons: Sequence[str]) -> RedDogResidentArchitectCycleResult:
     record = _new_record(intent if isinstance(intent, Mapping) else {}, retry_count=0)
     record.update(_failure_updates(STATUS_FAILED, reasons))
@@ -686,7 +1359,13 @@ def _result_from_record(
         duplicate_intent_reused=duplicate_intent_reused,
         recovered_existing_cycle=recovered_existing_cycle,
         retry_count=int(record.get("retry_count") or 0),
+        record_revision=int(record.get("record_revision") or 0),
+        intent_digest=str(record.get("intent_digest") or ""),
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason).strip())),
+        **{
+            field: record.get(field) is True
+            for field in RUNTIME_BOUNDARY_FIELDS
+        },
     )
 
 
@@ -714,6 +1393,7 @@ __all__ = [
     "REDDOG_RESIDENT_CYCLE_REJECT",
     "RedDogResidentArchitectCycleResult",
     "ResidentCycleReason",
+    "RUNTIME_BOUNDARY_FIELDS",
     "STATUS_CANCELLED",
     "STATUS_DETERMINED",
     "STATUS_ENQUEUED",
@@ -721,5 +1401,6 @@ __all__ = [
     "STATUS_RUNNING",
     "STATUS_SUBMITTED",
     "STATUS_TIMED_OUT",
+    "resident_intent_digest",
     "run_reddog_resident_architect_durable_agentdb_cycle",
 ]

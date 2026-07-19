@@ -1921,7 +1921,7 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         REDDOG_RESIDENT_ARCHITECT_FOUNDUP_ID               FoundUp scope, default foundups_agent
         REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS               Max OpenClaw claims, default 8
         REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS          Cycle timeout, default 60
-        REDDOG_RESIDENT_ARCHITECT_RETRY=0                  Retry failed/cancelled cycle
+        REDDOG_RESIDENT_ARCHITECT_RETRY=0                  Retry failed/timed-out cycle; cancelled is terminal
         REDDOG_RESIDENT_ARCHITECT_CANCEL=0                 Cancel running cycle
         REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF=1        Auto-arm safe FIX handoff after accepted FIX
         REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE        Optional downstream queue profile, default draft-PR
