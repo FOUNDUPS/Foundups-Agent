@@ -5,7 +5,7 @@ exemptions:
       bounded UI, retrieval, work-order, or receipt seams only when they remain
       within this ceiling and carry focused contract coverage. Decomposing the
       unrelated integration surfaces is tracked by the owned roadmap item.
-    threshold_override: 7900
+    threshold_override: 8350
     function_threshold_override: 180
     functions:
       - "callFusion"

@@ -1,10 +1,10 @@
 # RedDog
 
-Version: 0.4.7
+Version: 0.4.8
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
 
-Version 0.4.7 makes broad repository deep dives evidence-bearing: RedDog builds a bounded tracked-file manifest, removes active-editor module bias, derives source targets from generation-bound semantic hits plus path ranking, invokes the existing governed direct-reader, and blocks Fusion when no repository source context survives. Version 0.4.6 keeps quoted and fenced reference data out of actionable external-research targets and aligns editor target classes with the transport-neutral backend grounding service.
+Version 0.4.8 preserves governed repository direct reads when the generation-bound semantic owner is unavailable, stops generic repository wording from inventing an external-research obligation, and prioritizes the named subsystem over instruction words during manifest ranking. Explicit semantic and external-research targets remain fail-closed. Version 0.4.7 introduced the bounded repository deep-dive discovery gate.
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
@@ -228,6 +228,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.7.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.8.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

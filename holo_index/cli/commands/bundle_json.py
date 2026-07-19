@@ -109,6 +109,10 @@ def _direct_read_deny_reason(rel_norm: str) -> Optional[str]:
     # Absolute POSIX path or Windows drive-letter path -> reject.
     if rel_norm.startswith("/") or (len(rel_norm) >= 2 and rel_norm[1] == ":"):
         return "absolute_path"
+    # A colon anywhere else can address an NTFS alternate data stream on Windows
+    # (for example safe.py:payload). Repository evidence paths never need ADS.
+    if ":" in rel_norm:
+        return "alternate_data_stream"
     parts = rel_norm.lower().split("/")
     if any(p == ".." for p in parts):
         return "traversal"

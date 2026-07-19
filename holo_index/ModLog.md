@@ -1,5 +1,10 @@
 # HoloIndex Package ModLog
 
+## [2026-07-19] REDDOG_DEEP_DIVE_OWNER_FAILURE_DIRECT_READ_CONTINUITY_PHASE1
+
+- Hardened governed direct-read path validation against NTFS alternate data streams.
+- Added explicit UNC, extended-length device-path, and ADS rejection tests; no indexing or query behavior changed.
+
 ## [2026-07-19] HOLOINDEX_COMPLETE_SOURCE_INDEXING_AND_BATCHING_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 34, 50, 84, 87, 97

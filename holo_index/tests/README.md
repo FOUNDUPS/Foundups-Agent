@@ -19,6 +19,7 @@
 - HoloDAE orchestration emits structured reports without flooding alerts.
 - Video search health probe + metadata audit DB tests run without external deps.
 - Web asset indexing tests verify `public` HTML/JS discovery remains searchable.
+- RedDog direct-read tests reject traversal, symlink escapes, secret-like paths, UNC/device namespaces, and NTFS alternate data streams.
 
 ## Integration Requirements
 - Some integration tests require local model assets and may be skipped by default.
