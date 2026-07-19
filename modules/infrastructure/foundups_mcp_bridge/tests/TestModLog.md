@@ -1,5 +1,27 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-20] Receipt-v2 owner fixture integrity repair
+
+**WSP Protocol:** WSP 00, 22, 50, 62, 97
+
+**Observed:** The first owner runbook group produced 23 failures and 38 passes.
+The shared owner and HTTP fixtures still emitted the pre-v2 literal
+`generation-1`, only the seven query collections, and placeholder proof
+digests. Production correctly rejected those fixtures as
+`invalid_freshness_receipt_integrity` before reaching the semantic and timeout
+behaviors under test.
+
+**Change:** Kept production validation unchanged. The synthetic receipt helper
+now includes every v2 receipt collection, uses format-valid proof digests, and
+computes its generation with the production integrity algorithm after test
+repository/store identity normalization. The HTTP suite reuses that helper so
+the transport and core fixtures cannot drift independently.
+
+**Validation:** The exact first runbook group passes 61 tests. The adjacent
+embedding/generation and production freshness-receipt suites pass 39 tests.
+Changed Python test modules remain below the WSP 62 800-line warning threshold;
+no exemption is required.
+
 ## [2026-07-18] HoloIndex / RedDog Operational Truth Boundary POC
 
 **WSP Protocol:** WSP 05, 06, 15, 22, 50, 62, 87, 96, 97

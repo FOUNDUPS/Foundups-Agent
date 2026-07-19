@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,7 +10,12 @@ from typing import Any, Mapping
 
 import pytest
 
-from holo_index.freshness_receipt import SCHEMA_VERSION as FRESHNESS_SCHEMA_VERSION
+from holo_index.freshness_receipt import (
+    ALL_COLLECTIONS,
+    CollectionFreshness,
+    SCHEMA_VERSION as FRESHNESS_SCHEMA_VERSION,
+    _receipt_generation_id,
+)
 from holo_index.source_scope import canonical_source_scope_id
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     BASELINE_COLLECTIONS,
@@ -25,9 +31,36 @@ SHA = "a" * 40
 SPACE_FINGERPRINT = "sha256:" + ("1" * 64)
 
 
-def _receipt(*, sha: str = SHA, generation: str = "generation-1", omit: str = "") -> Mapping[str, Any]:
+def _test_digest(value: str) -> str:
+    return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _bind_receipt_generation(receipt: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Bind a synthetic receipt with the production v2 integrity algorithm."""
+    value = dict(receipt)
+    entries = [CollectionFreshness(**entry) for entry in value["collections"]]
+    value["generation_id"] = _receipt_generation_id(
+        str(value["repo_head_sha"]),
+        entries,
+        generated_at=str(value["generated_at"]),
+        base_generation_id=str(value["base_generation_id"]),
+        repo_root=str(value["repo_root"]),
+        ssd_path=str(value["ssd_path"]),
+        source=str(value["source"]),
+    )
+    return value
+
+
+def _receipt(
+    *,
+    sha: str = SHA,
+    generation: str = "generation-1",
+    omit: str = "",
+    repo_root: Path | str = "O:/Foundups-Agent",
+    ssd_path: Path | str = "E:/HoloIndex",
+) -> Mapping[str, Any]:
     collections = []
-    for name in sorted(BASELINE_COLLECTIONS):
+    for name in sorted(ALL_COLLECTIONS):
         if name == omit:
             continue
         collections.append(
@@ -38,28 +71,31 @@ def _receipt(*, sha: str = SHA, generation: str = "generation-1", omit: str = ""
                 "source": "test",
                 "repo_head_sha": sha,
                 "last_indexed_at": "2026-07-18T00:00:00+00:00",
-                "source_manifest_digest": f"sha256:manifest-{name}",
-                "indexed_paths_digest": f"sha256:paths-{name}",
-                "removed_paths_digest": "sha256:removed",
+                "source_manifest_digest": _test_digest(f"manifest:{name}"),
+                "indexed_paths_digest": _test_digest(f"paths:{name}"),
+                "removed_paths_digest": _test_digest(f"removed:{name}"),
                 "embedding_backend": "sentence_transformers",
                 "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
                 "embedding_space_fingerprint": SPACE_FINGERPRINT,
                 "verification": "PASS",
                 "proof_kind": "complete_source_manifest",
                 "source_scope_id": canonical_source_scope_id(name),
+                "source_policy_digest": _test_digest(f"policy:{name}"),
+                "collection_snapshot_digest": _test_digest(f"snapshot:{name}"),
             }
         )
-    return {
+    receipt = {
         "schema_version": FRESHNESS_SCHEMA_VERSION,
         "generated_at": "2026-07-18T00:00:00+00:00",
-        "repo_root": "O:/Foundups-Agent",
+        "repo_root": str(repo_root),
         "repo_head_sha": sha,
-        "ssd_path": "E:/HoloIndex",
-        "source": "test",
-        "generation_id": generation,
+        "ssd_path": str(ssd_path),
+        "source": f"test:{generation}" if generation else "test",
+        "generation_id": "",
         "base_generation_id": "",
         "collections": collections,
     }
+    return _bind_receipt_generation(receipt) if generation else receipt
 
 
 def _raw_result(*, mode: str = "semantic", error: str = "") -> Mapping[str, Any]:
@@ -139,7 +175,11 @@ def _service(
         normalized = dict(receipt)
         normalized["repo_root"] = str(tmp_path)
         normalized["ssd_path"] = str(tmp_path / "holo-store")
-        return normalized
+        return (
+            _bind_receipt_generation(normalized)
+            if normalized.get("generation_id")
+            else normalized
+        )
     kwargs.setdefault(
         "repository_state_reader",
         lambda _root: SimpleNamespace(
@@ -442,7 +482,10 @@ def test_stable_semantic_generation_preserves_complete_raw_wsp_and_knowledge(
         assert result["ok"] is True
         assert result["freshness"] == "CURRENT"
         assert result["retrieval_mode"] == "semantic"
-        assert result["freshness_generation_id"] == "generation-1"
+        assert result["freshness_generation_id"] == _receipt(
+            repo_root=tmp_path,
+            ssd_path=tmp_path / "holo-store",
+        )["generation_id"]
         assert result["repo_head_sha"] == SHA
         assert result["raw_result"] == raw
         assert result["raw_result"]["wsp_hits"] == raw["wsp_hits"]
