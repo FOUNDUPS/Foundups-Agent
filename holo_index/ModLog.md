@@ -53,6 +53,11 @@
   508.41 seconds. The immediate exact-content rerun reused the stable vectors
   and completed in 52.89 seconds (symbols: 28.68 seconds), within the resident
   maintenance budget.
+- OBSERVED: after the bounded-publish metadata update, targeted maintenance
+  completed in 80.39 seconds. The final exact-HEAD seven-collection baseline
+  completed in 186.88 seconds with all canonical proofs PASS; symbols reused
+  in 32.21 seconds and process working set stayed near 790 MiB during the
+  measured full run.
 - OBSERVED: fallback records are discoverability evidence only. They cannot
   support a symbol-level implementation claim.
 - SPECIFIED_NOT_IMPLEMENTED: routine post-merge incremental maintenance and a
