@@ -19,6 +19,10 @@
 - Added a final full collection snapshot recheck before atomic publication to
   close the proof-assembly/write race. Obsolete v1 receipts require a complete
   baseline migration and cannot authorize a partial refresh.
+- Live migration validation found a cached sibling collection handle can lag
+  the persisted Chroma state after another collection commits. Freshness proof
+  now reopens every collection through the persistent client when available;
+  one observed persisted-state mismatch still fails closed.
 - Corrected changed-path ownership for overlapping sources, including Python
   tests in the symbol collection, module Skillz in docs, and the canonical WSP
   test registry.
