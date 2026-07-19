@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-20 - REDDOG_RESIDENT_CYCLE_CAS_ATTESTATION_AND_INTENT_BINDING_PHASE1 (0.4.11)
+
+- Routed editor resident sessions through `RedDogResidentArchitectClient` instead of invoking the backend cycle directly.
+- Required host-authenticated principal and FoundUp scope, and bound both into the complete resident intent identity.
+- Added canonical genesis-state validation, revision-CAS transitions, terminal cancellation, monotonic retry history, and integrity-aware worker/model checkpoints.
+- Kept the nine no-effect fields explicitly process-local self-attestations; transition receipts remain internal-integrity telemetry, not signed authority.
+- Version 0.4.10 -> 0.4.11.
+
 ## 2026-07-20 - REDDOG_REPO_AUDIT_GROUNDING_FALLBACK_PHASE1 (0.4.10 unchanged)
 
 - Added entity-to-path repository/module audit grounding without replacing the generation-bound semantic owner, focused deep-dive selection, progress, usage, or signed Fusion panel behavior already present in 0.4.10.

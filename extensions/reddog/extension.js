@@ -15,7 +15,7 @@ const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.10';
+const EXTENSION_VERSION = '0.4.11';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3731,13 +3731,32 @@ function buildResidentArchitectSessionPayload(workFocus, options) {
   if (!groundedTargetContinuity.receiptReady(groundingReceipt)) {
     return { ok: false, rejection_reasons: ['grounded_target_receipt_not_ready'], payload: null };
   }
+  const authenticatedPrincipal = String(
+    opts.authenticatedPrincipal || process.env.REDDOG_AUTHENTICATED_PRINCIPAL_ID || ''
+  ).trim();
+  const authorizedFoundupIds = Array.isArray(opts.authorizedFoundupIds)
+    ? opts.authorizedFoundupIds.map((item) => String(item || '').trim()).filter(Boolean)
+    : String(process.env.REDDOG_AUTHORIZED_FOUNDUP_IDS || '').split(',').map((item) => item.trim()).filter(Boolean);
+  const foundupId = String(opts.foundupId || authorizedFoundupIds[0] || '').trim();
+  if (!authenticatedPrincipal || !foundupId || !authorizedFoundupIds.includes(foundupId)) {
+    return { ok: false, rejection_reasons: ['resident_architect_authenticated_scope_missing'], payload: null };
+  }
   const intentId = 'sha256:' + crypto.createHash('sha256')
-    .update([REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE, EXTENSION_VERSION, groundingReceipt.receipt_id].join('|'), 'utf8')
+    .update([
+      REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE,
+      EXTENSION_VERSION,
+      groundingReceipt.receipt_id,
+      authenticatedPrincipal,
+      foundupId
+    ].join('|'), 'utf8')
     .digest('hex');
   const redDogIntent = {
     schema_version: 'reddog_intent.v2',
     intent_id: intentId,
+    origin: 'extension',
     source_surface: 'editor_thin_client',
+    principal_ref: authenticatedPrincipal,
+    foundup_id: foundupId,
     extension_id: REDDOG_EXTENSION_ID,
     extension_version: EXTENSION_VERSION,
     work_focus: focus,

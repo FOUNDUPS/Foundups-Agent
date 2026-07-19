@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-20 - Resident cycle CAS and authenticated editor client (0.4.11)
+
+- Added canonical genesis, full-intent conflict, stale-revision, transition-state tamper, cancellation race, terminal retry, legacy cancel-only, and monotonic attempt-history regressions.
+- Proved the editor bridge fails without host principal/FoundUp scope and routes accepted requests through `RedDogResidentArchitectClient`.
+
 ## 2026-07-20 - REDDOG_REPO_AUDIT_GROUNDING_FALLBACK_PHASE1 (RAG-001..RAG-012)
 
 - Proved punctuation/case aliases resolve to one safe audit entity and select content-bearing implementation plus independent test/contract evidence outside the active-editor bias.

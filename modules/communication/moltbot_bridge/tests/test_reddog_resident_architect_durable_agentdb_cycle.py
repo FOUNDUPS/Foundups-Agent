@@ -25,13 +25,23 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
     RepoAuditModelResult,
 )
 import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
+import modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle as resident_cycle_runtime
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
+    AgentDbResidentArchitectCycleStore,
     REDDOG_RESIDENT_CYCLE_ACCEPT,
+    RUNTIME_BOUNDARY_FIELDS,
+    STATUS_CANCELLED,
     STATUS_DETERMINED,
+    STATUS_FAILED,
+    STATUS_RUNNING,
     STATUS_TIMED_OUT,
     NoopExternalResearchRetriever,
     ResidentCycleReason,
+    resident_intent_digest,
     run_reddog_resident_architect_durable_agentdb_cycle,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_architect_client import (
+    RedDogResidentArchitectClient,
 )
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
@@ -120,6 +130,8 @@ def _intent() -> dict[str, object]:
         "intent_id": "sha256:intent-resident-cycle",
         "origin": "extension",
         "principal_ref": "012",
+        "foundup_id": "foundups_agent",
+        "source_surface": "editor_thin_client",
         "work_focus": WORK_FOCUS,
         "grounding_receipt": _grounding_receipt(),
         "submits_executable_authority": False,
@@ -296,6 +308,73 @@ def _runtime_kwargs(**overrides):
     return kwargs
 
 
+def _stored_cycle_record(*, status: str, retry_count: int = 0) -> dict[str, object]:
+    record = resident_cycle_runtime._new_record(_intent(), retry_count=retry_count)
+    record["status"] = status
+    record["created_at"] = NOW
+    record["updated_at"] = NOW
+    record["genesis_state_digest"] = resident_cycle_runtime._genesis_state_digest(record)
+    return record
+
+
+def _seed_cycle_status(
+    store,
+    *,
+    status: str,
+    retry_count: int = 0,
+) -> dict[str, object]:
+    record = _stored_cycle_record(status="SUBMITTED", retry_count=0)
+    assert store.create_cycle(record)["ok"]
+    current = dict(store.load_cycle_by_intent(str(record["intent_id"])))
+    for attempt in range(retry_count + 1):
+        if status == "SUBMITTED" and attempt == retry_count:
+            return current
+        enqueued = store.transition_cycle(
+            str(record["intent_id"]),
+            expected_revision=int(current["record_revision"]),
+            expected_statuses=("SUBMITTED",),
+            updates={"status": "ENQUEUED"},
+        )
+        assert enqueued["ok"]
+        running = store.transition_cycle(
+            str(record["intent_id"]),
+            expected_revision=int(enqueued["record"]["record_revision"]),
+            expected_statuses=("ENQUEUED",),
+            updates={"status": STATUS_RUNNING},
+        )
+        assert running["ok"]
+        current = dict(running["record"])
+        if status == STATUS_RUNNING and attempt == retry_count:
+            return current
+        timed_out = store.transition_cycle(
+            str(record["intent_id"]),
+            expected_revision=int(current["record_revision"]),
+            expected_statuses=(STATUS_RUNNING,),
+            updates={"status": STATUS_TIMED_OUT},
+        )
+        assert timed_out["ok"]
+        current = dict(timed_out["record"])
+        if attempt == retry_count:
+            return current
+        retried = resident_cycle_runtime._new_record(_intent(), retry_count=attempt + 1)
+        retried["created_at"] = current["created_at"]
+        retried["genesis_state_digest"] = current["genesis_state_digest"]
+        retried["attempt_history"] = [
+            *list(current.get("attempt_history") or ()),
+            resident_cycle_runtime._attempt_history_entry(current),
+        ]
+        retry_result = store.transition_cycle(
+            str(record["intent_id"]),
+            expected_revision=int(current["record_revision"]),
+            expected_statuses=(STATUS_TIMED_OUT,),
+            updates=retried,
+            allow_terminal_retry=True,
+        )
+        assert retry_result["ok"]
+        current = dict(retry_result["record"])
+    raise AssertionError("unreachable cycle seed")
+
+
 def test_durable_cycle_submits_agentdb_tasks_openclaw_claims_reports_and_determines() -> None:
     result = run_reddog_resident_architect_durable_agentdb_cycle(**_runtime_kwargs())
 
@@ -399,6 +478,427 @@ def test_duplicate_intent_reconnects_to_persisted_cycle_without_new_claims() -> 
         claim["task_id"] for claim in first.openclaw_claims
     )
     assert AgentDB().get_autonomous_tasks(status="completed", limit=20)
+
+
+def test_real_agentdb_cycle_reconnects_through_fresh_canonical_client() -> None:
+    first = run_reddog_resident_architect_durable_agentdb_cycle(**_runtime_kwargs())
+    assert first.accepted is True
+
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="editor",
+    )
+    status = client.status(first.intent_id)
+
+    assert status.accepted is True
+    assert status.status == STATUS_DETERMINED
+    assert status.intent_id == first.intent_id
+
+
+def test_reconnect_rejects_sql_revision_json_mismatch() -> None:
+    first = run_reddog_resident_architect_durable_agentdb_cycle(**_runtime_kwargs())
+    assert first.accepted is True
+    db = AgentDB()
+    with db.db.get_connection() as conn:
+        conn.execute(
+            """
+            UPDATE reddog_resident_architect_cycles
+            SET revision = revision + 1
+            WHERE intent_id = ?
+            """,
+            (first.intent_id,),
+        )
+
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="editor",
+    )
+    status = client.status(first.intent_id)
+
+    assert status.accepted is False
+    assert "REJECT_REDDOG_RESIDENT_CLIENT_RUNTIME_FAILED" in status.rejection_reasons
+
+
+@pytest.mark.parametrize(
+    "changed",
+    (
+        {"principal_ref": "attacker-principal"},
+        {"client_request_id": "different-payload"},
+    ),
+)
+def test_same_intent_id_rejects_changed_principal_or_payload(changed) -> None:
+    first = run_reddog_resident_architect_durable_agentdb_cycle(**_runtime_kwargs())
+    assert first.accepted is True
+    conflicting = dict(_intent())
+    conflicting.update(changed)
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(red_dog_intent=conflicting)
+    )
+
+    assert result.accepted is False
+    assert ResidentCycleReason.INTENT_CONFLICT in result.rejection_reasons
+
+
+def test_cycle_store_rejects_stale_revision_transition() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    record = _seed_cycle_status(store, status=STATUS_RUNNING)
+
+    first = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_RUNNING,),
+        updates={"task_status_counts": {"completed": 1}},
+    )
+    stale = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_RUNNING,),
+        updates={"status": STATUS_DETERMINED},
+    )
+
+    assert first["ok"] is True
+    assert first["record"]["record_revision"] == int(record["record_revision"]) + 1
+    assert len(first["record"]["transition_history"]) == int(first["record"]["record_revision"])
+    assert first["record"]["transition_history"][-1]["authority"] == "observational_internal_integrity_only"
+    assert stale == {"ok": False, "reason": "revision_conflict"}
+
+
+def test_cycle_store_rejects_status_jump_and_immutable_intent_change() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    record = _seed_cycle_status(store, status=STATUS_RUNNING)
+
+    status_jump = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_RUNNING,),
+        updates={"status": "SUBMITTED"},
+    )
+    intent_change = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_RUNNING,),
+        updates={"intent_digest": "sha256:forged"},
+    )
+
+    assert status_jump == {"ok": False, "reason": "invalid_status_transition"}
+    assert intent_change == {"ok": False, "reason": "immutable_field:intent_digest"}
+
+
+def test_cycle_store_rejects_fabricated_terminal_revision_zero_record() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    forged = _stored_cycle_record(status=STATUS_DETERMINED, retry_count=41)
+
+    created = store.create_cycle(forged)
+
+    assert created["ok"] is False
+    assert created["reason"] == "invalid_cycle_record"
+    assert store.load_cycle_by_intent(str(forged["intent_id"])) is None
+
+
+def test_reconnect_rejects_fabricated_revision_zero_decision_fields() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    record = _stored_cycle_record(status="SUBMITTED")
+    assert store.create_cycle(record)["ok"]
+    db = AgentDB()
+    with db.db.get_connection() as conn:
+        row = conn.execute(
+            "SELECT cycle_json FROM reddog_resident_architect_cycles WHERE intent_id = ?",
+            (record["intent_id"],),
+        ).fetchone()
+        stored = json.loads(row["cycle_json"])
+        stored["architect_action"] = "FIX"
+        stored["queue_candidate_count"] = 1
+        conn.execute(
+            "UPDATE reddog_resident_architect_cycles SET cycle_json = ? WHERE intent_id = ?",
+            (json.dumps(stored, sort_keys=True, separators=(",", ":")), record["intent_id"]),
+        )
+
+    loaded = store.load_cycle_by_intent(str(record["intent_id"]))
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="editor",
+    )
+    status = client.status(str(record["intent_id"]))
+
+    assert loaded is not None and loaded["_store_integrity_valid"] is False
+    assert status.accepted is False
+    assert "REJECT_REDDOG_RESIDENT_CLIENT_RUNTIME_FAILED" in status.rejection_reasons
+
+
+def test_cycle_store_rejects_retrying_completed_determination() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    record = _seed_cycle_status(store, status=STATUS_RUNNING)
+    determined = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_RUNNING,),
+        updates={"status": STATUS_DETERMINED},
+    )
+    assert determined["ok"]
+
+    retry = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(determined["record"]["record_revision"]),
+        expected_statuses=(STATUS_DETERMINED,),
+        updates={"status": "SUBMITTED", "retry_count": 1, "attempt_history": []},
+        allow_terminal_retry=True,
+    )
+
+    assert retry == {"ok": False, "reason": "terminal_status"}
+
+
+def test_cancellation_during_claim_remains_terminal() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    cancel_results = []
+
+    def cancelling_claim_runner(**kwargs):
+        cancel_results.append(
+            run_reddog_resident_architect_durable_agentdb_cycle(
+                repo_root=REPO_ROOT,
+                red_dog_intent=_intent(),
+                cycle_store=store,
+                cancel_requested=True,
+            )
+        )
+        return {"accepted": True, "status": "OPENCLAW_READONLY_AUDIT_CLAIM_ACCEPT"}
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(cycle_store=store, openclaw_claim_runner=cancelling_claim_runner)
+    )
+    persisted = store.load_cycle_by_intent(str(_intent()["intent_id"]))
+
+    assert cancel_results and cancel_results[0].status == STATUS_CANCELLED
+    assert result.accepted is False
+    assert result.status == STATUS_CANCELLED
+    assert ResidentCycleReason.CANCELLED in result.rejection_reasons
+    assert persisted is not None and persisted["status"] == STATUS_CANCELLED
+
+
+class _CancellationConflictStore:
+    def __init__(self, *, failures: int) -> None:
+        self.inner = AgentDbResidentArchitectCycleStore()
+        self.failures = failures
+        self.cancel_attempts = 0
+
+    def __getattr__(self, name):
+        return getattr(self.inner, name)
+
+    def transition_cycle(self, intent_id, **kwargs):
+        if kwargs.get("updates", {}).get("status") == STATUS_CANCELLED:
+            self.cancel_attempts += 1
+            if self.cancel_attempts <= self.failures:
+                return {"ok": False, "reason": "revision_conflict"}
+        return self.inner.transition_cycle(intent_id, **kwargs)
+
+
+class _CheckpointIntegrityFailureStore:
+    def __init__(self) -> None:
+        self.inner = AgentDbResidentArchitectCycleStore()
+
+    def __getattr__(self, name):
+        return getattr(self.inner, name)
+
+    def load_cycle_by_intent(self, intent_id):
+        record = self.inner.load_cycle_by_intent(intent_id)
+        if isinstance(record, dict) and record.get("status") == STATUS_RUNNING:
+            return {**record, "_store_integrity_valid": False}
+        return record
+
+
+def test_integrity_invalid_checkpoint_blocks_worker_and_architect_model_calls() -> None:
+    store = _CheckpointIntegrityFailureStore()
+    claim_calls = []
+    architect = _ArchitectRunner()
+
+    def claim_runner(**kwargs):
+        claim_calls.append(kwargs)
+        return {"accepted": True, "status": "OPENCLAW_READONLY_AUDIT_CLAIM_ACCEPT"}
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(
+            cycle_store=store,
+            openclaw_claim_runner=claim_runner,
+            architect_model_runner=architect,
+        )
+    )
+
+    assert result.accepted is False
+    assert ResidentCycleReason.TRANSITION_CONFLICT in result.rejection_reasons
+    assert claim_calls == []
+    assert architect.calls == []
+
+
+def test_cancellation_retries_one_cas_conflict_and_proves_persisted_terminal_state() -> None:
+    store = _CancellationConflictStore(failures=1)
+    _seed_cycle_status(store, status=STATUS_RUNNING)
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(cycle_store=store, cancel_requested=True)
+    )
+    persisted = store.load_cycle_by_intent(result.intent_id)
+
+    assert store.cancel_attempts == 2
+    assert result.status == STATUS_CANCELLED
+    assert result.rejection_reasons == (ResidentCycleReason.CANCELLED,)
+    assert persisted is not None and persisted["status"] == STATUS_CANCELLED
+
+
+def test_cancellation_conflict_never_reports_cancelled_when_persisted_state_is_running() -> None:
+    store = _CancellationConflictStore(failures=10)
+    _seed_cycle_status(store, status=STATUS_RUNNING)
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(cycle_store=store, cancel_requested=True)
+    )
+    persisted = store.load_cycle_by_intent(result.intent_id)
+
+    assert store.cancel_attempts == 3
+    assert result.status == STATUS_RUNNING
+    assert result.rejection_reasons == (ResidentCycleReason.CANCELLATION_CONFLICT,)
+    assert persisted is not None and persisted["status"] == STATUS_RUNNING
+
+
+def test_legacy_active_cycle_is_cancel_only_and_cannot_resume() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    db = AgentDB()
+    store._ensure_table(db)
+    legacy = {
+        "schema_version": "reddog_resident_architect_cycle.v1",
+        "intent_id": _intent()["intent_id"],
+        "cycle_id": "sha256:legacy-cycle",
+        "status": STATUS_RUNNING,
+        "intent": _intent(),
+        "retry_count": 0,
+        "task_ids": [],
+        "created_at": NOW,
+        "updated_at": NOW,
+        "rejection_reasons": [],
+    }
+    with db.db.get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO reddog_resident_architect_cycles
+            (intent_id, cycle_id, status, snapshot_id, determination_id, revision, cycle_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                legacy["intent_id"],
+                legacy["cycle_id"],
+                legacy["status"],
+                None,
+                None,
+                0,
+                json.dumps(legacy, sort_keys=True, separators=(",", ":")),
+                NOW,
+            ),
+        )
+
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="editor",
+        cycle_store=store,
+    )
+    cancelled = client.cancel(str(legacy["intent_id"]))
+    cancelled_again = client.cancel(str(legacy["intent_id"]))
+    resumed = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(cycle_store=store)
+    )
+
+    assert cancelled.status == STATUS_CANCELLED
+    assert cancelled.rejection_reasons == (ResidentCycleReason.CANCELLED,)
+    assert cancelled.canonical_resident_cycle_used is False
+    assert cancelled_again.status == STATUS_CANCELLED
+    assert cancelled_again.rejection_reasons == (ResidentCycleReason.CANCELLED,)
+    assert cancelled_again.canonical_resident_cycle_used is False
+    assert resumed.accepted is False
+    assert ResidentCycleReason.INTENT_CONFLICT in resumed.rejection_reasons
+
+
+def test_store_rejects_retry_count_rollback_and_attempt_history_erasure() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    record = _seed_cycle_status(store, status=STATUS_TIMED_OUT, retry_count=7)
+
+    rolled_back = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_TIMED_OUT,),
+        updates={"status": "SUBMITTED", "retry_count": 0, "attempt_history": []},
+        allow_terminal_retry=True,
+    )
+    history_erased = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_TIMED_OUT,),
+        updates={"status": "SUBMITTED", "retry_count": 8, "attempt_history": []},
+        allow_terminal_retry=True,
+    )
+
+    assert rolled_back == {"ok": False, "reason": "retry_count_not_monotonic"}
+    assert history_erased == {"ok": False, "reason": "attempt_history_not_monotonic"}
+
+
+def test_reconnect_rejects_tampered_transition_state_digest() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    record = _seed_cycle_status(store, status=STATUS_RUNNING)
+    transitioned = store.transition_cycle(
+        str(record["intent_id"]),
+        expected_revision=int(record["record_revision"]),
+        expected_statuses=(STATUS_RUNNING,),
+        updates={"task_status_counts": {"completed": 1}},
+    )
+    assert transitioned["ok"]
+    db = AgentDB()
+    with db.db.get_connection() as conn:
+        row = conn.execute(
+            "SELECT cycle_json FROM reddog_resident_architect_cycles WHERE intent_id = ?",
+            (record["intent_id"],),
+        ).fetchone()
+        stored = json.loads(row["cycle_json"])
+        stored["task_status_counts"] = {"completed": 99}
+        conn.execute(
+            "UPDATE reddog_resident_architect_cycles SET cycle_json = ? WHERE intent_id = ?",
+            (json.dumps(stored, sort_keys=True, separators=(",", ":")), record["intent_id"]),
+        )
+
+    loaded = store.load_cycle_by_intent(str(record["intent_id"]))
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="editor",
+    )
+    status = client.status(str(record["intent_id"]))
+
+    assert loaded is not None and loaded["_store_integrity_valid"] is False
+    assert status.accepted is False
+    assert "REJECT_REDDOG_RESIDENT_CLIENT_RUNTIME_FAILED" in status.rejection_reasons
+
+
+def test_retry_count_is_monotonic_from_seven_to_eight() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    _seed_cycle_status(store, status=STATUS_TIMED_OUT, retry_count=7)
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(cycle_store=store, retry_requested=True, max_claims=0)
+    )
+
+    assert result.accepted is False
+    assert result.status == STATUS_TIMED_OUT
+    assert result.retry_count == 8
+    persisted = store.load_cycle_by_intent(result.intent_id)
+    assert persisted is not None
+    assert persisted["retry_count"] == 8
+    assert len(persisted["attempt_history"]) == 8
+    assert persisted["attempt_history"][-1]["retry_count"] == 7
 
 
 def test_missing_external_research_retriever_uses_noop_receipt_instead_of_blocking_cycle() -> None:

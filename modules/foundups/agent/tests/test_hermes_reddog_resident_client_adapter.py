@@ -12,6 +12,9 @@ from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_client import (
     RedDogResidentArchitectClient,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
+    resident_intent_digest,
+)
 from modules.foundups.agent.src.hermes_reddog_resident_client_adapter import (
     HERMES_REQUEST_SCHEMA,
     HERMES_TEXT_REQUEST_SCHEMA,
@@ -83,7 +86,10 @@ class _Store:
         self.records = {}
 
     def load_cycle_by_intent(self, intent_id):
-        return self.records.get(intent_id)
+        record = self.records.get(intent_id)
+        if record is None:
+            return None
+        return {**record, "_store_integrity_valid": True}
 
     def upsert_cycle(self, record):
         self.records[str(record["intent_id"])] = dict(record)
@@ -124,6 +130,7 @@ class _Runner:
             "task_status_counts": {"completed": 5},
             "rejection_reasons": [],
             "intent": intent,
+            "intent_digest": resident_intent_digest(intent),
             "read_only_authority_only": True,
             "no_shell_command_executed": True,
             "no_repo_mutation_performed": True,

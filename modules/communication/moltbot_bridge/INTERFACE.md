@@ -2,6 +2,16 @@
 
 ## Public API
 
+### Durable Resident Architect Cycle
+
+`run_reddog_resident_architect_durable_agentdb_cycle()` creates one intent-bound AgentDB cycle and advances it only through revision-checked status transitions. `AgentDbResidentArchitectCycleStore.create_cycle()` is insert-only; `transition_cycle()` requires the exact revision and allowed current status. Stored intent identity and nine process-local read-only self-attestations are immutable at this boundary. These fields are not external proof that effects did not occur. Cancellation checkpoints run between OpenClaw claims and before/following architect determination, so a stale caller cannot overwrite `CANCELLED`.
+
+`RedDogResidentArchitectClient` revalidates the authenticated principal, FoundUp scope, grounding receipt, full intent digest, and all nine persisted process-local self-attestations on reconnect. Hash-chained transition history is recomputed internal-integrity telemetry, not signer authority, external authentication, or independently observed effect evidence.
+
+The editor bridge requires host-supplied `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and `REDDOG_AUTHORIZED_FOUNDUP_IDS`, then invokes this canonical client. It cannot call the durable cycle directly.
+
+`CANCELLED` and `DETERMINED` are permanently terminal. Only `FAILED` and `TIMED_OUT` cycles may enter a revision-checked retry, and each retry appends one immutable prior-attempt summary. Legacy v1 rows are accepted only by the canonical cancellation path; they cannot reconnect, resume, or become authority-bearing v2 records.
+
 ### RedDog HoloIndex Query Adapter
 
     from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter import (

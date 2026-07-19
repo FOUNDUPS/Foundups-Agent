@@ -8,6 +8,8 @@ It is the IDE-side thin-client surface for the resident RedDog backend and the O
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode, not the product identity.
 
+Version 0.4.11 requires the editor host to provide `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and `REDDOG_AUTHORIZED_FOUNDUP_IDS`. The extension binds the selected principal and FoundUp into `reddog_intent.v2`; the Python bridge independently resolves the same host scope and submits through `RedDogResidentArchitectClient`. Missing or mismatched scope fails before the backend cycle. Resident records use canonical genesis state, full-intent binding, revision CAS, terminal cancellation, monotonic retries, and recomputed internal-integrity telemetry. These controls do not replace signed execution authority.
+
 Version 0.4.10 streams orchestrator-owned Fusion stage metadata to the webview and emits digest-bound progress and OpenRouter call receipts in Copy MD. Receipts include roles, requested/served models, provider routing, generation IDs, retries, timing, token counts, and cost in OpenRouter credits. Missing or retry-ambiguous provider accounting is reported as incomplete and cost remains unknown rather than zero. Receipts are integrity-checked, bound to the extension-generated process run, secret-filtered, and observational only; they are not authentication or action authority.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem

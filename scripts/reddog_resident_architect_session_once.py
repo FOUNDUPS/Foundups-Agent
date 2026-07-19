@@ -3,8 +3,9 @@
 Slice: REDDOG_EXTENSION_TO_RESIDENT_ARCHITECT_SESSION_RUNTIME_PHASE1
 
 The editor runtime may call this script only when the resident architect
-session is explicitly enabled. It delegates to the durable AgentDB resident
-cycle runtime and returns a bounded status packet. It does not perform source
+session is explicitly enabled. It delegates through the canonical
+host-authenticated resident client to the durable AgentDB cycle and returns a
+bounded status packet. It does not perform source
 mutation, shell work, worktree creation, PR creation, HoloIndex re-index,
 Hermes dispatch, live FoundUp enqueue, or direct inline task execution.
 """
@@ -21,8 +22,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (  # noqa: E402
-    run_reddog_resident_architect_durable_agentdb_cycle,
+from modules.communication.moltbot_bridge.src.reddog_resident_architect_client import (  # noqa: E402
+    RedDogResidentArchitectClient,
 )
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (  # noqa: E402
     validate_grounded_target_receipt,
@@ -128,8 +129,8 @@ def _sequence_of_mappings(value: Any) -> tuple[Mapping[str, Any], ...]:
 
 
 def _summarize_result(result: Any) -> Dict[str, Any]:
-    final = result.final_bootstrap
-    final_status = final.status if final else ""
+    task_ids = tuple(str(item) for item in result.task_ids if str(item))
+    completed = int(result.task_status_counts.get("completed", 0))
     return {
         "decision": RESIDENT_ARCHITECT_SESSION_ACCEPT if result.accepted else RESIDENT_ARCHITECT_SESSION_REJECT,
         "accepted": bool(result.accepted),
@@ -137,38 +138,38 @@ def _summarize_result(result: Any) -> Dict[str, Any]:
         "resident_backend_invoked": True,
         "red_dog_intent_submitted": True,
         "durable_agentdb_cycle": True,
+        "canonical_resident_client_used": bool(result.canonical_resident_cycle_used),
         "python_invocation_performed": True,
         "snapshot_id": _string(result.snapshot_id),
-        "final_snapshot_id": _string(getattr(final, "snapshot_receipt_id", "")) if final else "",
+        "final_snapshot_id": _string(result.snapshot_id),
         "swarm_id": _string(result.swarm_id),
         "cycle_id": _string(result.cycle_id),
         "intent_id": _string(result.intent_id),
         "initial_status": _string(result.status),
-        "final_status": final_status,
-        "task_count": len(result.task_ids),
+        "final_status": _string(result.status),
+        "task_count": len(task_ids),
         "task_status_counts": dict(result.task_status_counts),
-        "reports_persisted": int(result.task_status_counts.get("completed", 0)),
-        "readonly_audit_tasks_enqueued": bool(result.task_ids),
-        "readonly_audit_tasks_executed": (
-            int(result.task_status_counts.get("completed", 0)) == len(result.task_ids)
-            and bool(result.task_ids)
-        ),
-        "openclaw_claim_count": len(result.openclaw_claims),
+        "reports_persisted": completed,
+        "readonly_audit_tasks_enqueued": bool(task_ids),
+        "readonly_audit_tasks_executed": completed == len(task_ids) and bool(task_ids),
+        "openclaw_claim_count": int(result.openclaw_claim_count),
         "recovered_existing_cycle": bool(result.recovered_existing_cycle),
         "duplicate_intent_reused": bool(result.duplicate_intent_reused),
         "architect_action": _string(result.architect_action),
         "architect_next_slice": _string(result.architect_next_slice),
-        "architect_determination_id": _string(result.architect_determination_id),
+        "architect_determination_id": _string(result.determination_id),
         "queue_candidate_count": int(result.queue_candidate_count),
+        "record_revision": int(result.record_revision),
+        "intent_digest": _string(result.intent_digest),
         "rejection_reasons": list(result.rejection_reasons),
-        "no_shell_command_executed": bool(result.no_shell_command_executed),
-        "no_repo_mutation_performed": bool(result.no_repo_mutation_performed),
-        "no_holoindex_reindex_performed": bool(result.no_holoindex_reindex_performed),
-        "no_hermes_dispatch_performed": bool(result.no_hermes_dispatch_performed),
-        "no_worktree_operation_performed": bool(result.no_worktree_operation_performed),
-        "no_pr_created": bool(result.no_pr_created),
-        "no_pattern_memory_promotion_performed": bool(result.no_pattern_memory_promotion_performed),
-        "no_live_foundup_enqueue_performed": bool(result.no_live_foundup_enqueue_performed),
+        "no_shell_command_executed": bool(result.client_no_shell_command_executed),
+        "no_repo_mutation_performed": bool(result.client_no_repo_mutation_performed),
+        "no_holoindex_reindex_performed": bool(result.client_no_holoindex_reindex_performed),
+        "no_hermes_dispatch_performed": bool(result.client_no_hermes_execution_performed),
+        "no_worktree_operation_performed": bool(result.client_no_worktree_operation_performed),
+        "no_pr_created": bool(result.client_no_pr_created),
+        "no_pattern_memory_promotion_performed": True,
+        "no_live_foundup_enqueue_performed": True,
         "coding_worker_spawned": False,
     }
 
@@ -199,26 +200,41 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
 
     repo_root_text = payload.get("repo_root")
     repo_root = Path(str(repo_root_text)).resolve() if repo_root_text else REPO_ROOT
+    principal = str(os.getenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "")).strip()
+    authorized_foundups = tuple(
+        item.strip()
+        for item in str(os.getenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", "")).split(",")
+        if item.strip()
+    )
+    if not principal or not authorized_foundups:
+        return _reject("resident_architect_authenticated_scope_missing")
     try:
-        result = run_reddog_resident_architect_durable_agentdb_cycle(
+        client = RedDogResidentArchitectClient(
             repo_root=repo_root,
-            red_dog_intent=intent,
-            work_state_path=_string(
-                payload.get("work_state_path") or os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", "")
-            ),
-            holoindex_receipt_path=_string(
-                payload.get("holoindex_receipt_path") or os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", "")
-            ),
-            holoindex_ssd_path=_string(payload.get("holoindex_ssd_path") or os.getenv("HOLOINDEX_SSD_PATH", "")),
-            requested_operation="extension_resident_architect_session",
-            prompt_text=work_focus,
-            breadcrumbs=_sequence_of_mappings(payload.get("breadcrumbs")),
-            brain_state=_mapping(payload.get("brain_state")),
-            workspace_memory_notes=_sequence_of_mappings(payload.get("workspace_memory_notes")),
-            memex_snapshot_supply_config=_mapping(payload.get("memex_snapshot_supply")),
-            external_research_retriever=_external_retriever_from_env(),
-            timeout_seconds=_int(payload.get("timeout_seconds"), 60),
+            authenticated_principal_id=principal,
+            authorized_foundup_ids=authorized_foundups,
+            transport="editor",
+            runtime_defaults={
+                "work_state_path": _string(
+                    payload.get("work_state_path") or os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", "")
+                ),
+                "holoindex_receipt_path": _string(
+                    payload.get("holoindex_receipt_path") or os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", "")
+                ),
+                "holoindex_ssd_path": _string(
+                    payload.get("holoindex_ssd_path") or os.getenv("HOLOINDEX_SSD_PATH", "")
+                ),
+                "requested_operation": "extension_resident_architect_session",
+                "prompt_text": work_focus,
+                "breadcrumbs": _sequence_of_mappings(payload.get("breadcrumbs")),
+                "brain_state": _mapping(payload.get("brain_state")),
+                "workspace_memory_notes": _sequence_of_mappings(payload.get("workspace_memory_notes")),
+                "memex_snapshot_supply_config": _mapping(payload.get("memex_snapshot_supply")),
+                "external_research_retriever": _external_retriever_from_env(),
+                "timeout_seconds": _int(payload.get("timeout_seconds"), 60),
+            },
         )
+        result = client.submit(intent)
     except Exception as exc:
         output = _reject("resident_architect_session_bridge_failed", bridge_error_class=type(exc).__name__)
         output["resident_backend_invoked"] = True
