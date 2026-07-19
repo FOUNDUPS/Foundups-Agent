@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-20 - REDDOG_REPO_AUDIT_GROUNDING_FALLBACK_PHASE1 (RAG-001..RAG-012)
+
+- Proved punctuation/case aliases resolve to one safe audit entity and select content-bearing implementation plus independent test/contract evidence outside the active-editor bias.
+- Proved weak, missing, stale, or denied structured evidence activates bounded deterministic fallback; fixed private/tool-state roots are never entered, read, or selected.
+- Proved final 12-file/96KB packing, 4KB-per-file/512KB candidate scanning, secure path/identity failures, stable receipts, protected-context non-vacuity, local pre-provider blocking, primary Fusion packet preservation, defensive critic wording, and abstention truth.
+
 ## 2026-07-20 - Fusion progress and OpenRouter usage receipts (0.4.10)
 
 - Added receipt digest, hash-chain, tamper, usage, routing allowlist, failed-call, cap, and redaction-block regressions.

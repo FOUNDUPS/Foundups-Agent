@@ -48,6 +48,7 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 | Advisory model review | YES | OpenRouter request after Fusion redaction gate passes |
 | Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by WSP_15 tier and sends it through redaction gate |
 | HoloIndex recall | YES | Semantic evidence comes from the authenticated HoloIndex owner service and requires a current generation-bound query receipt. Legacy `--bundle-json` supplies bounded direct-read/context structure only; its unbound semantic hits are discarded. Explicit lexical opt-down remains diagnostic-only. |
+| Repository audit fallback | YES, READ-ONLY | Generation-bound semantic recall remains authoritative; structured Holo candidates must also survive secure direct read. Missing source or independent test/contract evidence triggers bounded deterministic discovery, never shell/model paths, writes, or execution authority. |
 | WSP_00/WSP_97/WSP_15 prompting | YES | System prompt requires role lock, truth labels, proposed fixes, and MPS priority |
 | Repo edits | NO | No write tool exposed to model |
 | Shell execution by model | NO | Extension host runs only bounded local context/bridge commands; model cannot execute Skillz/OpenClaw/Hermes |
@@ -56,6 +57,10 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 | CABR/payout/source authority | NO | Blocked by Fusion redaction gate and prompt contract |
 | pfMALL integration | SPECIFIED_NOT_IMPLEMENTED | Roadmap only |
 | FoundUps onboarding automation | SPECIFIED_NOT_IMPLEMENTED | Roadmap only; WSP_109 packet production is not implemented here |
+
+For a detected repository/module audit, the structured bundle returns `repo_audit_grounding.v1` with canonical entity/aliases, evidence references, deterministic candidates, selected path/digest/category records, exclusions, agreement, and coverage truth. Selected content reaches the model only through governed direct-read hits and protected target packing. Missing receipt, incomplete coverage, or post-pack source/test non-vacuity failure returns `codebase_audit_evidence_incomplete` before network access.
+
+Schema repair preserves the primary result and exact primary Fusion `review_packet`; repair provenance is a sibling `schema_repair_telemetry` object. A repair cannot mint or overwrite quorum evidence. Cybersecurity critic prompts are defensive-only, and empty/`None` panel outputs are abstentions.
 
 ## F0 Safety Boundary
 

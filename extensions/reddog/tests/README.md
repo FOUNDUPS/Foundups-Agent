@@ -12,6 +12,7 @@ From repo root:
 
 ```powershell
 node --check extensions/reddog/extension.js
+node extensions/reddog/tests/verify_repo_audit_grounding.js
 node extensions/reddog/tests/verify_extension_contract.js
 git diff --check -- extensions/reddog
 ```
@@ -20,6 +21,7 @@ HoloIndex bundle recall (separate module tests):
 
 ```powershell
 python -m pytest holo_index/tests/test_reddog_extension_bundle_recall.py -q
+python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/test_advisory_model_defensive_critic.py -q
 ```
 
 ## Fixtures
@@ -28,6 +30,7 @@ python -m pytest holo_index/tests/test_reddog_extension_bundle_recall.py -q
 | --- | --- |
 | `fixtures.js` | Shared prompts and path lists (EXT-ACC-001, denied paths) |
 | `verify_extension_contract.js` | Single contract runner; ADDENDUM E ~line 518+, ADDENDUM F gate probe ~line 595+ |
+| `verify_repo_audit_grounding.js` | Focused alias, receipt, protected-context non-vacuity, local block, repair-provenance, and defensive-prompt contracts |
 
 ## TEST_REGISTRY
 
@@ -40,6 +43,7 @@ See `TestModLog.md` for TCI-001 through TCI-010, THG-001 through THG-006, UNI-00
 - ADDENDUM F: sanitized snippets pass Python `evaluate_redaction_gate` (TCI-009/TCI-010).
 - THG-001..006: REGULAR HoloIndex grounding (see TestModLog registry).
 - Path safety rejects absolute, traversal, `.env`, `.git`, `node_modules`, `.vsix`.
+- Repository/module audits require content-bearing implementation source plus independent test/contract evidence in final model context; missing proof blocks locally before any network call.
 
 ## Integration requirements
 
