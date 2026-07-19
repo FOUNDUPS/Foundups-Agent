@@ -152,6 +152,28 @@ def test_configured_health_wrapper_uses_authenticated_loopback_probe(
     )
 
 
+def test_final_binding_probe_allows_bounded_semantic_canary_latency(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: list[float] = []
+
+    def probe(**kwargs) -> bool:
+        observed.append(float(kwargs["timeout_seconds"]))
+        return kwargs["timeout_seconds"] >= 1.1
+
+    monkeypatch.setattr(bootstrap, "_authenticated_health_probe", probe)
+
+    assert REAL_CONFIGURED_HEALTH(
+        service_url=SAFE_URL,
+        token=SAFE_TOKEN,
+        expected_repo_head_sha="a" * 40,
+        expected_generation_id="sha256:" + ("b" * 64),
+        expected_receipt_digest="sha256:" + ("c" * 64),
+    )
+    assert observed == [bootstrap.CONFIGURED_HEALTH_TIMEOUT_SECONDS]
+    assert 1.1 <= observed[0] <= 5.0
+
+
 @pytest.mark.parametrize(
     ("url", "token"),
     [
