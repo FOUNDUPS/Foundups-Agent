@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import os
+import tokenize
 from pathlib import Path
 from typing import Any, Optional
 
@@ -36,13 +38,14 @@ SKIP_DIRS = frozenset(
 )
 PreparedSymbolRecords = tuple[
     list[str],
-    list[list[float]],
     list[str],
     list[dict[str, Any]],
     int,
     int,
+    int,
     bool,
 ]
+DEFAULT_EMBED_BATCH_SIZE = 512
 
 
 def _roots(holo: Any, roots: Optional[list[Path]]) -> list[Path]:
@@ -115,6 +118,75 @@ def _symbol_record(
     return record_id, document, metadata
 
 
+def _unparsed_source_record(
+    *,
+    path: Path,
+    project_root: Path,
+    record_id: str,
+    error: Exception,
+) -> tuple[str, str, dict[str, Any]]:
+    """Account for a readable source without inventing symbols from it."""
+
+    try:
+        relative_path = path.relative_to(project_root).as_posix()
+    except ValueError:
+        relative_path = path.as_posix()
+    error_class = type(error).__name__
+    document = "\n".join(
+        (
+            "Unparsed Python source",
+            f"Path: {relative_path}",
+            f"Parse status: {error_class}",
+            "No verified symbols were extracted from this source.",
+        )
+    )
+    federation = resolve_foundup_metadata(path, project_root)
+    metadata = {
+        "symbol": "",
+        "path": str(path),
+        "line": 1,
+        "type": "unparsed_source",
+        "parse_status": error_class,
+        "source_path_digest": "sha256:"
+        + hashlib.sha256(relative_path.encode("utf-8")).hexdigest(),
+        "foundup_id": federation["foundup_id"],
+        "tenant_id": federation["tenant_id"],
+        "source_scope": federation["source_scope"],
+        "external_repo": federation["external_repo"],
+    }
+    return record_id, document, metadata
+
+
+def _embedding_batch_size() -> int:
+    raw = str(os.getenv("HOLO_SYMBOL_EMBED_BATCH_SIZE", "")).strip()
+    if not raw:
+        return DEFAULT_EMBED_BATCH_SIZE
+    try:
+        return max(1, min(int(raw), 5000))
+    except ValueError:
+        return DEFAULT_EMBED_BATCH_SIZE
+
+
+def _batch_embeddings(holo: Any, documents: list[str]) -> list[list[float]]:
+    """Encode one bounded batch, falling back for minimal/test backends."""
+
+    model = getattr(holo, "model", None)
+    encode = getattr(model, "encode", None)
+    if callable(encode):
+        try:
+            values = encode(
+                documents,
+                batch_size=_embedding_batch_size(),
+                show_progress_bar=False,
+            )
+            rows = values.tolist() if hasattr(values, "tolist") else list(values)
+            if len(rows) == len(documents):
+                return [row.tolist() if hasattr(row, "tolist") else list(row) for row in rows]
+        except (TypeError, ValueError, RuntimeError):
+            pass
+    return [holo._get_embedding(document) for document in documents]
+
+
 def _prepare_records(
     holo: Any,
     files: list[Path],
@@ -122,17 +194,42 @@ def _prepare_records(
     max_entries: int,
 ) -> PreparedSymbolRecords:
     ids: list[str] = []
-    embeddings: list[list[float]] = []
     documents: list[str] = []
     metadatas: list[dict[str, Any]] = []
     processed_files = 0
     failed_files = 0
+    fallback_files = 0
     for path in files:
         processed_files += 1
         try:
-            tree = ast.parse(path.read_text(encoding="utf-8", errors="strict"))
-        except (OSError, UnicodeError, SyntaxError):
+            with tokenize.open(path) as source:
+                source_text = source.read()
+            tree = ast.parse(source_text)
+        except OSError:
             failed_files += 1
+            continue
+        except (UnicodeError, SyntaxError) as exc:
+            if max_entries > 0 and len(ids) >= max_entries:
+                return (
+                    ids,
+                    documents,
+                    metadatas,
+                    max(0, processed_files - 1),
+                    failed_files,
+                    fallback_files,
+                    True,
+                )
+            record_id = f"sym_{len(ids) + 1}"
+            _, document, metadata = _unparsed_source_record(
+                path=path,
+                project_root=holo.project_root,
+                record_id=record_id,
+                error=exc,
+            )
+            ids.append(record_id)
+            documents.append(document)
+            metadatas.append(metadata)
+            fallback_files += 1
             continue
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -140,11 +237,11 @@ def _prepare_records(
             if max_entries > 0 and len(ids) >= max_entries:
                 return (
                     ids,
-                    embeddings,
                     documents,
                     metadatas,
                     max(0, processed_files - 1),
                     failed_files,
+                    fallback_files,
                     True,
                 )
             record_id = f"sym_{len(ids) + 1}"
@@ -155,25 +252,36 @@ def _prepare_records(
                 record_id=record_id,
             )
             ids.append(record_id)
-            embeddings.append(holo._get_embedding(document))
             documents.append(document)
             metadatas.append(metadata)
-    return ids, embeddings, documents, metadatas, processed_files, failed_files, False
+    return (
+        ids,
+        documents,
+        metadatas,
+        processed_files,
+        failed_files,
+        fallback_files,
+        False,
+    )
 
 
 def _add_batches(
+    holo: Any,
     collection: Any,
     ids: list[str],
-    embeddings: list[list[float]],
     documents: list[str],
     metadatas: list[dict[str, Any]],
 ) -> None:
     for start in range(0, len(ids), 5000):
         end = start + 5000
+        document_batch = documents[start:end]
+        embedding_batch = _batch_embeddings(holo, document_batch)
+        if len(embedding_batch) != len(document_batch):
+            raise ValueError("HOLOINDEX_SYMBOL_EMBEDDING_BATCH_MISMATCH")
         collection.add(
             ids=ids[start:end],
-            embeddings=embeddings[start:end],
-            documents=documents[start:end],
+            embeddings=embedding_batch,
+            documents=document_batch,
             metadatas=metadatas[start:end],
         )
 
@@ -245,6 +353,7 @@ def _symbol_index_warning(
     discovered_count: int,
     entry_truncated: bool,
     failed: int,
+    fallback: int,
     indexed_count: int,
 ) -> str:
     if selected_count != discovered_count:
@@ -253,6 +362,8 @@ def _symbol_index_warning(
         return "Symbol entry cap truncated the declared source set"
     if failed:
         return f"Symbol parser failed for {failed} source files"
+    if fallback:
+        return f"Indexed {fallback} unparseable source files without verified symbols"
     if not indexed_count:
         return "Symbol index empty - no entries added"
     return ""
@@ -281,15 +392,16 @@ def index_symbol_entries(
     holo._log_agent_action("Indexing symbol entries (functions/classes)...", "INDEX")
     holo.symbol_collection = holo._reset_collection(collection_name)
     records = _prepare_records(holo, selected_files, max_entries=max_entries)
-    ids, embeddings, documents, metadatas, processed, failed, entry_truncated = records
+    ids, documents, metadatas, processed, failed, fallback, entry_truncated = records
     if ids:
-        _add_batches(holo.symbol_collection, ids, embeddings, documents, metadatas)
+        _add_batches(holo, holo.symbol_collection, ids, documents, metadatas)
         holo._log_agent_action(f"Symbol index refreshed: {len(ids)} entries", "OK")
     warning = _symbol_index_warning(
         selected_count=len(selected_files),
         discovered_count=len(discovered_files),
         entry_truncated=entry_truncated,
         failed=failed,
+        fallback=fallback,
         indexed_count=len(ids),
     )
     return IndexResult(
@@ -299,6 +411,7 @@ def index_symbol_entries(
         warning=warning or None,
         processed_count=processed,
         failed_count=failed,
+        fallback_count=fallback,
         source_manifest_digest=manifest_digest,
         source_scope_id=scope_id,
     )

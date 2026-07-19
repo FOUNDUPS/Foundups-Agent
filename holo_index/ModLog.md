@@ -1,5 +1,45 @@
 # HoloIndex Package ModLog
 
+## [2026-07-19] HOLOINDEX_COMPLETE_SOURCE_INDEXING_AND_BATCHING_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 34, 50, 84, 87, 97
+**Phase**: Implementation and adversarial regression validation
+**Agent**: 0102 architect for 012
+
+**Changes**:
+
+- PRESERVE complete raw-content source manifests while accounting for readable
+  tracked Python files that cannot be parsed by the current interpreter as
+  typed `unparsed_source` records. These records expose a path, error class,
+  and path digest but never claim a verified function or class.
+- KEEP source I/O failures, collection caps, embedding-count mismatches, and
+  incomplete source sets fail-closed. `IndexResult.fallback_count` makes the
+  non-symbol records visible without treating them as parser failures.
+- LOAD Python sources through `tokenize.open()` so valid UTF-8 BOM and declared
+  source encodings are handled according to Python's own rules.
+- BATCH symbol embedding and collection writes in bounded chunks. This removes
+  the one-model-call-per-symbol behavior observed during the 42,071-record
+  canonical refresh while retaining the exact output-count proof.
+- NORMALIZE heterogeneous SKILLz `agents` lists to scalar strings. Integer WSP
+  and agent identifiers no longer abort an otherwise valid canonical Skillz
+  source set.
+- ADD hard regressions for invalid syntax, BOM input, mixed valid/unparsed
+  sources, 5,001-symbol batching, real read failure, and mixed scalar Skillz
+  agent identifiers.
+
+**Truth boundary**:
+
+- OBSERVED: the pre-fix full baseline required about nineteen minutes, then
+  rejected `navigation_symbols` (125 AST failures) and `navigation_skills`
+  (two heterogeneous-agent metadata failures).
+- OBSERVED: the post-fix canonical preparation pass accounted for all 3,385
+  tracked Python files as 42,484 records, including 88 typed fallbacks, with
+  zero source I/O failures and no cap truncation.
+- OBSERVED: fallback records are discoverability evidence only. They cannot
+  support a symbol-level implementation claim.
+- SPECIFIED_NOT_IMPLEMENTED: routine post-merge incremental maintenance and a
+  clean canonical shared runtime checkout remain separate operational gates.
+
 ## [2026-07-18] HOLOINDEX_REDDOG_OPERATIONAL_TRUTH_BOUNDARY_POC_PHASE1
 
 **WSP Protocol**: WSP 00, 05, 06, 15, 22, 34, 50, 62, 64, 84, 87, 96, 97
@@ -17,8 +57,9 @@
   IN_PROGRESS invalidation, and same-HEAD final PASS publication. Incomplete
   CLI plans and receipt failures exit nonzero and leave invalid proof in place.
 - BIND every baseline collection to a versioned canonical source_scope_id.
-  Canonical proof includes Git-tracked sources, full raw-content manifests,
-  and zero recorded source-read, cap, or Python-AST failures; scoped
+  Canonical proof includes Git-tracked sources and full raw-content manifests.
+  Source-read/cap failures remain fatal; later Phase 1 hardening accounts for
+  readable Python-AST failures with typed non-symbol records. Scoped
   diagnostics cannot publish CURRENT. No blanket all-parser claim is made.
 - REQUIRE semantic backend initialization before baseline collection reset.
 - BIND PASS receipts to each collection's backend, logical model, and
