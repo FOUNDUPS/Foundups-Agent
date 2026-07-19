@@ -56,6 +56,10 @@ class IndexResult:
         indexed_count: Number of documents actually inserted into Chroma
         collection_name: Name of the target Chroma collection
         warning: Optional warning message (e.g., zero discovered)
+        fallback_count: Sources represented by explicit non-authoritative
+            fallback records instead of silently omitted from the collection.
+        reused_count: Existing records whose exact document and embedding space
+            matched, so their embeddings were retained during reconciliation.
     """
     discovered_count: int
     indexed_count: int
@@ -63,6 +67,8 @@ class IndexResult:
     warning: Optional[str] = None
     processed_count: Optional[int] = None
     failed_count: int = 0
+    fallback_count: int = 0
+    reused_count: int = 0
     source_manifest_digest: str = ""
     source_scope_id: str = ""
 
@@ -1353,7 +1359,11 @@ def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
             metadata: Dict[str, Any] = {
                 "skill_name": name,
                 "description": description[:500],
-                "agents": ','.join(agents) if isinstance(agents, list) else str(agents),
+                "agents": (
+                    ','.join(str(agent) for agent in agents)
+                    if isinstance(agents, list)
+                    else str(agents)
+                ),
                 "primary_agent": primary_agent,
                 "intent_type": intent_type,
                 "promotion_state": promotion_state,
