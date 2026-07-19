@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-19 - REDDOG_REPO_DEEP_DIVE_FOCUS_BOUND_TARGET_SELECTION_PHASE1
+
+- Proved a complete p.fMALL corpus activates focus-core selection and an unrelated semantic runtime hit is excluded.
+- Proved a cross-cutting semantic dependency receives a bounded slot only when its evidence text names p.fMALL.
+- Proved explicit focus phrases outrank leading prose and focus matching is token-bound (`mall` does not match `small`; `api` does not match `rapid`).
+- Proved incomplete focus corpora preserve broad discovery and off-pool targets fail the repository evidence gate.
+- Proved a character-truncated `git ls-files` manifest remains explicitly incomplete after target filtering.
+- Proved the Run Trace exposes anchor provenance, match mode, pool strategy, candidate count, cross-cutting targets, and fallback reason.
+
 ## 2026-07-19 - REDDOG_DEEP_DIVE_OWNER_FAILURE_DIRECT_READ_CONTINUITY_PHASE1
 
 - Reproduced the exact 0.4.7 p.fMALL host prompt with an unavailable semantic owner.

@@ -170,7 +170,7 @@ Copy:
 
 The model cannot access the filesystem. It receives only the bounded context packet.
 
-Extension v0.4.8 keeps repository direct-read grounding available when the generation-bound semantic owner fails, while continuing to withhold unbound semantic claims. Broad repository audits no longer interpret the generic word `repository` as an external-research request, and deterministic manifest ranking prioritizes the named subsystem over WSP/instruction words. Explicit semantic or external-research targets remain independently fail-closed. Extension v0.4.7 introduced the bounded repository deep-dive discovery gate.
+Extension v0.4.9 makes a complete named-subsystem evidence corpus authoritative for the core of a focused repository deep dive. At most two off-anchor generation-bound semantic dependencies may enter when their evidence text names the focus; unrelated hits are excluded. Focus strategy, cross-cutting paths, and manifest completeness are explicit in the Run Trace. Extension v0.4.8 keeps repository direct-read grounding available when the semantic owner fails while withholding unbound semantic claims.
 
 If HoloIndex recall reports zero WSP hits, missing Tier-0 docs, stale/offline fallback, or unavailable output, the answer must treat protocol claims as `NEEDS_VERIFICATION` and propose retrieval/index repair before strong claims.
 
