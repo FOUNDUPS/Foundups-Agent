@@ -7,7 +7,7 @@ const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 
-const EXTENSION_VERSION = '0.4.6';
+const EXTENSION_VERSION = '0.4.7';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1730,7 +1730,10 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   const scorecard = (contextPacket && contextPacket.holoindex_scorecard)
     || extractHoloIndexScorecard(contextMode, contextPacket && contextPacket.holoindex_meta);
   const rejectionReasons = [];
-  const repoFiles = typedTargets.repo_file_targets;
+  const discoveredRepoFiles = scorecard && Array.isArray(scorecard.repo_deep_dive_targets)
+    ? scorecard.repo_deep_dive_targets
+    : [];
+  const repoFiles = uniqueStrings(typedTargets.repo_file_targets.concat(discoveredRepoFiles));
   const semantic = typedTargets.semantic_targets;
   const external = typedTargets.external_research_targets;
   const quoted = typedTargets.quoted_reference_blocks;
@@ -1747,6 +1750,13 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     }
     if (scorecard && Array.isArray(scorecard.required_targets_missing) && scorecard.required_targets_missing.length) {
       rejectionReasons.push('repo_file_targets_missing');
+    }
+  }
+
+  if (isRepoDeepDiveRequest(taskText) && (!scorecard || scorecard.repo_deep_dive_gate_passed !== true)) {
+    rejectionReasons.push('repo_deep_dive_evidence_incomplete');
+    if (scorecard && Array.isArray(scorecard.repo_deep_dive_gate_rejection_reasons)) {
+      rejectionReasons.push.apply(rejectionReasons, scorecard.repo_deep_dive_gate_rejection_reasons);
     }
   }
 
@@ -2032,6 +2042,14 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     wsp_hits: meta.wsp_hits !== undefined ? meta.wsp_hits : 'unknown',
     code_hits: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
     skill_hits: meta.skill_hits !== undefined ? meta.skill_hits : 'unknown',
+    repo_deep_dive_requested: meta.repo_deep_dive_requested !== undefined ? meta.repo_deep_dive_requested : false,
+    repo_manifest_generated: meta.repo_manifest_generated !== undefined ? meta.repo_manifest_generated : false,
+    repo_manifest_file_count: meta.repo_manifest_file_count !== undefined ? meta.repo_manifest_file_count : 0,
+    repo_deep_dive_targets: Array.isArray(meta.repo_deep_dive_targets) ? meta.repo_deep_dive_targets : [],
+    repo_deep_dive_targets_count: meta.repo_deep_dive_targets_count !== undefined ? meta.repo_deep_dive_targets_count : 0,
+    repo_deep_dive_gate_applied: meta.repo_deep_dive_gate_applied !== undefined ? meta.repo_deep_dive_gate_applied : false,
+    repo_deep_dive_gate_passed: meta.repo_deep_dive_gate_passed !== undefined ? meta.repo_deep_dive_gate_passed : true,
+    repo_deep_dive_gate_rejection_reasons: Array.isArray(meta.repo_deep_dive_gate_rejection_reasons) ? meta.repo_deep_dive_gate_rejection_reasons : [],
     target_recall_ok: meta.target_recall_ok !== undefined ? meta.target_recall_ok : 'unknown',
     index_gap_detected: meta.index_gap_detected !== undefined ? meta.index_gap_detected : 'unknown',
     required_targets_total: meta.required_targets_total !== undefined ? meta.required_targets_total : 'unknown',
@@ -2126,6 +2144,14 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- code_hits_count: ' + scorecard.code_hits_count,
     '- wsp_hits: ' + scorecard.wsp_hits,
     '- skill_hits: ' + scorecard.skill_hits,
+    '- repo_deep_dive_requested: ' + scorecard.repo_deep_dive_requested,
+    '- repo_manifest_generated: ' + scorecard.repo_manifest_generated,
+    '- repo_manifest_file_count: ' + scorecard.repo_manifest_file_count,
+    '- repo_deep_dive_targets_count: ' + scorecard.repo_deep_dive_targets_count,
+    '- repo_deep_dive_targets: ' + (Array.isArray(scorecard.repo_deep_dive_targets) && scorecard.repo_deep_dive_targets.length ? scorecard.repo_deep_dive_targets.join(', ') : '(none)'),
+    '- repo_deep_dive_gate_applied: ' + scorecard.repo_deep_dive_gate_applied,
+    '- repo_deep_dive_gate_passed: ' + scorecard.repo_deep_dive_gate_passed,
+    '- repo_deep_dive_gate_rejection_reasons: ' + (Array.isArray(scorecard.repo_deep_dive_gate_rejection_reasons) && scorecard.repo_deep_dive_gate_rejection_reasons.length ? scorecard.repo_deep_dive_gate_rejection_reasons.join(', ') : '(none)'),
     '- target_recall_ok: ' + scorecard.target_recall_ok,
     '- index_gap_detected: ' + scorecard.index_gap_detected,
     '- required_targets_total: ' + scorecard.required_targets_total,
@@ -6354,10 +6380,13 @@ function buildBoundedRepoContext(mode, taskText) {
   // work-focus-derived paths. Using the merged collector (not the header-only parser) ensures a
   // derived target that was direct-read is also packed into the protected block and proven present.
   const typedTargetsForContext = extractTypedTargets(taskText);
-  const requiredTargets = typedTargetsForContext.repo_file_targets;
+  let requiredTargets = typedTargetsForContext.repo_file_targets.slice();
   let directReadSection = null;
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
+    if (Array.isArray(holo.repo_deep_dive_targets) && holo.repo_deep_dive_targets.length) {
+      requiredTargets = uniqueStrings(requiredTargets.concat(holo.repo_deep_dive_targets));
+    }
     quality = holo.quality;
     holoindex_meta = holo.meta || null;
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
@@ -6539,6 +6568,213 @@ function repoFileIndex(root, maxFiles) {
     }
   }
   return files;
+}
+
+const REPO_DEEP_DIVE_MAX_MANIFEST_FILES = 20000;
+const REPO_DEEP_DIVE_MAX_TARGETS = 12;
+const REPO_DEEP_DIVE_TEXT_EXTENSIONS = new Set([
+  '.c', '.cc', '.cpp', '.css', '.go', '.h', '.hpp', '.html', '.java', '.js', '.json',
+  '.jsx', '.md', '.mjs', '.py', '.rs', '.sh', '.sql', '.toml', '.ts', '.tsx', '.txt',
+  '.yaml', '.yml'
+]);
+const REPO_DEEP_DIVE_STOP_WORDS = new Set([
+  'analyze', 'architecture', 'audit', 'codebase', 'complete', 'deep', 'dive', 'entire',
+  'foundups', 'foundupsagent', 'full', 'into', 'repository', 'repo', 'system', 'the', 'trace'
+]);
+
+function isRepoDeepDiveRequest(taskText) {
+  const text = String(taskText || '').toLowerCase();
+  const repositoryIntent = /\b(?:repo(?:sitory)?|codebase|foundups[\s_-]?agent)\b/.test(text);
+  const inspectionIntent = /\b(?:deep\s+dive|full\s+audit|complete\s+audit|architecture\s+audit|map\s+the\s+repo|inspect\s+the\s+repo|trace\s+end[\s_-]?to[\s_-]?end)\b/.test(text);
+  return repositoryIntent && inspectionIntent;
+}
+
+function repoDeepDiveConcepts(taskText) {
+  const normalized = String(taskText || '').toLowerCase().replace(/[^a-z0-9_]+/g, ' ');
+  const seen = new Set();
+  const out = [];
+  for (const token of normalized.split(/\s+/)) {
+    if (token.length < 3 || REPO_DEEP_DIVE_STOP_WORDS.has(token) || seen.has(token)) {
+      continue;
+    }
+    seen.add(token);
+    out.push(token);
+    if (out.length >= 24) {
+      break;
+    }
+  }
+
+  return out;
+}
+
+function isRepoDeepDiveTextPath(relPath) {
+  const rel = String(relPath || '').replace(/\\/g, '/');
+  if (!rel || isSelfFileLocation(rel) || isTargetReadPathDenied(rel)) {
+    return false;
+  }
+  if (/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|__pycache__|\.venv)(?:\/|$)/i.test(rel)) {
+    return false;
+  }
+  return REPO_DEEP_DIVE_TEXT_EXTENSIONS.has(path.posix.extname(rel).toLowerCase());
+}
+
+function isRepoDeepDiveReadableFile(root, relPath) {
+  const resolved = resolveSafeRepoFile(root, relPath);
+  if (!resolved.ok) {
+    return false;
+  }
+  try {
+    const stat = fs.statSync(resolved.full);
+    return stat.isFile() && stat.size > 0 && stat.size <= TARGET_SNIPPET_MAX_FILE_BYTES;
+  } catch (err) {
+    return false;
+  }
+}
+
+function repoPathFromEvidenceRef(raw) {
+  let ref = String(raw || '').trim().replace(/\\/g, '/');
+  if (!ref || /^(?:https?:|sha256:)/i.test(ref)) {
+    return '';
+  }
+  ref = ref.replace(/[#:]L?\d+(?:[-:]\d+)?$/i, '');
+  return normalizeTargetPath(ref);
+}
+
+function repoDeepDiveSemanticPaths(bundleOutput) {
+  let data;
+  try {
+    data = JSON.parse(String(bundleOutput || '{}'));
+  } catch (err) {
+    return [];
+  }
+  return uniqueStrings(semanticEvidenceHitsFromBundleData(data)
+    .map((hit) => repoPathFromEvidenceRef(hit && hit.evidence_ref))
+    .filter(Boolean));
+}
+
+function scoreRepoDeepDivePath(relPath, concepts, semanticSet) {
+  const rel = String(relPath || '').replace(/\\/g, '/');
+  const lower = rel.toLowerCase();
+  const searchable = lower.replace(/[^a-z0-9_]+/g, ' ');
+  let score = semanticSet.has(lower) ? 100 : 0;
+  for (const concept of concepts) {
+    if (lower.includes(concept)) {
+      score += 14;
+    } else if (searchable.includes(concept)) {
+      score += 8;
+    }
+  }
+  if (/(?:^|\/)(?:readme|interface|spec|roadmap|modlog)\.md$/i.test(rel)) {
+    score += 4;
+  }
+  if (/(?:^|\/)(?:tests?|test_[^/]+)(?:\/|\.|$)/i.test(rel)) {
+    score += 3;
+  }
+  if (/\.(?:py|js|mjs|ts|tsx|rs|go|java)$/i.test(rel)) {
+    score += 2;
+  }
+  if (/^(?:main\.py|holo_index\.py|README\.md)$/i.test(rel)) {
+    score += 1;
+  }
+  return score;
+}
+
+function discoverRepoDeepDiveTargets(root, taskText, bundleOutput, maxTargets) {
+  const manifest = repoFileIndex(root, REPO_DEEP_DIVE_MAX_MANIFEST_FILES)
+    .map((file) => String(file || '').replace(/\\/g, '/'))
+    .filter(isRepoDeepDiveTextPath);
+  const manifestSet = new Set(manifest.map((file) => file.toLowerCase()));
+  const semanticPaths = repoDeepDiveSemanticPaths(bundleOutput)
+    .filter((file) => manifestSet.has(file.toLowerCase()));
+  const semanticSet = new Set(semanticPaths.map((file) => file.toLowerCase()));
+  const concepts = repoDeepDiveConcepts(taskText);
+  const ranked = manifest
+    .map((file) => ({ file, score: scoreRepoDeepDivePath(file, concepts, semanticSet) }))
+    .filter((item) => item.score > 0)
+    .filter((item) => isRepoDeepDiveReadableFile(root, item.file))
+    .sort((a, b) => b.score - a.score || a.file.localeCompare(b.file));
+  const limit = Math.max(1, Math.min(Number(maxTargets) || REPO_DEEP_DIVE_MAX_TARGETS, REPO_DEEP_DIVE_MAX_TARGETS));
+  const selected = [];
+  const selectedSet = new Set();
+  const addFirst = (predicate) => {
+    const found = ranked.find((item) => predicate(item.file) && !selectedSet.has(item.file.toLowerCase()));
+    if (found && selected.length < limit) {
+      selected.push(found.file);
+      selectedSet.add(found.file.toLowerCase());
+    }
+  };
+  // Every deep-dive evidence packet starts with at least one implementation,
+  // test, and contract/document surface when the manifest contains them.
+  addFirst((file) => /\.(?:py|js|mjs|ts|tsx|rs|go|java)$/i.test(file) && !/(?:^|\/)(?:tests?|test_[^/]+)(?:\/|\.|$)/i.test(file));
+  addFirst((file) => /(?:^|\/)(?:tests?|test_[^/]+)(?:\/|\.|$)/i.test(file));
+  addFirst((file) => /\.(?:md|txt)$/i.test(file));
+  for (const item of ranked) {
+    if (selected.length >= limit) {
+      break;
+    }
+    const key = item.file.toLowerCase();
+    if (!selectedSet.has(key)) {
+      selected.push(item.file);
+      selectedSet.add(key);
+    }
+  }
+  return {
+    requested: isRepoDeepDiveRequest(taskText),
+    manifest_generated: true,
+    manifest_file_count: manifest.length,
+    concepts,
+    semantic_paths: semanticPaths,
+    targets: selected
+  };
+}
+
+function taskTextWithDiscoveredRepoTargets(taskText, targets) {
+  const paths = Array.isArray(targets) ? targets.filter(Boolean) : [];
+  if (!paths.length) {
+    return String(taskText || '');
+  }
+  return String(taskText || '') + '\n\nRequired direct-read targets (RedDog repository discovery):\n'
+    + paths.map((target) => '- ' + target).join('\n');
+}
+
+function applyRepoDeepDiveDiscoveryMeta(meta, discovery) {
+  const target = meta && typeof meta === 'object' ? meta : {};
+  const d = discovery && typeof discovery === 'object' ? discovery : {};
+  target.repo_deep_dive_requested = d.requested === true;
+  target.repo_manifest_generated = d.manifest_generated === true;
+  target.repo_manifest_file_count = Number(d.manifest_file_count || 0);
+  target.repo_deep_dive_concepts = Array.isArray(d.concepts) ? d.concepts.slice() : [];
+  target.repo_deep_dive_semantic_paths = Array.isArray(d.semantic_paths) ? d.semantic_paths.slice() : [];
+  target.repo_deep_dive_targets = Array.isArray(d.targets) ? d.targets.slice() : [];
+  target.repo_deep_dive_targets_count = target.repo_deep_dive_targets.length;
+  return target;
+}
+
+function evaluateRepoDeepDiveGate(meta, directReadSection) {
+  const m = meta && typeof meta === 'object' ? meta : {};
+  if (m.repo_deep_dive_requested !== true) {
+    return { applied: false, passed: true, rejection_reasons: [] };
+  }
+  const reasons = [];
+  if (m.repo_manifest_generated !== true || Number(m.repo_manifest_file_count || 0) <= 0) {
+    reasons.push('repository_manifest_missing');
+  }
+  if (!Array.isArray(m.repo_deep_dive_targets) || m.repo_deep_dive_targets.length === 0) {
+    reasons.push('no_repository_targets');
+  }
+  if (m.direct_read_fetch_attempted !== true) {
+    reasons.push('direct_read_not_attempted');
+  }
+  if (Number(m.direct_read_bytes || 0) <= 0) {
+    reasons.push('no_direct_read_content');
+  }
+  if (m.target_recall_ok !== true) {
+    reasons.push('repository_target_recall_incomplete');
+  }
+  if (!directReadSection || Number(directReadSection.chars || 0) <= 0) {
+    reasons.push('repository_source_context_missing');
+  }
+  return { applied: true, passed: reasons.length === 0, rejection_reasons: reasons };
 }
 
 function walkRepoFiles(root, relDir, files, maxFiles) {
@@ -6925,7 +7161,10 @@ function relativePath(root, filePath) {
   return path.basename(filePath);
 }
 
-function moduleHintFromActive(root) {
+function moduleHintFromActive(root, taskText) {
+  if (isRepoDeepDiveRequest(taskText)) {
+    return '';
+  }
   const editor = vscode.window.activeTextEditor || (vscode.window.visibleTextEditors && vscode.window.visibleTextEditors[0]);
   if (!editor || !editor.document || !editor.document.uri || editor.document.uri.scheme !== 'file') {
     return 'extensions/reddog';
@@ -7064,7 +7303,8 @@ function holoIndexOutput(root, taskText, maxChars) {
   const typedTargets = extractTypedTargets(taskText);
   const queryPlan = semanticGroundingPolicy.buildEffectiveHoloQuery(taskText, typedTargets.semantic_targets);
   const query = queryPlan.effective_query;
-  const moduleHint = moduleHintFromActive(root);
+  const moduleHint = moduleHintFromActive(root, taskText);
+  const repoDeepDiveRequested = isRepoDeepDiveRequest(taskText);
   const requestedMode = resolveHoloRetrievalMode(process.env);
   // The owner is the sole semantic authority. The legacy bundle contributes
   // structured memory and governed direct reads, so keep it lexical and avoid
@@ -7095,7 +7335,22 @@ function holoIndexOutput(root, taskText, maxChars) {
     if (requestedMode === 'semantic') {
       output = mergeGenerationBoundHoloResult(output, ownerResult);
     }
-    let meta = holoIndexMetaFromBundle(output, false, taskText);
+    let evidenceTaskText = taskText;
+    let repoDeepDiveDiscovery = repoDeepDiveRequested
+      ? discoverRepoDeepDiveTargets(root, taskText, output, REPO_DEEP_DIVE_MAX_TARGETS)
+      : {
+          requested: false,
+          manifest_generated: false,
+          manifest_file_count: 0,
+          concepts: [],
+          semantic_paths: [],
+          targets: []
+        };
+    if (repoDeepDiveDiscovery.targets.length) {
+      evidenceTaskText = taskTextWithDiscoveredRepoTargets(taskText, repoDeepDiveDiscovery.targets);
+    }
+    let meta = holoIndexMetaFromBundle(output, false, evidenceTaskText);
+    applyRepoDeepDiveDiscoveryMeta(meta, repoDeepDiveDiscovery);
     meta.requested_retrieval_mode = requestedMode;
     if (requestedMode === 'semantic' && meta.retrieval_mode !== 'semantic') {
       const semanticError = new Error('HoloIndex semantic retrieval unavailable');
@@ -7143,7 +7398,8 @@ function holoIndexOutput(root, taskText, maxChars) {
             enriched = mergeGenerationBoundHoloResult(enriched, ownerResult);
           }
           output = enriched;
-          meta = holoIndexMetaFromBundle(enriched, false, taskText);
+          meta = holoIndexMetaFromBundle(enriched, false, evidenceTaskText);
+          applyRepoDeepDiveDiscoveryMeta(meta, repoDeepDiveDiscovery);
           meta.requested_retrieval_mode = requestedMode;
           if (requestedMode === 'semantic' && meta.retrieval_mode !== 'semantic') {
             const semanticError = new Error('HoloIndex semantic retrieval unavailable after enriched fetch');
@@ -7167,6 +7423,10 @@ function holoIndexOutput(root, taskText, maxChars) {
     }
     Object.assign(meta, queryPlan);
     const directReadSection = buildDirectReadContentSection(output);
+    const repoDeepDiveGate = evaluateRepoDeepDiveGate(meta, directReadSection);
+    meta.repo_deep_dive_gate_applied = repoDeepDiveGate.applied;
+    meta.repo_deep_dive_gate_passed = repoDeepDiveGate.passed;
+    meta.repo_deep_dive_gate_rejection_reasons = repoDeepDiveGate.rejection_reasons.slice();
     const generationQuality = requestedMode !== 'semantic'
       ? summarizeHoloBundle(output) + '; lexical diagnostic mode does not carry generation authority.'
       : isGenerationBoundHoloQueryAccepted(ownerResult)
@@ -7178,7 +7438,8 @@ function holoIndexOutput(root, taskText, maxChars) {
       output: String(output || '').slice(0, maxChars),
       quality: generationQuality,
       meta: meta,
-      direct_read_section: directReadSection
+      direct_read_section: directReadSection,
+      repo_deep_dive_targets: repoDeepDiveDiscovery.targets.slice()
     };
   } catch (bundleErr) {
     try {
@@ -7195,7 +7456,25 @@ function holoIndexOutput(root, taskText, maxChars) {
         output = mergeGenerationBoundHoloResult(output, ownerResult);
       }
       const ownerAccepted = isGenerationBoundHoloQueryAccepted(ownerResult);
-      const meta = holoIndexMetaFromBundle(output, !ownerAccepted, taskText);
+      const fallbackDiscovery = repoDeepDiveRequested
+        ? discoverRepoDeepDiveTargets(root, taskText, output, REPO_DEEP_DIVE_MAX_TARGETS)
+        : {
+            requested: false,
+            manifest_generated: false,
+            manifest_file_count: 0,
+            concepts: [],
+            semantic_paths: [],
+            targets: []
+          };
+      const fallbackEvidenceTaskText = fallbackDiscovery.targets.length
+        ? taskTextWithDiscoveredRepoTargets(taskText, fallbackDiscovery.targets)
+        : taskText;
+      const meta = holoIndexMetaFromBundle(output, !ownerAccepted, fallbackEvidenceTaskText);
+      applyRepoDeepDiveDiscoveryMeta(meta, fallbackDiscovery);
+      const fallbackGate = evaluateRepoDeepDiveGate(meta, null);
+      meta.repo_deep_dive_gate_applied = fallbackGate.applied;
+      meta.repo_deep_dive_gate_passed = fallbackGate.passed;
+      meta.repo_deep_dive_gate_rejection_reasons = fallbackGate.rejection_reasons.slice();
       meta.requested_retrieval_mode = requestedMode;
       if (requestedMode === 'semantic' && !ownerAccepted) {
         holoGenerationBoundQuery.applyRejectedOwnerMeta(meta, ownerResult);
@@ -7206,13 +7485,32 @@ function holoIndexOutput(root, taskText, maxChars) {
         quality: ownerAccepted
           ? 'Structured bundle assembly fell back, but semantic evidence remains generation-bound to the HoloIndex owner receipt.'
           : 'HoloIndex bundle-json failed and no generation-bound semantic owner result was accepted. Treat protocol coverage as NEEDS_VERIFICATION and route the index gap to WRE/CI maintenance.',
-        meta: meta
+        meta: meta,
+        repo_deep_dive_targets: fallbackDiscovery.targets.slice()
       };
     } catch (offlineErr) {
       return {
         output: '[HoloIndex unavailable: ' + (offlineErr && offlineErr.message ? offlineErr.message.slice(0, 180) : 'unknown') + ']',
         quality: 'HoloIndex unavailable. Use supplied editor/git evidence only; propose HoloIndex recovery as a fix when retrieval affects the decision.',
-        meta: Object.assign(holoIndexMetaFromBundle('', false, taskText), queryPlan)
+        meta: Object.assign(
+          applyRepoDeepDiveDiscoveryMeta(holoIndexMetaFromBundle('', false, taskText), {
+            requested: repoDeepDiveRequested,
+            manifest_generated: false,
+            manifest_file_count: 0,
+            concepts: repoDeepDiveConcepts(taskText),
+            semantic_paths: [],
+            targets: []
+          }),
+          queryPlan,
+          {
+            repo_deep_dive_gate_applied: repoDeepDiveRequested,
+            repo_deep_dive_gate_passed: !repoDeepDiveRequested,
+            repo_deep_dive_gate_rejection_reasons: repoDeepDiveRequested
+              ? ['repository_manifest_missing', 'no_repository_targets', 'direct_read_not_attempted', 'no_direct_read_content', 'repository_target_recall_incomplete', 'repository_source_context_missing']
+              : []
+          }
+        ),
+        repo_deep_dive_targets: []
       };
     }
   }
@@ -7783,6 +8081,12 @@ module.exports = {
   modeSelectionReasoning,
   skillzWardrobeRolodexContext,
   buildBoundedRepoContext,
+  isRepoDeepDiveRequest,
+  repoDeepDiveConcepts,
+  discoverRepoDeepDiveTargets,
+  taskTextWithDiscoveredRepoTargets,
+  evaluateRepoDeepDiveGate,
+  moduleHintFromActive,
   buildRequiredTargetProtectedSection,
   assembleFinalBoundedContext,
   computeRequiredTargetContextProof,

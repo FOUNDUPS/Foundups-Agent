@@ -207,8 +207,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.6', 'package version must be 0.4.6');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.6'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.7', 'package version must be 0.4.7');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.7'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -228,7 +228,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.6', 'README version mismatch');
+includes(readme, 'Version: 0.4.7', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -568,6 +568,100 @@ try {
   cp.execFileSync = hsfOriginalExecFileSync;
   process.env.REDDOG_HOLO_RETRIEVAL_MODE = hsfOriginalMode;
 }
+
+// REDDOG_REPO_DEEP_DIVE_DISCOVERY_PHASE1 (RDD-001..008): broad repository
+// audits must derive real source targets and cannot pass on semantic prose alone.
+const rddPrompt = 'Complete deep dive into the FoundUps-Agent repository, focusing on p.fMALL runtime architecture.';
+assert.strictEqual(orchestrator.isRepoDeepDiveRequest(rddPrompt), true, 'RDD-001: broad repository deep dive detected');
+assert.strictEqual(orchestrator.isRepoDeepDiveRequest('Explain this function.'), false, 'RDD-001: ordinary question is not a repository deep dive');
+assert.strictEqual(orchestrator.moduleHintFromActive(root, rddPrompt), '', 'RDD-002: repo-wide audit ignores active-editor module bias');
+const rddConcepts = orchestrator.repoDeepDiveConcepts(rddPrompt);
+assert(rddConcepts.includes('fmall'), 'RDD-003: dotted product name contributes a searchable concept');
+const rddBundle = JSON.stringify({
+  task_retrieval: {
+    code_hits: [
+      { location: 'modules/foundups/pfmall/http_api.py:1', content: 'p.fMALL HTTP API runtime' },
+      { location: 'modules/foundups/pfmall/tests/test_http_api.py:1', content: 'p.fMALL HTTP API tests' },
+      { location: 'modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md:1', content: 'p.fMALL route contract' }
+    ],
+    metadata: { retrieval_mode: 'semantic', code_count: 3, wsp_count: 1 }
+  }
+});
+const rddDiscovery = orchestrator.discoverRepoDeepDiveTargets(root, rddPrompt, rddBundle, 12);
+assert.strictEqual(rddDiscovery.manifest_generated, true, 'RDD-003: manifest generated');
+assert(rddDiscovery.manifest_file_count > 0, 'RDD-003: manifest is non-empty');
+assert(rddDiscovery.targets.length > 0 && rddDiscovery.targets.length <= 12, 'RDD-003: bounded non-empty targets');
+assert(rddDiscovery.targets.some((p) => /modules\/foundups\/pfmall\/[^/]+\.py$/i.test(p)), 'RDD-004: implementation target selected');
+assert(rddDiscovery.targets.some((p) => /(?:^|\/)tests?(?:\/|_)/i.test(p)), 'RDD-004: test target selected');
+assert(rddDiscovery.targets.some((p) => /\.md$/i.test(p)), 'RDD-004: contract/document target selected');
+assert(!rddDiscovery.targets.some((p) => /extensions\/reddog\/extension\.js$/i.test(p)), 'RDD-004: RedDog self-file cannot satisfy discovery');
+const rddAugmented = orchestrator.taskTextWithDiscoveredRepoTargets(rddPrompt, rddDiscovery.targets);
+const rddCollected = orchestrator.collectRequiredTargets(rddAugmented);
+assert.strictEqual(rddCollected.targets.length, rddDiscovery.targets.length, 'RDD-005: discovered paths enter the existing required-target contract');
+const rddBlockedGate = orchestrator.evaluateRepoDeepDiveGate({
+  repo_deep_dive_requested: true,
+  repo_manifest_generated: true,
+  repo_manifest_file_count: rddDiscovery.manifest_file_count,
+  repo_deep_dive_targets: [],
+  direct_read_fetch_attempted: false,
+  direct_read_bytes: 0,
+  target_recall_ok: 'unknown'
+}, null);
+assert.strictEqual(rddBlockedGate.passed, false, 'RDD-006: zero-evidence deep dive fails closed');
+assert(rddBlockedGate.rejection_reasons.includes('no_repository_targets'), 'RDD-006: zero-target reason surfaced');
+assert(rddBlockedGate.rejection_reasons.includes('direct_read_not_attempted'), 'RDD-006: no-read reason surfaced');
+const rddPassedGate = orchestrator.evaluateRepoDeepDiveGate({
+  repo_deep_dive_requested: true,
+  repo_manifest_generated: true,
+  repo_manifest_file_count: rddDiscovery.manifest_file_count,
+  repo_deep_dive_targets: rddDiscovery.targets,
+  direct_read_fetch_attempted: true,
+  direct_read_bytes: 1234,
+  target_recall_ok: true
+}, { chars: 1234 });
+assert.strictEqual(rddPassedGate.passed, true, 'RDD-007: source-bearing deep dive passes');
+const rddBlockedPreflight = orchestrator.buildTypedGroundingPreflight(rddPrompt, 'wsp_holo', {
+  holoindex_scorecard: {
+    repo_deep_dive_requested: true,
+    repo_deep_dive_gate_passed: false,
+    repo_deep_dive_gate_rejection_reasons: ['no_repository_targets'],
+    repo_deep_dive_targets: [],
+    target_recall_ok: 'unknown',
+    required_targets_missing: [],
+    semantic_evidence_hits: []
+  }
+});
+assert.strictEqual(rddBlockedPreflight.passed, false, 'RDD-007: failed deep-dive gate blocks grounding');
+assert(rddBlockedPreflight.rejection_reasons.includes('repo_deep_dive_evidence_incomplete'), 'RDD-007: preflight surfaces deep-dive failure');
+assert.strictEqual(rddBlockedPreflight.no_model_call_when_failed, true, 'RDD-007: failed deep dive cannot call Fusion');
+const rddScorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', {
+  repo_deep_dive_requested: true,
+  repo_manifest_generated: true,
+  repo_manifest_file_count: rddDiscovery.manifest_file_count,
+  repo_deep_dive_targets: rddDiscovery.targets,
+  repo_deep_dive_targets_count: rddDiscovery.targets.length,
+  repo_deep_dive_gate_applied: true,
+  repo_deep_dive_gate_passed: true,
+  repo_deep_dive_gate_rejection_reasons: []
+});
+const rddLines = orchestrator.formatHoloIndexScorecardLines(rddScorecard).join('\n');
+includes(rddLines, '- repo_deep_dive_gate_passed: true', 'RDD-008: Run Trace exposes acceptance gate');
+includes(rddLines, '- repo_deep_dive_targets_count: ' + rddDiscovery.targets.length, 'RDD-008: Run Trace exposes target count');
+
+(function rdd009RealBundleRegression() {
+  const result = orchestrator.holoIndexOutput(root, rddPrompt, 18000);
+  const meta = result && result.meta ? result.meta : {};
+  assert.strictEqual(meta.repo_deep_dive_requested, true, 'RDD-009: runtime marks the deep-dive request');
+  assert.strictEqual(meta.repo_manifest_generated, true, 'RDD-009: runtime creates the tracked-file manifest');
+  assert(meta.repo_manifest_file_count > 0, 'RDD-009: runtime manifest is non-empty');
+  assert(meta.repo_deep_dive_targets_count > 0, 'RDD-009: runtime derives source targets');
+  assert.strictEqual(meta.direct_read_fetch_attempted, true, 'RDD-009: runtime invokes governed direct read');
+  assert(meta.direct_read_bytes > 0, 'RDD-009: runtime reads nonzero source bytes');
+  assert.strictEqual(meta.target_recall_ok, true, 'RDD-009: every discovered source target is recalled; missing='
+    + JSON.stringify(meta.required_targets_missing) + '; rejected=' + JSON.stringify(meta.direct_read_rejected));
+  assert.strictEqual(meta.repo_deep_dive_gate_passed, true, 'RDD-009: source-bearing runtime deep dive passes');
+  assert(result.direct_read_section && result.direct_read_section.chars > 0, 'RDD-009: source context reaches the bounded packet');
+})();
 
 // REDDOG_HOLOINDEX_GENERATION_BOUND_QUERY_RUNTIME_PHASE1 (HGBQ-001..010): only the
 // authenticated owner response may supply semantic hit authority. The legacy direct
@@ -1325,7 +1419,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.6', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.7', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2817,7 +2911,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.6'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.7'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2831,7 +2925,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.6'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.7'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2843,7 +2937,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.6'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.7'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -3862,7 +3956,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.6' } }
+      ? { id, packageJSON: { version: '0.4.7' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
