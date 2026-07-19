@@ -11,6 +11,24 @@
 - Required canonical revision-zero genesis state and routed the editor session bridge through `RedDogResidentArchitectClient` with host principal and FoundUp scope.
 - Added production AgentDB reconnect, stale-writer, cancellation-race, immutable-field, and `7 -> 8` retry regressions without adding execution authority.
 
+## 2026-07-20: REDDOG_TRANSPORT_NEUTRAL_REPO_AUDIT_FALLBACK_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 84, 97
+
+- Reused the reviewed bounded repository-audit discovery reader after an
+  owner-first HoloIndex attempt cannot ground an entity-scoped audit.
+- Bound safe implementation plus independent test/contract reads to a stable
+  repository HEAD and nested the proof in the canonical grounding receipt.
+- Rejected incomplete coverage, repository-state races, private/tool/generated
+  roots, traversal, link/reparse escapes, and receipt substitution before any
+  model, shell, repository mutation, or HoloIndex re-index path.
+- Added p.fMALL alias coverage and preserved CURRENT sufficient HoloIndex
+  evidence as the preferred path with no fallback scan.
+- The post-edit non-mutating HoloIndex probe ran in offline lexical mode and did
+  not surface the new transport fallback. Recorded
+  `HOLOINDEX_REDDOG_TRANSPORT_REPO_AUDIT_FALLBACK_INDEX_GAP_PHASE1`; no runtime
+  re-index was performed.
+
 ## 2026-07-20: REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97

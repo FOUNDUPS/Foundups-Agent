@@ -85,6 +85,17 @@ audit-enqueue, and configured auto-task consumers. The legacy
 foundups_mcp_bridge `holo_tools.py` path remains a direct-store consumer and is
 not covered by an all-consumers migration claim.
 
+For an entity-scoped repository/module audit, an unavailable, stale, or
+insufficient owner result may enter the deterministic repository-audit fallback.
+HoloIndex is always queried first. The fallback securely re-reads candidate
+files under fixed path, file-count, and byte budgets; prunes private tool state,
+generated/vendor roots, secrets, traversal, and links/reparse points; and accepts
+only implementation source plus an independent test or contract. Its immutable
+receipt binds the selected content digests to a stable local Git HEAD. Failure
+to establish either evidence class or stable repository state rejects before a
+model call. The fallback grants no indexing, shell, mutation, or execution
+authority.
+
 ## Setup
 
 > ⚠️ **Important**: See [docs/INSTALL_OPENCLAW.md](docs/INSTALL_OPENCLAW.md) for full guide

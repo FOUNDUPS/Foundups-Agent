@@ -85,6 +85,10 @@ These remain deferred until the FoundUp Memex POC and MVP contracts are proven.
 - Migrate or explicitly retire the legacy foundups_mcp_bridge `holo_tools.py`
   direct-store consumer; Phase 1 covers only the wired RedDog operational
   consumers.
+- Decompose `ground_transport_work_focus` into request validation, target
+  classification, owner preflight, and receipt composition after the bounded
+  repository-audit fallback stabilizes; the temporary WSP_62 exemption records
+  this integration debt without expanding the runtime's authority.
 
 These items are an explicit WSP_62 remediation register; no global compliance
 claim is made while historical monolith debt remains.

@@ -512,6 +512,16 @@ Resident RedDog live-canary contract:
 - `READY_FOR_EXECUTION` does not claim that a live canary ran. Missing authority artifacts, signer socket, Git/GitHub readiness, or OpenRouter key presence returns `BLOCKED` without exposing values.
 - The surface has no signer launch, secret resolution, PR-ready, merge, reward, or HoloIndex re-index authority.
 
+Transport-neutral grounding additionally supports a fail-closed repository
+audit fallback for entity-scoped audits (including `pfmall`, `p.fMALL`,
+`p-fmall`, and `PFMALL`). The owner query runs first. Only when that evidence is
+unavailable, stale, or insufficient does the service use the shared bounded
+repository discovery reader. Acceptance requires a stable repository HEAD,
+one implementation-source read, and one independent test/contract read. The
+resulting `reddog_repo_audit_fallback.v1` is nested in and digest-bound by the
+canonical `reddog_grounded_target_receipt.v1`; selected paths replace the
+unresolved semantic target for downstream direct-read audit execution.
+
 ### OpenClaw Supervisor Contract
 
 Canonical 0102 lifecycle owner:

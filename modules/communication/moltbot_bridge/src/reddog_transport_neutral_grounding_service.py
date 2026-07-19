@@ -6,8 +6,9 @@ The service converts host-authenticated work focus into the same immutable
 ``reddog_intent.v2`` consumed by the canonical AgentDB resident cycle. It is a
 read-only evidence router: repository targets are containment-checked and
 semantic targets require a current generation-bound HoloIndex owner response.
-Quoted blocks remain data, external research fails closed until an approved
-retriever is supplied, and no model, shell, indexing, or execution path exists.
+Entity-scoped audits may use bounded local source plus test/contract reads only
+after owner evidence fails. Quoted blocks remain data, external research fails
+closed, and no model, shell, indexing, or execution path exists.
 """
 
 from __future__ import annotations
@@ -31,6 +32,10 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter imp
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
     _resolve_safe_target,
+)
+from modules.communication.moltbot_bridge.src.reddog_repo_audit_fallback_grounding import (
+    RepoAuditFallbackReason,
+    build_bound_repo_audit_fallback,
 )
 
 
@@ -94,6 +99,8 @@ class GroundingServiceReason:
     HOLOINDEX_FAILED = "grounding_holoindex_owner_query_failed"
     HOLOINDEX_STALE = "grounding_holoindex_generation_not_current"
     SEMANTIC_EVIDENCE = "grounding_semantic_evidence_insufficient"
+    REPO_AUDIT_EVIDENCE = "grounding_repo_audit_evidence_incomplete"
+    REPO_STATE = "grounding_repo_state_unavailable_or_changed"
     EXTERNAL_RESEARCH = "grounding_external_research_adapter_required"
     RECEIPT_INVALID = "grounding_receipt_self_validation_failed"
 
@@ -194,6 +201,7 @@ def ground_transport_work_focus(
 
     semantic_coverage: list[Mapping[str, Any]] = []
     owner_results: list[Mapping[str, Any]] = []
+    repo_audit_fallback: Mapping[str, Any] = {}
     if semantic_targets:
         query = owner_query or _owner_query(
             repo_root=root,
@@ -222,6 +230,39 @@ def ground_transport_work_focus(
         if not _consistent_owner_bindings(owner_results):
             reasons.append(GroundingServiceReason.HOLOINDEX_STALE)
 
+    owner_failure_reasons = {
+        GroundingServiceReason.HOLOINDEX_FAILED,
+        GroundingServiceReason.HOLOINDEX_STALE,
+        GroundingServiceReason.SEMANTIC_EVIDENCE,
+    }
+    if (
+        len(semantic_targets) == 1
+        and not repo_targets
+        and any(reason in owner_failure_reasons for reason in reasons)
+    ):
+        fallback = build_bound_repo_audit_fallback(
+            repo_root=root,
+            work_focus=focus,
+            owner_results=owner_results,
+        )
+        if fallback.applied:
+            repo_audit_fallback = fallback.receipt
+            if fallback.accepted:
+                typed = {
+                    **typed,
+                    "repo_file_targets": list(fallback.repo_file_targets),
+                    "semantic_targets": [],
+                }
+                repo_targets = list(fallback.repo_file_targets)
+                direct_paths = list(fallback.repo_file_targets)
+                semantic_coverage = []
+                reasons = [reason for reason in reasons if reason not in owner_failure_reasons]
+            else:
+                if RepoAuditFallbackReason.REPO_STATE in fallback.rejection_reasons:
+                    reasons.append(GroundingServiceReason.REPO_STATE)
+                if RepoAuditFallbackReason.EVIDENCE in fallback.rejection_reasons:
+                    reasons.append(GroundingServiceReason.REPO_AUDIT_EVIDENCE)
+
     if external_targets:
         reasons.append(GroundingServiceReason.EXTERNAL_RESEARCH)
 
@@ -236,6 +277,7 @@ def ground_transport_work_focus(
         missing_paths=missing_paths,
         substantive=substantive,
         rejection_reasons=reasons,
+        repo_audit_fallback=repo_audit_fallback,
     )
     if reasons:
         return _reject(reasons, typed=typed, receipt=receipt)
@@ -435,6 +477,7 @@ def _build_grounding_receipt(
     missing_paths: Sequence[str],
     substantive: bool,
     rejection_reasons: Sequence[str],
+    repo_audit_fallback: Mapping[str, Any],
 ) -> Mapping[str, Any]:
     owner = owner_results[0] if owner_results else {}
     repo_targets = list(typed.get("repo_file_targets") or ())
@@ -461,6 +504,10 @@ def _build_grounding_receipt(
         "target_recall_ok": (not missing_paths) if repo_targets else None,
         "required_targets_missing": list(missing_paths),
         "direct_read_paths": list(direct_paths),
+        "repo_audit_fallback_used": bool(repo_audit_fallback),
+        "repo_audit_fallback": dict(repo_audit_fallback),
+        "repo_audit_fallback_digest": canonical_digest(repo_audit_fallback) if repo_audit_fallback else "",
+        "repo_state_head_sha": str(repo_audit_fallback.get("repo_head_sha") or ""),
         "holoindex_owner_query_ok": bool(owner_results) and all(item.get("ok") is True for item in owner_results),
         "holoindex_freshness": str(owner.get("freshness") or "UNKNOWN"),
         "holoindex_generation_id": str(owner.get("freshness_generation_id") or ""),
