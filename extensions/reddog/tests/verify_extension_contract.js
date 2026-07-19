@@ -14,6 +14,8 @@ const fixtures = require('./fixtures');
 const root = path.resolve(__dirname, '..', '..', '..');
 const extDir = path.join(root, 'extensions', 'reddog');
 const extensionJs = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8');
+const fusionProgressJs = fs.readFileSync(path.join(extDir, 'fusion_progress_receipt.js'), 'utf8');
+const fusionProgress = require(path.join(extDir, 'fusion_progress_receipt.js'));
 const holoGenerationBoundQueryJs = fs.readFileSync(path.join(extDir, 'holoindex_generation_bound_query.js'), 'utf8');
 const holoGenerationBoundQuery = require(path.join(extDir, 'holoindex_generation_bound_query.js'));
 const groundedTargetContinuity = require(path.join(extDir, 'grounded_target_continuity.js'));
@@ -208,8 +210,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.9', 'package version must be 0.4.9');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.9'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.10', 'package version must be 0.4.10');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.10'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -222,14 +224,88 @@ includes(iface, 'Fusion is one internal reasoning mode, not the product identity
 includes(roadmap, 'RedDog is the resident FoundUps architect', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
-includes(extensionJs, "command: 'progress'", 'progress command shape missing');
+includes(fusionProgressJs, "command: 'progress'", 'progress command shape missing');
+const safeProgress = fusionProgress.buildProgressMessage('lead_start', 'Lead request started.', {
+  run_id: 'run-1', role: 'lead', model: 'model-a', status: 'STARTED', elapsed_ms: 12,
+  prompt: 'must-not-cross', reasoning: 'must-not-cross', nested: { secret: true }
+});
+assert.deepStrictEqual(safeProgress, {
+  command: 'progress', stage: 'lead_start', text: 'Lead request started.', run_id: 'run-1',
+  status: 'STARTED', role: 'lead', model: 'model-a', elapsed_ms: 12
+}, 'progress UI projection must allowlist operational metadata');
+const decodedProgress = [];
+const decoder = fusionProgress.createProgressLineDecoder((stage, text, event) => decodedProgress.push({ stage, text, event }));
+const fragmentedEvent = JSON.stringify({ event: 'progress', stage: 'critic_done', text: 'Critic complete.', role: 'critic' });
+decoder.push(fragmentedEvent.slice(0, 17));
+decoder.push(fragmentedEvent.slice(17));
+assert.strictEqual(decodedProgress.length, 0, 'unterminated fragmented progress must remain buffered');
+decoder.flush();
+assert.strictEqual(decodedProgress.length, 1, 'fragmented trailing progress must decode exactly once');
+const progressSummary = fusionProgress.formatFusionProgressReceiptLines({
+  fusion_progress_receipts: [{
+    receipt_id: 'sha256:receipt', event_count: 3,
+    openrouter_calls: [{
+      generation_id: 'gen-1',
+      status: 'COMPLETED', retry_count: 1, duration_ms: 25,
+      usage_verified: true, cost_accounting_complete: true,
+      usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15, reasoning_tokens: 2, cached_tokens: 1, cost_microcredits: 200 },
+      router_metadata: { response_provider: 'Provider A', response_model: 'served/model' }
+    }]
+  }]
+}).join('\n');
+includes(progressSummary, '- openrouter_total_tokens: 15', 'progress token total missing');
+includes(progressSummary, '- openrouter_cost_microcredits: 200', 'OpenRouter credit total missing');
+includes(progressSummary, '- openrouter_cost_accounting_complete: true', 'complete OpenRouter accounting status missing');
+includes(progressSummary, '- openrouter_usage_verified_calls: 1/1', 'verified OpenRouter usage count missing');
+includes(progressSummary, '- openrouter_retries: 1', 'OpenRouter retry total missing');
+includes(progressSummary, '- openrouter_duration_ms: 25', 'OpenRouter duration total missing');
+includes(progressSummary, '- openrouter_selected_routes: Provider A:served/model', 'provider route missing');
+const incompleteProgressSummary = fusionProgress.formatFusionProgressReceiptLines({
+  fusion_progress_receipts: [{
+    receipt_id: 'sha256:incomplete', event_count: 1,
+    openrouter_calls: [{
+      status: 'FAILED', retry_count: 2, duration_ms: 30,
+      usage_verified: false, cost_accounting_complete: false,
+      usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0, reasoning_tokens: 0, cached_tokens: 0, cost_microcredits: 0 },
+      router_metadata: {}
+    }]
+  }]
+}).join('\n');
+includes(incompleteProgressSummary, '- openrouter_calls_failed: 1', 'failed OpenRouter call count missing');
+includes(incompleteProgressSummary, '- openrouter_cost_accounting_complete: false', 'incomplete accounting must remain explicit');
+includes(incompleteProgressSummary, '- openrouter_cost_microcredits: unknown', 'missing provider cost must not render as zero');
+const progressCollector = fusionProgress.createFusionProgressCollector();
+progressCollector.capture({ fusion_progress_receipt: { receipt_id: 'bad' } });
+assert.strictEqual(progressCollector.snapshot().length, 0, 'unvalidated progress receipt must not be consumed');
+assert.strictEqual(progressCollector.validation().valid, false, 'missing validation must fail aggregate receipt validation');
+const validProgressCollector = fusionProgress.createFusionProgressCollector();
+const boundProgressResult = fusionProgress.bindFusionProgressResultToRun({
+  fusion_progress_receipt: { receipt_id: 'good', run_id: 'run-good' },
+  fusion_progress_receipt_validation: { applied: true, valid: true, rejection_reasons: [] }
+}, 'run-good');
+validProgressCollector.capture(boundProgressResult);
+assert.strictEqual(validProgressCollector.snapshot().length, 1, 'validated progress receipt must be retained');
+assert.strictEqual(validProgressCollector.validation().valid, true, 'validated receipt aggregate must pass');
+const foreignProgressCollector = fusionProgress.createFusionProgressCollector();
+foreignProgressCollector.capture(fusionProgress.bindFusionProgressResultToRun({
+  fusion_progress_receipt: { receipt_id: 'foreign', run_id: 'run-foreign' },
+  fusion_progress_receipt_validation: { applied: true, valid: true, rejection_reasons: [] }
+}, 'run-local'));
+assert.strictEqual(foreignProgressCollector.snapshot().length, 0, 'foreign-run receipt must not be retained');
+assert(foreignProgressCollector.validation().rejection_reasons.includes('fusion_progress_receipt_run_id_mismatch'), 'foreign-run rejection reason missing');
+const secretProgress = fusionProgress.buildProgressMessage(null, 'route sk-or-v1-THIS-IS-A-SECRET-TOKEN', {
+  model: 'sk-or-v1-THIS-IS-A-SECRET-TOKEN'
+});
+assert(!secretProgress.text.includes('sk-or-v1-'), 'progress UI must redact secret-like text');
+assert.strictEqual(secretProgress.model, undefined, 'progress UI must drop secret-like metadata');
+assert.strictEqual(fusionProgress.buildProgressMessage('lead_start', 'attacker-controlled text', {}).text, 'Lead request started.', 'known stages must use canonical UI text');
 includes(extensionJs, 'Stopped before OpenRouter. Nothing left the machine.', 'redaction operator message missing');
 assert(!extensionJs.includes("command: 'status', stage"), 'status must not carry stage field');
 includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.9', 'README version mismatch');
+includes(readme, 'Version: 0.4.10', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1422,22 +1498,42 @@ includes(extensionJs, "'- extension_version: ' + EXTENSION_VERSION", 'RTBV-001: 
 // REDDOG_EXTENSION_OPERATOR_LOOP_RUNTIME_CONSUMPTION_PHASE1:
 // Runtime action planning may consume only validated, grounded, quorum-passed recommendations.
 const runtimeGatePass = orchestrator.buildRuntimeConsumptionGate(
-  { ok: true, reason: 'ok', review_packet: { fusion_panel_quorum: { passed: true } } },
+  {
+    ok: true,
+    reason: 'ok',
+    review_packet: {
+      fusion_panel_quorum: { passed: true }
+    }
+  },
   { validated: true, judgment_verification: { applied: true, verified: true } },
   'foundups_fusion',
   true
 );
 assert.strictEqual(runtimeGatePass.passed, true, 'runtime gate should pass only after validation, judgment, and quorum pass');
 const runtimeGateNoQuorum = orchestrator.buildRuntimeConsumptionGate(
-  { ok: true, reason: 'ok', review_packet: {} },
+  {
+    ok: true,
+    reason: 'ok',
+    review_packet: {
+      fusion_progress_receipt_validation: { applied: true, valid: true, rejection_reasons: [] }
+    }
+  },
   { validated: true },
   'foundups_fusion',
   true
 );
 assert.strictEqual(runtimeGateNoQuorum.passed, false, 'runtime gate must block missing Fusion quorum');
 assert(runtimeGateNoQuorum.rejection_reasons.includes('fusion_panel_quorum_not_passed'), 'runtime gate must cite missing Fusion quorum');
+assert(!runtimeGateNoQuorum.rejection_reasons.includes('fusion_progress_receipt_invalid'), 'observational progress evidence must not participate in authority');
 const runtimeGateValidationFail = orchestrator.buildRuntimeConsumptionGate(
-  { ok: true, reason: 'ok', review_packet: { fusion_panel_quorum: { passed: true } } },
+  {
+    ok: true,
+    reason: 'ok',
+    review_packet: {
+      fusion_panel_quorum: { passed: true },
+      fusion_progress_receipt_validation: { applied: true, valid: true, rejection_reasons: [] }
+    }
+  },
   { validated: false, output_validation_failed: true },
   'foundups_fusion',
   true
@@ -1668,7 +1764,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.9', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.10', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -3174,7 +3270,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.9'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.10'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -3188,7 +3284,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.9'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.10'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -3200,7 +3296,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.9'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.10'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -4219,7 +4315,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.9' } }
+      ? { id, packageJSON: { version: '0.4.10' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({

@@ -3,12 +3,18 @@ const cp = require('child_process');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+const {
+  bindFusionProgressResultToRun,
+  buildProgressMessage,
+  createFusionProgressCollector,
+  createProgressLineDecoder,
+  formatFusionProgressReceiptLines
+} = require('./fusion_progress_receipt');
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
-
-const EXTENSION_VERSION = '0.4.9';
+const EXTENSION_VERSION = '0.4.10';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -206,12 +212,10 @@ function postStatusMessage(webview, text) {
   webview.postMessage({ command: 'status', text: text });
 }
 
-function postProgressMessage(webview, stage, text) {
-  webview.postMessage({
-    command: 'progress',
-    stage: stage || null,
-    text: text || ''
-  });
+function postProgressMessage(webview, stage, text, metadata) {
+  const message = buildProgressMessage(stage, text, metadata);
+  webview.postMessage(message);
+  return message;
 }
 
 function postStatusAndProgress(webview, stage, text) {
@@ -266,7 +270,6 @@ function buildRuntimeConsumptionGate(result, validationState, mode, substantiveT
   const quorum = rp.fusion_panel_quorum && typeof rp.fusion_panel_quorum === 'object'
     ? rp.fusion_panel_quorum
     : null;
-
   if (rp.local_fast_path === 'simple_identity') {
     reasons.push('local_identity_fast_path_not_actionable');
   }
@@ -294,7 +297,6 @@ function buildRuntimeConsumptionGate(result, validationState, mode, substantiveT
   if (mode === 'foundups_fusion' && (!quorum || quorum.passed !== true)) {
     reasons.push('fusion_panel_quorum_not_passed');
   }
-
   return {
     applied: true,
     passed: reasons.length === 0,
@@ -2371,6 +2373,7 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     lines.push('- HoloIndex/context summary: ' + sanitizeCopyMdText(String(contextSummary)).slice(0, 500));
   }
   lines.push.apply(lines, formatHoloIndexScorecardLines(holoScorecard || rp.holoindex_scorecard));
+  lines.push.apply(lines, formatFusionProgressReceiptLines(rp));
   lines.push('- unicode_normalization_applied: ' + (rp.unicode_normalization_applied === true ? 'true' : rp.unicode_normalization_applied === false ? 'false' : 'unknown'));
   lines.push('- unicode_replacements_count: ' + (typeof rp.unicode_replacements_count === 'number' ? rp.unicode_replacements_count : 'unknown'));
   lines.push('- unicode_normalization_sources: ' + (typeof rp.unicode_normalization_sources === 'string' && rp.unicode_normalization_sources.length ? rp.unicode_normalization_sources : '(none)'));
@@ -5499,22 +5502,23 @@ function wireFusionWebview(context, webview, worker, state) {
         unicode_normalization_form: bridgeResult.unicode_normalization_form
       });
     };
-    const onBridgeProgress = (stage, text) => {
-      postStatusMessage(webview, text);
-      postProgressMessage(webview, stage, text);
-      const normalized = normalizeBridgeStageToWorkTrail(stage, text);
+    const onBridgeProgress = (stage, text, metadata) => {
+      const message = postProgressMessage(webview, stage, text, metadata);
+      postStatusMessage(webview, message.text);
+      const normalized = normalizeBridgeStageToWorkTrail(stage, message.text);
       if (normalized) {
         workTrail.push(normalized.event, normalized.detail);
       }
     };
-    const onRepairBridgeProgress = (stage, text) => {
-      postStatusMessage(webview, text);
-      postProgressMessage(webview, stage, text);
-      const normalized = normalizeRepairBridgeStageToWorkTrail(stage, text);
+    const onRepairBridgeProgress = (stage, text, metadata) => {
+      const message = postProgressMessage(webview, stage, text, metadata);
+      postStatusMessage(webview, message.text);
+      const normalized = normalizeRepairBridgeStageToWorkTrail(stage, message.text);
       if (normalized) {
         workTrail.push(normalized.event, normalized.detail);
       }
     };
+    const fusionProgress = createFusionProgressCollector();
     let result;
     if (localIdentityFastPath) {
       workTrail.push('local_fast_path', 'simple_identity');
@@ -5532,6 +5536,7 @@ function wireFusionWebview(context, webview, worker, state) {
     } else {
       result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
     }
+    fusionProgress.capture(result);
     if (holoScorecard) {
       holoScorecard.audit_context_applied = result && result.audit_context_applied === true;
       if (result && result.audit_context_requested !== undefined) {
@@ -5606,6 +5611,7 @@ function wireFusionWebview(context, webview, worker, state) {
           promptConstruction,
           { promptSource: 'repair_prompt', maxTokens: 2400 }
         );
+        fusionProgress.capture(repairResult);
         absorbUnicodeMeta(repairResult);
         if (repairResult.ok) {
           const mergeResult = mergeRepairedOutput(result.content, repairResult.content, validation.missingSections);
@@ -5759,6 +5765,13 @@ function wireFusionWebview(context, webview, worker, state) {
       workFocusDigest: promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash,
       wspPromptDigest: promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash
     });
+    if (!result.review_packet || typeof result.review_packet !== 'object') {
+      result.review_packet = {};
+    }
+    const fusionProgressReceipts = fusionProgress.snapshot();
+    const fusionProgressValidation = fusionProgress.validation();
+    result.review_packet.fusion_progress_receipts = fusionProgressReceipts;
+    result.review_packet.fusion_progress_receipt_validation = fusionProgressValidation;
     const runtimeConsumptionGate = buildRuntimeConsumptionGate(result, validationState, mode, substantiveTask);
     const actionPlanningAllowed = runtimeConsumptionGate.passed === true;
     const residentArchitectSessionEnabled = (
@@ -5824,6 +5837,8 @@ function wireFusionWebview(context, webview, worker, state) {
     );
     result.runtime_consumption_gate = runtimeConsumptionGate;
     result.review_packet.runtime_consumption_gate = runtimeConsumptionGate;
+    result.review_packet.fusion_progress_receipts = fusionProgressReceipts;
+    result.review_packet.fusion_progress_receipt_validation = fusionProgressValidation;
     result.install_state = state.installState || null;
     result.review_packet.install_state = result.install_state;
     result.governed_handoff_recommendation = handoffRecommendation;
@@ -6003,6 +6018,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
     const unicodeMeta = mergeUnicodeNormalizationMeta(null, Object.assign({}, promptNorm, { unicode_normalization_source: promptSource }));
     const mergedUnicodeMeta = mergeUnicodeNormalizationMeta(unicodeMeta, Object.assign({}, contextNorm, { unicode_normalization_source: 'context' }));
     const budgeted = applyBridgeContextBudget(promptNorm.text, contextNorm.text);
+    const bridgeRunId = 'reddog_bridge_run:' + crypto.randomBytes(16).toString('hex');
     onProgress(null, 'Mode: ' + mode);
     onProgress(null, 'Python interpreter: ' + interpreter.path + ' (' + interpreter.source + ')');
     onProgress(null, 'Bridge process starting');
@@ -6039,9 +6055,11 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
 
     let stdout = '';
     let stderr = '';
+    const progressDecoder = createProgressLineDecoder(onProgress);
     let stdoutBytes = 0;
     let stderrBytes = 0;
     const payload = {
+      bridge_run_id: bridgeRunId,
       mode,
       prompt: budgeted.prompt,
       context: budgeted.context,
@@ -6089,17 +6107,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
       }
       const text = chunk.toString();
       stderr += text;
-      for (const line of text.split(/\r?\n/)) {
-        if (!line.trim()) continue;
-        try {
-          const event = JSON.parse(line);
-          if (event && event.event === 'progress' && event.text) {
-            onProgress(event.stage || null, event.text);
-          }
-        } catch (err) {
-          // stderr can contain non-JSON diagnostics from Python dependencies.
-        }
-      }
+      progressDecoder.push(text);
     });
     child.on('error', (err) => {
       finish({ ok: false, reason: 'subprocess_failed', detail: err.message });
@@ -6109,12 +6117,13 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
         return;
       }
       try {
+        progressDecoder.flush();
         const parsed = JSON.parse(stdout || '{}');
         if (!parsed.ok && code !== 0 && !parsed.reason) {
           parsed.reason = 'subprocess_failed';
           parsed.exit_code = code;
         }
-        finish(Object.assign({}, parsed, mergedUnicodeMeta));
+        finish(bindFusionProgressResultToRun(Object.assign({}, parsed, mergedUnicodeMeta), bridgeRunId));
       } catch (err) {
         finish({ ok: false, reason: 'malformed_response', detail: stderr.slice(0, 500) });
       }
@@ -7962,7 +7971,8 @@ function renderHtml(worker, surface, logoUri, installState) {
     function applyProgressEvent(msg) {
       const matched = matchReddogProgressWeb({ stage: msg.stage, text: msg.text });
       if (matched) {
-        updateReddogTrail(matched.action, matched.pixel, '', { active: true });
+        const detail = [msg.role, msg.model, msg.status].filter(Boolean).join(' | ');
+        updateReddogTrail(matched.action, matched.pixel, detail, { active: true });
       }
     }
 
@@ -8239,6 +8249,7 @@ module.exports = {
   enrichRedactionBlockResult,
   detectMojibake,
   buildRunTraceSection,
+  formatFusionProgressReceiptLines,
   formatJudgmentVerificationLines,
   buildJudgmentVerificationSection,
   buildWorkTrailSection,

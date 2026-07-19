@@ -38,6 +38,8 @@ foundups_mcp_bridge `holo_tools.py` remains a direct-store path.
 
 ### FusionAdapter (advisory Fusion worker-panel, CONTRACT-ONLY)
 
+`reddog_fusion_progress_receipt.py` records one process-local, digest-bound lifecycle receipt for each RedDog bridge invocation. It allows only stage, role, requested/served model, provider route, generation ID, retry, timing, token, and OpenRouter cost-credit fields. Missing, malformed, or retry-ambiguous provider accounting is marked incomplete rather than reported as zero cost. Prompt/context/output/reasoning content and secret-like values are excluded. These unkeyed receipts prove internal consistency, not signer authenticity, and never grant execution or promotion authority.
+
 ```python
 from modules.communication.moltbot_bridge.src.fusion_adapter import (
     FusionAdapter,            # runtime_checkable Protocol: run(FusionRequest) -> ModelContributionReceipt

@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-20 - Fusion progress and OpenRouter usage receipts (0.4.10)
+
+- Added receipt digest, hash-chain, tamper, usage, routing allowlist, failed-call, cap, and redaction-block regressions.
+- Added fragmented stderr JSON decoding, bridge-run binding, safe UI projection, and Run Trace usage-summary coverage.
+
 ## 2026-07-19 - REDDOG_REPO_DEEP_DIVE_FOCUS_BOUND_TARGET_SELECTION_PHASE1
 
 - Proved a complete p.fMALL corpus activates focus-core selection and an unrelated semantic runtime hit is excluded.

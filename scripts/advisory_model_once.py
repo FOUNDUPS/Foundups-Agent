@@ -16,6 +16,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
@@ -27,6 +28,10 @@ if str(REPO_ROOT) not in sys.path:
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (  # noqa: E402
     REDACTION_GATE_PASSED,
     evaluate_redaction_gate,
+)
+from modules.communication.moltbot_bridge.src.reddog_fusion_progress_receipt import (  # noqa: E402
+    FusionProgressRecorder,
+    validate_fusion_progress_receipt,
 )
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -81,15 +86,40 @@ DEFAULT_SYSTEM_PROMPT = (
     "For every finding, include evidence, uncertainty, and an actionable proposed fix or explicit defer reason."
 )
 
+_PROGRESS_RECORDER: FusionProgressRecorder | None = None
+
 
 def _json_result(**fields: Any) -> int:
+    if _PROGRESS_RECORDER is not None:
+        receipt = _PROGRESS_RECORDER.receipt()
+        receipt_valid, receipt_reasons = validate_fusion_progress_receipt(receipt)
+        receipt_validation = {"applied": True, "valid": receipt_valid, "rejection_reasons": list(receipt_reasons)}
+        fields.setdefault("fusion_progress_receipt", receipt)
+        fields.setdefault("fusion_progress_receipt_validation", receipt_validation)
+        packet = fields.get("review_packet")
+        if isinstance(packet, dict):
+            packet.setdefault("fusion_progress_receipt", receipt)
+            packet.setdefault("fusion_progress_receipt_validation", receipt_validation)
     sys.stdout.write(json.dumps(fields, ensure_ascii=True, sort_keys=True))
     sys.stdout.write("\n")
     return 0
 
 
-def _progress(stage: str, text: str) -> None:
-    sys.stderr.write(json.dumps({"event": "progress", "stage": stage, "text": text}, ensure_ascii=True))
+def _progress(stage: str, text: str, *, role: str = "", model: str = "") -> None:
+    event: dict[str, Any] = {"event": "progress", "stage": stage, "text": text}
+    if _PROGRESS_RECORDER is not None:
+        recorded = _PROGRESS_RECORDER.emit(stage, role=role, model=model)
+        if recorded:
+            event.update({
+                "run_id": recorded["run_id"],
+                "event_id": recorded["event_id"],
+                "sequence": recorded["sequence"],
+                "status": recorded["status"],
+                "role": recorded["role"],
+                "model": recorded["model"],
+                "elapsed_ms": recorded["elapsed_ms"],
+            })
+    sys.stderr.write(json.dumps(event, ensure_ascii=True))
     sys.stderr.write("\n")
     sys.stderr.flush()
 
@@ -106,11 +136,25 @@ def _post_openrouter(api_key: str, body: dict[str, Any], timeout: int) -> tuple[
                 "Authorization": "Bearer " + api_key,
                 "Content-Type": "application/json",
                 "X-Title": "FoundUps Cursor Advisory Worker",
+                "X-OpenRouter-Metadata": "enabled",
             },
         )
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
-                return json.loads(response.read().decode("utf-8")), retry_meta
+                data = json.loads(response.read().decode("utf-8"))
+                headers = getattr(response, "headers", None)
+                generation_id = headers.get("X-Generation-Id", "") if headers is not None else ""
+                if not generation_id and isinstance(data, dict):
+                    generation_id = data.get("id", "")
+                retry_meta["openrouter_generation_id"] = str(generation_id or "")
+                retry_meta["openrouter_usage"] = data.get("usage") if isinstance(data, dict) else None
+                metadata = data.get("openrouter_metadata") if isinstance(data, dict) else None
+                safe_metadata = dict(metadata) if isinstance(metadata, dict) else {}
+                if isinstance(data, dict):
+                    safe_metadata["response_provider"] = data.get("provider")
+                    safe_metadata["response_model"] = data.get("model")
+                retry_meta["openrouter_metadata"] = safe_metadata
+                return data, retry_meta
         except urllib.error.HTTPError as exc:
             status = getattr(exc, "code", None)
             if status in RETRYABLE_HTTP_STATUS and attempt < MAX_HTTP_RETRIES:
@@ -166,6 +210,7 @@ def _chat_completion(
     max_tokens: int,
     temperature: float,
     timeout: int,
+    role: str = "single",
 ) -> tuple[str, dict[str, Any]]:
     body: dict[str, Any] = {
         "model": model,
@@ -180,9 +225,71 @@ def _chat_completion(
         body["reasoning"] = {"effort": "max"}
     else:
         body["temperature"] = temperature
-    data, retry_meta = _post_openrouter(api_key, body, timeout)
+    data, retry_meta = _receipted_openrouter_post(
+        api_key, body, timeout, role=role, model=model, requested_max_tokens=body["max_tokens"]
+    )
     content = data["choices"][0]["message"]["content"]
     return str(content), retry_meta
+
+
+def _receipted_openrouter_post(
+    api_key: str,
+    body: dict[str, Any],
+    timeout: int,
+    *,
+    role: str,
+    model: str,
+    requested_max_tokens: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    call_id = _begin_openrouter_call(role, model, requested_max_tokens)
+    try:
+        data, retry_meta = _post_openrouter(api_key, body, timeout)
+    except Exception as exc:
+        _finish_openrouter_failure(call_id, exc)
+        raise
+    _finish_openrouter_success(call_id, retry_meta)
+    return data, retry_meta
+
+
+def _begin_openrouter_call(role: str, model: str, requested_max_tokens: int) -> str:
+    if _PROGRESS_RECORDER is None:
+        return ""
+    return _PROGRESS_RECORDER.begin_call(
+        role=role,
+        model=model,
+        requested_max_tokens=requested_max_tokens,
+    )
+
+
+def _finish_openrouter_success(call_id: str, meta: dict[str, Any]) -> None:
+    if _PROGRESS_RECORDER is None or not call_id:
+        return
+    _PROGRESS_RECORDER.finish_call(
+        call_id,
+        status="COMPLETED",
+        retry_count=meta.get("retry_count", 0),
+        generation_id=str(meta.get("openrouter_generation_id") or ""),
+        usage=meta.get("openrouter_usage"),
+        router_metadata=meta.get("openrouter_metadata"),
+    )
+
+
+def _finish_openrouter_failure(call_id: str, exc: Exception) -> None:
+    if _PROGRESS_RECORDER is None or not call_id:
+        return
+    retry_meta = getattr(exc, "retry_meta", {})
+    if isinstance(exc, urllib.error.HTTPError):
+        reason = "http_" + str(getattr(exc, "code", "error"))
+    elif isinstance(exc, (urllib.error.URLError, TimeoutError)):
+        reason = "timeout"
+    else:
+        reason = "provider_response_error"
+    _PROGRESS_RECORDER.finish_call(
+        call_id,
+        status="FAILED",
+        retry_count=retry_meta.get("retry_count", 0) if isinstance(retry_meta, dict) else 0,
+        failure_reason=reason,
+    )
 
 
 def _effective_max_tokens(model: str, requested_max_tokens: int) -> int:
@@ -500,9 +607,12 @@ def _openrouter_fusion_alias(
             }
         ],
     }
-    _progress("fusion_alias_start", "OpenRouter Fusion alias request started. Judge: " + judge_model)
+    _progress("fusion_alias_start", "OpenRouter Fusion alias request started. Judge: " + judge_model,
+              role="fusion_alias", model=judge_model)
     try:
-        data, retry_meta = _post_openrouter(api_key, body, timeout)
+        data, retry_meta = _receipted_openrouter_post(
+            api_key, body, timeout, role="fusion_alias", model="openrouter/fusion", requested_max_tokens=0
+        )
         content = str(data["choices"][0]["message"]["content"])
     except urllib.error.HTTPError as exc:
         return _http_failure_reason(exc)
@@ -510,7 +620,8 @@ def _openrouter_fusion_alias(
         return {"ok": False, "reason": "timeout"}
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return {"ok": False, "reason": "fusion_alias_malformed_response"}
-    _progress("fusion_alias_done", "OpenRouter Fusion alias response received.")
+    _progress("fusion_alias_done", "OpenRouter Fusion alias response received.",
+              role="fusion_alias", model=judge_model)
     return _fusion_alias_success_packet(
         redacted_prompt=redacted_prompt,
         history=history,
@@ -565,7 +676,7 @@ def _run_foundups_fusion_core(
     lead_messages.extend(history)
     lead_messages.append({"role": "user", "content": redacted_prompt})
 
-    _progress("lead_start", "Lead request started: " + lead_model)
+    _progress("lead_start", "Lead request started: " + lead_model, role="lead", model=lead_model)
     lead_retry: dict[str, Any] = {"retry_count": 0, "final_retry_reason": None}
     try:
         lead_text, lead_retry = _chat_completion(
@@ -575,6 +686,7 @@ def _run_foundups_fusion_core(
             max_tokens=role_max_tokens["lead"],
             temperature=temperature,
             timeout=timeout,
+            role="lead",
         )
     except urllib.error.HTTPError as exc:
         return {**_http_failure_reason(exc), "lead_model": lead_model}
@@ -593,7 +705,7 @@ def _run_foundups_fusion_core(
             panel_max_tokens=panel_max_tokens,
         )
 
-    _progress("lead_done", "Lead response received: " + lead_model)
+    _progress("lead_done", "Lead response received: " + lead_model, role="lead", model=lead_model)
     critic_system = (
         base_system
         + "\n\nPanel critic pass: attack the lead answer for missing WSP_97 truth labels, missing WSP_15 scoring, unsupported evidence, weak HoloIndex retrieval, and fixes that are not actionable. Start with `Challenge:` when any evidence, claim, framing, scope, or WSP_15 priority issue exists, and explicitly mention the WSP_15 priority. Start with `No material challenge:` only when the lead framing, evidence, and priority are all sound. Do not claim authority."
@@ -604,7 +716,7 @@ def _run_foundups_fusion_core(
         {"role": "user", "content": critic_user},
     ]
     panel_results: dict[str, str] = {}
-    _progress("panel_start", "Panel requests started: " + ", ".join(panel_models))
+    _progress("panel_start", "Panel requests started: " + ", ".join(panel_models), role="panel")
     with ThreadPoolExecutor(max_workers=len(panel_models)) as executor:
         futures = {
             executor.submit(
@@ -615,6 +727,7 @@ def _run_foundups_fusion_core(
                 max_tokens=panel_max_tokens[model],
                 temperature=temperature,
                 timeout=timeout,
+                role="critic",
             ): model
             for model in panel_models
         }
@@ -622,16 +735,16 @@ def _run_foundups_fusion_core(
             model = futures[future]
             try:
                 panel_results[model], _panel_retry = future.result()
-                _progress("panel_done", "Panel response received: " + model)
+                _progress("panel_done", "Panel response received: " + model, role="critic", model=model)
             except urllib.error.HTTPError as exc:
                 panel_results[model] = "[blocked: http_error " + str(getattr(exc, "code", "")) + "]"
-                _progress("panel_blocked", "Panel blocked: " + model)
+                _progress("panel_blocked", "Panel blocked: " + model, role="critic", model=model)
             except (urllib.error.URLError, TimeoutError):
                 panel_results[model] = "[blocked: timeout]"
-                _progress("panel_blocked", "Panel network error: " + model)
+                _progress("panel_blocked", "Panel network error: " + model, role="critic", model=model)
             except (KeyError, IndexError, TypeError, json.JSONDecodeError):
                 panel_results[model] = "[blocked: malformed_response]"
-                _progress("panel_blocked", "Panel malformed response: " + model)
+                _progress("panel_blocked", "Panel malformed response: " + model, role="critic", model=model)
 
     challenging_critics = [
         model for model, text in panel_results.items() if _critic_challenges_framing_and_priority(text)
@@ -659,7 +772,7 @@ def _run_foundups_fusion_core(
             + "\n\nSynthesis pass: resolve panel disagreement, preserve useful dissent, and return the best actionable WSP-compliant recommendation. The final section must be WSP_15 Priority followed by Next safest step."
         )
     synthesis_user = _synthesis_user_prompt(redacted_prompt, lead_text, panel_results)
-    _progress("synthesis_start", "Synthesis request started: " + lead_model)
+    _progress("synthesis_start", "Synthesis request started: " + lead_model, role="synthesis", model=lead_model)
     try:
         synthesis, _syn_retry = _chat_completion(
             api_key,
@@ -671,6 +784,7 @@ def _run_foundups_fusion_core(
             max_tokens=role_max_tokens["synthesis"],
             temperature=temperature,
             timeout=timeout,
+            role="synthesis",
         )
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError, json.JSONDecodeError):
         return _fusion_quorum_packet(
@@ -684,7 +798,7 @@ def _run_foundups_fusion_core(
             challenging_critics=challenging_critics,
         )
 
-    _progress("synthesis_done", "Synthesis complete.")
+    _progress("synthesis_done", "Synthesis complete.", role="synthesis", model=lead_model)
     content = _format_panel(lead_model, lead_text, panel_results, synthesis)
     next_history = history + [
         {"role": "user", "content": redacted_prompt},
@@ -751,11 +865,21 @@ def _read_stdin_json() -> dict[str, Any]:
 
 
 def main() -> int:
-    _progress("bridge_start", "Bridge Python started.")
+    global _PROGRESS_RECORDER
+    _PROGRESS_RECORDER = None
     try:
         payload = _read_stdin_json()
     except json.JSONDecodeError:
         return _json_result(ok=False, reason="invalid_json")
+
+    bridge_run_id = str(payload.get("bridge_run_id") or "").strip()
+    if not bridge_run_id:
+        bridge_run_id = "reddog_bridge_run:" + uuid.uuid4().hex
+    try:
+        _PROGRESS_RECORDER = FusionProgressRecorder(bridge_run_id)
+    except ValueError:
+        return _json_result(ok=False, reason="invalid_bridge_run_id")
+    _progress("bridge_start", "Bridge Python started.")
 
     api_key = os.getenv(ENV_API_KEY)
     _progress("env_check", "OPENROUTER_API_KEY visible to bridge: " + ("yes" if bool(api_key) else "no"))
@@ -884,7 +1008,7 @@ def main() -> int:
     temperature = _bounded_temperature(payload.get("temperature"), 0.2)
     timeout = _bounded_int(payload.get("timeout"), 60, 1, 120)
 
-    _progress("single_start", "Regular OpenRouter request started: " + model)
+    _progress("single_start", "Regular OpenRouter request started: " + model, role="single", model=model)
     try:
         content, retry_meta = _chat_completion(
             api_key,
@@ -893,6 +1017,7 @@ def main() -> int:
             max_tokens=max_tokens,
             temperature=float(temperature),
             timeout=timeout,
+            role="single",
         )
     except urllib.error.HTTPError as exc:
         return _json_result(**_http_failure_reason(exc))
@@ -901,7 +1026,7 @@ def main() -> int:
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return _json_result(ok=False, reason="malformed_response")
 
-    _progress("single_done", "Regular OpenRouter response received: " + model)
+    _progress("single_done", "Regular OpenRouter response received: " + model, role="single", model=model)
     assistant_text = str(content)
     next_history = history + [
         {"role": "user", "content": redacted_user_message},

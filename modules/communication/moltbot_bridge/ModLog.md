@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-20: REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97
+
+- Added bounded, content-free Fusion progress and OpenRouter call receipts with per-event and aggregate digest verification.
+- Recorded provider-returned tokens, cost credits, generation IDs, selected routing metadata, retries, and timing while discarding arbitrary metadata payloads.
+- Kept receipts observational and advisory; they grant no model, execution, repository, shell, worktree, PR, merge, HoloIndex, or reward authority.
+
 ## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 71, 97
