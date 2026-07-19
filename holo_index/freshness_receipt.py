@@ -421,7 +421,7 @@ def _persisted_collection_handle(holo: Any, name: str, attr_name: str) -> Any:
     client = getattr(holo, "client", None)
     if client is not None:
         try:
-            return client.get_collection(name)
+            return client.get_collection(name, embedding_function=None)
         except Exception:
             return None
     return getattr(holo, attr_name, None)

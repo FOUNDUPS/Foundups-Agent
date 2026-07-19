@@ -21,8 +21,15 @@
   baseline migration and cannot authorize a partial refresh.
 - Live migration validation found a cached sibling collection handle can lag
   the persisted Chroma state after another collection commits. Freshness proof
-  now reopens every collection through the persistent client when available;
-  one observed persisted-state mismatch still fails closed.
+  now finalizes the writer system, rebuilds the candidate receipt from reopened
+  persisted collections without loading an encoder, finalizes that proof view,
+  and verifies it again in an isolated read-only Python process. The writer's
+  Chroma system cache cannot certify its own result; lifecycle failure, child
+  failure, timeout, malformed output, or one persisted-state mismatch remains
+  fail-closed. Verification lookups explicitly disable embedding functions, and
+  the proof view is finalized on receipt-build and repository-drift failures.
+  Isolated clients reopen the canonical `<ssd>/vectors` Chroma store rather
+  than the HoloIndex storage root.
 - Corrected changed-path ownership for overlapping sources, including Python
   tests in the symbol collection, module Skillz in docs, and the canonical WSP
   test registry.
