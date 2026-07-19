@@ -1,5 +1,18 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-19 - RedDog HoloIndex owner binding probe
+
+- OBSERVED: a canonical seven-collection HoloIndex receipt and owner health
+  payload were both CURRENT at the exact repository HEAD, but the post-start
+  binding probe failed because the semantic health canary took 1.016 seconds
+  against a fixed 1.0-second socket timeout.
+- Increased only the authenticated loopback health/binding response window to
+  a bounded five seconds. Query deadlines, startup budget, receipt binding,
+  token secrecy, loopback restriction, and fail-closed health checks remain
+  unchanged.
+- Added a regression proving a semantic health response just above one second
+  is accepted without making unbounded or unauthenticated probes.
+
 ## 2026-07-18 - HoloIndex private query owner and host supervisor POC
 
 **WSP Protocol**: WSP 00, 05, 06, 15, 22, 49, 50, 62, 87, 96, 97
