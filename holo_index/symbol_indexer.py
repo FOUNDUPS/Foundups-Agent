@@ -47,7 +47,8 @@ PreparedSymbolRecords = tuple[
     bool,
 ]
 DEFAULT_EMBED_BATCH_SIZE = 512
-PUBLISH_BATCH_SIZE = 5000
+PUBLISH_BATCH_SIZE = 1000
+SYMBOL_DOCSTRING_MAX_CHARS = 8192
 
 
 def _relative_path(path: Path, project_root: Path) -> str:
@@ -121,8 +122,10 @@ def _symbol_record(
         symbol = f"{name}({', '.join(args[:8])})"
     line_no = int(getattr(node, "lineno", 1) or 1)
     relative_path = _relative_path(path, project_root)
+    raw_docstring = ast.get_docstring(node) or ""
+    docstring = raw_docstring[:SYMBOL_DOCSTRING_MAX_CHARS]
     document = chr(10).join(
-        (symbol, ast.get_docstring(node) or "", f"{relative_path}:{line_no}")
+        (symbol, docstring, f"{relative_path}:{line_no}")
     )
     federation = resolve_foundup_metadata(path, project_root)
     metadata = {
@@ -130,6 +133,7 @@ def _symbol_record(
         "path": relative_path,
         "line": line_no,
         "type": "symbol",
+        "docstring_truncated": len(raw_docstring) > len(docstring),
         "foundup_id": federation["foundup_id"],
         "tenant_id": federation["tenant_id"],
         "source_scope": federation["source_scope"],
@@ -525,7 +529,10 @@ def index_symbol_entries(
     ids, documents, metadatas, processed, failed, fallback, entry_truncated = records
     reused = _publish_records(holo, ids, documents, metadatas)
     if ids:
-        holo._log_agent_action(f"Symbol index refreshed: {len(ids)} entries", "OK")
+        holo._log_agent_action(
+            f"Symbol index refreshed: {len(ids)} entries; reused={reused}",
+            "OK",
+        )
     warning = _symbol_index_warning(
         selected_count=len(selected_files),
         discovered_count=len(discovered_files),

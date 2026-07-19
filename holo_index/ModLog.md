@@ -20,6 +20,9 @@
 - BATCH symbol embedding and collection writes in bounded chunks. This removes
   the one-model-call-per-symbol behavior observed during the 42,071-record
   canonical refresh while retaining the exact output-count proof.
+- CAP per-symbol docstring evidence at 8 KiB and publish in 1,000-record
+  batches. Current canonical docstrings remain below the cap; the boundary
+  prevents a future tracked source from amplifying model/Chroma memory.
 - RECONCILE symbols by deterministic repository-relative IDs. An unchanged
   exact document reuses its existing vector only when backend, model, and
   embedding-space fingerprint all match. Changed/new documents are re-embedded,
@@ -46,6 +49,10 @@
 - OBSERVED: the first complete batched symbol migration took 613.55 seconds.
   That is correct but too expensive for routine refresh, so stable exact-space
   reuse is required and measured separately before operational promotion.
+- OBSERVED: the stable-ID migration indexed 42,529 symbols and 72 Skillz in
+  508.41 seconds. The immediate exact-content rerun reused the stable vectors
+  and completed in 52.89 seconds (symbols: 28.68 seconds), within the resident
+  maintenance budget.
 - OBSERVED: fallback records are discoverability evidence only. They cannot
   support a symbol-level implementation claim.
 - SPECIFIED_NOT_IMPLEMENTED: routine post-merge incremental maintenance and a

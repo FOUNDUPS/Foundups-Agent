@@ -8,7 +8,11 @@ from typing import Any
 import pytest
 
 from holo_index.core.indexing_engine import index_skillz_entries
-from holo_index.symbol_indexer import index_symbol_entries
+from holo_index.symbol_indexer import (
+    PUBLISH_BATCH_SIZE,
+    SYMBOL_DOCSTRING_MAX_CHARS,
+    index_symbol_entries,
+)
 
 
 class _Collection:
@@ -208,8 +212,32 @@ def test_symbol_embeddings_are_bounded_into_collection_batches(tmp_path: Path) -
 
     assert result.complete is True
     assert result.indexed_count == 5001
-    assert [len(call) for call in model.calls] == [5000, 1]
-    assert [len(call["ids"]) for call in holo.symbol_collection.add_calls] == [5000, 1]
+    assert [len(call) for call in model.calls] == [1000, 1000, 1000, 1000, 1000, 1]
+    assert [len(call["ids"]) for call in holo.symbol_collection.add_calls] == [
+        PUBLISH_BATCH_SIZE,
+        PUBLISH_BATCH_SIZE,
+        PUBLISH_BATCH_SIZE,
+        PUBLISH_BATCH_SIZE,
+        PUBLISH_BATCH_SIZE,
+        1,
+    ]
+
+
+def test_symbol_docstring_evidence_is_explicitly_bounded(tmp_path: Path) -> None:
+    oversized = "X" * (SYMBOL_DOCSTRING_MAX_CHARS + 1000)
+    source = tmp_path / "oversized.py"
+    source.write_text(
+        f'def bounded():\n    """{oversized}"""\n    return True\n',
+        encoding="utf-8",
+    )
+    model = _BatchModel()
+    holo = _Holo(tmp_path, model=model)
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.complete is True
+    assert model.calls[0][0].count("X") == SYMBOL_DOCSTRING_MAX_CHARS
+    assert _symbol_metadata(holo)[0]["docstring_truncated"] is True
 
 
 def test_unchanged_stable_records_reuse_exact_space_embeddings(tmp_path: Path) -> None:
