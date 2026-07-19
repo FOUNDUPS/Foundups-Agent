@@ -2,6 +2,17 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-19 - REDDOG_DEEP_DIVE_OWNER_FAILURE_DIRECT_READ_CONTINUITY_PHASE1 (0.4.8)
+
+- Preserved locally governed repository direct reads when the generation-bound semantic owner is unavailable; semantic hits remain withheld and explicit semantic obligations still fail closed.
+- Removed generic `repository` wording from external-research target detection and added exact 0.4.7 host-trace regression coverage.
+- Hardened deterministic manifest ranking so named subsystem concepts such as `p.fMALL` outrank WSP and instruction words.
+- Required implementation, test, and document coverage tied to the primary focus anchor before a deep dive may reach Fusion.
+- Marked fetched repository bodies as untrusted evidence, corrected direct-read telemetry, and classified missing/timeout/malformed owner failures without exposing raw diagnostics.
+- Added manifest-cap telemetry and fail-closed deep-dive rejection so repository scale cannot silently hide later targets.
+- Corrected the already-exceeded temporary WSP_62 ceiling from 7900 to 8350 lines for this focused integration-boundary change; the existing Q3 decomposition owner and expiry remain unchanged.
+- Version 0.4.7 -> 0.4.8. No shell, repository mutation, HoloIndex re-index, OpenClaw/Hermes execution, PR, or merge authority was added.
+
 ## 2026-07-19 - REDDOG_REPO_DEEP_DIVE_DISCOVERY_PHASE1 (0.4.7)
 
 - OBSERVED: RedDog 0.4.2 accepted a requested repository deep dive with zero repository targets, zero direct reads, and no source context; the active editor also biased the module hint to `extensions/reddog`.

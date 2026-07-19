@@ -170,7 +170,7 @@ Copy:
 
 The model cannot access the filesystem. It receives only the bounded context packet.
 
-Extension v0.4.7 adds a fail-closed repository deep-dive discovery gate. Broad repository audits ignore the active-editor module hint, build a bounded tracked-file manifest, combine generation-bound HoloIndex paths with deterministic repository-path ranking, and feed the selected targets through the existing governed direct-reader. Fusion is blocked unless the manifest, target set, recall, direct-read bytes, and source context all pass. RedDog remains query/read-only and never re-indexes during the reasoning run. Extension v0.4.6 introduced the transport-neutral grounding and generation-bound receipt chain used by this gate.
+Extension v0.4.8 keeps repository direct-read grounding available when the generation-bound semantic owner fails, while continuing to withhold unbound semantic claims. Broad repository audits no longer interpret the generic word `repository` as an external-research request, and deterministic manifest ranking prioritizes the named subsystem over WSP/instruction words. Explicit semantic or external-research targets remain independently fail-closed. Extension v0.4.7 introduced the bounded repository deep-dive discovery gate.
 
 If HoloIndex recall reports zero WSP hits, missing Tier-0 docs, stale/offline fallback, or unavailable output, the answer must treat protocol claims as `NEEDS_VERIFICATION` and propose retrieval/index repair before strong claims.
 

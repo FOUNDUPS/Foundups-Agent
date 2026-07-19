@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const fs = require('fs');
 
 const HOLOINDEX_SEMANTIC_BUCKETS = [
   'code_hits',
@@ -103,10 +104,28 @@ function parseBridgeResult(stdout) {
     : failureResult('owner_response_invalid');
 }
 
+function classifyOwnerBridgeError(err) {
+  const value = err && typeof err === 'object' ? err : {};
+  if (value.code === 'ETIMEDOUT') {
+    return 'owner_query_timeout';
+  }
+  if (value instanceof SyntaxError) {
+    return 'owner_response_invalid';
+  }
+  if (typeof value.status === 'number') {
+    return 'owner_query_process_error';
+  }
+  return 'owner_query_bridge_error';
+}
+
 function runOwnerQuery(options) {
   const opts = options && typeof options === 'object' ? options : {};
   try {
     const script = opts.path.join(opts.root, 'scripts', 'reddog_holoindex_owner_query_once.py');
+    const fsImpl = opts.fs && typeof opts.fs.existsSync === 'function' ? opts.fs : fs;
+    if (!fsImpl.existsSync(script)) {
+      return failureResult('owner_query_bridge_missing', opts.query);
+    }
     const stdout = opts.cp.execFileSync(opts.interpreterPath, ['-B', script], {
       input: JSON.stringify({ query: String(opts.query || ''), limit: Number(opts.limit || 5) }),
       cwd: opts.root,
@@ -120,7 +139,7 @@ function runOwnerQuery(options) {
     result.requested_query = String(opts.query || '');
     return result;
   } catch (err) {
-    return failureResult('owner_query_bridge_error', opts.query);
+    return failureResult(classifyOwnerBridgeError(err), opts.query);
   }
 }
 
@@ -237,7 +256,7 @@ function newMeta(usedOfflineFallback, emptyCoverageDigest) {
     routing_active: false,
     wsp_hits: 'unknown', code_hits: 'unknown', skill_hits: 'unknown',
     target_recall_ok: 'unknown', index_gap_detected: 'unknown',
-    direct_read_fallback_used: !!usedOfflineFallback,
+    direct_read_fallback_used: false,
     required_targets_total: 0, required_targets_recalled: 0, required_targets_missing: [],
     work_focus_targets_derived: false, work_focus_target_derivation_sources: [],
     work_focus_targets_dropped_low_confidence: [], typed_target_extraction_applied: false,
@@ -295,14 +314,16 @@ function applyRecallMetadata(meta, recall, data, dependencies) {
 function applyDirectReadMetadata(meta, data, usedOfflineFallback) {
   const directRead = data.direct_read && typeof data.direct_read === 'object' ? data.direct_read : null;
   if (!directRead) {
-    meta.direct_read_fallback_used = !!usedOfflineFallback;
+    meta.direct_read_fallback_used = false;
     return;
   }
-  meta.direct_read_fallback_used = !!directRead.direct_read_fallback_used;
   meta.direct_read_paths = Array.isArray(directRead.direct_read_paths) ? directRead.direct_read_paths : [];
   meta.direct_read_rejected = Array.isArray(directRead.direct_read_rejected) ? directRead.direct_read_rejected : [];
   meta.direct_read_bytes = Number(directRead.direct_read_bytes || 0);
   meta.direct_read_truncated = Array.isArray(directRead.direct_read_truncated) ? directRead.direct_read_truncated : [];
+  meta.direct_read_fallback_used = directRead.direct_read_fallback_used === true
+    && meta.direct_read_paths.length > 0
+    && meta.direct_read_bytes > 0;
 }
 
 function buildMetaFromBundle(output, usedOfflineFallback, taskText, dependencies) {
@@ -351,6 +372,7 @@ module.exports = {
   failureResult,
   queryReceiptId,
   isAccepted,
+  classifyOwnerBridgeError,
   runOwnerQuery,
   mergeBundle,
   buildMetaFromBundle,

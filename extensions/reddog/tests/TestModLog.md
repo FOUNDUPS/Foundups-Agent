@@ -1,5 +1,15 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-19 - REDDOG_DEEP_DIVE_OWNER_FAILURE_DIRECT_READ_CONTINUITY_PHASE1
+
+- Reproduced the exact 0.4.7 p.fMALL host prompt with an unavailable semantic owner.
+- Proved the structured bundle remains active, all discovered targets enter governed direct read, source bytes survive, and the repository evidence gate passes.
+- Proved generic repository wording creates no external-research target and instruction/WSP words cannot outrank the p.fMALL implementation, tests, and docs.
+- Proved off-focus readable files cannot satisfy the deep-dive gate and the Run Trace exposes focus coverage.
+- Proved repository prompt-injection text remains untrusted data, offline lexical fallback cannot forge direct-read use, and owner failures receive stable safe categories.
+- Proved a capped repository manifest is surfaced and blocks deep-dive grounding rather than silently omitting later files.
+- Preserved explicit semantic/external fail-closed behavior and query-only HoloIndex boundaries.
+
 ## 2026-07-19 - REDDOG_GROUNDED_TARGET_ASSIGNMENT_CONTINUITY_PHASE1
 
 - Added extension contract coverage for resident intent v2, immutable grounded-target receipt generation, work-focus binding, and rejection when grounding is not ready.

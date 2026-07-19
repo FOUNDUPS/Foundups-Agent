@@ -344,6 +344,26 @@ def test_direct_read_absolute_path_rejected():
     assert result["telemetry"]["direct_read_fallback_used"] is False
 
 
+def test_direct_read_windows_namespace_and_ads_rejected(tmp_path):
+    fake_root = tmp_path / "repo"
+    fake_root.mkdir(parents=True)
+    (fake_root / "safe.py:payload").write_text("SYNTHETIC-ADS-CONTENT\n", encoding="utf-8")
+    targets = [
+        r"\\server\share\source.py",
+        r"\\?\C:\repo\source.py",
+        "safe.py:payload",
+    ]
+    result = _direct_read_fetch(fake_root, targets)
+    reasons = _rejected_reasons(result["telemetry"])
+    assert reasons.get("//server/share/source.py") == "absolute_path"
+    assert reasons.get("//?/C:/repo/source.py") == "absolute_path"
+    assert reasons.get("safe.py:payload") == "alternate_data_stream"
+    assert result["telemetry"]["direct_read_paths"] == []
+    assert "SYNTHETIC-ADS-CONTENT" not in "\n".join(
+        hit.get("content", "") for hit in result["hits"]
+    )
+
+
 def test_direct_read_secret_fixtures_never_read(tmp_path, monkeypatch):
     """.env and *.key synthetic fixtures are hard-denied and never read."""
     # Build a synthetic repo root so real repo secrets are never touched.
