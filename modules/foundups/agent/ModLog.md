@@ -1,5 +1,15 @@
 # Agent Module ModLog
 
+## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_RESIDENT_CLIENT_AND_HERMES_ADAPTER_PHASE1
+
+**Author**: 0102 architect | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added a Hermes transport adapter for submit/status/cancel/resume against the one canonical resident RedDog AgentDB cycle.
+- Required the host-authenticated principal to match the grounded v2 intent; payload role text never grants authority.
+- Added a bounded one-shot JSON bridge for external Hermes instruments without importing the Hermes builder/model loop.
+- Kept the route read-only: no shell, repo mutation, HoloIndex re-index, worktree, PR, merge, or Hermes execution authority.
+- Omitted unset environment paths instead of overriding canonical resident defaults with empty values.
+
 ## 2026-07-09 - WRE worktree cwd hazard guard integration
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 34, 50, 97

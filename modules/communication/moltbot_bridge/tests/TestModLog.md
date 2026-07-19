@@ -1,3 +1,10 @@
+## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_RESIDENT_CLIENT_AND_HERMES_ADAPTER_PHASE1
+
+- Added resident-client tests for canonical-cycle use, status-only reconnect, cancel/retry, principal/source mismatch, runtime-key injection, stored-record substitution, and read-only boundary contradiction.
+- Added fail-closed coverage for omitted canonical safety attestations.
+- Re-ran the durable AgentDB cycle suite to preserve canonical OpenClaw audit execution behavior.
+- Validation: 17 focused client/cycle tests and 113 resident/OpenClaw/architect tests passed.
+
 ## 2026-07-18: REDDOG_RESIDENT_CONTROL_RECEIPT_TRUTH_AUTH_CONCURRENCY_PHASE1
 
 **Files**: control-receipt auth/context, signer, canary, chain-store, OpenClaw,

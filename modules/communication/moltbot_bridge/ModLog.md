@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_RESIDENT_CLIENT_AND_HERMES_ADAPTER_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 71, 97
+**Phase**: One resident RedDog authority with transport-neutral clients
+
+- Added `RedDogResidentArchitectClient` over the existing durable AgentDB cycle for submit, reconnect, cancel, and resume.
+- Bound every operation to a host-authenticated principal, exact transport source/origin, FoundUp scope, and verified grounding receipt.
+- Rejected mutable runtime-key overrides, tampered stored ownership, and any result contradicting the canonical read-only boundary.
+- Exposed only bounded status/determination metadata; the client implements no model, shell, repo mutation, Hermes execution, or indexing path.
+- Fail closed when any canonical resident-cycle safety attestation is missing or false; response digests bind acceptance and safety state.
+- HoloIndex preflight found the new transport symbols absent from the active generation, whose receipt is pinned to an older repository head. Recorded `HOLOINDEX_REDDOG_TRANSPORT_CLIENT_DISCOVERABILITY_INDEX_GAP_PHASE1`; WRE/CI owns refresh, and this runtime remains query-only.
+
 ## 2026-07-19: REDDOG_GROUNDED_TARGET_ASSIGNMENT_CONTINUITY_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 97
