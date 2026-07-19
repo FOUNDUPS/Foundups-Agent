@@ -1,5 +1,14 @@
 # Agent Module TestModLog
 
+## 2026-07-19 - Resident RedDog Hermes thin-client tests
+
+- Proved Hermes submit uses the canonical resident client and does not invoke the Hermes model/builder path.
+- Proved reconnect, cancel, and resume use the persisted intent and reject replacement-intent substitution.
+- Proved payload identity text, wrong schema, and unsupported operations fail before the cycle runner.
+- Proved the one-shot bridge requires a host-authenticated principal and contains no shell or Hermes model imports.
+- Proved unset host paths are omitted rather than forwarded as empty runtime overrides.
+- Full `modules/foundups/agent/tests` validation: 1140 passed.
+
 ## 2026-06-20 - Package __init__ lazy-import boundary tests (FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1)
 
 **Commands** (PYTHONIOENCODING=utf-8):

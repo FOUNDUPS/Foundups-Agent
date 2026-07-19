@@ -2,6 +2,23 @@
 
 Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, validated module-path resolution, and the read-only ContextBundle dry-run consumer.
 
+## Hermes -> Resident RedDog Thin Client
+
+`hermes_reddog_resident_client_adapter.py` exposes Hermes as a transport to the
+single canonical resident RedDog AgentDB cycle. It accepts only
+`hermes_reddog_resident_request.v1` operations: `submit`, `status`, `cancel`,
+and `resume`. `submit` requires an already-grounded `reddog_intent.v2` whose
+source is `hermes_thin_client`; status/cancel/resume load the persisted intent
+by ID and reject a replacement intent. The authenticated principal is supplied
+by the host, not request prose.
+
+`scripts/hermes_reddog_resident_client_once.py` is the bounded JSON instrument
+bridge. The host must set `REDDOG_AUTHENTICATED_PRINCIPAL_ID`. The bridge does
+not invoke a Hermes model or builder and grants no shell, repository-write,
+worktree, PR, merge, HoloIndex-indexing, or execution authority. Natural-language
+target extraction and grounding for non-editor channels are not fabricated by
+this adapter; an upstream governed grounding service must supply the v2 receipt.
+
 ## ContextBundle Dry-Run Consumer (WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1)
 
 First consumer wiring of the read-only #775 ContextBundle into the EXISTING
