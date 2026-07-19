@@ -169,11 +169,18 @@ def test_snapshot_verification_uses_fresh_client_collection_handle(
     persisted = SnapshotCollection("navigation_code", 3)
     candidate = _holo()
     candidate.code_collection = stale
+    lookups: list[tuple[str, object]] = []
+
+    def get_collection(name: str, *, embedding_function):
+        lookups.append((name, embedding_function))
+        return persisted if name == "navigation_code" else None
+
     candidate.client = SimpleNamespace(
-        get_collection=lambda name: persisted if name == "navigation_code" else None
+        get_collection=get_collection
     )
 
     assert collection_snapshot_matches_entry(candidate, "navigation_code", entry)
+    assert lookups == [("navigation_code", None)]
 
     candidate.client = SimpleNamespace(
         get_collection=lambda _name: (_ for _ in ()).throw(RuntimeError("unavailable"))

@@ -1,0 +1,286 @@
+"""Isolated persisted-state verification for HoloIndex maintenance receipts."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess  # nosec B404  # Fixed interpreter/module, never a worker command.
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, Callable, Mapping, Sequence
+
+from holo_index.freshness_receipt import (
+    BASELINE_QUERY_COLLECTIONS,
+    COLLECTION_ATTRS,
+    CollectionFreshness,
+    HoloIndexFreshnessReceipt,
+    collection_snapshot_matches_entry,
+    freshness_receipt_integrity_ok,
+)
+from holo_index.storage_contract import storage_path_identity
+
+
+SCHEMA_VERSION = "holoindex_isolated_snapshot_probe.v1"
+MAX_RECEIPT_BYTES = 2_000_000
+DEFAULT_TIMEOUT_SECONDS = 180.0
+
+
+class IsolatedSnapshotProbeError(RuntimeError):
+    """Stable fail-closed error raised by the parent maintenance process."""
+
+    def __init__(self, code: str) -> None:
+        self.code = code
+        super().__init__(code)
+
+
+@dataclass(frozen=True)
+class IsolatedSnapshotProbeResult:
+    """Secret-free persisted collection verification result."""
+
+    ok: bool
+    generation_id: str
+    mismatched_collections: tuple[str, ...]
+    error: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "ok": self.ok,
+            "generation_id": self.generation_id,
+            "mismatched_collections": list(self.mismatched_collections),
+            "error": self.error,
+        }
+
+
+def _receipt_from_mapping(value: Mapping[str, Any]) -> HoloIndexFreshnessReceipt:
+    collections = value.get("collections")
+    if not isinstance(collections, list):
+        raise ValueError("collections_required")
+    return HoloIndexFreshnessReceipt(
+        schema_version=str(value.get("schema_version") or ""),
+        generated_at=str(value.get("generated_at") or ""),
+        repo_root=str(value.get("repo_root") or ""),
+        repo_head_sha=str(value.get("repo_head_sha") or ""),
+        ssd_path=str(value.get("ssd_path") or ""),
+        source=str(value.get("source") or ""),
+        generation_id=str(value.get("generation_id") or ""),
+        base_generation_id=str(value.get("base_generation_id") or ""),
+        collections=[
+            CollectionFreshness(**entry)
+            for entry in collections
+            if isinstance(entry, Mapping)
+        ],
+    )
+
+
+def _default_client_factory(ssd_path: Path) -> Any:
+    os.environ.update(
+        {
+            "ANONYMIZED_TELEMETRY": "false",
+            "HOLOINDEX_QUERY_READONLY": "1",
+            "HOLO_OFFLINE": "1",
+            "HOLO_DISABLE_PIP_INSTALL": "1",
+            "HF_HUB_OFFLINE": "1",
+            "TRANSFORMERS_OFFLINE": "1",
+        }
+    )
+    import chromadb
+
+    return chromadb.PersistentClient(path=str(ssd_path / "vectors"))
+
+
+def open_persisted_collection_view(
+    ssd_path: Path | str,
+    *,
+    client_factory: Callable[[Path], Any] | None = None,
+) -> Any:
+    """Open collection handles from persisted state without loading an encoder."""
+
+    ssd = Path(ssd_path).resolve(strict=False)
+    client = (client_factory or _default_client_factory)(ssd)
+    attributes: dict[str, Any] = {}
+    for name, attr_name in COLLECTION_ATTRS.items():
+        try:
+            attributes[attr_name] = client.get_collection(
+                name,
+                embedding_function=None,
+            )
+        except Exception:
+            attributes[attr_name] = None
+    metadata = getattr(attributes.get("code_collection"), "metadata", None)
+    embedding = metadata if isinstance(metadata, Mapping) else {}
+    return SimpleNamespace(
+        client=client,
+        **attributes,
+        index_embedding_backend=str(embedding.get("embedding_backend") or ""),
+        index_embedding_model_id=str(embedding.get("embedding_model") or ""),
+        index_embedding_space_fingerprint=str(
+            embedding.get("embedding_space_fingerprint") or ""
+        ),
+    )
+
+
+def probe_collection_snapshots(
+    receipt: HoloIndexFreshnessReceipt,
+    *,
+    ssd_path: Path | str,
+    client_factory: Callable[[Path], Any] | None = None,
+) -> IsolatedSnapshotProbeResult:
+    """Reopen the persisted store and verify every canonical collection once."""
+
+    ssd = Path(ssd_path).resolve(strict=False)
+    if not freshness_receipt_integrity_ok(receipt):
+        return IsolatedSnapshotProbeResult(
+            False, receipt.generation_id, (), "INVALID_RECEIPT_INTEGRITY"
+        )
+    if storage_path_identity(receipt.ssd_path) != storage_path_identity(ssd):
+        return IsolatedSnapshotProbeResult(
+            False, receipt.generation_id, (), "SSD_PATH_MISMATCH"
+        )
+    entries = {
+        entry.name: entry
+        for entry in receipt.collections
+        if entry.name in BASELINE_QUERY_COLLECTIONS
+    }
+    if set(entries) != set(BASELINE_QUERY_COLLECTIONS):
+        return IsolatedSnapshotProbeResult(
+            False, receipt.generation_id, (), "BASELINE_COLLECTIONS_INCOMPLETE"
+        )
+    try:
+        client = (client_factory or _default_client_factory)(ssd)
+        holo = SimpleNamespace(client=client)
+        mismatches = tuple(
+            name
+            for name in sorted(BASELINE_QUERY_COLLECTIONS)
+            if not collection_snapshot_matches_entry(holo, name, entries[name])
+        )
+    except Exception:
+        return IsolatedSnapshotProbeResult(
+            False, receipt.generation_id, (), "PERSISTED_STORE_UNAVAILABLE"
+        )
+    return IsolatedSnapshotProbeResult(
+        not mismatches,
+        receipt.generation_id,
+        mismatches,
+        "" if not mismatches else "COLLECTION_SNAPSHOT_MISMATCH",
+    )
+
+
+def _probe_environment() -> dict[str, str]:
+    environment = dict(os.environ)
+    environment.update(
+        {
+            "ANONYMIZED_TELEMETRY": "false",
+            "HOLOINDEX_QUERY_READONLY": "1",
+            "HOLO_OFFLINE": "1",
+            "HOLO_DISABLE_PIP_INSTALL": "1",
+            "HF_HUB_OFFLINE": "1",
+            "TRANSFORMERS_OFFLINE": "1",
+        }
+    )
+    return environment
+
+
+def verify_collection_snapshots_isolated(
+    receipt: HoloIndexFreshnessReceipt,
+    *,
+    ssd_path: Path | str,
+    repo_root: Path | str,
+    timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+) -> list[str]:
+    """Run the persisted proof in a fresh Python process or fail closed."""
+
+    command = [
+        sys.executable,
+        "-B",
+        "-m",
+        "holo_index.isolated_collection_snapshot_probe",
+        "--ssd",
+        str(Path(ssd_path).resolve(strict=False)),
+    ]
+    try:
+        completed = subprocess.run(  # nosec B603  # Fixed argv; shell is disabled.
+            command,
+            cwd=str(Path(repo_root).resolve(strict=False)),
+            env=_probe_environment(),
+            input=receipt.to_json(),
+            text=True,
+            encoding="utf-8",
+            errors="strict",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=float(timeout_seconds),
+            check=False,
+            shell=False,
+        )
+    except (OSError, subprocess.SubprocessError, ValueError):
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_PROCESS_FAILED") from None
+    if completed.returncode != 0:
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_PROCESS_FAILED")
+    try:
+        response = json.loads(completed.stdout)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_RESPONSE_INVALID") from None
+    if not isinstance(response, Mapping):
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_RESPONSE_INVALID")
+    mismatches = response.get("mismatched_collections")
+    valid_mismatches = bool(
+        isinstance(mismatches, list)
+        and all(
+            isinstance(name, str) and name in BASELINE_QUERY_COLLECTIONS
+            for name in mismatches
+        )
+        and len(mismatches) == len(set(mismatches))
+    )
+    if (
+        response.get("schema_version") != SCHEMA_VERSION
+        or response.get("generation_id") != receipt.generation_id
+        or not valid_mismatches
+    ):
+        raise IsolatedSnapshotProbeError("ISOLATED_PROBE_RESPONSE_INVALID")
+    if response.get("ok") is True and not mismatches and not response.get("error"):
+        return []
+    if response.get("error") == "COLLECTION_SNAPSHOT_MISMATCH" and mismatches:
+        return sorted(mismatches)
+    raise IsolatedSnapshotProbeError(
+        str(response.get("error") or "ISOLATED_PROBE_FAILED")
+    )
+
+
+def _read_receipt() -> HoloIndexFreshnessReceipt:
+    raw = sys.stdin.buffer.read(MAX_RECEIPT_BYTES + 1)
+    if len(raw) > MAX_RECEIPT_BYTES:
+        raise ValueError("receipt_too_large")
+    value = json.loads(raw.decode("utf-8", errors="strict"))
+    if not isinstance(value, Mapping):
+        raise ValueError("receipt_not_object")
+    return _receipt_from_mapping(value)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ssd", required=True)
+    args = parser.parse_args(argv)
+    try:
+        receipt = _read_receipt()
+        result = probe_collection_snapshots(receipt, ssd_path=args.ssd)
+    except Exception:
+        result = IsolatedSnapshotProbeResult(False, "", (), "INVALID_REQUEST")
+    sys.stdout.write(json.dumps(result.to_dict(), sort_keys=True) + "\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+__all__ = [
+    "IsolatedSnapshotProbeError",
+    "IsolatedSnapshotProbeResult",
+    "open_persisted_collection_view",
+    "probe_collection_snapshots",
+    "verify_collection_snapshots_isolated",
+]

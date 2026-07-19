@@ -73,6 +73,26 @@ def _holo() -> SimpleNamespace:
     )
 
 
+def _attach_chroma_client(
+    holo: SimpleNamespace,
+    lifecycle: list[str],
+    label: str,
+) -> None:
+    class ChromaClient:
+        __module__ = "chromadb.api.client"
+
+        def __init__(self) -> None:
+            self._system = SimpleNamespace(
+                stop=lambda: lifecycle.append(f"{label}_stopped")
+            )
+
+        @staticmethod
+        def clear_system_cache() -> None:
+            lifecycle.append(f"{label}_cache_cleared")
+
+    holo.client = ChromaClient()
+
+
 def _clean_state(head: str = "abc123") -> SimpleNamespace:
     return SimpleNamespace(proven_clean=True, head_sha=head, error="")
 
@@ -402,7 +422,7 @@ def test_targeted_refresh_rejects_collection_snapshot_mutation(tmp_path: Path) -
     holo.wsp_collection._count = 3
     with pytest.raises(
         MaintenanceSessionError,
-        match="HOLOINDEX_CARRY_FORWARD_COLLECTION_MISMATCH",
+        match="HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_MISMATCH",
     ):
         session.complete(
             holo,
@@ -437,7 +457,7 @@ def test_targeted_refresh_rejects_collection_content_mutation(
     holo.wsp_collection.get = mutated_snapshot
     with pytest.raises(
         MaintenanceSessionError,
-        match="HOLOINDEX_CARRY_FORWARD_COLLECTION_MISMATCH",
+        match="HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_MISMATCH",
     ):
         session.complete(
             holo,
@@ -485,6 +505,158 @@ def test_final_snapshot_recheck_blocks_post_proof_mutation(tmp_path: Path) -> No
         entry for entry in invalidation.collections if entry.name == "navigation_code"
     )
     assert code.verification == "IN_PROGRESS"
+
+
+def test_real_client_routes_final_snapshot_check_to_isolated_probe(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    holo = _holo()
+    calls = []
+    lifecycle = []
+
+    class ChromaClient:
+        __module__ = "chromadb.api.client"
+
+        def __init__(self) -> None:
+            self._system = SimpleNamespace(
+                stop=lambda: lifecycle.append("writer_stopped")
+            )
+
+        @staticmethod
+        def clear_system_cache() -> None:
+            lifecycle.append("cache_cleared")
+
+    holo.client = ChromaClient()
+    monkeypatch.setattr(
+        maintenance_module,
+        "open_persisted_collection_view",
+        lambda _ssd: lifecycle.append("persisted_view_opened") or holo,
+    )
+    monkeypatch.setattr(
+        maintenance_module,
+        "verify_collection_snapshots_isolated",
+        lambda receipt, **kwargs: (
+            lifecycle.append("isolated_probe"),
+            calls.append((receipt, kwargs)),
+            [],
+        )[-1],
+    )
+
+    receipt = session.complete(
+        holo,
+        refreshed_collections={"navigation_code"},
+        source="targeted",
+        refresh_proofs=_proofs("navigation_code"),
+    )
+    session.close()
+
+    assert receipt.source == "targeted"
+    assert len(calls) == 1
+    assert lifecycle == [
+        "writer_stopped",
+        "cache_cleared",
+        "persisted_view_opened",
+        "writer_stopped",
+        "cache_cleared",
+        "isolated_probe",
+    ]
+    assert calls[0][1]["ssd_path"] == tmp_path / "ssd"
+    assert calls[0][1]["repo_root"] == tmp_path / "repo"
+
+
+def test_persisted_proof_view_finalizes_when_receipt_build_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    lifecycle: list[str] = []
+    writer = _holo()
+    proof = _holo()
+    _attach_chroma_client(writer, lifecycle, "writer")
+    _attach_chroma_client(proof, lifecycle, "proof")
+    monkeypatch.setattr(
+        maintenance_module,
+        "open_persisted_collection_view",
+        lambda _ssd: lifecycle.append("persisted_view_opened") or proof,
+    )
+    monkeypatch.setattr(
+        maintenance_module,
+        "_build_completed_receipt",
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("build failed")),
+    )
+
+    with pytest.raises(RuntimeError, match="build failed"):
+        session.complete(
+            writer,
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+    assert lifecycle == [
+        "writer_stopped",
+        "writer_cache_cleared",
+        "persisted_view_opened",
+        "proof_stopped",
+        "proof_cache_cleared",
+    ]
+
+
+def test_persisted_proof_view_finalizes_when_repository_head_changes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    states = iter((HEAD_SHA, "c" * 40))
+    session._repository_state_reader = lambda _root: _clean_state(next(states))
+    lifecycle: list[str] = []
+    writer = _holo()
+    proof = _holo()
+    _attach_chroma_client(writer, lifecycle, "writer")
+    _attach_chroma_client(proof, lifecycle, "proof")
+    monkeypatch.setattr(
+        maintenance_module,
+        "open_persisted_collection_view",
+        lambda _ssd: lifecycle.append("persisted_view_opened") or proof,
+    )
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_REPOSITORY_HEAD_CHANGED",
+    ):
+        session.complete(
+            writer,
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+    assert lifecycle == [
+        "writer_stopped",
+        "writer_cache_cleared",
+        "persisted_view_opened",
+        "proof_stopped",
+        "proof_cache_cleared",
+    ]
 
 
 def test_serialized_carry_forward_tampering_fails_query_admission(

@@ -7,6 +7,7 @@ CLI/WRE maintenance owners. Query workers never import this writer API.
 from __future__ import annotations
 
 import atexit
+from contextlib import contextmanager
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,6 +31,11 @@ from holo_index.maintenance_lock import (
     MaintenanceLockError,
     acquire_maintenance_lease,
     maintenance_lock_path,
+)
+from holo_index.isolated_collection_snapshot_probe import (
+    IsolatedSnapshotProbeError,
+    open_persisted_collection_view,
+    verify_collection_snapshots_isolated,
 )
 from holo_index.repository_state import read_repository_state
 from holo_index.source_scope import canonical_source_scope_id
@@ -326,22 +332,6 @@ def _verified_carry_forward_state(
         raise MaintenanceSessionError(
             "HOLOINDEX_CARRY_FORWARD_PROOF_FAILED", str(exc)
         ) from exc
-    if session.base_receipt is None:
-        return evidence
-    prior_entries = {
-        entry.name: entry for entry in session.base_receipt.collections
-    }
-    snapshot_failures = [
-        name
-        for name in carry_names
-        if name not in prior_entries
-        or not collection_snapshot_matches_entry(holo, name, prior_entries[name])
-    ]
-    if snapshot_failures:
-        raise MaintenanceSessionError(
-            "HOLOINDEX_CARRY_FORWARD_COLLECTION_MISMATCH",
-            f"collections={snapshot_failures}",
-        )
     return evidence
 
 
@@ -357,7 +347,7 @@ def _write_completed_receipt(
         ) from exc
 
 
-def _final_collection_snapshot_failures(
+def _in_process_collection_snapshot_failures(
     holo: Any,
     receipt: HoloIndexFreshnessReceipt,
 ) -> list[str]:
@@ -370,6 +360,72 @@ def _final_collection_snapshot_failures(
         and entry.verification == "PASS"
         and not collection_snapshot_matches_entry(holo, entry.name, entry)
     )
+
+
+def _requires_isolated_snapshot_probe(holo: Any) -> bool:
+    client = getattr(holo, "client", None)
+    return type(client).__module__.startswith("chromadb.")
+
+
+def _finalize_writer_store(holo: Any) -> None:
+    """Flush and stop the Chroma writer before isolated persisted proof."""
+
+    client = getattr(holo, "client", None)
+    system = getattr(client, "_system", None)
+    stop = getattr(system, "stop", None)
+    clear_cache = getattr(type(client), "clear_system_cache", None)
+    if not callable(stop) or not callable(clear_cache):
+        raise MaintenanceSessionError(
+            "HOLOINDEX_WRITER_STORE_FINALIZATION_FAILED",
+            "chroma_lifecycle_unavailable",
+        )
+    try:
+        stop()
+        clear_cache()
+    except Exception as exc:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_WRITER_STORE_FINALIZATION_FAILED",
+            type(exc).__name__,
+        ) from exc
+
+
+@contextmanager
+def _persisted_collection_proof_view(ssd_path: Path | str):
+    """Yield a fresh persisted view and always release its Chroma system."""
+
+    try:
+        proof_holo = open_persisted_collection_view(ssd_path)
+    except Exception as exc:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_PERSISTED_COLLECTION_VIEW_FAILED",
+            type(exc).__name__,
+        ) from exc
+    try:
+        yield proof_holo
+    finally:
+        _finalize_writer_store(proof_holo)
+
+
+def _final_collection_snapshot_failures(
+    session: Any,
+    holo: Any,
+    receipt: HoloIndexFreshnessReceipt,
+) -> list[str]:
+    """Verify persisted state outside Chroma's writer-process system cache."""
+
+    if not _requires_isolated_snapshot_probe(holo):
+        return _in_process_collection_snapshot_failures(holo, receipt)
+    try:
+        return verify_collection_snapshots_isolated(
+            receipt,
+            ssd_path=session.ssd_path,
+            repo_root=session.repo_root,
+        )
+    except IsolatedSnapshotProbeError as exc:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED",
+            exc.code,
+        ) from exc
 
 
 @dataclass
@@ -470,29 +526,60 @@ class MaintenanceSession:
             holo,
             head_sha=head_sha,
         )
-        receipt = _build_completed_receipt(
-            self,
-            holo,
-            refreshed=refreshed,
-            source=source,
-            refresh_proofs=refresh_proofs,
-            source_manifests=source_manifests,
-            source_scopes=source_scopes,
-            source_policy_digests=source_policy_digests,
-            carry_forward_evidence=carry_forward_evidence,
-            head_sha=head_sha,
-        )
-        final_head = _clean_repository_head(
-            self.repo_root,
-            self._repository_state_reader,
-            require_head=False,
-        )
-        if final_head != self.starting_head_sha:
-            raise MaintenanceSessionError(
-                "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
-                f"expected={self.starting_head_sha}; actual={final_head}",
+        if _requires_isolated_snapshot_probe(holo):
+            _finalize_writer_store(holo)
+            with _persisted_collection_proof_view(self.ssd_path) as proof_holo:
+                receipt = _build_completed_receipt(
+                    self,
+                    proof_holo,
+                    refreshed=refreshed,
+                    source=source,
+                    refresh_proofs=refresh_proofs,
+                    source_manifests=source_manifests,
+                    source_scopes=source_scopes,
+                    source_policy_digests=source_policy_digests,
+                    carry_forward_evidence=carry_forward_evidence,
+                    head_sha=head_sha,
+                )
+                final_head = _clean_repository_head(
+                    self.repo_root,
+                    self._repository_state_reader,
+                    require_head=False,
+                )
+                if final_head != self.starting_head_sha:
+                    raise MaintenanceSessionError(
+                        "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
+                        f"expected={self.starting_head_sha}; actual={final_head}",
+                    )
+        else:
+            proof_holo = holo
+            receipt = _build_completed_receipt(
+                self,
+                proof_holo,
+                refreshed=refreshed,
+                source=source,
+                refresh_proofs=refresh_proofs,
+                source_manifests=source_manifests,
+                source_scopes=source_scopes,
+                source_policy_digests=source_policy_digests,
+                carry_forward_evidence=carry_forward_evidence,
+                head_sha=head_sha,
             )
-        snapshot_failures = _final_collection_snapshot_failures(holo, receipt)
+            final_head = _clean_repository_head(
+                self.repo_root,
+                self._repository_state_reader,
+                require_head=False,
+            )
+            if final_head != self.starting_head_sha:
+                raise MaintenanceSessionError(
+                    "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
+                    f"expected={self.starting_head_sha}; actual={final_head}",
+                )
+        snapshot_failures = _final_collection_snapshot_failures(
+            self,
+            proof_holo,
+            receipt,
+        )
         if snapshot_failures:
             raise MaintenanceSessionError(
                 "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_MISMATCH",
