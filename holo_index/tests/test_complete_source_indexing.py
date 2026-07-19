@@ -168,4 +168,3 @@ def test_skillz_agent_identifiers_accept_mixed_scalar_values(tmp_path: Path) -> 
     assert result.failed_count == 0
     metadata = holo.skill_collection.add_calls[0]["metadatas"][0]
     assert metadata["agents"] == "97,66,worker"
-
