@@ -13,14 +13,18 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping
 
 from holo_index.freshness_receipt import (
+    BASELINE_QUERY_COLLECTIONS,
     HoloIndexFreshnessReceipt,
     build_freshness_receipt,
+    collection_snapshot_matches_entry,
     freshness_receipt_path,
+    freshness_receipt_integrity_ok,
     load_freshness_receipt,
     publish_maintenance_invalidation,
     write_freshness_receipt,
 )
 from holo_index.embedding_space import CANONICAL_INDEX_BACKEND
+from holo_index.canonical_source_manifest import probe_canonical_source_manifests
 from holo_index.maintenance_lock import (
     MaintenanceLease,
     MaintenanceLockError,
@@ -29,6 +33,11 @@ from holo_index.maintenance_lock import (
 )
 from holo_index.repository_state import read_repository_state
 from holo_index.source_scope import canonical_source_scope_id
+from holo_index.storage_contract import storage_path_identity
+from holo_index.verified_collection_carry_forward import (
+    build_carry_forward_evidence,
+    collection_source_policy_digest,
+)
 
 
 MAINTENANCE_FAILURE_EXIT_CODE = 4
@@ -52,7 +61,8 @@ class MaintenanceSessionError(RuntimeError):
 def _complete_source_proofs(
     planned: frozenset[str],
     refresh_proofs: Mapping[str, Any] | None,
-) -> tuple[dict[str, str], dict[str, str]]:
+    repo_root: Path,
+) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
     proofs = dict(refresh_proofs or {})
     if set(proofs) != set(planned):
         raise MaintenanceSessionError(
@@ -61,6 +71,7 @@ def _complete_source_proofs(
         )
     manifests: dict[str, str] = {}
     scopes: dict[str, str] = {}
+    policies: dict[str, str] = {}
     failed: list[str] = []
     for name in sorted(planned):
         proof = proofs[name]
@@ -76,6 +87,11 @@ def _complete_source_proofs(
             failed.append(name)
             continue
         manifests[name] = digest
+        policy_digest = collection_source_policy_digest(repo_root, name)
+        if not policy_digest:
+            failed.append(name)
+            continue
+        policies[name] = policy_digest
         if scope:
             scopes[name] = scope
     if failed:
@@ -83,7 +99,35 @@ def _complete_source_proofs(
             "HOLOINDEX_MAINTENANCE_SOURCE_PROOF_INCOMPLETE",
             f"collections={failed}",
         )
-    return manifests, scopes
+    return manifests, scopes, policies
+
+
+def _validate_canonical_refresh_manifests(
+    holo: Any,
+    refreshed: frozenset[str],
+    source_manifests: Mapping[str, str],
+    source_scopes: Mapping[str, str],
+) -> None:
+    """Independently re-prove every refreshed collection source set."""
+
+    try:
+        canonical = probe_canonical_source_manifests(holo, refreshed)
+    except Exception as exc:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_REFRESH_SOURCE_PROBE_FAILED", str(exc)
+        ) from exc
+    mismatched = [
+        name
+        for name in sorted(refreshed)
+        if name not in canonical
+        or canonical[name].digest != source_manifests.get(name, "")
+        or canonical[name].source_scope_id != source_scopes.get(name, "")
+    ]
+    if mismatched:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_REFRESH_SOURCE_MANIFEST_MISMATCH",
+            f"collections={mismatched}",
+        )
 
 
 def _final_proof_failures(
@@ -107,6 +151,8 @@ def _final_proof_failures(
             or entry.count != int(getattr(refresh_proofs[name], "indexed_count", -1))
             or not entry.source_manifest_digest
             or not entry.indexed_paths_digest
+            or not entry.source_policy_digest
+            or not entry.collection_snapshot_digest
             or entry.embedding_backend != CANONICAL_INDEX_BACKEND
             or not entry.embedding_model
             or not entry.embedding_space_fingerprint.startswith("sha256:")
@@ -143,7 +189,11 @@ def _begin_invalidation(
     planned: frozenset[str],
     source: str,
     head_sha: str,
-) -> tuple[MaintenanceLease, HoloIndexFreshnessReceipt]:
+) -> tuple[
+    MaintenanceLease,
+    HoloIndexFreshnessReceipt,
+    HoloIndexFreshnessReceipt | None,
+]:
     try:
         lease = acquire_maintenance_lease(maintenance_lock_path(ssd_path))
     except MaintenanceLockError as exc:
@@ -158,6 +208,26 @@ def _begin_invalidation(
                 base_receipt = load_freshness_receipt(receipt_path)
             except (OSError, TypeError, ValueError, json.JSONDecodeError):
                 base_receipt = None
+        if base_receipt is not None:
+            base_integrity_ok = freshness_receipt_integrity_ok(base_receipt)
+            base_binding_ok = bool(
+                base_receipt.repo_root
+                and base_receipt.ssd_path
+                and storage_path_identity(base_receipt.repo_root)
+                == storage_path_identity(repo_root)
+                and storage_path_identity(base_receipt.ssd_path)
+                == storage_path_identity(ssd_path)
+            )
+            if not base_integrity_ok or not base_binding_ok:
+                if BASELINE_QUERY_COLLECTIONS.issubset(planned):
+                    base_receipt = None
+                else:
+                    code = (
+                        "HOLOINDEX_BASE_FRESHNESS_RECEIPT_INVALID"
+                        if not base_integrity_ok
+                        else "HOLOINDEX_BASE_FRESHNESS_RECEIPT_BINDING_MISMATCH"
+                    )
+                    raise MaintenanceSessionError(code)
         invalidation = publish_maintenance_invalidation(
             receipt_path,
             planned,
@@ -167,12 +237,15 @@ def _begin_invalidation(
             source=source,
             repo_head_sha=head_sha,
         )
+    except MaintenanceSessionError:
+        lease.release()
+        raise
     except Exception as exc:
         lease.release()
         raise MaintenanceSessionError(
             "HOLOINDEX_MAINTENANCE_INVALIDATION_FAILED", str(exc)
         ) from exc
-    return lease, invalidation
+    return lease, invalidation, base_receipt
 
 
 def _validate_completed_plan(
@@ -199,6 +272,8 @@ def _build_completed_receipt(
     refresh_proofs: Mapping[str, Any] | None,
     source_manifests: Mapping[str, str],
     source_scopes: Mapping[str, str],
+    source_policy_digests: Mapping[str, str],
+    carry_forward_evidence: Mapping[str, Any],
     head_sha: str,
 ) -> HoloIndexFreshnessReceipt:
     receipt = build_freshness_receipt(
@@ -208,9 +283,11 @@ def _build_completed_receipt(
         source=source,
         repo_head_sha=head_sha,
         refreshed_collections=refreshed,
-        base_receipt=session.invalidation_receipt,
+        base_receipt=session.base_receipt,
         refresh_source_manifests=source_manifests,
         refresh_source_scopes=source_scopes,
+        refresh_source_policy_digests=source_policy_digests,
+        _carry_forward_evidence=carry_forward_evidence,
     )
     failed = _final_proof_failures(
         receipt,
@@ -225,6 +302,49 @@ def _build_completed_receipt(
     return receipt
 
 
+def _verified_carry_forward_state(
+    session: Any,
+    holo: Any,
+    *,
+    head_sha: str,
+) -> Mapping[str, Any]:
+    carry_names = (
+        sorted(BASELINE_QUERY_COLLECTIONS.difference(session.planned_collections))
+        if session.base_receipt is not None
+        else []
+    )
+    try:
+        source_manifests = probe_canonical_source_manifests(holo, carry_names)
+        evidence = build_carry_forward_evidence(
+            repo_root=session.repo_root,
+            base_receipt=session.base_receipt,
+            collection_names=carry_names,
+            head_sha=head_sha,
+            current_source_manifests=source_manifests,
+        )
+    except Exception as exc:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_CARRY_FORWARD_PROOF_FAILED", str(exc)
+        ) from exc
+    if session.base_receipt is None:
+        return evidence
+    prior_entries = {
+        entry.name: entry for entry in session.base_receipt.collections
+    }
+    snapshot_failures = [
+        name
+        for name in carry_names
+        if name not in prior_entries
+        or not collection_snapshot_matches_entry(holo, name, prior_entries[name])
+    ]
+    if snapshot_failures:
+        raise MaintenanceSessionError(
+            "HOLOINDEX_CARRY_FORWARD_COLLECTION_MISMATCH",
+            f"collections={snapshot_failures}",
+        )
+    return evidence
+
+
 def _write_completed_receipt(
     session: Any,
     receipt: HoloIndexFreshnessReceipt,
@@ -237,6 +357,21 @@ def _write_completed_receipt(
         ) from exc
 
 
+def _final_collection_snapshot_failures(
+    holo: Any,
+    receipt: HoloIndexFreshnessReceipt,
+) -> list[str]:
+    """Detect collection mutation after proof assembly and before publication."""
+
+    return sorted(
+        entry.name
+        for entry in receipt.collections
+        if entry.name in BASELINE_QUERY_COLLECTIONS
+        and entry.verification == "PASS"
+        and not collection_snapshot_matches_entry(holo, entry.name, entry)
+    )
+
+
 @dataclass
 class MaintenanceSession:
     """Exclusive maintenance lease plus an already-published invalidation."""
@@ -246,6 +381,7 @@ class MaintenanceSession:
     planned_collections: frozenset[str]
     starting_head_sha: str
     invalidation_receipt: HoloIndexFreshnessReceipt
+    base_receipt: HoloIndexFreshnessReceipt | None
     _lease: MaintenanceLease
     _repository_state_reader: Callable[[Path], Any]
     _closed: bool = False
@@ -269,7 +405,7 @@ class MaintenanceSession:
             raise MaintenanceSessionError("HOLOINDEX_MAINTENANCE_PLAN_EMPTY")
         state_reader = repository_state_reader or read_repository_state
         head_sha = _clean_repository_head(root, state_reader)
-        lease, invalidation = _begin_invalidation(
+        lease, invalidation, base_receipt = _begin_invalidation(
             ssd_path=ssd,
             repo_root=root,
             planned=planned,
@@ -283,6 +419,7 @@ class MaintenanceSession:
             planned_collections=planned,
             starting_head_sha=head_sha,
             invalidation_receipt=invalidation,
+            base_receipt=base_receipt,
             _lease=lease,
             _repository_state_reader=state_reader,
         )
@@ -307,9 +444,16 @@ class MaintenanceSession:
             self.planned_collections,
             refreshed_collections,
         )
-        source_manifests, source_scopes = _complete_source_proofs(
+        source_manifests, source_scopes, source_policy_digests = _complete_source_proofs(
             self.planned_collections,
             refresh_proofs,
+            self.repo_root,
+        )
+        _validate_canonical_refresh_manifests(
+            holo,
+            refreshed,
+            source_manifests,
+            source_scopes,
         )
         head_sha = _clean_repository_head(
             self.repo_root,
@@ -321,6 +465,11 @@ class MaintenanceSession:
                 "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
                 f"expected={self.starting_head_sha}; actual={head_sha}",
             )
+        carry_forward_evidence = _verified_carry_forward_state(
+            self,
+            holo,
+            head_sha=head_sha,
+        )
         receipt = _build_completed_receipt(
             self,
             holo,
@@ -329,8 +478,26 @@ class MaintenanceSession:
             refresh_proofs=refresh_proofs,
             source_manifests=source_manifests,
             source_scopes=source_scopes,
+            source_policy_digests=source_policy_digests,
+            carry_forward_evidence=carry_forward_evidence,
             head_sha=head_sha,
         )
+        final_head = _clean_repository_head(
+            self.repo_root,
+            self._repository_state_reader,
+            require_head=False,
+        )
+        if final_head != self.starting_head_sha:
+            raise MaintenanceSessionError(
+                "HOLOINDEX_REPOSITORY_HEAD_CHANGED",
+                f"expected={self.starting_head_sha}; actual={final_head}",
+            )
+        snapshot_failures = _final_collection_snapshot_failures(holo, receipt)
+        if snapshot_failures:
+            raise MaintenanceSessionError(
+                "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_MISMATCH",
+                f"collections={snapshot_failures}",
+            )
         _write_completed_receipt(self, receipt)
         return receipt
 

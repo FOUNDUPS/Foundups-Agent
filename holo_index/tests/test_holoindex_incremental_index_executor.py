@@ -82,16 +82,24 @@ class FakeCollection:
         ids = kwargs.get("ids", [])
         documents = kwargs.get("documents", [])
         metadatas = kwargs.get("metadatas", [])
-        for item_id, document, metadata in zip(ids, documents, metadatas):
+        embeddings = kwargs.get("embeddings", [])
+        for item_id, document, metadata, embedding in zip(
+            ids,
+            documents,
+            metadatas,
+            embeddings,
+        ):
             self.records[item_id] = {
                 "document": document,
                 "metadata": metadata,
+                "embedding": embedding,
             }
 
     def seed(self, item_id: str, *, path: str, foundup_id: str = "paccess_001") -> None:
         self.records[item_id] = {
             "document": "legacy",
             "metadata": {"path": path, "foundup_id": foundup_id},
+            "embedding": [0.0],
         }
 
     def count(self) -> int:
@@ -100,10 +108,12 @@ class FakeCollection:
     def get(self, include=None):
         return {
             "ids": list(self.records),
+            "documents": [record["document"] for record in self.records.values()],
             "metadatas": [
                 record["metadata"]
                 for record in self.records.values()
             ],
+            "embeddings": [record["embedding"] for record in self.records.values()],
         }
 
 

@@ -24,7 +24,12 @@ class _Collection:
         return 1
 
     def get(self, include=None):
-        return {"ids": ["one"], "metadatas": [{"path": "source.py"}]}
+        return {
+            "ids": ["one"],
+            "documents": ["source"],
+            "metadatas": [{"path": "source.py"}],
+            "embeddings": [[1.0]],
+        }
 
 
 class _FakeHolo:

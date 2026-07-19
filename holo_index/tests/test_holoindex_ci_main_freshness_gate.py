@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -16,8 +17,7 @@ from holo_index.ci_main_freshness_gate import (
     run_ci_main_freshness_gate,
 )
 from holo_index.freshness_receipt import (
-    CollectionFreshness,
-    HoloIndexFreshnessReceipt,
+    build_freshness_receipt,
     freshness_receipt_path,
     write_freshness_receipt,
 )
@@ -31,30 +31,37 @@ DIGEST = "sha256:" + "0" * 64
 
 
 def _write_receipt(tmp_path: Path, *, head: str = HEAD) -> Path:
-    receipt = HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
-        generated_at="2026-07-14T00:00:00+00:00",
-        repo_root=str(REPO_ROOT),
-        repo_head_sha=head,
-        ssd_path=str(tmp_path),
+    class _Collection:
+        metadata = {}
+
+        @staticmethod
+        def count() -> int:
+            return 2
+
+        @staticmethod
+        def get(include=None):
+            return {
+                "ids": ["ledger:0", "ledger:1"],
+                "documents": ["first", "second"],
+                "metadatas": [
+                    {"path": "docs/0102_session_briefings/work_ledger.example.json"},
+                    {"path": "docs/0102_session_briefings/work_ledger.schema.json"},
+                ],
+                "embeddings": [[0.0], [1.0]],
+            }
+
+    receipt = build_freshness_receipt(
+        SimpleNamespace(work_ledger_collection=_Collection()),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
         source="ci_targeted_reindex",
-        generation_id=DIGEST,
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=2,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=head,
-                last_indexed_at="2026-07-14T00:00:00+00:00",
-                source_manifest_digest=DIGEST,
-                indexed_paths_digest=DIGEST,
-                removed_paths_digest=DIGEST,
-                embedding_backend="ci-test",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            )
-        ],
+        generated_at="2026-07-14T00:00:00+00:00",
+        repo_head_sha=head,
+        refreshed_collections={"navigation_work_ledger"},
+        refresh_source_manifests={"navigation_work_ledger": DIGEST},
+        refresh_source_policy_digests={
+            "navigation_work_ledger": "sha256:" + ("1" * 64),
+        },
     )
     path = freshness_receipt_path(tmp_path)
     write_freshness_receipt(receipt, path)

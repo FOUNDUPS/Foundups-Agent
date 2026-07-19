@@ -15,7 +15,6 @@ WSP Compliance: WSP 87 (Size Limits), WSP 72 (Block Independence)
 
 from __future__ import annotations
 
-import ast
 import hashlib
 import json
 import logging
@@ -961,33 +960,9 @@ def index_docs_entries(holo: "HoloIndex") -> IndexResult:
         and optional warning message.
     """
     collection_name = "navigation_docs"
-    doc_paths = [
-        holo.project_root / "modules",
-        holo.project_root / "docs",
-        holo.project_root / "holo_index" / "docs",
-        holo.project_root / "WSP_framework" / "docs",
-    ]
+    from holo_index.canonical_source_manifest import _docs_source_files
 
-    files: List[Path] = []
-    for base in doc_paths:
-        if base.exists():
-            all_doc_files = sorted(list(base.rglob("*.md")))
-            filtered_files = [
-                f for f in all_doc_files
-                if 'node_modules' not in str(f)
-                and 'CHANGELOG' not in f.name.upper()
-                and 'package-lock' not in f.name.lower()
-                # Worktree safety fix: Check dot-prefix relative to base, not absolute path.
-                # This prevents rejecting all files when project_root is under .claude/worktrees/.
-                and not _has_dotfile_in_relative_path(f, base)
-                and '_backup' not in str(f).lower()
-                and '/archive/' not in str(f).lower()
-                and '\\archive\\' not in str(f).lower()
-                # Note: The .claude/worktrees clauses previously here are now redundant
-                # because the relative-path check ignores parent directories above base.
-            ]
-            files.extend(filtered_files)
-    files = filter_git_tracked_files(holo.project_root, files)
+    files = _docs_source_files(holo)
 
     discovered_count = len(files)
 
@@ -1137,6 +1112,7 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
     """
     collection_name = "navigation_knowledge"
     knowledge_path = holo.project_root / "WSP_knowledge" / "docs" / "Papers"
+    from holo_index.canonical_source_manifest import _knowledge_source_files
 
     if not knowledge_path.exists():
         holo._log_agent_action(f"Knowledge path not found: {knowledge_path}", "WARN")
@@ -1147,15 +1123,7 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
             warning=f"Knowledge path not found: {knowledge_path}"
         )
 
-    all_files = sorted(knowledge_path.rglob("*.md"))
-    files = [
-        f for f in all_files
-        if not _has_dotfile_in_relative_path(f, knowledge_path)
-        and '_backup' not in str(f).lower()
-        and '/archive/' not in str(f).lower()
-        and '\\archive\\' not in str(f).lower()
-    ]
-    files = filter_git_tracked_files(holo.project_root, files)
+    files = _knowledge_source_files(holo)
 
     discovered_count = len(files)
 
@@ -1279,24 +1247,11 @@ def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
         IndexResult with discovered_count, indexed_count, collection_name,
         and optional warning message.
     """
-    import glob
     import yaml
+    from holo_index.canonical_source_manifest import _skill_source_files
 
     collection_name = "navigation_skills"
-    skillz_patterns = [
-        str(holo.project_root / "modules" / "**" / "skills" / "*" / "SKILLz.md"),
-        str(holo.project_root / "modules" / "**" / "skillz" / "*" / "SKILLz.md"),
-        str(holo.project_root / "holo_index" / "skillz" / "*" / "SKILLz.md"),
-        str(holo.project_root / "holo_index" / "qwen_advisor" / "skills" / "*" / "SKILLz.md"),
-        str(holo.project_root / ".claude" / "skills" / "*" / "SKILLz.md"),
-        str(holo.project_root / ".claude" / "skillz" / "*" / "SKILLz.md"),
-    ]
-
-    files: List[Path] = []
-    for pattern in skillz_patterns:
-        found = glob.glob(pattern, recursive=True)
-        files.extend(Path(f) for f in found)
-    files = filter_git_tracked_files(holo.project_root, files)
+    files = _skill_source_files(holo)
 
     discovered_count = len(files)
 

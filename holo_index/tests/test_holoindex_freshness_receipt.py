@@ -17,6 +17,7 @@ from holo_index.freshness_receipt import (
     build_freshness_receipt,
     build_maintenance_invalidation,
     collections_for_changed_paths,
+    collections_for_path,
     evaluate_freshness_for_paths,
     freshness_receipt_path,
     load_freshness_receipt,
@@ -59,10 +60,14 @@ class SnapshotCollection:
     def get(self, include=None):
         return {
             "ids": [f"{self.name}:{index}" for index in range(self._count)],
+            "documents": [
+                f"document:{self.name}:{index}" for index in range(self._count)
+            ],
             "metadatas": [
                 {"path": f"{self.name}/item_{index}.txt"}
                 for index in range(self._count)
             ],
+            "embeddings": [[float(index)] for index in range(self._count)],
         }
 
 
@@ -242,7 +247,11 @@ def test_stale_repo_sha_fails_closed_for_required_collections(tmp_path: Path) ->
     )
 
     assert check.ok is False
-    assert check.stale_collections == ["navigation_work_ledger", "navigation_wsp"]
+    assert check.stale_collections == [
+        "navigation_docs",
+        "navigation_work_ledger",
+        "navigation_wsp",
+    ]
     assert "stale_repo_head_sha" in check.reasons
 
 
@@ -263,7 +272,10 @@ def test_empty_collection_fails_closed_when_path_requires_it(tmp_path: Path) -> 
     )
 
     assert check.ok is False
-    assert check.stale_collections == ["navigation_work_ledger"]
+    assert check.stale_collections == [
+        "navigation_docs",
+        "navigation_work_ledger",
+    ]
     assert "collection_not_indexed:navigation_work_ledger" in check.reasons
     assert "collection_verification_not_pass:navigation_work_ledger" in check.reasons
 
@@ -344,6 +356,51 @@ def test_generation_id_changes_when_collection_manifest_changes(tmp_path: Path) 
     assert first.generation_id != second.generation_id
 
 
+@pytest.mark.parametrize(
+    ("scope", "field", "value"),
+    (
+        ("receipt", "generated_at", "2026-07-13T00:00:00+00:00"),
+        ("receipt", "repo_root", "O:/forged"),
+        ("receipt", "ssd_path", "O:/forged-index"),
+        ("receipt", "source", "forged-source"),
+        ("collection", "last_indexed_at", "2026-07-13T00:00:00+00:00"),
+        ("collection", "source", "forged-source"),
+        ("collection", "schema_version", "holoindex_collection_freshness.v1"),
+    ),
+)
+def test_query_rejects_tampering_of_any_generation_bound_field(
+    tmp_path: Path,
+    scope: str,
+    field: str,
+    value: str,
+) -> None:
+    receipt = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="manual_index",
+        generated_at="2026-07-12T00:00:00+00:00",
+        repo_head_sha="abc123",
+        refresh_source_manifests={
+            "navigation_symbols": "sha256:" + ("a" * 64),
+        },
+        refresh_source_scopes={
+            "navigation_symbols": canonical_source_scope_id("navigation_symbols"),
+        },
+    ).to_dict()
+    target = receipt if scope == "receipt" else receipt["collections"][4]
+    target[field] = value
+
+    result = evaluate_freshness_for_paths(
+        receipt,
+        ["modules/example/src/example.py"],
+        expected_repo_head_sha="abc123",
+    )
+
+    assert result.ok is False
+    assert "invalid_freshness_receipt_integrity" in result.reasons
+
+
 def _assert_scoped_refresh_truth(refreshed) -> None:
     wsp_check = evaluate_freshness_for_paths(
         refreshed,
@@ -362,7 +419,31 @@ def _assert_scoped_refresh_truth(refreshed) -> None:
     )
     assert "stale_collection_sha:navigation_wsp" in wsp_check.reasons
     assert "stale_collection_sha:navigation_knowledge" in knowledge_check.reasons
-    assert test_check.ok is True
+    assert test_check.ok is False
+    assert "stale_collection_sha:navigation_symbols" in test_check.reasons
+
+
+def test_changed_path_mapping_covers_overlapping_source_sets() -> None:
+    assert collections_for_path("modules/example/tests/test_runtime.py") == {
+        "navigation_symbols",
+        "navigation_tests",
+    }
+    assert collections_for_path("modules/example/SKILLz.md") == {
+        "navigation_docs",
+        "navigation_skills",
+    }
+    assert collections_for_path("WSP_knowledge/WSP_Test_Registry.json") == {
+        "navigation_tests",
+    }
+    assert collections_for_path(
+        "docs/0102_session_briefings/work_ledger.schema.json"
+    ) == {"navigation_work_ledger"}
+    assert collections_for_path(
+        "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md"
+    ) == {"navigation_docs", "navigation_work_ledger"}
+    assert collections_for_path("public/runtime.mjs") == {"navigation_code"}
+    assert collections_for_path("public/worker.cjs") == {"navigation_code"}
+    assert collections_for_path("WSP_framework/src/README.md") == set()
 
 
 def test_test_only_refresh_preserves_prior_wsp_and_knowledge_entries(
@@ -432,6 +513,34 @@ def test_complete_manifest_without_canonical_scope_fails_closed(
     assert "collection_source_scope_mismatch:navigation_tests" in check.reasons
 
 
+def test_complete_manifest_without_policy_digest_fails_closed(
+    tmp_path: Path,
+) -> None:
+    receipt = build_freshness_receipt(
+        _holo(),
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="test_refresh",
+        repo_head_sha="sha-b",
+        refreshed_collections={"navigation_tests"},
+        refresh_source_manifests={
+            "navigation_tests": "sha256:" + ("a" * 64),
+        },
+        refresh_source_scopes={
+            "navigation_tests": canonical_source_scope_id("navigation_tests"),
+        },
+    )
+
+    check = evaluate_freshness_for_paths(
+        receipt,
+        ["modules/example/tests/test_example.py"],
+        expected_repo_head_sha="sha-b",
+    )
+
+    assert check.ok is False
+    assert "collection_source_policy_digest_invalid:navigation_tests" in check.reasons
+
+
 def test_partial_refresh_without_base_marks_untouched_collections_unverified(
     tmp_path: Path,
 ) -> None:
@@ -491,7 +600,7 @@ def test_code_refresh_does_not_mark_skill_collection_fresh_without_skill_manifes
     )
 
     assert check.ok is False
-    assert check.stale_collections == ["navigation_skills"]
+    assert check.stale_collections == ["navigation_docs", "navigation_skills"]
     assert "collection_verification_not_pass:navigation_skills" in check.reasons
     assert "collection_manifest_missing:navigation_skills" in check.reasons
 
@@ -643,7 +752,10 @@ def test_maintenance_invalidation_preserves_only_unplanned_proof(
         expected_repo_head_sha="sha-a",
     )
     assert check.ok is False
-    assert check.stale_collections == ["navigation_tests"]
+    assert check.stale_collections == [
+        "navigation_symbols",
+        "navigation_tests",
+    ]
     assert "collection_not_indexed:navigation_tests" in check.reasons
 
 
