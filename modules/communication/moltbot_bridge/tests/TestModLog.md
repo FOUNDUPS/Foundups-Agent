@@ -13,7 +13,14 @@
 - Added deterministic and model-backed consuming-read regressions for exact
   path/digest/bytes/truncated equality, including unstaged changes before the
   worker and during model execution while HEAD remains unchanged.
+## 2026-07-20: REDDOG_EXECUTION_VALVE_RECONCILED_TRUST_BOUNDARY_PHASE1
 
+- Added canonical reader/writer lock parity tests using the real work-state,
+  authority-profile, resolver, permission/principal, and valve writers.
+- Preserved authenticated control-receipt prestate adversaries while updating
+  post-run assertions to the permanent production-CLOSED verifier boundary.
+- Reconciled current resident fixtures with independently confined runtime
+  roots and canonical governed artifact packs; refreshed exact no-growth gates.
 ## 2026-07-19: REDDOG_HOLOINDEX_V2_RUNTIME_FIXTURE_MIGRATION_PHASE1
 
 - Replaced stale positive HoloIndex v1 receipt fixtures with one canonical v2 helper that builds complete source-manifest, scope, policy, and collection-snapshot proofs.

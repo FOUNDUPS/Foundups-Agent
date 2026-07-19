@@ -238,12 +238,9 @@ def _validated_receipt_path(
 
 def _invoke_canary(
     *,
-    context: _CanaryContext,
-    checks: Sequence[LiveCanaryReadinessCheck],
-    execute: bool,
-    confirmation: str,
-    queue_item_id: str,
-    max_rounds: int,
+    context: _CanaryContext, checks: Sequence[LiveCanaryReadinessCheck],
+    execute: bool, confirmation: str,
+    queue_item_id: str, max_rounds: int,
     runner: ControlLoopRunner,
 ) -> CanaryInvocationEvidence:
     blockers = [check.reason for check in checks if not check.passed]

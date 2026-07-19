@@ -18,7 +18,8 @@ CONTROL_RECEIPT_HEAD_SCHEMA_VERSION = "reddog_control_receipt_head.v1"
 def load_control_receipt_head(
     path: Path | str,
 ) -> tuple[AtomicJsonAuthorityRuntimeStore, dict[str, Any], dict[str, Any] | None]:
-    store = AtomicJsonAuthorityRuntimeStore(Path(path).resolve())
+    resolved = Path(path).resolve()
+    store = AtomicJsonAuthorityRuntimeStore(resolved, allowed_root=resolved.parent)
     state = store.load()
     if not isinstance(state, dict):
         raise ValueError("resident_control_loop_head_state_invalid")

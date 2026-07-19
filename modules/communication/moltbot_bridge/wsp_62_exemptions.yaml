@@ -82,18 +82,24 @@ exemptions:
   - <<: *reddog_security_repair
     file: "src/reddog_signed_worker_queue_serial_loop_runner.py"
     reason: "Inherited signed-worker transaction boundary retained while confined locked reads are introduced."
-    threshold_override: 445
-    function_threshold_override: 115
+    threshold_override: 473
+    function_threshold_override: 132
     functions: ["run_signed_worker_dispatch_task"]
-    no_growth_ceiling: {file_lines: 445, functions: {run_signed_worker_dispatch_task: 115}}
+    no_growth_ceiling: {file_lines: 473, functions: {run_signed_worker_dispatch_task: 132}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_signer_delegated_authority_runtime.py"
     reason: "Inherited signed-authority issuance boundary; exact model and Memex lineage fields were added."
-    threshold_override: 833
-    function_threshold_override: 258
+    threshold_override: 707
+    function_threshold_override: 262
     functions: ["issue_delegated_authority_runtime"]
-    no_growth_ceiling: {file_lines: 833, functions: {issue_delegated_authority_runtime: 258}}
+    no_growth_ceiling: {file_lines: 707, functions: {issue_delegated_authority_runtime: 262}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_resident_live_canary.py"
+    reason: "Authenticated control-receipt preflight and governed artifact readiness remain adjacent during the focused valve reconciliation."
+    threshold_override: 714
+    no_growth_ceiling: {file_lines: 714, functions: {}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_wre_queue_authority_request_dryrun.py"
@@ -130,10 +136,10 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_openclaw_signed_worker_claim_loop_preflight.py"
     reason: "Inherited startup integration matrix retained while the independent runtime root is threaded."
-    threshold_override: 1486
+    threshold_override: 1600
     function_threshold_override: 179
     functions: ["test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing", "test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage", "test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation", "test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain"]
-    no_growth_ceiling: {file_lines: 1486, functions: {test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing: 99, test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage: 136, test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation: 128, test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain: 179}}
+    no_growth_ceiling: {file_lines: 1600, functions: {test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing: 99, test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage: 136, test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation: 128, test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain: 179}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py"
@@ -144,10 +150,10 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_signed_worker_dispatch_task_executor.py"
     reason: "Inherited worker-dispatch integration matrix retained while the runtime root is threaded."
-    threshold_override: 2514
-    function_threshold_override: 179
+    threshold_override: 2692
+    function_threshold_override: 185
     functions: ["test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet", "test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues", "test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness"]
-    no_growth_ceiling: {file_lines: 2514, functions: {test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact: 119, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 124, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 133, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 149, test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues: 179, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 173}}
+    no_growth_ceiling: {file_lines: 2692, functions: {test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact: 119, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 124, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 133, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 149, test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues: 185, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 173}}
 
   - file: "scripts/run_task.py"
     reason: >-

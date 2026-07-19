@@ -82,8 +82,8 @@ class AtomicJsonResidentQueueChainResultsStore:
     """Single-file JSON store using atomic replace."""
 
     def __init__(self, path: str | Path, *, allowed_root: str | Path) -> None:
-        self.path = Path(path)
-        self.allowed_root = Path(allowed_root)
+        self.path = Path(os.path.abspath(Path(path).expanduser()))
+        self.allowed_root = Path(os.path.abspath(Path(allowed_root).expanduser()))
 
     def load(self) -> Mapping[str, Any]:
         with runtime_operation_lock(str(self.path) + ".operation"):

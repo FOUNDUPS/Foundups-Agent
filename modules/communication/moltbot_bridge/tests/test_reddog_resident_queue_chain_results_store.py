@@ -49,7 +49,10 @@ EXPIRES = "2026-07-14T01:00:00+00:00"
 
 def _concurrent_commit(args: tuple[str, str]) -> str:
     path, marker = args
-    store = AtomicJsonResidentQueueChainResultsStore(path)
+    store = AtomicJsonResidentQueueChainResultsStore(
+        path,
+        allowed_root=Path(path).parent,
+    )
     try:
         store.commit(
             {"schema_version": "test.v1", "marker": marker, "receipts": []},
@@ -347,9 +350,13 @@ def test_relative_and_absolute_store_paths_share_one_canonical_identity(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    relative = AtomicJsonResidentQueueChainResultsStore("runtime/chain-results.json")
+    relative = AtomicJsonResidentQueueChainResultsStore(
+        "runtime/chain-results.json",
+        allowed_root="runtime",
+    )
     absolute = AtomicJsonResidentQueueChainResultsStore(
-        tmp_path / "runtime" / "chain-results.json"
+        tmp_path / "runtime" / "chain-results.json",
+        allowed_root=tmp_path / "runtime",
     )
     assert relative.path == absolute.path
     relative.commit({"marker": "first"}, expected_revision=None)

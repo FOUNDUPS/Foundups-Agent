@@ -99,13 +99,7 @@ def _digest(value: object) -> str:
 
 
 def _runtime_paths_env(tmp_path: Path) -> dict[str, str]:
-    runtime_root = tmp_path.parent / f"{tmp_path.name}-resident-runtime"
-    return {
-        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
-        "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(runtime_root / "state.json"),
-        "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(runtime_root / "chain.json"),
-        "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(runtime_root / "profile.json"),
-    }
+    return _binding_runtime_paths(tmp_path)
 
 
 def _allocation():

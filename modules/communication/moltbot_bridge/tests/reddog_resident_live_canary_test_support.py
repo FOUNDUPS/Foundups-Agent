@@ -11,6 +11,11 @@ from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_recei
     ControlLoopReceiptSigningContext,
     build_resident_control_loop_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_head_store import (
+    build_control_receipt_head,
+    commit_control_receipt_head,
+    load_control_receipt_head,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
     encode_ed25519_public_key,
@@ -24,6 +29,10 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
+    AtomicSignerControlLoopAnchorStore,
+    ControlLoopAnchorPreparation,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_live_canary import (
     LIVE_CANARY_CONFIRMATION,
@@ -165,17 +174,6 @@ _AUTHORITY_PROFILE = {
         },
     },
 }
-from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_head_store import (
-    build_control_receipt_head,
-    commit_control_receipt_head,
-    load_control_receipt_head,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
-    AtomicSignerControlLoopAnchorStore,
-    ControlLoopAnchorPreparation,
-)
-
-
 class _StatelessTestControlLoopAnchorStore:
     """Test-only anchor used where persistence is not under test."""
 
@@ -232,7 +230,11 @@ def _git(cwd: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def _roots(tmp_path: Path) -> tuple[Path, Path]:
+def _roots(
+    tmp_path: Path,
+    *,
+    canonical_artifacts: bool = False,
+) -> tuple[Path, Path]:
     repo = tmp_path / "repo"
     repo.mkdir()
     _git(repo, "init")
@@ -249,6 +251,8 @@ def _roots(tmp_path: Path) -> tuple[Path, Path]:
         queue_item_id=QUEUE_ID,
         now_iso=NOW,
     )
+    if canonical_artifacts:
+        return repo, runtime
     for filename in REQUIRED_JSON_ARTIFACTS:
         payload = {"kind": filename}
         if filename == "authority_profile.json":

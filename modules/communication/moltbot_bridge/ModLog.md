@@ -37,7 +37,22 @@
   evidence with the confined reader and require exact path/digest/bytes/truncated
   equality. The model-backed path repeats the check after model return, so a
   clean or unchanged HEAD cannot mask working-tree evidence drift.
+## 2026-07-20: REDDOG_EXECUTION_VALVE_RECONCILED_TRUST_BOUNDARY_PHASE1
 
+**WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
+
+- Reconciled the audited governed-valve stack with authenticated resident
+  control receipts, grounded OpenClaw/Hermes assignments, transport-neutral
+  resident clients, Fusion usage receipts, and signed PANEL evidence.
+- Preserved complete work-order/plan/valve admission binding, fresh-clock lease
+  expiry, truthful commit outcomes, independent runtime roots, bounded locked
+  no-link reads, and exact model-selection/runtime/Memex lineage propagation.
+- Added coherent double collection and matching `.operation` locks across all
+  canonical readers and production writers. Detected replacement or every
+  still-missing independent verifier remains permanently fail-closed.
+- Updated exact temporary WSP 62 no-growth ceilings to the reconciled current-
+  main surfaces. No live execution, signing, runtime artifact generation,
+  model call, repository mutation, or publish ran.
 ## 2026-07-20: REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97

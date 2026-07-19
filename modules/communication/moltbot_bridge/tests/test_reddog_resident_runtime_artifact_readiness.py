@@ -49,7 +49,7 @@ def _mutate(runtime: Path, filename: str, mutation: str) -> None:
 
 
 def test_unsigned_seven_artifact_pack_is_not_execution_authority(tmp_path: Path) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
 
     result = _validate(repo, runtime)
 
@@ -64,7 +64,7 @@ def test_unsigned_seven_artifact_pack_is_not_execution_authority(tmp_path: Path)
 
 
 def test_linked_runtime_root_cannot_supply_artifacts(tmp_path: Path) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     linked = tmp_path / "linked-runtime"
     try:
         linked.symlink_to(runtime, target_is_directory=True)
@@ -92,7 +92,7 @@ def test_linked_runtime_root_cannot_supply_artifacts(tmp_path: Path) -> None:
 def test_each_artifact_fails_closed_when_semantically_spliced(
     tmp_path: Path, filename: str, mutation: str,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     _mutate(runtime, filename, mutation)
 
     result = _validate(repo, runtime)
@@ -113,7 +113,7 @@ def test_each_artifact_fails_closed_when_semantically_spliced(
 def test_signer_artifacts_reject_forbidden_keys_even_when_null(
     tmp_path: Path, filename: str, field: str,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     path = runtime / filename
     payload = json.loads(path.read_text(encoding="utf-8"))
     payload[field] = None

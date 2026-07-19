@@ -1157,18 +1157,19 @@ def test_openclaw_claim_0102_bounded_code_waits_for_bounded_stage(
         worker_runtime="0102",
         capability="bounded_code_change",
     )
-    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    runtime_root = tmp_path.parent / f"{tmp_path.name}-runtime"
+    state = _write_runtime_json(runtime_root, "work_state.json", _bootstrap_snapshot())
     chain = _write_runtime_json(
-        tmp_path,
+        runtime_root,
         "chain_results.json",
         _queue_chain_results_through("execution_valve"),
     )
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(runtime_root / "profile.json"))
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
@@ -1191,18 +1192,19 @@ def test_openclaw_claim_0102_bounded_code_requires_artifact_request_source(
         worker_runtime="0102",
         capability="bounded_code_change",
     )
-    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    runtime_root = tmp_path.parent / f"{tmp_path.name}-runtime"
+    state = _write_runtime_json(runtime_root, "work_state.json", _bootstrap_snapshot())
     chain = _write_runtime_json(
-        tmp_path,
+        runtime_root,
         "chain_results.json",
         _queue_chain_results_through("worktree_create"),
     )
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(runtime_root / "profile.json"))
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
 
@@ -1224,20 +1226,21 @@ def test_openclaw_claim_executes_0102_bounded_code_when_bounded_stage_ready(
         worker_runtime="0102",
         capability="bounded_code_change",
     )
-    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
+    runtime_root = tmp_path.parent / f"{tmp_path.name}-runtime"
+    state = _write_runtime_json(runtime_root, "work_state.json", _bootstrap_snapshot())
     chain = _write_runtime_json(
-        tmp_path,
+        runtime_root,
         "chain_results.json",
         _queue_chain_results_through("worktree_create"),
     )
     runner = _FakeRunner()
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
-    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code")
     monkeypatch.setenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", str(state))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH", str(chain))
-    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(tmp_path / "profile.json"))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(runtime_root / "profile.json"))
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     from modules.communication.moltbot_bridge.src import (

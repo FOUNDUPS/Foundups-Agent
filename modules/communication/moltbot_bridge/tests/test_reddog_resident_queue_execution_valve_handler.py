@@ -24,13 +24,11 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_execution_va
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     FAIL_RECORD_REJECTED,
-    RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
     ResidentQueueStageDispatchRequest,
     invoke_reddog_resident_queue_next_stage_dispatch,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_EXECUTION_VALVE_INVOKE,
-    NEXT_QUEUE_WORKTREE_CREATE_INVOKE,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     CANONICAL_BINDING_FIELDS,
@@ -53,9 +51,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verific
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
-    QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_REJECT,
-    QueueAuthorizedExecutionValveInvokeReason,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_executor_plan_dryrun import (
     QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT,
@@ -364,7 +360,10 @@ class _UseTimeResolver:
 def test_governed_production_handler_invokes_canonical_gate_and_fails_closed(
     tmp_path: Path,
 ) -> None:
-    _, runtime = _canonical_runtime_roots(tmp_path)
+    _, runtime = _canonical_runtime_roots(
+        tmp_path,
+        canonical_artifacts=True,
+    )
     payload = __import__("json").loads(
         (runtime / "execution_valve_env.json").read_text(encoding="utf-8")
     )

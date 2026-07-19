@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
@@ -216,8 +216,12 @@ class DelegatedAuthorityRuntimeRequest:
     key_epoch: str
     consensus_receipt_digest: Optional[str] = None
     sovereign_authorization_digest: Optional[str] = None
+    model_selection_receipt_id: Optional[str] = None
+    model_selection_digest: Optional[str] = None
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    memex_supply_receipt_id: Optional[str] = None
+    memex_supply_digest: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -401,6 +405,16 @@ def _commit_issued_authority(
         issued_next[request.work_order_id]["model_runtime_binding_digest"] = str(
             request.model_runtime_binding_digest or ""
         )
+    for prefix in ("model_selection", "memex_supply"):
+        receipt_id = getattr(request, f"{prefix}_receipt_id")
+        digest = getattr(request, f"{prefix}_digest")
+        if receipt_id or digest:
+            issued_next[request.work_order_id][f"{prefix}_receipt_id"] = str(
+                receipt_id or ""
+            )
+            issued_next[request.work_order_id][f"{prefix}_digest"] = str(
+                digest or ""
+            )
     next_state["issued_authorities"] = issued_next
     return store.commit(next_state, expected_revision=expected_revision)
 
@@ -473,6 +487,18 @@ def issue_delegated_authority_runtime(
         and str(request.model_runtime_binding_digest or "").startswith("sha256:")
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
+    for receipt_id, digest in (
+        (request.model_selection_receipt_id, request.model_selection_digest),
+        (request.memex_supply_receipt_id, request.memex_supply_digest),
+    ):
+        if bool(receipt_id) != bool(digest) or (
+            digest and not str(digest).startswith("sha256:")
+        ):
+            return _rejection_result(
+                now=now,
+                request=request,
+                reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
+            )
 
     effective_paths = set(request.allowed_paths) - set(request.denied_paths)
     if not effective_paths or not all(_path_within_foundup(path, request.foundup_id) for path in effective_paths):
@@ -584,6 +610,12 @@ def issue_delegated_authority_runtime(
     if has_runtime_binding:
         work_authority["model_runtime_binding_receipt_id"] = str(request.model_runtime_binding_receipt_id)
         work_authority["model_runtime_binding_digest"] = str(request.model_runtime_binding_digest)
+    for prefix in ("model_selection", "memex_supply"):
+        receipt_id = getattr(request, f"{prefix}_receipt_id")
+        digest = getattr(request, f"{prefix}_digest")
+        if receipt_id and digest:
+            work_authority[f"{prefix}_receipt_id"] = str(receipt_id)
+            work_authority[f"{prefix}_digest"] = str(digest)
     workauth_input = canonical_signing_input(work_authority, PREFIX_WORKAUTH)
     workauth_sign = signer_client.sign(
         SigningRequest(

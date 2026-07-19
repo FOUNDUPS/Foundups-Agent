@@ -43,7 +43,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
 def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
     tmp_path, monkeypatch,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     valve_payload = json.loads(
         (runtime / "execution_valve_env.json").read_text(encoding="utf-8")
     )
@@ -151,7 +151,7 @@ def test_real_promotion_materializes_complete_governed_work_order() -> None:
 def test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage(
     tmp_path, monkeypatch,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     valve_payload = json.loads(
         (runtime / "execution_valve_env.json").read_text(encoding="utf-8")
     )
@@ -236,7 +236,7 @@ def test_registry_rejects_legacy_environment_with_zero_handlers() -> None:
 def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
     tmp_path, monkeypatch,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     link = runtime / "valve-link.json"
     try:
         link.symlink_to(runtime / "execution_valve_env.json")
@@ -270,7 +270,7 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
 def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors(
     tmp_path, monkeypatch,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
     work_order_id = valve["work_order_id"]
     work_authority = {

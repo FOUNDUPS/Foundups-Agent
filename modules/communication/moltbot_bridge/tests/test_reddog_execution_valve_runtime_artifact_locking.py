@@ -165,7 +165,7 @@ def test_use_time_reload_waits_for_each_exact_artifact_operation_lock(
     attribute: str,
     filename: str,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     resolver = _resolver(repo, runtime)
     target = Path(getattr(resolver, attribute))
     attempted = Event()
@@ -197,7 +197,7 @@ def test_use_time_reload_replacement_fails_closed_without_mixed_snapshot(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    repo, runtime = _roots(tmp_path)
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     resolver = _resolver(repo, runtime)
     profile_path = Path(resolver.authority_profile_path)
     first_read = Event()

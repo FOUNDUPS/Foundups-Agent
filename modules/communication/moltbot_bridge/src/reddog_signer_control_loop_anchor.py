@@ -41,7 +41,10 @@ class AtomicSignerControlLoopAnchorStore:
 
     def __init__(self, path: Path | str) -> None:
         self.path = Path(path).resolve()
-        self._store = AtomicJsonAuthorityRuntimeStore(self.path)
+        self._store = AtomicJsonAuthorityRuntimeStore(
+            self.path,
+            allowed_root=self.path.parent,
+        )
 
     def prepare(self, payload: Mapping[str, Any]) -> ControlLoopAnchorPreparation:
         state = self._store.load()

@@ -485,7 +485,7 @@ def test_json_store_compare_and_swap_is_serialized_across_store_instances(
     def commit(index: int) -> str:
         barrier.wait(timeout=5)
         try:
-            AtomicJsonAuthorityRuntimeStore(path).commit(
+            AtomicJsonAuthorityRuntimeStore(path, allowed_root=tmp_path).commit(
                 {"writer": index}, expected_revision=None
             )
         except RuntimeError as exc:
@@ -496,7 +496,9 @@ def test_json_store_compare_and_swap_is_serialized_across_store_instances(
         outcomes = list(executor.map(commit, (1, 2)))
 
     assert sorted(outcomes) == ["committed", "revision_conflict"]
-    assert AtomicJsonAuthorityRuntimeStore(path).load()["writer"] in {1, 2}
+    assert AtomicJsonAuthorityRuntimeStore(path, allowed_root=tmp_path).load()[
+        "writer"
+    ] in {1, 2}
 
 
 def test_json_store_fsyncs_parent_directory_after_atomic_replace(
@@ -514,7 +516,7 @@ def test_json_store_fsyncs_parent_directory_after_atomic_replace(
     )
     target = tmp_path / "authority-state.json"
 
-    AtomicJsonAuthorityRuntimeStore(target).commit(
+    AtomicJsonAuthorityRuntimeStore(target, allowed_root=tmp_path).commit(
         {"writer": 1}, expected_revision=None
     )
 

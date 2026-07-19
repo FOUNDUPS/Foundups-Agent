@@ -19,9 +19,6 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
     run_reddog_signer_socket_service_run_packet_supply,
 )
-from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
-    canonical_reddog_wsp15_allocation_digest,
-)
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
 )
@@ -129,6 +126,7 @@ def _profile(
         "required_tests": ["pytest canary"], "required_policy_gates": ["signed_authority"],
         "consensus_receipt_digest": CONSENSUS_DIGEST,
         "sovereign_authorization_digest": SOVEREIGN_DIGEST,
+        "authority_profile_source_receipt_id": "sha256:" + "d" * 64,
         "work_order_id": work_order_id,
         "wsp15_allocation_receipt": binding["wsp15_allocation_receipt"],
         "model_catalog_snapshot_id": selection["catalog_snapshot_id"],
