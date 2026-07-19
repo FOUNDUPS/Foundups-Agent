@@ -2,6 +2,13 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-19 - REDDOG_REPO_DEEP_DIVE_DISCOVERY_PHASE1 (0.4.7)
+
+- OBSERVED: RedDog 0.4.2 accepted a requested repository deep dive with zero repository targets, zero direct reads, and no source context; the active editor also biased the module hint to `extensions/reddog`.
+- Added bounded tracked-file manifest discovery and deterministic target ranking seeded by generation-bound HoloIndex evidence. Discovered targets reuse the existing governed direct-read, redaction, protected-packing, and recall-proof stack.
+- Broad repository deep dives now fail closed before Fusion unless manifest generation, nonzero targets, complete recall, nonzero direct-read bytes, and source-context inclusion all pass.
+- Version 0.4.6 -> 0.4.7. No repository mutation, shell execution, HoloIndex re-index, OpenClaw enqueue, Hermes execution, PR, or merge authority was added.
+
 ## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1 (0.4.6)
 
 - Kept blockquote and fenced reference blocks separate when adjacent.
