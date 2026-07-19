@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
 from holo_index.repository_state import RepositoryState
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ARCHITECT_DETERMINATION_ACCEPT,
@@ -17,9 +17,6 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
 )
 from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
     DEFAULT_BOOTSTRAP_READ_TARGETS,
-)
-from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
-    READONLY_AUDIT_TASK_SOURCE,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     RepoAuditModelResult,
@@ -31,7 +28,6 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_per
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_research_decision_e2e_runtime import (
     READONLY_AUDIT_RESEARCH_DECISION_E2E_ACCEPT,
     READONLY_AUDIT_RESEARCH_DECISION_E2E_REJECT,
-    DirectReadOnlyAuditTaskExecutor,
     ReadOnlyAuditResearchDecisionE2EReason,
     run_reddog_readonly_audit_research_decision_e2e,
 )
@@ -42,6 +38,9 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
     READONLY_AUDIT_TASK_REPORT_REJECT,
     ReadOnlyAuditTaskExecutionResult,
     ReadOnlyAuditTaskRejectReason,
+)
+from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
+    build_fresh_holoindex_receipt,
 )
 
 
@@ -98,41 +97,10 @@ def _work_state() -> dict[str, object]:
 
 
 def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
-    return HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
+    return build_fresh_holoindex_receipt(
+        repo_root=REPO_ROOT,
+        head_sha=HEAD,
         generated_at=NOW,
-        repo_root=str(REPO_ROOT),
-        repo_head_sha=HEAD,
-        ssd_path="E:/HoloIndex",
-        source="ci_targeted_reindex",
-        generation_id="sha256:holo-generation-e2e",
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=4,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:work-ledger-manifest",
-                indexed_paths_digest="sha256:work-ledger-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-            CollectionFreshness(
-                name="navigation_symbols",
-                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
-                count=9,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:symbols-manifest",
-                indexed_paths_digest="sha256:symbols-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-        ],
     )
 
 

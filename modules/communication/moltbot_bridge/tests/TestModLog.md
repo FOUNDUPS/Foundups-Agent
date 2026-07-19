@@ -1,3 +1,11 @@
+## 2026-07-19: REDDOG_HOLOINDEX_V2_RUNTIME_FIXTURE_MIGRATION_PHASE1
+
+- Replaced stale positive HoloIndex v1 receipt fixtures with one canonical v2 helper that builds complete source-manifest, scope, policy, and collection-snapshot proofs.
+- Migrated operational snapshots, FoundUp Brain, Memex supply, OpenClaw audit planning/enqueue, backend architect determination, readonly bootstrap, end-to-end audit decisions, and the durable resident cycle.
+- Preserved the intentional v1 query-boundary compatibility adversary.
+- Validation: 150 focused runtime tests passed; the full bridge suite reached
+  3,749 passed / 8 skipped with 39 unrelated baseline/environment failures.
+
 ## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1
 
 - Added target-classification, receipt self-validation, current/stale generation, semantic support/corroboration, quoted-data isolation, and repo-path safety tests.

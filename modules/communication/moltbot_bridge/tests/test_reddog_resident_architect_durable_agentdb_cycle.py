@@ -8,10 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
 from holo_index.repository_state import RepositoryState
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
-    ARCHITECT_DETERMINATION_ACCEPT,
     ArchitectModelResult,
     InMemoryArchitectDeterminationStore,
 )
@@ -28,13 +27,14 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
 import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
     REDDOG_RESIDENT_CYCLE_ACCEPT,
-    REDDOG_RESIDENT_CYCLE_REJECT,
     STATUS_DETERMINED,
     STATUS_TIMED_OUT,
-    AgentDbResidentArchitectCycleStore,
     NoopExternalResearchRetriever,
     ResidentCycleReason,
     run_reddog_resident_architect_durable_agentdb_cycle,
+)
+from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
+    build_fresh_holoindex_receipt,
 )
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
@@ -167,41 +167,10 @@ def _foundup_work_state() -> dict[str, object]:
 
 
 def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
-    return HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
+    return build_fresh_holoindex_receipt(
         generated_at=NOW,
-        repo_root=str(REPO_ROOT),
-        repo_head_sha=HEAD,
-        ssd_path="E:/HoloIndex",
-        source="ci_targeted_reindex",
-        generation_id="sha256:holo-generation-resident",
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=4,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:work-ledger-manifest",
-                indexed_paths_digest="sha256:work-ledger-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-            CollectionFreshness(
-                name="navigation_symbols",
-                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
-                count=9,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:symbols-manifest",
-                indexed_paths_digest="sha256:symbols-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-        ],
+        repo_root=REPO_ROOT,
+        head_sha=HEAD,
     )
 
 
@@ -394,7 +363,11 @@ def test_durable_cycle_supplies_operational_memex_to_openclaw_workers() -> None:
     assert len(audit_runner.calls) == 5
     contexts = [json.loads(call["context"]) for call in audit_runner.calls]
     assert all(context["memex_query_receipt"]["source_class"] == "memex" for context in contexts)
-    assert all(context["memex_query_receipt"]["freshness_generation_id"] == "sha256:holo-generation-resident" for context in contexts)
+    assert all(
+        context["memex_query_receipt"]["freshness_generation_id"]
+        == _fresh_holo_receipt().generation_id
+        for context in contexts
+    )
     assert all(context["memex_evidence_bundle"]["records"] for context in contexts)
     completed = AgentDB().get_autonomous_tasks(status="completed", limit=10)
     readonly_contexts = [
@@ -404,7 +377,11 @@ def test_durable_cycle_supplies_operational_memex_to_openclaw_workers() -> None:
     ]
     assert readonly_contexts
     assert all(context["assignment"]["principal_id"] == "principal-012" for context in readonly_contexts)
-    assert all(context["assignment"]["memex_holoindex_generation_id"] == "sha256:holo-generation-resident" for context in readonly_contexts)
+    assert all(
+        context["assignment"]["memex_holoindex_generation_id"]
+        == _fresh_holo_receipt().generation_id
+        for context in readonly_contexts
+    )
 
 
 def test_duplicate_intent_reconnects_to_persisted_cycle_without_new_claims() -> None:

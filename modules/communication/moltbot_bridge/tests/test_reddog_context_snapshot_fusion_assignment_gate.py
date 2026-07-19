@@ -6,7 +6,6 @@ import ast
 from dataclasses import replace
 from pathlib import Path
 
-from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
 from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_assignment_gate import (
     FUSION_ASSIGNMENT_GATE_PASSED,
     FUSION_ASSIGNMENT_GATE_REJECTED,
@@ -15,6 +14,9 @@ from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_ass
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     build_evidence_bundle,
     build_operational_context_snapshot,
+)
+from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
+    build_fresh_holoindex_receipt,
 )
 
 
@@ -33,41 +35,10 @@ REVISION = "sha256:work-state-revision"
 
 
 def _fresh_holo_receipt():
-    return HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
+    return build_fresh_holoindex_receipt(
+        repo_root=REPO_ROOT,
+        head_sha=HEAD,
         generated_at=NOW,
-        repo_root=str(REPO_ROOT),
-        repo_head_sha=HEAD,
-        ssd_path="E:/HoloIndex",
-        source="ci_targeted_reindex",
-        generation_id="sha256:holo-generation",
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=2,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:work-ledger-manifest",
-                indexed_paths_digest="sha256:work-ledger-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-            CollectionFreshness(
-                name="navigation_symbols",
-                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
-                count=3,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:symbols-manifest",
-                indexed_paths_digest="sha256:symbols-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-        ],
     )
 
 
