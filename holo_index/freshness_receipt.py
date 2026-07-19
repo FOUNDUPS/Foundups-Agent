@@ -415,6 +415,18 @@ def _collection_handle(holo: Any, name: str, attr_name: str) -> Any:
         return None
 
 
+def _persisted_collection_handle(holo: Any, name: str, attr_name: str) -> Any:
+    """Reopen persisted state for verification without replacing write handles."""
+
+    client = getattr(holo, "client", None)
+    if client is not None:
+        try:
+            return client.get_collection(name)
+        except Exception:
+            return None
+    return getattr(holo, attr_name, None)
+
+
 def _unrefreshed_collection_entry(name: str, collection: Any) -> CollectionFreshness:
     return CollectionFreshness(
         name=name,
@@ -700,7 +712,7 @@ def collection_snapshot_matches_entry(
     attr_name = COLLECTION_ATTRS.get(name)
     if not attr_name:
         return False
-    collection = _collection_handle(holo, name, attr_name)
+    collection = _persisted_collection_handle(holo, name, attr_name)
     count = _safe_count(collection)
     manifest = _collection_snapshot_manifest(collection, name=name, count=count)
     return bool(

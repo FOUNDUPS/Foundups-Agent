@@ -18,6 +18,7 @@ from holo_index.freshness_receipt import (
     build_maintenance_invalidation,
     collections_for_changed_paths,
     collections_for_path,
+    collection_snapshot_matches_entry,
     evaluate_freshness_for_paths,
     freshness_receipt_path,
     load_freshness_receipt,
@@ -143,6 +144,76 @@ def test_receipt_contains_all_expected_collections(tmp_path: Path) -> None:
         _assert_sha256_digest(entry.source_manifest_digest)
         _assert_sha256_digest(entry.indexed_paths_digest)
         _assert_sha256_digest(entry.removed_paths_digest)
+
+
+def test_snapshot_verification_uses_fresh_client_collection_handle(
+    tmp_path: Path,
+) -> None:
+    baseline_holo = _holo()
+    receipt = build_freshness_receipt(
+        baseline_holo,
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="manual_index",
+        generated_at="2026-07-19T00:00:00+00:00",
+        repo_head_sha="abc123",
+    )
+    entry = next(
+        value for value in receipt.collections if value.name == "navigation_code"
+    )
+    stale = SnapshotCollection("navigation_code", 3)
+    stale.get = lambda include=None: {
+        **SnapshotCollection("navigation_code", 3).get(include=include),
+        "documents": ["stale", "stale", "stale"],
+    }
+    persisted = SnapshotCollection("navigation_code", 3)
+    candidate = _holo()
+    candidate.code_collection = stale
+    candidate.client = SimpleNamespace(
+        get_collection=lambda name: persisted if name == "navigation_code" else None
+    )
+
+    assert collection_snapshot_matches_entry(candidate, "navigation_code", entry)
+
+    candidate.client = SimpleNamespace(
+        get_collection=lambda _name: (_ for _ in ()).throw(RuntimeError("unavailable"))
+    )
+    assert not collection_snapshot_matches_entry(candidate, "navigation_code", entry)
+
+    persisted.get = lambda include=None: {
+        **SnapshotCollection("navigation_code", 3).get(include=include),
+        "documents": ["mutated", "mutated", "mutated"],
+    }
+    candidate.client = SimpleNamespace(get_collection=lambda _name: persisted)
+    assert not collection_snapshot_matches_entry(candidate, "navigation_code", entry)
+
+
+def test_receipt_construction_uses_indexer_write_handle(
+    tmp_path: Path,
+) -> None:
+    candidate = _holo()
+    client_calls = 0
+
+    def stale_persisted_handle(_name: str):
+        nonlocal client_calls
+        client_calls += 1
+        return SnapshotCollection("navigation_code", 2)
+
+    candidate.client = SimpleNamespace(get_collection=stale_persisted_handle)
+    receipt = build_freshness_receipt(
+        candidate,
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="manual_index",
+        generated_at="2026-07-19T00:00:00+00:00",
+        repo_head_sha="abc123",
+    )
+    code = next(
+        value for value in receipt.collections if value.name == "navigation_code"
+    )
+
+    assert code.count == 3
+    assert client_calls == 0
 
 
 def test_receipt_roundtrip_json(tmp_path: Path) -> None:
