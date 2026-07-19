@@ -7,7 +7,7 @@ const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 
-const EXTENSION_VERSION = '0.4.5';
+const EXTENSION_VERSION = '0.4.6';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1381,8 +1381,8 @@ function extractQuotedReferenceBlocks(taskText) {
         flush('fenced_block');
         inFence = false;
       } else {
+        flush('blockquote');
         inFence = true;
-        current = [];
       }
       continue;
     }
@@ -1503,7 +1503,7 @@ function extractTypedTargets(taskText) {
   }
   const collected = collectRequiredTargets(textWithoutQuotes);
   const repoTargets = collected.targets.slice();
-  const externalTargets = extractExternalResearchTargets(taskText);
+  const externalTargets = extractExternalResearchTargets(textWithoutQuotes);
   const quotedBlocks = extractQuotedReferenceBlocks(taskText);
   const semanticTargets = extractSemanticTargets(taskText, repoTargets, externalTargets);
   return {

@@ -1,5 +1,13 @@
 # Agent Module TestModLog
 
+## 2026-07-19 - Transport-neutral Hermes grounding tests
+
+- Proved plain-text v2 requests use host identity/scope and submit a verified grounded intent to the canonical resident client.
+- Proved identity, FoundUp scope, and caller-supplied grounding substitutions fail before the cycle runner.
+- Proved the default repo-target route succeeds and external research fails closed without an approved adapter.
+- Proved the bridge requires both authenticated principal and authorized FoundUp scope.
+- Full agent regression: 1145 tests passed.
+
 ## 2026-07-19 - Resident RedDog Hermes thin-client tests
 
 - Proved Hermes submit uses the canonical resident client and does not invoke the Hermes model/builder path.

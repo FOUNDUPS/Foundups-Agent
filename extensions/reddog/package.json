@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {

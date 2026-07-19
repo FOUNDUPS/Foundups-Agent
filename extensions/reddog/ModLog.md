@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1 (0.4.6)
+
+- Kept blockquote and fenced reference blocks separate when adjacent.
+- Removed quoted/fenced content before external-research target extraction, so supplied URLs remain data rather than actionable retrieval instructions.
+- Added editor/backend target-class parity coverage and transport-neutral Hermes grounding support in the backend runtime.
+- Version 0.4.5 -> 0.4.6. No new shell, repository mutation, indexing, execution, PR, or merge authority.
+- Full RedDog extension contract suite passed after the extractor and version changes.
+
 ## 2026-07-19 - REDDOG_GROUNDED_TARGET_ASSIGNMENT_CONTINUITY_PHASE1 (0.4.5)
 
 - Added immutable `reddog_grounded_target_receipt.v1` generation at the editor thin-client boundary.

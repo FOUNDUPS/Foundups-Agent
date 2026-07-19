@@ -1,3 +1,11 @@
+## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1
+
+- Added target-classification, receipt self-validation, current/stale generation, semantic support/corroboration, quoted-data isolation, and repo-path safety tests.
+- Added resident-client FoundUp scope rejection before canonical cycle invocation.
+- Adversarial regressions cover blockquote/fence loss, `.env` punctuation stripping, traversal, absolute paths, and unrelated two-category HoloIndex decoys.
+- Added cross-language fixture parity against the live editor extractor so backend and extension target classes cannot drift silently.
+- Validation: 128 resident/grounding/OpenClaw/architect tests passed; Python compile and diff checks passed.
+
 ## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_RESIDENT_CLIENT_AND_HERMES_ADAPTER_PHASE1
 
 - Added resident-client tests for canonical-cycle use, status-only reconnect, cancel/retry, principal/source mismatch, runtime-key injection, stored-record substitution, and read-only boundary contradiction.

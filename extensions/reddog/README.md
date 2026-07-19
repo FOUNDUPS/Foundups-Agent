@@ -1,10 +1,10 @@
 # RedDog
 
-Version: 0.4.5
+Version: 0.4.6
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
 
-Version 0.4.5 binds the thin-client work focus, typed targets, semantic coverage, and generation-bound HoloIndex proof into one immutable grounding receipt. That receipt survives the resident AgentDB cycle and OpenClaw assignment handoff, so workers cannot silently substitute or lose the evidence target universe selected before Fusion.
+Version 0.4.6 keeps quoted and fenced reference data out of actionable external-research targets and aligns editor target classes with the transport-neutral backend grounding service. Version 0.4.5 bound the thin-client work focus, typed targets, semantic coverage, and generation-bound HoloIndex proof into one immutable grounding receipt that survives the resident AgentDB cycle and OpenClaw assignment handoff.
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
@@ -228,6 +228,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.5.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.6.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

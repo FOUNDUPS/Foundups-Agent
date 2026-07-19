@@ -54,6 +54,7 @@ def test_bridge_requires_host_authenticated_principal_before_adapter(monkeypatch
 
 def test_bridge_uses_host_principal_and_forwards_bounded_request(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "principal-012")
+    monkeypatch.setenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", "foundups_agent,second_foundup")
     monkeypatch.setenv("FOUNDUPS_REPO_ROOT", str(tmp_path))
     monkeypatch.setattr(bridge, "HermesRedDogResidentClientAdapter", _Adapter)
     _Adapter.calls.clear()
@@ -63,12 +64,14 @@ def test_bridge_uses_host_principal_and_forwards_bounded_request(monkeypatch, tm
 
     assert result["accepted"] is True
     assert _Adapter.calls[0]["init"]["authenticated_principal_id"] == "principal-012"
+    assert _Adapter.calls[0]["init"]["authorized_foundup_ids"] == ("foundups_agent", "second_foundup")
     assert _Adapter.calls[0]["init"]["repo_root"] == tmp_path.resolve()
     assert _Adapter.calls[1]["payload"] == payload
 
 
 def test_bridge_omits_empty_runtime_path_overrides(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "principal-012")
+    monkeypatch.setenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", "foundups_agent")
     monkeypatch.setenv("FOUNDUPS_REPO_ROOT", str(tmp_path))
     monkeypatch.delenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", raising=False)
     monkeypatch.delenv("HOLOINDEX_FRESHNESS_RECEIPT", raising=False)
@@ -80,6 +83,19 @@ def test_bridge_omits_empty_runtime_path_overrides(monkeypatch, tmp_path) -> Non
 
     assert result["accepted"] is True
     assert _Adapter.calls[0]["init"]["runtime_defaults"] == {}
+
+
+def test_bridge_requires_host_authorized_foundup_scope(monkeypatch) -> None:
+    monkeypatch.setenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "principal-012")
+    monkeypatch.delenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", raising=False)
+    monkeypatch.setattr(bridge, "HermesRedDogResidentClientAdapter", _Adapter)
+    _Adapter.calls.clear()
+
+    result = bridge._result({"schema_version": "hermes_reddog_resident_request.v2"})
+
+    assert result["accepted"] is False
+    assert "authorized_foundup_scope_missing" in result["rejection_reasons"]
+    assert _Adapter.calls == []
 
 
 def test_bridge_source_has_no_shell_or_hermes_model_runtime() -> None:

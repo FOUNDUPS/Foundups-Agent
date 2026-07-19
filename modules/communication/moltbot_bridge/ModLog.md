@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 71, 97
+**Phase**: Natural-language Hermes/API grounding into canonical resident intents
+
+- Added a bounded transport-neutral service that classifies repo, semantic, external, and quoted targets and emits a self-validated `reddog_grounded_target_receipt.v1` plus `reddog_intent.v2`.
+- Required safe in-repo file resolution for repository targets and CURRENT generation-bound owner-query evidence for semantic targets.
+- Added content-support and broad-audit corroboration checks so unrelated HoloIndex hits cannot satisfy grounding.
+- Rejected external research without an approved adapter, path traversal, absolute paths, secret basenames, stale/mixed HoloIndex generations, and empty substantive target universes.
+- Added explicit host-authorized FoundUp scope to the resident client; payload role text and caller-selected FoundUps remain non-authoritative.
+- HoloIndex preflight did not surface the new grounding module and exposed a generation pinned to repository head `69b0ccfc...`, including a stale legacy extension path. Recorded `HOLOINDEX_REDDOG_TRANSPORT_NEUTRAL_GROUNDING_DISCOVERABILITY_INDEX_GAP_PHASE1`; no runtime re-index was performed.
+
 ## 2026-07-19: REDDOG_TRANSPORT_NEUTRAL_RESIDENT_CLIENT_AND_HERMES_ADAPTER_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 71, 97

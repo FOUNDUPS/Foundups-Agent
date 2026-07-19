@@ -32,6 +32,15 @@ def _result(payload: Mapping[str, Any] | None) -> dict[str, Any]:
     principal = str(os.getenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "")).strip()
     if not principal:
         return _reject("authenticated_principal_missing")
+    authorized_foundups = tuple(
+        dict.fromkeys(
+            item.strip()
+            for item in str(os.getenv("REDDOG_AUTHORIZED_FOUNDUP_IDS", "")).split(",")
+            if item.strip()
+        )
+    )
+    if not authorized_foundups:
+        return _reject("authorized_foundup_scope_missing")
     root_text = str(os.getenv("FOUNDUPS_REPO_ROOT", "")).strip()
     repo_root = Path(root_text).resolve() if root_text else REPO_ROOT
     runtime_defaults = {
@@ -47,6 +56,7 @@ def _result(payload: Mapping[str, Any] | None) -> dict[str, Any]:
         adapter = HermesRedDogResidentClientAdapter(
             repo_root=repo_root,
             authenticated_principal_id=principal,
+            authorized_foundup_ids=authorized_foundups,
             runtime_defaults=runtime_defaults,
         )
         receipt = adapter.handle(payload)

@@ -11,17 +11,27 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_client import (
     RedDogResidentArchitectClient,
     ResidentClientResponse,
 )
+from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
+    TransportGroundingResult,
+    ground_transport_work_focus,
+)
 
 
 HERMES_REQUEST_SCHEMA = "hermes_reddog_resident_request.v1"
+HERMES_TEXT_REQUEST_SCHEMA = "hermes_reddog_resident_request.v2"
 HERMES_RECEIPT_SCHEMA = "hermes_reddog_resident_receipt.v1"
 OPERATIONS = frozenset({"submit", "status", "cancel", "resume"})
+RESERVED_IDENTITY_FIELDS = frozenset(
+    {"principal_id", "principal_ref", "origin_principal", "source_surface", "origin"}
+)
+
+GroundingService = Callable[..., TransportGroundingResult]
 
 
 @dataclass(frozen=True)
@@ -57,12 +67,24 @@ class HermesRedDogResidentClientAdapter:
         *,
         repo_root: Path | str,
         authenticated_principal_id: str,
+        authorized_foundup_ids: Sequence[str],
         resident_client: RedDogResidentArchitectClient | None = None,
+        grounding_service: GroundingService | None = None,
         runtime_defaults: Mapping[str, Any] | None = None,
     ) -> None:
+        self._repo_root = Path(repo_root).resolve()
+        self._principal = str(authenticated_principal_id or "").strip()
+        scope_input_valid = not isinstance(authorized_foundup_ids, (str, bytes))
+        self._authorized_foundup_ids = frozenset(
+            str(item or "").strip() for item in authorized_foundup_ids if str(item or "").strip()
+        ) if scope_input_valid else frozenset()
+        if not self._principal or not self._authorized_foundup_ids:
+            raise ValueError("REJECT_HERMES_REDDOG_RUNTIME_CONFIGURATION")
+        self._grounding_service = grounding_service or ground_transport_work_focus
         self._client = resident_client or RedDogResidentArchitectClient(
-            repo_root=repo_root,
-            authenticated_principal_id=authenticated_principal_id,
+            repo_root=self._repo_root,
+            authenticated_principal_id=self._principal,
+            authorized_foundup_ids=self._authorized_foundup_ids,
             transport="hermes",
             runtime_defaults=runtime_defaults,
         )
@@ -71,15 +93,21 @@ class HermesRedDogResidentClientAdapter:
         data = dict(request) if isinstance(request, Mapping) else {}
         request_id = str(data.get("request_id") or "").strip()
         operation = str(data.get("operation") or "").strip().lower()
-        if data.get("schema_version") != HERMES_REQUEST_SCHEMA or not request_id or operation not in OPERATIONS:
+        schema = data.get("schema_version")
+        if schema not in {HERMES_REQUEST_SCHEMA, HERMES_TEXT_REQUEST_SCHEMA} or not request_id or operation not in OPERATIONS:
             return self._receipt(
                 request_id=request_id,
                 operation=operation,
                 response=_rejected_response(operation, "REJECT_HERMES_REDDOG_REQUEST_INVALID"),
             )
         if operation == "submit":
-            intent = data.get("red_dog_intent")
-            response = self._client.submit(intent if isinstance(intent, Mapping) else None)
+            if RESERVED_IDENTITY_FIELDS.intersection(data):
+                response = _rejected_response(operation, "REJECT_HERMES_REDDOG_IDENTITY_INJECTION")
+            elif schema == HERMES_TEXT_REQUEST_SCHEMA:
+                response = self._submit_text(data, request_id)
+            else:
+                intent = data.get("red_dog_intent")
+                response = self._client.submit(intent if isinstance(intent, Mapping) else None)
         else:
             if data.get("red_dog_intent") is not None:
                 response = _rejected_response(operation, "REJECT_HERMES_REDDOG_INTENT_SUBSTITUTION")
@@ -91,6 +119,28 @@ class HermesRedDogResidentClientAdapter:
                     "resume": self._client.resume,
                 }[operation](intent_id)
         return self._receipt(request_id=request_id, operation=operation, response=response)
+
+    def _submit_text(self, data: Mapping[str, Any], request_id: str) -> ResidentClientResponse:
+        if data.get("red_dog_intent") is not None or data.get("grounding_receipt") is not None:
+            return _rejected_response("submit", "REJECT_HERMES_REDDOG_GROUNDING_SUBSTITUTION")
+        foundup_id = str(data.get("foundup_id") or "").strip()
+        if foundup_id not in self._authorized_foundup_ids:
+            return _rejected_response("submit", "REJECT_HERMES_REDDOG_FOUNDUP_SCOPE_MISMATCH")
+        try:
+            grounded = self._grounding_service(
+                repo_root=self._repo_root,
+                work_focus=str(data.get("work_focus") or ""),
+                foundup_id=foundup_id,
+                authenticated_principal_id=self._principal,
+                source_surface="hermes_thin_client",
+                client_request_id=request_id,
+            )
+        except Exception:
+            return _rejected_response("submit", "REJECT_HERMES_REDDOG_GROUNDING_FAILED")
+        if not grounded.accepted:
+            reason = ",".join(grounded.rejection_reasons) or "REJECT_HERMES_REDDOG_GROUNDING_FAILED"
+            return _rejected_response("submit", reason)
+        return self._client.submit(grounded.intent)
 
     @staticmethod
     def _receipt(
@@ -157,6 +207,7 @@ def _digest(payload: Any) -> str:
 __all__ = [
     "HERMES_RECEIPT_SCHEMA",
     "HERMES_REQUEST_SCHEMA",
+    "HERMES_TEXT_REQUEST_SCHEMA",
     "HermesRedDogResidentClientAdapter",
     "HermesRedDogResidentReceipt",
 ]

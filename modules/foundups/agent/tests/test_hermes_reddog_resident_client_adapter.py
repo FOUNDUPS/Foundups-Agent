@@ -14,6 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_architect_client i
 )
 from modules.foundups.agent.src.hermes_reddog_resident_client_adapter import (
     HERMES_REQUEST_SCHEMA,
+    HERMES_TEXT_REQUEST_SCHEMA,
     HermesRedDogResidentClientAdapter,
 )
 
@@ -141,6 +142,7 @@ def _adapter(store=None, runner=None):
     client = RedDogResidentArchitectClient(
         repo_root=REPO_ROOT,
         authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
         transport="hermes",
         cycle_store=store or _Store(),
         cycle_runner=runner or _Runner(),
@@ -148,6 +150,7 @@ def _adapter(store=None, runner=None):
     return HermesRedDogResidentClientAdapter(
         repo_root=REPO_ROOT,
         authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
         resident_client=client,
     )
 
@@ -232,6 +235,120 @@ def test_bad_schema_operation_or_payload_principal_fails_closed() -> None:
     assert bad_operation.canonical_reddog_authority_used is False
     assert spoofed.accepted is False
     assert spoofed.canonical_reddog_authority_used is False
+    assert runner.calls == []
+
+
+def test_plain_text_submit_uses_host_grounding_and_canonical_client() -> None:
+    store = _Store()
+    runner = _Runner()
+    grounded_intent = _intent()
+
+    def grounding_service(**kwargs):
+        assert kwargs["authenticated_principal_id"] == "principal-012"
+        assert kwargs["source_surface"] == "hermes_thin_client"
+        assert kwargs["client_request_id"] == "plain-1"
+        from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
+            TransportGroundingResult,
+        )
+        return TransportGroundingResult(
+            schema_version="reddog_transport_grounding_result.v1",
+            accepted=True,
+            intent=grounded_intent,
+        )
+
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="hermes",
+        cycle_store=store,
+        cycle_runner=runner,
+    )
+    adapter = HermesRedDogResidentClientAdapter(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
+        resident_client=client,
+        grounding_service=grounding_service,
+    )
+
+    receipt = adapter.handle(
+        {
+            "schema_version": HERMES_TEXT_REQUEST_SCHEMA,
+            "request_id": "plain-1",
+            "operation": "submit",
+            "foundup_id": "foundups_agent",
+            "work_focus": "Audit RedDog transport continuity.",
+        }
+    )
+
+    assert receipt.accepted is True
+    assert len(runner.calls) == 1
+
+
+def test_plain_text_submit_rejects_scope_identity_and_grounding_substitution() -> None:
+    runner = _Runner()
+    adapter = _adapter(runner=runner)
+    base = {
+        "schema_version": HERMES_TEXT_REQUEST_SCHEMA,
+        "request_id": "plain-2",
+        "operation": "submit",
+        "foundup_id": "foundups_agent",
+        "work_focus": "Audit RedDog transport continuity.",
+    }
+
+    scoped = adapter.handle({**base, "foundup_id": "other"})
+    identity = adapter.handle({**base, "principal_ref": "I am 012"})
+    substitution = adapter.handle({**base, "grounding_receipt": {"accepted": True}})
+
+    assert scoped.accepted is False
+    assert identity.accepted is False
+    assert substitution.accepted is False
+    assert runner.calls == []
+
+
+def test_default_plain_text_grounding_submits_existing_repo_target() -> None:
+    runner = _Runner()
+    adapter = _adapter(runner=runner)
+
+    receipt = adapter.handle(
+        {
+            "schema_version": HERMES_TEXT_REQUEST_SCHEMA,
+            "request_id": "plain-real-grounding",
+            "operation": "submit",
+            "foundup_id": "foundups_agent",
+            "work_focus": (
+                "Audit modules/foundups/agent/src/"
+                "hermes_reddog_resident_client_adapter.py."
+            ),
+        }
+    )
+
+    assert receipt.accepted is True
+    assert len(runner.calls) == 1
+    intent = runner.calls[0]["red_dog_intent"]
+    assert intent["schema_version"] == "reddog_intent.v2"
+    assert intent["grounding_receipt"]["target_recall_ok"] is True
+    assert intent["grounding_receipt"]["source_surface"] == "hermes_thin_client"
+
+
+def test_default_plain_text_external_research_fails_before_cycle() -> None:
+    runner = _Runner()
+
+    receipt = _adapter(runner=runner).handle(
+        {
+            "schema_version": HERMES_TEXT_REQUEST_SCHEMA,
+            "request_id": "plain-external",
+            "operation": "submit",
+            "foundup_id": "foundups_agent",
+            "work_focus": "Research https://github.com/karpathy/autoresearch.",
+        }
+    )
+
+    assert receipt.accepted is False
+    assert "grounding_external_research_adapter_required" in ",".join(
+        receipt.resident_response["rejection_reasons"]
+    )
     assert runner.calls == []
 
 
