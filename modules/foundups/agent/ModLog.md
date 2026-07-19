@@ -1,5 +1,14 @@
 # Agent Module ModLog
 
+## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1
+
+**Author**: 0102 architect | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added Hermes request v2 for natural-language submit through the transport-neutral backend grounding service.
+- Required host-provided authenticated principal and explicit authorized FoundUp scope before adapter construction.
+- Preserved request v1 for already-grounded intents and the same canonical AgentDB resident cycle.
+- Kept external research, model calls, shell, repository mutation, indexing, execution, worktree, PR, and merge authority outside this route.
+
 ## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_RESIDENT_CLIENT_AND_HERMES_ADAPTER_PHASE1
 
 **Author**: 0102 architect | Commander: 012 | WSP: 00, 15, 50, 71, 97

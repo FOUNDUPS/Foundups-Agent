@@ -146,6 +146,7 @@ def _client(store=None, runner=None) -> RedDogResidentArchitectClient:
     return RedDogResidentArchitectClient(
         repo_root=REPO_ROOT,
         authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
         transport="hermes",
         cycle_store=store or _Store(),
         cycle_runner=runner or _Runner(),
@@ -236,6 +237,7 @@ def test_runtime_defaults_cannot_override_canonical_cycle_inputs() -> None:
             RedDogResidentArchitectClient(
                 repo_root=REPO_ROOT,
                 authenticated_principal_id="principal-012",
+                authorized_foundup_ids=("foundups_agent",),
                 transport="hermes",
                 runtime_defaults={key: "attacker"},
             )
@@ -243,6 +245,18 @@ def test_runtime_defaults_cannot_override_canonical_cycle_inputs() -> None:
             assert str(exc) == ResidentClientReason.RUNTIME_CONFIGURATION
         else:
             raise AssertionError(f"reserved runtime key accepted: {key}")
+
+    try:
+        RedDogResidentArchitectClient(
+            repo_root=REPO_ROOT,
+            authenticated_principal_id="principal-012",
+            authorized_foundup_ids="foundups_agent",
+            transport="hermes",
+        )
+    except ValueError as exc:
+        assert str(exc) == ResidentClientReason.RUNTIME_CONFIGURATION
+    else:
+        raise AssertionError("string FoundUp scope accepted as a sequence of characters")
 
 
 def test_runtime_boundary_contradiction_is_not_reported_as_safe() -> None:
@@ -257,6 +271,18 @@ def test_runtime_boundary_contradiction_is_not_reported_as_safe() -> None:
     assert result.accepted is False
     assert result.canonical_resident_cycle_used is True
     assert ResidentClientReason.RUNTIME_FAILED in result.rejection_reasons
+
+
+def test_foundup_outside_host_authorized_scope_never_reaches_cycle() -> None:
+    runner = _Runner()
+    intent = _intent()
+    intent["foundup_id"] = "attacker_foundup"
+
+    result = _client(runner=runner).submit(intent)
+
+    assert result.accepted is False
+    assert ResidentClientReason.FOUNDUP_SCOPE_MISMATCH in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_missing_runtime_boundary_attestation_fails_closed() -> None:

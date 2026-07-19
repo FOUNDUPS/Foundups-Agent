@@ -15,7 +15,7 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Callable, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     validate_grounded_target_receipt,
@@ -67,6 +67,7 @@ class ResidentClientReason:
     REQUEST_INVALID = "REJECT_REDDOG_RESIDENT_CLIENT_REQUEST_INVALID"
     PRINCIPAL_MISMATCH = "REJECT_REDDOG_RESIDENT_CLIENT_PRINCIPAL_MISMATCH"
     SOURCE_MISMATCH = "REJECT_REDDOG_RESIDENT_CLIENT_SOURCE_MISMATCH"
+    FOUNDUP_SCOPE_MISMATCH = "REJECT_REDDOG_RESIDENT_CLIENT_FOUNDUP_SCOPE_MISMATCH"
     GROUNDING_REJECTED = "REJECT_REDDOG_RESIDENT_CLIENT_GROUNDING_REJECTED"
     CYCLE_NOT_FOUND = "REJECT_REDDOG_RESIDENT_CLIENT_CYCLE_NOT_FOUND"
     RUNTIME_FAILED = "REJECT_REDDOG_RESIDENT_CLIENT_RUNTIME_FAILED"
@@ -114,6 +115,7 @@ class RedDogResidentArchitectClient:
         *,
         repo_root: Path | str,
         authenticated_principal_id: str,
+        authorized_foundup_ids: Sequence[str],
         transport: str,
         cycle_store: ResidentArchitectCycleStore | None = None,
         cycle_runner: Callable[..., Any] | None = None,
@@ -122,10 +124,22 @@ class RedDogResidentArchitectClient:
         principal = str(authenticated_principal_id or "").strip()
         surface = TRANSPORT_TO_SOURCE.get(str(transport or "").strip())
         defaults = dict(runtime_defaults or {})
-        if not principal or surface is None or RESERVED_RUNTIME_KEYS.intersection(defaults):
+        scope_input_valid = not isinstance(authorized_foundup_ids, (str, bytes))
+        foundup_scope = frozenset(
+            str(item or "").strip() for item in authorized_foundup_ids if str(item or "").strip()
+        ) if scope_input_valid else frozenset()
+        if (
+            not principal
+            or len(principal) > 256
+            or any(ord(character) < 32 for character in principal)
+            or not foundup_scope
+            or surface is None
+            or RESERVED_RUNTIME_KEYS.intersection(defaults)
+        ):
             raise ValueError(ResidentClientReason.RUNTIME_CONFIGURATION)
         self._repo_root = Path(repo_root).resolve()
         self._principal = principal
+        self._authorized_foundup_ids = foundup_scope
         self._transport = str(transport).strip()
         self._source_surface = surface
         self._origin = TRANSPORT_TO_ORIGIN[self._transport]
@@ -174,6 +188,8 @@ class RedDogResidentArchitectClient:
             reasons.append(ResidentClientReason.SOURCE_MISMATCH)
         if str(intent.get("origin") or "") != self._origin:
             reasons.append(ResidentClientReason.SOURCE_MISMATCH)
+        if str(intent.get("foundup_id") or "").strip() not in self._authorized_foundup_ids:
+            reasons.append(ResidentClientReason.FOUNDUP_SCOPE_MISMATCH)
         if intent.get("submits_executable_authority") is not False:
             reasons.append(ResidentClientReason.REQUEST_INVALID)
         grounding = validate_grounded_target_receipt(

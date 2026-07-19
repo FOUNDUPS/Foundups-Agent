@@ -6,18 +6,26 @@ Public API and schema contracts for agent lifecycle management, BuildPlan genera
 
 `hermes_reddog_resident_client_adapter.py` exposes Hermes as a transport to the
 single canonical resident RedDog AgentDB cycle. It accepts only
-`hermes_reddog_resident_request.v1` operations: `submit`, `status`, `cancel`,
-and `resume`. `submit` requires an already-grounded `reddog_intent.v2` whose
-source is `hermes_thin_client`; status/cancel/resume load the persisted intent
-by ID and reject a replacement intent. The authenticated principal is supplied
-by the host, not request prose.
+`hermes_reddog_resident_request.v1` operations preserve the already-grounded
+`reddog_intent.v2` route. `hermes_reddog_resident_request.v2` accepts bounded
+natural-language `work_focus` plus an authorized `foundup_id`, then uses the
+transport-neutral backend grounding service to produce the same immutable v2
+intent. Status/cancel/resume load the persisted intent by ID and reject a
+replacement intent. The authenticated principal and allowed FoundUp scope are
+supplied by the host, not request prose.
 
 `scripts/hermes_reddog_resident_client_once.py` is the bounded JSON instrument
-bridge. The host must set `REDDOG_AUTHENTICATED_PRINCIPAL_ID`. The bridge does
+bridge. The host must set `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and the
+comma-separated `REDDOG_AUTHORIZED_FOUNDUP_IDS`. The bridge does
 not invoke a Hermes model or builder and grants no shell, repository-write,
-worktree, PR, merge, HoloIndex-indexing, or execution authority. Natural-language
-target extraction and grounding for non-editor channels are not fabricated by
-this adapter; an upstream governed grounding service must supply the v2 receipt.
+worktree, PR, merge, HoloIndex-indexing, or execution authority.
+
+`reddog_transport_neutral_grounding_service.py` classifies repository paths,
+semantic targets, external research URLs, and quoted reference blocks. Repo
+paths must resolve to governed in-repo files. Semantic targets require a
+CURRENT generation-bound HoloIndex owner response with supporting evidence.
+Quoted blocks remain context-only. External URLs fail closed until an approved
+research retriever is configured; this service never re-indexes HoloIndex.
 
 ## ContextBundle Dry-Run Consumer (WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1)
 
