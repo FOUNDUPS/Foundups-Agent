@@ -51,10 +51,14 @@ class SnapshotCollection:
     def get(self, include=None):
         return {
             "ids": [f"{self.name}:{index}" for index in range(self._count)],
+            "documents": [
+                f"document:{self.name}:{index}" for index in range(self._count)
+            ],
             "metadatas": [
                 {"path": f"{self.name}/item_{index}.txt"}
                 for index in range(self._count)
             ],
+            "embeddings": [[float(index)] for index in range(self._count)],
         }
 
 
@@ -77,19 +81,24 @@ def _holo(**counts: int):
 
 
 def _write_receipt(tmp_path: Path, *, sha: str = "abc123", **counts: int) -> Path:
+    collection_names = (
+        "navigation_code",
+        "navigation_wsp",
+        "navigation_tests",
+        "navigation_skills",
+        "navigation_symbols",
+        "navigation_docs",
+        "navigation_knowledge",
+        "navigation_work_ledger",
+        "navigation_vocabulary",
+    )
     complete_manifests = {
-        name: f"sha256:complete-source:{name}"
-        for name in (
-            "navigation_code",
-            "navigation_wsp",
-            "navigation_tests",
-            "navigation_skills",
-            "navigation_symbols",
-            "navigation_docs",
-            "navigation_knowledge",
-            "navigation_work_ledger",
-            "navigation_vocabulary",
-        )
+        name: "sha256:" + format(index + 1, "064x")
+        for index, name in enumerate(collection_names)
+    }
+    policy_digests = {
+        name: "sha256:" + format(index + 101, "064x")
+        for index, name in enumerate(collection_names)
     }
     receipt = build_freshness_receipt(
         _holo(**counts),
@@ -100,6 +109,7 @@ def _write_receipt(tmp_path: Path, *, sha: str = "abc123", **counts: int) -> Pat
         repo_head_sha=sha,
         refresh_source_manifests=complete_manifests,
         refresh_source_scopes=CANONICAL_SOURCE_SCOPE_IDS,
+        refresh_source_policy_digests=policy_digests,
     )
     path = freshness_receipt_path(tmp_path)
     write_freshness_receipt(receipt, path)
@@ -121,7 +131,10 @@ def test_ci_gate_passes_when_receipt_covers_changed_collections(tmp_path: Path) 
     assert result.ok is True
     assert result.status == STATUS_PASS
     assert result.configured is True
-    assert result.required_collections == ["navigation_symbols", "navigation_work_ledger"]
+    assert result.required_collections == [
+        "navigation_symbols",
+        "navigation_work_ledger",
+    ]
     assert result.stale_collections == []
     assert result.no_reindex_performed is True
     assert result.no_runtime_reindex_performed is True
@@ -174,7 +187,11 @@ def test_ci_gate_fails_on_stale_repo_sha(tmp_path: Path) -> None:
 
     assert result.ok is False
     assert result.status == STATUS_FAIL
-    assert result.stale_collections == ["navigation_work_ledger", "navigation_wsp"]
+    assert result.stale_collections == [
+        "navigation_docs",
+        "navigation_work_ledger",
+        "navigation_wsp",
+    ]
     assert "stale_repo_head_sha" in result.reasons
 
 

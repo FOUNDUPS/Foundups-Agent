@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -9,14 +10,19 @@ import pytest
 
 import holo_index.maintenance_session as maintenance_module
 from holo_index.freshness_receipt import (
+    BASELINE_QUERY_COLLECTIONS,
+    evaluate_freshness_for_paths,
     freshness_receipt_path,
     load_freshness_receipt,
+    write_freshness_receipt,
 )
 from holo_index.maintenance_lock import maintenance_lock_path, probe_maintenance_lock
 from holo_index.maintenance_session import MaintenanceSession, MaintenanceSessionError
 from holo_index.source_scope import canonical_source_scope_id
 
 SPACE_FINGERPRINT = "sha256:" + ("1" * 64)
+BASE_SHA = "a" * 40
+HEAD_SHA = "b" * 40
 
 class _Collection:
     def __init__(self, name: str, count: int = 2) -> None:
@@ -34,9 +40,15 @@ class _Collection:
     def get(self, include=None):
         return {
             "ids": [f"{self.name}:{index}" for index in range(self._count)],
+            "documents": [
+                f"document:{self.name}:{index}" for index in range(self._count)
+            ],
             "metadatas": [
                 {"path": f"{self.name}/item_{index}.py"}
                 for index in range(self._count)
+            ],
+            "embeddings": [
+                [float(index), float(index + 1)] for index in range(self._count)
             ],
         }
 
@@ -78,10 +90,56 @@ def _proofs(*names: str) -> dict[str, SimpleNamespace]:
     }
 
 
+def _manifest_probe(_holo, names) -> dict[str, SimpleNamespace]:
+    return {
+        name: SimpleNamespace(
+            digest="sha256:" + ("a" * 64),
+            source_scope_id=canonical_source_scope_id(name),
+        )
+        for name in names
+    }
+
+
+@pytest.fixture(autouse=True)
+def _canonical_manifest_probe(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        maintenance_module,
+        "probe_canonical_source_manifests",
+        _manifest_probe,
+    )
+
+
+def _seed_baseline(tmp_path: Path) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections=BASELINE_QUERY_COLLECTIONS,
+        repository_state_reader=lambda _root: _clean_state(BASE_SHA),
+    )
+    session.complete(
+        _holo(),
+        refreshed_collections=BASELINE_QUERY_COLLECTIONS,
+        source="baseline",
+        refresh_proofs=_proofs(*BASELINE_QUERY_COLLECTIONS),
+    )
+    session.close()
+
+
+def _targeted_session(tmp_path: Path) -> MaintenanceSession:
+    return MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+
+
 def test_session_invalidates_before_work_and_publishes_only_full_plan(
     tmp_path: Path,
 ) -> None:
-    reader = lambda _root: _clean_state()
+    def reader(_root: Path):
+        return _clean_state()
+
     session = MaintenanceSession.begin(
         ssd_path=tmp_path / "ssd",
         repo_root=tmp_path / "repo",
@@ -235,6 +293,341 @@ def test_repository_head_change_blocks_final_pass(tmp_path: Path) -> None:
             refresh_proofs=_proofs("navigation_code"),
         )
     session.close()
+
+
+def test_targeted_refresh_carries_only_verified_unchanged_collections(
+    tmp_path: Path,
+) -> None:
+    _seed_baseline(tmp_path)
+    baseline = load_freshness_receipt(freshness_receipt_path(tmp_path / "ssd"))
+    session = _targeted_session(tmp_path)
+    receipt = session.complete(
+        _holo(),
+        refreshed_collections={"navigation_code"},
+        source="targeted",
+        refresh_proofs=_proofs("navigation_code"),
+    )
+    session.close()
+
+    by_name = {entry.name: entry for entry in receipt.collections}
+    carried = BASELINE_QUERY_COLLECTIONS.difference({"navigation_code"})
+    assert all(by_name[name].repo_head_sha == HEAD_SHA for name in carried)
+    assert all(
+        by_name[name].proof_kind == "verified_unchanged_source_manifest"
+        for name in carried
+    )
+    assert all(by_name[name].carried_from_repo_head_sha == BASE_SHA for name in carried)
+    assert all(
+        by_name[name].carried_from_generation_id == baseline.generation_id
+        for name in carried
+    )
+    check = evaluate_freshness_for_paths(
+        receipt,
+        (
+            "NAVIGATION.py",
+            "modules/example/src/example.py",
+            "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+            "WSP_knowledge/WSP_Test_Registry.json",
+            "modules/example/SKILLz.md",
+            "modules/example/README.md",
+            "WSP_knowledge/docs/Papers/example.md",
+        ),
+        expected_repo_head_sha=HEAD_SHA,
+    )
+    assert check.ok is True
+
+
+def test_targeted_refresh_rejects_changed_source_manifest(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_baseline(tmp_path)
+
+    def changed_probe(holo, names):
+        manifests = _manifest_probe(holo, names)
+        manifests["navigation_wsp"] = SimpleNamespace(
+            digest="sha256:" + ("f" * 64),
+            source_scope_id=canonical_source_scope_id("navigation_wsp"),
+        )
+        return manifests
+
+    monkeypatch.setattr(
+        maintenance_module,
+        "probe_canonical_source_manifests",
+        changed_probe,
+    )
+    session = _targeted_session(tmp_path)
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_CARRY_FORWARD_PROOF_FAILED",
+    ):
+        session.complete(
+            _holo(),
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+
+def test_refreshed_collection_rejects_claimed_manifest_mismatch(
+    tmp_path: Path,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    proofs = _proofs("navigation_code")
+    proofs["navigation_code"].source_manifest_digest = "sha256:" + ("f" * 64)
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_REFRESH_SOURCE_MANIFEST_MISMATCH",
+    ):
+        session.complete(
+            _holo(),
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=proofs,
+        )
+    session.close()
+
+
+def test_targeted_refresh_rejects_collection_snapshot_mutation(tmp_path: Path) -> None:
+    _seed_baseline(tmp_path)
+    session = _targeted_session(tmp_path)
+    holo = _holo()
+    holo.wsp_collection._count = 3
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_CARRY_FORWARD_COLLECTION_MISMATCH",
+    ):
+        session.complete(
+            holo,
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+
+@pytest.mark.parametrize("mutated_field", ("documents", "metadatas", "embeddings"))
+def test_targeted_refresh_rejects_collection_content_mutation(
+    tmp_path: Path,
+    mutated_field: str,
+) -> None:
+    _seed_baseline(tmp_path)
+    session = _targeted_session(tmp_path)
+    holo = _holo()
+    original_get = holo.wsp_collection.get
+
+    def mutated_snapshot(include=None):
+        snapshot = original_get(include=include)
+        snapshot[mutated_field][0] = (
+            {"path": "navigation_wsp/tampered.py"}
+            if mutated_field == "metadatas"
+            else [99.0, 100.0]
+            if mutated_field == "embeddings"
+            else "tampered document"
+        )
+        return snapshot
+
+    holo.wsp_collection.get = mutated_snapshot
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_CARRY_FORWARD_COLLECTION_MISMATCH",
+    ):
+        session.complete(
+            holo,
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+
+def test_final_snapshot_recheck_blocks_post_proof_mutation(tmp_path: Path) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    holo = _holo()
+    original_get = holo.code_collection.get
+    calls = 0
+
+    def changing_snapshot(include=None):
+        nonlocal calls
+        calls += 1
+        snapshot = original_get(include=include)
+        if calls > 1:
+            snapshot["documents"][0] = "changed after receipt assembly"
+        return snapshot
+
+    holo.code_collection.get = changing_snapshot
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_MISMATCH",
+    ):
+        session.complete(
+            holo,
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+    invalidation = load_freshness_receipt(freshness_receipt_path(tmp_path / "ssd"))
+    code = next(
+        entry for entry in invalidation.collections if entry.name == "navigation_code"
+    )
+    assert code.verification == "IN_PROGRESS"
+
+
+def test_serialized_carry_forward_tampering_fails_query_admission(
+    tmp_path: Path,
+) -> None:
+    _seed_baseline(tmp_path)
+    session = _targeted_session(tmp_path)
+    receipt = session.complete(
+        _holo(),
+        refreshed_collections={"navigation_code"},
+        source="targeted",
+        refresh_proofs=_proofs("navigation_code"),
+    )
+    session.close()
+    serialized = receipt.to_dict()
+    carried = next(
+        entry
+        for entry in serialized["collections"]
+        if entry["name"] == "navigation_wsp"
+    )
+    carried["carry_forward_evidence_digest"] = "sha256:" + ("f" * 64)
+
+    result = evaluate_freshness_for_paths(
+        serialized,
+        ["WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"],
+        expected_repo_head_sha=HEAD_SHA,
+    )
+
+    assert result.ok is False
+    assert "invalid_freshness_receipt_integrity" in result.reasons
+
+
+def test_full_refresh_migrates_obsolete_receipt_schema(tmp_path: Path) -> None:
+    _seed_baseline(tmp_path)
+    path = freshness_receipt_path(tmp_path / "ssd")
+    obsolete = replace(load_freshness_receipt(path), schema_version="v1-obsolete")
+    write_freshness_receipt(obsolete, path)
+
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections=BASELINE_QUERY_COLLECTIONS,
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    receipt = session.complete(
+        _holo(),
+        refreshed_collections=BASELINE_QUERY_COLLECTIONS,
+        source="full_migration",
+        refresh_proofs=_proofs(*BASELINE_QUERY_COLLECTIONS),
+    )
+    session.close()
+
+    assert receipt.base_generation_id == ""
+    assert all(
+        entry.verification == "PASS"
+        for entry in receipt.collections
+        if entry.name in BASELINE_QUERY_COLLECTIONS
+    )
+
+
+def test_targeted_refresh_rejects_policy_environment_change(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_baseline(tmp_path)
+    monkeypatch.setenv("HOLO_SYMBOL_ROOTS", "modules")
+    session = _targeted_session(tmp_path)
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="carry_forward_policy_changed:navigation_symbols",
+    ):
+        session.complete(
+            _holo(),
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+
+def test_targeted_refresh_rejects_source_probe_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _seed_baseline(tmp_path)
+
+    def fail_probe(_holo, _names):
+        raise RuntimeError("source probe failed")
+
+    monkeypatch.setattr(
+        maintenance_module,
+        "probe_canonical_source_manifests",
+        fail_probe,
+    )
+    session = _targeted_session(tmp_path)
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_REFRESH_SOURCE_PROBE_FAILED",
+    ):
+        session.complete(
+            _holo(),
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+
+def test_targeted_refresh_rejects_tampered_base_generation(tmp_path: Path) -> None:
+    _seed_baseline(tmp_path)
+    path = freshness_receipt_path(tmp_path / "ssd")
+    receipt = load_freshness_receipt(path)
+    receipt.collections[0] = receipt.collections[0].__class__(
+        **{
+            **receipt.collections[0].__dict__,
+            "source_manifest_digest": "sha256:" + ("f" * 64),
+        }
+    )
+    write_freshness_receipt(receipt, path)
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_BASE_FRESHNESS_RECEIPT_INVALID",
+    ):
+        _targeted_session(tmp_path)
+
+
+@pytest.mark.parametrize("field", ("repo_root", "ssd_path"))
+def test_targeted_refresh_rejects_cross_store_base_receipt(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    _seed_baseline(tmp_path)
+    path = freshness_receipt_path(tmp_path / "ssd")
+    receipt = load_freshness_receipt(path)
+    receipt = replace(receipt, **{field: str(tmp_path / "different" / field)})
+    write_freshness_receipt(receipt, path)
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_BASE_FRESHNESS_RECEIPT_INVALID",
+    ):
+        _targeted_session(tmp_path)
 
 
 @pytest.mark.parametrize(

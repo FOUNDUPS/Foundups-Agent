@@ -158,7 +158,12 @@ class _Collection:
         return 1
 
     def get(self, include=None):
-        return {"ids": ["one"], "metadatas": [{"path": "NAVIGATION.py"}]}
+        return {
+            "ids": ["one"],
+            "documents": ["navigation"],
+            "metadatas": [{"path": "NAVIGATION.py"}],
+            "embeddings": [[1.0]],
+        }
 
 
 def test_receipt_blanks_collection_space_when_runtime_changed(tmp_path: Path) -> None:

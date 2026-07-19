@@ -8,17 +8,23 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
+import re
 import tempfile
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from holo_index.source_scope import canonical_source_scope_id
+from holo_index.verified_collection_carry_forward import (
+    carry_forward_evidence_digest,
+)
 
 
-SCHEMA_VERSION = "holoindex_freshness_receipt.v1"
+SCHEMA_VERSION = "holoindex_freshness_receipt.v2"
+COLLECTION_SCHEMA_VERSION = "holoindex_collection_freshness.v2"
 FRESHNESS_RECEIPT_FILENAME = "holoindex_freshness_receipt.json"
 
 COLLECTION_ATTRS: dict[str, str] = {
@@ -54,6 +60,8 @@ BASELINE_QUERY_FRESHNESS_PATHS = (
     "modules/_holoindex_baseline/README.md",
     "WSP_knowledge/docs/Papers/_holoindex_baseline.md",
 )
+SHA_PATTERN = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})")
+DIGEST_PATTERN = re.compile(r"sha256:[0-9a-f]{64}")
 
 
 @dataclass(frozen=True)
@@ -69,13 +77,18 @@ class CollectionFreshness:
     source_manifest_digest: str = ""
     indexed_paths_digest: str = ""
     removed_paths_digest: str = ""
-    schema_version: str = "holoindex_collection_freshness.v1"
+    schema_version: str = COLLECTION_SCHEMA_VERSION
     embedding_backend: str = ""
     embedding_model: str = ""
     embedding_space_fingerprint: str = ""
     verification: str = "UNKNOWN"
     proof_kind: str = "snapshot_only"
     source_scope_id: str = ""
+    source_policy_digest: str = ""
+    carried_from_repo_head_sha: str = ""
+    carried_from_generation_id: str = ""
+    carry_forward_evidence_digest: str = ""
+    collection_snapshot_digest: str = ""
 
 
 @dataclass(frozen=True)
@@ -196,13 +209,30 @@ def _empty_snapshot_manifest(name: str) -> dict[str, str]:
     }
 
 
-def _snapshot_values(snapshot: Any) -> tuple[list[Any], list[Any]]:
-    ids = snapshot.get("ids", []) if isinstance(snapshot, Mapping) else []
-    metadatas = snapshot.get("metadatas", []) if isinstance(snapshot, Mapping) else []
-    return (
-        ids if isinstance(ids, list) else [],
-        metadatas if isinstance(metadatas, list) else [],
-    )
+def _snapshot_list(snapshot: Any, key: str) -> list[Any]:
+    value = snapshot.get(key, []) if isinstance(snapshot, Mapping) else []
+    if hasattr(value, "tolist"):
+        value = value.tolist()
+    return value if isinstance(value, list) else []
+
+
+def _canonical_snapshot_value(value: Any) -> Any:
+    if hasattr(value, "tolist"):
+        value = value.tolist()
+    if value is None or isinstance(value, (str, bool, int)):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("non_finite_snapshot_value")
+        return value
+    if isinstance(value, Mapping):
+        return {
+            str(key): _canonical_snapshot_value(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, (list, tuple)):
+        return [_canonical_snapshot_value(item) for item in value]
+    raise TypeError(f"unsupported_snapshot_value:{type(value).__name__}")
 
 
 def _collection_snapshot_manifest(
@@ -223,18 +253,49 @@ def _collection_snapshot_manifest(
         return _empty_snapshot_manifest(name)
 
     try:
-        snapshot = collection.get(include=["metadatas"])
+        snapshot = collection.get(include=["documents", "metadatas", "embeddings"])
     except Exception:
         return _unavailable_snapshot_manifest("UNVERIFIED")
 
-    ids, metadatas = _snapshot_values(snapshot)
+    ids = _snapshot_list(snapshot, "ids")
+    documents = _snapshot_list(snapshot, "documents")
+    metadatas = _snapshot_list(snapshot, "metadatas")
+    embeddings = _snapshot_list(snapshot, "embeddings")
+    if (
+        len(ids) != count
+        or len(documents) != count
+        or len(metadatas) != count
+        or len(embeddings) != count
+        or len({str(item) for item in ids}) != count
+    ):
+        return _unavailable_snapshot_manifest("UNVERIFIED")
+    try:
+        rows = sorted(
+            (
+                {
+                    "id": str(item_id),
+                    "document": _canonical_snapshot_value(document),
+                    "metadata": _canonical_snapshot_value(metadata),
+                    "embedding": _canonical_snapshot_value(embedding),
+                }
+                for item_id, document, metadata, embedding in zip(
+                    ids,
+                    documents,
+                    metadatas,
+                    embeddings,
+                )
+            ),
+            key=lambda row: row["id"],
+        )
+    except (TypeError, ValueError):
+        return _unavailable_snapshot_manifest("UNVERIFIED")
     indexed_paths = sorted(
         path for path in (_metadata_path(metadata) for metadata in metadatas) if path
     )
     source_manifest = {
         "collection": name,
         "count": count,
-        "ids": sorted(str(item) for item in ids),
+        "rows": rows,
         "paths": indexed_paths,
     }
     embedding = _collection_embedding_metadata(collection)
@@ -378,6 +439,7 @@ def _refreshed_collection_entry(
     generated: str,
     source_manifest: str,
     source_scope_id: str,
+    source_policy_digest: str,
 ) -> CollectionFreshness:
     count = _safe_count(collection)
     manifest = _collection_snapshot_manifest(collection, name=name, count=count)
@@ -417,6 +479,34 @@ def _refreshed_collection_entry(
             else "snapshot_only"
         ),
         source_scope_id=source_scope_id,
+        source_policy_digest=source_policy_digest,
+        collection_snapshot_digest=manifest["source_manifest_digest"],
+    )
+
+
+def _verified_carried_entry(
+    previous: CollectionFreshness,
+    *,
+    head_sha: str,
+    evidence: Any,
+) -> CollectionFreshness:
+    return replace(
+        previous,
+        source="verified_carry_forward",
+        repo_head_sha=head_sha,
+        proof_kind="verified_unchanged_source_manifest",
+        source_policy_digest=str(
+            getattr(evidence, "source_policy_digest", "") or ""
+        ),
+        carried_from_repo_head_sha=str(
+            getattr(evidence, "carried_from_repo_head_sha", "") or ""
+        ),
+        carried_from_generation_id=str(
+            getattr(evidence, "carried_from_generation_id", "") or ""
+        ),
+        carry_forward_evidence_digest=str(
+            getattr(evidence, "evidence_digest", "") or ""
+        ),
     )
 
 
@@ -430,13 +520,23 @@ def _build_collection_entries(
     generated: str,
     source_manifests: Mapping[str, str],
     source_scopes: Mapping[str, str],
+    source_policy_digests: Mapping[str, str],
+    carry_forward_evidence: Mapping[str, Any],
 ) -> list[CollectionFreshness]:
     entries: list[CollectionFreshness] = []
     for name, attr_name in COLLECTION_ATTRS.items():
         collection = _collection_handle(holo, name, attr_name)
         if refreshed is not None and name not in refreshed:
+            previous = previous_by_name.get(name)
+            evidence = carry_forward_evidence.get(name)
             entries.append(
-                previous_by_name.get(name)
+                _verified_carried_entry(
+                    previous,
+                    head_sha=head_sha,
+                    evidence=evidence,
+                )
+                if previous is not None and evidence is not None
+                else previous
                 or _unrefreshed_collection_entry(name, collection)
             )
             continue
@@ -450,6 +550,7 @@ def _build_collection_entries(
                 generated=generated,
                 source_manifest=source_manifests.get(name, ""),
                 source_scope_id=source_scopes.get(name, ""),
+                source_policy_digest=source_policy_digests.get(name, ""),
             )
         )
     return entries
@@ -458,28 +559,23 @@ def _build_collection_entries(
 def _receipt_generation_id(
     head_sha: str,
     entries: Iterable[CollectionFreshness],
+    *,
+    generated_at: str = "",
+    base_generation_id: str = "",
+    repo_root: str = "",
+    ssd_path: str = "",
+    source: str = "",
 ) -> str:
     return _digest(
         {
             "schema_version": SCHEMA_VERSION,
+            "generated_at": generated_at,
             "repo_head_sha": head_sha,
-            "collections": [
-                {
-                    "name": entry.name,
-                    "count": entry.count,
-                    "status": entry.status,
-                    "source_manifest_digest": entry.source_manifest_digest,
-                    "indexed_paths_digest": entry.indexed_paths_digest,
-                    "removed_paths_digest": entry.removed_paths_digest,
-                    "embedding_backend": entry.embedding_backend,
-                    "embedding_model": entry.embedding_model,
-                    "embedding_space_fingerprint": entry.embedding_space_fingerprint,
-                    "verification": entry.verification,
-                    "proof_kind": entry.proof_kind,
-                    "source_scope_id": entry.source_scope_id,
-                }
-                for entry in entries
-            ],
+            "base_generation_id": base_generation_id,
+            "repo_root": repo_root,
+            "ssd_path": ssd_path,
+            "source": source,
+            "collections": [asdict(entry) for entry in entries],
         }
     )
 
@@ -523,6 +619,8 @@ def _freshness_build_state(
     base_receipt: HoloIndexFreshnessReceipt | Mapping[str, Any] | None,
     refresh_source_manifests: Mapping[str, str] | None,
     refresh_source_scopes: Mapping[str, str] | None,
+    refresh_source_policy_digests: Mapping[str, str] | None,
+    carry_forward_evidence: Mapping[str, Any] | None,
 ) -> tuple[
     str,
     str,
@@ -539,7 +637,14 @@ def _freshness_build_state(
         refresh_source_manifests,
         refresh_source_scopes,
     )
+    policies = {
+        str(name): str(digest)
+        for name, digest in (refresh_source_policy_digests or {}).items()
+        if str(name) and str(digest)
+    }
     base = _coerce_build_base_receipt(base_receipt)
+    if base is not None and not freshness_receipt_integrity_ok(base):
+        raise ValueError("invalid base freshness receipt integrity")
     previous = {entry.name: entry for entry in (base.collections if base else [])}
     collections = _build_collection_entries(
         holo,
@@ -550,8 +655,65 @@ def _freshness_build_state(
         generated=generated,
         source_manifests=manifests,
         source_scopes=scopes,
+        source_policy_digests=policies,
+        carry_forward_evidence=dict(carry_forward_evidence or {}),
     )
     return generated, head_sha, base, collections
+
+
+def freshness_receipt_integrity_ok(
+    receipt: HoloIndexFreshnessReceipt | None,
+) -> bool:
+    """Verify schema, uniqueness, and the complete generation payload."""
+
+    if receipt is None or receipt.schema_version != SCHEMA_VERSION:
+        return False
+    names = [entry.name for entry in receipt.collections]
+    return bool(
+        receipt.generation_id
+        and len(names) == len(set(names))
+        and set(names) == set(ALL_COLLECTIONS)
+        and all(
+            entry.schema_version == COLLECTION_SCHEMA_VERSION
+            for entry in receipt.collections
+        )
+        and receipt.generation_id
+        == _receipt_generation_id(
+            receipt.repo_head_sha,
+            receipt.collections,
+            generated_at=receipt.generated_at,
+            base_generation_id=receipt.base_generation_id,
+            repo_root=receipt.repo_root,
+            ssd_path=receipt.ssd_path,
+            source=receipt.source,
+        )
+    )
+
+
+def collection_snapshot_matches_entry(
+    holo: Any,
+    name: str,
+    entry: CollectionFreshness,
+) -> bool:
+    """Re-prove that an untouched collection still matches its receipt."""
+
+    attr_name = COLLECTION_ATTRS.get(name)
+    if not attr_name:
+        return False
+    collection = _collection_handle(holo, name, attr_name)
+    count = _safe_count(collection)
+    manifest = _collection_snapshot_manifest(collection, name=name, count=count)
+    return bool(
+        count == entry.count
+        and manifest["verification"] == "PASS"
+        and manifest["source_manifest_digest"] == entry.collection_snapshot_digest
+        and manifest["indexed_paths_digest"] == entry.indexed_paths_digest
+        and manifest["removed_paths_digest"] == entry.removed_paths_digest
+        and manifest["embedding_backend"] == entry.embedding_backend
+        and manifest["embedding_model"] == entry.embedding_model
+        and manifest["embedding_space_fingerprint"]
+        == entry.embedding_space_fingerprint
+    )
 
 
 def build_freshness_receipt(
@@ -566,6 +728,8 @@ def build_freshness_receipt(
     base_receipt: HoloIndexFreshnessReceipt | Mapping[str, Any] | None = None,
     refresh_source_manifests: Mapping[str, str] | None = None,
     refresh_source_scopes: Mapping[str, str] | None = None,
+    refresh_source_policy_digests: Mapping[str, str] | None = None,
+    _carry_forward_evidence: Mapping[str, Any] | None = None,
 ) -> HoloIndexFreshnessReceipt:
     """Build a truthful receipt from current and previously proven state.
 
@@ -586,8 +750,19 @@ def build_freshness_receipt(
         base_receipt=base_receipt,
         refresh_source_manifests=refresh_source_manifests,
         refresh_source_scopes=refresh_source_scopes,
+        refresh_source_policy_digests=refresh_source_policy_digests,
+        carry_forward_evidence=_carry_forward_evidence,
     )
-    generation_id = _receipt_generation_id(head_sha, collections)
+    base_generation_id = base_receipt.generation_id if base_receipt is not None else ""
+    generation_id = _receipt_generation_id(
+        head_sha,
+        collections,
+        generated_at=generated,
+        base_generation_id=base_generation_id,
+        repo_root=str(Path(repo_root)),
+        ssd_path=str(Path(ssd_path)),
+        source=source,
+    )
 
     return HoloIndexFreshnessReceipt(
         schema_version=SCHEMA_VERSION,
@@ -597,7 +772,7 @@ def build_freshness_receipt(
         ssd_path=str(Path(ssd_path)),
         source=source,
         generation_id=generation_id,
-        base_generation_id=(base_receipt.generation_id if base_receipt is not None else ""),
+        base_generation_id=base_generation_id,
         collections=collections,
     )
 
@@ -701,7 +876,16 @@ def build_maintenance_invalidation(
         )
         for name in ALL_COLLECTIONS
     ]
-    generation_id = _receipt_generation_id(head_sha, entries)
+    base_generation_id = base.generation_id if base is not None else ""
+    generation_id = _receipt_generation_id(
+        head_sha,
+        entries,
+        generated_at=generated,
+        base_generation_id=base_generation_id,
+        repo_root=str(Path(repo_root)),
+        ssd_path=str(Path(ssd_path)),
+        source=source,
+    )
     return HoloIndexFreshnessReceipt(
         schema_version=SCHEMA_VERSION,
         generated_at=generated,
@@ -710,7 +894,7 @@ def build_maintenance_invalidation(
         ssd_path=str(Path(ssd_path)),
         source=source,
         generation_id=generation_id,
-        base_generation_id=(base.generation_id if base is not None else ""),
+        base_generation_id=base_generation_id,
         collections=entries,
     )
 
@@ -815,24 +999,39 @@ def collections_for_path(path: str | Path) -> set[str]:
     if not p or p.startswith("../") or p.startswith("/"):
         return collections
 
-    if p.startswith("WSP_framework/src/") and name.startswith("WSP_") and lower.endswith(".md"):
+    if (
+        p.startswith("WSP_framework/src/")
+        and name.startswith("WSP_")
+        and lower.endswith(".md")
+    ):
         collections.add("navigation_wsp")
-    elif p.startswith("WSP_knowledge/docs/Papers/"):
+        return collections
+    if p.startswith("WSP_knowledge/docs/Papers/"):
         collections.add("navigation_knowledge")
-    elif p.startswith("docs/0102_session_briefings/") or name in {
+        return collections
+    if p.startswith("docs/0102_session_briefings/") or name in {
         "ACTIVE_SLICE_LEDGER.md",
         "work_ledger.schema.json",
     }:
         collections.add("navigation_work_ledger")
-    elif name == "SKILLz.md":
-        collections.add("navigation_skills")
-    elif "/tests/" in p or name.startswith("test_"):
+    if name == "WSP_Test_Registry.json":
         collections.add("navigation_tests")
-    elif lower.endswith("navigation.py") or lower.endswith((".js", ".ts", ".tsx", ".jsx", ".html", ".css")):
+        return collections
+    if name == "SKILLz.md":
+        collections.add("navigation_skills")
+        if p.startswith("modules/"):
+            collections.add("navigation_docs")
+    if "/tests/" in p or name.startswith("test_"):
+        collections.add("navigation_tests")
+    if lower.endswith("navigation.py") or lower.endswith(
+        (".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".html", ".css")
+    ):
         collections.add("navigation_code")
-    elif lower.endswith(".py"):
+    if lower.endswith(".py") and p.startswith(("modules/", "scripts/", "holo_index/")):
         collections.add("navigation_symbols")
-    elif lower.endswith((".md", ".json", ".yaml", ".yml", ".txt")):
+    if lower.endswith(".md") and p.startswith(
+        ("modules/", "docs/", "holo_index/docs/", "WSP_framework/docs/")
+    ):
         collections.add("navigation_docs")
 
     return collections
@@ -863,14 +1062,59 @@ def _collection_freshness_reasons(
     entry: CollectionFreshness,
     *,
     expected_repo_head_sha: str | None,
+    entry_generation_id: str,
 ) -> list[str]:
     reasons: list[str] = []
     if entry.status != "indexed" or entry.count <= 0:
         reasons.append(f"collection_not_indexed:{name}")
     if entry.verification != "PASS":
         reasons.append(f"collection_verification_not_pass:{name}")
-    if entry.proof_kind != "complete_source_manifest":
+    allowed_proofs = {
+        "complete_source_manifest",
+        "verified_unchanged_source_manifest",
+    }
+    if entry.proof_kind not in allowed_proofs:
         reasons.append(f"collection_source_proof_incomplete:{name}")
+    required_digests = {
+        "source_manifest": entry.source_manifest_digest,
+        "indexed_paths": entry.indexed_paths_digest,
+        "removed_paths": entry.removed_paths_digest,
+        "source_policy": entry.source_policy_digest,
+        "collection_snapshot": entry.collection_snapshot_digest,
+    }
+    for field_name, digest in required_digests.items():
+        if not DIGEST_PATTERN.fullmatch(digest):
+            reasons.append(f"collection_{field_name}_digest_invalid:{name}")
+    if entry.proof_kind == "verified_unchanged_source_manifest" and not all(
+        (
+            entry.source_policy_digest,
+            entry.carried_from_repo_head_sha,
+            entry.carried_from_generation_id,
+            entry.carry_forward_evidence_digest,
+            entry.collection_snapshot_digest,
+        )
+    ):
+        reasons.append(f"collection_carry_forward_proof_incomplete:{name}")
+    if entry.proof_kind == "verified_unchanged_source_manifest":
+        if entry.carried_from_generation_id != entry_generation_id:
+            reasons.append(f"collection_carry_forward_lineage_mismatch:{name}")
+        if (
+            not SHA_PATTERN.fullmatch(entry.carried_from_repo_head_sha)
+            or not DIGEST_PATTERN.fullmatch(entry.source_manifest_digest)
+            or not DIGEST_PATTERN.fullmatch(entry.source_policy_digest)
+            or not DIGEST_PATTERN.fullmatch(entry.collection_snapshot_digest)
+        ):
+            reasons.append(f"collection_carry_forward_format_invalid:{name}")
+        expected_evidence = carry_forward_evidence_digest(
+            collection_name=name,
+            source_manifest_digest=entry.source_manifest_digest,
+            source_policy_digest=entry.source_policy_digest,
+            carried_from_repo_head_sha=entry.carried_from_repo_head_sha,
+            carried_from_generation_id=entry.carried_from_generation_id,
+            current_repo_head_sha=entry.repo_head_sha,
+        )
+        if entry.carry_forward_evidence_digest != expected_evidence:
+            reasons.append(f"collection_carry_forward_evidence_invalid:{name}")
     expected_scope_id = canonical_source_scope_id(name)
     if expected_scope_id and entry.source_scope_id != expected_scope_id:
         reasons.append(f"collection_source_scope_mismatch:{name}")
@@ -915,6 +1159,7 @@ def _required_collection_failures(
             name,
             entry,
             expected_repo_head_sha=expected_repo_head_sha,
+            entry_generation_id=receipt.base_generation_id,
         )
         if entry_reasons:
             stale.add(name)
@@ -942,6 +1187,9 @@ def evaluate_freshness_for_paths(
     stale: set[str] = set()
     if receipt.schema_version != SCHEMA_VERSION:
         reasons.append("unsupported_freshness_receipt_schema")
+        stale.update(required)
+    if not freshness_receipt_integrity_ok(receipt):
+        reasons.append("invalid_freshness_receipt_integrity")
         stale.update(required)
     if required and not receipt.generation_id:
         reasons.append("missing_holoindex_generation_id")
@@ -974,10 +1222,12 @@ __all__ = [
     "BASELINE_QUERY_COLLECTIONS",
     "BASELINE_QUERY_FRESHNESS_PATHS",
     "COLLECTION_ATTRS",
+    "COLLECTION_SCHEMA_VERSION",
     "CollectionFreshness",
     "FreshnessCheck",
     "FRESHNESS_RECEIPT_FILENAME",
     "HoloIndexFreshnessReceipt",
+    "collection_snapshot_matches_entry",
     "SCHEMA_VERSION",
     "build_freshness_receipt",
     "build_maintenance_invalidation",
@@ -985,6 +1235,7 @@ __all__ = [
     "collections_for_path",
     "evaluate_freshness_for_paths",
     "freshness_receipt_path",
+    "freshness_receipt_integrity_ok",
     "load_freshness_receipt",
     "publish_maintenance_invalidation",
     "read_git_head_sha",

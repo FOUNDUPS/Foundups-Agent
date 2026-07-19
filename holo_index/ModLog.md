@@ -1,5 +1,33 @@
 # HoloIndex Package ModLog
 
+## [2026-07-19] HOLOINDEX_VERIFIED_UNCHANGED_COLLECTION_CARRY_FORWARD_PHASE1
+
+- Added maintenance-time proof for unchanged baseline collections during a
+  targeted refresh. Carry-forward now requires an internally valid base
+  generation, an exact canonical source manifest, an unchanged source-policy
+  digest, and a full document/metadata/embedding collection snapshot.
+- Added explicit receipt provenance for carried collections and included all
+  receipt and collection fields in the generation digest. Query admission now
+  recomputes v2 receipt integrity, carry evidence, and direct base-generation
+  lineage; query execution remains read-only and never reindexes.
+- Truth boundary: v2 digests provide tamper evidence inside the trusted local
+  maintenance host. They are not signatures and do not authenticate a hostile
+  same-user filesystem writer.
+- Reused the indexers' canonical source-discovery functions for code, symbols,
+  WSPs, tests, docs, knowledge, and Skillz. A targeted refresh can carry an
+  unrefreshed collection only when the exact current source set still matches.
+- Added a final full collection snapshot recheck before atomic publication to
+  close the proof-assembly/write race. Obsolete v1 receipts require a complete
+  baseline migration and cannot authorize a partial refresh.
+- Corrected changed-path ownership for overlapping sources, including Python
+  tests in the symbol collection, module Skillz in docs, and the canonical WSP
+  test registry.
+- Added fail-closed tests for source/policy drift, base-receipt and serialized
+  carry tampering, document/metadata/vector mutation, post-proof races, modern
+  JavaScript source coverage, v1 migration, and successful unchanged carry.
+
+**WSP Protocols**: WSP 00, 15, 22, 50, 62, 97
+
 ## [2026-07-19] REDDOG_DEEP_DIVE_OWNER_FAILURE_DIRECT_READ_CONTINUITY_PHASE1
 
 - Hardened governed direct-read path validation against NTFS alternate data streams.
