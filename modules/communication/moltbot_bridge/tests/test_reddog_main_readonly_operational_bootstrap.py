@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import pytest
 
-from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
 from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
     DEFAULT_BOOTSTRAP_CHANGED_PATHS,
     REDDOG_MAIN_BOOTSTRAP_NOT_READY,
@@ -48,6 +48,9 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _model_selection,
+)
+from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
+    build_fresh_holoindex_receipt,
 )
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_owner_bootstrap as owner_bootstrap,
@@ -103,41 +106,10 @@ def _work_state() -> dict[str, object]:
 
 
 def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
-    return HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
+    return build_fresh_holoindex_receipt(
+        repo_root=REPO_ROOT,
+        head_sha=HEAD,
         generated_at=NOW,
-        repo_root=str(REPO_ROOT),
-        repo_head_sha=HEAD,
-        ssd_path="E:/HoloIndex",
-        source="ci_targeted_reindex",
-        generation_id="sha256:holo-generation",
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=4,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:work-ledger-manifest",
-                indexed_paths_digest="sha256:work-ledger-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-            CollectionFreshness(
-                name="navigation_symbols",
-                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
-                count=9,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:symbols-manifest",
-                indexed_paths_digest="sha256:symbols-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-        ],
     )
 
 
@@ -668,7 +640,7 @@ def test_bootstrap_memex_supply_enriches_enqueued_readonly_audit_tasks() -> None
     assert task_context["memex_view"]["snapshot_id"] == result.snapshot_receipt_id
     assert assignment["principal_id"] == "principal-012"
     assert assignment["work_order_id"] == assignment["assignment_id"]
-    assert assignment["memex_holoindex_generation_id"] == "sha256:holo-generation"
+    assert assignment["memex_holoindex_generation_id"] == _fresh_holo_receipt().generation_id
     assert assignment["memex_policy_expires_at"]
     assert task_context["memex_snapshot_supply_receipt"]["no_holoindex_reindex_performed"] is True
 
@@ -714,31 +686,10 @@ def test_bootstrap_not_ready_without_authoritative_work_state_or_holoindex_recei
 
 
 def test_bootstrap_rejects_stale_holoindex_receipt() -> None:
-    stale = HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
+    stale = build_fresh_holoindex_receipt(
+        repo_root=REPO_ROOT,
+        head_sha="old-head",
         generated_at=NOW,
-        repo_root=str(REPO_ROOT),
-        repo_head_sha="old-head",
-        ssd_path="E:/HoloIndex",
-        source="ci_targeted_reindex",
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=4,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha="old-head",
-                last_indexed_at=NOW,
-            ),
-            CollectionFreshness(
-                name="navigation_symbols",
-                count=9,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha="old-head",
-                last_indexed_at=NOW,
-            ),
-        ],
     )
 
     result = run_reddog_main_readonly_operational_bootstrap(

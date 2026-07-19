@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Mapping
 
-from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ACTION_FIX,
     ACTION_RESEARCH_MORE,
@@ -26,7 +26,6 @@ from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_ass
 )
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_runtime import (
     DEFAULT_AUDIT_LANES,
-    READONLY_AUDIT_REPORTS_ACCEPTED,
     validate_reddog_openclaw_readonly_audit_reports,
     plan_reddog_openclaw_readonly_audit_swarm,
 )
@@ -46,6 +45,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
+)
+from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
+    build_fresh_holoindex_receipt,
 )
 
 
@@ -125,41 +127,10 @@ def _work_state() -> dict[str, object]:
 
 
 def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
-    return HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
+    return build_fresh_holoindex_receipt(
+        repo_root=REPO_ROOT,
+        head_sha=HEAD,
         generated_at=NOW,
-        repo_root=str(REPO_ROOT),
-        repo_head_sha=HEAD,
-        ssd_path="E:/HoloIndex",
-        source="ci_targeted_reindex",
-        generation_id="sha256:holo-generation",
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=4,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:work-ledger-manifest",
-                indexed_paths_digest="sha256:work-ledger-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-            CollectionFreshness(
-                name="navigation_symbols",
-                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
-                count=9,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:symbols-manifest",
-                indexed_paths_digest="sha256:symbols-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-        ],
     )
 
 

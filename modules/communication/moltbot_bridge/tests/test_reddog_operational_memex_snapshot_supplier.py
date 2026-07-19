@@ -6,7 +6,7 @@ import ast
 from dataclasses import replace
 from pathlib import Path
 
-from holo_index.freshness_receipt import CollectionFreshness, HoloIndexFreshnessReceipt
+from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     ReadOnlyAuditSwarmEnqueueReceipt,
     ReadOnlyAuditTaskSpec,
@@ -19,6 +19,9 @@ from modules.communication.moltbot_bridge.src.reddog_operational_memex_snapshot_
     OPERATIONAL_MEMEX_SUPPLY_REJECT,
     OperationalMemexReadOnlyAuditTaskWriter,
     enrich_readonly_audit_tasks_with_operational_memex,
+)
+from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
+    build_fresh_holoindex_receipt,
 )
 
 
@@ -35,45 +38,11 @@ NOW = "2026-07-16T00:00:00+00:00"
 HEAD = "06d823f52"
 REVISION = "sha256:work-state-memex"
 FOUNDUP_ID = "foundups_agent"
-GENERATION_ID = "sha256:holo-generation-memex"
-
-
 def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
-    return HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
+    return build_fresh_holoindex_receipt(
+        repo_root=REPO_ROOT,
+        head_sha=HEAD,
         generated_at=NOW,
-        repo_root=str(REPO_ROOT),
-        repo_head_sha=HEAD,
-        ssd_path="E:/HoloIndex",
-        source="ci_targeted_reindex",
-        generation_id=GENERATION_ID,
-        collections=[
-            CollectionFreshness(
-                name="navigation_work_ledger",
-                count=4,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:work-ledger-manifest",
-                indexed_paths_digest="sha256:work-ledger-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-            CollectionFreshness(
-                name="navigation_symbols",
-                source_scope_id="holoindex.navigation_symbols.tracked-modules-scripts-holo.v1",
-                count=9,
-                status="indexed",
-                source="ci_targeted_reindex",
-                repo_head_sha=HEAD,
-                last_indexed_at=NOW,
-                source_manifest_digest="sha256:symbols-manifest",
-                indexed_paths_digest="sha256:symbols-paths",
-                verification="PASS",
-                proof_kind="complete_source_manifest",
-            ),
-        ],
     )
 
 
@@ -206,7 +175,7 @@ def test_enriches_task_with_snapshot_bound_memex_view_and_worker_bindings() -> N
     assert assignment["work_order_id"] == "assignment-1"
     assert assignment["memex_source_scope"] == f"foundup:{FOUNDUP_ID}:lane:repo_code_audit"
     assert assignment["memex_source_revision"] == REVISION
-    assert assignment["memex_holoindex_generation_id"] == GENERATION_ID
+    assert assignment["memex_holoindex_generation_id"] == _fresh_holo_receipt().generation_id
     assert enriched["memex_snapshot_supply_receipt"]["no_holoindex_reindex_performed"] is True
     assert result.supply_receipt is not None
     assert result.supply_receipt["schema_version"] == "reddog_operational_memex_snapshot_supply_receipt.v1"
