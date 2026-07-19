@@ -243,7 +243,7 @@ def test_runtime_binding_rejects_mismatched_receipts_and_policy():
     assert "verifier_digest_mismatch" in receipt.rejection_reasons
 
 
-def test_panel_runtime_binding_remains_deferred_even_with_role_topology():
+def test_panel_runtime_binding_rejects_single_model_evidence_without_signed_aggregate():
     cards = (
         _card("provider/principal", provider="a"),
         _card("provider/researcher", provider="b"),
@@ -277,14 +277,14 @@ def test_panel_runtime_binding_remains_deferred_even_with_role_topology():
 
     assert selection.decision == SelectionDecision.SELECTED
     assert receipt.decision == ModelRuntimeBindingDecision.REJECTED
-    assert "panel_runtime_binding_deferred" in receipt.rejection_reasons
+    assert "missing_verified_panel_evidence" in receipt.rejection_reasons
     assert receipt.principal_model is None
     try:
         receipt.to_reddog_bridge_payload()
     except ValueError as exc:
         assert str(exc) == "runtime_binding_not_bound"
     else:
-        raise AssertionError("deferred panel binding must not produce a bridge payload")
+        raise AssertionError("unauthenticated panel binding must not produce a bridge payload")
 
 
 def test_panel_runtime_binding_rejects_topology_mismatch():

@@ -262,8 +262,9 @@ produce a minimal RedDog bridge payload via `to_reddog_bridge_payload()`.
 The verifier role remains outside candidate panels. Catalog-only champions,
 evaluation selections, stale topology, mismatched benchmark evidence, missing
 verified production evidence, missing signed promotion receipts, and
-below-threshold evidence fail closed. Panel runtime binding is intentionally
-deferred until panel topology evidence is signed and verified. This API does not
+below-threshold evidence fail closed. Panel runtime binding accepts only a
+`VerifiedModelPanelEvidence` aggregate; independently valid member proofs alone
+remain insufficient. This API does not
 call model providers, run benchmarks, mutate the extension, persist runtime
 defaults, or write PatternMemory.
 
@@ -290,6 +291,28 @@ interface; this module never signs, never holds private keys and never imports a
 crypto signing library. Nonces are consumed only when admission explicitly
 requests it. Downstream selection and runtime checks validate immutable verified
 evidence and do not consume single-use nonces again.
+
+#### Signed Aggregate PANEL Evidence
+
+```python
+build_panel_member_evidence_binding(...) -> PanelMemberEvidenceBinding
+build_model_panel_signed_evidence_receipt(...) -> ModelPanelSignedEvidenceReceipt
+rehydrate_model_panel_signed_evidence_receipt(...)
+build_verified_model_panel_evidence(...) -> VerifiedModelPanelEvidence
+```
+
+The PANEL verifier first invokes the existing signed single-model admission
+chain for every ordered role/model/provider member. It then checks member and
+required-role uniqueness, exact selection order, per-member evidence IDs and
+digests, explicit synthesizer, and exact catalog/selection/task/topology/policy/
+surface ID-and-digest bindings. Only then does it verify the aggregate signer,
+trusted key, key epoch, validity window and signature; optional aggregate nonce
+consumption is last. Runtime binding rejects PANEL selections unless supplied
+this exact process-local factory-issued aggregate proof. The proof cannot be
+directly constructed, copied, replaced or serialized; runtime rechecks its
+closure-held identity seal and exact aggregate/member/context/synthesizer
+projections. The API does not sign, choose models, call providers,
+wire Fusion consumers, mutate runtime defaults or perform network/file writes.
 
 #### RedDog Model Selection Artifact Supply
 

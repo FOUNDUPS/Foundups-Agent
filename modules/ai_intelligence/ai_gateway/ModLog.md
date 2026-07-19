@@ -1,5 +1,34 @@
 # AI Gateway Module Change Log
 
+## [2026-07-18] - Signed Aggregate Fusion PANEL Evidence
+
+**Who:** 0102 Codex worker, architect-audited lane
+**Type:** Production Evidence / Runtime Binding Security
+**Slice:** MODEL_SIGNED_PANEL_EVIDENCE_PHASE1
+
+**What:** Added a separate signed aggregate PANEL envelope and required it for
+PANEL runtime binding. Every member's existing signed benchmark/promotion chain
+is verified first; the aggregate binds ordered roles, models, providers,
+per-member evidence IDs/digests, catalog, selection, task, topology, policy,
+runtime surface and explicit synthesizer before aggregate signature and nonce
+admission.
+
+**Truth Boundary:**
+- IMPLEMENTED: process-local sealed PANEL proof, deterministic rehydration,
+  independent member verification, anti-splice checks, signer trust/revocation/
+  freshness, replay rejection, exact runtime identity/projection gate, and
+  adversarial construction/replacement/copy/pickle tests.
+- NOT IMPLEMENTED: Fusion consumer wiring, provider calls, model discovery or
+  ranking, artifact supply/bootstrap, WRE scheduling, OpenClaw/Hermes changes,
+  signing/private-key custody, durable nonce/trust stores, live execution.
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
+**WSP_15 Score:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 =
+19 (P0 security boundary).
+
+---
+
 ## [2026-07-18] - Kimi K3 OpenRouter AutoResearch Candidate
 
 **Who:** 0102 Codex

@@ -183,8 +183,21 @@ authority. Those mappings remain useful as legacy scalar projections, but
 `selection.purpose == production` requires a typed
 `VerifiedModelProductionEvidence` object that passed signed-evidence
 verification. Runtime binding also requires that verified object before a bridge
-payload can be emitted. Single-model chains can pass; panel runtime binding is
-still deferred until topology-bound panel evidence is signed and verified.
+payload can be emitted. Single-model chains pass through their existing typed
+evidence object. Panel binding requires the separate aggregate proof described
+below; a collection of otherwise-valid single-model proofs is insufficient.
+
+`src/model_panel_signed_evidence.py` verifies every member's complete existing
+single-model chain before it admits a signed PANEL envelope. The envelope binds
+the exact ordered role/model/provider members, per-member evidence IDs and
+digests, catalog, selection, task, topology, policy and runtime-surface context,
+plus an explicit synthesizer. Aggregate trust, signature, revocation, freshness
+and optional nonce consumption are checked only after all member and anti-splice
+checks pass. This slice enables the runtime-binding receipt to represent a
+verified panel. The returned proof is process-local, sealed, non-copyable and
+non-serializable; runtime binding requires the exact factory-issued identity and
+rechecks its canonical aggregate, member, context and synthesizer projections.
+This slice does not wire any Fusion consumer or choose panel members.
 
 ## RedDog Model Selection Artifact Supply
 
