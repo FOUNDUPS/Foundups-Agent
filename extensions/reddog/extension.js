@@ -5,8 +5,9 @@ const path = require('path');
 const fs = require('fs');
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
+const groundedTargetContinuity = require('./grounded_target_continuity');
 
-const EXTENSION_VERSION = '0.4.4';
+const EXTENSION_VERSION = '0.4.5';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -3595,16 +3596,23 @@ function buildResidentArchitectSessionPayload(workFocus, options) {
     };
   }
   const focus = String(workFocus || '');
+  const groundingReceipt = groundedTargetContinuity.buildGroundedTargetReceipt(
+    focus, opts.groundingPreflight, opts.holoScorecard, 'editor_thin_client'
+  );
+  if (!groundedTargetContinuity.receiptReady(groundingReceipt)) {
+    return { ok: false, rejection_reasons: ['grounded_target_receipt_not_ready'], payload: null };
+  }
   const intentId = 'sha256:' + crypto.createHash('sha256')
-    .update([REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE, EXTENSION_VERSION, focus].join('|'), 'utf8')
+    .update([REDDOG_PRODUCT_IDENTITY_THIN_CLIENT_SLICE, EXTENSION_VERSION, groundingReceipt.receipt_id].join('|'), 'utf8')
     .digest('hex');
   const redDogIntent = {
-    schema_version: 'reddog_intent.v1',
+    schema_version: 'reddog_intent.v2',
     intent_id: intentId,
     source_surface: 'editor_thin_client',
     extension_id: REDDOG_EXTENSION_ID,
     extension_version: EXTENSION_VERSION,
     work_focus: focus,
+    grounding_receipt: groundingReceipt,
     requested_operation: 'resident_architect_session',
     submits_executable_authority: false,
     shell_authority_requested: false,
@@ -3617,6 +3625,7 @@ function buildResidentArchitectSessionPayload(workFocus, options) {
     payload: {
       red_dog_intent: redDogIntent,
       intent_id: intentId,
+      grounding_receipt_id: groundingReceipt.receipt_id,
       explicit_resident_architect_session_requested: true,
       work_focus: focus,
       repo_root: opts.repoRoot ? String(opts.repoRoot) : undefined,
@@ -5721,7 +5730,9 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     const residentArchitectSessionResult = (actionPlanningAllowed && residentArchitectSessionEnabled)
       ? runResidentArchitectSessionBridge(context, workFocus, {
-        explicitResidentArchitectSessionRequested: true
+        explicitResidentArchitectSessionRequested: true,
+        groundingPreflight: groundingPreflight,
+        holoScorecard: holoScorecard
       })
       : null;
     result.review_packet = attachOrchestratorMetadata(

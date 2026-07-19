@@ -6,6 +6,11 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    SCHEMA_VERSION as GROUNDING_SCHEMA_VERSION,
+    canonical_digest as grounding_digest,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 BRIDGE_PATH = REPO_ROOT / "scripts" / "reddog_resident_architect_session_once.py"
@@ -13,6 +18,46 @@ SPEC = importlib.util.spec_from_file_location("reddog_resident_architect_session
 assert SPEC and SPEC.loader
 bridge = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(bridge)
+
+
+def _grounding_receipt(work_focus: str) -> dict:
+    typed = {
+        "repo_file_targets": ["modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py"],
+        "semantic_targets": [],
+        "external_research_targets": [],
+        "quoted_reference_blocks_count": 0,
+        "quoted_reference_blocks_digest": grounding_digest([]),
+    }
+    value = {
+        "schema_version": GROUNDING_SCHEMA_VERSION,
+        "source_surface": "editor_thin_client",
+        "work_focus_digest": grounding_digest({"work_focus": work_focus}),
+        "typed_targets": typed,
+        "typed_targets_digest": grounding_digest(typed),
+        "grounding_preflight_applied": True,
+        "grounding_preflight_passed": True,
+        "grounding_preflight_rejection_reasons": [],
+        "grounding_target_universe_required": True,
+        "repo_file_targets_count": 1,
+        "semantic_targets_count": 0,
+        "external_research_targets_count": 0,
+        "quoted_reference_blocks_count": 0,
+        "semantic_target_coverage": [],
+        "semantic_target_coverage_digest": grounding_digest({"semantic_target_coverage": []}),
+        "target_recall_ok": True,
+        "required_targets_missing": [],
+        "direct_read_paths": [],
+        "holoindex_owner_query_ok": False,
+        "holoindex_freshness": "UNKNOWN",
+        "holoindex_generation_id": "",
+        "holoindex_freshness_receipt_digest": "",
+        "holoindex_repo_head_sha": "",
+        "holoindex_query_receipt_id": "",
+        "holoindex_index_gap_detected": False,
+        "no_holoindex_reindex_performed": True,
+    }
+    value["receipt_id"] = grounding_digest(value)
+    return value
 
 
 def _accepted_result():
@@ -65,6 +110,7 @@ def test_resident_architect_session_requires_explicit_request() -> None:
 
 def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch) -> None:
     calls = []
+    grounding = _grounding_receipt("audit resident loop")
 
     def fake_cycle(**kwargs):
         calls.append(kwargs)
@@ -75,10 +121,13 @@ def test_resident_architect_session_summarizes_durable_cycle_runtime(monkeypatch
         {
             "explicit_resident_architect_session_requested": True,
             "red_dog_intent": {
-                "schema_version": "reddog_intent.v1",
+                "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
+                "work_focus": "audit resident loop",
+                "grounding_receipt": grounding,
                 "submits_executable_authority": False,
             },
+            "grounding_receipt_id": grounding["receipt_id"],
             "repo_root": ".",
             "work_focus": "audit resident loop",
             "work_state_path": "O:/state/work_state.json",
@@ -127,14 +176,19 @@ def test_resident_architect_session_bridge_failure_fails_closed(monkeypatch) -> 
         raise RuntimeError("boom")
 
     monkeypatch.setattr(bridge, "run_reddog_resident_architect_durable_agentdb_cycle", fail_cycle)
+    grounding = _grounding_receipt("audit resident loop")
     result = bridge._result(
         {
             "explicit_resident_architect_session_requested": True,
             "red_dog_intent": {
-                "schema_version": "reddog_intent.v1",
+                "schema_version": "reddog_intent.v2",
                 "intent_id": "sha256:intent",
+                "work_focus": "audit resident loop",
+                "grounding_receipt": grounding,
                 "submits_executable_authority": False,
             },
+            "grounding_receipt_id": grounding["receipt_id"],
+            "work_focus": "audit resident loop",
         }
     )
 

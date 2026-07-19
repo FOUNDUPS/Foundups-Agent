@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-19: REDDOG_GROUNDED_TARGET_ASSIGNMENT_CONTINUITY_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 97
+**Phase**: Grounding evidence continuity through resident OpenClaw audit assignments
+**Agent**: 0102 architect with fail-closed adversarial tests
+
+- Added a typed validator for `reddog_grounded_target_receipt.v1`, binding work focus, typed targets, recall, semantic coverage, and current HoloIndex generation evidence.
+- Required editor resident intents to use v2 and pass grounding verification before the durable AgentDB cycle; retained v1 only for the read-only `main.py` bootstrap compatibility path.
+- Bound the verified receipt into OpenClaw swarm assignments and AgentDB task contexts, then revalidated it before worker index or model calls.
+- Separated internal semantic retrieval from explicit external research so semantic targets can guide every audit lane without being misrouted as external requests.
+
 ## 2026-07-18: REDDOG_RESIDENT_CONTROL_RECEIPT_TRUTH_AUTH_CONCURRENCY_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 91, 97

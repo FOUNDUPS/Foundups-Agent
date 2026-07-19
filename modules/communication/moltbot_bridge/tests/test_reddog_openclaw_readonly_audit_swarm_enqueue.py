@@ -34,6 +34,10 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_openclaw_readonly_audit_swarm_runtime import (
+    GROUNDING_FOCUS,
+    _grounding_receipt,
+)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -115,7 +119,7 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
     )
 
 
-def _valid_plan(wsp15_allocation_receipt=None):
+def _valid_plan(wsp15_allocation_receipt=None, *, with_grounding: bool = False):
     snapshot_result = build_operational_context_snapshot(
         repo_state={
             "head_sha": HEAD,
@@ -176,6 +180,8 @@ def _valid_plan(wsp15_allocation_receipt=None):
             "modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py",
         ],
         wsp15_allocation_receipt=wsp15_allocation_receipt,
+        grounding_receipt=_grounding_receipt() if with_grounding else None,
+        grounding_work_focus=GROUNDING_FOCUS if with_grounding else "",
     )
     assert plan.accepted is True
     return plan
@@ -221,6 +227,47 @@ def test_enqueue_carries_wsp15_allocation_into_every_task_context() -> None:
         assert task.context["wsp15_allocation_receipt"]["receipt_id"] == allocation["receipt_id"]
         assert task.context["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
         assert task.context["wsp15_allocation_digest"]
+
+
+def test_enqueue_carries_grounding_receipt_and_typed_targets_into_agentdb_tasks() -> None:
+    plan = _valid_plan(with_grounding=True)
+
+    result = enqueue_reddog_readonly_audit_swarm(plan=plan, writer=_FakeWriter())
+
+    assert result.accepted is True
+    for task in result.tasks:
+        assert task.context["grounding_receipt_id"] == plan.receipt.grounding_receipt_id
+        assert task.context["grounding_receipt"] == plan.receipt.grounding_receipt
+        assert task.context["work_focus"] == GROUNDING_FOCUS
+        assert task.context["typed_targets"]["repo_file_targets"] == [
+            "holo_index/adaptive_learning/breadcrumb_tracer.py"
+        ]
+        assert task.context["semantic_targets"] == ["RedDog continuity semantics"]
+
+
+def test_enqueue_rejects_assignment_grounding_substitution_before_writer() -> None:
+    plan = _valid_plan(with_grounding=True)
+    bad_assignment = replace(plan.assignments[0], grounding_receipt_id="sha256:wrong")
+    bad_plan = replace(plan, assignments=(bad_assignment,) + plan.assignments[1:])
+    writer = _FakeWriter()
+
+    result = enqueue_reddog_readonly_audit_swarm(plan=bad_plan, writer=writer)
+
+    assert result.accepted is False
+    assert ReadOnlyAuditEnqueueReason.ASSIGNMENT_UNSAFE in result.rejection_reasons
+    assert writer.calls == []
+
+
+def test_enqueue_revalidates_nested_grounding_mapping_after_plan_creation() -> None:
+    plan = _valid_plan(with_grounding=True)
+    plan.receipt.grounding_receipt["typed_targets"]["semantic_targets"] = ["substituted"]
+    writer = _FakeWriter()
+
+    result = enqueue_reddog_readonly_audit_swarm(plan=plan, writer=writer)
+
+    assert result.accepted is False
+    assert ReadOnlyAuditEnqueueReason.ASSIGNMENT_UNSAFE in result.rejection_reasons
+    assert writer.calls == []
 
 
 def test_rejects_rejected_plan_and_missing_writer_before_publication() -> None:

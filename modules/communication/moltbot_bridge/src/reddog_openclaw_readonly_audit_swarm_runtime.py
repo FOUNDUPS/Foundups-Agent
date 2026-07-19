@@ -23,6 +23,10 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
     EvidenceBundle,
     OperationalContextSnapshot,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    canonical_digest as grounding_digest,
+    validate_grounded_target_receipt,
+)
 
 
 READONLY_AUDIT_SWARM_PLANNED = "READONLY_AUDIT_SWARM_PLANNED"
@@ -76,6 +80,8 @@ class ReadOnlyAuditAssignment:
     determination_id: str
     required_source: str
     allowed_read_targets: tuple[str, ...]
+    grounding_receipt_id: str = ""
+    grounding_receipt_digest: str = ""
     wsp15_allocation_receipt_id: str = ""
     wsp15_allocation_digest: str = ""
     forbidden_actions: tuple[str, ...] = FORBIDDEN_ACTIONS
@@ -103,6 +109,10 @@ class ReadOnlyAuditSwarmReceipt:
     assignment_ids: tuple[str, ...]
     lanes: tuple[str, ...]
     rejection_reasons: tuple[str, ...]
+    grounding_receipt_id: str = ""
+    grounding_receipt_digest: str = ""
+    grounding_receipt: Mapping[str, Any] = field(default_factory=dict)
+    grounding_work_focus: str = ""
     wsp15_allocation_receipt_id: str = ""
     wsp15_allocation_digest: str = ""
     wsp15_allocation_receipt: Mapping[str, Any] = field(default_factory=dict)
@@ -183,6 +193,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     allowed_read_targets: Sequence[str] = (),
     wsp15_allocation_receipt: Mapping[str, Any] | None = None,
+    grounding_receipt: Mapping[str, Any] | None = None,
+    grounding_work_focus: str = "",
 ) -> ReadOnlyAuditSwarmPlan:
     """Plan read-only audit assignments from an already accepted context gate."""
 
@@ -212,13 +224,27 @@ def plan_reddog_openclaw_readonly_audit_swarm(
         reasons.append(f"missing_required_audit_lane:{lane}")
 
     targets = _normalize_targets(allowed_read_targets)
-    if len(targets) > MAX_ASSIGNMENT_TARGETS:
-        reasons.append("too_many_allowed_read_targets")
     allocation_id = ""
     allocation_digest = ""
     if wsp15_allocation_receipt:
         allocation_id = str(wsp15_allocation_receipt.get("receipt_id") or "").strip()
         allocation_digest = _digest(wsp15_allocation_receipt)
+    grounding_data = dict(grounding_receipt) if isinstance(grounding_receipt, Mapping) else {}
+    grounding_id = ""
+    grounding_receipt_digest = ""
+    if grounding_receipt is not None:
+        grounding_validation = validate_grounded_target_receipt(
+            grounding_receipt,
+            work_focus=grounding_work_focus,
+        )
+        if not grounding_validation.accepted or grounding_validation.verified is None:
+            reasons.extend(grounding_validation.rejection_reasons)
+        else:
+            grounding_id = grounding_validation.verified.receipt_id
+            grounding_receipt_digest = grounding_digest(grounding_data)
+            targets = _normalize_targets((*targets, *grounding_validation.verified.repo_file_targets))
+    if len(targets) > MAX_ASSIGNMENT_TARGETS:
+        reasons.append("too_many_allowed_read_targets")
 
     if not reasons and snapshot and context_view and evidence_bundle and binding:
         _validate_binding(
@@ -263,6 +289,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
             allowed_read_targets=targets,
             wsp15_allocation_receipt_id=allocation_id,
             wsp15_allocation_digest=allocation_digest,
+            grounding_receipt_id=grounding_id,
+            grounding_receipt_digest=grounding_receipt_digest,
         )
         for lane in normalized_lanes
     )
@@ -274,6 +302,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
             "determination_id": binding.determination_id,
             "wsp15_allocation_receipt_id": allocation_id,
             "wsp15_allocation_digest": allocation_digest,
+            "grounding_receipt_id": grounding_id,
+            "grounding_receipt_digest": grounding_receipt_digest,
             "assignment_ids": [assignment.assignment_id for assignment in assignments],
         }
     )
@@ -286,6 +316,10 @@ def plan_reddog_openclaw_readonly_audit_swarm(
         evidence_bundle_id=evidence_bundle.evidence_bundle_id,
         determination_id=binding.determination_id,
         requested_operation=binding.requested_operation,
+        grounding_receipt_id=grounding_id,
+        grounding_receipt_digest=grounding_receipt_digest,
+        grounding_receipt=grounding_data,
+        grounding_work_focus=str(grounding_work_focus or ""),
         wsp15_allocation_receipt_id=allocation_id,
         wsp15_allocation_digest=allocation_digest,
         wsp15_allocation_receipt=dict(wsp15_allocation_receipt or {}),
@@ -374,6 +408,8 @@ def _build_assignment(
     allowed_read_targets: tuple[str, ...],
     wsp15_allocation_receipt_id: str,
     wsp15_allocation_digest: str,
+    grounding_receipt_id: str,
+    grounding_receipt_digest: str,
 ) -> ReadOnlyAuditAssignment:
     payload = {
         "lane_id": lane_id,
@@ -384,6 +420,8 @@ def _build_assignment(
         "determination_id": binding.determination_id,
         "wsp15_allocation_receipt_id": wsp15_allocation_receipt_id,
         "wsp15_allocation_digest": wsp15_allocation_digest,
+        "grounding_receipt_id": grounding_receipt_id,
+        "grounding_receipt_digest": grounding_receipt_digest,
         "required_source": LANE_REQUIRED_SOURCE[lane_id],
         "allowed_read_targets": allowed_read_targets,
     }
@@ -398,6 +436,8 @@ def _build_assignment(
         determination_id=binding.determination_id,
         wsp15_allocation_receipt_id=wsp15_allocation_receipt_id,
         wsp15_allocation_digest=wsp15_allocation_digest,
+        grounding_receipt_id=grounding_receipt_id,
+        grounding_receipt_digest=grounding_receipt_digest,
         required_source=LANE_REQUIRED_SOURCE[lane_id],
         allowed_read_targets=allowed_read_targets,
     )

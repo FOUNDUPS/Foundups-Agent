@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-19 - REDDOG_GROUNDED_TARGET_ASSIGNMENT_CONTINUITY_PHASE1 (0.4.5)
+
+- Added immutable `reddog_grounded_target_receipt.v1` generation at the editor thin-client boundary.
+- Bound work focus, typed target universe, direct-read recall, semantic coverage, and current HoloIndex generation proof into resident intent v2.
+- Revalidated the receipt through the durable AgentDB cycle, OpenClaw assignment/task publication, and the read-only 0102 worker before index or model calls.
+- Preserved internal semantic targets for all audit lanes while keeping explicit external-research targets confined to the governed research adapter.
+- Version 0.4.4 -> 0.4.5. WSP_15: Complexity 4 + Importance 5 + Deferability 5 + Impact 5 = 19 (P0).
+
 ## 2026-07-19 - REDDOG_HOLOINDEX_GENERATION_BOUND_QUERY_RUNTIME_PHASE1 (0.4.4)
 
 - Replaced unbound semantic evidence from the extension's direct `holo_index.py --bundle-json` subprocess with an authenticated query through the existing localhost HoloIndex owner service.

@@ -20,6 +20,10 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     plan_reddog_openclaw_readonly_audit_swarm,
     validate_reddog_openclaw_readonly_audit_reports,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    SCHEMA_VERSION as GROUNDING_SCHEMA_VERSION,
+    canonical_digest as grounding_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
@@ -41,6 +45,58 @@ MODULE_PATH = (
 NOW = "2026-07-14T00:00:00+00:00"
 HEAD = "a764551a89068f57affff47350c5537d849a4564"
 REVISION = "sha256:work-state-refresh"
+GROUNDING_FOCUS = "Audit the work ledger and RedDog continuity semantics."
+
+
+def _grounding_receipt() -> dict[str, object]:
+    repo_target = "holo_index/adaptive_learning/breadcrumb_tracer.py"
+    semantic_target = "RedDog continuity semantics"
+    typed = {
+        "repo_file_targets": [repo_target],
+        "semantic_targets": [semantic_target],
+        "external_research_targets": [],
+        "quoted_reference_blocks_count": 0,
+        "quoted_reference_blocks_digest": grounding_digest([]),
+    }
+    coverage = [
+        {
+            "target": semantic_target,
+            "verdict": "SUFFICIENT",
+            "evidence_refs": ["code:holo_index/adaptive_learning/breadcrumb_tracer.py"],
+        }
+    ]
+    value = {
+        "schema_version": GROUNDING_SCHEMA_VERSION,
+        "source_surface": "editor_thin_client",
+        "work_focus_digest": grounding_digest({"work_focus": GROUNDING_FOCUS}),
+        "typed_targets": typed,
+        "typed_targets_digest": grounding_digest(typed),
+        "grounding_preflight_applied": True,
+        "grounding_preflight_passed": True,
+        "grounding_preflight_rejection_reasons": [],
+        "grounding_target_universe_required": True,
+        "repo_file_targets_count": 1,
+        "semantic_targets_count": 1,
+        "external_research_targets_count": 0,
+        "quoted_reference_blocks_count": 0,
+        "semantic_target_coverage": coverage,
+        "semantic_target_coverage_digest": grounding_digest(
+            {"semantic_target_coverage": coverage}
+        ),
+        "target_recall_ok": True,
+        "required_targets_missing": [],
+        "direct_read_paths": [repo_target],
+        "holoindex_owner_query_ok": True,
+        "holoindex_freshness": "CURRENT",
+        "holoindex_generation_id": "sha256:" + "a" * 64,
+        "holoindex_freshness_receipt_digest": "sha256:" + "b" * 64,
+        "holoindex_repo_head_sha": HEAD,
+        "holoindex_query_receipt_id": "sha256:" + "c" * 64,
+        "holoindex_index_gap_detected": False,
+        "no_holoindex_reindex_performed": True,
+    }
+    value["receipt_id"] = grounding_digest(value)
+    return value
 
 
 def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
@@ -213,6 +269,47 @@ def test_plan_binds_wsp15_allocation_to_every_assignment() -> None:
         for assignment in plan.assignments
     )
     assert all(assignment.wsp15_allocation_digest for assignment in plan.assignments)
+
+
+def test_plan_binds_grounded_prompt_targets_to_every_assignment() -> None:
+    snapshot, context_view, evidence_bundle, gate = _accepted_gate_bundle()
+    grounding = _grounding_receipt()
+
+    plan = plan_reddog_openclaw_readonly_audit_swarm(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        gate_decision=gate,
+        allowed_read_targets=["docs/0102_session_briefings/work_ledger.schema.json"],
+        grounding_receipt=grounding,
+        grounding_work_focus=GROUNDING_FOCUS,
+    )
+
+    assert plan.accepted is True
+    assert plan.receipt.grounding_receipt_id == grounding["receipt_id"]
+    assert plan.receipt.grounding_receipt == grounding
+    assert plan.receipt.grounding_work_focus == GROUNDING_FOCUS
+    for assignment in plan.assignments:
+        assert "holo_index/adaptive_learning/breadcrumb_tracer.py" in assignment.allowed_read_targets
+        assert assignment.grounding_receipt_id == grounding["receipt_id"]
+        assert assignment.grounding_receipt_digest == plan.receipt.grounding_receipt_digest
+
+
+def test_plan_rejects_grounding_work_focus_substitution() -> None:
+    snapshot, context_view, evidence_bundle, gate = _accepted_gate_bundle()
+
+    plan = plan_reddog_openclaw_readonly_audit_swarm(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        gate_decision=gate,
+        grounding_receipt=_grounding_receipt(),
+        grounding_work_focus="different work focus",
+    )
+
+    assert plan.accepted is False
+    assert "grounding_work_focus_mismatch" in plan.rejection_reasons
+    assert plan.assignments == ()
 
 
 def test_rejects_when_fusion_assignment_gate_rejected() -> None:

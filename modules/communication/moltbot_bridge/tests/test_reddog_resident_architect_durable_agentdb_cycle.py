@@ -18,6 +18,10 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SOURCE,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    SCHEMA_VERSION as GROUNDING_SCHEMA_VERSION,
+    canonical_digest as grounding_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     RepoAuditModelResult,
 )
@@ -48,6 +52,49 @@ MODULE_PATH = (
 NOW = "2026-07-16T00:00:00+00:00"
 HEAD = "f9ac824d8"
 REVISION = "sha256:resident-work-state"
+WORK_FOCUS = "resident RedDog architect audit"
+
+
+def _grounding_receipt() -> dict[str, object]:
+    typed = {
+        "repo_file_targets": [
+            "modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py"
+        ],
+        "semantic_targets": [],
+        "external_research_targets": [],
+        "quoted_reference_blocks_count": 0,
+        "quoted_reference_blocks_digest": grounding_digest([]),
+    }
+    value = {
+        "schema_version": GROUNDING_SCHEMA_VERSION,
+        "source_surface": "editor_thin_client",
+        "work_focus_digest": grounding_digest({"work_focus": WORK_FOCUS}),
+        "typed_targets": typed,
+        "typed_targets_digest": grounding_digest(typed),
+        "grounding_preflight_applied": True,
+        "grounding_preflight_passed": True,
+        "grounding_preflight_rejection_reasons": [],
+        "grounding_target_universe_required": True,
+        "repo_file_targets_count": 1,
+        "semantic_targets_count": 0,
+        "external_research_targets_count": 0,
+        "quoted_reference_blocks_count": 0,
+        "semantic_target_coverage": [],
+        "semantic_target_coverage_digest": grounding_digest({"semantic_target_coverage": []}),
+        "target_recall_ok": True,
+        "required_targets_missing": [],
+        "direct_read_paths": [],
+        "holoindex_owner_query_ok": False,
+        "holoindex_freshness": "UNKNOWN",
+        "holoindex_generation_id": "",
+        "holoindex_freshness_receipt_digest": "",
+        "holoindex_repo_head_sha": "",
+        "holoindex_query_receipt_id": "",
+        "holoindex_index_gap_detected": False,
+        "no_holoindex_reindex_performed": True,
+    }
+    value["receipt_id"] = grounding_digest(value)
+    return value
 
 
 @pytest.fixture(autouse=True)
@@ -69,11 +116,12 @@ def isolated_agent_db(tmp_path, monkeypatch):
 
 def _intent() -> dict[str, object]:
     return {
-        "schema_version": "reddog_intent.v1",
+        "schema_version": "reddog_intent.v2",
         "intent_id": "sha256:intent-resident-cycle",
         "origin": "extension",
         "principal_ref": "012",
-        "work_focus": "resident RedDog architect audit",
+        "work_focus": WORK_FOCUS,
+        "grounding_receipt": _grounding_receipt(),
         "submits_executable_authority": False,
     }
 

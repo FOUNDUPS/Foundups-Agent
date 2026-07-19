@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ArchitectDeterminationStore,
     ArchitectModelRunner,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    validate_grounded_target_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
     DEFAULT_BOOTSTRAP_CHANGED_PATHS,
     DEFAULT_BOOTSTRAP_READ_TARGETS,
@@ -405,6 +408,8 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
                 red_dog_intent=red_dog_intent,
                 config=memex_snapshot_supply_config,
             ),
+            grounding_receipt=red_dog_intent.get("grounding_receipt"),
+            grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
         )
         if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
             record.update(
@@ -501,6 +506,8 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         breadcrumbs=breadcrumbs,
         brain_state=brain_state,
         workspace_memory_notes=workspace_memory_notes,
+        grounding_receipt=red_dog_intent.get("grounding_receipt"),
+        grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
         audit_lanes=audit_lanes,
         collect_readonly_audit_reports=True,
         report_store=report_store or AgentDbReadOnlyAuditReportStore(agent_db_factory=agent_db_factory),
@@ -576,12 +583,24 @@ def _new_record(intent: Mapping[str, Any], *, retry_count: int) -> dict[str, Any
 
 def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
     reasons: list[str] = []
-    if not isinstance(intent, Mapping) or intent.get("schema_version") != "reddog_intent.v1":
+    schema = intent.get("schema_version") if isinstance(intent, Mapping) else None
+    main_v1 = bool(
+        schema == "reddog_intent.v1"
+        and intent.get("origin") == "main.py"
+        and intent.get("requested_authority") == "read_only_audit"
+    )
+    if not isinstance(intent, Mapping) or (schema != "reddog_intent.v2" and not main_v1):
         reasons.append(ResidentCycleReason.INTENT_INVALID)
     if not str(intent.get("intent_id") or "").strip():
         reasons.append(ResidentCycleReason.INTENT_INVALID)
     if intent.get("submits_executable_authority") is not False:
         reasons.append(ResidentCycleReason.EXECUTABLE_AUTHORITY_REQUESTED)
+    if isinstance(intent, Mapping) and schema == "reddog_intent.v2":
+        grounding = validate_grounded_target_receipt(
+            intent.get("grounding_receipt") if isinstance(intent.get("grounding_receipt"), Mapping) else None,
+            work_focus=str(intent.get("work_focus") or ""),
+        )
+        reasons.extend(grounding.rejection_reasons)
     return tuple(dict.fromkeys(reasons))
 
 

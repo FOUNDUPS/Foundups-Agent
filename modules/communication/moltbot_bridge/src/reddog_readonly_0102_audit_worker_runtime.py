@@ -41,6 +41,10 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 from modules.communication.moltbot_bridge.src.reddog_typed_evidence_citation_policy import (
     validate_typed_evidence_citations,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    canonical_digest as grounding_digest,
+    validate_grounded_target_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_holoindex_first_external_research_grounding_adapter import (
     ExternalResearchRetriever,
     ground_reddog_holoindex_first_external_research,
@@ -141,6 +145,40 @@ class ReadOnlyEvidenceQueryAdapter(Protocol):
         allowed_paths: Sequence[str],
         limit: int,
     ) -> Mapping[str, Any]: ...
+
+
+def _validated_task_grounding(
+    task_context: Mapping[str, Any],
+    assignment: Mapping[str, Any],
+) -> tuple[Any | None, tuple[str, ...]]:
+    receipt = task_context.get("grounding_receipt")
+    grounding_present = bool(
+        receipt
+        or task_context.get("grounding_receipt_id")
+        or assignment.get("grounding_receipt_id")
+    )
+    if not grounding_present:
+        return None, ()
+    validation = validate_grounded_target_receipt(
+        receipt if isinstance(receipt, Mapping) else None,
+        work_focus=str(task_context.get("work_focus") or ""),
+    )
+    if not validation.accepted or validation.verified is None:
+        return None, tuple(validation.rejection_reasons or ("grounding_receipt_rejected",))
+    verified = validation.verified
+    expected_digest = grounding_digest(verified.receipt)
+    bindings = (
+        (task_context.get("grounding_receipt_id"), verified.receipt_id),
+        (assignment.get("grounding_receipt_id"), verified.receipt_id),
+        (task_context.get("grounding_receipt_digest"), expected_digest),
+        (assignment.get("grounding_receipt_digest"), expected_digest),
+    )
+    if any(str(value or "") != expected for value, expected in bindings):
+        return None, ("grounding_assignment_binding_mismatch",)
+    typed = task_context.get("typed_targets")
+    if not isinstance(typed, Mapping) or grounding_digest(typed) != verified.typed_targets_digest:
+        return None, ("grounding_typed_targets_binding_mismatch",)
+    return verified, ()
 
 
 @dataclass(frozen=True)
@@ -420,6 +458,9 @@ def execute_model_backed_repo_code_audit(
     external_research_retriever: ExternalResearchRetriever | None = None,
     timeout_seconds: int = 60,
 ) -> ReadOnlyAuditTaskExecutionResult:
+    grounding, grounding_reasons = _validated_task_grounding(task_context, assignment)
+    if grounding_reasons:
+        return _reject(grounding_reasons)
     allocation = task_context.get("wsp15_allocation_receipt") or assignment.get("wsp15_allocation_receipt")
     validation = validate_reddog_wsp15_allocation_receipt(allocation if isinstance(allocation, Mapping) else None)
     if validation.rejection_reasons == ("missing_wsp15_allocation",):
@@ -454,7 +495,11 @@ def execute_model_backed_repo_code_audit(
     if worker_plan.get("fusion_required") is not True:
         return _reject([ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED])
 
-    query = _repo_audit_query(assignment=assignment, seed_targets=seed_targets)
+    query = _repo_audit_query(
+        assignment=assignment,
+        seed_targets=seed_targets,
+        semantic_targets=grounding.semantic_targets if grounding is not None else (),
+    )
     discovery_targets = tuple(dict.fromkeys(
         (
             *tuple(seed_targets),
@@ -867,6 +912,8 @@ def _optional_external_research_artifacts(
     if not request:
         return None
     if lane_id != EXTERNAL_RESEARCH_AUDIT_LANE:
+        if not request.get("external_research_targets"):
+            return None
         return (
             _external_research_error_receipt(
                 query=json.dumps(request, sort_keys=True),
@@ -912,12 +959,12 @@ def _external_research_request(
         typed = assignment.get("typed_targets")
     if not isinstance(typed, Mapping):
         typed = {}
-    semantic_targets = (
+    semantic_targets = _dedupe_text(
         _raw_sequence(task_context.get("semantic_targets"))
         + _raw_sequence(assignment.get("semantic_targets"))
         + _raw_sequence(typed.get("semantic_targets"))
     )
-    external_targets = (
+    external_targets = _dedupe_text(
         _raw_sequence(task_context.get("external_research_targets"))
         + _raw_sequence(assignment.get("external_research_targets"))
         + _raw_sequence(typed.get("external_research_targets"))
@@ -1064,6 +1111,10 @@ def _raw_sequence(value: Any) -> list[Any]:
     return [item for item in value if item not in (None, "")]
 
 
+def _dedupe_text(values: Sequence[Any]) -> list[str]:
+    return list(dict.fromkeys(str(value).strip() for value in values if str(value).strip()))
+
+
 def _int_context_value(task_context: Mapping[str, Any], assignment: Mapping[str, Any], key: str) -> int:
     try:
         return int(task_context.get(key) or assignment.get(key) or 0)
@@ -1153,9 +1204,21 @@ def _module_roots_from_paths(paths: Sequence[str]) -> list[str]:
     return roots
 
 
-def _repo_audit_query(*, assignment: Mapping[str, Any], seed_targets: Sequence[str]) -> str:
+def _repo_audit_query(
+    *,
+    assignment: Mapping[str, Any],
+    seed_targets: Sequence[str],
+    semantic_targets: Sequence[str] = (),
+) -> str:
     lane_id = str(assignment.get("lane_id") or "readonly_audit").strip()
-    targets = " ".join(str(value).replace("/", " ") for value in (*tuple(seed_targets), *tuple(assignment.get("allowed_read_targets", ()))))
+    targets = " ".join(
+        str(value).replace("/", " ")
+        for value in (
+            *tuple(semantic_targets),
+            *tuple(seed_targets),
+            *tuple(assignment.get("allowed_read_targets", ())),
+        )
+    )
     return f"RedDog {lane_id} readonly audit evidence {targets}".strip()
 
 
@@ -1711,6 +1774,8 @@ def _build_model_report(
         "repo_head": repo_head,
         "wsp15_allocation_receipt_id": allocation.get("receipt_id"),
         "wsp15_allocation_digest": allocation_digest,
+        "grounding_receipt_id": str(assignment.get("grounding_receipt_id") or ""),
+        "grounding_receipt_digest": str(assignment.get("grounding_receipt_digest") or ""),
         "model_receipt_id": model_result.model_receipt_id,
         "model_result_digest": model_result.model_result_digest,
         "model_route_receipt": route_receipt,
