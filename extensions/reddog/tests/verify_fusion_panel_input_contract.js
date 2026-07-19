@@ -13,6 +13,7 @@ const bridgePython = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_
 const rootExemptionYaml = fs.readFileSync(path.join(root, 'wsp_62_exemptions.yaml'), 'utf8');
 const exemptionYaml = fs.readFileSync(path.join(extDir, 'wsp_62_exemptions.yaml'), 'utf8');
 const roadmap = fs.readFileSync(path.join(extDir, 'ROADMAP.md'), 'utf8');
+const fusionProgress = require(path.join(extDir, 'fusion_progress_receipt.js'));
 const defaultPanel = packageJson.contributes.configuration.properties['reddog.panelModels'].default;
 const configState = {
   reddog: {},
@@ -79,8 +80,21 @@ function fakeBridgeChild(onPayload) {
       stdinText += String(chunk);
     },
     end: () => {
-      onPayload(JSON.parse(stdinText));
-      child.stdout.emit('data', Buffer.from(JSON.stringify({ ok: false, reason: 'contract_probe' })));
+      const payload = JSON.parse(stdinText);
+      onPayload(payload);
+      const progress = JSON.stringify({
+        event: 'progress', stage: 'lead_start', text: 'Lead request started.',
+        run_id: 'run-contract', event_id: 'event-contract', sequence: 1,
+        status: 'STARTED', role: 'lead', model: 'model-a', elapsed_ms: 3
+      });
+      child.stderr.emit('data', Buffer.from(progress.slice(0, 23)));
+      child.stderr.emit('data', Buffer.from(progress.slice(23)));
+      child.stdout.emit('data', Buffer.from(JSON.stringify({
+        ok: false,
+        reason: 'contract_probe',
+        fusion_progress_receipt: { run_id: payload.bridge_run_id, receipt_id: 'contract-receipt' },
+        fusion_progress_receipt_validation: { applied: true, valid: true, rejection_reasons: [] }
+      })));
       child.emit('close', 0);
     }
   };
@@ -92,6 +106,7 @@ async function captureBridgeInvocation(worker, mode) {
   let invocation = null;
   let payload = null;
   let spawnCount = 0;
+  const progressEvents = [];
   cp.spawn = (command, args, options) => {
     spawnCount += 1;
     invocation = { command, args, options };
@@ -101,9 +116,9 @@ async function captureBridgeInvocation(worker, mode) {
   };
   try {
     const state = { bridgeChild: null, disposed: false };
-    await reddog.callFusion({}, worker, 'contract prompt', 'bounded context', 'system prompt', [], mode,
-      () => {}, state, {}, {});
-    return { invocation, payload, spawnCount, state };
+    const result = await reddog.callFusion({}, worker, 'contract prompt', 'bounded context', 'system prompt', [], mode,
+      (stage, text, metadata) => progressEvents.push({ stage, text, metadata }), state, {}, {});
+    return { invocation, payload, progressEvents, result, spawnCount, state };
   } finally {
     cp.spawn = originalSpawn;
   }
@@ -172,7 +187,14 @@ async function assertModeCases(mode, cases) {
     );
     assert.strictEqual(captured.invocation.options.env.OPENROUTER_API_KEY, undefined);
     assert.strictEqual(captured.payload.mode, mode, mode + '/' + name + ': mode mismatch');
+    assert(/^reddog_bridge_run:[0-9a-f]{32}$/.test(captured.payload.bridge_run_id), mode + '/' + name + ': bridge run ID missing');
     assert.deepStrictEqual(captured.payload.panel_models, expected, mode + '/' + name + ': stdin mismatch');
+    const bridgeProgress = captured.progressEvents.filter((event) => event.stage === 'lead_start');
+    assert.strictEqual(bridgeProgress.length, 1, mode + '/' + name + ': fragmented progress must decode once');
+    assert.strictEqual(bridgeProgress[0].metadata.role, 'lead', mode + '/' + name + ': progress metadata missing');
+    const collector = fusionProgress.createFusionProgressCollector();
+    collector.capture(captured.result);
+    assert.strictEqual(collector.snapshot().length, 1, mode + '/' + name + ': local run binding must survive callFusion return');
     assert.strictEqual(captured.state.bridgeChild, null, mode + '/' + name + ': child state must clear');
   }
 }

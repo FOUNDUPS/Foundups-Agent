@@ -1,5 +1,7 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+RedDog Fusion progress observability is implemented by `src/reddog_fusion_progress_receipt.py`: bounded hash-chained stage events plus content-free OpenRouter usage and routing receipts. It does not retain prompts, outputs, hidden reasoning, or secrets, and it grants no action authority.
+
 > **OpenClaw** (formerly Moltbot/Clawdbot), trained on WSP framework, operating on Foundups-Agent codebase
 
 ## Version Note

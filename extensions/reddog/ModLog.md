@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-20 - REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1 (0.4.10)
+
+- Added digest-bound, hash-chained Fusion progress events and per-call OpenRouter usage/routing receipts.
+- Added chunk-safe stderr progress decoding and UI role/model/status details without exposing prompts, outputs, private reasoning, or secrets.
+- Added Run Trace totals for calls, failures, retries, duration, tokens, OpenRouter cost credits, generation IDs, and selected routes; incomplete provider cost remains explicitly unknown.
+- Kept the unkeyed progress receipt observational: process-local run binding rejects cross-run receipts, while runtime authority remains governed by the existing signed gates.
+- Kept non-streaming model calls, redaction, quorum, model selection, and execution authority unchanged.
+- Version 0.4.9 -> 0.4.10.
+
 ## 2026-07-19 - REDDOG_REPO_DEEP_DIVE_FOCUS_BOUND_TARGET_SELECTION_PHASE1 (0.4.9)
 
 - Reserved the repository deep-dive core for token-matched paths under an explicit named focus when readable implementation, test, and document evidence all exist.
