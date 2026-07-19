@@ -26,6 +26,10 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
     ReadOnlyAuditAssignment,
     ReadOnlyAuditSwarmPlan,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    canonical_digest as grounding_digest,
+    validate_grounded_target_receipt,
+)
 
 
 READONLY_AUDIT_SWARM_ENQUEUE_ACCEPT = "READONLY_AUDIT_SWARM_ENQUEUE_ACCEPT"
@@ -272,6 +276,19 @@ def _validate_plan(plan: ReadOnlyAuditSwarmPlan) -> list[str]:
         reasons.append(ReadOnlyAuditEnqueueReason.PLAN_NOT_ACCEPTED)
     if not plan.assignments:
         reasons.append(ReadOnlyAuditEnqueueReason.MISSING_ASSIGNMENTS)
+    grounding = plan.receipt.grounding_receipt
+    if plan.receipt.grounding_receipt_id or grounding:
+        validation = validate_grounded_target_receipt(
+            grounding if isinstance(grounding, Mapping) else None,
+            work_focus=plan.receipt.grounding_work_focus,
+        )
+        if (
+            not validation.accepted
+            or validation.verified is None
+            or validation.verified.receipt_id != plan.receipt.grounding_receipt_id
+            or grounding_digest(validation.verified.receipt) != plan.receipt.grounding_receipt_digest
+        ):
+            reasons.append(ReadOnlyAuditEnqueueReason.ASSIGNMENT_UNSAFE)
     for assignment in plan.assignments:
         if not _assignment_safe(assignment, plan):
             reasons.append(ReadOnlyAuditEnqueueReason.ASSIGNMENT_UNSAFE)
@@ -294,6 +311,10 @@ def _assignment_safe(assignment: ReadOnlyAuditAssignment, plan: ReadOnlyAuditSwa
         return False
     if assignment.wsp15_allocation_digest != plan.receipt.wsp15_allocation_digest:
         return False
+    if assignment.grounding_receipt_id != plan.receipt.grounding_receipt_id:
+        return False
+    if assignment.grounding_receipt_digest != plan.receipt.grounding_receipt_digest:
+        return False
     if assignment.no_worker_spawn_performed is not True:
         return False
     if assignment.no_execution_performed is not True:
@@ -313,6 +334,9 @@ def _build_task_spec(plan: ReadOnlyAuditSwarmPlan, assignment: ReadOnlyAuditAssi
             "lane_id": assignment.lane_id,
         }
     )[:16]
+    grounding = plan.receipt.grounding_receipt
+    typed_targets = grounding.get("typed_targets") if isinstance(grounding, Mapping) else {}
+    typed_targets = typed_targets if isinstance(typed_targets, Mapping) else {}
     context = {
         "source": READONLY_AUDIT_TASK_SOURCE,
         "slice_name": "REDDOG_OPENCLAW_READONLY_AUDIT_SWARM_AGENTDB_ENQUEUE_PHASE1",
@@ -320,6 +344,13 @@ def _build_task_spec(plan: ReadOnlyAuditSwarmPlan, assignment: ReadOnlyAuditAssi
         "wsp15_allocation_receipt_id": assignment.wsp15_allocation_receipt_id,
         "wsp15_allocation_digest": assignment.wsp15_allocation_digest,
         "wsp15_allocation_receipt": dict(plan.receipt.wsp15_allocation_receipt),
+        "grounding_receipt_id": assignment.grounding_receipt_id,
+        "grounding_receipt_digest": assignment.grounding_receipt_digest,
+        "grounding_receipt": dict(grounding) if isinstance(grounding, Mapping) else {},
+        "work_focus": plan.receipt.grounding_work_focus,
+        "typed_targets": dict(typed_targets),
+        "semantic_targets": list(typed_targets.get("semantic_targets") or ()),
+        "external_research_targets": list(typed_targets.get("external_research_targets") or ()),
         "swarm_receipt": plan.receipt.to_dict(),
         "assignment": assignment.to_dict(),
         "forbidden_actions": list(FORBIDDEN_ACTIONS),

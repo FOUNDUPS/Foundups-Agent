@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-19 - REDDOG_GROUNDED_TARGET_ASSIGNMENT_CONTINUITY_PHASE1
+
+- Added extension contract coverage for resident intent v2, immutable grounded-target receipt generation, work-focus binding, and rejection when grounding is not ready.
+- Added Python tamper batteries for receipt rehash, typed-target substitution, semantic-coverage downgrade, stale generation, index-gap, query-receipt, repo-recall, assignment, and AgentDB task bindings.
+- Proved prompt-derived repository targets reach every OpenClaw assignment and task, semantic targets reach the worker HoloIndex query, and any substituted focus/target/receipt fails before index or model calls.
+- Re-ran 136 resident bootstrap, bridge, durable-cycle, OpenClaw, worker, and research/decision tests plus the RedDog extension and Fusion ingress contracts.
+
 ## 2026-07-19 - REDDOG_HOLOINDEX_GENERATION_BOUND_QUERY_RUNTIME_PHASE1
 
 - Added HGBQ-001..010 to prove the exact generation-bound acceptance predicate, stale/lexical/mismatched/reindex rejection, unbound semantic-hit removal, governed direct-read preservation, and Run Trace generation receipts.

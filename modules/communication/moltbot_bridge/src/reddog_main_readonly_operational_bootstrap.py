@@ -170,6 +170,8 @@ def run_reddog_main_readonly_operational_bootstrap(
     brain_state: Mapping[str, Any] | None = None,
     workspace_memory_notes: Sequence[Mapping[str, Any]] = (),
     bootstrap_projection: Mapping[str, Any] | None = None,
+    grounding_receipt: Mapping[str, Any] | None = None,
+    grounding_work_focus: str = "",
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     enqueue_readonly_audit_tasks: bool = False,
     enqueue_writer: ReadOnlyAuditTaskWriter | None = None,
@@ -292,6 +294,8 @@ def run_reddog_main_readonly_operational_bootstrap(
         audit_lanes=audit_lanes,
         allowed_read_targets=targets,
         wsp15_allocation_receipt=wsp15_allocation_receipt,
+        grounding_receipt=grounding_receipt,
+        grounding_work_focus=grounding_work_focus,
     )
     if not plan.accepted:
         return _not_ready(

@@ -24,6 +24,9 @@ if str(REPO_ROOT) not in sys.path:
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (  # noqa: E402
     run_reddog_resident_architect_durable_agentdb_cycle,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (  # noqa: E402
+    validate_grounded_target_receipt,
+)
 
 RESIDENT_ARCHITECT_SESSION_ACCEPT = "RESIDENT_ARCHITECT_SESSION_ACCEPT"
 RESIDENT_ARCHITECT_SESSION_REJECT = "RESIDENT_ARCHITECT_SESSION_REJECT"
@@ -179,10 +182,20 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
     if payload.get("explicit_resident_architect_session_requested") is not True:
         return _reject("explicit_resident_architect_session_request_missing")
     intent = payload.get("red_dog_intent")
-    if not isinstance(intent, dict) or intent.get("schema_version") != "reddog_intent.v1":
+    if not isinstance(intent, dict) or intent.get("schema_version") != "reddog_intent.v2":
         return _reject("reddog_intent_missing_or_invalid")
     if intent.get("submits_executable_authority") is not False:
         return _reject("reddog_intent_must_not_submit_executable_authority")
+    work_focus = _string(payload.get("work_focus") or intent.get("work_focus"))
+    grounding = validate_grounded_target_receipt(
+        intent.get("grounding_receipt") if isinstance(intent.get("grounding_receipt"), Mapping) else None,
+        work_focus=work_focus,
+        expected_source_surface="editor_thin_client",
+    )
+    if not grounding.accepted:
+        return _reject((grounding.rejection_reasons or ("grounding_receipt_rejected",))[0])
+    if payload.get("grounding_receipt_id") != grounding.verified.receipt_id:
+        return _reject("grounding_receipt_id_mismatch")
 
     repo_root_text = payload.get("repo_root")
     repo_root = Path(str(repo_root_text)).resolve() if repo_root_text else REPO_ROOT
@@ -198,7 +211,7 @@ def _result(payload: Mapping[str, Any]) -> Dict[str, Any]:
             ),
             holoindex_ssd_path=_string(payload.get("holoindex_ssd_path") or os.getenv("HOLOINDEX_SSD_PATH", "")),
             requested_operation="extension_resident_architect_session",
-            prompt_text=_string(payload.get("work_focus") or "extension resident RedDog architect session"),
+            prompt_text=work_focus,
             breadcrumbs=_sequence_of_mappings(payload.get("breadcrumbs")),
             brain_state=_mapping(payload.get("brain_state")),
             workspace_memory_notes=_sequence_of_mappings(payload.get("workspace_memory_notes")),

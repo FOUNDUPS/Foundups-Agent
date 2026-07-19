@@ -25,6 +25,10 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_
     HoloIndexReadOnlyQueryAdapter,
     RepoAuditModelResult,
 )
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    SCHEMA_VERSION as GROUNDING_SCHEMA_VERSION,
+    canonical_digest as grounding_digest,
+)
 import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
 import modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt as wsp15_allocation
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
@@ -347,6 +351,68 @@ def _model_context(
     return context
 
 
+def _grounded_model_context() -> dict:
+    focus = "Audit work ledger continuity and RedDog worker grounding."
+    semantic_target = "RedDog worker grounding"
+    repo_target = "docs/work_ledger.schema.json"
+    context = _model_context(allowed_read_targets=(repo_target,))
+    typed = {
+        "repo_file_targets": [repo_target],
+        "semantic_targets": [semantic_target],
+        "external_research_targets": [],
+        "quoted_reference_blocks_count": 0,
+        "quoted_reference_blocks_digest": grounding_digest([]),
+    }
+    coverage = [
+        {
+            "target": semantic_target,
+            "verdict": "SUFFICIENT",
+            "evidence_refs": ["code:docs/work_ledger.schema.json"],
+        }
+    ]
+    receipt = {
+        "schema_version": GROUNDING_SCHEMA_VERSION,
+        "source_surface": "editor_thin_client",
+        "work_focus_digest": grounding_digest({"work_focus": focus}),
+        "typed_targets": typed,
+        "typed_targets_digest": grounding_digest(typed),
+        "grounding_preflight_applied": True,
+        "grounding_preflight_passed": True,
+        "grounding_preflight_rejection_reasons": [],
+        "grounding_target_universe_required": True,
+        "repo_file_targets_count": 1,
+        "semantic_targets_count": 1,
+        "external_research_targets_count": 0,
+        "quoted_reference_blocks_count": 0,
+        "semantic_target_coverage": coverage,
+        "semantic_target_coverage_digest": grounding_digest(
+            {"semantic_target_coverage": coverage}
+        ),
+        "target_recall_ok": True,
+        "required_targets_missing": [],
+        "direct_read_paths": [repo_target],
+        "holoindex_owner_query_ok": True,
+        "holoindex_freshness": "CURRENT",
+        "holoindex_generation_id": "sha256:" + "1" * 64,
+        "holoindex_freshness_receipt_digest": "sha256:" + "2" * 64,
+        "holoindex_repo_head_sha": "abc123",
+        "holoindex_query_receipt_id": "sha256:" + "3" * 64,
+        "holoindex_index_gap_detected": False,
+        "no_holoindex_reindex_performed": True,
+    }
+    receipt["receipt_id"] = grounding_digest(receipt)
+    context["grounding_receipt"] = receipt
+    context["grounding_receipt_id"] = receipt["receipt_id"]
+    context["grounding_receipt_digest"] = grounding_digest(receipt)
+    context["work_focus"] = focus
+    context["typed_targets"] = typed
+    context["semantic_targets"] = [semantic_target]
+    context["assignment"] = dict(context["assignment"])
+    context["assignment"]["grounding_receipt_id"] = receipt["receipt_id"]
+    context["assignment"]["grounding_receipt_digest"] = context["grounding_receipt_digest"]
+    return context
+
+
 def _memex_access_policy_receipt() -> dict:
     result = build_memex_access_policy_receipt(
         principal_id="principal-012",
@@ -462,6 +528,65 @@ def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_p
     assert result.report["worker_receipt"]["model_receipt_id"] == "model-receipt-1"
     assert result.report["worker_receipt"]["model_route_receipt_id"].startswith("sha256:")
     assert result.report["findings"][0]["evidence_refs"][0] in result.report["evidence_refs"]
+
+
+def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+    context = _grounded_model_context()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-grounded",
+        model_runner=runner,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is True
+    assert holo.calls and "RedDog worker grounding" in holo.calls[0]["query"]
+    assert "docs/work_ledger.schema.json" in holo.calls[0]["allowed_paths"]
+    assert result.report is not None
+    worker_receipt = result.report["worker_receipt"]
+    assert worker_receipt["grounding_receipt_id"] == context["grounding_receipt_id"]
+    assert worker_receipt["grounding_receipt_digest"] == context["grounding_receipt_digest"]
+
+
+@pytest.mark.parametrize("mutation", ["work_focus", "receipt_id", "typed_targets"])
+def test_grounding_substitution_rejects_before_index_or_model(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+    context = _grounded_model_context()
+    if mutation == "work_focus":
+        context["work_focus"] = "substituted focus"
+    elif mutation == "receipt_id":
+        context["grounding_receipt_id"] = "sha256:substituted"
+    else:
+        context["typed_targets"] = dict(context["typed_targets"])
+        context["typed_targets"]["repo_file_targets"] = ["modules/attacker.py"]
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-grounded",
+        model_runner=runner,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is False
+    assert result.no_model_call_performed is True
+    assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
 
 
 def test_model_selection_receipt_is_bound_to_readonly_audit_runner(tmp_path: Path) -> None:
