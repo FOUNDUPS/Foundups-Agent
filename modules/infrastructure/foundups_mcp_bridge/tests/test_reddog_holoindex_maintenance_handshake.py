@@ -8,9 +8,12 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from holo_index.freshness_receipt import (
-    BASELINE_QUERY_COLLECTIONS,
+    ALL_COLLECTIONS,
+    SCHEMA_VERSION,
     CollectionFreshness,
     HoloIndexFreshnessReceipt,
+    _receipt_generation_id,
+    freshness_receipt_integrity_ok,
     freshness_receipt_path,
     write_freshness_receipt,
 )
@@ -42,6 +45,8 @@ def _receipt(
     *,
     embedding_fingerprint: str = "sha256:" + ("1" * 64),
 ) -> HoloIndexFreshnessReceipt:
+    generated_at = "2026-07-18T00:00:00+00:00"
+    source = "cli"
     entries = [
         CollectionFreshness(
             name=name,
@@ -50,7 +55,7 @@ def _receipt(
             status="indexed",
             source="cli",
             repo_head_sha=HEAD,
-            last_indexed_at="2026-07-18T00:00:00+00:00",
+            last_indexed_at=generated_at,
             source_manifest_digest="sha256:" + ("b" * 64),
             indexed_paths_digest="sha256:" + ("c" * 64),
             removed_paths_digest="sha256:" + ("d" * 64),
@@ -59,19 +64,31 @@ def _receipt(
             embedding_space_fingerprint=embedding_fingerprint,
             verification="PASS",
             proof_kind="complete_source_manifest",
+            source_policy_digest="sha256:" + ("e" * 64),
+            collection_snapshot_digest="sha256:" + ("f" * 64),
         )
-        for name in sorted(BASELINE_QUERY_COLLECTIONS)
+        for name in sorted(ALL_COLLECTIONS)
     ]
-    return HoloIndexFreshnessReceipt(
-        schema_version="holoindex_freshness_receipt.v1",
-        generated_at="2026-07-18T00:00:00+00:00",
+    generation_id = _receipt_generation_id(
+        HEAD,
+        entries,
+        generated_at=generated_at,
+        repo_root=str(repo_root),
+        ssd_path=str(ssd_path),
+        source=source,
+    )
+    receipt = HoloIndexFreshnessReceipt(
+        schema_version=SCHEMA_VERSION,
+        generated_at=generated_at,
         repo_root=str(repo_root),
         repo_head_sha=HEAD,
         ssd_path=str(ssd_path),
-        source="cli",
-        generation_id="sha256:generation",
+        source=source,
+        generation_id=generation_id,
         collections=entries,
     )
+    assert freshness_receipt_integrity_ok(receipt)
+    return receipt
 
 
 def _publish(repo_root: Path, ssd_path: Path) -> None:
@@ -158,7 +175,7 @@ def test_fresh_exact_head_receipt_starts_owner_without_refresh(
     assert result.ready is True
     assert result.status == handshake.OPERATIONAL_READY
     assert result.refreshed is False
-    assert result.generation_id == "sha256:generation"
+    assert result.generation_id == _receipt(repo_root, ssd_path).generation_id
 
 
 def test_missing_receipt_runs_bounded_secret_free_refresh_and_restarts_owner(

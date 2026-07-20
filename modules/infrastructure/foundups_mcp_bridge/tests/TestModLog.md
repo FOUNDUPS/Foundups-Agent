@@ -1,5 +1,28 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-20] Receipt-v2 maintenance fixture integrity repair
+
+**WSP Protocol:** WSP 00, 22, 50, 62, 97
+
+**Observed:** The second owner runbook group produced 3 failures and 61
+passes. Its maintenance fixture still declared receipt schema v1, used a
+literal generation, emitted only the seven query collections, and omitted the
+v2 source-policy and collection-snapshot proof digests. Production correctly
+treated the supposedly fresh fixture as stale and rejected refresh-published
+fixtures whose baseline proofs were incomplete.
+
+**Change:** Kept production validation unchanged. The maintenance fixture now
+emits all receipt-v2 collection entries, supplies format-valid policy and
+snapshot digests, computes the generation with the production helper, and
+self-checks with the production integrity validator. A blank legacy embedding
+fingerprint remains integrity-bound but semantically stale, so its test still
+proves that maintenance refreshes it.
+
+**Validation:** The exact second runbook group passes 64 tests. Adjacent
+freshness-receipt, maintenance-session, CLI-maintenance, and incremental-index
+suites pass 84 tests. The changed Python test module remains below the WSP 62
+800-line warning threshold; no exemption is required.
+
 ## [2026-07-20] Receipt-v2 owner fixture integrity repair
 
 **WSP Protocol:** WSP 00, 22, 50, 62, 97
