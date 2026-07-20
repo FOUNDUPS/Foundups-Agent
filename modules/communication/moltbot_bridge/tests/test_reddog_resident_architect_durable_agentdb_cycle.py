@@ -14,6 +14,9 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ArchitectModelResult,
     InMemoryArchitectDeterminationStore,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SOURCE,
 )
@@ -29,15 +32,12 @@ import modules.communication.moltbot_bridge.src.reddog_resident_architect_durabl
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
     AgentDbResidentArchitectCycleStore,
     REDDOG_RESIDENT_CYCLE_ACCEPT,
-    RUNTIME_BOUNDARY_FIELDS,
     STATUS_CANCELLED,
     STATUS_DETERMINED,
-    STATUS_FAILED,
     STATUS_RUNNING,
     STATUS_TIMED_OUT,
     NoopExternalResearchRetriever,
     ResidentCycleReason,
-    resident_intent_digest,
     run_reddog_resident_architect_durable_agentdb_cycle,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_client import (
@@ -396,6 +396,47 @@ def test_durable_cycle_submits_agentdb_tasks_openclaw_claims_reports_and_determi
 
     tasks = AgentDB().get_autonomous_tasks(status="completed", limit=10)
     assert len([task for task in tasks if task["discovered_by"] == READONLY_AUDIT_TASK_SOURCE]) == 5
+
+
+def test_resident_cycle_forwards_surface_specific_glm_k3_bindings_end_to_end() -> None:
+    audit_runner = _AuditModelRunner()
+    architect_runner = _ArchitectRunner()
+    architect_store = InMemoryArchitectDeterminationStore()
+    audit_binding = model_runtime_binding_receipt(
+        runtime_surface="reddog_readonly_audit_worker",
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+    architect_binding = model_runtime_binding_receipt(
+        runtime_surface="reddog_backend_architect",
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(
+            audit_model_runner=audit_runner,
+            architect_model_runner=architect_runner,
+            architect_determination_store=architect_store,
+            audit_model_runtime_binding_receipt=audit_binding,
+            architect_model_runtime_binding_receipt=architect_binding,
+        )
+    )
+
+    assert result.accepted is True
+    assert len(audit_runner.calls) == 5
+    for call in audit_runner.calls:
+        topology = call["binding"]["model_selection"]
+        assert topology["lead_model"] == "z-ai/glm-5.2"
+        assert topology["panel_models"] == ["moonshotai/kimi-k3"]
+        assert topology["model_runtime_binding_receipt_id"] == audit_binding["receipt_id"]
+    architect_topology = architect_runner.calls[0]["binding"]["model_selection"]
+    assert architect_topology["lead_model"] == "z-ai/glm-5.2"
+    assert architect_topology["panel_models"] == ["moonshotai/kimi-k3"]
+    assert architect_topology["model_runtime_binding_receipt_id"] == architect_binding["receipt_id"]
+    determination = architect_store.records[0].determination
+    assert determination["model_runtime_binding_receipt_id"] == architect_binding["receipt_id"]
+    assert determination["model_runtime_binding_digest"]
 
 
 def test_durable_cycle_supplies_operational_memex_to_openclaw_workers() -> None:

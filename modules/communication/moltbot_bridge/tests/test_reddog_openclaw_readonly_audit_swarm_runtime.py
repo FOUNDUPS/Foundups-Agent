@@ -34,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -241,6 +244,34 @@ def test_plan_binds_wsp15_allocation_to_every_assignment() -> None:
         for assignment in plan.assignments
     )
     assert all(assignment.wsp15_allocation_digest for assignment in plan.assignments)
+
+
+def test_required_runtime_binding_rejects_absent_and_wrong_surface_before_assignments() -> None:
+    snapshot, context_view, evidence_bundle, gate = _accepted_gate_bundle()
+    absent = plan_reddog_openclaw_readonly_audit_swarm(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        gate_decision=gate,
+        require_model_runtime_binding=True,
+    )
+    wrong = plan_reddog_openclaw_readonly_audit_swarm(
+        snapshot=snapshot,
+        context_view=context_view,
+        evidence_bundle=evidence_bundle,
+        gate_decision=gate,
+        model_runtime_binding_receipt=model_runtime_binding_receipt(
+            runtime_surface="reddog_backend_architect"
+        ),
+        require_model_runtime_binding=True,
+    )
+
+    assert absent.accepted is False
+    assert "missing_model_runtime_binding_receipt" in absent.rejection_reasons
+    assert absent.assignments == ()
+    assert wrong.accepted is False
+    assert "model_runtime_binding_surface_mismatch" in wrong.rejection_reasons
+    assert wrong.assignments == ()
 
 
 def test_plan_binds_grounded_prompt_targets_to_every_assignment() -> None:

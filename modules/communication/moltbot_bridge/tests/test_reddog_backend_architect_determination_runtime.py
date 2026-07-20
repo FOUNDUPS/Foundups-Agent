@@ -334,7 +334,11 @@ def test_model_selection_receipt_is_bound_to_backend_runner_and_receipt() -> Non
 def test_model_runtime_binding_receipt_is_bound_to_backend_runner_and_receipt() -> None:
     inputs = _build_inputs()
     evidence_ref = inputs["reports"][0]["evidence_refs"][0]
-    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT)
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
     runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref))
 
     result = run_reddog_backend_architect_determination_runtime(
@@ -351,7 +355,8 @@ def test_model_runtime_binding_receipt_is_bound_to_backend_runner_and_receipt() 
     assert result.receipt.model_runtime_binding_digest
     binding = runner.calls[0]["binding"]["model_selection"]
     assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert binding["lead_model"] == "z-ai/glm-5.2"
+    assert binding["panel_models"] == ["moonshotai/kimi-k3"]
 
 
 def test_mismatched_model_runtime_binding_receipt_rejects_before_backend_model_call() -> None:
@@ -371,6 +376,23 @@ def test_mismatched_model_runtime_binding_receipt_rejects_before_backend_model_c
     assert result.accepted is False
     assert ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
     assert runner.calls == []
+
+
+def test_production_architect_rejects_selection_only_before_provider_call() -> None:
+    inputs = _build_inputs()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=None,
+        model_selection_receipt=_model_selection(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert result.receipt.model_result_digest is None
 
 
 def test_tampered_model_selection_receipt_rejects_before_backend_model_call() -> None:
@@ -642,26 +664,29 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     monkeypatch.setattr(backend_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
 
-    result = FoundupsFusionArchitectModelRunner(
-        lead_model="legacy/lead",
-        panel_models=("legacy/panel",),
-    ).run_architect_determination(
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+    topology_reasons: list[str] = []
+    topology = backend_runtime._model_runtime_binding(
+        runtime_binding,
+        topology_reasons,
+        expected_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+    )
+    assert topology_reasons == []
+    result = FoundupsFusionArchitectModelRunner().run_architect_determination(
         prompt="Return JSON.",
         context="public evidence",
-        binding={
-            "model_selection": {
-                "receipt_id": "model_selection_receipt:test",
-                "lead_model": "openai/gpt-5.6-code",
-                "panel_models": ["anthropic/claude-opus-5"],
-            }
-        },
+            binding={"model_selection": topology},
         timeout_seconds=1,
     )
 
     assert result.ok is True
-    assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
-    assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
-    assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == "model_selection_receipt:test"
+    assert calls[0]["lead_model"] == "z-ai/glm-5.2"
+    assert calls[0]["panel_models"] == ["moonshotai/kimi-k3"]
+    assert calls[0]["bridge_meta"]["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
 
 
 def test_module_ast_denies_execution_and_mutation_surfaces() -> None:

@@ -12,6 +12,16 @@ The editor bridge requires host-supplied `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and
 
 `CANCELLED` and `DETERMINED` are permanently terminal. Only `FAILED` and `TIMED_OUT` cycles may enter a revision-checked retry, and each retry appends one immutable prior-attempt summary. Legacy v1 rows are accepted only by the canonical cancellation path; they cannot reconnect, resume, or become authority-bearing v2 records.
 
+Production resident model execution requires separate runtime-binding inputs
+for the read-only audit and backend architect surfaces. The audit binding is
+carried content-bearing through WSP 15, swarm planning, assignment, enqueue,
+and AgentDB/OpenClaw claim execution. The architect binding is revalidated at
+bootstrap and determination. Both results record the runtime receipt ID and
+canonical digest. Missing, invalid, rejected, or cross-surface receipts stop
+before the FoundUps Fusion provider seam; a model-selection receipt is not a
+runtime authorization substitute. Fake runner injection remains a test-only
+seam.
+
 ### Canonical RedDog execution-valve readiness
 
 `reddog_execution_valve_environment_supply_cli` reads the authoritative work

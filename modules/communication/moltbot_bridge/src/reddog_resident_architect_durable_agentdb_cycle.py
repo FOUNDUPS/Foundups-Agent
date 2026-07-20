@@ -577,8 +577,10 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
     report_store: ReadOnlyAuditReportStore | None = None,
     decision_store: ReadOnlyAuditDecisionStore | None = None,
     architect_model_runner: ArchitectModelRunner | None = None,
+    architect_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     architect_determination_store: ArchitectDeterminationStore | None = None,
     audit_model_runner: RepoAuditModelRunner | None = None,
+    audit_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     holoindex_adapter: ReadOnlyEvidenceQueryAdapter | None = None,
     codeindex_adapter: ReadOnlyEvidenceQueryAdapter | None = None,
     external_research_retriever: ExternalResearchRetriever | None = None,
@@ -734,6 +736,8 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             ),
             grounding_receipt=red_dog_intent.get("grounding_receipt"),
             grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
+            audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
+            require_audit_model_runtime_binding=audit_model_runner is None,
         )
         if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
             transitioned = _transition_record(
@@ -903,6 +907,8 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         workspace_memory_notes=workspace_memory_notes,
         grounding_receipt=red_dog_intent.get("grounding_receipt"),
         grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
+        audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
+        require_audit_model_runtime_binding=audit_model_runner is None,
         audit_lanes=audit_lanes,
         collect_readonly_audit_reports=True,
         report_store=report_store or AgentDbReadOnlyAuditReportStore(agent_db_factory=agent_db_factory),
@@ -910,6 +916,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         decision_store=decision_store,
         run_backend_architect_determination=True,
         architect_model_runner=architect_model_runner,
+        architect_model_runtime_binding_receipt_override=architect_model_runtime_binding_receipt,
         architect_determination_store=architect_determination_store,
     )
     if not final.ready:

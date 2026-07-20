@@ -52,6 +52,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
+)
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_owner_bootstrap as owner_bootstrap,
 )
@@ -444,6 +447,45 @@ def test_bootstrap_passes_architect_model_selection_receipt_override_to_backend_
     assert architect_store.records[0].determination["model_selection_receipt_id"] == model_selection["receipt_id"]
 
 
+def test_bootstrap_passes_architect_runtime_binding_into_determination_lineage() -> None:
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+    )
+    report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+    architect_store = InMemoryArchitectDeterminationStore()
+    architect_runner = _FakeArchitectRunner()
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface="reddog_backend_architect",
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=report_store,
+        run_backend_architect_determination=True,
+        architect_model_runner=architect_runner,
+        architect_model_runtime_binding_receipt_override=runtime_binding,
+        architect_determination_store=architect_store,
+    )
+
+    assert result.ready is True
+    topology = architect_runner.calls[0]["binding"]["model_selection"]
+    assert topology["lead_model"] == "z-ai/glm-5.2"
+    assert topology["panel_models"] == ["moonshotai/kimi-k3"]
+    assert architect_store.records[0].determination["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert architect_store.records[0].determination["model_runtime_binding_digest"]
+
+
 def test_bootstrap_requires_architect_model_selection_for_production_runner() -> None:
     baseline = run_reddog_main_readonly_operational_bootstrap(
         repo_root=REPO_ROOT,
@@ -468,7 +510,7 @@ def test_bootstrap_requires_architect_model_selection_for_production_runner() ->
     )
 
     assert result.ready is False
-    assert "missing_architect_model_selection_receipt_path" in result.rejection_reasons
+    assert "missing_architect_model_runtime_binding_receipt" in result.rejection_reasons
     assert result.backend_architect_determination_attempted is False
 
 

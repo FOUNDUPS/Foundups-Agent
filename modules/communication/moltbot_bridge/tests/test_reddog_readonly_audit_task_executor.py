@@ -806,7 +806,11 @@ def test_model_selection_receipt_is_bound_to_readonly_audit_runner(tmp_path: Pat
 def test_model_runtime_binding_receipt_is_bound_to_readonly_audit_runner(tmp_path: Path) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
-    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT)
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
     context = _model_context()
     context["model_runtime_binding_receipt"] = runtime_binding
 
@@ -823,7 +827,8 @@ def test_model_runtime_binding_receipt_is_bound_to_readonly_audit_runner(tmp_pat
     assert result.report is not None
     binding = runner.calls[0]["binding"]["model_selection"]
     assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert binding["lead_model"] == "z-ai/glm-5.2"
+    assert binding["panel_models"] == ["moonshotai/kimi-k3"]
     worker_receipt = result.report["worker_receipt"]
     assert worker_receipt["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     assert worker_receipt["model_runtime_binding_digest"]
@@ -855,6 +860,29 @@ def test_mismatched_model_runtime_binding_receipt_rejects_before_readonly_model_
     assert ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
     assert result.no_model_call_performed is True
     assert runner.calls == []
+
+
+def test_production_audit_rejects_absent_runtime_binding_before_provider_or_index_calls(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-1",
+        model_runner=None,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert result.no_model_call_performed is True
+    assert holo.calls == []
+    assert code.calls == []
     assert holo.calls == []
     assert code.calls == []
 
@@ -1730,8 +1758,14 @@ def test_production_runner_uses_fusion_synthesis_excerpt_for_json(tmp_path: Path
 
     monkeypatch.setattr(readonly_worker_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
 
+    task_context = _model_context()
+    task_context["model_runtime_binding_receipt"] = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=task_context,
         repo_root=root,
         task_id="task-1",
         model_runner=FoundupsFusionRepoAuditModelRunner(),
@@ -1760,31 +1794,35 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
 
     monkeypatch.setattr(readonly_worker_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
 
-    result = FoundupsFusionRepoAuditModelRunner(
-        lead_model="legacy/lead",
-        panel_models=("legacy/panel",),
-    ).run_repo_code_audit(
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+    topology_reasons: list[str] = []
+    topology = readonly_worker_runtime._model_runtime_binding(
+        runtime_binding,
+        topology_reasons,
+        expected_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+    )
+    assert topology_reasons == []
+    result = FoundupsFusionRepoAuditModelRunner().run_repo_code_audit(
         prompt="Return strict JSON.",
         context="Read-only repository evidence.",
         binding={
             "wsp15_reasoning_tier": "HIGH",
             "wsp15_priority": "P1",
-            "model_selection": {
-                "receipt_id": "model_selection_receipt:test",
-                "digest": "sha256:model-selection",
-                "lead_model": "openai/gpt-5.6-code",
-                "panel_models": ["anthropic/claude-opus-5"],
-            },
+            "model_selection": topology,
         },
         timeout_seconds=30,
     )
 
     assert result.ok is True
-    assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
-    assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
-    assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == "model_selection_receipt:test"
-    assert result.route_receipt["lead_model"] == "openai/gpt-5.6-code"
-    assert result.route_receipt["model_selection_receipt_id"] == "model_selection_receipt:test"
+    assert calls[0]["lead_model"] == "z-ai/glm-5.2"
+    assert calls[0]["panel_models"] == ["moonshotai/kimi-k3"]
+    assert calls[0]["bridge_meta"]["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert result.route_receipt["lead_model"] == "z-ai/glm-5.2"
+    assert result.route_receipt["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
 
 
 def test_model_backed_requires_valid_wsp15_receipt(tmp_path: Path) -> None:
@@ -1937,13 +1975,17 @@ def test_run_task_model_backed_task_fails_closed_without_runtime_mode(tmp_path: 
     _patch_default_query_adapters(monkeypatch)
     db = AgentDB()
     task_id = "readonly-audit-model-task-1"
+    context = _model_context()
+    context["model_runtime_binding_receipt"] = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT
+    )
     assert db.create_autonomous_task(
         task_id=task_id,
         description="RedDog read-only audit lane: repo_code_audit",
         required_skills=[READONLY_AUDIT_TASK_SKILL],
         estimated_complexity=0.35,
         priority_score=0.85,
-        context=_model_context(),
+        context=context,
         origin_continuity_id="det-1",
     )
     assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
@@ -1993,13 +2035,17 @@ def test_agentdb_openclaw_claim_run_task_model_worker_persists_report(tmp_path: 
     monkeypatch.setattr(FoundupsFusionRepoAuditModelRunner, "run_repo_code_audit", fake_run)
     db = AgentDB()
     task_id = "readonly-audit-model-task-2"
+    context = _model_context()
+    context["model_runtime_binding_receipt"] = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT
+    )
     assert db.create_autonomous_task(
         task_id=task_id,
         description="RedDog read-only audit lane: repo_code_audit",
         required_skills=[READONLY_AUDIT_TASK_SKILL],
         estimated_complexity=0.35,
         priority_score=0.85,
-        context=_model_context(),
+        context=context,
         origin_continuity_id="det-1",
     )
     assert db.assign_autonomous_task(task_id, "openclaw_supervisor")

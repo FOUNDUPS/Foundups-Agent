@@ -27,6 +27,10 @@ from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_
     canonical_digest as grounding_digest,
     validate_grounded_target_receipt,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import ModelRuntimeBindingDecision
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
+)
 
 
 READONLY_AUDIT_SWARM_PLANNED = "READONLY_AUDIT_SWARM_PLANNED"
@@ -64,6 +68,7 @@ FORBIDDEN_ACTIONS = (
 
 MAX_ASSIGNMENT_TARGETS = 32
 MAX_REPORT_BYTES = 48_000
+RUNTIME_SURFACE_READONLY_AUDIT = "reddog_readonly_audit_worker"
 
 
 @dataclass(frozen=True)
@@ -84,6 +89,8 @@ class ReadOnlyAuditAssignment:
     grounding_receipt_digest: str = ""
     wsp15_allocation_receipt_id: str = ""
     wsp15_allocation_digest: str = ""
+    model_runtime_binding_receipt_id: str = ""
+    model_runtime_binding_digest: str = ""
     forbidden_actions: tuple[str, ...] = FORBIDDEN_ACTIONS
     no_worker_spawn_performed: bool = True
     no_execution_performed: bool = True
@@ -116,6 +123,9 @@ class ReadOnlyAuditSwarmReceipt:
     wsp15_allocation_receipt_id: str = ""
     wsp15_allocation_digest: str = ""
     wsp15_allocation_receipt: Mapping[str, Any] = field(default_factory=dict)
+    model_runtime_binding_receipt_id: str = ""
+    model_runtime_binding_digest: str = ""
+    model_runtime_binding_receipt: Mapping[str, Any] = field(default_factory=dict)
     no_model_call_performed: bool = True
     no_worker_spawn_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -195,6 +205,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
     wsp15_allocation_receipt: Mapping[str, Any] | None = None,
     grounding_receipt: Mapping[str, Any] | None = None,
     grounding_work_focus: str = "",
+    model_runtime_binding_receipt: Mapping[str, Any] | None = None,
+    require_model_runtime_binding: bool = False,
 ) -> ReadOnlyAuditSwarmPlan:
     """Plan read-only audit assignments from an already accepted context gate."""
 
@@ -229,6 +241,16 @@ def plan_reddog_openclaw_readonly_audit_swarm(
     if wsp15_allocation_receipt:
         allocation_id = str(wsp15_allocation_receipt.get("receipt_id") or "").strip()
         allocation_digest = _digest(wsp15_allocation_receipt)
+    runtime_binding_data, runtime_binding_id, runtime_binding_digest = _runtime_binding(
+        model_runtime_binding_receipt,
+        reasons,
+        required=require_model_runtime_binding,
+    )
+    if runtime_binding_id and wsp15_allocation_receipt:
+        if str(wsp15_allocation_receipt.get("model_runtime_binding_receipt_id") or "") != runtime_binding_id:
+            reasons.append("wsp15_model_runtime_binding_receipt_mismatch")
+        if str(wsp15_allocation_receipt.get("model_runtime_binding_digest") or "") != runtime_binding_digest:
+            reasons.append("wsp15_model_runtime_binding_digest_mismatch")
     grounding_data = dict(grounding_receipt) if isinstance(grounding_receipt, Mapping) else {}
     grounding_id = ""
     grounding_receipt_digest = ""
@@ -291,6 +313,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
             wsp15_allocation_digest=allocation_digest,
             grounding_receipt_id=grounding_id,
             grounding_receipt_digest=grounding_receipt_digest,
+            model_runtime_binding_receipt_id=runtime_binding_id,
+            model_runtime_binding_digest=runtime_binding_digest,
         )
         for lane in normalized_lanes
     )
@@ -304,6 +328,8 @@ def plan_reddog_openclaw_readonly_audit_swarm(
             "wsp15_allocation_digest": allocation_digest,
             "grounding_receipt_id": grounding_id,
             "grounding_receipt_digest": grounding_receipt_digest,
+            "model_runtime_binding_receipt_id": runtime_binding_id,
+            "model_runtime_binding_digest": runtime_binding_digest,
             "assignment_ids": [assignment.assignment_id for assignment in assignments],
         }
     )
@@ -323,6 +349,9 @@ def plan_reddog_openclaw_readonly_audit_swarm(
         wsp15_allocation_receipt_id=allocation_id,
         wsp15_allocation_digest=allocation_digest,
         wsp15_allocation_receipt=dict(wsp15_allocation_receipt or {}),
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
+        model_runtime_binding_receipt=runtime_binding_data,
         assignment_ids=tuple(assignment.assignment_id for assignment in assignments),
         lanes=tuple(assignment.lane_id for assignment in assignments),
         rejection_reasons=(),
@@ -410,6 +439,8 @@ def _build_assignment(
     wsp15_allocation_digest: str,
     grounding_receipt_id: str,
     grounding_receipt_digest: str,
+    model_runtime_binding_receipt_id: str,
+    model_runtime_binding_digest: str,
 ) -> ReadOnlyAuditAssignment:
     payload = {
         "lane_id": lane_id,
@@ -422,6 +453,8 @@ def _build_assignment(
         "wsp15_allocation_digest": wsp15_allocation_digest,
         "grounding_receipt_id": grounding_receipt_id,
         "grounding_receipt_digest": grounding_receipt_digest,
+        "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": model_runtime_binding_digest,
         "required_source": LANE_REQUIRED_SOURCE[lane_id],
         "allowed_read_targets": allowed_read_targets,
     }
@@ -438,6 +471,8 @@ def _build_assignment(
         wsp15_allocation_digest=wsp15_allocation_digest,
         grounding_receipt_id=grounding_receipt_id,
         grounding_receipt_digest=grounding_receipt_digest,
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+        model_runtime_binding_digest=model_runtime_binding_digest,
         required_source=LANE_REQUIRED_SOURCE[lane_id],
         allowed_read_targets=allowed_read_targets,
     )
@@ -474,6 +509,9 @@ def _rejected_plan(
         wsp15_allocation_receipt_id="",
         wsp15_allocation_digest="",
         wsp15_allocation_receipt={},
+        model_runtime_binding_receipt_id="",
+        model_runtime_binding_digest="",
+        model_runtime_binding_receipt={},
         assignment_ids=(),
         lanes=tuple(lanes),
         rejection_reasons=tuple(reasons),
@@ -485,6 +523,35 @@ def _rejected_plan(
         assignments=(),
         rejection_reasons=tuple(reasons),
     )
+
+
+def _runtime_binding(
+    value: Mapping[str, Any] | None,
+    reasons: list[str],
+    *,
+    required: bool,
+) -> tuple[dict[str, Any], str, str]:
+    if value is None:
+        if required:
+            reasons.append("missing_model_runtime_binding_receipt")
+        return {}, "", ""
+    if not isinstance(value, Mapping):
+        reasons.append("invalid_model_runtime_binding_receipt")
+        return {}, "", ""
+    try:
+        data = json.loads(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+        receipt = rehydrate_model_runtime_binding_receipt(data)
+    except Exception:
+        reasons.append("invalid_model_runtime_binding_receipt")
+        return {}, "", ""
+    if (
+        receipt.decision != ModelRuntimeBindingDecision.BOUND
+        or not receipt.principal_model
+        or receipt.runtime_surface != RUNTIME_SURFACE_READONLY_AUDIT
+    ):
+        reasons.append("model_runtime_binding_surface_mismatch")
+        return {}, "", ""
+    return data, receipt.receipt_id, _digest(data)
 
 
 def _validate_binding(

@@ -1,3 +1,16 @@
+## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_PHASE1
+
+- Added digest/rehydration-valid test receipts for receipt-selected panel
+  topologies and used GLM-5.2 principal plus Kimi K3 critic only as receipt-bound test
+  fixture identities, never as production policy.
+- Covered exact WSP 15/swarm/assignment/AgentDB propagation, durable resident
+  audit and architect forwarding, architect determination lineage, and
+  absent/wrong-surface/selection-only rejection before provider invocation.
+- Preserved direct injected-runner tests and verified the production runner
+  provider stubs receive the exact receipt topology.
+- Focused runtime gate: 184 passed. WSP 62 exemption gate: 2 passed; no ceiling
+  increase was required.
+
 ## 2026-07-20: REDDOG_EXECUTION_VALVE_INDEPENDENT_REVIEW_REPAIR_PHASE1
 
 - Added signed `base_ref` and canonical full-work-order digest mutation tests

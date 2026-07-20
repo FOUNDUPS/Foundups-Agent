@@ -41,6 +41,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_openclaw_readonly_au
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
+)
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -91,7 +94,12 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
     )
 
 
-def _valid_plan(wsp15_allocation_receipt=None, *, with_grounding: bool = False):
+def _valid_plan(
+    wsp15_allocation_receipt=None,
+    *,
+    with_grounding: bool = False,
+    runtime_binding=None,
+):
     snapshot_result = build_operational_context_snapshot(
         repo_state={
             "head_sha": HEAD,
@@ -154,6 +162,8 @@ def _valid_plan(wsp15_allocation_receipt=None, *, with_grounding: bool = False):
         wsp15_allocation_receipt=wsp15_allocation_receipt,
         grounding_receipt=_grounding_receipt() if with_grounding else None,
         grounding_work_focus=GROUNDING_FOCUS if with_grounding else "",
+        model_runtime_binding_receipt=runtime_binding,
+        require_model_runtime_binding=runtime_binding is not None,
     )
     assert plan.accepted is True
     return plan
@@ -199,6 +209,31 @@ def test_enqueue_carries_wsp15_allocation_into_every_task_context() -> None:
         assert task.context["wsp15_allocation_receipt"]["receipt_id"] == allocation["receipt_id"]
         assert task.context["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
         assert task.context["wsp15_allocation_digest"]
+
+
+def test_enqueue_carries_exact_glm_k3_runtime_binding_into_agentdb_task_context() -> None:
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface="reddog_readonly_audit_worker",
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation="readonly_audit_swarm",
+        prompt_text="audit current RedDog operational loop",
+        allowed_read_targets=["docs/0102_session_briefings/work_ledger.schema.json"],
+        model_runtime_binding_receipt=runtime_binding,
+    ).to_dict()
+    plan = _valid_plan(wsp15_allocation_receipt=allocation, runtime_binding=runtime_binding)
+
+    result = enqueue_reddog_readonly_audit_swarm(plan=plan, writer=_FakeWriter())
+
+    assert result.accepted is True
+    assert plan.receipt.model_runtime_binding_receipt == runtime_binding
+    for task in result.tasks:
+        assert task.context["model_runtime_binding_receipt"] == runtime_binding
+        assert task.context["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+        assert task.context["assignment"]["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+        assert task.context["wsp15_allocation_receipt"]["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
 
 
 def test_enqueue_carries_grounding_receipt_and_typed_targets_into_agentdb_tasks() -> None:

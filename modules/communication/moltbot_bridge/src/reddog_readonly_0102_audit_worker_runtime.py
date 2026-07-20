@@ -278,8 +278,8 @@ class CodeIndexReadOnlyQueryAdapter:
 class FoundupsFusionRepoAuditModelRunner:
     """Production model runner for explicit RedDog read-only repo audits."""
 
-    lead_model: str = "z-ai/glm-5.2"
-    panel_models: tuple[str, ...] = ("deepseek/deepseek-v4-pro", "moonshotai/kimi-k2.7-code")
+    lead_model: str = ""
+    panel_models: tuple[str, ...] = ()
     max_tokens: int = 1800
     temperature: float = 0.0
 
@@ -297,6 +297,11 @@ class FoundupsFusionRepoAuditModelRunner:
             default_lead=self.lead_model,
             default_panel=self.panel_models,
         )
+        if (
+            not model_topology["model_runtime_binding_receipt_id"]
+            or not model_topology["lead_model"]
+        ):
+            return _model_reject(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
         lead_model = str(model_topology["lead_model"])
         panel_models = tuple(model_topology["panel_models"])
         if os.getenv(ENV_READONLY_AUDIT_RUNTIME_MODE, "").strip() != RUNTIME_MODE_FOUNDUPS_FUSION:
@@ -491,7 +496,11 @@ def execute_model_backed_repo_code_audit(
         model_selection_reasons,
         expected_surface=RUNTIME_SURFACE_READONLY_AUDIT,
     )
-    if not model_selection:
+    production_runner = model_runner is None or isinstance(model_runner, FoundupsFusionRepoAuditModelRunner)
+    if not model_selection and production_runner:
+        if ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT not in model_selection_reasons:
+            model_selection_reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
+    elif not model_selection:
         model_selection = _model_selection_binding(
             task_context.get("model_selection_receipt") or assignment.get("model_selection_receipt"),
             model_selection_reasons,

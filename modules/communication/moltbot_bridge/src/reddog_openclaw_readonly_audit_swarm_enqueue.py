@@ -315,6 +315,10 @@ def _assignment_safe(assignment: ReadOnlyAuditAssignment, plan: ReadOnlyAuditSwa
         return False
     if assignment.grounding_receipt_digest != plan.receipt.grounding_receipt_digest:
         return False
+    if assignment.model_runtime_binding_receipt_id != plan.receipt.model_runtime_binding_receipt_id:
+        return False
+    if assignment.model_runtime_binding_digest != plan.receipt.model_runtime_binding_digest:
+        return False
     if assignment.no_worker_spawn_performed is not True:
         return False
     if assignment.no_execution_performed is not True:
@@ -347,6 +351,9 @@ def _build_task_spec(plan: ReadOnlyAuditSwarmPlan, assignment: ReadOnlyAuditAssi
         "grounding_receipt_id": assignment.grounding_receipt_id,
         "grounding_receipt_digest": assignment.grounding_receipt_digest,
         "grounding_receipt": dict(grounding) if isinstance(grounding, Mapping) else {},
+        "model_runtime_binding_receipt_id": assignment.model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": assignment.model_runtime_binding_digest,
+        "model_runtime_binding_receipt": dict(plan.receipt.model_runtime_binding_receipt),
         "work_focus": plan.receipt.grounding_work_focus,
         "typed_targets": dict(typed_targets),
         "semantic_targets": list(typed_targets.get("semantic_targets") or ()),
