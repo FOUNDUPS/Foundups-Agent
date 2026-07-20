@@ -516,11 +516,16 @@ Transport-neutral grounding additionally supports a fail-closed repository
 audit fallback for entity-scoped audits (including `pfmall`, `p.fMALL`,
 `p-fmall`, and `PFMALL`). The owner query runs first. Only when that evidence is
 unavailable, stale, or insufficient does the service use the shared bounded
-repository discovery reader. Acceptance requires a stable repository HEAD,
-one implementation-source read, and one independent test/contract read. The
-resulting `reddog_repo_audit_fallback.v1` is nested in and digest-bound by the
-canonical `reddog_grounded_target_receipt.v1`; selected paths replace the
-unresolved semantic target for downstream direct-read audit execution.
+repository discovery reader. Acceptance requires entity-bound paths, exact
+fixed-policy limits, one implementation-source read, and one independent
+test/contract read. The resulting `reddog_repo_audit_fallback.v1` records the
+creation-time HEAD and evidence digests and is nested in the canonical
+`reddog_grounded_target_receipt.v1`. At consumption, both deterministic and
+model-backed audit executors reopen every selected path with the confined
+reader and match path, digest, bytes, and truncation; the model-backed executor
+checks again after the model returns. Thus an unstaged content change rejects
+even when HEAD is unchanged. Selected paths replace the unresolved semantic
+target only after these checks.
 
 ### OpenClaw Supervisor Contract
 

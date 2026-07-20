@@ -90,11 +90,15 @@ insufficient owner result may enter the deterministic repository-audit fallback.
 HoloIndex is always queried first. The fallback securely re-reads candidate
 files under fixed path, file-count, and byte budgets; prunes private tool state,
 generated/vendor roots, secrets, traversal, and links/reparse points; and accepts
-only implementation source plus an independent test or contract. Its immutable
-receipt binds the selected content digests to a stable local Git HEAD. Failure
-to establish either evidence class or stable repository state rejects before a
-model call. The fallback grants no indexing, shell, mutation, or execution
-authority.
+only implementation source plus an independent test or contract whose paths
+bind to the requested entity. The creation-time receipt records the fixed
+policy, selected content digests, and local Git HEAD; it does not claim that
+HEAD alone proves later working-tree content. Each read-only executor reopens
+every selected file through the confined reader and requires exact path,
+digest, byte-count, and truncation equality before consuming it. The
+model-backed path repeats that check after the model returns. Any mismatch
+rejects the result. The fallback grants no indexing, shell, mutation, or
+execution authority.
 
 ## Setup
 

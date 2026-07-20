@@ -266,7 +266,8 @@ def secure_read_repo_file(
         os.close(fd)
 
 
-def _category(rel_path: str) -> str:
+def repo_audit_category(rel_path: str) -> str:
+    """Derive the evidence category from a repository-relative path."""
     parts = rel_path.casefold().split("/")
     name = parts[-1]
     if "tests" in parts or name.startswith("test_") or name.endswith(".test.js"):
@@ -282,6 +283,12 @@ def _category(rel_path: str) -> str:
     if Path(name).suffix.casefold() in {".py", ".js", ".ts", ".tsx", ".jsx", ".sol", ".go", ".rs", ".java", ".c", ".h"}:
         return "implementation_source"
     return "documentation"
+
+
+def repo_audit_path_supports_entity(rel_path: str, entity: str) -> bool:
+    """Return whether a path itself binds evidence to the canonical entity."""
+    score, _reasons = _path_match_score(rel_path, entity)
+    return score > 0
 
 
 def _path_match_score(rel_path: str, entity: str) -> Tuple[int, List[str]]:
@@ -312,7 +319,7 @@ def _candidate(rel_path: str, entity: str, source: str, content_match: bool = Fa
         reasons.append("bounded_content_match")
     if score <= 0:
         return None
-    category = _category(rel_path)
+    category = repo_audit_category(rel_path)
     if category == "implementation_source":
         score += 25
     elif category in {"test", "contract"}:

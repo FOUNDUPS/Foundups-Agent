@@ -28,6 +28,15 @@
   not surface the new transport fallback. Recorded
   `HOLOINDEX_REDDOG_TRANSPORT_REPO_AUDIT_FALLBACK_INDEX_GAP_PHASE1`; no runtime
   re-index was performed.
+- Independent review exposed that a fully rehashed unrelated-path substitution
+  and an unstaged post-receipt content change were not rejected. The repaired
+  validator now derives the expected entity from the original focus, recomputes
+  path categories, and enforces the exact discovery policy, limits, coverage,
+  and no-action attestations.
+- Both deterministic and model-backed audit consumers now reopen selected
+  evidence with the confined reader and require exact path/digest/bytes/truncated
+  equality. The model-backed path repeats the check after model return, so a
+  clean or unchanged HEAD cannot mask working-tree evidence drift.
 
 ## 2026-07-20: REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1
 

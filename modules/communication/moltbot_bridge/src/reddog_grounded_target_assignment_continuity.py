@@ -16,6 +16,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from holo_index.cli.repo_audit_discovery import (
+    canonicalize_entity,
+    detect_repo_audit_intent,
+    repo_audit_category,
+    repo_audit_path_supports_entity,
+)
+from modules.communication.moltbot_bridge.src.reddog_repo_audit_fallback_grounding import (
+    NO_ACTION_FIELDS,
+    REPO_AUDIT_POLICY,
+)
 
 SCHEMA_VERSION = "reddog_grounded_target_receipt.v1"
 SOURCE_SURFACES = frozenset({"editor_thin_client", "hermes_thin_client", "api_thin_client"})
@@ -23,6 +33,7 @@ SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 REPO_AUDIT_PRUNED_SEGMENTS = frozenset({
     ".agent", ".agents", ".cache", ".chroma", ".claude", ".codex", ".cursor",
     ".git", ".idea", ".m2m", ".memory", ".venv", ".vscode", ".windsurf",
+    ".worktrees",
     "__pycache__", "archive", "archives", "build", "cache", "chroma", "dist",
     "generated", "log", "logs", "memory", "node_modules", "temp", "tmp",
     "vector", "vectors", "vendor", "venv",
@@ -125,7 +136,7 @@ def validate_grounded_target_receipt(
     if data.get("grounding_target_universe_required") is True and not any(targets):
         reasons.append(GroundingReason.TARGET_UNIVERSE)
     _validate_semantic(data, targets[1], reasons)
-    _validate_repo(data, targets[0], reasons)
+    _validate_repo(data, targets[0], str(work_focus or ""), reasons)
     reasons = list(dict.fromkeys(reasons))
     if reasons:
         return GroundedTargetReceiptValidation(False, None, tuple(reasons))
@@ -187,7 +198,9 @@ def _validate_semantic(data: Mapping[str, Any], targets: Sequence[str], reasons:
         reasons.append(GroundingReason.SEMANTIC_GENERATION)
 
 
-def _validate_repo(data: Mapping[str, Any], targets: Sequence[str], reasons: list[str]) -> None:
+def _validate_repo(
+    data: Mapping[str, Any], targets: Sequence[str], work_focus: str, reasons: list[str]
+) -> None:
     if not targets:
         return
     if data.get("target_recall_ok") is not True or _strings(data.get("required_targets_missing")):
@@ -200,12 +213,15 @@ def _validate_repo(data: Mapping[str, Any], targets: Sequence[str], reasons: lis
     if not isinstance(fallback, Mapping):
         reasons.append(GroundingReason.REPO_AUDIT)
         return
-    if not _valid_repo_audit_fallback(data, fallback, targets):
+    if not _valid_repo_audit_fallback(data, fallback, targets, work_focus):
         reasons.append(GroundingReason.REPO_AUDIT)
 
 
 def _valid_repo_audit_fallback(
-    data: Mapping[str, Any], fallback: Mapping[str, Any], targets: Sequence[str]
+    data: Mapping[str, Any],
+    fallback: Mapping[str, Any],
+    targets: Sequence[str],
+    work_focus: str,
 ) -> bool:
     audit = fallback.get("repo_audit_grounding")
     audit_mapping = dict(audit) if isinstance(audit, Mapping) else {}
@@ -215,7 +231,9 @@ def _valid_repo_audit_fallback(
         if _sequence(selected)
         else []
     )
-    categories = {str(item.get("category") or "") for item in records}
+    intent = detect_repo_audit_intent(work_focus)
+    expected_entity = str(intent.get("entity") or "")
+    categories = {repo_audit_category(str(item.get("path") or "")) for item in records}
     paths = tuple(str(item.get("path") or "") for item in records)
     coverage = (
         audit_mapping.get("coverage")
@@ -225,35 +243,104 @@ def _valid_repo_audit_fallback(
     state = {
         "repo_head_sha": str(fallback.get("repo_head_sha") or ""),
         "evidence_digest": str(fallback.get("selected_evidence_digest") or ""),
-        "entity": str(audit_mapping.get("entity") or ""),
+        "expected_entity": expected_entity,
         "search_mode": str(audit_mapping.get("search_mode") or ""),
+        "work_focus_digest": canonical_digest({"work_focus": work_focus}),
+        "policy_digest": canonical_digest(REPO_AUDIT_POLICY),
     }
-    required = (
+    aliases = _strings(audit_mapping.get("aliases"))
+    expected_search_mode = (
+        "holo_evidence_only"
+        if audit_mapping.get("holo_evidence_sufficient") is True
+        else "holo_then_deterministic"
+    )
+    deterministic = audit_mapping.get("deterministic_candidates")
+    deterministic_records = list(deterministic) if _sequence(deterministic) else []
+    total_bytes = sum(_integer(item.get("bytes")) for item in records)
+    return all((
+        _valid_fallback_metadata(
+            fallback, audit_mapping, intent, aliases, expected_entity, expected_search_mode
+        ),
+        _valid_fallback_evidence(
+            records, categories, coverage, deterministic_records, total_bytes, expected_entity
+        ),
+        _valid_fallback_bindings(data, fallback, audit_mapping, records, paths, targets, state),
+    ))
+
+
+def _valid_fallback_metadata(
+    fallback: Mapping[str, Any],
+    audit: Mapping[str, Any],
+    intent: Mapping[str, Any],
+    aliases: Sequence[str],
+    expected_entity: str,
+    expected_search_mode: str,
+) -> bool:
+    return all((
         fallback.get("schema_version") == "reddog_repo_audit_fallback.v1",
         fallback.get("applied") is True,
         fallback.get("accepted") is True,
         fallback.get("holo_owner_attempted_first") is True,
         fallback.get("holo_owner_evidence_usable") is False,
+        fallback.get("expected_entity") == expected_entity,
+        fallback.get("fixed_policy") == REPO_AUDIT_POLICY,
+        fallback.get("fixed_policy_digest") == canonical_digest(REPO_AUDIT_POLICY),
+        all(fallback.get(field_name) is True for field_name in NO_ACTION_FIELDS),
         not _strings(fallback.get("rejection_reasons")),
-        audit_mapping.get("schema_version") == "repo_audit_grounding.v1",
-        audit_mapping.get("applied") is True,
-        audit_mapping.get("holo_first") is True,
+        audit.get("schema_version") == "repo_audit_grounding.v1",
+        audit.get("applied") is True,
+        audit.get("audit_intent") is True,
+        audit.get("holo_first") is True,
+        intent.get("audit_intent") is True,
+        audit.get("entity") == expected_entity,
+        bool(aliases) and all(canonicalize_entity(alias) == expected_entity for alias in aliases),
+        audit.get("search_mode") == expected_search_mode,
+    ))
+
+
+def _valid_fallback_evidence(
+    records: Sequence[Mapping[str, Any]],
+    categories: set[str],
+    coverage: Mapping[str, Any],
+    deterministic_records: Sequence[Any],
+    total_bytes: int,
+    expected_entity: str,
+) -> bool:
+    return all((
+        len(deterministic_records) <= int(REPO_AUDIT_POLICY["max_selected_paths"]) * 3,
         coverage.get("verdict") == "PASS",
+        _strings(coverage.get("reasons")) == (),
         "implementation_source" in categories,
         bool(categories.intersection({"test", "contract"})),
-        bool(records) and all(_valid_repo_audit_record(item) for item in records),
+        0 < len(records) <= int(REPO_AUDIT_POLICY["max_selected_paths"]),
+        len({str(item.get("path") or "").casefold() for item in records}) == len(records),
+        0 < total_bytes <= int(REPO_AUDIT_POLICY["total_read_budget_bytes"]),
+        all(_valid_repo_audit_record(item, expected_entity) for item in records),
+    ))
+
+
+def _valid_fallback_bindings(
+    data: Mapping[str, Any],
+    fallback: Mapping[str, Any],
+    audit: Mapping[str, Any],
+    records: Sequence[Mapping[str, Any]],
+    paths: Sequence[str],
+    targets: Sequence[str],
+    state: Mapping[str, Any],
+) -> bool:
+    return all((
+        fallback.get("work_focus_digest") == state["work_focus_digest"],
         tuple(targets) == paths,
         data.get("repo_audit_fallback_digest") == canonical_digest(fallback),
-        fallback.get("repo_audit_grounding_digest") == canonical_digest(audit_mapping),
+        fallback.get("repo_audit_grounding_digest") == canonical_digest(audit),
         fallback.get("selected_evidence_digest") == canonical_digest({"selected": records}),
         fallback.get("repository_state_digest") == canonical_digest(state),
         data.get("repo_state_head_sha") == fallback.get("repo_head_sha"),
         re.fullmatch(r"[0-9a-f]{40}(?:[0-9a-f]{24})?", state["repo_head_sha"]) is not None,
-    )
-    return all(required)
+    ))
 
 
-def _valid_repo_audit_record(record: Mapping[str, Any]) -> bool:
+def _valid_repo_audit_record(record: Mapping[str, Any], expected_entity: str) -> bool:
     path = str(record.get("path") or "").replace("\\", "/")
     parts = path.split("/")
     lowered = [part.casefold() for part in parts]
@@ -271,8 +358,10 @@ def _valid_repo_audit_record(record: Mapping[str, Any]) -> bool:
         and not any(marker in part for part in lowered for marker in REPO_AUDIT_SECRET_MARKERS)
         and not lowered[-1].endswith(REPO_AUDIT_SECRET_SUFFIXES)
         and Path(lowered[-1]).suffix in REPO_AUDIT_ALLOWED_SUFFIXES
+        and repo_audit_path_supports_entity(path, expected_entity)
+        and record.get("category") == repo_audit_category(path)
         and SHA256_RE.fullmatch(str(record.get("digest") or "")) is not None
-        and 0 < size <= 12_000
+        and 0 < size <= int(REPO_AUDIT_POLICY["per_file_read_bytes"])
         and isinstance(record.get("truncated"), bool)
     )
 

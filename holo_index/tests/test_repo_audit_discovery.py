@@ -214,16 +214,16 @@ def test_secure_reader_fails_closed_when_final_handle_path_is_unavailable(tmp_pa
 
 def test_discovery_prunes_secret_vendor_generated_and_reparse(tmp_path):
     _seed_pfmall(tmp_path)
-    for folder in ("vendor", "generated"):
+    for folder in ("vendor", "generated", ".worktrees"):
         path = tmp_path / folder
         path.mkdir()
         (path / "pfmall.py").write_text("pfmall", encoding="utf-8")
     (tmp_path / "pfmall_secret.py").write_text("pfmall", encoding="utf-8")
     receipt = discovery.build_repo_audit_grounding(tmp_path, "audit pfmall codebase", {})["receipt"]
     selected = {item["path"] for item in receipt["selected"]}
-    assert not any(path.startswith(("vendor/", "generated/")) for path in selected)
+    assert not any(path.startswith(("vendor/", "generated/", ".worktrees/")) for path in selected)
     assert "pfmall_secret.py" not in selected
-    assert receipt["exclusion_counts"]["pruned"] >= 2
+    assert receipt["exclusion_counts"]["pruned"] >= 3
 
 
 def test_discovery_never_enters_reads_or_selects_private_tool_state_roots(tmp_path, monkeypatch):

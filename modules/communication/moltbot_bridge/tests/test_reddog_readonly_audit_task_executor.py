@@ -39,6 +39,9 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
     ReadOnlyAuditTaskRejectReason,
     execute_reddog_readonly_audit_task,
 )
+from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
+    ground_transport_work_focus,
+)
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
     canonical_reddog_wsp15_allocation_digest,
@@ -309,6 +312,97 @@ def _context() -> dict:
     }
 
 
+def _fallback_grounding_context(root: Path, *, model_backed: bool) -> dict:
+    source = root / "modules" / "foundups" / "pfmall" / "src" / "pfmall_runtime.py"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("def run_pfmall():\n    return 'current'\n", encoding="utf-8")
+    test = root / "modules" / "foundups" / "pfmall" / "tests" / "test_pfmall_runtime.py"
+    test.parent.mkdir(parents=True, exist_ok=True)
+    test.write_text("def test_pfmall():\n    assert True\n", encoding="utf-8")
+    ref = root / ".git" / "refs" / "heads" / "main"
+    ref.parent.mkdir(parents=True, exist_ok=True)
+    (root / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+    ref.write_text("a" * 40 + "\n", encoding="utf-8")
+    focus = "Audit p.fMALL codebase and recommend defensive improvements."
+    grounding = ground_transport_work_focus(
+        repo_root=root,
+        work_focus=focus,
+        foundup_id="foundups_agent",
+        authenticated_principal_id="principal-012",
+        source_surface="hermes_thin_client",
+        client_request_id="executor-fallback-1",
+        owner_query=lambda query: {
+            "ok": False,
+            "query": query,
+            "freshness": "STALE",
+            "raw_result": {},
+            "index_gap_detected": True,
+            "no_holoindex_reindex_performed": True,
+        },
+    )
+    assert grounding.accepted is True
+    targets = tuple(grounding.typed_targets["repo_file_targets"])
+    context = (
+        _model_context(allowed_read_targets=targets)
+        if model_backed
+        else _context()
+    )
+    context["assignment"] = dict(context["assignment"])
+    context["assignment"]["allowed_read_targets"] = list(targets)
+    receipt = dict(grounding.grounding_receipt)
+    receipt_digest = grounding_digest(receipt)
+    context.update({
+        "grounding_receipt": receipt,
+        "grounding_receipt_id": receipt["receipt_id"],
+        "grounding_receipt_digest": receipt_digest,
+        "work_focus": focus,
+        "typed_targets": dict(grounding.typed_targets),
+    })
+    context["assignment"]["grounding_receipt_id"] = receipt["receipt_id"]
+    context["assignment"]["grounding_receipt_digest"] = receipt_digest
+    return context
+
+
+def _fallback_source_path(root: Path, context: dict) -> Path:
+    selected = context["grounding_receipt"]["repo_audit_fallback"]["repo_audit_grounding"]["selected"]
+    record = next(item for item in selected if item["category"] == "implementation_source")
+    return root / record["path"]
+
+
+def _rehash_fallback_context(context: dict) -> None:
+    receipt = context["grounding_receipt"]
+    fallback = receipt["repo_audit_fallback"]
+    audit = fallback["repo_audit_grounding"]
+    selected = audit["selected"]
+    paths = [item["path"] for item in selected]
+    receipt["typed_targets"]["repo_file_targets"] = paths
+    receipt["direct_read_paths"] = paths
+    receipt["repo_file_targets_count"] = len(paths)
+    receipt["typed_targets_digest"] = grounding_digest(receipt["typed_targets"])
+    fallback["repo_audit_grounding_digest"] = grounding_digest(audit)
+    fallback["selected_evidence_digest"] = grounding_digest({"selected": selected})
+    state = {
+        "repo_head_sha": fallback["repo_head_sha"],
+        "evidence_digest": fallback["selected_evidence_digest"],
+        "expected_entity": fallback["expected_entity"],
+        "search_mode": audit["search_mode"],
+        "work_focus_digest": fallback["work_focus_digest"],
+        "policy_digest": fallback["fixed_policy_digest"],
+    }
+    fallback["repository_state_digest"] = grounding_digest(state)
+    receipt["repo_audit_fallback_digest"] = grounding_digest(fallback)
+    receipt["receipt_id"] = grounding_digest(
+        {key: value for key, value in receipt.items() if key != "receipt_id"}
+    )
+    context["typed_targets"] = dict(receipt["typed_targets"])
+    context["assignment"]["allowed_read_targets"] = paths
+    context["grounding_receipt_id"] = receipt["receipt_id"]
+    context["assignment"]["grounding_receipt_id"] = receipt["receipt_id"]
+    digest = grounding_digest(receipt)
+    context["grounding_receipt_digest"] = digest
+    context["assignment"]["grounding_receipt_digest"] = digest
+
+
 def _model_context(
     *,
     allowed_read_targets: tuple[str, ...] | None = None,
@@ -498,6 +592,96 @@ def test_readonly_audit_executor_reads_only_allowlisted_targets(tmp_path: Path) 
     assert finding["recommended_action"] == "FIX"
     assert finding["next_slice_name"] == READONLY_AUDIT_LANE_ANALYZER_SLICE
     assert set(finding["evidence_refs"]) == set(result.report["evidence_refs"])
+
+
+def test_deterministic_fallback_rejects_unstaged_content_change_at_consuming_read(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    context = _fallback_grounding_context(root, model_backed=False)
+    _fallback_source_path(root, context).write_text("CHANGED = True\n", encoding="utf-8")
+
+    result = execute_reddog_readonly_audit_task(task_context=context, repo_root=root)
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
+    assert result.no_model_call_performed is True
+
+
+@pytest.mark.parametrize("field", ["path", "digest", "bytes", "truncated"])
+def test_deterministic_consumer_requires_exact_selected_read_receipt(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    root = _repo(tmp_path)
+    context = _fallback_grounding_context(root, model_backed=False)
+    selected = context["grounding_receipt"]["repo_audit_fallback"]["repo_audit_grounding"]["selected"]
+    record = next(item for item in selected if item["category"] == "implementation_source")
+    if field == "path":
+        record[field] = "modules/foundups/pfmall/src/pfmall_missing.py"
+    elif field == "digest":
+        record[field] = "sha256:" + "0" * 64
+    elif field == "bytes":
+        record[field] += 1
+    else:
+        record[field] = not record[field]
+    _rehash_fallback_context(context)
+
+    result = execute_reddog_readonly_audit_task(task_context=context, repo_root=root)
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
+
+
+def test_model_fallback_rejects_changed_content_before_index_or_model(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    context = _fallback_grounding_context(root, model_backed=True)
+    _fallback_source_path(root, context).write_text("CHANGED = True\n", encoding="utf-8")
+    runner = _EchoEvidenceModelRunner()
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        model_runner=runner,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
+    assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
+
+
+def test_model_fallback_rechecks_content_after_model_even_when_head_is_unchanged(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    context = _fallback_grounding_context(root, model_backed=True)
+    source = _fallback_source_path(root, context)
+
+    class _MutatingRunner(_EchoEvidenceModelRunner):
+        def run_repo_code_audit(self, **kwargs):
+            result = super().run_repo_code_audit(**kwargs)
+            source.write_text("CHANGED_DURING_MODEL = True\n", encoding="utf-8")
+            return result
+
+    runner = _MutatingRunner()
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        model_runner=runner,
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED in result.rejection_reasons
+    assert runner.calls
+    assert context["grounding_receipt"]["repo_state_head_sha"] == "a" * 40
 
 
 def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_path: Path) -> None:

@@ -115,6 +115,33 @@ def _ground_at(repo_root: Path, work_focus: str, owner_query):
     )
 
 
+def _rehash_fallback_receipt(receipt: dict) -> None:
+    fallback = receipt["repo_audit_fallback"]
+    audit = fallback["repo_audit_grounding"]
+    selected = audit["selected"]
+    paths = [item["path"] for item in selected]
+    receipt["typed_targets"]["repo_file_targets"] = paths
+    receipt["direct_read_paths"] = paths
+    receipt["repo_file_targets_count"] = len(paths)
+    receipt["typed_targets_digest"] = canonical_digest(receipt["typed_targets"])
+    fallback["repo_audit_grounding_digest"] = canonical_digest(audit)
+    fallback["selected_evidence_digest"] = canonical_digest({"selected": selected})
+    fallback["fixed_policy_digest"] = canonical_digest(fallback["fixed_policy"])
+    state = {
+        "repo_head_sha": fallback["repo_head_sha"],
+        "evidence_digest": fallback["selected_evidence_digest"],
+        "expected_entity": fallback["expected_entity"],
+        "search_mode": audit["search_mode"],
+        "work_focus_digest": fallback["work_focus_digest"],
+        "policy_digest": fallback["fixed_policy_digest"],
+    }
+    fallback["repository_state_digest"] = canonical_digest(state)
+    receipt["repo_audit_fallback_digest"] = canonical_digest(fallback)
+    receipt["receipt_id"] = canonical_digest(
+        {key: value for key, value in receipt.items() if key != "receipt_id"}
+    )
+
+
 def test_repo_path_is_verified_and_bound_into_v2_intent() -> None:
     focus = (
         "Audit modules/communication/moltbot_bridge/src/"
@@ -330,6 +357,110 @@ def test_rehashed_repo_fallback_cannot_bind_private_or_traversal_path(tmp_path: 
     validation = validate_grounded_target_receipt(receipt, work_focus=focus)
     assert validation.accepted is False
     assert "grounding_repo_audit_receipt_invalid" in validation.rejection_reasons
+
+
+def test_fully_rehashed_safe_unrelated_evidence_cannot_replace_requested_entity(
+    tmp_path: Path,
+) -> None:
+    _seed_repo_audit_fixture(tmp_path)
+    focus = "Audit p.fMALL repository."
+    result = _ground_at(
+        tmp_path,
+        focus,
+        lambda query: _owner_result(query=query, current=False, hits=[]),
+    )
+    receipt = deepcopy(result.grounding_receipt)
+    selected = receipt["repo_audit_fallback"]["repo_audit_grounding"]["selected"]
+    selected[0]["path"] = "modules/unrelated/safe_runtime.py"
+    selected[0]["category"] = "implementation_source"
+    selected[1]["path"] = "modules/unrelated/tests/test_safe_runtime.py"
+    selected[1]["category"] = "test"
+    _rehash_fallback_receipt(receipt)
+
+    validation = validate_grounded_target_receipt(receipt, work_focus=focus)
+    assert validation.accepted is False
+    assert "grounding_repo_audit_receipt_invalid" in validation.rejection_reasons
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "category",
+        "search_mode",
+        "audit_intent",
+        "coverage",
+        "fixed_policy",
+        "no_action",
+        "worktrees_path",
+        "selected_limit",
+        "aggregate_budget",
+    ],
+)
+def test_fully_rehashed_fallback_policy_substitution_fails_closed(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    _seed_repo_audit_fixture(tmp_path)
+    focus = "Audit p.fMALL repository."
+    result = _ground_at(
+        tmp_path,
+        focus,
+        lambda query: _owner_result(query=query, current=False, hits=[]),
+    )
+    receipt = deepcopy(result.grounding_receipt)
+    fallback = receipt["repo_audit_fallback"]
+    _mutate_fallback_policy(fallback, mutation)
+    _rehash_fallback_receipt(receipt)
+
+    validation = validate_grounded_target_receipt(receipt, work_focus=focus)
+    assert validation.accepted is False
+    assert "grounding_repo_audit_receipt_invalid" in validation.rejection_reasons
+
+
+def _mutate_fallback_policy(fallback: dict, mutation: str) -> None:
+    audit = fallback["repo_audit_grounding"]
+    selected = audit["selected"]
+    if mutation == "category":
+        selected[0]["category"] = "test"
+    elif mutation == "search_mode":
+        audit["search_mode"] = "model_selected"
+    elif mutation == "audit_intent":
+        audit["audit_intent"] = False
+    elif mutation == "coverage":
+        audit["coverage"] = {"verdict": "PASS", "reasons": ["missing_test"]}
+    elif mutation == "fixed_policy":
+        fallback["fixed_policy"]["max_selected_paths"] = 99
+    elif mutation == "no_action":
+        fallback["no_shell_command_executed"] = False
+    elif mutation == "worktrees_path":
+        selected[0]["path"] = ".worktrees/pfmall/pfmall_runtime.py"
+    elif mutation == "selected_limit":
+        selected[:] = [
+            {
+                **selected[index % len(selected)],
+                "path": (
+                    f"modules/foundups/pfmall/tests/test_pfmall_{index}.py"
+                    if index == 0
+                    else f"modules/foundups/pfmall/src/pfmall_{index}.py"
+                ),
+                "category": "implementation_source" if index else "test",
+            }
+            for index in range(13)
+        ]
+    else:
+        selected[:] = [
+            {
+                **selected[index % len(selected)],
+                "path": (
+                    f"modules/foundups/pfmall/tests/test_pfmall_{index}.py"
+                    if index == 0
+                    else f"modules/foundups/pfmall/src/pfmall_{index}.py"
+                ),
+                "category": "test" if index == 0 else "implementation_source",
+                "bytes": 12_000,
+            }
+            for index in range(9)
+        ]
 
 
 def test_two_category_decoys_still_cannot_ground_unrelated_claim() -> None:
