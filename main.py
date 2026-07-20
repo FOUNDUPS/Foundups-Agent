@@ -1932,6 +1932,9 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         REDDOG_RESIDENT_BREADCRUMBS_PATH                    Optional breadcrumb JSON override
         REDDOG_RESIDENT_WORKSPACE_MEMORY_NOTES_PATH         Optional workspace memory note JSON
         REDDOG_RESIDENT_MEMORY_MAX_RECORDS=20               Max breadcrumb/workspace records supplied
+        REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT           Outside-repo root for binding artifacts
+        REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH Exact audit binding artifact
+        REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH Exact architect binding artifact
         REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH             Approved external snapshot JSON
         REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Existing work-state JSON
         HOLOINDEX_FRESHNESS_RECEIPT                        Existing HoloIndex receipt
@@ -1941,6 +1944,14 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
     if not _reddog_resident_architect_cycle_requested():
         logger.info("[REDDOG-RESIDENT-CYCLE] Startup preflight disabled")
         return True
+
+    audit_runtime_binding, architect_runtime_binding, binding_reason = (
+        _reddog_resident_model_runtime_bindings_from_env(repo_root)
+    )
+    if binding_reason:
+        logger.error("[REDDOG-RESIDENT-CYCLE] Runtime model binding preflight failed: %s", binding_reason)
+        print(f"[REDDOG-RESIDENT-CYCLE] preflight=FAIL reason={binding_reason}")
+        return False
 
     enforced = os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "0") != "0"
     principal_ref = os.getenv("REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF", "012").strip() or "012"
@@ -1997,6 +2008,8 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
             brain_state=brain_state,
             workspace_memory_notes=workspace_memory_notes,
             external_research_retriever=_reddog_external_research_retriever_from_env(),
+            audit_model_runtime_binding_receipt=audit_runtime_binding,
+            architect_model_runtime_binding_receipt=architect_runtime_binding,
             max_claims=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS", 8),
             timeout_seconds=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS", 60),
             cancel_requested=os.getenv("REDDOG_RESIDENT_ARCHITECT_CANCEL", "0") != "0",
@@ -2058,6 +2071,80 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
         print("[REDDOG-RESIDENT-CYCLE] Startup blocked by REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=1")
         return False
     return True
+
+
+def _reddog_resident_model_runtime_bindings_from_env(
+    repo_root: Path,
+) -> tuple[Mapping[str, Any] | None, Mapping[str, Any] | None, str]:
+    runtime_root_value = os.getenv("REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT", "").strip()
+    audit_path_value = os.getenv(
+        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH", ""
+    ).strip()
+    architect_path_value = os.getenv(
+        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH", ""
+    ).strip()
+    if not runtime_root_value:
+        return None, None, "missing_model_runtime_binding_root"
+    if not audit_path_value:
+        return None, None, "missing_audit_model_runtime_binding_path"
+    if not architect_path_value:
+        return None, None, "missing_architect_model_runtime_binding_path"
+    runtime_root = Path(runtime_root_value)
+    audit_path = Path(audit_path_value)
+    architect_path = Path(architect_path_value)
+    if not runtime_root.is_absolute() or not audit_path.is_absolute() or not architect_path.is_absolute():
+        return None, None, "model_runtime_binding_path_not_absolute"
+    root = repo_root.resolve()
+    runtime_root = runtime_root.resolve()
+    try:
+        runtime_root.relative_to(root)
+        return None, None, "model_runtime_binding_root_inside_repo"
+    except ValueError:
+        pass
+    audit_identity = Path(os.path.abspath(audit_path))
+    architect_identity = Path(os.path.abspath(architect_path))
+    try:
+        audit_identity.relative_to(root)
+        return None, None, "model_runtime_binding_artifact_inside_repo"
+    except ValueError:
+        pass
+    try:
+        architect_identity.relative_to(root)
+        return None, None, "model_runtime_binding_artifact_inside_repo"
+    except ValueError:
+        pass
+    if os.path.normcase(str(audit_identity)) == os.path.normcase(str(architect_identity)):
+        return None, None, "model_runtime_binding_artifacts_not_distinct"
+    try:
+        from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
+            ModelRuntimeBindingDecision,
+        )
+        from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+            rehydrate_model_runtime_binding_receipt,
+        )
+        from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+            read_reddog_runtime_json_mapping,
+        )
+
+        audit = read_reddog_runtime_json_mapping(audit_path, allowed_root=runtime_root)
+        architect = read_reddog_runtime_json_mapping(architect_path, allowed_root=runtime_root)
+        audit_receipt = rehydrate_model_runtime_binding_receipt(audit)
+        architect_receipt = rehydrate_model_runtime_binding_receipt(architect)
+    except Exception:
+        return None, None, "model_runtime_binding_artifact_invalid"
+    if (
+        audit_receipt.decision != ModelRuntimeBindingDecision.BOUND
+        or not audit_receipt.principal_model
+        or audit_receipt.runtime_surface != "reddog_readonly_audit_worker"
+    ):
+        return None, None, "audit_model_runtime_binding_surface_invalid"
+    if (
+        architect_receipt.decision != ModelRuntimeBindingDecision.BOUND
+        or not architect_receipt.principal_model
+        or architect_receipt.runtime_surface != "reddog_backend_architect"
+    ):
+        return None, None, "architect_model_runtime_binding_surface_invalid"
+    return audit, architect, ""
 
 
 def _reddog_startup_blocker_token(value: str) -> str:

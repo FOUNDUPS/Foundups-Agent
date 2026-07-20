@@ -173,7 +173,7 @@ exemptions:
       Legacy audit-worker integration boundary spanning evidence acquisition,
       model invocation, and receipt composition. This POC preserves its
       reviewed repository and HoloIndex truth checks without a broad rewrite.
-    threshold_override: 2100
+    threshold_override: 2106
     function_threshold_override: 270
     functions:
       - "execute_model_backed_repo_code_audit"
@@ -211,8 +211,8 @@ exemptions:
 
   - file: "tests/test_reddog_backend_architect_determination_runtime.py"
     reason: "Legacy architect-input fixture and suite awaiting fixture extraction."
-    threshold_override: 725
-    function_threshold_override: 65
+    threshold_override: 760
+    function_threshold_override: 80
     functions: ["_build_inputs"]
     temporary: true
     review_date: "2026-Q3"
@@ -223,7 +223,7 @@ exemptions:
     reason: >-
       Legacy end-to-end startup integration suite; focused owner-preflight
       stubs are retained while durable-cycle sections are split by contract.
-    threshold_override: 1800
+    threshold_override: 1935
     function_threshold_override: 75
     functions:
       - "test_bootstrap_memex_supply_enriches_enqueued_readonly_audit_tasks"
@@ -248,7 +248,7 @@ exemptions:
     reason: >-
       Legacy executor regression matrix. Repository-state truth-boundary cases
       were added without mixing production refactoring into the security fix.
-    threshold_override: 2100
+    threshold_override: 2237
     function_threshold_override: 60
     temporary: true
     review_date: "2026-Q3"

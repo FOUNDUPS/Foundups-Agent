@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
+
+- Closed same-surface substitution by comparing the rehydrated audit receipt
+  ID/digest against task, assignment, and WSP 15 lineage, and by binding the
+  architect receipt pair into WSP 15 as a separate field pair.
+- Made runtime bindings mandatory for injected and production runners alike;
+  model-selection metadata remains non-authoritative and cannot replace or
+  override the validated runtime identity.
+- Bound both receipt pairs into durable resident intent identity and used the
+  same two-pair WSP 15 identity for enqueue and final report collection, so
+  reconnect/retry substitution fails before downstream work or persistence.
+- Added the `main.py` readiness boundary: two distinct, exact-surface artifacts
+  must be read from an explicit outside-repository root through bounded,
+  regular-file, no-follow reads before the resident cycle can start. Logs emit
+  stable path-free reason codes only.
+- WSP 62 truth: focused security tests increased legacy integration fixtures
+  and the startup entrypoint. Temporary ceilings were updated to their exact
+  post-repair sizes (`main.py` 4,978; audit runtime 2,106; architect tests 760;
+  startup tests 1,935; audit executor tests 2,237) without widening function
+  ceilings beyond the expanded 77-line architect fixture.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 62, 97

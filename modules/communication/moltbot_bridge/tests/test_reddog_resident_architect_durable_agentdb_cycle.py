@@ -138,6 +138,30 @@ def _intent() -> dict[str, object]:
     }
 
 
+def _audit_runtime_binding(*, model_id: str = "openai/gpt-5.6-code") -> dict[str, object]:
+    return model_runtime_binding_receipt(
+        runtime_surface="reddog_readonly_audit_worker",
+        model_id=model_id,
+    )
+
+
+def _architect_runtime_binding(*, model_id: str = "openai/gpt-5.6-code") -> dict[str, object]:
+    return model_runtime_binding_receipt(
+        runtime_surface="reddog_backend_architect",
+        model_id=model_id,
+    )
+
+
+def _bound_intent() -> dict[str, object]:
+    intent, reasons = resident_cycle_runtime._intent_bound_model_runtime_bindings(
+        _intent(),
+        audit_model_runtime_binding_receipt=_audit_runtime_binding(),
+        architect_model_runtime_binding_receipt=_architect_runtime_binding(),
+    )
+    assert reasons == ()
+    return dict(intent)
+
+
 def _repo_state() -> dict[str, object]:
     return {
         "head_sha": HEAD,
@@ -303,13 +327,15 @@ def _runtime_kwargs(**overrides):
         "holoindex_adapter": _FakeQueryAdapter(),
         "codeindex_adapter": _FakeQueryAdapter(),
         "external_research_retriever": _FakeExternalResearchRetriever(),
+        "audit_model_runtime_binding_receipt": _audit_runtime_binding(),
+        "architect_model_runtime_binding_receipt": _architect_runtime_binding(),
     }
     kwargs.update(overrides)
     return kwargs
 
 
 def _stored_cycle_record(*, status: str, retry_count: int = 0) -> dict[str, object]:
-    record = resident_cycle_runtime._new_record(_intent(), retry_count=retry_count)
+    record = resident_cycle_runtime._new_record(_bound_intent(), retry_count=retry_count)
     record["status"] = status
     record["created_at"] = NOW
     record["updated_at"] = NOW
@@ -356,7 +382,7 @@ def _seed_cycle_status(
         current = dict(timed_out["record"])
         if attempt == retry_count:
             return current
-        retried = resident_cycle_runtime._new_record(_intent(), retry_count=attempt + 1)
+        retried = resident_cycle_runtime._new_record(_bound_intent(), retry_count=attempt + 1)
         retried["created_at"] = current["created_at"]
         retried["genesis_state_digest"] = current["genesis_state_digest"]
         retried["attempt_history"] = [
@@ -519,6 +545,45 @@ def test_duplicate_intent_reconnects_to_persisted_cycle_without_new_claims() -> 
         claim["task_id"] for claim in first.openclaw_claims
     )
     assert AgentDB().get_autonomous_tasks(status="completed", limit=20)
+
+
+def test_same_surface_binding_substitution_conflicts_before_downstream_calls_or_mutation() -> None:
+    store = AgentDbResidentArchitectCycleStore()
+    first = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(cycle_store=store)
+    )
+    assert first.accepted is True
+    persisted_before = store.load_cycle_by_intent(first.intent_id)
+    assert persisted_before is not None
+    tasks_before = AgentDB().get_autonomous_tasks(limit=20)
+    audit_runner = _AuditModelRunner()
+    architect_runner = _ArchitectRunner()
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+
+    result = run_reddog_resident_architect_durable_agentdb_cycle(
+        **_runtime_kwargs(
+            cycle_store=store,
+            audit_model_runtime_binding_receipt=_audit_runtime_binding(
+                model_id="moonshotai/kimi-k3"
+            ),
+            audit_model_runner=audit_runner,
+            architect_model_runner=architect_runner,
+            holoindex_adapter=holo,
+            codeindex_adapter=code,
+        )
+    )
+
+    assert result.accepted is False
+    assert ResidentCycleReason.INTENT_CONFLICT in result.rejection_reasons
+    assert audit_runner.calls == []
+    assert architect_runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
+    assert AgentDB().get_autonomous_tasks(limit=20) == tasks_before
+    persisted_after = store.load_cycle_by_intent(first.intent_id)
+    assert persisted_after is not None
+    assert persisted_after["record_revision"] == persisted_before["record_revision"]
 
 
 def test_real_agentdb_cycle_reconnects_through_fresh_canonical_client() -> None:
@@ -706,6 +771,8 @@ def test_cancellation_during_claim_remains_terminal() -> None:
                 red_dog_intent=_intent(),
                 cycle_store=store,
                 cancel_requested=True,
+                audit_model_runtime_binding_receipt=_audit_runtime_binding(),
+                architect_model_runtime_binding_receipt=_architect_runtime_binding(),
             )
         )
         return {"accepted": True, "status": "OPENCLAW_READONLY_AUDIT_CLAIM_ACCEPT"}

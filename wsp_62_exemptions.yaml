@@ -18,10 +18,11 @@ exemptions:
   - file: "main.py"
     reason: >-
       Legacy application entrypoint and RedDog preflight integration boundary.
-      This focused POC changes only the HoloIndex owner preflight call path;
-      decomposing unrelated startup and queue control flows here would expand
-      the security review surface.
-    threshold_override: 4891
+      This focused repair adds only the bounded outside-repository runtime-
+      binding artifact preflight ahead of the resident cycle; decomposing
+      unrelated startup and queue control flows here would expand the security
+      review surface.
+    threshold_override: 4978
     function_threshold_override: 954
     functions:
       - "monitor_youtube"
@@ -58,7 +59,7 @@ exemptions:
     architect_reviewer: "0102 Technical Architect"
     expires_on: "2026-09-30"
     no_growth_ceiling:
-      file_lines: 4891
+      file_lines: 4978
       functions:
         run_reddog_wre_queue_consumer_preflight: 60
         run_reddog_resident_queue_next_stage_dispatch_preflight: 84

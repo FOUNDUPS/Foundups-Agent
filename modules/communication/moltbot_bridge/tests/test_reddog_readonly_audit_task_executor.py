@@ -414,10 +414,14 @@ def _model_context(
     if allowed_read_targets is not None:
         context["assignment"] = dict(context["assignment"])
         context["assignment"]["allowed_read_targets"] = list(allowed_read_targets)
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+    )
     allocation = allocate_reddog_wsp15_receipt(
         requested_operation=requested_operation,
         prompt_text=prompt_text,
         allowed_read_targets=context["assignment"]["allowed_read_targets"],
+        model_runtime_binding_receipt=runtime_binding,
     ).to_dict()
     context["worker_mode"] = MODEL_WORKER_MODE
     context["principal_id"] = "principal-012"
@@ -427,6 +431,9 @@ def _model_context(
     context["wsp15_allocation_receipt"] = allocation
     context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
     context["wsp15_allocation_digest"] = canonical_reddog_wsp15_allocation_digest(allocation)
+    context["model_runtime_binding_receipt"] = runtime_binding
+    context["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    context["model_runtime_binding_digest"] = allocation["model_runtime_binding_digest"]
     context["assignment"] = dict(context["assignment"])
     context["assignment"]["lane_id"] = lane_id
     context["assignment"]["foundup_id"] = MEMEX_FOUNDUP_ID
@@ -438,6 +445,10 @@ def _model_context(
     context["assignment"]["determination_id"] = "sha256:determination"
     context["assignment"]["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
     context["assignment"]["wsp15_allocation_digest"] = context["wsp15_allocation_digest"]
+    context["assignment"]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    context["assignment"]["model_runtime_binding_digest"] = context[
+        "model_runtime_binding_digest"
+    ]
     context["assignment"]["memex_source_scope"] = f"foundup:{MEMEX_FOUNDUP_ID}:lane:{lane_id}"
     context["assignment"]["memex_source_revision"] = MEMEX_SOURCE_REVISION
     context["assignment"]["memex_holoindex_generation_id"] = MEMEX_GENERATION_ID
@@ -505,6 +516,51 @@ def _grounded_model_context() -> dict:
     context["assignment"]["grounding_receipt_id"] = receipt["receipt_id"]
     context["assignment"]["grounding_receipt_digest"] = context["grounding_receipt_digest"]
     return context
+
+
+def _replace_model_runtime_binding(context: dict, runtime_binding: dict) -> None:
+    assignment = context["assignment"]
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation=str(context["wsp15_allocation_receipt"]["requested_operation"]),
+        prompt_text="Run model-backed RedDog repo code audit.",
+        allowed_read_targets=assignment["allowed_read_targets"],
+        model_runtime_binding_receipt=runtime_binding,
+    ).to_dict()
+    digest = canonical_reddog_wsp15_allocation_digest(allocation)
+    runtime_digest = allocation["model_runtime_binding_digest"]
+    context["model_runtime_binding_receipt"] = runtime_binding
+    context["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    context["model_runtime_binding_digest"] = runtime_digest
+    context["wsp15_allocation_receipt"] = allocation
+    context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
+    context["wsp15_allocation_digest"] = digest
+    assignment["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    assignment["model_runtime_binding_digest"] = runtime_digest
+    assignment["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
+    assignment["wsp15_allocation_digest"] = digest
+
+
+def _remove_model_runtime_binding(context: dict) -> None:
+    assignment = context["assignment"]
+    allocation = allocate_reddog_wsp15_receipt(
+        requested_operation=str(context["wsp15_allocation_receipt"]["requested_operation"]),
+        prompt_text="Run model-backed RedDog repo code audit.",
+        allowed_read_targets=assignment["allowed_read_targets"],
+    ).to_dict()
+    digest = canonical_reddog_wsp15_allocation_digest(allocation)
+    for key in (
+        "model_runtime_binding_receipt",
+        "model_runtime_binding_receipt_id",
+        "model_runtime_binding_digest",
+    ):
+        context.pop(key, None)
+    assignment["model_runtime_binding_receipt_id"] = ""
+    assignment["model_runtime_binding_digest"] = ""
+    context["wsp15_allocation_receipt"] = allocation
+    context["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
+    context["wsp15_allocation_digest"] = digest
+    assignment["wsp15_allocation_receipt_id"] = allocation["receipt_id"]
+    assignment["wsp15_allocation_digest"] = digest
 
 
 def _memex_access_policy_receipt() -> dict:
@@ -773,7 +829,9 @@ def test_grounding_substitution_rejects_before_index_or_model(
     assert code.calls == []
 
 
-def test_model_selection_receipt_is_bound_to_readonly_audit_runner(tmp_path: Path) -> None:
+def test_runtime_binding_is_authoritative_over_readonly_model_selection_metadata(
+    tmp_path: Path,
+) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
     selection = _model_selection()
@@ -792,15 +850,44 @@ def test_model_selection_receipt_is_bound_to_readonly_audit_runner(tmp_path: Pat
     assert result.accepted is True
     assert result.report is not None
     binding = runner.calls[0]["binding"]["model_selection"]
-    assert binding["receipt_id"] == selection["receipt_id"]
+    runtime_binding = context["model_runtime_binding_receipt"]
+    assert binding["receipt_id"] == runtime_binding["selection_receipt_id"]
     assert binding["purpose"] == "production"
-    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     worker_receipt = result.report["worker_receipt"]
-    assert worker_receipt["model_selection_receipt_id"] == selection["receipt_id"]
+    assert worker_receipt["model_selection_receipt_id"] == runtime_binding["selection_receipt_id"]
     assert worker_receipt["model_selection_digest"]
     route_receipt = worker_receipt["model_route_receipt"]
-    assert route_receipt["model_selection_receipt_id"] == selection["receipt_id"]
+    assert route_receipt["model_selection_receipt_id"] == runtime_binding["selection_receipt_id"]
     assert route_receipt["model_selection_digest"] == worker_receipt["model_selection_digest"]
+
+
+def test_model_selection_receipt_cannot_replace_required_runtime_binding(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    _remove_model_runtime_binding(context)
+    context["model_selection_receipt"] = _model_selection()
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert result.no_model_call_performed is True
+    assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
 
 
 def test_model_runtime_binding_receipt_is_bound_to_readonly_audit_runner(tmp_path: Path) -> None:
@@ -812,7 +899,7 @@ def test_model_runtime_binding_receipt_is_bound_to_readonly_audit_runner(tmp_pat
         panel_model_ids=("moonshotai/kimi-k3",),
     )
     context = _model_context()
-    context["model_runtime_binding_receipt"] = runtime_binding
+    _replace_model_runtime_binding(context, runtime_binding)
 
     result = execute_reddog_readonly_audit_task(
         task_context=context,
@@ -860,6 +947,39 @@ def test_mismatched_model_runtime_binding_receipt_rejects_before_readonly_model_
     assert ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
     assert result.no_model_call_performed is True
     assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
+
+
+def test_same_surface_runtime_binding_substitution_rejects_before_any_call(
+    tmp_path: Path,
+) -> None:
+    root = _repo(tmp_path)
+    runner = _EchoEvidenceModelRunner()
+    context = _model_context()
+    substituted = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+        model_id="moonshotai/kimi-k3",
+    )
+    context["model_runtime_binding_receipt"] = substituted
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=context,
+        repo_root=root,
+        task_id="task-1",
+        model_runner=runner,
+        holoindex_adapter=holo,
+        codeindex_adapter=code,
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert result.no_model_call_performed is True
+    assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
 
 
 def test_production_audit_rejects_absent_runtime_binding_before_provider_or_index_calls(
@@ -869,8 +989,11 @@ def test_production_audit_rejects_absent_runtime_binding_before_provider_or_inde
     holo = _FakeQueryAdapter()
     code = _FakeQueryAdapter()
 
+    context = _model_context()
+    _remove_model_runtime_binding(context)
+
     result = execute_reddog_readonly_audit_task(
-        task_context=_model_context(),
+        task_context=context,
         repo_root=root,
         task_id="task-1",
         model_runner=None,
@@ -883,11 +1006,11 @@ def test_production_audit_rejects_absent_runtime_binding_before_provider_or_inde
     assert result.no_model_call_performed is True
     assert holo.calls == []
     assert code.calls == []
-    assert holo.calls == []
-    assert code.calls == []
 
 
-def test_tampered_model_selection_receipt_rejects_before_readonly_model_call(tmp_path: Path) -> None:
+def test_tampered_selection_metadata_cannot_override_readonly_runtime_binding(
+    tmp_path: Path,
+) -> None:
     root = _repo(tmp_path)
     runner = _EchoEvidenceModelRunner()
     selection = _model_selection()
@@ -906,12 +1029,13 @@ def test_tampered_model_selection_receipt_rejects_before_readonly_model_call(tmp
         codeindex_adapter=code,
     )
 
-    assert result.accepted is False
-    assert ReadOnlyAuditTaskRejectReason.MODEL_SELECTION_RECEIPT in result.rejection_reasons
-    assert result.no_model_call_performed is True
-    assert runner.calls == []
-    assert holo.calls == []
-    assert code.calls == []
+    assert result.accepted is True
+    assert len(runner.calls) == 1
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["model_runtime_binding_receipt_id"] == context[
+        "model_runtime_binding_receipt"
+    ]["receipt_id"]
+    assert binding["selected_model_ids"] != ["attacker/model"]
 
 
 def test_model_backed_runtime_freshness_lane_uses_same_guarded_path(tmp_path: Path) -> None:
@@ -1527,6 +1651,7 @@ def test_model_backed_rejects_regular_allocation_without_fusion_requirement(tmp_
         requested_operation="answer_simple_question",
         prompt_text="Say hello.",
         allowed_read_targets=context["assignment"]["allowed_read_targets"],
+        model_runtime_binding_receipt=context["model_runtime_binding_receipt"],
     ).to_dict()
     allocation.update(
         {
@@ -1759,10 +1884,13 @@ def test_production_runner_uses_fusion_synthesis_excerpt_for_json(tmp_path: Path
     monkeypatch.setattr(readonly_worker_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
 
     task_context = _model_context()
-    task_context["model_runtime_binding_receipt"] = model_runtime_binding_receipt(
-        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
-        model_id="z-ai/glm-5.2",
-        panel_model_ids=("moonshotai/kimi-k3",),
+    _replace_model_runtime_binding(
+        task_context,
+        model_runtime_binding_receipt(
+            runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT,
+            model_id="z-ai/glm-5.2",
+            panel_model_ids=("moonshotai/kimi-k3",),
+        ),
     )
     result = execute_reddog_readonly_audit_task(
         task_context=task_context,
@@ -1976,8 +2104,9 @@ def test_run_task_model_backed_task_fails_closed_without_runtime_mode(tmp_path: 
     db = AgentDB()
     task_id = "readonly-audit-model-task-1"
     context = _model_context()
-    context["model_runtime_binding_receipt"] = model_runtime_binding_receipt(
-        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT
+    _replace_model_runtime_binding(
+        context,
+        model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT),
     )
     assert db.create_autonomous_task(
         task_id=task_id,
@@ -2036,8 +2165,9 @@ def test_agentdb_openclaw_claim_run_task_model_worker_persists_report(tmp_path: 
     db = AgentDB()
     task_id = "readonly-audit-model-task-2"
     context = _model_context()
-    context["model_runtime_binding_receipt"] = model_runtime_binding_receipt(
-        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT
+    _replace_model_runtime_binding(
+        context,
+        model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT),
     )
     assert db.create_autonomous_task(
         task_id=task_id,

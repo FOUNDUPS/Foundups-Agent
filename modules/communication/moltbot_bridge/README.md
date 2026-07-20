@@ -122,19 +122,22 @@ execution authority.
 
 ### RedDog runtime model-binding boundary
 
-The resident read-only audit cycle accepts two independently issued,
+The resident read-only audit cycle requires two independently issued,
 surface-specific `reddog_model_runtime_binding_receipt.v1` artifacts: one for
 `reddog_readonly_audit_worker` and one for `reddog_backend_architect`. The
-audit receipt is digest-bound into the WSP 15 allocation, swarm, assignment,
-and AgentDB task context; the architect receipt is bound into determination
-and queue-candidate lineage. Production `foundups_fusion` execution rejects a
-missing, malformed, rejected, or wrong-surface receipt before provider access.
-Selection receipts alone do not authorize either production call.
+audit and architect receipt pairs are both digest-bound into WSP 15 and the
+durable intent identity. The audit pair continues through swarm, assignment,
+and AgentDB task context; the architect pair continues through determination
+and queue-candidate lineage. Every runner, including an injected test runner,
+rejects a missing, malformed, rejected, wrong-surface, or pair-mismatched
+receipt before index/provider access or persistence. Selection receipts alone
+do not authorize either call.
 
-Model identities and panel topology come only from the validated runtime
-receipt. The production runners have no model fallback list. Injected test
-runners remain available for deterministic read-only tests and perform no
-provider call unless the test explicitly supplies one.
+Model identities and panel topology come only from the exact validated runtime
+receipt. Same-surface substitution is rejected against task, assignment, WSP
+15, and durable-intent bindings. The runners have no model fallback list.
+Injected test runners remain available for deterministic read-only tests, but
+must receive the same valid binding lineage as production runners.
 
 ## Setup
 

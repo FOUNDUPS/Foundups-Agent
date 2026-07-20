@@ -1,3 +1,17 @@
+## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
+
+- Added worker and architect same-surface substitution regressions with zero
+  model/index/store calls, plus selection-only and injected-runner rejection.
+- Added resident and direct E2E substitution seams proving unchanged durable
+  state, no new tasks, and no downstream runner/index/persistence activity.
+- Added real startup artifact tests for missing paths, malformed JSON, wrong
+  surfaces, same artifact reuse, oversized/non-regular files, outside-root and
+  inside-repository paths, and no-follow symlinks where the platform permits.
+  Every rejection occurs before the cycle mock and emits no configured path.
+- Focused affected runtime suite: 205 passed / 1 platform skip. The skip is
+  Windows symlink creation when unavailable; the no-follow behavior remains
+  covered by the shared confined-reader contract.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_PHASE1
 
 - Added digest/rehydration-valid test receipts for receipt-selected panel

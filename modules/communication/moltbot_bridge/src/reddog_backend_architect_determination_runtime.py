@@ -519,12 +519,22 @@ def run_reddog_backend_architect_determination_runtime(
         reasons,
         expected_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
     )
-    production_runner = model_runner is None or isinstance(model_runner, FoundupsFusionArchitectModelRunner)
-    if not model_selection and production_runner:
+    if not model_selection and ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT not in reasons:
+        reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
+    expected_runtime_id = str(
+        wsp15_allocation_receipt.get("architect_model_runtime_binding_receipt_id") or ""
+    )
+    expected_runtime_digest = str(
+        wsp15_allocation_receipt.get("architect_model_runtime_binding_digest") or ""
+    )
+    if (
+        not expected_runtime_id
+        or not expected_runtime_digest
+        or str(model_selection.get("model_runtime_binding_receipt_id") or "") != expected_runtime_id
+        or str(model_selection.get("model_runtime_binding_digest") or "") != expected_runtime_digest
+    ):
         if ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT not in reasons:
             reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
-    elif not model_selection:
-        model_selection = _model_selection_binding(model_selection_receipt, reasons)
     model_selection_receipt_id = str(model_selection.get("receipt_id") or "").strip() or None
     model_selection_digest = str(model_selection.get("digest") or "").strip() or None
     model_runtime_binding_receipt_id = (

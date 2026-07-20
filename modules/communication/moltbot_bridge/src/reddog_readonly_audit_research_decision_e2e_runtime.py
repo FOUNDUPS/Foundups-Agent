@@ -248,7 +248,10 @@ def run_reddog_readonly_audit_research_decision_e2e(
         enqueue_readonly_audit_tasks=True,
         enqueue_writer=capture_writer,
         audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
-        require_audit_model_runtime_binding=audit_model_runner is None and task_executor is None,
+        require_audit_model_runtime_binding=True,
+        architect_model_runtime_binding_receipt_override=(
+            architect_model_runtime_binding_receipt
+        ),
     )
     if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
         return _result(
@@ -346,7 +349,7 @@ def run_reddog_readonly_audit_research_decision_e2e(
         holoindex_receipt_override=holoindex_receipt_override,
         audit_lanes=audit_lanes,
         audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
-        require_audit_model_runtime_binding=audit_model_runner is None and task_executor is None,
+        require_audit_model_runtime_binding=True,
         collect_readonly_audit_reports=True,
         report_store=report_writer,
         persist_readonly_audit_decision=True,

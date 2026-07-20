@@ -496,17 +496,19 @@ def execute_model_backed_repo_code_audit(
         model_selection_reasons,
         expected_surface=RUNTIME_SURFACE_READONLY_AUDIT,
     )
-    production_runner = model_runner is None or isinstance(model_runner, FoundupsFusionRepoAuditModelRunner)
-    if not model_selection and production_runner:
-        if ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT not in model_selection_reasons:
-            model_selection_reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
-    elif not model_selection:
-        model_selection = _model_selection_binding(
-            task_context.get("model_selection_receipt") or assignment.get("model_selection_receipt"),
-            model_selection_reasons,
-        )
+    if not model_selection and ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT not in model_selection_reasons:
+        model_selection_reasons.append(ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT)
     if model_selection_reasons:
         return _reject(model_selection_reasons)
+    if model_selection.get("model_runtime_binding_receipt_id"):
+        runtime_lineage_reasons = _validate_model_runtime_binding_lineage(
+            task_context=task_context,
+            assignment=assignment,
+            allocation=allocation,
+            runtime_binding=model_selection,
+        )
+        if runtime_lineage_reasons:
+            return _reject(runtime_lineage_reasons)
     worker_plan = allocation.get("worker_plan") if isinstance(allocation.get("worker_plan"), Mapping) else {}
     if worker_plan.get("fusion_required") is not True:
         return _reject([ReadOnlyAuditTaskRejectReason.WSP15_FUSION_REQUIRED])
@@ -1395,9 +1397,40 @@ def _model_runtime_binding(
         "lead_model": str(payload.get("lead_model") or ""),
         "panel_models": [str(item) for item in payload.get("panel_models") or ()],
         "model_runtime_binding_receipt_id": receipt.receipt_id,
-        "model_runtime_binding_digest": _digest(binding),
+        "model_runtime_binding_digest": "sha256:" + _digest(binding),
         "runtime_surface": receipt.runtime_surface,
     }
+
+
+def _validate_model_runtime_binding_lineage(
+    *,
+    task_context: Mapping[str, Any],
+    assignment: Mapping[str, Any],
+    allocation: Mapping[str, Any],
+    runtime_binding: Mapping[str, Any],
+) -> tuple[str, ...]:
+    expected_id = str(runtime_binding.get("model_runtime_binding_receipt_id") or "")
+    expected_digest = str(runtime_binding.get("model_runtime_binding_digest") or "")
+    bound_pairs = (
+        (
+            str(task_context.get("model_runtime_binding_receipt_id") or ""),
+            str(task_context.get("model_runtime_binding_digest") or ""),
+        ),
+        (
+            str(assignment.get("model_runtime_binding_receipt_id") or ""),
+            str(assignment.get("model_runtime_binding_digest") or ""),
+        ),
+        (
+            str(allocation.get("model_runtime_binding_receipt_id") or ""),
+            str(allocation.get("model_runtime_binding_digest") or ""),
+        ),
+    )
+    if not expected_id or not expected_digest or any(
+        receipt_id != expected_id or digest != expected_digest
+        for receipt_id, digest in bound_pairs
+    ):
+        return (ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT,)
+    return ()
 
 
 def _json_compatible_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:

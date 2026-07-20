@@ -28,6 +28,7 @@ from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ArchitectDeterminationStore,
     ArchitectModelRunner,
+    RUNTIME_SURFACE_BACKEND_ARCHITECT,
 )
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     validate_grounded_target_receipt,
@@ -51,8 +52,13 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swa
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     ExternalResearchRetriever,
+    RUNTIME_SURFACE_READONLY_AUDIT,
     ReadOnlyEvidenceQueryAdapter,
     RepoAuditModelRunner,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import ModelRuntimeBindingDecision
+from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
+    rehydrate_model_runtime_binding_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_persistence import (
     ReadOnlyAuditDecisionStore,
@@ -150,6 +156,8 @@ class ResidentCycleReason:
     ACTIVE_INTENT = "REJECT_RESIDENT_CYCLE_ACTIVE_INTENT"
     TRANSITION_CONFLICT = "REJECT_RESIDENT_CYCLE_TRANSITION_CONFLICT"
     CANCELLATION_CONFLICT = "REJECT_RESIDENT_CYCLE_CANCELLATION_CONFLICT"
+    AUDIT_MODEL_RUNTIME_BINDING = "REJECT_RESIDENT_CYCLE_AUDIT_MODEL_RUNTIME_BINDING"
+    ARCHITECT_MODEL_RUNTIME_BINDING = "REJECT_RESIDENT_CYCLE_ARCHITECT_MODEL_RUNTIME_BINDING"
 
 
 class ResidentArchitectCycleStore(Protocol):
@@ -594,7 +602,12 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
 
     root = Path(repo_root).resolve()
     store = cycle_store or AgentDbResidentArchitectCycleStore(agent_db_factory=agent_db_factory)
-    reasons = _validate_intent(red_dog_intent)
+    red_dog_intent, runtime_binding_reasons = _intent_bound_model_runtime_bindings(
+        red_dog_intent,
+        audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
+        architect_model_runtime_binding_receipt=architect_model_runtime_binding_receipt,
+    )
+    reasons = [*_validate_intent(red_dog_intent), *runtime_binding_reasons]
     intent_id = str(red_dog_intent.get("intent_id") or "").strip()
     existing = store.load_cycle_by_intent(intent_id) if intent_id else None
     submitted_intent_digest = resident_intent_digest(red_dog_intent)
@@ -737,7 +750,10 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             grounding_receipt=red_dog_intent.get("grounding_receipt"),
             grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
             audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
-            require_audit_model_runtime_binding=audit_model_runner is None,
+            require_audit_model_runtime_binding=True,
+            architect_model_runtime_binding_receipt_override=(
+                architect_model_runtime_binding_receipt
+            ),
         )
         if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
             transitioned = _transition_record(
@@ -908,7 +924,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         grounding_receipt=red_dog_intent.get("grounding_receipt"),
         grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
         audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
-        require_audit_model_runtime_binding=audit_model_runner is None,
+        require_audit_model_runtime_binding=True,
         audit_lanes=audit_lanes,
         collect_readonly_audit_reports=True,
         report_store=report_store or AgentDbReadOnlyAuditReportStore(agent_db_factory=agent_db_factory),
@@ -1009,6 +1025,57 @@ def _new_record(intent: Mapping[str, Any], *, retry_count: int) -> dict[str, Any
     record.update({field: True for field in RUNTIME_BOUNDARY_FIELDS})
     record["genesis_state_digest"] = _genesis_state_digest(record)
     return record
+
+
+def _intent_bound_model_runtime_bindings(
+    intent: Mapping[str, Any],
+    *,
+    audit_model_runtime_binding_receipt: Mapping[str, Any] | None,
+    architect_model_runtime_binding_receipt: Mapping[str, Any] | None,
+) -> tuple[Mapping[str, Any], tuple[str, ...]]:
+    value = dict(intent) if isinstance(intent, Mapping) else {}
+    bindings: dict[str, Mapping[str, str]] = {}
+    reasons: list[str] = []
+    for name, receipt_value, surface, reason in (
+        (
+            "audit",
+            audit_model_runtime_binding_receipt,
+            RUNTIME_SURFACE_READONLY_AUDIT,
+            ResidentCycleReason.AUDIT_MODEL_RUNTIME_BINDING,
+        ),
+        (
+            "architect",
+            architect_model_runtime_binding_receipt,
+            RUNTIME_SURFACE_BACKEND_ARCHITECT,
+            ResidentCycleReason.ARCHITECT_MODEL_RUNTIME_BINDING,
+        ),
+    ):
+        if not isinstance(receipt_value, Mapping):
+            reasons.append(reason)
+            continue
+        try:
+            normalized = json.loads(
+                json.dumps(receipt_value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+            )
+            receipt = rehydrate_model_runtime_binding_receipt(normalized)
+        except Exception:
+            reasons.append(reason)
+            continue
+        if (
+            receipt.decision != ModelRuntimeBindingDecision.BOUND
+            or not receipt.principal_model
+            or receipt.runtime_surface != surface
+        ):
+            reasons.append(reason)
+            continue
+        bindings[name] = {
+            "receipt_id": receipt.receipt_id,
+            "digest": _digest(normalized),
+            "runtime_surface": receipt.runtime_surface,
+        }
+    if bindings:
+        value["model_runtime_bindings"] = bindings
+    return value, tuple(dict.fromkeys(reasons))
 
 
 def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
