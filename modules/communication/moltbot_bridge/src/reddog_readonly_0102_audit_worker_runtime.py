@@ -27,6 +27,7 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
     READONLY_AUDIT_TASK_REPORT_ACCEPT,
     ReadOnlyAuditTaskExecutionResult,
     ReadOnlyAuditTaskRejectReason,
+    _bound_fallback_snapshots,
     _ReadOnlyTargetSnapshot,
     _digest,
     _evidence_ref,
@@ -54,7 +55,6 @@ from modules.communication.moltbot_bridge.src.reddog_memex_snapshot_projection_s
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter import (
     HoloIndexReadOnlyQueryAdapter,
-    holoindex_hits as _holoindex_hits,
     path_is_allowed,
     paths_from_query_receipt,
 )
@@ -461,6 +461,13 @@ def execute_model_backed_repo_code_audit(
     grounding, grounding_reasons = _validated_task_grounding(task_context, assignment)
     if grounding_reasons:
         return _reject(grounding_reasons)
+    bound_snapshots, bound_reject = _bound_fallback_snapshots(
+        task_context=task_context,
+        assignment=assignment,
+        repo_root=repo_root,
+    )
+    if bound_reject:
+        return _reject([bound_reject])
     allocation = task_context.get("wsp15_allocation_receipt") or assignment.get("wsp15_allocation_receipt")
     validation = validate_reddog_wsp15_allocation_receipt(allocation if isinstance(allocation, Mapping) else None)
     if validation.rejection_reasons == ("missing_wsp15_allocation",):
@@ -517,7 +524,10 @@ def execute_model_backed_repo_code_audit(
         return _reject([holo_reject])
 
     candidate_paths = _candidate_paths(
-        seed_targets=seed_targets,
+        seed_targets=(
+            *tuple(item.evidence.path for item in (bound_snapshots or ())),
+            *tuple(seed_targets),
+        ),
         discovered_paths=paths_from_query_receipt(holo_receipt),
     )
     if not candidate_paths:
@@ -527,6 +537,7 @@ def execute_model_backed_repo_code_audit(
         seed_targets=seed_targets,
         candidate_paths=candidate_paths,
         allowed_targets=discovery_targets,
+        bound_snapshots=bound_snapshots or (),
     )
     if read_reject:
         return _reject([read_reject])
@@ -653,6 +664,13 @@ def execute_model_backed_repo_code_audit(
     )
     if final_repository_state is None:
         return _reject([ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED])
+    _final_bound, final_bound_reject = _bound_fallback_snapshots(
+        task_context=task_context,
+        assignment=assignment,
+        repo_root=repo_root,
+    )
+    if final_bound_reject:
+        return _reject([final_bound_reject])
 
     report = _build_model_report(
         assignment=assignment,
@@ -1171,13 +1189,18 @@ def _read_candidate_snapshots(
     seed_targets: Sequence[str],
     candidate_paths: Sequence[str],
     allowed_targets: Sequence[str],
+    bound_snapshots: Sequence[_ReadOnlyTargetSnapshot] = (),
 ) -> tuple[tuple[_ReadOnlyTargetSnapshot, ...], str]:
     seed_set = {str(item).replace("\\", "/").strip() for item in seed_targets}
+    bound_by_path = {item.evidence.path: item for item in bound_snapshots}
     snapshots: list[_ReadOnlyTargetSnapshot] = []
     for path in candidate_paths:
         if not path_is_allowed(path, allowed_targets):
             if path in seed_set:
                 return (), ReadOnlyAuditTaskRejectReason.UNSAFE_TARGET
+            continue
+        if path in bound_by_path:
+            snapshots.append(bound_by_path[path])
             continue
         safe_path = _resolve_safe_target(repo_root, path)
         if safe_path is None:

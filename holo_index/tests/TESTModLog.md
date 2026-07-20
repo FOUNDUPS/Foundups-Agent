@@ -1,5 +1,11 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-07-20] RedDog Repository-Audit Consumer Binding Repair
+
+- Added `.worktrees` pruning coverage alongside vendor/generated roots.
+- Retained confined-reader traversal, link/reparse, final-handle, identity-race,
+  byte-budget, deterministic-ordering, and source-plus-test coverage tests.
+
 ## [2026-07-18] HoloIndex / RedDog Operational Truth Boundary POC
 
 **WSP Protocol**: WSP 05, 06, 15, 22, 50, 62, 87, 97

@@ -1,4 +1,30 @@
 exemptions:
+  - file: "INTERFACE.md"
+    reason: >-
+      Legacy module interface registry. This slice adds one bounded transport
+      contract beside its canonical resident-client boundary; splitting the
+      historical registry is separate documentation-maintenance work.
+    threshold_override: 1100
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
+
+  - file: "src/reddog_transport_neutral_grounding_service.py"
+    reason: >-
+      Existing transport integration boundary spanning request validation,
+      target classification, owner preflight, bounded repository-audit
+      fallback, and canonical receipt composition. The fallback implementation
+      itself is isolated in a compliant module; broad decomposition is tracked
+      separately to avoid mixing architecture churn into this safety slice.
+    threshold_override: 600
+    function_threshold_override: 180
+    functions: ["ground_transport_work_focus"]
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
+
   - file: "scripts/run_task.py"
     reason: >-
       Legacy multi-family task dispatcher. The newly added HoloIndex startup
@@ -17,8 +43,8 @@ exemptions:
       Legacy audit-worker integration boundary spanning evidence acquisition,
       model invocation, and receipt composition. This POC preserves its
       reviewed repository and HoloIndex truth checks without a broad rewrite.
-    threshold_override: 2000
-    function_threshold_override: 240
+    threshold_override: 2100
+    function_threshold_override: 270
     functions:
       - "execute_model_backed_repo_code_audit"
       - "_optional_memex_query_artifacts"
@@ -32,11 +58,11 @@ exemptions:
 
   - file: "src/reddog_readonly_audit_task_executor.py"
     reason: >-
-      Existing task-execution transaction boundary; the exact-HEAD pre/post
-      repository proofs must remain adjacent until a dedicated transaction
-      object is introduced with parity tests.
+      Existing task-execution transaction boundary; repository-state and exact
+      selected-evidence consuming reads remain adjacent until a dedicated
+      transaction object is introduced with parity tests.
     threshold_override: 675
-    function_threshold_override: 75
+    function_threshold_override: 90
     functions: ["execute_reddog_readonly_audit_task"]
     temporary: true
     review_date: "2026-Q3"
@@ -92,7 +118,7 @@ exemptions:
     reason: >-
       Legacy executor regression matrix. Repository-state truth-boundary cases
       were added without mixing production refactoring into the security fix.
-    threshold_override: 1800
+    threshold_override: 2100
     function_threshold_override: 60
     temporary: true
     review_date: "2026-Q3"
@@ -103,7 +129,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 8500
+    threshold_override: 9000
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -115,7 +141,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1400
+    threshold_override: 1500
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

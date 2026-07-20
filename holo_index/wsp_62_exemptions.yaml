@@ -117,7 +117,7 @@ exemptions:
     reason: >-
       Legacy HoloIndex WSP_22 reverse-chronological journal. This focused slice
       appends current evidence without rewriting historical module traceability.
-    threshold_override: 8700
+    threshold_override: 8800
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

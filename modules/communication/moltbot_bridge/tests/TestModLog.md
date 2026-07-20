@@ -1,3 +1,19 @@
+## 2026-07-20: REDDOG_TRANSPORT_NEUTRAL_REPO_AUDIT_FALLBACK_PHASE1
+
+- Covered `pfmall`, `p.fMALL`, `p-fmall`, and `PFMALL` owner-unavailable audits.
+- Proved owner-first ordering, CURRENT-owner short circuiting, stable-HEAD
+  binding, source-plus-test enforcement, private/generated-root pruning, and
+  no-model/no-shell fail-closed behavior.
+- Added nested receipt tamper and fully rehashed private/traversal path
+  substitution regressions; retained the shared discovery suite for link,
+  reparse, identity-race, bounded-read, and deterministic ordering coverage.
+- Added independent-review reproductions for fully rehashed safe unrelated
+  source/test substitution, category/search/audit/coverage/policy/no-action
+  changes, selected-count and aggregate-byte overruns, and `.worktrees` paths.
+- Added deterministic and model-backed consuming-read regressions for exact
+  path/digest/bytes/truncated equality, including unstaged changes before the
+  worker and during model execution while HEAD remains unchanged.
+
 ## 2026-07-19: REDDOG_HOLOINDEX_V2_RUNTIME_FIXTURE_MIGRATION_PHASE1
 
 - Replaced stale positive HoloIndex v1 receipt fixtures with one canonical v2 helper that builds complete source-manifest, scope, policy, and collection-snapshot proofs.

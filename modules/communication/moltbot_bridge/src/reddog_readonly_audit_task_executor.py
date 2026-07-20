@@ -20,11 +20,19 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from holo_index.cli.repo_audit_discovery import secure_read_repo_file
+from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
+    canonical_digest as grounding_digest,
+    validate_grounded_target_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_lane_state_reconciler import (
     reconcile_active_and_json_ledgers,
 )
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SOURCE,
+)
+from modules.communication.moltbot_bridge.src.reddog_repo_audit_fallback_grounding import (
+    reread_bound_repo_audit_evidence,
 )
 
 
@@ -57,6 +65,8 @@ class ReadOnlyAuditTaskRejectReason:
     INDEX_QUERY_STALE = "REJECT_INDEX_QUERY_STALE"
     INDEX_QUERY_NO_CANDIDATES = "REJECT_INDEX_QUERY_NO_CANDIDATES"
     REPOSITORY_STATE_CHANGED = "REJECT_REPOSITORY_STATE_CHANGED"
+    GROUNDING_EVIDENCE_CHANGED = "REJECT_GROUNDING_EVIDENCE_CHANGED"
+    GROUNDING_RECEIPT_INVALID = "REJECT_GROUNDING_RECEIPT_INVALID"
     MODEL_FAILURE = "REJECT_MODEL_FAILURE"
     MODEL_TIMEOUT = "REJECT_MODEL_TIMEOUT"
     MODEL_SELECTION_RECEIPT = "REJECT_MODEL_SELECTION_RECEIPT"
@@ -151,7 +161,13 @@ def execute_reddog_readonly_audit_task(
         return _reject([ReadOnlyAuditTaskRejectReason.TOO_MANY_TARGETS])
 
     root = Path(repo_root).resolve()
-    lane_id = str(assignment.get("lane_id") or "")
+    bound_snapshots, bound_reject = _bound_fallback_snapshots(
+        task_context=task_context,
+        assignment=assignment,
+        repo_root=root,
+    )
+    if bound_reject:
+        return _reject([bound_reject])
     if task_context.get("worker_mode") == "model_backed_0102":
         from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
             execute_model_backed_repo_code_audit,
@@ -170,8 +186,15 @@ def execute_reddog_readonly_audit_task(
             timeout_seconds=timeout_seconds,
         )
 
+    bound_by_path = {
+        item.evidence.path: item for item in (bound_snapshots or ())
+    }
     snapshots: list[_ReadOnlyTargetSnapshot] = []
     for target in targets:
+        normalized = str(target).replace("\\", "/").strip()
+        if normalized in bound_by_path:
+            snapshots.append(bound_by_path[normalized])
+            continue
         safe_path = _resolve_safe_target(root, target)
         if safe_path is None:
             return _reject([ReadOnlyAuditTaskRejectReason.UNSAFE_TARGET])
@@ -215,25 +238,66 @@ def _resolve_safe_target(root: Path, target: str) -> Optional[Path]:
 
 
 def _read_target_snapshot(root: Path, path: Path) -> _ReadOnlyTargetSnapshot:
-    raw = path.read_bytes()
-    truncated = len(raw) > MAX_READ_BYTES_PER_TARGET
-    payload = raw[:MAX_READ_BYTES_PER_TARGET]
-    digest = "sha256:" + hashlib.sha256(payload).hexdigest()
-    try:
-        text = payload.decode("utf-8")
-    except UnicodeDecodeError:
-        text = payload.decode("utf-8", errors="replace")
     relative = path.relative_to(root).as_posix()
+    read = secure_read_repo_file(
+        root,
+        relative,
+        byte_cap=MAX_READ_BYTES_PER_TARGET,
+        remaining_budget=MAX_READ_BYTES_PER_TARGET,
+    )
+    if read.get("ok") is not True:
+        raise OSError(str(read.get("reason") or "secure_read_rejected"))
+    return _snapshot_from_secure_read(read)
+
+
+def _snapshot_from_secure_read(read: Mapping[str, Any]) -> _ReadOnlyTargetSnapshot:
+    text = str(read.get("content") or "")
     return _ReadOnlyTargetSnapshot(
         evidence=ReadOnlyTargetEvidence(
-            path=relative,
-            digest=digest,
-            bytes_read=len(payload),
+            path=str(read.get("path") or ""),
+            digest=str(read.get("digest") or ""),
+            bytes_read=int(read.get("bytes") or 0),
             line_count=text.count("\n") + (1 if text else 0),
-            truncated=truncated,
+            truncated=bool(read.get("truncated")),
         ),
         text=text,
     )
+
+
+def _bound_fallback_snapshots(
+    *,
+    task_context: Mapping[str, Any],
+    assignment: Mapping[str, Any],
+    repo_root: Path,
+) -> tuple[tuple[_ReadOnlyTargetSnapshot, ...] | None, str]:
+    receipt = task_context.get("grounding_receipt")
+    if not isinstance(receipt, Mapping) or receipt.get("repo_audit_fallback_used") is not True:
+        return None, ""
+    validation = validate_grounded_target_receipt(
+        receipt,
+        work_focus=str(task_context.get("work_focus") or ""),
+    )
+    if not validation.accepted or validation.verified is None:
+        return None, ReadOnlyAuditTaskRejectReason.GROUNDING_RECEIPT_INVALID
+    verified = validation.verified
+    receipt_digest = grounding_digest(verified.receipt)
+    bindings = (
+        (task_context.get("grounding_receipt_id"), verified.receipt_id),
+        (assignment.get("grounding_receipt_id"), verified.receipt_id),
+        (task_context.get("grounding_receipt_digest"), receipt_digest),
+        (assignment.get("grounding_receipt_digest"), receipt_digest),
+        (grounding_digest(task_context.get("typed_targets")), verified.typed_targets_digest),
+    )
+    if any(str(value or "") != expected for value, expected in bindings):
+        return None, ReadOnlyAuditTaskRejectReason.GROUNDING_RECEIPT_INVALID
+    allowed = {str(item).replace("\\", "/").strip() for item in assignment.get("allowed_read_targets", ())}
+    if not set(verified.repo_file_targets).issubset(allowed):
+        return None, ReadOnlyAuditTaskRejectReason.GROUNDING_RECEIPT_INVALID
+    fallback = receipt.get("repo_audit_fallback")
+    reads, reasons = reread_bound_repo_audit_evidence(repo_root, fallback)
+    if reasons:
+        return None, ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED
+    return tuple(_snapshot_from_secure_read(item) for item in reads), ""
 
 
 def _build_report(
