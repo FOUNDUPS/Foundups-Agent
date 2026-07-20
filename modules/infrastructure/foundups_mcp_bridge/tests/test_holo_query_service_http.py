@@ -11,8 +11,6 @@ from typing import Any, Mapping
 
 import pytest
 
-from holo_index.freshness_receipt import SCHEMA_VERSION
-from holo_index.source_scope import canonical_source_scope_id
 from modules.communication.moltbot_bridge.src import (
     reddog_holoindex_owner_query_client as owner_client,
 )
@@ -28,6 +26,9 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     HoloIndexQueryOwnerService,
     main,
 )
+from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service import (
+    _receipt as _service_receipt,
+)
 
 
 TOKEN = "stdlib-owner-service-token-with-strong-length"
@@ -36,36 +37,10 @@ SPACE_FINGERPRINT = "sha256:" + ("1" * 64)
 
 
 def _receipt(repo_root: Path, ssd_path: Path) -> Mapping[str, Any]:
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "generated_at": "2026-07-18T00:00:00+00:00",
-        "repo_root": str(repo_root.resolve(strict=False)),
-        "repo_head_sha": SHA,
-        "ssd_path": str(ssd_path.resolve(strict=False)),
-        "source": "test",
-        "generation_id": "generation-1",
-        "base_generation_id": "",
-        "collections": [
-            {
-                "name": name,
-                "count": 1,
-                "status": "indexed",
-                "source": "test",
-                "repo_head_sha": SHA,
-                "last_indexed_at": "2026-07-18T00:00:00+00:00",
-                "source_manifest_digest": f"sha256:manifest-{name}",
-                "indexed_paths_digest": f"sha256:paths-{name}",
-                "removed_paths_digest": "sha256:removed",
-                "embedding_backend": "sentence_transformers",
-                "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-                "embedding_space_fingerprint": SPACE_FINGERPRINT,
-                "verification": "PASS",
-                "proof_kind": "complete_source_manifest",
-                "source_scope_id": canonical_source_scope_id(name),
-            }
-            for name in sorted(BASELINE_COLLECTIONS)
-        ],
-    }
+    return _service_receipt(
+        repo_root=repo_root.resolve(strict=False),
+        ssd_path=ssd_path.resolve(strict=False),
+    )
 
 
 class _Backend:
@@ -201,7 +176,10 @@ def test_reddog_adapter_queries_live_owner_without_opening_local_chroma(
         assert result["freshness"] == "CURRENT"
         assert result["retrieval_mode"] == "semantic"
         assert result["repo_head_sha"] == SHA
-        assert result["freshness_generation_id"] == "generation-1"
+        assert result["freshness_generation_id"] == _receipt(
+            tmp_path,
+            tmp_path / "holo-store",
+        )["generation_id"]
         assert {hit["path"] for hit in result["hits"]} == {
             "WSP_framework/src/WSP_97.md",
             "WSP_knowledge/docs/Papers/example.md",
