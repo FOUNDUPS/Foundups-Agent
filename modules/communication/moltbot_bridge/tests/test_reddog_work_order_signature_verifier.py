@@ -109,6 +109,8 @@ def _build(now: int = 1000):
     digest = "sha256:snap-1"
     workauth = {
         "work_order_id": "wo-1",
+        "work_order_digest": "sha256:" + ("a" * 64),
+        "base_ref": "main",
         "principal_id": "github:mjtrout",
         "reddog_id": "reddog:abc123",
         "repo_full_name": _REPO,

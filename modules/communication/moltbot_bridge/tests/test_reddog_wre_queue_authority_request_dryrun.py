@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src import (
@@ -10,6 +11,9 @@ from modules.communication.moltbot_bridge.src import (
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
@@ -74,6 +78,7 @@ def _profile(**overrides):
         "reddog_public_key": "pub:reddog",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
+        "base_ref": "main",
         "allowed_paths": ["modules/foundups/paccess_001/**"],
         "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
         "requested_operation": "create_foundup",
@@ -101,10 +106,22 @@ def _profile(**overrides):
     return profile
 
 
+def _work_order(**overrides):
+    work_order = {
+        "work_order_id": "wre-queue-" + hashlib.sha256(b"queue-1").hexdigest()[:16],
+        "base_ref": "main",
+        "branch_name": "feat/reddog-bound-work-order",
+        "requested_operation": "create_foundup",
+    }
+    work_order.update(overrides)
+    return work_order
+
+
 def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     result = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
         authority_profile=_profile(),
+        work_order=_work_order(),
     )
 
     assert result.accepted is True
@@ -126,6 +143,8 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     request = result.delegated_authority_request
     assert request is not None
     assert request["work_order_id"].startswith("wre-queue-")
+    assert request["base_ref"] == "main"
+    assert request["work_order_digest"] == canonical_full_work_order_digest(_work_order())
     assert request["foundup_id"] == "paccess_001"
     assert request["allowed_paths"] == ("modules/foundups/paccess_001/**",)
     assert request["requested_operation"] == "create_foundup"
@@ -227,12 +246,24 @@ def test_allows_legacy_queue_without_model_runtime_binding() -> None:
     result = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=queue,
         authority_profile=profile,
+        work_order=_work_order(),
     )
 
     assert result.accepted is True
     assert result.delegated_authority_request is not None
     assert result.delegated_authority_request["model_runtime_binding_receipt_id"] is None
     assert result.delegated_authority_request["model_runtime_binding_digest"] is None
+
+
+def test_rejects_base_ref_spliced_between_profile_and_full_work_order() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(base_ref="release"),
+        work_order=_work_order(base_ref="main"),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_WORK_ORDER_BINDING in result.rejection_reasons
 
 
 def test_rejects_missing_required_profile_field() -> None:
@@ -306,6 +337,7 @@ def test_low_authority_does_not_require_cosign() -> None:
             consensus_receipt_digest=None,
             sovereign_authorization_digest=None,
         ),
+        work_order=_work_order(requested_operation="inspect_repo"),
     )
 
     assert result.accepted is True

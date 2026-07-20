@@ -252,6 +252,7 @@ def _profile() -> dict[str, object]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": REPO,
         "foundup_id": FID,
+        "base_ref": "main",
         "allowed_paths": ALLOWED,
         "denied_paths": DENIED,
         "requested_operation": OPERATION,
@@ -329,10 +330,16 @@ def _work_order(**overrides: object) -> dict[str, object]:
     return payload
 
 
+class _WorkOrderResolver:
+    def resolve(self, *, work_order_id, queue_item_id, selected_slice):
+        return _work_order(work_order_id=work_order_id)
+
+
 def _seed_verified_authority(chain_store: InMemoryResidentQueueChainResultsStore, signer: _MockSignerVerifier) -> None:
     request_handler = build_reddog_resident_queue_authority_request_stage_handler(
         work_state_snapshot=_snapshot(),
         authority_profile=_profile(),
+        work_order_resolver=_WorkOrderResolver(),
         now_iso=NOW_ISO,
     )
     request_result = invoke_reddog_resident_queue_next_stage_dispatch(
@@ -481,6 +488,7 @@ def test_missing_authority_verification_stage_rejects_direct_handler_call() -> N
     request_handler = build_reddog_resident_queue_authority_request_stage_handler(
         work_state_snapshot=_snapshot(),
         authority_profile=_profile(),
+        work_order_resolver=_WorkOrderResolver(),
         now_iso=NOW_ISO,
     )
     assert invoke_reddog_resident_queue_next_stage_dispatch(

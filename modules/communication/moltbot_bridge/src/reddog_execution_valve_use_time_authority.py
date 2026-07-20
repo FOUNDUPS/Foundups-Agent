@@ -33,6 +33,10 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     WorkAuthorityVerificationPhase,
     verify_delegated_work_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+    canonical_work_order_base_ref,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     GovernedExecutionValveEnvironment,
 )
@@ -221,10 +225,15 @@ class GovernedValveUseTimeAuthorityResolver:
         identity: Mapping[str, Any],
         work_authority: Mapping[str, Any],
     ) -> bool:
+        try:
+            fresh_now_epoch = int(self.trusted_now_epoch())
+        except Exception:
+            return False
         checked = self._verify_authority(
             identity=identity,
             work_authority=work_authority,
             phase=WorkAuthorityVerificationPhase.AUTHORITATIVE_USE,
+            now_epoch=fresh_now_epoch,
         )
         return checked.accepted is True
 
@@ -234,6 +243,7 @@ class GovernedValveUseTimeAuthorityResolver:
         identity: Mapping[str, Any],
         work_authority: Mapping[str, Any],
         phase: WorkAuthorityVerificationPhase,
+        now_epoch: Optional[int] = None,
     ):
         return verify_delegated_work_authority(
             work_authority=work_authority,
@@ -243,7 +253,7 @@ class GovernedValveUseTimeAuthorityResolver:
             nonce_store=self.nonce_store,
             snapshot_resolver=self.snapshot_resolver,
             revocation_oracle=self.revocation_oracle,
-            now=self.now_epoch,
+            now=self.now_epoch if now_epoch is None else int(now_epoch),
             required_valve_state=self.required_valve_state,
             forbidden_operations=self.forbidden_operations,
             revoked_key_epochs=self.revoked_key_epochs,
@@ -454,10 +464,17 @@ def _signed_binding_reasons(
     work_order: Mapping[str, Any],
     expected: Mapping[str, Any],
 ) -> list[str]:
+    try:
+        work_order_digest = canonical_full_work_order_digest(work_order)
+        base_ref = canonical_work_order_base_ref(work_order)
+    except (TypeError, ValueError):
+        return ["canonical_work_order_binding_invalid"]
     snapshot = _mapping(work_order.get("repo_permission_snapshot"))
     allocation = _mapping(work_order.get("wsp15_allocation_receipt"))
     work_order_values = {
         "work_order_id": work_order.get("work_order_id"),
+        "work_order_digest": work_order_digest,
+        "base_ref": base_ref,
         "requested_operation": work_order.get("requested_operation"),
         "repo_full_name": work_order.get("repo_full_name"),
         "foundup_id": work_order.get("foundup_id"),

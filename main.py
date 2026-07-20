@@ -3184,6 +3184,7 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         REDDOG_AUTHORITY_RUNTIME_STATE_PATH                  Outside-repo authority-runtime JSON
         REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission snapshot JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal authority JSON
+        REDDOG_WORK_ORDERS_PATH                              Outside-repo canonical work-order JSON
         REDDOG_RESIDENT_QUEUE_NOW_EPOCH                      Optional runtime epoch for authority checks
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
     """
@@ -3223,6 +3224,7 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
                 "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
             )
             or None,
+            work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
         )
     except Exception as exc:

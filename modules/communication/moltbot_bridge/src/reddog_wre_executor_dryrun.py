@@ -32,6 +32,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, MutableSet, Optional, Sequence, Union
 
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+    canonical_work_order_base_ref,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_governed_work_order_dryrun import (
     PROTECTED_BASE_REFS,
 )
@@ -81,6 +86,8 @@ class ExecutorDryRunPhaseReceipt:
 class WREExecutorPlan:
     plan_id: str
     work_order_id: str
+    work_order_digest: str
+    base_ref: str
     proposed_branch_name: str
     proposed_worktree_path: str
     lock_key: str
@@ -250,7 +257,12 @@ def _validate_contract_rules(
     reasons: List[str] = []
     work_order_id = _work_order_id(work_order)
     branch = str(work_order.get("branch_name") or "").strip()
-    base_ref = str(work_order.get("base_ref") or "main").strip().lower()
+    try:
+        base_ref = canonical_work_order_base_ref(work_order)
+        canonical_full_work_order_digest(work_order)
+    except (TypeError, ValueError):
+        reasons.append("invalid_work_order_binding")
+        base_ref = ""
     nonce = str(work_order.get("nonce") or "").strip()
     allowed_paths = list(work_order.get("allowed_paths") or [])
     denied_paths = list(work_order.get("denied_paths") or [])
@@ -260,7 +272,7 @@ def _validate_contract_rules(
         reasons.append("missing_branch_name")
     elif branch.lower() in PROTECTED_BASE_REFS:
         reasons.append("protected_branch_forbidden")
-    elif branch.lower() == base_ref:
+    elif branch.lower() == base_ref.lower():
         reasons.append("branch_equals_base_ref")
 
     if not nonce:
@@ -332,6 +344,8 @@ def plan_wre_isolated_worktree_execution_dryrun(
         return _rejection_result(work_order_id, contract_reasons, checked_at)
 
     branch_name = str(work_order["branch_name"]).strip()
+    base_ref = canonical_work_order_base_ref(work_order)
+    work_order_digest = canonical_full_work_order_digest(work_order)
     nonce = str(work_order["nonce"]).strip()
     lock_key = work_order_id
     worktree_path = _proposed_worktree_path(repo_root, work_order_id, nonce)
@@ -347,6 +361,8 @@ def plan_wre_isolated_worktree_execution_dryrun(
             work_order_id,
             {
                 "proposed_branch_name": branch_name,
+                "base_ref": base_ref,
+                "work_order_digest": work_order_digest,
                 "proposed_worktree_path": worktree_path,
                 "invocation_receipt_digest": invocation.receipt_digest,
             },
@@ -372,6 +388,8 @@ def plan_wre_isolated_worktree_execution_dryrun(
 
     plan_body = {
         "work_order_id": work_order_id,
+        "work_order_digest": work_order_digest,
+        "base_ref": base_ref,
         "proposed_branch_name": branch_name,
         "proposed_worktree_path": worktree_path,
         "lock_key": lock_key,
@@ -388,6 +406,8 @@ def plan_wre_isolated_worktree_execution_dryrun(
     plan = WREExecutorPlan(
         plan_id=plan_id,
         work_order_id=work_order_id,
+        work_order_digest=work_order_digest,
+        base_ref=base_ref,
         proposed_branch_name=branch_name,
         proposed_worktree_path=worktree_path,
         lock_key=lock_key,

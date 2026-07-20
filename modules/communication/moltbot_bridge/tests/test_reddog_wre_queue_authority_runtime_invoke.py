@@ -151,6 +151,7 @@ def _profile(**overrides):
         "reddog_public_key": "pub:reddog",
         "repo_full_name": REPO,
         "foundup_id": FID,
+        "base_ref": "main",
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
         "requested_operation": "create_foundup",
@@ -172,9 +173,15 @@ def _profile(**overrides):
 
 
 def _dryrun():
+    work_order = {
+        "work_order_id": "wre-queue-" + hashlib.sha256(b"queue-1").hexdigest()[:16],
+        "base_ref": "main",
+        "branch_name": "feat/runtime-authority-binding",
+    }
     return planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
         authority_profile=_profile(),
+        work_order=work_order,
     ).to_dict()
 
 
@@ -300,6 +307,8 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
 
     typed = DelegatedAuthorityRuntimeRequest(
         work_order_id=str(request["work_order_id"]),
+        work_order_digest=str(request["work_order_digest"]),
+        base_ref=str(request["base_ref"]),
         principal_id=str(request["principal_id"]),
         principal_provider=str(request["principal_provider"]),
         principal_public_key=str(request["principal_public_key"]),

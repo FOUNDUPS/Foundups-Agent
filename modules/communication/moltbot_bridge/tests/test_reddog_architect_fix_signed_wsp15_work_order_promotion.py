@@ -149,6 +149,7 @@ def _authority_profile(**overrides: Any) -> dict[str, Any]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
+        "base_ref": "main",
         "allowed_paths": ["modules/communication/moltbot_bridge/**"],
         "denied_paths": ["modules/communication/moltbot_bridge/secrets/**"],
         "requested_operation": "feature_slice",

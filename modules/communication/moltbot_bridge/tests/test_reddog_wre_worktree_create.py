@@ -268,8 +268,56 @@ class TestWorktreeCreateAccept:
         blob = json.dumps(first.to_dict())
         assert _TOKEN not in blob
 
+    def test_runner_uses_validated_plan_base_ref_after_admission_mutates_order(
+        self, tmp_path: Path,
+    ) -> None:
+        order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
+        runner = FakeRunner()
+
+        def consume_and_splice() -> bool:
+            order["base_ref"] = "attacker-controlled-ref"
+            return True
+
+        result = create_reddog_wre_worktree(
+            order,
+            executor.to_dict(),
+            valve.to_dict(),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+            admission_consumer=consume_and_splice,
+        )
+
+        assert result.decision == WORKTREE_CREATE_ACCEPT
+        assert runner.calls[0][3] == "main"
+
 
 class TestWorktreeCreateReject:
+    def test_spliced_plan_base_ref_rejects_before_admission_and_runner(
+        self, tmp_path: Path,
+    ) -> None:
+        order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
+        payload = executor.to_dict()
+        payload["plan"]["base_ref"] = "release"
+        consumed: list[bool] = []
+        runner = FakeRunner()
+
+        result = create_reddog_wre_worktree(
+            order,
+            payload,
+            valve.to_dict(),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+            admission_consumer=lambda: not consumed.append(True),
+        )
+
+        assert result.decision == WORKTREE_CREATE_REJECT
+        assert "plan_base_ref_mismatch" in result.rejection_reasons
+        assert "plan_digest_mismatch" in result.rejection_reasons
+        assert consumed == []
+        assert runner.calls == []
+
     def test_closed_valve_rejects_before_runner(self, tmp_path: Path):
         order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
         closed = valve.to_dict()

@@ -261,10 +261,14 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers,
         missing,
         AUTHORITY_REQUEST_STAGE_KEY,
-        _missing(("authority_profile", authority_profile)),
+        _missing(
+            ("authority_profile", authority_profile),
+            ("work_order_resolver", work_order_resolver),
+        ),
         lambda: build_reddog_resident_queue_authority_request_stage_handler(
             work_state_snapshot=work_state_snapshot,
             authority_profile=authority_profile or {},
+            work_order_resolver=work_order_resolver,
             now_iso=now_iso,
         ),
     )

@@ -33,6 +33,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PREFIX_WORKAUTH,
     canonical_signing_input,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_work_order_base_ref,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
     AuthorityRuntimeStore,
@@ -191,6 +194,8 @@ class FailClosedSignerClient:
 @dataclass(frozen=True)
 class DelegatedAuthorityRuntimeRequest:
     work_order_id: str
+    work_order_digest: str
+    base_ref: str
     principal_id: str
     principal_provider: str
     principal_public_key: str
@@ -390,6 +395,8 @@ def _commit_issued_authority(
         "receipt_id": receipt_id,
         "identity_digest": identity_digest,
         "work_authority_digest": work_authority_digest,
+        "work_order_digest": request.work_order_digest,
+        "base_ref": request.base_ref,
         "principal_id": request.principal_id,
         "reddog_id": request.reddog_id,
         "foundup_id": request.foundup_id,
@@ -447,6 +454,27 @@ def issue_delegated_authority_runtime(
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
     if request.identity_expires_at <= now or request.work_authority_expires_at <= now:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
+    try:
+        canonical_work_order_base_ref({"base_ref": request.base_ref})
+    except ValueError:
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
+        )
+    if not (
+        request.work_order_digest.startswith("sha256:")
+        and len(request.work_order_digest) == 71
+        and all(
+            char in "0123456789abcdef"
+            for char in request.work_order_digest.removeprefix("sha256:")
+        )
+    ):
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
+        )
     if request.principal_public_key == request.reddog_public_key:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.PRINCIPAL_KEY_MISMATCH])
 
@@ -583,6 +611,8 @@ def issue_delegated_authority_runtime(
 
     work_authority = {
         "work_order_id": request.work_order_id,
+        "work_order_digest": request.work_order_digest,
+        "base_ref": request.base_ref,
         "principal_id": request.principal_id,
         "reddog_id": request.reddog_id,
         "repo_full_name": request.repo_full_name,

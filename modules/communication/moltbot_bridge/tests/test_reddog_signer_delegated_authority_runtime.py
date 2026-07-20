@@ -144,6 +144,8 @@ def _principal() -> PrincipalAuthorityRecord:
 def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
     payload = {
         "work_order_id": "wo-paccess-001",
+        "work_order_digest": "sha256:" + ("a" * 64),
+        "base_ref": "main",
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
         "principal_public_key": "pub:principal",
@@ -218,6 +220,8 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
     assert signer.requests[0].signer_role == "principal"
     assert signer.requests[1].signer_role == "reddog"
     assert result.work_authority["wsp15_allocation_receipt_id"] == "sha256:wsp15-allocation"
+    assert result.work_authority["work_order_digest"] == "sha256:" + ("a" * 64)
+    assert result.work_authority["base_ref"] == "main"
     assert result.work_authority["wsp15_allocation_digest"] == "sha256:wsp15-allocation-digest"
     assert result.work_authority["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"
     assert result.work_authority["model_runtime_binding_digest"] == "sha256:model-runtime-binding"
@@ -261,6 +265,31 @@ def test_changed_signed_wsp15_allocation_digest_rejects() -> None:
 
     assert verified.accepted is False
     assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
+
+
+def test_changed_signed_base_ref_or_work_order_digest_rejects() -> None:
+    for field, value in (
+        ("base_ref", "release"),
+        ("work_order_digest", "sha256:" + ("f" * 64)),
+    ):
+        result, signer, _, snapshot_resolver = _issue()
+        assert result.identity and result.work_authority
+        result.work_authority[field] = value
+
+        verified = verify_delegated_work_authority(
+            work_authority=result.work_authority,
+            identity=result.identity,
+            signature_verifier=signer,
+            principal_key_resolver=_PrincipalKeyResolver(),
+            nonce_store=InMemoryNonceStore(),
+            snapshot_resolver=snapshot_resolver,
+            revocation_oracle=_NoRevocation(),
+            now=_NOW,
+            required_valve_state=_VALVE,
+        )
+
+        assert verified.accepted is False
+        assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
 
 
 def test_changed_signed_runtime_binding_digest_rejects() -> None:

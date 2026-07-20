@@ -93,6 +93,8 @@ def _reject(
 def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRuntimeRequest:
     return DelegatedAuthorityRuntimeRequest(
         work_order_id=str(payload["work_order_id"]),
+        work_order_digest=str(payload["work_order_digest"]),
+        base_ref=str(payload["base_ref"]),
         principal_id=str(payload["principal_id"]),
         principal_provider=str(payload["principal_provider"]),
         principal_public_key=str(payload["principal_public_key"]),

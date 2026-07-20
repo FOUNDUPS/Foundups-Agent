@@ -41,11 +41,11 @@ exemptions:
 
   - <<: *reddog_security_repair
     file: "src/reddog_main_resident_queue_next_stage_dispatch_bootstrap.py"
-    reason: "Inherited dispatch transaction boundary; this slice confines all runtime paths."
-    threshold_override: 275
-    function_threshold_override: 96
+    reason: "Inherited dispatch transaction boundary; canonical outside-repo work-order resolution is now required before authority issuance."
+    threshold_override: 311
+    function_threshold_override: 113
     functions: ["run_reddog_main_resident_queue_next_stage_dispatch_bootstrap"]
-    no_growth_ceiling: {file_lines: 275, functions: {run_reddog_main_resident_queue_next_stage_dispatch_bootstrap: 96}}
+    no_growth_ceiling: {file_lines: 311, functions: {run_reddog_main_resident_queue_next_stage_dispatch_bootstrap: 113}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_main_resident_queue_runtime_dependency_bundle.py"
@@ -57,11 +57,11 @@ exemptions:
 
   - <<: *reddog_security_repair
     file: "src/reddog_main_resident_queue_serial_loop_bootstrap.py"
-    reason: "Inherited serial startup boundary retained for focused trust-root repair and parity validation."
-    threshold_override: 1770
+    reason: "Inherited serial startup boundary retained while pre-materialization requests receive an explicit deterministic binding seed."
+    threshold_override: 1781
     function_threshold_override: 463
     functions: ["run_reddog_main_resident_queue_serial_loop_bootstrap", "_materialize_work_orders_from_authority_profile"]
-    no_growth_ceiling: {file_lines: 1770, functions: {run_reddog_main_resident_queue_serial_loop_bootstrap: 463, _materialize_work_orders_from_authority_profile: 148}}
+    no_growth_ceiling: {file_lines: 1781, functions: {run_reddog_main_resident_queue_serial_loop_bootstrap: 463, _materialize_work_orders_from_authority_profile: 159}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_openclaw_live_enqueue.py"
@@ -89,11 +89,11 @@ exemptions:
 
   - <<: *reddog_security_repair
     file: "src/reddog_signer_delegated_authority_runtime.py"
-    reason: "Inherited signed-authority issuance boundary; exact model and Memex lineage fields were added."
-    threshold_override: 707
-    function_threshold_override: 262
+    reason: "Inherited signed-authority issuance boundary; exact base ref and canonical full-work-order digest are now validated and signed."
+    threshold_override: 737
+    function_threshold_override: 285
     functions: ["issue_delegated_authority_runtime"]
-    no_growth_ceiling: {file_lines: 707, functions: {issue_delegated_authority_runtime: 262}}
+    no_growth_ceiling: {file_lines: 737, functions: {issue_delegated_authority_runtime: 285}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_resident_live_canary.py"
@@ -103,11 +103,11 @@ exemptions:
 
   - <<: *reddog_security_repair
     file: "src/reddog_wre_queue_authority_request_dryrun.py"
-    reason: "Inherited authority-request planner retained to preserve canonical digest parity."
-    threshold_override: 422
-    function_threshold_override: 136
+    reason: "Inherited authority-request planner retained while canonical work-order and exact base-ref bindings are propagated to signing."
+    threshold_override: 453
+    function_threshold_override: 158
     functions: ["plan_reddog_wre_queue_authority_request_dry_run"]
-    no_growth_ceiling: {file_lines: 422, functions: {plan_reddog_wre_queue_authority_request_dry_run: 136}}
+    no_growth_ceiling: {file_lines: 453, functions: {plan_reddog_wre_queue_authority_request_dry_run: 158}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_wre_queue_consumer_dryrun.py"
@@ -119,19 +119,19 @@ exemptions:
 
   - <<: *reddog_security_repair
     file: "src/reddog_wre_worktree_create.py"
-    reason: "Inherited worktree transaction boundary retained for truthful effect-state and reconciliation repair."
-    threshold_override: 563
-    function_threshold_override: 224
+    reason: "Inherited worktree transaction boundary retained while plan and immutable work-order bindings are revalidated before effect admission."
+    threshold_override: 601
+    function_threshold_override: 225
     functions: ["create_reddog_wre_worktree"]
-    no_growth_ceiling: {file_lines: 563, functions: {create_reddog_wre_worktree: 224}}
+    no_growth_ceiling: {file_lines: 601, functions: {create_reddog_wre_worktree: 225}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_governed_execution_valve_production_wiring.py"
-    reason: "Inherited integration cases retain end-to-end production wiring assertions."
-    threshold_override: 359
-    function_threshold_override: 90
+    reason: "Inherited integration cases retain end-to-end production wiring assertions plus terminal expiry and work-order splice regressions."
+    threshold_override: 439
+    function_threshold_override: 93
     functions: ["test_bootstrap_routes_canonical_environment_and_use_time_resolver", "test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage", "test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors"]
-    no_growth_ceiling: {file_lines: 359, functions: {test_bootstrap_routes_canonical_environment_and_use_time_resolver: 74, test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage: 62, test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors: 90}}
+    no_growth_ceiling: {file_lines: 439, functions: {test_bootstrap_routes_canonical_environment_and_use_time_resolver: 74, test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage: 62, test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors: 93}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_openclaw_signed_worker_claim_loop_preflight.py"

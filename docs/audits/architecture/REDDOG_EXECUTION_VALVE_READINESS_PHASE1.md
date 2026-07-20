@@ -61,8 +61,9 @@ evidence, not authority.
    handshake.
 7. No production verifier exists for the consensus or sovereign digests; the
    principal subject-to-key source is not independently attested; model signed
-   evidence lacks complete durable nonce/revocation/trusted-key provenance; and
-   the nonce store lacks a cross-process transactional lock.
+   evidence lacks complete durable nonce/revocation/trusted-key provenance.
+   The authority and nonce store is cross-process atomic under its canonical
+   `.operation` lock, but that serialization is not an independent trust anchor.
 
 ## Alternatives rejected
 
@@ -77,8 +78,18 @@ The resident execution-valve stage now secure-reloads the governed artifacts,
 validates the current chain revision, checks queue/claim/work-order equality,
 recomputes the signed work-authority receipt digest, and re-runs signed-authority
 verification without consuming a second nonce. The earlier authority stage
-retains its existing consume-on-accept semantics. Because the durable nonce
-store is not cross-process transactional, this is defense-in-depth only.
+and the recorded verification stage both use `PREFLIGHT_NON_CONSUMING`. Only
+the terminal authoritative-use lease consumes the nonce, under the same
+cross-process `.operation` lock used by the canonical store writer.
+
+The signed work authority now binds the exact explicit `base_ref` and the
+canonical digest of every full work-order field. Use-time resolution recomputes
+that digest, the executor plan carries both bindings in its own verified digest,
+and the effect runner uses only the validated plan snapshot. A mutable work
+order is never consulted for `base_ref` after authoritative admission. Terminal
+`AUTHORITATIVE_USE` verification also receives a fresh invocation clock, so an
+identity or permission snapshot that expires after preflight still fails closed
+before nonce consumption and before the runner.
 
 The canonical evaluator is invoked, then forced closed with exact missing-anchor
 reasons. In particular,

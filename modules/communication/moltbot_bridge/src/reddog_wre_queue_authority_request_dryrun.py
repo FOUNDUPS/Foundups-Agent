@@ -21,6 +21,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     DelegatedAuthorityRuntimeRequest,
     HIGH_AUTHORITY_OPERATIONS,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+    canonical_work_order_base_ref,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
@@ -40,6 +44,7 @@ FAIL_HIGH_AUTHORITY_COSIGN = "FAIL_HIGH_AUTHORITY_COSIGN"
 FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY = "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY"
 FAIL_WSP15_ALLOCATION_BINDING = "FAIL_WSP15_ALLOCATION_BINDING"
 FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
+FAIL_WORK_ORDER_BINDING = "FAIL_WORK_ORDER_BINDING"
 
 _REQUIRED_PROFILE_FIELDS = (
     "principal_id",
@@ -49,6 +54,7 @@ _REQUIRED_PROFILE_FIELDS = (
     "reddog_public_key",
     "repo_full_name",
     "foundup_id",
+    "base_ref",
     "allowed_paths",
     "requested_operation",
     "permission_snapshot_digest",
@@ -69,6 +75,8 @@ class QueueAuthorityRequestDryRunReceipt:
     queue_item_id: str
     slice_id: str
     work_order_id: str
+    work_order_digest: str
+    base_ref: str
     requested_operation: str
     foundup_id: str
     allowed_paths: Tuple[str, ...]
@@ -269,6 +277,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     *,
     queue_consumer_result: Mapping[str, Any],
     authority_profile: Mapping[str, Any] | None,
+    work_order: Mapping[str, Any] | None = None,
 ) -> QueueAuthorityRequestDryRunResult:
     """Build a signer-runtime request from a validated queue-consumer receipt."""
 
@@ -293,6 +302,23 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         reasons.append(FAIL_WSP15_ALLOCATION_BINDING)
     if queue_receipt and profile and not _valid_model_runtime_binding(queue_receipt, profile):
         reasons.append(FAIL_MODEL_RUNTIME_BINDING)
+
+    bound_work_order = _mapping(work_order)
+    try:
+        work_order_digest = canonical_full_work_order_digest(bound_work_order)
+        base_ref = canonical_work_order_base_ref(bound_work_order)
+    except (TypeError, ValueError):
+        work_order_digest = ""
+        base_ref = ""
+        reasons.append(FAIL_WORK_ORDER_BINDING)
+    if bound_work_order and (
+        str(profile.get("base_ref") or "") != base_ref
+        or str(profile.get("work_order_id") or _work_order_id(
+            str(queue_receipt.get("queue_item_id") or queue.get("selected_queue_item_id") or "")
+        ))
+        != str(bound_work_order.get("work_order_id") or "")
+    ):
+        reasons.append(FAIL_WORK_ORDER_BINDING)
 
     missing = [field for field in _REQUIRED_PROFILE_FIELDS if field not in profile or profile.get(field) in (None, "", ())]
     if missing:
@@ -327,6 +353,8 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     memex_supply_digest = str(queue_receipt.get("memex_supply_digest") or "")
     request = DelegatedAuthorityRuntimeRequest(
         work_order_id=str(profile.get("work_order_id") or _work_order_id(queue_item_id)),
+        work_order_digest=work_order_digest,
+        base_ref=base_ref,
         principal_id=str(profile["principal_id"]),
         principal_provider=str(profile["principal_provider"]),
         principal_public_key=str(profile["principal_public_key"]),
@@ -376,6 +404,8 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         queue_item_id=queue_item_id,
         slice_id=str(queue_receipt.get("slice_id") or queue.get("selected_slice") or ""),
         work_order_id=request.work_order_id,
+        work_order_digest=request.work_order_digest,
+        base_ref=request.base_ref,
         requested_operation=request.requested_operation,
         foundup_id=request.foundup_id,
         allowed_paths=request.allowed_paths,
@@ -414,6 +444,7 @@ __all__ = [
     "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY",
     "FAIL_WSP15_ALLOCATION_BINDING",
+    "FAIL_WORK_ORDER_BINDING",
     "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT",
     "QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT",
     "QueueAuthorityRequestDryRunReceipt",

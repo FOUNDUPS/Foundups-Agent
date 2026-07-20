@@ -26,6 +26,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, MutableSet, Optional
 
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+    canonical_work_order_base_ref,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_governed_work_order_dryrun import (
     PROTECTED_BASE_REFS,
 )
@@ -276,6 +281,38 @@ def _validate_plan(
     if plan.get("no_mutation_performed") is not True:
         reasons.append("plan_mutation_detected")
 
+    try:
+        work_order_digest = canonical_full_work_order_digest(work_order)
+        base_ref = canonical_work_order_base_ref(work_order)
+    except (TypeError, ValueError):
+        reasons.append("work_order_binding_invalid")
+        work_order_digest = ""
+        base_ref = ""
+    if plan.get("work_order_digest") != work_order_digest:
+        reasons.append("plan_work_order_digest_mismatch")
+    if plan.get("base_ref") != base_ref:
+        reasons.append("plan_base_ref_mismatch")
+
+    plan_body = {
+        "work_order_id": plan.get("work_order_id"),
+        "work_order_digest": plan.get("work_order_digest"),
+        "base_ref": plan.get("base_ref"),
+        "proposed_branch_name": plan.get("proposed_branch_name"),
+        "proposed_worktree_path": plan.get("proposed_worktree_path"),
+        "lock_key": plan.get("lock_key"),
+        "allowed_paths": plan.get("allowed_paths"),
+        "denied_paths": plan.get("denied_paths"),
+        "required_tests": plan.get("required_tests"),
+        "cleanup_plan": plan.get("cleanup_plan"),
+        "no_mutation_performed": plan.get("no_mutation_performed"),
+        "invocation_receipt_digest": plan.get("invocation_receipt_digest"),
+    }
+    expected_plan_digest = _canonical_digest(plan_body)
+    if plan.get("plan_digest") != expected_plan_digest:
+        reasons.append("plan_digest_mismatch")
+    if plan.get("plan_id") != expected_plan_digest:
+        reasons.append("plan_id_mismatch")
+
     branch = str(work_order.get("branch_name") or "").strip()
     if not branch:
         reasons.append("missing_branch_name")
@@ -343,6 +380,7 @@ def create_reddog_wre_worktree(
     work_order_id = _work_order_id(work_order)
     plan = _plan_from_result(executor_plan_result)
     branch_name = str(plan.get("proposed_branch_name") or work_order.get("branch_name") or "")
+    base_ref = str(plan.get("base_ref") or "")
     worktree_path_text = str(plan.get("proposed_worktree_path") or "")
     plan_id = str(plan.get("plan_id") or "")
     plan_digest = str(plan.get("plan_digest") or "")
@@ -428,7 +466,7 @@ def create_reddog_wre_worktree(
         create_result = runner.create_worktree(
             worktree_path=worktree_path,
             branch_name=branch_name,
-            base_ref=str(work_order.get("base_ref") or "main"),
+            base_ref=base_ref,
         )
     except Exception as exc:
         create_exception = True
@@ -471,7 +509,7 @@ def create_reddog_wre_worktree(
                 "effect_attempted": attempted,
                 "worktree_path": worktree_path_text,
                 "branch_name": branch_name,
-                "base_ref": str(work_order.get("base_ref") or "main"),
+                "base_ref": base_ref,
                 "runner_result_digest": _canonical_digest(create_result),
                 "cleanup_result_digest": _canonical_digest(cleanup_result),
                 "next_action": (
@@ -543,7 +581,7 @@ def create_reddog_wre_worktree(
             "effect_attempted": True,
             "worktree_path": worktree_path_text,
             "branch_name": branch_name,
-            "base_ref": str(work_order.get("base_ref") or "main"),
+            "base_ref": base_ref,
             "runner_result_digest": _canonical_digest(create_result),
             "next_action": "none",
         },

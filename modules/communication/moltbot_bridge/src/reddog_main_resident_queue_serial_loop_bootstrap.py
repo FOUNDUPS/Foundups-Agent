@@ -727,9 +727,21 @@ def _materialize_work_orders_from_authority_profile(
             f"work_order_materializer_queue:{reason}" for reason in queue_result.rejection_reasons
         )
 
+    queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
+    queue_item_id = str(queue_receipt.get("queue_item_id") or "")
+    materialization_binding_seed = {
+        "schema_version": "reddog_work_order_materialization_binding_seed.v1",
+        "work_order_id": str(
+            authority_profile.get("work_order_id")
+            or "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
+        ),
+        "base_ref": authority_profile.get("base_ref"),
+        "queue_consumer_receipt_digest": _canonical_digest(queue_receipt),
+    }
     authority_request = plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=queue_result.to_dict(),
         authority_profile=authority_profile,
+        work_order=materialization_binding_seed,
     )
     if authority_request.accepted is not True or authority_request.delegated_authority_request is None:
         return None, tuple(
@@ -745,7 +757,6 @@ def _materialize_work_orders_from_authority_profile(
     if not work_order_id:
         return None, ("work_order_materializer_missing_work_order_id",)
 
-    queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
     queue_item = _queue_item(snapshot=snapshot, queue_item_id=str(queue_receipt.get("queue_item_id") or ""))
     queue_wsp15_allocation = _nested_mapping(queue_item, "wsp15_allocation_receipt")
     slice_id = str(queue_receipt.get("slice_id") or "")
@@ -810,7 +821,7 @@ def _materialize_work_orders_from_authority_profile(
             authority_profile.get("branch_name")
             or _branch_name(slice_id=slice_id, queue_item_id=str(queue_receipt.get("queue_item_id") or ""))
         ),
-        "base_ref": str(authority_profile.get("base_ref") or "main"),
+        "base_ref": str(request["base_ref"]),
         "task_summary": str(
             authority_profile.get("task_summary")
             or f"Resident queue materialized governed work order for {slice_id or 'selected slice'}."

@@ -16,6 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocati
     INVOCATION_REJECT,
     invoke_reddog_work_order_dryrun,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
     EXECUTOR_PLAN_ACCEPT,
     EXECUTOR_PLAN_REJECT,
@@ -121,6 +124,8 @@ class TestExecutorDryRunAccept:
         assert result.no_mutation_performed is True
         assert result.plan.no_mutation_performed is True
         assert result.plan.proposed_branch_name == "docs/executor-dryrun-test"
+        assert result.plan.base_ref == "main"
+        assert result.plan.work_order_digest == canonical_full_work_order_digest(order)
         assert "/.reddog/worktrees/" in result.plan.proposed_worktree_path
         assert "/wo-exec-dryrun-001/" in result.plan.proposed_worktree_path
         assert "/Foundups-Agent/.reddog/worktrees/" not in result.plan.proposed_worktree_path
@@ -214,6 +219,15 @@ class TestExecutorDryRunReject:
         result = plan_wre_isolated_worktree_execution_dryrun(invocation, order)
         assert result.decision == EXECUTOR_PLAN_REJECT
         assert "cleanup_plan_missing" in result.rejection_reasons
+
+    def test_explicit_base_ref_is_required_for_bound_plan(self):
+        invocation, order = _accepted_invocation(nonce_suffix="missing-base-ref")
+        del order["base_ref"]
+
+        result = plan_wre_isolated_worktree_execution_dryrun(invocation, order)
+
+        assert result.decision == EXECUTOR_PLAN_REJECT
+        assert "invalid_work_order_binding" in result.rejection_reasons
 
 
 class TestNoExecutionBoundary:

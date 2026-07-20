@@ -35,6 +35,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import 
     WORKTREE_CREATE_ACCEPT,
     WORKTREE_CREATE_REJECT,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
+    plan_wre_isolated_worktree_execution_dryrun,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -145,29 +148,21 @@ def _work_order(**overrides):
 
 
 def _executor_payload(repo_root: Path, **overrides):
-    payload = {
-        "decision": "EXECUTOR_PLAN_ACCEPT",
-        "work_order_id": WORK_ORDER_ID,
-        "plan": {
-            "plan_id": "plan-001",
+    payload = plan_wre_isolated_worktree_execution_dryrun(
+        work_order=_work_order(),
+        invocation_result={
+            "decision": "INVOCATION_ACCEPT",
             "work_order_id": WORK_ORDER_ID,
-            "proposed_branch_name": "feat/paccess-001-worktree",
-            "proposed_worktree_path": _worktree_path(repo_root),
-            "lock_key": WORK_ORDER_ID,
-            "allowed_paths": [f"modules/foundups/{FID}/**"],
-            "denied_paths": [".env", ".git/**"],
-            "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
-            "cleanup_plan": {"on_failure": "remove_worktree_delete_branch"},
-            "phase_receipts": [],
-            "no_mutation_performed": True,
-            "invocation_receipt_digest": INVOCATION_DIGEST,
-            "plan_digest": PLAN_DIGEST,
+            "policy_gate_decision": "POLICY_ACCEPT",
+            "receipt_id": "receipt-001",
+            "receipt_digest": INVOCATION_DIGEST,
+            "no_execution_performed": True,
+            "rejection_reasons": [],
+            "gates_checked": [],
         },
-        "rejection_reasons": [],
-        "rejection_receipt_digest": "",
-        "no_mutation_performed": True,
-        "phase_receipts": [],
-    }
+        repo_root=str(repo_root),
+        now=NOW,
+    ).to_dict()
     payload.update(overrides)
     return payload
 

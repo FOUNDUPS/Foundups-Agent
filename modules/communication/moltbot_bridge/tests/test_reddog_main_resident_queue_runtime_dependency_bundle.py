@@ -115,6 +115,8 @@ def _authority_request_result() -> dict[str, object]:
         "status": "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT",
         "delegated_authority_request": {
             "work_order_id": "wre-queue-1",
+            "work_order_digest": "sha256:" + ("a" * 64),
+            "base_ref": "main",
             "principal_id": "github:mjtrout",
             "principal_provider": "github",
             "principal_public_key": "pub:principal",

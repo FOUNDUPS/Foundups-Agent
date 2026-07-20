@@ -170,6 +170,7 @@ def _profile(**overrides):
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
         "requested_operation": "create_foundup",
+        "base_ref": "main",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -185,11 +186,19 @@ def _profile(**overrides):
     return profile
 
 
+def _work_order():
+    return {
+        "work_order_id": "wre-queue-" + hashlib.sha256(b"queue-1").hexdigest()[:16],
+        "base_ref": "main",
+    }
+
+
 def _runtime_result(**profile_overrides):
     signer = _MockSignerVerifier()
     dryrun = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
         authority_profile=_profile(**profile_overrides),
+        work_order=_work_order(),
     )
     assert dryrun.accepted is True, dryrun.rejection_reasons
     result = invoke_reddog_wre_queue_authority_runtime(

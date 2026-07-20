@@ -11,9 +11,14 @@ from modules.communication.moltbot_bridge.src import (
     reddog_main_resident_queue_serial_loop_bootstrap as bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AuthoritativeUseLease,
     GovernedValveUseTimeAuthorityResolver,
     SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
     _digest,
+    _signed_binding_reasons,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     InMemoryResidentQueueChainResultsStore,
@@ -273,8 +278,11 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
     repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
     work_order_id = valve["work_order_id"]
+    work_order = {"work_order_id": work_order_id, "base_ref": "main"}
     work_authority = {
         "work_order_id": work_order_id,
+        "work_order_digest": canonical_full_work_order_digest(work_order),
+        "base_ref": "main",
         "nonce": "nonce-use-time",
         "expires_at": 1_784_006_700,
     }
@@ -340,7 +348,7 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
 
     result = resolver.resolve(
         chain_state=store.load(),
-        work_order={"work_order_id": work_order_id},
+        work_order=work_order,
         queue_item_id=QUEUE_ID,
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
     )
@@ -357,3 +365,75 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
     assert "canonical_sovereign_authorization_verifier_missing" in result.rejection_reasons
     assert "canonical_model_selection_signed_evidence_verifier_missing" in result.rejection_reasons
     assert "canonical_memex_supply_signed_evidence_verifier_missing" in result.rejection_reasons
+
+
+@pytest.mark.parametrize(
+    "expiry_boundary",
+    ("identity_expires_at", "permission_snapshot_expires_at"),
+)
+def test_terminal_authoritative_use_verification_receives_fresh_clock(
+    tmp_path, monkeypatch, expiry_boundary: str,
+) -> None:
+    clock = [100]
+    calls: list[dict[str, object]] = []
+
+    def verify(**kwargs):
+        calls.append(kwargs)
+        return VerificationResult(
+            accepted=int(kwargs["now"]) < 150,
+            work_order_id="wo-fresh-clock",
+            reason_codes=[] if int(kwargs["now"]) < 150 else [expiry_boundary],
+        )
+
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority.verify_delegated_work_authority",
+        verify,
+    )
+    resolver = GovernedValveUseTimeAuthorityResolver(
+        repo_root=tmp_path / "repo",
+        work_state_path=None,
+        authority_profile_path=None,
+        permission_snapshots_path=None,
+        principal_authority_records_path=None,
+        valve_environment_path=None,
+        runtime_allowed_root=tmp_path / "runtime",
+        signature_verifier=object(),
+        principal_key_resolver=object(),
+        nonce_store=object(),
+        snapshot_resolver=object(),
+        revocation_oracle=object(),
+        now_epoch=100,
+        required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
+        trusted_now_epoch=lambda: clock[0],
+    )
+    lease = AuthoritativeUseLease(
+        lambda: resolver._consume_authoritative_nonce(
+            identity={"expires_at": 150},
+            work_authority={"work_order_id": "wo-fresh-clock", "expires_at": 200},
+        ),
+        expires_at_epoch=200,
+        trusted_now_epoch=lambda: clock[0],
+    )
+
+    clock[0] = 150
+    assert lease.consume() is False
+    assert len(calls) == 1
+    assert calls[0]["now"] == 150
+    assert calls[0]["verification_phase"] is WorkAuthorityVerificationPhase.AUTHORITATIVE_USE
+
+
+def test_use_time_binding_rejects_base_ref_and_full_work_order_splices() -> None:
+    original = {"work_order_id": "wo-bound", "base_ref": "main", "task_summary": "one"}
+    authority = {
+        "work_order_id": "wo-bound",
+        "base_ref": "main",
+        "work_order_digest": canonical_full_work_order_digest(original),
+    }
+    spliced = dict(original)
+    spliced["base_ref"] = "release"
+    spliced["task_summary"] = "two"
+
+    reasons = _signed_binding_reasons(authority, spliced, {})
+
+    assert "canonical_signed_work_order_binding_mismatch:base_ref" in reasons
+    assert "canonical_signed_work_order_binding_mismatch:work_order_digest" in reasons

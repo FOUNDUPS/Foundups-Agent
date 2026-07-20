@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -78,6 +79,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
+        "base_ref": "main",
         "allowed_paths": ["modules/foundups/paccess_001/**"],
         "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
         "requested_operation": "create_foundup",
@@ -103,6 +105,19 @@ def _write_runtime_json(tmp_path: Path, name: str, payload: object) -> Path:
     return path
 
 
+def _work_orders() -> dict[str, object]:
+    work_order_id = "wre-queue-" + hashlib.sha256(b"queue-1").hexdigest()[:16]
+    return {
+        "work_orders": {
+            work_order_id: {
+                "work_order_id": work_order_id,
+                "base_ref": "main",
+                "branch_name": "feat/main-next-stage-binding",
+            }
+        }
+    }
+
+
 def _repo(tmp_path: Path) -> Path:
     path = tmp_path / "repo"
     path.mkdir()
@@ -113,6 +128,7 @@ def test_bootstrap_dispatches_authority_request_and_writes_outside_repo_chain_st
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
     chain = tmp_path / "runtime" / "chain_results.json"
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
@@ -121,6 +137,7 @@ def test_bootstrap_dispatches_authority_request_and_writes_outside_repo_chain_st
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_orders_path=work_orders,
         now_iso=NOW,
         requested_queue_item_id="queue-1",
     )
@@ -181,6 +198,7 @@ def test_bootstrap_rejects_chain_output_inside_repo(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         repo_root=repo,
@@ -188,6 +206,7 @@ def test_bootstrap_rejects_chain_output_inside_repo(tmp_path: Path) -> None:
         work_state_path=state,
         chain_results_path=repo / "chain_results.json",
         authority_profile_path=profile,
+        work_orders_path=work_orders,
         now_iso=NOW,
     )
 
@@ -199,6 +218,7 @@ def test_bootstrap_rejects_invalid_profile_without_store_write(tmp_path: Path) -
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile(principal_public_key=""))
+    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
     chain = tmp_path / "runtime" / "chain_results.json"
 
     result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
@@ -207,6 +227,7 @@ def test_bootstrap_rejects_invalid_profile_without_store_write(tmp_path: Path) -
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_orders_path=work_orders,
         now_iso=NOW,
     )
 

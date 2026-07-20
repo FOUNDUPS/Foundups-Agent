@@ -44,6 +44,12 @@ Use-time validation reuses the strict queue consumer and binds the promoted
 claim, determination/model/Memex receipts, signed identity/work authority,
 FoundUp scope, and complete WSP 15 allocation lineage.
 
+Delegated authority additionally signs the exact explicit `base_ref` and the
+canonical digest of the complete work order. The executor plan carries those
+bindings in its verified plan digest, and the effect runner reads `base_ref`
+only from that validated plan snapshot. Terminal `AUTHORITATIVE_USE`
+verification uses a fresh invocation clock before atomic nonce consumption.
+
 Worktree creation and live OpenClaw enqueue additionally require digest-bound,
 one-shot in-memory admissions. Fabricated, replayed, restarted, or spliced
 serialized acceptance chains fail before the injected runner/writer is called.

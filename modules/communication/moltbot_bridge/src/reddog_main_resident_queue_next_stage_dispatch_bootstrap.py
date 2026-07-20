@@ -82,6 +82,7 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
     work_state_path: Path | str | None,
     chain_results_path: Path | str | None,
     authority_profile_path: Path | str | None,
+    work_orders_path: Path | str | None = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
 ) -> RedDogMainResidentQueueNextStageDispatchBootstrapResult:
@@ -119,6 +120,21 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         return _not_ready(profile_reasons, chain_results_path=None)
     assert profile is not None
 
+    work_orders_payload, work_order_reasons = _read_json_outside_repo(
+        root,
+        runtime_root,
+        work_orders_path,
+        missing_reason="missing_work_orders_path",
+        inside_reason="work_orders_path_inside_repo",
+        unreadable_reason="malformed_work_orders",
+    )
+    if work_order_reasons:
+        return _not_ready(work_order_reasons, chain_results_path=None)
+    raw_work_orders = work_orders_payload.get("work_orders") if work_orders_payload else None
+    if not isinstance(raw_work_orders, Mapping):
+        return _not_ready(("malformed_work_orders",), chain_results_path=None)
+    work_order_resolver = _BoundWorkOrderResolver(raw_work_orders)
+
     chain_path, chain_reasons = _resolve_output_outside_repo(
         root,
         runtime_root,
@@ -138,6 +154,7 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         work_state_snapshot=snapshot,
         chain_results_store=store,
         authority_profile=profile,
+        work_order_resolver=work_order_resolver,
         now_iso=now_iso or "",
     )
     result = invoke_reddog_resident_queue_next_stage_dispatch(
@@ -203,6 +220,25 @@ def _read_json_outside_repo(
     if not isinstance(payload, Mapping):
         return None, (unreadable_reason,)
     return payload, ()
+
+
+@dataclass(frozen=True)
+class _BoundWorkOrderResolver:
+    work_orders: Mapping[str, Any]
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: Optional[str],
+        selected_slice: Optional[str],
+    ) -> Mapping[str, Any]:
+        value = self.work_orders.get(work_order_id)
+        if not isinstance(value, Mapping):
+            return {}
+        if str(value.get("work_order_id") or "") != work_order_id:
+            return {}
+        return dict(value)
 
 
 def _resolve_output_outside_repo(

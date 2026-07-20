@@ -87,6 +87,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
+        "base_ref": "main",
         "allowed_paths": ["modules/foundups/paccess_001/**"],
         "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
         "requested_operation": "create_foundup",
@@ -105,10 +106,20 @@ def _profile(**overrides: object) -> dict[str, object]:
     return profile
 
 
+class _WorkOrderResolver:
+    def resolve(self, *, work_order_id, queue_item_id, selected_slice):
+        return {
+            "work_order_id": work_order_id,
+            "base_ref": "main",
+            "branch_name": "feat/authority-request-binding",
+        }
+
+
 def _handler(**profile_overrides: object):
     return build_reddog_resident_queue_authority_request_stage_handler(
         work_state_snapshot=_snapshot(),
         authority_profile=_profile(**profile_overrides),
+        work_order_resolver=_WorkOrderResolver(),
         now_iso=NOW,
     )
 

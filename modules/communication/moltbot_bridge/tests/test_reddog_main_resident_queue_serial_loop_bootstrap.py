@@ -336,6 +336,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": FOUNDUP_ID,
+        "base_ref": "main",
         "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
         "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
         "requested_operation": "feature_slice",
@@ -1513,6 +1514,7 @@ def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(tmp_
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         now_iso=NOW,
         requested_queue_item_id="queue-1",
         max_steps=1,
@@ -1543,6 +1545,7 @@ def test_bootstrap_serial_loop_fails_closed_when_later_dependency_missing(tmp_pa
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         now_iso=NOW,
         requested_queue_item_id="queue-1",
         max_steps=2,
@@ -1571,6 +1574,7 @@ def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -1611,6 +1615,7 @@ def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -1660,6 +1665,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -3856,16 +3862,10 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 5
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            )
+    assert result.steps_run == 0
+    assert result.dispatched_stages == ()
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
-    assert "stage:work_order_invocation" in result.rejection_reasons
+    assert "stage:authority_request" in result.rejection_reasons
     assert result.no_worktree_created is True
     assert result.no_shell_command_executed is True
 
