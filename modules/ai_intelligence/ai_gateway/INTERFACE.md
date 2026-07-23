@@ -323,9 +323,10 @@ startup behavior remains `deterministic_fixture`.
 
 Live configured-provider execution is a phase-B NO-GO until canonical catalog
 admission, authoritative provider usage receipts, and a model-budget-specific
-bounded response-byte contract are present, and every input/receipt read and
-preflight path identity is protected by bounded streaming and an exclusive
-runtime-directory claim or equivalent identity-preserving boundary.
+pre-buffer response-byte transport contract are present, and every
+input/receipt read and preflight path identity is protected by bounded
+streaming and an exclusive runtime-directory claim or equivalent
+identity-preserving boundary.
 
 #### Model Combination Benchmark Harness
 

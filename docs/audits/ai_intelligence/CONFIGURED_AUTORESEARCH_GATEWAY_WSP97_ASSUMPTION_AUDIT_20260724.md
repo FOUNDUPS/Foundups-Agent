@@ -30,7 +30,7 @@ budget claims as canonical catalog facts.
 | Attempt and success evidence is tamper-detecting | IDs, statuses, routes, digests, costs, and call lists rehydrate and recompute | High |
 | Budget/catalog metadata is trustworthy | The bundle contains an operator-supplied self-authenticated catalog-claim digest, but is not reconciled with the canonical catalog | Low |
 | Reported token usage proves actual provider usage | The adapter currently derives whitespace estimates unless an injected caller supplies usage; no authoritative provider-usage receipt is bound | Low |
-| Response buffering proves the campaign output cap | The transport may buffer up to the gateway's global 1 MiB response bound; this is not a model-budget-specific byte bound | Low |
+| Response buffering proves the campaign output cap | False: `requests.post()` and `response.json()` may buffer an unbounded response before the runner applies its 1 MiB post-buffer normalized-result limit | High |
 | Runtime input and receipt reads are allocation-bounded | False: current JSON and JSONL readers use whole-file reads | High |
 | Preflight path freshness and alias checks remain stable through execution | False: no exclusive runtime-directory claim prevents path replacement between check and use | High |
 
@@ -51,8 +51,8 @@ budget claims as canonical catalog facts.
 ## 4. Alternatives considered
 
 1. Enable a small K3-versus-GLM canary now. Rejected: catalog claims, sampling
-   controls, endpoint identity, authoritative usage, and response-byte bounds
-   are not all admitted evidence.
+   controls, endpoint identity, authoritative usage, and pre-buffer transport
+   response-byte bounds are not all admitted evidence.
 2. Trust OpenRouter aliases from the operator budget file. Rejected: the file
    is self-authenticated operator evidence, not an independently trusted route
    mapping.
@@ -73,7 +73,7 @@ phase B supplies:
 - canonical catalog admission for exact provider, endpoint, route, prices,
   reasoning and sampling controls;
 - authoritative provider-reported usage bound into receipts; and
-- model-budget-specific bounded response-byte handling, or an equivalent
+- model-budget-specific pre-buffer response-byte handling, or an equivalent
   independently verified transport bound;
 - bounded streaming reads for every input and receipt artifact; and
 - an exclusive runtime-directory claim, or an equivalent identity-preserving

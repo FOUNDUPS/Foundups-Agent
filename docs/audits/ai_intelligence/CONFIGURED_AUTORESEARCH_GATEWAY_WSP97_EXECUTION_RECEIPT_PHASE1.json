@@ -37,7 +37,7 @@
     ],
     "first_principles": [
       "Exactly one fully prepared call, exact route identity, pre-call global cap, content-free failure, and durable evidence before success are the minimum truthful POC boundary.",
-      "Live configured execution remains halted until phase-B catalog, usage, and response-bound evidence exists."
+      "Live configured execution remains halted until phase-B catalog, usage, and pre-buffer response-byte transport evidence exists."
     ],
     "execute": [
       "modules/ai_intelligence/ai_gateway/src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py",

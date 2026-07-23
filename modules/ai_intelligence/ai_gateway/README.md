@@ -260,10 +260,12 @@ paths are supplied outside the repo, and verifier mode is `exact_output_digest` 
 
 Configured live execution remains **HALTED**. The budget bundle is
 self-authenticated operator evidence, not canonical catalog admission; gateway
-usage remains estimated rather than authoritative, and the transport's global
-response buffer is not a model-budget-specific byte bound. Whole-file input
-and receipt reads also remain unbounded, and no exclusive runtime-directory
-claim preserves path identity from preflight through execution. See
+usage remains estimated rather than authoritative. The runner's 1 MiB limit is
+post-buffer: `requests.post()` and `response.json()` can allocate an unbounded
+response first, so there is no model-budget-specific pre-buffer transport
+bound. Whole-file input and receipt reads also remain unbounded, and no
+exclusive runtime-directory claim preserves path identity from preflight
+through execution. See
 `docs/audits/ai_intelligence/CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_ASSUMPTION_AUDIT_20260724.md`
 and its structurally validated
 `CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.

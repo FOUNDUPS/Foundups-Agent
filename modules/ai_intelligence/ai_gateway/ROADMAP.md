@@ -40,8 +40,8 @@
   exclusive runtime-directory claim so path replacement cannot create a
   check/use race.
 - [ ] Keep configured live execution halted until these blockers and the
-  assumption audit's phase-B catalog, usage, and response-byte gates are
-  independently mitigated and re-audited.
+  assumption audit's phase-B catalog, usage, and pre-buffer response-byte
+  transport gates are independently mitigated and re-audited.
 
 ### ModLog archive
 
