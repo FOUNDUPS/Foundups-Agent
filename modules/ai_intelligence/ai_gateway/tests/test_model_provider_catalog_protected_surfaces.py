@@ -18,6 +18,8 @@ NEW_MODULE_NAMES = {
     "model_openrouter_scheduled_discovery",
     "model_provider_catalog_replay_state",
     "model_provider_catalog_snapshot",
+    "model_provider_execution_control_evidence",
+    "model_provider_execution_control_projection",
     "openrouter_model_catalog_snapshot_once",
 }
 FUNCTION_LIMIT_MODULES = (
@@ -29,7 +31,20 @@ FUNCTION_LIMIT_MODULES = (
     "model_provider_catalog_artifact_store.py",
     "model_provider_catalog_snapshot.py",
     "model_provider_catalog_replay_state.py",
+    "model_provider_execution_control_evidence.py",
+    "model_provider_execution_control_projection.py",
 )
+SOURCE_LINE_LIMITS = {
+    "model_provider_catalog_snapshot.py": 450,
+    "model_openrouter_direct_discovery.py": 400,
+    "model_provider_catalog_atomic_io.py": 400,
+    "model_provider_catalog_artifact_store.py": 250,
+    "model_openrouter_scheduled_discovery.py": 500,
+    "model_openrouter_schedule_adapter.py": 250,
+    "model_provider_catalog_replay_state.py": 500,
+    "model_provider_execution_control_projection.py": 200,
+    "model_provider_execution_control_evidence.py": 400,
+}
 
 
 def _imports(path: Path) -> set[str]:
@@ -77,42 +92,43 @@ def test_snapshot_is_pure_and_discovery_is_the_only_network_boundary() -> None:
     assert "os.environ" not in discovery_source
 
 
+def test_execution_control_surfaces_have_no_network_or_runtime_authority_imports() -> None:
+    forbidden = (
+        "ai_gateway",
+        "aiohttp",
+        "http",
+        "httpx",
+        "requests",
+        "urllib",
+        "socket",
+        "subprocess",
+        "websocket",
+        "model_openrouter_direct_discovery",
+        "model_intelligence_catalog",
+        "model_intelligence_selection",
+        "model_promotion_gate",
+        "model_registry",
+        "model_runtime_binding",
+        "model_signed_evidence",
+        "model_autoresearch_configured_gateway_runner",
+        "reddog_provider_call_evidence",
+    )
+    for name in (
+        "model_provider_execution_control_projection.py",
+        "model_provider_execution_control_evidence.py",
+    ):
+        imports = _imports(MODULE / "src" / name)
+        assert not any(
+            fragment in imported
+            for imported in imports
+            for fragment in forbidden
+        ), name
+
+
 def test_new_surfaces_stay_below_phase_one_size_limits() -> None:
-    assert len(
-        (MODULE / "src/model_provider_catalog_snapshot.py").read_text(
-            encoding="utf-8"
-        ).splitlines()
-    ) < 450
-    assert len(
-        (MODULE / "src/model_openrouter_direct_discovery.py").read_text(
-            encoding="utf-8"
-        ).splitlines()
-    ) < 400
-    assert len(
-        (MODULE / "src/model_provider_catalog_atomic_io.py").read_text(
-            encoding="utf-8"
-        ).splitlines()
-    ) < 400
-    assert len(
-        (MODULE / "src/model_provider_catalog_artifact_store.py").read_text(
-            encoding="utf-8"
-        ).splitlines()
-    ) < 250
-    assert len(
-        (MODULE / "src/model_openrouter_scheduled_discovery.py").read_text(
-            encoding="utf-8"
-        ).splitlines()
-    ) < 500
-    assert len(
-        (MODULE / "src/model_openrouter_schedule_adapter.py").read_text(
-            encoding="utf-8"
-        ).splitlines()
-    ) < 250
-    assert len(
-        (MODULE / "src/model_provider_catalog_replay_state.py").read_text(
-            encoding="utf-8"
-        ).splitlines()
-    ) < 500
+    for name, limit in SOURCE_LINE_LIMITS.items():
+        source = (MODULE / "src" / name).read_text(encoding="utf-8")
+        assert len(source.splitlines()) < limit, name
     assert len(
         (REPO / "scripts/openrouter_model_catalog_snapshot_once.py").read_text(
             encoding="utf-8"

@@ -66,6 +66,11 @@
   serialization, and fail-closed replay recovery.
 - [x] Default-off idle scheduling POC for the exact daily OpenRouter refresh
   claim, with canonical invocation mapping and a six-key evidence-only adapter.
+- [x] Preserve bounded optional OpenRouter reasoning/top-provider assertions and
+  derive exact-model, lineage-bound provider-asserted execution-control evidence.
+- [ ] Keep execution halted until canonical route/endpoint admission, sampling
+  defaults, authoritative usage, and bounded transport response evidence are
+  supplied independently; provider assertions do not satisfy those gates.
 - [ ] General provider-discovery cadence and scheduler expansion remains out of
   scope; the POC does not grant discovery any startup, selection, promotion,
   registry, or runtime authority.

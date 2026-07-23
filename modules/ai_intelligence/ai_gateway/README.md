@@ -136,6 +136,23 @@ model selection, promotion, registry mutation, or runtime binding. Production
 enablement is owned by idle automation and remains default-off. Tests inject
 transport and remain offline.
 
+### Provider-asserted execution-control evidence
+
+`src/model_provider_execution_control_evidence.py` derives immutable,
+content-addressed evidence for one exact model from a fresh, rehydrated
+`ProviderCatalogCandidateSnapshot`. It binds the OpenRouter model-list source
+endpoint, candidate and discovery lineage, exact canonical prompt/completion
+prices, supported parameters, and allowlisted optional `reasoning` and
+`top_provider` assertions.
+
+Optional provider fields remain optional: omitted and explicit-null effort,
+default-effort, or top-provider numeric claims are distinct, partial assertions
+survive, and unknown nested fields are dropped. Malformed recognized values
+and contradictory co-present claims poison the record. The result has trust class
+`provider_asserted_model_execution_controls`; it is candidate evidence only,
+not canonical route admission, endpoint discovery, sampling defaults,
+selection, promotion, runtime binding, or permission to call a provider.
+
 ## Model Selection Receipts
 
 `src/model_intelligence_selection.py` consumes a `ModelCatalogSnapshot` and

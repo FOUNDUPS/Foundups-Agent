@@ -9,10 +9,11 @@ from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping, Sequence
 from .model_intelligence_catalog import ModelCatalogSnapshot, build_canonical_model_catalog
+from .model_provider_execution_control_projection import MAX_CONTEXT_LENGTH, project_optional_controls
 INVOCATION_SCHEMA, RECEIPT_SCHEMA = "model_provider_catalog_discovery_invocation.v1", "model_provider_catalog_discovery_receipt.v1"
 CANDIDATE_SCHEMA, PROVIDER = "model_provider_catalog_candidate_snapshot.v1", "openrouter"
 ENDPOINT_ID, DEFAULT_FRESHNESS_MS = "openrouter_models_api_v1", 86_400_000
-MAX_RESPONSE_BYTES, MAX_RECORDS, MAX_CONTEXT_LENGTH, MAX_PRICE = 8 * 1024 * 1024, 2048, 100_000_000, Decimal("1000")
+MAX_RESPONSE_BYTES, MAX_RECORDS, MAX_PRICE = 8 * 1024 * 1024, 2048, Decimal("1000")
 _ID = re.compile(r"[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/"
                  r"[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?(?::free)?\Z")
 _TOKEN, _DIGEST = re.compile(r"[a-z0-9][a-z0-9._:-]{0,63}\Z"), re.compile(r"sha256:[0-9a-f]{64}\Z")
@@ -326,14 +327,12 @@ def _sanitize_record(raw: Mapping[str, Any]) -> dict[str, Any]:
         if type(value) is not int or not 0 < value <= MAX_CONTEXT_LENGTH:
             raise ValueError("record_invalid")
         result["context_length"] = value
-    result["pricing"] = {
-        key: _canonical_price(pricing[key]) for key in ("prompt", "completion") if key in pricing
-    }
-    result["architecture"] = {
-        key: list(_tokens(architecture.get(key, [])))
-        for key in ("input_modalities", "output_modalities")
-    }
+    result["pricing"] = {key: _canonical_price(pricing[key])
+                         for key in ("prompt", "completion") if key in pricing}
+    result["architecture"] = {key: list(_tokens(architecture.get(key, [])))
+                              for key in ("input_modalities", "output_modalities")}
     result["supported_parameters"] = list(_tokens(raw.get("supported_parameters", [])))
+    result.update(project_optional_controls(raw))
     return result
 def _canonical_price(value: Any) -> str:
     if not isinstance(value, str) or len(value) > 64 or not _PRICE.fullmatch(value):

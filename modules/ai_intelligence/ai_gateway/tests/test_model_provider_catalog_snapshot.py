@@ -75,11 +75,12 @@ def test_success_fixture_is_allowlisted_canonical_and_sorted() -> None:
     assert zeta["pricing"] == {"completion": "0.000015", "prompt": "0.000003"}
     assert zeta["architecture"]["input_modalities"] == ["image", "text"]
     assert zeta["supported_parameters"] == ["response_format", "tools"]
+    assert zeta["top_provider"] == {"context_length": 131072}
     assert set(zeta) == {
-        "id", "context_length", "pricing", "architecture", "supported_parameters"
+        "id", "context_length", "pricing", "architecture", "supported_parameters",
+        "top_provider",
     }
     assert "name" not in json.dumps(payload)
-    assert "top_provider" not in json.dumps(payload)
 
 
 def test_duplicate_groups_collapse_conflict_and_poison_fail_closed() -> None:
