@@ -213,13 +213,19 @@ def _records_for_sample(
         and record.candidate_id == candidate.candidate_id
         and record.candidate_topology_digest == candidate.topology_digest
     ]
-    by_role = {record.role: record for record in matching}
-    ordered: list[ModelAutoResearchOutputEvidenceRecord] = []
-    for assignment in candidate.role_assignments:
-        record = by_role.get(assignment.role)
-        if record is not None:
-            ordered.append(record)
-    return tuple(ordered)
+    role_order = {
+        assignment.role: index
+        for index, assignment in enumerate(candidate.role_assignments)
+    }
+    return tuple(
+        sorted(
+            matching,
+            key=lambda record: (
+                role_order.get(record.role, len(role_order)),
+                record.record_id,
+            ),
+        )
+    )
 
 
 def _role_binding_rejections(
@@ -334,6 +340,15 @@ def _v2_runner_digest_rejections(
             reasons.append(
                 f"semantic_verifier_runner_call_mismatch:{_clean_reason(record.role)}"
             )
+    reasons.extend(_v2_output_rejections(output, receipt))
+    return reasons
+
+
+def _v2_output_rejections(
+    output: ModelBenchmarkTaskOutput,
+    receipt: ConfiguredGatewayRunnerReceipt,
+) -> list[str]:
+    reasons: list[str] = []
     expected_output = (
         "configured_gateway_benchmark_output:" + digest_payload(receipt.to_dict())[7:]
     )

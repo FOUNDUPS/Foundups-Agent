@@ -28,17 +28,33 @@ call and performs no live comparative canary.
 
 **WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
 
-**WSP_62 extraction plan:** All touched Python files remain below 1,200 lines
-(largest safety test: 1,198). The pre-existing bootstrap entry point remains
-208 lines, and the semantic-verifier factory/closure remain 96/83 lines.
-A follow-on structure-only slice should extract bootstrap admission/runtime
-assembly and semantic sample evaluation without changing their fail-closed
-contracts; this security slice does not mix that refactor into the evidence
-migration.
+**Corrective safety gate:** Campaign admission now computes the complete
+selected-role × task call count and requires exactly one executable planned
+call in this POC. It also requires an explicit total-call cap, exact budget for
+every selected assignment, canonical positive Decimal strings, exact
+provider/API routes, distinct empty write artifacts, bounded final prompts,
+durable output evidence before completion, and duplicate-role rejection.
+Multi-call and panel campaigns remain halted pending atomic whole-campaign
+preparation. Live execution remains halted pending canonical catalog admission,
+authoritative usage, and model-specific response-byte bounds.
 
-**Validation:** 147 focused offline runner/bootstrap/semantic tests passed;
-full AI Gateway: 526 passed, 2 platform-capability skips. Ruff, compileall, and
-diff-check passed.
+**WSP_62:** New/touched helpers are at most 50 lines; root `main.py` is 4,974
+lines and its touched architect function is 953. The bootstrap entry point grew
+from 208 to 235 lines; inherited semantic factory/closure remain 96/83.
+Module-local temporary exact no-growth ceilings, owner/reviewer, 2026-09-30
+expiry, mechanical tests, and ROADMAP decomposition anchors govern these three
+inherited boundaries.
+
+**Validation:** 88 focused corrective/bootstrap/semantic/evidence tests and the
+targeted root-main environment-threading test passed. Full AI Gateway: 587
+passed, 2 platform-capability skips. Ruff on the changed module/test scope,
+compileall, and diff-check passed. All callers/transports were injected; no
+live provider call was made.
+
+**WSP_97 evidence:** The assumption audit and structurally validated execution
+receipt are stored under `docs/audits/ai_intelligence/` as
+`CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_ASSUMPTION_AUDIT_20260724.md` and
+`CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
 
 ---
 

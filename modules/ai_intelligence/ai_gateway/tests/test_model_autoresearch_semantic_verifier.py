@@ -19,6 +19,7 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_canonical_prompt_
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
     InMemoryModelAutoResearchOutputEvidenceStore,
+    build_model_autoresearch_output_evidence_record,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_semantic_verifier import (
     build_model_autoresearch_output_evidence_semantic_verifier,
@@ -271,6 +272,31 @@ def test_semantic_verifier_requires_each_panel_role_evidence() -> None:
 
     assert result.decision == VerifierDecision.ACCEPT
     assert result.evidence_correct is True
+
+
+def test_semantic_verifier_rejects_distinct_duplicate_role_evidence() -> None:
+    task, candidate, output, store, verifier = _run_sample()
+    first = store.records[0]
+    store.append(
+        build_model_autoresearch_output_evidence_record(
+            task_id=first["task_id"],
+            prompt_digest=first["prompt_digest"],
+            candidate_id=first["candidate_id"],
+            candidate_topology_digest=first["candidate_topology_digest"],
+            role=first["role"],
+            provider=first["provider"],
+            model=first["model"],
+            policy_digest=first["policy_digest"],
+            response_text="different bounded evidence answer",
+            latency_ms=first["latency_ms"],
+            input_tokens=first["input_tokens"],
+            output_tokens=first["output_tokens"],
+            cost_estimate_usd=first["cost_estimate_usd"],
+        )
+    )
+    result = verifier(task, candidate, output)
+    assert result.decision == VerifierDecision.REJECT
+    assert "semantic_verifier_duplicate_role_evidence" in result.rejection_reasons
 
 
 def test_semantic_verifier_module_has_no_network_command_runtime_or_holoindex_imports() -> None:

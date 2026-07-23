@@ -115,7 +115,8 @@ def _semantic_execution_payload(tmp_path: Path, *, contains: str = "configured;g
         runner_allowed_providers="provider",
         runner_max_prompt_chars=2000,
         runner_max_calls_per_sample=1,
-        runner_max_cost_estimate_usd_per_sample=1.0,
+        runner_max_total_calls=1,
+        runner_max_cost_estimate_usd_per_sample="1",
         gateway=gateway,
     )
     assert result.accepted is True

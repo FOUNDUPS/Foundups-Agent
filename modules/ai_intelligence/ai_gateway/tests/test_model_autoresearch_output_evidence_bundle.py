@@ -6,6 +6,9 @@ import ast
 import json
 from pathlib import Path
 
+from modules.ai_intelligence.ai_gateway.src import (
+    model_autoresearch_output_evidence_bundle as evidence_module,
+)
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
     InMemoryModelAutoResearchOutputEvidenceStore,
     JsonlModelAutoResearchOutputEvidenceStore,
@@ -91,6 +94,18 @@ def test_jsonl_store_writes_outside_repo_and_rehydrates_records(tmp_path: Path) 
     assert records[0].response_text == "outside repo evidence"
     line = path.read_text(encoding="utf-8").strip()
     assert json.loads(line)["record_id"] == record_id
+
+
+def test_jsonl_store_fsyncs_record_before_reporting_success(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    calls: list[int] = []
+    monkeypatch.setattr(evidence_module.os, "fsync", calls.append)
+    path = tmp_path / "runtime" / "model_outputs.jsonl"
+    store = JsonlModelAutoResearchOutputEvidenceStore(path, repo_root=REPO_ROOT)
+    store.append(_record("durable evidence"))
+    assert len(calls) == 1
 
 
 def test_jsonl_store_rejects_inside_repo_path() -> None:

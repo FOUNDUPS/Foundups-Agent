@@ -262,16 +262,32 @@ runner receipt IDs, and bounded metrics.
 
 `ConfiguredGatewayRunnerPolicy.model_budgets` is mandatory. Each assignment is
 bound to its exact provider/API model, canonical decimal rates, prompt overhead,
-completion-token cap, and catalog-evidenced reasoning effort. The caller
+completion-token cap, and operator catalog-claim-bound reasoning effort. This
+claim is non-authoritative until canonical catalog admission. The caller
 receives `max_completion_tokens` and `reasoning_effort` as exact keyword-only
 controls. The canonical prompt guard evaluates the fully wrapped prompt in
 audit mode and permits only a byte-identical approved prompt.
+
+The reasoning catalog digest is currently an operator-supplied catalog claim,
+not proof of canonical catalog admission. Exact assignment/API-model equality
+is therefore mandatory; aliases are rejected.
 
 Panel calls are reserved atomically against `max_total_calls`. A durable
 `ATTEMPTED` receipt is written before caller entry and consumes that slot.
 Failure releases only roles whose attempts were never persisted. Attempt and
 success JSONL readers canonically rehydrate records, recompute their IDs and
 cost totals, and reject tampering.
+
+Configured bootstrap callers must also provide `runner_max_total_calls` and a
+canonical positive Decimal string for per-sample cost. Before runner
+construction it checks the complete selected-role × normalized-task call count,
+all selected assignment budgets, canonical path non-aliasing, and absent/empty
+write targets. The runner checks each final wrapped prompt size before prompt
+guard evaluation or caller entry.
+
+This phase-1 configured bootstrap admits exactly one executable planned call.
+Multi-call task sets and panel combinations remain NO-GO until a later phase
+can atomically prepare the complete task-by-role campaign before caller entry.
 
 When supplied with a `ModelAutoResearchOutputEvidenceStore`, the runner writes
 each raw role response as a digest-bound
@@ -304,6 +320,10 @@ digest, and checks explicit task metadata keys
 `expected_answer_contains` and `expected_answer_excludes`. It fails closed when
 required terms are absent or no semantic requirements are supplied. Default
 startup behavior remains `deterministic_fixture`.
+
+Live configured-provider execution is a phase-B NO-GO until canonical catalog
+admission, authoritative provider usage receipts, and a model-budget-specific
+bounded response-byte contract are present.
 
 #### Model Combination Benchmark Harness
 

@@ -203,10 +203,17 @@ harness.
 
 Every route requires immutable model-budget evidence: exact provider/API model,
 canonical decimal input/output rates, prompt overhead, completion-token cap,
-and catalog-bound reasoning effort. The fully role-wrapped prompt passes the
+and an operator-supplied catalog-claim digest for reasoning effort. The fully role-wrapped prompt passes the
 canonical local audit-only redaction guard byte-identically before a call.
 Panel admission reserves atomically; persisted `ATTEMPTED` calls consume their
 slots, while a failed run releases only its definitely unstarted suffix.
+Bootstrap admission also proves the complete selected-role × normalized-task
+call count against an explicit campaign-wide cap before constructing the
+runner. All write artifacts must be absent or empty and canonically distinct
+from every read input and other write target.
+This phase-1 configured bootstrap admits exactly one executable planned call;
+multi-call task sets and panel combinations remain NO-GO until the complete
+task-by-role campaign can be prepared atomically before caller entry.
 
 Call-attempt and successful-run receipts are append-only outside-repository
 JSONL artifacts. Public readers rehydrate each record, recompute group/receipt
@@ -250,6 +257,14 @@ providers are explicitly allowlisted, an outside-repo output evidence path is
 supplied, immutable model-budget evidence and distinct attempt/success receipt
 paths are supplied outside the repo, and verifier mode is `exact_output_digest` or
 `output_evidence_semantic`. The default remains deterministic fixture execution.
+
+Configured live execution remains **HALTED**. The budget bundle is
+self-authenticated operator evidence, not canonical catalog admission; gateway
+usage remains estimated rather than authoritative, and the transport's global
+response buffer is not a model-budget-specific byte bound. See
+`docs/audits/ai_intelligence/CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_ASSUMPTION_AUDIT_20260724.md`
+and its structurally validated
+`CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
 
 ## Model Combination Benchmark Harness
 

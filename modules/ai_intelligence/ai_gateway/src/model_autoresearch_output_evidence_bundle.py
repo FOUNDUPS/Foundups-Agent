@@ -15,9 +15,10 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Protocol, Sequence
+from typing import Any, Dict, List, Mapping, Protocol
 
 
 MODEL_AUTORESEARCH_OUTPUT_EVIDENCE_SCHEMA_VERSION = (
@@ -109,6 +110,8 @@ class JsonlModelAutoResearchOutputEvidenceStore:
         )
         with self.path.open("a", encoding="utf-8", newline="\n") as handle:
             handle.write(line + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
         return rehydrated.record_id
 
 

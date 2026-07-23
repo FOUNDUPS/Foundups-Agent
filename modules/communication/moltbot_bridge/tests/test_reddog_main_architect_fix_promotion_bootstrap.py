@@ -818,6 +818,7 @@ def test_main_preflight_model_autoresearch_campaign_execution_supply_runs_before
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_ALLOWED_PROVIDERS": "openai;anthropic",
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS": "1234",
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE": "2",
+                    "REDDOG_MODEL_AUTORESEARCH_RUNNER_MAX_TOTAL_CALLS": "3",
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE": "0.25",
                 },
                 clear=True,
@@ -842,6 +843,7 @@ def test_main_preflight_model_autoresearch_campaign_execution_supply_runs_before
     assert campaign_kwargs["runner_allowed_providers"] == "openai;anthropic"
     assert campaign_kwargs["runner_max_prompt_chars"] == "1234"
     assert campaign_kwargs["runner_max_calls_per_sample"] == "2"
+    assert campaign_kwargs["runner_max_total_calls"] == "3"
     assert campaign_kwargs["runner_max_cost_estimate_usd_per_sample"] == "0.25"
     promote.assert_called_once()
 

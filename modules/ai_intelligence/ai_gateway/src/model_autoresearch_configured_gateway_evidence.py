@@ -145,6 +145,8 @@ class ConfiguredGatewayModelBudgetEvidence:
         api_model = exact_model_id("api_model", self.api_model)
         if not assignment.startswith(provider + "/"):
             raise ValueError("assignment_provider_mismatch")
+        if assignment != f"{provider}/{api_model}":
+            raise ValueError("assignment_route_mismatch")
         return ConfiguredGatewayModelBudgetEvidence(
             assignment_model_id=assignment,
             provider=provider,
@@ -492,10 +494,35 @@ def rehydrate_call_attempt_receipt(
     _require_exact_keys(payload, set(ConfiguredGatewayCallAttemptReceipt.__dataclass_fields__))
     if payload.get("schema_version") != ATTEMPT_RECEIPT_SCHEMA_VERSION:
         raise ValueError("invalid_attempt_receipt_schema_version")
+    status, terminal_reason = _attempt_status(payload)
+    fields = _attempt_fields_from_payload(payload)
+    expected_group = digest_payload(
+        {
+            "task_id": fields["task_id"],
+            "candidate_id": fields["candidate_id"],
+            "role": fields["role"],
+            "sent_prompt_digest": fields["sent_prompt_digest"],
+        }
+    )
+    if payload.get("attempt_group_id") != expected_group:
+        raise ValueError("attempt_group_id_mismatch")
+    receipt = build_attempt_receipt(
+        attempt_group_id=expected_group,
+        status=status,
+        terminal_reason=terminal_reason,
+        fields=fields,
+    )
+    if payload.get("attempt_receipt_id") != receipt.attempt_receipt_id:
+        raise ValueError("attempt_receipt_id_mismatch")
+    return receipt
+
+
+def _attempt_status(payload: Mapping[str, object]) -> tuple[str, str | None]:
     status, terminal_reason = payload.get("status"), payload.get("terminal_reason")
     terminal_statuses = {
         "CANCELLED",
         "COMPLETED",
+        "EVIDENCE_FAILED",
         "FAILED",
         "REJECTED_OUTPUT",
         "ROUTE_MISMATCH",
@@ -505,7 +532,11 @@ def rehydrate_call_attempt_receipt(
             raise ValueError("invalid_attempt_receipt_terminal_reason")
     elif status not in terminal_statuses or terminal_reason != str(status).lower():
         raise ValueError("invalid_attempt_receipt_status")
-    fields = {
+    return str(status), terminal_reason if isinstance(terminal_reason, str) else None
+
+
+def _attempt_fields_from_payload(payload: Mapping[str, object]) -> dict[str, object]:
+    return {
         "task_id": exact_model_id("task_id", payload.get("task_id")),
         "candidate_id": exact_model_id("candidate_id", payload.get("candidate_id")),
         "role": exact_model_id("role", payload.get("role")),
@@ -521,25 +552,6 @@ def rehydrate_call_attempt_receipt(
             "reserved_cost_usd", payload.get("reserved_cost_usd")
         ),
     }
-    expected_group = digest_payload(
-        {
-            "task_id": fields["task_id"],
-            "candidate_id": fields["candidate_id"],
-            "role": fields["role"],
-            "sent_prompt_digest": fields["sent_prompt_digest"],
-        }
-    )
-    if payload.get("attempt_group_id") != expected_group:
-        raise ValueError("attempt_group_id_mismatch")
-    receipt = build_attempt_receipt(
-        attempt_group_id=expected_group,
-        status=str(status),
-        terminal_reason=terminal_reason if isinstance(terminal_reason, str) else None,
-        fields=fields,
-    )
-    if payload.get("attempt_receipt_id") != receipt.attempt_receipt_id:
-        raise ValueError("attempt_receipt_id_mismatch")
-    return receipt
 
 
 def rehydrate_runner_receipt(

@@ -276,6 +276,7 @@ class _PreparedCall:
     prompt_digest: str
     guard_report_digest: str
     budget: ConfiguredGatewayModelBudgetEvidence
+    input_upper_tokens: int
     reserved_cost: Decimal
 
 
@@ -427,6 +428,8 @@ def _prepare_call(
         candidate_id=candidate.candidate_id,
         task_id=task.task_id,
     )
+    if len(prompt) > policy.max_prompt_chars:
+        raise ValueError("configured_gateway_runner_prompt_too_large")
     approval = _guard_prompt(prompt_guard, prompt, task, policy)
     input_upper = len(prompt.encode("utf-8")) + budget.request_overhead_input_tokens
     reserved = (
@@ -442,6 +445,7 @@ def _prepare_call(
         prompt_digest=_content_digest(prompt),
         guard_report_digest=approval.report_digest,
         budget=budget,
+        input_upper_tokens=input_upper,
         reserved_cost=reserved,
     )
 
@@ -535,12 +539,41 @@ def _execute_call(
     fields = _attempt_fields(prepared, item)
     _persist_attempt(attempt_store, attempt_group_id, "ATTEMPTED", None, fields)
     reservation.mark_attempted()
+    raw_result = _invoke_model_call(
+        caller=caller,
+        item=item,
+        task_type=policy.task_type,
+        attempt_store=attempt_store,
+        attempt_group_id=attempt_group_id,
+        fields=fields,
+    )
+    return _validate_and_record_result(
+        raw_result=raw_result,
+        prepared=prepared,
+        item=item,
+        policy_digest=policy_digest,
+        output_evidence_store=output_evidence_store,
+        attempt_store=attempt_store,
+        attempt_group_id=attempt_group_id,
+        fields=fields,
+    )
+
+
+def _invoke_model_call(
+    *,
+    caller,
+    item,
+    task_type,
+    attempt_store,
+    attempt_group_id,
+    fields,
+):
     try:
-        raw_result = caller.call_model(
+        return caller.call_model(
             provider=item.provider,
             model=item.api_model,
             prompt=item.prompt,
-            task_type=policy.task_type,
+            task_type=task_type,
             max_completion_tokens=item.budget.max_completion_tokens,
             reasoning_effort=item.budget.reasoning_control.effort,
         )
@@ -557,16 +590,6 @@ def _execute_call(
         if isinstance(exc, Exception):
             raise ValueError("configured_gateway_runner_call_failed") from None
         raise
-    return _validate_and_record_result(
-        raw_result=raw_result,
-        prepared=prepared,
-        item=item,
-        policy_digest=policy_digest,
-        output_evidence_store=output_evidence_store,
-        attempt_store=attempt_store,
-        attempt_group_id=attempt_group_id,
-        fields=fields,
-    )
 
 
 def _validate_and_record_result(
@@ -594,6 +617,9 @@ def _validate_and_record_result(
     if result.output_tokens > item.budget.max_completion_tokens:
         _persist_terminal(attempt_store, attempt_group_id, "REJECTED_OUTPUT", fields)
         raise ValueError("configured_gateway_runner_output_tokens_exceeded")
+    if result.input_tokens > item.input_upper_tokens:
+        _persist_terminal(attempt_store, attempt_group_id, "REJECTED_OUTPUT", fields)
+        raise ValueError("configured_gateway_runner_input_tokens_exceeded")
     try:
         evidence = _build_output_evidence(
             prepared, item, result, policy_digest
@@ -603,8 +629,17 @@ def _validate_and_record_result(
         if isinstance(exc, ValueError):
             raise
         raise ValueError("configured_gateway_runner_output_rejected") from None
+    evidence_id = None
+    if output_evidence_store is not None:
+        try:
+            evidence_id = output_evidence_store.append(evidence)
+        except Exception:
+            _persist_terminal(attempt_store, attempt_group_id, "EVIDENCE_FAILED", fields)
+            raise ValueError("configured_gateway_runner_output_evidence_failed") from None
+        if evidence_id != evidence.record_id:
+            _persist_terminal(attempt_store, attempt_group_id, "EVIDENCE_FAILED", fields)
+            raise ValueError("configured_gateway_runner_output_evidence_failed")
     _persist_terminal(attempt_store, attempt_group_id, "COMPLETED", fields)
-    evidence_id = output_evidence_store.append(evidence) if output_evidence_store else None
     return _call_receipt(item, result, evidence_id)
 
 

@@ -284,7 +284,8 @@ def test_campaign_execution_bootstrap_configured_gateway_mode_materializes_recei
         runner_allowed_providers="provider",
         runner_max_prompt_chars=2000,
         runner_max_calls_per_sample=1,
-        runner_max_cost_estimate_usd_per_sample=1.0,
+        runner_max_total_calls=1,
+        runner_max_cost_estimate_usd_per_sample="1",
         gateway=gateway,
     )
 
@@ -333,7 +334,8 @@ def test_campaign_execution_bootstrap_configured_gateway_semantic_verifier_accep
         runner_allowed_providers="provider",
         runner_max_prompt_chars=2000,
         runner_max_calls_per_sample=1,
-        runner_max_cost_estimate_usd_per_sample=1.0,
+        runner_max_total_calls=1,
+        runner_max_cost_estimate_usd_per_sample="1",
         gateway=gateway,
     )
 
@@ -372,7 +374,8 @@ def test_campaign_execution_bootstrap_configured_gateway_semantic_verifier_rejec
         runner_allowed_providers="provider",
         runner_max_prompt_chars=2000,
         runner_max_calls_per_sample=1,
-        runner_max_cost_estimate_usd_per_sample=1.0,
+        runner_max_total_calls=1,
+        runner_max_cost_estimate_usd_per_sample="1",
         gateway=gateway,
     )
 

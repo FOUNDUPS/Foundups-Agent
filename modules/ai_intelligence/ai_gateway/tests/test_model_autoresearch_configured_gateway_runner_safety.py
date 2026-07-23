@@ -321,20 +321,13 @@ def test_budget_rejects_noncanonical_unbounded_rate_or_token_evidence(field, val
         _budget(**{field: value}).normalized()
 
 
-def test_policy_rejects_empty_duplicate_assignment_duplicate_route_and_provider_set_mismatch():
+def test_policy_rejects_empty_duplicate_assignment_and_provider_set_mismatch():
     with pytest.raises(ValueError, match="model_budgets_required"):
         _policy(budgets=()).normalized()
     first = _budget()
-    duplicate_assignment = _budget(api_model="other/model")
-    duplicate_route = _budget(
-        assignment_model_id="openrouter/other-alias",
-        provider="openrouter",
-        api_model="z-ai/glm-5.2",
-    )
+    duplicate_assignment = _budget()
     with pytest.raises(ValueError, match="duplicate_assignment"):
         _policy(budgets=(first, duplicate_assignment)).normalized()
-    with pytest.raises(ValueError, match="duplicate_route"):
-        _policy(budgets=(first, duplicate_route)).normalized()
     with pytest.raises(ValueError, match="provider_set_mismatch"):
         _policy(budgets=(first,), allowed_providers=("openrouter", "openai")).normalized()
 
@@ -712,7 +705,7 @@ def test_terminal_attempt_persistence_failure_is_indeterminate_and_consumes_slot
     assert "sensitive" not in str(raised.value)
     assert len(caller.calls) == 1
     assert [item.status for item in attempts.receipts] == ["ATTEMPTED"]
-    assert outputs.records == []
+    assert len(outputs.records) == 1
     assert successes.receipts == []
     with pytest.raises(ValueError, match="total_call_budget_exceeded"):
         runner(_task(), _candidate())
