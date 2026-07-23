@@ -70,13 +70,40 @@ bridge_candidate_to_canonical_catalog(..., prior_admitted_candidate_id=...) -> C
 Discovery is an explicit manual or pre-authorized scheduled operation. It
 persists an attempt receipt separately from the last-known-good candidate under
 one validated outside-repository runtime root. Candidate IDs bind only the
-schema, provider, endpoint, and sanitized payload, while embedded observation
-receipts and a 24-hour freshness window are revalidated on admission.
+schema, provider, model-list source endpoint, and sanitized payload, while
+embedded observation receipts and a 24-hour freshness window are revalidated
+on admission.
 
 The bridge is idempotent for an unchanged prior candidate ID and invokes the
 existing canonical catalog builder with `static_registry=False`. It does not
 mutate the registry, select or promote a model, bind runtime roles, or create a
 scheduler.
+
+#### Provider model execution-control evidence
+
+```python
+build_provider_model_execution_control_evidence(
+    candidate=...,
+    model_id=...,
+    now_ms=...,
+) -> ProviderModelExecutionControlEvidence
+
+rehydrate_provider_model_execution_control_evidence(
+    payload,
+    candidate=...,
+    now_ms=...,
+) -> ProviderModelExecutionControlEvidence
+```
+
+The builder requires an exact model ID and a fresh, canonical candidate
+snapshot. It binds candidate/receipt lineage, exact prices, supported
+parameters, and strict optional projections of provider `reasoning` and
+`top_provider` metadata. The rehydrator recomputes the complete evidence object
+and content ID from the supplied candidate.
+
+The trust class is `provider_asserted_model_execution_controls`. These APIs do
+not call providers, discover an execution endpoint, select sampling defaults,
+admit a canonical route, rank a model, or grant runtime authority.
 
 `ProviderCatalogArtifactStore` is the confined persistence boundary used for
 both attempt and candidate artifacts. Replacement is same-directory and atomic:

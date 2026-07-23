@@ -1,5 +1,29 @@
 # AI Gateway TestModLog
 
+## 2026-07-24 - OpenRouter model execution-control evidence phase B1
+
+Scope: offline adversarial coverage of optional provider-control projection and
+exact-model evidence lineage.
+
+- Preserves current K3 price/context/reasoning assertions without hard-coding
+  runtime behavior.
+- Proves descending effort order, duplicate/enum/bool/token bounds,
+  mandatory contradictions, and top-provider context/completion relationships.
+- Proves partial assertions, explicit empty lists, null-versus-omitted effort,
+  default-effort, and top-provider numeric claims, and omitted
+  `supports_max_tokens` remain distinct.
+- Drops unknown provider names, prose, secrets, defaults, and per-request limits
+  before duplicate equality and evidence construction.
+- Rehydrates legacy v1 candidates, rejects stale/future/tampered candidates,
+  exact-ID aliases, evidence field tampering, and recomputed attacker IDs.
+- Enrolls both new modules in persistent protected-authority import guards,
+  AST network/runtime-dependency purity, explicit `<200`/`<400` source
+  ceilings, and WSP_62 function ceilings.
+
+Focused execution-control/catalog/protected result: `112 passed`. Full AI
+Gateway: `647 passed, 2 skipped`. Ruff passed. No provider, model, network, or
+credential call occurred.
+
 ## 2026-07-24 - Configured AutoResearch gateway safety contract v2
 
 Scope: offline adversarial verification of configured provider calls, prompt

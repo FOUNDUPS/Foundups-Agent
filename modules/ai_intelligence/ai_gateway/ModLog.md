@@ -1,5 +1,38 @@
 # AI Gateway Module Change Log
 
+## [2026-07-24] - OpenRouter Model Execution-Control Evidence Phase B1
+
+**Who/Type/Slice:** 0102 RedDog Architect isolated worker / Provider Evidence /
+`OPENROUTER_MODEL_EXECUTION_CONTROL_EVIDENCE_PHASE_B1`
+
+**What:** Evolved the v1 candidate payload compatibly to retain only strict
+optional `reasoning` and `top_provider` projections, then added immutable
+exact-model evidence binding canonical prices, supported parameters, candidate
+and discovery lineage, source-record/control digests, freshness, and a
+recomputed content ID.
+
+**Truth boundary:** Unknown provider prose, names, secrets, default parameters,
+and per-request limits are dropped. Partial assertions, explicit empty effort
+lists, and omitted/null distinctions remain truthful candidate evidence.
+Malformed recognized fields and contradictory co-present claims fail closed.
+This trust class is provider-asserted only: no endpoint discovery, sampling
+default, canonical route, selection, promotion, transport, provider call,
+credential access, startup wiring, or live authority was added.
+
+**WSP_15 MPS:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 = 19
+(P0 defensive trust boundary).
+
+**Validation:** Focused execution-control/catalog/protected matrix: `112
+passed`. Full AI Gateway: `647 passed, 2 skipped`. Ruff and WSP_62 source-file/
+function gates passed. The projection and evidence modules are explicitly
+enrolled in authority-import, network-purity, line-ceiling, and AST function
+guards. Tests were offline; no provider, model, network, or credential call
+occurred.
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 81, WSP 97.
+
+---
+
 ## [2026-07-24] - Configured AutoResearch Gateway Safety Contract v2
 
 **Who/Type/Slice:** 0102 Codex worker / Defensive Reliability /

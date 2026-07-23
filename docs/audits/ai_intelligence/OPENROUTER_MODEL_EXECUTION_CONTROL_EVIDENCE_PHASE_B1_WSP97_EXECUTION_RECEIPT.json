@@ -1,0 +1,76 @@
+{
+  "execution_id": "OPENROUTER_MODEL_EXECUTION_CONTROL_EVIDENCE_PHASE_B1",
+  "execution_plane": "runtime",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_05_WSP_Micro_Coding_Protocol.md",
+      "WSP_framework/src/WSP_06_Module_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_and_Roadmap_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_81_Cube-Level_DAE_Orchestration_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "HoloIndex-first retrieval exited 0 with no output and was recorded as impaired/silent.",
+      "Direct rg/file-read fallback inspected candidate sanitization, discovery lineage, model evidence, tests, module documentation, and protected-surface gates.",
+      "docs/audits/ai_intelligence/OPENROUTER_MODEL_EXECUTION_CONTROL_EVIDENCE_PHASE_B1_WSP97_ASSUMPTION_AUDIT_20260724.md"
+    ],
+    "research": [
+      "Compared existing candidate-schema normalization, duplicate poisoning, freshness, receipt lineage, canonical prices, configured runner control claims, and execution HALT gates.",
+      "Applied documented OpenRouter descending reasoning efforts, optional control semantics, current K3 fixture metadata, and the existing 100000000-token local bound."
+    ],
+    "micro_pass": [
+      "Focused execution-control, candidate-snapshot, and protected-surface matrix: 112 passed.",
+      "Tests-first RED evidence: initial 20 failures/19 passes, then optional-assertion correction 8 failures/48 passes."
+    ],
+    "macro_pass": [
+      "Full modules/ai_intelligence/ai_gateway/tests matrix: 647 passed, 2 platform-capability skips.",
+      "Changed Python scope passed Ruff and WSP_62 AST/file checks."
+    ],
+    "hard_think": [
+      "docs/audits/ai_intelligence/OPENROUTER_MODEL_EXECUTION_CONTROL_EVIDENCE_PHASE_B1_WSP97_ASSUMPTION_AUDIT_20260724.md#4-failure-modes-and-mitigations",
+      "Separated truthful optional provider assertions from later route and sampling admission."
+    ],
+    "dialectic_sweep": [
+      "docs/audits/ai_intelligence/OPENROUTER_MODEL_EXECUTION_CONTROL_EVIDENCE_PHASE_B1_WSP97_ASSUMPTION_AUDIT_20260724.md#5-alternatives-considered",
+      "Rejected runtime hard-coding, whole-record retention, required-field overreach, and live-route authority."
+    ],
+    "first_principles": [
+      "Only recognized bounded provider claims may cross the candidate boundary; absence, null, and explicit empty claims are materially different evidence.",
+      "Provider-asserted metadata cannot authorize execution without independent route, sampling, usage, transport, benchmark, promotion, and runtime-binding evidence."
+    ],
+    "execute": [
+      "modules/ai_intelligence/ai_gateway/src/model_provider_catalog_snapshot.py",
+      "modules/ai_intelligence/ai_gateway/src/model_provider_execution_control_projection.py",
+      "modules/ai_intelligence/ai_gateway/src/model_provider_execution_control_evidence.py",
+      "modules/ai_intelligence/ai_gateway/tests/test_model_provider_catalog_snapshot.py",
+      "modules/ai_intelligence/ai_gateway/tests/test_model_provider_execution_control_evidence.py"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_05",
+    "WSP_06",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_81",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "Isolated worktree and branch: codex/openrouter-model-execution-control-evidence-phase-b1-20260724.",
+    "No framework WSP or knowledge-backup file changed; WSP_81 backup action was not applicable.",
+    "No provider, model, network, credential, transport, startup, promotion, or runtime-binding call was made.",
+    "Provider controls remain candidate evidence with no canonical route or execution authority.",
+    "modules/ai_intelligence/ai_gateway/README.md",
+    "modules/ai_intelligence/ai_gateway/INTERFACE.md",
+    "modules/ai_intelligence/ai_gateway/ROADMAP.md",
+    "modules/ai_intelligence/ai_gateway/ModLog.md",
+    "modules/ai_intelligence/ai_gateway/tests/TestModLog.md"
+  ]
+}
