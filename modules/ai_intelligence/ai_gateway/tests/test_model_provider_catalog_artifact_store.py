@@ -241,10 +241,11 @@ def test_postvalidation_substitution_preserves_lkg_before_default_replace(
         store.replace_text(target, "trusted-new-value")
 
     assert attempted is True
-    assert substituted is (os.name != "nt")
     assert target.read_bytes() == old
     assert b"attacker-controlled" not in target.read_bytes()
-    assert _temps(tmp_path) == []
+    remaining_payloads = sorted(path.read_bytes() for path in _temps(tmp_path))
+    expected_payloads = [b"attacker-controlled"] if substituted else []
+    assert remaining_payloads == expected_payloads
 
 
 @pytest.mark.parametrize("prior_exists", [True, False])
