@@ -28,6 +28,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     RevocationOracle,
     SignatureVerifier,
     VerificationResult,
+    WorkAuthorityVerificationPhase,
     verify_delegated_work_authority,
 )
 
@@ -148,6 +149,7 @@ def invoke_reddog_wre_queue_authority_verification(
         forbidden_operations=forbidden_operations,
         revoked_key_epochs=revoked_key_epochs,
         leeway_s=leeway_s,
+        verification_phase=WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING,
     )
     if verification.accepted is not True:
         return _reject(

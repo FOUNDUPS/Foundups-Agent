@@ -35,6 +35,7 @@ FAIL_FRESHNESS_RECEIPT = "FAIL_FRESHNESS_RECEIPT"
 FAIL_QUEUE_EVIDENCE_REFS = "FAIL_QUEUE_EVIDENCE_REFS"
 FAIL_WSP15_ALLOCATION_RECEIPT = "FAIL_WSP15_ALLOCATION_RECEIPT"
 FAIL_REQUESTED_QUEUE_NOT_FOUND = "FAIL_REQUESTED_QUEUE_NOT_FOUND"
+FAIL_QUEUE_GOVERNED_LINEAGE = "FAIL_QUEUE_GOVERNED_LINEAGE"
 
 WORK_STATE_SCHEMA_VERSION = "reddog_authoritative_work_state.v1"
 
@@ -55,8 +56,12 @@ class WREQueueConsumerDryRunReceipt:
     wsp15_mps_total: int
     reasoning_tier: str
     next_required_gate: str
+    model_selection_receipt_id: Optional[str] = None
+    model_selection_digest: Optional[str] = None
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    memex_supply_receipt_id: Optional[str] = None
+    memex_supply_digest: Optional[str] = None
     execution_ready: bool = False
     no_queue_mutation_performed: bool = True
     no_worker_spawn_performed: bool = True
@@ -189,6 +194,7 @@ def plan_reddog_wre_queue_consumer_dry_run(
     *,
     now_iso: Optional[str] = None,
     requested_queue_item_id: Optional[str] = None,
+    require_governed_lineage: bool = False,
 ) -> WREQueueConsumerDryRunResult:
     """Validate one authoritative WRE queue item without executing it."""
 
@@ -260,6 +266,10 @@ def plan_reddog_wre_queue_consumer_dry_run(
         f"freshness:{freshness_receipt_id}",
         f"wsp15_allocation:{allocation_receipt_id}",
     }
+    if require_governed_lineage:
+        governed_reasons, governed_refs = _governed_lineage_reasons(selected, claim)
+        reasons.extend(governed_reasons)
+        expected_refs.update(governed_refs)
     if not expected_refs.issubset(set(evidence_refs)):
         reasons.append(FAIL_QUEUE_EVIDENCE_REFS)
 
@@ -286,8 +296,12 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "wsp15_priority": allocation_priority,
         "wsp15_mps_total": allocation_total,
         "reasoning_tier": allocation_tier,
+        "model_selection_receipt_id": str(selected.get("model_selection_receipt_id") or ""),
+        "model_selection_digest": str(selected.get("model_selection_digest") or ""),
         "model_runtime_binding_receipt_id": str(selected.get("model_runtime_binding_receipt_id") or ""),
         "model_runtime_binding_digest": str(selected.get("model_runtime_binding_digest") or ""),
+        "memex_supply_receipt_id": str(selected.get("memex_supply_receipt_id") or ""),
+        "memex_supply_digest": str(selected.get("memex_supply_digest") or ""),
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     }
     receipt = WREQueueConsumerDryRunReceipt(
@@ -302,8 +316,12 @@ def plan_reddog_wre_queue_consumer_dry_run(
         wsp15_priority=allocation_priority,
         wsp15_mps_total=allocation_total,
         reasoning_tier=allocation_tier,
+        model_selection_receipt_id=str(selected.get("model_selection_receipt_id") or "") or None,
+        model_selection_digest=str(selected.get("model_selection_digest") or "") or None,
         model_runtime_binding_receipt_id=str(selected.get("model_runtime_binding_receipt_id") or "") or None,
         model_runtime_binding_digest=str(selected.get("model_runtime_binding_digest") or "") or None,
+        memex_supply_receipt_id=str(selected.get("memex_supply_receipt_id") or "") or None,
+        memex_supply_digest=str(selected.get("memex_supply_digest") or "") or None,
         next_required_gate=NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     )
     return WREQueueConsumerDryRunResult(
@@ -318,6 +336,39 @@ def plan_reddog_wre_queue_consumer_dry_run(
     )
 
 
+def _governed_lineage_reasons(
+    queue: Mapping[str, Any], claim: Mapping[str, Any]
+) -> tuple[list[str], set[str]]:
+    reasons: list[str] = []
+    refs: set[str] = set()
+    if str(claim.get("lane_id") or "") != "reddog_operational":
+        reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:lane_id")
+    if not str(claim.get("reconciliation_report_id") or ""):
+        reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:reconciliation_report_id")
+    governed_ids = {
+        "source_determination_receipt_id": "architect_determination",
+        "model_selection_receipt_id": "model_selection",
+        "memex_supply_receipt_id": "memex_supply",
+    }
+    for field, evidence_kind in governed_ids.items():
+        queue_value = str(queue.get(field) or "")
+        if not queue_value or queue_value != str(claim.get(field) or ""):
+            reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:{field}")
+        refs.add(f"{evidence_kind}:{queue_value}")
+    runtime_id = str(queue.get("model_runtime_binding_receipt_id") or "")
+    runtime_digest = str(queue.get("model_runtime_binding_digest") or "")
+    if bool(runtime_id) != bool(runtime_digest):
+        reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:model_runtime_binding_pair")
+    if runtime_id:
+        if runtime_id != str(claim.get("model_runtime_binding_receipt_id") or ""):
+            reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:model_runtime_binding_receipt_id")
+        refs.add(f"model_runtime_binding:{runtime_id}")
+    for field in ("model_selection_digest", "memex_supply_digest"):
+        if not str(queue.get(field) or "").startswith("sha256:"):
+            reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:{field}")
+    return reasons, refs
+
+
 __all__ = [
     "FAIL_CLAIM_EXPIRED",
     "FAIL_CLAIM_MISSING",
@@ -329,6 +380,7 @@ __all__ = [
     "FAIL_QUEUE_EVIDENCE_REFS",
     "FAIL_QUEUE_ITEM_STATUS",
     "FAIL_REQUESTED_QUEUE_NOT_FOUND",
+    "FAIL_QUEUE_GOVERNED_LINEAGE",
     "FAIL_SCHEMA_VERSION",
     "NEXT_GATE_SIGNED_AUTHORITY_REQUIRED",
     "WREQueueConsumerDryRunReceipt",

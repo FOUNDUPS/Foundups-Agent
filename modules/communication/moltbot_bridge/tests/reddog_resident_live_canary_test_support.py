@@ -11,6 +11,11 @@ from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_recei
     ControlLoopReceiptSigningContext,
     build_resident_control_loop_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_head_store import (
+    build_control_receipt_head,
+    commit_control_receipt_head,
+    load_control_receipt_head,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
     encode_ed25519_public_key,
@@ -24,6 +29,10 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
+    AtomicSignerControlLoopAnchorStore,
+    ControlLoopAnchorPreparation,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_live_canary import (
     LIVE_CANARY_CONFIRMATION,
@@ -57,13 +66,16 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verifi
     invoke_reddog_wre_queue_authorized_verified_draft_pr_publish,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import WORKTREE_CREATE_ACCEPT
+from modules.communication.moltbot_bridge.tests.reddog_live_canary_artifact_test_support import (
+    write_live_canary_artifacts,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_serial_loop import _snapshot
 
 
-QUEUE_ID = "queue-1"
 SLICE_NAME = "REDDOG_TEST_SLICE_PHASE1"
 WORK_ORDER_ID = "work-order-1"
 NOW = "2026-07-14T00:00:00+00:00"
+QUEUE_ID = "queue-1"
 
 
 def _test_private_key():
@@ -162,17 +174,6 @@ _AUTHORITY_PROFILE = {
         },
     },
 }
-from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_head_store import (
-    build_control_receipt_head,
-    commit_control_receipt_head,
-    load_control_receipt_head,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
-    AtomicSignerControlLoopAnchorStore,
-    ControlLoopAnchorPreparation,
-)
-
-
 class _StatelessTestControlLoopAnchorStore:
     """Test-only anchor used where persistence is not under test."""
 
@@ -229,7 +230,11 @@ def _git(cwd: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def _roots(tmp_path: Path) -> tuple[Path, Path]:
+def _roots(
+    tmp_path: Path,
+    *,
+    canonical_artifacts: bool = False,
+) -> tuple[Path, Path]:
     repo = tmp_path / "repo"
     repo.mkdir()
     _git(repo, "init")
@@ -240,6 +245,14 @@ def _roots(tmp_path: Path) -> tuple[Path, Path]:
     _git(repo, "commit", "-m", "test: seed live canary repo")
     runtime = tmp_path / "runtime"
     runtime.mkdir()
+    write_live_canary_artifacts(
+        repo=repo,
+        runtime=runtime,
+        queue_item_id=QUEUE_ID,
+        now_iso=NOW,
+    )
+    if canonical_artifacts:
+        return repo, runtime
     for filename in REQUIRED_JSON_ARTIFACTS:
         payload = {"kind": filename}
         if filename == "authority_profile.json":
@@ -396,8 +409,10 @@ def _stage_results(repo: Path, runtime: Path) -> dict[str, dict[str, object]]:
 
 
 def _write_pre_state(repo: Path, runtime: Path) -> dict[str, object]:
-    (runtime / "authoritative_work_state.json").write_text(json.dumps(_snapshot()), encoding="utf-8")
-    store = AtomicJsonResidentQueueChainResultsStore(runtime / "resident_queue_chain_results.json")
+    store = AtomicJsonResidentQueueChainResultsStore(
+        runtime / "resident_queue_chain_results.json",
+        allowed_root=runtime,
+    )
     for stage_key, stage_result in _stage_results(repo, runtime).items():
         result = record_resident_queue_stage_result(
             work_state_snapshot=_snapshot(), store=store, stage_key=stage_key,
@@ -508,7 +523,10 @@ def _runner(
     pattern_db_mutator=None,
 ):
     def run(_: Path) -> dict[str, object]:
-        store = AtomicJsonResidentQueueChainResultsStore(runtime / "resident_queue_chain_results.json")
+        store = AtomicJsonResidentQueueChainResultsStore(
+            runtime / "resident_queue_chain_results.json",
+            allowed_root=runtime,
+        )
         chain = dict(store.load())
         held = chain["stage_results"]["held_out_regression_gate"]
         sink = build_reddog_verified_pattern_memory_sink(repo_root=repo, db_path=runtime / "pattern_memory.db")

@@ -6,6 +6,13 @@ import ast
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AuthoritativeUseLease,
+)
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    InMemoryWorktreeAdmissionRegistry,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     CHAIN_RESULTS_SCHEMA_VERSION,
     InMemoryResidentQueueChainResultsStore,
@@ -56,6 +63,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authorit
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import (
     WORKTREE_CREATE_ACCEPT,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
+    plan_wre_isolated_worktree_execution_dryrun,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
@@ -238,29 +248,21 @@ def _work_order_invocation_result() -> dict[str, object]:
 
 
 def _executor_payload(repo_root: Path, **overrides: object) -> dict[str, object]:
-    payload: dict[str, object] = {
-        "decision": "EXECUTOR_PLAN_ACCEPT",
-        "work_order_id": WORK_ORDER_ID,
-        "plan": {
-            "plan_id": "plan-001",
+    payload: dict[str, object] = plan_wre_isolated_worktree_execution_dryrun(
+        work_order=_work_order(),
+        invocation_result={
+            "decision": "INVOCATION_ACCEPT",
             "work_order_id": WORK_ORDER_ID,
-            "proposed_branch_name": "feat/paccess-001-worktree",
-            "proposed_worktree_path": _worktree_path(repo_root),
-            "lock_key": WORK_ORDER_ID,
-            "allowed_paths": [f"modules/foundups/{FID}/**"],
-            "denied_paths": [".env", ".git/**"],
-            "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
-            "cleanup_plan": {"on_failure": "remove_worktree_delete_branch"},
-            "phase_receipts": [],
-            "no_mutation_performed": True,
-            "invocation_receipt_digest": INVOCATION_DIGEST,
-            "plan_digest": PLAN_DIGEST,
+            "policy_gate_decision": "POLICY_ACCEPT",
+            "receipt_id": "receipt-001",
+            "receipt_digest": INVOCATION_DIGEST,
+            "no_execution_performed": True,
+            "rejection_reasons": [],
+            "gates_checked": [],
         },
-        "rejection_reasons": [],
-        "rejection_receipt_digest": "",
-        "no_mutation_performed": True,
-        "phase_receipts": [],
-    }
+        repo_root=str(repo_root),
+        now=NOW,
+    ).to_dict()
     payload.update(overrides)
     return payload
 
@@ -325,7 +327,24 @@ def _handler(
     runner: FakeRunner | None = None,
     resolver: _Resolver | None = None,
     locks: set[str] | None = None,
+    admit: bool = False,
 ):
+    registry = InMemoryWorktreeAdmissionRegistry()
+    if admit:
+        stage_results = chain_store.load()["stage_results"]
+        assert registry.issue(
+            queue_item_id="queue-1",
+            selected_slice="REDDOG_TEST_SLICE_PHASE1",
+            work_order=_work_order(),
+            executor_plan_result=stage_results[EXECUTOR_PLAN_STAGE_KEY],
+            valve_decision=stage_results[EXECUTION_VALVE_STAGE_KEY]["valve_decision"],
+            signed_authority_reverified=True,
+            authoritative_use_lease=AuthoritativeUseLease(
+                lambda: True,
+                expires_at_epoch=2_000_000_000,
+                trusted_now_epoch=lambda: 1_000_000_000,
+            ),
+        )
     return build_reddog_resident_queue_worktree_create_stage_handler(
         chain_results_store=chain_store,
         work_order_resolver=resolver or _Resolver(_work_order()),
@@ -333,6 +352,7 @@ def _handler(
         repo_root=repo_root,
         now=NOW,
         locks=locks,
+        worktree_admission_registry=registry,
     )
 
 
@@ -352,6 +372,7 @@ def test_dispatcher_records_worktree_create_and_advances_to_bounded_worker_pilot
                 repo_root=repo_root,
                 runner=runner,
                 resolver=resolver,
+                admit=True,
             )
         },
         now_iso=NOW_ISO,
@@ -378,6 +399,29 @@ def test_dispatcher_records_worktree_create_and_advances_to_bounded_worker_pilot
     assert stage["no_hermes_dispatch_performed"] is True
     assert [call[0] for call in runner.calls] == ["create_worktree"]
     assert Path(stage["worktree_create_result"]["worktree_path"]).exists()
+
+
+def test_persisted_accepted_stage_results_are_audit_only(tmp_path: Path) -> None:
+    repo_root = _repo_root(tmp_path)
+    chain_store = _seeded_store(repo_root)
+    runner = FakeRunner()
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            WORKTREE_CREATE_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                repo_root=repo_root,
+                runner=runner,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is False
+    assert "authoritative_worktree_admission_missing" in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_missing_executor_plan_stage_rejects_direct_handler_call(tmp_path: Path) -> None:
@@ -494,6 +538,7 @@ def test_runner_failure_is_not_recorded_by_dispatcher(tmp_path: Path) -> None:
                 chain_store=chain_store,
                 repo_root=repo_root,
                 runner=runner,
+                admit=True,
             )
         },
         now_iso=NOW_ISO,

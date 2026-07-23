@@ -1591,11 +1591,12 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
             run_reddog_main_wre_queue_consumer_bootstrap,
         )
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
-            resident_queue_runtime_file_path,
+            resident_queue_runtime_file_path, resident_queue_runtime_root_path,
         )
 
         result = run_reddog_main_wre_queue_consumer_bootstrap(
             repo_root=repo_root,
+            runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
             work_state_path=resident_queue_runtime_file_path(
                 os.environ,
                 repo_root,
@@ -3183,6 +3184,7 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         REDDOG_AUTHORITY_RUNTIME_STATE_PATH                  Outside-repo authority-runtime JSON
         REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission snapshot JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal authority JSON
+        REDDOG_WORK_ORDERS_PATH                              Outside-repo canonical work-order JSON
         REDDOG_RESIDENT_QUEUE_NOW_EPOCH                      Optional runtime epoch for authority checks
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
     """
@@ -3199,10 +3201,12 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         )
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
             resident_queue_runtime_file_path,
+            resident_queue_runtime_root_path,
         )
 
         result = run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
             repo_root=repo_root,
+            runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
             work_state_path=resident_queue_runtime_file_path(
                 os.environ,
                 repo_root,
@@ -3220,6 +3224,7 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
                 "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
             )
             or None,
+            work_orders_path=os.getenv("REDDOG_WORK_ORDERS_PATH", "") or None,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
         )
     except Exception as exc:
@@ -3371,6 +3376,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_outcome_ratchet_store_path,
             resident_queue_pattern_memory_admission_db_path,
             resident_queue_runtime_file_path,
+            resident_queue_runtime_root_path,
             resident_queue_worktree_runner_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
@@ -3724,6 +3730,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
+            runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
             work_state_path=resident_queue_runtime_file_path(
                 os.environ,
                 repo_root,

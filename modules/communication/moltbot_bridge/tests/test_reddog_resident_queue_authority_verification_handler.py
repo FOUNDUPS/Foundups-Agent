@@ -203,6 +203,7 @@ def _profile() -> dict[str, object]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": REPO,
         "foundup_id": FID,
+        "base_ref": "main",
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
         "requested_operation": "create_foundup",
@@ -219,10 +220,16 @@ def _profile() -> dict[str, object]:
     }
 
 
+class _WorkOrderResolver:
+    def resolve(self, *, work_order_id, queue_item_id, selected_slice):
+        return {"work_order_id": work_order_id, "base_ref": "main"}
+
+
 def _seed_runtime(chain_store: InMemoryResidentQueueChainResultsStore, signer: _MockSignerVerifier) -> None:
     request_handler = build_reddog_resident_queue_authority_request_stage_handler(
         work_state_snapshot=_snapshot(),
         authority_profile=_profile(),
+        work_order_resolver=_WorkOrderResolver(),
         now_iso=NOW_ISO,
     )
     request_result = invoke_reddog_resident_queue_next_stage_dispatch(

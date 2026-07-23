@@ -12,8 +12,9 @@ or re-index HoloIndex.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     ResidentQueueStageDispatchRequest,
@@ -34,8 +35,19 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
 FAIL_DISPATCH_STAGE_MISMATCH = "FAIL_DISPATCH_STAGE_MISMATCH"
 FAIL_DISPATCH_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_NEXT_ACTION_MISMATCH"
 FAIL_QUEUE_SELECTION_MISMATCH = "FAIL_QUEUE_SELECTION_MISMATCH"
+FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
 
 AUTHORITY_REQUEST_STAGE_KEY = "authority_request"
+
+
+class ResidentQueueAuthorityRequestWorkOrderResolver(Protocol):
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: Optional[str],
+        selected_slice: Optional[str],
+    ) -> Mapping[str, Any]: ...
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -77,6 +89,7 @@ class ResidentQueueAuthorityRequestStageHandler:
 
     work_state_snapshot: Mapping[str, Any]
     authority_profile: Mapping[str, Any]
+    work_order_resolver: ResidentQueueAuthorityRequestWorkOrderResolver
     now_iso: str
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
@@ -110,9 +123,24 @@ class ResidentQueueAuthorityRequestStageHandler:
             ]
             return _reject(*reasons)
 
+        queue_item_id = str(request.queue_item_id or "")
+        work_order_id = str(self.authority_profile.get("work_order_id") or "") or (
+            "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
+        )
+        work_order = _mapping(
+            self.work_order_resolver.resolve(
+                work_order_id=work_order_id,
+                queue_item_id=request.queue_item_id,
+                selected_slice=request.selected_slice,
+            )
+        )
+        if not work_order:
+            return _reject(FAIL_WORK_ORDER_MISSING, f"work_order_id:{work_order_id}")
+
         result = plan_reddog_wre_queue_authority_request_dry_run(
             queue_consumer_result=queue_consumer,
             authority_profile=_mapping(self.authority_profile),
+            work_order=work_order,
         )
         return result.to_dict()
 
@@ -121,6 +149,7 @@ def build_reddog_resident_queue_authority_request_stage_handler(
     *,
     work_state_snapshot: Mapping[str, Any],
     authority_profile: Mapping[str, Any],
+    work_order_resolver: ResidentQueueAuthorityRequestWorkOrderResolver,
     now_iso: str,
 ) -> ResidentQueueAuthorityRequestStageHandler:
     """Build the injected handler for the resident queue dispatcher."""
@@ -128,6 +157,7 @@ def build_reddog_resident_queue_authority_request_stage_handler(
     return ResidentQueueAuthorityRequestStageHandler(
         work_state_snapshot=work_state_snapshot,
         authority_profile=authority_profile,
+        work_order_resolver=work_order_resolver,
         now_iso=now_iso,
     )
 
@@ -137,6 +167,8 @@ __all__ = [
     "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_STAGE_MISMATCH",
     "FAIL_QUEUE_SELECTION_MISMATCH",
+    "FAIL_WORK_ORDER_MISSING",
     "ResidentQueueAuthorityRequestStageHandler",
+    "ResidentQueueAuthorityRequestWorkOrderResolver",
     "build_reddog_resident_queue_authority_request_stage_handler",
 ]

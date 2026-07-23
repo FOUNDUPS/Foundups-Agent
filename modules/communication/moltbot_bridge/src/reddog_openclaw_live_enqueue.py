@@ -15,7 +15,13 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Mapping, Optional, Protocol, Sequence, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, Protocol, Sequence, Union
+
+from modules.communication.moltbot_bridge.src.reddog_effect_commit_outcome import (
+    EFFECT_COMMITTED,
+    EFFECT_INDETERMINATE,
+    EFFECT_NOT_COMMITTED,
+)
 
 from modules.communication.moltbot_bridge.src.reddog_openclaw_adapter_dryrun import (
     ADAPTER_DRYRUN_ACCEPT,
@@ -53,6 +59,7 @@ class LiveEnqueueReason:
     IDEMPOTENCY_REPLAY = "REJECT_LIVE_ENQUEUE_REPLAY"
     WRITER_MISSING = "REJECT_LIVE_ENQUEUE_WRITER_MISSING"
     WRITER_REJECTED = "REJECT_LIVE_ENQUEUE_WRITER_REJECTED"
+    AUTHORITATIVE_ADMISSION_MISSING = "REJECT_AUTHORITATIVE_LIVE_ENQUEUE_ADMISSION_MISSING"
 
 
 class LiveEnqueueWriter(Protocol):
@@ -78,6 +85,8 @@ class RedDogOpenClawLiveEnqueueReceipt:
     no_execution_performed: bool
     no_reward_settlement_performed: bool
     created_at: str
+    effect_commit_state: str
+    effect_attempt_key: str
     receipt_digest: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
@@ -91,7 +100,11 @@ class RedDogOpenClawLiveEnqueueResult:
     target_type: str
     rejection_reasons: List[str] = field(default_factory=list)
     receipt: Optional[RedDogOpenClawLiveEnqueueReceipt] = None
-    live_enqueue_performed: bool = False
+    live_enqueue_performed: Optional[bool] = False
+    effect_commit_state: str = EFFECT_NOT_COMMITTED
+    effect_attempt_key: str = ""
+    reconciliation_required: bool = False
+    reconciliation_data: Dict[str, Any] = field(default_factory=dict)
     no_execution_performed: bool = True
     no_reward_settlement_performed: bool = True
 
@@ -146,13 +159,46 @@ def _live_enqueue_key(work_order_id: str, adapter_receipt_digest: str) -> str:
     return f"{work_order_id}:{adapter_receipt_digest}"
 
 
-def _reject(work_order_id: str, target_type: str, reasons: Sequence[str]) -> RedDogOpenClawLiveEnqueueResult:
+def _live_enqueue_attempt_key(
+    *,
+    work_order_id: str,
+    target_type: str,
+    adapter_digest: str,
+    intake: Mapping[str, Any],
+) -> str:
+    evidence = {
+        "work_order_id": work_order_id,
+        "target_type": target_type,
+        "adapter_digest": adapter_digest,
+        "proposed_intake_digest": _canonical_digest(dict(intake)),
+    }
+    return "live-enqueue-attempt-" + _canonical_digest(evidence)[:24]
+
+
+def _reject(
+    work_order_id: str,
+    target_type: str,
+    reasons: Sequence[str],
+    *,
+    effect_attempt_key: str = "",
+    effect_commit_state: str = EFFECT_NOT_COMMITTED,
+    reconciliation_required: bool = False,
+    reconciliation_data: Optional[Mapping[str, Any]] = None,
+) -> RedDogOpenClawLiveEnqueueResult:
     return RedDogOpenClawLiveEnqueueResult(
         decision=LIVE_ENQUEUE_REJECT,
         work_order_id=work_order_id or "unknown",
         target_type=target_type or "",
         rejection_reasons=list(dict.fromkeys(reasons)),
-        live_enqueue_performed=False,
+        live_enqueue_performed=(
+            None if effect_commit_state == EFFECT_INDETERMINATE else False
+        ),
+        effect_commit_state=effect_commit_state,
+        effect_attempt_key=effect_attempt_key,
+        reconciliation_required=reconciliation_required,
+        reconciliation_data=dict(
+            reconciliation_data or {"effect_attempted": False, "next_action": "none"}
+        ),
         no_execution_performed=True,
         no_reward_settlement_performed=True,
     )
@@ -190,6 +236,106 @@ def _validate_inputs(
     return list(dict.fromkeys(reasons))
 
 
+def _receipt_seed(
+    *,
+    work_order_id: str,
+    target_type: str,
+    intake: Mapping[str, Any],
+    adapter_digest: str,
+    policy: Mapping[str, Any],
+    chain: Mapping[str, Any],
+    valve: Mapping[str, Any],
+    checked_at: str,
+    effect_attempt_key: str,
+) -> Dict[str, Any]:
+    return {
+        "work_order_id": work_order_id,
+        "target_type": target_type,
+        "proposed_intake_digest": _canonical_digest(dict(intake)),
+        "adapter_dryrun_receipt_digest": adapter_digest,
+        "policy_gate_receipt_digest": str(policy.get("receipt_digest") or ""),
+        "signature_gate_digest": str(policy.get("signature_gate_digest") or ""),
+        "signed_receipt_chain_terminal_hash": chain.get("terminal_receipt_hash"),
+        "valve_decision_digest": str(valve.get("decision_digest") or ""),
+        "created_at": checked_at,
+        "effect_attempt_key": effect_attempt_key,
+    }
+
+
+def _call_writer(
+    writer: LiveEnqueueWriter,
+    *,
+    target_type: str,
+    intake: Mapping[str, Any],
+    provisional_receipt: Mapping[str, Any],
+) -> tuple[str, Optional[Mapping[str, Any]], str]:
+    try:
+        if target_type == TARGET_AUTONOMOUS_TASK:
+            result = writer.enqueue_autonomous_task(dict(intake), provisional_receipt)
+        else:
+            result = writer.enqueue_foundup_job(dict(intake), provisional_receipt)
+    except Exception as exc:
+        return EFFECT_INDETERMINATE, None, type(exc).__name__
+    if isinstance(result, Mapping) and result.get("ok") is True:
+        return EFFECT_COMMITTED, result, ""
+    return EFFECT_NOT_COMMITTED, None, "writer_rejected"
+
+
+def _accepted_live_enqueue_result(
+    *,
+    seed: Mapping[str, Any],
+    write_result: Mapping[str, Any],
+) -> RedDogOpenClawLiveEnqueueResult:
+    live_enqueue_id = "live-enqueue-" + _canonical_digest(seed)[:16]
+    receipt = RedDogOpenClawLiveEnqueueReceipt(
+        live_enqueue_id=live_enqueue_id,
+        work_order_id=str(seed["work_order_id"]),
+        target_type=str(seed["target_type"]),
+        proposed_intake_digest=str(seed["proposed_intake_digest"]),
+        adapter_dryrun_receipt_digest=str(seed["adapter_dryrun_receipt_digest"]),
+        policy_gate_receipt_digest=str(seed["policy_gate_receipt_digest"]),
+        signature_gate_digest=str(seed["signature_gate_digest"]),
+        signed_receipt_chain_terminal_hash=seed["signed_receipt_chain_terminal_hash"],
+        valve_decision_digest=str(seed["valve_decision_digest"]),
+        openclaw_queue_item_id=(
+            None
+            if write_result.get("openclaw_queue_item_id") is None
+            else str(write_result.get("openclaw_queue_item_id"))
+        ),
+        agentdb_task_id=(
+            None
+            if write_result.get("agentdb_task_id") is None
+            else str(write_result.get("agentdb_task_id"))
+        ),
+        live_enqueue_performed=True,
+        no_execution_performed=True,
+        no_reward_settlement_performed=True,
+        created_at=str(seed["created_at"]),
+        effect_commit_state=EFFECT_COMMITTED,
+        effect_attempt_key=str(seed["effect_attempt_key"]),
+    )
+    receipt.receipt_digest = _canonical_digest(
+        {key: value for key, value in receipt.to_dict().items() if key != "receipt_digest"}
+    )
+    return RedDogOpenClawLiveEnqueueResult(
+        decision=LIVE_ENQUEUE_ACCEPT,
+        work_order_id=receipt.work_order_id,
+        target_type=receipt.target_type,
+        receipt=receipt,
+        live_enqueue_performed=True,
+        effect_commit_state=EFFECT_COMMITTED,
+        effect_attempt_key=receipt.effect_attempt_key,
+        reconciliation_required=False,
+        reconciliation_data={
+            "effect_attempted": True,
+            "live_enqueue_id": receipt.live_enqueue_id,
+            "openclaw_queue_item_id": receipt.openclaw_queue_item_id,
+            "agentdb_task_id": receipt.agentdb_task_id,
+            "next_action": "none",
+        },
+    )
+
+
 def perform_reddog_openclaw_live_enqueue(
     adapter_result: Union[RedDogOpenClawAdapterDryRunResult, Mapping[str, Any]],
     policy_gate_receipt: Mapping[str, Any],
@@ -199,6 +345,7 @@ def perform_reddog_openclaw_live_enqueue(
     writer: Optional[LiveEnqueueWriter],
     seen_live_enqueue_keys: Optional[set] = None,
     now: Optional[datetime] = None,
+    admission_consumer: Optional[Callable[[], bool]] = None,
 ) -> RedDogOpenClawLiveEnqueueResult:
     """Validate and enqueue a proposed OpenClaw intake item through an injected writer."""
     adapter = _mapping(adapter_result)
@@ -207,89 +354,95 @@ def perform_reddog_openclaw_live_enqueue(
     valve = _mapping(valve_decision)
     intake = _intake_mapping(adapter)
     adapter_receipt = _adapter_receipt_mapping(adapter)
-
     work_order_id = str(adapter.get("work_order_id") or intake.get("work_order_id") or "unknown")
     target_type = str(intake.get("target_type") or adapter_receipt.get("target_type") or "")
+    adapter_digest = str(adapter_receipt.get("adapter_receipt_digest") or "")
+    effect_attempt_key = _live_enqueue_attempt_key(
+        work_order_id=work_order_id,
+        target_type=target_type,
+        adapter_digest=adapter_digest,
+        intake=intake,
+    )
     reasons = _validate_inputs(adapter, policy, chain, valve, intake)
     if writer is None:
         reasons.append(LiveEnqueueReason.WRITER_MISSING)
-
-    adapter_digest = str(adapter_receipt.get("adapter_receipt_digest") or "")
     replay_key = _live_enqueue_key(work_order_id, adapter_digest)
     if seen_live_enqueue_keys is not None and replay_key in seen_live_enqueue_keys:
         reasons.append(LiveEnqueueReason.IDEMPOTENCY_REPLAY)
-
     deduped = list(dict.fromkeys(reasons))
     if deduped:
-        return _reject(work_order_id, target_type, deduped)
-
+        return _reject(
+            work_order_id,
+            target_type,
+            deduped,
+            effect_attempt_key=effect_attempt_key,
+        )
     assert writer is not None
-    checked_at = _iso8601(_utc_now(now))
-    proposed_intake_digest = _canonical_digest(dict(intake))
-    receipt_seed = {
-        "work_order_id": work_order_id,
-        "target_type": target_type,
-        "proposed_intake_digest": proposed_intake_digest,
-        "adapter_dryrun_receipt_digest": adapter_digest,
-        "policy_gate_receipt_digest": str(policy.get("receipt_digest") or ""),
-        "signature_gate_digest": str(policy.get("signature_gate_digest") or ""),
-        "signed_receipt_chain_terminal_hash": chain.get("terminal_receipt_hash"),
-        "valve_decision_digest": str(valve.get("decision_digest") or ""),
-        "created_at": checked_at,
-    }
-    live_enqueue_id = "live-enqueue-" + _canonical_digest(receipt_seed)[:16]
+    receipt_seed = _receipt_seed(
+        work_order_id=work_order_id,
+        target_type=target_type,
+        intake=intake,
+        adapter_digest=adapter_digest,
+        policy=policy,
+        chain=chain,
+        valve=valve,
+        checked_at=_iso8601(_utc_now(now)),
+        effect_attempt_key=effect_attempt_key,
+    )
     provisional_receipt = {
         **receipt_seed,
-        "live_enqueue_id": live_enqueue_id,
-        "live_enqueue_performed": False,
+        "live_enqueue_id": "live-enqueue-" + _canonical_digest(receipt_seed)[:16],
+        "live_enqueue_performed": None,
+        "effect_commit_state": EFFECT_INDETERMINATE,
+        "reconciliation_required": True,
         "no_execution_performed": True,
         "no_reward_settlement_performed": True,
     }
-
     try:
-        if target_type == TARGET_AUTONOMOUS_TASK:
-            write_result = writer.enqueue_autonomous_task(dict(intake), provisional_receipt)
-        else:
-            write_result = writer.enqueue_foundup_job(dict(intake), provisional_receipt)
+        admitted = admission_consumer is not None and admission_consumer() is True
     except Exception:
-        return _reject(work_order_id, target_type, [LiveEnqueueReason.WRITER_REJECTED])
+        admitted = False
+    if not admitted:
+        return _reject(
+            work_order_id,
+            target_type,
+            [LiveEnqueueReason.AUTHORITATIVE_ADMISSION_MISSING],
+            effect_attempt_key=effect_attempt_key,
+        )
 
-    if not isinstance(write_result, Mapping) or write_result.get("ok") is not True:
-        return _reject(work_order_id, target_type, [LiveEnqueueReason.WRITER_REJECTED])
+    commit_state, write_result, writer_error = _call_writer(
+        writer,
+        target_type=target_type,
+        intake=intake,
+        provisional_receipt=provisional_receipt,
+    )
+    if commit_state != EFFECT_COMMITTED or write_result is None:
+        return _reject(
+            work_order_id,
+            target_type,
+            [LiveEnqueueReason.WRITER_REJECTED],
+            effect_attempt_key=effect_attempt_key,
+            effect_commit_state=commit_state,
+            reconciliation_required=commit_state == EFFECT_INDETERMINATE,
+            reconciliation_data={
+                "effect_attempted": True,
+                "target_type": target_type,
+                "work_order_id": work_order_id,
+                "writer_error_type": writer_error,
+                "next_action": (
+                    "query_openclaw_queue_by_effect_attempt_key"
+                    if commit_state == EFFECT_INDETERMINATE
+                    else "none"
+                ),
+            },
+        )
 
     if seen_live_enqueue_keys is not None:
         seen_live_enqueue_keys.add(replay_key)
 
-    receipt = RedDogOpenClawLiveEnqueueReceipt(
-        live_enqueue_id=live_enqueue_id,
-        work_order_id=work_order_id,
-        target_type=target_type,
-        proposed_intake_digest=proposed_intake_digest,
-        adapter_dryrun_receipt_digest=adapter_digest,
-        policy_gate_receipt_digest=str(policy.get("receipt_digest") or ""),
-        signature_gate_digest=str(policy.get("signature_gate_digest") or ""),
-        signed_receipt_chain_terminal_hash=(
-            None if chain.get("terminal_receipt_hash") is None else str(chain.get("terminal_receipt_hash"))
-        ),
-        valve_decision_digest=str(valve.get("decision_digest") or ""),
-        openclaw_queue_item_id=None if write_result.get("openclaw_queue_item_id") is None else str(write_result.get("openclaw_queue_item_id")),
-        agentdb_task_id=None if write_result.get("agentdb_task_id") is None else str(write_result.get("agentdb_task_id")),
-        live_enqueue_performed=True,
-        no_execution_performed=True,
-        no_reward_settlement_performed=True,
-        created_at=checked_at,
-    )
-    receipt.receipt_digest = _canonical_digest({k: v for k, v in receipt.to_dict().items() if k != "receipt_digest"})
-
-    return RedDogOpenClawLiveEnqueueResult(
-        decision=LIVE_ENQUEUE_ACCEPT,
-        work_order_id=work_order_id,
-        target_type=target_type,
-        rejection_reasons=[],
-        receipt=receipt,
-        live_enqueue_performed=True,
-        no_execution_performed=True,
-        no_reward_settlement_performed=True,
+    return _accepted_live_enqueue_result(
+        seed=receipt_seed,
+        write_result=write_result,
     )
 
 

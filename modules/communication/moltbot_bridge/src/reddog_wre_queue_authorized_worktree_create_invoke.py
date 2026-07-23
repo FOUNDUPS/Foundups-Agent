@@ -16,6 +16,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, MutableSet, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    InMemoryWorktreeAdmissionRegistry,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
 )
@@ -41,6 +45,7 @@ class QueueAuthorizedWorktreeCreateInvokeReason:
     VALVE_PAYLOAD_MISSING = "REJECT_VALVE_PAYLOAD_MISSING"
     RUNNER_REQUIRED = "REJECT_INJECTED_WORKTREE_RUNNER_REQUIRED"
     WORKTREE_CREATE_NOT_ACCEPTED = "REJECT_WORKTREE_CREATE_NOT_ACCEPTED"
+    AUTHORITATIVE_ADMISSION_MISSING = "REJECT_AUTHORITATIVE_WORKTREE_ADMISSION_MISSING"
 
 
 @dataclass(frozen=True)
@@ -89,6 +94,25 @@ def _reject(
     )
 
 
+def _accepted_queue_payloads(
+    queue_executor_plan_result: Mapping[str, Any],
+    queue_execution_valve_result: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], Mapping[str, Any], Mapping[str, Any], Optional[str]]:
+    queue_executor = _mapping(queue_executor_plan_result)
+    if queue_executor.get("decision") != QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT:
+        return {}, {}, {}, QueueAuthorizedWorktreeCreateInvokeReason.EXECUTOR_PLAN_NOT_ACCEPTED
+    executor_payload = _mapping(queue_executor.get("executor_plan_result"))
+    if not executor_payload:
+        return {}, {}, {}, QueueAuthorizedWorktreeCreateInvokeReason.EXECUTOR_PLAN_PAYLOAD_MISSING
+    queue_valve = _mapping(queue_execution_valve_result)
+    if queue_valve.get("decision") != QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT:
+        return {}, {}, {}, QueueAuthorizedWorktreeCreateInvokeReason.VALVE_NOT_ACCEPTED
+    valve_payload = _mapping(queue_valve.get("valve_decision"))
+    if not valve_payload:
+        return {}, {}, {}, QueueAuthorizedWorktreeCreateInvokeReason.VALVE_PAYLOAD_MISSING
+    return queue_executor, executor_payload, valve_payload, None
+
+
 def invoke_reddog_wre_queue_authorized_worktree_create(
     *,
     explicit_queue_authorized_worktree_create_requested: bool,
@@ -97,6 +121,9 @@ def invoke_reddog_wre_queue_authorized_worktree_create(
     work_order: Mapping[str, Any],
     runner: Optional[Any],
     repo_root: Path,
+    admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
+    queue_item_id: Optional[str] = None,
+    selected_slice: Optional[str] = None,
     now: Optional[datetime] = None,
     locks: Optional[MutableSet[str]] = None,
 ) -> QueueAuthorizedWorktreeCreateInvokeResult:
@@ -112,30 +139,17 @@ def invoke_reddog_wre_queue_authorized_worktree_create(
             [QueueAuthorizedWorktreeCreateInvokeReason.RUNNER_REQUIRED],
             explicit_requested=True,
         )
-
-    queue_executor = _mapping(queue_executor_plan_result)
-    if queue_executor.get("decision") != QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT:
-        return _reject(
-            [QueueAuthorizedWorktreeCreateInvokeReason.EXECUTOR_PLAN_NOT_ACCEPTED],
-            explicit_requested=True,
+    queue_executor, executor_payload, valve_payload, payload_reason = (
+        _accepted_queue_payloads(
+            queue_executor_plan_result,
+            queue_execution_valve_result,
         )
-    executor_payload = _mapping(queue_executor.get("executor_plan_result"))
-    if not executor_payload:
+    )
+    if payload_reason:
+        return _reject([payload_reason], explicit_requested=True)
+    if admission_registry is None:
         return _reject(
-            [QueueAuthorizedWorktreeCreateInvokeReason.EXECUTOR_PLAN_PAYLOAD_MISSING],
-            explicit_requested=True,
-        )
-
-    queue_valve = _mapping(queue_execution_valve_result)
-    if queue_valve.get("decision") != QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT:
-        return _reject(
-            [QueueAuthorizedWorktreeCreateInvokeReason.VALVE_NOT_ACCEPTED],
-            explicit_requested=True,
-        )
-    valve_payload = _mapping(queue_valve.get("valve_decision"))
-    if not valve_payload:
-        return _reject(
-            [QueueAuthorizedWorktreeCreateInvokeReason.VALVE_PAYLOAD_MISSING],
+            [QueueAuthorizedWorktreeCreateInvokeReason.AUTHORITATIVE_ADMISSION_MISSING],
             explicit_requested=True,
         )
 
@@ -147,6 +161,14 @@ def invoke_reddog_wre_queue_authorized_worktree_create(
         repo_root=repo_root,
         now=now,
         locks=locks,
+        admission_consumer=lambda: admission_registry.consume(
+            queue_item_id=queue_item_id,
+            selected_slice=selected_slice,
+            work_order=work_order,
+            executor_plan_result=queue_executor,
+            valve_decision=valve_payload,
+        )
+        is not None,
     )
     if worktree.decision != WORKTREE_CREATE_ACCEPT:
         return _reject(

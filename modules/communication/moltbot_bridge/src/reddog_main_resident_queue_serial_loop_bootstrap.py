@@ -19,11 +19,17 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any, Mapping, Optional
+
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
+)
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
@@ -44,11 +50,22 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handler_registry import (
     build_reddog_resident_queue_stage_handler_registry,
 )
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    GovernedValveUseTimeAuthorityResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    CANONICAL_ENVIRONMENT_SCHEMA_VERSION,
+    VALVE_OPEN_WORKTREE_CREATE,
+    GovernedExecutionValveEnvironment,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     plan_reddog_wre_queue_authority_request_dry_run,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
 )
 from modules.ai_intelligence.ai_gateway.src.model_feedback_ledger import (
     JsonlModelFeedbackLedgerStore,
@@ -125,6 +142,7 @@ class JsonResidentQueueWorkOrderResolver:
 def run_reddog_main_resident_queue_serial_loop_bootstrap(
     *,
     repo_root: Path | str,
+    runtime_allowed_root: Path | str | None = None,
     work_state_path: Path | str | None,
     chain_results_path: Path | str | None,
     authority_profile_path: Path | str | None,
@@ -181,8 +199,16 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     """Load runtime inputs and run the bounded resident queue serial loop."""
 
     root = Path(repo_root).resolve()
+    if runtime_allowed_root is None:
+        return _not_ready(("missing_runtime_artifact_root",), chain_results_path=None)
+    runtime_root = Path(os.path.abspath(Path(runtime_allowed_root).expanduser()))
+    try:
+        validate_runtime_root_path(runtime_root, repo_root=root)
+    except ValueError:
+        return _not_ready(("invalid_runtime_artifact_root",), chain_results_path=None)
     snapshot, snapshot_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         work_state_path,
         missing_reason="missing_authoritative_work_state_path",
         inside_reason="work_state_path_inside_repo",
@@ -194,6 +220,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     profile, profile_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         authority_profile_path,
         missing_reason="missing_authority_profile_path",
         inside_reason="authority_profile_path_inside_repo",
@@ -205,6 +232,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     chain_path, chain_reasons = _resolve_output_outside_repo(
         root,
+        runtime_root,
         chain_results_path,
         missing_reason="missing_chain_results_path",
         inside_reason="chain_results_path_inside_repo",
@@ -215,6 +243,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     work_orders, work_order_reasons = _load_or_materialize_work_orders(
         root,
+        runtime_root,
         work_orders_path,
         mode=work_order_materializer_mode,
         snapshot=snapshot,
@@ -227,6 +256,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     valve_environment, valve_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         valve_environment_path,
         missing_reason="missing_valve_environment_path",
         inside_reason="valve_environment_path_inside_repo",
@@ -235,9 +265,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if valve_reasons:
         return _not_ready(valve_reasons, chain_results_path=None)
+    if valve_environment is not None and (
+        valve_environment.get("schema_version") != CANONICAL_ENVIRONMENT_SCHEMA_VERSION
+    ):
+        return _not_ready(
+            ("governed_execution_valve_environment_required",),
+            chain_results_path=None,
+        )
 
     generic_writer_dryrun_result, generic_writer_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         generic_writer_dryrun_result_path,
         missing_reason="missing_generic_writer_dryrun_result_path",
         inside_reason="generic_writer_dryrun_result_path_inside_repo",
@@ -249,6 +287,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     governed_shell_dryrun_result, governed_shell_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         governed_shell_dryrun_result_path,
         missing_reason="missing_governed_shell_dryrun_result_path",
         inside_reason="governed_shell_dryrun_result_path_inside_repo",
@@ -260,6 +299,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     artifact_contents, artifact_contents_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         artifact_contents_path,
         missing_reason="missing_artifact_contents_path",
         inside_reason="artifact_contents_path_inside_repo",
@@ -271,6 +311,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     artifact_generation_request, artifact_generation_request_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         artifact_generation_request_path,
         missing_reason="missing_artifact_generation_request_path",
         inside_reason="artifact_generation_request_path_inside_repo",
@@ -282,6 +323,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     holoindex_evidence, holoindex_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         holoindex_evidence_path,
         missing_reason="missing_holoindex_evidence_path",
         inside_reason="holoindex_evidence_path_inside_repo",
@@ -293,6 +335,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     verifier_request, verifier_request_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         verifier_request_path,
         missing_reason="missing_verifier_request_path",
         inside_reason="verifier_request_path_inside_repo",
@@ -304,6 +347,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     evidence_producer_request, evidence_producer_request_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         evidence_producer_request_path,
         missing_reason="missing_evidence_producer_request_path",
         inside_reason="evidence_producer_request_path_inside_repo",
@@ -315,6 +359,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     publish_request, publish_request_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         publish_request_path,
         missing_reason="missing_publish_request_path",
         inside_reason="publish_request_path_inside_repo",
@@ -326,6 +371,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     ratchet_request, ratchet_request_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         ratchet_request_path,
         missing_reason="missing_ratchet_request_path",
         inside_reason="ratchet_request_path_inside_repo",
@@ -337,6 +383,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     held_out_gate_request, held_out_gate_request_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         held_out_gate_request_path,
         missing_reason="missing_held_out_gate_request_path",
         inside_reason="held_out_gate_request_path_inside_repo",
@@ -348,6 +395,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     admission_request, admission_request_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         admission_request_path,
         missing_reason="missing_admission_request_path",
         inside_reason="admission_request_path_inside_repo",
@@ -357,7 +405,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if admission_request_reasons:
         return _not_ready(admission_request_reasons, chain_results_path=None)
 
-    chain_state = _read_existing_chain_state(chain_path)
+    chain_state = _read_existing_chain_state(chain_path, runtime_root)
     if (
         artifact_generation_request_binding_enabled
         and artifact_contents is None
@@ -381,6 +429,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
         root,
+        runtime_root,
         injected_store=outcome_ratchet_store,
         store_path=outcome_ratchet_store_path,
     )
@@ -389,6 +438,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     resolved_model_feedback_store, model_feedback_store_reasons = _build_model_feedback_ledger_store(
         root,
+        runtime_root,
         injected_store=model_feedback_ledger_store,
         store_path=model_feedback_ledger_store_path,
     )
@@ -420,6 +470,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
     dependency_bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=root,
+        runtime_allowed_root=runtime_root,
         authority_state_path=authority_state_path,
         permission_snapshots_path=permission_snapshots_path,
         principal_authority_records_path=principal_authority_records_path,
@@ -438,7 +489,39 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             runtime_dependency_bundle_requested=dependency_bundle.requested,
         )
 
-    store = AtomicJsonResidentQueueChainResultsStore(chain_path)
+    governed_environment = None
+    governed_authority_resolver = None
+    if isinstance(valve_environment, Mapping):
+        try:
+            governed_environment = GovernedExecutionValveEnvironment.from_mapping(
+                valve_environment
+            )
+        except ValueError as exc:
+            return _not_ready((str(exc),), chain_results_path=None)
+        governed_authority_resolver = GovernedValveUseTimeAuthorityResolver(
+            repo_root=root,
+            work_state_path=_runtime_input_path(root, work_state_path),
+            authority_profile_path=_runtime_input_path(root, authority_profile_path),
+            permission_snapshots_path=_runtime_input_path(root, permission_snapshots_path),
+            principal_authority_records_path=_runtime_input_path(
+                root, principal_authority_records_path
+            ),
+            valve_environment_path=_runtime_input_path(root, valve_environment_path),
+            runtime_allowed_root=runtime_root,
+            signature_verifier=dependency_bundle.signature_verifier,
+            principal_key_resolver=dependency_bundle.principal_key_resolver,
+            nonce_store=dependency_bundle.nonce_store,
+            snapshot_resolver=dependency_bundle.snapshot_resolver,
+            revocation_oracle=dependency_bundle.revocation_oracle,
+            now_epoch=int(dependency_bundle.now_epoch or 0),
+            required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
+            trusted_now_epoch=lambda: int(datetime.now().timestamp()),
+        )
+
+    store = AtomicJsonResidentQueueChainResultsStore(
+        chain_path,
+        allowed_root=runtime_root,
+    )
     run_now = _parse_datetime(now_iso) if now_iso else None
     registry = build_reddog_resident_queue_stage_handler_registry(
         work_state_snapshot=snapshot,
@@ -458,7 +541,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             JsonResidentQueueWorkOrderResolver(work_orders) if work_orders is not None else None
         ),
         repo_root=root,
-        valve_environment=valve_environment,
+        valve_environment=governed_environment,
+        governed_use_time_authority_resolver=governed_authority_resolver,
         worktree_runner=resolved_worktree_runner,
         pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
         generic_writer_dryrun_result=generic_writer_dryrun_result,
@@ -522,6 +606,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
 
 def _read_json_outside_repo(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
     *,
     missing_reason: str,
@@ -531,17 +616,23 @@ def _read_json_outside_repo(
 ) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
     if not value:
         return None, (missing_reason,) if required else ()
-    path = Path(value)
-    if not path.is_absolute():
-        path = (repo_root / path).resolve()
-    else:
-        path = path.resolve()
-    if _is_inside(path, repo_root):
+    raw_path = Path(value)
+    candidate = raw_path if raw_path.is_absolute() else repo_root / raw_path
+    candidate = Path(os.path.abspath(candidate.expanduser()))
+    if _is_inside(candidate, repo_root):
         return None, (inside_reason,)
-    if not path.exists() or not path.is_file():
+    if not candidate.exists() or not candidate.is_file():
         return None, (missing_reason,)
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        validate_runtime_artifact_path(
+            candidate,
+            repo_root=repo_root,
+            allowed_root=allowed_root,
+        )
+        payload = read_reddog_runtime_json_mapping(
+            candidate,
+            allowed_root=allowed_root,
+        )
     except Exception:
         return None, (unreadable_reason,)
     if not isinstance(payload, Mapping):
@@ -549,12 +640,22 @@ def _read_json_outside_repo(
     return payload, ()
 
 
+def _runtime_input_path(repo_root: Path, value: Path | str | None) -> Optional[Path]:
+    if not value:
+        return None
+    path = Path(value)
+    candidate = path if path.is_absolute() else repo_root / path
+    return Path(os.path.abspath(candidate.expanduser()))
+
+
 def _load_work_orders(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
 ) -> tuple[Optional[Mapping[str, Mapping[str, Any]]], tuple[str, ...]]:
     payload, reasons = _read_json_outside_repo(
         repo_root,
+        allowed_root,
         value,
         missing_reason="missing_work_orders_path",
         inside_reason="work_orders_path_inside_repo",
@@ -581,6 +682,7 @@ def _load_work_orders(
 
 def _load_or_materialize_work_orders(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
     *,
     mode: str | None,
@@ -595,7 +697,7 @@ def _load_or_materialize_work_orders(
     if normalized_mode and normalized_mode != WORK_ORDER_MATERIALIZER_MODE_AUTHORITY_PROFILE:
         return None, ("unsupported_work_order_materializer_mode",)
 
-    work_orders, reasons = _load_work_orders(repo_root, value)
+    work_orders, reasons = _load_work_orders(repo_root, allowed_root, value)
     if reasons or work_orders is not None or not normalized_mode:
         return work_orders, reasons
 
@@ -618,15 +720,28 @@ def _materialize_work_orders_from_authority_profile(
         snapshot,
         now_iso=now_iso,
         requested_queue_item_id=requested_queue_item_id,
+        require_governed_lineage=True,
     )
     if queue_result.accepted is not True:
         return None, tuple(
             f"work_order_materializer_queue:{reason}" for reason in queue_result.rejection_reasons
         )
 
+    queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
+    queue_item_id = str(queue_receipt.get("queue_item_id") or "")
+    materialization_binding_seed = {
+        "schema_version": "reddog_work_order_materialization_binding_seed.v1",
+        "work_order_id": str(
+            authority_profile.get("work_order_id")
+            or "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
+        ),
+        "base_ref": authority_profile.get("base_ref"),
+        "queue_consumer_receipt_digest": _canonical_digest(queue_receipt),
+    }
     authority_request = plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=queue_result.to_dict(),
         authority_profile=authority_profile,
+        work_order=materialization_binding_seed,
     )
     if authority_request.accepted is not True or authority_request.delegated_authority_request is None:
         return None, tuple(
@@ -642,7 +757,6 @@ def _materialize_work_orders_from_authority_profile(
     if not work_order_id:
         return None, ("work_order_materializer_missing_work_order_id",)
 
-    queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
     queue_item = _queue_item(snapshot=snapshot, queue_item_id=str(queue_receipt.get("queue_item_id") or ""))
     queue_wsp15_allocation = _nested_mapping(queue_item, "wsp15_allocation_receipt")
     slice_id = str(queue_receipt.get("slice_id") or "")
@@ -691,6 +805,7 @@ def _materialize_work_orders_from_authority_profile(
         "authenticated_principal": str(request.get("principal_id") or ""),
         "principal_provider": str(request.get("principal_provider") or ""),
         "repo_full_name": str(request.get("repo_full_name") or ""),
+        "foundup_id": str(request.get("foundup_id") or ""),
         "repo_permission_snapshot": {
             "permission_level": str(authority_profile.get("permission_level") or "write"),
             "captured_at": str(authority_profile.get("permission_captured_at") or created_at),
@@ -698,6 +813,7 @@ def _materialize_work_orders_from_authority_profile(
             "digest": str(request.get("permission_snapshot_digest") or ""),
         },
         "requested_operation": str(request.get("requested_operation") or ""),
+        "valve_state_required": str(request.get("valve_state_required") or ""),
         "authority_tier": str(authority_profile.get("authority_tier") or "source"),
         "allowed_paths": _string_list(request.get("allowed_paths")),
         "denied_paths": _string_list(request.get("denied_paths")),
@@ -705,7 +821,7 @@ def _materialize_work_orders_from_authority_profile(
             authority_profile.get("branch_name")
             or _branch_name(slice_id=slice_id, queue_item_id=str(queue_receipt.get("queue_item_id") or ""))
         ),
-        "base_ref": str(authority_profile.get("base_ref") or "main"),
+        "base_ref": str(request["base_ref"]),
         "task_summary": str(
             authority_profile.get("task_summary")
             or f"Resident queue materialized governed work order for {slice_id or 'selected slice'}."
@@ -734,6 +850,12 @@ def _materialize_work_orders_from_authority_profile(
         "advisory_only_source_packet": _advisory_source_packet(evidence_seed),
         "holoindex_evidence": holoindex_evidence,
         "operational_context_binding": context_binding,
+        "wsp15_allocation_receipt": dict(queue_wsp15_allocation),
+        "wsp15_allocation_receipt_id": str(queue_receipt.get("wsp15_allocation_receipt_id") or ""),
+        "wsp15_allocation_digest": str(queue_receipt.get("wsp15_allocation_digest") or ""),
+        "wsp15_priority": str(queue_receipt.get("wsp15_priority") or ""),
+        "wsp15_mps_total": queue_receipt.get("wsp15_mps_total"),
+        "wsp15_reasoning_tier": str(queue_receipt.get("reasoning_tier") or ""),
         "model_selection_receipt": _nested_mapping(authority_profile, "model_selection_receipt"),
         "model_selection_receipt_id": str(authority_profile.get("model_selection_receipt_id") or ""),
         "model_selection_digest": str(authority_profile.get("model_selection_digest") or ""),
@@ -851,11 +973,17 @@ def _canonical_digest(payload: Any) -> str:
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def _read_existing_chain_state(chain_path: Path | None) -> Mapping[str, Any]:
+def _read_existing_chain_state(
+    chain_path: Path | None,
+    allowed_root: Path,
+) -> Mapping[str, Any]:
     if chain_path is None or not chain_path.exists():
         return {}
     try:
-        payload = json.loads(chain_path.read_text(encoding="utf-8"))
+        payload = read_reddog_runtime_json_mapping(
+            chain_path,
+            allowed_root=allowed_root,
+        )
     except Exception:
         return {}
     return payload if isinstance(payload, Mapping) else {}
@@ -1347,7 +1475,7 @@ def _operational_context_binding(
         reasons.append("work_order_materializer_missing_queue_wsp15_allocation_receipt_id")
     if allocation:
         for label, duplicate in duplicate_allocations:
-            if dict(duplicate) != dict(allocation):
+            if _canonical_digest(duplicate) != _canonical_digest(allocation):
                 reasons.append(f"work_order_materializer_conflicting_wsp15_allocation_receipt:{label}")
         receipt_id = str(allocation.get("receipt_id") or "")
         if queue_wsp15_allocation_receipt_id and receipt_id != queue_wsp15_allocation_receipt_id:
@@ -1474,6 +1602,7 @@ def _build_artifact_generator(
 
 def _build_outcome_ratchet_store(
     repo_root: Path,
+    allowed_root: Path,
     *,
     injected_store: Any,
     store_path: Path | str | None,
@@ -1484,6 +1613,7 @@ def _build_outcome_ratchet_store(
         return None, ()
     path, reasons = _resolve_output_outside_repo(
         repo_root,
+        allowed_root,
         store_path,
         missing_reason="missing_outcome_ratchet_store_path",
         inside_reason="outcome_ratchet_store_path_inside_repo",
@@ -1496,6 +1626,7 @@ def _build_outcome_ratchet_store(
 
 def _build_model_feedback_ledger_store(
     repo_root: Path,
+    allowed_root: Path,
     *,
     injected_store: Any,
     store_path: Path | str | None,
@@ -1506,6 +1637,7 @@ def _build_model_feedback_ledger_store(
         return None, ()
     path, reasons = _resolve_output_outside_repo(
         repo_root,
+        allowed_root,
         store_path,
         missing_reason="missing_model_feedback_ledger_store_path",
         inside_reason="model_feedback_ledger_store_path_inside_repo",
@@ -1518,6 +1650,7 @@ def _build_model_feedback_ledger_store(
 
 def _resolve_output_outside_repo(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
     *,
     missing_reason: str,
@@ -1525,12 +1658,18 @@ def _resolve_output_outside_repo(
 ) -> tuple[Optional[Path], tuple[str, ...]]:
     if not value:
         return None, (missing_reason,)
-    path = Path(value)
-    if not path.is_absolute():
-        path = (repo_root / path).resolve()
-    else:
-        path = path.resolve()
+    raw = Path(value)
+    path = raw if raw.is_absolute() else repo_root / raw
+    path = Path(os.path.abspath(path.expanduser()))
     if _is_inside(path, repo_root):
+        return None, (inside_reason,)
+    try:
+        validate_runtime_artifact_path(
+            path,
+            repo_root=repo_root,
+            allowed_root=allowed_root,
+        )
+    except ValueError:
         return None, (inside_reason,)
     return path, ()
 

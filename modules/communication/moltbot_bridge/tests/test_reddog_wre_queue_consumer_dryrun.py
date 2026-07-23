@@ -56,6 +56,10 @@ def _snapshot(**overrides):
     claim_id = "claim-1"
     freshness_id = "fresh-1"
     allocation = _allocation_receipt()
+    determination_id = "sha256:determination"
+    selection_id = "sha256:model-selection"
+    runtime_id = "reddog_model_runtime_binding:abc123"
+    memex_id = "sha256:memex-supply"
     base = {
         "schema_version": "reddog_authoritative_work_state.v1",
         "revision": "sha256:revision",
@@ -73,6 +77,12 @@ def _snapshot(**overrides):
                 "status": "ACTIVE",
                 "expires_at": "2026-07-14T01:00:00+00:00",
                 "freshness_receipt_id": freshness_id,
+                "lane_id": "reddog_operational",
+                "reconciliation_report_id": "sha256:reconciliation",
+                "source_determination_receipt_id": determination_id,
+                "model_selection_receipt_id": selection_id,
+                "model_runtime_binding_receipt_id": runtime_id,
+                "memex_supply_receipt_id": memex_id,
             }
         ],
         "wre_queue_items": [
@@ -87,10 +97,19 @@ def _snapshot(**overrides):
                     f"claim:{claim_id}",
                     f"freshness:{freshness_id}",
                     f"wsp15_allocation:{allocation['receipt_id']}",
+                    f"architect_determination:{determination_id}",
+                    f"model_selection:{selection_id}",
+                    f"model_runtime_binding:{runtime_id}",
+                    f"memex_supply:{memex_id}",
                 ],
                 "wsp15_allocation_receipt": allocation,
-                "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
+                "source_determination_receipt_id": determination_id,
+                "model_selection_receipt_id": selection_id,
+                "model_selection_digest": "sha256:model-selection",
+                "model_runtime_binding_receipt_id": runtime_id,
                 "model_runtime_binding_digest": "sha256:model-runtime-binding",
+                "memex_supply_receipt_id": memex_id,
+                "memex_supply_digest": "sha256:memex-supply",
                 "no_execution_performed": True,
             }
         ],
@@ -117,8 +136,12 @@ def test_accepts_one_fresh_queued_item_without_execution() -> None:
     assert result.receipt.wsp15_priority == "P0"
     assert result.receipt.wsp15_mps_total == 18
     assert result.receipt.reasoning_tier == "ULTRA"
+    assert result.receipt.model_selection_receipt_id == "sha256:model-selection"
+    assert result.receipt.model_selection_digest == "sha256:model-selection"
     assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
     assert result.receipt.model_runtime_binding_digest == "sha256:model-runtime-binding"
+    assert result.receipt.memex_supply_receipt_id == "sha256:memex-supply"
+    assert result.receipt.memex_supply_digest == "sha256:memex-supply"
     assert result.receipt.no_queue_mutation_performed is True
     assert result.receipt.no_worker_spawn_performed is True
     assert result.receipt.no_worktree_created is True

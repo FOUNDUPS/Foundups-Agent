@@ -8,6 +8,12 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_effect_commit_outcome import (
+    EFFECT_COMMITTED,
+    EFFECT_INDETERMINATE,
+    EFFECT_NOT_COMMITTED,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_work_order_receipt import (
     RedDogWorkOrderReceiptStore,
 )
@@ -38,13 +44,23 @@ _TOKEN = "SOVEREIGN-WORKTREE-CREATE-TEST"
 
 
 class FakeRunner:
-    def __init__(self, *, ok: bool = True, raises: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        ok: bool = True,
+        raises: bool = False,
+        commit_then_raise: bool = False,
+    ) -> None:
         self.ok = ok
         self.raises = raises
+        self.commit_then_raise = commit_then_raise
         self.calls: list[tuple] = []
 
     def create_worktree(self, *, worktree_path, branch_name, base_ref):
         self.calls.append(("create_worktree", str(worktree_path), branch_name, base_ref))
+        if self.commit_then_raise:
+            Path(worktree_path).mkdir(parents=True, exist_ok=True)
+            raise RuntimeError("simulated post-commit transport failure")
         if self.raises:
             raise RuntimeError("simulated create failure")
         Path(worktree_path).mkdir(parents=True, exist_ok=True)
@@ -202,8 +218,12 @@ class TestWorktreeCreateAccept:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_ACCEPT
+        assert result.effect_commit_state == EFFECT_COMMITTED
+        assert result.effect_attempt_key.startswith("worktree-attempt-")
+        assert result.reconciliation_required is False
         assert result.no_task_execution_performed is True
         assert result.no_file_edit_performed is True
         assert result.no_pr_created is True
@@ -233,6 +253,7 @@ class TestWorktreeCreateAccept:
             runner=FakeRunner(),
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         second = create_reddog_wre_worktree(
             order,
@@ -241,13 +262,62 @@ class TestWorktreeCreateAccept:
             runner=FakeRunner(),
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert first.result_digest == second.result_digest
         blob = json.dumps(first.to_dict())
         assert _TOKEN not in blob
 
+    def test_runner_uses_validated_plan_base_ref_after_admission_mutates_order(
+        self, tmp_path: Path,
+    ) -> None:
+        order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
+        runner = FakeRunner()
+
+        def consume_and_splice() -> bool:
+            order["base_ref"] = "attacker-controlled-ref"
+            return True
+
+        result = create_reddog_wre_worktree(
+            order,
+            executor.to_dict(),
+            valve.to_dict(),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+            admission_consumer=consume_and_splice,
+        )
+
+        assert result.decision == WORKTREE_CREATE_ACCEPT
+        assert runner.calls[0][3] == "main"
+
 
 class TestWorktreeCreateReject:
+    def test_spliced_plan_base_ref_rejects_before_admission_and_runner(
+        self, tmp_path: Path,
+    ) -> None:
+        order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
+        payload = executor.to_dict()
+        payload["plan"]["base_ref"] = "release"
+        consumed: list[bool] = []
+        runner = FakeRunner()
+
+        result = create_reddog_wre_worktree(
+            order,
+            payload,
+            valve.to_dict(),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+            admission_consumer=lambda: not consumed.append(True),
+        )
+
+        assert result.decision == WORKTREE_CREATE_REJECT
+        assert "plan_base_ref_mismatch" in result.rejection_reasons
+        assert "plan_digest_mismatch" in result.rejection_reasons
+        assert consumed == []
+        assert runner.calls == []
+
     def test_closed_valve_rejects_before_runner(self, tmp_path: Path):
         order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
         closed = valve.to_dict()
@@ -260,6 +330,7 @@ class TestWorktreeCreateReject:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_REJECT
         assert "execution_valve_not_open_for_worktree_create" in result.rejection_reasons
@@ -277,6 +348,7 @@ class TestWorktreeCreateReject:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_REJECT
         assert "worktree_path_not_absolute" in result.rejection_reasons
@@ -329,10 +401,33 @@ class TestWorktreeCreateReject:
             runner=runner,
             repo_root=repo_root,
             now=fixed,
+            admission_consumer=lambda: True,
         )
         assert result.decision == WORKTREE_CREATE_REJECT
         assert "worktree_create_failed" in result.rejection_reasons
+        assert result.effect_commit_state == EFFECT_NOT_COMMITTED
         assert [call[0] for call in runner.calls] == ["create_worktree", "cleanup_worktree"]
+
+    def test_commit_then_throw_is_indeterminate(self, tmp_path: Path):
+        order, executor, valve, repo_root, fixed = _accepted_spine(tmp_path)
+        runner = FakeRunner(commit_then_raise=True)
+        result = create_reddog_wre_worktree(
+            order,
+            executor.to_dict(),
+            valve.to_dict(),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+            admission_consumer=lambda: True,
+        )
+
+        assert result.decision == WORKTREE_CREATE_REJECT
+        assert result.effect_commit_state == EFFECT_INDETERMINATE
+        assert result.reconciliation_required is True
+        assert result.reconciliation_data["next_action"] == (
+            "inspect_worktree_registry_path_and_branch"
+        )
+        assert result.effect_attempt_key.startswith("worktree-attempt-")
 
 
 class TestWorktreeCreateBoundaries:
@@ -353,7 +448,7 @@ class TestWorktreeCreateBoundaries:
             "git worktree",
             "worktree add",
             "gh pr",
-            "commit",
+            "git commit",
             "push_branch",
             "create_draft_pr",
             "shell=True",

@@ -16,10 +16,15 @@ PRs, settle rewards, mutate repository files, or re-index HoloIndex.
 
 from __future__ import annotations
 
-import json
+import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional
+
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
+)
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
@@ -30,6 +35,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handler_registry import (
     build_reddog_resident_queue_stage_handler_registry,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
 )
 
 
@@ -70,17 +78,27 @@ class RedDogMainResidentQueueNextStageDispatchBootstrapResult:
 def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
     *,
     repo_root: Path | str,
+    runtime_allowed_root: Path | str | None = None,
     work_state_path: Path | str | None,
     chain_results_path: Path | str | None,
     authority_profile_path: Path | str | None,
+    work_orders_path: Path | str | None = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
 ) -> RedDogMainResidentQueueNextStageDispatchBootstrapResult:
     """Load runtime inputs and dispatch the first resident queue stage."""
 
     root = Path(repo_root).resolve()
+    if runtime_allowed_root is None:
+        return _not_ready(("missing_runtime_artifact_root",), chain_results_path=None)
+    runtime_root = Path(os.path.abspath(Path(runtime_allowed_root).expanduser()))
+    try:
+        validate_runtime_root_path(runtime_root, repo_root=root)
+    except ValueError:
+        return _not_ready(("invalid_runtime_artifact_root",), chain_results_path=None)
     snapshot, snapshot_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         work_state_path,
         missing_reason="missing_authoritative_work_state_path",
         inside_reason="work_state_path_inside_repo",
@@ -92,6 +110,7 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
 
     profile, profile_reasons = _read_json_outside_repo(
         root,
+        runtime_root,
         authority_profile_path,
         missing_reason="missing_authority_profile_path",
         inside_reason="authority_profile_path_inside_repo",
@@ -101,8 +120,24 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         return _not_ready(profile_reasons, chain_results_path=None)
     assert profile is not None
 
+    work_orders_payload, work_order_reasons = _read_json_outside_repo(
+        root,
+        runtime_root,
+        work_orders_path,
+        missing_reason="missing_work_orders_path",
+        inside_reason="work_orders_path_inside_repo",
+        unreadable_reason="malformed_work_orders",
+    )
+    if work_order_reasons:
+        return _not_ready(work_order_reasons, chain_results_path=None)
+    raw_work_orders = work_orders_payload.get("work_orders") if work_orders_payload else None
+    if not isinstance(raw_work_orders, Mapping):
+        return _not_ready(("malformed_work_orders",), chain_results_path=None)
+    work_order_resolver = _BoundWorkOrderResolver(raw_work_orders)
+
     chain_path, chain_reasons = _resolve_output_outside_repo(
         root,
+        runtime_root,
         chain_results_path,
         missing_reason="missing_chain_results_path",
         inside_reason="chain_results_path_inside_repo",
@@ -111,11 +146,15 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
 
-    store = AtomicJsonResidentQueueChainResultsStore(chain_path)
+    store = AtomicJsonResidentQueueChainResultsStore(
+        chain_path,
+        allowed_root=runtime_root,
+    )
     registry = build_reddog_resident_queue_stage_handler_registry(
         work_state_snapshot=snapshot,
         chain_results_store=store,
         authority_profile=profile,
+        work_order_resolver=work_order_resolver,
         now_iso=now_iso or "",
     )
     result = invoke_reddog_resident_queue_next_stage_dispatch(
@@ -153,6 +192,7 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
 
 def _read_json_outside_repo(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
     *,
     missing_reason: str,
@@ -163,15 +203,18 @@ def _read_json_outside_repo(
         return None, (missing_reason,)
     path = Path(value)
     if not path.is_absolute():
-        path = (repo_root / path).resolve()
+        path = Path(os.path.abspath(repo_root / path))
     else:
-        path = path.resolve()
+        path = Path(os.path.abspath(path))
     if _is_inside(path, repo_root):
         return None, (inside_reason,)
     if not path.exists() or not path.is_file():
         return None, (missing_reason,)
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        validate_runtime_artifact_path(
+            path, repo_root=repo_root, allowed_root=allowed_root
+        )
+        payload = read_reddog_runtime_json_mapping(path, allowed_root=allowed_root)
     except Exception:
         return None, (unreadable_reason,)
     if not isinstance(payload, Mapping):
@@ -179,8 +222,28 @@ def _read_json_outside_repo(
     return payload, ()
 
 
+@dataclass(frozen=True)
+class _BoundWorkOrderResolver:
+    work_orders: Mapping[str, Any]
+
+    def resolve(
+        self,
+        *,
+        work_order_id: str,
+        queue_item_id: Optional[str],
+        selected_slice: Optional[str],
+    ) -> Mapping[str, Any]:
+        value = self.work_orders.get(work_order_id)
+        if not isinstance(value, Mapping):
+            return {}
+        if str(value.get("work_order_id") or "") != work_order_id:
+            return {}
+        return dict(value)
+
+
 def _resolve_output_outside_repo(
     repo_root: Path,
+    allowed_root: Path,
     value: Path | str | None,
     *,
     missing_reason: str,
@@ -190,11 +253,17 @@ def _resolve_output_outside_repo(
         return None, (missing_reason,)
     path = Path(value)
     if not path.is_absolute():
-        path = (repo_root / path).resolve()
+        path = Path(os.path.abspath(repo_root / path))
     else:
-        path = path.resolve()
+        path = Path(os.path.abspath(path))
     if _is_inside(path, repo_root):
         return None, (inside_reason,)
+    try:
+        validate_runtime_artifact_path(
+            path, repo_root=repo_root, allowed_root=allowed_root
+        )
+    except ValueError:
+        return None, ("chain_results_path_outside_runtime_root_or_linked",)
     return path, ()
 
 

@@ -6,10 +6,14 @@ import hashlib
 import json
 import os
 import tempfile
+import threading
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Protocol, Tuple
 
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
 )
@@ -58,6 +62,8 @@ class AuthorityRuntimeStore(Protocol):
         self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]
     ) -> str: ...
 
+    def consume_verified_work_authority_nonce(self, nonce: str) -> bool: ...
+
 
 class InMemoryAuthorityRuntimeStore:
     def __init__(
@@ -65,6 +71,7 @@ class InMemoryAuthorityRuntimeStore:
     ) -> None:
         self._state: Dict[str, Any] = dict(initial or {})
         self.fail_commit = fail_commit
+        self._lock = threading.Lock()
 
     def load(self) -> Dict[str, Any]:
         return json.loads(json.dumps(self._state, sort_keys=True))
@@ -72,41 +79,77 @@ class InMemoryAuthorityRuntimeStore:
     def commit(
         self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]
     ) -> str:
-        if self.fail_commit:
-            raise RuntimeError("commit_failed")
-        if self._state.get("revision") != expected_revision:
-            raise RuntimeError("revision_conflict")
-        committed = json.loads(json.dumps(snapshot, sort_keys=True))
-        revision = _canonical_digest(committed)
-        committed["revision"] = revision
-        self._state = committed
-        return revision
+        with self._lock:
+            if self.fail_commit:
+                raise RuntimeError("commit_failed")
+            if self._state.get("revision") != expected_revision:
+                raise RuntimeError("revision_conflict")
+            committed = json.loads(json.dumps(snapshot, sort_keys=True))
+            revision = _canonical_digest(committed)
+            committed["revision"] = revision
+            self._state = committed
+            return revision
+
+    def consume_verified_work_authority_nonce(self, nonce: str) -> bool:
+        with self._lock:
+            seen = self._state.get("verified_work_authority_nonces", [])
+            if not isinstance(seen, list) or nonce in set(map(str, seen)):
+                return False
+            committed = json.loads(json.dumps(self._state, sort_keys=True))
+            committed["verified_work_authority_nonces"] = [*seen, nonce]
+            committed["revision"] = _canonical_digest(committed)
+            self._state = committed
+            return True
 
 
 class AtomicJsonAuthorityRuntimeStore:
     """Single-file authority store using durable atomic replace."""
 
-    def __init__(self, path: str | Path) -> None:
-        self.path = Path(path)
+    def __init__(self, path: str | Path, *, allowed_root: str | Path) -> None:
+        self.path = Path(os.path.abspath(Path(path).expanduser()))
+        self.allowed_root = Path(os.path.abspath(Path(allowed_root).expanduser()))
 
     def load(self) -> Dict[str, Any]:
+        with runtime_operation_lock(str(self.path) + ".operation"):
+            return self._load_unlocked()
+
+    def _load_unlocked(self) -> Dict[str, Any]:
         if not self.path.exists():
             return {}
-        return json.loads(self.path.read_text(encoding="utf-8"))
+        return dict(
+            read_reddog_runtime_json_mapping(
+                self.path,
+                allowed_root=self.allowed_root,
+            )
+        )
 
     def commit(
         self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]
     ) -> str:
-        with runtime_operation_lock(str(self.path.resolve()) + ".authority-state"):
-            current = self.load()
+        with runtime_operation_lock(str(self.path) + ".operation"):
+            current = self._load_unlocked()
             if current.get("revision") != expected_revision:
                 raise RuntimeError("revision_conflict")
-            committed = json.loads(json.dumps(snapshot, sort_keys=True))
-            revision = _canonical_digest(committed)
-            committed["revision"] = revision
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            self._atomic_write(committed)
-            return revision
+            return self._write_snapshot(snapshot)
+
+    def consume_verified_work_authority_nonce(self, nonce: str) -> bool:
+        with runtime_operation_lock(str(self.path) + ".operation"):
+            current = self._load_unlocked()
+            seen = current.get("verified_work_authority_nonces", [])
+            if not isinstance(seen, list) or nonce in set(map(str, seen)):
+                return False
+            updated = dict(current)
+            updated["verified_work_authority_nonces"] = [*seen, nonce]
+            self._write_snapshot(updated)
+            return True
+
+    def _write_snapshot(self, snapshot: Mapping[str, Any]) -> str:
+        committed = json.loads(json.dumps(snapshot, sort_keys=True))
+        revision = _canonical_digest(committed)
+        committed["revision"] = revision
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._atomic_write(committed)
+        return revision
 
     def _atomic_write(self, committed: Mapping[str, Any]) -> None:
         fd, tmp_name = tempfile.mkstemp(

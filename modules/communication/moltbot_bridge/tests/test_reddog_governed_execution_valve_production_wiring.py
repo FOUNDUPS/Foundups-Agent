@@ -1,0 +1,439 @@
+"""Production-path wiring tests for the governed RedDog execution valve."""
+
+from __future__ import annotations
+
+import json
+from types import SimpleNamespace
+
+import pytest
+
+from modules.communication.moltbot_bridge.src import (
+    reddog_main_resident_queue_serial_loop_bootstrap as bootstrap,
+)
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AuthoritativeUseLease,
+    GovernedValveUseTimeAuthorityResolver,
+    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
+    _digest,
+    _signed_binding_reasons,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
+    InMemoryResidentQueueChainResultsStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    VerificationResult,
+    WorkAuthorityVerificationPhase,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_serial_loop import (
+    ResidentQueueSerialLoopResult,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    ExecutionValveEnvironment,
+    GovernedExecutionValveEnvironment,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
+    NOW,
+    QUEUE_ID,
+    _roots,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _authority_profile,
+    _promote,
+)
+
+
+def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
+    tmp_path, monkeypatch,
+) -> None:
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    valve_payload = json.loads(
+        (runtime / "execution_valve_env.json").read_text(encoding="utf-8")
+    )
+    work_order_id = valve_payload["work_order_id"]
+    work_orders_path = runtime / "work_orders.json"
+    work_orders_path.write_text(
+        json.dumps({"work_orders": {work_order_id: {"work_order_id": work_order_id}}}),
+        encoding="utf-8",
+    )
+    captured: dict[str, object] = {}
+    dependency_bundle = SimpleNamespace(
+        accepted=True,
+        rejection_reasons=(),
+        status="READY",
+        requested=True,
+        authority_store=object(),
+        signer=object(),
+        principal_resolver=object(),
+        snapshot_resolver=object(),
+        signature_verifier=object(),
+        principal_key_resolver=object(),
+        nonce_store=object(),
+        revocation_oracle=object(),
+        now_epoch=1_784_006_400,
+    )
+
+    monkeypatch.setattr(
+        bootstrap,
+        "load_reddog_main_resident_queue_runtime_dependency_bundle",
+        lambda **_: dependency_bundle,
+    )
+
+    def capture_registry(**kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(handlers={})
+
+    monkeypatch.setattr(bootstrap, "build_reddog_resident_queue_stage_handler_registry", capture_registry)
+    monkeypatch.setattr(
+        bootstrap,
+        "run_reddog_resident_queue_serial_loop",
+        lambda **_: ResidentQueueSerialLoopResult(
+            accepted=True,
+            status="RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED",
+            steps_run=0,
+        ),
+    )
+
+    result = bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=runtime / "authoritative_work_state.json",
+        chain_results_path=runtime / "chain_results.json",
+        authority_profile_path=runtime / "authority_profile.json",
+        work_orders_path=work_orders_path,
+        valve_environment_path=runtime / "execution_valve_env.json",
+        runtime_allowed_root=runtime,
+        authority_state_path=runtime / "authority_state.json",
+        permission_snapshots_path=runtime / "permission_snapshots.json",
+        principal_authority_records_path=runtime / "principal_authority_records.json",
+        requested_queue_item_id=QUEUE_ID,
+        now_iso=NOW,
+        now_epoch=dependency_bundle.now_epoch,
+        max_steps=1,
+    )
+
+    assert result.accepted is True, result.rejection_reasons
+    assert isinstance(captured["valve_environment"], GovernedExecutionValveEnvironment)
+    resolver = captured["governed_use_time_authority_resolver"]
+    assert isinstance(resolver, GovernedValveUseTimeAuthorityResolver)
+    assert resolver.valve_environment_path == runtime / "execution_valve_env.json"
+    assert resolver.permission_snapshots_path == runtime / "permission_snapshots.json"
+
+
+def test_real_promotion_materializes_complete_governed_work_order() -> None:
+    promoted, store = _promote(
+        authority_profile=_authority_profile(
+            allowed_paths=["modules/foundups/paccess_001/**"],
+            denied_paths=["modules/foundups/paccess_001/secrets/**"],
+        )
+    )
+    assert promoted.accepted is True
+    assert promoted.authority_profile is not None
+    snapshot = store.load()
+    queue = snapshot["wre_queue_items"][0]
+
+    work_orders, reasons = bootstrap._materialize_work_orders_from_authority_profile(
+        snapshot=snapshot,
+        authority_profile=promoted.authority_profile,
+        requested_queue_item_id=queue["queue_item_id"],
+        now_iso="2026-07-16T00:10:00+00:00",
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    work_order = work_orders[promoted.authority_profile["work_order_id"]]
+    allocation = queue["wsp15_allocation_receipt"]
+    assert work_order["foundup_id"] == promoted.authority_profile["foundup_id"]
+    assert work_order["valve_state_required"] == "VALVE_OPEN_WORKTREE_CREATE"
+    assert work_order["wsp15_allocation_receipt"] == allocation
+    assert work_order["wsp15_allocation_receipt_id"] == allocation["receipt_id"]
+    assert work_order["wsp15_priority"] == allocation["priority"]
+    assert work_order["wsp15_mps_total"] == allocation["mps_total"]
+    assert work_order["wsp15_reasoning_tier"] == allocation["reasoning_tier"]
+
+
+def test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage(
+    tmp_path, monkeypatch,
+) -> None:
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    valve_payload = json.loads(
+        (runtime / "execution_valve_env.json").read_text(encoding="utf-8")
+    )
+    work_order_id = valve_payload["work_order_id"]
+    work_orders_path = runtime / "work_orders.json"
+    work_orders_path.write_text(
+        json.dumps({"work_orders": {work_order_id: {"work_order_id": work_order_id}}}),
+        encoding="utf-8",
+    )
+    legacy_path = runtime / "legacy_valve.json"
+    legacy_path.write_text(
+        json.dumps(
+            {
+                "valve_worktree_create_enabled": True,
+                "sovereign_worktree_token": "attacker-controlled-token",
+            }
+        ),
+        encoding="utf-8",
+    )
+    dependency_calls = 0
+    registry_calls = 0
+
+    def dependency_bundle(**_):
+        nonlocal dependency_calls
+        dependency_calls += 1
+        raise AssertionError("dependency bundle must not be constructed")
+
+    def registry(**_):
+        nonlocal registry_calls
+        registry_calls += 1
+        raise AssertionError("effectful registry must not be constructed")
+
+    monkeypatch.setattr(
+        bootstrap, "load_reddog_main_resident_queue_runtime_dependency_bundle", dependency_bundle
+    )
+    monkeypatch.setattr(
+        bootstrap, "build_reddog_resident_queue_stage_handler_registry", registry
+    )
+
+    result = bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=runtime / "authoritative_work_state.json",
+        chain_results_path=runtime / "chain_results.json",
+        authority_profile_path=runtime / "authority_profile.json",
+        work_orders_path=work_orders_path,
+        valve_environment_path=legacy_path,
+        runtime_allowed_root=runtime,
+        requested_queue_item_id=QUEUE_ID,
+        now_iso=NOW,
+        max_steps=1,
+    )
+
+    assert result.accepted is False
+    assert result.rejection_reasons == (
+        "governed_execution_valve_environment_required",
+    )
+    assert dependency_calls == 0
+    assert registry_calls == 0
+
+
+def test_registry_rejects_legacy_environment_with_zero_handlers() -> None:
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_stage_handler_registry import (
+        build_reddog_resident_queue_stage_handler_registry,
+    )
+
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot={},
+        chain_results_store=InMemoryResidentQueueChainResultsStore(),
+        now_iso=NOW,
+        valve_environment=ExecutionValveEnvironment(
+            valve_worktree_create_enabled=True,
+            sovereign_worktree_token="attacker-controlled-token",
+        ),  # type: ignore[arg-type]
+    )
+
+    assert registry.handlers == {}
+    assert registry.missing_stage_reasons["production_environment"] == (
+        "governed_execution_valve_environment_required",
+    )
+
+
+def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
+    tmp_path, monkeypatch,
+) -> None:
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    link = runtime / "valve-link.json"
+    try:
+        link.symlink_to(runtime / "execution_valve_env.json")
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+    monkeypatch.setattr(
+        bootstrap,
+        "load_reddog_main_resident_queue_runtime_dependency_bundle",
+        lambda **_: (_ for _ in ()).throw(
+            AssertionError("dependency bundle must not be constructed")
+        ),
+    )
+
+    result = bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=repo,
+        work_state_path=runtime / "authoritative_work_state.json",
+        chain_results_path=runtime / "chain_results.json",
+        authority_profile_path=runtime / "authority_profile.json",
+        work_order_materializer_mode="authority_profile",
+        valve_environment_path=link,
+        runtime_allowed_root=runtime,
+        requested_queue_item_id=QUEUE_ID,
+        now_iso=NOW,
+        max_steps=1,
+    )
+
+    assert result.accepted is False
+    assert result.rejection_reasons == ("malformed_valve_environment",)
+
+
+def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors(
+    tmp_path, monkeypatch,
+) -> None:
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
+    work_order_id = valve["work_order_id"]
+    work_order = {"work_order_id": work_order_id, "base_ref": "main"}
+    work_authority = {
+        "work_order_id": work_order_id,
+        "work_order_digest": canonical_full_work_order_digest(work_order),
+        "base_ref": "main",
+        "nonce": "nonce-use-time",
+        "expires_at": 1_784_006_700,
+    }
+    stages = {
+        "authority_runtime": {
+            "decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT",
+            "authority_result": {
+                "accepted": True,
+                "receipt": {
+                    "status": "DELEGATED_AUTHORITY_ISSUED",
+                    "work_authority_digest": _digest(work_authority),
+                },
+                "identity": {"principal_id": "github:mjtrout"},
+                "work_authority": work_authority,
+            },
+        },
+        "authority_verification": {
+            "decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT",
+            "verification_result": {
+                "accepted": True,
+                "work_order_id": work_order_id,
+            },
+        },
+    }
+    store = InMemoryResidentQueueChainResultsStore()
+    store.commit(
+        {
+            "schema_version": "reddog_resident_queue_chain_results.v1",
+            "queue_item_id": QUEUE_ID,
+            "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
+            "stage_results": stages,
+            "receipts": [{"store_revision": None}],
+        },
+        expected_revision=None,
+    )
+    calls: list[dict[str, object]] = []
+
+    def verify(**kwargs):
+        calls.append(kwargs)
+        return VerificationResult(accepted=True, work_order_id=work_order_id)
+
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority.verify_delegated_work_authority",
+        verify,
+    )
+    resolver = GovernedValveUseTimeAuthorityResolver(
+        repo_root=repo,
+        work_state_path=runtime / "authoritative_work_state.json",
+        authority_profile_path=runtime / "authority_profile.json",
+        permission_snapshots_path=runtime / "permission_snapshots.json",
+            principal_authority_records_path=runtime / "principal_authority_records.json",
+            valve_environment_path=runtime / "execution_valve_env.json",
+            runtime_allowed_root=runtime,
+        signature_verifier=object(),
+        principal_key_resolver=object(),
+        nonce_store=object(),
+        snapshot_resolver=object(),
+        revocation_oracle=object(),
+        now_epoch=1_784_006_400,
+        required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
+        trusted_now_epoch=lambda: 1_784_006_400,
+    )
+
+    result = resolver.resolve(
+        chain_state=store.load(),
+        work_order=work_order,
+        queue_item_id=QUEUE_ID,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+    )
+
+    assert len(calls) == 1
+    assert (
+        calls[0]["verification_phase"]
+        == WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING
+    )
+    assert result.signed_authority_reverified is True
+    assert result.authoritative_use_lease is None
+    assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in result.rejection_reasons
+    assert "canonical_consensus_receipt_verifier_missing" in result.rejection_reasons
+    assert "canonical_sovereign_authorization_verifier_missing" in result.rejection_reasons
+    assert "canonical_model_selection_signed_evidence_verifier_missing" in result.rejection_reasons
+    assert "canonical_memex_supply_signed_evidence_verifier_missing" in result.rejection_reasons
+
+
+@pytest.mark.parametrize(
+    "expiry_boundary",
+    ("identity_expires_at", "permission_snapshot_expires_at"),
+)
+def test_terminal_authoritative_use_verification_receives_fresh_clock(
+    tmp_path, monkeypatch, expiry_boundary: str,
+) -> None:
+    clock = [100]
+    calls: list[dict[str, object]] = []
+
+    def verify(**kwargs):
+        calls.append(kwargs)
+        return VerificationResult(
+            accepted=int(kwargs["now"]) < 150,
+            work_order_id="wo-fresh-clock",
+            reason_codes=[] if int(kwargs["now"]) < 150 else [expiry_boundary],
+        )
+
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority.verify_delegated_work_authority",
+        verify,
+    )
+    resolver = GovernedValveUseTimeAuthorityResolver(
+        repo_root=tmp_path / "repo",
+        work_state_path=None,
+        authority_profile_path=None,
+        permission_snapshots_path=None,
+        principal_authority_records_path=None,
+        valve_environment_path=None,
+        runtime_allowed_root=tmp_path / "runtime",
+        signature_verifier=object(),
+        principal_key_resolver=object(),
+        nonce_store=object(),
+        snapshot_resolver=object(),
+        revocation_oracle=object(),
+        now_epoch=100,
+        required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
+        trusted_now_epoch=lambda: clock[0],
+    )
+    lease = AuthoritativeUseLease(
+        lambda: resolver._consume_authoritative_nonce(
+            identity={"expires_at": 150},
+            work_authority={"work_order_id": "wo-fresh-clock", "expires_at": 200},
+        ),
+        expires_at_epoch=200,
+        trusted_now_epoch=lambda: clock[0],
+    )
+
+    clock[0] = 150
+    assert lease.consume() is False
+    assert len(calls) == 1
+    assert calls[0]["now"] == 150
+    assert calls[0]["verification_phase"] is WorkAuthorityVerificationPhase.AUTHORITATIVE_USE
+
+
+def test_use_time_binding_rejects_base_ref_and_full_work_order_splices() -> None:
+    original = {"work_order_id": "wo-bound", "base_ref": "main", "task_summary": "one"}
+    authority = {
+        "work_order_id": "wo-bound",
+        "base_ref": "main",
+        "work_order_digest": canonical_full_work_order_digest(original),
+    }
+    spliced = dict(original)
+    spliced["base_ref"] = "release"
+    spliced["task_summary"] = "two"
+
+    reasons = _signed_binding_reasons(authority, spliced, {})
+
+    assert "canonical_signed_work_order_binding_mismatch:base_ref" in reasons
+    assert "canonical_signed_work_order_binding_mismatch:work_order_digest" in reasons

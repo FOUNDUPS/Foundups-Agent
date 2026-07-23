@@ -136,6 +136,7 @@ class TestOperationalSpineAccept:
             repo_root=repo_root,
             now=fixed,
             locks=locks,
+            admission_consumer=lambda: True,
         )
 
         assert result.decision == WORKTREE_SPINE_ACCEPT

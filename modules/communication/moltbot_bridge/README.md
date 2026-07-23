@@ -53,6 +53,26 @@ Current OpenClaw loop:
 
 `assigned work -> retrieve bounded HoloIndex bundle -> execute -> verify -> emit -> write durable knowledge`
 
+RedDog's production execution valve is governed-only. Legacy sovereign-token
+JSON cannot enter the bootstrap/registry/handler path. Signed-authority queue
+preflight does not consume a nonce; the canonical use-time verifier performs
+the transactional single consumption immediately before valve evaluation.
+The lease checks a fresh trusted clock at that final boundary, so an expired
+lease performs neither nonce consumption nor an effect. Runtime authority
+artifacts are confined to one independently configured outside-repository root
+and read through bounded no-follow descriptors under their exact operation
+locks; a file's own parent never defines trust. Use-time authority artifacts
+are collected twice, and any replacement between collections discards the
+complete snapshot and fails closed. The strict promoted queue/claim/WSP 15
+lineage is revalidated at use time.
+
+Worktree and OpenClaw effects report `COMMITTED`, `NOT_COMMITTED`, or
+`INDETERMINATE` with a stable attempt key. Exceptions after an effect attempt
+are never reported as false non-events; they require reconciliation by that
+key. Production remains `VALVE_CLOSED`: model-selection and Memex identifiers
+are now carried by signed work authority, but their independent signed-evidence
+verifiers and the other canonical trust anchors do not yet exist.
+
 ### RedDog HoloIndex Query Boundary
 
 The RedDog operational consumers migrated in this POC use an authenticated

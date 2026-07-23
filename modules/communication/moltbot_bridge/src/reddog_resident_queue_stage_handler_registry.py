@@ -89,6 +89,13 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_worktree_cre
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
     ExecutionValveEnvironment,
+    GovernedExecutionValveEnvironment,
+)
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    GovernedValveUseTimeAuthorityResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    InMemoryWorktreeAdmissionRegistry,
 )
 
 
@@ -196,7 +203,10 @@ def build_reddog_resident_queue_stage_handler_registry(
     permission_expires_at: Optional[str] = None,
     locks: Optional[MutableSet[str]] = None,
     repo_root: Optional[Path | str] = None,
-    valve_environment: Optional[ExecutionValveEnvironment | Mapping[str, Any]] = None,
+    valve_environment: Optional[GovernedExecutionValveEnvironment] = None,
+    governed_use_time_authority_resolver: Optional[
+        GovernedValveUseTimeAuthorityResolver
+    ] = None,
     intake_target: str = "foundup_job",
     expected_valve_state: str = VALVE_OPEN_WORKTREE_CREATE,
     worktree_runner: Any = None,
@@ -225,21 +235,40 @@ def build_reddog_resident_queue_stage_handler_registry(
     admission_request: Optional[Mapping[str, Any]] = None,
     pattern_memory_admission_sink: Any = None,
     worker_dispatch_writer: Any = None,
+    worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
 ) -> ResidentQueueStageHandlerRegistry:
     """Build a handler map from explicitly injected dependencies."""
 
     handlers: Dict[str, ResidentQueueStageHandler] = {}
     missing: Dict[str, tuple[str, ...]] = {}
     root = Path(repo_root) if repo_root is not None else None
+    admission_registry = (
+        worktree_admission_registry or InMemoryWorktreeAdmissionRegistry()
+    )
+    if valve_environment is not None and not isinstance(
+        valve_environment, GovernedExecutionValveEnvironment
+    ):
+        return ResidentQueueStageHandlerRegistry(
+            handlers={},
+            missing_stage_reasons={
+                "production_environment": (
+                    "governed_execution_valve_environment_required",
+                )
+            },
+        )
 
     _add_if_ready(
         handlers,
         missing,
         AUTHORITY_REQUEST_STAGE_KEY,
-        _missing(("authority_profile", authority_profile)),
+        _missing(
+            ("authority_profile", authority_profile),
+            ("work_order_resolver", work_order_resolver),
+        ),
         lambda: build_reddog_resident_queue_authority_request_stage_handler(
             work_state_snapshot=work_state_snapshot,
             authority_profile=authority_profile or {},
+            work_order_resolver=work_order_resolver,
             now_iso=now_iso,
         ),
     )
@@ -344,14 +373,20 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers,
         missing,
         EXECUTION_VALVE_STAGE_KEY,
-        _missing(("work_order_resolver", work_order_resolver), ("valve_environment", valve_environment)),
+        _missing(
+            ("work_order_resolver", work_order_resolver),
+            ("valve_environment", valve_environment),
+            ("governed_use_time_authority_resolver", governed_use_time_authority_resolver),
+        ),
         lambda: build_reddog_resident_queue_execution_valve_stage_handler(
             chain_results_store=chain_results_store,
             work_order_resolver=work_order_resolver,
-            valve_environment=valve_environment or {},
+            valve_environment=valve_environment,
+            governed_use_time_authority_resolver=governed_use_time_authority_resolver,
             now=now_datetime,
             intake_target=intake_target,
             expected_valve_state=expected_valve_state,
+            worktree_admission_registry=admission_registry,
         ),
     )
     _add_if_ready(
@@ -366,6 +401,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             repo_root=root or Path("."),
             now=now_datetime,
             locks=locks,
+            worktree_admission_registry=admission_registry,
         ),
     )
     _add_if_ready(

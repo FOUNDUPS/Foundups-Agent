@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import ast
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
+    AuthorityRuntimeWorkAuthorityNonceStore,
     JsonPrincipalKeyResolver,
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     JsonPermissionSnapshotResolver,
@@ -17,6 +19,7 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime
     load_reddog_main_resident_queue_runtime_dependency_bundle,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    AtomicJsonAuthorityRuntimeStore,
     RuntimeRejectCode,
     public_key_fingerprint,
 )
@@ -37,6 +40,30 @@ MODULE_PATH = (
 NOW = 1000
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+
+
+def test_atomic_runtime_nonce_consume_allows_exactly_one_concurrent_winner(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "runtime" / "authority_state.json"
+    stores = [
+        AuthorityRuntimeWorkAuthorityNonceStore(
+            AtomicJsonAuthorityRuntimeStore(path, allowed_root=path.parent)
+        )
+        for _ in range(8)
+    ]
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        results = list(
+            executor.map(
+                lambda store: store.consume("authoritative-use-nonce"), stores
+            )
+        )
+
+    assert results.count(True) == 1
+    assert results.count(False) == 7
+    state = AtomicJsonAuthorityRuntimeStore(path, allowed_root=path.parent).load()
+    assert state["verified_work_authority_nonces"] == ["authoritative-use-nonce"]
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -88,6 +115,8 @@ def _authority_request_result() -> dict[str, object]:
         "status": "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT",
         "delegated_authority_request": {
             "work_order_id": "wre-queue-1",
+            "work_order_digest": "sha256:" + ("a" * 64),
+            "base_ref": "main",
             "principal_id": "github:mjtrout",
             "principal_provider": "github",
             "principal_public_key": "pub:principal",
@@ -176,6 +205,7 @@ def test_bundle_rejects_paths_inside_repo(tmp_path: Path) -> None:
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=inside,
     )
 
@@ -191,6 +221,7 @@ def test_bundle_loads_outside_repo_resolvers_and_fail_closed_signer(tmp_path: Pa
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         principal_authority_records_path=principal_path,
@@ -230,6 +261,7 @@ def test_bundle_uses_isolated_socket_signer_when_explicitly_configured(tmp_path:
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         principal_authority_records_path=principal_path,
@@ -272,6 +304,7 @@ def test_bundle_configures_ed25519_verification_dependencies_when_explicit(tmp_p
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         principal_authority_records_path=principal_path,
@@ -303,6 +336,7 @@ def test_bundle_ed25519_revocation_oracle_reads_authority_state(tmp_path: Path) 
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         principal_authority_records_path=principal_path,
@@ -333,6 +367,7 @@ def test_bundle_rejects_unsupported_signature_verifier_backend(tmp_path: Path) -
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         principal_authority_records_path=principal_path,
@@ -351,6 +386,7 @@ def test_bundle_rejects_ed25519_verification_without_principal_records(tmp_path:
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
@@ -369,6 +405,7 @@ def test_bundle_rejects_invalid_signer_socket_without_falling_back(tmp_path: Pat
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         principal_authority_records_path=principal_path,
@@ -391,6 +428,7 @@ def test_bundle_rejects_unavailable_production_signer_socket_before_queue_runtim
 
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshot_path,
         principal_authority_records_path=principal_path,

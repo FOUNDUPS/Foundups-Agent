@@ -58,6 +58,49 @@ INTAKE_ASSIGNMENT_DISPATCHER = "assignment_dispatcher"
 CANONICAL_INTAKE_TARGETS = frozenset({INTAKE_FOUNDUP_JOB, INTAKE_AUTONOMOUS_TASK})
 FORBIDDEN_INTAKE_TARGETS = frozenset({INTAKE_ASSIGNMENT_DISPATCHER})
 
+CANONICAL_ENVIRONMENT_SCHEMA_VERSION = "reddog_execution_valve_environment.v1"
+CANONICAL_AUTHORIZATION_MODE = "signed_work_authority_consensus"
+CANONICAL_PROVENANCE_SCHEMA_VERSION = "reddog_execution_valve_environment_supply_receipt.v1"
+CANONICAL_BINDING_FIELDS = frozenset(
+    {
+        "work_order_id",
+        "requested_operation",
+        "valve_state_required",
+        "queue_item_id",
+        "claim_id",
+        "determination_receipt_id",
+        "repo_full_name",
+        "foundup_id",
+        "principal_id",
+        "reddog_id",
+        "key_epoch",
+        "permission_snapshot_digest",
+        "authority_profile_digest",
+        "work_state_revision",
+        "wsp15_allocation_receipt_id",
+        "wsp15_allocation_digest",
+        "model_selection_receipt_id",
+        "model_selection_digest",
+        "model_runtime_binding_receipt_id",
+        "model_runtime_binding_digest",
+        "memex_supply_receipt_id",
+        "memex_supply_digest",
+        "resolver_supply_receipt_id",
+        "consensus_receipt_digest",
+        "sovereign_authorization_digest",
+    }
+)
+_CANONICAL_ENVIRONMENT_FIELDS = CANONICAL_BINDING_FIELDS | {
+    "schema_version",
+    "authorization_mode",
+    "authorization_binding_digest",
+    "requested_valve_state",
+    "valve_dryrun_enabled",
+    "valve_live_enqueue_enabled",
+    "valve_worktree_create_enabled",
+    "supply_provenance",
+}
+
 
 @dataclass
 class ExecutionValveRequest:
@@ -91,6 +134,24 @@ class ExecutionValveEnvironment:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class GovernedExecutionValveEnvironment:
+    """Allowlisted canonical environment with no legacy token surface."""
+
+    values: Mapping[str, Any]
+
+    @classmethod
+    def from_mapping(cls, value: Mapping[str, Any]) -> "GovernedExecutionValveEnvironment":
+        if set(value) != _CANONICAL_ENVIRONMENT_FIELDS:
+            raise ValueError("canonical_environment_field_set_mismatch")
+        if any(key in value for key in ("sovereign_live_enqueue_token", "sovereign_worktree_token")):
+            raise ValueError("canonical_environment_token_key_forbidden")
+        return cls(values=dict(value))
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {key: self.values[key] for key in sorted(_CANONICAL_ENVIRONMENT_FIELDS)}
+
+
 @dataclass
 class ExecutionValveDecision:
     valve_state: str
@@ -100,6 +161,8 @@ class ExecutionValveDecision:
     no_execution_performed: bool
     decision_digest: str
     intake_target: str = ""
+    authorization_mode: str = "legacy_environment"
+    authorization_binding_digest: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -387,11 +450,213 @@ def evaluate_reddog_execution_valve(
     )
 
 
+def evaluate_reddog_execution_valve_canonical(
+    request: Union[ExecutionValveRequest, Mapping[str, Any]], environment: GovernedExecutionValveEnvironment, *,
+    expected_bindings: Mapping[str, Any],
+    permission_ttl_seconds: int,
+    permission_expires_at: str,
+    now: Optional[datetime] = None,
+) -> ExecutionValveDecision:
+    """Evaluate an allowlisted environment against independently verified bindings."""
+
+    env = environment.to_dict()
+    reasons = _validate_canonical_environment(env, expected_bindings)
+    reasons.extend(_validate_canonical_request_bindings(_mapping(request), expected_bindings))
+    if type(permission_ttl_seconds) is not int or not 1 <= permission_ttl_seconds <= 3600:
+        reasons.append("canonical_permission_ttl_invalid")
+    state = str(env.get("requested_valve_state") or "")
+    internal = {
+        "valve_dryrun_enabled": env.get("valve_dryrun_enabled") is True,
+        "valve_live_enqueue_enabled": env.get("valve_live_enqueue_enabled") is True,
+        "valve_worktree_create_enabled": env.get("valve_worktree_create_enabled") is True,
+        "permission_ttl_seconds": permission_ttl_seconds,
+        "permission_expires_at": permission_expires_at,
+    }
+    if not reasons and state == VALVE_OPEN_LIVE_ENQUEUE:
+        internal["sovereign_live_enqueue_token"] = "governed-internal"
+    if not reasons and state == VALVE_OPEN_WORKTREE_CREATE:
+        internal["sovereign_worktree_token"] = "governed-internal"
+    decision = evaluate_reddog_execution_valve(request, internal, now=now)
+    combined = list(dict.fromkeys([*reasons, *decision.rejection_reasons]))
+    valve_state = VALVE_CLOSED if combined else decision.valve_state
+    binding_digest = str(env.get("authorization_binding_digest") or "")
+    final_gates = [*decision.gates_checked, "canonical_governed_environment"]
+    body = {
+        **decision.to_dict(),
+        "valve_state": valve_state,
+        "rejection_reasons": combined,
+        "gates_checked": final_gates,
+        "authorization_mode": env.get("authorization_mode"),
+        "authorization_binding_digest": binding_digest,
+    }
+    body.pop("decision_digest", None)
+    return ExecutionValveDecision(
+        valve_state=valve_state,
+        work_order_id=decision.work_order_id,
+        rejection_reasons=combined,
+        gates_checked=final_gates,
+        no_execution_performed=True,
+        decision_digest=_canonical_digest(body),
+        intake_target=decision.intake_target,
+        authorization_mode=str(env.get("authorization_mode") or ""),
+        authorization_binding_digest=binding_digest or None,
+    )
+
+
+def _validate_canonical_environment(
+    environment: Mapping[str, Any], expected: Mapping[str, Any]
+) -> List[str]:
+    reasons: List[str] = []
+    if set(environment) != _CANONICAL_ENVIRONMENT_FIELDS:
+        reasons.append("canonical_environment_field_set_mismatch")
+    if environment.get("schema_version") != CANONICAL_ENVIRONMENT_SCHEMA_VERSION:
+        reasons.append("canonical_environment_schema_mismatch")
+    if environment.get("authorization_mode") != CANONICAL_AUTHORIZATION_MODE:
+        reasons.append("canonical_authorization_mode_mismatch")
+    if set(expected) != CANONICAL_BINDING_FIELDS:
+        reasons.append("canonical_expected_binding_field_set_mismatch")
+    for field in CANONICAL_BINDING_FIELDS:
+        if environment.get(field) != expected.get(field):
+            reasons.append(f"canonical_environment_binding_mismatch:{field}")
+    digest_fields = (
+        "permission_snapshot_digest", "authority_profile_digest", "wsp15_allocation_digest",
+        "model_selection_digest", "model_runtime_binding_digest", "memex_supply_digest",
+        "consensus_receipt_digest", "sovereign_authorization_digest",
+    )
+    for field in digest_fields:
+        value = expected.get(field)
+        if value and not _valid_prefixed_sha256(value):
+            reasons.append(f"canonical_binding_digest_malformed:{field}")
+    state = str(environment.get("requested_valve_state") or "")
+    expected_flags = {
+        "valve_dryrun_enabled": state != VALVE_CLOSED,
+        "valve_live_enqueue_enabled": state == VALVE_OPEN_LIVE_ENQUEUE,
+        "valve_worktree_create_enabled": state == VALVE_OPEN_WORKTREE_CREATE,
+    }
+    if state not in {
+        VALVE_CLOSED, VALVE_OPEN_DRYRUN_ONLY, VALVE_OPEN_LIVE_ENQUEUE,
+        VALVE_OPEN_WORKTREE_CREATE,
+    }:
+        reasons.append("canonical_requested_valve_state_invalid")
+    if state != VALVE_CLOSED and state != expected.get("valve_state_required"):
+        reasons.append("canonical_required_valve_state_mismatch")
+    for field, value in expected_flags.items():
+        if environment.get(field) is not value:
+            reasons.append(f"canonical_valve_flag_mismatch:{field}")
+    if state in {VALVE_OPEN_LIVE_ENQUEUE, VALVE_OPEN_WORKTREE_CREATE}:
+        for field in ("consensus_receipt_digest", "sovereign_authorization_digest"):
+            if not str(expected.get(field) or "").startswith("sha256:"):
+                reasons.append(f"canonical_high_authority_binding_missing:{field}")
+    for first, second in (
+        ("model_runtime_binding_receipt_id", "model_runtime_binding_digest"),
+    ):
+        if bool(expected.get(first)) != bool(expected.get(second)):
+            reasons.append(f"canonical_binding_half_pair:{first}")
+    expected_digest = "sha256:" + _canonical_digest(
+        {
+            "authorization_mode": environment.get("authorization_mode"),
+            "bindings": {field: expected.get(field) for field in sorted(CANONICAL_BINDING_FIELDS)},
+        }
+    )
+    if environment.get("authorization_binding_digest") != expected_digest:
+        reasons.append("canonical_authorization_binding_digest_mismatch")
+    reasons.extend(_validate_canonical_provenance(environment))
+    return list(dict.fromkeys(reasons))
+
+
+def validate_governed_execution_valve_environment(
+    environment: GovernedExecutionValveEnvironment, expected_bindings: Mapping[str, Any]
+) -> tuple[str, ...]:
+    """Validate canonical structure/provenance against independent expected bindings."""
+
+    return tuple(_validate_canonical_environment(environment.to_dict(), expected_bindings))
+
+
+def _validate_canonical_request_bindings(
+    request: Mapping[str, Any], expected: Mapping[str, Any]
+) -> List[str]:
+    work_order = request.get("work_order")
+    if not isinstance(work_order, Mapping):
+        return ["canonical_work_order_missing"]
+    snapshot = work_order.get("repo_permission_snapshot")
+    snapshot_digest = snapshot.get("digest") if isinstance(snapshot, Mapping) else None
+    allocation = work_order.get("wsp15_allocation_receipt")
+    checks = {
+        "work_order_id": work_order.get("work_order_id"),
+        "requested_operation": work_order.get("requested_operation"),
+        "repo_full_name": work_order.get("repo_full_name"),
+        "foundup_id": work_order.get("foundup_id"),
+        "permission_snapshot_digest": snapshot_digest,
+        "wsp15_allocation_receipt_id": (
+            allocation.get("receipt_id") if isinstance(allocation, Mapping) else None
+        ),
+    }
+    return [
+        f"canonical_work_order_binding_mismatch:{field}"
+        for field, value in checks.items()
+        if value != expected.get(field)
+    ]
+
+
+def _validate_canonical_provenance(environment: Mapping[str, Any]) -> List[str]:
+    provenance = environment.get("supply_provenance")
+    if not isinstance(provenance, Mapping):
+        return ["canonical_environment_provenance_missing"]
+    core = dict(environment)
+    core.pop("supply_provenance", None)
+    environment_digest = "sha256:" + _canonical_digest(core)
+    reasons: List[str] = []
+    expected_fields = {
+        "schema_version", "environment_digest", "authority_profile_digest",
+        "work_state_revision", "permission_snapshot_digest", "resolver_supply_receipt_id",
+        "no_secret_values_serialized", "no_execution_performed", "no_authority_minted",
+        "no_repo_mutation_performed", "receipt_id",
+    }
+    if set(provenance) != expected_fields:
+        reasons.append("canonical_environment_provenance_field_set_mismatch")
+    if provenance.get("environment_digest") != environment_digest:
+        reasons.append("canonical_environment_digest_mismatch")
+    if provenance.get("schema_version") != CANONICAL_PROVENANCE_SCHEMA_VERSION:
+        reasons.append("canonical_environment_provenance_schema_mismatch")
+    receipt_body = dict(provenance)
+    receipt_id = receipt_body.pop("receipt_id", None)
+    expected_receipt_id = "sha256:" + _canonical_digest(receipt_body)
+    if receipt_id != expected_receipt_id:
+        reasons.append("canonical_environment_provenance_receipt_mismatch")
+    required_true = (
+        "no_secret_values_serialized",
+        "no_execution_performed",
+        "no_authority_minted",
+        "no_repo_mutation_performed",
+    )
+    reasons.extend(
+        f"canonical_environment_provenance_attestation_missing:{field}"
+        for field in required_true
+        if provenance.get(field) is not True
+    )
+    return reasons
+
+
+def _valid_prefixed_sha256(value: Any) -> bool:
+    text = str(value or "")
+    if not text.startswith("sha256:") or len(text) != 71:
+        return False
+    try:
+        int(text[7:], 16)
+    except ValueError:
+        return False
+    return True
+
+
 __all__ = [
     "CANONICAL_INTAKE_TARGETS",
+    "CANONICAL_ENVIRONMENT_SCHEMA_VERSION",
+    "CANONICAL_AUTHORIZATION_MODE",
+    "CANONICAL_BINDING_FIELDS",
     "ExecutionValveDecision",
     "ExecutionValveEnvironment",
     "ExecutionValveRequest",
+    "GovernedExecutionValveEnvironment",
     "FORBIDDEN_INTAKE_TARGETS",
     "INTAKE_ASSIGNMENT_DISPATCHER",
     "INTAKE_AUTONOMOUS_TASK",
@@ -401,4 +666,6 @@ __all__ = [
     "VALVE_OPEN_LIVE_ENQUEUE",
     "VALVE_OPEN_WORKTREE_CREATE",
     "evaluate_reddog_execution_valve",
+    "evaluate_reddog_execution_valve_canonical",
+    "validate_governed_execution_valve_environment",
 ]

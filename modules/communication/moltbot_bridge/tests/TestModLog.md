@@ -1,3 +1,13 @@
+## 2026-07-20: REDDOG_EXECUTION_VALVE_INDEPENDENT_REVIEW_REPAIR_PHASE1
+
+- Added signed `base_ref` and canonical full-work-order digest mutation tests
+  across authority issuance, use-time reconstruction, executor plans, opaque
+  admission, and the effect runner.
+- Added a race regression that mutates the work order during admission and
+  proves the runner still receives only the previously validated plan ref.
+- Added fresh-clock terminal-authority regressions for identity and permission-
+  snapshot expiry after preflight and before authoritative nonce consumption.
+
 ## 2026-07-20: REDDOG_TRANSPORT_NEUTRAL_REPO_AUDIT_FALLBACK_PHASE1
 
 - Covered `pfmall`, `p.fMALL`, `p-fmall`, and `PFMALL` owner-unavailable audits.
@@ -13,6 +23,15 @@
 - Added deterministic and model-backed consuming-read regressions for exact
   path/digest/bytes/truncated equality, including unstaged changes before the
   worker and during model execution while HEAD remains unchanged.
+
+## 2026-07-20: REDDOG_EXECUTION_VALVE_RECONCILED_TRUST_BOUNDARY_PHASE1
+
+- Added canonical reader/writer lock parity tests using the real work-state,
+  authority-profile, resolver, permission/principal, and valve writers.
+- Preserved authenticated control-receipt prestate adversaries while updating
+  post-run assertions to the permanent production-CLOSED verifier boundary.
+- Reconciled current resident fixtures with independently confined runtime
+  roots and canonical governed artifact packs; refreshed exact no-growth gates.
 
 ## 2026-07-19: REDDOG_HOLOINDEX_V2_RUNTIME_FIXTURE_MIGRATION_PHASE1
 

@@ -9,6 +9,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional
 
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+    secure_read_confined_bytes,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
     CONTROL_LOOP_RECEIPT_SCHEMA_VERSION,
     verify_resident_control_loop_receipt,
@@ -65,15 +70,25 @@ class CanaryInvocationEvidence:
     chain_state: Mapping[str, Any]
 
 
-def read_control_receipts(path: Path) -> tuple[Mapping[str, Any], ...]:
-    """Parse the complete JSONL stream or reject it fail-closed."""
+def read_control_receipts(
+    path: Path,
+    *,
+    allowed_root: Path,
+) -> tuple[Mapping[str, Any], ...]:
+    """Read the complete confined JSONL stream or reject it fail-closed."""
 
     if not path.is_file():
         return ()
     receipts: list[Mapping[str, Any]] = []
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
-    except OSError as exc:
+        with runtime_operation_lock(str(path) + ".operation"):
+            raw, _ = secure_read_confined_bytes(
+                path,
+                allowed_root=allowed_root,
+                max_bytes=1024 * 1024,
+            )
+        lines = raw.decode("utf-8").splitlines()
+    except (OSError, UnicodeError, ValueError) as exc:
         raise ValueError("control_receipt_stream_unreadable") from exc
     for line_number, line in enumerate(lines, start=1):
         if not line.strip():

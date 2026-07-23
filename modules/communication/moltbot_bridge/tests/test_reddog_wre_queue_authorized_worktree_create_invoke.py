@@ -6,6 +6,16 @@ import ast
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Callable
+
+import pytest
+
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AuthoritativeUseLease,
+)
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    InMemoryWorktreeAdmissionRegistry,
+)
 
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
@@ -24,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_worktr
 from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import (
     WORKTREE_CREATE_ACCEPT,
     WORKTREE_CREATE_REJECT,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
+    plan_wre_isolated_worktree_execution_dryrun,
 )
 
 
@@ -135,29 +148,21 @@ def _work_order(**overrides):
 
 
 def _executor_payload(repo_root: Path, **overrides):
-    payload = {
-        "decision": "EXECUTOR_PLAN_ACCEPT",
-        "work_order_id": WORK_ORDER_ID,
-        "plan": {
-            "plan_id": "plan-001",
+    payload = plan_wre_isolated_worktree_execution_dryrun(
+        work_order=_work_order(),
+        invocation_result={
+            "decision": "INVOCATION_ACCEPT",
             "work_order_id": WORK_ORDER_ID,
-            "proposed_branch_name": "feat/paccess-001-worktree",
-            "proposed_worktree_path": _worktree_path(repo_root),
-            "lock_key": WORK_ORDER_ID,
-            "allowed_paths": [f"modules/foundups/{FID}/**"],
-            "denied_paths": [".env", ".git/**"],
-            "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
-            "cleanup_plan": {"on_failure": "remove_worktree_delete_branch"},
-            "phase_receipts": [],
-            "no_mutation_performed": True,
-            "invocation_receipt_digest": INVOCATION_DIGEST,
-            "plan_digest": PLAN_DIGEST,
+            "policy_gate_decision": "POLICY_ACCEPT",
+            "receipt_id": "receipt-001",
+            "receipt_digest": INVOCATION_DIGEST,
+            "no_execution_performed": True,
+            "rejection_reasons": [],
+            "gates_checked": [],
         },
-        "rejection_reasons": [],
-        "rejection_receipt_digest": "",
-        "no_mutation_performed": True,
-        "phase_receipts": [],
-    }
+        repo_root=str(repo_root),
+        now=NOW,
+    ).to_dict()
     payload.update(overrides)
     return payload
 
@@ -198,6 +203,34 @@ def _repo_root(tmp_path: Path) -> Path:
     return repo_root
 
 
+def _admission_registry(
+    repo_root: Path,
+    *,
+    executor: dict | None = None,
+    valve: dict | None = None,
+    consume: Callable[[], bool] = lambda: True,
+    expires_at_epoch: int = 2_000_000_000,
+    trusted_now_epoch: Callable[[], int] = lambda: 1_000_000_000,
+) -> InMemoryWorktreeAdmissionRegistry:
+    registry = InMemoryWorktreeAdmissionRegistry()
+    queue_executor = executor or _queue_executor_result(repo_root)
+    queue_valve = valve or _queue_valve_result()
+    assert registry.issue(
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        work_order=_work_order(),
+        executor_plan_result=queue_executor,
+        valve_decision=queue_valve["valve_decision"],
+        signed_authority_reverified=True,
+        authoritative_use_lease=AuthoritativeUseLease(
+            consume,
+            expires_at_epoch=expires_at_epoch,
+            trusted_now_epoch=trusted_now_epoch,
+        ),
+    )
+    return registry
+
+
 def test_queue_authorized_chain_creates_isolated_worktree_only(tmp_path: Path) -> None:
     repo_root = _repo_root(tmp_path)
     runner = FakeRunner()
@@ -208,6 +241,9 @@ def test_queue_authorized_chain_creates_isolated_worktree_only(tmp_path: Path) -
         work_order=_work_order(),
         runner=runner,
         repo_root=repo_root,
+        admission_registry=_admission_registry(repo_root),
+        queue_item_id="queue-1",
+        selected_slice=FID,
         now=NOW,
     )
 
@@ -310,6 +346,7 @@ def test_inside_repo_path_rejects_before_runner(tmp_path: Path) -> None:
         work_order=_work_order(),
         runner=runner,
         repo_root=repo_root,
+        admission_registry=InMemoryWorktreeAdmissionRegistry(),
         now=NOW,
     )
 
@@ -332,6 +369,7 @@ def test_lock_collision_rejects_before_runner(tmp_path: Path) -> None:
         runner=runner,
         repo_root=repo_root,
         locks={WORK_ORDER_ID},
+        admission_registry=InMemoryWorktreeAdmissionRegistry(),
         now=NOW,
     )
 
@@ -350,6 +388,9 @@ def test_create_failure_preserves_cleanup_result(tmp_path: Path) -> None:
         work_order=_work_order(),
         runner=runner,
         repo_root=repo_root,
+        admission_registry=_admission_registry(repo_root),
+        queue_item_id="queue-1",
+        selected_slice=FID,
         now=NOW,
     )
 
@@ -368,6 +409,9 @@ def test_result_is_json_serializable(tmp_path: Path) -> None:
         work_order=_work_order(),
         runner=FakeRunner(),
         repo_root=repo_root,
+        admission_registry=_admission_registry(repo_root),
+        queue_item_id="queue-1",
+        selected_slice=FID,
         now=NOW,
     )
 
@@ -375,6 +419,194 @@ def test_result_is_json_serializable(tmp_path: Path) -> None:
     assert payload["decision"] == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT
     assert payload["worktree_create_result"]["decision"] == WORKTREE_CREATE_ACCEPT
     json.dumps(payload)
+
+
+def test_fabricated_persisted_acceptance_cannot_call_runner(tmp_path: Path) -> None:
+    repo_root = _repo_root(tmp_path)
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=_queue_executor_result(repo_root),
+        queue_execution_valve_result=_queue_valve_result(),
+        work_order=_work_order(),
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=InMemoryWorktreeAdmissionRegistry(),
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert "authoritative_worktree_admission_missing" in result.rejection_reasons
+    assert runner.calls == []
+
+
+def test_replayed_admission_cannot_call_runner_twice(tmp_path: Path) -> None:
+    repo_root = _repo_root(tmp_path)
+    runner = FakeRunner()
+    consumed: list[str] = []
+    registry = _admission_registry(
+        repo_root,
+        consume=lambda: not consumed.append("nonce"),
+    )
+    arguments = {
+        "explicit_queue_authorized_worktree_create_requested": True,
+        "queue_executor_plan_result": _queue_executor_result(repo_root),
+        "queue_execution_valve_result": _queue_valve_result(),
+        "work_order": _work_order(),
+        "runner": runner,
+        "repo_root": repo_root,
+        "admission_registry": registry,
+        "queue_item_id": "queue-1",
+        "selected_slice": FID,
+        "now": NOW,
+    }
+    first = invoke_reddog_wre_queue_authorized_worktree_create(**arguments)
+    Path(first.worktree_create_result.worktree_path).rmdir()
+    second = invoke_reddog_wre_queue_authorized_worktree_create(**arguments)
+
+    assert first.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT
+    assert second.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert [call[0] for call in runner.calls] == ["create_worktree"]
+    assert consumed == ["nonce"]
+
+
+def test_spliced_plan_does_not_consume_nonce_or_call_runner(tmp_path: Path) -> None:
+    repo_root = _repo_root(tmp_path)
+    consumed: list[str] = []
+    original = _queue_executor_result(repo_root)
+    registry = _admission_registry(
+        repo_root,
+        executor=original,
+        consume=lambda: not consumed.append("nonce"),
+    )
+    spliced = json.loads(json.dumps(original))
+    spliced["executor_plan_result"]["plan"]["plan_digest"] = "sha256:" + ("9" * 64)
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=spliced,
+        queue_execution_valve_result=_queue_valve_result(),
+        work_order=_work_order(),
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=registry,
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert consumed == []
+    assert runner.calls == []
+
+
+def _spliced_value(value):
+    if isinstance(value, bool):
+        return not value
+    if isinstance(value, int):
+        return value + 1
+    if isinstance(value, str):
+        return value + "-spliced"
+    if isinstance(value, list):
+        return [*value, "spliced"]
+    if isinstance(value, dict):
+        return {**value, "spliced": True}
+    return "spliced"
+
+
+@pytest.mark.parametrize("field", tuple(_work_order().keys()))
+def test_every_work_order_field_splice_rejects_before_nonce_and_runner(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    repo_root = _repo_root(tmp_path)
+    consumed: list[str] = []
+    registry = _admission_registry(
+        repo_root,
+        consume=lambda: not consumed.append("nonce"),
+    )
+    spliced = _work_order()
+    spliced[field] = _spliced_value(spliced[field])
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=_queue_executor_result(repo_root),
+        queue_execution_valve_result=_queue_valve_result(),
+        work_order=spliced,
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=registry,
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert consumed == []
+    assert runner.calls == []
+
+
+def test_expired_admission_uses_fresh_clock_without_burning_nonce(
+    tmp_path: Path,
+) -> None:
+    repo_root = _repo_root(tmp_path)
+    clock = [100]
+    consumed: list[str] = []
+    registry = _admission_registry(
+        repo_root,
+        consume=lambda: not consumed.append("nonce"),
+        expires_at_epoch=101,
+        trusted_now_epoch=lambda: clock[0],
+    )
+    clock[0] = 102
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=_queue_executor_result(repo_root),
+        queue_execution_valve_result=_queue_valve_result(),
+        work_order=_work_order(),
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=registry,
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert consumed == []
+    assert runner.calls == []
+
+
+def test_spliced_valve_does_not_consume_nonce_or_call_runner(tmp_path: Path) -> None:
+    repo_root = _repo_root(tmp_path)
+    consumed: list[str] = []
+    registry = _admission_registry(
+        repo_root,
+        consume=lambda: not consumed.append("nonce"),
+    )
+    valve = _queue_valve_result()
+    valve["valve_decision"] = dict(valve["valve_decision"])
+    valve["valve_decision"]["decision_digest"] = "sha256:" + ("8" * 64)
+    runner = FakeRunner()
+    result = invoke_reddog_wre_queue_authorized_worktree_create(
+        explicit_queue_authorized_worktree_create_requested=True,
+        queue_executor_plan_result=_queue_executor_result(repo_root),
+        queue_execution_valve_result=valve,
+        work_order=_work_order(),
+        runner=runner,
+        repo_root=repo_root,
+        admission_registry=registry,
+        queue_item_id="queue-1",
+        selected_slice=FID,
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_REJECT
+    assert consumed == []
+    assert runner.calls == []
 
 
 def test_module_has_no_shell_openclaw_hermes_pr_reward_or_holoindex_imports() -> None:

@@ -6,6 +6,12 @@ import ast
 from datetime import datetime, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_effect_commit_outcome import (
+    EFFECT_COMMITTED,
+    EFFECT_INDETERMINATE,
+    EFFECT_NOT_COMMITTED,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_openclaw_live_enqueue import (
     LIVE_ENQUEUE_ACCEPT,
     LIVE_ENQUEUE_REJECT,
@@ -37,12 +43,15 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 
 
 class _FakeWriter:
-    def __init__(self, ok=True) -> None:
+    def __init__(self, ok=True, commit_then_raise=False) -> None:
         self.ok = ok
+        self.commit_then_raise = commit_then_raise
         self.calls = []
 
     def enqueue_foundup_job(self, intake, receipt):
         self.calls.append(("foundup_job", dict(intake), dict(receipt)))
+        if self.commit_then_raise:
+            raise RuntimeError("simulated post-commit transport failure")
         if not self.ok:
             return {"ok": False}
         return {"ok": True, "openclaw_queue_item_id": intake["proposed_job_id"], "agentdb_task_id": None}
@@ -141,10 +150,13 @@ def test_live_enqueue_foundup_job_calls_injected_writer_only():
         writer=writer,
         seen_live_enqueue_keys=set(),
         now=datetime(2026, 7, 11, tzinfo=timezone.utc),
+        admission_consumer=lambda: True,
     )
 
     assert result.decision == LIVE_ENQUEUE_ACCEPT
     assert result.live_enqueue_performed is True
+    assert result.effect_commit_state == EFFECT_COMMITTED
+    assert result.effect_attempt_key.startswith("live-enqueue-attempt-")
     assert result.no_execution_performed is True
     assert result.no_reward_settlement_performed is True
     assert result.receipt is not None
@@ -161,6 +173,7 @@ def test_live_enqueue_autonomous_task_calls_task_writer():
         _chain(),
         _valve(),
         writer=writer,
+        admission_consumer=lambda: True,
     )
 
     assert result.decision == LIVE_ENQUEUE_ACCEPT
@@ -241,8 +254,8 @@ def test_rejects_adapter_rejection_and_missing_intake():
 def test_rejects_replay_before_second_writer_call():
     writer = _FakeWriter()
     seen = set()
-    first = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen)
-    second = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen)
+    first = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen, admission_consumer=lambda: True)
+    second = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=writer, seen_live_enqueue_keys=seen, admission_consumer=lambda: True)
 
     assert first.decision == LIVE_ENQUEUE_ACCEPT
     assert second.decision == LIVE_ENQUEUE_REJECT
@@ -252,12 +265,35 @@ def test_rejects_replay_before_second_writer_call():
 
 def test_rejects_writer_missing_or_writer_rejected():
     missing = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=None)
-    rejected = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=_FakeWriter(ok=False))
+    rejected = perform_reddog_openclaw_live_enqueue(_adapter(), _policy(), _chain(), _valve(), writer=_FakeWriter(ok=False), admission_consumer=lambda: True)
 
     assert missing.decision == LIVE_ENQUEUE_REJECT
     assert LiveEnqueueReason.WRITER_MISSING in missing.rejection_reasons
     assert rejected.decision == LIVE_ENQUEUE_REJECT
     assert rejected.rejection_reasons == [LiveEnqueueReason.WRITER_REJECTED]
+    assert rejected.effect_commit_state == EFFECT_NOT_COMMITTED
+
+
+def test_commit_then_throw_is_indeterminate_and_never_false() -> None:
+    writer = _FakeWriter(commit_then_raise=True)
+    result = perform_reddog_openclaw_live_enqueue(
+        _adapter(),
+        _policy(),
+        _chain(),
+        _valve(),
+        writer=writer,
+        admission_consumer=lambda: True,
+    )
+
+    assert result.decision == LIVE_ENQUEUE_REJECT
+    assert result.effect_commit_state == EFFECT_INDETERMINATE
+    assert result.live_enqueue_performed is None
+    assert result.reconciliation_required is True
+    assert result.reconciliation_data["next_action"] == (
+        "query_openclaw_queue_by_effect_attempt_key"
+    )
+    assert result.effect_attempt_key.startswith("live-enqueue-attempt-")
+    assert writer.calls[0][2]["live_enqueue_performed"] is None
 
 
 def test_ast_boundary_no_direct_execution_or_queue_imports():

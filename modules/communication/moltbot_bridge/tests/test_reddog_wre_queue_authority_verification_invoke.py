@@ -170,6 +170,7 @@ def _profile(**overrides):
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
         "requested_operation": "create_foundup",
+        "base_ref": "main",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -185,11 +186,19 @@ def _profile(**overrides):
     return profile
 
 
+def _work_order():
+    return {
+        "work_order_id": "wre-queue-" + hashlib.sha256(b"queue-1").hexdigest()[:16],
+        "base_ref": "main",
+    }
+
+
 def _runtime_result(**profile_overrides):
     signer = _MockSignerVerifier()
     dryrun = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
         authority_profile=_profile(**profile_overrides),
+        work_order=_work_order(),
     )
     assert dryrun.accepted is True, dryrun.rejection_reasons
     result = invoke_reddog_wre_queue_authority_runtime(
@@ -319,7 +328,7 @@ def test_wrong_valve_state_rejects() -> None:
     assert ReasonCode.VALVE_STATE in result.rejection_reasons
 
 
-def test_nonce_replay_rejects_second_verification() -> None:
+def test_preflight_verification_does_not_consume_nonce() -> None:
     runtime, signer = _runtime_result()
     nonce_store = InMemoryNonceStore()
     first = invoke_reddog_wre_queue_authority_verification(
@@ -346,8 +355,7 @@ def test_nonce_replay_rejects_second_verification() -> None:
     )
 
     assert first.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT
-    assert second.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_REJECT
-    assert ReasonCode.NONCE_REPLAY in second.rejection_reasons
+    assert second.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT
 
 
 def test_module_has_no_shell_network_signing_issue_worktree_or_holoindex_imports() -> None:

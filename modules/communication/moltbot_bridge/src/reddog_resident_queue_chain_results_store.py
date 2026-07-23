@@ -19,6 +19,9 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Optional, Protocol, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
 )
@@ -78,17 +81,27 @@ class InMemoryResidentQueueChainResultsStore:
 class AtomicJsonResidentQueueChainResultsStore:
     """Single-file JSON store using atomic replace."""
 
-    def __init__(self, path: str | Path) -> None:
-        self.path = Path(path).resolve()
+    def __init__(self, path: str | Path, *, allowed_root: str | Path) -> None:
+        self.path = Path(os.path.abspath(Path(path).expanduser()))
+        self.allowed_root = Path(os.path.abspath(Path(allowed_root).expanduser()))
 
     def load(self) -> Mapping[str, Any]:
+        with runtime_operation_lock(str(self.path) + ".operation"):
+            return self._load_unlocked()
+
+    def _load_unlocked(self) -> Mapping[str, Any]:
         if not self.path.exists():
             return {}
-        return json.loads(self.path.read_text(encoding="utf-8"))
+        return dict(
+            read_reddog_runtime_json_mapping(
+                self.path,
+                allowed_root=self.allowed_root,
+            )
+        )
 
     def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        with runtime_operation_lock(self.path):
-            current = self.load()
+        with runtime_operation_lock(str(self.path) + ".operation"):
+            current = self._load_unlocked()
             if current.get("revision") != expected_revision:
                 raise RuntimeError("revision_conflict")
             committed, revision = _committed_snapshot(snapshot)

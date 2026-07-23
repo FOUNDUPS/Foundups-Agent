@@ -20,6 +20,9 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_live_enqueue impor
     RedDogOpenClawLiveEnqueueResult,
     perform_reddog_openclaw_live_enqueue,
 )
+from modules.communication.moltbot_bridge.src.reddog_live_enqueue_admission_capability import (
+    InMemoryLiveEnqueueAdmissionRegistry,
+)
 from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_selection import (
     AUTHORITY_SIGNED_VALVE_REQUIRED,
     AUTHORITY_SOVEREIGN_TOKEN_REQUIRED,
@@ -45,6 +48,7 @@ class ExtensionLiveEnqueueInvokeReason:
     SELECTION_ALREADY_EXECUTED = "REJECT_SELECTION_ALREADY_EXECUTED"
     VALVE_NOT_LIVE_ENQUEUE = "REJECT_VALVE_NOT_OPEN_LIVE_ENQUEUE"
     LIVE_ENQUEUE_REJECTED = "REJECT_LIVE_ENQUEUE_SEAM_REJECTED"
+    AUTHORITATIVE_ADMISSION_MISSING = "REJECT_AUTHORITATIVE_LIVE_ENQUEUE_ADMISSION_MISSING"
 
 
 @dataclass(frozen=True)
@@ -77,6 +81,12 @@ def _selection_mapping(
     if value is None:
         return {}
     return _mapping(value)
+
+
+def _adapter_work_order_id(adapter_result: Mapping[str, Any]) -> str:
+    adapter = _mapping(adapter_result)
+    intake = _mapping(adapter.get("proposed_intake"))
+    return str(adapter.get("work_order_id") or intake.get("work_order_id") or "")
 
 
 def _reject(reasons: Sequence[str], explicit_requested: bool) -> RedDogExtensionLiveEnqueueInvokeResult:
@@ -127,6 +137,7 @@ def invoke_reddog_extension_live_enqueue_explicit_valve(
     valve_decision: Mapping[str, Any],
     writer: Optional[LiveEnqueueWriter],
     seen_live_enqueue_keys: Optional[set] = None,
+    admission_registry: Optional[InMemoryLiveEnqueueAdmissionRegistry] = None,
 ) -> RedDogExtensionLiveEnqueueInvokeResult:
     """Invoke live enqueue only after explicit request and selection-receipt validation."""
 
@@ -135,13 +146,25 @@ def invoke_reddog_extension_live_enqueue_explicit_valve(
             [ExtensionLiveEnqueueInvokeReason.EXPLICIT_INVOKE_MISSING],
             explicit_requested=False,
         )
-
     selection = _selection_mapping(selection_receipt)
     valve = _mapping(valve_decision)
     reasons = _validate_selection_receipt(selection, valve)
     if reasons:
         return _reject(reasons, explicit_requested=True)
+    if admission_registry is None:
+        return _reject(
+            [ExtensionLiveEnqueueInvokeReason.AUTHORITATIVE_ADMISSION_MISSING],
+            explicit_requested=True,
+        )
 
+    evidence = {
+        "selection_receipt": selection,
+        "adapter_result": _mapping(adapter_result),
+        "policy_gate_receipt": _mapping(policy_gate_receipt),
+        "signed_receipt_chain_result": _mapping(signed_receipt_chain_result),
+        "valve_decision": valve,
+    }
+    work_order_id = _adapter_work_order_id(adapter_result)
     live_result = perform_reddog_openclaw_live_enqueue(
         adapter_result,
         policy_gate_receipt,
@@ -149,6 +172,11 @@ def invoke_reddog_extension_live_enqueue_explicit_valve(
         valve,
         writer=writer,
         seen_live_enqueue_keys=seen_live_enqueue_keys,
+        admission_consumer=lambda: admission_registry.consume(
+            work_order_id=work_order_id,
+            evidence=evidence,
+        )
+        is not None,
     )
     if live_result.decision != LIVE_ENQUEUE_ACCEPT:
         reasons = [ExtensionLiveEnqueueInvokeReason.LIVE_ENQUEUE_REJECTED]

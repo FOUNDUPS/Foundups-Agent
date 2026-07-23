@@ -1,3 +1,12 @@
+x-reddog-security-repair: &reddog_security_repair
+  temporary: true
+  review_date: "2026-Q3"
+  reviewer: "0102 Technical Architect"
+  owner: "MoltbotBridge"
+  architect_reviewer: "0102 Technical Architect"
+  expires_on: "2026-09-30"
+  remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
+
 exemptions:
   - file: "INTERFACE.md"
     reason: >-
@@ -24,6 +33,127 @@ exemptions:
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
+  - <<: *reddog_security_repair
+    file: "src/reddog_authoritative_work_state_refresh_runtime.py"
+    reason: "Inherited work-state reconciliation boundary; this repair adds only the shared operation-lock transaction wrapper."
+    threshold_override: 790
+    no_growth_ceiling: {file_lines: 790, functions: {}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_main_resident_queue_next_stage_dispatch_bootstrap.py"
+    reason: "Inherited dispatch transaction boundary; canonical outside-repo work-order resolution is now required before authority issuance."
+    threshold_override: 311
+    function_threshold_override: 113
+    functions: ["run_reddog_main_resident_queue_next_stage_dispatch_bootstrap"]
+    no_growth_ceiling: {file_lines: 311, functions: {run_reddog_main_resident_queue_next_stage_dispatch_bootstrap: 113}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_main_resident_queue_runtime_dependency_bundle.py"
+    reason: "Inherited dependency assembly boundary; this slice adds independent runtime-root confinement and locked descriptor reads."
+    threshold_override: 530
+    function_threshold_override: 143
+    functions: ["load_reddog_main_resident_queue_runtime_dependency_bundle"]
+    no_growth_ceiling: {file_lines: 530, functions: {load_reddog_main_resident_queue_runtime_dependency_bundle: 143}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_main_resident_queue_serial_loop_bootstrap.py"
+    reason: "Inherited serial startup boundary retained while pre-materialization requests receive an explicit deterministic binding seed."
+    threshold_override: 1781
+    function_threshold_override: 463
+    functions: ["run_reddog_main_resident_queue_serial_loop_bootstrap", "_materialize_work_orders_from_authority_profile"]
+    no_growth_ceiling: {file_lines: 1781, functions: {run_reddog_main_resident_queue_serial_loop_bootstrap: 463, _materialize_work_orders_from_authority_profile: 159}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_openclaw_live_enqueue.py"
+    reason: "Inherited enqueue transaction boundary retained while truthful indeterminate outcomes are introduced."
+    threshold_override: 457
+    function_threshold_override: 108
+    functions: ["perform_reddog_openclaw_live_enqueue"]
+    no_growth_ceiling: {file_lines: 457, functions: {perform_reddog_openclaw_live_enqueue: 108}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py"
+    reason: "Inherited environment-binding boundary retained while the independent runtime root is made mandatory."
+    threshold_override: 431
+    function_threshold_override: 110
+    functions: ["build_reddog_signed_worker_queue_loop_runner_from_env", "_bootstrap_kwargs"]
+    no_growth_ceiling: {file_lines: 431, functions: {build_reddog_signed_worker_queue_loop_runner_from_env: 110, _bootstrap_kwargs: 72}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_signed_worker_queue_serial_loop_runner.py"
+    reason: "Inherited signed-worker transaction boundary retained while confined locked reads are introduced."
+    threshold_override: 473
+    function_threshold_override: 132
+    functions: ["run_signed_worker_dispatch_task"]
+    no_growth_ceiling: {file_lines: 473, functions: {run_signed_worker_dispatch_task: 132}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_signer_delegated_authority_runtime.py"
+    reason: "Inherited signed-authority issuance boundary; exact base ref and canonical full-work-order digest are now validated and signed."
+    threshold_override: 737
+    function_threshold_override: 285
+    functions: ["issue_delegated_authority_runtime"]
+    no_growth_ceiling: {file_lines: 737, functions: {issue_delegated_authority_runtime: 285}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_resident_live_canary.py"
+    reason: "Authenticated control-receipt preflight and governed artifact readiness remain adjacent during the focused valve reconciliation."
+    threshold_override: 714
+    no_growth_ceiling: {file_lines: 714, functions: {}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_wre_queue_authority_request_dryrun.py"
+    reason: "Inherited authority-request planner retained while canonical work-order and exact base-ref bindings are propagated to signing."
+    threshold_override: 453
+    function_threshold_override: 158
+    functions: ["plan_reddog_wre_queue_authority_request_dry_run"]
+    no_growth_ceiling: {file_lines: 453, functions: {plan_reddog_wre_queue_authority_request_dry_run: 158}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_wre_queue_consumer_dryrun.py"
+    reason: "Inherited queue-consumer planner retained while signed lineage fields are propagated."
+    threshold_override: 391
+    function_threshold_override: 145
+    functions: ["plan_reddog_wre_queue_consumer_dry_run"]
+    no_growth_ceiling: {file_lines: 391, functions: {plan_reddog_wre_queue_consumer_dry_run: 145}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_wre_worktree_create.py"
+    reason: "Inherited worktree transaction boundary retained while plan and immutable work-order bindings are revalidated before effect admission."
+    threshold_override: 601
+    function_threshold_override: 225
+    functions: ["create_reddog_wre_worktree"]
+    no_growth_ceiling: {file_lines: 601, functions: {create_reddog_wre_worktree: 225}}
+
+  - <<: *reddog_security_repair
+    file: "tests/test_reddog_governed_execution_valve_production_wiring.py"
+    reason: "Inherited integration cases retain end-to-end production wiring assertions plus terminal expiry and work-order splice regressions."
+    threshold_override: 439
+    function_threshold_override: 93
+    functions: ["test_bootstrap_routes_canonical_environment_and_use_time_resolver", "test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage", "test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors"]
+    no_growth_ceiling: {file_lines: 439, functions: {test_bootstrap_routes_canonical_environment_and_use_time_resolver: 74, test_bootstrap_rejects_legacy_token_json_before_registry_or_worktree_stage: 62, test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors: 93}}
+
+  - <<: *reddog_security_repair
+    file: "tests/test_reddog_main_openclaw_signed_worker_claim_loop_preflight.py"
+    reason: "Inherited startup integration matrix retained while the independent runtime root is threaded."
+    threshold_override: 1600
+    function_threshold_override: 179
+    functions: ["test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing", "test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage", "test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation", "test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain"]
+    no_growth_ceiling: {file_lines: 1600, functions: {test_main_resident_control_loop_enforced_fails_closed_when_profile_signer_socket_missing: 99, test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage: 136, test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation: 128, test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain: 179}}
+
+  - <<: *reddog_security_repair
+    file: "tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py"
+    reason: "Inherited resident-loop regression matrix retained for cross-stage parity."
+    threshold_override: 4908
+    no_growth_ceiling: {file_lines: 4908, functions: {}}
+
+  - <<: *reddog_security_repair
+    file: "tests/test_reddog_signed_worker_dispatch_task_executor.py"
+    reason: "Inherited worker-dispatch integration matrix retained while the runtime root is threaded."
+    threshold_override: 2692
+    function_threshold_override: 185
+    functions: ["test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish", "test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet", "test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues", "test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness"]
+    no_growth_ceiling: {file_lines: 2692, functions: {test_openclaw_claim_env_bound_queue_loop_runner_materializes_bounded_artifact: 119, test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier: 124, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_publish: 133, test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_ratchet: 149, test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues: 185, test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness: 173}}
 
   - file: "scripts/run_task.py"
     reason: >-

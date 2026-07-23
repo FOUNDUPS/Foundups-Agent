@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import socket
 import tempfile
@@ -21,7 +22,7 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
     _derive_outcome_ratchet_request_from_chain,
     _materialize_work_orders_from_authority_profile,
     _operational_context_binding,
-    run_reddog_main_resident_queue_serial_loop_bootstrap,
+    run_reddog_main_resident_queue_serial_loop_bootstrap as _run_bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     RUNTIME_SURFACE_READONLY_AUDIT,
@@ -62,7 +63,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
+    CANONICAL_BINDING_FIELDS,
+    GovernedExecutionValveEnvironment,
     VALVE_OPEN_WORKTREE_CREATE,
+)
+from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AuthoritativeUseLease,
+    GovernedValveUseTimeResolution,
 )
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     ArtifactGenerationModelResult,
@@ -109,6 +116,135 @@ FOUNDUP_ID = "paccess_001"
 PILOT_OPERATION = "queue_bounded_pilot_docs_patch"
 PILOT_DOMAIN_ID = FOUNDUP_ID
 PILOT_ARTIFACT = f"modules/foundups/{PILOT_DOMAIN_ID}/README.md"
+PERMISSION_DIGEST = "sha256:" + ("1" * 64)
+
+
+class _InjectedUseTimeResolver:
+    def __init__(self, resolution: GovernedValveUseTimeResolution) -> None:
+        self.resolution = resolution
+
+    def resolve(self, **_: object) -> GovernedValveUseTimeResolution:
+        return self.resolution
+
+
+def _sha256_json(payload: object) -> str:
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _test_governed_environment(
+    work_order: Mapping[str, object], *, queue_item_id: str = "queue-1"
+) -> tuple[dict[str, object], dict[str, object]]:
+    allocation = work_order.get("wsp15_allocation_receipt")
+    allocation = allocation if isinstance(allocation, Mapping) else _queue_wsp15_allocation_receipt()
+    snapshot = work_order.get("repo_permission_snapshot")
+    snapshot = snapshot if isinstance(snapshot, Mapping) else {}
+    expected = {field: "" for field in CANONICAL_BINDING_FIELDS}
+    expected.update(
+        {
+            "work_order_id": work_order.get("work_order_id"),
+            "requested_operation": work_order.get("requested_operation"),
+            "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
+            "queue_item_id": queue_item_id,
+            "claim_id": "claim-1",
+            "determination_receipt_id": "sha256:determination-1",
+            "repo_full_name": work_order.get("repo_full_name"),
+            "foundup_id": work_order.get("foundup_id"),
+            "principal_id": "github:mjtrout",
+            "reddog_id": "reddog:abc123",
+            "key_epoch": "epoch-1",
+            "permission_snapshot_digest": snapshot.get("digest"),
+            "authority_profile_digest": _sha256_json({"profile": "test"}),
+            "work_state_revision": _sha256_json({"work_state": "test"}),
+            "wsp15_allocation_receipt_id": allocation.get("receipt_id"),
+            "wsp15_allocation_digest": _sha256_json(allocation),
+            "consensus_receipt_digest": _sha256_json({"consensus": "test"}),
+            "sovereign_authorization_digest": _sha256_json({"sovereign": "test"}),
+        }
+    )
+    authorization_mode = "signed_work_authority_consensus"
+    authorization_binding_digest = _sha256_json(
+        {
+            "authorization_mode": authorization_mode,
+            "bindings": {field: expected[field] for field in sorted(CANONICAL_BINDING_FIELDS)},
+        }
+    )
+    core = {
+        **expected,
+        "schema_version": "reddog_execution_valve_environment.v1",
+        "authorization_mode": authorization_mode,
+        "authorization_binding_digest": authorization_binding_digest,
+        "requested_valve_state": VALVE_OPEN_WORKTREE_CREATE,
+        "valve_dryrun_enabled": True,
+        "valve_live_enqueue_enabled": False,
+        "valve_worktree_create_enabled": True,
+    }
+    provenance = {
+        "schema_version": "reddog_execution_valve_environment_supply_receipt.v1",
+        "environment_digest": _sha256_json(core),
+        "authority_profile_digest": expected["authority_profile_digest"],
+        "work_state_revision": expected["work_state_revision"],
+        "permission_snapshot_digest": expected["permission_snapshot_digest"],
+        "resolver_supply_receipt_id": expected["resolver_supply_receipt_id"],
+        "no_secret_values_serialized": True,
+        "no_execution_performed": True,
+        "no_authority_minted": True,
+        "no_repo_mutation_performed": True,
+    }
+    provenance["receipt_id"] = _sha256_json(provenance)
+    return {**core, "supply_provenance": provenance}, expected
+
+
+def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
+    """Exercise downstream stages with an explicitly injected governed resolution."""
+
+    if "runtime_allowed_root" not in kwargs and kwargs.get("work_state_path"):
+        kwargs["runtime_allowed_root"] = Path(kwargs["work_state_path"]).parent
+    valve_path = kwargs.get("valve_environment_path")
+    if valve_path:
+        work_order = _work_order()
+        work_orders_path = kwargs.get("work_orders_path")
+        if work_orders_path:
+            raw_orders = json.loads(Path(work_orders_path).read_text(encoding="utf-8"))
+            orders = raw_orders.get("work_orders", raw_orders)
+            work_order = next(iter(orders.values()))
+        elif kwargs.get("work_order_materializer_mode") == "authority_profile":
+            snapshot = json.loads(Path(kwargs["work_state_path"]).read_text(encoding="utf-8"))
+            profile = json.loads(Path(kwargs["authority_profile_path"]).read_text(encoding="utf-8"))
+            orders, reasons = _materialize_work_orders_from_authority_profile(
+                snapshot=snapshot,
+                authority_profile=profile,
+                requested_queue_item_id=str(kwargs.get("requested_queue_item_id") or "queue-1"),
+                now_iso=str(kwargs.get("now_iso") or NOW),
+            )
+            if orders and not reasons:
+                work_order = next(iter(orders.values()))
+        payload, expected = _test_governed_environment(work_order)
+        Path(valve_path).write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        governed = GovernedExecutionValveEnvironment.from_mapping(payload)
+        injected_resolver = _InjectedUseTimeResolver(
+            GovernedValveUseTimeResolution(
+                environment=governed,
+                expected_bindings=expected,
+                permission_ttl_seconds=300,
+                permission_expires_at=EXPIRES,
+                rejection_reasons=(),
+                signed_authority_reverified=True,
+                authoritative_use_lease=AuthoritativeUseLease(
+                    lambda: True,
+                    expires_at_epoch=2_000_000_000,
+                    trusted_now_epoch=lambda: 1_000_000_000,
+                ),
+            )
+        )
+        with patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_resident_queue_serial_loop_bootstrap."
+            "GovernedValveUseTimeAuthorityResolver",
+            return_value=injected_resolver,
+        ):
+            return _run_bootstrap(**kwargs)
+    return _run_bootstrap(**kwargs)
 
 
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:
@@ -139,6 +275,9 @@ def _queue_wsp15_allocation_receipt() -> dict[str, object]:
 
 def _snapshot() -> dict[str, object]:
     allocation = _queue_wsp15_allocation_receipt()
+    determination_id = "sha256:determination-1"
+    selection_id = "sha256:model-selection-1"
+    memex_id = "sha256:memex-1"
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -150,6 +289,12 @@ def _snapshot() -> dict[str, object]:
                 "status": "ACTIVE",
                 "expires_at": EXPIRES,
                 "freshness_receipt_id": "fresh-1",
+                "lane_id": "reddog_operational",
+                "reconciliation_report_id": "sha256:reconciliation-1",
+                "source_determination_receipt_id": determination_id,
+                "model_selection_receipt_id": selection_id,
+                "model_runtime_binding_receipt_id": "",
+                "memex_supply_receipt_id": memex_id,
             }
         ],
         "wre_queue_items": [
@@ -163,8 +308,18 @@ def _snapshot() -> dict[str, object]:
                     "claim:claim-1",
                     "freshness:fresh-1",
                     f"wsp15_allocation:{allocation['receipt_id']}",
+                    f"architect_determination:{determination_id}",
+                    f"model_selection:{selection_id}",
+                    f"memex_supply:{memex_id}",
                 ],
                 "wsp15_allocation_receipt": allocation,
+                "source_determination_receipt_id": determination_id,
+                "model_selection_receipt_id": selection_id,
+                "model_selection_digest": "sha256:model-selection-digest",
+                "model_runtime_binding_receipt_id": "",
+                "model_runtime_binding_digest": "",
+                "memex_supply_receipt_id": memex_id,
+                "memex_supply_digest": "sha256:memex-digest",
                 "no_execution_performed": True,
             }
         ],
@@ -181,10 +336,11 @@ def _profile(**overrides: object) -> dict[str, object]:
         "reddog_public_key": "pub:reddog",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": FOUNDUP_ID,
+        "base_ref": "main",
         "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
         "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
         "requested_operation": "feature_slice",
-        "permission_snapshot_digest": "sha256:snap-1",
+        "permission_snapshot_digest": PERMISSION_DIGEST,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
         "issued_at": 1000,
@@ -199,6 +355,10 @@ def _profile(**overrides: object) -> dict[str, object]:
         "evidence_bundle_id": "sha256:evidence-bundle-1",
         "readonly_audit_decision_id": "sha256:decision-1",
         "wsp15_allocation_receipt": _queue_wsp15_allocation_receipt(),
+        "model_selection_receipt_id": "sha256:model-selection-1",
+        "model_selection_digest": "sha256:model-selection-digest",
+        "memex_supply_receipt_id": "sha256:memex-1",
+        "memex_supply_digest": "sha256:memex-digest",
         "holoindex_evidence": {
             "holoindex_query": "RedDog resident queue materialized work order",
             "holoindex_status": "bundle_json_ok",
@@ -223,6 +383,7 @@ def _profile(**overrides: object) -> dict[str, object]:
 
 
 def _work_order(**overrides: object) -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt()
     payload = {
         "work_order_id": WORK_ORDER_ID,
         "created_at": "2026-07-13T23:59:30+00:00",
@@ -230,13 +391,15 @@ def _work_order(**overrides: object) -> dict[str, object]:
         "authenticated_principal": "github:mjtrout",
         "principal_provider": "github",
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
+        "foundup_id": FOUNDUP_ID,
         "repo_permission_snapshot": {
             "permission_level": "write",
             "captured_at": "2026-07-13T23:59:30+00:00",
             "source": "test",
-            "digest": "sha256:snap-1",
+            "digest": PERMISSION_DIGEST,
         },
         "requested_operation": "feature_slice",
+        "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
         "authority_tier": "source",
         "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
         "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
@@ -278,6 +441,12 @@ def _work_order(**overrides: object) -> dict[str, object]:
             "retrieval_quality": "HIGH",
             "skillz_gap_detected": False,
         },
+        "wsp15_allocation_receipt": allocation,
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": _canonical_digest(allocation),
+        "wsp15_priority": allocation["priority"],
+        "wsp15_mps_total": allocation["mps_total"],
+        "wsp15_reasoning_tier": allocation["reasoning_tier"],
     }
     payload.update(overrides)
     return payload
@@ -289,6 +458,10 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
     queue_item = snapshot["wre_queue_items"][0]
     queue_item["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
     queue_item["model_runtime_binding_digest"] = _canonical_digest(runtime_binding)
+    snapshot["worker_claims"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    queue_item["evidence_refs"].append(
+        f"model_runtime_binding:{runtime_binding['receipt_id']}"
+    )
     profile = _profile(
         model_runtime_binding_receipt=runtime_binding,
         model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
@@ -505,7 +678,7 @@ def _pilot_worktree_path(repo: Path, work_order: Mapping[str, object]) -> Path:
 
 def _pilot_signed_authority_for_bootstrap() -> dict[str, object]:
     authority = dict(_pilot_signed_authority(WORK_ORDER_ID))
-    authority["permission_snapshot_digest"] = "sha256:snap-1"
+    authority["permission_snapshot_digest"] = PERMISSION_DIGEST
     return authority
 
 
@@ -526,7 +699,7 @@ def _pilot_payloads(repo: Path, worktree: Path, work_order: Mapping[str, object]
             "signed_authority": _pilot_signed_authority_for_bootstrap(),
             "signed_receipt_chain": _pilot_receipt_chain(),
             "execution_valve_decision": _pilot_valve(),
-            "permission_snapshot_digest": "sha256:snap-1",
+            "permission_snapshot_digest": PERMISSION_DIGEST,
             "holoindex_evidence": {"index_gap_detected": False},
         }
     )
@@ -552,7 +725,7 @@ def _pilot_payloads(repo: Path, worktree: Path, work_order: Mapping[str, object]
             "signed_receipt_chain": _pilot_receipt_chain(),
             "execution_valve_decision": _pilot_valve(),
             "generic_writer_dryrun_receipt": writer.receipt.to_dict(),
-            "permission_snapshot_digest": "sha256:snap-1",
+            "permission_snapshot_digest": PERMISSION_DIGEST,
             "stdin_policy": "none",
             "env_policy": {"scrubbed": True},
             "holoindex_evidence": {
@@ -865,8 +1038,8 @@ def _pattern_memory_admission_request() -> dict[str, object]:
 def _snapshots() -> dict[str, object]:
     return {
         "snapshots": {
-            "sha256:snap-1": {
-                "evidence_digest": "sha256:snap-1",
+            PERMISSION_DIGEST: {
+                "evidence_digest": PERMISSION_DIGEST,
                 "expires_at": 1600,
                 "can_write": True,
                 "repo_full_name": "FOUNDUPS/Foundups-Agent",
@@ -1341,12 +1514,13 @@ def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(tmp_
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         now_iso=NOW,
         requested_queue_item_id="queue-1",
         max_steps=1,
     )
 
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
     assert result.queue_item_id == "queue-1"
     assert result.selected_slice == "REDDOG_TEST_SLICE_PHASE1"
@@ -1371,6 +1545,7 @@ def test_bootstrap_serial_loop_fails_closed_when_later_dependency_missing(tmp_pa
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         now_iso=NOW,
         requested_queue_item_id="queue-1",
         max_steps=2,
@@ -1399,6 +1574,7 @@ def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -1439,6 +1615,7 @@ def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -1488,6 +1665,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -1521,7 +1699,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
     assert verification["decision"] == "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
     assert verification["verification_result"]["accepted"] is True
     authority = json.loads(authority_state.read_text(encoding="utf-8"))
-    assert authority["verified_work_authority_nonces"] == ["workauth-nonce-0001"]
+    assert authority.get("verified_work_authority_nonces", []) == []
 
 
 def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
@@ -1615,7 +1793,7 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
     assert not socket_path.exists()
 
 
-def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_inputs(
+def test_bootstrap_rejects_legacy_token_environment_before_execution_valve(
     tmp_path: Path,
 ) -> None:
     repo = _repo(tmp_path)
@@ -1635,8 +1813,9 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
     socket_path = tmp_path / "runtime" / "signer.sock"
     worker_dispatch_writer = _FakeWorkerDispatchTaskWriter()
 
-    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+    result = _run_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
@@ -1655,21 +1834,12 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
         max_steps=8,
     )
 
-    assert result.accepted is True
-    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.steps_run == 8
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
-        "executor_plan",
-        "execution_valve",
+    assert result.accepted is False
+    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
+    assert result.rejection_reasons == (
+        "governed_execution_valve_environment_required",
     )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE"
-    assert result.no_signature_verification_performed is False
+    assert result.steps_run == 0
     assert result.no_worker_spawn_performed is True
     assert result.no_worktree_created is True
     assert result.no_shell_command_executed is True
@@ -1678,27 +1848,8 @@ def test_bootstrap_serial_loop_reaches_execution_valve_with_explicit_work_order_
     assert result.no_repo_mutation_performed is True
     assert result.no_holoindex_reindex_performed is True
     assert result.no_pr_created is True
-    assert worker_dispatch_writer.calls
-    published_tasks = worker_dispatch_writer.calls[0]["task_ids"]
-    assert len(published_tasks) == 2
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage_results = stored["stage_results"]
-    dispatch_intents = stage_results["worker_dispatch_dryrun"]["receipt"]["dispatch_intents"]
-    assert any(
-        intent["role"] == "queue_stage_worker"
-        and intent["worker_runtime"] == "openclaw"
-        and intent["capability"] == "queue_stage_progress"
-        for intent in dispatch_intents
-    )
-    assert sum(1 for intent in dispatch_intents if intent["capability"] == "bounded_code_change") == 1
-    assert not any(intent["role"] == "openclaw_candidate" for intent in dispatch_intents)
-    assert stage_results["work_order_invocation"]["decision"] == "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
-    assert stage_results["executor_plan"]["decision"] == "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"
-    valve = stage_results["execution_valve"]
-    assert valve["decision"] == "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"
-    assert valve["valve_decision"]["valve_state"] == VALVE_OPEN_WORKTREE_CREATE
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+    assert worker_dispatch_writer.calls == []
+    assert not chain.exists()
 
 
 def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
@@ -1875,7 +2026,7 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
         max_steps=9,
     )
 
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
     assert result.steps_run == 9
     assert result.dispatched_stages == (
@@ -3711,16 +3862,10 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 5
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            )
+    assert result.steps_run == 0
+    assert result.dispatched_stages == ()
     assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
-    assert "stage:work_order_invocation" in result.rejection_reasons
+    assert "stage:authority_request" in result.rejection_reasons
     assert result.no_worktree_created is True
     assert result.no_shell_command_executed is True
 
@@ -4027,6 +4172,7 @@ def test_bootstrap_rejects_inputs_inside_repo(tmp_path: Path) -> None:
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
+        runtime_allowed_root=tmp_path / "runtime",
         work_state_path=inside_state,
         chain_results_path=tmp_path / "runtime" / "chain_results.json",
         authority_profile_path=tmp_path / "runtime" / "profile.json",
@@ -4218,6 +4364,7 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
             "os.environ",
             {
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
@@ -4372,6 +4519,7 @@ def test_main_serial_loop_preflight_worktree_profile_derives_model_and_worktree_
             "os.environ",
             {
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree",
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
                 "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
@@ -4510,6 +4658,7 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
             "os.environ",
             {
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
                 "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
@@ -4524,18 +4673,10 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
     assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "outcome_ratchet"
-        / REPO_ROOT.resolve().name
-        / "verified_outcomes.jsonl"
+        tmp_path / "outcome_ratchet" / "verified_outcomes.jsonl"
     )
     assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "model_feedback"
-        / REPO_ROOT.resolve().name
-        / "model_feedback.jsonl"
+        tmp_path / "model_feedback" / "model_feedback.jsonl"
     )
     assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is None
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
@@ -4570,6 +4711,7 @@ def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
             "os.environ",
             {
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": (
                     "signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory"
                 ),
@@ -4586,28 +4728,16 @@ def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
     assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "outcome_ratchet"
-        / REPO_ROOT.resolve().name
-        / "verified_outcomes.jsonl"
+        tmp_path / "outcome_ratchet" / "verified_outcomes.jsonl"
     )
     assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "model_feedback"
-        / REPO_ROOT.resolve().name
-        / "model_feedback.jsonl"
+        tmp_path / "model_feedback" / "model_feedback.jsonl"
     )
     sink = mocked.call_args.kwargs["pattern_memory_admission_sink"]
     assert sink is not None
     assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
     assert str(sink.db_path) == str(
-        REPO_ROOT.resolve().parent
-        / ".reddog"
-        / "pattern_memory"
-        / REPO_ROOT.resolve().name
-        / "pattern_memory.db"
+        tmp_path / "pattern_memory" / "pattern_memory.db"
     )
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 92
@@ -4637,6 +4767,7 @@ def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_d
         "os.environ",
         {
             "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
+            "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "runtime"),
             "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": (
                 "signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory"
             ),
@@ -4660,13 +4791,7 @@ def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_d
     assert stage["no_holoindex_reindex_performed"] is True
     assert stage["no_reward_settlement_performed"] is True
 
-    db_path = (
-        Path(ctx["repo"]).resolve().parent
-        / ".reddog"
-        / "pattern_memory"
-        / Path(ctx["repo"]).resolve().name
-        / "pattern_memory.db"
-    )
+    db_path = tmp_path / "runtime" / "pattern_memory" / "pattern_memory.db"
     assert db_path.exists()
     assert not (Path(ctx["repo"]) / ".reddog").exists()
     with sqlite3.connect(db_path) as conn:

@@ -12,6 +12,65 @@ The editor bridge requires host-supplied `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and
 
 `CANCELLED` and `DETERMINED` are permanently terminal. Only `FAILED` and `TIMED_OUT` cycles may enter a revision-checked retry, and each retry appends one immutable prior-attempt summary. Legacy v1 rows are accepted only by the canonical cancellation path; they cannot reconnect, resume, or become authority-bearing v2 records.
 
+### Canonical RedDog execution-valve readiness
+
+`reddog_execution_valve_environment_supply_cli` reads the authoritative work
+state, promoted authority profile, permission snapshots, and principal records
+from absolute outside-repository paths and atomically supplies
+`reddog_execution_valve_environment.v1`. The artifact contains no legacy token
+keys or freshness controls. `GovernedExecutionValveEnvironment` enforces the
+exact allowlist; a trusted caller explicitly selects canonical evaluation and
+provides independently reconstructed bindings and freshness bounds.
+
+`validate_reddog_resident_runtime_artifacts` semantically cross-validates the
+seven live-canary artifacts but never treats the unsigned pack as execution
+authority. It reports the missing signed immutable-manifest producer and signer
+client-handshake verifier. The resident use-time stage now reconstructs the
+binding and re-verifies signed authority, then invokes the canonical evaluator
+and forces it closed while any required trust anchor is absent.
+
+Production bootstrap and the resident registry accept only
+`GovernedExecutionValveEnvironment`; legacy token mappings are rejected before
+the dependency bundle or effectful handlers are constructed. The legacy
+evaluator remains available only as an explicit non-effectful compatibility
+API. Authority verification has two typed phases. Queue and canonical use-time
+preflight use `PREFLIGHT_NON_CONSUMING`. Only after all non-mutating gates pass
+does the resolver issue an opaque process-local lease; the final effect boundary
+invokes `AUTHORITATIVE_USE` and transactionally consumes the nonce exactly once.
+That boundary reads a fresh trusted clock first; expiry or clock failure returns
+without consuming the nonce or invoking the effect.
+Persisted stage mappings are audit evidence and cannot recreate that lease.
+Use-time validation reuses the strict queue consumer and binds the promoted
+claim, determination/model/Memex receipts, signed identity/work authority,
+FoundUp scope, and complete WSP 15 allocation lineage.
+
+Delegated authority additionally signs the exact explicit `base_ref` and the
+canonical digest of the complete work order. The executor plan carries those
+bindings in its verified plan digest, and the effect runner reads `base_ref`
+only from that validated plan snapshot. Terminal `AUTHORITATIVE_USE`
+verification uses a fresh invocation clock before atomic nonce consumption.
+
+Worktree creation and live OpenClaw enqueue additionally require digest-bound,
+one-shot in-memory admissions. Fabricated, replayed, restarted, or spliced
+serialized acceptance chains fail before the injected runner/writer is called.
+The admission digest covers the complete work order, plan, and valve. Runtime
+JSON dependency, authority-store, canary, and evidence reads use an independently
+configured allowed root, are locked and bounded, and reject any symlink,
+junction, or reparse component before resolution. Caller paths remain raw;
+neither a resolved path nor the file's own parent becomes a trust root. The
+use-time authority reload reads every artifact under its exact operation lock
+and verifies a second locked collection before using the snapshot. Any
+replacement observed across the two collections discards the complete set and
+fails closed; a mixed authority set is never returned for valve evaluation.
+
+Effect results expose `COMMITTED`, `NOT_COMMITTED`, or `INDETERMINATE`, plus a
+stable attempt key and reconciliation data. A writer/runner exception after an
+attempt is `INDETERMINATE`; callers must query the external system by attempt
+key and cannot treat it as proof that no effect occurred. Model-selection and
+Memex ID/digest pairs are propagated into signed delegated work authority, but
+production remains closed because independent signed-evidence verifiers for
+those pairs and the other named trust anchors are absent.
+
 ### RedDog HoloIndex Query Adapter
 
     from modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter import (

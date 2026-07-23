@@ -34,6 +34,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     resident_queue_pattern_memory_admission_db_path,
     resident_queue_runtime_file_path,
     resident_queue_runtime_flag_enabled,
+    resident_queue_runtime_root_path,
     resident_queue_worktree_runner_mode,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_loop_runner import (
@@ -228,6 +229,7 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         work_state_path=str(work_state_path),
         chain_results_path=str(chain_results_path),
         authority_profile_path=str(authority_profile_path),
+        runtime_allowed_root=resident_queue_runtime_root_path(env, repo_root),
         repo_root=Path(repo_root).resolve(),
         now_iso=_stripped(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO")) or None,
         now_epoch=now_epoch,

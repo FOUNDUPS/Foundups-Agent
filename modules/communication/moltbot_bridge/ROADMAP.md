@@ -1,5 +1,20 @@
 # moltbot_bridge Roadmap
 
+## RedDog execution-valve readiness
+
+- Phase 1 safety wiring complete locally: token-free canonical supplier,
+  bootstrap-to-handler canonical routing, secure use-time reload, signed
+  authority re-verification, process-local single-use effect admissions, and
+  fail-closed decision lineage. Persisted results are audit-only. Queue and
+  use-time preflight are non-consuming; after every non-mutating gate passes,
+  the final worktree/live-enqueue boundary consumes the nonce lease exactly once.
+- Operational status is BLOCKED, not READY. Next gates are independently signed
+  descriptor-derived artifact manifests; verified consensus and sovereign
+  receipts; authenticated principal/model trust provenance; a fresh client-side
+  signer handshake. Closed attempts do not consume nonce state.
+- Only after those anchors and adversarial live-path tests are green may an
+  operator run the Linux live canary; merge authority remains unavailable.
+
 ## FoundUps Memex lane
 
 The FoundUp Memex grows from existing RedDog operational context, Brain,
@@ -92,3 +107,20 @@ These remain deferred until the FoundUp Memex POC and MVP contracts are proven.
 
 These items are an explicit WSP_62 remediation register; no global compliance
 claim is made while historical monolith debt remains.
+
+## RedDog execution-valve trust-boundary decomposition
+
+- Split the resident serial bootstrap into runtime-input loading, dependency
+  assembly, handler construction, and bounded-loop coordination without
+  changing canonical receipts.
+- Extract delegated-authority request validation and signed model/Memex
+  lineage assembly from the signer transaction boundary.
+- Split worktree and OpenClaw effect transactions into preflight, effect
+  attempt, reconciliation, and receipt modules while preserving stable attempt
+  keys and truthful indeterminate outcomes.
+- Decompose inherited end-to-end startup suites by stage contract. Temporary
+  WSP_62 exemptions expire on 2026-09-30 and their exact no-growth ceilings are
+  enforced by AST tests.
+- Production remains `VALVE_CLOSED` until independent signed model-selection,
+  Memex, runtime-artifact manifest, consensus, sovereign, principal-subject,
+  and signer peer-handshake anchors are implemented and adversarially verified.

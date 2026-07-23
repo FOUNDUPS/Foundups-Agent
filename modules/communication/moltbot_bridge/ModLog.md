@@ -1,5 +1,23 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-20: REDDOG_EXECUTION_VALVE_INDEPENDENT_REVIEW_REPAIR_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
+
+- Bound the exact explicit `base_ref` and canonical digest of every full work-
+  order field through delegated authority, use-time reconstruction, executor
+  plan, process-local admission, and the terminal effect boundary.
+- Made the runner consume `base_ref` only from the validated plan snapshot;
+  work-order or plan mutation/splicing fails before nonce use and effect calls.
+- Passed the fresh invocation clock into terminal `AUTHORITATIVE_USE`
+  verification so identity and permission-snapshot expiry cannot reuse the
+  earlier preflight timestamp.
+- Corrected the readiness audit: authority verification is
+  `PREFLIGHT_NON_CONSUMING`, while nonce consumption is terminal and the
+  canonical store is cross-process atomic under `.operation`.
+- Production remains permanently CLOSED while independent trust-anchor
+  verifiers listed by the governed resolver are absent.
+
 ## 2026-07-20: REDDOG_RESIDENT_CYCLE_CAS_ATTESTATION_AND_INTENT_BINDING_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97
@@ -37,7 +55,24 @@
   evidence with the confined reader and require exact path/digest/bytes/truncated
   equality. The model-backed path repeats the check after model return, so a
   clean or unchanged HEAD cannot mask working-tree evidence drift.
+## 2026-07-20: REDDOG_EXECUTION_VALVE_RECONCILED_TRUST_BOUNDARY_PHASE1
 
+**WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
+
+- Reconciled the audited governed-valve stack with authenticated resident
+  control receipts, grounded OpenClaw/Hermes assignments, transport-neutral
+  resident clients, Fusion usage receipts, and signed PANEL evidence.
+- Preserved work-order/plan/valve admission, truthful commit outcomes,
+  independent runtime roots, bounded locked no-link reads, and exact model-
+  selection/runtime/Memex lineage propagation. Independent review later found
+  missing full-order/base-ref and terminal fresh-clock bindings; the repair
+  entry above supersedes this pre-review statement.
+- Added coherent double collection and matching `.operation` locks across all
+  canonical readers and production writers. Detected replacement or every
+  still-missing independent verifier remains permanently fail-closed.
+- Updated exact temporary WSP 62 no-growth ceilings to the reconciled current-
+  main surfaces. No live execution, signing, runtime artifact generation,
+  model call, repository mutation, or publish ran.
 ## 2026-07-20: REDDOG_FUSION_PROGRESS_AND_OPENROUTER_USAGE_RECEIPTS_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97

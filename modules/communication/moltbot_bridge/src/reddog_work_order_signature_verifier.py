@@ -44,7 +44,12 @@ from __future__ import annotations
 import hmac
 import json
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, List, Mapping, Optional, Protocol, Sequence, runtime_checkable
+
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_work_order_base_ref,
+)
 
 # Domain-separation prefixes (contract Section 2, frozen).
 PREFIX_IDENTITY = "reddog-identity.v1"
@@ -57,6 +62,11 @@ PREFIX_RECEIPT = "reddog-receipt.v1"
 _EXCLUDED_FROM_SIGNED = frozenset({"signature", "receipt_chain"})
 
 ALLOWED_PRINCIPAL_PROVIDERS = frozenset({"github", "intake_session", "intake_invite"})
+
+
+class WorkAuthorityVerificationPhase(str, Enum):
+    PREFLIGHT_NON_CONSUMING = "PREFLIGHT_NON_CONSUMING"
+    AUTHORITATIVE_USE = "AUTHORITATIVE_USE"
 
 
 class ReasonCode:
@@ -176,6 +186,7 @@ class InMemoryNonceStore:
         return True
 
 
+
 @runtime_checkable
 class PermissionSnapshotResolver(Protocol):
     def resolve(self, digest: str) -> Optional["PermissionSnapshot"]: ...
@@ -285,7 +296,7 @@ def _path_within_foundup(path: str, foundup_id: str) -> bool:
 
 
 _REQUIRED_WORKAUTH_FIELDS = (
-    "work_order_id", "principal_id", "reddog_id", "repo_full_name", "foundup_id",
+    "work_order_id", "work_order_digest", "base_ref", "principal_id", "reddog_id", "repo_full_name", "foundup_id",
     "allowed_paths", "denied_paths", "requested_operation", "permission_snapshot_digest",
     "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
     "wsp15_mps_total", "wsp15_reasoning_tier",
@@ -311,6 +322,9 @@ def verify_delegated_work_authority(
     forbidden_operations: Sequence[str] = (),
     revoked_key_epochs: Sequence[str] = (),
     leeway_s: int = 60,
+    verification_phase: WorkAuthorityVerificationPhase = (
+        WorkAuthorityVerificationPhase.AUTHORITATIVE_USE
+    ),
 ) -> VerificationResult:
     """Verify a signed RedDogDelegatedWorkAuthority. ACCEPT / REJECT with reason codes.
 
@@ -338,6 +352,17 @@ def verify_delegated_work_authority(
         return reject(ReasonCode.NON_ASCII)
     if str(identity.get("principal_provider")) not in ALLOWED_PRINCIPAL_PROVIDERS:
         return reject(ReasonCode.IDENTITY_PROVIDER_INVALID)
+    try:
+        canonical_work_order_base_ref(work_authority)
+    except ValueError:
+        return reject(ReasonCode.MALFORMED_PAYLOAD)
+    work_order_digest = str(work_authority.get("work_order_digest") or "")
+    if not (
+        work_order_digest.startswith("sha256:")
+        and len(work_order_digest) == 71
+        and all(char in "0123456789abcdef" for char in work_order_digest[7:])
+    ):
+        return reject(ReasonCode.MALFORMED_PAYLOAD)
     if (
         not str(work_authority.get("wsp15_allocation_receipt_id") or "").startswith("sha256:")
         or not str(work_authority.get("wsp15_allocation_digest") or "").startswith("sha256:")
@@ -484,8 +509,13 @@ def verify_delegated_work_authority(
     if not constant_time_compare(str(work_authority["valve_state_required"]), str(required_valve_state)):
         return reject(ReasonCode.VALVE_STATE)
 
-    # ---- 9. Nonce consume LAST: burn only on a full ACCEPT (still AFTER signature
-    #         success), so a transient later-gate reject never locks out a valid order.
+    # ---- 9. Nonce consume LAST. A preflight caller may explicitly defer this
+    #         terminal mutation; the authoritative use-time caller must consume it.
+    if verification_phase is WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING:
+        result.accepted = True
+        return result
+    if verification_phase is not WorkAuthorityVerificationPhase.AUTHORITATIVE_USE:
+        return reject(ReasonCode.MALFORMED_PAYLOAD)
     try:
         consumed = nonce_store.consume(str(work_authority["nonce"]))
     except Exception:
