@@ -12,6 +12,18 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-07-24 - Legacy Failed-Row Durable Retry Migration
+
+**WSP Protocol**: WSP 22, WSP 62, WSP 97
+
+- Corrected legacy migration so a current-window `last_run` suppresses work
+  only when `last_result` is explicit canonical `success:...`.
+- Failed or unknown legacy results now remain due and enter durable claim
+  control instead of being silently skipped.
+- `record_execution()` advances `last_run` only for successful executions.
+- Added persisted failed-row, unknown-result fail-safe, canonical-success, and
+  failed-record timestamp regressions.
+
 ### 2026-07-24 - Durable Schedule Claim Lease Phase 1
 
 **WSP Protocol**: WSP 15, WSP 22, WSP 62, WSP 97

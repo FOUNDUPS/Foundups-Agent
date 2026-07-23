@@ -261,6 +261,9 @@ dispatcher text.
   and exact last-known-good restoration on uncertain replacer behavior.
 - Malformed, partial, duplicate-key, oversized, or noncanonical state fails
   closed before dispatch.
+- A legacy `last_run` suppresses a window only when `last_result` has the
+  canonical `success:` prefix. Failed or unknown legacy results remain due and
+  enter durable claim/retry control.
 - Claims provide cooperative single ownership, not exactly-once side effects;
   registered routines must be repeat-safe or independently fenced.
 

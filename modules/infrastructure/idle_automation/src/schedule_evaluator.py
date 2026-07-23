@@ -369,7 +369,8 @@ class ScheduleEvaluator:
             return False
 
         spec = self._schedules[spec_id]
-        spec.last_run = utc_now_iso()
+        if success:
+            spec.last_run = utc_now_iso()
         spec.last_result = f"{'success' if success else 'failed'}: {result_summary}"
         self._save_schedules()
         return True
@@ -474,4 +475,10 @@ def _schedule_is_due(spec: ScheduleSpec, now: datetime) -> bool:
     window_start = now.replace(
         hour=start_hour, minute=0, second=0, microsecond=0
     )
-    return last_run < window_start
+    if last_run < window_start:
+        return True
+    return not _is_canonical_legacy_success(spec.last_result)
+
+
+def _is_canonical_legacy_success(value: object) -> bool:
+    return isinstance(value, str) and value.startswith("success:")

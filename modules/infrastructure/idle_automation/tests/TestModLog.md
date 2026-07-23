@@ -7,6 +7,23 @@
 
 ---
 
+## 2026-07-24: Legacy Failed-Row Migration Regression
+
+- Proves a persisted current-window `failed:` row remains due after restart and
+  receives a durable claim.
+- Proves missing, empty, case-variant, and unknown legacy results fail safe as
+  due.
+- Proves only explicit canonical `success:` suppresses the current window.
+- Proves failed `record_execution()` calls do not advance `last_run`.
+
+**Focused Result**: `91 passed`
+
+**Full Module Result**: `125 passed, 1 pre-existing failure`
+
+**Neighbor Runtime Safety**: `11 passed, 1 skipped`
+
+---
+
 ## 2026-07-24: Durable Schedule Claim Lease Phase 1
 
 **Files**: `test_schedule_claim_state.py`, `test_schedule_evaluator.py`,

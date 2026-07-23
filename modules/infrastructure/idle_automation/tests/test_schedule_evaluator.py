@@ -13,14 +13,11 @@ Tests cover:
 import json
 import pytest
 from datetime import datetime, timedelta, UTC
-from pathlib import Path
 
 from modules.infrastructure.idle_automation.src.schedule_evaluator import (
     ScheduleParser,
     ScheduleEvaluator,
     ScheduleSpec,
-    SUPPORTED_ROUTINES,
-    CADENCE_WINDOWS,
     get_supported_phrases,
 )
 from modules.infrastructure.idle_automation.src.schedule_claim_state import (
@@ -177,6 +174,14 @@ class TestScheduleEvaluator:
         assert updated.last_run is not None
         assert "success" in updated.last_result
 
+    def test_failed_execution_does_not_advance_last_run(self, evaluator):
+        """A failed legacy record must remain eligible for durable retry."""
+        spec = evaluator.add_schedule("run self research daily")
+        assert evaluator.record_execution(spec.id, False, "failed")
+        updated = evaluator.get_schedule(spec.id)
+        assert updated.last_run is None
+        assert updated.last_result == "failed: failed"
+
 
 class TestDueScheduleEvaluation:
     """Test due schedule evaluation logic."""
@@ -205,6 +210,7 @@ class TestDueScheduleEvaluation:
         now = datetime.now(UTC).replace(hour=12, minute=0, second=0, microsecond=0)
         ran_at = now.replace(hour=8)
         evaluator._schedules[spec.id].last_run = ran_at.isoformat()
+        evaluator._schedules[spec.id].last_result = "success: completed"
         evaluator._save_schedules()
 
         # Check at noon - should not be due
@@ -372,3 +378,43 @@ class TestDurableScheduleClaims:
         assert claim is not None
         assert evaluator.claim_store.runtime_root != untrusted
         assert not untrusted.exists()
+
+    def test_persisted_current_window_failure_is_due_and_claimable(
+        self, tmp_path
+    ):
+        schedules_path = tmp_path / "schedules.json"
+        evaluator = ScheduleEvaluator(schedules_path=schedules_path)
+        spec = evaluator.add_schedule("run self research daily")
+        now = datetime(2026, 7, 24, 1, tzinfo=UTC)
+        spec.last_run = now.isoformat()
+        spec.last_result = "failed: legacy failure"
+        evaluator._save_schedules()
+
+        restarted = ScheduleEvaluator(schedules_path=schedules_path)
+        due = restarted.get_due_schedules(now)
+        assert [item.id for item in due] == [spec.id]
+        assert restarted.claim_schedule(due[0], now=now) is not None
+
+    @pytest.mark.parametrize(
+        "legacy_result",
+        [None, "", "completed", "Success: completed", "unknown: completed"],
+    )
+    def test_unknown_legacy_result_is_due_fail_safe(
+        self, tmp_path, legacy_result
+    ):
+        evaluator = ScheduleEvaluator(schedules_path=tmp_path / "schedules.json")
+        spec = evaluator.add_schedule("run self research daily")
+        now = datetime(2026, 7, 24, 1, tzinfo=UTC)
+        spec.last_run = now.isoformat()
+        spec.last_result = legacy_result
+        assert evaluator.get_due_schedules(now) == [spec]
+
+    def test_explicit_canonical_legacy_success_suppresses_window(
+        self, tmp_path
+    ):
+        evaluator = ScheduleEvaluator(schedules_path=tmp_path / "schedules.json")
+        spec = evaluator.add_schedule("run self research daily")
+        now = datetime(2026, 7, 24, 1, tzinfo=UTC)
+        spec.last_run = now.isoformat()
+        spec.last_result = "success: completed"
+        assert evaluator.get_due_schedules(now) == []
