@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "id": "zeta/model-b",
+      "name": "discard me",
+      "description": "provider prose is outside the allowlist",
+      "context_length": 131072,
+      "pricing": {"prompt": "0.0000030", "completion": "0.000015"},
+      "architecture": {
+        "input_modalities": ["Text", "image", "text"],
+        "output_modalities": ["text"]
+      },
+      "supported_parameters": ["tools", "response format", "tools"],
+      "top_provider": {"context_length": 131072},
+      "default_parameters": {"temperature": 0.7},
+      "per_request_limits": {"prompt_tokens": 1}
+    },
+    {
+      "id": "alpha/model-a:free",
+      "context_length": 32768,
+      "pricing": {"prompt": "0", "completion": "0"},
+      "architecture": {
+        "input_modalities": ["text"],
+        "output_modalities": ["text"]
+      },
+      "supported_parameters": []
+    }
+  ]
+}

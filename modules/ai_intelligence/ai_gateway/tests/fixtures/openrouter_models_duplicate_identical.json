@@ -1,0 +1,20 @@
+{
+  "data": [
+    {
+      "id": "publisher/model",
+      "name": "discarded variant one",
+      "context_length": 4096,
+      "pricing": {"prompt": "0.1", "completion": "0.2"},
+      "architecture": {"input_modalities": ["text"], "output_modalities": ["text"]},
+      "supported_parameters": ["tools"]
+    },
+    {
+      "id": "publisher/model",
+      "name": "discarded variant two",
+      "context_length": 4096,
+      "pricing": {"prompt": "0.10", "completion": "0.20"},
+      "architecture": {"input_modalities": ["text"], "output_modalities": ["text"]},
+      "supported_parameters": ["tools"]
+    }
+  ]
+}

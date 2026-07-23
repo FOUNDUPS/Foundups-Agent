@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from enum import Enum
@@ -204,39 +205,11 @@ def normalize_openrouter_catalog(
     cards: list[ModelCapabilityCard] = []
     rejected: list[ModelCatalogRejectedRecord] = []
     for record in records:
-        if not isinstance(record, Mapping):
-            rejected.append(_reject_openrouter_record(record, "record_not_mapping"))
-            continue
-        model_id = str(record.get("id") or "").strip()
-        if not model_id:
-            rejected.append(_reject_openrouter_record(record, "missing_model_id"))
-            continue
-        architecture = record.get("architecture") if isinstance(record.get("architecture"), Mapping) else {}
-        pricing = record.get("pricing") if isinstance(record.get("pricing"), Mapping) else {}
-        supported_parameters = _string_tuple(record.get("supported_parameters"))
-        modalities = _modalities_from_openrouter(architecture)
-        provider = model_id.split("/", 1)[0] if "/" in model_id else "openrouter"
-        cards.append(
-            ModelCapabilityCard(
-                provider=provider,
-                model_id=model_id,
-                canonical_model_id=model_id,
-                source="openrouter_catalog",
-                availability=Availability.AVAILABLE,
-                freshness="provider_catalog",
-                promotion_state=PromotionState.CANDIDATE,
-                task_families=(),
-                context_window=_positive_int(record.get("context_length")),
-                input_cost_per_million=_per_million(pricing.get("prompt")),
-                output_cost_per_million=_per_million(pricing.get("completion")),
-                supports_tools=bool({"tools", "tool_choice"} & set(supported_parameters)),
-                supports_structured_output=bool({"response_format", "structured_outputs"} & set(supported_parameters)),
-                supports_reasoning="reasoning" in set(supported_parameters),
-                modalities=modalities,
-                supported_parameters=supported_parameters,
-                privacy_policy="openrouter_provider_policy",
-            ).normalized()
-        )
+        normalized = _normalize_openrouter_record(record)
+        if isinstance(normalized, ModelCapabilityCard):
+            cards.append(normalized)
+        else:
+            rejected.append(normalized)
     return tuple(sorted(cards, key=lambda card: card.canonical_model_id)), tuple(rejected)
 
 
@@ -328,7 +301,7 @@ def _string_tuple(value: Any) -> tuple[str, ...]:
 def _positive_int(value: Any) -> int | None:
     try:
         parsed = int(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     return parsed if parsed > 0 else None
 
@@ -336,9 +309,9 @@ def _positive_int(value: Any) -> int | None:
 def _per_million(value: Any) -> float | None:
     try:
         parsed = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
-    if parsed < 0:
+    if not math.isfinite(parsed) or parsed < 0:
         return None
     return round(parsed * 1_000_000, 10)
 
@@ -370,6 +343,42 @@ def _reject_openrouter_record(record: Any, reason: str) -> ModelCatalogRejectedR
         reason=reason,
         record_digest=_digest_prefixed("rejected_record", record),
     )
+
+
+def _normalize_openrouter_record(
+    record: Any,
+) -> ModelCapabilityCard | ModelCatalogRejectedRecord:
+    if not isinstance(record, Mapping):
+        return _reject_openrouter_record(record, "record_not_mapping")
+    model_id = str(record.get("id") or "").strip()
+    if not model_id:
+        return _reject_openrouter_record(record, "missing_model_id")
+    architecture = record.get("architecture")
+    architecture = architecture if isinstance(architecture, Mapping) else {}
+    pricing = record.get("pricing")
+    pricing = pricing if isinstance(pricing, Mapping) else {}
+    supported_parameters = _string_tuple(record.get("supported_parameters"))
+    return ModelCapabilityCard(
+        provider="openrouter",
+        model_id=model_id,
+        canonical_model_id=model_id,
+        source="openrouter_catalog",
+        availability=Availability.UNKNOWN,
+        freshness="provider_catalog_listing",
+        promotion_state=PromotionState.CANDIDATE,
+        task_families=(),
+        context_window=_positive_int(record.get("context_length")),
+        input_cost_per_million=_per_million(pricing.get("prompt")),
+        output_cost_per_million=_per_million(pricing.get("completion")),
+        supports_tools=bool({"tools", "tool_choice"} & set(supported_parameters)),
+        supports_structured_output=bool(
+            {"response_format", "structured_outputs"} & set(supported_parameters)
+        ),
+        supports_reasoning="reasoning" in set(supported_parameters),
+        modalities=_modalities_from_openrouter(architecture),
+        supported_parameters=supported_parameters,
+        privacy_policy="provider_policy_unknown",
+    ).normalized()
 
 
 def _digest_prefixed(prefix: str, value: Any) -> str:

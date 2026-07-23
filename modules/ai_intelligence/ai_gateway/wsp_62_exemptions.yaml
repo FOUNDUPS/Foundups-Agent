@@ -13,16 +13,3 @@ exemptions:
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "ROADMAP.md#runtime-binder-decomposition"
-
-  - file: "ModLog.md"
-    reason: >-
-      Legacy reverse-chronological WSP_22 module journal. This slice appends a
-      bounded truth record; splitting historical entries requires a dedicated
-      archive operation that preserves traceability.
-    threshold_override: 1500
-    temporary: true
-    owner: "AI Gateway Maintainers"
-    expires_on: "2026-09-30"
-    review_date: "2026-Q3"
-    reviewer: "0102 Technical Architect"
-    remediation: "ROADMAP.md#modlog-archive"

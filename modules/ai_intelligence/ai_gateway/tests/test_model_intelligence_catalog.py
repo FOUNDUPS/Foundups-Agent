@@ -63,9 +63,12 @@ def test_openrouter_catalog_normalizes_capability_and_pricing_evidence():
     assert rejected == ()
     assert len(cards) == 1
     card = cards[0]
-    assert card.provider == "moonshotai"
+    assert card.provider == "openrouter"
     assert card.canonical_model_id == "moonshotai/kimi-k3"
-    assert card.availability == Availability.AVAILABLE
+    assert card.availability == Availability.UNKNOWN
+    assert card.freshness == "provider_catalog_listing"
+    assert card.privacy_policy == "provider_policy_unknown"
+    assert card.task_families == ()
     assert card.promotion_state == PromotionState.CANDIDATE
     assert card.context_window == 1048576
     assert card.input_cost_per_million == 3.0

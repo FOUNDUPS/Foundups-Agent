@@ -58,6 +58,33 @@ context window, modalities, supported parameters, rough cost metadata, task
 families, and promotion state. `ModelCatalogSnapshot` binds cards and rejected
 records to a deterministic `snapshot_id`.
 
+#### Direct provider catalog candidate snapshots
+
+```python
+build_discovery_invocation(...) -> DiscoveryInvocation
+discover_openrouter_model_catalog(..., transport=...) -> DiscoveryRunResult
+rehydrate_candidate_snapshot(candidate, now_ms=...) -> ProviderCatalogCandidateSnapshot
+bridge_candidate_to_canonical_catalog(..., prior_admitted_candidate_id=...) -> CatalogBridgeResult
+```
+
+Discovery is an explicit manual or pre-authorized scheduled operation. It
+persists an attempt receipt separately from the last-known-good candidate under
+one validated outside-repository runtime root. Candidate IDs bind only the
+schema, provider, endpoint, and sanitized payload, while embedded observation
+receipts and a 24-hour freshness window are revalidated on admission.
+
+The bridge is idempotent for an unchanged prior candidate ID and invokes the
+existing canonical catalog builder with `static_registry=False`. It does not
+mutate the registry, select or promote a model, bind runtime roles, or create a
+scheduler.
+
+`ProviderCatalogArtifactStore` is the confined persistence boundary used for
+both attempt and candidate artifacts. Replacement is same-directory and atomic:
+the target is untouched until exact UTF-8 bytes have been flushed and fsynced
+to a validated exclusive temporary file. `AtomicArtifactOps` is injectable for
+offline failure tests; production uses ordinary writes, `os.fsync`, and
+`os.replace`.
+
 #### Model Intelligence Selection
 
 ```python

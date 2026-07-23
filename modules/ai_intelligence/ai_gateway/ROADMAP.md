@@ -21,8 +21,17 @@
 
 ### ModLog archive
 
-- [ ] Move closed historical epochs into a WSP_22-governed archive before the
-  module journal reaches the temporary 1,500-line ceiling.
+- [x] Moved entries dated 2026-07-16 and earlier into
+  `docs/archives/ModLog_2026-07-16_and_earlier.md`; both journals are below
+  1,000 lines.
+
+### Direct provider catalog evidence
+
+- [x] Explicit bounded OpenRouter model-list discovery with injected offline
+  transport tests, strict candidate normalization, durable attempt receipts,
+  and outside-repository last-known-good persistence.
+- [ ] Operator-owned scheduling integration. Phase 1 provides scheduled
+  invocation admission fields but intentionally installs no scheduler.
 
 ## Phase 1: Enhanced Intelligence (Next)
 - **Cost optimization algorithms** - Auto-select cheapest provider
