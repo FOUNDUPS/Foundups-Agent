@@ -78,6 +78,13 @@ existing canonical catalog builder with `static_registry=False`. It does not
 mutate the registry, select or promote a model, bind runtime roles, or create a
 scheduler.
 
+`ProviderCatalogArtifactStore` is the confined persistence boundary used for
+both attempt and candidate artifacts. Replacement is same-directory and atomic:
+the target is untouched until exact UTF-8 bytes have been flushed and fsynced
+to a validated exclusive temporary file. `AtomicArtifactOps` is injectable for
+offline failure tests; production uses ordinary writes, `os.fsync`, and
+`os.replace`.
+
 #### Model Intelligence Selection
 
 ```python

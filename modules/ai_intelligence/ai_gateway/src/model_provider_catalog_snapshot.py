@@ -10,14 +10,12 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping, Sequence
 from .model_intelligence_catalog import ModelCatalogSnapshot, build_canonical_model_catalog
 INVOCATION_SCHEMA, RECEIPT_SCHEMA = "model_provider_catalog_discovery_invocation.v1", "model_provider_catalog_discovery_receipt.v1"
-CANDIDATE_SCHEMA = "model_provider_catalog_candidate_snapshot.v1"
-PROVIDER, ENDPOINT_ID, DEFAULT_FRESHNESS_MS = "openrouter", "openrouter_models_api_v1", 86_400_000
-MAX_RESPONSE_BYTES, MAX_RECORDS = 8 * 1024 * 1024, 2048
-MAX_CONTEXT_LENGTH, MAX_PRICE = 100_000_000, Decimal("1000")
+CANDIDATE_SCHEMA, PROVIDER = "model_provider_catalog_candidate_snapshot.v1", "openrouter"
+ENDPOINT_ID, DEFAULT_FRESHNESS_MS = "openrouter_models_api_v1", 86_400_000
+MAX_RESPONSE_BYTES, MAX_RECORDS, MAX_CONTEXT_LENGTH, MAX_PRICE = 8 * 1024 * 1024, 2048, 100_000_000, Decimal("1000")
 _ID = re.compile(r"[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/"
                  r"[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?(?::free)?\Z")
-_TOKEN = re.compile(r"[a-z0-9][a-z0-9._:-]{0,63}\Z")
-_DIGEST = re.compile(r"sha256:[0-9a-f]{64}\Z")
+_TOKEN, _DIGEST = re.compile(r"[a-z0-9][a-z0-9._:-]{0,63}\Z"), re.compile(r"sha256:[0-9a-f]{64}\Z")
 _CANDIDATE_ID = re.compile(r"model_provider_catalog_candidate_snapshot:[0-9a-f]{64}\Z")
 _PRICE = re.compile(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?\Z")
 _SECRET = re.compile(r"(?i)(?:bearer\s+\S+|(?:api[_-]?key|token|secret)\s*[:=]|"
@@ -410,31 +408,33 @@ def _validate_receipt_state(
     empty = snapshot_id is None and accepted == rejected == 0 and not counts
     evidence_empty, valid = status is digest is size is None, False
     if outcome == "COMPLETED":
-        valid = (attempted and reason == "completed" and status == 200 and digest is not None
-                 and size is not None and accepted > 0
+        valid = (attempted and reason == "completed" and status == 200 and digest is not None and size is not None and accepted > 0
                  and _CANDIDATE_ID.fullmatch(str(snapshot_id)) is not None)
     elif outcome == "BLOCKED_PRECALL":
-        valid = not attempted and empty and evidence_empty and reason in {
-            "precall_intent", "invocation_invalid", "scheduled_invocation_not_due",
+        valid = not attempted and empty and evidence_empty and reason in {"precall_intent", "invocation_invalid", "scheduled_invocation_not_due",
             "scheduled_invocation_expired", "output_path_invalid", "precall_write_failed"}
     elif outcome == "INDETERMINATE":
-        valid = (empty and (attempted, reason) in {
-            (True, "transport_pending"), (True, "terminal_receipt_write_failed")}
+        valid = (empty and (attempted, reason) in {(True, "transport_pending"), (True, "terminal_receipt_write_failed")}
             and (reason == "terminal_receipt_write_failed" or evidence_empty))
     else:
-        valid = attempted and empty and reason in {
-            "transport_timeout", "transport_failed", "redirect_rejected", "http_status_rejected",
-            "content_type_rejected", "body_too_large", "json_invalid", "top_level_invalid",
-            "record_limit_exceeded", "no_acceptable_records", "candidate_write_failed"}
-        if reason in {"transport_timeout", "transport_failed"}:
-            valid = valid and evidence_empty
-        elif reason == "candidate_write_failed":
-            valid = valid and status == 200 and digest is not None and size is not None
+        has_body = digest is not None and size is not None
+        if reason == "redirect_rejected":
+            evidence = has_body and status is not None and 300 <= status < 400
+        elif reason == "http_status_rejected":
+            evidence = has_body and status is not None and status != 200 and not 300 <= status < 400
+        elif reason in {"content_type_rejected", "json_invalid", "top_level_invalid", "record_limit_exceeded", "no_acceptable_records"}:
+            evidence = status == 200 and has_body
+        elif reason in {"transport_timeout", "transport_failed"}:
+            evidence = evidence_empty
+        elif reason == "body_too_large":
+            evidence = digest is size is None
+        else:
+            evidence = reason == "candidate_write_failed" and status == 200 and has_body
+        valid = attempted and empty and evidence
     if not valid:
         raise ValueError("discovery_receipt_invalid")
 def _valid_model_id(value: Any) -> bool:
-    return (isinstance(value, str) and len(value) <= 200
-            and _ID.fullmatch(value) is not None and not _SECRET.search(value))
+    return (isinstance(value, str) and len(value) <= 200 and _ID.fullmatch(value) is not None and not _SECRET.search(value))
 def _exact(value: Any, keys: frozenset[str], reason: str) -> None:
     if not isinstance(value, Mapping) or set(value) != keys:
         raise ValueError(reason)

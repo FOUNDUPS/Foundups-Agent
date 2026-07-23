@@ -1,5 +1,30 @@
 # AI Gateway Module Change Log
 
+## [2026-07-23] - Provider Catalog Atomic Artifact Repair
+
+**Who:** 0102 Codex worker, independent reviewer-driven repair
+**Type:** Security / Crash-Safe Artifact Durability
+**Slice:** DIRECT_PROVIDER_SNAPSHOT_AND_BOUNDED_DISCOVERY_PHASE1_REPAIR2
+
+**What:** Replaced destructive runtime artifact writes with a module-local,
+same-directory atomic store for both attempt receipts and candidate snapshots.
+Exact UTF-8 bytes are flushed and fsynced before locked replacement; failure
+removes the temporary file while preserving the prior target byte-for-byte.
+
+**Truth Boundary:**
+- IMPLEMENTED: confined exclusive temp files, regular-file and link checks,
+  target-mode preservation, injected partial-write/fsync/replace regressions,
+  best-effort parent-directory fsync, and reason-specific FAILED evidence.
+- NOT IMPLEMENTED: shared runtime-safety changes, live provider calls,
+  scheduling, registry/selection/promotion mutation, or runtime binding.
+
+**WSP_15 Score:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 =
+19 (P0 crash-safety and receipt-truth boundary).
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
+---
+
 ## [2026-07-23] - Direct Provider Discovery Independent NO-GO Repair
 
 **Who:** 0102 Codex worker, independent reviewer-driven repair

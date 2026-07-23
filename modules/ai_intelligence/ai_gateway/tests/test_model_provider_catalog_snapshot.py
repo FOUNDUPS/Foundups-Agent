@@ -252,6 +252,66 @@ def test_noncompleted_receipts_reject_incoherent_state(
         )
 
 
+@pytest.mark.parametrize(
+    "reason,details",
+    [
+        ("redirect_rejected", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("redirect_rejected", {"http_status": 302}),
+        ("http_status_rejected", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("http_status_rejected", {"http_status": 302, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("content_type_rejected", {"http_status": 415, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("json_invalid", {"http_status": 500, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("transport_failed", {"http_status": 500, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("body_too_large", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("candidate_write_failed", {}),
+    ],
+)
+def test_failed_receipt_reason_requires_coherent_transport_evidence(
+    reason: str, details: dict
+) -> None:
+    with pytest.raises(ValueError, match="discovery_receipt_invalid"):
+        build_discovery_receipt(
+            call_id="offline-reason-evidence",
+            invocation=build_discovery_invocation(mode="manual"),
+            request_envelope_digest=sha256_bytes(b"request"),
+            attempted=True,
+            outcome="FAILED",
+            reason=reason,
+            started_at_ms=1,
+            completed_at_ms=2,
+            **details,
+        )
+
+
+@pytest.mark.parametrize(
+    "reason,details",
+    [
+        ("redirect_rejected", {"http_status": 302, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("http_status_rejected", {"http_status": 503, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("content_type_rejected", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("json_invalid", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("transport_timeout", {}),
+        ("body_too_large", {"http_status": 200}),
+        ("candidate_write_failed", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+    ],
+)
+def test_failed_receipt_accepts_only_reason_specific_evidence(
+    reason: str, details: dict
+) -> None:
+    receipt = build_discovery_receipt(
+        call_id="offline-valid-reason-evidence",
+        invocation=build_discovery_invocation(mode="manual"),
+        request_envelope_digest=sha256_bytes(b"request"),
+        attempted=True,
+        outcome="FAILED",
+        reason=reason,
+        started_at_ms=1,
+        completed_at_ms=2,
+        **details,
+    )
+    assert receipt.reason == reason
+
+
 def test_bridge_is_freshness_checked_idempotent_and_does_not_merge_static() -> None:
     candidate = _candidate(_raw("openrouter_models_success.json"))
     built = bridge_candidate_to_canonical_catalog(candidate, now_ms=1_001)

@@ -34,6 +34,13 @@ failed refreshes leave the last-known-good candidate untouched. Provider
 listing metadata remains candidate evidence with unknown availability and
 provider-policy privacy, not selection, promotion, or runtime-binding authority.
 
+Both runtime artifacts use a module-local atomic store. It writes exact UTF-8
+to an exclusive same-directory temporary file, flushes and fsyncs it, then
+replaces the validated target while holding the existing runtime lock. A failed
+temporary write, fsync, or replacement removes the temporary file and leaves
+the previous target byte-identical. Low-level write and replace seams exist
+only for deterministic offline durability tests.
+
 Example manual invocation:
 
 ```text

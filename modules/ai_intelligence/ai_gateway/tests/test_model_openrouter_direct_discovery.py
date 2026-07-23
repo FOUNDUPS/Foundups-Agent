@@ -9,7 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from modules.ai_intelligence.ai_gateway.src import model_openrouter_direct_discovery as discovery
+from modules.ai_intelligence.ai_gateway.src.model_provider_catalog_artifact_store import (
+    AtomicArtifactOps,
+)
 from modules.ai_intelligence.ai_gateway.src.model_openrouter_direct_discovery import (
     HTTPResponse,
     discover_openrouter_model_catalog,
@@ -147,21 +149,19 @@ def test_oversized_response_is_rejected_without_hashing_or_lkg_replacement(
     assert (tmp_path / "candidate.json").read_bytes() == old
 
 
-def test_candidate_write_failure_preserves_lkg_and_updates_attempt(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_candidate_write_failure_preserves_lkg_and_updates_attempt(tmp_path: Path) -> None:
     old = b'{"existing":"last-known-good"}\n'
     candidate_path = tmp_path / "candidate.json"
     candidate_path.write_bytes(old)
-    original = discovery.secure_replace_runtime_text
-
-    def guarded(path, text, **kwargs):
-        if Path(path) == candidate_path:
+    def guarded(source: Path, target: Path) -> None:
+        if target == candidate_path:
             raise OSError("simulated")
-        return original(path, text, **kwargs)
+        os.replace(source, target)
 
-    monkeypatch.setattr(discovery, "secure_replace_runtime_text", guarded)
-    result = _run(tmp_path, _success_transport())
+    result = _run(
+        tmp_path, _success_transport(),
+        artifact_ops=AtomicArtifactOps(replacer=guarded),
+    )
 
     assert result.receipt.outcome == "FAILED"
     assert result.receipt.reason == "candidate_write_failed"
@@ -172,20 +172,21 @@ def test_candidate_write_failure_preserves_lkg_and_updates_attempt(
 
 
 def test_terminal_receipt_failure_occurs_after_lkg_and_leaves_attempt_armed(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
     old = b"last-known-good"
     candidate_path = tmp_path / "candidate.json"
     candidate_path.write_bytes(old)
-    original = discovery.secure_replace_runtime_text
-
-    def guarded(path, text, **kwargs):
-        if Path(path).name == "attempt.json" and '"outcome":"COMPLETED"' in text:
+    def guarded(source: Path, target: Path) -> None:
+        text = source.read_text(encoding="utf-8")
+        if target.name == "attempt.json" and '"outcome":"COMPLETED"' in text:
             raise OSError("simulated")
-        return original(path, text, **kwargs)
+        os.replace(source, target)
 
-    monkeypatch.setattr(discovery, "secure_replace_runtime_text", guarded)
-    result = _run(tmp_path, _success_transport())
+    result = _run(
+        tmp_path, _success_transport(),
+        artifact_ops=AtomicArtifactOps(replacer=guarded),
+    )
 
     assert result.receipt.outcome == "INDETERMINATE"
     assert result.receipt.reason == "terminal_receipt_write_failed"
@@ -201,20 +202,21 @@ def test_terminal_receipt_failure_occurs_after_lkg_and_leaves_attempt_armed(
 
 
 def test_candidate_and_failed_receipt_write_failure_preserves_armed_truth(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
     old = b"last-known-good"
     candidate_path = tmp_path / "candidate.json"
     candidate_path.write_bytes(old)
-    original = discovery.secure_replace_runtime_text
-
-    def guarded(path, text, **kwargs):
-        if Path(path) == candidate_path or '"outcome":"FAILED"' in text:
+    def guarded(source: Path, target: Path) -> None:
+        text = source.read_text(encoding="utf-8")
+        if target == candidate_path or '"outcome":"FAILED"' in text:
             raise OSError("raw failure detail")
-        return original(path, text, **kwargs)
+        os.replace(source, target)
 
-    monkeypatch.setattr(discovery, "secure_replace_runtime_text", guarded)
-    result = _run(tmp_path, _success_transport())
+    result = _run(
+        tmp_path, _success_transport(),
+        artifact_ops=AtomicArtifactOps(replacer=guarded),
+    )
     assert (result.receipt.outcome, result.receipt.reason) == (
         "INDETERMINATE", "terminal_receipt_write_failed"
     )
@@ -227,14 +229,15 @@ def test_candidate_and_failed_receipt_write_failure_preserves_armed_truth(
 
 
 def test_first_precall_write_failure_never_arms_or_calls_transport(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
-    monkeypatch.setattr(
-        discovery, "secure_replace_runtime_text",
-        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("raw detail")),
-    )
     transport = _success_transport()
-    result = _run(tmp_path, transport)
+    result = _run(
+        tmp_path, transport,
+        artifact_ops=AtomicArtifactOps(
+            replacer=lambda *_: (_ for _ in ()).throw(OSError("raw detail"))
+        ),
+    )
     assert (result.receipt.outcome, result.receipt.reason, result.receipt.attempted) == (
         "BLOCKED_PRECALL", "precall_write_failed", False
     )
@@ -243,18 +246,19 @@ def test_first_precall_write_failure_never_arms_or_calls_transport(
 
 
 def test_second_precall_write_failure_returns_durable_intent(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
-    original = discovery.secure_replace_runtime_text
-
-    def guarded(path, text, **kwargs):
+    def guarded(source: Path, target: Path) -> None:
+        text = source.read_text(encoding="utf-8")
         if '"outcome":"INDETERMINATE"' in text:
             raise OSError("raw detail")
-        return original(path, text, **kwargs)
+        os.replace(source, target)
 
-    monkeypatch.setattr(discovery, "secure_replace_runtime_text", guarded)
     transport = _success_transport()
-    result = _run(tmp_path, transport)
+    result = _run(
+        tmp_path, transport,
+        artifact_ops=AtomicArtifactOps(replacer=guarded),
+    )
     persisted = json.loads((tmp_path / "attempt.json").read_text(encoding="utf-8"))
     assert result.receipt.to_dict() == persisted
     assert (persisted["outcome"], persisted["reason"], persisted["attempted"]) == (
@@ -379,18 +383,20 @@ def test_scheduled_not_due_is_durable_blocked_precall(tmp_path: Path) -> None:
 
 
 def test_attempt_receipt_transitions_precall_indeterminate_terminal(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
     writes = []
-    original = discovery.secure_replace_runtime_text
 
-    def recording(path, text, **kwargs):
-        if Path(path).name == "attempt.json":
+    def recording(source: Path, target: Path) -> None:
+        if target.name == "attempt.json":
+            text = source.read_text(encoding="utf-8")
             writes.append(json.loads(text))
-        return original(path, text, **kwargs)
+        os.replace(source, target)
 
-    monkeypatch.setattr(discovery, "secure_replace_runtime_text", recording)
-    result = _run(tmp_path, _success_transport())
+    result = _run(
+        tmp_path, _success_transport(),
+        artifact_ops=AtomicArtifactOps(replacer=recording),
+    )
 
     assert result.receipt.outcome == "COMPLETED"
     assert [(item["attempted"], item["outcome"]) for item in writes] == [
@@ -402,18 +408,20 @@ def test_attempt_receipt_transitions_precall_indeterminate_terminal(
 
 
 def test_candidate_is_durable_before_completed_attempt(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
     order = []
-    original = discovery.secure_replace_runtime_text
 
-    def recording(path, text, **kwargs):
+    def recording(source: Path, target: Path) -> None:
+        text = source.read_text(encoding="utf-8")
         payload = json.loads(text)
-        order.append((Path(path).name, payload.get("outcome")))
-        return original(path, text, **kwargs)
+        order.append((target.name, payload.get("outcome")))
+        os.replace(source, target)
 
-    monkeypatch.setattr(discovery, "secure_replace_runtime_text", recording)
-    result = _run(tmp_path, _success_transport())
+    result = _run(
+        tmp_path, _success_transport(),
+        artifact_ops=AtomicArtifactOps(replacer=recording),
+    )
     assert result.receipt.outcome == "COMPLETED"
     assert order == [
         ("attempt.json", "BLOCKED_PRECALL"),

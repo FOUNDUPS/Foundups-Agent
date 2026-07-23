@@ -72,6 +72,11 @@ def test_new_surfaces_stay_below_phase_one_size_limits() -> None:
         ).splitlines()
     ) < 400
     assert len(
+        (MODULE / "src/model_provider_catalog_artifact_store.py").read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ) < 250
+    assert len(
         (REPO / "scripts/openrouter_model_catalog_snapshot_once.py").read_text(
             encoding="utf-8"
         ).splitlines()

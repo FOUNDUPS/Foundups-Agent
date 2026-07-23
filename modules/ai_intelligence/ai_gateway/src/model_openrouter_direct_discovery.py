@@ -8,10 +8,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Protocol
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    secure_replace_runtime_text,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
+from .model_provider_catalog_artifact_store import AtomicArtifactOps, ProviderCatalogArtifactStore
 from .model_provider_catalog_snapshot import (
     MAX_RECORDS,
     MAX_RESPONSE_BYTES,
@@ -97,6 +97,7 @@ async def discover_openrouter_model_catalog(
     candidate_path: Path | str,
     transport: AsyncHTTPProtocol | None = None,
     clock_ms: Callable[[], int] | None = None,
+    artifact_ops: AtomicArtifactOps | None = None,
 ) -> DiscoveryRunResult:
     """Perform one admitted refresh; no caller or scheduler invokes this implicitly."""
     clock = clock_ms or _clock_ms
@@ -106,6 +107,7 @@ async def discover_openrouter_model_catalog(
     call_id = _call_id(item.invocation_id, started)
     try:
         root, attempt_target, candidate_target = _validated_paths(repo_root, runtime_root, attempt_path, candidate_path)
+        store = ProviderCatalogArtifactStore.create(repo_root=repo_root, runtime_root=root, ops=artifact_ops)
     except (OSError, ValueError):
         receipt = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
                            "output_path_invalid", started, clock())
@@ -118,12 +120,12 @@ async def discover_openrouter_model_catalog(
             reason = "invocation_invalid"
         receipt = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
                            reason, started, clock())
-        _try_write(attempt_target, receipt.to_dict(), repo_root, root)
+        _try_write(attempt_target, receipt.to_dict(), store)
         return DiscoveryRunResult(receipt, None, attempt_target, candidate_target)
     intent = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
                       "precall_intent", started, started)
     try:
-        _write(attempt_target, intent.to_dict(), repo_root, root)
+        _write(attempt_target, intent.to_dict(), store)
     except (OSError, ValueError):
         failed = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
                           "precall_write_failed", started, clock())
@@ -131,11 +133,11 @@ async def discover_openrouter_model_catalog(
     armed = _receipt(item, call_id, request_digest, True, "INDETERMINATE",
                      "transport_pending", started, clock())
     try:
-        _write(attempt_target, armed.to_dict(), repo_root, root)
+        _write(attempt_target, armed.to_dict(), store)
     except (OSError, ValueError):
         return DiscoveryRunResult(intent, None, attempt_target, candidate_target)
     return await _execute(
-        item, call_id, request_digest, started, repo_root, root,
+        item, call_id, request_digest, started, store,
         attempt_target, candidate_target, transport or AioHTTPTransport(), clock,
     )
 async def _execute(
@@ -143,8 +145,7 @@ async def _execute(
     call_id: str,
     request_digest: str,
     started: int,
-    repo_root: Path | str,
-    runtime_root: Path,
+    store: ProviderCatalogArtifactStore,
     attempt_path: Path,
     candidate_path: Path,
     transport: AsyncHTTPProtocol,
@@ -155,17 +156,17 @@ async def _execute(
     except (asyncio.TimeoutError, TimeoutError):
         return _failed(
             invocation, call_id, request_digest, started, "transport_timeout",
-            repo_root, runtime_root, attempt_path, candidate_path, clock,
+            store, attempt_path, candidate_path, clock,
         )
     except ResponseBodyTooLarge:
         return _failed(
             invocation, call_id, request_digest, started, "body_too_large",
-            repo_root, runtime_root, attempt_path, candidate_path, clock,
+            store, attempt_path, candidate_path, clock,
         )
     except Exception:
         return _failed(
             invocation, call_id, request_digest, started, "transport_failed",
-            repo_root, runtime_root, attempt_path, candidate_path, clock,
+            store, attempt_path, candidate_path, clock,
         )
     try:
         response = _validated_response(response)
@@ -173,19 +174,19 @@ async def _execute(
     except Exception:
         return _failed(
             invocation, call_id, request_digest, started, "transport_failed",
-            repo_root, runtime_root, attempt_path, candidate_path, clock,
+            store, attempt_path, candidate_path, clock,
         )
     if rejected is not None:
         reason, body_digest, body_size = rejected
         return _failed(
             invocation, call_id, request_digest, started, reason,
-            repo_root, runtime_root, attempt_path, candidate_path, clock,
+            store, attempt_path, candidate_path, clock,
             http_status=response.status, response_body_digest=body_digest,
             response_byte_count=body_size,
         )
     return _normalize_and_persist(
         invocation, call_id, request_digest, started, response,
-        repo_root, runtime_root, attempt_path, candidate_path, clock,
+        store, attempt_path, candidate_path, clock,
     )
 def _normalize_and_persist(
     invocation: DiscoveryInvocation,
@@ -193,8 +194,7 @@ def _normalize_and_persist(
     request_digest: str,
     started: int,
     response: HTTPResponse,
-    repo_root: Path | str,
-    runtime_root: Path,
+    store: ProviderCatalogArtifactStore,
     attempt_path: Path,
     candidate_path: Path,
     clock: Callable[[], int],
@@ -211,18 +211,18 @@ def _normalize_and_persist(
             reason = "json_invalid"
         return _failed(
             invocation, call_id, request_digest, started, reason,
-            repo_root, runtime_root, attempt_path, candidate_path, clock,
+            store, attempt_path, candidate_path, clock,
             http_status=response.status, response_body_digest=body_digest,
             response_byte_count=body_size,
         )
     return _persist_candidate(
         invocation, call_id, request_digest, started, response, payload,
-        rejected_count, counts, repo_root, runtime_root, attempt_path, candidate_path, clock,
+        rejected_count, counts, store, attempt_path, candidate_path, clock,
     )
 def _persist_candidate(
     invocation: DiscoveryInvocation, call_id: str, request_digest: str, started: int,
     response: HTTPResponse, payload: Mapping[str, Any], rejected_count: int,
-    counts: Mapping[str, int], repo_root: Path | str, runtime_root: Path,
+    counts: Mapping[str, int], store: ProviderCatalogArtifactStore,
     attempt_path: Path, candidate_path: Path, clock: Callable[[], int],
 ) -> DiscoveryRunResult:
     body_digest, body_size = sha256_bytes(response.body), len(response.body)
@@ -241,16 +241,16 @@ def _persist_candidate(
         observation_receipt=receipt,
     )
     try:
-        _write(candidate_path, candidate.to_dict(), repo_root, runtime_root)
+        _write(candidate_path, candidate.to_dict(), store)
     except (OSError, ValueError):
         return _failed(
             invocation, call_id, request_digest, started, "candidate_write_failed",
-            repo_root, runtime_root, attempt_path, candidate_path, clock,
+            store, attempt_path, candidate_path, clock,
             http_status=response.status, response_body_digest=body_digest,
             response_byte_count=body_size,
         )
     try:
-        _write(attempt_path, receipt.to_dict(), repo_root, runtime_root)
+        _write(attempt_path, receipt.to_dict(), store)
     except (OSError, ValueError):
         indeterminate = _receipt(
             invocation, call_id, request_digest, True, "INDETERMINATE",
@@ -266,8 +266,7 @@ def _failed(
     request_digest: str,
     started: int,
     reason: str,
-    repo_root: Path | str,
-    runtime_root: Path,
+    store: ProviderCatalogArtifactStore,
     attempt_path: Path,
     candidate_path: Path,
     clock: Callable[[], int],
@@ -277,7 +276,7 @@ def _failed(
         invocation, call_id, request_digest, True, "FAILED", reason,
         started, clock(), **details,
     )
-    if not _try_write(attempt_path, receipt.to_dict(), repo_root, runtime_root):
+    if not _try_write(attempt_path, receipt.to_dict(), store):
         receipt = _receipt(
             invocation, call_id, request_digest, True, "INDETERMINATE",
             "terminal_receipt_write_failed", started, clock(), **details,
@@ -349,14 +348,11 @@ def _validated_paths(
     if attempt == candidate:
         raise ValueError("runtime_artifact_paths_not_distinct")
     return root, attempt, candidate
-def _write(path: Path, payload: Mapping[str, Any], repo_root: Path | str, root: Path) -> None:
-    secure_replace_runtime_text(
-        path, json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
-        repo_root=repo_root, allowed_root=root,
-    )
-def _try_write(path: Path, payload: Mapping[str, Any], repo_root: Path | str, root: Path) -> bool:
+def _write(path: Path, payload: Mapping[str, Any], store: ProviderCatalogArtifactStore) -> None:
+    store.replace_text(path, json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n")
+def _try_write(path: Path, payload: Mapping[str, Any], store: ProviderCatalogArtifactStore) -> bool:
     try:
-        _write(path, payload, repo_root, root)
+        _write(path, payload, store)
         return True
     except (OSError, ValueError):
         return False
