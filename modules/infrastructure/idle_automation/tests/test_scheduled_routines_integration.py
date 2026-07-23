@@ -199,6 +199,84 @@ class TestScheduledRoutinesDispatch:
         assert result["success"] is False
         assert "disabled" in result["error"].lower()
 
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("failure", ["malformed", "write_failed"])
+    async def test_claim_state_failure_causes_zero_dispatch(
+        self, mock_dae, failure
+    ):
+        """Uncertain claim durability fails closed before any routine runs."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+        from modules.infrastructure.idle_automation.src.schedule_claim_state import (
+            ScheduleStateError,
+        )
+
+        evaluator = MagicMock()
+        evaluator.get_due_schedules.return_value = [
+            MagicMock(id="one", routine="self_research", cadence="daily")
+        ]
+        evaluator.claim_schedule.side_effect = ScheduleStateError(failure)
+        mock_dae._dispatch_scheduled_routine = AsyncMock()
+
+        with patch(
+            "modules.infrastructure.idle_automation.src.schedule_evaluator.ScheduleEvaluator",
+            return_value=evaluator,
+        ):
+            result = await IdleAutomationDAE._execute_scheduled_routines(mock_dae)
+
+        assert result["success"] is False
+        assert "claim state" in result["error"].lower()
+        mock_dae._dispatch_scheduled_routine.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_disabled_mode_does_not_construct_or_dispatch(self, mock_dae):
+        """Disabled scheduling performs zero claim-state or dispatch work."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        mock_dae._parse_bool_env = lambda key, default: (
+            False if key == "AUTO_SCHEDULED_ROUTINES" else default
+        )
+        mock_dae._dispatch_scheduled_routine = AsyncMock()
+        with patch(
+            "modules.infrastructure.idle_automation.src.schedule_evaluator.ScheduleEvaluator"
+        ) as evaluator_type:
+            result = await IdleAutomationDAE._execute_scheduled_routines(mock_dae)
+
+        assert result["success"] is False
+        evaluator_type.assert_not_called()
+        mock_dae._dispatch_scheduled_routine.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_finalize_failure_is_completion_unknown(self, mock_dae):
+        """A publish failure after dispatch does not update legacy last-run."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        spec = MagicMock(id="one", routine="self_research", cadence="daily")
+        claim = MagicMock(token="opaque", routine="self_research")
+        evaluator = MagicMock()
+        evaluator.get_due_schedules.return_value = [spec]
+        evaluator.claim_schedule.return_value = claim
+        evaluator.finalize_claim.side_effect = OSError("simulated")
+        mock_dae._dispatch_scheduled_routine = AsyncMock(
+            return_value={"success": True, "summary": "done"}
+        )
+        with patch(
+            "modules.infrastructure.idle_automation.src.schedule_evaluator.ScheduleEvaluator",
+            return_value=evaluator,
+        ):
+            result = await IdleAutomationDAE._execute_scheduled_routines(mock_dae)
+
+        assert result["success"] is False
+        assert result["finalization_failed_count"] == 1
+        assert result["executed_count"] == 0
+        evaluator.record_execution.assert_not_called()
+        mock_dae._dispatch_scheduled_routine.assert_awaited_once()
+
 
 class TestDispatchScheduledRoutine:
     """Test individual routine dispatch."""

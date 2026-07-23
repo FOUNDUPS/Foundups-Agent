@@ -792,31 +792,13 @@ class IdleAutomationDAE:
         return result
 
     async def _execute_scheduled_routines(self) -> Dict[str, Any]:
-        """
-        Execute scheduled OpenClaw routines based on natural-language schedules.
-
-        Evaluates due schedules and dispatches to existing native paths.
-        Prevents duplicate immediate reruns by tracking last execution.
-        """
-        result = {
-            "task": "scheduled_routines",
-            "success": False,
-            "due_count": 0,
-            "executed_count": 0,
-            "skipped_count": 0,
-            "executed_routines": [],
-            "duration": 0,
-        }
-
+        """Claim each due window durably before dispatching its safe routine."""
+        result = self._scheduled_routines_result()
         start_time = datetime.now()
-
         try:
-            # Check if scheduled routines are enabled
-            scheduled_enabled = self._parse_bool_env("AUTO_SCHEDULED_ROUTINES", True)
-            if not scheduled_enabled:
+            if not self._parse_bool_env("AUTO_SCHEDULED_ROUTINES", True):
                 result["error"] = "Scheduled routines disabled"
                 return result
-
             from modules.infrastructure.idle_automation.src.schedule_evaluator import (
                 ScheduleEvaluator,
             )
@@ -824,53 +806,111 @@ class IdleAutomationDAE:
             evaluator = ScheduleEvaluator()
             due_schedules = evaluator.get_due_schedules()
             result["due_count"] = len(due_schedules)
-
             if not due_schedules:
                 result["success"] = True
                 result["error"] = "No schedules due"
                 return result
-
-            failed_count = 0
             for spec in due_schedules:
-                routine_result = await self._dispatch_scheduled_routine(spec.routine)
-                success = routine_result.get("success", False)
-                summary = routine_result.get("summary", "completed" if success else "failed")
-
-                evaluator.record_execution(spec.id, success, summary)
-
-                if success:
-                    result["executed_count"] += 1
-                    result["executed_routines"].append({
-                        "id": spec.id,
-                        "routine": spec.routine,
-                        "cadence": spec.cadence,
-                        "success": True,
-                    })
-                else:
-                    failed_count += 1
-                    result["skipped_count"] += 1
-                    result["executed_routines"].append({
-                        "id": spec.id,
-                        "routine": spec.routine,
-                        "cadence": spec.cadence,
-                        "success": False,
-                        "error": routine_result.get("error"),
-                    })
-
-            # Only report success if all due routines succeeded
-            result["success"] = failed_count == 0
-            result["failed_count"] = failed_count
+                if not await self._claim_and_dispatch(evaluator, spec, result):
+                    break
+            result["success"] = (
+                result["failed_count"] == 0
+                and result["finalization_failed_count"] == 0
+            )
             self.idle_state["last_scheduled_routines"] = datetime.now().isoformat()
-
         except ImportError:
             result["error"] = "Schedule evaluator not available"
         except Exception as e:
-            result["error"] = f"Scheduled routines failed: {e}"
-            logger.warning(f"Scheduled routines error: {e}")
+            result["error"] = "Scheduled claim state unavailable"
+            logger.warning(
+                "Scheduled routines stopped on %s", type(e).__name__
+            )
         finally:
             result["duration"] = (datetime.now() - start_time).total_seconds()
-
         return result
+
+    async def _claim_and_dispatch(self, evaluator, spec, result) -> bool:
+        """Claim one window, dispatch it, then exact-token finalize."""
+        try:
+            claim = evaluator.claim_schedule(spec)
+        except Exception as exc:
+            result["error"] = "Scheduled claim state unavailable"
+            logger.warning("Schedule claim failed on %s", type(exc).__name__)
+            result["failed_count"] += 1
+            return False
+        if claim is None:
+            result["skipped_count"] += 1
+            result["lease_conflict_count"] += 1
+            return True
+        dispatch = await self._dispatch_claimed_routine(claim.routine)
+        outcome = "success" if dispatch["success"] else dispatch["outcome"]
+        try:
+            finalized = evaluator.finalize_claim(
+                claim.token,
+                success=dispatch["success"],
+                outcome_code=outcome,
+            )
+        except Exception as exc:
+            finalized = False
+            logger.warning("Schedule finalize failed on %s", type(exc).__name__)
+        self._record_claim_result(evaluator, spec, dispatch, finalized, result)
+        return finalized
+
+    async def _dispatch_claimed_routine(self, routine: str) -> Dict[str, Any]:
+        """Convert dispatcher exceptions to a bounded durable outcome code."""
+        try:
+            response = await self._dispatch_scheduled_routine(routine)
+            return {
+                "success": bool(response.get("success", False)),
+                "outcome": "routine_failed",
+                "error": response.get("error"),
+            }
+        except Exception as exc:
+            logger.warning("Scheduled dispatch failed on %s", type(exc).__name__)
+            return {
+                "success": False,
+                "outcome": "dispatch_error",
+                "error": "Scheduled routine dispatch failed",
+            }
+
+    def _record_claim_result(
+        self, evaluator, spec, dispatch, finalized, result
+    ) -> None:
+        """Update reporting and legacy last-run only after durable completion."""
+        entry = {
+            "id": spec.id,
+            "routine": spec.routine,
+            "cadence": spec.cadence,
+            "success": dispatch["success"] and finalized,
+        }
+        if not finalized:
+            result["finalization_failed_count"] += 1
+            result["failed_count"] += 1
+            entry["error"] = "Scheduled claim finalization failed"
+        elif dispatch["success"]:
+            result["executed_count"] += 1
+            evaluator.record_execution(spec.id, True, "durable claim completed")
+        else:
+            result["failed_count"] += 1
+            result["skipped_count"] += 1
+            entry["error"] = dispatch.get("error")
+        result["executed_routines"].append(entry)
+
+    @staticmethod
+    def _scheduled_routines_result() -> Dict[str, Any]:
+        """Return stable scheduled-routine reporting fields."""
+        return {
+            "task": "scheduled_routines",
+            "success": False,
+            "due_count": 0,
+            "executed_count": 0,
+            "skipped_count": 0,
+            "failed_count": 0,
+            "lease_conflict_count": 0,
+            "finalization_failed_count": 0,
+            "executed_routines": [],
+            "duration": 0,
+        }
 
     async def _dispatch_scheduled_routine(self, routine: str) -> Dict[str, Any]:
         """
