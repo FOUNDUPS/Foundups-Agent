@@ -8,36 +8,27 @@ import stat
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import BinaryIO, Callable
 
+from modules.ai_intelligence.ai_gateway.src.model_provider_catalog_atomic_io import (
+    AtomicArtifactOps,
+    _TempArtifactProof,
+    _VerifiedTemp,
+    _cleanup_failed_publication,
+    _fsync_parent,
+    _open_verification_descriptor,
+    _publish_verified,
+    _release_native_publication,
+    _remove_owned_temp,
+    _restore_prior_target,
+    _snapshot_target,
+    _valid_metadata,
+    _verify_descriptor_content,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
-
-
-def _write_all(stream: BinaryIO, payload: bytes) -> None:
-    written = stream.write(payload)
-    if written != len(payload):
-        raise OSError("runtime_artifact_temp_write_incomplete")
-
-
-@dataclass(frozen=True)
-class AtomicArtifactOps:
-    """Injectable low-level seams used by offline durability tests."""
-
-    writer: Callable[[BinaryIO, bytes], None] = _write_all
-    fsync: Callable[[int], None] = os.fsync
-    replacer: Callable[[Path, Path], None] = os.replace
-
-
-@dataclass(frozen=True)
-class _TempArtifactProof:
-    device: int
-    inode: int
-    size: int
-    digest: str
 
 
 @dataclass(frozen=True)
@@ -59,7 +50,6 @@ class ProviderCatalogArtifactStore:
 
     def replace_text(self, path: Path | str, text: str) -> Path:
         """Atomically replace one confined regular artifact with exact UTF-8."""
-
         if type(text) is not str:
             raise ValueError("runtime_artifact_text_invalid")
         target = self._target(path, create_parent=True)
@@ -67,7 +57,12 @@ class ProviderCatalogArtifactStore:
         with runtime_operation_lock(target):
             target = self._target(target)
             mode = self._existing_mode(target)
+            prior = _snapshot_target(target, mode)
             temporary: Path | None = None
+            verified: _VerifiedTemp | None = None
+            proof: _TempArtifactProof | None = None
+            publication_started = False
+            native_handle_published = False
             try:
                 descriptor, raw_temp = tempfile.mkstemp(
                     prefix=f".{target.name}.", suffix=".tmp", dir=target.parent
@@ -75,15 +70,32 @@ class ProviderCatalogArtifactStore:
                 temporary = Path(raw_temp)
                 proof = self._write_temp(descriptor, temporary, payload, mode)
                 target = self._target(target)
-                temporary = self._validated_temp(
-                    temporary, target.parent, proof, payload
+                verified = self._validated_temp(temporary, target.parent, proof, payload)
+                self.ops.before_commit(verified.path)
+                self._verify_for_commit(verified, target.parent, payload)
+                publication_started = True
+                verified = _publish_verified(
+                    verified, target, self.ops.replacer, payload
                 )
-                self.ops.replacer(temporary, target)
+                native_handle_published = os.name == "nt" and self.ops.replacer is os.replace
+                self._verify_published_target(target, verified, payload)
+                _remove_owned_temp(temporary, proof)
                 temporary = None
                 _fsync_parent(target.parent, self.ops.fsync)
             except Exception:
-                _remove_temp(temporary)
+                verified = _release_native_publication(verified, native_handle_published)
+                try:
+                    if publication_started:
+                        _restore_prior_target(target, prior)
+                finally:
+                    failed_verified, verified = verified, None
+                    _cleanup_failed_publication(
+                        failed_verified, temporary, proof
+                    )
                 raise
+            finally:
+                if verified is not None:
+                    os.close(verified.descriptor)
         return target
 
     def _target(self, path: Path | str, *, create_parent: bool = False) -> Path:
@@ -141,39 +153,55 @@ class ProviderCatalogArtifactStore:
         parent: Path,
         proof: _TempArtifactProof,
         payload: bytes,
-    ) -> Path:
+    ) -> _VerifiedTemp:
         value = validate_runtime_artifact_path(
             temporary, repo_root=self.repo_root, allowed_root=self.runtime_root
         )
-        metadata = os.lstat(value)
-        if (
-            value.parent != parent
-            or not stat.S_ISREG(metadata.st_mode)
-            or metadata.st_nlink != 1
-            or metadata.st_size != proof.size
-            or not _same_identity(metadata, proof)
-        ):
+        if value.parent != parent or not _valid_metadata(os.lstat(value), proof):
             raise ValueError("runtime_artifact_temp_invalid")
-        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-        descriptor = os.open(value, flags)
+        descriptor = _open_verification_descriptor(value)
         try:
             opened = os.fstat(descriptor)
-            if (
-                not stat.S_ISREG(opened.st_mode)
-                or opened.st_nlink != 1
-                or opened.st_size != proof.size
-                or not _same_identity(opened, proof)
-            ):
+            if not _valid_metadata(opened, proof):
                 raise ValueError("runtime_artifact_temp_invalid")
-            with os.fdopen(descriptor, "rb", closefd=True) as stream:
-                descriptor = -1
-                content = stream.read(proof.size + 1)
+            _verify_descriptor_content(descriptor, proof, payload)
+            return _VerifiedTemp(value, descriptor, proof)
+        except Exception:
+            os.close(descriptor)
+            raise
+
+    def _verify_for_commit(
+        self, verified: _VerifiedTemp, parent: Path, payload: bytes
+    ) -> None:
+        value = validate_runtime_artifact_path(
+            verified.path,
+            repo_root=self.repo_root,
+            allowed_root=self.runtime_root,
+        )
+        if (
+            value.parent != parent
+            or not _valid_metadata(os.lstat(value), verified.proof)
+            or not _valid_metadata(os.fstat(verified.descriptor), verified.proof)
+        ):
+            raise ValueError("runtime_artifact_temp_changed_before_commit")
+        _verify_descriptor_content(verified.descriptor, verified.proof, payload)
+
+    @staticmethod
+    def _verify_published_target(
+        target: Path, verified: _VerifiedTemp, payload: bytes
+    ) -> None:
+        if (
+            not _valid_metadata(os.lstat(target), verified.proof)
+            or not _valid_metadata(os.fstat(verified.descriptor), verified.proof)
+        ):
+            raise ValueError("runtime_artifact_publication_identity_mismatch")
+        descriptor = _open_verification_descriptor(target)
+        try:
+            if not _valid_metadata(os.fstat(descriptor), verified.proof):
+                raise ValueError("runtime_artifact_publication_identity_mismatch")
+            _verify_descriptor_content(descriptor, verified.proof, payload)
         finally:
-            if descriptor >= 0:
-                os.close(descriptor)
-        if content != payload or hashlib.sha256(content).hexdigest() != proof.digest:
-            raise ValueError("runtime_artifact_temp_content_mismatch")
-        return value
+            os.close(descriptor)
 
     @staticmethod
     def _existing_mode(target: Path) -> int | None:
@@ -184,35 +212,5 @@ class ProviderCatalogArtifactStore:
         if not stat.S_ISREG(metadata.st_mode):
             raise ValueError("runtime_artifact_target_not_regular")
         return stat.S_IMODE(metadata.st_mode)
-
-
-def _same_identity(metadata: os.stat_result, proof: _TempArtifactProof) -> bool:
-    if proof.inode > 0 and metadata.st_ino > 0:
-        return (metadata.st_dev, metadata.st_ino) == (proof.device, proof.inode)
-    return True
-
-
-def _remove_temp(path: Path | None) -> None:
-    if path is None:
-        return
-    try:
-        path.unlink(missing_ok=True)
-    except OSError:
-        pass
-
-
-def _fsync_parent(parent: Path, fsync: Callable[[int], None]) -> None:
-    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
-    try:
-        descriptor = os.open(parent, flags)
-    except (OSError, NotImplementedError):
-        return
-    try:
-        fsync(descriptor)
-    except (OSError, NotImplementedError):
-        pass
-    finally:
-        os.close(descriptor)
-
 
 __all__ = ["AtomicArtifactOps", "ProviderCatalogArtifactStore"]

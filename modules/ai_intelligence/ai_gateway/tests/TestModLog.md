@@ -2,8 +2,8 @@
 
 ## 2026-07-24 - Provider discovery defensive reliability hotfix
 
-Scope: offline-only regressions for redirect-history receipt coherence and
-post-write/precommit artifact pathname integrity.
+Scope: offline-only regressions for redirect-history receipt coherence,
+retained-handle publication, rollback, and pathname integrity.
 
 - `test_redirected_200_emits_truthful_terminal_receipt_and_preserves_lkg`
   requires a canonical `FAILED/redirect_history_rejected` receipt, exact final
@@ -11,13 +11,17 @@ post-write/precommit artifact pathname integrity.
 - `test_precommit_path_attack_never_publishes_substituted_bytes` covers
   pathname replacement, hard-link creation, and file-symlink substitution.
   Unsupported unprivileged Windows symlink creation is reported as one
-  platform skip; pathname replacement and hard-link cases still run.
+  platform skip; ambiguous foreign substitutes are preserved, never unlinked.
+- Post-validation and Windows final-check substitution cases prove that no
+  substituted bytes become the candidate; Windows publishes the exact verified
+  handle object. Wrong-publication and held-target failures restore exact prior
+  bytes/mode or absence and clean only identity-owned temporary files.
 - Receipt-unit cases require redirect-history evidence with a non-3xx final
   status and keep raw 3xx evidence bound to `redirect_rejected`.
 - WSP 62 AST enforcement remains green for every touched production function.
 
-Hotfix focused gate (the five provider/catalog files): `91 passed, 1 skipped`.
-Full `modules/ai_intelligence/ai_gateway/tests`: `332 passed, 1 skipped`.
+Hotfix focused gate (the five provider/catalog files): `98 passed, 1 skipped`.
+Full `modules/ai_intelligence/ai_gateway/tests`: `339 passed, 1 skipped`.
 
 ## 2026-07-23 - Direct provider catalog durability and WSP62 repair
 

@@ -32,11 +32,13 @@
   and outside-repository last-known-good persistence.
 - [x] Bound atomic candidate/attempt commits to post-write descriptor identity,
   exact size/content, and single-link pathname validation.
+- [x] Retain verified object identity through Windows publication and restore
+  exact prior target state after detected publication failure or mismatch.
 - [ ] Operator-owned scheduling integration. Phase 1 provides scheduled
   invocation admission fields but intentionally installs no scheduler.
-- [ ] Evaluate platform-specific handle-based publication and stronger
-  directory durability. The current portable boundary requires a trusted
-  runtime directory and uses best-effort parent-directory fsync.
+- [ ] Evaluate directory-handle publication on non-Windows hosts and stronger
+  directory durability. Their current boundary requires a trusted non-shared
+  runtime directory and all parent-directory fsync remains best-effort.
 
 ## Phase 1: Enhanced Intelligence (Next)
 - **Cost optimization algorithms** - Auto-select cheapest provider

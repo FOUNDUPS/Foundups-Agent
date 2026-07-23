@@ -3,14 +3,14 @@
 ## [2026-07-24] - Provider Discovery Defensive Reliability Hotfix
 
 **Who/Type/Slice/WSP:** 0102 Codex / Defensive Reliability / DIRECT_PROVIDER_DEFENSIVE_RELIABILITY_20260723 / 15,22,50,62,97
-**What:** Added truthful non-3xx redirect-history receipts and bound artifact
-commit to post-write descriptor identity, exact size/content, regular-file
-type, and single-link pathname state.
-**Truth:** Path replacement and hard links fail closed; supported symlinks do
-too. A trusted runtime directory is required; arbitrary post-check writer
-races, parent-directory fsync, and Windows sync/mode behavior remain limited.
+**What:** Added truthful non-3xx redirect-history receipts; retained verified
+artifact identity through publication; added Windows exact-handle rename,
+identity-aware cleanup, and exact prior-target rollback on detected mismatch.
+**Truth:** Path replacement, hard links, and supported symlinks fail closed.
+Non-Windows publication requires a trusted non-shared runtime directory;
+parent-directory fsync and Windows sync/mode behavior remain limited.
 No live network/provider/runtime/Holo or authority mutations were performed.
-**Validation:** 91 passed / 1 Windows symlink skip focused; 332 passed / 1
+**Validation:** 98 passed / 1 Windows symlink skip focused; 339 passed / 1
 skip full ai_gateway.
 
 ## [2026-07-23] - Provider Catalog Atomic Artifact Repair

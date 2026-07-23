@@ -38,15 +38,21 @@ Both runtime artifacts use a module-local atomic store. It writes exact UTF-8
 to an exclusive same-directory temporary file, flushes and fsyncs it, then
 replaces the validated target while holding the existing runtime lock. A failed
 temporary write, fsync, or replacement removes the temporary file and leaves
-the previous target byte-identical. Low-level write and replace seams exist
-only for deterministic offline durability tests.
+the previous target byte-identical. A detected post-publication mismatch is
+rolled back to the prior bytes and mode, or to absence. Low-level write,
+precommit, and replace seams are trusted and exist only for deterministic
+offline durability tests.
 
 The store binds each commit to post-write descriptor evidence: device/inode
 identity when the host exposes it, exact size, SHA-256 digest, regular-file
-type, and a single-link pathname. A changed pathname or changed content fails
-before replacement and leaves the previous artifact intact. This boundary
-assumes the operator supplies a trusted runtime directory; it does not claim
-portable exclusion of an arbitrary writer racing after the final check.
+type, and a single-link pathname. It retains that descriptor through
+publication and verifies the published target before releasing it. Windows
+production publication renames the verified object by native handle, so a
+pathname substitution cannot select different bytes. Cleanup never unlinks a
+foreign or identity-ambiguous substitute. Other hosts require an
+operator-controlled, non-shared runtime directory because their standard
+pathname replace cannot exclude an arbitrary writer after the final check.
+Unavailable file identity fails closed.
 Parent-directory fsync remains best-effort, including on Windows.
 
 Transport responses that report redirect history with a non-3xx final status
