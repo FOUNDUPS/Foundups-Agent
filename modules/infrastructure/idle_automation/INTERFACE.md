@@ -138,6 +138,8 @@ if result["overall_success"]:
 | `MAX_DAILY_EXECUTIONS` | int | `3` | Maximum executions per day |
 | `AUTO_SCHEDULED_ROUTINES` | bool | `true` | Enable scheduled routine claims and dispatch |
 | `IDLE_AUTOMATION_RUNTIME_ROOT` | path | `~/.foundups-agent/idle_automation` | Trusted private claim-state root outside the repository |
+| `AUTO_OPENROUTER_CATALOG_REFRESH` | bool | `false` | Enable the exact daily OpenRouter catalog refresh claim |
+| `OPENROUTER_CATALOG_RUNTIME_ROOT` | path | `~/.foundups-agent/ai_gateway/openrouter_catalog` | Trusted outside-repository provider evidence root |
 
 ### Safety Controls
 
@@ -250,6 +252,30 @@ Performs exact-token compare-and-set finalization. A token that expired may
 finalize only while it remains current; recovery immediately makes the old
 token stale. Outcome state stores only bounded codes or a digest, never raw
 dispatcher text.
+
+### Daily OpenRouter catalog claim
+
+`ScheduleParser` accepts `openrouter_catalog_refresh` only with `daily`
+cadence and generates canonical schedule ID `e324884d66c4`.
+`IdleAutomationDAE._claim_and_dispatch(...)` passes the full exact
+`ScheduleClaim` to the provider branch. The final boundary is default-off via
+`AUTO_OPENROUTER_CATALOG_REFRESH=false`.
+
+When enabled, the DAE supplies only the code-derived repository root and trusted
+`OPENROUTER_CATALOG_RUNTIME_ROOT` to the AI Gateway adapter. Its response must
+be an exact six-key dictionary. Success requires exact boolean `true`,
+`COMPLETED/completed`, an exact boolean replay flag, and canonical 64-hex
+receipt/candidate evidence IDs. Every other shape becomes the fixed
+`routine_failed` outcome without forwarding provider text.
+
+Claim finalization occurs before legacy `last_run` recording. A successful
+adapter projection records success only after exact-token finalization; failed
+or uncertain finalization leaves legacy suppression untouched. This interface
+collects candidate evidence only and grants no selection, promotion, registry,
+or runtime-binding authority.
+
+Cancellation propagates without finalizing or recording the claim. The claim
+remains leased for the existing bounded expiry and replay-recovery policy.
 
 ### Durability Contract
 

@@ -52,6 +52,21 @@ The Idle Automation module provides autonomous background tasks that execute whe
 - Claim control state is stored under a trusted, private runtime root outside
   the repository; schedule phrases cannot select its path.
 
+### Daily OpenRouter Catalog Refresh POC
+- `openrouter_catalog_refresh` is allowlisted for `daily` cadence only.
+- The exact parser-owned schedule ID is `e324884d66c4`; full durable claim
+  evidence reaches the final dispatch boundary.
+- `AUTO_OPENROUTER_CATALOG_REFRESH` defaults to `false`, so the provider adapter
+  is not called unless an operator explicitly enables this routine.
+- `OPENROUTER_CATALOG_RUNTIME_ROOT` defaults to
+  `~/.foundups-agent/ai_gateway/openrouter_catalog` and must remain a trusted
+  outside-repository runtime root.
+- Only an exact six-key `COMPLETED/completed` projection with canonical receipt
+  and candidate IDs finalizes success. Malformed or nonterminal projections
+  finalize as fixed content-free failure; legacy routine dispatch is unchanged.
+- This POC gathers replay-protected candidate evidence only. It does not select
+  or promote models, mutate registries, or bind runtime roles.
+
 ### Safety & Controls
 - Opt-in configuration via environment variables
 - Network availability checks
@@ -87,6 +102,9 @@ wre_integration.record_idle_execution(
 - `IDLE_TASK_TIMEOUT=300`: Maximum execution time per idle task
 - `AUTO_SCHEDULED_ROUTINES=true`: Enable scheduled safe-routine dispatch
 - `IDLE_AUTOMATION_RUNTIME_ROOT=...`: Trusted outside-repository claim-state root
+- `AUTO_OPENROUTER_CATALOG_REFRESH=false`: Opt in to the daily catalog POC
+- `OPENROUTER_CATALOG_RUNTIME_ROOT=...`: Trusted catalog evidence root; defaults
+  to `~/.foundups-agent/ai_gateway/openrouter_catalog`
 
 ### Safety Controls
 - `--no-auto-push` CLI flag to disable during testing

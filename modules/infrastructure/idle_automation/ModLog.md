@@ -12,6 +12,49 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-07-24 - Daily OpenRouter Catalog Schedule POC
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 62, WSP 97
+
+- Added `openrouter_catalog_refresh` as a daily-only allowlisted schedule with
+  canonical ID `e324884d66c4`.
+- Passed the full exact durable claim through DAE dispatch while leaving the
+  legacy string dispatcher unchanged.
+- Added default-off `AUTO_OPENROUTER_CATALOG_REFRESH` and trusted
+  `OPENROUTER_CATALOG_RUNTIME_ROOT`, defaulting outside the repository.
+- Added a pure exact-projection boundary: only six-key
+  `COMPLETED/completed` evidence with canonical receipt/candidate IDs may
+  finalize success; every malformed or nonterminal result becomes a fixed
+  content-free failure.
+- Preserved claim ordering: dispatch, exact-token finalize, then legacy
+  successful `last_run` recording. Finalization uncertainty records no legacy
+  completion.
+- Kept candidate discovery separate from selection, promotion, registry
+  mutation, and runtime binding.
+
+**WSP_15 MPS:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 = 19
+(P0).
+
+**MPS rationale/remediation:** Truthy non-boolean adapter values could have
+been coerced into successful claim finalization. Exact six-key/type/token/ID
+validation now rejects truthy strings/integers, wrong states, missing or forged
+IDs, extra/missing keys, and secret-bearing text before finalization. Deep claim
+validation remains canonical in the AI Gateway adapter; the DAE retains only
+the narrow exact type/routine/daily/schedule-ID pre-import check.
+
+**Validation:** `174 passed, 1 skipped` focused; `575 passed, 3 skipped`
+combined AI Gateway + IdleAutomation + runtime-artifact-safety scope. The
+concatenation test uses real parser, schedule ID, durable claim, dispatch, and
+finalization with an offline mocked provider boundary.
+
+**WSP_62 remediation status:** `test_scheduled_routines_integration.py` is
+1,057 lines, above the 1,000-line remediation trigger but below the current
+1,200-line Python limit; future provider-schedule tests move to
+`test_openrouter_catalog_schedule_integration.py`. `idle_automation_dae.py` is
+1,444 lines in the 1,200-1,500 DAE guideline window; scheduled-claim
+orchestration/configuration must be extracted before further feature growth or
+the 1,500-line boundary.
+
 ### 2026-07-24 - Legacy Failed-Row Durable Retry Migration
 
 **WSP Protocol**: WSP 22, WSP 62, WSP 97

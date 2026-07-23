@@ -2,10 +2,37 @@
 
 **Module**: `modules/infrastructure/idle_automation`
 **Framework**: pytest
-**Last Updated**: 2026-03-27
+**Last Updated**: 2026-07-24
 **WSP Compliance**: WSP 22 (Module ModLog Protocol), WSP 34 (Test Validation)
 
 ---
+
+## 2026-07-24: Daily OpenRouter Catalog Schedule POC
+
+**Files:** `test_schedule_evaluator.py`,
+`test_scheduled_routines_integration.py`, and AI Gateway provider-catalog tests.
+
+- Proves the parser accepts only the exact daily routine and rejects forged
+  cadence before adapter/provider work.
+- Proves default-off execution makes zero adapter/provider calls and trusted
+  runtime roots are code/config owned.
+- Proves exact full-claim mapping, replay/finalize ordering, and no legacy
+  `last_run` after failed finalization.
+- Rejects truthy string/integer success, wrong status/reason, malformed replay,
+  missing/forged IDs, extra/missing keys, and secret-bearing projections with a
+  fixed content-free failure.
+- Runs a real offline concatenation from `add_schedule` through canonical ID
+  `e324884d66c4`, durable claim, DAE dispatch, exact-token finalization, and
+  successful legacy recording.
+- Proves cancellation propagates without finalization or legacy recording,
+  leaving the claim leased for bounded expiry/replay recovery.
+- Provider tests remain offline and verify no selection, promotion, registry,
+  runtime-binding, direct-discovery, or catalog-bridge authority expansion.
+
+**Focused Result:** `174 passed, 1 skipped`
+
+**Combined AI Gateway + IdleAutomation + Runtime-Artifact-Safety Result:**
+`575 passed, 3 skipped`
 
 ## 2026-07-24: Canonical HoloIndex Maintenance Dispatch Mock
 

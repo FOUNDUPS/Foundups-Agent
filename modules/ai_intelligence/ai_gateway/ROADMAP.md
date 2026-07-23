@@ -40,9 +40,11 @@
 - [x] Scheduled-only durable replay guard with per-invocation `ARMED` admission,
   bounded terminal ledger evidence, pre-ledger migration, cross-process
   serialization, and fail-closed replay recovery.
-- [ ] Operator-owned scheduling integration. Phase 1 provides scheduled
-  invocation admission and replay enforcement but intentionally installs no
-  scheduler.
+- [x] Default-off idle scheduling POC for the exact daily OpenRouter refresh
+  claim, with canonical invocation mapping and a six-key evidence-only adapter.
+- [ ] General provider-discovery cadence and scheduler expansion remains out of
+  scope; the POC does not grant discovery any startup, selection, promotion,
+  registry, or runtime authority.
 - [ ] Evaluate directory-handle publication on non-Windows hosts and stronger
   directory durability. Their current boundary requires a trusted non-shared
   runtime directory and all parent-directory fsync remains best-effort.

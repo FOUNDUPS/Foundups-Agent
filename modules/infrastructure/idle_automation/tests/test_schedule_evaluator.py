@@ -53,6 +53,16 @@ class TestScheduleParser:
         assert routine == expected_routine
         assert cadence == expected_cadence
 
+    def test_openrouter_catalog_refresh_is_daily_only(self):
+        """Provider discovery has one allowlisted daily schedule surface."""
+        assert ScheduleParser.parse(
+            "run openrouter catalog refresh daily"
+        ) == ("openrouter_catalog_refresh", "daily")
+        for cadence in ("nightly", "morning", "evening"):
+            assert ScheduleParser.parse(
+                f"run openrouter catalog refresh {cadence}"
+            ) is None
+
     @pytest.mark.parametrize(
         "phrase",
         [

@@ -26,6 +26,22 @@ wsp_cycle(input="idle_automation", log=True)
 - **Durable Schedule Claims (Phase 1)**: Canonical windows, one-owner leases,
   exact-token finalization, restart idempotency, bounded retry/recovery, and
   fail-closed atomic outside-repository state
+- **Daily OpenRouter Catalog Refresh POC**: Exact daily claim, default-off final
+  boundary, trusted external evidence root, replay-protected six-key adapter
+  projection, and fail-closed exact-token finalization
+
+### WSP 62 Near-Term Remediation
+
+- `tests/test_scheduled_routines_integration.py` is 1,057 physical lines:
+  above the 1,000-line remediation trigger but below the 1,200-line
+  OK/guideline boundary. Add no further provider-schedule cases there. The next
+  provider-schedule test change must extract those cases into
+  `tests/test_openrouter_catalog_schedule_integration.py`, targeting roughly
+  500 lines in each resulting test module.
+- `src/idle_automation_dae.py` is 1,444 physical lines, within the 1,200-1,500
+  DAE guideline window. Extract remaining scheduled-claim orchestration and
+  configuration before any further feature growth and before the file reaches
+  1,500 lines.
 
 ## Development Phases
 
@@ -38,6 +54,7 @@ wsp_cycle(input="idle_automation", log=True)
 - [OK] Memory persistence and telemetry
 - [OK] YouTube DAE hook integration
 - [OK] Comprehensive safety controls
+- [OK] Offline-tested daily OpenRouter candidate-evidence schedule adapter
 
 ### Phase 2: Enhancement (IN PROGRESS [U+1F6A7])
 **Goal**: Expand automation capabilities and intelligence
