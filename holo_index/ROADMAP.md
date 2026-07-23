@@ -1,5 +1,31 @@
 # HoloIndex Development Roadmap
 
+## [2026-07-24] Root-Bound Read Admission P0
+
+**Complete in this slice:** raw persistent CLI search, persistent bundle
+retrieval, and RedDog direct diagnostics share one fail-closed pre-backend
+admission proof for exact repository root, SSD, clean HEAD, generation,
+complete baseline/embedding evidence, and maintenance state. Offline lexical
+retrieval remains available only as explicitly degraded current-repository
+evidence.
+
+**Deferred P1:** introduce explicit multi-repository store namespaces and
+receipt metadata migration; consolidate maintenance ownership policy across
+legacy direct-store consumers. No index refresh or store migration belongs to
+this read-gate slice. Add descriptor-relative/final-handle path identity where
+hostile concurrent path replacement must be excluded; P0's bounded lstat-based
+no-follow checks do not claim to close that TOCTOU window.
+
+### P1: Neutral Freshness-Gate Contract Extraction / Dependency Inversion
+
+Extract the freshness/admission proof contract into a neutral HoloIndex-owned
+or shared infrastructure package, then invert both the owner service and raw
+clients onto that contract. Remove the current lower-level
+`holo_index.query_admission` dependency on the infrastructure-owned
+`HoloQueryFreshnessGate` without cloning proof semantics or changing reason
+codes. Require import-cycle, exact-receipt-parity, and owner/raw/direct
+cross-surface tests before retiring the P0 dependency direction.
+
 ## [2026-07-18] Operational Truth Boundary and WSP_62 Remediation
 
 **Current P0:** Land the canonical storage, exact-HEAD maintenance, complete

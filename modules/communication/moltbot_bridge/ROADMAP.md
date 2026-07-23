@@ -125,6 +125,10 @@ These remain deferred until the FoundUp Memex POC and MVP contracts are proven.
 
 ## 2026-07-18: RedDog / HoloIndex Truth Boundary Follow-ups
 
+- Completed 2026-07-24 P0: direct diagnostics now share the canonical
+  root/SSD/HEAD/generation/baseline/maintenance admission proof before backend
+  construction. P1 store namespaces and legacy metadata migration remain owned
+  by the HoloIndex roadmap.
 - Complete post-merge activation at the exact merge SHA before treating the
   persistent semantic store as CURRENT.
 - Bind resident governed work orders to process-private owner handoffs without

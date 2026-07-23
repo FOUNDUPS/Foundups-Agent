@@ -156,7 +156,15 @@ code. The owner's authenticated health gate also requires a non-empty semantic
 canary and repository/generation binding.
 
 Passing an explicit SSD/receipt enables a diagnostic-only direct adapter. It
-always returns a non-operational freshness state and can never satisfy CURRENT.
+derives the only admissible receipt from `freshness_receipt_path(ssd)`. A
+supplied receipt path must stable-ancestor-canonicalize to that exact path and
+cannot have a link/reparse final component. Mismatch denies before receipt
+loading or backend construction. The canonical receipt must then prove the
+explicit invoking repository root and SSD, clean exact HEAD, generation,
+complete canonical baseline and embedding space, with no active or unprovable
+maintenance. Denial returns stable content-free reasons with zero hits. An
+admitted result still returns a non-operational freshness state and can never
+satisfy CURRENT.
 Only the trusted host maintenance handshake may refresh the canonical store;
 startup may route the request through governed WRE dispatch, and the RedDog
 adapter has no index-write surface. This is not an OS privilege boundary:

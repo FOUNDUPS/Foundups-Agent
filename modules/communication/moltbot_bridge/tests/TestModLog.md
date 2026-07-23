@@ -1,3 +1,13 @@
+## 2026-07-24: HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
+
+- Added direct regressions for pre-backend foreign-root denial and rejection
+  of a noncanonical external receipt before repository evaluation, receipt
+  admission, or backend access. Canonical receipt and maintenance locations
+  are SSD-derived by the current adapter code.
+- Unfiltered admission/confinement/direct matrix passed 62 with five portable
+  symlink skips; owner passed 60/60; wider retrieval passed 126 with four
+  portable symlink skips; WSP_62 guards passed 19/19.
+
 ## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND3
 
 - Added requested-provider and requested-model secret/raw-shape rejection at
@@ -264,6 +274,9 @@ test_reddog_readonly_audit_task_executor.py (UPDATED)
 - Split boundary tests by owner-client transport, private handoff/response
   binding, adapter behavior, and direct diagnostics to stay within WSP_62
   domain thresholds without a new-file exemption.
+- Added a focused canonical-receipt test proving a valid external receipt
+  cannot override a disagreeing SSD-derived receipt and is rejected before
+  receipt loading or direct backend construction.
 
 **Impact**: The migrated downstream model/audit paths are designed to stop on
 absent, lexical, stale, dirty, raced, narrowed, or unbound HoloIndex evidence.

@@ -1,0 +1,93 @@
+{
+  "execution_id": "HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1",
+  "execution_plane": "wre_runtime",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_81_Framework_Backup_Governance_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/audits/infrastructure/HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1.md",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_freshness_gate.py",
+      "holo_index/freshness_receipt.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_query_adapter.py"
+    ],
+    "research": [
+      "Traced raw CLI, bundle JSON, owner client, and direct diagnostic backend-construction boundaries.",
+      "Confirmed bundle JSON locally imports HoloIndex and required its own pre-backend admission hook.",
+      "Traced raw-CLI and bundle module-hint, NAVIGATION, WSP metadata, nested module walk, artifact snapshot, and direct maintenance-lock derivation after independent review.",
+      "Second-amend review proved the raw CLI bypassed the confined loader and that capped directory prefixes remained filesystem-order dependent; overflow now fails closed at cap + 1.",
+      "Third-amend review proved an external valid receipt could override a disagreeing canonical SSD receipt, final receipt reparse points were not rejected before reads, bounded module walks returned partial evidence on cap/depth/error, and the bundle handler exceeded WSP 62.",
+      "Compared framework WSP authority with knowledge backups; neither copy was modified."
+    ],
+    "micro_pass": [
+      "Focused tests cover foreign root, wrong SSD, wrong HEAD, missing generation, incomplete baseline, active maintenance, exact admission, canonical receipt disagreement/final-reparse denial, pre-resolution bundle ordering, relative-only path confinement, raw-CLI symlink/reparse/NAVIGATION-byte denial, deterministic cap + 1 overflow before/after a match, complete-or-empty module walks, artifact no-follow checks, direct maintenance fail-closed/race handling, and offline lexical bypass. Code review confirms canonical receipt and maintenance locations derive solely from the SSD.",
+      "holo_index/tests/test_bundle_path_confinement.py",
+      "holo_index/tests/test_bundle_path_completeness.py",
+      "holo_index/tests/test_holoindex_query_admission.py",
+      "holo_index/tests/test_holoindex_readonly_query_guard.py",
+      "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_direct_query_boundary.py",
+      "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_receipt_binding.py"
+    ],
+    "macro_pass": [
+      "Unfiltered changed-file matrix: 62 passed and 5 optional real-symlink tests skipped on the Windows privilege profile; deterministic reparse seams passed.",
+      "Canonical owner service/freshness matrix: 60 passed, including exact root and SSD mismatch cases.",
+      "Wider bundle, freshness receipt, owner-client, and RedDog query matrix: 126 passed and 4 optional real-symlink tests skipped.",
+      "WSP 62 guards: 3 bridge-exemption tests and 16 modular-audit tests passed; admission evaluator is 35 lines, direct diagnostic is 50, focused confinement module is 288 lines with maximum function size 47, and the bundle handler is 49 lines without a broad exemption.",
+      "Wider CLI/index diagnostic: 32 passed and one source-string purity assertion failed identically on unmodified origin/main 545f4b3b8.",
+      "Eleven changed Python files compiled in memory; focused Ruff, critical _cli_main lint, import smoke, diff-check, JSON parsing, and WSP_97 receipt validation passed.",
+      "A live offline/fast raw CLI smoke returned repository-local lexical code/WSP hits while a caller-supplied nonexistent SSD remained outside the lexical metadata path.",
+      "Visible loopback owner processes predated this worktree by more than four hours; this lane did not spawn or terminate them and left no attributable service."
+    ],
+    "hard_think": [
+      "docs/audits/infrastructure/HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1.md#3-failure-modes",
+      "Identified persistent bundle JSON as a separate local-backend bypass.",
+      "Identified caller-controlled module resolution, nested reparse enumeration, artifact link following, and receipt-derived maintenance locks as pre/post-admission bypasses.",
+      "Rejected caller-selected receipt authority: admission derives the canonical receipt solely from the resolved SSD and treats an explicit path only as an exact assertion.",
+      "Rejected a sorted capped prefix because its membership still depends on filesystem iteration order; discovery now rejects the entire result when cap + 1 exists.",
+      "Required complete-or-empty module evidence on cap, depth, scan, or verification failure; only a complete set is sorted.",
+      "Kept post-query maintenance probing in the diagnostic adapter to detect races after preflight."
+    ],
+    "dialectic_sweep": [
+      "docs/audits/infrastructure/HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1.md#4-alternatives",
+      "Rejected caller-local proof duplication, caller-selected receipt authority, CWD inference, query-then-stale behavior, automatic refresh, partial bounded walks, unbounded sorting, and filesystem-order-dependent capped prefixes."
+    ],
+    "first_principles": [
+      "Persistent evidence must be bound to the explicit invoking repository before any backend access.",
+      "Receipt authority follows the admitted SSD; a caller path may assert but cannot redirect that identity.",
+      "A read consumer cannot repair or refresh its own evidence substrate.",
+      "Bounded module evidence is truthful only when the scanner proves the complete eligible set fits inside all caps; overflow or uncertainty yields no evidence.",
+      "Admission reason codes and raw CLI/bundle denial serialization must be content-free; the direct diagnostic preserves its pre-existing caller-local query response field."
+    ],
+    "execute": [
+      "holo_index/query_admission.py",
+      "holo_index/_cli_main.py",
+      "holo_index/cli/bundle_path_confinement.py",
+      "holo_index/cli/commands/bundle_json.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_query_adapter.py"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_81",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "Dedicated worktree and branch: fix/holoindex-root-bound-query-p0.",
+    "Rebased onto origin/main 545f4b3b828cf083c20e266961c6df2fde1565c7.",
+    "No framework WSP, knowledge backup, persistent index, or E:/HoloIndex state changed.",
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1.md",
+    "holo_index/tests/TESTModLog.md",
+    "modules/communication/moltbot_bridge/tests/TestModLog.md"
+  ]
+}

@@ -1,5 +1,34 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
+
+- Added exact proof tests for foreign worktree receipts, maintenance,
+  same-root wrong HEAD/SSD, missing generation, incomplete baseline, and a
+  clean admitted generation.
+- Added CLI and bundle fail-before-backend tests plus an offline lexical
+  no-persistent-admission regression. A foreign-summary test records every
+  read and proves the supplied SSD is untouched while current-repository WSP
+  metadata remains available.
+- Added focused `test_bundle_path_confinement.py` coverage for absolute and
+  traversal hints, root/component/nested reparse denial, optional real
+  symlinks, artifact no-follow checks, and nested-walk entry budgets.
+- Added raw-CLI NAVIGATION symlink/reparse/oversize coverage plus explicit
+  module-domain and WSP discovery caps. Oversized directories are tested with
+  a match both before and after the cap so no partial filesystem-order result
+  can be accepted.
+- Final unfiltered admission/confinement/direct matrix: 62 passed with five
+  portable real-symlink skips; deterministic reparse cases all executed.
+- Added canonical-receipt override/final-reparse denial, module-walk
+  complete-or-empty cap/depth/error/order, and bundle-handler WSP_62
+  regressions. Split completeness tests into a focused file; no exemption was
+  added.
+- RED was the missing `holo_index.query_admission` module; focused GREEN
+  evidence is recorded in the WSP_97 execution receipt.
+- Wider CLI/index diagnostic passed 32 and retained one exact origin/main
+  baseline failure:
+  `test_index_refresh_repair.py::TestWspPurity::test_wsp_purity_only_wsp_files`
+  expects a literal `glob("WSP_*.md")` source string in untouched indexing code.
+
 ## [2026-07-20] RedDog Repository-Audit Consumer Binding Repair
 
 - Added `.worktrees` pruning coverage alongside vendor/generated roots.

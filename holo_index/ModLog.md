@@ -1,5 +1,36 @@
 # HoloIndex Package ModLog
 
+## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
+
+- Added a reusable content-free read-only admission decision that reuses the
+  canonical freshness/maintenance proof and requires the invoking repository
+  root, SSD, clean exact HEAD, generation, complete baseline, and embedding
+  binding before persistent backend construction.
+- Applied the gate to raw CLI search and persistent bundle retrieval. Offline
+  lexical retrieval bypasses Chroma and shared SSD summaries, derives bounded
+  WSP metadata from the invoking repository, and is labeled degraded/UNKNOWN.
+- Added fail-before-backend regressions for foreign roots, wrong HEAD/SSD,
+  missing generation/baseline proof, active maintenance, exact admission, and
+  persistent bundle denial. A foreign-SSD regression proves cached WSP paths
+  cannot contaminate offline bundle results.
+- Persistent bundle admission now precedes module-hint resolution. A focused
+  confinement helper rejects absolute/traversal/link/reparse escapes, bounds
+  nested walks, and applies the same no-follow policy to artifact checks.
+- Raw offline/fast CLI retrieval now reuses the bundle lexical loader rather
+  than opening `NAVIGATION.py` directly. NAVIGATION is rejected when it
+  exceeds its explicit byte cap; link/reparse components remain fail-closed.
+- Module-domain and WSP discovery inspect no more than `cap + 1` entries,
+  reject an oversized directory instead of returning a filesystem-order
+  dependent partial set, and sort only a proven-complete bounded set.
+- Canonical receipt admission now derives exclusively from the resolved SSD.
+  A noncanonical explicit override or final receipt link/reparse is rejected
+  before receipt loading; direct diagnostics pass only the SSD-derived receipt
+  onward.
+- Nested module-file discovery now returns complete sorted evidence or nothing:
+  cap overflow, depth overflow, and any scan/verification error fail empty.
+- Decomposed bundle request admission, retrieval, direct-read application, and
+  response emission; `handle_bundle_json` is now 49 lines without exemption.
+
 ## [2026-07-20] HOLOINDEX_REDDOG_REPO_AUDIT_GROUNDING_FALLBACK_PHASE1
 
 - Added read-only `repo_audit_grounding.v1` generation after the existing bundle retrieval path. Generation-bound semantic ownership is unchanged; the structured bundle supplies only bounded candidate/direct-read evidence.

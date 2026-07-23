@@ -60,6 +60,7 @@ from holo_index.storage_contract import (
     READONLY_QUERY_ENV,
     resolve_holoindex_ssd_path,
 )
+from holo_index.query_admission import evaluate_readonly_query_admission  # noqa: E402
 # WSP 97: Lazy import codeindex_reporter (4s+ startup cost) - only needed for --code-index-report
 CodeIndexReporter = None  # Lazy loaded
 resolve_module_paths = None  # Lazy loaded
@@ -127,6 +128,7 @@ def _env_truthy(name: str, default: str = "false") -> bool:
 
 READONLY_GUARD_CODE = "HOLOINDEX_READONLY_QUERY_GUARD"
 STORAGE_ERROR_EXIT_CODE = 3
+QUERY_ADMISSION_EXIT_CODE = 4
 
 
 def _query_only_requested(args) -> bool:
@@ -170,6 +172,11 @@ def _exit_storage_error(exc: HoloIndexStorageError) -> None:
 def _exit_maintenance_error(exc: MaintenanceSessionError) -> None:
     safe_print(json.dumps(exc.to_dict(), sort_keys=True))
     raise SystemExit(MAINTENANCE_FAILURE_EXIT_CODE)
+
+
+def _exit_query_admission_error(result: Any) -> None:
+    safe_print(json.dumps(result.to_dict(), sort_keys=True))
+    raise SystemExit(QUERY_ADMISSION_EXIT_CODE)
 
 # 0102 speed knob: allow bundle-json/offline/fast-search fastpath without importing Chroma/model stack.
 _skip_heavy_imports = (
@@ -1083,6 +1090,13 @@ def main():
                 "Run DocDAE changes, commit them, then refresh HoloIndex.",
             )
         )
+    if HoloIndex is not None and args.search and not maintenance_plan:
+        admission = evaluate_readonly_query_admission(
+            repo_root=project_root,
+            ssd_path=Path(args.ssd),
+        )
+        if not admission.allowed:
+            _exit_query_admission_error(admission)
     maintenance_session = None
     if maintenance_plan:
         try:
@@ -1101,7 +1115,10 @@ def main():
             _exit_maintenance_error(
                 MaintenanceSessionError("HOLOINDEX_MAINTENANCE_BACKEND_UNAVAILABLE")
             )
-        safe_print("[INFO] HoloIndex unavailable (offline/fast mode) - using lexical search only")
+        safe_print(
+            "[DEGRADED] Persistent HoloIndex unavailable (offline/fast mode); "
+            "using current-repository lexical search only."
+        )
         holo = None
     else:
         try:
@@ -1556,67 +1573,18 @@ def main():
             if holo is None:
                 # WSP 97: Fallback to lexical search when HoloIndex unavailable
                 safe_print(f"[OFFLINE] Running lexical search for: {args.search}")
-                import re as _re
-                from datetime import datetime as _dt
                 from pathlib import Path as _Path
+                from holo_index.cli.commands.bundle_json import (
+                    _lexical_task_retrieval,
+                )
 
                 repo_root = _Path(__file__).resolve().parents[1]
-
-                # Reuse the lexical search logic from bundle-json path
-                def _tokenize(query: str):
-                    return [t for t in _re.findall(r"[a-z0-9_]+", (query or "").lower()) if t]
-
-                def _score_text(tokens, *fields):
-                    score = 0.0
-                    for tok in tokens:
-                        for idx, field in enumerate(fields):
-                            if tok in (field or "").lower():
-                                score += (2.0 if idx == 0 else 1.0)
-                    return score
-
-                # Load NAVIGATION.py NEED_TO
-                import ast
-                nav_path = repo_root / "NAVIGATION.py"
-                need_to = {}
-                if nav_path.exists():
-                    try:
-                        tree = ast.parse(nav_path.read_text(encoding="utf-8-sig", errors="ignore"))
-                        for node in ast.walk(tree):
-                            if isinstance(node, ast.Assign):
-                                for target in node.targets:
-                                    if isinstance(target, ast.Name) and target.id == "NEED_TO":
-                                        need_to = ast.literal_eval(node.value)
-                    except Exception:
-                        pass
-
-                tokens = _tokenize(args.search)
-                code_hits = []
-                for need, location in need_to.items():
-                    score = _score_text(tokens, need, location)
-                    if score > 0:
-                        similarity = min(1.0, score / max(1.0, len(tokens) * 3.0))
-                        code_hits.append({
-                            "need": need,
-                            "location": location,
-                            "similarity": f"{similarity*100:.1f}%",
-                            "type": "code",
-                            "priority": 1,
-                        })
-                code_hits.sort(key=lambda x: float(x["similarity"].rstrip("%")), reverse=True)
-                code_hits = code_hits[:args.limit]
-
-                search_payload = {
-                    "code_hits": code_hits,
-                    "wsp_hits": [],
-                    "code": code_hits,
-                    "wsps": [],
-                    "metadata": {
-                        "query": args.search,
-                        "mode": "lexical_offline",
-                        "code_count": len(code_hits),
-                        "wsp_count": 0,
-                    }
-                }
+                search_payload = _lexical_task_retrieval(
+                    repo_root,
+                    args.search,
+                    int(args.limit),
+                    "",
+                )
                 # WSP 97: Offline mode returns results immediately without heavy post-processing
                 _render_fast_search_summary(search_payload, limit=args.limit)
                 return

@@ -6,16 +6,45 @@ Extracted from holo_index/cli.py (lines 634-960).
 Self-contained lexical search + artifact snapshot + JSON bundle output.
 """
 
+import json as _json
 import os
 import re
 import sys
 import logging
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
+
+from holo_index.cli.bundle_path_confinement import (
+    LEXICAL_NAVIGATION_MAX_BYTES,
+    _artifact_exists,
+    _bounded_directory_names,
+    _bounded_module_files,
+    _confined_repo_path,
+    _read_confined_text,
+    _resolve_module_dir,
+)
+from holo_index.query_admission import evaluate_readonly_query_admission
 
 
 def _env_truthy(key: str, default: str = "false") -> bool:
     """Check if environment variable is truthy."""
     return os.getenv(key, default).lower() in {"1", "true", "yes", "on"}
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _persistent_query_denial(repo_root, ssd_path):
+    """Return a content-free denial before bundle backend construction."""
+    admission = evaluate_readonly_query_admission(
+        repo_root=repo_root,
+        ssd_path=ssd_path,
+    )
+    if admission.allowed:
+        return None
+    return admission.to_dict()
 
 
 # ---------------------------------------------------------------------------
@@ -50,6 +79,9 @@ DIRECT_READ_SYMBOL_LEAD_LINES = 6        # context lines kept BEFORE the def lin
 # Cap symbol targets per file so a caller naming MANY (plausible-but-absent) symbols of ONE file
 # cannot consume all target slots (DIRECT_READ_MAX_TARGETS) and starve other required targets.
 DIRECT_READ_MAX_SYMBOLS_PER_PATH = 8
+LEXICAL_WSP_MAX_ENTRIES = 512
+LEXICAL_WSP_MAX_FILES = 256
+LEXICAL_WSP_READ_BYTES = 16384
 # A valid symbol is a bounded identifier. Rejecting anything else keeps the symbol an opaque, safe
 # search key (no regex-injection, no path traversal via the '#' suffix).
 _SYMBOL_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,127}$")
@@ -448,44 +480,7 @@ def _direct_read_fetch(repo_root, requested_paths, seen_locations=None):
     return {"telemetry": telemetry, "hits": hits}
 
 
-def _resolve_module_dir(repo_root, hint: str):
-    """Resolve a module hint to an actual directory path."""
-    from pathlib import Path as _Path
-
-    raw = (hint or "").strip()
-    if not raw:
-        return None
-
-    norm = raw.replace("\\", "/").strip("/")
-
-    # Allow direct relative paths (modules/... or holo_index/...)
-    direct = repo_root / norm
-    if direct.exists() and direct.is_dir():
-        return direct
-
-    # Allow shorthand "communication/livechat" by prefixing "modules/"
-    if "/" in norm and not norm.startswith("modules/"):
-        prefixed = repo_root / "modules" / norm
-        if prefixed.exists() and prefixed.is_dir():
-            return prefixed
-
-    # Allow module name-only resolution under modules/<domain>/<module>
-    modules_root = repo_root / "modules"
-    if modules_root.exists():
-        try:
-            for domain_dir in modules_root.iterdir():
-                if not domain_dir.is_dir():
-                    continue
-                candidate = domain_dir / norm
-                if candidate.exists() and candidate.is_dir():
-                    return candidate
-        except Exception:
-            return None
-
-    return None
-
-
-def _artifact_snapshot(module_dir) -> Dict[str, Any]:
+def _artifact_snapshot(repo_root, module_dir) -> Dict[str, Any]:
     """Generate artifact snapshot for a module directory."""
     # Tier definitions mirror WSP_CORE "Tiered Holo Retrieval Targets" (minimal v1)
     tiers: Dict[str, Dict[str, Any]] = {
@@ -510,18 +505,14 @@ def _artifact_snapshot(module_dir) -> Dict[str, Any]:
     missing_required: List[str] = []
     missing_optional: List[str] = []
 
-    def _exists(p, is_dir: bool) -> bool:
-        try:
-            return p.is_dir() if is_dir else p.exists()
-        except Exception:
-            return False
-
     for tier_key, tier_def in tiers.items():
         tier_num = int(tier_key)
         for name in tier_def["required"]:
             is_dir = name.endswith("/")
             p = module_dir / name.rstrip("/")
-            exists = _exists(p, is_dir=is_dir)
+            exists = _artifact_exists(
+                repo_root, module_dir, name, directory=is_dir
+            )
             rel = str(p.relative_to(module_dir)).replace("\\", "/")
             artifacts.append({
                 "tier": tier_num,
@@ -537,7 +528,9 @@ def _artifact_snapshot(module_dir) -> Dict[str, Any]:
         for name in tier_def["optional"]:
             is_dir = name.endswith("/")
             p = module_dir / name.rstrip("/")
-            exists = _exists(p, is_dir=is_dir)
+            exists = _artifact_exists(
+                repo_root, module_dir, name, directory=is_dir
+            )
             rel = str(p.relative_to(module_dir)).replace("\\", "/")
             artifacts.append({
                 "tier": tier_num,
@@ -580,11 +573,16 @@ def _score_text(tokens: List[str], *fields: str) -> float:
 
 def _load_need_to(repo_root) -> Dict[str, str]:
     import ast as _ast
-    nav_path = repo_root / "NAVIGATION.py"
-    if not nav_path.exists():
+    text = _read_confined_text(
+        repo_root,
+        "NAVIGATION.py",
+        max_bytes=LEXICAL_NAVIGATION_MAX_BYTES,
+        reject_oversize=True,
+    )
+    if text is None:
         return {}
     try:
-        tree = _ast.parse(nav_path.read_text(encoding="utf-8-sig", errors="ignore"))
+        tree = _ast.parse(text)
     except Exception:
         return {}
     for node in _ast.walk(tree):
@@ -598,25 +596,54 @@ def _load_need_to(repo_root) -> Dict[str, str]:
     return {}
 
 
-def _load_wsp_summary(ssd_path: str) -> Dict[str, Dict[str, str]]:
-    import json as _json
-    from pathlib import Path as _Path
-    try:
-        summary_path = _Path(ssd_path) / "indexes" / "wsp_summary.json"
-        if not summary_path.exists():
-            return {}
-        return _json.loads(summary_path.read_text(encoding="utf-8", errors="ignore"))
-    except Exception:
-        return {}
+def _load_repo_wsp_summary(repo_root) -> Dict[str, Dict[str, str]]:
+    """Build bounded lexical WSP metadata from the invoking repository only."""
+    summary: Dict[str, Dict[str, str]] = {}
+    repo_root = Path(repo_root)
+    wsp_root = _confined_repo_path(
+        repo_root, "WSP_framework/src", directory=True
+    )
+    if wsp_root is None:
+        return summary
+    repo_root = wsp_root.parents[1]
+    candidates = _bounded_directory_names(
+        repo_root,
+        "WSP_framework/src",
+        entry_cap=LEXICAL_WSP_MAX_ENTRIES,
+        prefix="WSP_",
+        suffix=".md",
+        directories=False,
+    )[:LEXICAL_WSP_MAX_FILES]
+    for name in candidates:
+        relative = f"WSP_framework/src/{name}"
+        text = _read_confined_text(
+            repo_root,
+            relative,
+            max_bytes=LEXICAL_WSP_READ_BYTES,
+            reject_oversize=False,
+        )
+        if text is None:
+            continue
+        match = re.match(r"^WSP_(\d+)", name, flags=re.IGNORECASE)
+        if not match:
+            continue
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        title = lines[0].lstrip("# ").strip() if lines else Path(name).stem
+        detail = next((line for line in lines[1:] if not line.startswith("#")), "")
+        summary[f"WSP {int(match.group(1))}"] = {
+            "title": title,
+            "summary": detail[:500],
+            "path": relative,
+        }
+    return summary
 
 
-def _lexical_task_retrieval(repo_root, task: str, limit: int, ssd_path: str, module_dir=None) -> Dict[str, Any]:
+def _lexical_task_retrieval(repo_root, task: str, limit: int, _ssd_path: str, module_dir=None) -> Dict[str, Any]:
     """Lexical search fallback when embeddings are unavailable."""
-    from datetime import datetime as _dt
 
     tokens = _tokenize(task)
     need_to = _load_need_to(repo_root)
-    wsp_summary = _load_wsp_summary(ssd_path)
+    wsp_summary = _load_repo_wsp_summary(repo_root)
 
     code_hits: List[Dict[str, Any]] = []
     for need, location in list(need_to.items()):
@@ -640,11 +667,9 @@ def _lexical_task_retrieval(repo_root, task: str, limit: int, ssd_path: str, mod
         })
 
     # Path-based fallback when module hint is provided (fast lexical, no embeddings)
-    if module_dir is not None and module_dir.exists():
+    if module_dir is not None:
         allowed_ext = {".py", ".js", ".md", ".txt", ".json", ".yaml", ".yml"}
-        for path in module_dir.rglob("*"):
-            if not path.is_file():
-                continue
+        for path in _bounded_module_files(repo_root, module_dir):
             if path.suffix.lower() not in allowed_ext:
                 continue
             rel_path = str(path.relative_to(repo_root)).replace("\\", "/")
@@ -713,12 +738,17 @@ def _lexical_task_retrieval(repo_root, task: str, limit: int, ssd_path: str, mod
         "metadata": {
             "query": task,
             "mode": "lexical",
+            "retrieval_mode": "lexical",
+            "freshness": "UNKNOWN",
+            "index_gap_detected": True,
+            "no_holoindex_store_access": True,
+            "wsp_source": "current_repository",
             "skip_model": True,
             "code_count": len(code_hits),
             "wsp_count": len(wsp_hits),
             "test_count": 0,
             "skill_count": 0,
-            "timestamp": _dt.utcnow().isoformat() + "Z",
+            "timestamp": _utc_now_iso(),
         }
     }
 
@@ -754,113 +784,156 @@ def _apply_repo_audit_grounding(repo_root, task, search_payload):
     return audit["receipt"], audit["telemetry"]
 
 
-def handle_bundle_json(args):
-    """Handle --bundle-json command. Returns True if handled, False otherwise."""
-    if not getattr(args, "bundle_json", False):
-        return False
+def _write_bundle_payload(payload: Dict[str, Any], *, sort_keys=False) -> None:
+    sys.stdout.write(
+        _json.dumps(
+            payload,
+            ensure_ascii=True,
+            sort_keys=sort_keys,
+        )
+        + "\n"
+    )
 
-    import json as _json
-    from datetime import datetime as _dt
-    from pathlib import Path as _Path
 
-    # Hard silence: bundle-json requires stdout = JSON only
+def _activate_bundle_silence() -> None:
     os.environ.setdefault("HOLO_SILENT", "1")
     try:
         logging.disable(logging.CRITICAL)
     except Exception:
         pass
 
-    repo_root = _Path(__file__).resolve().parents[3]
-    task = (getattr(args, "bundle_task", None) or getattr(args, "search", None) or "").strip()
-    module_hint = (getattr(args, "bundle_module_hint", None) or "").strip()
 
-    if not task:
-        sys.stdout.write(_json.dumps({
-            "schema_version": "wsp_memory_bundle_v1",
-            "generated_at": _dt.utcnow().isoformat() + "Z",
-            "ok": False,
-            "error": "bundle-json requires --search or --bundle-task",
-        }, ensure_ascii=True) + "\n")
-        return True
-
-    module_dir = _resolve_module_dir(repo_root, module_hint) if module_hint else None
+def _bundle_module_context(repo_root: Path, module_hint: str):
+    module_dir = (
+        _resolve_module_dir(repo_root, module_hint) if module_hint else None
+    )
     module_path = None
     if module_dir is not None:
         try:
-            module_path = str(module_dir.relative_to(repo_root)).replace("\\", "/")
-        except Exception:
-            module_path = str(module_dir).replace("\\", "/")
+            module_path = module_dir.relative_to(repo_root).as_posix()
+        except ValueError:
+            module_dir = None
+    return module_dir, module_path
 
-    # Task retrieval: fast lexical path when HOLO_SKIP_MODEL=1, otherwise full HoloIndex search.
-    skip_model = _env_truthy("HOLO_SKIP_MODEL", "false")
+
+def _bundle_search(
+    args,
+    repo_root: Path,
+    task: str,
+    module_hint: str,
+    module_dir,
+    module_path,
+    *,
+    skip_model: bool,
+):
     if skip_model:
-        search_payload = _lexical_task_retrieval(repo_root, task, int(args.limit), str(args.ssd), module_dir=module_dir)
-    else:
-        try:
-            from holo_index.core import HoloIndex as _HoloIndex  # local import to avoid heavy imports in fastpath
-            holo = _HoloIndex(ssd_path=args.ssd, quiet=True)
-            search_payload = holo.search(task, limit=args.limit, doc_type_filter=getattr(args, "doc_type", "all"))
-        except Exception as exc:
-            sys.stdout.write(_json.dumps({
-                "schema_version": "wsp_memory_bundle_v1",
-                "generated_at": _dt.utcnow().isoformat() + "Z",
-                "ok": False,
-                "task": task,
-                "module_hint": module_hint,
-                "module_path": module_path,
-                "error": f"holo_search_failed: {exc}",
-            }, ensure_ascii=True) + "\n")
-            return True
+        return _lexical_task_retrieval(
+            repo_root,
+            task,
+            int(args.limit),
+            str(args.ssd),
+            module_dir=module_dir,
+        ), None
+    try:
+        from holo_index.core import HoloIndex as _HoloIndex
 
-    structured_memory = None
-    if module_dir is not None:
-        structured_memory = _artifact_snapshot(module_dir)
+        holo = _HoloIndex(ssd_path=args.ssd, quiet=True)
+        return holo.search(
+            task,
+            limit=args.limit,
+            doc_type_filter=getattr(args, "doc_type", "all"),
+        ), None
+    except Exception as exc:
+        return None, {
+            "schema_version": "wsp_memory_bundle_v1",
+            "generated_at": _utc_now_iso(),
+            "ok": False,
+            "task": task,
+            "module_hint": module_hint,
+            "module_path": module_path,
+            "error": f"holo_search_failed: {exc}",
+        }
 
-    # HoloIndex evidence is evaluated first.  Audit prompts with insufficient
-    # source + independent evidence receive a fixed-policy, read-only fallback.
-    repo_audit_grounding, direct_read = _apply_repo_audit_grounding(repo_root, task, search_payload)
 
-    # REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3): governed direct-read.
-    # When the extension names must-include target paths (from an explicit
-    # "Required direct-read targets" prompt list) that the semantic bundle did
-    # not surface, fetch those exact files here under the hard security allowlist
-    # and splice them into code_hits so slice-1's recall check sees real content.
-    must_include_raw = getattr(args, "bundle_must_include", None)
-    must_include: List[str] = []
-    if must_include_raw:
-        if isinstance(must_include_raw, (list, tuple)):
-            for item in must_include_raw:
-                must_include.extend([p for p in str(item).split(",") if p.strip()])
-        else:
-            must_include.extend([p for p in str(must_include_raw).split(",") if p.strip()])
+def _bundle_must_include(raw) -> List[str]:
+    if not raw:
+        return []
+    items = raw if isinstance(raw, (list, tuple)) else (raw,)
+    return [
+        path
+        for item in items
+        for path in str(item).split(",")
+        if path.strip()
+    ]
 
-    if must_include:
+
+def _apply_bundle_direct_read(
+    repo_root: Path,
+    search_payload: Dict[str, Any],
+    direct_read,
+    must_include_raw,
+):
+    must_include = _bundle_must_include(must_include_raw)
+    if not must_include:
+        return direct_read
+    try:
+        existing_locations = {
+            str(hit.get("location") or "").replace("\\", "/").lower()
+            for hit in (search_payload.get("code_hits") or [])
+            if str(hit.get("location") or "")
+        }
+    except Exception:
         existing_locations = set()
+    fetched = _direct_read_fetch(
+        repo_root,
+        must_include,
+        seen_locations=existing_locations,
+    )
+    direct_read = _merge_direct_read_telemetry(
+        direct_read,
+        fetched["telemetry"],
+    )
+    if fetched["hits"]:
         try:
-            for hit in (search_payload.get("code_hits") or []):
-                loc = str(hit.get("location") or "").replace("\\", "/").lower()
-                if loc:
-                    existing_locations.add(loc)
+            hits = fetched["hits"] + list(search_payload.get("code_hits") or [])
+            search_payload["code_hits"] = hits
+            search_payload["code"] = hits
+            metadata = search_payload.get("metadata")
+            if isinstance(metadata, dict):
+                metadata["code_count"] = len(hits)
+                metadata["direct_read_fallback_used"] = direct_read[
+                    "direct_read_fallback_used"
+                ]
         except Exception:
-            existing_locations = set()
-        fetched = _direct_read_fetch(repo_root, must_include, seen_locations=existing_locations)
-        direct_read = _merge_direct_read_telemetry(direct_read, fetched["telemetry"])
-        if fetched["hits"]:
-            try:
-                # Prepend direct-read hits (highest priority) so recall + display
-                # both see the fetched content-bearing locations first.
-                search_payload["code_hits"] = fetched["hits"] + list(search_payload.get("code_hits") or [])
-                search_payload["code"] = search_payload["code_hits"]
-                meta = search_payload.get("metadata")
-                if isinstance(meta, dict):
-                    meta["code_count"] = len(search_payload["code_hits"])
-                    meta["direct_read_fallback_used"] = direct_read["direct_read_fallback_used"]
-            except Exception:
-                pass
+            pass
+    return direct_read
 
-    bundle = {
+
+def _bundle_persistent_denial(args, repo_root: Path, skip_model: bool):
+    if skip_model:
+        return None
+    denial = _persistent_query_denial(repo_root, Path(args.ssd))
+    if denial is None:
+        return None
+    return {
         "schema_version": "wsp_memory_bundle_v1",
-        "generated_at": _dt.utcnow().isoformat() + "Z",
+        "generated_at": _utc_now_iso(),
+        **denial,
+    }
+
+
+def _bundle_success_payload(
+    task: str,
+    module_hint: str,
+    module_path,
+    structured_memory,
+    search_payload,
+    direct_read,
+    repo_audit_grounding,
+) -> Dict[str, Any]:
+    return {
+        "schema_version": "wsp_memory_bundle_v1",
+        "generated_at": _utc_now_iso(),
         "ok": True,
         "task": task,
         "module_hint": module_hint,
@@ -871,5 +944,53 @@ def handle_bundle_json(args):
         "repo_audit_grounding": repo_audit_grounding,
     }
 
-    sys.stdout.write(_json.dumps(bundle, ensure_ascii=True) + "\n")
+
+def handle_bundle_json(args):
+    """Handle --bundle-json command. Returns True if handled, False otherwise."""
+    if not getattr(args, "bundle_json", False):
+        return False
+
+    _activate_bundle_silence()
+    repo_root = Path(__file__).resolve().parents[3]
+    task = (getattr(args, "bundle_task", None) or getattr(args, "search", None) or "").strip()
+    module_hint = (getattr(args, "bundle_module_hint", None) or "").strip()
+
+    if not task:
+        _write_bundle_payload({
+            "schema_version": "wsp_memory_bundle_v1",
+            "generated_at": _utc_now_iso(),
+            "ok": False,
+            "error": "bundle-json requires --search or --bundle-task",
+        })
+        return True
+
+    # Persistent admission must precede every caller-controlled filesystem hint.
+    skip_model = _env_truthy("HOLO_SKIP_MODEL", "false")
+    denial = _bundle_persistent_denial(args, repo_root, skip_model)
+    if denial is not None:
+        _write_bundle_payload(denial, sort_keys=True)
+        return True
+
+    module_dir, module_path = _bundle_module_context(repo_root, module_hint)
+    search_payload, search_error = _bundle_search(
+        args, repo_root, task, module_hint, module_dir, module_path,
+        skip_model=skip_model,
+    )
+    if search_error is not None:
+        _write_bundle_payload(search_error)
+        return True
+    structured_memory = (
+        _artifact_snapshot(repo_root, module_dir) if module_dir else None
+    )
+    repo_audit_grounding, direct_read = _apply_repo_audit_grounding(repo_root, task, search_payload)
+    direct_read = _apply_bundle_direct_read(
+        repo_root,
+        search_payload,
+        direct_read,
+        getattr(args, "bundle_must_include", None),
+    )
+    _write_bundle_payload(_bundle_success_payload(
+        task, module_hint, module_path, structured_memory,
+        search_payload, direct_read, repo_audit_grounding,
+    ))
     return True
