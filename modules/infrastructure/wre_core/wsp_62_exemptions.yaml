@@ -52,3 +52,60 @@ exemptions:
         _dispatch_to_hermes: 111
         _attach_context_bundle_dry_run: 160
         drain_openclaw_queue_with_retention: 94
+
+  - file: "INTERFACE.md"
+    reason: >-
+      Inherited public API history exceeds the canonical Markdown threshold.
+      Current model-capability interface changes are bounded; archival
+      decomposition requires a separate documentation-retention review.
+    threshold_override: 1051
+    function_threshold_override: 0
+    functions: []
+    temporary: true
+    owner: "WRE Core Maintainers"
+    architect_reviewer: "0102 Technical Architect"
+    reviewer: "0102 Technical Architect"
+    review_date: "2026-Q3"
+    expires_on: "2026-09-30"
+    remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
+    no_growth_ceiling:
+      file_lines: 1051
+      functions: {}
+
+  - file: "ModLog.md"
+    reason: >-
+      Inherited chronological production history exceeds the canonical
+      Markdown threshold. History must remain auditable until an approved
+      archival decomposition preserves its lineage.
+    threshold_override: 4251
+    function_threshold_override: 0
+    functions: []
+    temporary: true
+    owner: "WRE Core Maintainers"
+    architect_reviewer: "0102 Technical Architect"
+    reviewer: "0102 Technical Architect"
+    review_date: "2026-Q3"
+    expires_on: "2026-09-30"
+    remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
+    no_growth_ceiling:
+      file_lines: 4251
+      functions: {}
+
+  - file: "tests/TestModLog.md"
+    reason: >-
+      Inherited chronological verification history exceeds the canonical
+      Markdown threshold. History must remain auditable until an approved
+      archival decomposition preserves its lineage.
+    threshold_override: 1366
+    function_threshold_override: 0
+    functions: []
+    temporary: true
+    owner: "WRE Core Maintainers"
+    architect_reviewer: "0102 Technical Architect"
+    reviewer: "0102 Technical Architect"
+    review_date: "2026-Q3"
+    expires_on: "2026-09-30"
+    remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
+    no_growth_ceiling:
+      file_lines: 1366
+      functions: {}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Exact, non-ratcheting WSP62 debt authority for create-route host files."""
+"""Exact, non-ratcheting WSP62 debt authority for WRE inherited files."""
 
 from __future__ import annotations
 
@@ -33,6 +33,9 @@ EXPECTED = {
             "drain_openclaw_queue_with_retention": 94,
         },
     ),
+    WRE_ROOT / "INTERFACE.md": (1051, {}),
+    WRE_ROOT / "ModLog.md": (4251, {}),
+    WRE_ROOT / "tests/TestModLog.md": (1366, {}),
     MOLTBOT_ROOT / "src/foundup_job_contract.py": (796, {}),
 }
 
@@ -61,6 +64,7 @@ def _assert_exact_entry(
 ) -> None:
     assert entry["temporary"] is True
     assert entry["owner"] and entry["architect_reviewer"]
+    assert entry["reviewer"] and entry["review_date"]
     assert SLICE_DATE < date.fromisoformat(entry["expires_on"])
     assert entry["remediation"]
     assert "\\" not in entry["file"]
@@ -71,12 +75,13 @@ def _assert_exact_entry(
         "functions": function_ceilings,
     }
     assert len(target.read_text(encoding="utf-8").splitlines()) == file_ceiling
-    sizes = _named_function_sizes(target)
-    for name, exact_ceiling in function_ceilings.items():
-        assert sizes[name] == exact_ceiling
+    if function_ceilings:
+        sizes = _named_function_sizes(target)
+        for name, exact_ceiling in function_ceilings.items():
+            assert sizes[name] == exact_ceiling
 
 
-def test_create_route_host_exemptions_are_exact_and_non_ratcheting() -> None:
+def test_wre_inherited_exemptions_are_exact_and_non_ratcheting() -> None:
     wre_entries = {
         WRE_ROOT / entry["file"]: entry
         for entry in _entries(WRE_ROOT / "wsp_62_exemptions.yaml")

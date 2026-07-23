@@ -1,5 +1,44 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-23: FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1_REPAIR1
+
+- Proved self-consistent binding artifacts in job payload are ignored and
+  stripped, while a valid injected trusted artifact binds successfully.
+- Proved the explicit trust residual: a structurally valid, self-consistent
+  artifact returned by the injected trust anchor is accepted by design.
+- Added trusted-supply schema, surface, task, and digest mismatch rejection;
+  duplicate/extra/missing roles and models; hostile `get`/`items`; recursive
+  noncanonical values; and NaN/positive/negative infinity probes.
+- Added mutation-between-admission-and-Hermes proof: the original job can
+  change during trusted lookup while Hermes still receives the detached
+  pre-lookup snapshot.
+- Verified raising boundaries redact secret exception text and static source
+  contains no selector, binder, catalog-builder, provider, subprocess, file,
+  HoloIndex, or runtime invocation.
+- Extended exact exemption tests to the inherited oversized WRE interface and
+  chronological documentation with owner, reviewer, expiry, remediation, and
+  no-growth ceilings.
+- Verification: 78 focused projection/consumer/exemption tests and 291
+  combined WRE routing/scaffold, communication-contract, and AI Gateway
+  runtime-binding/signed-evidence tests passed. Ruff, compileall, canonical
+  size, protected-authority, and diff gates passed.
+
+## 2026-07-23: FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1
+
+- Added exact-schema and deterministic-ID coverage for all five profiles,
+  including explicit-null provider-capable requirements and provider-forbidden
+  create/queue boundaries.
+- Covered dry unbound, live absent, valid bound lineage, exact schema,
+  decision, surface, task, digest, authority, route identity, and backend
+  rejection paths without leaking resolver exceptions.
+- Proved validate-only consumer admission blocks before Hermes when required,
+  preserves dry-run simulation when admitted, serializes the projection, and
+  leaves every other action projection-free.
+- Verification: 57 focused projection/consumer/exemption tests and 270
+  combined WRE routing/scaffold, communication-contract, and AI Gateway
+  runtime-binding/signed-evidence tests passed. Ruff, compileall, and diff
+  checks passed.
+
 ## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
 
 - Replaced the obsolete route-function no-growth assertion with a regression

@@ -39,6 +39,46 @@ public function and every decision helper are at or below the WSP 62
 75-line function limit; remaining inherited router/consumer debt is governed
 by exact no-growth module exemptions.
 
+### FoundUp Job Model-Capability Projection
+
+`get_foundup_job_model_capability_profile(requested_action)` returns one
+frozen `foundup_job_model_capability_profile.v1` artifact for each canonical
+FoundUp action. Profile IDs are SHA-256 digests of canonical JSON including
+explicit nulls. Provider-capable profile requirements remain `None` until a
+production authority supplies them; create/queue use empty/false/zero values
+only to state that provider capability is not applicable.
+
+`resolve_foundup_job_model_capability_projection(...)` is a deterministic,
+read-only resolver. It accepts only an exact runtime-binding receipt plus its
+canonical artifact digest, calls
+`rehydrate_model_runtime_binding_receipt()`, and maps only keys emitted by
+`to_reddog_bridge_payload()`. Stable decisions are `not_applicable`,
+`unbound_dry_run`, `bound`, and `rejected`; rejection reasons are sorted and
+deduplicated. `provider_call_admission` is always `not_evaluated`.
+
+`FoundUpJobConsumer` invokes this admission seam only for
+`requested_action="validate_foundup"`. Dry-run validation may dispatch while
+unbound, a valid bound projection is serialized on `ConsumerResult`, and a
+rejected or live-unbound projection blocks before Hermes. All other consumer
+actions leave `model_capability_projection=None`.
+
+The consumer constructor accepts a
+`TrustedModelRuntimeBindingResolver(ModelRuntimeBindingLookup)` dependency.
+It returns either `None` or a `TrustedModelRuntimeBindingArtifact` containing
+the persisted receipt mapping, canonical artifact digest, and non-empty
+provenance label. Implementations are trust anchors and must resolve through
+the existing outside-repository confined runtime-binding artifact supply.
+This seam does not read files.
+
+`FoundUpJob.payload` is never consulted for model-binding authority. Any
+binding-like keys there are removed while constructing a detached canonical
+`FoundUpJob` snapshot before the trusted lookup. Projection and Hermes both
+consume that snapshot, closing the mutable-ingress interval. Canonical
+normalization rejects hostile mappings, non-finite numbers, tuples and other
+non-JSON recursive types without exposing exception text. Runtime receipt
+rehydration proves integrity; it cannot establish the honesty of a malicious
+injected resolver, which remains an explicit out-of-scope residual.
+
 ### Data Structures
 
 ```python
