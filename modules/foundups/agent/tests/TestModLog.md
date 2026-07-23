@@ -1,5 +1,20 @@
 # Agent Module TestModLog
 
+## 2026-07-23 - Create planner canonical-schema repair tests
+
+- Updated all planner/writer happy-path registry fixtures to satisfy the
+  canonical schema and added a direct fixture/schema assertion.
+- Added a 75-line planner entrypoint regression. Planner plus adjacent
+  scaffold writers: 83 passed; canonical registry schema suite: 46 passed.
+
+## 2026-07-23 - Create planner registry/determinism repair tests
+
+- Proved missing, unreadable, malformed, and schema-invalid registries fail
+  closed with the same redacted `FAIL_REGISTRY_UNAVAILABLE` result.
+- Proved repeated planning is byte-equivalent when legacy genesis input omits
+  `created_at`.
+- Planner plus adjacent scaffold-writer suites: 80 passed.
+
 ## 2026-07-19 - Transport-neutral Hermes grounding tests
 
 - Proved plain-text v2 requests use host identity/scope and submit a verified grounded intent to the canonical resident client.

@@ -8,12 +8,23 @@ x-reddog-security-repair: &reddog_security_repair
   remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
 
 exemptions:
+  - <<: *reddog_security_repair
+    file: "src/foundup_job_contract.py"
+    reason: >-
+      Inherited typed job contract and serialization host. Create-scaffold
+      lineage added only nullable fields; splitting the shared lifecycle,
+      policy, transition, and factory contracts requires a separate
+      compatibility-preserving migration.
+    threshold_override: 796
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#create-foundup-job-contract-wsp62-decomposition"
+    no_growth_ceiling: {file_lines: 796, functions: {}}
+
   - file: "INTERFACE.md"
     reason: >-
       Legacy module interface registry. This slice adds one bounded transport
       contract beside its canonical resident-client boundary; splitting the
       historical registry is separate documentation-maintenance work.
-    threshold_override: 1136
+    threshold_override: 1140
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -197,7 +208,7 @@ exemptions:
       Module-local WSP 62 registry. Provider-evidence review adds exact,
       review-dated ceilings for the touched legacy surfaces; splitting the
       registry would break the canonical module-level exemption lookup.
-    threshold_override: 392
+    threshold_override: 403
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -371,7 +382,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 8757
+    threshold_override: 8778
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -383,7 +394,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1564
+    threshold_override: 1584
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

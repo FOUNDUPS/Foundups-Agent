@@ -33,6 +33,22 @@ temporary exact ceilings and the focused contract/store ceiling are recorded
 in `wsp_62_exemptions.yaml`. Store extraction and legacy seam decomposition
 remain tracked in `ROADMAP.md`; no permanent exemption was added.
 
+## 2026-07-23: inherited create-job contract WSP 62 debt
+
+**Status:** ACTIVE TEMPORARY EXEMPTION
+
+**Owner:** MoltbotBridge
+
+**Exact no-growth ceiling:** `src/foundup_job_contract.py` = 796 lines
+
+**Expiry:** 2026-09-30
+
+**Remediation:** [Create FoundUp job contract WSP62 decomposition](ROADMAP.md#create-foundup-job-contract-wsp62-decomposition)
+
+The contract remains oversized after the nullable create-route fields were
+added. The exemption applies only to this inherited file ceiling; it is not a
+test exemption and grants no function-ceiling increase.
+
 ## 2026-02-07: WSP 95/71 Security Audit - CLEAN
 
 **Auditor**: 0102

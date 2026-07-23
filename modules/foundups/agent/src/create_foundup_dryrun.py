@@ -200,86 +200,79 @@ def _revalidate_envelope(envelope: Dict[str, Any]):
         validate_genesis_envelope,
     )
 
-    parsed = FoundUpGenesisEnvelope.from_dict(envelope)
+    normalized = json.loads(
+        json.dumps(
+            envelope,
+            allow_nan=False,
+            ensure_ascii=True,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+    )
+    if not isinstance(normalized, dict):
+        raise ValueError("genesis envelope must be a mapping")
+    normalized.setdefault("created_at", 0.0)
+    parsed = FoundUpGenesisEnvelope.from_dict(normalized)
     result = validate_genesis_envelope(parsed, strict_mode=True)
     return result.is_valid, list(result.errors), parsed
 
 
-def _foundup_id_exists(foundup_id: str, registry_path: Optional[Path]) -> bool:
-    """Read-only registry existence check. Missing registry -> treated as 'no ids'.
+class RegistryUnavailableError(RuntimeError):
+    """Raised when the authoritative registry cannot be safely inspected."""
 
-    Reads ``foundup_registry.json`` directly (same ``entities[].foundup_id`` shape
-    the read-only ``foundup_registry_loader`` validates). We do NOT import the
-    loader here because ``modules/foundups/src/__init__`` eagerly imports a missing
-    ``platform_manager`` and would break this import; a direct read is dependency-free
-    and equally read-only. (Residual: the loader-import blocker is out of scope.)
-    """
-    path = registry_path
-    if path is None:
-        # Default production registry: modules/foundups/foundup_registry.json
-        path = Path(__file__).resolve().parents[2] / "foundup_registry.json"
-    path = Path(path)
-    if not path.exists():
-        return False
+
+def _load_schema_valid_registry(registry_path: Optional[Path]) -> Dict[str, Any]:
+    """Load registry data only after canonical JSON Schema validation."""
+    foundups_root = Path(__file__).resolve().parents[2]
+    path = Path(registry_path or foundups_root / "foundup_registry.json")
+    schema_path = foundups_root / "foundup_registry.schema.json"
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return False
-    entities = data.get("entities", []) if isinstance(data, dict) else []
+        from jsonschema import Draft202012Validator
+
+        registry = json.loads(path.read_text(encoding="utf-8"))
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        if next(Draft202012Validator(schema).iter_errors(registry), None):
+            raise RegistryUnavailableError
+    except RegistryUnavailableError:
+        raise
+    except Exception:
+        raise RegistryUnavailableError from None
+    if not isinstance(registry, dict):
+        raise RegistryUnavailableError
+    return registry
+
+
+def _foundup_id_exists(foundup_id: str, registry_path: Optional[Path]) -> bool:
+    """Return existence only after the canonical registry schema accepts data."""
+    registry = _load_schema_valid_registry(registry_path)
     return any(
-        isinstance(e, dict) and e.get("foundup_id") == foundup_id for e in entities
+        entity["foundup_id"] == foundup_id for entity in registry["entities"]
     )
 
 
-def plan_create_foundup_dry_run(
+def _reject_plan(code: str, reason: str) -> CreateFoundUpPlanResult:
+    return CreateFoundUpPlanResult(
+        action=CREATE_ACTION,
+        ok=False,
+        rejection_code=code,
+        rejection_reason=reason[:300],
+        scaffold_contract=None,
+        planned_artifacts=[],
+        planned_manifest=None,
+        planned_registry_seed=None,
+    )
+
+
+def _build_success_plan(
     envelope: Dict[str, Any],
-    *,
-    actor_id: str = "0102",
-    registry_path: Optional[Path] = None,
+    parsed: Any,
 ) -> CreateFoundUpPlanResult:
-    """Plan (dry-run) the scaffold for a NEW FoundUp from a genesis envelope.
-
-    Writes nothing. Returns a CreateFoundUpPlanResult with the FoundUpScaffoldContract,
-    the planned WSP-49 artifacts, planned manifest, and planned registry seed -- or a
-    fail-closed rejection.
-
-    Args:
-        envelope: a FoundUpGenesisEnvelope dict (e.g. from the WSP 109 intake builder).
-        actor_id: who is requesting creation (telemetry only).
-        registry_path: optional registry path (defaults to production, read-only).
-    """
-    def _reject(code: str, reason: str) -> CreateFoundUpPlanResult:
-        return CreateFoundUpPlanResult(
-            action=CREATE_ACTION,
-            ok=False,
-            rejection_code=code,
-            rejection_reason=reason[:300],
-            scaffold_contract=None,
-            planned_artifacts=[],
-            planned_manifest=None,
-            planned_registry_seed=None,
-        )
-
-    is_valid, errors, parsed = _revalidate_envelope(envelope or {})
-    if not is_valid:
-        return _reject(
-            "FAIL_ENVELOPE_NOT_GATE_PASSED",
-            "envelope did not pass genesis validation: " + "; ".join(errors),
-        )
-
     foundup_id = parsed.foundup_id
-    if _foundup_id_exists(foundup_id, registry_path):
-        return _reject(
-            "FAIL_FOUNDUP_ID_EXISTS",
-            "foundup_id already exists in registry; create_foundup authors a NEW "
-            "scaffold and must not update/extract an existing FoundUp",
-        )
-
     module_path = f"modules/foundups/{foundup_id}"
     artifacts = _wsp49_artifacts(module_path, foundup_id)
     manifest = _planned_manifest(foundup_id, module_path)
     seed = _registry_seed(foundup_id, parsed.name, module_path)
-
     contract = {
         "foundup_id": foundup_id,
         "display_name": parsed.name,
@@ -301,7 +294,6 @@ def plan_create_foundup_dry_run(
         "validation_commands": [["python", "-m", "pytest", f"{module_path}/tests"]],
         "receipt_chain": [],
     }
-
     return CreateFoundUpPlanResult(
         action=CREATE_ACTION,
         ok=True,
@@ -312,3 +304,50 @@ def plan_create_foundup_dry_run(
         planned_manifest=manifest,
         planned_registry_seed=seed,
     )
+
+
+def plan_create_foundup_dry_run(
+    envelope: Dict[str, Any],
+    *,
+    actor_id: str = "0102",
+    registry_path: Optional[Path] = None,
+) -> CreateFoundUpPlanResult:
+    """Plan (dry-run) the scaffold for a NEW FoundUp from a genesis envelope.
+
+    Writes nothing. Returns a CreateFoundUpPlanResult with the FoundUpScaffoldContract,
+    the planned WSP-49 artifacts, planned manifest, and planned registry seed -- or a
+    fail-closed rejection.
+
+    Args:
+        envelope: a FoundUpGenesisEnvelope dict (e.g. from the WSP 109 intake builder).
+        actor_id: who is requesting creation (telemetry only).
+        registry_path: optional registry path (defaults to production, read-only).
+    """
+    try:
+        is_valid, errors, parsed = _revalidate_envelope(envelope or {})
+    except (AttributeError, TypeError, ValueError):
+        return _reject_plan(
+            "FAIL_ENVELOPE_NOT_GATE_PASSED",
+            "genesis envelope validation failed",
+        )
+    if not is_valid:
+        return _reject_plan(
+            "FAIL_ENVELOPE_NOT_GATE_PASSED",
+            "envelope did not pass genesis validation: " + "; ".join(errors),
+        )
+
+    foundup_id = parsed.foundup_id
+    try:
+        foundup_exists = _foundup_id_exists(foundup_id, registry_path)
+    except RegistryUnavailableError:
+        return _reject_plan(
+            "FAIL_REGISTRY_UNAVAILABLE",
+            "FoundUp registry unavailable or invalid",
+        )
+    if foundup_exists:
+        return _reject_plan(
+            "FAIL_FOUNDUP_ID_EXISTS",
+            "foundup_id already exists in registry; create_foundup authors a NEW "
+            "scaffold and must not update/extract an existing FoundUp",
+        )
+    return _build_success_plan(envelope, parsed)

@@ -24,6 +24,21 @@
 
 ## Public API
 
+### create_foundup Scaffold Route
+
+`route_foundup_job()` admits `create_foundup` only to `HERMES_SCAFFOLD` with explicit dry-run, `new_scaffold`, canonical genesis/scaffold digests, and matching genesis/job identity. Its frozen `RouteEnvelope.scaffold_request` is the canonical immutable request passed to `ScaffoldAdapter.plan(request)`; no mutable job crosses that boundary. The consumer canonical-JSON detaches evidence, revalidates returned identity and both lineage digests, returns `SIMULATED` evidence only on success, and maps malformed adapters to stable redacted blocked results. It never calls the generic Hermes executor, a live writer/provider, registry mutation, or worktree API.
+
+Adapter `ok`, `reason_code`, and `reason_human` controls must be JSON scalar
+types (`bool`, `str`, `str`) before dispatch uses them. Route identifiers reject
+path traversal plus every Unicode `Cc` and `Cf` control. Internal router
+failures expose only `FAIL_INTERNAL` / `Internal routing error` and a generic
+structured log event.
+
+The public route entrypoint delegates to the bounded decision module. Its
+public function and every decision helper are at or below the WSP 62
+75-line function limit; remaining inherited router/consumer debt is governed
+by exact no-growth module exemptions.
+
 ### Data Structures
 
 ```python

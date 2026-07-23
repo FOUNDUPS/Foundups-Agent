@@ -89,6 +89,27 @@
   files; the focused contract/store has a bounded temporary 775-line ceiling
   with extraction tracked in the roadmap.
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
+
+**WSP Protocol**: WSP 22, 49, 62
+
+- Recorded `src/foundup_job_contract.py` under an exact, non-ratcheting
+  796-line module exemption with an owner, expiry, remediation target, and
+  active violations record.
+- The nullable create-route lineage fields and their wire format are unchanged;
+  no behavior or authority was added.
+
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 34, 50, 62, 97, 108
+
+- Added typed `creation_mode`, `genesis_envelope_digest`, and
+  `scaffold_contract_digest` fields to the canonical `FoundUpJob` contract.
+- Added factory and serialization round-trip support without changing
+  existing-module build/extract semantics.
+- This contract change grants no live scaffold, registry, provider, worktree,
+  launch, certification, or model-selection authority.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 62, 71, 97

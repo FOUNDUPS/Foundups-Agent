@@ -25,6 +25,29 @@ This README section is the canonical implementation delta for current WRE code.
 
 ## Architecture
 
+### create_foundup Dry-Run Routing
+
+`FoundUpJob(requested_action="create_foundup")` routes only to
+`TargetBackend.HERMES_SCAFFOLD`. Admission requires explicit
+`dry_run_mode=True`, `creation_mode="new_scaffold"`, canonical genesis and
+scaffold digests, and a matching `payload.genesis_envelope.foundup_id`.
+The router freezes those values plus canonical genesis JSON in an immutable
+`CreateScaffoldRequest`. `FoundUpJobConsumer` passes that exact snapshot
+through an injected scaffold adapter backed by the existing dry-run planner,
+then independently checks returned identity and both lineage digests.
+Nested evidence is detached through canonical JSON and malformed adapters
+produce stable redacted blocked receipts. The route never sends the action to
+the generic Hermes executor and performs no file, registry, FAM, provider, or
+worktree mutation.
+
+The extracted `dispatch_create_scaffold` and
+`freeze_create_scaffold_request` entrypoints remain below the 75-line WSP 62
+function limit. The public `route_foundup_job` entrypoint is 34 lines, and
+every function in its extracted decision module is at or below 75 lines.
+Inherited router and consumer file/function debt remains under exact,
+non-ratcheting ceilings in `wsp_62_exemptions.yaml`; its owner and decomposition
+target are recorded in `violations.md` and `ROADMAP.md`.
+
 ### Core Components (5)
 ```
 wre_core/

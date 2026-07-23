@@ -2,6 +2,64 @@
 
 ## Chronological Change Log
 
+### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
+
+- Extracted the create-route decision from the legacy router into
+  `foundup_job_route_decision.py`; the public entrypoint is 34 lines and every
+  function in the decision module is at or below 75 lines.
+- Reduced `foundup_job_router.py` from 1,360 to 1,193 lines without changing
+  route outcomes, validation order, redaction, or fail-closed behavior.
+- Added exact, non-ratcheting WSP 62 authority for the remaining inherited
+  router (1,193 lines) and consumer (1,112 lines) file/function debt, with an
+  owner, expiry, remediation target, and active violations record.
+
+### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR2
+
+- Required exact scalar adapter control fields before set membership and
+  mapped every malformed exact-type result to stable redacted blocked output.
+- Rejected Unicode `Cc`/`Cf` identifiers, removed raw exception text from the
+  router failure receipt/log, and deep-detached `DrainResult.results`.
+- Split the touched dispatch and request-freeze entrypoints to 30 and 16
+  lines. The later WSP 62 repair supersedes this checkpoint's temporary
+  route-function no-growth guard.
+
+### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR1
+
+- Froze a canonical `CreateScaffoldRequest` in the `RouteEnvelope`; the
+  consumer now passes that exact immutable snapshot instead of the mutable job.
+- Extracted create-route validation and dispatch into sub-600-line modules,
+  while reducing both legacy oversized host files relative to the prerequisite
+  commit.
+- Canonical-JSON detached adapter and consumer evidence, revalidated returned
+  plan identity and lineage, and contained malformed/raising adapters in
+  stable redacted blocked results.
+
+### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 34, 50, 62, 97, 108
+**Phase**: Bug Fix
+**Agent**: 0102
+**WSP_15**: Complexity 3 + Importance 5 + Deferability 4 + Impact 4 =
+16 (P0).
+
+#### Changes
+- Added the distinct `HERMES_SCAFFOLD` route for canonical `create_foundup`
+  jobs with fail-closed dry-run, mode, digest, payload, and identity checks.
+- Carried typed creation lineage in `RouteEnvelope`.
+- Added an injected scaffold adapter backed by the existing
+  `create_foundup_dryrun` planner and a dedicated consumer branch that never
+  invokes the generic Hermes executor.
+
+#### Impact
+- Valid create jobs can produce a verified dry-run scaffold plan.
+- No live writer, registry mutation, FAM/provider call, worktree, capability
+  certification, or model-selection authority was added.
+
+#### WSP Compliance
+- Focused contract/router/adapter tests cover success and fail-closed paths.
+- New adapter and test files remain below WSP 62 thresholds; legacy oversized
+  router/consumer files received only bounded routing-seam edits.
+
 ### [2026-07-18] - REDDOG_RUNTIME_ARTIFACT_PATH_DAEMON_REDACTION_PHASE1
 
 - Moved DAEmon self-audit tasks, proposals, escalations, state, and diagnostic

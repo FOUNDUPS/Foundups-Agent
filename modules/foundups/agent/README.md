@@ -11,6 +11,13 @@ Provides canonical agent state management including:
 - Coherence tracking for state transitions
 - Wallet/public key integration
 
+The read-only `create_foundup_dryrun` planner fails closed when its
+authoritative registry is missing, unreadable, malformed, or schema-invalid.
+Validation reads the canonical `foundup_registry.schema.json` directly through
+`Draft202012Validator`; no parallel schema definition is maintained.
+Legacy genesis envelopes without `created_at` receive a deterministic
+validation sentinel; planning never writes the registry or scaffold.
+
 ## Agent State Machine
 
 ```

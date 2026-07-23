@@ -46,6 +46,16 @@ OpenClaw becomes **0102** — the Digital Twin of 012:
 
 ## Architecture
 
+### Canonical create_foundup Job Bindings
+
+`FoundUpJob` carries `creation_mode`, `genesis_envelope_digest`, and
+`scaffold_contract_digest` as typed top-level fields. For
+`requested_action="create_foundup"`, callers set
+`creation_mode="new_scaffold"` and place the validated genesis envelope at
+`payload.genesis_envelope`; WRE performs the fail-closed route validation.
+These fields round-trip through `to_dict()` / `from_dict()` and are not an
+alias for the existing-module build or extraction actions.
+
 ```
 012 (Human) ──voice/chat──► OpenClaw Gateway ──WSP-trained──► Foundups Codebase
                                    │

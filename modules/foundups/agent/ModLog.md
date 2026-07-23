@@ -1,5 +1,21 @@
 # Agent Module ModLog
 
+## 2026-07-23 - CREATE_FOUNDUP_REGISTRY_SCHEMA_REPAIR2
+
+- Replaced planner-local shape checks with `Draft202012Validator` evaluation
+  of the canonical `modules/foundups/foundup_registry.schema.json`; no second
+  schema authority was introduced.
+- Split `plan_create_foundup_dry_run` to 45 lines while preserving the stable
+  `FAIL_REGISTRY_UNAVAILABLE` boundary.
+
+## 2026-07-23 - CREATE_FOUNDUP_REGISTRY_FAIL_CLOSED_REPAIR1
+
+- The create-foundup dry-run planner now treats missing, unreadable,
+  malformed, and schema-invalid registries as
+  `FAIL_REGISTRY_UNAVAILABLE` instead of an empty registry.
+- Envelope normalization supplies a deterministic sentinel timestamp when
+  legacy input omits `created_at`; no write or runtime authority was added.
+
 ## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1
 
 **Author**: 0102 architect | Commander: 012 | WSP: 00, 15, 50, 71, 97

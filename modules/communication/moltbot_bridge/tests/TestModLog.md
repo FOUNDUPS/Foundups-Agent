@@ -43,6 +43,26 @@
 - Focused provider/architect/audit/WSP62 suite: `117 passed`.
 - Fusion progress receipt suite: `13 passed`.
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
+
+- Extended the module exemption regression to require the canonical
+  `src/foundup_job_contract.py` exact 796-line no-growth ceiling.
+- Cross-module WRE regression checks its POSIX key, metadata, expiry,
+  remediation authority, and exact source size.
+
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
+
+- Added `test_foundup_job_create_lineage.py` with a canonical
+  factory/serialization round-trip test for
+  `creation_mode`, `genesis_envelope_digest`, and
+  `scaffold_contract_digest`.
+- Added a legacy serialized-job regression proving absent lineage fields
+  remain readable and round-trip with nullable defaults.
+- Focused lineage file: 2 passed. Adjacent contract/E2E run: 89 passed and 3
+  pre-existing missing-manifest failures remained outside this route.
+- Included in the focused cross-module contract/router/consumer run:
+  145 passed.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
 
 - Added worker and architect same-surface substitution regressions with zero

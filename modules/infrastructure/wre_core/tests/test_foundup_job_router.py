@@ -45,12 +45,14 @@ class MockPolicyFlags:
     security_gate_checked: bool = False
     security_gate_passed: bool = False
     genesis_validated: bool = False
+    dry_run_mode: bool = False
 
     def to_dict(self) -> Dict[str, bool]:
         return {
             "security_gate_checked": self.security_gate_checked,
             "security_gate_passed": self.security_gate_passed,
             "genesis_validated": self.genesis_validated,
+            "dry_run_mode": self.dry_run_mode,
         }
 
 
@@ -63,11 +65,90 @@ class MockFoundUpJob:
     status: MockJobStatus = MockJobStatus.QUEUED
     foundup_id: Optional[str] = None
     policy_flags: Optional[MockPolicyFlags] = None
+    payload: Optional[Dict[str, Any]] = None
+    creation_mode: Optional[str] = None
+    genesis_envelope_digest: Optional[str] = None
+    scaffold_contract_digest: Optional[str] = None
+
+
+def _create_foundup_job() -> MockFoundUpJob:
+    """Build the smallest route-valid dry-run scaffold job."""
+    return MockFoundUpJob(
+        job_id="job_create_001",
+        tenant_id="tenant_creator",
+        requested_action="create_foundup",
+        foundup_id="widget_demo",
+        policy_flags=MockPolicyFlags(dry_run_mode=True),
+        payload={"genesis_envelope": {"foundup_id": "widget_demo"}},
+        creation_mode="new_scaffold",
+        genesis_envelope_digest="sha256:" + ("a" * 64),
+        scaffold_contract_digest="sha256:" + ("b" * 64),
+    )
 
 
 # ---------------------------------------------------------------------------
 # Test: Build/Extract/Validate Route to Hermes
 # ---------------------------------------------------------------------------
+
+
+class TestCreateFoundUpRouting:
+    """create_foundup has a distinct, fail-closed scaffold route."""
+
+    def test_valid_create_routes_to_distinct_scaffold_backend(self):
+        envelope = route_foundup_job(_create_foundup_job())
+
+        assert envelope.route_status == RouteStatus.ROUTED
+        assert envelope.target_backend == TargetBackend.HERMES_SCAFFOLD
+        assert envelope.target_backend != TargetBackend.HERMES_BUILDER
+        assert envelope.creation_mode == "new_scaffold"
+        assert envelope.genesis_envelope_digest == "sha256:" + ("a" * 64)
+        assert envelope.scaffold_contract_digest == "sha256:" + ("b" * 64)
+        assert envelope.to_dict()["target_backend"] == "hermes_scaffold"
+
+    @pytest.mark.parametrize(
+        ("field_name", "value", "reason_fragment"),
+        [
+            ("creation_mode", None, "creation_mode"),
+            ("genesis_envelope_digest", "bad", "genesis_envelope_digest"),
+            ("scaffold_contract_digest", None, "scaffold_contract_digest"),
+        ],
+    )
+    def test_missing_or_invalid_lineage_blocks(
+        self,
+        field_name: str,
+        value: Optional[str],
+        reason_fragment: str,
+    ):
+        job = _create_foundup_job()
+        setattr(job, field_name, value)
+
+        envelope = route_foundup_job(job)
+
+        assert envelope.route_status == RouteStatus.BLOCKED
+        assert envelope.target_backend == TargetBackend.NONE
+        assert (
+            envelope.reason_code
+            == RouteReasonCode.BLOCKED_INVALID_CREATE_BINDING
+        )
+        assert reason_fragment in envelope.reason_human
+
+    def test_create_requires_explicit_dry_run(self):
+        job = _create_foundup_job()
+        job.policy_flags = MockPolicyFlags(dry_run_mode=False)
+
+        envelope = route_foundup_job(job)
+
+        assert envelope.route_status == RouteStatus.BLOCKED
+        assert "dry_run_mode=True" in envelope.reason_human
+
+    def test_create_rejects_genesis_identity_mismatch(self):
+        job = _create_foundup_job()
+        job.payload["genesis_envelope"]["foundup_id"] = "other_foundup"
+
+        envelope = route_foundup_job(job)
+
+        assert envelope.route_status == RouteStatus.BLOCKED
+        assert "must match" in envelope.reason_human
 
 
 class TestHermesRouting:
