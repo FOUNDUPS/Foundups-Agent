@@ -17,6 +17,10 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
 )
+from modules.communication.moltbot_bridge.tests.provider_call_evidence_test_helpers import (
+    architect_provider_call_evidence,
+    audit_provider_call_evidence,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SOURCE,
 )
@@ -282,6 +286,7 @@ class _AuditModelRunner:
             model_receipt_id=f"model-receipt-{lane_id}",
             model_result_digest=f"sha256:model-result-{lane_id}",
             made_network_call=True,
+            provider_call_evidence=audit_provider_call_evidence(binding),
         )
 
 
@@ -310,6 +315,7 @@ class _ArchitectRunner:
             review_packet={"fusion_panel_quorum": {"passed": True}},
             made_network_call=True,
             rejection_reasons=(),
+            provider_call_evidence=architect_provider_call_evidence(binding),
         )
 
 

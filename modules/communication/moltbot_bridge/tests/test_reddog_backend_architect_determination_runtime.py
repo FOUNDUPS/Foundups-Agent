@@ -5,7 +5,9 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
+
+import pytest
 
 from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
@@ -81,13 +83,17 @@ class FakeArchitectRunner:
         ok: bool = True,
         quorum: bool = True,
         raise_timeout: bool = False,
-        provider_call_evidence: Mapping[str, Any] | None = None,
+        provider_call_evidence: (
+            Mapping[str, Any]
+            | Callable[[Mapping[str, Any]], Mapping[str, Any]]
+            | None
+        ) = None,
     ) -> None:
         self.output = output
         self.ok = ok
         self.quorum = quorum
         self.raise_timeout = raise_timeout
-        self.provider_call_evidence = dict(provider_call_evidence or {})
+        self.provider_call_evidence = provider_call_evidence
         self.calls: list[dict[str, Any]] = []
 
     def run_architect_determination(self, *, prompt: str, context: str, binding: Mapping[str, Any], timeout_seconds: int):
@@ -102,6 +108,11 @@ class FakeArchitectRunner:
         if self.raise_timeout:
             raise TimeoutError("model timeout")
         content = self.output if isinstance(self.output, str) else json.dumps(self.output, sort_keys=True)
+        evidence = self.provider_call_evidence
+        if evidence is None:
+            evidence = _provider_call_evidence_from_binding(binding)
+        elif callable(evidence):
+            evidence = evidence(binding)
         return ArchitectModelResult(
             ok=self.ok,
             status="MODEL_OK" if self.ok else "MODEL_REJECT",
@@ -111,7 +122,7 @@ class FakeArchitectRunner:
             review_packet={"fusion_panel_quorum": {"passed": self.quorum}},
             made_network_call=True,
             rejection_reasons=() if self.ok else ("model_failed",),
-            provider_call_evidence=self.provider_call_evidence,
+            provider_call_evidence=dict(evidence),
         )
 
 
@@ -282,26 +293,43 @@ def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
     return kwargs
 
 
-def _provider_call_evidence(task_id: str) -> dict[str, Any]:
+def _provider_call_evidence_from_binding(
+    binding: Mapping[str, Any],
+    *,
+    task_id: str = "provider-task",
+    surface: str = RUNTIME_SURFACE_BACKEND_ARCHITECT,
+    cycle_id: str | None = None,
+    runtime_receipt_id: str | None = None,
+    runtime_digest: str | None = None,
+    outcome: ProviderCallOutcome = ProviderCallOutcome.COMPLETED,
+) -> dict[str, Any]:
+    model_selection = binding.get("model_selection")
+    topology = model_selection if isinstance(model_selection, Mapping) else {}
     precall = create_precall_evidence(
-        surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        surface=surface,
         task_id=task_id,
         work_order_id="work-1",
         queue_item_id="queue-1",
         run_id="run-1",
-        cycle_id="cycle-1",
+        cycle_id=cycle_id or str(binding.get("cycle_id") or ""),
         requested_provider="openrouter",
         requested_model="synthetic/model",
         redacted_input_digest="sha256:" + "a" * 64,
-        model_runtime_binding_receipt_id="binding-1",
-        model_runtime_binding_digest="sha256:" + "b" * 64,
+        model_runtime_binding_receipt_id=runtime_receipt_id
+        or str(topology.get("model_runtime_binding_receipt_id") or ""),
+        model_runtime_binding_digest=runtime_digest
+        or str(topology.get("model_runtime_binding_digest") or ""),
         request_metadata={"timeout_seconds": 1},
         started_at_ms=100,
     )
     return terminalize_provider_call(
         arm_provider_call(precall),
-        outcome=ProviderCallOutcome.COMPLETED,
-        reason=ProviderCallReason.PROVIDER_RETURNED,
+        outcome=outcome,
+        reason=(
+            ProviderCallReason.PROVIDER_RETURNED
+            if outcome == ProviderCallOutcome.COMPLETED
+            else ProviderCallReason.PROVIDER_FAILED
+        ),
         completed_at_ms=101,
     ).to_dict()
 
@@ -349,7 +377,9 @@ def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> N
         store=InMemoryArchitectDeterminationStore(),
         model_runner=FakeArchitectRunner(
             output,
-            provider_call_evidence=_provider_call_evidence("provider-task-1"),
+            provider_call_evidence=lambda binding: _provider_call_evidence_from_binding(
+                binding, task_id="provider-task-1"
+            ),
         ),
         now_iso=NOW,
     )
@@ -359,7 +389,9 @@ def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> N
         store=InMemoryArchitectDeterminationStore(),
         model_runner=FakeArchitectRunner(
             output,
-            provider_call_evidence=_provider_call_evidence("provider-task-2"),
+            provider_call_evidence=lambda binding: _provider_call_evidence_from_binding(
+                binding, task_id="provider-task-2"
+            ),
         ),
         now_iso=NOW,
     )
@@ -379,6 +411,52 @@ def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> N
     assert (
         second.receipt.queue_candidate.source_determination_receipt_id
         == second.receipt.determination_receipt_id
+    )
+
+
+@pytest.mark.parametrize(
+    "evidence_factory",
+    [
+        lambda binding: {},
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, surface="wrong_architect_surface"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, cycle_id="wrong-cycle"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, runtime_receipt_id="wrong-binding"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, runtime_digest="sha256:" + "f" * 64
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, outcome=ProviderCallOutcome.FAILED
+        ),
+    ],
+)
+def test_architect_rejects_missing_or_mismatched_provider_evidence_before_queue(
+    evidence_factory,
+) -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=FakeArchitectRunner(
+            _model_output(inputs["allocation"], evidence_ref),
+            provider_call_evidence=evidence_factory,
+        ),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert result.queue_candidate_count == 0
+    assert result.receipt.queue_candidate is None
+    assert (
+        ArchitectDeterminationReason.PROVIDER_CALL_EVIDENCE
+        in result.rejection_reasons
     )
 
 

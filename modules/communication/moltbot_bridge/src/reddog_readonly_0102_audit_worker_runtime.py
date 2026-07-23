@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import os
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 import importlib.util
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
@@ -42,10 +42,12 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
     ProviderCallAttemptError,
     ProviderCallEvidenceStore,
+    ProviderCallOutcome,
     canonical_digest as provider_evidence_digest,
     create_precall_evidence,
     execute_evidenced_provider_call,
     provider_call_store_from_env,
+    validate_provider_call_evidence,
 )
 from modules.communication.moltbot_bridge.src.reddog_typed_evidence_citation_policy import (
     validate_typed_evidence_citations,
@@ -690,13 +692,29 @@ def execute_model_backed_repo_code_audit(
         return _reject([ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT])
     except Exception:
         return _reject([ReadOnlyAuditTaskRejectReason.MODEL_FAILURE])
+    provider_call_evidence = _canonical_provider_call_evidence(
+        model_result.provider_call_evidence
+    )
     if not model_result.ok:
         reasons = [ReadOnlyAuditTaskRejectReason.MODEL_FAILURE, *model_result.rejection_reasons]
         return _reject(
             reasons,
-            provider_call_evidence=model_result.provider_call_evidence,
+            provider_call_evidence=provider_call_evidence,
             no_model_call_performed=False,
         )
+    if not _provider_call_evidence_matches_audit(
+        provider_call_evidence,
+        binding=binding,
+        model_selection=model_selection,
+    ):
+        return _reject(
+            [ReadOnlyAuditTaskRejectReason.PROVIDER_CALL_EVIDENCE],
+            no_model_call_performed=False,
+        )
+    model_result = replace(
+        model_result,
+        provider_call_evidence=provider_call_evidence,
+    )
 
     parsed = _parse_model_output(model_result.content)
     output_reasons = _validate_repo_audit_model_output(
@@ -773,6 +791,31 @@ def execute_model_backed_repo_code_audit(
         no_openclaw_enqueue_performed=True,
         no_hermes_dispatch_performed=True,
         no_worktree_operation_performed=True,
+    )
+
+
+def _canonical_provider_call_evidence(value: Any) -> dict[str, Any]:
+    try:
+        return validate_provider_call_evidence(value).to_dict()
+    except (TypeError, ValueError):
+        return {}
+
+
+def _provider_call_evidence_matches_audit(
+    evidence: Mapping[str, Any],
+    *,
+    binding: Mapping[str, Any],
+    model_selection: Mapping[str, Any],
+) -> bool:
+    return bool(evidence) and (
+        evidence.get("surface") == RUNTIME_SURFACE_READONLY_AUDIT
+        and evidence.get("task_id")
+        == (str(binding.get("task_id") or "") or None)
+        and evidence.get("model_runtime_binding_receipt_id")
+        == str(model_selection.get("model_runtime_binding_receipt_id") or "")
+        and evidence.get("model_runtime_binding_digest")
+        == str(model_selection.get("model_runtime_binding_digest") or "")
+        and evidence.get("outcome") == ProviderCallOutcome.COMPLETED.value
     )
 
 

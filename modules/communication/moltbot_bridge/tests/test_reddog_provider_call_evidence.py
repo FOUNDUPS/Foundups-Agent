@@ -64,6 +64,14 @@ def _metadata():
         "s" "k-" + "a" * 24,
         "github" "_pat_" + "b" * 24,
         "Bearer " + "c" * 24,
+        "https://provider.example",
+        "C:/provider",
+        "../provider",
+        "provider/..",
+        "provider?region=us",
+        "provider#fragment",
+        "Ab3Cd5Ef7Gh9Jk2Lm4Np6Qr8St",
+        "Ab3Cd5Ef7Gh9Jk2Lm4Np6Qr8St-route",
         "model output sentence",
         "model\noutput",
         '{"model":"raw-content"}',
@@ -73,7 +81,39 @@ def test_served_identity_rejects_secret_and_raw_content_shapes(identity: str) ->
     metadata = _metadata()
     metadata["served_provider"] = identity
 
-    with pytest.raises(ValueError, match="served_identity"):
+    with pytest.raises(ValueError, match="served_provider"):
+        terminalize_provider_call(
+            arm_provider_call(_precall()),
+            outcome=ProviderCallOutcome.COMPLETED,
+            reason=ProviderCallReason.PROVIDER_RETURNED,
+            completed_at_ms=101,
+            served_metadata=metadata,
+        )
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        "https://example/model",
+        "C:/model",
+        "../model",
+        "vendor/../model",
+        "vendor/.",
+        "vendor/model?route=fast",
+        "vendor/model#fragment",
+        "Bearer " + "d" * 24,
+        "raw model sentence",
+        "vendor/Ab3Cd5Ef7Gh9Jk2Lm4Np6Qr8St",
+        "vendor/Ab3Cd5Ef7Gh9Jk2Lm4Np6Qr8St:online",
+    ],
+)
+def test_served_model_rejects_noncanonical_and_high_entropy_shapes(
+    model: str,
+) -> None:
+    metadata = _metadata()
+    metadata["served_model"] = model
+
+    with pytest.raises(ValueError, match="served_model"):
         terminalize_provider_call(
             arm_provider_call(_precall()),
             outcome=ProviderCallOutcome.COMPLETED,
@@ -448,6 +488,11 @@ class _TerminalWriteAndRecoveryReadFailureStore(
         raise RuntimeError("store_load_failed")
 
 
+class _RaisingText:
+    def __str__(self) -> str:
+        raise RuntimeError("synthetic_extraction_failure")
+
+
 def test_direct_audit_preserves_attempted_lineage_when_terminal_and_load_fail(
     monkeypatch,
 ) -> None:
@@ -534,6 +579,76 @@ def test_direct_architect_preserves_attempted_lineage_when_terminal_and_load_fai
         "reddog_provider_call:"
     )
     assert len(calls) == 1
+
+
+def test_direct_audit_preserves_lineage_when_response_extraction_raises(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("REDDOG_READONLY_AUDIT_RUNTIME_MODE", "foundups_fusion")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(
+        audit_runtime,
+        "_load_foundups_fusion_runner",
+        lambda: lambda *args: {"ok": True, "content": _RaisingText()},
+    )
+    binding_receipt = model_runtime_binding_receipt(
+        runtime_surface=audit_runtime.RUNTIME_SURFACE_READONLY_AUDIT
+    )
+    reasons: list[str] = []
+    topology = audit_runtime._model_runtime_binding(
+        binding_receipt,
+        reasons,
+        expected_surface=audit_runtime.RUNTIME_SURFACE_READONLY_AUDIT,
+    )
+
+    result = audit_runtime.FoundupsFusionRepoAuditModelRunner(
+        provider_call_evidence_store=_TerminalWriteAndRecoveryReadFailureStore()
+    ).run_repo_code_audit(
+        prompt="Return JSON.",
+        context="public evidence",
+        binding={"task_id": "task-extraction-failure", "model_selection": topology},
+        timeout_seconds=1,
+    )
+
+    assert not result.ok
+    assert result.made_network_call
+    assert result.provider_call_evidence["attempted"] is True
+    assert result.provider_call_evidence["outcome"] == "INDETERMINATE"
+
+
+def test_direct_architect_preserves_lineage_when_response_extraction_raises(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("REDDOG_BACKEND_ARCHITECT_RUNTIME_MODE", "foundups_fusion")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(
+        architect_runtime,
+        "_load_foundups_fusion_runner",
+        lambda: lambda *args: {"ok": True, "content": _RaisingText()},
+    )
+    binding_receipt = model_runtime_binding_receipt(
+        runtime_surface=architect_runtime.RUNTIME_SURFACE_BACKEND_ARCHITECT
+    )
+    reasons: list[str] = []
+    topology = architect_runtime._model_runtime_binding(
+        binding_receipt,
+        reasons,
+        expected_surface=architect_runtime.RUNTIME_SURFACE_BACKEND_ARCHITECT,
+    )
+
+    result = architect_runtime.FoundupsFusionArchitectModelRunner(
+        provider_call_evidence_store=_TerminalWriteAndRecoveryReadFailureStore()
+    ).run_architect_determination(
+        prompt="Return JSON.",
+        context="public evidence",
+        binding={"cycle_id": "cycle-extraction-failure", "model_selection": topology},
+        timeout_seconds=1,
+    )
+
+    assert not result.ok
+    assert result.made_network_call
+    assert result.provider_call_evidence["attempted"] is True
+    assert result.provider_call_evidence["outcome"] == "INDETERMINATE"
 
 
 def test_fusion_progress_embeds_canonical_receipt_without_parallel_truth() -> None:

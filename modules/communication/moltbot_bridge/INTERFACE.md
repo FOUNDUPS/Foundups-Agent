@@ -21,17 +21,25 @@ content-free local evidence through `ProviderCallAttemptError`; a failed
 terminal write therefore returns armed `INDETERMINATE` truth without depending
 on a recovery read. Output promotion remains blocked. Served provider/model
 are nullable unless the returned `provider_call_metadata` exact schema supplies
-both canonical, secret-free identifiers; requested configuration is never used
-as served identity.
+both canonical, secret-free identifiers. Providers are canonical slugs and
+models are canonical `provider/model` identifiers; URI/path/traversal,
+query/fragment, bearer-like, high-entropy, and raw-sentence values are rejected.
+Requested configuration is never used as served identity.
 
 Audit rejection results retain the canonical provider-call evidence mapping
-after a model attempt. Accepted architect determination identity is computed
-from the provider call ID, provider receipt ID, and canonical evidence digest
-before a queue candidate is formed, so the queue parent cannot outlive or
-substitute its provider lineage.
+after a model attempt. Before acceptance, the audit surface requires exact
+surface/task/runtime-binding lineage and the architect surface requires exact
+surface/cycle/runtime-binding lineage; both require a canonical `COMPLETED`
+receipt. Omitted, forged, mismatched, or non-completed evidence fails before
+report acceptance or queue construction. Accepted architect determination
+identity is computed from the provider call ID, provider receipt ID, and
+canonical evidence digest, so the queue parent cannot outlive or substitute
+its provider lineage.
 
 `FusionProgressRecorder.record_provider_call_evidence()` embeds the canonical
-generic receipt. Its legacy OpenRouter receipt remains compatibility telemetry,
+generic receipt as an optional all-or-none extension of
+`reddog_fusion_progress_receipt.v1`. Frozen legacy-v1 receipts without those
+fields remain valid. Legacy OpenRouter data remains compatibility telemetry,
 not a second authoritative provider-call identity.
 
 ### Durable Resident Architect Cycle

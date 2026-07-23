@@ -1,5 +1,16 @@
 # WSP Violations Log - moltbot_bridge
 
+## 2026-07-23: WSP 62 Provider Evidence Review Repair Round 2 - RESOLVED
+
+**Status**: EXACT TEMPORARY NO-GROWTH CEILINGS / REMEDIATION TRACKED
+
+Every touched communication function over 60 lines now has an exact measured
+no-growth ceiling with owner, architect reviewer, expiry, and remediation.
+The canonical audit matcher now compares `relative_path.as_posix()`, so the
+same slash-delimited exemption keys work on Windows and POSIX. A
+platform-neutral regression covers both path families; the prior Windows
+matching gap is closed.
+
 ## 2026-07-23: WSP 62 Provider Evidence Review Repair - RESOLVED
 
 **Status**: TEMPORARY EXEMPTION / REMEDIATION TRACKED

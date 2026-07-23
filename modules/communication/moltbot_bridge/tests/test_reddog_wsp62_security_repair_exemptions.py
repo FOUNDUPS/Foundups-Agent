@@ -25,20 +25,39 @@ EXPECTED_MODULE_FILES = {
     "src/reddog_wre_queue_authority_request_dryrun.py",
     "src/reddog_wre_queue_consumer_dryrun.py",
     "src/reddog_wre_worktree_create.py",
+    "src/reddog_backend_architect_determination_runtime.py",
+    "src/reddog_fusion_progress_validation.py",
+    "src/reddog_provider_call_evidence.py",
+    "src/reddog_readonly_0102_audit_worker_runtime.py",
+    "src/reddog_readonly_audit_task_executor.py",
     "tests/test_reddog_governed_execution_valve_production_wiring.py",
+    "tests/test_reddog_backend_architect_determination_runtime.py",
+    "tests/test_reddog_fusion_progress_receipt.py",
     "tests/test_reddog_main_openclaw_signed_worker_claim_loop_preflight.py",
+    "tests/test_reddog_main_readonly_operational_bootstrap.py",
     "tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py",
+    "tests/test_reddog_provider_call_evidence.py",
+    "tests/test_reddog_readonly_audit_research_decision_e2e_runtime.py",
+    "tests/test_reddog_readonly_audit_task_executor.py",
+    "tests/test_reddog_resident_architect_durable_agentdb_cycle.py",
     "tests/test_reddog_signed_worker_dispatch_task_executor.py",
 }
 PROVIDER_EVIDENCE_EXACT_FILES = {
     "INTERFACE.md",
     "ModLog.md",
     "src/reddog_backend_architect_determination_runtime.py",
+    "src/reddog_fusion_progress_validation.py",
     "src/reddog_provider_call_evidence.py",
     "src/reddog_readonly_0102_audit_worker_runtime.py",
+    "src/reddog_readonly_audit_task_executor.py",
     "tests/TestModLog.md",
     "tests/test_reddog_backend_architect_determination_runtime.py",
+    "tests/test_reddog_fusion_progress_receipt.py",
+    "tests/test_reddog_main_readonly_operational_bootstrap.py",
+    "tests/test_reddog_provider_call_evidence.py",
+    "tests/test_reddog_readonly_audit_research_decision_e2e_runtime.py",
     "tests/test_reddog_readonly_audit_task_executor.py",
+    "tests/test_reddog_resident_architect_durable_agentdb_cycle.py",
     "wsp_62_exemptions.yaml",
 }
 
@@ -56,6 +75,17 @@ def _named_sizes(path: Path) -> dict[str, int]:
         for node in ast.walk(tree)
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
         and node.end_lineno is not None
+    }
+
+
+def _oversized_function_sizes(path: Path) -> dict[str, int]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return {
+        node.name: node.end_lineno - node.lineno + 1
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.end_lineno is not None
+        and node.end_lineno - node.lineno + 1 > 60
     }
 
 
@@ -104,3 +134,10 @@ def test_provider_evidence_exemptions_match_exact_touched_file_sizes() -> None:
         assert item["threshold_override"] == len(
             target.read_text(encoding="utf-8").splitlines()
         )
+        if target.suffix == ".py" and "no_growth_ceiling" in item:
+            assert item["no_growth_ceiling"]["file_lines"] == len(
+                target.read_text(encoding="utf-8").splitlines()
+            )
+            assert item["no_growth_ceiling"].get("functions", {}) == (
+                _oversized_function_sizes(target)
+            )

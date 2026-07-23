@@ -1,5 +1,33 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND2
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97
+
+- Replaced the shared permissive served-identity grammar with provider-slug and
+  `provider/model` parsers that reject URI/path/traversal, dot-segment,
+  query/fragment, bearer-like, high-entropy, and raw-sentence shapes.
+- Added independent canonical provider-evidence acceptance gates at the audit
+  and architect consumers. Exact surface, task/cycle, runtime-binding receipt
+  and digest, and `COMPLETED` outcome are required before report acceptance or
+  queue construction.
+- Normal post-invocation extraction exceptions now raise
+  `ProviderCallAttemptError` with the last local armed/failed evidence, even
+  when the terminal write and recovery read are unavailable.
+- Preserved the frozen legacy `reddog_fusion_progress_receipt.v1` shape while
+  retaining generic provider evidence as an all-or-none optional extension.
+- Canonicalized WSP 62 exemption matching with POSIX relative keys on every
+  host and recorded exact no-growth ceilings for every touched function over
+  60 lines.
+- Post-repair gate: 252 passed / 1 platform skip across the provider, Fusion
+  receipt, audit, architect, main bootstrap, end-to-end, durable-cycle, and
+  WSP 62 files; the broader Fusion/architect family sweep passed 57/57.
+- A whole bridge diagnostic run reached 3,976 passed / 17 skipped / 51 failed.
+  Remaining failures are outside this slice (missing optional dependencies or
+  external fixtures, grant/skill environment state, and pre-model
+  bootstrap/runtime-binding rejections); no remaining failure names the new
+  provider-evidence acceptance reason.
+
 ## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97

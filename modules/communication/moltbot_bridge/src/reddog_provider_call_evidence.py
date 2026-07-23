@@ -31,7 +31,11 @@ _REQUEST_DOMAIN = b"reddog-provider-request-envelope.v1\x00"
 _MAX_TEXT = 512
 _MAX_SERVED_IDENTITY = 160
 _MAX_USAGE = 10**12
-_SERVED_IDENTITY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,159}$")
+_SERVED_PROVIDER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+_SERVED_MODEL = re.compile(
+    r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}/"
+    r"[A-Za-z0-9][A-Za-z0-9._+:-]{0,127}$"
+)
 _ADDITIONAL_SECRET_LIKE = re.compile(
     r"(?:github_pat_[A-Za-z0-9_]{20,}|hf_[A-Za-z0-9]{16,})",
     re.IGNORECASE,
@@ -282,8 +286,8 @@ def parse_served_metadata(
         "usage",
     }:
         raise ValueError("served_metadata_schema")
-    provider = _optional_served_identity(value["served_provider"])
-    model = _optional_served_identity(value["served_model"])
+    provider = _optional_served_provider(value["served_provider"])
+    model = _optional_served_model(value["served_model"])
     if (provider is None) != (model is None):
         raise ValueError("served_identity_incomplete")
     usage_raw = value["usage"]
@@ -354,8 +358,8 @@ def validate_provider_call_evidence(
         raise ValueError("call_id_mismatch")
     if (receipt.served_provider is None) != (receipt.served_model is None):
         raise ValueError("served_identity_incomplete")
-    _optional_served_identity(receipt.served_provider)
-    _optional_served_identity(receipt.served_model)
+    _optional_served_provider(receipt.served_provider)
+    _optional_served_model(receipt.served_model)
     if not isinstance(receipt.attempted, bool):
         raise ValueError("attempted")
     if type(receipt.started_at_ms) is not int or receipt.started_at_ms < 0:
@@ -635,14 +639,23 @@ def execute_evidenced_provider_call(
             content=content,
             served_metadata=metadata,
         )
-    except (TypeError, ValueError):
-        terminal = terminalize_provider_call(
-            armed,
-            outcome=ProviderCallOutcome.FAILED,
-            reason=ProviderCallReason.RESPONSE_INVALID,
-            completed_at_ms=now_ms(),
-        )
-        result = None
+    except Exception as exc:
+        failure_evidence = armed
+        try:
+            failed = terminalize_provider_call(
+                armed,
+                outcome=ProviderCallOutcome.FAILED,
+                reason=ProviderCallReason.RESPONSE_INVALID,
+                completed_at_ms=now_ms(),
+            )
+            store.transition(failed)
+            failure_evidence = failed
+        except Exception:
+            pass
+        raise ProviderCallAttemptError(
+            evidence=failure_evidence,
+            timed_out=False,
+        ) from exc
     try:
         store.transition(terminal)
     except Exception:
@@ -745,21 +758,49 @@ def _optional_text(value: Any) -> str | None:
     return _text(value)
 
 
-def _optional_served_identity(value: Any) -> str | None:
+def _optional_served_provider(value: Any) -> str | None:
     if value is None:
         return None
     text = _text(value)
-    redaction = redact_runtime_text(text, max_chars=_MAX_SERVED_IDENTITY)
-    if (
-        len(text) > _MAX_SERVED_IDENTITY
-        or not _SERVED_IDENTITY.fullmatch(text)
-        or redaction.text != text
-        or redaction.replacements
-        or redaction.truncated
-        or _ADDITIONAL_SECRET_LIKE.search(text)
-    ):
-        raise ValueError("served_identity")
+    if not _served_identity_is_safe(text, pattern=_SERVED_PROVIDER):
+        raise ValueError("served_provider")
     return text
+
+
+def _optional_served_model(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = _text(value)
+    if not _served_identity_is_safe(text, pattern=_SERVED_MODEL):
+        raise ValueError("served_model")
+    return text
+
+
+def _served_identity_is_safe(text: str, *, pattern: re.Pattern[str]) -> bool:
+    redaction = redact_runtime_text(text, max_chars=_MAX_SERVED_IDENTITY)
+    return (
+        len(text) <= _MAX_SERVED_IDENTITY
+        and pattern.fullmatch(text) is not None
+        and redaction.text == text
+        and not redaction.replacements
+        and not redaction.truncated
+        and _ADDITIONAL_SECRET_LIKE.search(text) is None
+        and not any(_looks_high_entropy(segment) for segment in text.split("/"))
+    )
+
+
+def _looks_high_entropy(segment: str) -> bool:
+    for token in re.split(r"[._:+-]", segment):
+        if len(token) < 24:
+            continue
+        categories = (
+            any(char.islower() for char in token),
+            any(char.isupper() for char in token),
+            any(char.isdigit() for char in token),
+        )
+        if all(categories) and len(set(token)) / len(token) >= 0.55:
+            return True
+    return False
 
 
 def _digest(value: Any) -> str:

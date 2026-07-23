@@ -669,6 +669,12 @@ def check_exemption_file(module_path):
         logging.debug(f"Unable to load exemption file {exemption_file}: {e}")
         return set()
 
+
+def canonical_relative_path(file_path, module_path):
+    """Return the WSP 62 exemption key independent of the host path separator."""
+    return file_path.relative_to(module_path).as_posix()
+
+
 def audit_file_sizes(modules_root, enable_wsp_62=False):
     """
     Audit file sizes according to WSP 62 Large File and Refactoring Enforcement Protocol.
@@ -704,7 +710,7 @@ def audit_file_sizes(modules_root, enable_wsp_62=False):
                 
             # Check if file is exempted
             relative_path = file_path.relative_to(module_path)
-            if str(relative_path) in exempted_files:
+            if canonical_relative_path(file_path, module_path) in exempted_files:
                 continue
                 
             # Get threshold for this file type

@@ -24,7 +24,7 @@ import os
 import tempfile
 import shutil
 import logging
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from unittest.mock import patch, MagicMock
 
 # Add the parent directory to the path so we can import modular_audit
@@ -33,6 +33,17 @@ import modular_audit
 
 # Disable logging during tests
 logging.disable(logging.CRITICAL)
+
+
+def test_canonical_relative_path_is_platform_neutral():
+    assert modular_audit.canonical_relative_path(
+        PureWindowsPath(r"C:\repo\modules\communication\moltbot_bridge\src\file.py"),
+        PureWindowsPath(r"C:\repo\modules\communication\moltbot_bridge"),
+    ) == "src/file.py"
+    assert modular_audit.canonical_relative_path(
+        PurePosixPath("/repo/modules/communication/moltbot_bridge/src/file.py"),
+        PurePosixPath("/repo/modules/communication/moltbot_bridge"),
+    ) == "src/file.py"
 
 class TestArgumentParsing(unittest.TestCase):
     """Test the argument parsing functionality."""
@@ -104,6 +115,7 @@ class TestArgumentParsing(unittest.TestCase):
                         args.verbose = False
                         args.debug = False
                         args.quiet = False
+                        args.wsp_62_size_check = False
                         mock_parse_args.return_value = args
                         
                         # Run main logic

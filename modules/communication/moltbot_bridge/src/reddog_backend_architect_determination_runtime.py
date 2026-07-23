@@ -18,7 +18,7 @@ import hashlib
 import importlib.util
 import json
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
@@ -41,10 +41,12 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
     ProviderCallAttemptError,
     ProviderCallEvidenceStore,
+    ProviderCallOutcome,
     canonical_digest as provider_evidence_digest,
     create_precall_evidence,
     execute_evidenced_provider_call,
     provider_call_store_from_env,
+    validate_provider_call_evidence,
 )
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     SelectionDecision,
@@ -101,6 +103,7 @@ class ArchitectDeterminationReason:
     PROMPT_BUDGET_EXCEEDED = "REJECT_ARCHITECT_DETERMINATION_PROMPT_BUDGET_EXCEEDED"
     MODEL_SELECTION_RECEIPT = "REJECT_ARCHITECT_DETERMINATION_MODEL_SELECTION_RECEIPT"
     MODEL_RUNTIME_BINDING_RECEIPT = "REJECT_ARCHITECT_DETERMINATION_MODEL_RUNTIME_BINDING_RECEIPT"
+    PROVIDER_CALL_EVIDENCE = "REJECT_ARCHITECT_DETERMINATION_PROVIDER_CALL_EVIDENCE"
 
 
 @dataclass(frozen=True)
@@ -757,9 +760,23 @@ def run_reddog_backend_architect_determination_runtime(
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
 
+    provider_call_evidence = _canonical_provider_call_evidence(
+        model_result.provider_call_evidence
+    )
+    model_result = replace(
+        model_result,
+        provider_call_evidence=provider_call_evidence,
+    )
     if not model_result.ok:
         reasons.append(ArchitectDeterminationReason.MODEL_FAILURE)
         reasons.extend(model_result.rejection_reasons)
+    elif not _provider_call_evidence_matches_architect(
+        provider_call_evidence,
+        cycle_id=cycle_id,
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+        model_runtime_binding_digest=model_runtime_binding_digest,
+    ):
+        reasons.append(ArchitectDeterminationReason.PROVIDER_CALL_EVIDENCE)
     if not _fusion_quorum_passed(model_result.review_packet):
         reasons.append(ArchitectDeterminationReason.FUSION_QUORUM_NOT_PASSED)
 
@@ -1231,6 +1248,31 @@ def _queue_candidate(
             f"wsp15_allocation:{wsp15_allocation_receipt.get('receipt_id')}",
         ),
         wsp15_allocation_receipt=dict(wsp15_allocation_receipt),
+    )
+
+
+def _canonical_provider_call_evidence(value: Any) -> dict[str, Any]:
+    try:
+        return validate_provider_call_evidence(value).to_dict()
+    except (TypeError, ValueError):
+        return {}
+
+
+def _provider_call_evidence_matches_architect(
+    evidence: Mapping[str, Any],
+    *,
+    cycle_id: str,
+    model_runtime_binding_receipt_id: str | None,
+    model_runtime_binding_digest: str | None,
+) -> bool:
+    return bool(evidence) and (
+        evidence.get("surface") == RUNTIME_SURFACE_BACKEND_ARCHITECT
+        and evidence.get("cycle_id") == cycle_id
+        and evidence.get("model_runtime_binding_receipt_id")
+        == model_runtime_binding_receipt_id
+        and evidence.get("model_runtime_binding_digest")
+        == model_runtime_binding_digest
+        and evidence.get("outcome") == ProviderCallOutcome.COMPLETED.value
     )
 
 

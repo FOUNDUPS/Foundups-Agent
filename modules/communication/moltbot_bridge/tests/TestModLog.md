@@ -1,3 +1,23 @@
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND2
+
+- Added adversarial provider/model parser cases for URI, drive/path traversal,
+  dot segments, query/fragment, bearer-like, high-entropy, and raw sentences,
+  plus documented OpenRouter-style identifiers.
+- Added direct audit and architect extraction-failure cases using a raising
+  `__str__` value and an unreadable evidence store; attempted local evidence
+  remains truthful.
+- Added omitted, forged-surface, wrong task/cycle, wrong runtime-binding
+  ID/digest, and non-completed evidence rejection at both acceptance consumers.
+- Added a hard-coded frozen legacy-v1 progress receipt and a platform-neutral
+  Windows/POSIX WSP 62 exemption-key regression.
+- Exact WSP 62 tests now require the complete measured set of every touched
+  communication function over 60 lines.
+- Consolidated post-repair suite: `252 passed, 1 skipped`; Fusion/architect
+  family sweep: `57 passed`; modular-audit unit suite: `16 passed`.
+- Whole bridge diagnostic: `3976 passed, 17 skipped, 51 failed`. The remaining
+  failures are unrelated optional-dependency, external-fixture, grant/skill
+  environment, or pre-model bootstrap/runtime-binding cases.
+
 ## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR
 
 - Added adversarial served-identity cases covering credential-shaped values,

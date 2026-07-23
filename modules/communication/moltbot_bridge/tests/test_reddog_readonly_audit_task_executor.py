@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+from typing import Any, Mapping
 
 import pytest
 
@@ -240,7 +241,48 @@ class _EchoEvidenceModelRunner:
             model_receipt_id="model-receipt-1",
             model_result_digest="sha256:model-result-1",
             made_network_call=True,
+            provider_call_evidence=_audit_provider_call_evidence_from_binding(
+                binding
+            ),
         )
+
+
+def _audit_provider_call_evidence_from_binding(
+    binding: Mapping[str, Any],
+    *,
+    task_id: str | None = None,
+    surface: str = RUNTIME_SURFACE_READONLY_AUDIT,
+    runtime_receipt_id: str | None = None,
+    runtime_digest: str | None = None,
+    outcome: ProviderCallOutcome = ProviderCallOutcome.COMPLETED,
+) -> dict:
+    precall = create_precall_evidence(
+        surface=surface,
+        task_id=task_id or str(binding.get("task_id") or "") or None,
+        work_order_id="work-1",
+        queue_item_id="queue-1",
+        run_id="run-1",
+        cycle_id=None,
+        requested_provider="openrouter",
+        requested_model="synthetic/model",
+        redacted_input_digest="sha256:" + "a" * 64,
+        model_runtime_binding_receipt_id=runtime_receipt_id
+        or str(binding.get("model_runtime_binding_receipt_id") or ""),
+        model_runtime_binding_digest=runtime_digest
+        or str(binding.get("model_runtime_binding_digest") or ""),
+        request_metadata={"timeout_seconds": 1},
+        started_at_ms=100,
+    )
+    return terminalize_provider_call(
+        arm_provider_call(precall),
+        outcome=outcome,
+        reason=(
+            ProviderCallReason.PROVIDER_RETURNED
+            if outcome == ProviderCallOutcome.COMPLETED
+            else ProviderCallReason.PROVIDER_FAILED
+        ),
+        completed_at_ms=101,
+    ).to_dict()
 
 
 def _failed_provider_call_evidence(task_id: str) -> dict:
@@ -833,6 +875,60 @@ def test_model_failure_result_carries_provider_call_evidence(tmp_path: Path) -> 
     assert result.no_model_call_performed is False
     assert result.provider_call_evidence == provider_evidence
     assert result.to_dict()["provider_call_evidence"] == provider_evidence
+
+
+@pytest.mark.parametrize(
+    "evidence_factory",
+    [
+        lambda binding: {},
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, surface="wrong_audit_surface"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, task_id="wrong-task"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, runtime_receipt_id="wrong-binding"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, runtime_digest="sha256:" + "f" * 64
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, outcome=ProviderCallOutcome.FAILED
+        ),
+    ],
+)
+def test_audit_rejects_missing_or_mismatched_provider_evidence_before_acceptance(
+    tmp_path: Path,
+    evidence_factory,
+) -> None:
+    root = _repo(tmp_path)
+
+    class _ForgedEvidenceRunner(_EchoEvidenceModelRunner):
+        def run_repo_code_audit(self, **kwargs):
+            result = super().run_repo_code_audit(**kwargs)
+            return RepoAuditModelResult(
+                **{
+                    **result.__dict__,
+                    "provider_call_evidence": evidence_factory(kwargs["binding"]),
+                }
+            )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-provider-gate",
+        model_runner=_ForgedEvidenceRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert result.no_model_call_performed is False
+    assert ReadOnlyAuditTaskRejectReason.PROVIDER_CALL_EVIDENCE in (
+        result.rejection_reasons
+    )
+    assert result.provider_call_evidence == {}
 
 
 def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: Path) -> None:
@@ -1858,6 +1954,7 @@ def test_model_backed_rejects_invalid_recommended_action_enum(tmp_path: Path) ->
                 model_receipt_id="model-receipt-1",
                 model_result_digest="sha256:model-result-1",
                 made_network_call=True,
+                provider_call_evidence=result.provider_call_evidence,
             )
 
     result = execute_reddog_readonly_audit_task(
@@ -1894,6 +1991,7 @@ def test_model_backed_rejects_stop_with_next_slice(tmp_path: Path) -> None:
                 model_receipt_id="model-receipt-1",
                 model_result_digest="sha256:model-result-1",
                 made_network_call=True,
+                provider_call_evidence=result.provider_call_evidence,
             )
 
     result = execute_reddog_readonly_audit_task(
@@ -2228,7 +2326,10 @@ def test_agentdb_openclaw_claim_run_task_model_worker_persists_report(tmp_path: 
             content=json.dumps(output, sort_keys=True),
             model_receipt_id="model-receipt-run-task",
             model_result_digest="sha256:model-result-run-task",
-            made_network_call=False,
+            made_network_call=True,
+            provider_call_evidence=_audit_provider_call_evidence_from_binding(
+                binding
+            ),
         )
 
     monkeypatch.setattr(FoundupsFusionRepoAuditModelRunner, "run_repo_code_audit", fake_run)

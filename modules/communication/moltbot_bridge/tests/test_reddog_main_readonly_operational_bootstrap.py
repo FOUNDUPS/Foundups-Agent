@@ -55,6 +55,9 @@ from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
 )
+from modules.communication.moltbot_bridge.tests.provider_call_evidence_test_helpers import (
+    architect_provider_call_evidence,
+)
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_owner_bootstrap as owner_bootstrap,
 )
@@ -211,6 +214,7 @@ class _FakeArchitectRunner:
             review_packet={"fusion_panel_quorum": {"passed": True}},
             made_network_call=True,
             rejection_reasons=(),
+            provider_call_evidence=architect_provider_call_evidence(binding),
         )
 
 
