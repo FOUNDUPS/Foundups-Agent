@@ -115,11 +115,8 @@ async def discover_openrouter_model_catalog(
     try:
         admit_discovery_invocation(item, now_ms=started)
     except ValueError as error:
-        reason = str(error)
-        if reason not in {"scheduled_invocation_not_due", "scheduled_invocation_expired"}:
-            reason = "invocation_invalid"
         receipt = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
-                           reason, started, clock())
+                           _admission_failure_reason(error), started, clock())
         _try_write(attempt_target, receipt.to_dict(), store)
         return DiscoveryRunResult(receipt, None, attempt_target, candidate_target)
     intent = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
@@ -373,6 +370,11 @@ def _request_digest() -> str:
         REQUEST_ENVELOPE, sort_keys=True, separators=(",", ":")
     ).encode("utf-8")
     return sha256_bytes(encoded)
+def _admission_failure_reason(error: ValueError) -> str:
+    reason = str(error)
+    if reason in {"scheduled_invocation_not_due", "scheduled_invocation_expired"}:
+        return reason
+    return "invocation_invalid"
 def _call_id(invocation_id: str, started: int) -> str:
     value = f"{invocation_id}\0{started}".encode("utf-8")
     return f"model_provider_catalog_discovery_call:{hashlib.sha256(value).hexdigest()}"

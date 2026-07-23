@@ -13,6 +13,12 @@ NEW_MODULE_NAMES = {
     "model_provider_catalog_snapshot",
     "openrouter_model_catalog_snapshot_once",
 }
+FUNCTION_LIMIT_MODULES = (
+    "model_intelligence_catalog.py",
+    "model_openrouter_direct_discovery.py",
+    "model_provider_catalog_artifact_store.py",
+    "model_provider_catalog_snapshot.py",
+)
 
 
 def _imports(path: Path) -> set[str]:
@@ -81,6 +87,19 @@ def test_new_surfaces_stay_below_phase_one_size_limits() -> None:
             encoding="utf-8"
         ).splitlines()
     ) < 120
+
+
+def test_touched_production_functions_stay_within_wsp62_limit() -> None:
+    violations = []
+    for name in FUNCTION_LIMIT_MODULES:
+        path = MODULE / "src" / name
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
+                lines = node.end_lineno - node.lineno + 1
+                if lines > 50:
+                    violations.append(f"{name}:{node.name}:{lines}")
+    assert violations == []
 
 
 def test_no_implicit_scheduler_or_runtime_hook_was_added() -> None:

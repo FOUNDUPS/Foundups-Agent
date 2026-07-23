@@ -205,38 +205,11 @@ def normalize_openrouter_catalog(
     cards: list[ModelCapabilityCard] = []
     rejected: list[ModelCatalogRejectedRecord] = []
     for record in records:
-        if not isinstance(record, Mapping):
-            rejected.append(_reject_openrouter_record(record, "record_not_mapping"))
-            continue
-        model_id = str(record.get("id") or "").strip()
-        if not model_id:
-            rejected.append(_reject_openrouter_record(record, "missing_model_id"))
-            continue
-        architecture = record.get("architecture") if isinstance(record.get("architecture"), Mapping) else {}
-        pricing = record.get("pricing") if isinstance(record.get("pricing"), Mapping) else {}
-        supported_parameters = _string_tuple(record.get("supported_parameters"))
-        modalities = _modalities_from_openrouter(architecture)
-        cards.append(
-            ModelCapabilityCard(
-                provider="openrouter",
-                model_id=model_id,
-                canonical_model_id=model_id,
-                source="openrouter_catalog",
-                availability=Availability.UNKNOWN,
-                freshness="provider_catalog_listing",
-                promotion_state=PromotionState.CANDIDATE,
-                task_families=(),
-                context_window=_positive_int(record.get("context_length")),
-                input_cost_per_million=_per_million(pricing.get("prompt")),
-                output_cost_per_million=_per_million(pricing.get("completion")),
-                supports_tools=bool({"tools", "tool_choice"} & set(supported_parameters)),
-                supports_structured_output=bool({"response_format", "structured_outputs"} & set(supported_parameters)),
-                supports_reasoning="reasoning" in set(supported_parameters),
-                modalities=modalities,
-                supported_parameters=supported_parameters,
-                privacy_policy="provider_policy_unknown",
-            ).normalized()
-        )
+        normalized = _normalize_openrouter_record(record)
+        if isinstance(normalized, ModelCapabilityCard):
+            cards.append(normalized)
+        else:
+            rejected.append(normalized)
     return tuple(sorted(cards, key=lambda card: card.canonical_model_id)), tuple(rejected)
 
 
@@ -370,6 +343,42 @@ def _reject_openrouter_record(record: Any, reason: str) -> ModelCatalogRejectedR
         reason=reason,
         record_digest=_digest_prefixed("rejected_record", record),
     )
+
+
+def _normalize_openrouter_record(
+    record: Any,
+) -> ModelCapabilityCard | ModelCatalogRejectedRecord:
+    if not isinstance(record, Mapping):
+        return _reject_openrouter_record(record, "record_not_mapping")
+    model_id = str(record.get("id") or "").strip()
+    if not model_id:
+        return _reject_openrouter_record(record, "missing_model_id")
+    architecture = record.get("architecture")
+    architecture = architecture if isinstance(architecture, Mapping) else {}
+    pricing = record.get("pricing")
+    pricing = pricing if isinstance(pricing, Mapping) else {}
+    supported_parameters = _string_tuple(record.get("supported_parameters"))
+    return ModelCapabilityCard(
+        provider="openrouter",
+        model_id=model_id,
+        canonical_model_id=model_id,
+        source="openrouter_catalog",
+        availability=Availability.UNKNOWN,
+        freshness="provider_catalog_listing",
+        promotion_state=PromotionState.CANDIDATE,
+        task_families=(),
+        context_window=_positive_int(record.get("context_length")),
+        input_cost_per_million=_per_million(pricing.get("prompt")),
+        output_cost_per_million=_per_million(pricing.get("completion")),
+        supports_tools=bool({"tools", "tool_choice"} & set(supported_parameters)),
+        supports_structured_output=bool(
+            {"response_format", "structured_outputs"} & set(supported_parameters)
+        ),
+        supports_reasoning="reasoning" in set(supported_parameters),
+        modalities=_modalities_from_openrouter(architecture),
+        supported_parameters=supported_parameters,
+        privacy_policy="provider_policy_unknown",
+    ).normalized()
 
 
 def _digest_prefixed(prefix: str, value: Any) -> str:
