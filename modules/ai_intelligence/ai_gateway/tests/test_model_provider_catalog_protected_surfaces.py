@@ -10,15 +10,19 @@ REPO = Path(__file__).resolve().parents[4]
 MODULE = REPO / "modules/ai_intelligence/ai_gateway"
 NEW_MODULE_NAMES = {
     "model_openrouter_direct_discovery",
+    "model_openrouter_scheduled_discovery",
+    "model_provider_catalog_replay_state",
     "model_provider_catalog_snapshot",
     "openrouter_model_catalog_snapshot_once",
 }
 FUNCTION_LIMIT_MODULES = (
     "model_intelligence_catalog.py",
     "model_openrouter_direct_discovery.py",
+    "model_openrouter_scheduled_discovery.py",
     "model_provider_catalog_atomic_io.py",
     "model_provider_catalog_artifact_store.py",
     "model_provider_catalog_snapshot.py",
+    "model_provider_catalog_replay_state.py",
 )
 
 
@@ -89,6 +93,16 @@ def test_new_surfaces_stay_below_phase_one_size_limits() -> None:
         ).splitlines()
     ) < 250
     assert len(
+        (MODULE / "src/model_openrouter_scheduled_discovery.py").read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ) < 500
+    assert len(
+        (MODULE / "src/model_provider_catalog_replay_state.py").read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ) < 500
+    assert len(
         (REPO / "scripts/openrouter_model_catalog_snapshot_once.py").read_text(
             encoding="utf-8"
         ).splitlines()
@@ -118,3 +132,44 @@ def test_no_implicit_scheduler_or_runtime_hook_was_added() -> None:
     assert "--candidate-path" in script
     assert "schedule.every" not in script
     assert "APScheduler" not in script
+
+
+def test_scheduled_guard_has_no_authority_surface_imports() -> None:
+    imports = set()
+    for name in (
+        "model_openrouter_scheduled_discovery.py",
+        "model_provider_catalog_replay_state.py",
+    ):
+        imports.update(_imports(MODULE / "src" / name))
+    forbidden = (
+        "model_registry",
+        "model_intelligence_catalog",
+        "model_intelligence_selection",
+        "model_promotion_gate",
+        "model_runtime_binding",
+    )
+    assert not any(
+        fragment in imported
+        for imported in imports
+        for fragment in forbidden
+    )
+
+
+def test_manual_surfaces_do_not_import_or_export_scheduled_guard() -> None:
+    scheduled_names = (
+        "model_openrouter_scheduled_discovery",
+        "model_provider_catalog_replay_state",
+    )
+    manual_paths = (
+        MODULE / "src/model_openrouter_direct_discovery.py",
+        REPO / "scripts/openrouter_model_catalog_snapshot_once.py",
+    )
+    for path in manual_paths:
+        imports = _imports(path)
+        source = path.read_text(encoding="utf-8")
+        assert not any(
+            name in imported
+            for imported in imports
+            for name in scheduled_names
+        )
+        assert not any(name in source for name in scheduled_names)

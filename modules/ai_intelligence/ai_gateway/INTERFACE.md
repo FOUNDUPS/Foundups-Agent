@@ -96,6 +96,49 @@ concurrent directory writer. Parent-directory fsync is best-effort.
 Redirect history with a non-3xx final response is represented by
 `redirect_history_rejected`; raw 3xx responses remain `redirect_rejected`.
 
+#### Scheduled provider discovery replay guard
+
+```python
+await discover_scheduled_openrouter_model_catalog(
+    invocation,
+    repo_root=...,
+    runtime_root=...,
+    transport=...,
+) -> ScheduledDiscoveryResult
+```
+
+This API accepts scheduled invocations only. It fixes attempt, candidate,
+bounded replay-ledger, and outer operation-lock identities below the validated
+outside-repository runtime root. The full synchronous critical section executes
+in one worker thread; the asynchronous direct-discovery implementation executes
+there with `asyncio.run`, leaving the caller's event loop outside the OS lock.
+Nested artifact locks have separate identities.
+
+The ledger is keyed by invocation ID and durably publishes `ARMED` before
+transport. Exact completed/failed attempt receipts are terminal. A
+`BLOCKED_PRECALL` entry already owned by a valid guard ledger may retry.
+`ARMED`, indeterminate, malformed, capacity-exhausted, and
+candidate-only states fail closed without transport. `ARMED` recovery requires
+the exact same-invocation terminal attempt receipt. Completed replay additionally
+requires exact candidate lineage or independently valid fresh candidate evidence
+observed strictly later than the cached completion.
+
+An exact pre-ledger blocked receipt is ambiguous and fails closed. With no
+guard ledger, older fixed evidence permits a new invocation only when that
+evidence is internally valid and every relevant completion/observation time is
+strictly before the new scheduled window. Ledger entries are authoritative only
+for their exact invocation IDs; missing IDs still pass the chronology proof.
+Ledger `updated_at_ms` is a wall-clock high-water mark, so rollback below it
+fails closed. The fixed guarded identities are exclusive to this API;
+manual/direct callers must use other attempt and candidate paths.
+
+This boundary provides scheduled replay control only. It installs no scheduler,
+does not run at startup, does not change manual discovery, and grants no
+selection, promotion, runtime-binding, or registry authority. Runtime artifacts
+must remain under a trusted-principal-controlled root; the cooperative lock
+does not defend against an arbitrary writer with directory access. Ledger state
+contains no response body, credential, or authorization data.
+
 #### Model Intelligence Selection
 
 ```python

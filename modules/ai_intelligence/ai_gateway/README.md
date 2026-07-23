@@ -72,6 +72,48 @@ Scheduled mode is admission metadata, not an installed scheduler. It additionall
 requires `--schedule-id`, `--scheduled-for-ms`, and `--expires-at-ms`; callers
 must invoke the script explicitly within that inclusive time window.
 
+### Scheduled discovery replay guard
+
+`discover_scheduled_openrouter_model_catalog(...)` is the scheduled-only
+execution boundary. It does not install a scheduler, alter startup behavior, or
+change the manual one-shot discovery path. The caller supplies a canonical
+scheduled `DiscoveryInvocation`, trusted repository/runtime roots, and a
+transport seam. Attempt, candidate, replay-ledger, and operation-lock identities
+are fixed beneath the validated outside-repository runtime root.
+
+The complete synchronous admission, replay decision, transport, and publication
+sequence runs in one worker thread under one outer cross-process operation lock.
+The existing asynchronous discovery call runs in that same worker by
+`asyncio.run`, so the outer lock never blocks the caller's event loop. Inner
+artifact locks use distinct identities.
+
+Before transport, a strict bounded durable ledger publishes `ARMED` for the
+invocation ID. Completed and failed attempts are terminal. A completed replay
+requires its exact valid receipt plus either the exact current candidate
+lineage or a separately valid, fresh candidate observed strictly after that
+completion. `ARMED`, indeterminate, malformed, capacity-exhausted, and
+candidate-without-terminal states fail closed. Only an exact terminal attempt
+can recover an `ARMED` entry; candidate evidence alone cannot. Only a
+`BLOCKED_PRECALL` entry already owned by a valid guard ledger remains retryable.
+An exact pre-ledger blocked receipt is ambiguous and fails closed.
+
+When no guard ledger exists, older fixed direct-discovery evidence permits a
+new invocation only when its attempt/candidate evidence is internally valid and
+all relevant completion/observation times are strictly before the new scheduled
+window. Valid ledger entries are authoritative only for their exact invocation
+IDs; a missing ID still passes the same fixed-evidence chronology proof. A
+different, strictly later valid scheduled window may then make one new call.
+
+The ledger contains strict structured invocation/receipt evidence only; it does
+not persist response bodies, authorization values, or secrets. Expired windows
+alone are pruned and cannot pass current admission. Its `updated_at_ms` is a
+wall-clock high-water mark; rollback below it fails closed. The runtime root
+must be controlled by the same trusted principal as the process. The
+cooperative operation lock is a replay/concurrency boundary, not a security
+boundary against an arbitrary writer with access to that directory.
+The fixed guarded artifact identities are exclusive to this API; manual/direct
+callers must use different attempt and candidate paths.
+
 ## Model Selection Receipts
 
 `src/model_intelligence_selection.py` consumes a `ModelCatalogSnapshot` and

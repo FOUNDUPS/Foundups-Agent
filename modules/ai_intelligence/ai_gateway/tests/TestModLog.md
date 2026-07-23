@@ -1,5 +1,33 @@
 # AI Gateway TestModLog
 
+## 2026-07-24 - Scheduled provider discovery replay guard
+
+Scope: offline-only adversarial verification of scheduled replay admission
+around the unchanged direct OpenRouter discovery boundary.
+
+- Concurrent same-loop callers and two subprocesses permit one transport call.
+- `ARMED`, indeterminate, malformed, deep-nested, capacity-exhausted, linked,
+  missing-candidate, and candidate-only states fail closed.
+- Pre-ledger exact terminal evidence can migrate; exact blocked evidence cannot
+  retry. Every missing ledger ID must prove fixed evidence strictly predates the
+  new scheduled window, while guard-owned blocked entries remain retryable.
+- Ledger `updated_at_ms` is enforced as a high-water mark so expiry pruning
+  followed by wall-clock rollback cannot reopen transport admission.
+- Event-driven cancellation cases prove that a cancelled active caller and a
+  cancelled lock waiter leave their worker threads governed by the same outer
+  lock, complete without deadlock, and never duplicate transport.
+- Terminal ledger-write failure preserves the exact prior `ARMED` bytes and
+  recovers only from the exact same-invocation terminal attempt.
+- A valid candidate artifact larger than 1 MiB replays under the conservative
+  bound derived from the direct 8 MiB response limit.
+- Protected AST/file/function gates enforce no scheduler, startup, selection,
+  promotion, registry, runtime-binding, or manual-surface authority expansion.
+
+Focused scheduled/replay/protected result: `44 passed, 1 skipped` (unavailable
+unprivileged Windows symlink creation only). Full ai_gateway: `378 passed, 2
+skipped`. Idle automation: `126 passed`. Runtime artifact safety: `11 passed, 1
+skipped`. Ruff, compileall, and diff-check passed.
+
 ## 2026-07-24 - Provider discovery defensive reliability hotfix
 
 Scope: offline-only regressions for redirect-history receipt coherence,
