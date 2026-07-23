@@ -514,11 +514,11 @@ def test_main_preflight_model_autoresearch_plan_supply_runs_before_promotion(
                     "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
                     "REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH": str(
-                        tmp_path / "promotion_gates.json"
+                        runtime_root / "promotion_gates.json"
                     ),
-                    "REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH": str(tmp_path / "candidates.json"),
-                    "REDDOG_MODEL_AUTORESEARCH_POLICY_PATH": str(tmp_path / "autoresearch_policy.json"),
-                    "REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH": str(tmp_path / "feedback.jsonl"),
+                    "REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH": str(runtime_root / "candidates.json"),
+                    "REDDOG_MODEL_AUTORESEARCH_POLICY_PATH": str(runtime_root / "autoresearch_policy.json"),
+                    "REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH": str(runtime_root / "feedback.jsonl"),
                 },
                 clear=True,
             ):
@@ -529,10 +529,10 @@ def test_main_preflight_model_autoresearch_plan_supply_runs_before_promotion(
 
     autoresearch_supply.assert_called_once()
     autoresearch_kwargs = autoresearch_supply.call_args.kwargs
-    assert autoresearch_kwargs["promotion_gate_receipts_path"] == str(tmp_path / "promotion_gates.json")
-    assert autoresearch_kwargs["candidate_pool_path"] == str(tmp_path / "candidates.json")
-    assert autoresearch_kwargs["policy_path"] == str(tmp_path / "autoresearch_policy.json")
-    assert autoresearch_kwargs["feedback_records_path"] == str(tmp_path / "feedback.jsonl")
+    assert autoresearch_kwargs["promotion_gate_receipts_path"] == str(runtime_root / "promotion_gates.json")
+    assert autoresearch_kwargs["candidate_pool_path"] == str(runtime_root / "candidates.json")
+    assert autoresearch_kwargs["policy_path"] == str(runtime_root / "autoresearch_policy.json")
+    assert autoresearch_kwargs["feedback_records_path"] == str(runtime_root / "feedback.jsonl")
     assert autoresearch_kwargs["output_path"] == str(runtime_root / "model_autoresearch_plan_receipt.json")
     promote.assert_called_once()
 
@@ -604,10 +604,10 @@ def test_main_preflight_defaults_autoresearch_feedback_to_existing_cycle_feedbac
                     "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
                     "REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH": str(
-                        tmp_path / "promotion_gates.json"
+                        runtime_root / "promotion_gates.json"
                     ),
-                    "REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH": str(tmp_path / "candidates.json"),
-                    "REDDOG_MODEL_AUTORESEARCH_POLICY_PATH": str(tmp_path / "autoresearch_policy.json"),
+                    "REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH": str(runtime_root / "candidates.json"),
+                    "REDDOG_MODEL_AUTORESEARCH_POLICY_PATH": str(runtime_root / "autoresearch_policy.json"),
                 },
                 clear=True,
             ):
@@ -686,10 +686,10 @@ def test_main_preflight_explicit_autoresearch_feedback_path_overrides_cycle_feed
                     "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
                     "REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH": str(
-                        tmp_path / "promotion_gates.json"
+                        runtime_root / "promotion_gates.json"
                     ),
-                    "REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH": str(tmp_path / "candidates.json"),
-                    "REDDOG_MODEL_AUTORESEARCH_POLICY_PATH": str(tmp_path / "autoresearch_policy.json"),
+                    "REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH": str(runtime_root / "candidates.json"),
+                    "REDDOG_MODEL_AUTORESEARCH_POLICY_PATH": str(runtime_root / "autoresearch_policy.json"),
                     "REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH": str(explicit_feedback),
                 },
                 clear=True,
@@ -1530,9 +1530,9 @@ def test_main_preflight_authority_source_supply_runs_before_promotion(tmp_path: 
                     "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
                     "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
                     "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
-                    "REDDOG_AUTHORITY_PROFILE_SEED_PATH": str(tmp_path / "seed.json"),
-                    "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": str(tmp_path / "principal.json"),
-                    "REDDOG_PERMISSION_SNAPSHOT_PATH": str(tmp_path / "permission.json"),
+                    "REDDOG_AUTHORITY_PROFILE_SEED_PATH": str(runtime_root / "seed.json"),
+                    "REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH": str(runtime_root / "principal.json"),
+                    "REDDOG_PERMISSION_SNAPSHOT_PATH": str(runtime_root / "permission.json"),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_NOW_EPOCH": "1800000000",
                 },
                 clear=True,
