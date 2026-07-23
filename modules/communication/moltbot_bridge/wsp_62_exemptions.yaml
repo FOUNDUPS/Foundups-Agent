@@ -173,7 +173,7 @@ exemptions:
       Legacy audit-worker integration boundary spanning evidence acquisition,
       model invocation, and receipt composition. This POC preserves its
       reviewed repository and HoloIndex truth checks without a broad rewrite.
-    threshold_override: 2106
+    threshold_override: 2190
     function_threshold_override: 270
     functions:
       - "execute_model_backed_repo_code_audit"
@@ -185,6 +185,20 @@ exemptions:
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
+
+  - file: "src/reddog_provider_call_evidence.py"
+    reason: >-
+      Focused phase-2a contract and atomic store are colocated so the exact
+      validator and state-transition writer cannot drift. Store extraction is
+      the first follow-up after both governed Fusion surfaces prove parity.
+    threshold_override: 775
+    function_threshold_override: 90
+    functions:
+      - "validate_provider_call_evidence"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
 
   - file: "src/reddog_readonly_audit_task_executor.py"
     reason: >-
@@ -211,7 +225,7 @@ exemptions:
 
   - file: "tests/test_reddog_backend_architect_determination_runtime.py"
     reason: "Legacy architect-input fixture and suite awaiting fixture extraction."
-    threshold_override: 760
+    threshold_override: 770
     function_threshold_override: 80
     functions: ["_build_inputs"]
     temporary: true
@@ -248,7 +262,7 @@ exemptions:
     reason: >-
       Legacy executor regression matrix. Repository-state truth-boundary cases
       were added without mixing production refactoring into the security fix.
-    threshold_override: 2237
+    threshold_override: 2250
     function_threshold_override: 60
     temporary: true
     review_date: "2026-Q3"

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 from . import reddog_fusion_progress_receipt as receipt
+from .reddog_provider_call_evidence import validate_provider_call_evidence
 
 
 _CALL_STATUSES = frozenset({"COMPLETED", "FAILED"})
@@ -24,7 +25,8 @@ _CALL_KEYS = frozenset({
 _RECEIPT_KEYS = frozenset({
     "schema_version", "run_id", "events", "openrouter_calls", "event_count", "openrouter_call_count",
     "events_digest", "openrouter_calls_digest", "contains_prompt_or_response_content",
-    "contains_reasoning_content", "receipt_id",
+    "contains_reasoning_content", "provider_call_evidence", "provider_call_evidence_count",
+    "provider_call_evidence_digest", "receipt_id",
 })
 _REQUIRED_START = {
     "lead_done": "lead_start", "synthesis_done": "synthesis_start", "single_done": "single_start",
@@ -264,6 +266,24 @@ def validate_fusion_progress_receipt(value: Any) -> tuple[bool, tuple[str, ...]]
         _validate_calls(calls, body.get("run_id"), reasons)
     if isinstance(events, list) and isinstance(calls, list):
         _validate_event_call_correlation(events, calls, reasons)
+    provider_evidence = body.get("provider_call_evidence")
+    if not isinstance(provider_evidence, list) or len(provider_evidence) > receipt.MAX_CALLS:
+        reasons.append("provider_call_evidence_invalid")
+    else:
+        if body.get("provider_call_evidence_count") != len(provider_evidence):
+            reasons.append("provider_call_evidence_count_mismatch")
+        if body.get("provider_call_evidence_digest") != receipt._digest(
+            "reddog_provider_call_evidence", provider_evidence
+        ):
+            reasons.append("provider_call_evidence_digest_mismatch")
+        for item in provider_evidence:
+            try:
+                evidence = validate_provider_call_evidence(item)
+            except (TypeError, ValueError):
+                reasons.append("provider_call_evidence_receipt_invalid")
+                continue
+            if evidence.run_id is not None and evidence.run_id != run_id:
+                reasons.append("provider_call_evidence_binding_invalid")
     if value.get("receipt_id") != receipt._digest("reddog_fusion_progress_receipt", body):
         reasons.append("progress_receipt_id_mismatch")
     if body.get("contains_prompt_or_response_content") is not False:

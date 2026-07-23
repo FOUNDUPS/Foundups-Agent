@@ -31,6 +31,9 @@ from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_
 )
 import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
 import modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt as wsp15_allocation
+from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    InMemoryProviderCallEvidenceStore,
+)
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
     AUTHORITATIVE_WORK_STATE_REFRESH_SLICE,
     READONLY_AUDIT_LANE_ANALYZER_SLICE,
@@ -1896,7 +1899,9 @@ def test_production_runner_uses_fusion_synthesis_excerpt_for_json(tmp_path: Path
         task_context=task_context,
         repo_root=root,
         task_id="task-1",
-        model_runner=FoundupsFusionRepoAuditModelRunner(),
+        model_runner=FoundupsFusionRepoAuditModelRunner(
+            provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+        ),
         holoindex_adapter=_FakeQueryAdapter(),
         codeindex_adapter=_FakeQueryAdapter(),
     )
@@ -1934,12 +1939,15 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
         expected_surface=RUNTIME_SURFACE_READONLY_AUDIT,
     )
     assert topology_reasons == []
-    result = FoundupsFusionRepoAuditModelRunner().run_repo_code_audit(
+    result = FoundupsFusionRepoAuditModelRunner(
+        provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+    ).run_repo_code_audit(
         prompt="Return strict JSON.",
         context="Read-only repository evidence.",
         binding={
             "wsp15_reasoning_tier": "HIGH",
             "wsp15_priority": "P1",
+            "task_id": "task-direct-1",
             "model_selection": topology,
         },
         timeout_seconds=30,

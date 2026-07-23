@@ -1,5 +1,27 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A
+
+**WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
+
+- Added the exact, content-free `reddog_provider_call_evidence.v1` contract,
+  strict validator, domain-separated IDs/digests, bounded usage and served
+  metadata, and locked atomic history store.
+- Governed audit and backend-architect Fusion entry paths now durably write
+  PRECALL intent and armed INDETERMINATE evidence before invocation, then
+  terminalize COMPLETED/FAILED. Missing lineage/store blocks before provider;
+  terminal-store uncertainty blocks promotion and automatic retry.
+- Bound canonical evidence IDs/digests into audit/architect result lineage and
+  allowed `FusionProgressRecorder` to embed the generic receipt without
+  treating its legacy OpenRouter telemetry as parallel truth.
+- Added tamper, content-smuggling, replay, crash, atomic-store, zero-provider
+  precall, terminal-persistence, synthetic served-metadata, and direct
+  in-process cross-surface parity tests. OpenClaw/Hermes wiring and gateway
+  served-identity evidence are explicitly deferred.
+- WSP 62 truth: temporary ceilings now match the touched legacy integration
+  files; the focused contract/store has a bounded temporary 775-line ceiling
+  with extraction tracked in the roadmap.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 62, 71, 97

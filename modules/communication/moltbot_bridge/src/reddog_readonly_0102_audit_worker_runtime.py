@@ -39,6 +39,13 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    ProviderCallEvidenceStore,
+    canonical_digest as provider_evidence_digest,
+    create_precall_evidence,
+    execute_evidenced_provider_call,
+    provider_call_store_from_env,
+)
 from modules.communication.moltbot_bridge.src.reddog_typed_evidence_citation_policy import (
     validate_typed_evidence_citations,
 )
@@ -124,6 +131,7 @@ class RepoAuditModelResult:
     made_network_call: bool
     rejection_reasons: tuple[str, ...] = ()
     route_receipt: Mapping[str, Any] = field(default_factory=dict)
+    provider_call_evidence: Mapping[str, Any] = field(default_factory=dict)
 
 
 class RepoAuditModelRunner(Protocol):
@@ -282,6 +290,7 @@ class FoundupsFusionRepoAuditModelRunner:
     panel_models: tuple[str, ...] = ()
     max_tokens: int = 1800
     temperature: float = 0.0
+    provider_call_evidence_store: ProviderCallEvidenceStore | None = None
 
     def run_repo_code_audit(
         self,
@@ -352,6 +361,41 @@ class FoundupsFusionRepoAuditModelRunner:
         user_payload = gate.redacted_prompt
         if gate.redacted_context:
             user_payload = gate.redacted_prompt + "\n\n" + gate.redacted_context
+        store = self.provider_call_evidence_store or provider_call_store_from_env()
+        if store is None:
+            return _model_reject("provider_call_evidence_store_unavailable")
+        try:
+            precall = create_precall_evidence(
+                surface=RUNTIME_SURFACE_READONLY_AUDIT,
+                task_id=_optional_binding_text(binding, "task_id"),
+                work_order_id=_optional_binding_text(binding, "work_order_id"),
+                queue_item_id=_optional_binding_text(binding, "queue_item_id"),
+                run_id=_optional_binding_text(binding, "run_id"),
+                cycle_id=_optional_binding_text(binding, "cycle_id"),
+                requested_provider="openrouter",
+                requested_model=lead_model,
+                redacted_input_digest=provider_evidence_digest(
+                    {"prompt_digest": gate.prompt_digest, "context_digest": gate.context_digest},
+                    domain=b"reddog-redacted-input.v1\x00",
+                ),
+                model_runtime_binding_receipt_id=str(
+                    model_topology["model_runtime_binding_receipt_id"]
+                ),
+                model_runtime_binding_digest=str(
+                    model_topology["model_runtime_binding_digest"]
+                ),
+                request_metadata={
+                    "timeout_seconds": int(timeout_seconds),
+                    "max_tokens": int(self.max_tokens),
+                    "temperature_milli": int(self.temperature * 1000),
+                    "panel_models_digest": provider_evidence_digest(
+                        {"panel_models": list(panel_models)},
+                        domain=b"reddog-requested-panel.v1\x00",
+                    ),
+                },
+            )
+        except (TypeError, ValueError):
+            return _model_reject("provider_call_evidence_binding_invalid")
         bridge_meta = {"readonly_repo_audit_binding": dict(binding)}
         if model_topology["model_selection_receipt_id"]:
             bridge_meta["model_selection_receipt_id"] = model_topology["model_selection_receipt_id"]
@@ -372,55 +416,41 @@ class FoundupsFusionRepoAuditModelRunner:
         }
         try:
             _run_foundups_fusion = _load_foundups_fusion_runner()
-            result = _run_foundups_fusion(api_key, user_payload, [], bridge_payload)
+            result, evidence, certain = execute_evidenced_provider_call(
+                store=store,
+                precall=precall,
+                invoke=lambda: _run_foundups_fusion(api_key, user_payload, [], bridge_payload),
+                content_from_result=_fusion_audit_content,
+                metadata_from_result=_provider_call_metadata,
+            )
         except TimeoutError:
+            persisted = _safe_provider_evidence(store, precall.call_id)
             return _model_reject(
                 ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT,
-                route_receipt=_model_route_receipt(
-                    binding=binding,
-                    lead_model=lead_model,
-                    panel_models=panel_models,
-                    timeout_seconds=timeout_seconds,
-                    max_tokens=self.max_tokens,
-                    made_network_call=False,
-                    status=ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT,
-                    started=started,
-                ),
+                provider_call_evidence=persisted,
+                made_network_call=bool(persisted.get("attempted")),
             )
         except Exception:
+            persisted = _safe_provider_evidence(store, precall.call_id)
             return _model_reject(
-                "fusion_bridge_call_failed",
-                route_receipt=_model_route_receipt(
-                    binding=binding,
-                    lead_model=lead_model,
-                    panel_models=panel_models,
-                    timeout_seconds=timeout_seconds,
-                    max_tokens=self.max_tokens,
-                    made_network_call=False,
-                    status="fusion_bridge_call_failed",
-                    started=started,
-                ),
+                "provider_call_evidence_or_fusion_failed",
+                provider_call_evidence=persisted,
+                made_network_call=bool(persisted.get("attempted")),
             )
-        if not isinstance(result, Mapping) or result.get("ok") is not True:
-            reason = (
-                str(result.get("reason") or result.get("error") or "fusion_result_not_ok")
-                if isinstance(result, Mapping)
-                else "fusion_result_not_mapping"
-            )
+        evidence_payload = evidence.to_dict()
+        if not certain:
             return _model_reject(
-                reason,
-                route_receipt=_model_route_receipt(
-                    binding=binding,
-                    lead_model=lead_model,
-                    panel_models=panel_models,
-                    timeout_seconds=timeout_seconds,
-                    max_tokens=self.max_tokens,
-                    made_network_call=True,
-                    status=reason,
-                    started=started,
-                ),
+                "provider_call_indeterminate",
+                provider_call_evidence=evidence_payload,
+                made_network_call=True,
             )
-        content = str(result.get("content") or result.get("text") or "").strip()
+        if evidence.outcome != "COMPLETED" or not isinstance(result, Mapping):
+            return _model_reject(
+                "provider_call_failed",
+                provider_call_evidence=evidence_payload,
+                made_network_call=True,
+            )
+        content = _fusion_audit_content(result) or ""
         review_packet = result.get("review_packet") if isinstance(result.get("review_packet"), Mapping) else {}
         synthesis_excerpt = str(review_packet.get("synthesis_excerpt") or "").strip()
         if synthesis_excerpt:
@@ -447,6 +477,7 @@ class FoundupsFusionRepoAuditModelRunner:
                 status="MODEL_OK",
                 started=started,
             ),
+            provider_call_evidence=evidence_payload,
         )
 
 
@@ -1845,6 +1876,13 @@ def _build_model_report(
         "model_result_digest": model_result.model_result_digest,
         "model_route_receipt": route_receipt,
         "model_route_receipt_id": route_receipt.get("receipt_id"),
+        "provider_call_id": model_result.provider_call_evidence.get("call_id"),
+        "provider_call_receipt_id": model_result.provider_call_evidence.get("receipt_id"),
+        "provider_call_evidence_digest": (
+            provider_evidence_digest(model_result.provider_call_evidence)
+            if model_result.provider_call_evidence
+            else None
+        ),
         "holoindex_query_receipt": dict(holo_receipt),
         "codeindex_query_receipt": dict(code_receipt),
         "direct_read_evidence_refs": list(evidence_refs),
@@ -2074,7 +2112,13 @@ def _normalized_model_route_receipt(
     return {**payload, "receipt_id": "sha256:" + _digest(payload)}
 
 
-def _model_reject(reason: str, *, route_receipt: Mapping[str, Any] | None = None) -> RepoAuditModelResult:
+def _model_reject(
+    reason: str,
+    *,
+    route_receipt: Mapping[str, Any] | None = None,
+    provider_call_evidence: Mapping[str, Any] | None = None,
+    made_network_call: bool = False,
+) -> RepoAuditModelResult:
     normalized = str(reason or ReadOnlyAuditTaskRejectReason.MODEL_FAILURE)
     return RepoAuditModelResult(
         ok=False,
@@ -2082,10 +2126,43 @@ def _model_reject(reason: str, *, route_receipt: Mapping[str, Any] | None = None
         content="",
         model_receipt_id=None,
         model_result_digest="sha256:" + _digest({"ok": False, "reason": normalized}),
-        made_network_call=False,
+        made_network_call=made_network_call,
         rejection_reasons=(normalized,),
         route_receipt=dict(route_receipt or {}),
+        provider_call_evidence=dict(provider_call_evidence or {}),
     )
+
+
+def _optional_binding_text(binding: Mapping[str, Any], key: str) -> str | None:
+    value = str(binding.get(key) or "").strip()
+    return value or None
+
+
+def _provider_call_metadata(result: Any) -> Mapping[str, Any] | None:
+    value = result.get("provider_call_metadata") if isinstance(result, Mapping) else None
+    return value if isinstance(value, Mapping) else None
+
+
+def _fusion_audit_content(result: Any) -> str | None:
+    if not isinstance(result, Mapping):
+        return None
+    content = str(result.get("content") or result.get("text") or "").strip()
+    packet = result.get("review_packet") if isinstance(result.get("review_packet"), Mapping) else {}
+    excerpt = str(packet.get("synthesis_excerpt") or "").strip()
+    if excerpt:
+        return excerpt
+    synthesis = packet.get("synthesis") if isinstance(packet.get("synthesis"), Mapping) else {}
+    return content or str(synthesis.get("content") or synthesis.get("text") or "").strip()
+
+
+def _safe_provider_evidence(
+    store: ProviderCallEvidenceStore, call_id: str
+) -> dict[str, Any]:
+    try:
+        receipt = store.load(call_id)
+    except Exception:
+        return {}
+    return receipt.to_dict() if receipt is not None else {}
 
 
 __all__ = [

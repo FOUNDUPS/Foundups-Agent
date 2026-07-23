@@ -18,7 +18,7 @@ import hashlib
 import importlib.util
 import json
 import os
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
@@ -37,6 +37,13 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     validate_reddog_wsp15_allocation_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    ProviderCallEvidenceStore,
+    canonical_digest as provider_evidence_digest,
+    create_precall_evidence,
+    execute_evidenced_provider_call,
+    provider_call_store_from_env,
 )
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     SelectionDecision,
@@ -107,6 +114,7 @@ class ArchitectModelResult:
     review_packet: Mapping[str, Any]
     made_network_call: bool
     rejection_reasons: tuple[str, ...] = ()
+    provider_call_evidence: Mapping[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -139,6 +147,7 @@ class FoundupsFusionArchitectModelRunner:
     panel_models: tuple[str, ...] = ()
     max_tokens: int = 1200
     temperature: float = 0.0
+    provider_call_evidence_store: ProviderCallEvidenceStore | None = None
 
     def run_architect_determination(
         self,
@@ -178,6 +187,41 @@ class FoundupsFusionArchitectModelRunner:
         redacted_user = gate.redacted_prompt
         if gate.redacted_context:
             redacted_user = gate.redacted_prompt + "\n\n" + gate.redacted_context
+        store = self.provider_call_evidence_store or provider_call_store_from_env()
+        if store is None:
+            return _model_result_reject("provider_call_evidence_store_unavailable")
+        try:
+            precall = create_precall_evidence(
+                surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+                task_id=_optional_binding_text(binding, "task_id"),
+                work_order_id=_optional_binding_text(binding, "work_order_id"),
+                queue_item_id=_optional_binding_text(binding, "queue_item_id"),
+                run_id=_optional_binding_text(binding, "run_id"),
+                cycle_id=_optional_binding_text(binding, "cycle_id"),
+                requested_provider="openrouter",
+                requested_model=str(model_topology["lead_model"]),
+                redacted_input_digest=provider_evidence_digest(
+                    {"prompt_digest": gate.prompt_digest, "context_digest": gate.context_digest},
+                    domain=b"reddog-redacted-input.v1\x00",
+                ),
+                model_runtime_binding_receipt_id=str(
+                    model_topology["model_runtime_binding_receipt_id"]
+                ),
+                model_runtime_binding_digest=str(
+                    model_topology["model_runtime_binding_digest"]
+                ),
+                request_metadata={
+                    "timeout_seconds": int(timeout_seconds),
+                    "max_tokens": int(self.max_tokens),
+                    "temperature_milli": int(self.temperature * 1000),
+                    "panel_models_digest": provider_evidence_digest(
+                        {"panel_models": list(model_topology["panel_models"])},
+                        domain=b"reddog-requested-panel.v1\x00",
+                    ),
+                },
+            )
+        except (TypeError, ValueError):
+            return _model_result_reject("provider_call_evidence_binding_invalid")
         payload = {
             "mode": "foundups_fusion",
             "lead_model": model_topology["lead_model"],
@@ -193,14 +237,41 @@ class FoundupsFusionArchitectModelRunner:
             },
         }
         try:
-            result = run_foundups_fusion(api_key, redacted_user, [], payload)
+            result, evidence, certain = execute_evidenced_provider_call(
+                store=store,
+                precall=precall,
+                invoke=lambda: run_foundups_fusion(api_key, redacted_user, [], payload),
+                content_from_result=_fusion_architect_content,
+                metadata_from_result=_provider_call_metadata,
+            )
         except TimeoutError:
-            return _model_result_reject(ArchitectDeterminationReason.MODEL_TIMEOUT)
+            persisted = _safe_provider_evidence(store, precall.call_id)
+            return _model_result_reject(
+                ArchitectDeterminationReason.MODEL_TIMEOUT,
+                provider_call_evidence=persisted,
+                made_network_call=bool(persisted.get("attempted")),
+            )
         except Exception:
-            return _model_result_reject("fusion_bridge_call_failed")
-        if not isinstance(result, Mapping) or result.get("ok") is not True:
-            return _model_result_reject(str(result.get("reason") if isinstance(result, Mapping) else "model_failed"))
-        content = str(result.get("content") or "")
+            persisted = _safe_provider_evidence(store, precall.call_id)
+            return _model_result_reject(
+                "provider_call_evidence_or_fusion_failed",
+                provider_call_evidence=persisted,
+                made_network_call=bool(persisted.get("attempted")),
+            )
+        evidence_payload = evidence.to_dict()
+        if not certain:
+            return _model_result_reject(
+                "provider_call_indeterminate",
+                provider_call_evidence=evidence_payload,
+                made_network_call=True,
+            )
+        if evidence.outcome != "COMPLETED" or not isinstance(result, Mapping):
+            return _model_result_reject(
+                "provider_call_failed",
+                provider_call_evidence=evidence_payload,
+                made_network_call=True,
+            )
+        content = _fusion_architect_content(result) or ""
         review_packet = result.get("review_packet") if isinstance(result.get("review_packet"), Mapping) else {}
         model_receipt_id = str(review_packet.get("receipt_id") or "").strip() or None
         return ArchitectModelResult(
@@ -212,6 +283,7 @@ class FoundupsFusionArchitectModelRunner:
             review_packet=dict(review_packet),
             made_network_call=True,
             rejection_reasons=(),
+            provider_call_evidence=evidence_payload,
         )
 
 
@@ -262,6 +334,9 @@ class ArchitectDeterminationReceipt:
     model_selection_digest: Optional[str]
     model_runtime_binding_receipt_id: Optional[str]
     model_runtime_binding_digest: Optional[str]
+    provider_call_id: Optional[str]
+    provider_call_receipt_id: Optional[str]
+    provider_call_evidence_digest: Optional[str]
     fusion_quorum_passed: bool
     wsp15_allocation_receipt_id: Optional[str]
     wsp15_allocation_digest: Optional[str]
@@ -628,6 +703,7 @@ def run_reddog_backend_architect_determination_runtime(
         )
         return _result(receipt=receipt, persist_result=_persist_rejected(receipt))
     binding = fusion_gate.determination_binding.to_dict() if fusion_gate.determination_binding else {}
+    binding = {**binding, "cycle_id": cycle_id}
     if model_selection:
         binding = {**binding, "model_selection": dict(model_selection)}
     try:
@@ -973,6 +1049,7 @@ def _runtime_model_topology(
         "panel_models": tuple(item for item in panel if item),
         "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
         "model_runtime_binding_receipt_id": str(selection.get("model_runtime_binding_receipt_id") or ""),
+        "model_runtime_binding_digest": str(selection.get("model_runtime_binding_digest") or ""),
     }
 
 
@@ -1181,6 +1258,17 @@ def _receipt(
         "model_selection_digest": model_selection_digest,
         "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
         "model_runtime_binding_digest": model_runtime_binding_digest,
+        "provider_call_id": (
+            model_result.provider_call_evidence.get("call_id") if model_result else None
+        ),
+        "provider_call_receipt_id": (
+            model_result.provider_call_evidence.get("receipt_id") if model_result else None
+        ),
+        "provider_call_evidence_digest": (
+            provider_evidence_digest(model_result.provider_call_evidence)
+            if model_result and model_result.provider_call_evidence
+            else None
+        ),
         "fusion_quorum_passed": _fusion_quorum_passed(model_result.review_packet) if model_result else False,
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
@@ -1211,6 +1299,17 @@ def _receipt(
         model_selection_digest=model_selection_digest,
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
         model_runtime_binding_digest=model_runtime_binding_digest,
+        provider_call_id=(
+            model_result.provider_call_evidence.get("call_id") if model_result else None
+        ),
+        provider_call_receipt_id=(
+            model_result.provider_call_evidence.get("receipt_id") if model_result else None
+        ),
+        provider_call_evidence_digest=(
+            provider_evidence_digest(model_result.provider_call_evidence)
+            if model_result and model_result.provider_call_evidence
+            else None
+        ),
         fusion_quorum_passed=_fusion_quorum_passed(model_result.review_packet) if model_result else False,
         wsp15_allocation_receipt_id=allocation_receipt_id,
         wsp15_allocation_digest=allocation_digest,
@@ -1290,7 +1389,12 @@ def _result(
     )
 
 
-def _model_result_reject(reason: str) -> ArchitectModelResult:
+def _model_result_reject(
+    reason: str,
+    *,
+    provider_call_evidence: Mapping[str, Any] | None = None,
+    made_network_call: bool = False,
+) -> ArchitectModelResult:
     normalized = str(reason or ArchitectDeterminationReason.MODEL_FAILURE)
     return ArchitectModelResult(
         ok=False,
@@ -1299,9 +1403,34 @@ def _model_result_reject(reason: str) -> ArchitectModelResult:
         model_receipt_id=None,
         model_result_digest=_digest({"ok": False, "reason": normalized}),
         review_packet={},
-        made_network_call=False,
+        made_network_call=made_network_call,
         rejection_reasons=(normalized,),
+        provider_call_evidence=dict(provider_call_evidence or {}),
     )
+
+
+def _optional_binding_text(binding: Mapping[str, Any], key: str) -> str | None:
+    value = str(binding.get(key) or "").strip()
+    return value or None
+
+
+def _provider_call_metadata(result: Any) -> Mapping[str, Any] | None:
+    value = result.get("provider_call_metadata") if isinstance(result, Mapping) else None
+    return value if isinstance(value, Mapping) else None
+
+
+def _fusion_architect_content(result: Any) -> str | None:
+    return str(result.get("content") or "") if isinstance(result, Mapping) else None
+
+
+def _safe_provider_evidence(
+    store: ProviderCallEvidenceStore, call_id: str
+) -> dict[str, Any]:
+    try:
+        receipt = store.load(call_id)
+    except Exception:
+        return {}
+    return receipt.to_dict() if receipt is not None else {}
 
 
 def _load_foundups_fusion_runner():

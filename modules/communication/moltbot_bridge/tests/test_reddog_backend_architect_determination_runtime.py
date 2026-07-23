@@ -40,6 +40,9 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    InMemoryProviderCallEvidenceStore,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _model_selection,
 )
@@ -679,7 +682,9 @@ def test_production_runner_is_explicit_mode_only_without_network(monkeypatch) ->
     monkeypatch.delenv("REDDOG_BACKEND_ARCHITECT_RUNTIME_MODE", raising=False)
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
-    result = FoundupsFusionArchitectModelRunner().run_architect_determination(
+    result = FoundupsFusionArchitectModelRunner(
+        provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+    ).run_architect_determination(
         prompt="Return JSON.",
         context="{}",
         binding={"binding": "test"},
@@ -728,10 +733,12 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
         expected_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
     )
     assert topology_reasons == []
-    result = FoundupsFusionArchitectModelRunner().run_architect_determination(
+    result = FoundupsFusionArchitectModelRunner(
+        provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+    ).run_architect_determination(
         prompt="Return JSON.",
         context="public evidence",
-            binding={"model_selection": topology},
+            binding={"cycle_id": "cycle-direct-1", "model_selection": topology},
         timeout_seconds=1,
     )
 

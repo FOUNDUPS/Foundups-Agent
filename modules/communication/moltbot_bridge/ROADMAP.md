@@ -1,5 +1,17 @@
 # moltbot_bridge Roadmap
 
+## RedDog provider-call evidence follow-ups
+
+- Phase 2a covers only the governed repo-audit and backend-architect in-process
+  FoundUps Fusion entry paths with one durable, generic content-free receipt.
+- Next: make the Fusion/OpenRouter gateway return authoritative served
+  provider/model and normalized numeric usage evidence. Until then those
+  fields remain null; configuration is never evidence of service.
+- Next: wire the same canonical receipt through OpenClaw/Hermes provider
+  boundaries after their independent lineage and retry contracts are defined.
+- Next: extract the atomic store from the focused contract module after
+  cross-surface parity is stable, retiring the temporary WSP 62 ceiling.
+
 ## RedDog execution-valve readiness
 
 - Phase 1 safety wiring complete locally: token-free canonical supplier,

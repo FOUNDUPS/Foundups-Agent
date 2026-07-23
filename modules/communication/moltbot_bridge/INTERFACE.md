@@ -2,6 +2,29 @@
 
 ## Public API
 
+### Generic provider-call evidence
+
+`create_precall_evidence()`, `arm_provider_call()`, and
+`terminalize_provider_call()` define the exact
+`reddog_provider_call_evidence.v1` state machine. `call_id` is stable for one
+request envelope; each state has a different canonical `receipt_id`.
+`AtomicJsonProviderCallEvidenceStore` retains every validated transition under
+one operation lock and commits with fsync plus atomic replace. Exact replay is
+idempotent; divergent replay and non-monotonic transitions are rejected.
+
+Production audit/architect runners require an injected store or the explicit
+outside-repository `REDDOG_PROVIDER_CALL_EVIDENCE_STORE_PATH`. They persist
+`BLOCKED_PRECALL` (`attempted=false`), atomically arm `INDETERMINATE`
+(`attempted=true`), invoke the provider only after both writes, then persist
+`COMPLETED` or `FAILED`. A terminal-store failure returns the armed
+`INDETERMINATE` evidence and blocks output promotion. Served provider/model are
+nullable unless the returned `provider_call_metadata` exact schema supplies
+both; requested configuration is never used as served identity.
+
+`FusionProgressRecorder.record_provider_call_evidence()` embeds the canonical
+generic receipt. Its legacy OpenRouter receipt remains compatibility telemetry,
+not a second authoritative provider-call identity.
+
 ### Durable Resident Architect Cycle
 
 `run_reddog_resident_architect_durable_agentdb_cycle()` creates one intent-bound AgentDB cycle and advances it only through revision-checked status transitions. `AgentDbResidentArchitectCycleStore.create_cycle()` is insert-only; `transition_cycle()` requires the exact revision and allowed current status. Stored intent identity and nine process-local read-only self-attestations are immutable at this boundary. These fields are not external proof that effects did not occur. Cancellation checkpoints run between OpenClaw claims and before/following architect determination, so a stale caller cannot overwrite `CANCELLED`.

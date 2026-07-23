@@ -1,5 +1,16 @@
 # WSP Violations Log - moltbot_bridge
 
+## 2026-07-23: WSP 62 Provider Evidence Review - TEMPORARY CEILINGS RECORDED
+
+**Status**: FOLLOW-UP TRACKED
+
+The phase-2a provider-evidence contract is isolated from OpenClaw/Hermes and
+does not add provider logic to root orchestration. Existing legacy audit and
+architect integration/test files grew to establish fail-closed parity; their
+temporary exact ceilings and the focused contract/store ceiling are recorded
+in `wsp_62_exemptions.yaml`. Store extraction and legacy seam decomposition
+remain tracked in `ROADMAP.md`; no permanent exemption was added.
+
 ## 2026-02-07: WSP 95/71 Security Audit - CLEAN
 
 **Auditor**: 0102

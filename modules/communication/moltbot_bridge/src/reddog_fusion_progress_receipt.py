@@ -15,6 +15,11 @@ import threading
 import time
 from typing import Any, Callable, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    ProviderCallEvidence,
+    validate_provider_call_evidence,
+)
+
 
 PROGRESS_SCHEMA = "reddog_fusion_progress_receipt.v1"
 EVENT_SCHEMA = "reddog_fusion_progress_event.v1"
@@ -176,6 +181,7 @@ class FusionProgressRecorder:
         self._lock = threading.Lock()
         self._events: list[dict[str, Any]] = []
         self._calls: dict[str, dict[str, Any]] = {}
+        self._provider_call_evidence: dict[str, dict[str, Any]] = {}
         self._call_sequence = 0
 
     def emit(self, stage: str, *, role: str = "", model: str = "") -> dict[str, Any] | None:
@@ -271,6 +277,20 @@ class FusionProgressRecorder:
             self._calls[call_id] = receipt
             return dict(receipt)
 
+    def record_provider_call_evidence(
+        self, value: ProviderCallEvidence | Mapping[str, Any]
+    ) -> dict[str, Any]:
+        evidence = validate_provider_call_evidence(value)
+        if evidence.run_id is not None and evidence.run_id != self.run_id:
+            raise ValueError("provider_call_run_id_mismatch")
+        with self._lock:
+            existing = self._provider_call_evidence.get(evidence.call_id)
+            if existing is not None and existing["receipt_id"] != evidence.receipt_id:
+                raise ValueError("provider_call_evidence_divergent")
+            payload = evidence.to_dict()
+            self._provider_call_evidence[evidence.call_id] = payload
+            return dict(payload)
+
     def receipt(self) -> dict[str, Any]:
         with self._lock:
             events = [dict(item) for item in self._events]
@@ -278,6 +298,12 @@ class FusionProgressRecorder:
                 dict(item)
                 for item in sorted(self._calls.values(), key=lambda value: int(value["sequence"]))
                 if "receipt_id" in item
+            ]
+            provider_evidence = [
+                dict(item) for item in sorted(
+                    self._provider_call_evidence.values(),
+                    key=lambda value: str(value["call_id"]),
+                )
             ]
         body = {
             "schema_version": PROGRESS_SCHEMA,
@@ -288,6 +314,11 @@ class FusionProgressRecorder:
             "openrouter_call_count": len(calls),
             "events_digest": _digest("reddog_fusion_progress_events", events),
             "openrouter_calls_digest": _digest("reddog_openrouter_calls", calls),
+            "provider_call_evidence": provider_evidence,
+            "provider_call_evidence_count": len(provider_evidence),
+            "provider_call_evidence_digest": _digest(
+                "reddog_provider_call_evidence", provider_evidence
+            ),
             "contains_prompt_or_response_content": False,
             "contains_reasoning_content": False,
         }
