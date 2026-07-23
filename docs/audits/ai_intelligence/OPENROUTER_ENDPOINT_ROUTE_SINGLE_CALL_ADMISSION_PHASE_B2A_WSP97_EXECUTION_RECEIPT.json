@@ -1,0 +1,95 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "a3c13f05299bf745a1fc01650e1ae91f0db2f820"
+  },
+  "execution_id": "OPENROUTER_ENDPOINT_ROUTE_SINGLE_CALL_ADMISSION_PHASE_B2A",
+  "execution_plane": "runtime",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "HoloIndex-first offline retrieval exited 0 in lexical-only mode with unrelated hits; semantic retrieval remained impaired.",
+      "Direct rg/file-read fallback inspected endpoint schemas, existing candidate/control evidence, module journals, protected-surface gates, and test fixtures.",
+      "docs/audits/ai_intelligence/OPENROUTER_ENDPOINT_ROUTE_SINGLE_CALL_ADMISSION_PHASE_B2A_WSP97_ASSUMPTION_AUDIT_20260724.md"
+    ],
+    "research": [
+      "Compared OpenRouter endpoint-list schema, exact provider routing controls, chat-completion route, metadata-header limits, nullable fields, price dimensions, and data-policy evidence gaps.",
+      "Pinned the current official EndpointStatus enum to 0, -1, -2, -3, -5, -10 and rejected forward-unknown values.",
+      "Rejected all unknown pricing keys, including zero values, so additive cost-schema drift cannot be dropped or inferred free.",
+      "Bound the exact emitted-control set max_tokens plus reasoning in both trusted policy normalization and independent admission derivation.",
+      "Rejected explicit reasoning.supports_max_tokens=false while allowing omission only when exact endpoint and model parameter evidence supports max_tokens.",
+      "Preserved request-price presence and bound optional-request absence-as-zero to a named, content-digested PublicPricing schema policy.",
+      "Integration migration preserved prior action evidence, rebased the one focused commit onto verified origin/main a3c13f05299bf745a1fc01650e1ae91f0db2f820, and adopted the v1.1 repository-bound receipt without claiming a research rerun.",
+      "Corrected the Chat Completions control overlay from internal max_completion_tokens vocabulary to exact max_tokens, reasoning, and provider keys; endpoint fixture bytes were unaffected.",
+      "Separated route availability, trusted job certification, output-training permission, and live runtime authority."
+    ],
+    "micro_pass": [
+      "Tests-first RED: collection failed because the admission module did not exist.",
+      "Amendment RED: 8 failed, 20 passed for unknown pricing and status-policy gaps.",
+      "Emitted-control/request-price amendment RED: 9 failed, 25 passed.",
+      "Integration wire-key RED: 2 failed, 34 passed.",
+      "Post-rebase offline endpoint/admission matrix: 65 passed.",
+      "Post-rebase combined protected catalog/execution-control matrix: 134 passed."
+    ],
+    "macro_pass": [
+      "Changed Python scope passed Ruff.",
+      "All new production files are below 500 lines and every function is at most 50 lines.",
+      "Post-rebase full AI Gateway matrix: 712 passed, 2 platform-capability skips.",
+      "Focused Ruff, WSP 62 file/function gates, JSON/diff checks, and WSP 97 v1.1 CLI validation passed."
+    ],
+    "hard_think": [
+      "docs/audits/ai_intelligence/OPENROUTER_ENDPOINT_ROUTE_SINGLE_CALL_ADMISSION_PHASE_B2A_WSP97_ASSUMPTION_AUDIT_20260724.md#4-failure-modes-and-mitigations",
+      "Kept authenticated observation, authoritative usage, atomic consumption, transport buffering, and runtime-directory identity outside the pure eligibility boundary."
+    ],
+    "dialectic_sweep": [
+      "docs/audits/ai_intelligence/OPENROUTER_ENDPOINT_ROUTE_SINGLE_CALL_ADMISSION_PHASE_B2A_WSP97_ASSUMPTION_AUDIT_20260724.md#5-alternatives-considered",
+      "Rejected model-list route inference, in-builder network discovery, fallback routing, and inferred ZDR/training authority."
+    ],
+    "first_principles": [
+      "One exact model, one unambiguous endpoint tag, one trusted policy, one content-bound intent, exact Decimal bounds, and no runtime authority form the minimum truthful eligibility receipt.",
+      "A canonical request's mandatory controls cannot be weakened by caller-selected policy subsets.",
+      "Internal admission and budget names cannot substitute for exact provider wire keys.",
+      "Optional request-price absence is a preserved fact; zero is a named local schema-policy interpretation, not provider usage evidence.",
+      "Provider availability cannot imply job certification or output-training permission."
+    ],
+    "execute": [
+      "modules/ai_intelligence/ai_gateway/src/model_openrouter_endpoint_payload_projection.py",
+      "modules/ai_intelligence/ai_gateway/src/model_openrouter_endpoint_route_evidence.py",
+      "modules/ai_intelligence/ai_gateway/src/model_autoresearch_single_call_contracts.py",
+      "modules/ai_intelligence/ai_gateway/src/model_autoresearch_single_call_admission.py",
+      "modules/ai_intelligence/ai_gateway/tests/test_model_openrouter_endpoint_route_evidence.py",
+      "modules/ai_intelligence/ai_gateway/tests/test_model_openrouter_endpoint_contract_drift.py",
+      "modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_single_call_admission.py"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "Isolated worktree and branch: codex/openrouter-endpoint-route-admission-phase-b2a-20260724.",
+    "Rebased the one focused commit onto verified origin/main a3c13f05299bf745a1fc01650e1ae91f0db2f820 after WSP_97 PR #1334.",
+    "No framework WSP or knowledge-backup file changed; no WSP_81 backup action was applicable.",
+    "No provider, model, network, credential, gateway, configured-runner, caller, startup, promotion, or runtime-binding call was made.",
+    "CanonicalSingleCallAdmission has runtime_authority=eligibility_only and explicit HALTED reasons.",
+    "endpoint_status_policy_accepted proves only exact trusted policy membership; authoritative endpoint availability remains HALTED.",
+    "request_price_present and the named PublicPricing schema-policy digest remain eligibility evidence only, not billing or usage authority.",
+    "modules/ai_intelligence/ai_gateway/README.md",
+    "modules/ai_intelligence/ai_gateway/INTERFACE.md",
+    "modules/ai_intelligence/ai_gateway/ROADMAP.md",
+    "modules/ai_intelligence/ai_gateway/ModLog.md",
+    "modules/ai_intelligence/ai_gateway/tests/TestModLog.md"
+  ]
+}

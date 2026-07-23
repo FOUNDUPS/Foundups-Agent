@@ -68,9 +68,18 @@
   claim, with canonical invocation mapping and a six-key evidence-only adapter.
 - [x] Preserve bounded optional OpenRouter reasoning/top-provider assertions and
   derive exact-model, lineage-bound provider-asserted execution-control evidence.
-- [ ] Keep execution halted until canonical route/endpoint admission, sampling
-  defaults, authoritative usage, and bounded transport response evidence are
-  supplied independently; provider assertions do not satisfy those gates.
+- [x] Add pure, externally supplied endpoint-route evidence and task-specific
+  single-call eligibility admission with exact route, sampling, token, cost,
+  response-byte, lineage, closed pricing schema, and evaluation-only status
+  policy controls. The admission independently derives its immutable emitted
+  parameter set and preserves optional request-price absence under a named,
+  digested PublicPricing schema policy. Chat Completions wire controls use exact
+  `max_tokens`, `reasoning`, and `provider` keys while the internal completion
+  budget remains `max_completion_tokens`.
+- [ ] Keep execution halted until authenticated endpoint supply, atomic
+  admission consumption, authoritative availability and usage, caller wiring,
+  pre-buffer response-byte enforcement, and runtime-directory identity are
+  supplied independently; eligibility receipts do not grant live authority.
 - [ ] General provider-discovery cadence and scheduler expansion remains out of
   scope; the POC does not grant discovery any startup, selection, promotion,
   registry, or runtime authority.

@@ -1,5 +1,56 @@
 # AI Gateway Module Change Log
 
+## [2026-07-24] - OpenRouter Endpoint Route Single-Call Admission Phase B2A
+
+**Who/Type/Slice:** 0102 RedDog Architect isolated worker / Defensive
+Eligibility / `OPENROUTER_ENDPOINT_ROUTE_SINGLE_CALL_ADMISSION_PHASE_B2A`
+
+**What:** Added strict bounded projection of externally supplied OpenRouter
+endpoint payloads, immutable byte/receipt/route lineage, trusted one-call policy
+and intent contracts, and a pure canonical admission receipt binding the exact
+POST route, provider order, no-fallback policy, supported controls, token/
+context/response limits, Decimal cost reservation, and trusted exact `(0,)`
+endpoint-status policy. Unknown additive price keys now fail closed even at
+zero; only the current official endpoint-status enum crosses projection. The
+trusted policy and independent admission derivation both require the exact
+emitted-control set `("max_tokens", "reasoning")`; explicit model
+`supports_max_tokens=false` contradicts the emitted cap. Request-price presence
+is preserved, and absence becomes zero only under a named, digested OpenRouter
+PublicPricing schema-policy proof.
+
+**Integration migration:** Rebased the single focused slice onto
+`origin/main` `a3c13f05299bf745a1fc01650e1ae91f0db2f820` after WSP_97 PR #1334.
+Migrated the execution receipt to `wsp97_execution_receipt.v1.1` with exact
+repository context. Corrected the Chat Completions wire overlay to the exact
+keys `max_tokens`, `reasoning`, and `provider`; `max_completion_tokens` remains
+only the internal admission/budget field. Deterministic admission IDs now
+rederive from the corrected control object.
+
+**Truth boundary:** `runtime_authority=eligibility_only`. No metadata-fetch,
+network, model, provider, credential, gateway, configured-runner, caller, or
+startup call was added. Availability, job certification, and output-training
+permission stay separate; the POC is evaluation-only and fails closed for
+requested ZDR or training authority. Live execution remains explicitly halted
+for authenticated endpoint supply, atomic consumption, authoritative
+availability and usage, caller wiring, pre-buffer response enforcement, and
+runtime-directory identity.
+`endpoint_status_policy_accepted` proves policy membership, not availability.
+The request-price schema proof is not authoritative billing/usage evidence.
+
+**WSP_15 MPS:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 = 19
+(P0 defensive trust boundary).
+
+**Validation:** Initial amendment RED: `8 failed, 20 passed`; emitted-control/
+request-price amendment RED: `9 failed, 25 passed`; integration wire-key RED:
+`2 failed, 34 passed`. Post-rebase endpoint/admission: `65 passed`; combined
+protected catalog/execution-control: `134 passed`; full AI Gateway: `712 passed,
+2 skipped`. Ruff, WSP_62, JSON, diff, and WSP_97 v1.1 receipt validation passed.
+No provider, model, network, or credential call occurred.
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
+---
+
 ## [2026-07-24] - OpenRouter Model Execution-Control Evidence Phase B1
 
 **Who/Type/Slice:** 0102 RedDog Architect isolated worker / Provider Evidence /

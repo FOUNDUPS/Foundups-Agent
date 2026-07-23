@@ -1,5 +1,50 @@
 # AI Gateway TestModLog
 
+## 2026-07-24 - OpenRouter endpoint-route single-call admission phase B2A
+
+Scope: offline adversarial verification of externally supplied endpoint
+observation, exact route evidence, and one-call evaluation eligibility.
+
+- Binds exact raw bytes, request/response digests, payload/record IDs,
+  observation freshness, model identity, and one unambiguous endpoint tag.
+- Preserves nullable caps/status/quantization separately from omission and
+  rejects malformed recognized values, duplicate keys, non-finite JSON,
+  duplicate tags, prefix collisions, and oversized payloads.
+- Rejects every unknown pricing key, including zero-valued forward additions;
+  additive cost-schema drift is never dropped or inferred free.
+- Restricts status projection to official values `0, -1, -2, -3, -5, -10`,
+  retains known negative evidence, and requires a present value accepted by the
+  trusted exact `(0,)` job policy.
+- Rejects unknown caps, unsupported controls, mismatched identities/intents,
+  stale/future evidence, requested ZDR, output training, unsafe cost
+  dimensions, price-cap violations, and context/token overflow.
+- Proves exact Decimal reconciliation and reservation, exact immutable POST
+  route controls, response-byte binding, rehydration, and explicit HALTED
+  reasons with `runtime_authority=eligibility_only`.
+- Rejects reasoning-only and max-tokens-only weakened policies even when both
+  evidence sources match the weakened subset. The policy and admission bind the
+  exact emitted-control set independently.
+- Proves the Chat Completions wire-control mapping has exactly `max_tokens`,
+  `reasoning`, and `provider`, excludes internal `max_completion_tokens`, and
+  retains the same value in the separate admission/budget field.
+- Rejects explicit `supports_max_tokens=false`; proves omitted/unknown and true
+  claims can proceed only with exact endpoint/model `max_tokens` evidence.
+- Preserves present versus absent request pricing, binds the named PublicPricing
+  optional-request absence-as-zero policy and digest, and rejects recomputed-ID
+  tampering of presence, proof, or digest.
+- Binds `endpoint_status_policy_accepted` through policy/admission IDs and
+  rehydration while proving that omitted, negative, forward-unknown, and
+  policy-tampered status evidence fails closed. The proof is not availability.
+- Enrolls all four production modules in protected-authority import, network
+  purity, source-line, and WSP_62 AST function guards.
+
+Initial amendment RED: `8 failed, 20 passed`; emitted-control/request-price
+amendment RED: `9 failed, 25 passed`; integration wire-key RED: `2 failed, 34
+passed`. Post-rebase focused endpoint/admission: `65 passed`; combined protected
+catalog/execution-control: `134 passed`; full AI Gateway: `712 passed, 2
+skipped`. Ruff and WSP_97 v1.1 validation passed. All fixtures and transports
+were offline; no provider, model, network, or credential call occurred.
+
 ## 2026-07-24 - OpenRouter model execution-control evidence phase B1
 
 Scope: offline adversarial coverage of optional provider-control projection and
