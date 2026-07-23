@@ -27,6 +27,7 @@ NAVIGATION:
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -67,6 +68,7 @@ class TargetBackend(str, Enum):
     """
     Execution backend targets.
 
+    HERMES_SCAFFOLD  : create_foundup dry-run scaffold planner
     HERMES_BUILDER   : Hermes FoundUp builder (build/extract)
     HERMES_VALIDATOR : Hermes validation (validate)
     OPENCLAW_QUEUE   : OpenClaw job queue (queue_foundup_job)
@@ -74,6 +76,7 @@ class TargetBackend(str, Enum):
     NONE             : No routing target (blocked/failed/unsupported)
     """
 
+    HERMES_SCAFFOLD = "hermes_scaffold"
     HERMES_BUILDER = "hermes_builder"
     HERMES_VALIDATOR = "hermes_validator"
     OPENCLAW_QUEUE = "openclaw_queue"
@@ -83,6 +86,7 @@ class TargetBackend(str, Enum):
 
 # Action -> Backend mapping
 _ACTION_BACKEND_MAP: Dict[str, TargetBackend] = {
+    "create_foundup": TargetBackend.HERMES_SCAFFOLD,
     "build_foundup": TargetBackend.HERMES_BUILDER,
     "extract_foundup": TargetBackend.HERMES_BUILDER,
     "validate_foundup": TargetBackend.HERMES_VALIDATOR,
@@ -110,6 +114,7 @@ class RouteReasonCode(str, Enum):
     BLOCKED_MISSING_ACTION = "BLOCKED_MISSING_ACTION"
     BLOCKED_TERMINAL_STATUS = "BLOCKED_TERMINAL_STATUS"
     BLOCKED_POLICY_GATE = "BLOCKED_POLICY_GATE"
+    BLOCKED_INVALID_CREATE_BINDING = "BLOCKED_INVALID_CREATE_BINDING"
 
     # Unsupported
     UNSUPPORTED_ACTION = "UNSUPPORTED_ACTION"
@@ -324,6 +329,7 @@ def detect_envelope_type(envelope: Dict[str, Any]) -> EnvelopeType:
     # Check for canonical actions
     action = envelope.get("requested_action", "")
     if action and action in {
+        "create_foundup",
         "build_foundup",
         "extract_foundup",
         "validate_foundup",
@@ -1051,6 +1057,15 @@ class RouteEnvelope:
     foundup_id: Optional[str] = None
     """Target FoundUp ID from source job (if present)."""
 
+    creation_mode: Optional[str] = None
+    """Typed create_foundup mode binding carried from the source job."""
+
+    genesis_envelope_digest: Optional[str] = None
+    """Typed create_foundup genesis-envelope lineage digest."""
+
+    scaffold_contract_digest: Optional[str] = None
+    """Typed create_foundup scaffold-contract lineage digest."""
+
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for JSON/logging."""
         return {
@@ -1066,12 +1081,49 @@ class RouteEnvelope:
             "routed_at": self.routed_at.isoformat(),
             "source_job_status": self.source_job_status,
             "foundup_id": self.foundup_id,
+            "creation_mode": self.creation_mode,
+            "genesis_envelope_digest": self.genesis_envelope_digest,
+            "scaffold_contract_digest": self.scaffold_contract_digest,
         }
 
 
 # ---------------------------------------------------------------------------
 # Router Implementation
 # ---------------------------------------------------------------------------
+
+_SHA256_LINEAGE_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+
+def _validate_create_foundup_bindings(
+    job: Any,
+    policy_summary: Dict[str, bool],
+) -> Optional[str]:
+    """Validate the fail-closed, dry-run-only create_foundup route contract."""
+    if policy_summary.get("dry_run_mode") is not True:
+        return "create_foundup requires explicit dry_run_mode=True"
+
+    if getattr(job, "creation_mode", None) != "new_scaffold":
+        return "create_foundup requires creation_mode='new_scaffold'"
+
+    for field_name in ("genesis_envelope_digest", "scaffold_contract_digest"):
+        value = getattr(job, field_name, None)
+        if not isinstance(value, str) or _SHA256_LINEAGE_RE.fullmatch(value) is None:
+            return f"create_foundup requires canonical {field_name}"
+
+    foundup_id = getattr(job, "foundup_id", None)
+    if not isinstance(foundup_id, str) or not foundup_id.strip():
+        return "create_foundup requires foundup_id"
+
+    payload = getattr(job, "payload", None)
+    if not isinstance(payload, dict):
+        return "create_foundup requires a payload mapping"
+    genesis_envelope = payload.get("genesis_envelope")
+    if not isinstance(genesis_envelope, dict):
+        return "create_foundup requires payload.genesis_envelope"
+    if genesis_envelope.get("foundup_id") != foundup_id:
+        return "create_foundup foundup_id must match payload.genesis_envelope.foundup_id"
+
+    return None
 
 
 def route_foundup_job(job: Any) -> RouteEnvelope:
@@ -1182,6 +1234,33 @@ def route_foundup_job(job: Any) -> RouteEnvelope:
                 policy_summary=policy_summary,
             )
 
+        # === create_foundup Dry-Run Scaffold Contract ===
+        # This action is intentionally distinct from the generic Hermes builder.
+        # The router admits it only with typed lineage and an explicit dry-run.
+        if requested_action == "create_foundup":
+            create_binding_error = _validate_create_foundup_bindings(
+                job,
+                policy_summary,
+            )
+            if create_binding_error is not None:
+                return _make_blocked_envelope(
+                    job_id=job_id,
+                    tenant_id=tenant_id,
+                    action=requested_action,
+                    reason_code=RouteReasonCode.BLOCKED_INVALID_CREATE_BINDING,
+                    reason_human=create_binding_error,
+                    source_status=status_str,
+                    foundup_id=getattr(job, "foundup_id", None),
+                    policy_summary=policy_summary,
+                    creation_mode=getattr(job, "creation_mode", None),
+                    genesis_envelope_digest=getattr(
+                        job, "genesis_envelope_digest", None
+                    ),
+                    scaffold_contract_digest=getattr(
+                        job, "scaffold_contract_digest", None
+                    ),
+                )
+
         # === Route to Backend ===
         target_backend = _ACTION_BACKEND_MAP.get(requested_action)
 
@@ -1226,6 +1305,11 @@ def route_foundup_job(job: Any) -> RouteEnvelope:
             policy_summary=policy_summary,
             source_job_status=status_str,
             foundup_id=getattr(job, "foundup_id", None),
+            creation_mode=getattr(job, "creation_mode", None),
+            genesis_envelope_digest=getattr(job, "genesis_envelope_digest", None),
+            scaffold_contract_digest=getattr(
+                job, "scaffold_contract_digest", None
+            ),
         )
 
     except Exception as e:
@@ -1250,6 +1334,9 @@ def _make_blocked_envelope(
     source_status: str = "",
     foundup_id: Optional[str] = None,
     policy_summary: Optional[Dict[str, bool]] = None,
+    creation_mode: Optional[str] = None,
+    genesis_envelope_digest: Optional[str] = None,
+    scaffold_contract_digest: Optional[str] = None,
 ) -> RouteEnvelope:
     """Helper to construct blocked/failed envelopes."""
     return RouteEnvelope(
@@ -1263,6 +1350,9 @@ def _make_blocked_envelope(
         policy_summary=policy_summary or {},
         source_job_status=source_status,
         foundup_id=foundup_id,
+        creation_mode=creation_mode,
+        genesis_envelope_digest=genesis_envelope_digest,
+        scaffold_contract_digest=scaffold_contract_digest,
     )
 
 

@@ -25,6 +25,17 @@ This README section is the canonical implementation delta for current WRE code.
 
 ## Architecture
 
+### create_foundup Dry-Run Routing
+
+`FoundUpJob(requested_action="create_foundup")` routes only to
+`TargetBackend.HERMES_SCAFFOLD`. Admission requires explicit
+`dry_run_mode=True`, `creation_mode="new_scaffold"`, canonical genesis and
+scaffold digests, and a matching `payload.genesis_envelope.foundup_id`.
+`FoundUpJobConsumer` dispatches this backend through an injected scaffold
+adapter backed by the existing dry-run planner; it never sends the action to
+the generic Hermes executor and performs no file, registry, FAM, provider, or
+worktree mutation.
+
 ### Core Components (5)
 ```
 wre_core/

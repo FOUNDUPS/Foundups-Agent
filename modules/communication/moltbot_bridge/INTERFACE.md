@@ -45,6 +45,10 @@ generic receipt as an optional all-or-none extension of
 fields remain valid. Legacy OpenRouter data remains compatibility telemetry,
 not a second authoritative provider-call identity.
 
+### FoundUpJob create_foundup Lineage
+
+`FoundUpJob` exposes typed top-level `creation_mode`, `genesis_envelope_digest`, and `scaffold_contract_digest` fields through `create_job()` and `to_dict()` / `from_dict()`. For `create_foundup`, use `creation_mode="new_scaffold"`, explicit `PolicyFlags(dry_run_mode=True)`, canonical SHA-256 digests, and `payload.genesis_envelope`; WRE validates the route and never aliases it to build/extract.
+
 ### Durable Resident Architect Cycle
 
 `run_reddog_resident_architect_durable_agentdb_cycle()` creates one intent-bound AgentDB cycle and advances it only through revision-checked status transitions. `AgentDbResidentArchitectCycleStore.create_cycle()` is insert-only; `transition_cycle()` requires the exact revision and allowed current status. Stored intent identity and nine process-local read-only self-attestations are immutable at this boundary. These fields are not external proof that effects did not occur. Cancellation checkpoints run between OpenClaw claims and before/following architect determination, so a stale caller cannot overwrite `CANCELLED`.

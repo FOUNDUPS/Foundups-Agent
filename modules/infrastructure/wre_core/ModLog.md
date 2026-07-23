@@ -2,6 +2,32 @@
 
 ## Chronological Change Log
 
+### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 34, 50, 62, 97, 108
+**Phase**: Bug Fix
+**Agent**: 0102
+**WSP_15**: Complexity 3 + Importance 5 + Deferability 4 + Impact 4 =
+16 (P0).
+
+#### Changes
+- Added the distinct `HERMES_SCAFFOLD` route for canonical `create_foundup`
+  jobs with fail-closed dry-run, mode, digest, payload, and identity checks.
+- Carried typed creation lineage in `RouteEnvelope`.
+- Added an injected scaffold adapter backed by the existing
+  `create_foundup_dryrun` planner and a dedicated consumer branch that never
+  invokes the generic Hermes executor.
+
+#### Impact
+- Valid create jobs can produce a verified dry-run scaffold plan.
+- No live writer, registry mutation, FAM/provider call, worktree, capability
+  certification, or model-selection authority was added.
+
+#### WSP Compliance
+- Focused contract/router/adapter tests cover success and fail-closed paths.
+- New adapter and test files remain below WSP 62 thresholds; legacy oversized
+  router/consumer files received only bounded routing-seam edits.
+
 ### [2026-07-18] - REDDOG_RUNTIME_ARTIFACT_PATH_DAEMON_REDACTION_PHASE1
 
 - Moved DAEmon self-audit tasks, proposals, escalations, state, and diagnostic

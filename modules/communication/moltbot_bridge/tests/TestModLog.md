@@ -43,6 +43,15 @@
 - Focused provider/architect/audit/WSP62 suite: `117 passed`.
 - Fusion progress receipt suite: `13 passed`.
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
+
+- Added `test_foundup_job_create_lineage.py` with a canonical
+  factory/serialization round-trip test for
+  `creation_mode`, `genesis_envelope_digest`, and
+  `scaffold_contract_digest`.
+- Included in the focused cross-module contract/router/consumer run:
+  145 passed.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
 
 - Added worker and architect same-surface substitution regressions with zero

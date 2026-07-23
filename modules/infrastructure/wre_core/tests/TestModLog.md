@@ -1,5 +1,17 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
+
+- Extended `test_foundup_job_router.py` with the distinct scaffold backend,
+  typed lineage propagation, missing/malformed binding rejection, explicit
+  dry-run enforcement, and genesis/job identity mismatch coverage.
+- Added `test_foundup_scaffold_adapter.py` for real planner lineage checks,
+  no-side-effect evidence, injected adapter dispatch, global live-mode block,
+  planner-result tamper/rejection coverage, and a spy proving the generic
+  Hermes executor is not called.
+- Focused WRE/contract suite: 145 passed. Adapter branch coverage: 100%.
+  Existing dry-run planner suite: 10 passed.
+
 ## 2026-07-18: DAEmon Runtime Safety
 
 - Added outside-repo output, secret redaction, log-glob confinement, and

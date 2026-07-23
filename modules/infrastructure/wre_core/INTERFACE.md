@@ -24,6 +24,9 @@
 
 ## Public API
 
+### create_foundup Scaffold Route
+
+`route_foundup_job()` admits `create_foundup` only to `HERMES_SCAFFOLD` with explicit dry-run, `new_scaffold`, canonical genesis/scaffold digests, and matching genesis/job identity; its `RouteEnvelope` carries those bindings. `FoundUpJobConsumer` uses an injected `ScaffoldAdapter` backed by the existing dry-run planner, returns `SIMULATED` evidence, and never calls the generic Hermes executor, a live writer/provider, registry mutation, or worktree API.
 ### Data Structures
 
 ```python

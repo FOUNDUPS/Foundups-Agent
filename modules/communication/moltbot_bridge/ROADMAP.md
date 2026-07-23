@@ -22,6 +22,14 @@
   composition transaction behind a focused internal boundary, then retire its
   temporary WSP 62 ceiling without changing determination/queue identities.
 
+## FoundUp scaffold routing
+
+- Completed prerequisite: canonical `FoundUpJob` now carries typed
+  `new_scaffold`, genesis-envelope, and scaffold-contract lineage bindings for
+  WRE's distinct dry-run scaffold route.
+- Still deferred: live scaffold writer, registry mutation, worktree creation,
+  provider/model execution, capability certification, and launch authority.
+
 ## RedDog execution-valve readiness
 
 - Phase 1 safety wiring complete locally: token-free canonical supplier,

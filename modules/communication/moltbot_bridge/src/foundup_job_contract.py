@@ -429,6 +429,12 @@ class FoundUpJob:
     OpenClaw and Hermes agree on payload schema per action.
     """
 
+    creation_mode: Optional[str] = None
+    """Creation contract mode. ``create_foundup`` requires ``new_scaffold``."""
+    genesis_envelope_digest: Optional[str] = None
+    """SHA-256 binding to the validated FoundUp genesis envelope."""
+    scaffold_contract_digest: Optional[str] = None
+    """SHA-256 binding to the dry-run FoundUp scaffold contract."""
     # === Compute Metering ===
     compute_tier: str = "freemium"
     """Compute tier: freemium | basic | enterprise. Determines model routing."""
@@ -644,6 +650,9 @@ class FoundUpJob:
             "evidence_refs": self.evidence_refs,
             "policy_flags": self.policy_flags.to_dict(),
             "payload": self.payload,
+            "creation_mode": self.creation_mode,
+            "genesis_envelope_digest": self.genesis_envelope_digest,
+            "scaffold_contract_digest": self.scaffold_contract_digest,
             "compute_tier": self.compute_tier,
             "compute_budget": self.compute_budget,
             "compute_used": self.compute_used,
@@ -679,6 +688,9 @@ class FoundUpJob:
             evidence_refs=data.get("evidence_refs", []),
             policy_flags=PolicyFlags.from_dict(data.get("policy_flags", {})),
             payload=data.get("payload", {}),
+            creation_mode=data.get("creation_mode"),
+            genesis_envelope_digest=data.get("genesis_envelope_digest"),
+            scaffold_contract_digest=data.get("scaffold_contract_digest"),
             compute_tier=data.get("compute_tier", "freemium"),
             compute_budget=data.get("compute_budget"),
             compute_used=data.get("compute_used", 0),
@@ -740,6 +752,9 @@ def create_job(
     intent_id: Optional[str] = None,
     payload: Optional[Dict[str, Any]] = None,
     generate_idempotency: bool = True,
+    creation_mode: Optional[str] = None,
+    genesis_envelope_digest: Optional[str] = None,
+    scaffold_contract_digest: Optional[str] = None,
 ) -> FoundUpJob:
     """
     Factory function to create a new FoundUpJob.
@@ -751,6 +766,9 @@ def create_job(
         intent_id: Source request correlation (optional)
         payload: Action-specific payload (optional)
         generate_idempotency: Auto-generate idempotency key
+        creation_mode: Typed create_foundup mode binding (optional)
+        genesis_envelope_digest: Typed genesis-envelope lineage binding (optional)
+        scaffold_contract_digest: Typed scaffold-contract lineage binding (optional)
 
     Returns:
         FoundUpJob in QUEUED state
@@ -772,4 +790,7 @@ def create_job(
         requested_action=requested_action,
         idempotency_key=idempotency_key,
         payload=payload,
+        creation_mode=creation_mode,
+        genesis_envelope_digest=genesis_envelope_digest,
+        scaffold_contract_digest=scaffold_contract_digest,
     )
