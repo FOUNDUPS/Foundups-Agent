@@ -1,5 +1,47 @@
 # AI Gateway Module Change Log
 
+## [2026-07-24] - Configured AutoResearch Gateway Safety Contract v2
+
+**Who/Type/Slice:** 0102 Codex worker / Defensive Reliability /
+OPENROUTER_AUTORESEARCH_CANARY_PHASE1
+
+**What:** Replaced permissive configured-runner inputs with exact immutable
+model-budget and reasoning evidence, canonical fully wrapped prompt guarding,
+authoritative Decimal cost reservation, exact gateway token/reasoning controls,
+durable attempt/success receipts, and typed tamper-detecting receipt readers.
+The semantic verifier now authenticates the persisted v2 success receipt.
+
+**Concurrency/security boundary:** Panel capacity is reserved atomically.
+Persisted attempts remain consumed; only a definitely unstarted suffix is
+released in a per-run `finally`. Caller entry is never rolled back, terminal
+persistence failure is indeterminate, and cancellation/SystemExit/
+KeyboardInterrupt/other BaseException signals are not swallowed. No live
+provider call, startup default, promotion, registry, HoloIndex, worker, or
+repository-mutation authority was added.
+
+**Comparative-canary gap:** Sampling controls and the provider endpoint are not
+yet catalog-bound evidence. This slice therefore makes no K3-vs-GLM ranking
+call and performs no live comparative canary.
+
+**WSP_15 MPS:** Complexity 5 + Importance 5 + Deferability 5 + Impact 5 = 20
+(P0).
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
+**WSP_62 extraction plan:** All touched Python files remain below 1,200 lines
+(largest safety test: 1,198). The pre-existing bootstrap entry point remains
+208 lines, and the semantic-verifier factory/closure remain 96/83 lines.
+A follow-on structure-only slice should extract bootstrap admission/runtime
+assembly and semantic sample evaluation without changing their fail-closed
+contracts; this security slice does not mix that refactor into the evidence
+migration.
+
+**Validation:** 147 focused offline runner/bootstrap/semantic tests passed;
+full AI Gateway: 526 passed, 2 platform-capability skips. Ruff, compileall, and
+diff-check passed.
+
+---
+
 ## [2026-07-24] - Idle OpenRouter Catalog Schedule Adapter
 
 **Who/Type/Slice:** 0102 Codex / Defensive Reliability /

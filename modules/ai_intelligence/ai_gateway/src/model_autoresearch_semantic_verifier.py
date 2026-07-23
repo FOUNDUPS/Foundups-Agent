@@ -16,6 +16,11 @@ import json
 from dataclasses import dataclass
 from typing import Callable, Mapping, Sequence
 
+from .model_autoresearch_configured_gateway_evidence import (
+    ConfiguredGatewayRunnerReceipt,
+    digest_payload,
+    rehydrate_runner_receipt,
+)
 from .model_autoresearch_configured_gateway_runner import CONFIGURED_GATEWAY_RUNNER_SCHEMA_VERSION
 from .model_autoresearch_output_evidence_bundle import (
     ModelAutoResearchOutputEvidenceRecord,
@@ -39,6 +44,10 @@ FORBIDDEN_TERMS_METADATA_KEY = "expected_answer_excludes"
 OutputEvidenceRecords = (
     Sequence[ModelAutoResearchOutputEvidenceRecord | Mapping[str, object]]
     | Callable[[], Sequence[ModelAutoResearchOutputEvidenceRecord | Mapping[str, object]]]
+)
+RunnerReceipts = (
+    Sequence[ConfiguredGatewayRunnerReceipt | Mapping[str, object]]
+    | Callable[[], Sequence[ConfiguredGatewayRunnerReceipt | Mapping[str, object]]]
 )
 
 
@@ -68,6 +77,7 @@ class ModelAutoResearchSemanticVerifierPolicy:
 def build_model_autoresearch_output_evidence_semantic_verifier(
     *,
     evidence_records: OutputEvidenceRecords,
+    runner_receipts: RunnerReceipts | None = None,
     policy: ModelAutoResearchSemanticVerifierPolicy | None = None,
 ):
     """Return a benchmark verifier over configured-gateway output evidence."""
@@ -109,6 +119,11 @@ def build_model_autoresearch_output_evidence_semantic_verifier(
                         candidate=candidate,
                         output=normalized_output,
                         records=relevant_records,
+                        runner_receipts=(
+                            _runner_receipts(runner_receipts)
+                            if runner_receipts is not None
+                            else None
+                        ),
                     )
                 )
             text = "\n".join(record.response_text for record in relevant_records).lower()
@@ -171,6 +186,19 @@ def _records(source: OutputEvidenceRecords) -> tuple[ModelAutoResearchOutputEvid
     return records
 
 
+def _runner_receipts(source: RunnerReceipts) -> tuple[ConfiguredGatewayRunnerReceipt, ...]:
+    raw = source() if callable(source) else source
+    receipts = tuple(
+        item
+        if isinstance(item, ConfiguredGatewayRunnerReceipt)
+        else rehydrate_runner_receipt(item)
+        for item in raw
+    )
+    if len({item.receipt_id for item in receipts}) != len(receipts):
+        raise ValueError("duplicate_configured_gateway_runner_receipts")
+    return receipts
+
+
 def _records_for_sample(
     *,
     records: Sequence[ModelAutoResearchOutputEvidenceRecord],
@@ -221,7 +249,16 @@ def _runner_digest_rejections(
     candidate: ModelBenchmarkCandidate,
     output: ModelBenchmarkTaskOutput,
     records: Sequence[ModelAutoResearchOutputEvidenceRecord],
+    runner_receipts: Sequence[ConfiguredGatewayRunnerReceipt] | None,
 ) -> list[str]:
+    if runner_receipts is not None:
+        return _v2_runner_digest_rejections(
+            task=task,
+            candidate=candidate,
+            output=output,
+            records=records,
+            runner_receipts=runner_receipts,
+        )
     policy_digests = {record.policy_digest for record in records}
     if len(policy_digests) != 1:
         return ["semantic_verifier_policy_digest_mismatch"]
@@ -254,6 +291,68 @@ def _runner_digest_rejections(
         reasons.append("semantic_verifier_output_digest_mismatch")
     if not hmac.compare_digest(output.runner_receipt_id, expected_runner):
         reasons.append("semantic_verifier_runner_receipt_mismatch")
+    return reasons
+
+
+def _v2_runner_digest_rejections(
+    *,
+    task: ModelBenchmarkTask,
+    candidate: ModelBenchmarkCandidate,
+    output: ModelBenchmarkTaskOutput,
+    records: Sequence[ModelAutoResearchOutputEvidenceRecord],
+    runner_receipts: Sequence[ConfiguredGatewayRunnerReceipt],
+) -> list[str]:
+    matching = [item for item in runner_receipts if item.receipt_id == output.runner_receipt_id]
+    if len(matching) != 1:
+        return ["semantic_verifier_runner_receipt_missing"]
+    receipt = matching[0]
+    reasons: list[str] = []
+    if (
+        receipt.task_id != task.task_id
+        or receipt.candidate_id != candidate.candidate_id
+        or receipt.source_prompt_digest != task.prompt_digest
+    ):
+        reasons.append("semantic_verifier_runner_receipt_binding_mismatch")
+    policy_digests = {record.policy_digest for record in records}
+    if policy_digests != {receipt.policy_digest}:
+        reasons.append("semantic_verifier_policy_digest_mismatch")
+    calls_by_role = {item.role: item for item in receipt.calls}
+    if len(calls_by_role) != len(records):
+        reasons.append("semantic_verifier_runner_call_count_mismatch")
+    for record in records:
+        call = calls_by_role.get(record.role)
+        if call is None or (
+            call.provider != record.provider
+            or call.api_model != record.model
+            or call.response_digest != record.response_digest
+            or call.latency_ms != record.latency_ms
+            or call.input_tokens != record.input_tokens
+            or call.output_tokens != record.output_tokens
+            or call.output_evidence_record_id != record.record_id
+            or float(call.reserved_cost_usd) != record.cost_estimate_usd
+        ):
+            reasons.append(
+                f"semantic_verifier_runner_call_mismatch:{_clean_reason(record.role)}"
+            )
+    expected_output = (
+        "configured_gateway_benchmark_output:" + digest_payload(receipt.to_dict())[7:]
+    )
+    if not hmac.compare_digest(output.output_digest, expected_output):
+        reasons.append("semantic_verifier_output_digest_mismatch")
+    expected_metrics = (
+        sum(item.latency_ms for item in receipt.calls),
+        sum(item.input_tokens for item in receipt.calls),
+        sum(item.output_tokens for item in receipt.calls),
+        float(receipt.total_reserved_cost_usd),
+    )
+    actual_metrics = (
+        output.metrics.latency_ms,
+        output.metrics.input_tokens,
+        output.metrics.output_tokens,
+        output.metrics.cost_estimate_usd,
+    )
+    if actual_metrics != expected_metrics:
+        reasons.append("semantic_verifier_runner_metrics_mismatch")
     return reasons
 
 

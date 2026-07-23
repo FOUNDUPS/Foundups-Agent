@@ -11,9 +11,20 @@ from pathlib import Path
 from modules.ai_intelligence.ai_gateway.src.ai_gateway import ProviderConfig
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_runner import (
     AIGatewayConfiguredModelCaller,
+    ConfiguredGatewayModelBudgetEvidence,
+    ConfiguredGatewayReasoningControlEvidence,
     ConfiguredGatewayRunnerPolicy,
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
+)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_canonical_prompt_guard import (
+    CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
+    CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
+    build_canonical_local_autoresearch_prompt_guard,
+)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_evidence import (
+    BUDGET_SCHEMA_VERSION,
+    digest_payload,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
     InMemoryModelAutoResearchOutputEvidenceStore,
@@ -87,6 +98,24 @@ def _sha256(text: str) -> str:
     return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _test_budget(model_id: str) -> ConfiguredGatewayModelBudgetEvidence:
+    return ConfiguredGatewayModelBudgetEvidence(
+        assignment_model_id=model_id,
+        provider=model_id.split("/", 1)[0],
+        api_model=model_id.split("/", 1)[1],
+        input_cost_per_million="1",
+        output_cost_per_million="1",
+        request_overhead_input_tokens=11,
+        max_completion_tokens=32,
+        reasoning_control=ConfiguredGatewayReasoningControlEvidence(
+            mode="effort",
+            effort="high",
+            supported_efforts=("high",),
+            catalog_evidence_digest=_sha256("test-catalog"),
+        ),
+    )
+
+
 class FakeGateway:
     def __init__(self) -> None:
         self.providers = {
@@ -101,7 +130,13 @@ class FakeGateway:
         }
         self.calls: list[dict[str, str]] = []
 
-    def _call_provider(self, provider: ProviderConfig, prompt: str, task_type: str) -> str:
+    def _call_provider(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        task_type: str,
+        **kwargs,
+    ) -> str:
         self.calls.append(
             {
                 "provider": provider.name,
@@ -128,10 +163,16 @@ def _configured_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
         prompt_source=MappingPromptSource({base_task.task_id: prompt}),
         policy=ConfiguredGatewayRunnerPolicy(
             allowed_providers=("provider",),
+            model_budgets=(_test_budget("provider/new"),),
             max_prompt_chars=2000,
             max_calls_per_sample=1,
-            max_cost_estimate_usd_per_sample=1.0,
+            max_cost_estimate_usd_per_sample="1",
+            required_prompt_guard_contract_digest=(
+                CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST
+            ),
+            required_prompt_guard_profile_digest=CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
         ),
+        prompt_guard=build_canonical_local_autoresearch_prompt_guard(),
         output_evidence_store=InMemoryModelAutoResearchOutputEvidenceStore(),
     )
     expected = precompute_runner(base_task, candidate).output_digest
@@ -148,6 +189,12 @@ def _configured_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
         ),
         feedback_records=(_feedback_record("provider/new", suffix="2"),),
     )
+    budget = _test_budget("provider/new")
+    budget_body = {
+        "schema_version": BUDGET_SCHEMA_VERSION,
+        "allowed_providers": ["provider"],
+        "model_budgets": [budget.to_dict()],
+    }
     return (
         {
             "plan": _write_json(runtime, "autoresearch_plan.json", plan.to_dict()),
@@ -168,6 +215,13 @@ def _configured_inputs(tmp_path: Path) -> tuple[dict[str, Path], FakeGateway]:
                 {"prompts": [{"task_id": task.task_id, "prompt": prompt, "prompt_digest": _sha256(prompt)}]},
             ),
             "evidence": runtime / "output_evidence.jsonl",
+            "budgets": _write_json(
+                runtime,
+                "model_budget_evidence.json",
+                {**budget_body, "evidence_digest": digest_payload(budget_body)},
+            ),
+            "attempts": runtime / "call_attempt_evidence.jsonl",
+            "successes": runtime / "runner_success_receipts.jsonl",
             "output": runtime / "campaign_execution.json",
         },
         FakeGateway(),
@@ -219,6 +273,9 @@ def test_campaign_execution_bootstrap_configured_gateway_mode_materializes_recei
         tasks_path=files["tasks"],
         prompt_records_path=files["prompts"],
         output_evidence_path=files["evidence"],
+        model_budget_evidence_path=files["budgets"],
+        call_attempt_evidence_path=files["attempts"],
+        runner_success_receipt_path=files["successes"],
         output_path=files["output"],
         verifier_digest="sha256:verifier",
         held_out_split_id="heldout-v1",
@@ -265,6 +322,9 @@ def test_campaign_execution_bootstrap_configured_gateway_semantic_verifier_accep
         tasks_path=files["tasks"],
         prompt_records_path=files["prompts"],
         output_evidence_path=files["evidence"],
+        model_budget_evidence_path=files["budgets"],
+        call_attempt_evidence_path=files["attempts"],
+        runner_success_receipt_path=files["successes"],
         output_path=files["output"],
         verifier_digest="sha256:verifier",
         held_out_split_id="heldout-v1",
@@ -301,6 +361,9 @@ def test_campaign_execution_bootstrap_configured_gateway_semantic_verifier_rejec
         tasks_path=files["tasks"],
         prompt_records_path=files["prompts"],
         output_evidence_path=files["evidence"],
+        model_budget_evidence_path=files["budgets"],
+        call_attempt_evidence_path=files["attempts"],
+        runner_success_receipt_path=files["successes"],
         output_path=files["output"],
         verifier_digest="sha256:verifier",
         held_out_split_id="heldout-v1",

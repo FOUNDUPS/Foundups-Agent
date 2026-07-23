@@ -201,6 +201,20 @@ the exact provider/model role assignment in the candidate, supports panel role
 calls, and returns only digest-bound output and runner receipts to the benchmark
 harness.
 
+Every route requires immutable model-budget evidence: exact provider/API model,
+canonical decimal input/output rates, prompt overhead, completion-token cap,
+and catalog-bound reasoning effort. The fully role-wrapped prompt passes the
+canonical local audit-only redaction guard byte-identically before a call.
+Panel admission reserves atomically; persisted `ATTEMPTED` calls consume their
+slots, while a failed run releases only its definitely unstarted suffix.
+
+Call-attempt and successful-run receipts are append-only outside-repository
+JSONL artifacts. Public readers rehydrate each record, recompute group/receipt
+IDs and total reserved cost, and reject changed status, route, digest, cost, or
+call data. A terminal persistence failure after caller entry is indeterminate
+and never rolls back the consumed call. Cancellation and other `BaseException`
+signals remain the caller's original signals.
+
 `src/model_autoresearch_output_evidence_bundle.py` provides the content-bearing
 evidence layer for those configured runs. When an output evidence store is
 injected, each raw model response is written to an outside-repo JSONL record
@@ -209,8 +223,9 @@ verifier. Secret-bearing output is rejected before persistence.
 
 `src/model_autoresearch_semantic_verifier.py` is the first deterministic
 content verifier over those evidence records. It does not call a model; it
-rehydrates the output evidence, recomputes the configured-runner output and
-receipt digests, then checks explicit task metadata requirements:
+rehydrates the output evidence and durable v2 runner receipt, verifies their
+task/candidate/prompt/policy/call/evidence/metrics bindings, recomputes the
+configured-runner output digest, then checks explicit task metadata requirements:
 `expected_answer_contains` and `expected_answer_excludes`. Missing requirements
 fail closed.
 
@@ -232,7 +247,8 @@ rates so the existing per-sample cost gate can reject over-budget results.
 use this runner only when `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE` is
 set to `configured_gateway`, prompt records are supplied from outside the repo,
 providers are explicitly allowlisted, an outside-repo output evidence path is
-supplied, and verifier mode is `exact_output_digest` or
+supplied, immutable model-budget evidence and distinct attempt/success receipt
+paths are supplied outside the repo, and verifier mode is `exact_output_digest` or
 `output_evidence_semantic`. The default remains deterministic fixture execution.
 
 ## Model Combination Benchmark Harness
