@@ -807,15 +807,26 @@ def _provider_call_evidence_matches_audit(
     binding: Mapping[str, Any],
     model_selection: Mapping[str, Any],
 ) -> bool:
-    return bool(evidence) and (
-        evidence.get("surface") == RUNTIME_SURFACE_READONLY_AUDIT
-        and evidence.get("task_id")
-        == (str(binding.get("task_id") or "") or None)
-        and evidence.get("model_runtime_binding_receipt_id")
-        == str(model_selection.get("model_runtime_binding_receipt_id") or "")
-        and evidence.get("model_runtime_binding_digest")
-        == str(model_selection.get("model_runtime_binding_digest") or "")
-        and evidence.get("outcome") == ProviderCallOutcome.COMPLETED.value
+    expected = {
+        "surface": RUNTIME_SURFACE_READONLY_AUDIT,
+        "task_id": _optional_binding_text(binding, "task_id"),
+        "work_order_id": _optional_binding_text(binding, "work_order_id"),
+        "queue_item_id": _optional_binding_text(binding, "queue_item_id"),
+        "run_id": _optional_binding_text(binding, "run_id"),
+        "cycle_id": _optional_binding_text(binding, "cycle_id"),
+        "model_runtime_binding_receipt_id": str(
+            model_selection.get("model_runtime_binding_receipt_id") or ""
+        ),
+        "model_runtime_binding_digest": str(
+            model_selection.get("model_runtime_binding_digest") or ""
+        ),
+        "requested_provider": "openrouter",
+        "requested_model": str(model_selection.get("lead_model") or ""),
+        "outcome": ProviderCallOutcome.COMPLETED.value,
+        "attempted": True,
+    }
+    return bool(evidence) and all(
+        evidence.get(field) == value for field, value in expected.items()
     )
 
 

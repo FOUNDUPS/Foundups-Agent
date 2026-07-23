@@ -296,11 +296,16 @@ def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
 def _provider_call_evidence_from_binding(
     binding: Mapping[str, Any],
     *,
-    task_id: str = "provider-task",
+    task_id: str | None = None,
+    work_order_id: str | None = None,
+    queue_item_id: str | None = None,
+    run_id: str | None = None,
     surface: str = RUNTIME_SURFACE_BACKEND_ARCHITECT,
     cycle_id: str | None = None,
     runtime_receipt_id: str | None = None,
     runtime_digest: str | None = None,
+    requested_provider: str = "openrouter",
+    requested_model: str | None = None,
     outcome: ProviderCallOutcome = ProviderCallOutcome.COMPLETED,
 ) -> dict[str, Any]:
     model_selection = binding.get("model_selection")
@@ -308,12 +313,13 @@ def _provider_call_evidence_from_binding(
     precall = create_precall_evidence(
         surface=surface,
         task_id=task_id,
-        work_order_id="work-1",
-        queue_item_id="queue-1",
-        run_id="run-1",
+        work_order_id=work_order_id,
+        queue_item_id=queue_item_id,
+        run_id=run_id,
         cycle_id=cycle_id or str(binding.get("cycle_id") or ""),
-        requested_provider="openrouter",
-        requested_model="synthetic/model",
+        requested_provider=requested_provider,
+        requested_model=requested_model
+        or str(topology.get("lead_model") or ""),
         redacted_input_digest="sha256:" + "a" * 64,
         model_runtime_binding_receipt_id=runtime_receipt_id
         or str(topology.get("model_runtime_binding_receipt_id") or ""),
@@ -371,46 +377,22 @@ def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> N
     inputs = _build_inputs()
     evidence_ref = inputs["reports"][0]["evidence_refs"][0]
     output = _model_output(inputs["allocation"], evidence_ref)
-    first = run_reddog_backend_architect_determination_runtime(
+    result = run_reddog_backend_architect_determination_runtime(
         **_runtime_kwargs(inputs),
         wsp15_allocation_receipt=inputs["allocation"],
         store=InMemoryArchitectDeterminationStore(),
-        model_runner=FakeArchitectRunner(
-            output,
-            provider_call_evidence=lambda binding: _provider_call_evidence_from_binding(
-                binding, task_id="provider-task-1"
-            ),
-        ),
-        now_iso=NOW,
-    )
-    second = run_reddog_backend_architect_determination_runtime(
-        **_runtime_kwargs(inputs),
-        wsp15_allocation_receipt=inputs["allocation"],
-        store=InMemoryArchitectDeterminationStore(),
-        model_runner=FakeArchitectRunner(
-            output,
-            provider_call_evidence=lambda binding: _provider_call_evidence_from_binding(
-                binding, task_id="provider-task-2"
-            ),
-        ),
+        model_runner=FakeArchitectRunner(output),
         now_iso=NOW,
     )
 
-    assert first.accepted and second.accepted
-    assert first.receipt.provider_call_id != second.receipt.provider_call_id
+    assert result.accepted
+    assert result.receipt.provider_call_id
+    assert result.receipt.provider_call_receipt_id
+    assert result.receipt.provider_call_evidence_digest
+    assert result.receipt.queue_candidate is not None
     assert (
-        first.receipt.determination_receipt_id
-        != second.receipt.determination_receipt_id
-    )
-    assert first.receipt.queue_candidate is not None
-    assert second.receipt.queue_candidate is not None
-    assert (
-        first.receipt.queue_candidate.source_determination_receipt_id
-        == first.receipt.determination_receipt_id
-    )
-    assert (
-        second.receipt.queue_candidate.source_determination_receipt_id
-        == second.receipt.determination_receipt_id
+        result.receipt.queue_candidate.source_determination_receipt_id
+        == result.receipt.determination_receipt_id
     )
 
 
@@ -425,6 +407,18 @@ def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> N
             binding, cycle_id="wrong-cycle"
         ),
         lambda binding: _provider_call_evidence_from_binding(
+            binding, task_id="forged-task"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, work_order_id="forged-work"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, queue_item_id="forged-queue"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, run_id="forged-run"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
             binding, runtime_receipt_id="wrong-binding"
         ),
         lambda binding: _provider_call_evidence_from_binding(
@@ -433,6 +427,16 @@ def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> N
         lambda binding: _provider_call_evidence_from_binding(
             binding, outcome=ProviderCallOutcome.FAILED
         ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, requested_provider="other-provider"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, requested_model="other/model"
+        ),
+        lambda binding: {
+            **_provider_call_evidence_from_binding(binding),
+            "attempted": False,
+        },
     ],
 )
 def test_architect_rejects_missing_or_mismatched_provider_evidence_before_queue(

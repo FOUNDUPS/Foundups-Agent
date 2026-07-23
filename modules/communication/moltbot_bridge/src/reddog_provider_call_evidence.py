@@ -192,8 +192,12 @@ def create_precall_evidence(
     envelope = {
         "surface": _text(surface),
         **lineage,
-        "requested_provider": _text(requested_provider),
-        "requested_model": _text(requested_model),
+        "requested_provider": _provider_identity(
+            requested_provider, field="requested_provider"
+        ),
+        "requested_model": _model_identity(
+            requested_model, field="requested_model"
+        ),
         "redacted_input_digest": redacted_input_digest,
         "model_runtime_binding_receipt_id": _text(model_runtime_binding_receipt_id),
         "model_runtime_binding_digest": model_runtime_binding_digest,
@@ -323,11 +327,11 @@ def validate_provider_call_evidence(
         "receipt_id",
         "call_id",
         "surface",
-        "requested_provider",
-        "requested_model",
         "model_runtime_binding_receipt_id",
     ):
         _text(getattr(receipt, field))
+    _provider_identity(receipt.requested_provider, field="requested_provider")
+    _model_identity(receipt.requested_model, field="requested_model")
     for field in ("task_id", "work_order_id", "queue_item_id", "run_id", "cycle_id"):
         _optional_text(getattr(receipt, field))
     if not any(
@@ -761,22 +765,30 @@ def _optional_text(value: Any) -> str | None:
 def _optional_served_provider(value: Any) -> str | None:
     if value is None:
         return None
-    text = _text(value)
-    if not _served_identity_is_safe(text, pattern=_SERVED_PROVIDER):
-        raise ValueError("served_provider")
-    return text
+    return _provider_identity(value, field="served_provider")
 
 
 def _optional_served_model(value: Any) -> str | None:
     if value is None:
         return None
+    return _model_identity(value, field="served_model")
+
+
+def _provider_identity(value: Any, *, field: str) -> str:
     text = _text(value)
-    if not _served_identity_is_safe(text, pattern=_SERVED_MODEL):
-        raise ValueError("served_model")
+    if not _identity_is_safe(text, pattern=_SERVED_PROVIDER):
+        raise ValueError(field)
     return text
 
 
-def _served_identity_is_safe(text: str, *, pattern: re.Pattern[str]) -> bool:
+def _model_identity(value: Any, *, field: str) -> str:
+    text = _text(value)
+    if not _identity_is_safe(text, pattern=_SERVED_MODEL):
+        raise ValueError(field)
+    return text
+
+
+def _identity_is_safe(text: str, *, pattern: re.Pattern[str]) -> bool:
     redaction = redact_runtime_text(text, max_chars=_MAX_SERVED_IDENTITY)
     return (
         len(text) <= _MAX_SERVED_IDENTITY

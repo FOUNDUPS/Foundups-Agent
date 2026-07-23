@@ -13,7 +13,7 @@ exemptions:
       Legacy module interface registry. This slice adds one bounded transport
       contract beside its canonical resident-client boundary; splitting the
       historical registry is separate documentation-maintenance work.
-    threshold_override: 1133
+    threshold_override: 1136
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -174,7 +174,7 @@ exemptions:
       Legacy audit-worker integration boundary spanning evidence acquisition,
       model invocation, and receipt composition. This POC preserves its
       reviewed repository and HoloIndex truth checks without a broad rewrite.
-    threshold_override: 2254
+    threshold_override: 2265
     function_threshold_override: 298
     functions:
       - "execute_model_backed_repo_code_audit"
@@ -184,7 +184,7 @@ exemptions:
       - "FoundupsFusionRepoAuditModelRunner.run_repo_code_audit"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
     no_growth_ceiling:
-      file_lines: 2254
+      file_lines: 2265
       functions:
         execute_model_backed_repo_code_audit: 298
         _optional_memex_query_artifacts: 171
@@ -211,17 +211,17 @@ exemptions:
       and queue-candidate projection. This repair only binds provider evidence
       into the accepted receipt identity; transaction extraction is tracked
       separately to avoid mixing lifecycle refactoring into the safety fix.
-    threshold_override: 1660
-    function_threshold_override: 331
+    threshold_override: 1672
+    function_threshold_override: 332
     functions:
       - "run_reddog_backend_architect_determination_runtime"
       - "FoundupsFusionArchitectModelRunner.run_architect_determination"
       - "_receipt"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
     no_growth_ceiling:
-      file_lines: 1660
+      file_lines: 1672
       functions:
-        run_reddog_backend_architect_determination_runtime: 331
+        run_reddog_backend_architect_determination_runtime: 332
         _receipt: 103
         run_architect_determination: 146
 
@@ -231,7 +231,7 @@ exemptions:
       Focused phase-2a contract and atomic store are colocated so the exact
       validator and state-transition writer cannot drift. Store extraction is
       the first follow-up after both governed Fusion surfaces prove parity.
-    threshold_override: 855
+    threshold_override: 867
     function_threshold_override: 123
     functions:
       - "validate_provider_call_evidence"
@@ -239,9 +239,9 @@ exemptions:
       - "execute_evidenced_provider_call"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
     no_growth_ceiling:
-      file_lines: 855
+      file_lines: 867
       functions:
-        create_precall_evidence: 65
+        create_precall_evidence: 69
         validate_provider_call_evidence: 123
         execute_evidenced_provider_call: 79
 
@@ -281,11 +281,11 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_backend_architect_determination_runtime.py"
     reason: "Legacy architect-input fixture and suite awaiting fixture extraction."
-    threshold_override: 920
+    threshold_override: 924
     function_threshold_override: 77
     functions: ["_build_inputs"]
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
-    no_growth_ceiling: {file_lines: 920, functions: {_build_inputs: 77}}
+    no_growth_ceiling: {file_lines: 924, functions: {_build_inputs: 77}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_main_readonly_operational_bootstrap.py"
@@ -339,9 +339,9 @@ exemptions:
   - <<: *reddog_security_repair
     file: "tests/test_reddog_provider_call_evidence.py"
     reason: "Adversarial provider-identity and post-invocation evidence regressions."
-    threshold_override: 685
+    threshold_override: 717
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
-    no_growth_ceiling: {file_lines: 685, functions: {}}
+    no_growth_ceiling: {file_lines: 717, functions: {}}
 
   - <<: *reddog_security_repair
     file: "tests/test_reddog_fusion_progress_receipt.py"
@@ -355,14 +355,14 @@ exemptions:
     reason: >-
       Legacy executor regression matrix. Repository-state truth-boundary cases
       were added without mixing production refactoring into the security fix.
-    threshold_override: 2408
+    threshold_override: 2439
     function_threshold_override: 63
     functions:
       - "test_production_runner_uses_fusion_synthesis_excerpt_for_json"
       - "test_agentdb_openclaw_claim_run_task_model_worker_persists_report"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
     no_growth_ceiling:
-      file_lines: 2408
+      file_lines: 2439
       functions:
         test_production_runner_uses_fusion_synthesis_excerpt_for_json: 63
         test_agentdb_openclaw_claim_run_task_model_worker_persists_report: 64
@@ -371,7 +371,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 8741
+    threshold_override: 8757
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -383,7 +383,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1552
+    threshold_override: 1564
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

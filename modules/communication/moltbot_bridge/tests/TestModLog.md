@@ -1,3 +1,15 @@
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND3
+
+- Added requested-provider and requested-model secret/raw-shape rejection at
+  receipt creation and direct validator rehydration.
+- Expanded audit and architect adversarial matrices across surface, task,
+  work-order, queue, run, cycle, runtime receipt/digest, requested
+  provider/model, attempted state, and terminal outcome.
+- Updated integration fixtures so valid receipts carry only binding-derived
+  lineage; no test-only extra lineage is accepted.
+- Consolidated gate: `274 passed, 1 skipped`; Fusion/architect family:
+  `64 passed`; modular-audit suite: `16 passed`.
+
 ## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND2
 
 - Added adversarial provider/model parser cases for URI, drive/path traversal,

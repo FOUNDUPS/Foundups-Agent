@@ -32,7 +32,12 @@ DIGEST_A = "sha256:" + "a" * 64
 DIGEST_B = "sha256:" + "b" * 64
 
 
-def _precall(*, started_at_ms: int = 100):
+def _precall(
+    *,
+    started_at_ms: int = 100,
+    requested_provider: str = "openrouter",
+    requested_model: str = "test/model",
+):
     return create_precall_evidence(
         surface="governed_repo_audit",
         task_id="task-1",
@@ -40,8 +45,8 @@ def _precall(*, started_at_ms: int = 100):
         queue_item_id="queue-1",
         run_id="run-1",
         cycle_id=None,
-        requested_provider="openrouter",
-        requested_model="test/model",
+        requested_provider=requested_provider,
+        requested_model=requested_model,
         redacted_input_digest=DIGEST_A,
         model_runtime_binding_receipt_id="binding-1",
         model_runtime_binding_digest=DIGEST_B,
@@ -56,6 +61,33 @@ def _metadata():
         "served_model": "synthetic/model",
         "usage": {"input_tokens": 3, "output_tokens": 5, "total_tokens": 8},
     }
+
+
+@pytest.mark.parametrize(
+    ("field", "identity"),
+    [
+        ("requested_provider", "sk-" + "a" * 24),
+        ("requested_provider", "https://openrouter.ai"),
+        ("requested_provider", "raw provider sentence"),
+        ("requested_provider", "Ab3Cd5Ef7Gh9Jk2Lm4Np6Qr8St"),
+        ("requested_model", "sk-" + "b" * 24),
+        ("requested_model", "vendor/raw model sentence"),
+        ("requested_model", "../vendor/model"),
+        ("requested_model", "vendor/Ab3Cd5Ef7Gh9Jk2Lm4Np6Qr8St"),
+    ],
+)
+def test_requested_identity_rejects_secret_and_raw_shapes_at_creation_and_validation(
+    field: str,
+    identity: str,
+) -> None:
+    kwargs = {field: identity}
+    with pytest.raises(ValueError, match=field):
+        _precall(**kwargs)
+
+    payload = _precall().to_dict()
+    payload[field] = identity
+    with pytest.raises(ValueError, match=field):
+        validate_provider_call_evidence(payload)
 
 
 @pytest.mark.parametrize(

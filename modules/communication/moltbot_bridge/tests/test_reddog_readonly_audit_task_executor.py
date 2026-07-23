@@ -251,20 +251,27 @@ def _audit_provider_call_evidence_from_binding(
     binding: Mapping[str, Any],
     *,
     task_id: str | None = None,
+    work_order_id: str | None = None,
+    queue_item_id: str | None = None,
+    run_id: str | None = None,
+    cycle_id: str | None = None,
     surface: str = RUNTIME_SURFACE_READONLY_AUDIT,
     runtime_receipt_id: str | None = None,
     runtime_digest: str | None = None,
+    requested_provider: str = "openrouter",
+    requested_model: str | None = None,
     outcome: ProviderCallOutcome = ProviderCallOutcome.COMPLETED,
 ) -> dict:
     precall = create_precall_evidence(
         surface=surface,
         task_id=task_id or str(binding.get("task_id") or "") or None,
-        work_order_id="work-1",
-        queue_item_id="queue-1",
-        run_id="run-1",
-        cycle_id=None,
-        requested_provider="openrouter",
-        requested_model="synthetic/model",
+        work_order_id=work_order_id,
+        queue_item_id=queue_item_id,
+        run_id=run_id,
+        cycle_id=cycle_id,
+        requested_provider=requested_provider,
+        requested_model=requested_model
+        or str(binding.get("model_selection", {}).get("lead_model") or ""),
         redacted_input_digest="sha256:" + "a" * 64,
         model_runtime_binding_receipt_id=runtime_receipt_id
         or str(binding.get("model_runtime_binding_receipt_id") or ""),
@@ -774,6 +781,7 @@ def test_model_fallback_rejects_changed_content_before_index_or_model(tmp_path: 
     result = execute_reddog_readonly_audit_task(
         task_context=context,
         repo_root=root,
+        task_id="task-fallback-recheck",
         model_runner=runner,
         holoindex_adapter=holo,
         codeindex_adapter=code,
@@ -803,6 +811,7 @@ def test_model_fallback_rechecks_content_after_model_even_when_head_is_unchanged
     result = execute_reddog_readonly_audit_task(
         task_context=context,
         repo_root=root,
+        task_id="task-fallback-post-model",
         model_runner=runner,
         holoindex_adapter=_FakeQueryAdapter(),
         codeindex_adapter=_FakeQueryAdapter(),
@@ -888,6 +897,18 @@ def test_model_failure_result_carries_provider_call_evidence(tmp_path: Path) -> 
             binding, task_id="wrong-task"
         ),
         lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, work_order_id="forged-work"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, queue_item_id="forged-queue"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, run_id="forged-run"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, cycle_id="forged-cycle"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
             binding, runtime_receipt_id="wrong-binding"
         ),
         lambda binding: _audit_provider_call_evidence_from_binding(
@@ -896,6 +917,16 @@ def test_model_failure_result_carries_provider_call_evidence(tmp_path: Path) -> 
         lambda binding: _audit_provider_call_evidence_from_binding(
             binding, outcome=ProviderCallOutcome.FAILED
         ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, requested_provider="other-provider"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, requested_model="other/model"
+        ),
+        lambda binding: {
+            **_audit_provider_call_evidence_from_binding(binding),
+            "attempted": False,
+        },
     ],
 )
 def test_audit_rejects_missing_or_mismatched_provider_evidence_before_acceptance(

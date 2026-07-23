@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND3
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97
+
+- Applied the canonical provider-slug and `provider/model` parsers to requested
+  identities at both creation and rehydration; secret-like and raw-prompt
+  shapes now fail before a provider call.
+- Audit and architect acceptance now compare the complete expected invocation
+  vector: surface, task/work-order/queue/run/cycle lineage, runtime-binding ID
+  and digest, requested provider/model, attempted state, and terminal outcome.
+  Unbound lineage fields must be null, so extra forged lineage is rejected.
+- Added parameterized substitution probes for every compared field plus valid
+  canonical receipts and requested-identity creation/validator regressions.
+- Post-repair gate: 274 passed / 1 platform skip; the broader
+  Fusion/architect family sweep passed 64/64.
+
 ## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND2
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97

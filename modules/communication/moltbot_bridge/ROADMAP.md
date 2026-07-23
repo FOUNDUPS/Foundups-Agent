@@ -8,6 +8,9 @@
   acceptance lineage gates, post-invocation extraction failure evidence,
   frozen legacy-v1 progress compatibility, and platform-neutral WSP 62
   exemption matching are covered by adversarial regressions.
+- Final review repair: requested identities use the same typed grammar, and
+  acceptance compares the complete invocation lineage plus requested runtime
+  identity; unbound lineage fields must remain null.
 - Next: make the Fusion/OpenRouter gateway return authoritative served
   provider/model and normalized numeric usage evidence. Until then those
   fields remain null; configuration is never evidence of service.

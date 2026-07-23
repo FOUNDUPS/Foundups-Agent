@@ -8,15 +8,18 @@ and count, bounded numeric usage, and only explicitly returned served identity.
 The outside-repository store path is supplied by
 `REDDOG_PROVIDER_CALL_EVIDENCE_STORE_PATH`; absence or a failed PRECALL/arm
 write blocks the provider call. Terminal-write uncertainty remains durably
-`INDETERMINATE` and cannot be promoted or automatically retried. Served
-providers use a canonical provider-slug grammar; served models use a distinct
-`provider/model` grammar. URI, filesystem, traversal, dot-segment,
-query/fragment, bearer-like, high-entropy, and raw-sentence shapes fail closed.
+`INDETERMINATE` and cannot be promoted or automatically retried. Requested and
+served providers use a canonical provider-slug grammar; requested and served
+models use a distinct `provider/model` grammar. URI, filesystem, traversal,
+dot-segment, query/fragment, bearer-like, high-entropy, and raw-sentence shapes
+fail closed.
 Post-invocation failures carry the last content-free local evidence to the
 audit/architect result even when extraction, terminal persistence, and
 recovery reads fail. Audit and architect acceptance independently revalidate
-the canonical receipt and its exact surface, task/cycle, runtime-binding, and
-`COMPLETED` lineage before a report or queue candidate can be accepted.
+the canonical receipt and its exact surface, complete task/work/queue/run/cycle
+lineage, runtime binding, requested runtime identity, attempted state, and
+`COMPLETED` outcome before a report or queue candidate can be accepted.
+Unbound lineage fields must remain null.
 
 RedDog Fusion progress observability is implemented by `src/reddog_fusion_progress_receipt.py`: bounded hash-chained stage events plus content-free OpenRouter usage and routing receipts. The original frozen `reddog_fusion_progress_receipt.v1` shape remains valid; generic provider evidence is an all-or-none optional v1 extension. It does not retain prompts, outputs, hidden reasoning, or secrets, and it grants no action authority.
 

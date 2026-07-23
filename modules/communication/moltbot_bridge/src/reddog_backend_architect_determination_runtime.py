@@ -772,6 +772,7 @@ def run_reddog_backend_architect_determination_runtime(
         reasons.extend(model_result.rejection_reasons)
     elif not _provider_call_evidence_matches_architect(
         provider_call_evidence,
+        binding=binding,
         cycle_id=cycle_id,
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
         model_runtime_binding_digest=model_runtime_binding_digest,
@@ -1261,18 +1262,29 @@ def _canonical_provider_call_evidence(value: Any) -> dict[str, Any]:
 def _provider_call_evidence_matches_architect(
     evidence: Mapping[str, Any],
     *,
+    binding: Mapping[str, Any],
     cycle_id: str,
     model_runtime_binding_receipt_id: str | None,
     model_runtime_binding_digest: str | None,
 ) -> bool:
-    return bool(evidence) and (
-        evidence.get("surface") == RUNTIME_SURFACE_BACKEND_ARCHITECT
-        and evidence.get("cycle_id") == cycle_id
-        and evidence.get("model_runtime_binding_receipt_id")
-        == model_runtime_binding_receipt_id
-        and evidence.get("model_runtime_binding_digest")
-        == model_runtime_binding_digest
-        and evidence.get("outcome") == ProviderCallOutcome.COMPLETED.value
+    model_selection = binding.get("model_selection")
+    topology = model_selection if isinstance(model_selection, Mapping) else {}
+    expected = {
+        "surface": RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        "task_id": _optional_binding_text(binding, "task_id"),
+        "work_order_id": _optional_binding_text(binding, "work_order_id"),
+        "queue_item_id": _optional_binding_text(binding, "queue_item_id"),
+        "run_id": _optional_binding_text(binding, "run_id"),
+        "cycle_id": cycle_id,
+        "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
+        "model_runtime_binding_digest": model_runtime_binding_digest,
+        "requested_provider": "openrouter",
+        "requested_model": str(topology.get("lead_model") or ""),
+        "outcome": ProviderCallOutcome.COMPLETED.value,
+        "attempted": True,
+    }
+    return bool(evidence) and all(
+        evidence.get(field) == value for field, value in expected.items()
     )
 
 

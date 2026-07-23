@@ -21,16 +21,19 @@ content-free local evidence through `ProviderCallAttemptError`; a failed
 terminal write therefore returns armed `INDETERMINATE` truth without depending
 on a recovery read. Output promotion remains blocked. Served provider/model
 are nullable unless the returned `provider_call_metadata` exact schema supplies
-both canonical, secret-free identifiers. Providers are canonical slugs and
-models are canonical `provider/model` identifiers; URI/path/traversal,
-query/fragment, bearer-like, high-entropy, and raw-sentence values are rejected.
-Requested configuration is never used as served identity.
+both canonical, secret-free identifiers. Requested and served providers are
+canonical slugs; requested and served models are canonical `provider/model`
+identifiers. URI/path/traversal, query/fragment, bearer-like, high-entropy, and
+raw-sentence values are rejected. Requested configuration is never used as
+served identity.
 
 Audit rejection results retain the canonical provider-call evidence mapping
-after a model attempt. Before acceptance, the audit surface requires exact
-surface/task/runtime-binding lineage and the architect surface requires exact
-surface/cycle/runtime-binding lineage; both require a canonical `COMPLETED`
-receipt. Omitted, forged, mismatched, or non-completed evidence fails before
+after a model attempt. Before acceptance, both consumers compare surface,
+task/work-order/queue/run/cycle lineage, runtime-binding ID and digest,
+requested provider/model, attempted state, and terminal outcome field by field
+against the invocation binding. Any lineage field without an expected binding
+must be null, and the receipt must be canonical, attempted, and `COMPLETED`.
+Omitted, extra, forged, mismatched, or non-completed evidence fails before
 report acceptance or queue construction. Accepted architect determination
 identity is computed from the provider call ID, provider receipt ID, and
 canonical evidence digest, so the queue parent cannot outlive or substitute
