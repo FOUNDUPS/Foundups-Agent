@@ -33,6 +33,12 @@ types (`bool`, `str`, `str`) before dispatch uses them. Route identifiers reject
 path traversal plus every Unicode `Cc` and `Cf` control. Internal router
 failures expose only `FAIL_INTERNAL` / `Internal routing error` and a generic
 structured log event.
+
+The public route entrypoint delegates to the bounded decision module. Its
+public function and every decision helper are at or below the WSP 62
+75-line function limit; remaining inherited router/consumer debt is governed
+by exact no-growth module exemptions.
+
 ### Data Structures
 
 ```python

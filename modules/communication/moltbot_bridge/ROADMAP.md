@@ -30,6 +30,17 @@
 - Still deferred: live scaffold writer, registry mutation, worktree creation,
   provider/model execution, capability certification, and launch authority.
 
+## Create FoundUp job contract WSP62 decomposition
+
+The canonical `src/foundup_job_contract.py` remains an inherited 796-line
+contract surface after the nullable create-route lineage fields were added.
+Its temporary module exemption is an exact, non-ratcheting 796-line ceiling.
+
+Before 2026-09-30, split serialization, validation, and action-specific
+contract helpers into cohesive modules while preserving the public import and
+wire-format compatibility. Remove the exemption once the canonical contract
+file is at or below the WSP 62 file threshold; do not widen the ceiling.
+
 ## RedDog execution-valve readiness
 
 - Phase 1 safety wiring complete locally: token-free canonical supplier,

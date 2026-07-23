@@ -18,6 +18,7 @@ from modules.infrastructure.wre_core.src.foundup_job_router import (
     route_foundup_job,
 )
 from modules.infrastructure.wre_core.src import (
+    foundup_job_route_decision,
     foundup_job_router,
     foundup_scaffold_route_contract,
 )
@@ -157,6 +158,14 @@ def test_freeze_entrypoint_stays_below_wsp62_function_limit() -> None:
     ) <= 75
 
 
-def test_inherited_router_debt_has_exact_no_growth_guard() -> None:
-    """The inherited router remains exempt only while it does not exceed round 1."""
-    assert _function_span(foundup_job_router, "route_foundup_job") <= 201
+def test_public_router_and_extracted_decision_functions_are_bounded() -> None:
+    assert _function_span(foundup_job_router, "route_foundup_job") <= 75
+    path = Path(foundup_job_route_decision.__file__)
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    spans = {
+        node.name: node.end_lineno - node.lineno + 1
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+    }
+    assert spans
+    assert max(spans.values()) <= 75

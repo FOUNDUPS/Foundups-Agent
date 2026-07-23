@@ -1,5 +1,17 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
+
+- Replaced the obsolete route-function no-growth assertion with a regression
+  proving the public entrypoint and every extracted decision function remain
+  at or below 75 lines.
+- Added canonical module exemption checks for exact file and function ceilings,
+  metadata, POSIX YAML keys, expiry, and remediation authority across WRE and
+  the shared communication contract.
+- Verification: 339 router/consumer/scaffold/communication-contract tests,
+  18 planner tests, 112 adjacent writer/executor tests, and 20 focused
+  route/exemption tests passed. Ruff, compileall, and diff checks passed.
+
 ## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR2
 
 - Added unhashable/wrong scalar adapter fields, C1/RTL/format controls, router

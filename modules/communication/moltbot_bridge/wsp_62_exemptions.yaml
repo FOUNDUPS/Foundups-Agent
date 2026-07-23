@@ -8,6 +8,17 @@ x-reddog-security-repair: &reddog_security_repair
   remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-execution-valve-trust-boundary-decomposition"
 
 exemptions:
+  - <<: *reddog_security_repair
+    file: "src/foundup_job_contract.py"
+    reason: >-
+      Inherited typed job contract and serialization host. Create-scaffold
+      lineage added only nullable fields; splitting the shared lifecycle,
+      policy, transition, and factory contracts requires a separate
+      compatibility-preserving migration.
+    threshold_override: 796
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#create-foundup-job-contract-wsp62-decomposition"
+    no_growth_ceiling: {file_lines: 796, functions: {}}
+
   - file: "INTERFACE.md"
     reason: >-
       Legacy module interface registry. This slice adds one bounded transport

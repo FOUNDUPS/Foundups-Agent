@@ -43,6 +43,13 @@
 - Focused provider/architect/audit/WSP62 suite: `117 passed`.
 - Fusion progress receipt suite: `13 passed`.
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
+
+- Extended the module exemption regression to require the canonical
+  `src/foundup_job_contract.py` exact 796-line no-growth ceiling.
+- Cross-module WRE regression checks its POSIX key, metadata, expiry,
+  remediation authority, and exact source size.
+
 ## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
 
 - Added `test_foundup_job_create_lineage.py` with a canonical

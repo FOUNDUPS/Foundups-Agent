@@ -42,9 +42,11 @@ worktree mutation.
 
 The extracted `dispatch_create_scaffold` and
 `freeze_create_scaffold_request` entrypoints remain below the 75-line WSP 62
-function limit. The inherited `route_foundup_job` is still oversized at 200
-lines; its exact exemption ceiling is 201 lines and a regression test prevents
-growth while broader router decomposition remains separate debt.
+function limit. The public `route_foundup_job` entrypoint is 34 lines, and
+every function in its extracted decision module is at or below 75 lines.
+Inherited router and consumer file/function debt remains under exact,
+non-ratcheting ceilings in `wsp_62_exemptions.yaml`; its owner and decomposition
+target are recorded in `violations.md` and `ROADMAP.md`.
 
 ### Core Components (5)
 ```

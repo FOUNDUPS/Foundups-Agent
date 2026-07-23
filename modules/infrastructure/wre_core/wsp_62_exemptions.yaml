@@ -1,0 +1,54 @@
+exemptions:
+  - file: "src/foundup_job_router.py"
+    reason: >-
+      Inherited multi-contract validation host. The create-route orchestration
+      is now extracted into bounded decision phases, while unrelated envelope,
+      policy, evidence, and compute-budget validators require a separate parity
+      decomposition.
+    threshold_override: 1193
+    function_threshold_override: 212
+    functions:
+      - "validate_foundup_job_envelope"
+      - "_validate_live_mode_gates"
+      - "_validate_evidence_refs"
+      - "_validate_compute_budget"
+    temporary: true
+    owner: "WRE Core Maintainers"
+    architect_reviewer: "0102 Technical Architect"
+    reviewer: "0102 Technical Architect"
+    review_date: "2026-Q3"
+    expires_on: "2026-09-30"
+    remediation: "ROADMAP.md#foundup-job-router-and-consumer-wsp62-decomposition"
+    no_growth_ceiling:
+      file_lines: 1193
+      functions:
+        validate_foundup_job_envelope: 212
+        _validate_live_mode_gates: 88
+        _validate_evidence_refs: 113
+        _validate_compute_budget: 163
+
+  - file: "src/foundup_job_consumer.py"
+    reason: >-
+      Inherited consumer host spanning legacy Hermes dispatch, context-bundle
+      evidence, receipt emission, and queue retention. Create-scaffold dispatch
+      is already isolated; the remaining unrelated flows require a dedicated
+      parity decomposition.
+    threshold_override: 1112
+    function_threshold_override: 160
+    functions:
+      - "_dispatch_to_hermes"
+      - "_attach_context_bundle_dry_run"
+      - "drain_openclaw_queue_with_retention"
+    temporary: true
+    owner: "WRE Core Maintainers"
+    architect_reviewer: "0102 Technical Architect"
+    reviewer: "0102 Technical Architect"
+    review_date: "2026-Q3"
+    expires_on: "2026-09-30"
+    remediation: "ROADMAP.md#foundup-job-router-and-consumer-wsp62-decomposition"
+    no_growth_ceiling:
+      file_lines: 1112
+      functions:
+        _dispatch_to_hermes: 111
+        _attach_context_bundle_dry_run: 160
+        drain_openclaw_queue_with_retention: 94
