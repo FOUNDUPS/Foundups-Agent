@@ -86,6 +86,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_readonly_audit_task_executor import (
+    _audit_provider_call_evidence_from_binding,
+)
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
 )
@@ -226,6 +229,7 @@ class _EchoEvidenceModelRunner:
             model_receipt_id="model-receipt-1",
             model_result_digest="sha256:model-result-1",
             made_network_call=True,
+            provider_call_evidence=_audit_provider_call_evidence_from_binding(binding),
         )
 
 
@@ -300,11 +304,16 @@ def _allocation(**overrides):
     return payload
 
 
-def _valid_readonly_allocation(*, targets=("docs/work_ledger.schema.json",)):
+def _valid_readonly_allocation(
+    *,
+    targets=("docs/work_ledger.schema.json",),
+    runtime_binding=None,
+):
     return allocate_reddog_wsp15_receipt(
         requested_operation="signed_0102_readonly_review:redDog_runtime_security",
         prompt_text="RedDog OpenClaw signed 0102 read-only review runtime security audit.",
         allowed_read_targets=targets,
+        model_runtime_binding_receipt=runtime_binding,
     ).to_dict()
 
 
@@ -390,16 +399,20 @@ def _task_context():
     return dict(task.context)
 
 
-def _task_context_with_model_runtime_binding(runtime_binding=None):
+def _task_context_with_model_runtime_binding(
+    runtime_binding=None,
+    *,
+    intent_overrides=None,
+):
     runtime_binding = runtime_binding or model_runtime_binding_receipt(
         runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT
     )
-    allocation = _allocation()
+    allocation = _valid_readonly_allocation(runtime_binding=runtime_binding)
     binding_refs = {
         "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
-        "model_runtime_binding_digest": _digest(runtime_binding),
+        "model_runtime_binding_digest": allocation["model_runtime_binding_digest"],
     }
-    intent = _intent(allocation, **binding_refs)
+    intent = _intent(allocation, **binding_refs, **(intent_overrides or {}))
     result = runtime.publish_reddog_signed_worker_dispatch_runtime(
         worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
         work_state_snapshot=_snapshot(allocation, **binding_refs),
@@ -579,20 +592,15 @@ def test_signed_0102_readonly_runner_executes_architect_review_with_bound_target
     tmp_path: Path,
 ) -> None:
     repo = _repo_with_readonly_target(tmp_path)
-    allocation = _valid_readonly_allocation()
-    intent = _intent(
-        allocation,
-        intent_id="worker_dispatch_intent_fusion_lead",
-        role="fusion_lead",
-        worker_runtime="0102",
-        capability="architect_review",
+    context, _ = _task_context_with_model_runtime_binding(
+        intent_overrides={
+            "intent_id": "worker_dispatch_intent_fusion_lead",
+            "role": "fusion_lead",
+            "worker_runtime": "0102",
+            "capability": "architect_review",
+        }
     )
-    context = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
-        work_state_snapshot=_snapshot(allocation),
-        queue_item_id="queue-1",
-        writer=_CollectingWriter(),
-    ).tasks[0].context
+    allocation = context["wsp15_allocation_receipt"]
     model_runner = _EchoEvidenceModelRunner()
     runner = Signed0102ReadOnlyReviewRunner(
         model_runner=model_runner,
@@ -626,28 +634,14 @@ def test_signed_0102_readonly_runner_receives_model_runtime_binding_receipt(
     tmp_path: Path,
 ) -> None:
     repo = _repo_with_readonly_target(tmp_path)
-    allocation = _valid_readonly_allocation()
-    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT)
-    binding_refs = {
-        "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
-        "model_runtime_binding_digest": _digest(runtime_binding),
-    }
-    intent = _intent(
-        allocation,
-        intent_id="worker_dispatch_intent_fusion_lead",
-        role="fusion_lead",
-        worker_runtime="0102",
-        capability="architect_review",
-        **binding_refs,
+    context, runtime_binding = _task_context_with_model_runtime_binding(
+        intent_overrides={
+            "intent_id": "worker_dispatch_intent_fusion_lead",
+            "role": "fusion_lead",
+            "worker_runtime": "0102",
+            "capability": "architect_review",
+        }
     )
-    context = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
-        work_state_snapshot=_snapshot(allocation, **binding_refs),
-        queue_item_id="queue-1",
-        writer=_CollectingWriter(),
-    ).tasks[0].context
-    context = dict(context)
-    context["model_runtime_binding_receipt"] = runtime_binding
     model_runner = _EchoEvidenceModelRunner()
 
     result = execute_reddog_signed_worker_dispatch_task(
