@@ -23,6 +23,9 @@ wsp_cycle(input="idle_automation", log=True)
 - **LinkedIn Integration**: Social media posting with duplicate prevention
 - **Safety Controls**: Network checks, daily limits, environment opt-in
 - **YouTube DAE Integration**: Hook system for idle task execution
+- **Durable Schedule Claims (Phase 1)**: Canonical windows, one-owner leases,
+  exact-token finalization, restart idempotency, bounded retry/recovery, and
+  fail-closed atomic outside-repository state
 
 ## Development Phases
 
@@ -46,6 +49,8 @@ wsp_cycle(input="idle_automation", log=True)
 - **Performance Analytics**: Detailed execution metrics and optimization
 - **Multi-Platform Support**: Support for additional social media platforms
 - **Advanced Scheduling**: Time-based and event-based task triggers
+- **Schedule Fencing Phase 2**: Add side-effect fencing before allowing
+  non-repeat-safe routines or cross-logon-session Windows workers
 
 #### WSP Enhancements
 - **WSP 70 Status Reporting**: Enhanced status reporting capabilities

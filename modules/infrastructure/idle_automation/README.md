@@ -42,6 +42,16 @@ The Idle Automation module provides autonomous background tasks that execute whe
 - Prevents duplicate executions
 - Telemetry collection for optimization
 
+### Durable Scheduled-Routine Claims
+- `ScheduleEvaluator` remains the sole cadence/window owner.
+- Each due window receives a canonical SHA-256 execution ID.
+- The DAE durably claims exactly one window immediately before dispatch.
+- Exact opaque tokens finalize success or bounded retry state.
+- Completed windows remain idempotent across process restarts.
+- One expired-lease recovery and three total attempts are permitted.
+- Claim control state is stored under a trusted, private runtime root outside
+  the repository; schedule phrases cannot select its path.
+
 ### Safety & Controls
 - Opt-in configuration via environment variables
 - Network availability checks
@@ -75,6 +85,8 @@ wre_integration.record_idle_execution(
 - `AUTO_GIT_PUSH=true`: Enable automatic Git operations
 - `AUTO_LINKEDIN_POST=true`: Enable LinkedIn posting
 - `IDLE_TASK_TIMEOUT=300`: Maximum execution time per idle task
+- `AUTO_SCHEDULED_ROUTINES=true`: Enable scheduled safe-routine dispatch
+- `IDLE_AUTOMATION_RUNTIME_ROOT=...`: Trusted outside-repository claim-state root
 
 ### Safety Controls
 - `--no-auto-push` CLI flag to disable during testing
@@ -92,6 +104,9 @@ idle_automation/
 +-- __init__.py          # Module exports
 +-- src/
 [U+2502]   +-- idle_automation_dae.py    # Main DAE implementation
+[U+2502]   +-- schedule_evaluator.py     # Cadence/window ownership
+[U+2502]   +-- schedule_claim_state.py   # Claim lease state machine
+[U+2502]   +-- schedule_claim_codec.py   # Strict codec + atomic publication
 [U+2502]   +-- git_automation.py         # Git operations
 [U+2502]   +-- social_media_integration.py # Social media posting
 +-- tests/
@@ -132,3 +147,15 @@ print(f"Last execution: {status['last_run']}")
 ---
 
 *This module transforms idle time into productive autonomous operations per WSP 35 Module Execution Automation.*
+
+## Claim Safety Boundary
+
+The lease prevents concurrent cooperative workers from owning the same logical
+window. Recovery is intentionally at-least-once: after a wedged lease expires,
+an earlier worker may still finish while the recovery owner runs. Only
+repeat-safe or independently fenced routines may be added to scheduled
+dispatch.
+
+The runtime directory must be private and non-shared. On Windows, the reused
+`Local\` named-mutex boundary coordinates processes in the same logon session;
+it is not a cross-session service lock.

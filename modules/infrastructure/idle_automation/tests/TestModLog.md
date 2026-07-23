@@ -7,6 +7,31 @@
 
 ---
 
+## 2026-07-24: Durable Schedule Claim Lease Phase 1
+
+**Files**: `test_schedule_claim_state.py`, `test_schedule_evaluator.py`,
+`test_scheduled_routines_integration.py`
+
+- Proves two independent stores cannot double-claim one canonical window.
+- Proves active-lease blocking, one expiry recovery, and stale-token rejection.
+- Proves restart completion idempotency and 60/300/max-three failure retry.
+- Proves malformed, partial, duplicate-key, timestamp-order, and token-collision
+  state fails closed without mutation.
+- Proves writer and wrong-success replacer failures preserve exact prior bytes
+  and leave no owned temp files.
+- Proves outside-repository confinement and payload path non-influence.
+- Proves disabled/unknown/out-of-window schedules create no claim.
+- Proves DAE performs zero dispatch on claim uncertainty and treats finalize
+  failure as completion unknown without legacy `last_run`.
+
+**Focused Result**: `83 passed`
+
+**Full Module Result**: `117 passed, 1 pre-existing failure`
+
+**Neighbor Runtime Safety**: `11 passed, 1 skipped`
+
+---
+
 ## 2026-03-27: Caller Wiring + Runtime Emitter Instrumentation
 
 **File**: `test_caller_wiring.py`

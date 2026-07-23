@@ -23,6 +23,9 @@ from modules.infrastructure.idle_automation.src.schedule_evaluator import (
     CADENCE_WINDOWS,
     get_supported_phrases,
 )
+from modules.infrastructure.idle_automation.src.schedule_claim_state import (
+    LEASE_SECONDS,
+)
 
 
 class TestScheduleParser:
@@ -292,3 +295,80 @@ class TestScheduleSpec:
         assert restored.phrase == spec.phrase
         assert restored.routine == spec.routine
         assert restored.last_run == spec.last_run
+
+
+class TestDurableScheduleClaims:
+    """Test evaluator-to-claim-store integration boundaries."""
+
+    def test_two_due_windows_are_claimed_one_at_a_time(self, tmp_path):
+        evaluator = ScheduleEvaluator(schedules_path=tmp_path / "schedules.json")
+        first = evaluator.add_schedule("run self research daily")
+        second = evaluator.add_schedule("run queue audit daily")
+        now = datetime(2026, 7, 24, 1, tzinfo=UTC)
+
+        first_claim = evaluator.claim_schedule(first, now=now)
+        assert first_claim is not None
+        state = json.loads(
+            evaluator.claim_store.state_path.read_text(encoding="utf-8")
+        )
+        assert list(state["executions"]) == [first_claim.execution_id]
+
+        second_claim = evaluator.claim_schedule(second, now=now)
+        assert second_claim is not None
+        assert second_claim.execution_id != first_claim.execution_id
+
+    def test_next_cadence_window_has_new_execution_id(self, tmp_path):
+        evaluator = ScheduleEvaluator(schedules_path=tmp_path / "schedules.json")
+        spec = evaluator.add_schedule("run self research daily")
+        first_now = datetime(2026, 7, 24, 1, tzinfo=UTC)
+        first = evaluator.claim_schedule(spec, now=first_now)
+        assert first is not None
+        assert evaluator.finalize_claim(
+            first.token,
+            success=True,
+            outcome_code="success",
+            now=first_now,
+        )
+
+        second = evaluator.claim_schedule(
+            spec, now=first_now + timedelta(days=1)
+        )
+        assert second is not None
+        assert second.execution_id != first.execution_id
+
+    def test_disabled_or_unknown_schedule_is_never_claimed(self, tmp_path):
+        evaluator = ScheduleEvaluator(schedules_path=tmp_path / "schedules.json")
+        spec = evaluator.add_schedule("run self research daily")
+        now = datetime(2026, 7, 24, 1, tzinfo=UTC)
+        evaluator.set_enabled(spec.id, False)
+        assert evaluator.claim_schedule(spec, now=now) is None
+        unknown = ScheduleSpec(
+            id="unknown",
+            phrase="unknown",
+            routine="not_supported",
+            cadence="daily",
+        )
+        assert evaluator.claim_schedule(unknown, now=now) is None
+        assert not evaluator.claim_store.state_path.exists()
+
+    def test_before_cadence_window_is_never_claimed(self, tmp_path):
+        evaluator = ScheduleEvaluator(schedules_path=tmp_path / "schedules.json")
+        spec = evaluator.add_schedule("run self research morning")
+        before = datetime(2026, 7, 24, 5, 59, tzinfo=UTC)
+        assert evaluator.claim_schedule(spec, now=before) is None
+        assert not evaluator.claim_store.state_path.exists()
+
+    def test_claim_lease_exceeds_maximum_dispatch_timeout(self):
+        assert LEASE_SECONDS >= 3660
+
+    def test_payload_like_phrase_cannot_select_claim_path(self, tmp_path):
+        untrusted = tmp_path / "payload-owned"
+        evaluator = ScheduleEvaluator(schedules_path=tmp_path / "schedules.json")
+        phrase = f"run self research daily runtime_root={untrusted}"
+        spec = evaluator.add_schedule(phrase)
+        claim = evaluator.claim_schedule(
+            spec, now=datetime(2026, 7, 24, 1, tzinfo=UTC)
+        )
+        assert claim is not None
+        assert evaluator.claim_store.runtime_root != untrusted
+        assert not untrusted.exists()

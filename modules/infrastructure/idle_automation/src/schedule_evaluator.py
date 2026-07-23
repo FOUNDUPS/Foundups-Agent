@@ -17,11 +17,20 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import re
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+from modules.infrastructure.idle_automation.src.schedule_claim_state import (
+    ScheduleClaim,
+    ScheduleClaimOps,
+    ScheduleClaimStore,
+    ScheduleWindow,
+    build_execution_id,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -179,18 +188,35 @@ class ScheduleParser:
 class ScheduleEvaluator:
     """Evaluate and manage scheduled OpenClaw routines."""
 
-    def __init__(self, schedules_path: Optional[Path] = None):
+    def __init__(
+        self,
+        schedules_path: Optional[Path] = None,
+        *,
+        runtime_root: Optional[Path] = None,
+        repo_root: Optional[Path] = None,
+        claim_ops: Optional[ScheduleClaimOps] = None,
+    ):
         """
         Initialize schedule evaluator.
 
         Args:
             schedules_path: Path to schedules.json. Defaults to module memory dir.
         """
-        if schedules_path is None:
+        explicit_schedules_path = schedules_path is not None
+        if not explicit_schedules_path:
             module_path = Path(__file__).parent.parent
             schedules_path = module_path / "memory" / "schedules.json"
         self.schedules_path = Path(schedules_path)
         self.schedules_path.parent.mkdir(parents=True, exist_ok=True)
+        repository = repo_root or Path(__file__).resolve().parents[4]
+        claim_root = runtime_root or _default_claim_root(
+            self.schedules_path, explicit_schedules_path, Path(repository)
+        )
+        self.claim_store = ScheduleClaimStore(
+            repo_root=repository,
+            runtime_root=claim_root,
+            ops=claim_ops,
+        )
         self._schedules: Dict[str, ScheduleSpec] = {}
         self._load_schedules()
 
@@ -283,56 +309,53 @@ class ScheduleEvaluator:
         2. Current hour is within the cadence window
         3. It hasn't run during the current cadence window
         """
-        if now is None:
-            now = utc_now()
+        current = _utc_value(now or utc_now())
+        return [
+            spec
+            for spec in self._schedules.values()
+            if _schedule_is_due(spec, current)
+        ]
 
-        due = []
-        current_hour = now.hour
+    def claim_schedule(
+        self,
+        spec: ScheduleSpec,
+        *,
+        now: Optional[datetime] = None,
+    ) -> Optional[ScheduleClaim]:
+        """Durably claim one currently due schedule immediately before dispatch."""
 
-        for spec in self._schedules.values():
-            if not spec.enabled:
-                continue
+        current = _utc_value(now or utc_now())
+        known = self._schedules.get(spec.id)
+        if (
+            known is None
+            or not known.enabled
+            or known.routine != spec.routine
+            or known.cadence != spec.cadence
+            or known.routine not in SUPPORTED_ROUTINES
+            or known.cadence not in CADENCE_WINDOWS
+        ):
+            return None
+        window = _schedule_window(known, current)
+        if window is None:
+            return None
+        return self.claim_store.claim_window(window, now=current)
 
-            window = CADENCE_WINDOWS.get(spec.cadence)
-            if window is None:
-                continue
+    def finalize_claim(
+        self,
+        token: str,
+        *,
+        success: bool,
+        outcome_code: str,
+        now: Optional[datetime] = None,
+    ) -> bool:
+        """Finalize only the current exact durable claim token."""
 
-            # Check if current hour is within window
-            start_hour = window["start_hour"]
-            end_hour = window["end_hour"]
-            in_window = start_hour <= current_hour < end_hour
-
-            if not in_window:
-                continue
-
-            # Check if already ran in this window
-            if spec.last_run:
-                try:
-                    last_run_dt = datetime.fromisoformat(
-                        spec.last_run.replace("Z", "+00:00")
-                    )
-                    if last_run_dt.tzinfo is None:
-                        last_run_dt = last_run_dt.replace(tzinfo=UTC)
-
-                    # Calculate window start for today
-                    window_start = now.replace(
-                        hour=start_hour, minute=0, second=0, microsecond=0
-                    )
-                    if spec.cadence == "daily":
-                        # For daily, window starts at midnight of current day
-                        window_start = now.replace(
-                            hour=0, minute=0, second=0, microsecond=0
-                        )
-
-                    # If last run is after window start, skip
-                    if last_run_dt >= window_start:
-                        continue
-                except ValueError:
-                    pass  # Invalid timestamp, treat as never run
-
-            due.append(spec)
-
-        return due
+        return self.claim_store.finalize(
+            token,
+            success=success,
+            outcome_code=outcome_code,
+            now=_utc_value(now or utc_now()),
+        )
 
     def record_execution(
         self, spec_id: str, success: bool, result_summary: str
@@ -372,3 +395,83 @@ def get_supported_phrases() -> List[str]:
         for cadence in CADENCE_WINDOWS:
             examples.append(f"run {primary_alias} {cadence}")
     return examples
+
+
+def _default_claim_root(
+    path: Path, explicit_path: bool, repo_root: Path
+) -> Path:
+    configured = os.getenv("IDLE_AUTOMATION_RUNTIME_ROOT", "").strip()
+    if configured:
+        return Path(configured).expanduser()
+    if explicit_path and not _is_within(path.parent, repo_root):
+        return path.parent / "claim-runtime"
+    return Path.home() / ".foundups-agent" / "idle_automation"
+
+
+def _is_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def _utc_value(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def _schedule_window(
+    spec: ScheduleSpec, now: datetime
+) -> Optional[ScheduleWindow]:
+    bounds = CADENCE_WINDOWS.get(spec.cadence)
+    if bounds is None:
+        return None
+    start = now.replace(
+        hour=bounds["start_hour"], minute=0, second=0, microsecond=0
+    )
+    end_hour = bounds["end_hour"]
+    end = (
+        now.replace(hour=end_hour, minute=0, second=0, microsecond=0)
+        if end_hour < 24
+        else now.replace(hour=0, minute=0, second=0, microsecond=0)
+        + timedelta(days=1)
+    )
+    if not start <= now < end:
+        return None
+    start_text, end_text = start.isoformat(), end.isoformat()
+    execution_id = build_execution_id(
+        spec.id, spec.routine, spec.cadence, start_text, end_text
+    )
+    return ScheduleWindow(
+        schedule_id=spec.id,
+        routine=spec.routine,
+        cadence=spec.cadence,
+        window_start=start_text,
+        window_end=end_text,
+        execution_id=execution_id,
+    )
+
+
+def _schedule_is_due(spec: ScheduleSpec, now: datetime) -> bool:
+    if not spec.enabled:
+        return False
+    bounds = CADENCE_WINDOWS.get(spec.cadence)
+    if bounds is None:
+        return False
+    if not bounds["start_hour"] <= now.hour < bounds["end_hour"]:
+        return False
+    if not spec.last_run:
+        return True
+    try:
+        last_run = _utc_value(
+            datetime.fromisoformat(spec.last_run.replace("Z", "+00:00"))
+        )
+    except ValueError:
+        return True
+    start_hour = 0 if spec.cadence == "daily" else bounds["start_hour"]
+    window_start = now.replace(
+        hour=start_hour, minute=0, second=0, microsecond=0
+    )
+    return last_run < window_start

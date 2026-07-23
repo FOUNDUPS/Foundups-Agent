@@ -136,6 +136,8 @@ if result["overall_success"]:
 | `AUTO_LINKEDIN_POST` | bool | `true` | Enable LinkedIn posting |
 | `IDLE_TASK_TIMEOUT` | int | `300` | Maximum execution time (seconds) |
 | `MAX_DAILY_EXECUTIONS` | int | `3` | Maximum executions per day |
+| `AUTO_SCHEDULED_ROUTINES` | bool | `true` | Enable scheduled routine claims and dispatch |
+| `IDLE_AUTOMATION_RUNTIME_ROOT` | path | `~/.foundups-agent/idle_automation` | Trusted private claim-state root outside the repository |
 
 ### Safety Controls
 
@@ -231,6 +233,36 @@ All external dependencies can be mocked for testing:
 - Network checks via connectivity mocking
 - LinkedIn API via bridge mocking
 - WRE integration via mock objects
+
+## Scheduled Claim Interface
+
+### `ScheduleEvaluator.claim_schedule(spec, *, now=None)`
+
+Computes the canonical cadence window and asks `ScheduleClaimStore` to publish
+one durable claim. It returns `ScheduleClaim` only after the fixed
+`schedule_claim_state.json` artifact is atomically published under the trusted
+runtime root. Disabled, unknown, out-of-window, completed, actively leased, and
+backoff-blocked schedules return `None`.
+
+### `ScheduleEvaluator.finalize_claim(token, *, success, outcome_code, now=None)`
+
+Performs exact-token compare-and-set finalization. A token that expired may
+finalize only while it remains current; recovery immediately makes the old
+token stale. Outcome state stores only bounded codes or a digest, never raw
+dispatcher text.
+
+### Durability Contract
+
+- Maximum claim lease: 3900 seconds, exceeding the 3600-second bounded routine
+  timeout plus margin.
+- Retry policy: 60 seconds, then 300 seconds; maximum three attempts.
+- Lease recovery: at most one expired-claim recovery per window.
+- Publication: same-directory temp, fsync, replace, post-replace byte proof,
+  and exact last-known-good restoration on uncertain replacer behavior.
+- Malformed, partial, duplicate-key, oversized, or noncanonical state fails
+  closed before dispatch.
+- Claims provide cooperative single ownership, not exactly-once side effects;
+  registered routines must be repeat-safe or independently fenced.
 
 ## WSP Compliance Matrix
 

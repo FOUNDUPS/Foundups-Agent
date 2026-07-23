@@ -12,6 +12,49 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-07-24 - Durable Schedule Claim Lease Phase 1
+
+**WSP Protocol**: WSP 15, WSP 22, WSP 62, WSP 97
+**Phase**: P0 autonomous scheduling correctness
+**Agent**: 0102
+
+#### Problem
+
+Scheduled dispatch used a non-atomic `get_due -> await dispatch ->
+record_execution` sequence. Independent workers could observe the same due
+schedule and both execute it; crashes also left no authoritative retry or
+completion boundary.
+
+#### Solution
+
+- Kept `ScheduleEvaluator` as the single cadence/window owner.
+- Added canonical full SHA-256 window execution IDs.
+- Added trusted outside-repository `schedule_claim_state.json`.
+- Added one-window durable leases with opaque exact-token finalization.
+- Added restart idempotency, one lease recovery, three attempts, and 60/300
+  second backoff.
+- Added strict malformed/partial/duplicate/cap validation, bounded retention,
+  content-free outcomes, atomic publication proof, and exact LKG restoration.
+- Changed DAE ordering to claim immediately before dispatch and finalize before
+  recording successful legacy `last_run`; failed attempts no longer suppress
+  their bounded retry.
+
+#### Safety Boundary
+
+Lease recovery is at-least-once and therefore permits only repeat-safe or
+independently fenced routines. The Windows `Local\` mutex coordinates the same
+logon session, not cross-session services.
+
+#### Tests
+
+- 83 focused claim/evaluator/DAE tests pass.
+- Full module run: 117 passed; one unrelated pre-existing startup HoloIndex
+  mock-target mismatch remains outside this lane.
+- Neighbor runtime safety: 11 passed, 1 skipped.
+- Adversarial coverage includes concurrency, stale tokens, expiry recovery,
+  retry cap, malformed state, exact LKG preservation, path confinement,
+  retention, disabled zero-dispatch, and completion-unknown finalization.
+
 ### 2026-03-27 - Cross-Surface Continuity Wiring (triggering_session)
 
 **WSP Protocol**: WSP 22, WSP 54 (Multi-Agent Coordination)
