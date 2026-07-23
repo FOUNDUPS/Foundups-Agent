@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Optional, Protocol
 
@@ -13,6 +14,9 @@ from .foundup_job_model_capability_projection import (
 )
 from .foundup_job_router import RouteStatus
 from .foundup_job_validate_snapshot import freeze_validate_foundup_job
+
+
+_SHA256_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 
 
 @dataclass(frozen=True)
@@ -160,11 +164,15 @@ def _trusted_binding(
             type(supply) is not TrustedModelRuntimeBindingArtifact
             or type(supply.provenance) is not str
             or not supply.provenance
-            or supply.artifact is None
-            or supply.artifact_digest is None
         ):
             return object(), "invalid"
-        return supply.artifact, supply.artifact_digest
+        artifact = supply.artifact
+        digest = supply.artifact_digest
+        if type(artifact) is not dict or type(digest) is not str:
+            return object(), "invalid"
+        if _SHA256_DIGEST.fullmatch(digest) is None:
+            return object(), "invalid"
+        return artifact, digest
     except Exception:
         return object(), "invalid"
 

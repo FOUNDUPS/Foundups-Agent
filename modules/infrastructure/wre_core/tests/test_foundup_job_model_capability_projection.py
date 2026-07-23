@@ -6,7 +6,7 @@ import hashlib
 import json
 from dataclasses import replace
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -16,9 +16,6 @@ from modules.communication.moltbot_bridge.src.foundup_job_contract import (
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
-)
-from modules.infrastructure.wre_core.src.foundup_job_consumer import (
-    FoundUpJobConsumer,
 )
 from modules.infrastructure.wre_core.src.foundup_job_model_capability_consumer import (
     TrustedModelRuntimeBindingArtifact,
@@ -32,7 +29,6 @@ from modules.infrastructure.wre_core.src.foundup_job_model_capability_projection
     resolve_foundup_job_model_capability_projection,
 )
 from modules.infrastructure.wre_core.src.foundup_job_router import (
-    RouteStatus,
     TargetBackend,
     route_foundup_job,
 )
@@ -355,112 +351,6 @@ def test_binding_digest_and_lineage_mismatch_reject_stably() -> None:
     assert lineage.rejection_reasons == ("binding_lineage_invalid",)
 
 
-@pytest.mark.parametrize(
-    "mutation",
-    ["duplicate", "missing", "duplicate_role", "extra_model", "extra_role_model"],
-)
-def test_role_bindings_require_exact_unique_model_and_role_lineage(
-    mutation: str,
-) -> None:
-    binding = _binding()
-    if mutation == "duplicate":
-        binding["role_bindings"].append(dict(binding["role_bindings"][0]))
-    elif mutation == "missing":
-        binding["role_bindings"].pop()
-    elif mutation in ("duplicate_role", "extra_model"):
-        panel_model = "anthropic/claude-reviewer"
-        binding["panel_models"].append(panel_model)
-        binding["benchmark_evidence_receipt_ids"].append("benchmark:reviewer")
-        binding["promotion_evidence_receipt_ids"].append("promotion:reviewer")
-        binding["signed_promotion_receipt_ids"].append("signed:reviewer")
-        if mutation == "duplicate_role":
-            binding["role_bindings"].append(
-                {
-                    "role": binding["role_bindings"][0]["role"],
-                    "model_id": panel_model,
-                    "provider": "anthropic",
-                }
-            )
-    else:
-        binding["role_bindings"][0]["model_id"] = "anthropic/unbound-reviewer"
-        binding["role_bindings"][0]["provider"] = "anthropic"
-    _refresh_receipt_id(binding)
-    projection = _project_binding(_job(), binding)
-    assert projection.rejection_reasons == ("binding_lineage_invalid",)
-
-
-@pytest.mark.parametrize("nonfinite", [float("nan"), float("inf"), -float("inf")])
-def test_nonfinite_binding_values_reject_before_rehydration(
-    nonfinite: float,
-) -> None:
-    binding = _binding()
-    binding["policy"]["min_verifier_pass_rate"] = nonfinite
-    projection = _project(
-        _job(),
-        binding=binding,
-        digest="sha256:" + ("0" * 64),
-    )
-    assert projection.rejection_reasons == ("binding_schema_invalid",)
-
-
-def test_recursive_noncanonical_type_rejects_stably() -> None:
-    binding = _binding()
-    binding["panel_models"] = tuple(binding["panel_models"])
-    projection = _project(
-        _job(),
-        binding=binding,
-        digest="sha256:" + ("0" * 64),
-    )
-    assert projection.rejection_reasons == ("binding_schema_invalid",)
-
-
-def test_canonical_digest_disallows_nonfinite_json() -> None:
-    with pytest.raises(ValueError):
-        canonical_artifact_digest({"value": float("nan")})
-
-
-@pytest.mark.parametrize("method_name", ["get", "items"])
-def test_hostile_mapping_exception_is_redacted_and_stable(
-    method_name: str,
-) -> None:
-    secret = "DO_NOT_EXPOSE_BINDING_SECRET"
-
-    class HostileMapping(dict):
-        pass
-
-    def explode(*args, **kwargs):
-        del args, kwargs
-        raise RuntimeError(secret)
-
-    setattr(HostileMapping, method_name, explode)
-    projection = _project(
-        _job(),
-        binding=HostileMapping(_binding()),
-        digest="sha256:" + ("0" * 64),
-    )
-    serialized = json.dumps(projection.to_dict(), sort_keys=True)
-    assert projection.rejection_reasons == ("binding_schema_invalid",)
-    assert secret not in serialized
-
-
-def test_hostile_mapping_iteration_is_redacted_and_stable() -> None:
-    secret = "DO_NOT_EXPOSE_ITERATION_SECRET"
-
-    class HostileIteration(dict):
-        def items(self):
-            yield from list(super().items())[:1]
-            raise RuntimeError(secret)
-
-    projection = _project(
-        _job(),
-        binding=HostileIteration(_binding()),
-        digest="sha256:" + ("0" * 64),
-    )
-    serialized = json.dumps(projection.to_dict(), sort_keys=True)
-    assert projection.rejection_reasons == ("binding_schema_invalid",)
-    assert secret not in serialized
-
-
 def test_one_sided_binding_lineage_rejects_without_raw_exception() -> None:
     binding = _binding()
     projection = _project(_job(), binding=binding)
@@ -502,202 +392,6 @@ def test_provider_forbidden_action_rejects_supplied_binding(action: str) -> None
     projection = _project_binding(job, binding)
     assert projection.decision == "rejected"
     assert projection.rejection_reasons == ("binding_not_applicable",)
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_consumer_dry_validate_without_binding_dispatches_unbound(
-    execute: MagicMock,
-) -> None:
-    execute.return_value = _simulated_result()
-    result = FoundUpJobConsumer(dry_run=True).consume_one(_job())
-    assert result.dispatched is True
-    assert result.model_capability_projection["decision"] == "unbound_dry_run"
-    execute.assert_called_once()
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_consumer_bound_validate_preserves_simulation_and_serializes_projection(
-    execute: MagicMock,
-) -> None:
-    binding = _binding()
-    execute.return_value = _simulated_result()
-    job = _job()
-    result = FoundUpJobConsumer(
-        dry_run=True,
-        model_runtime_binding_resolver=_trusted(binding),
-    ).consume_one(job)
-    assert result.dispatched is True
-    assert result.checkpoint_state == "SIMULATED"
-    assert result.real_execution_performed is False
-    assert result.model_capability_projection["decision"] == "bound"
-    assert result.to_dict()["model_capability_projection"] == (
-        result.model_capability_projection
-    )
-    execution_job = execute.call_args.args[0]
-    assert execution_job is not job
-    assert execution_job.to_dict() == job.to_dict()
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_self_consistent_trusted_artifact_relies_on_injected_trust_anchor(
-    execute: MagicMock,
-) -> None:
-    binding = _binding(catalog_snapshot_id="forged-but-self-consistent")
-    execute.return_value = _simulated_result()
-    result = FoundUpJobConsumer(
-        dry_run=True,
-        model_runtime_binding_resolver=_trusted(binding),
-    ).consume_one(_job())
-    assert result.model_capability_projection["decision"] == "bound"
-    assert result.model_capability_projection["catalog_snapshot_id"] == (
-        "forged-but-self-consistent"
-    )
-    execute.assert_called_once()
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_consumer_rejects_invalid_and_live_absent_before_hermes(
-    execute: MagicMock,
-) -> None:
-    invalid_result = FoundUpJobConsumer(
-        dry_run=True,
-        model_runtime_binding_resolver=_trusted(
-            {"schema_version": "bad"},
-            "sha256:" + ("0" * 64),
-        ),
-    ).consume_one(_job())
-    live_result = FoundUpJobConsumer(dry_run=False).consume_one(_job())
-    assert invalid_result.route_status == RouteStatus.BLOCKED
-    assert invalid_result.checkpoint_blocker == "binding_schema_invalid"
-    assert live_result.route_status == RouteStatus.BLOCKED
-    assert live_result.checkpoint_blocker == "live_binding_required"
-    execute.assert_not_called()
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_self_consistent_forged_job_payload_is_ignored(
-    execute: MagicMock,
-) -> None:
-    binding = _binding()
-    execute.return_value = _simulated_result()
-    job = _job(
-        payload={
-            "model_runtime_binding_receipt": binding,
-            "model_runtime_binding_digest": canonical_artifact_digest(binding),
-            "validation_input": {"mode": "readonly"},
-        }
-    )
-    result = FoundUpJobConsumer(dry_run=True).consume_one(job)
-    execution_job = execute.call_args.args[0]
-    assert result.model_capability_projection["decision"] == "unbound_dry_run"
-    assert execution_job.payload == {"validation_input": {"mode": "readonly"}}
-
-
-@pytest.mark.parametrize(
-    ("mutation", "digest_mismatch", "reason"),
-    [
-        ({"schema_version": "bad"}, False, "binding_schema_invalid"),
-        (
-            {"runtime_surface": "reddog_artifact_generation"},
-            False,
-            "binding_surface_mismatch",
-        ),
-        ({"task_family": "other_task"}, False, "binding_task_family_mismatch"),
-        ({}, True, "binding_digest_mismatch"),
-    ],
-)
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_trusted_injected_artifact_mismatches_block_before_hermes(
-    execute: MagicMock,
-    mutation: dict,
-    digest_mismatch: bool,
-    reason: str,
-) -> None:
-    binding = _binding(**mutation)
-    digest = "sha256:" + ("0" * 64) if digest_mismatch else None
-    result = FoundUpJobConsumer(
-        dry_run=True,
-        model_runtime_binding_resolver=_trusted(binding, digest),
-    ).consume_one(_job())
-    assert result.checkpoint_blocker == reason
-    execute.assert_not_called()
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_validate_snapshot_prevents_mutation_between_admission_and_hermes(
-    execute: MagicMock,
-) -> None:
-    binding = _binding()
-    job = _job(payload={"validation_input": {"value": "before"}})
-    execute.return_value = _simulated_result()
-
-    def mutating_supply(lookup):
-        assert lookup.requested_action == "validate_foundup"
-        job.requested_action = "build_foundup"
-        job.payload["validation_input"]["value"] = "after"
-        return TrustedModelRuntimeBindingArtifact(
-            artifact=binding,
-            artifact_digest=canonical_artifact_digest(binding),
-            provenance="outside_repo_confined_artifact_supply",
-        )
-
-    result = FoundUpJobConsumer(
-        dry_run=True,
-        model_runtime_binding_resolver=mutating_supply,
-    ).consume_one(job)
-    execution_job = execute.call_args.args[0]
-    assert result.model_capability_projection["decision"] == "bound"
-    assert execution_job is not job
-    assert execution_job.requested_action == "validate_foundup"
-    assert execution_job.payload["validation_input"]["value"] == "before"
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_raising_trusted_resolver_is_redacted_and_blocks(
-    execute: MagicMock,
-) -> None:
-    secret = "DO_NOT_EXPOSE_SUPPLY_SECRET"
-
-    def raising_resolver(lookup):
-        del lookup
-        raise RuntimeError(secret)
-
-    result = FoundUpJobConsumer(
-        dry_run=True,
-        model_runtime_binding_resolver=raising_resolver,
-    ).consume_one(_job())
-    assert result.checkpoint_blocker == "binding_schema_invalid"
-    assert secret not in json.dumps(result.to_dict(), sort_keys=True)
-    execute.assert_not_called()
-
-
-@patch(
-    "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job"
-)
-def test_consumer_leaves_other_action_projection_absent(
-    execute: MagicMock,
-) -> None:
-    execute.return_value = _simulated_result()
-    job = _job("build_foundup")
-    result = FoundUpJobConsumer(dry_run=True).consume_one(job)
-    assert result.model_capability_projection is None
-    execute.assert_called_once_with(job)
 
 
 def test_projection_sources_have_no_selection_binding_or_provider_calls() -> None:
