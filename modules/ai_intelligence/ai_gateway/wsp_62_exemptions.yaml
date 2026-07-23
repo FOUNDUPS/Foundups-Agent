@@ -34,33 +34,18 @@ exemptions:
     remediation: "ROADMAP.md#configured-autoresearch-bootstrap-decomposition"
   - file: "src/model_autoresearch_semantic_verifier.py"
     reason: >-
-      The inherited semantic-verifier factory remains exactly 96 lines. This
-      corrective security slice changes duplicate-role rejection without
-      mixing a broad evaluator refactor into the evidence migration.
+      The inherited semantic-verifier factory and closure remain exactly 96
+      and 83 lines. This corrective security slice changes duplicate-role
+      rejection without mixing a broad evaluator refactor into the evidence
+      migration.
     function_threshold_override: 96
     functions:
       - "build_model_autoresearch_output_evidence_semantic_verifier"
-    no_growth_ceiling:
-      file_lines: 462
-      functions:
-        build_model_autoresearch_output_evidence_semantic_verifier: 96
-    temporary: true
-    owner: "AI Gateway Maintainers"
-    expires_on: "2026-09-30"
-    review_date: "2026-09-30"
-    reviewer: "0102 Technical Architect"
-    remediation: "ROADMAP.md#configured-autoresearch-semantic-verifier-decomposition"
-  - file: "src/model_autoresearch_semantic_verifier.py"
-    reason: >-
-      The inherited semantic-verifier closure remains exactly 83 lines. This
-      corrective security slice changes duplicate-role rejection without
-      mixing a broad evaluator refactor into the evidence migration.
-    function_threshold_override: 83
-    functions:
       - "_verifier"
     no_growth_ceiling:
       file_lines: 462
       functions:
+        build_model_autoresearch_output_evidence_semantic_verifier: 96
         _verifier: 83
     temporary: true
     owner: "AI Gateway Maintainers"

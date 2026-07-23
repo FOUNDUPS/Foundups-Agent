@@ -23,7 +23,7 @@ budget claims as canonical catalog facts.
 | Assumption | Current evidence | Confidence |
 |---|---|---|
 | Configured mode remains default-off | Root startup default is `deterministic_fixture`; configured admission requires explicit paths, allowlist, total-call cap, and mode | High |
-| A complete campaign can be rejected before its first provider call | Rehydrated plan/candidates/tasks produce an exact selected-role × task count checked against `runner_max_total_calls` | High |
+| A complete campaign can be rejected before its first provider call | Rehydrated plan/candidates/tasks produce an exact selected-role x normalized-task count checked against `runner_max_total_calls` | High |
 | Phase 1 can execute multi-call or panel campaigns safely | False: configured admission requires exactly one executable planned call and rejects every multi-call or panel campaign before caller entry | High |
 | Provider route aliases are not authorized | Candidate assignment suffix must equal `api_model`; no trusted alias mapping exists | High |
 | Prompt egress is bounded and inspected | Source digest, final wrapped character limit, and canonical audit-only guard are checked before caller entry | High |
@@ -31,6 +31,8 @@ budget claims as canonical catalog facts.
 | Budget/catalog metadata is trustworthy | The bundle contains an operator-supplied self-authenticated catalog-claim digest, but is not reconciled with the canonical catalog | Low |
 | Reported token usage proves actual provider usage | The adapter currently derives whitespace estimates unless an injected caller supplies usage; no authoritative provider-usage receipt is bound | Low |
 | Response buffering proves the campaign output cap | The transport may buffer up to the gateway's global 1 MiB response bound; this is not a model-budget-specific byte bound | Low |
+| Runtime input and receipt reads are allocation-bounded | False: current JSON and JSONL readers use whole-file reads | High |
+| Preflight path freshness and alias checks remain stable through execution | False: no exclusive runtime-directory claim prevents path replacement between check and use | High |
 
 ## 3. High-impact failure modes and mitigations
 
@@ -43,6 +45,8 @@ budget claims as canonical catalog facts.
 | Terminal completion persistence fails after durable evidence append | Indeterminate result and orphan evidence; no success receipt for semantic admission | Operator cleanup/reconciliation is required |
 | Duplicate same-role evidence is hidden by map collapse | Semantic verifier retains all matching records and rejects duplicate roles | None within the deterministic verifier |
 | Live cost/usage exceeds local estimates | Live execution is halted | Requires authoritative provider usage and bounded response handling |
+| A large input or receipt file causes unbounded allocation | Live execution is halted | Requires bounded streaming readers with explicit byte/record/depth limits |
+| A runtime artifact is replaced after preflight | Live execution is halted | Requires an exclusive runtime-directory claim or equivalent identity-preserving check/use boundary |
 
 ## 4. Alternatives considered
 
@@ -70,7 +74,10 @@ phase B supplies:
   reasoning and sampling controls;
 - authoritative provider-reported usage bound into receipts; and
 - model-budget-specific bounded response-byte handling, or an equivalent
-  independently verified transport bound.
+  independently verified transport bound;
+- bounded streaming reads for every input and receipt artifact; and
+- an exclusive runtime-directory claim, or an equivalent identity-preserving
+  freshness and alias boundary across preflight and execution.
 
 This audit expires for any future live-activation decision 48 hours after
 2026-07-24, or immediately when any cited contract, provider catalog, endpoint,

@@ -280,7 +280,7 @@ cost totals, and reject tampering.
 
 Configured bootstrap callers must also provide `runner_max_total_calls` and a
 canonical positive Decimal string for per-sample cost. Before runner
-construction it checks the complete selected-role × normalized-task call count,
+construction it checks the complete selected-role x normalized-task call count,
 all selected assignment budgets, canonical path non-aliasing, and absent/empty
 write targets. The runner checks each final wrapped prompt size before prompt
 guard evaluation or caller entry.
@@ -323,7 +323,9 @@ startup behavior remains `deterministic_fixture`.
 
 Live configured-provider execution is a phase-B NO-GO until canonical catalog
 admission, authoritative provider usage receipts, and a model-budget-specific
-bounded response-byte contract are present.
+bounded response-byte contract are present, and every input/receipt read and
+preflight path identity is protected by bounded streaming and an exclusive
+runtime-directory claim or equivalent identity-preserving boundary.
 
 #### Model Combination Benchmark Harness
 

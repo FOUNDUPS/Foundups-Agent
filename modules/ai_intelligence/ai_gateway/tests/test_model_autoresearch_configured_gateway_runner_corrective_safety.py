@@ -144,11 +144,11 @@ def test_inherited_wsp62_exemptions_are_exact_no_growth_ceils() -> None:
         "build_model_autoresearch_output_evidence_semantic_verifier": 96,
         "_verifier": 83,
     }
-    entries = {
-        entry["functions"][0]: entry
-        for entry in config["exemptions"]
-        if entry.get("functions", [None])[0] in expected
-    }
+    entries = {}
+    for entry in config["exemptions"]:
+        for name in entry.get("functions", []):
+            if name in expected:
+                entries[name] = entry
     assert set(entries) == set(expected)
     for name, ceiling in expected.items():
         entry = entries[name]
@@ -158,4 +158,8 @@ def test_inherited_wsp62_exemptions_are_exact_no_growth_ceils() -> None:
         assert no_growth["file_lines"] == len(
             target.read_text(encoding="utf-8").splitlines()
         )
-        assert no_growth["functions"] == {name: ceiling}
+        assert no_growth["functions"][name] == ceiling
+        assert set(no_growth["functions"]) == set(entry["functions"])
+        assert entry["function_threshold_override"] == max(
+            expected[item] for item in entry["functions"]
+        )

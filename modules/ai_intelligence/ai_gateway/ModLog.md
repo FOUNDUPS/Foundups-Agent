@@ -29,14 +29,16 @@ call and performs no live comparative canary.
 **WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
 
 **Corrective safety gate:** Campaign admission now computes the complete
-selected-role × task call count and requires exactly one executable planned
+selected-role x task call count and requires exactly one executable planned
 call in this POC. It also requires an explicit total-call cap, exact budget for
 every selected assignment, canonical positive Decimal strings, exact
 provider/API routes, distinct empty write artifacts, bounded final prompts,
 durable output evidence before completion, and duplicate-role rejection.
 Multi-call and panel campaigns remain halted pending atomic whole-campaign
 preparation. Live execution remains halted pending canonical catalog admission,
-authoritative usage, and model-specific response-byte bounds.
+authoritative usage, model-specific response-byte bounds, bounded input/receipt
+reads, and an exclusive runtime-directory claim or equivalent path-identity
+boundary.
 
 **WSP_62:** New/touched helpers are at most 50 lines; root `main.py` is 4,974
 lines and its touched architect function is 953. The bootstrap entry point grew

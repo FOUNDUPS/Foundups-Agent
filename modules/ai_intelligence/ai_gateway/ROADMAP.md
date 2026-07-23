@@ -32,6 +32,17 @@
   `build_model_autoresearch_output_evidence_semantic_verifier` and its
   `_verifier` closure while preserving byte-for-byte receipt IDs and reasons.
 
+### Configured AutoResearch live-admission blockers
+
+- [ ] Replace whole-file JSON/JSONL input and receipt reads with bounded,
+  streaming admission that fails closed before unbounded allocation.
+- [ ] Bind read freshness, write-target emptiness, and alias checks to an
+  exclusive runtime-directory claim so path replacement cannot create a
+  check/use race.
+- [ ] Keep configured live execution halted until these blockers and the
+  assumption audit's phase-B catalog, usage, and response-byte gates are
+  independently mitigated and re-audited.
+
 ### ModLog archive
 
 - [x] Moved entries dated 2026-07-16 and earlier into

@@ -207,7 +207,7 @@ and an operator-supplied catalog-claim digest for reasoning effort. The fully ro
 canonical local audit-only redaction guard byte-identically before a call.
 Panel admission reserves atomically; persisted `ATTEMPTED` calls consume their
 slots, while a failed run releases only its definitely unstarted suffix.
-Bootstrap admission also proves the complete selected-role × normalized-task
+Bootstrap admission also proves the complete selected-role x normalized-task
 call count against an explicit campaign-wide cap before constructing the
 runner. All write artifacts must be absent or empty and canonically distinct
 from every read input and other write target.
@@ -261,7 +261,9 @@ paths are supplied outside the repo, and verifier mode is `exact_output_digest` 
 Configured live execution remains **HALTED**. The budget bundle is
 self-authenticated operator evidence, not canonical catalog admission; gateway
 usage remains estimated rather than authoritative, and the transport's global
-response buffer is not a model-budget-specific byte bound. See
+response buffer is not a model-budget-specific byte bound. Whole-file input
+and receipt reads also remain unbounded, and no exclusive runtime-directory
+claim preserves path identity from preflight through execution. See
 `docs/audits/ai_intelligence/CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_ASSUMPTION_AUDIT_20260724.md`
 and its structurally validated
 `CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
