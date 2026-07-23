@@ -318,31 +318,52 @@ class TestStartupTaskExecution:
         # ok can be True or False depending on LM Studio state, but should not error
         assert "detail" in result
 
-    def test_holo_index_task_executes(self):
+    def test_holo_index_task_executes(self, tmp_path):
         """startup_refresh_holo_index task executes through dispatch path."""
         from modules.communication.moltbot_bridge.scripts.run_task import (
             _try_startup_maintenance_dispatch,
         )
+        from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_handshake import (
+            RedDogHoloIndexOperationalResult,
+        )
 
-        # Use short timeout to avoid actual indexing
         with patch(
-            "modules.infrastructure.idle_automation.src.self_research_refresh.SelfResearchRefresher.refresh_holo_index"
-        ) as mock_refresh:
-            mock_refresh.return_value = {
-                "code_stale": False,
-                "wsp_stale": False,
-                "refresh_success": True,
-            }
-
+            "modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_handshake.ensure_reddog_holoindex_operational",
+            return_value=RedDogHoloIndexOperationalResult(
+                ready=True,
+                status="READY",
+                refreshed=False,
+                error="",
+                repo_head_sha="a" * 40,
+                generation_id=f"sha256:{'b' * 64}",
+                freshness_reasons=(),
+            ),
+        ) as mock_ensure:
             result = _try_startup_maintenance_dispatch(
-                repo_root=REPO_ROOT,
+                repo_root=tmp_path,
                 task_id="startup_refresh_holo_index",
                 context={"source": "startup_maintenance_gate"},
             )
 
+        mock_ensure.assert_called_once_with(
+            repo_root=tmp_path,
+            requested=True,
+            auto_maintenance=True,
+        )
         assert result is not None, "HoloIndex task should have an executor"
         assert result["executor"] == "startup:holo_index"
         assert result["ok"] is True
+        expected_receipt = {
+            "ready": True,
+            "status": "READY",
+            "refreshed": False,
+            "error": "",
+            "repo_head_sha": "a" * 40,
+            "generation_id": f"sha256:{'b' * 64}",
+            "freshness_reasons": [],
+        }
+        assert result["structured_result"] == expected_receipt
+        assert json.loads(result["detail"]) == expected_receipt
 
     def test_self_research_task_executes_live(self):
         """startup_refresh_self_research executes through live dispatch (no mocking)."""

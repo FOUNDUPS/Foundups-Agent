@@ -7,6 +7,27 @@
 
 ---
 
+## 2026-07-24: Canonical HoloIndex Maintenance Dispatch Mock
+
+**File**: `test_startup_maintenance_gate.py`
+
+- Replaced the obsolete `SelfResearchRefresher.refresh_holo_index` mock with
+  the canonical RedDog maintenance-handshake boundary.
+- Uses the production `RedDogHoloIndexOperationalResult` type and a complete,
+  secret-free ready receipt.
+- Proves exact `repo_root`, `requested=True`, and `auto_maintenance=True`
+  arguments without running HoloIndex, runtime maintenance, or network work.
+- Retains exact executor, success, structured receipt, and serialized receipt
+  assertions.
+
+**Targeted Result**: `1 passed`
+
+**Canonical Dispatch Result**: `3 passed`
+
+**Full Idle Automation Result**: `126 passed`
+
+---
+
 ## 2026-07-24: Legacy Failed-Row Migration Regression
 
 - Proves a persisted current-window `failed:` row remains due after restart and
