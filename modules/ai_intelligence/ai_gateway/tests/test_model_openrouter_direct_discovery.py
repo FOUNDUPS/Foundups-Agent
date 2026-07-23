@@ -130,6 +130,31 @@ def test_failed_refresh_preserves_lkg_and_emits_content_free_terminal_reason(
     assert "sensitive provider detail" not in json.dumps(persisted)
 
 
+def test_redirected_200_emits_truthful_terminal_receipt_and_preserves_lkg(
+    tmp_path: Path,
+) -> None:
+    old = b'{"existing":"last-known-good"}\n'
+    candidate = tmp_path / "candidate.json"
+    candidate.write_bytes(old)
+    response = HTTPResponse(
+        200,
+        {"Content-Type": "application/json"},
+        (FIXTURES / "openrouter_models_success.json").read_bytes(),
+        redirected=True,
+    )
+
+    result = _run(tmp_path, _FakeTransport(response))
+
+    assert (result.receipt.outcome, result.receipt.reason) == (
+        "FAILED",
+        "redirect_history_rejected",
+    )
+    assert result.receipt.http_status == 200
+    assert candidate.read_bytes() == old
+    persisted = json.loads((tmp_path / "attempt.json").read_text(encoding="utf-8"))
+    assert rehydrate_discovery_receipt(persisted) == result.receipt
+
+
 def test_oversized_response_is_rejected_without_hashing_or_lkg_replacement(
     tmp_path: Path,
 ) -> None:

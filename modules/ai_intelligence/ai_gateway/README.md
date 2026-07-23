@@ -41,6 +41,18 @@ temporary write, fsync, or replacement removes the temporary file and leaves
 the previous target byte-identical. Low-level write and replace seams exist
 only for deterministic offline durability tests.
 
+The store binds each commit to post-write descriptor evidence: device/inode
+identity when the host exposes it, exact size, SHA-256 digest, regular-file
+type, and a single-link pathname. A changed pathname or changed content fails
+before replacement and leaves the previous artifact intact. This boundary
+assumes the operator supplies a trusted runtime directory; it does not claim
+portable exclusion of an arbitrary writer racing after the final check.
+Parent-directory fsync remains best-effort, including on Windows.
+
+Transport responses that report redirect history with a non-3xx final status
+produce the content-free `redirect_history_rejected` terminal reason. Raw 3xx
+responses continue to use `redirect_rejected`.
+
 Example manual invocation:
 
 ```text

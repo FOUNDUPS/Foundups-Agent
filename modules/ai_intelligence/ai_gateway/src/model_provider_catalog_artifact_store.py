@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import stat
 import tempfile
@@ -29,6 +30,14 @@ class AtomicArtifactOps:
     writer: Callable[[BinaryIO, bytes], None] = _write_all
     fsync: Callable[[int], None] = os.fsync
     replacer: Callable[[Path, Path], None] = os.replace
+
+
+@dataclass(frozen=True)
+class _TempArtifactProof:
+    device: int
+    inode: int
+    size: int
+    digest: str
 
 
 @dataclass(frozen=True)
@@ -64,9 +73,11 @@ class ProviderCatalogArtifactStore:
                     prefix=f".{target.name}.", suffix=".tmp", dir=target.parent
                 )
                 temporary = Path(raw_temp)
-                self._write_temp(descriptor, temporary, payload, mode)
+                proof = self._write_temp(descriptor, temporary, payload, mode)
                 target = self._target(target)
-                temporary = self._validated_temp(temporary, target.parent)
+                temporary = self._validated_temp(
+                    temporary, target.parent, proof, payload
+                )
                 self.ops.replacer(temporary, target)
                 temporary = None
                 _fsync_parent(target.parent, self.ops.fsync)
@@ -88,35 +99,80 @@ class ProviderCatalogArtifactStore:
 
     def _write_temp(
         self, descriptor: int, temporary: Path, payload: bytes, mode: int | None
-    ) -> None:
+    ) -> _TempArtifactProof:
+        proof: _TempArtifactProof | None = None
         try:
             opened, named = os.fstat(descriptor), os.lstat(temporary)
             if (
                 not stat.S_ISREG(opened.st_mode)
+                or opened.st_nlink != 1
                 or (opened.st_dev, opened.st_ino) != (named.st_dev, named.st_ino)
             ):
                 raise ValueError("runtime_artifact_temp_descriptor_mismatch")
             if mode is not None and hasattr(os, "fchmod"):
                 os.fchmod(descriptor, mode)
-            with os.fdopen(descriptor, "wb", closefd=True) as stream:
+            with os.fdopen(descriptor, "w+b", closefd=True) as stream:
                 descriptor = -1
                 self.ops.writer(stream, payload)
                 stream.flush()
-                if os.fstat(stream.fileno()).st_size != len(payload):
+                metadata = os.fstat(stream.fileno())
+                if metadata.st_size != len(payload) or metadata.st_nlink != 1:
                     raise OSError("runtime_artifact_temp_size_mismatch")
                 self.ops.fsync(stream.fileno())
+                stream.seek(0)
+                if stream.read(len(payload) + 1) != payload:
+                    raise OSError("runtime_artifact_temp_content_mismatch")
+                proof = _TempArtifactProof(
+                    metadata.st_dev,
+                    metadata.st_ino,
+                    metadata.st_size,
+                    hashlib.sha256(payload).hexdigest(),
+                )
         finally:
             if descriptor >= 0:
                 os.close(descriptor)
-        self._validated_temp(temporary, temporary.parent)
+        if proof is None:
+            raise OSError("runtime_artifact_temp_proof_missing")
+        return proof
 
-    def _validated_temp(self, temporary: Path, parent: Path) -> Path:
+    def _validated_temp(
+        self,
+        temporary: Path,
+        parent: Path,
+        proof: _TempArtifactProof,
+        payload: bytes,
+    ) -> Path:
         value = validate_runtime_artifact_path(
             temporary, repo_root=self.repo_root, allowed_root=self.runtime_root
         )
         metadata = os.lstat(value)
-        if value.parent != parent or not stat.S_ISREG(metadata.st_mode):
+        if (
+            value.parent != parent
+            or not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_nlink != 1
+            or metadata.st_size != proof.size
+            or not _same_identity(metadata, proof)
+        ):
             raise ValueError("runtime_artifact_temp_invalid")
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(value, flags)
+        try:
+            opened = os.fstat(descriptor)
+            if (
+                not stat.S_ISREG(opened.st_mode)
+                or opened.st_nlink != 1
+                or opened.st_size != proof.size
+                or not _same_identity(opened, proof)
+            ):
+                raise ValueError("runtime_artifact_temp_invalid")
+            with os.fdopen(descriptor, "rb", closefd=True) as stream:
+                descriptor = -1
+                content = stream.read(proof.size + 1)
+        finally:
+            if descriptor >= 0:
+                os.close(descriptor)
+        if content != payload or hashlib.sha256(content).hexdigest() != proof.digest:
+            raise ValueError("runtime_artifact_temp_content_mismatch")
         return value
 
     @staticmethod
@@ -128,6 +184,12 @@ class ProviderCatalogArtifactStore:
         if not stat.S_ISREG(metadata.st_mode):
             raise ValueError("runtime_artifact_target_not_regular")
         return stat.S_IMODE(metadata.st_mode)
+
+
+def _same_identity(metadata: os.stat_result, proof: _TempArtifactProof) -> bool:
+    if proof.inode > 0 and metadata.st_ino > 0:
+        return (metadata.st_dev, metadata.st_ino) == (proof.device, proof.inode)
+    return True
 
 
 def _remove_temp(path: Path | None) -> None:

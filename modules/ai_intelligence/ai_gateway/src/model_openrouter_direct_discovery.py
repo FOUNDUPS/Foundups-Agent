@@ -284,7 +284,9 @@ def _response_rejection(response: HTTPResponse) -> tuple[str, str | None, int | 
     if size > MAX_RESPONSE_BYTES:
         return "body_too_large", None, None
     digest = sha256_bytes(response.body)
-    if response.redirected or 300 <= response.status < 400:
+    if response.redirected and not 300 <= response.status < 400:
+        return "redirect_history_rejected", digest, min(size, MAX_RESPONSE_BYTES)
+    if 300 <= response.status < 400:
         return "redirect_rejected", digest, min(size, MAX_RESPONSE_BYTES)
     if response.status != 200:
         return "http_status_rejected", digest, min(size, MAX_RESPONSE_BYTES)

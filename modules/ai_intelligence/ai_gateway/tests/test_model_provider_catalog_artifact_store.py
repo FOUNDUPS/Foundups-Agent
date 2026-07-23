@@ -153,3 +153,56 @@ def test_successful_atomic_replace_is_exact_and_preserves_mode(tmp_path: Path) -
     assert target.read_bytes() == "exact-\u03c9\n".encode("utf-8")
     assert stat.S_IMODE(os.lstat(target).st_mode) == before_mode
     assert _temps(tmp_path) == []
+
+
+@pytest.mark.parametrize("attack", ["pathname_replacement", "hard_link", "symlink"])
+def test_precommit_path_attack_never_publishes_substituted_bytes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    attack: str,
+) -> None:
+    target = tmp_path / "candidate.json"
+    old = b"last-known-good"
+    target.write_bytes(old)
+    original = ProviderCatalogArtifactStore._validated_temp
+    attacked = False
+
+    def attack_then_validate(self, *args):
+        nonlocal attacked
+        temporary = next(
+            value
+            for value in args
+            if isinstance(value, Path) and value.suffix == ".tmp"
+        )
+        if not attacked:
+            attacked = True
+            substitute = tmp_path / f"{attack}.substitute"
+            if attack == "hard_link":
+                os.link(temporary, substitute)
+            else:
+                substitute.write_bytes(b"attacker-controlled")
+                if attack == "pathname_replacement":
+                    os.replace(substitute, temporary)
+                else:
+                    temporary.unlink()
+                    try:
+                        temporary.symlink_to(substitute)
+                    except OSError as error:
+                        pytest.skip(f"file symlink unavailable: {error}")
+        return original(self, *args)
+
+    monkeypatch.setattr(
+        ProviderCatalogArtifactStore,
+        "_validated_temp",
+        attack_then_validate,
+    )
+    store = ProviderCatalogArtifactStore.create(
+        repo_root=Path.cwd(), runtime_root=tmp_path
+    )
+
+    with pytest.raises((OSError, ValueError)):
+        store.replace_text(target, "trusted-new-value")
+
+    assert attacked is True
+    assert target.read_bytes() == old
+    assert b"attacker-controlled" not in target.read_bytes()

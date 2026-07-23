@@ -23,7 +23,7 @@ _SECRET = re.compile(r"(?i)(?:bearer\s+\S+|(?:api[_-]?key|token|secret)\s*[:=]|"
                      r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.)")
 _REASONS = frozenset("""completed precall_intent transport_pending invocation_invalid scheduled_invocation_not_due
 scheduled_invocation_expired output_path_invalid precall_write_failed transport_timeout transport_failed
-redirect_rejected http_status_rejected content_type_rejected body_too_large json_invalid top_level_invalid
+redirect_rejected redirect_history_rejected http_status_rejected content_type_rejected body_too_large json_invalid top_level_invalid
 record_limit_exceeded no_acceptable_records candidate_write_failed terminal_receipt_write_failed""".split())
 _OUTCOMES = frozenset("BLOCKED_PRECALL INDETERMINATE COMPLETED FAILED".split())
 _INVOCATION_KEYS = frozenset("schema_version invocation_id mode schedule_id scheduled_for_ms expires_at_ms".split())
@@ -418,8 +418,8 @@ def _validate_receipt_state(
             and (reason == "terminal_receipt_write_failed" or evidence_empty))
     else:
         has_body = digest is not None and size is not None
-        if reason == "redirect_rejected":
-            evidence = has_body and status is not None and 300 <= status < 400
+        if reason in {"redirect_rejected", "redirect_history_rejected"}:
+            evidence = has_body and status is not None and ((300 <= status < 400) == (reason == "redirect_rejected"))
         elif reason == "http_status_rejected":
             evidence = has_body and status is not None and status != 200 and not 300 <= status < 400
         elif reason in {"content_type_rejected", "json_invalid", "top_level_invalid", "record_limit_exceeded", "no_acceptable_records"}:

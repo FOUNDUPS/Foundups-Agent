@@ -83,7 +83,15 @@ both attempt and candidate artifacts. Replacement is same-directory and atomic:
 the target is untouched until exact UTF-8 bytes have been flushed and fsynced
 to a validated exclusive temporary file. `AtomicArtifactOps` is injectable for
 offline failure tests; production uses ordinary writes, `os.fsync`, and
-`os.replace`.
+`os.replace`. Before replacement, the pathname must still be a single-link
+regular file matching the post-write descriptor device/inode where meaningful,
+exact size, and expected SHA-256 content digest. This is a trusted-runtime-root
+boundary, not a portable claim against an arbitrary concurrent directory
+writer. Parent-directory fsync is best-effort and may be unavailable on
+Windows.
+
+Redirect history with a non-3xx final response is represented by
+`redirect_history_rejected`; raw 3xx responses remain `redirect_rejected`.
 
 #### Model Intelligence Selection
 

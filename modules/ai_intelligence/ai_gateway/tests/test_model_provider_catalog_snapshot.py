@@ -257,6 +257,8 @@ def test_noncompleted_receipts_reject_incoherent_state(
     [
         ("redirect_rejected", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
         ("redirect_rejected", {"http_status": 302}),
+        ("redirect_history_rejected", {"http_status": 302, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("redirect_history_rejected", {"http_status": 200}),
         ("http_status_rejected", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
         ("http_status_rejected", {"http_status": 302, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
         ("content_type_rejected", {"http_status": 415, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
@@ -287,6 +289,7 @@ def test_failed_receipt_reason_requires_coherent_transport_evidence(
     "reason,details",
     [
         ("redirect_rejected", {"http_status": 302, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
+        ("redirect_history_rejected", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
         ("http_status_rejected", {"http_status": 503, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
         ("content_type_rejected", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
         ("json_invalid", {"http_status": 200, "response_body_digest": sha256_bytes(b"x"), "response_byte_count": 1}),
