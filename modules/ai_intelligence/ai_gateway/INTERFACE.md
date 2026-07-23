@@ -245,7 +245,13 @@ models, write PatternMemory, mutate HoloIndex, or bind RedDog runtime defaults.
 build_configured_gateway_benchmark_runner(...) -> BenchmarkRunner
 AIGatewayConfiguredModelCaller(gateway).call_model(...)
 JsonlModelAutoResearchOutputEvidenceStore(path, repo_root=...)
-build_model_autoresearch_output_evidence_semantic_verifier(...) -> BenchmarkVerifier
+JsonlConfiguredGatewayReceiptStore(path)
+rehydrate_model_budget_evidence_bundle(payload)
+read_call_attempt_receipts_jsonl(path)
+read_runner_receipts_jsonl(path)
+build_model_autoresearch_output_evidence_semantic_verifier(
+    evidence_records=..., runner_receipts=...
+) -> BenchmarkVerifier
 ```
 
 The configured runner consumes a digest-bound prompt source and an explicit
@@ -253,6 +259,35 @@ provider/model gateway caller, then produces `ModelBenchmarkTaskOutput` records
 for the benchmark harness. It verifies `ModelBenchmarkTask.prompt_digest`
 against the supplied prompt before any call and emits only content digests,
 runner receipt IDs, and bounded metrics.
+
+`ConfiguredGatewayRunnerPolicy.model_budgets` is mandatory. Each assignment is
+bound to its exact provider/API model, canonical decimal rates, prompt overhead,
+completion-token cap, and operator catalog-claim-bound reasoning effort. This
+claim is non-authoritative until canonical catalog admission. The caller
+receives `max_completion_tokens` and `reasoning_effort` as exact keyword-only
+controls. The canonical prompt guard evaluates the fully wrapped prompt in
+audit mode and permits only a byte-identical approved prompt.
+
+The reasoning catalog digest is currently an operator-supplied catalog claim,
+not proof of canonical catalog admission. Exact assignment/API-model equality
+is therefore mandatory; aliases are rejected.
+
+Panel calls are reserved atomically against `max_total_calls`. A durable
+`ATTEMPTED` receipt is written before caller entry and consumes that slot.
+Failure releases only roles whose attempts were never persisted. Attempt and
+success JSONL readers canonically rehydrate records, recompute their IDs and
+cost totals, and reject tampering.
+
+Configured bootstrap callers must also provide `runner_max_total_calls` and a
+canonical positive Decimal string for per-sample cost. Before runner
+construction it checks the complete selected-role x normalized-task call count,
+all selected assignment budgets, canonical path non-aliasing, and absent/empty
+write targets. The runner checks each final wrapped prompt size before prompt
+guard evaluation or caller entry.
+
+This phase-1 configured bootstrap admits exactly one executable planned call.
+Multi-call task sets and panel combinations remain NO-GO until a later phase
+can atomically prepare the complete task-by-role campaign before caller entry.
 
 When supplied with a `ModelAutoResearchOutputEvidenceStore`, the runner writes
 each raw role response as a digest-bound
@@ -277,12 +312,21 @@ records separate input/output token prices for bounded cost-gate estimates.
 The campaign execution bootstrap accepts this runner only through the explicit
 `configured_gateway` mode, an outside-repo prompt-record file, an explicit
 provider allowlist, an outside-repo output-evidence JSONL path, and the
+outside-repo model-budget evidence, call-attempt JSONL, runner-success JSONL,
 `exact_output_digest` or `output_evidence_semantic` verifier mode. The semantic
-mode is deterministic: it rehydrates output-evidence records, recomputes runner
-output/receipt digests, and checks explicit task metadata keys
+mode is deterministic: it rehydrates output-evidence and runner-success
+records, verifies exact lineage/call/metric bindings, recomputes the output
+digest, and checks explicit task metadata keys
 `expected_answer_contains` and `expected_answer_excludes`. It fails closed when
 required terms are absent or no semantic requirements are supplied. Default
 startup behavior remains `deterministic_fixture`.
+
+Live configured-provider execution is a phase-B NO-GO until canonical catalog
+admission, authoritative provider usage receipts, and a model-budget-specific
+pre-buffer response-byte transport contract are present, and every
+input/receipt read and preflight path identity is protected by bounded
+streaming and an exclusive runtime-directory claim or equivalent
+identity-preserving boundary.
 
 #### Model Combination Benchmark Harness
 

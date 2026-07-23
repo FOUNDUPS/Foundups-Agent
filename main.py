@@ -2275,7 +2275,8 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_ALLOWED_PROVIDERS ; or , separated allowlist
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS Optional positive int
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE Optional positive int
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE Optional positive float
+        REDDOG_MODEL_AUTORESEARCH_RUNNER_MAX_TOTAL_CALLS       Required configured campaign call cap
+        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE Canonical positive decimal string
         REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_POLICIES_PATH Outside-repo promotion policies JSON
         REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH         Outside-repo AutoResearch cycle receipt JSON
         REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_PATH Outside-repo AutoResearch cycle feedback JSONL
@@ -2642,14 +2643,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
                         "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS",
                         "20000",
                     ),
-                    runner_max_calls_per_sample=os.getenv(
-                        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE",
-                        "4",
-                    ),
-                    runner_max_cost_estimate_usd_per_sample=os.getenv(
-                        "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE",
-                        "1.0",
-                    ),
+                    runner_max_calls_per_sample=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE", "4"),
+                    runner_max_total_calls=os.getenv("REDDOG_MODEL_AUTORESEARCH_RUNNER_MAX_TOTAL_CALLS", "") or None,
+                    runner_max_cost_estimate_usd_per_sample=os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE", "1"),
                 )
             )
         except Exception as exc:

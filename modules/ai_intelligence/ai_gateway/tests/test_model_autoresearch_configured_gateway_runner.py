@@ -10,10 +10,17 @@ from pathlib import Path
 from modules.ai_intelligence.ai_gateway.src.ai_gateway import AIGateway, ProviderConfig
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_runner import (
     AIGatewayConfiguredModelCaller,
+    ConfiguredGatewayModelBudgetEvidence,
+    ConfiguredGatewayReasoningControlEvidence,
     ConfiguredGatewayRunnerPolicy,
     GatewayModelCallResult,
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
+)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_canonical_prompt_guard import (
+    CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
+    CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
+    build_canonical_local_autoresearch_prompt_guard,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
     InMemoryModelAutoResearchOutputEvidenceStore,
@@ -60,7 +67,16 @@ class FakeConfiguredCaller:
         self.cost_estimate_usd = cost_estimate_usd
         self.calls: list[dict[str, str]] = []
 
-    def call_model(self, *, provider: str, model: str, prompt: str, task_type: str) -> GatewayModelCallResult:
+    def call_model(
+        self,
+        *,
+        provider: str,
+        model: str,
+        prompt: str,
+        task_type: str,
+        max_completion_tokens: int,
+        reasoning_effort: str,
+    ) -> GatewayModelCallResult:
         self.calls.append(
             {
                 "provider": provider,
@@ -92,11 +108,51 @@ def _runner(
         caller=caller or FakeConfiguredCaller(),
         prompt_source=MappingPromptSource({"task-001": prompt}),
         policy=policy
-        or ConfiguredGatewayRunnerPolicy(
-            allowed_providers=("openai", "anthropic"),
-            max_cost_estimate_usd_per_sample=1.0,
+        or _policy(
+            "openai/gpt-test",
+            "openai/gpt-5.2",
+            "anthropic/claude-test",
+            allow_panel=True,
         ),
+        prompt_guard=build_canonical_local_autoresearch_prompt_guard(),
         output_evidence_store=output_evidence_store,
+    )
+
+
+def _budget(model_id: str) -> ConfiguredGatewayModelBudgetEvidence:
+    provider, api_model = model_id.split("/", 1)
+    return ConfiguredGatewayModelBudgetEvidence(
+        assignment_model_id=model_id,
+        provider=provider,
+        api_model=api_model,
+        input_cost_per_million="1",
+        output_cost_per_million="1",
+        request_overhead_input_tokens=11,
+        max_completion_tokens=1000,
+        reasoning_control=ConfiguredGatewayReasoningControlEvidence(
+            mode="effort",
+            effort="high",
+            supported_efforts=("high",),
+            catalog_evidence_digest=_digest("test-catalog"),
+        ),
+    )
+
+
+def _policy(
+    *model_ids: str,
+    allow_panel: bool = False,
+    max_cost: str = "1",
+) -> ConfiguredGatewayRunnerPolicy:
+    budgets = tuple(_budget(item) for item in model_ids)
+    return ConfiguredGatewayRunnerPolicy(
+        allowed_providers=tuple(dict.fromkeys(item.provider for item in budgets)),
+        model_budgets=budgets,
+        max_calls_per_sample=max(1, len(budgets)),
+        max_total_calls=max(4, len(budgets)),
+        max_cost_estimate_usd_per_sample=max_cost,
+        allow_panel_candidates=allow_panel,
+        required_prompt_guard_contract_digest=CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
+        required_prompt_guard_profile_digest=CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
     )
 
 
@@ -120,9 +176,9 @@ def test_configured_runner_calls_explicit_provider_model_and_returns_digest_only
     assert caller.calls[0]["task_type"] == "model_autoresearch"
     assert "Role: principal" in caller.calls[0]["prompt"]
     assert output.output_digest.startswith("configured_gateway_benchmark_output:")
-    assert output.runner_receipt_id.startswith("configured_gateway_benchmark_runner:")
+    assert output.runner_receipt_id.startswith("configured_gateway_runner:")
     assert output.metrics.latency_ms == 25
-    assert output.metrics.cost_estimate_usd == 0.01
+    assert 0 < output.metrics.cost_estimate_usd < 1
     assert prompt not in output.output_digest
     assert "This answer is bounded." not in output.runner_receipt_id
 
@@ -207,7 +263,7 @@ def test_panel_candidate_calls_each_non_verifier_role_and_aggregates_metrics():
     assert [call["model"] for call in caller.calls] == ["gpt-5.2", "claude-test"]
     assert "Role: principal" in caller.calls[0]["prompt"]
     assert "Role: critic" in caller.calls[1]["prompt"]
-    assert output.metrics.cost_estimate_usd == 0.2
+    assert 0 < output.metrics.cost_estimate_usd < 1
     assert output.metrics.latency_ms == 50
 
 
@@ -227,7 +283,7 @@ def test_prompt_digest_mismatch_fails_before_model_call():
 
 def test_disallowed_provider_fails_before_model_call():
     caller = FakeConfiguredCaller()
-    policy = ConfiguredGatewayRunnerPolicy(allowed_providers=("anthropic",))
+    policy = _policy("anthropic/claude-test")
     runner = _runner(caller=caller, policy=policy)
 
     try:
@@ -265,9 +321,10 @@ def test_panel_candidate_can_be_disabled_by_policy():
     caller = FakeConfiguredCaller()
     runner = _runner(
         caller=caller,
-        policy=ConfiguredGatewayRunnerPolicy(
-            allowed_providers=("openai", "anthropic"),
-            allow_panel_candidates=False,
+        policy=_policy(
+            "openai/gpt-5.2",
+            "anthropic/claude-test",
+            allow_panel=False,
         ),
     )
 
@@ -285,20 +342,17 @@ def test_cost_budget_fails_closed_after_call_without_returning_successful_output
     caller = FakeConfiguredCaller(cost_estimate_usd=5.0)
     runner = _runner(
         caller=caller,
-        policy=ConfiguredGatewayRunnerPolicy(
-            allowed_providers=("openai",),
-            max_cost_estimate_usd_per_sample=0.01,
-        ),
+        policy=_policy("openai/gpt-test", max_cost="0.000001"),
     )
 
     try:
         runner(_task(), _candidate())
     except ValueError as exc:
-        assert str(exc) == "configured_gateway_runner_cost_budget_exceeded"
+        assert str(exc) == "configured_gateway_runner_cost_reservation_exceeded"
     else:
         raise AssertionError("expected cost budget rejection")
 
-    assert len(caller.calls) == 1
+    assert len(caller.calls) == 0
 
 
 def test_aigateway_adapter_targets_exact_provider_and_model_without_fallback():
@@ -316,7 +370,9 @@ def test_aigateway_adapter_targets_exact_provider_and_model_without_fallback():
             }
             self.calls: list[tuple[ProviderConfig, str, str]] = []
 
-        def _call_provider(self, provider: ProviderConfig, prompt: str, task_type: str) -> str:
+        def _call_provider(
+            self, provider: ProviderConfig, prompt: str, task_type: str, **kwargs
+        ) -> str:
             self.calls.append((provider, prompt, task_type))
             assert provider.models[task_type] == "gpt-5.2"
             return "gateway response"
@@ -329,6 +385,8 @@ def test_aigateway_adapter_targets_exact_provider_and_model_without_fallback():
         model="gpt-5.2",
         prompt="hello world",
         task_type="model_autoresearch",
+        max_completion_tokens=1000,
+        reasoning_effort="high",
     )
 
     assert result.success is True
@@ -337,7 +395,7 @@ def test_aigateway_adapter_targets_exact_provider_and_model_without_fallback():
     assert result.response_text == "gateway response"
     assert result.input_tokens == 2
     assert result.output_tokens == 2
-    assert result.cost_estimate_usd == 0.5
+    assert result.cost_estimate_usd == 0.0
     assert len(gateway.calls) == 1
 
 
@@ -357,7 +415,9 @@ def test_aigateway_adapter_targets_kimi_k3_through_openrouter_for_autoresearch()
             }
             self.calls: list[tuple[ProviderConfig, str, str]] = []
 
-        def _call_provider(self, provider: ProviderConfig, prompt: str, task_type: str) -> str:
+        def _call_provider(
+            self, provider: ProviderConfig, prompt: str, task_type: str, **kwargs
+        ) -> str:
             self.calls.append((provider, prompt, task_type))
             assert provider.models[task_type] == "moonshotai/kimi-k3"
             return "kimi benchmark response"
@@ -368,12 +428,14 @@ def test_aigateway_adapter_targets_kimi_k3_through_openrouter_for_autoresearch()
         model="moonshotai/kimi-k3",
         prompt="held out task",
         task_type="model_autoresearch",
+        max_completion_tokens=4096,
+        reasoning_effort="max",
     )
 
     assert result.success is True
     assert result.provider == "openrouter"
     assert result.model == "moonshotai/kimi-k3"
-    assert round(result.cost_estimate_usd, 8) == 0.000054
+    assert result.cost_estimate_usd == 0.0
     assert len(gateway.calls) == 1
 
 

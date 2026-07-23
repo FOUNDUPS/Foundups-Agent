@@ -19,6 +19,30 @@
 - [ ] Extract receipt serialization from inherited `bind_reddog_runtime_models`
   while preserving byte-for-byte receipt IDs and SINGLE/PANEL parity.
 
+### Configured AutoResearch bootstrap decomposition
+
+- [ ] Before 2026-09-30, extract admission evidence collection and configured
+  runner/verifier assembly from
+  `run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap`
+  while preserving exact rejection precedence and result truth flags.
+
+### Configured AutoResearch semantic-verifier decomposition
+
+- [ ] Before 2026-09-30, extract per-sample semantic evaluation from
+  `build_model_autoresearch_output_evidence_semantic_verifier` and its
+  `_verifier` closure while preserving byte-for-byte receipt IDs and reasons.
+
+### Configured AutoResearch live-admission blockers
+
+- [ ] Replace whole-file JSON/JSONL input and receipt reads with bounded,
+  streaming admission that fails closed before unbounded allocation.
+- [ ] Bind read freshness, write-target emptiness, and alias checks to an
+  exclusive runtime-directory claim so path replacement cannot create a
+  check/use race.
+- [ ] Keep configured live execution halted until these blockers and the
+  assumption audit's phase-B catalog, usage, and pre-buffer response-byte
+  transport gates are independently mitigated and re-audited.
+
 ### ModLog archive
 
 - [x] Moved entries dated 2026-07-16 and earlier into

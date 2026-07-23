@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
@@ -28,6 +29,23 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gatewa
     ConfiguredGatewayRunnerPolicy,
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
+)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_canonical_prompt_guard import (
+    CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
+    CANONICAL_PROMPT_GUARD_PROFILE,
+    CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
+    build_canonical_local_autoresearch_prompt_guard,
+)
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_evidence import (
+    ConfiguredGatewayModelBudgetEvidenceBundle,
+    JsonlConfiguredGatewayReceiptStore,
+    canonical_decimal,
+    read_runner_receipts_jsonl,
+    rehydrate_model_budget_evidence_bundle,
+)
+from modules.ai_intelligence.ai_gateway.src.model_champion_challenger_autoresearch import (
+    ModelAutoResearchAction,
+    rehydrate_model_autoresearch_plan_receipt,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
     JsonlModelAutoResearchOutputEvidenceStore,
@@ -42,9 +60,11 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_executio
 )
 from modules.ai_intelligence.ai_gateway.src.model_combination_benchmark_harness import (
     ModelBenchmarkCandidate,
+    ModelBenchmarkRoleAssignment,
     ModelBenchmarkTask,
     ModelBenchmarkTaskOutput,
     ModelBenchmarkVerifierResult,
+    build_model_benchmark_candidate,
 )
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
     ModelOutcomeMetrics,
@@ -108,7 +128,12 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
     runner_allowed_providers: str | Sequence[str] | None = None,
     runner_max_prompt_chars: int | str = 20000,
     runner_max_calls_per_sample: int | str = 4,
-    runner_max_cost_estimate_usd_per_sample: float | str = 1.0,
+    runner_max_total_calls: int | str | None = None,
+    runner_max_cost_estimate_usd_per_sample: str | None = None,
+    model_budget_evidence_path: Path | str | None = None,
+    call_attempt_evidence_path: Path | str | None = None,
+    runner_success_receipt_path: Path | str | None = None,
+    runner_prompt_guard_profile: str = CANONICAL_PROMPT_GUARD_PROFILE,
     gateway: object | None = None,
 ) -> ModelAutoResearchCampaignExecutionBootstrapResult:
     """Materialize an AutoResearch campaign execution artifact from runtime files."""
@@ -139,6 +164,8 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
     )
     prompt_payload: Any | None = None
     prompt_reasons: tuple[str, ...] = ()
+    budget_payload: Any | None = None
+    budget_reasons: tuple[str, ...] = ()
     if runner_mode_text == MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
         prompt_payload, prompt_reasons = _read_json_outside_repo(
             root,
@@ -147,16 +174,49 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
             inside_reason="model_autoresearch_campaign_prompt_records_path_inside_repo",
             malformed_reason="malformed_model_autoresearch_campaign_prompt_records",
         )
+        budget_payload, budget_reasons = _read_json_outside_repo(
+            root,
+            model_budget_evidence_path,
+            missing_reason="missing_model_autoresearch_campaign_model_budget_evidence_path",
+            inside_reason="model_autoresearch_campaign_model_budget_evidence_path_inside_repo",
+            malformed_reason="malformed_model_autoresearch_campaign_model_budget_evidence",
+        )
     reasons = [
         *plan_reasons,
         *candidate_reasons,
         *task_reasons,
         *prompt_reasons,
+        *budget_reasons,
         *_output_path_reasons(root, output_path),
         *_configured_output_evidence_path_reasons(
             root,
             output_evidence_path,
             runner_mode=runner_mode_text,
+        ),
+        *_configured_receipt_path_reasons(
+            root,
+            call_attempt_evidence_path,
+            runner_mode=runner_mode_text,
+            label="call_attempt_evidence",
+        ),
+        *_configured_receipt_path_reasons(
+            root,
+            runner_success_receipt_path,
+            runner_mode=runner_mode_text,
+            label="runner_success_receipt",
+        ),
+        *_configured_artifact_state_reasons(
+            root,
+            runner_mode=runner_mode_text,
+            output_evidence_path=output_evidence_path,
+            call_attempt_evidence_path=call_attempt_evidence_path,
+            runner_success_receipt_path=runner_success_receipt_path,
+            output_path=output_path,
+            model_budget_evidence_path=model_budget_evidence_path,
+            prompt_records_path=prompt_records_path,
+            plan_receipt_path=plan_receipt_path,
+            candidate_pool_path=candidate_pool_path,
+            tasks_path=tasks_path,
         ),
         *_mode_reasons(runner_mode_text, verifier_mode_text),
     ]
@@ -180,14 +240,37 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
         prompts = _prompt_records(prompt_payload)
         if prompts is None:
             reasons.append("malformed_model_autoresearch_campaign_prompt_records")
+    budget_bundle, bundle_reasons = _configured_budget_bundle(
+        runner_mode=runner_mode_text,
+        payload=budget_payload,
+        runner_allowed_providers=runner_allowed_providers,
+    )
+    reasons.extend(bundle_reasons)
     policy, policy_reasons = _configured_runner_policy(
         runner_mode=runner_mode_text,
         runner_allowed_providers=runner_allowed_providers,
+        budget_bundle=budget_bundle,
         runner_max_prompt_chars=runner_max_prompt_chars,
         runner_max_calls_per_sample=runner_max_calls_per_sample,
+        runner_max_total_calls=runner_max_total_calls,
         runner_max_cost_estimate_usd_per_sample=runner_max_cost_estimate_usd_per_sample,
     )
     reasons.extend(policy_reasons)
+    reasons.extend(
+        _configured_campaign_call_reasons(
+            runner_mode=runner_mode_text,
+            plan_payload=plan_payload,
+            candidate_pool=candidate_pool,
+            tasks=tasks,
+            budget_bundle=budget_bundle,
+            policy=policy,
+        )
+    )
+    if (
+        runner_mode_text == MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER
+        and runner_prompt_guard_profile != CANONICAL_PROMPT_GUARD_PROFILE
+    ):
+        reasons.append("unsupported_model_autoresearch_campaign_prompt_guard_profile")
     if reasons:
         return _not_ready(reasons)
 
@@ -203,13 +286,23 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
         assert policy is not None
         evidence_path = _runtime_path(root, output_evidence_path)
         resolved_output_evidence_path = str(evidence_path)
+        trusted_prompt_guard = build_canonical_local_autoresearch_prompt_guard()
         runner = build_configured_gateway_benchmark_runner(
-            caller=AIGatewayConfiguredModelCaller(gateway or AIGateway()),
+            caller=AIGatewayConfiguredModelCaller(
+                gateway if gateway is not None else AIGateway()
+            ),
             prompt_source=MappingPromptSource(prompts),
             policy=policy,
+            prompt_guard=trusted_prompt_guard,
             output_evidence_store=JsonlModelAutoResearchOutputEvidenceStore(
                 evidence_path,
                 repo_root=root,
+            ),
+            call_attempt_receipt_store=JsonlConfiguredGatewayReceiptStore(
+                _runtime_path(root, call_attempt_evidence_path),
+            ),
+            runner_receipt_store=JsonlConfiguredGatewayReceiptStore(
+                _runtime_path(root, runner_success_receipt_path),
             ),
         )
         if verifier_mode_text == MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER:
@@ -217,7 +310,10 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
                 evidence_records=lambda: read_model_autoresearch_output_evidence_jsonl(
                     evidence_path,
                     repo_root=root,
-                )
+                ),
+                runner_receipts=lambda: read_runner_receipts_jsonl(
+                    _runtime_path(root, runner_success_receipt_path)
+                ),
             )
         else:
             verifier = _exact_output_digest_verifier
@@ -235,7 +331,8 @@ def run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap(
     )
     if not execution.accepted or execution.status != MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ACCEPT:
         return _not_ready(
-            execution.rejection_reasons or ("model_autoresearch_campaign_execution_rejected",)
+            execution.rejection_reasons or ("model_autoresearch_campaign_execution_rejected",),
+            no_provider_call_performed=no_provider_call,
         )
     return ModelAutoResearchCampaignExecutionBootstrapResult(
         accepted=True,
@@ -430,11 +527,217 @@ def _configured_output_evidence_path_reasons(
     return ()
 
 
+def _configured_receipt_path_reasons(
+    repo_root: Path,
+    value: Path | str | None,
+    *,
+    runner_mode: str,
+    label: str,
+) -> tuple[str, ...]:
+    if runner_mode != MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
+        return ()
+    if not value:
+        return (f"missing_model_autoresearch_campaign_{label}_path",)
+    if _is_inside(_runtime_path(repo_root, value), repo_root):
+        return (f"model_autoresearch_campaign_{label}_path_inside_repo",)
+    return ()
+
+
+def _configured_artifact_state_reasons(
+    repo_root: Path,
+    *,
+    runner_mode: str,
+    output_evidence_path: Path | str | None,
+    call_attempt_evidence_path: Path | str | None,
+    runner_success_receipt_path: Path | str | None,
+    output_path: Path | str | None,
+    model_budget_evidence_path: Path | str | None,
+    prompt_records_path: Path | str | None,
+    plan_receipt_path: Path | str | None,
+    candidate_pool_path: Path | str | None,
+    tasks_path: Path | str | None,
+) -> tuple[str, ...]:
+    if runner_mode != MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
+        return ()
+    values = (
+        ("output_evidence", output_evidence_path),
+        ("call_attempt_evidence", call_attempt_evidence_path),
+        ("runner_success_receipt", runner_success_receipt_path),
+        ("campaign_output", output_path),
+        ("model_budget_evidence", model_budget_evidence_path),
+        ("prompt_records", prompt_records_path),
+        ("plan_receipt", plan_receipt_path),
+        ("candidate_pool", candidate_pool_path),
+        ("tasks", tasks_path),
+    )
+    paths = [_canonical_path(repo_root, value) for _, value in values if value]
+    reasons: list[str] = []
+    if len(paths) != len(set(paths)):
+        reasons.append("model_autoresearch_campaign_artifact_path_alias")
+    for label, value in values[:4]:
+        if value and not _is_absent_or_empty_file(_runtime_path(repo_root, value)):
+            reasons.append(f"model_autoresearch_campaign_{label}_path_not_empty")
+    return tuple(reasons)
+
+
+def _canonical_path(repo_root: Path, value: Path | str | None) -> str:
+    path = _runtime_path(repo_root, value)
+    return os.path.normcase(os.path.normpath(str(path)))
+
+
+def _is_absent_or_empty_file(path: Path) -> bool:
+    try:
+        return not path.exists() or (path.is_file() and path.stat().st_size == 0)
+    except OSError:
+        return False
+
+
 def _runtime_path(repo_root: Path, value: Path | str | None) -> Path:
     path = Path(value or "")
     if not path.is_absolute():
         path = repo_root.parent / path
     return path.resolve()
+
+
+def _configured_budget_bundle(
+    *,
+    runner_mode: str,
+    payload: Any,
+    runner_allowed_providers: str | Sequence[str] | None,
+) -> tuple[ConfiguredGatewayModelBudgetEvidenceBundle | None, tuple[str, ...]]:
+    if runner_mode != MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
+        return None, ()
+    if not isinstance(payload, Mapping):
+        return None, ()
+    try:
+        bundle = rehydrate_model_budget_evidence_bundle(payload)
+    except ValueError as exc:
+        reason = str(exc)
+        if reason == "model_budget_evidence_digest_mismatch":
+            return None, ("tampered_model_autoresearch_campaign_model_budget_evidence",)
+        if "provider_set_mismatch" in reason:
+            return None, (
+                "model_autoresearch_campaign_model_budget_provider_set_mismatch",
+            )
+        if "assignment_route_mismatch" in reason:
+            return None, ("model_autoresearch_campaign_assignment_route_mismatch",)
+        return None, ("malformed_model_autoresearch_campaign_model_budget_evidence",)
+    providers = _split_providers(runner_allowed_providers)
+    if tuple(bundle.allowed_providers) != providers:
+        return None, ("model_autoresearch_campaign_model_budget_provider_set_mismatch",)
+    for budget in bundle.model_budgets:
+        _provider, separator, api_model = budget.assignment_model_id.partition("/")
+        if not separator or budget.api_model != api_model:
+            return None, ("model_autoresearch_campaign_assignment_route_mismatch",)
+    return bundle, ()
+
+
+def _configured_campaign_call_reasons(
+    *,
+    runner_mode: str,
+    plan_payload: Any,
+    candidate_pool: tuple[Mapping[str, Any], ...] | None,
+    tasks: tuple[Mapping[str, Any], ...] | None,
+    budget_bundle: ConfiguredGatewayModelBudgetEvidenceBundle | None,
+    policy: ConfiguredGatewayRunnerPolicy | None,
+) -> tuple[str, ...]:
+    if runner_mode != MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
+        return ()
+    facts = _configured_campaign_call_facts(plan_payload, candidate_pool, tasks)
+    if facts is None or budget_bundle is None or policy is None:
+        return ()
+    assignments, planned_calls = facts
+    admitted = {item.assignment_model_id for item in budget_bundle.model_budgets}
+    reasons: list[str] = []
+    if any(model_id not in admitted for model_id in assignments):
+        reasons.append("model_autoresearch_campaign_assignment_not_in_model_budget")
+    if planned_calls > policy.max_total_calls:
+        reasons.append("model_autoresearch_campaign_total_call_budget_exceeded")
+    if planned_calls != 1:
+        reasons.append("model_autoresearch_campaign_multi_call_not_supported")
+    return tuple(reasons)
+
+
+def _configured_campaign_call_facts(
+    plan_payload: Any,
+    candidate_pool: tuple[Mapping[str, Any], ...] | None,
+    tasks: tuple[Mapping[str, Any], ...] | None,
+) -> tuple[tuple[str, ...], int] | None:
+    if not isinstance(plan_payload, Mapping) or not candidate_pool or not tasks:
+        return None
+    try:
+        plan = rehydrate_model_autoresearch_plan_receipt(plan_payload)
+        candidates = tuple(_preflight_candidate(item) for item in candidate_pool)
+        task_count = _normalized_task_count(tasks)
+    except (TypeError, ValueError):
+        return None
+    candidate_digest = _digest(
+        "model_autoresearch_candidate_pool",
+        {
+            "candidates": [
+                item.to_dict()
+                for item in sorted(candidates, key=lambda value: value.candidate_id)
+            ]
+        },
+    )
+    if candidate_digest != plan.candidate_pool_digest or plan.rejection_reasons:
+        return None
+    by_id = {item.candidate_id: item for item in candidates}
+    selected = [
+        by_id.get(item.candidate_id)
+        for item in plan.campaign_items
+        if item.action != ModelAutoResearchAction.STOP
+        and item.requires_independent_verifier
+    ]
+    if not selected or any(item is None for item in selected):
+        return None
+    assignments = tuple(
+        role.model_id
+        for candidate in selected
+        if candidate is not None
+        for role in candidate.role_assignments
+    )
+    return assignments, len(assignments) * task_count
+
+
+def _preflight_candidate(payload: Mapping[str, Any]) -> ModelBenchmarkCandidate:
+    raw_roles = payload.get("role_assignments")
+    if not isinstance(raw_roles, list) or not raw_roles:
+        raise ValueError("invalid_candidate_roles")
+    if any(not isinstance(item, Mapping) for item in raw_roles):
+        raise ValueError("invalid_candidate_role")
+    roles = tuple(
+        ModelBenchmarkRoleAssignment(
+            role=item.get("role"),  # type: ignore[arg-type]
+            model_id=item.get("model_id"),  # type: ignore[arg-type]
+            provider=item.get("provider"),  # type: ignore[arg-type]
+        )
+        for item in raw_roles
+    )
+    candidate = build_model_benchmark_candidate(roles)
+    if (
+        candidate.candidate_id != payload.get("candidate_id")
+        or candidate.topology_digest != payload.get("topology_digest")
+    ):
+        raise ValueError("candidate_binding_mismatch")
+    return candidate
+
+
+def _normalized_task_count(tasks: Sequence[Mapping[str, Any]]) -> int:
+    normalized = tuple(
+        ModelBenchmarkTask(
+            task_id=item.get("task_id"),  # type: ignore[arg-type]
+            task_family=item.get("task_family"),  # type: ignore[arg-type]
+            prompt_digest=item.get("prompt_digest"),  # type: ignore[arg-type]
+            expected_output_digest=item.get("expected_output_digest"),  # type: ignore[arg-type]
+            verifier_contract_digest=item.get("verifier_contract_digest"),  # type: ignore[arg-type]
+            metadata=item.get("metadata") or {},  # type: ignore[arg-type]
+        ).normalized()
+        for item in tasks
+    )
+    if not normalized:
+        raise ValueError("missing_tasks")
+    return len(normalized)
 
 
 def _mode_reasons(runner_mode: str, verifier_mode: str) -> tuple[str, ...]:
@@ -472,9 +775,11 @@ def _configured_runner_policy(
     *,
     runner_mode: str,
     runner_allowed_providers: str | Sequence[str] | None,
+    budget_bundle: ConfiguredGatewayModelBudgetEvidenceBundle | None,
     runner_max_prompt_chars: int | str,
     runner_max_calls_per_sample: int | str,
-    runner_max_cost_estimate_usd_per_sample: float | str,
+    runner_max_total_calls: int | str | None,
+    runner_max_cost_estimate_usd_per_sample: str | None,
 ) -> tuple[ConfiguredGatewayRunnerPolicy | None, tuple[str, ...]]:
     if runner_mode != MODEL_AUTORESEARCH_CAMPAIGN_CONFIGURED_GATEWAY_RUNNER:
         return None, ()
@@ -482,6 +787,8 @@ def _configured_runner_policy(
     reasons: list[str] = []
     if not providers:
         reasons.append("missing_model_autoresearch_campaign_runner_allowed_providers")
+    if budget_bundle is None:
+        reasons.append("missing_model_autoresearch_campaign_model_budget_evidence")
     prompt_chars, prompt_reason = _positive_int(
         runner_max_prompt_chars,
         "invalid_model_autoresearch_campaign_runner_max_prompt_chars",
@@ -490,22 +797,43 @@ def _configured_runner_policy(
         runner_max_calls_per_sample,
         "invalid_model_autoresearch_campaign_runner_max_calls_per_sample",
     )
-    cost, cost_reason = _positive_float(
-        runner_max_cost_estimate_usd_per_sample,
-        "invalid_model_autoresearch_campaign_runner_max_cost_estimate_usd_per_sample",
+    total_calls, total_reason = _configured_total_calls(runner_max_total_calls)
+    cost, cost_reason = _configured_cost(runner_max_cost_estimate_usd_per_sample)
+    reasons.extend(
+        reason
+        for reason in (prompt_reason, calls_reason, total_reason, cost_reason)
+        if reason
     )
-    reasons.extend(reason for reason in (prompt_reason, calls_reason, cost_reason) if reason)
     if reasons:
         return None, tuple(reasons)
+    assert budget_bundle is not None
     return (
         ConfiguredGatewayRunnerPolicy(
             allowed_providers=providers,
+            model_budgets=budget_bundle.model_budgets,
             max_prompt_chars=prompt_chars,
             max_calls_per_sample=calls,
+            max_total_calls=total_calls,
             max_cost_estimate_usd_per_sample=cost,
+            allow_panel_candidates=calls > 1,
+            required_prompt_guard_contract_digest=CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
+            required_prompt_guard_profile_digest=CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
         ),
         (),
     )
+
+
+def _configured_cost(value: str | None) -> tuple[str, str | None]:
+    try:
+        cost = canonical_decimal(
+            "runner_max_cost_estimate_usd_per_sample",
+            value,
+        )
+    except ValueError:
+        return "", (
+            "invalid_model_autoresearch_campaign_runner_max_cost_estimate_usd_per_sample"
+        )
+    return cost, None
 
 
 def _split_providers(value: str | Sequence[str] | None) -> tuple[str, ...]:
@@ -519,23 +847,29 @@ def _split_providers(value: str | Sequence[str] | None) -> tuple[str, ...]:
 
 
 def _positive_int(value: int | str, reason: str) -> tuple[int, str | None]:
-    try:
+    if type(value) is int:
+        parsed = value
+    elif (
+        isinstance(value, str)
+        and value.isascii()
+        and value.isdigit()
+        and not value.startswith("0")
+    ):
         parsed = int(value)
-    except Exception:
+    else:
         return 0, reason
     if parsed <= 0:
         return 0, reason
     return parsed, None
 
 
-def _positive_float(value: float | str, reason: str) -> tuple[float, str | None]:
-    try:
-        parsed = float(value)
-    except Exception:
-        return 0.0, reason
-    if parsed <= 0.0:
-        return 0.0, reason
-    return parsed, None
+def _configured_total_calls(value: int | str | None) -> tuple[int, str | None]:
+    if value is None:
+        return 0, "missing_model_autoresearch_campaign_runner_max_total_calls"
+    return _positive_int(
+        value,
+        "invalid_model_autoresearch_campaign_runner_max_total_calls",
+    )
 
 
 def _is_inside(child: Path, parent: Path) -> bool:
@@ -555,6 +889,8 @@ def _content_digest(value: str) -> str:
 
 def _not_ready(
     reasons: tuple[str, ...] | list[str],
+    *,
+    no_provider_call_performed: bool = True,
 ) -> ModelAutoResearchCampaignExecutionBootstrapResult:
     return ModelAutoResearchCampaignExecutionBootstrapResult(
         accepted=False,
@@ -567,6 +903,7 @@ def _not_ready(
         executed_candidate_ids=(),
         task_count=0,
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons if str(reason))),
+        no_direct_provider_call_performed=no_provider_call_performed,
     )
 
 

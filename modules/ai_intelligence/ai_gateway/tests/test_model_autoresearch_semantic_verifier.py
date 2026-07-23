@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import ast
 import hashlib
-from pathlib import Path
-
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_runner import (
+    ConfiguredGatewayModelBudgetEvidence,
+    ConfiguredGatewayReasoningControlEvidence,
     ConfiguredGatewayRunnerPolicy,
     GatewayModelCallResult,
     MappingPromptSource,
     build_configured_gateway_benchmark_runner,
 )
+from modules.ai_intelligence.ai_gateway.src.model_autoresearch_canonical_prompt_guard import (
+    CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
+    CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
+    build_canonical_local_autoresearch_prompt_guard,
+)
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_output_evidence_bundle import (
     InMemoryModelAutoResearchOutputEvidenceStore,
+    build_model_autoresearch_output_evidence_record,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_semantic_verifier import (
     build_model_autoresearch_output_evidence_semantic_verifier,
@@ -78,7 +84,10 @@ class FakeConfiguredCaller:
     def __init__(self, responses: dict[str, str] | None = None) -> None:
         self.responses = responses or {"principal": "bounded evidence answer"}
 
-    def call_model(self, *, provider: str, model: str, prompt: str, task_type: str) -> GatewayModelCallResult:
+    def call_model(
+        self, *, provider: str, model: str, prompt: str, task_type: str,
+        max_completion_tokens: int, reasoning_effort: str,
+    ) -> GatewayModelCallResult:
         role = prompt.split("Role: ", 1)[1].splitlines()[0]
         response = self.responses.get(role, self.responses.get("principal", "bounded evidence answer"))
         return GatewayModelCallResult(
@@ -93,6 +102,46 @@ class FakeConfiguredCaller:
         )
 
 
+class ReceiptStore:
+    def __init__(self) -> None:
+        self.receipts = []
+
+    def append(self, receipt):
+        self.receipts.append(receipt)
+        return receipt.receipt_id
+
+
+def _policy(candidate) -> ConfiguredGatewayRunnerPolicy:
+    budgets = tuple(
+        ConfiguredGatewayModelBudgetEvidence(
+            assignment_model_id=item.model_id,
+            provider=item.provider,
+            api_model=item.model_id.split("/", 1)[1],
+            input_cost_per_million="1",
+            output_cost_per_million="1",
+            request_overhead_input_tokens=11,
+            max_completion_tokens=64,
+            reasoning_control=ConfiguredGatewayReasoningControlEvidence(
+                mode="effort",
+                effort="high",
+                supported_efforts=("high",),
+                catalog_evidence_digest=_digest("semantic-verifier-test-catalog"),
+            ),
+        )
+        for item in candidate.role_assignments
+    )
+    return ConfiguredGatewayRunnerPolicy(
+        allowed_providers=("provider",),
+        model_budgets=budgets,
+        max_calls_per_sample=4,
+        max_total_calls=4,
+        max_cost_estimate_usd_per_sample="1",
+        allow_panel_candidates=len(budgets) > 1,
+        required_prompt_guard_contract_digest=CANONICAL_PROMPT_GUARD_CONTRACT_DIGEST,
+        required_prompt_guard_profile_digest=CANONICAL_PROMPT_GUARD_PROFILE_DIGEST,
+    )
+
+
 def _run_sample(
     *,
     task: ModelBenchmarkTask | None = None,
@@ -103,19 +152,19 @@ def _run_sample(
     task = task or _task(prompt=prompt)
     candidate = candidate or _candidate()
     store = InMemoryModelAutoResearchOutputEvidenceStore()
+    receipts = ReceiptStore()
     runner = build_configured_gateway_benchmark_runner(
         caller=FakeConfiguredCaller(responses),
         prompt_source=MappingPromptSource({task.task_id: prompt}),
-        policy=ConfiguredGatewayRunnerPolicy(
-            allowed_providers=("provider",),
-            max_calls_per_sample=4,
-            max_cost_estimate_usd_per_sample=1.0,
-        ),
+        policy=_policy(candidate),
+        prompt_guard=build_canonical_local_autoresearch_prompt_guard(),
         output_evidence_store=store,
+        runner_receipt_store=receipts,
     )
     output = runner(task, candidate)
     verifier = build_model_autoresearch_output_evidence_semantic_verifier(
         evidence_records=store.records,
+        runner_receipts=receipts.receipts,
     )
     return task, candidate, output, store, verifier
 
@@ -181,27 +230,32 @@ def test_semantic_verifier_rejects_digest_only_output_without_evidence_id_bindin
     task = _task(prompt=prompt)
     candidate = _candidate()
     evidence_store = InMemoryModelAutoResearchOutputEvidenceStore()
+    evidence_receipts, digest_receipts = ReceiptStore(), ReceiptStore()
     evidence_output = build_configured_gateway_benchmark_runner(
         caller=FakeConfiguredCaller(),
         prompt_source=MappingPromptSource({task.task_id: prompt}),
-        policy=ConfiguredGatewayRunnerPolicy(allowed_providers=("provider",)),
+        policy=_policy(candidate),
+        prompt_guard=build_canonical_local_autoresearch_prompt_guard(),
         output_evidence_store=evidence_store,
+        runner_receipt_store=evidence_receipts,
     )(task, candidate)
     digest_only_output = build_configured_gateway_benchmark_runner(
         caller=FakeConfiguredCaller(),
         prompt_source=MappingPromptSource({task.task_id: prompt}),
-        policy=ConfiguredGatewayRunnerPolicy(allowed_providers=("provider",)),
+        policy=_policy(candidate),
+        prompt_guard=build_canonical_local_autoresearch_prompt_guard(),
+        runner_receipt_store=digest_receipts,
     )(task, candidate)
     assert evidence_output.output_digest != digest_only_output.output_digest
     verifier = build_model_autoresearch_output_evidence_semantic_verifier(
         evidence_records=evidence_store.records,
+        runner_receipts=evidence_receipts.receipts,
     )
 
     result = verifier(task, candidate, digest_only_output)
 
     assert result.decision == VerifierDecision.REJECT
-    assert "semantic_verifier_output_digest_mismatch" in result.rejection_reasons
-    assert "semantic_verifier_runner_receipt_mismatch" in result.rejection_reasons
+    assert "semantic_verifier_runner_receipt_missing" in result.rejection_reasons
 
 
 def test_semantic_verifier_requires_each_panel_role_evidence() -> None:
@@ -218,6 +272,31 @@ def test_semantic_verifier_requires_each_panel_role_evidence() -> None:
 
     assert result.decision == VerifierDecision.ACCEPT
     assert result.evidence_correct is True
+
+
+def test_semantic_verifier_rejects_distinct_duplicate_role_evidence() -> None:
+    task, candidate, output, store, verifier = _run_sample()
+    first = store.records[0]
+    store.append(
+        build_model_autoresearch_output_evidence_record(
+            task_id=first["task_id"],
+            prompt_digest=first["prompt_digest"],
+            candidate_id=first["candidate_id"],
+            candidate_topology_digest=first["candidate_topology_digest"],
+            role=first["role"],
+            provider=first["provider"],
+            model=first["model"],
+            policy_digest=first["policy_digest"],
+            response_text="different bounded evidence answer",
+            latency_ms=first["latency_ms"],
+            input_tokens=first["input_tokens"],
+            output_tokens=first["output_tokens"],
+            cost_estimate_usd=first["cost_estimate_usd"],
+        )
+    )
+    result = verifier(task, candidate, output)
+    assert result.decision == VerifierDecision.REJECT
+    assert "semantic_verifier_duplicate_role_evidence" in result.rejection_reasons
 
 
 def test_semantic_verifier_module_has_no_network_command_runtime_or_holoindex_imports() -> None:

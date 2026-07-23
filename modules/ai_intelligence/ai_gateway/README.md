@@ -201,6 +201,27 @@ the exact provider/model role assignment in the candidate, supports panel role
 calls, and returns only digest-bound output and runner receipts to the benchmark
 harness.
 
+Every route requires immutable model-budget evidence: exact provider/API model,
+canonical decimal input/output rates, prompt overhead, completion-token cap,
+and an operator-supplied catalog-claim digest for reasoning effort. The fully role-wrapped prompt passes the
+canonical local audit-only redaction guard byte-identically before a call.
+Panel admission reserves atomically; persisted `ATTEMPTED` calls consume their
+slots, while a failed run releases only its definitely unstarted suffix.
+Bootstrap admission also proves the complete selected-role x normalized-task
+call count against an explicit campaign-wide cap before constructing the
+runner. All write artifacts must be absent or empty and canonically distinct
+from every read input and other write target.
+This phase-1 configured bootstrap admits exactly one executable planned call;
+multi-call task sets and panel combinations remain NO-GO until the complete
+task-by-role campaign can be prepared atomically before caller entry.
+
+Call-attempt and successful-run receipts are append-only outside-repository
+JSONL artifacts. Public readers rehydrate each record, recompute group/receipt
+IDs and total reserved cost, and reject changed status, route, digest, cost, or
+call data. A terminal persistence failure after caller entry is indeterminate
+and never rolls back the consumed call. Cancellation and other `BaseException`
+signals remain the caller's original signals.
+
 `src/model_autoresearch_output_evidence_bundle.py` provides the content-bearing
 evidence layer for those configured runs. When an output evidence store is
 injected, each raw model response is written to an outside-repo JSONL record
@@ -209,8 +230,9 @@ verifier. Secret-bearing output is rejected before persistence.
 
 `src/model_autoresearch_semantic_verifier.py` is the first deterministic
 content verifier over those evidence records. It does not call a model; it
-rehydrates the output evidence, recomputes the configured-runner output and
-receipt digests, then checks explicit task metadata requirements:
+rehydrates the output evidence and durable v2 runner receipt, verifies their
+task/candidate/prompt/policy/call/evidence/metrics bindings, recomputes the
+configured-runner output digest, then checks explicit task metadata requirements:
 `expected_answer_contains` and `expected_answer_excludes`. Missing requirements
 fail closed.
 
@@ -232,8 +254,21 @@ rates so the existing per-sample cost gate can reject over-budget results.
 use this runner only when `REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE` is
 set to `configured_gateway`, prompt records are supplied from outside the repo,
 providers are explicitly allowlisted, an outside-repo output evidence path is
-supplied, and verifier mode is `exact_output_digest` or
+supplied, immutable model-budget evidence and distinct attempt/success receipt
+paths are supplied outside the repo, and verifier mode is `exact_output_digest` or
 `output_evidence_semantic`. The default remains deterministic fixture execution.
+
+Configured live execution remains **HALTED**. The budget bundle is
+self-authenticated operator evidence, not canonical catalog admission; gateway
+usage remains estimated rather than authoritative. The runner's 1 MiB limit is
+post-buffer: `requests.post()` and `response.json()` can allocate an unbounded
+response first, so there is no model-budget-specific pre-buffer transport
+bound. Whole-file input and receipt reads also remain unbounded, and no
+exclusive runtime-directory claim preserves path identity from preflight
+through execution. See
+`docs/audits/ai_intelligence/CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_ASSUMPTION_AUDIT_20260724.md`
+and its structurally validated
+`CONFIGURED_AUTORESEARCH_GATEWAY_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
 
 ## Model Combination Benchmark Harness
 

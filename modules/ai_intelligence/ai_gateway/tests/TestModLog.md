@@ -1,5 +1,38 @@
 # AI Gateway TestModLog
 
+## 2026-07-24 - Configured AutoResearch gateway safety contract v2
+
+Scope: offline adversarial verification of configured provider calls, prompt
+egress, exact cost/call bounds, durable receipts, and semantic verification.
+
+- Exact route/budget/reasoning evidence rejects substitution and malformed or
+  noncanonical values before provider entry.
+- Canonical audit-only prompt guarding permits only byte-identical fully
+  wrapped prompts and emits content-free failures.
+- Twenty-way contention admits one bounded call. Panel failure/cancellation
+  consumes the attempted role, releases the definitely unstarted suffix, and
+  permits only the remaining capacity.
+- ATTEMPTED-store failure releases its pre-call reservation; caller or terminal
+  failure never reclaims an entered call. Terminal-store failure preserves the
+  original cancellation/SystemExit/KeyboardInterrupt/BaseException.
+- JSONL attempt/success readers rehydrate records, recompute IDs/cost totals,
+  and reject tampered call routes.
+- The semantic verifier binds output evidence to the durable v2 runner receipt
+  rather than the obsolete v1 reconstructed digest shape.
+
+Corrective coverage additionally proves exact-one-call campaign admission,
+campaign-wide total-call preflight, canonical cost/cap inputs, route-alias
+rejection, read/write and write/write artifact separation, stale-target
+rejection, falsey injected gateway preservation, final wrapped-prompt bounds,
+durable evidence ordering and fsync, conservative truth flags, and exact
+WSP_62 ceilings.
+
+Focused corrective result: `88 passed`; targeted root-main environment
+threading: `1 passed`. Full AI Gateway: `587 passed, 2 skipped` (platform
+capabilities only). All callers/transports were injected; no provider or
+network call was made. Sampling controls and provider endpoint evidence are not
+catalog-bound yet, so no live K3-vs-GLM comparative ranking was attempted.
+
 ## 2026-07-24 - Idle OpenRouter schedule adapter
 
 Scope: offline adversarial validation of the exact daily claim-to-guard bridge.

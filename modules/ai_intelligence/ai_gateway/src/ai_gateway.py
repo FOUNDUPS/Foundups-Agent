@@ -22,17 +22,14 @@ Usage:
 import os
 import time
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 import requests
-import json
 
 # Import model registry for centralized model management
 from .model_registry import (
     RECOMMENDED_MODELS,
     classify_task,
-    get_current_models,
-    check_model_status,
 )
 
 # Configure logging
@@ -135,6 +132,22 @@ class AIGateway:
         if os.getenv("TEMPERATURE"):
             return self._get_env_float("TEMPERATURE", default)
         return self._get_env_float("LLM_TEMPERATURE", default)
+
+    @staticmethod
+    def _bounded_exact_completion_tokens(value: object) -> int:
+        """Validate an explicit per-call completion cap without env fallback."""
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError("invalid_max_completion_tokens")
+        if value <= 0 or value > 1_000_000:
+            raise ValueError("invalid_max_completion_tokens")
+        return value
+
+    @staticmethod
+    def _bounded_exact_reasoning_effort(value: object) -> str:
+        """Validate an explicit catalog-admitted reasoning effort."""
+        if not isinstance(value, str) or value not in {"low", "medium", "high", "xhigh", "max"}:
+            raise ValueError("invalid_reasoning_effort")
+        return value
 
     def _setup_providers(self) -> Dict[str, ProviderConfig]:
         """Set up AI provider configurations"""
@@ -406,26 +419,58 @@ class AIGateway:
 
         return task_routing.get(task_type, ['anthropic', 'openai', 'gemini', 'grok'])
 
-    def _call_provider(self, provider: ProviderConfig, prompt: str, task_type: str) -> str:
+    def _call_provider(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        task_type: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+        reasoning_effort: Optional[str] = None,
+    ) -> str:
         """Call specific AI provider"""
 
         model = provider.models.get(task_type, provider.models.get('quick', 'default'))
 
         if provider.name in {'openai', 'openrouter'}:
-            return self._call_openai(provider, prompt, model)
+            return self._call_openai(
+                provider,
+                prompt,
+                model,
+                max_completion_tokens=max_completion_tokens,
+                reasoning_effort=reasoning_effort,
+            )
         elif provider.name == 'anthropic':
-            return self._call_anthropic(provider, prompt, model)
+            return self._call_anthropic(
+                provider, prompt, model, max_completion_tokens=max_completion_tokens
+            )
         elif provider.name == 'grok':
-            return self._call_grok(provider, prompt, model)
+            return self._call_grok(
+                provider, prompt, model, max_completion_tokens=max_completion_tokens
+            )
         elif provider.name == 'gemini':
-            return self._call_gemini(provider, prompt, model)
+            return self._call_gemini(
+                provider, prompt, model, max_completion_tokens=max_completion_tokens
+            )
         else:
             raise ValueError(f"Unknown provider: {provider.name}")
 
-    def _call_openai(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _call_openai(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+        reasoning_effort: Optional[str] = None,
+    ) -> str:
         """Call OpenAI API"""
         default_max_tokens = 4096 if provider.name == 'openrouter' and model == 'moonshotai/kimi-k3' else 1000
-        max_tokens = self._get_provider_max_tokens(provider.name, default_max_tokens)
+        max_tokens = (
+            self._bounded_exact_completion_tokens(max_completion_tokens)
+            if max_completion_tokens is not None
+            else self._get_provider_max_tokens(provider.name, default_max_tokens)
+        )
         temperature = self._get_provider_temperature(provider.name, 0.7)
         headers = {
             'Authorization': f'Bearer {provider.api_key}',
@@ -437,7 +482,11 @@ class AIGateway:
             'messages': [{'role': 'user', 'content': prompt}],
             'max_tokens': max_tokens,
         }
-        if provider.name == 'openrouter' and model == 'moonshotai/kimi-k3':
+        if provider.name == 'openrouter' and reasoning_effort is not None:
+            data['reasoning'] = {
+                'effort': self._bounded_exact_reasoning_effort(reasoning_effort)
+            }
+        elif provider.name == 'openrouter' and model == 'moonshotai/kimi-k3':
             # OpenRouter lists Kimi K3 with mandatory max reasoning and without
             # temperature support. Preserve the published request contract.
             data['reasoning'] = {'effort': 'max'}
@@ -455,9 +504,20 @@ class AIGateway:
         result = response.json()
         return result['choices'][0]['message']['content'].strip()
 
-    def _call_anthropic(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _call_anthropic(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+    ) -> str:
         """Call Anthropic API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
+        max_tokens = (
+            self._bounded_exact_completion_tokens(max_completion_tokens)
+            if max_completion_tokens is not None
+            else self._get_provider_max_tokens(provider.name, 1000)
+        )
         temperature = self._get_provider_temperature(provider.name, 0.7)
         headers = {
             'x-api-key': provider.api_key,
@@ -483,9 +543,20 @@ class AIGateway:
         result = response.json()
         return result['content'][0]['text'].strip()
 
-    def _call_grok(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _call_grok(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+    ) -> str:
         """Call Grok API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
+        max_tokens = (
+            self._bounded_exact_completion_tokens(max_completion_tokens)
+            if max_completion_tokens is not None
+            else self._get_provider_max_tokens(provider.name, 1000)
+        )
         temperature = self._get_provider_temperature(provider.name, 0.7)
         headers = {
             'Authorization': f'Bearer {provider.api_key}',
@@ -510,9 +581,20 @@ class AIGateway:
         result = response.json()
         return result['choices'][0]['message']['content'].strip()
 
-    def _call_gemini(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _call_gemini(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+    ) -> str:
         """Call Google Gemini API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
+        max_tokens = (
+            self._bounded_exact_completion_tokens(max_completion_tokens)
+            if max_completion_tokens is not None
+            else self._get_provider_max_tokens(provider.name, 1000)
+        )
         temperature = self._get_provider_temperature(provider.name, 0.7)
         data = {
             'contents': [{

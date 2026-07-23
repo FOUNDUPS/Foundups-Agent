@@ -58,6 +58,9 @@ def _semantic_execution_files(tmp_path: Path, *, required_term: str = "configure
         tasks_path=files["tasks"],
         prompt_records_path=files["prompts"],
         output_evidence_path=files["evidence"],
+        model_budget_evidence_path=files["budgets"],
+        call_attempt_evidence_path=files["attempts"],
+        runner_success_receipt_path=files["successes"],
         output_path=files["output"],
         verifier_digest="sha256:verifier",
         held_out_split_id="heldout-v1",
@@ -66,7 +69,8 @@ def _semantic_execution_files(tmp_path: Path, *, required_term: str = "configure
         runner_allowed_providers="provider",
         runner_max_prompt_chars=2000,
         runner_max_calls_per_sample=1,
-        runner_max_cost_estimate_usd_per_sample=1.0,
+        runner_max_total_calls=1,
+        runner_max_cost_estimate_usd_per_sample="1",
         gateway=gateway,
     )
     assert result.accepted is True
