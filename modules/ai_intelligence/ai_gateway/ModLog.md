@@ -1,5 +1,30 @@
 # AI Gateway Module Change Log
 
+## [2026-07-23] - Direct Provider Discovery Independent NO-GO Repair
+
+**Who:** 0102 Codex worker, independent reviewer-driven repair
+**Type:** Security / Durability Hardening
+**Slice:** DIRECT_PROVIDER_SNAPSHOT_AND_BOUNDED_DISCOVERY_PHASE1_REPAIR1
+
+**What:** Closed seven trust-boundary blockers covering exact model identifiers,
+future-dated candidate observations, receipt state coherence, hostile HTTP
+metadata, candidate-before-COMPLETED durability, truthful pre-call transitions,
+and exact prior-candidate ID admission.
+
+**Truth Boundary:**
+- IMPLEMENTED: content-free rejection of hostile response objects and metadata,
+  truthful durable intent/armed/terminal transitions, last-known-good
+  preservation on candidate failure, and adversarial regression coverage.
+- NOT IMPLEMENTED: provider calls in tests, automatic scheduling, registry or
+  selection mutation, promotion, runtime binding, or RedDog evidence changes.
+
+**WSP_15 Score:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 =
+19 (P0 security and durable-truth boundary).
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
+---
+
 ## [2026-07-23] - Direct Provider Snapshot and Bounded Discovery
 
 **Who:** 0102 Codex worker, architect-audited lane

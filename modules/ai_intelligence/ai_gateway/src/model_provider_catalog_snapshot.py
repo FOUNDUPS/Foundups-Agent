@@ -9,46 +9,31 @@ from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping, Sequence
 from .model_intelligence_catalog import ModelCatalogSnapshot, build_canonical_model_catalog
-INVOCATION_SCHEMA = "model_provider_catalog_discovery_invocation.v1"
-RECEIPT_SCHEMA = "model_provider_catalog_discovery_receipt.v1"
+INVOCATION_SCHEMA, RECEIPT_SCHEMA = "model_provider_catalog_discovery_invocation.v1", "model_provider_catalog_discovery_receipt.v1"
 CANDIDATE_SCHEMA = "model_provider_catalog_candidate_snapshot.v1"
-PROVIDER, ENDPOINT_ID = "openrouter", "openrouter_models_api_v1"
-DEFAULT_FRESHNESS_MS = 86_400_000
+PROVIDER, ENDPOINT_ID, DEFAULT_FRESHNESS_MS = "openrouter", "openrouter_models_api_v1", 86_400_000
 MAX_RESPONSE_BYTES, MAX_RECORDS = 8 * 1024 * 1024, 2048
 MAX_CONTEXT_LENGTH, MAX_PRICE = 100_000_000, Decimal("1000")
-_ID = re.compile(r"[a-z0-9][a-z0-9._-]{0,63}/[a-z0-9][a-z0-9._/-]{0,126}(?::free)?\Z")
+_ID = re.compile(r"[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/"
+                 r"[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?(?::free)?\Z")
 _TOKEN = re.compile(r"[a-z0-9][a-z0-9._:-]{0,63}\Z")
 _DIGEST = re.compile(r"sha256:[0-9a-f]{64}\Z")
-_CONTENT_ID = re.compile(r"[a-z0-9_.]+:[0-9a-f]{64}\Z")
+_CANDIDATE_ID = re.compile(r"model_provider_catalog_candidate_snapshot:[0-9a-f]{64}\Z")
 _PRICE = re.compile(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?\Z")
-_SECRET = re.compile(
-    r"(?i)(?:bearer\s+\S+|(?:api[_-]?key|token|secret)\s*[:=]|"
-    r"\bsk-[a-z0-9_-]{12,}\b|\bgh[opusr]_[a-z0-9_]{12,}\b|"
-    r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.)"
-)
-_REASONS = frozenset(
-    """completed transport_pending invocation_invalid scheduled_invocation_not_due
-    scheduled_invocation_expired output_path_invalid precall_write_failed
-    transport_timeout transport_failed redirect_rejected http_status_rejected
-    content_type_rejected body_too_large json_invalid top_level_invalid
-    record_limit_exceeded no_acceptable_records candidate_write_failed
-    terminal_receipt_write_failed""".split()
-)
+_SECRET = re.compile(r"(?i)(?:bearer\s+\S+|(?:api[_-]?key|token|secret)\s*[:=]|"
+                     r"\bsk-[a-z0-9_-]{12,}\b|\bgh[opusr]_[a-z0-9_]{12,}\b|"
+                     r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.)")
+_REASONS = frozenset("""completed precall_intent transport_pending invocation_invalid scheduled_invocation_not_due
+scheduled_invocation_expired output_path_invalid precall_write_failed transport_timeout transport_failed
+redirect_rejected http_status_rejected content_type_rejected body_too_large json_invalid top_level_invalid
+record_limit_exceeded no_acceptable_records candidate_write_failed terminal_receipt_write_failed""".split())
 _OUTCOMES = frozenset("BLOCKED_PRECALL INDETERMINATE COMPLETED FAILED".split())
-_INVOCATION_KEYS = frozenset(
-    "schema_version invocation_id mode schedule_id scheduled_for_ms expires_at_ms".split()
-)
-_RECEIPT_KEYS = frozenset(
-    """schema_version receipt_id call_id invocation provider endpoint_id
-    request_envelope_digest attempted outcome reason started_at_ms completed_at_ms
-    http_status response_body_digest response_byte_count candidate_snapshot_id
-    accepted_record_count rejected_record_count rejection_counts""".split()
-)
-_CANDIDATE_KEYS = frozenset(
-    """schema_version snapshot_id provider endpoint_id catalog_payload_digest
-    catalog_payload accepted_record_count rejected_record_count rejection_counts
-    observed_at_ms fresh_until_ms observation_receipt trust_class""".split()
-)
+_INVOCATION_KEYS = frozenset("schema_version invocation_id mode schedule_id scheduled_for_ms expires_at_ms".split())
+_RECEIPT_KEYS = frozenset("""schema_version receipt_id call_id invocation provider endpoint_id request_envelope_digest
+attempted outcome reason started_at_ms completed_at_ms http_status response_body_digest response_byte_count
+candidate_snapshot_id accepted_record_count rejected_record_count rejection_counts""".split())
+_CANDIDATE_KEYS = frozenset("""schema_version snapshot_id provider endpoint_id catalog_payload_digest catalog_payload
+accepted_record_count rejected_record_count rejection_counts observed_at_ms fresh_until_ms observation_receipt trust_class""".split())
 def _serialized(value: Any) -> dict[str, Any]:
     return json.loads(json.dumps(asdict(value), sort_keys=True, separators=(",", ":")))
 @dataclass(frozen=True)
@@ -174,8 +159,6 @@ def rehydrate_discovery_receipt(data: Mapping[str, Any]) -> DiscoveryReceipt:
     outcome, attempted, reason = data["outcome"], data["attempted"], data["reason"]
     if outcome not in _OUTCOMES or type(attempted) is not bool or reason not in _REASONS:
         raise ValueError("discovery_receipt_invalid")
-    if (outcome == "BLOCKED_PRECALL" and attempted) or (outcome in {"COMPLETED", "FAILED"} and not attempted):
-        raise ValueError("discovery_receipt_invalid")
     started, completed = data["started_at_ms"], data["completed_at_ms"]
     if not _uint(started) or not _uint(completed) or completed < started:
         raise ValueError("discovery_receipt_invalid")
@@ -188,13 +171,13 @@ def rehydrate_discovery_receipt(data: Mapping[str, Any]) -> DiscoveryReceipt:
     if size is not None and (not _uint(size) or size > MAX_RESPONSE_BYTES):
         raise ValueError("discovery_receipt_invalid")
     snapshot_id = data["candidate_snapshot_id"]
-    if snapshot_id is not None and not _CONTENT_ID.fullmatch(str(snapshot_id)):
-        raise ValueError("discovery_receipt_invalid")
     accepted, rejected, counts = data["accepted_record_count"], data["rejected_record_count"], _counts(data["rejection_counts"])
     if not _uint(accepted) or not _uint(rejected) or rejected != sum(counts.values()):
         raise ValueError("discovery_receipt_invalid")
-    if outcome == "COMPLETED" and (reason != "completed" or snapshot_id is None or accepted == 0):
-        raise ValueError("discovery_receipt_invalid")
+    _validate_receipt_state(
+        outcome, attempted, reason, status, digest, size, snapshot_id,
+        accepted, rejected, counts,
+    )
     expected = _content_id(
         "model_provider_catalog_discovery_receipt",
         {key: data[key] for key in _RECEIPT_KEYS if key != "receipt_id"},
@@ -223,9 +206,13 @@ def parse_and_sanitize_openrouter_catalog(raw: bytes) -> tuple[dict[str, Any], i
     _bound_json(payload)
     return sanitize_openrouter_catalog_payload(payload)
 def sanitize_openrouter_catalog_payload(payload: Mapping[str, Any]) -> tuple[dict[str, Any], int, Mapping[str, int]]:
+    if not isinstance(payload, Mapping):
+        raise ValueError("top_level_invalid")
     records = payload.get("data")
     if not isinstance(records, list):
         raise ValueError("top_level_invalid")
+    if len(records) > MAX_RECORDS:
+        raise ValueError("record_limit_exceeded")
     groups: dict[str, list[dict[str, Any] | None]] = {}
     ungrouped = 0
     for raw in records:
@@ -273,9 +260,7 @@ def build_candidate_snapshot(
         "trust_class": "provider_asserted_candidate_metadata",
     }
     return rehydrate_candidate_snapshot(data, now_ms=observed_at_ms)
-def rehydrate_candidate_snapshot(
-    data: Mapping[str, Any], *, now_ms: int,
-) -> ProviderCatalogCandidateSnapshot:
+def rehydrate_candidate_snapshot(data: Mapping[str, Any], *, now_ms: int) -> ProviderCatalogCandidateSnapshot:
     _exact(data, _CANDIDATE_KEYS, "candidate_snapshot_invalid")
     if (data["schema_version"], data["provider"], data["endpoint_id"], data["trust_class"]) != (
         CANDIDATE_SCHEMA, PROVIDER, ENDPOINT_ID, "provider_asserted_candidate_metadata"
@@ -292,8 +277,13 @@ def rehydrate_candidate_snapshot(
     observed, fresh = data["observed_at_ms"], data["fresh_until_ms"]
     if accepted != len(payload["data"]) or not _uint(rejected) or rejected != sum(counts.values()):
         raise ValueError("candidate_snapshot_invalid")
-    if (not _uint(observed) or observed > 253_402_300_799_999
-            or fresh != observed + DEFAULT_FRESHNESS_MS or not _uint(now_ms) or now_ms > fresh):
+    if (not _uint(observed) or not _uint(fresh) or not _uint(now_ms)
+            or observed > 253_402_300_799_999 or observed > fresh
+            or fresh != observed + DEFAULT_FRESHNESS_MS):
+        raise ValueError("candidate_snapshot_invalid")
+    if observed > now_ms:
+        raise ValueError("candidate_snapshot_future_observation")
+    if now_ms > fresh:
         raise ValueError("candidate_snapshot_stale")
     receipt = rehydrate_discovery_receipt(_mapping(data["observation_receipt"], "candidate_snapshot_invalid"))
     if receipt.outcome != "COMPLETED" or receipt.candidate_snapshot_id != data["snapshot_id"]:
@@ -313,7 +303,7 @@ def bridge_candidate_to_canonical_catalog(
     raw = candidate.to_dict() if isinstance(candidate, ProviderCatalogCandidateSnapshot) else candidate
     item = rehydrate_candidate_snapshot(raw, now_ms=now_ms)
     if prior_admitted_candidate_id is not None:
-        if not _CONTENT_ID.fullmatch(prior_admitted_candidate_id):
+        if not _CANDIDATE_ID.fullmatch(prior_admitted_candidate_id):
             raise ValueError("prior_candidate_id_invalid")
         if prior_admitted_candidate_id == item.snapshot_id:
             return CatalogBridgeResult(item, False, None)
@@ -413,11 +403,38 @@ def _counts(value: Any) -> dict[str, int]:
     if any(not _token_string(key, 80) or not _uint(count) for key, count in value.items()):
         raise ValueError("counts_invalid")
     return dict(sorted((str(key), count) for key, count in value.items()))
+def _validate_receipt_state(
+    outcome: str, attempted: bool, reason: str, status: int | None, digest: str | None,
+    size: int | None, snapshot_id: str | None, accepted: int, rejected: int, counts: Mapping[str, int],
+) -> None:
+    empty = snapshot_id is None and accepted == rejected == 0 and not counts
+    evidence_empty, valid = status is digest is size is None, False
+    if outcome == "COMPLETED":
+        valid = (attempted and reason == "completed" and status == 200 and digest is not None
+                 and size is not None and accepted > 0
+                 and _CANDIDATE_ID.fullmatch(str(snapshot_id)) is not None)
+    elif outcome == "BLOCKED_PRECALL":
+        valid = not attempted and empty and evidence_empty and reason in {
+            "precall_intent", "invocation_invalid", "scheduled_invocation_not_due",
+            "scheduled_invocation_expired", "output_path_invalid", "precall_write_failed"}
+    elif outcome == "INDETERMINATE":
+        valid = (empty and (attempted, reason) in {
+            (True, "transport_pending"), (True, "terminal_receipt_write_failed")}
+            and (reason == "terminal_receipt_write_failed" or evidence_empty))
+    else:
+        valid = attempted and empty and reason in {
+            "transport_timeout", "transport_failed", "redirect_rejected", "http_status_rejected",
+            "content_type_rejected", "body_too_large", "json_invalid", "top_level_invalid",
+            "record_limit_exceeded", "no_acceptable_records", "candidate_write_failed"}
+        if reason in {"transport_timeout", "transport_failed"}:
+            valid = valid and evidence_empty
+        elif reason == "candidate_write_failed":
+            valid = valid and status == 200 and digest is not None and size is not None
+    if not valid:
+        raise ValueError("discovery_receipt_invalid")
 def _valid_model_id(value: Any) -> bool:
-    return (
-        isinstance(value, str) and len(value) <= 200
-        and _ID.fullmatch(value) is not None and not _SECRET.search(value)
-    )
+    return (isinstance(value, str) and len(value) <= 200
+            and _ID.fullmatch(value) is not None and not _SECRET.search(value))
 def _exact(value: Any, keys: frozenset[str], reason: str) -> None:
     if not isinstance(value, Mapping) or set(value) != keys:
         raise ValueError(reason)
@@ -429,12 +446,4 @@ def _uint(value: Any) -> bool:
     return type(value) is int and value >= 0
 def _token_string(value: Any, limit: int) -> bool:
     return isinstance(value, str) and 0 < len(value) <= limit and not _SECRET.search(value)
-__all__ = [
-    "CatalogBridgeResult", "DiscoveryInvocation", "DiscoveryReceipt",
-    "ProviderCatalogCandidateSnapshot", "admit_discovery_invocation",
-    "bridge_candidate_to_canonical_catalog", "build_candidate_snapshot",
-    "build_discovery_invocation", "build_discovery_receipt", "candidate_snapshot_id",
-    "parse_and_sanitize_openrouter_catalog", "rehydrate_candidate_snapshot",
-    "rehydrate_discovery_invocation", "rehydrate_discovery_receipt",
-    "sanitize_openrouter_catalog_payload", "sha256_bytes",
-]
+__all__ = ["CatalogBridgeResult", "DiscoveryInvocation", "DiscoveryReceipt", "ProviderCatalogCandidateSnapshot", "admit_discovery_invocation", "bridge_candidate_to_canonical_catalog", "build_candidate_snapshot", "build_discovery_invocation", "build_discovery_receipt", "candidate_snapshot_id", "parse_and_sanitize_openrouter_catalog", "rehydrate_candidate_snapshot", "rehydrate_discovery_invocation", "rehydrate_discovery_receipt", "sanitize_openrouter_catalog_payload", "sha256_bytes"]

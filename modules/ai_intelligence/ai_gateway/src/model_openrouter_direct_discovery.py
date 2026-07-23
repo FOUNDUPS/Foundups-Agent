@@ -120,17 +120,20 @@ async def discover_openrouter_model_catalog(
                            reason, started, clock())
         _try_write(attempt_target, receipt.to_dict(), repo_root, root)
         return DiscoveryRunResult(receipt, None, attempt_target, candidate_target)
-    pending = _receipt(item, call_id, request_digest, False, "INDETERMINATE",
-                       "transport_pending", started, started)
+    intent = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
+                      "precall_intent", started, started)
     try:
-        _write(attempt_target, pending.to_dict(), repo_root, root)
-        attempted = _receipt(item, call_id, request_digest, True, "INDETERMINATE",
-                             "transport_pending", started, clock())
-        _write(attempt_target, attempted.to_dict(), repo_root, root)
+        _write(attempt_target, intent.to_dict(), repo_root, root)
     except (OSError, ValueError):
         failed = _receipt(item, call_id, request_digest, False, "BLOCKED_PRECALL",
                           "precall_write_failed", started, clock())
         return DiscoveryRunResult(failed, None, attempt_target, candidate_target)
+    armed = _receipt(item, call_id, request_digest, True, "INDETERMINATE",
+                     "transport_pending", started, clock())
+    try:
+        _write(attempt_target, armed.to_dict(), repo_root, root)
+    except (OSError, ValueError):
+        return DiscoveryRunResult(intent, None, attempt_target, candidate_target)
     return await _execute(
         item, call_id, request_digest, started, repo_root, root,
         attempt_target, candidate_target, transport or AioHTTPTransport(), clock,
@@ -164,7 +167,14 @@ async def _execute(
             invocation, call_id, request_digest, started, "transport_failed",
             repo_root, runtime_root, attempt_path, candidate_path, clock,
         )
-    rejected = _response_rejection(response)
+    try:
+        response = _validated_response(response)
+        rejected = _response_rejection(response)
+    except Exception:
+        return _failed(
+            invocation, call_id, request_digest, started, "transport_failed",
+            repo_root, runtime_root, attempt_path, candidate_path, clock,
+        )
     if rejected is not None:
         reason, body_digest, body_size = rejected
         return _failed(
@@ -231,18 +241,6 @@ def _persist_candidate(
         observation_receipt=receipt,
     )
     try:
-        _write(attempt_path, receipt.to_dict(), repo_root, runtime_root)
-    except (OSError, ValueError):
-        return DiscoveryRunResult(
-            _receipt(
-                invocation, call_id, request_digest, True, "INDETERMINATE",
-                "terminal_receipt_write_failed", started, clock(),
-                http_status=response.status, response_body_digest=body_digest,
-                response_byte_count=body_size,
-            ),
-            None, attempt_path, candidate_path,
-        )
-    try:
         _write(candidate_path, candidate.to_dict(), repo_root, runtime_root)
     except (OSError, ValueError):
         return _failed(
@@ -251,6 +249,16 @@ def _persist_candidate(
             http_status=response.status, response_body_digest=body_digest,
             response_byte_count=body_size,
         )
+    try:
+        _write(attempt_path, receipt.to_dict(), repo_root, runtime_root)
+    except (OSError, ValueError):
+        indeterminate = _receipt(
+            invocation, call_id, request_digest, True, "INDETERMINATE",
+            "terminal_receipt_write_failed", started, clock(),
+            http_status=response.status, response_body_digest=body_digest,
+            response_byte_count=body_size,
+        )
+        return DiscoveryRunResult(indeterminate, candidate, attempt_path, candidate_path)
     return DiscoveryRunResult(receipt, candidate, attempt_path, candidate_path)
 def _failed(
     invocation: DiscoveryInvocation,
@@ -276,10 +284,6 @@ def _failed(
         )
     return DiscoveryRunResult(receipt, None, attempt_path, candidate_path)
 def _response_rejection(response: HTTPResponse) -> tuple[str, str | None, int | None] | None:
-    if type(response.status) is not int or type(response.redirected) is not bool:
-        return "transport_failed", None, None
-    if not isinstance(response.body, bytes):
-        return "transport_failed", None, None
     size = len(response.body)
     if size > MAX_RESPONSE_BYTES:
         return "body_too_large", None, None
@@ -292,6 +296,26 @@ def _response_rejection(response: HTTPResponse) -> tuple[str, str | None, int | 
     if content_type != "application/json":
         return "content_type_rejected", digest, min(size, MAX_RESPONSE_BYTES)
     return None
+def _validated_response(value: Any) -> HTTPResponse:
+    if type(value) is not HTTPResponse:
+        raise ValueError("transport_failed")
+    status, headers, body, redirected = value.status, value.headers, value.body, value.redirected
+    if type(status) is not int or not 100 <= status <= 599:
+        raise ValueError("transport_failed")
+    if type(headers) is not dict or len(headers) > 64:
+        raise ValueError("transport_failed")
+    clean: dict[str, str] = {}
+    for key, item in headers.items():
+        if type(key) is not str or type(item) is not str:
+            raise ValueError("transport_failed")
+        if not 0 < len(key) <= 128 or len(item) > 4096 or _control_text(key + item):
+            raise ValueError("transport_failed")
+        clean[key] = item
+    if type(body) is not bytes or type(redirected) is not bool:
+        raise ValueError("transport_failed")
+    return HTTPResponse(status, clean, body, redirected)
+def _control_text(value: str) -> bool:
+    return any(ord(char) < 32 or ord(char) == 127 for char in value)
 def _receipt(
     invocation: DiscoveryInvocation,
     call_id: str,

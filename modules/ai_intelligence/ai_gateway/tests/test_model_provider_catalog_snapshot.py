@@ -139,6 +139,30 @@ def test_record_scalar_bounds_and_secret_shaped_ids_are_rejected() -> None:
     assert counts == {"record_invalid": 5}
 
 
+def test_model_ids_require_exact_bounded_lowercase_publisher_model_segments() -> None:
+    publisher64 = "p" * 64
+    model128 = "m" * 128
+    invalid = [
+        "/model", "publisher/", "publisher//model", "publisher/model/extra",
+        "./model", "../model", "publisher/.", "publisher/..",
+        "Publisher/model", "publisher/Model", "publisher/model:FREE",
+        "publisher/model:paid", "publisher/../model", f"{'p' * 65}/model",
+        f"publisher/{'m' * 129}",
+    ]
+    payload, rejected, counts = sanitize_openrouter_catalog_payload(
+        {"data": [
+            {"id": "publisher/model"}, {"id": "publisher/model:free"},
+            {"id": f"{publisher64}/{model128}"},
+            *({"id": model_id} for model_id in invalid),
+        ]}
+    )
+    assert [item["id"] for item in payload["data"]] == [
+        f"{publisher64}/{model128}", "publisher/model", "publisher/model:free"
+    ]
+    assert rejected == len(invalid)
+    assert counts == {"record_invalid": len(invalid)}
+
+
 def test_content_id_excludes_observation_time_and_rehydration_detects_tamper() -> None:
     raw = _raw("openrouter_models_success.json")
     first = _candidate(raw, completed=1_000)
@@ -161,6 +185,70 @@ def test_content_id_excludes_observation_time_and_rehydration_detects_tamper() -
     with pytest.raises(ValueError, match="candidate_snapshot_stale"):
         rehydrate_candidate_snapshot(
             first.to_dict(), now_ms=first.observed_at_ms + DEFAULT_FRESHNESS_MS + 1
+        )
+
+
+def test_candidate_rehydration_rejects_future_observation_and_invalid_interval() -> None:
+    candidate = _candidate(_raw("openrouter_models_success.json"))
+    future = copy.deepcopy(candidate.to_dict())
+    future["observed_at_ms"] = 1_002
+    future["fresh_until_ms"] = 1_002 + DEFAULT_FRESHNESS_MS
+    with pytest.raises(ValueError, match="candidate_snapshot_future_observation"):
+        rehydrate_candidate_snapshot(future, now_ms=1_001)
+
+    interval = copy.deepcopy(candidate.to_dict())
+    interval["fresh_until_ms"] = interval["observed_at_ms"] - 1
+    with pytest.raises(ValueError, match="candidate_snapshot_invalid"):
+        rehydrate_candidate_snapshot(interval, now_ms=1_001)
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"attempted": False},
+        {"reason": "transport_pending"},
+        {"http_status": 201},
+        {"response_body_digest": None, "response_byte_count": None},
+        {"candidate_snapshot_id": "other_receipt:" + "0" * 64},
+        {"accepted_record_count": 0},
+        {"completed_at_ms": -1},
+    ],
+)
+def test_completed_receipt_requires_exact_terminal_evidence(changes) -> None:
+    candidate = _candidate(_raw("openrouter_models_success.json"))
+    values = candidate.observation_receipt.to_dict()
+    values.update(changes)
+    values.pop("receipt_id")
+    with pytest.raises(ValueError, match="discovery_receipt_invalid"):
+        build_discovery_receipt(**values)
+
+
+@pytest.mark.parametrize(
+    "outcome,attempted,reason,details",
+    [
+        ("BLOCKED_PRECALL", False, "precall_intent", {"http_status": 200}),
+        ("INDETERMINATE", False, "transport_pending", {}),
+        ("INDETERMINATE", True, "precall_intent", {}),
+        ("FAILED", False, "transport_failed", {}),
+        ("FAILED", True, "transport_failed", {
+            "candidate_snapshot_id": "model_provider_catalog_candidate_snapshot:" + "0" * 64,
+        }),
+    ],
+)
+def test_noncompleted_receipts_reject_incoherent_state(
+    outcome: str, attempted: bool, reason: str, details: dict
+) -> None:
+    with pytest.raises(ValueError, match="discovery_receipt_invalid"):
+        build_discovery_receipt(
+            call_id="offline-incoherent",
+            invocation=build_discovery_invocation(mode="manual"),
+            request_envelope_digest=sha256_bytes(b"request"),
+            attempted=attempted,
+            outcome=outcome,
+            reason=reason,
+            started_at_ms=1,
+            completed_at_ms=2,
+            **details,
         )
 
 
@@ -188,6 +276,12 @@ def test_bridge_is_freshness_checked_idempotent_and_does_not_merge_static() -> N
     )
     assert unchanged.catalog_build_required is False
     assert unchanged.catalog_snapshot is None
+    with pytest.raises(ValueError, match="prior_candidate_id_invalid"):
+        bridge_candidate_to_canonical_catalog(
+            candidate,
+            now_ms=1_001,
+            prior_admitted_candidate_id="model_provider_catalog_discovery_receipt:" + "0" * 64,
+        )
 
 
 def test_scheduled_invocation_admission_is_inclusive_and_digest_bound() -> None:
