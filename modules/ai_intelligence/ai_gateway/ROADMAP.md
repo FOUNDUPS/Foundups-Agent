@@ -24,6 +24,9 @@
 - [x] Moved entries dated 2026-07-16 and earlier into
   `docs/archives/ModLog_2026-07-16_and_earlier.md`; both journals are below
   1,000 lines.
+- [x] Moved entries dated 2026-07-17 into
+  `docs/archives/ModLog_2026-07-17.md`; live and archived journals remain below
+  1,000 lines.
 
 ### Direct provider catalog evidence
 
@@ -34,8 +37,12 @@
   exact size/content, and single-link pathname validation.
 - [x] Retain verified object identity through Windows publication and restore
   exact prior target state after detected publication failure or mismatch.
+- [x] Scheduled-only durable replay guard with per-invocation `ARMED` admission,
+  bounded terminal ledger evidence, pre-ledger migration, cross-process
+  serialization, and fail-closed replay recovery.
 - [ ] Operator-owned scheduling integration. Phase 1 provides scheduled
-  invocation admission fields but intentionally installs no scheduler.
+  invocation admission and replay enforcement but intentionally installs no
+  scheduler.
 - [ ] Evaluate directory-handle publication on non-Windows hosts and stronger
   directory durability. Their current boundary requires a trusted non-shared
   runtime directory and all parent-directory fsync remains best-effort.
