@@ -5,7 +5,9 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
+
+import pytest
 
 from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
@@ -40,6 +42,14 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_colle
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    InMemoryProviderCallEvidenceStore,
+    ProviderCallOutcome,
+    ProviderCallReason,
+    arm_provider_call,
+    create_precall_evidence,
+    terminalize_provider_call,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _model_selection,
 )
@@ -73,11 +83,17 @@ class FakeArchitectRunner:
         ok: bool = True,
         quorum: bool = True,
         raise_timeout: bool = False,
+        provider_call_evidence: (
+            Mapping[str, Any]
+            | Callable[[Mapping[str, Any]], Mapping[str, Any]]
+            | None
+        ) = None,
     ) -> None:
         self.output = output
         self.ok = ok
         self.quorum = quorum
         self.raise_timeout = raise_timeout
+        self.provider_call_evidence = provider_call_evidence
         self.calls: list[dict[str, Any]] = []
 
     def run_architect_determination(self, *, prompt: str, context: str, binding: Mapping[str, Any], timeout_seconds: int):
@@ -92,6 +108,11 @@ class FakeArchitectRunner:
         if self.raise_timeout:
             raise TimeoutError("model timeout")
         content = self.output if isinstance(self.output, str) else json.dumps(self.output, sort_keys=True)
+        evidence = self.provider_call_evidence
+        if evidence is None:
+            evidence = _provider_call_evidence_from_binding(binding)
+        elif callable(evidence):
+            evidence = evidence(binding)
         return ArchitectModelResult(
             ok=self.ok,
             status="MODEL_OK" if self.ok else "MODEL_REJECT",
@@ -101,6 +122,7 @@ class FakeArchitectRunner:
             review_packet={"fusion_panel_quorum": {"passed": self.quorum}},
             made_network_call=True,
             rejection_reasons=() if self.ok else ("model_failed",),
+            provider_call_evidence=dict(evidence),
         )
 
 
@@ -271,6 +293,53 @@ def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
     return kwargs
 
 
+def _provider_call_evidence_from_binding(
+    binding: Mapping[str, Any],
+    *,
+    task_id: str | None = None,
+    work_order_id: str | None = None,
+    queue_item_id: str | None = None,
+    run_id: str | None = None,
+    surface: str = RUNTIME_SURFACE_BACKEND_ARCHITECT,
+    cycle_id: str | None = None,
+    runtime_receipt_id: str | None = None,
+    runtime_digest: str | None = None,
+    requested_provider: str = "openrouter",
+    requested_model: str | None = None,
+    outcome: ProviderCallOutcome = ProviderCallOutcome.COMPLETED,
+) -> dict[str, Any]:
+    model_selection = binding.get("model_selection")
+    topology = model_selection if isinstance(model_selection, Mapping) else {}
+    precall = create_precall_evidence(
+        surface=surface,
+        task_id=task_id,
+        work_order_id=work_order_id,
+        queue_item_id=queue_item_id,
+        run_id=run_id,
+        cycle_id=cycle_id or str(binding.get("cycle_id") or ""),
+        requested_provider=requested_provider,
+        requested_model=requested_model
+        or str(topology.get("lead_model") or ""),
+        redacted_input_digest="sha256:" + "a" * 64,
+        model_runtime_binding_receipt_id=runtime_receipt_id
+        or str(topology.get("model_runtime_binding_receipt_id") or ""),
+        model_runtime_binding_digest=runtime_digest
+        or str(topology.get("model_runtime_binding_digest") or ""),
+        request_metadata={"timeout_seconds": 1},
+        started_at_ms=100,
+    )
+    return terminalize_provider_call(
+        arm_provider_call(precall),
+        outcome=outcome,
+        reason=(
+            ProviderCallReason.PROVIDER_RETURNED
+            if outcome == ProviderCallOutcome.COMPLETED
+            else ProviderCallReason.PROVIDER_FAILED
+        ),
+        completed_at_ms=101,
+    ).to_dict()
+
+
 def test_backend_architect_runtime_accepts_fix_persists_and_emits_one_queue_candidate() -> None:
     inputs = _build_inputs()
     evidence_ref = inputs["reports"][0]["evidence_refs"][0]
@@ -302,6 +371,97 @@ def test_backend_architect_runtime_accepts_fix_persists_and_emits_one_queue_cand
     assert result.no_openclaw_enqueue_performed is True
     assert result.no_hermes_dispatch_performed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=FakeArchitectRunner(output),
+        now_iso=NOW,
+    )
+
+    assert result.accepted
+    assert result.receipt.provider_call_id
+    assert result.receipt.provider_call_receipt_id
+    assert result.receipt.provider_call_evidence_digest
+    assert result.receipt.queue_candidate is not None
+    assert (
+        result.receipt.queue_candidate.source_determination_receipt_id
+        == result.receipt.determination_receipt_id
+    )
+
+
+@pytest.mark.parametrize(
+    "evidence_factory",
+    [
+        lambda binding: {},
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, surface="wrong_architect_surface"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, cycle_id="wrong-cycle"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, task_id="forged-task"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, work_order_id="forged-work"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, queue_item_id="forged-queue"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, run_id="forged-run"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, runtime_receipt_id="wrong-binding"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, runtime_digest="sha256:" + "f" * 64
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, outcome=ProviderCallOutcome.FAILED
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, requested_provider="other-provider"
+        ),
+        lambda binding: _provider_call_evidence_from_binding(
+            binding, requested_model="other/model"
+        ),
+        lambda binding: {
+            **_provider_call_evidence_from_binding(binding),
+            "attempted": False,
+        },
+    ],
+)
+def test_architect_rejects_missing_or_mismatched_provider_evidence_before_queue(
+    evidence_factory,
+) -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=FakeArchitectRunner(
+            _model_output(inputs["allocation"], evidence_ref),
+            provider_call_evidence=evidence_factory,
+        ),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert result.queue_candidate_count == 0
+    assert result.receipt.queue_candidate is None
+    assert (
+        ArchitectDeterminationReason.PROVIDER_CALL_EVIDENCE
+        in result.rejection_reasons
+    )
 
 
 def test_research_more_persists_without_queue_candidate() -> None:
@@ -679,7 +839,9 @@ def test_production_runner_is_explicit_mode_only_without_network(monkeypatch) ->
     monkeypatch.delenv("REDDOG_BACKEND_ARCHITECT_RUNTIME_MODE", raising=False)
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
-    result = FoundupsFusionArchitectModelRunner().run_architect_determination(
+    result = FoundupsFusionArchitectModelRunner(
+        provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+    ).run_architect_determination(
         prompt="Return JSON.",
         context="{}",
         binding={"binding": "test"},
@@ -728,10 +890,12 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
         expected_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
     )
     assert topology_reasons == []
-    result = FoundupsFusionArchitectModelRunner().run_architect_determination(
+    result = FoundupsFusionArchitectModelRunner(
+        provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+    ).run_architect_determination(
         prompt="Return JSON.",
         context="public evidence",
-            binding={"model_selection": topology},
+            binding={"cycle_id": "cycle-direct-1", "model_selection": topology},
         timeout_seconds=1,
     )
 

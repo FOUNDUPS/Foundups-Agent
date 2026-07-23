@@ -1,5 +1,27 @@
 # moltbot_bridge Roadmap
 
+## RedDog provider-call evidence follow-ups
+
+- Phase 2a covers only the governed repo-audit and backend-architect in-process
+  FoundUps Fusion entry paths with one durable, generic content-free receipt.
+- Review repair complete: typed served-identity parsers, exact audit/architect
+  acceptance lineage gates, post-invocation extraction failure evidence,
+  frozen legacy-v1 progress compatibility, and platform-neutral WSP 62
+  exemption matching are covered by adversarial regressions.
+- Final review repair: requested identities use the same typed grammar, and
+  acceptance compares the complete invocation lineage plus requested runtime
+  identity; unbound lineage fields must remain null.
+- Next: make the Fusion/OpenRouter gateway return authoritative served
+  provider/model and normalized numeric usage evidence. Until then those
+  fields remain null; configuration is never evidence of service.
+- Next: wire the same canonical receipt through OpenClaw/Hermes provider
+  boundaries after their independent lineage and retry contracts are defined.
+- Next: extract the atomic store from the focused contract module after
+  cross-surface parity is stable, retiring the temporary WSP 62 ceiling.
+- Next: extract the backend architect model-call and accepted-receipt
+  composition transaction behind a focused internal boundary, then retire its
+  temporary WSP 62 ceiling without changing determination/queue identities.
+
 ## RedDog execution-valve readiness
 
 - Phase 1 safety wiring complete locally: token-free canonical supplier,

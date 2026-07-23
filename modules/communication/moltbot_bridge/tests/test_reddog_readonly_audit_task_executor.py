@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+from typing import Any, Mapping
 
 import pytest
 
@@ -31,6 +32,14 @@ from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_
 )
 import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
 import modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt as wsp15_allocation
+from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    InMemoryProviderCallEvidenceStore,
+    ProviderCallOutcome,
+    ProviderCallReason,
+    arm_provider_call,
+    create_precall_evidence,
+    terminalize_provider_call,
+)
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
     AUTHORITATIVE_WORK_STATE_REFRESH_SLICE,
     READONLY_AUDIT_LANE_ANALYZER_SLICE,
@@ -232,7 +241,79 @@ class _EchoEvidenceModelRunner:
             model_receipt_id="model-receipt-1",
             model_result_digest="sha256:model-result-1",
             made_network_call=True,
+            provider_call_evidence=_audit_provider_call_evidence_from_binding(
+                binding
+            ),
         )
+
+
+def _audit_provider_call_evidence_from_binding(
+    binding: Mapping[str, Any],
+    *,
+    task_id: str | None = None,
+    work_order_id: str | None = None,
+    queue_item_id: str | None = None,
+    run_id: str | None = None,
+    cycle_id: str | None = None,
+    surface: str = RUNTIME_SURFACE_READONLY_AUDIT,
+    runtime_receipt_id: str | None = None,
+    runtime_digest: str | None = None,
+    requested_provider: str = "openrouter",
+    requested_model: str | None = None,
+    outcome: ProviderCallOutcome = ProviderCallOutcome.COMPLETED,
+) -> dict:
+    precall = create_precall_evidence(
+        surface=surface,
+        task_id=task_id or str(binding.get("task_id") or "") or None,
+        work_order_id=work_order_id,
+        queue_item_id=queue_item_id,
+        run_id=run_id,
+        cycle_id=cycle_id,
+        requested_provider=requested_provider,
+        requested_model=requested_model
+        or str(binding.get("model_selection", {}).get("lead_model") or ""),
+        redacted_input_digest="sha256:" + "a" * 64,
+        model_runtime_binding_receipt_id=runtime_receipt_id
+        or str(binding.get("model_runtime_binding_receipt_id") or ""),
+        model_runtime_binding_digest=runtime_digest
+        or str(binding.get("model_runtime_binding_digest") or ""),
+        request_metadata={"timeout_seconds": 1},
+        started_at_ms=100,
+    )
+    return terminalize_provider_call(
+        arm_provider_call(precall),
+        outcome=outcome,
+        reason=(
+            ProviderCallReason.PROVIDER_RETURNED
+            if outcome == ProviderCallOutcome.COMPLETED
+            else ProviderCallReason.PROVIDER_FAILED
+        ),
+        completed_at_ms=101,
+    ).to_dict()
+
+
+def _failed_provider_call_evidence(task_id: str) -> dict:
+    precall = create_precall_evidence(
+        surface=RUNTIME_SURFACE_READONLY_AUDIT,
+        task_id=task_id,
+        work_order_id="work-1",
+        queue_item_id="queue-1",
+        run_id="run-1",
+        cycle_id=None,
+        requested_provider="openrouter",
+        requested_model="synthetic/model",
+        redacted_input_digest="sha256:" + "a" * 64,
+        model_runtime_binding_receipt_id="binding-1",
+        model_runtime_binding_digest="sha256:" + "b" * 64,
+        request_metadata={"timeout_seconds": 1},
+        started_at_ms=100,
+    )
+    return terminalize_provider_call(
+        arm_provider_call(precall),
+        outcome=ProviderCallOutcome.FAILED,
+        reason=ProviderCallReason.PROVIDER_FAILED,
+        completed_at_ms=101,
+    ).to_dict()
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -700,6 +781,7 @@ def test_model_fallback_rejects_changed_content_before_index_or_model(tmp_path: 
     result = execute_reddog_readonly_audit_task(
         task_context=context,
         repo_root=root,
+        task_id="task-fallback-recheck",
         model_runner=runner,
         holoindex_adapter=holo,
         codeindex_adapter=code,
@@ -729,6 +811,7 @@ def test_model_fallback_rechecks_content_after_model_even_when_head_is_unchanged
     result = execute_reddog_readonly_audit_task(
         task_context=context,
         repo_root=root,
+        task_id="task-fallback-post-model",
         model_runner=runner,
         holoindex_adapter=_FakeQueryAdapter(),
         codeindex_adapter=_FakeQueryAdapter(),
@@ -768,6 +851,115 @@ def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_p
     assert result.report["worker_receipt"]["model_receipt_id"] == "model-receipt-1"
     assert result.report["worker_receipt"]["model_route_receipt_id"].startswith("sha256:")
     assert result.report["findings"][0]["evidence_refs"][0] in result.report["evidence_refs"]
+
+
+def test_model_failure_result_carries_provider_call_evidence(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    task_id = "task-provider-failure"
+    provider_evidence = _failed_provider_call_evidence(task_id)
+
+    class _FailedEvidenceModelRunner:
+        def run_repo_code_audit(self, **kwargs):
+            return RepoAuditModelResult(
+                ok=False,
+                status="MODEL_REJECT",
+                content="",
+                model_receipt_id=None,
+                model_result_digest="sha256:model-failure",
+                made_network_call=True,
+                rejection_reasons=("provider_call_failed",),
+                provider_call_evidence=provider_evidence,
+            )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id=task_id,
+        model_runner=_FailedEvidenceModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert result.no_model_call_performed is False
+    assert result.provider_call_evidence == provider_evidence
+    assert result.to_dict()["provider_call_evidence"] == provider_evidence
+
+
+@pytest.mark.parametrize(
+    "evidence_factory",
+    [
+        lambda binding: {},
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, surface="wrong_audit_surface"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, task_id="wrong-task"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, work_order_id="forged-work"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, queue_item_id="forged-queue"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, run_id="forged-run"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, cycle_id="forged-cycle"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, runtime_receipt_id="wrong-binding"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, runtime_digest="sha256:" + "f" * 64
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, outcome=ProviderCallOutcome.FAILED
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, requested_provider="other-provider"
+        ),
+        lambda binding: _audit_provider_call_evidence_from_binding(
+            binding, requested_model="other/model"
+        ),
+        lambda binding: {
+            **_audit_provider_call_evidence_from_binding(binding),
+            "attempted": False,
+        },
+    ],
+)
+def test_audit_rejects_missing_or_mismatched_provider_evidence_before_acceptance(
+    tmp_path: Path,
+    evidence_factory,
+) -> None:
+    root = _repo(tmp_path)
+
+    class _ForgedEvidenceRunner(_EchoEvidenceModelRunner):
+        def run_repo_code_audit(self, **kwargs):
+            result = super().run_repo_code_audit(**kwargs)
+            return RepoAuditModelResult(
+                **{
+                    **result.__dict__,
+                    "provider_call_evidence": evidence_factory(kwargs["binding"]),
+                }
+            )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id="task-provider-gate",
+        model_runner=_ForgedEvidenceRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert result.no_model_call_performed is False
+    assert ReadOnlyAuditTaskRejectReason.PROVIDER_CALL_EVIDENCE in (
+        result.rejection_reasons
+    )
+    assert result.provider_call_evidence == {}
 
 
 def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: Path) -> None:
@@ -1793,6 +1985,7 @@ def test_model_backed_rejects_invalid_recommended_action_enum(tmp_path: Path) ->
                 model_receipt_id="model-receipt-1",
                 model_result_digest="sha256:model-result-1",
                 made_network_call=True,
+                provider_call_evidence=result.provider_call_evidence,
             )
 
     result = execute_reddog_readonly_audit_task(
@@ -1829,6 +2022,7 @@ def test_model_backed_rejects_stop_with_next_slice(tmp_path: Path) -> None:
                 model_receipt_id="model-receipt-1",
                 model_result_digest="sha256:model-result-1",
                 made_network_call=True,
+                provider_call_evidence=result.provider_call_evidence,
             )
 
     result = execute_reddog_readonly_audit_task(
@@ -1896,7 +2090,9 @@ def test_production_runner_uses_fusion_synthesis_excerpt_for_json(tmp_path: Path
         task_context=task_context,
         repo_root=root,
         task_id="task-1",
-        model_runner=FoundupsFusionRepoAuditModelRunner(),
+        model_runner=FoundupsFusionRepoAuditModelRunner(
+            provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+        ),
         holoindex_adapter=_FakeQueryAdapter(),
         codeindex_adapter=_FakeQueryAdapter(),
     )
@@ -1934,12 +2130,15 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
         expected_surface=RUNTIME_SURFACE_READONLY_AUDIT,
     )
     assert topology_reasons == []
-    result = FoundupsFusionRepoAuditModelRunner().run_repo_code_audit(
+    result = FoundupsFusionRepoAuditModelRunner(
+        provider_call_evidence_store=InMemoryProviderCallEvidenceStore()
+    ).run_repo_code_audit(
         prompt="Return strict JSON.",
         context="Read-only repository evidence.",
         binding={
             "wsp15_reasoning_tier": "HIGH",
             "wsp15_priority": "P1",
+            "task_id": "task-direct-1",
             "model_selection": topology,
         },
         timeout_seconds=30,
@@ -2158,7 +2357,10 @@ def test_agentdb_openclaw_claim_run_task_model_worker_persists_report(tmp_path: 
             content=json.dumps(output, sort_keys=True),
             model_receipt_id="model-receipt-run-task",
             model_result_digest="sha256:model-result-run-task",
-            made_network_call=False,
+            made_network_call=True,
+            provider_call_evidence=_audit_provider_call_evidence_from_binding(
+                binding
+            ),
         )
 
     monkeypatch.setattr(FoundupsFusionRepoAuditModelRunner, "run_repo_code_audit", fake_run)

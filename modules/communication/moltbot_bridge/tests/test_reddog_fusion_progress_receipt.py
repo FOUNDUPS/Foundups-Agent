@@ -9,6 +9,26 @@ from modules.communication.moltbot_bridge.src.reddog_fusion_progress_receipt imp
     validate_fusion_progress_receipt,
 )
 
+LEGACY_V1_EMPTY_RECEIPT = {
+    "contains_prompt_or_response_content": False,
+    "contains_reasoning_content": False,
+    "event_count": 0,
+    "events": [],
+    "events_digest": (
+        "sha256:fdc918a2ba66d9f5c2a72c7f31a06659ef2c688382005a1dd19ada7235bcd6f1"
+    ),
+    "openrouter_call_count": 0,
+    "openrouter_calls": [],
+    "openrouter_calls_digest": (
+        "sha256:b3ca0b3604b87e8a7be45d46a519058bbdbb922fc8092e62c1ed1bf0931389ab"
+    ),
+    "receipt_id": (
+        "sha256:07c50c30914d62645da8e0c287dc9f2a0cfe17708854f54fba7b1993ccd83fec"
+    ),
+    "run_id": "run-legacy-v1",
+    "schema_version": "reddog_fusion_progress_receipt.v1",
+}
+
 
 class _Clock:
     def __init__(self) -> None:
@@ -31,6 +51,10 @@ def _recorder() -> FusionProgressRecorder:
         wall_clock_ms=clock.wall_ms,
         monotonic_ns=clock.monotonic_ns,
     )
+
+
+def test_frozen_legacy_v1_receipt_remains_valid() -> None:
+    assert validate_fusion_progress_receipt(LEGACY_V1_EMPTY_RECEIPT) == (True, ())
 
 
 def test_progress_receipt_round_trip_and_tamper_rejection() -> None:

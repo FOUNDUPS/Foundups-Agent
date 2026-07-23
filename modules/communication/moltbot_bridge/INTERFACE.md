@@ -2,6 +2,49 @@
 
 ## Public API
 
+### Generic provider-call evidence
+
+`create_precall_evidence()`, `arm_provider_call()`, and
+`terminalize_provider_call()` define the exact
+`reddog_provider_call_evidence.v1` state machine. `call_id` is stable for one
+request envelope; each state has a different canonical `receipt_id`.
+`AtomicJsonProviderCallEvidenceStore` retains every validated transition under
+one operation lock and commits with fsync plus atomic replace. Exact replay is
+idempotent; divergent replay and non-monotonic transitions are rejected.
+
+Production audit/architect runners require an injected store or the explicit
+outside-repository `REDDOG_PROVIDER_CALL_EVIDENCE_STORE_PATH`. They persist
+`BLOCKED_PRECALL` (`attempted=false`), atomically arm `INDETERMINATE`
+(`attempted=true`), invoke the provider only after both writes, then persist
+`COMPLETED` or `FAILED`. Any normal post-invocation exception carries the last
+content-free local evidence through `ProviderCallAttemptError`; a failed
+terminal write therefore returns armed `INDETERMINATE` truth without depending
+on a recovery read. Output promotion remains blocked. Served provider/model
+are nullable unless the returned `provider_call_metadata` exact schema supplies
+both canonical, secret-free identifiers. Requested and served providers are
+canonical slugs; requested and served models are canonical `provider/model`
+identifiers. URI/path/traversal, query/fragment, bearer-like, high-entropy, and
+raw-sentence values are rejected. Requested configuration is never used as
+served identity.
+
+Audit rejection results retain the canonical provider-call evidence mapping
+after a model attempt. Before acceptance, both consumers compare surface,
+task/work-order/queue/run/cycle lineage, runtime-binding ID and digest,
+requested provider/model, attempted state, and terminal outcome field by field
+against the invocation binding. Any lineage field without an expected binding
+must be null, and the receipt must be canonical, attempted, and `COMPLETED`.
+Omitted, extra, forged, mismatched, or non-completed evidence fails before
+report acceptance or queue construction. Accepted architect determination
+identity is computed from the provider call ID, provider receipt ID, and
+canonical evidence digest, so the queue parent cannot outlive or substitute
+its provider lineage.
+
+`FusionProgressRecorder.record_provider_call_evidence()` embeds the canonical
+generic receipt as an optional all-or-none extension of
+`reddog_fusion_progress_receipt.v1`. Frozen legacy-v1 receipts without those
+fields remain valid. Legacy OpenRouter data remains compatibility telemetry,
+not a second authoritative provider-call identity.
+
 ### Durable Resident Architect Cycle
 
 `run_reddog_resident_architect_durable_agentdb_cycle()` creates one intent-bound AgentDB cycle and advances it only through revision-checked status transitions. `AgentDbResidentArchitectCycleStore.create_cycle()` is insert-only; `transition_cycle()` requires the exact revision and allowed current status. Stored intent identity and nine process-local read-only self-attestations are immutable at this boundary. These fields are not external proof that effects did not occur. Cancellation checkpoints run between OpenClaw claims and before/following architect determination, so a stale caller cannot overwrite `CANCELLED`.

@@ -46,6 +46,10 @@ from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
 )
+from modules.communication.moltbot_bridge.tests.provider_call_evidence_test_helpers import (
+    architect_provider_call_evidence,
+    audit_provider_call_evidence,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -214,6 +218,7 @@ class _AuditModelRunner:
             model_receipt_id=f"model-receipt-{lane_id}",
             model_result_digest=f"sha256:model-result-{lane_id}",
             made_network_call=True,
+            provider_call_evidence=audit_provider_call_evidence(binding),
         )
 
 
@@ -242,6 +247,7 @@ class _ArchitectRunner:
             review_packet={"fusion_panel_quorum": {"passed": True}},
             made_network_call=True,
             rejection_reasons=(),
+            provider_call_evidence=architect_provider_call_evidence(binding),
         )
 
 

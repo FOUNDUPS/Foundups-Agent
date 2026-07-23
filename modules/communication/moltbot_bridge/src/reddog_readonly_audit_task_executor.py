@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
@@ -71,6 +71,7 @@ class ReadOnlyAuditTaskRejectReason:
     MODEL_TIMEOUT = "REJECT_MODEL_TIMEOUT"
     MODEL_SELECTION_RECEIPT = "REJECT_MODEL_SELECTION_RECEIPT"
     MODEL_RUNTIME_BINDING_RECEIPT = "REJECT_MODEL_RUNTIME_BINDING_RECEIPT"
+    PROVIDER_CALL_EVIDENCE = "REJECT_PROVIDER_CALL_EVIDENCE"
     MODEL_SCHEMA_FAILURE = "REJECT_MODEL_SCHEMA_FAILURE"
     UNKNOWN_EVIDENCE_REF = "REJECT_UNKNOWN_EVIDENCE_REF"
     REPORT_MISSING_EVIDENCE = "REJECT_REPORT_MISSING_EVIDENCE"
@@ -102,6 +103,7 @@ class ReadOnlyAuditTaskExecutionResult:
     report: Optional[Mapping[str, Any]]
     evidence: tuple[ReadOnlyTargetEvidence, ...]
     rejection_reasons: tuple[str, ...]
+    provider_call_evidence: Mapping[str, Any] = field(default_factory=dict)
     no_model_call_performed: bool = True
     no_shell_command_executed: bool = True
     no_repo_mutation_performed: bool = True
@@ -117,6 +119,7 @@ class ReadOnlyAuditTaskExecutionResult:
             "report": dict(self.report) if self.report else None,
             "evidence": [item.to_dict() for item in self.evidence],
             "rejection_reasons": list(self.rejection_reasons),
+            "provider_call_evidence": dict(self.provider_call_evidence),
             "no_model_call_performed": self.no_model_call_performed,
             "no_shell_command_executed": self.no_shell_command_executed,
             "no_repo_mutation_performed": self.no_repo_mutation_performed,
@@ -433,13 +436,20 @@ def _evidence_ref(item: ReadOnlyTargetEvidence) -> str:
     return f"file:{item.path}:{item.digest}:lines:{item.line_count}"
 
 
-def _reject(reasons: Sequence[str]) -> ReadOnlyAuditTaskExecutionResult:
+def _reject(
+    reasons: Sequence[str],
+    *,
+    provider_call_evidence: Mapping[str, Any] | None = None,
+    no_model_call_performed: bool = True,
+) -> ReadOnlyAuditTaskExecutionResult:
     return ReadOnlyAuditTaskExecutionResult(
         accepted=False,
         decision=READONLY_AUDIT_TASK_REPORT_REJECT,
         report=None,
         evidence=(),
         rejection_reasons=tuple(dict.fromkeys(str(reason) for reason in reasons)),
+        provider_call_evidence=dict(provider_call_evidence or {}),
+        no_model_call_performed=no_model_call_performed,
     )
 
 

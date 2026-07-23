@@ -1,5 +1,94 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND3
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97
+
+- Applied the canonical provider-slug and `provider/model` parsers to requested
+  identities at both creation and rehydration; secret-like and raw-prompt
+  shapes now fail before a provider call.
+- Audit and architect acceptance now compare the complete expected invocation
+  vector: surface, task/work-order/queue/run/cycle lineage, runtime-binding ID
+  and digest, requested provider/model, attempted state, and terminal outcome.
+  Unbound lineage fields must be null, so extra forged lineage is rejected.
+- Added parameterized substitution probes for every compared field plus valid
+  canonical receipts and requested-identity creation/validator regressions.
+- Post-repair gate: 274 passed / 1 platform skip; the broader
+  Fusion/architect family sweep passed 64/64.
+
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND2
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97
+
+- Replaced the shared permissive served-identity grammar with provider-slug and
+  `provider/model` parsers that reject URI/path/traversal, dot-segment,
+  query/fragment, bearer-like, high-entropy, and raw-sentence shapes.
+- Added independent canonical provider-evidence acceptance gates at the audit
+  and architect consumers. Exact surface, task/cycle, runtime-binding receipt
+  and digest, and `COMPLETED` outcome are required before report acceptance or
+  queue construction.
+- Normal post-invocation extraction exceptions now raise
+  `ProviderCallAttemptError` with the last local armed/failed evidence, even
+  when the terminal write and recovery read are unavailable.
+- Preserved the frozen legacy `reddog_fusion_progress_receipt.v1` shape while
+  retaining generic provider evidence as an all-or-none optional extension.
+- Canonicalized WSP 62 exemption matching with POSIX relative keys on every
+  host and recorded exact no-growth ceilings for every touched function over
+  60 lines.
+- Post-repair gate: 252 passed / 1 platform skip across the provider, Fusion
+  receipt, audit, architect, main bootstrap, end-to-end, durable-cycle, and
+  WSP 62 files; the broader Fusion/architect family sweep passed 57/57.
+- A whole bridge diagnostic run reached 3,976 passed / 17 skipped / 51 failed.
+  Remaining failures are outside this slice (missing optional dependencies or
+  external fixtures, grant/skill environment state, and pre-model
+  bootstrap/runtime-binding rejections); no remaining failure names the new
+  provider-evidence acceptance reason.
+
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97
+
+- Restricted served provider/model persistence to canonical identifier grammar
+  after the shared runtime secret-shape detector; secrets, credentials,
+  whitespace/control characters, and raw-content shapes now fail closed.
+- Added a static `ProviderCallAttemptError` carrying only canonical local
+  evidence and a timeout bit. Audit and architect runners now report
+  `made_network_call=true` with non-promotable INDETERMINATE lineage even when
+  terminal persistence and recovery reads are unavailable.
+- Bound accepted architect determination/queue-parent identity to provider call
+  ID, provider receipt ID, and canonical evidence digest.
+- Added provider evidence to audit execution rejection results, including
+  invalid-output and post-model repository-change rejections.
+- Recorded exact temporary WSP 62 ceilings for every enlarged legacy source and
+  test surface, including the previously missing 1,618-line architect runtime.
+  Transaction/store extraction remains a separately tracked follow-up.
+- Added adversarial regressions for secret/raw identity smuggling, double store
+  failure truth, architect provider-lineage substitution, and audit failure
+  linkage. Focused provider/architect/audit/WSP62 tests pass 117/117; Fusion
+  progress tests pass 13/13.
+
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A
+
+**WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
+
+- Added the exact, content-free `reddog_provider_call_evidence.v1` contract,
+  strict validator, domain-separated IDs/digests, bounded usage and served
+  metadata, and locked atomic history store.
+- Governed audit and backend-architect Fusion entry paths now durably write
+  PRECALL intent and armed INDETERMINATE evidence before invocation, then
+  terminalize COMPLETED/FAILED. Missing lineage/store blocks before provider;
+  terminal-store uncertainty blocks promotion and automatic retry.
+- Bound canonical evidence IDs/digests into audit/architect result lineage and
+  allowed `FusionProgressRecorder` to embed the generic receipt without
+  treating its legacy OpenRouter telemetry as parallel truth.
+- Added tamper, content-smuggling, replay, crash, atomic-store, zero-provider
+  precall, terminal-persistence, synthetic served-metadata, and direct
+  in-process cross-surface parity tests. OpenClaw/Hermes wiring and gateway
+  served-identity evidence are explicitly deferred.
+- WSP 62 truth: temporary ceilings now match the touched legacy integration
+  files; the focused contract/store has a bounded temporary 775-line ceiling
+  with extraction tracked in the roadmap.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 62, 71, 97

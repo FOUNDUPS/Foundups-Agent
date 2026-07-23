@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 from . import reddog_fusion_progress_receipt as receipt
+from .reddog_provider_call_evidence import validate_provider_call_evidence
 
 
 _CALL_STATUSES = frozenset({"COMPLETED", "FAILED"})
@@ -21,11 +22,15 @@ _CALL_KEYS = frozenset({
     "started_at_ms", "completed_at_ms", "duration_ms", "retry_count", "generation_id", "usage",
     "usage_verified", "cost_accounting_complete", "router_metadata", "failure_reason", "receipt_id",
 })
-_RECEIPT_KEYS = frozenset({
+_LEGACY_RECEIPT_KEYS = frozenset({
     "schema_version", "run_id", "events", "openrouter_calls", "event_count", "openrouter_call_count",
     "events_digest", "openrouter_calls_digest", "contains_prompt_or_response_content",
     "contains_reasoning_content", "receipt_id",
 })
+_PROVIDER_EVIDENCE_KEYS = frozenset({
+    "provider_call_evidence", "provider_call_evidence_count", "provider_call_evidence_digest",
+})
+_RECEIPT_KEYS = _LEGACY_RECEIPT_KEYS | _PROVIDER_EVIDENCE_KEYS
 _REQUIRED_START = {
     "lead_done": "lead_start", "synthesis_done": "synthesis_start", "single_done": "single_start",
     "fusion_alias_done": "fusion_alias_start", "redaction_pass": "redaction_start",
@@ -238,7 +243,8 @@ def _validate_event_call_correlation(events: list[Any], calls: list[Any], reason
 def validate_fusion_progress_receipt(value: Any) -> tuple[bool, tuple[str, ...]]:
     if not isinstance(value, Mapping) or value.get("schema_version") != receipt.PROGRESS_SCHEMA:
         return False, ("progress_receipt_schema_invalid",)
-    if set(value) != _RECEIPT_KEYS:
+    receipt_keys = set(value)
+    if receipt_keys not in {_LEGACY_RECEIPT_KEYS, _RECEIPT_KEYS}:
         return False, ("progress_receipt_fields_invalid",)
     body = {key: item for key, item in value.items() if key != "receipt_id"}
     reasons: list[str] = []
@@ -264,6 +270,25 @@ def validate_fusion_progress_receipt(value: Any) -> tuple[bool, tuple[str, ...]]
         _validate_calls(calls, body.get("run_id"), reasons)
     if isinstance(events, list) and isinstance(calls, list):
         _validate_event_call_correlation(events, calls, reasons)
+    if _PROVIDER_EVIDENCE_KEYS <= receipt_keys:
+        provider_evidence = body.get("provider_call_evidence")
+        if not isinstance(provider_evidence, list) or len(provider_evidence) > receipt.MAX_CALLS:
+            reasons.append("provider_call_evidence_invalid")
+        else:
+            if body.get("provider_call_evidence_count") != len(provider_evidence):
+                reasons.append("provider_call_evidence_count_mismatch")
+            if body.get("provider_call_evidence_digest") != receipt._digest(
+                "reddog_provider_call_evidence", provider_evidence
+            ):
+                reasons.append("provider_call_evidence_digest_mismatch")
+            for item in provider_evidence:
+                try:
+                    evidence = validate_provider_call_evidence(item)
+                except (TypeError, ValueError):
+                    reasons.append("provider_call_evidence_receipt_invalid")
+                    continue
+                if evidence.run_id is not None and evidence.run_id != run_id:
+                    reasons.append("provider_call_evidence_binding_invalid")
     if value.get("receipt_id") != receipt._digest("reddog_fusion_progress_receipt", body):
         reasons.append("progress_receipt_id_mismatch")
     if body.get("contains_prompt_or_response_content") is not False:

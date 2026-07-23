@@ -1,3 +1,48 @@
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND3
+
+- Added requested-provider and requested-model secret/raw-shape rejection at
+  receipt creation and direct validator rehydration.
+- Expanded audit and architect adversarial matrices across surface, task,
+  work-order, queue, run, cycle, runtime receipt/digest, requested
+  provider/model, attempted state, and terminal outcome.
+- Updated integration fixtures so valid receipts carry only binding-derived
+  lineage; no test-only extra lineage is accepted.
+- Consolidated gate: `274 passed, 1 skipped`; Fusion/architect family:
+  `64 passed`; modular-audit suite: `16 passed`.
+
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND2
+
+- Added adversarial provider/model parser cases for URI, drive/path traversal,
+  dot segments, query/fragment, bearer-like, high-entropy, and raw sentences,
+  plus documented OpenRouter-style identifiers.
+- Added direct audit and architect extraction-failure cases using a raising
+  `__str__` value and an unreadable evidence store; attempted local evidence
+  remains truthful.
+- Added omitted, forged-surface, wrong task/cycle, wrong runtime-binding
+  ID/digest, and non-completed evidence rejection at both acceptance consumers.
+- Added a hard-coded frozen legacy-v1 progress receipt and a platform-neutral
+  Windows/POSIX WSP 62 exemption-key regression.
+- Exact WSP 62 tests now require the complete measured set of every touched
+  communication function over 60 lines.
+- Consolidated post-repair suite: `252 passed, 1 skipped`; Fusion/architect
+  family sweep: `57 passed`; modular-audit unit suite: `16 passed`.
+- Whole bridge diagnostic: `3976 passed, 17 skipped, 51 failed`. The remaining
+  failures are unrelated optional-dependency, external-fixture, grant/skill
+  environment, or pre-model bootstrap/runtime-binding cases.
+
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR
+
+- Added adversarial served-identity cases covering credential-shaped values,
+  whitespace, controls, and JSON-like raw content, plus valid OpenRouter-style
+  provider/model identifiers.
+- Added direct audit and architect regressions where the provider was invoked,
+  terminal persistence failed, and the store was unreadable; both retain
+  attempted INDETERMINATE lineage and truthful network-call status.
+- Added accepted architect receipt/queue-parent substitution coverage and a
+  final audit-rejection provider-evidence linkage regression.
+- Focused provider/architect/audit/WSP62 suite: `117 passed`.
+- Fusion progress receipt suite: `13 passed`.
+
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
 
 - Added worker and architect same-surface substitution regressions with zero

@@ -1,6 +1,27 @@
 # OpenClaw Bridge = 012's Digital Twin
 
-RedDog Fusion progress observability is implemented by `src/reddog_fusion_progress_receipt.py`: bounded hash-chained stage events plus content-free OpenRouter usage and routing receipts. It does not retain prompts, outputs, hidden reasoning, or secrets, and it grants no action authority.
+Governed read-only audit and backend-architect FoundUps Fusion calls now use
+`reddog_provider_call_evidence.v1`. The content-free receipt binds task/work
+lineage, the validated runtime-model binding, requested identity, a
+domain-separated redacted-input request digest, exact response bytes by digest
+and count, bounded numeric usage, and only explicitly returned served identity.
+The outside-repository store path is supplied by
+`REDDOG_PROVIDER_CALL_EVIDENCE_STORE_PATH`; absence or a failed PRECALL/arm
+write blocks the provider call. Terminal-write uncertainty remains durably
+`INDETERMINATE` and cannot be promoted or automatically retried. Requested and
+served providers use a canonical provider-slug grammar; requested and served
+models use a distinct `provider/model` grammar. URI, filesystem, traversal,
+dot-segment, query/fragment, bearer-like, high-entropy, and raw-sentence shapes
+fail closed.
+Post-invocation failures carry the last content-free local evidence to the
+audit/architect result even when extraction, terminal persistence, and
+recovery reads fail. Audit and architect acceptance independently revalidate
+the canonical receipt and its exact surface, complete task/work/queue/run/cycle
+lineage, runtime binding, requested runtime identity, attempted state, and
+`COMPLETED` outcome before a report or queue candidate can be accepted.
+Unbound lineage fields must remain null.
+
+RedDog Fusion progress observability is implemented by `src/reddog_fusion_progress_receipt.py`: bounded hash-chained stage events plus content-free OpenRouter usage and routing receipts. The original frozen `reddog_fusion_progress_receipt.v1` shape remains valid; generic provider evidence is an all-or-none optional v1 extension. It does not retain prompts, outputs, hidden reasoning, or secrets, and it grants no action authority.
 
 The durable resident architect cycle in `src/reddog_resident_architect_durable_agentdb_cycle.py` is intent-digest-bound and revision-CAS protected. Its nine process-local read-only self-attestations are persisted and enforced at this code boundary; they are not externally observed or signer-authenticated effect receipts. Cancellation is terminal against stale workers, and retries retain monotonic attempt history. Transition receipts are recomputed internal-integrity telemetry only, not execution authority or external authentication.
 
