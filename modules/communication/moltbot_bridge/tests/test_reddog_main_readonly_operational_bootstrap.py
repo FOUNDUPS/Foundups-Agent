@@ -52,6 +52,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
+)
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_owner_bootstrap as owner_bootstrap,
 )
@@ -85,6 +88,21 @@ def _configured_owner_health(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
+@pytest.fixture(autouse=True)
+def _valid_resident_runtime_binding_preflight(monkeypatch: pytest.MonkeyPatch):
+    import main
+
+    original = main._reddog_resident_model_runtime_bindings_from_env
+    audit = model_runtime_binding_receipt(runtime_surface="reddog_readonly_audit_worker")
+    architect = model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")
+    monkeypatch.setattr(
+        main,
+        "_reddog_resident_model_runtime_bindings_from_env",
+        lambda _repo_root: (audit, architect, ""),
+    )
+    yield original
+
+
 def _repo_state() -> dict[str, object]:
     return {
         "head_sha": HEAD,
@@ -111,6 +129,10 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
         head_sha=HEAD,
         generated_at=NOW,
     )
+
+
+def _architect_runtime_binding() -> dict[str, object]:
+    return model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")
 
 
 class _FakeEnqueueWriter:
@@ -372,12 +394,14 @@ def test_bootstrap_persists_accepted_next_action_decision_when_enabled() -> None
 
 
 def test_bootstrap_runs_backend_architect_determination_when_enabled() -> None:
+    runtime_binding = _architect_runtime_binding()
     baseline = run_reddog_main_readonly_operational_bootstrap(
         repo_root=REPO_ROOT,
         repo_state_override=_repo_state(),
         work_state_snapshot_override=_work_state(),
         holoindex_receipt_override=_fresh_holo_receipt(),
         now_iso=NOW,
+        architect_model_runtime_binding_receipt_override=runtime_binding,
     )
     report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
     architect_store = InMemoryArchitectDeterminationStore()
@@ -393,6 +417,7 @@ def test_bootstrap_runs_backend_architect_determination_when_enabled() -> None:
         report_store=report_store,
         run_backend_architect_determination=True,
         architect_model_runner=architect_runner,
+        architect_model_runtime_binding_receipt_override=runtime_binding,
         architect_determination_store=architect_store,
     )
 
@@ -412,7 +437,7 @@ def test_bootstrap_runs_backend_architect_determination_when_enabled() -> None:
     assert result.no_queue_mutation_performed is True
 
 
-def test_bootstrap_passes_architect_model_selection_receipt_override_to_backend_runner() -> None:
+def test_bootstrap_rejects_architect_model_selection_without_runtime_binding() -> None:
     baseline = run_reddog_main_readonly_operational_bootstrap(
         repo_root=REPO_ROOT,
         repo_state_override=_repo_state(),
@@ -439,9 +464,49 @@ def test_bootstrap_passes_architect_model_selection_receipt_override_to_backend_
         architect_determination_store=architect_store,
     )
 
+    assert result.ready is False
+    assert "REJECT_ARCHITECT_DETERMINATION_MODEL_RUNTIME_BINDING_RECEIPT" in result.rejection_reasons
+    assert architect_runner.calls == []
+    assert architect_store.records == []
+
+
+def test_bootstrap_passes_architect_runtime_binding_into_determination_lineage() -> None:
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface="reddog_backend_architect",
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+    baseline = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        architect_model_runtime_binding_receipt_override=runtime_binding,
+    )
+    report_store = _FakeReportStore(_reports_for_bootstrap_result(baseline, include_findings=True))
+    architect_store = InMemoryArchitectDeterminationStore()
+    architect_runner = _FakeArchitectRunner()
+    result = run_reddog_main_readonly_operational_bootstrap(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        collect_readonly_audit_reports=True,
+        report_store=report_store,
+        run_backend_architect_determination=True,
+        architect_model_runner=architect_runner,
+        architect_model_runtime_binding_receipt_override=runtime_binding,
+        architect_determination_store=architect_store,
+    )
+
     assert result.ready is True
-    assert architect_runner.calls[0]["binding"]["model_selection"]["receipt_id"] == model_selection["receipt_id"]
-    assert architect_store.records[0].determination["model_selection_receipt_id"] == model_selection["receipt_id"]
+    topology = architect_runner.calls[0]["binding"]["model_selection"]
+    assert topology["lead_model"] == "z-ai/glm-5.2"
+    assert topology["panel_models"] == ["moonshotai/kimi-k3"]
+    assert architect_store.records[0].determination["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
+    assert architect_store.records[0].determination["model_runtime_binding_digest"]
 
 
 def test_bootstrap_requires_architect_model_selection_for_production_runner() -> None:
@@ -468,7 +533,7 @@ def test_bootstrap_requires_architect_model_selection_for_production_runner() ->
     )
 
     assert result.ready is False
-    assert "missing_architect_model_selection_receipt_path" in result.rejection_reasons
+    assert "missing_architect_model_runtime_binding_receipt" in result.rejection_reasons
     assert result.backend_architect_determination_attempted is False
 
 
@@ -969,6 +1034,141 @@ def _resident_cycle_result(
     )
 
 
+@pytest.mark.parametrize(
+    ("case", "expected_reason"),
+    (
+        ("absent", "missing_audit_model_runtime_binding_path"),
+        ("invalid", "model_runtime_binding_artifact_invalid"),
+        ("wrong_surface", "audit_model_runtime_binding_surface_invalid"),
+        ("same_artifact", "model_runtime_binding_artifacts_not_distinct"),
+        ("oversized", "model_runtime_binding_artifact_invalid"),
+        ("directory", "model_runtime_binding_artifact_invalid"),
+        ("outside_root", "model_runtime_binding_artifact_invalid"),
+        ("inside_repo", "model_runtime_binding_artifact_inside_repo"),
+    ),
+)
+def test_main_resident_runtime_artifact_preflight_rejects_before_cycle(
+    tmp_path,
+    monkeypatch,
+    capsys,
+    _valid_resident_runtime_binding_preflight,
+    case,
+    expected_reason,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "runtime-bindings"
+    runtime_root.mkdir()
+    audit_path = runtime_root / "audit.json"
+    architect_path = runtime_root / "architect.json"
+    audit_path.write_text(
+        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_readonly_audit_worker")),
+        encoding="utf-8",
+    )
+    architect_path.write_text(
+        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")),
+        encoding="utf-8",
+    )
+    env = {
+        "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": str(runtime_root),
+        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(audit_path),
+        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(architect_path),
+    }
+    if case == "absent":
+        env.pop("REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH")
+    elif case == "invalid":
+        audit_path.write_text("{}", encoding="utf-8")
+    elif case == "wrong_surface":
+        audit_path.write_text(
+            json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")),
+            encoding="utf-8",
+        )
+    elif case == "same_artifact":
+        env["REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH"] = str(audit_path)
+    elif case == "oversized":
+        audit_path.write_text('{"padding":"' + ("x" * 1_100_000) + '"}', encoding="utf-8")
+    elif case == "directory":
+        audit_path.unlink()
+        audit_path.mkdir()
+    elif case == "outside_root":
+        outside = tmp_path / "outside-audit.json"
+        outside.write_text(
+            json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_readonly_audit_worker")),
+            encoding="utf-8",
+        )
+        env["REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH"] = str(outside)
+    elif case == "inside_repo":
+        env["REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT"] = str(REPO_ROOT.parent)
+        env["REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH"] = str(
+            REPO_ROOT / "main.py"
+        )
+
+    monkeypatch.setattr(
+        main,
+        "_reddog_resident_model_runtime_bindings_from_env",
+        _valid_resident_runtime_binding_preflight,
+    )
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+    ) as mocked:
+        with patch.dict("os.environ", env, clear=True):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is False
+
+    mocked.assert_not_called()
+    output = capsys.readouterr().out
+    assert f"reason={expected_reason}" in output
+    assert str(tmp_path) not in output
+
+
+def test_main_resident_runtime_artifact_preflight_rejects_symlink_before_cycle(
+    tmp_path,
+    monkeypatch,
+    capsys,
+    _valid_resident_runtime_binding_preflight,
+) -> None:
+    import main
+
+    runtime_root = tmp_path / "runtime-bindings"
+    runtime_root.mkdir()
+    target = runtime_root / "audit-target.json"
+    target.write_text(
+        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_readonly_audit_worker")),
+        encoding="utf-8",
+    )
+    audit_path = runtime_root / "audit-link.json"
+    try:
+        audit_path.symlink_to(target)
+    except OSError:
+        pytest.skip("symlink creation is unavailable on this platform")
+    architect_path = runtime_root / "architect.json"
+    architect_path.write_text(
+        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")),
+        encoding="utf-8",
+    )
+    env = {
+        "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": str(runtime_root),
+        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(audit_path),
+        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(architect_path),
+    }
+    monkeypatch.setattr(
+        main,
+        "_reddog_resident_model_runtime_bindings_from_env",
+        _valid_resident_runtime_binding_preflight,
+    )
+    with patch(
+        "modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle."
+        "run_reddog_resident_architect_durable_agentdb_cycle",
+    ) as mocked:
+        with patch.dict("os.environ", env, clear=True):
+            assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is False
+
+    mocked.assert_not_called()
+    output = capsys.readouterr().out
+    assert "reason=model_runtime_binding_artifact_invalid" in output
+    assert str(tmp_path) not in output
+
+
 def test_main_preflight_durable_resident_cycle_disabled_is_inert() -> None:
     import main
 
@@ -1006,6 +1206,16 @@ def test_main_preflight_durable_resident_cycle_product_mode_runs_by_default(caps
     kwargs = mocked.call_args.kwargs
     assert kwargs["requested_operation"] == "main_resident_architect_cycle"
     assert kwargs["prompt_text"] == "main.py resident RedDog architect cycle"
+    assert kwargs["audit_model_runtime_binding_receipt"]["runtime_surface"] == (
+        "reddog_readonly_audit_worker"
+    )
+    assert kwargs["architect_model_runtime_binding_receipt"]["runtime_surface"] == (
+        "reddog_backend_architect"
+    )
+    assert (
+        kwargs["audit_model_runtime_binding_receipt"]["receipt_id"]
+        != kwargs["architect_model_runtime_binding_receipt"]["receipt_id"]
+    )
     assert kwargs["external_research_retriever"] is None
     assert kwargs["red_dog_intent"]["requested_authority"] == "read_only_audit"
     assert kwargs["red_dog_intent"]["submits_executable_authority"] is False

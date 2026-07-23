@@ -12,6 +12,18 @@ The editor bridge requires host-supplied `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and
 
 `CANCELLED` and `DETERMINED` are permanently terminal. Only `FAILED` and `TIMED_OUT` cycles may enter a revision-checked retry, and each retry appends one immutable prior-attempt summary. Legacy v1 rows are accepted only by the canonical cancellation path; they cannot reconnect, resume, or become authority-bearing v2 records.
 
+Resident model execution requires separate runtime-binding inputs
+for the read-only audit and backend architect surfaces. The audit binding is
+carried content-bearing through WSP 15, swarm planning, assignment, enqueue,
+and AgentDB/OpenClaw claim execution. The architect binding is separately
+bound into WSP 15 and revalidated at bootstrap and determination. Both exact
+receipt ID/digest pairs are part of durable intent identity, so retry/resume
+cannot substitute another valid same-surface artifact. Missing, invalid,
+rejected, cross-surface, or pair-mismatched receipts stop before index/model
+calls or persistence; a model-selection receipt is not a runtime authorization
+substitute. Fake runner injection remains a test-only seam but obeys the same
+required binding checks.
+
 ### Canonical RedDog execution-valve readiness
 
 `reddog_execution_valve_environment_supply_cli` reads the authoritative work

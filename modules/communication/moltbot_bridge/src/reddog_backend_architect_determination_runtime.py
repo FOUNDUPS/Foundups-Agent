@@ -135,8 +135,8 @@ class FoundupsFusionArchitectModelRunner:
     fake runner instead of reaching the network.
     """
 
-    lead_model: str = "z-ai/glm-5.2"
-    panel_models: tuple[str, ...] = ("deepseek/deepseek-v4-pro", "moonshotai/kimi-k2.7-code")
+    lead_model: str = ""
+    panel_models: tuple[str, ...] = ()
     max_tokens: int = 1200
     temperature: float = 0.0
 
@@ -170,6 +170,11 @@ class FoundupsFusionArchitectModelRunner:
             default_lead=self.lead_model,
             default_panel=self.panel_models,
         )
+        if (
+            not model_topology["model_runtime_binding_receipt_id"]
+            or not model_topology["lead_model"]
+        ):
+            return _model_result_reject(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
         redacted_user = gate.redacted_prompt
         if gate.redacted_context:
             redacted_user = gate.redacted_prompt + "\n\n" + gate.redacted_context
@@ -514,8 +519,22 @@ def run_reddog_backend_architect_determination_runtime(
         reasons,
         expected_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
     )
-    if not model_selection:
-        model_selection = _model_selection_binding(model_selection_receipt, reasons)
+    if not model_selection and ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT not in reasons:
+        reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
+    expected_runtime_id = str(
+        wsp15_allocation_receipt.get("architect_model_runtime_binding_receipt_id") or ""
+    )
+    expected_runtime_digest = str(
+        wsp15_allocation_receipt.get("architect_model_runtime_binding_digest") or ""
+    )
+    if (
+        not expected_runtime_id
+        or not expected_runtime_digest
+        or str(model_selection.get("model_runtime_binding_receipt_id") or "") != expected_runtime_id
+        or str(model_selection.get("model_runtime_binding_digest") or "") != expected_runtime_digest
+    ):
+        if ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT not in reasons:
+            reasons.append(ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT)
     model_selection_receipt_id = str(model_selection.get("receipt_id") or "").strip() or None
     model_selection_digest = str(model_selection.get("digest") or "").strip() or None
     model_runtime_binding_receipt_id = (

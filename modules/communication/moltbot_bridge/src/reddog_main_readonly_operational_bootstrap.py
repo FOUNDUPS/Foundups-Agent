@@ -172,6 +172,8 @@ def run_reddog_main_readonly_operational_bootstrap(
     bootstrap_projection: Mapping[str, Any] | None = None,
     grounding_receipt: Mapping[str, Any] | None = None,
     grounding_work_focus: str = "",
+    audit_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
+    require_audit_model_runtime_binding: bool = False,
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     enqueue_readonly_audit_tasks: bool = False,
     enqueue_writer: ReadOnlyAuditTaskWriter | None = None,
@@ -185,6 +187,8 @@ def run_reddog_main_readonly_operational_bootstrap(
     architect_model_runner: ArchitectModelRunner | None = None,
     architect_model_selection_receipt_path: Path | str | None = None,
     architect_model_selection_receipt_override: Mapping[str, Any] | None = None,
+    architect_model_runtime_binding_receipt_path: Path | str | None = None,
+    architect_model_runtime_binding_receipt_override: Mapping[str, Any] | None = None,
     architect_determination_store: ArchitectDeterminationStore | None = None,
 ) -> RedDogMainReadonlyBootstrapResult:
     """Build a read-only startup plan or explain why it is not ready."""
@@ -197,9 +201,36 @@ def run_reddog_main_readonly_operational_bootstrap(
         prompt_text=prompt_text,
         changed_paths=paths,
         allowed_read_targets=targets,
+        model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
     ).to_dict()
     reasons: list[str] = []
     architect_model_selection_receipt = architect_model_selection_receipt_override
+    architect_model_runtime_binding_receipt = architect_model_runtime_binding_receipt_override
+    if architect_model_runtime_binding_receipt is None and architect_model_runtime_binding_receipt_path:
+        architect_model_runtime_binding_receipt, runtime_reasons = _read_json_outside_repo(
+            root,
+            architect_model_runtime_binding_receipt_path,
+            missing_reason="missing_architect_model_runtime_binding_receipt",
+            inside_reason="architect_model_runtime_binding_receipt_path_inside_repo",
+            unreadable_reason="malformed_architect_model_runtime_binding_receipt",
+            required=True,
+        )
+        if runtime_reasons:
+            return _not_ready(
+                reasons=tuple(runtime_reasons),
+                changed_paths=paths,
+                allowed_read_targets=targets,
+                wsp15_allocation_receipt=wsp15_allocation_receipt,
+            )
+    if architect_model_runtime_binding_receipt is not None:
+        wsp15_allocation_receipt = allocate_reddog_wsp15_receipt(
+            requested_operation=requested_operation,
+            prompt_text=prompt_text,
+            changed_paths=paths,
+            allowed_read_targets=targets,
+            model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
+            architect_model_runtime_binding_receipt=architect_model_runtime_binding_receipt,
+        ).to_dict()
 
     work_state_snapshot = work_state_snapshot_override
     if work_state_snapshot is None:
@@ -296,6 +327,8 @@ def run_reddog_main_readonly_operational_bootstrap(
         wsp15_allocation_receipt=wsp15_allocation_receipt,
         grounding_receipt=grounding_receipt,
         grounding_work_focus=grounding_work_focus,
+        model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
+        require_model_runtime_binding=require_audit_model_runtime_binding,
     )
     if not plan.accepted:
         return _not_ready(
@@ -403,9 +436,9 @@ def run_reddog_main_readonly_operational_bootstrap(
                                 decision_persist_result=decision_persist_result,
                                 architect_result=architect_result,
                             )
-                    elif architect_model_runner is None:
+                    elif architect_model_runner is None and architect_model_runtime_binding_receipt is None:
                         return _not_ready(
-                            reasons=("missing_architect_model_selection_receipt_path",),
+                            reasons=("missing_architect_model_runtime_binding_receipt",),
                             changed_paths=paths,
                             allowed_read_targets=targets,
                             wsp15_allocation_receipt=wsp15_allocation_receipt,
@@ -434,6 +467,7 @@ def run_reddog_main_readonly_operational_bootstrap(
                     store=architect_store,
                     model_runner=architect_model_runner,
                     model_selection_receipt=architect_model_selection_receipt,
+                    model_runtime_binding_receipt=architect_model_runtime_binding_receipt,
                     now_iso=now_iso,
                 )
                 if not architect_result.accepted:

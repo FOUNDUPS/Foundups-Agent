@@ -90,6 +90,10 @@ class RedDogWSP15AllocationReceipt:
     reasoning_tier: str
     worker_plan: Mapping[str, Any]
     scoring_rationale: Mapping[str, str]
+    model_runtime_binding_receipt_id: str = ""
+    model_runtime_binding_digest: str = ""
+    architect_model_runtime_binding_receipt_id: str = ""
+    architect_model_runtime_binding_digest: str = ""
     wsp_refs: tuple[str, ...] = ("WSP_15", "WSP_97")
     wsp97_label: str = "INFERRED"
     scoring_method: str = "deterministic_wsp15_runtime_heuristic"
@@ -120,6 +124,8 @@ def allocate_reddog_wsp15_receipt(
     prompt_text: str,
     changed_paths: Sequence[str] = (),
     allowed_read_targets: Sequence[str] = (),
+    model_runtime_binding_receipt: Mapping[str, Any] | None = None,
+    architect_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
 ) -> RedDogWSP15AllocationReceipt:
     """Allocate a deterministic WSP 15 receipt for a RedDog work focus."""
 
@@ -150,6 +156,20 @@ def allocate_reddog_wsp15_receipt(
         "deferability": _deferability_rationale(ultra_hit=ultra_hit, urgency_hit=urgency_hit),
         "impact": _impact_rationale(ultra_hit=ultra_hit, system_hit=system_hit, urgency_hit=urgency_hit),
     }
+    runtime_binding = (
+        json.loads(json.dumps(model_runtime_binding_receipt, sort_keys=True, default=str))
+        if isinstance(model_runtime_binding_receipt, Mapping)
+        else {}
+    )
+    runtime_binding_id = str(runtime_binding.get("receipt_id") or "")
+    runtime_binding_digest = _digest(runtime_binding) if runtime_binding else ""
+    architect_runtime_binding = (
+        json.loads(json.dumps(architect_model_runtime_binding_receipt, sort_keys=True, default=str))
+        if isinstance(architect_model_runtime_binding_receipt, Mapping)
+        else {}
+    )
+    architect_runtime_binding_id = str(architect_runtime_binding.get("receipt_id") or "")
+    architect_runtime_binding_digest = _digest(architect_runtime_binding) if architect_runtime_binding else ""
     input_payload = {
         "schema_version": SCHEMA_VERSION,
         "requested_operation": str(requested_operation or ""),
@@ -166,6 +186,12 @@ def allocate_reddog_wsp15_receipt(
         "worker_plan": worker_plan,
         "scoring_method": "deterministic_wsp15_runtime_heuristic",
     }
+    if runtime_binding:
+        input_payload["model_runtime_binding_receipt_id"] = runtime_binding_id
+        input_payload["model_runtime_binding_digest"] = runtime_binding_digest
+    if architect_runtime_binding:
+        input_payload["architect_model_runtime_binding_receipt_id"] = architect_runtime_binding_id
+        input_payload["architect_model_runtime_binding_digest"] = architect_runtime_binding_digest
     input_digest = _digest(input_payload)
     return RedDogWSP15AllocationReceipt(
         schema_version=SCHEMA_VERSION,
@@ -184,6 +210,10 @@ def allocate_reddog_wsp15_receipt(
         reasoning_tier=reasoning_tier,
         worker_plan=worker_plan,
         scoring_rationale=scoring_rationale,
+        model_runtime_binding_receipt_id=runtime_binding_id,
+        model_runtime_binding_digest=runtime_binding_digest,
+        architect_model_runtime_binding_receipt_id=architect_runtime_binding_id,
+        architect_model_runtime_binding_digest=architect_runtime_binding_digest,
     )
 
 
@@ -260,6 +290,29 @@ def validate_reddog_wsp15_allocation_receipt(
     reasoning_tier = str(allocation.get("reasoning_tier") or "")
     if reasoning_tier not in {REASONING_REGULAR, REASONING_HIGH, REASONING_ULTRA}:
         reasons.append("malformed_reasoning_tier")
+
+    runtime_binding_id = str(allocation.get("model_runtime_binding_receipt_id") or "")
+    runtime_binding_digest = str(allocation.get("model_runtime_binding_digest") or "")
+    if bool(runtime_binding_id) != bool(runtime_binding_digest):
+        reasons.append("model_runtime_binding_half_pair")
+    if runtime_binding_id and not runtime_binding_id.startswith("reddog_model_runtime_binding:"):
+        reasons.append("malformed_model_runtime_binding_receipt_id")
+    if runtime_binding_digest and not runtime_binding_digest.startswith("sha256:"):
+        reasons.append("malformed_model_runtime_binding_digest")
+    architect_runtime_binding_id = str(
+        allocation.get("architect_model_runtime_binding_receipt_id") or ""
+    )
+    architect_runtime_binding_digest = str(
+        allocation.get("architect_model_runtime_binding_digest") or ""
+    )
+    if bool(architect_runtime_binding_id) != bool(architect_runtime_binding_digest):
+        reasons.append("architect_model_runtime_binding_half_pair")
+    if architect_runtime_binding_id and not architect_runtime_binding_id.startswith(
+        "reddog_model_runtime_binding:"
+    ):
+        reasons.append("malformed_architect_model_runtime_binding_receipt_id")
+    if architect_runtime_binding_digest and not architect_runtime_binding_digest.startswith("sha256:"):
+        reasons.append("malformed_architect_model_runtime_binding_digest")
 
     worker_plan = allocation.get("worker_plan")
     if not isinstance(worker_plan, Mapping):
@@ -384,7 +437,7 @@ def _worker_plan(*, priority: str, reasoning_tier: str, ultra_hit: bool) -> Mapp
 
 
 def _allocation_input_payload(allocation: Mapping[str, Any]) -> Mapping[str, Any]:
-    return {
+    payload = {
         "schema_version": SCHEMA_VERSION,
         "requested_operation": str(allocation.get("requested_operation") or ""),
         "prompt_digest": str(allocation.get("prompt_digest") or ""),
@@ -400,6 +453,21 @@ def _allocation_input_payload(allocation: Mapping[str, Any]) -> Mapping[str, Any
         "worker_plan": allocation.get("worker_plan"),
         "scoring_method": str(allocation.get("scoring_method") or ""),
     }
+    runtime_binding_id = str(allocation.get("model_runtime_binding_receipt_id") or "")
+    runtime_binding_digest = str(allocation.get("model_runtime_binding_digest") or "")
+    if runtime_binding_id or runtime_binding_digest:
+        payload["model_runtime_binding_receipt_id"] = runtime_binding_id
+        payload["model_runtime_binding_digest"] = runtime_binding_digest
+    architect_runtime_binding_id = str(
+        allocation.get("architect_model_runtime_binding_receipt_id") or ""
+    )
+    architect_runtime_binding_digest = str(
+        allocation.get("architect_model_runtime_binding_digest") or ""
+    )
+    if architect_runtime_binding_id or architect_runtime_binding_digest:
+        payload["architect_model_runtime_binding_receipt_id"] = architect_runtime_binding_id
+        payload["architect_model_runtime_binding_digest"] = architect_runtime_binding_digest
+    return payload
 
 
 def _complexity_rationale(*, path_count: int, ultra_hit: bool) -> str:

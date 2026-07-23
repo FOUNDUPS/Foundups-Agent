@@ -1,3 +1,30 @@
+## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
+
+- Added worker and architect same-surface substitution regressions with zero
+  model/index/store calls, plus selection-only and injected-runner rejection.
+- Added resident and direct E2E substitution seams proving unchanged durable
+  state, no new tasks, and no downstream runner/index/persistence activity.
+- Added real startup artifact tests for missing paths, malformed JSON, wrong
+  surfaces, same artifact reuse, oversized/non-regular files, outside-root and
+  inside-repository paths, and no-follow symlinks where the platform permits.
+  Every rejection occurs before the cycle mock and emits no configured path.
+- Focused affected runtime suite: 205 passed / 1 platform skip. The skip is
+  Windows symlink creation when unavailable; the no-follow behavior remains
+  covered by the shared confined-reader contract.
+
+## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_PHASE1
+
+- Added digest/rehydration-valid test receipts for receipt-selected panel
+  topologies and used GLM-5.2 principal plus Kimi K3 critic only as receipt-bound test
+  fixture identities, never as production policy.
+- Covered exact WSP 15/swarm/assignment/AgentDB propagation, durable resident
+  audit and architect forwarding, architect determination lineage, and
+  absent/wrong-surface/selection-only rejection before provider invocation.
+- Preserved direct injected-runner tests and verified the production runner
+  provider stubs receive the exact receipt topology.
+- Focused runtime gate: 184 passed. WSP 62 exemption gate: 2 passed; no ceiling
+  increase was required.
+
 ## 2026-07-20: REDDOG_EXECUTION_VALVE_INDEPENDENT_REVIEW_REPAIR_PHASE1
 
 - Added signed `base_ref` and canonical full-work-order digest mutation tests

@@ -213,8 +213,10 @@ def run_reddog_readonly_audit_research_decision_e2e(
     report_store: ReadOnlyAuditReportStore | None = None,
     decision_store: ReadOnlyAuditDecisionStore | None = None,
     architect_model_runner: ArchitectModelRunner | None = None,
+    architect_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     architect_determination_store: ArchitectDeterminationStore | None = None,
     audit_model_runner: RepoAuditModelRunner | None = None,
+    audit_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     holoindex_adapter: ReadOnlyEvidenceQueryAdapter | None = None,
     codeindex_adapter: ReadOnlyEvidenceQueryAdapter | None = None,
     external_research_retriever: ExternalResearchRetriever | None = None,
@@ -245,6 +247,11 @@ def run_reddog_readonly_audit_research_decision_e2e(
         audit_lanes=audit_lanes,
         enqueue_readonly_audit_tasks=True,
         enqueue_writer=capture_writer,
+        audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
+        require_audit_model_runtime_binding=True,
+        architect_model_runtime_binding_receipt_override=(
+            architect_model_runtime_binding_receipt
+        ),
     )
     if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
         return _result(
@@ -341,12 +348,15 @@ def run_reddog_readonly_audit_research_decision_e2e(
         work_state_snapshot_override=work_state_snapshot_override,
         holoindex_receipt_override=holoindex_receipt_override,
         audit_lanes=audit_lanes,
+        audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
+        require_audit_model_runtime_binding=True,
         collect_readonly_audit_reports=True,
         report_store=report_writer,
         persist_readonly_audit_decision=True,
         decision_store=decision_store,
         run_backend_architect_determination=True,
         architect_model_runner=architect_model_runner,
+        architect_model_runtime_binding_receipt_override=architect_model_runtime_binding_receipt,
         architect_determination_store=architect_determination_store,
     )
     if final.swarm_id != initial.swarm_id:

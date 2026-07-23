@@ -134,7 +134,16 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
     )
 
 
-def _build_inputs(*, include_reports: bool = True):
+def _build_inputs(
+    *,
+    include_reports: bool = True,
+    include_runtime_binding: bool = True,
+    architect_runtime_binding: Mapping[str, Any] | None = None,
+):
+    if architect_runtime_binding is None:
+        architect_runtime_binding = model_runtime_binding_receipt(
+            runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT
+        )
     snapshot_result = build_operational_context_snapshot(
         repo_state=_repo_state(),
         work_state_snapshot=_work_state(),
@@ -182,11 +191,15 @@ def _build_inputs(*, include_reports: bool = True):
         validation=validation,
         rejection_reasons=validation.rejection_reasons,
     )
+    allocation_kwargs: dict[str, Any] = {}
+    if include_runtime_binding:
+        allocation_kwargs["architect_model_runtime_binding_receipt"] = architect_runtime_binding
     allocation = allocate_reddog_wsp15_receipt(
         requested_operation="backend_architect_determination",
         prompt_text="RedDog backend architect determination runtime",
         changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
         allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+        **allocation_kwargs,
     ).to_dict()
     return {
         "snapshot": snapshot,
@@ -196,6 +209,7 @@ def _build_inputs(*, include_reports: bool = True):
         "report_collection": collection,
         "reports": reports,
         "allocation": allocation,
+        "architect_runtime_binding": architect_runtime_binding if include_runtime_binding else None,
     }
 
 
@@ -244,7 +258,7 @@ def _model_output(allocation: Mapping[str, Any], evidence_ref: str, *, action: s
 
 
 def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
-    return {
+    kwargs = {
         "snapshot": inputs["snapshot"],
         "context_view": inputs["context_view"],
         "evidence_bundle": inputs["evidence_bundle"],
@@ -252,6 +266,9 @@ def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
         "report_collection": inputs["report_collection"],
         "reports": inputs["reports"],
     }
+    if inputs["architect_runtime_binding"] is not None:
+        kwargs["model_runtime_binding_receipt"] = inputs["architect_runtime_binding"]
+    return kwargs
 
 
 def test_backend_architect_runtime_accepts_fix_persists_and_emits_one_queue_candidate() -> None:
@@ -307,7 +324,7 @@ def test_research_more_persists_without_queue_candidate() -> None:
     assert result.queue_candidate_count == 0
 
 
-def test_model_selection_receipt_is_bound_to_backend_runner_and_receipt() -> None:
+def test_runtime_binding_is_authoritative_over_model_selection_metadata() -> None:
     inputs = _build_inputs()
     evidence_ref = inputs["reports"][0]["evidence_refs"][0]
     selection = _model_selection()
@@ -323,18 +340,23 @@ def test_model_selection_receipt_is_bound_to_backend_runner_and_receipt() -> Non
     )
 
     assert result.accepted is True
-    assert result.receipt.model_selection_receipt_id == selection["receipt_id"]
+    runtime_binding = inputs["architect_runtime_binding"]
+    assert result.receipt.model_selection_receipt_id == runtime_binding["selection_receipt_id"]
     assert result.receipt.model_selection_digest
     binding = runner.calls[0]["binding"]["model_selection"]
-    assert binding["receipt_id"] == selection["receipt_id"]
-    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert binding["receipt_id"] == runtime_binding["selection_receipt_id"]
+    assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     assert binding["purpose"] == "production"
 
 
 def test_model_runtime_binding_receipt_is_bound_to_backend_runner_and_receipt() -> None:
-    inputs = _build_inputs()
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+    inputs = _build_inputs(architect_runtime_binding=runtime_binding)
     evidence_ref = inputs["reports"][0]["evidence_refs"][0]
-    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT)
     runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref))
 
     result = run_reddog_backend_architect_determination_runtime(
@@ -342,7 +364,6 @@ def test_model_runtime_binding_receipt_is_bound_to_backend_runner_and_receipt() 
         wsp15_allocation_receipt=inputs["allocation"],
         store=InMemoryArchitectDeterminationStore(),
         model_runner=runner,
-        model_runtime_binding_receipt=runtime_binding,
         now_iso=NOW,
     )
 
@@ -351,33 +372,82 @@ def test_model_runtime_binding_receipt_is_bound_to_backend_runner_and_receipt() 
     assert result.receipt.model_runtime_binding_digest
     binding = runner.calls[0]["binding"]["model_selection"]
     assert binding["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert binding["lead_model"] == "openai/gpt-5.6-code"
+    assert binding["lead_model"] == "z-ai/glm-5.2"
+    assert binding["panel_models"] == ["moonshotai/kimi-k3"]
 
 
 def test_mismatched_model_runtime_binding_receipt_rejects_before_backend_model_call() -> None:
     inputs = _build_inputs()
     runtime_binding = model_runtime_binding_receipt(runtime_surface="wrong_surface")
     runner = FakeArchitectRunner({})
+    store = InMemoryArchitectDeterminationStore()
+    runtime_kwargs = _runtime_kwargs(inputs)
+    runtime_kwargs["model_runtime_binding_receipt"] = runtime_binding
 
     result = run_reddog_backend_architect_determination_runtime(
-        **_runtime_kwargs(inputs),
+        **runtime_kwargs,
         wsp15_allocation_receipt=inputs["allocation"],
-        store=InMemoryArchitectDeterminationStore(),
+        store=store,
         model_runner=runner,
-        model_runtime_binding_receipt=runtime_binding,
         now_iso=NOW,
     )
 
     assert result.accepted is False
     assert ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
     assert runner.calls == []
+    assert store.records == []
 
 
-def test_tampered_model_selection_receipt_rejects_before_backend_model_call() -> None:
+def test_same_surface_runtime_binding_substitution_rejects_before_backend_calls() -> None:
     inputs = _build_inputs()
+    substituted = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        model_id="moonshotai/kimi-k3",
+    )
+    runner = FakeArchitectRunner({})
+    store = InMemoryArchitectDeterminationStore()
+    runtime_kwargs = _runtime_kwargs(inputs)
+    runtime_kwargs["model_runtime_binding_receipt"] = substituted
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **runtime_kwargs,
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=store,
+        model_runner=runner,
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert runner.calls == []
+    assert store.records == []
+
+
+def test_production_architect_rejects_selection_only_before_provider_call() -> None:
+    inputs = _build_inputs(include_runtime_binding=False)
+    store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=store,
+        model_runner=None,
+        model_selection_receipt=_model_selection(),
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert ArchitectDeterminationReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert result.receipt.model_result_digest is None
+    assert store.records == []
+
+
+def test_tampered_selection_metadata_cannot_override_valid_runtime_binding() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
     selection = _model_selection()
     selection["selected_model_ids"] = ["attacker/model"]
-    runner = FakeArchitectRunner({})
+    runner = FakeArchitectRunner(_model_output(inputs["allocation"], evidence_ref))
 
     result = run_reddog_backend_architect_determination_runtime(
         **_runtime_kwargs(inputs),
@@ -388,9 +458,13 @@ def test_tampered_model_selection_receipt_rejects_before_backend_model_call() ->
         now_iso=NOW,
     )
 
-    assert result.accepted is False
-    assert ArchitectDeterminationReason.MODEL_SELECTION_RECEIPT in result.rejection_reasons
-    assert runner.calls == []
+    assert result.accepted is True
+    assert len(runner.calls) == 1
+    binding = runner.calls[0]["binding"]["model_selection"]
+    assert binding["model_runtime_binding_receipt_id"] == inputs["architect_runtime_binding"][
+        "receipt_id"
+    ]
+    assert binding["selected_model_ids"] != ["attacker/model"]
 
 
 def test_missing_reports_fail_before_model_call() -> None:
@@ -642,26 +716,29 @@ def test_production_runner_uses_model_selection_topology(monkeypatch) -> None:
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     monkeypatch.setattr(backend_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
 
-    result = FoundupsFusionArchitectModelRunner(
-        lead_model="legacy/lead",
-        panel_models=("legacy/panel",),
-    ).run_architect_determination(
+    runtime_binding = model_runtime_binding_receipt(
+        runtime_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        model_id="z-ai/glm-5.2",
+        panel_model_ids=("moonshotai/kimi-k3",),
+    )
+    topology_reasons: list[str] = []
+    topology = backend_runtime._model_runtime_binding(
+        runtime_binding,
+        topology_reasons,
+        expected_surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+    )
+    assert topology_reasons == []
+    result = FoundupsFusionArchitectModelRunner().run_architect_determination(
         prompt="Return JSON.",
         context="public evidence",
-        binding={
-            "model_selection": {
-                "receipt_id": "model_selection_receipt:test",
-                "lead_model": "openai/gpt-5.6-code",
-                "panel_models": ["anthropic/claude-opus-5"],
-            }
-        },
+            binding={"model_selection": topology},
         timeout_seconds=1,
     )
 
     assert result.ok is True
-    assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
-    assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
-    assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == "model_selection_receipt:test"
+    assert calls[0]["lead_model"] == "z-ai/glm-5.2"
+    assert calls[0]["panel_models"] == ["moonshotai/kimi-k3"]
+    assert calls[0]["bridge_meta"]["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
 
 
 def test_module_ast_denies_execution_and_mutation_surfaces() -> None:

@@ -38,9 +38,13 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
     READONLY_AUDIT_TASK_REPORT_REJECT,
     ReadOnlyAuditTaskExecutionResult,
     ReadOnlyAuditTaskRejectReason,
+    execute_reddog_readonly_audit_task,
 )
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_receipt,
 )
 
 
@@ -102,6 +106,17 @@ def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
         head_sha=HEAD,
         generated_at=NOW,
     )
+
+
+def _audit_runtime_binding(*, model_id: str = "openai/gpt-5.6-code") -> dict[str, object]:
+    return model_runtime_binding_receipt(
+        runtime_surface="reddog_readonly_audit_worker",
+        model_id=model_id,
+    )
+
+
+def _architect_runtime_binding() -> dict[str, object]:
+    return model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")
 
 
 class _AcceptingTaskWriter:
@@ -241,6 +256,27 @@ class _RejectingTaskExecutor:
         )
 
 
+class _SubstitutingTaskExecutor:
+    def __init__(self, *, runner, holoindex_adapter, codeindex_adapter) -> None:
+        self.runner = runner
+        self.holoindex_adapter = holoindex_adapter
+        self.codeindex_adapter = codeindex_adapter
+
+    def execute_readonly_audit_task(self, *, task, repo_root, **kwargs):
+        context = dict(task.context)
+        context["model_runtime_binding_receipt"] = _audit_runtime_binding(
+            model_id="moonshotai/kimi-k3"
+        )
+        return execute_reddog_readonly_audit_task(
+            task_context=context,
+            repo_root=repo_root,
+            task_id=task.task_id,
+            model_runner=self.runner,
+            holoindex_adapter=self.holoindex_adapter,
+            codeindex_adapter=self.codeindex_adapter,
+        )
+
+
 def test_e2e_runs_enqueued_readonly_tasks_persists_reports_and_architect_decides() -> None:
     writer = _AcceptingTaskWriter()
     report_store = _InMemoryReportStore()
@@ -261,6 +297,8 @@ def test_e2e_runs_enqueued_readonly_tasks_persists_reports_and_architect_decides
         architect_determination_store=architect_store,
         audit_model_runner=audit_runner,
         architect_model_runner=architect_runner,
+        audit_model_runtime_binding_receipt=_audit_runtime_binding(),
+        architect_model_runtime_binding_receipt=_architect_runtime_binding(),
         holoindex_adapter=_FakeQueryAdapter(),
         codeindex_adapter=_FakeQueryAdapter(),
     )
@@ -300,6 +338,8 @@ def test_e2e_fails_closed_before_report_collection_when_task_execution_rejects()
         enqueue_writer=_AcceptingTaskWriter(),
         report_store=_InMemoryReportStore(),
         task_executor=_RejectingTaskExecutor(),
+        audit_model_runtime_binding_receipt=_audit_runtime_binding(),
+        architect_model_runtime_binding_receipt=_architect_runtime_binding(),
     )
 
     assert result.accepted is False
@@ -321,6 +361,8 @@ def test_e2e_fails_closed_when_report_persistence_rejects() -> None:
         enqueue_writer=_AcceptingTaskWriter(),
         report_store=_InMemoryReportStore(reject_store=True),
         audit_model_runner=_AuditModelRunner(),
+        audit_model_runtime_binding_receipt=_audit_runtime_binding(),
+        architect_model_runtime_binding_receipt=_architect_runtime_binding(),
         holoindex_adapter=_FakeQueryAdapter(),
         codeindex_adapter=_FakeQueryAdapter(),
     )
@@ -331,6 +373,43 @@ def test_e2e_fails_closed_when_report_persistence_rejects() -> None:
     assert len(result.task_runs) == 1
     assert result.task_runs[0].accepted is True
     assert result.task_runs[0].persist_accepted is False
+
+
+def test_e2e_rejects_same_surface_binding_substitution_before_index_or_model_calls() -> None:
+    runner = _AuditModelRunner()
+    holo = _FakeQueryAdapter()
+    code = _FakeQueryAdapter()
+    report_store = _InMemoryReportStore()
+    architect_store = InMemoryArchitectDeterminationStore()
+
+    result = run_reddog_readonly_audit_research_decision_e2e(
+        repo_root=REPO_ROOT,
+        repo_state_override=_repo_state(),
+        work_state_snapshot_override=_work_state(),
+        holoindex_receipt_override=_fresh_holo_receipt(),
+        now_iso=NOW,
+        enqueue_writer=_AcceptingTaskWriter(),
+        report_store=report_store,
+        architect_determination_store=architect_store,
+        audit_model_runtime_binding_receipt=_audit_runtime_binding(),
+        architect_model_runtime_binding_receipt=_architect_runtime_binding(),
+        task_executor=_SubstitutingTaskExecutor(
+            runner=runner,
+            holoindex_adapter=holo,
+            codeindex_adapter=code,
+        ),
+    )
+
+    assert result.accepted is False
+    assert ReadOnlyAuditResearchDecisionE2EReason.TASK_EXECUTION_REJECTED in result.rejection_reasons
+    assert ReadOnlyAuditTaskRejectReason.MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert result.final_bootstrap is None
+    assert len(result.task_runs) == 1
+    assert report_store.records == []
+    assert architect_store.records == []
+    assert runner.calls == []
+    assert holo.calls == []
+    assert code.calls == []
 
 
 def test_e2e_module_has_no_shell_worktree_repo_mutation_or_reindex_imports() -> None:

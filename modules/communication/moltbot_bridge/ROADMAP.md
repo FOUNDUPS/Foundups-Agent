@@ -91,6 +91,10 @@ These remain deferred until the FoundUp Memex POC and MVP contracts are proven.
   remain a separate deployment control.
 - Split reddog_readonly_0102_audit_worker_runtime.py by evidence acquisition,
   freshness normalization, model invocation, and receipt composition.
+- Extract the duplicated audit/architect runtime-binding rehydration and
+  topology projection into a focused contract module after Phase 1 parity is
+  stable. Until then, keep the two surface constants and rejection semantics
+  covered by cross-surface tests; do not broaden either production surface.
 - Continue extracting main.py RedDog preflight and dispatch policy into
   cohesive module-owned helpers; do not add new orchestration branches to the
   root monolith.

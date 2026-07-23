@@ -120,6 +120,25 @@ model-backed path repeats that check after the model returns. Any mismatch
 rejects the result. The fallback grants no indexing, shell, mutation, or
 execution authority.
 
+### RedDog runtime model-binding boundary
+
+The resident read-only audit cycle requires two independently issued,
+surface-specific `reddog_model_runtime_binding_receipt.v1` artifacts: one for
+`reddog_readonly_audit_worker` and one for `reddog_backend_architect`. The
+audit and architect receipt pairs are both digest-bound into WSP 15 and the
+durable intent identity. The audit pair continues through swarm, assignment,
+and AgentDB task context; the architect pair continues through determination
+and queue-candidate lineage. Every runner, including an injected test runner,
+rejects a missing, malformed, rejected, wrong-surface, or pair-mismatched
+receipt before index/provider access or persistence. Selection receipts alone
+do not authorize either call.
+
+Model identities and panel topology come only from the exact validated runtime
+receipt. Same-surface substitution is rejected against task, assignment, WSP
+15, and durable-intent bindings. The runners have no model fallback list.
+Injected test runners remain available for deterministic read-only tests, but
+must receive the same valid binding lineage as production runners.
+
 ## Setup
 
 > ⚠️ **Important**: See [docs/INSTALL_OPENCLAW.md](docs/INSTALL_OPENCLAW.md) for full guide

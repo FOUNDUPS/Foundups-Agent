@@ -1,5 +1,51 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_REVIEW_REPAIR_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
+
+- Closed same-surface substitution by comparing the rehydrated audit receipt
+  ID/digest against task, assignment, and WSP 15 lineage, and by binding the
+  architect receipt pair into WSP 15 as a separate field pair.
+- Made runtime bindings mandatory for injected and production runners alike;
+  model-selection metadata remains non-authoritative and cannot replace or
+  override the validated runtime identity.
+- Bound both receipt pairs into durable resident intent identity and used the
+  same two-pair WSP 15 identity for enqueue and final report collection, so
+  reconnect/retry substitution fails before downstream work or persistence.
+- Added the `main.py` readiness boundary: two distinct, exact-surface artifacts
+  must be read from an explicit outside-repository root through bounded,
+  regular-file, no-follow reads before the resident cycle can start. Logs emit
+  stable path-free reason codes only.
+- WSP 62 truth: focused security tests increased legacy integration fixtures
+  and the startup entrypoint. Temporary ceilings were updated to their exact
+  post-repair sizes (`main.py` 4,978; audit runtime 2,106; architect tests 760;
+  startup tests 1,935; audit executor tests 2,237) without widening function
+  ceilings beyond the expanded 77-line architect fixture.
+
+## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 62, 97
+
+- Added separate audit and backend-architect runtime-binding inputs to the
+  durable resident and direct read-only audit cycles.
+- Bound the audit receipt ID/digest through WSP 15 allocation identity, swarm
+  and assignment identity, content-bearing AgentDB task context, OpenClaw
+  claim execution, worker route receipts, and audit report lineage.
+- Required the backend architect bootstrap/determination to carry the matching
+  architect-surface receipt into result and queue-candidate lineage.
+- Production `foundups_fusion` audit and architect paths now reject missing,
+  malformed, rejected, wrong-surface, or selection-only bindings before a
+  provider call. Removed production runner model defaults, including the
+  inherited Kimi K2.7 fallback; topology is receipt-derived only.
+- Preserved injected fake-runner seams and all read-only/no-dispatch
+  boundaries. Tests prove an exact receipt-selected GLM/Kimi K3 topology is
+  forwarded without network calls, model promotion, progress recording, or
+  publication.
+- WSP 62 truth: the legacy audit runtime remains inside its existing temporary
+  2,100-line ceiling (2,073 lines). The focused architect test suite remains
+  under its 725-line ceiling (708 lines); no exemption ceiling was raised.
+
 ## 2026-07-20: REDDOG_EXECUTION_VALVE_INDEPENDENT_REVIEW_REPAIR_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 62, 71, 97
