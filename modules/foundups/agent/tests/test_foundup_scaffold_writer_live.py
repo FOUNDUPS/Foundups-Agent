@@ -13,7 +13,6 @@ pAccess (paccess_001) is used ONLY as the acceptance fixture.
 from __future__ import annotations
 
 import ast
-import copy
 import json
 import sys
 import types
@@ -79,7 +78,11 @@ def _envelope(fid: str = "paccess_001") -> dict:
 
 def _make_valid(tmp_path: Path, fid: str = "paccess_001"):
     reg = tmp_path / "reg.json"
-    reg.write_text('{"entities": []}', encoding="utf-8")
+    reg.write_text(
+        '{"schema_version":"1.0.0","last_updated":"2026-07-23T00:00:00Z",'
+        '"entities":[]}',
+        encoding="utf-8",
+    )
     contract = plan_create_foundup_dry_run(_envelope(fid), registry_path=reg).scaffold_contract
     assert contract is not None
     module_path = f"modules/foundups/{fid}"
@@ -555,7 +558,11 @@ def test_real_preauth_packet_is_field_compatible(tmp_path: Path) -> None:
         build_live_writer_preauth_packet,
     )
     reg = tmp_path / "r.json"
-    reg.write_text('{"entities": []}', encoding="utf-8")
+    reg.write_text(
+        '{"schema_version":"1.0.0","last_updated":"2026-07-23T00:00:00Z",'
+        '"entities":[]}',
+        encoding="utf-8",
+    )
     p = build_live_writer_preauth_packet(
         idea="decentralized agent/crawler access rail",
         foundup_id="paccess_001", foundup_name="pAccess",

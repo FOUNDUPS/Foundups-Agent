@@ -1,5 +1,13 @@
 # Agent Module ModLog
 
+## 2026-07-23 - CREATE_FOUNDUP_REGISTRY_SCHEMA_REPAIR2
+
+- Replaced planner-local shape checks with `Draft202012Validator` evaluation
+  of the canonical `modules/foundups/foundup_registry.schema.json`; no second
+  schema authority was introduced.
+- Split `plan_create_foundup_dry_run` to 45 lines while preserving the stable
+  `FAIL_REGISTRY_UNAVAILABLE` boundary.
+
 ## 2026-07-23 - CREATE_FOUNDUP_REGISTRY_FAIL_CLOSED_REPAIR1
 
 - The create-foundup dry-run planner now treats missing, unreadable,

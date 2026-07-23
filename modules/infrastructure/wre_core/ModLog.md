@@ -2,6 +2,16 @@
 
 ## Chronological Change Log
 
+### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR2
+
+- Required exact scalar adapter control fields before set membership and
+  mapped every malformed exact-type result to stable redacted blocked output.
+- Rejected Unicode `Cc`/`Cf` identifiers, removed raw exception text from the
+  router failure receipt/log, and deep-detached `DrainResult.results`.
+- Split the touched dispatch and request-freeze entrypoints to 30 and 16
+  lines. The inherited `route_foundup_job` remains 200 lines and is explicitly
+  guarded by a 201-line no-growth regression; this debt is not claimed fixed.
+
 ### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR1
 
 - Froze a canonical `CreateScaffoldRequest` in the `RouteEnvelope`; the

@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 from typing import Any, Dict, Mapping, Optional
 
@@ -111,7 +112,95 @@ def _is_safe_identifier(value: Any) -> bool:
         and ".." not in value
         and "/" not in value
         and "\\" not in value
-        and all(ord(character) >= 32 and ord(character) != 127 for character in value)
+        and all(
+            unicodedata.category(character) not in {"Cc", "Cf"}
+            for character in value
+        )
+    )
+
+
+@dataclass(frozen=True)
+class _CreateBindings:
+    job_id: Any
+    tenant_id: Any
+    foundup_id: Any
+    creation_mode: Any
+    genesis_digest: Any
+    scaffold_digest: Any
+    payload: Any
+
+
+def _read_create_bindings(job: Any) -> _CreateBindings:
+    return _CreateBindings(
+        job_id=getattr(job, "job_id", None),
+        tenant_id=getattr(job, "tenant_id", None),
+        foundup_id=getattr(job, "foundup_id", None),
+        creation_mode=getattr(job, "creation_mode", None),
+        genesis_digest=getattr(job, "genesis_envelope_digest", None),
+        scaffold_digest=getattr(job, "scaffold_contract_digest", None),
+        payload=getattr(job, "payload", None),
+    )
+
+
+def _create_binding_error(
+    bindings: _CreateBindings,
+    policy_summary: Mapping[str, bool],
+) -> Optional[str]:
+    if policy_summary.get("dry_run_mode") is not True:
+        return "create_foundup requires explicit dry_run_mode=True"
+    if not _is_safe_identifier(bindings.job_id):
+        return "create_foundup requires safe job_id"
+    if not _is_safe_identifier(bindings.tenant_id):
+        return "create_foundup requires safe tenant_id"
+    if (
+        not isinstance(bindings.foundup_id, str)
+        or _FOUNDUP_ID_RE.fullmatch(bindings.foundup_id) is None
+    ):
+        return "create_foundup requires canonical foundup_id"
+    if bindings.creation_mode != CREATE_MODE:
+        return "create_foundup requires creation_mode='new_scaffold'"
+    if not isinstance(bindings.genesis_digest, str) or not _SHA256_RE.fullmatch(
+        bindings.genesis_digest
+    ):
+        return "create_foundup requires canonical genesis_envelope_digest"
+    if not isinstance(bindings.scaffold_digest, str) or not _SHA256_RE.fullmatch(
+        bindings.scaffold_digest
+    ):
+        return "create_foundup requires canonical scaffold_contract_digest"
+    if not isinstance(bindings.payload, dict):
+        return "create_foundup requires a payload mapping"
+    genesis = bindings.payload.get("genesis_envelope")
+    if not isinstance(genesis, dict):
+        return "create_foundup requires payload.genesis_envelope"
+    if genesis.get("foundup_id") != bindings.foundup_id:
+        return "create_foundup foundup_id must match genesis envelope"
+    return None
+
+
+def _build_create_request(bindings: _CreateBindings) -> CreateScaffoldRequest:
+    genesis_json = canonical_json(bindings.payload["genesis_envelope"])
+    request_body = {
+        "job_id": bindings.job_id,
+        "tenant_id": bindings.tenant_id,
+        "foundup_id": bindings.foundup_id,
+        "requested_action": CREATE_ACTION,
+        "creation_mode": bindings.creation_mode,
+        "genesis_envelope_digest": bindings.genesis_digest,
+        "scaffold_contract_digest": bindings.scaffold_digest,
+        "genesis_envelope": json.loads(genesis_json),
+    }
+    request_digest = "sha256:" + hashlib.sha256(
+        canonical_json(request_body).encode("utf-8")
+    ).hexdigest()
+    return CreateScaffoldRequest(
+        job_id=bindings.job_id,
+        tenant_id=bindings.tenant_id,
+        foundup_id=bindings.foundup_id,
+        creation_mode=bindings.creation_mode,
+        genesis_envelope_digest=bindings.genesis_digest,
+        scaffold_contract_digest=bindings.scaffold_digest,
+        genesis_envelope_json=genesis_json,
+        request_digest=request_digest,
     )
 
 
@@ -121,80 +210,15 @@ def freeze_create_scaffold_request(
 ) -> CreateScaffoldRequestDecision:
     """Read a mutable job once and freeze its canonical create request."""
     try:
-        if policy_summary.get("dry_run_mode") is not True:
-            return _reject("create_foundup requires explicit dry_run_mode=True")
-
-        job_id = getattr(job, "job_id", None)
-        tenant_id = getattr(job, "tenant_id", None)
-        foundup_id = getattr(job, "foundup_id", None)
-        creation_mode = getattr(job, "creation_mode", None)
-        genesis_digest = getattr(job, "genesis_envelope_digest", None)
-        scaffold_digest = getattr(job, "scaffold_contract_digest", None)
-        payload = getattr(job, "payload", None)
-
-        if not _is_safe_identifier(job_id):
-            return _reject("create_foundup requires safe job_id")
-        if not _is_safe_identifier(tenant_id):
-            return _reject("create_foundup requires safe tenant_id")
-        if (
-            not isinstance(foundup_id, str)
-            or _FOUNDUP_ID_RE.fullmatch(foundup_id) is None
-        ):
-            return _reject("create_foundup requires canonical foundup_id")
-        if creation_mode != CREATE_MODE:
-            return _reject("create_foundup requires creation_mode='new_scaffold'")
-        if (
-            not isinstance(genesis_digest, str)
-            or _SHA256_RE.fullmatch(genesis_digest) is None
-        ):
-            return _reject(
-                "create_foundup requires canonical genesis_envelope_digest"
-            )
-        if (
-            not isinstance(scaffold_digest, str)
-            or _SHA256_RE.fullmatch(scaffold_digest) is None
-        ):
-            return _reject(
-                "create_foundup requires canonical scaffold_contract_digest"
-            )
-        if not isinstance(payload, dict):
-            return _reject("create_foundup requires a payload mapping")
-        genesis_envelope = payload.get("genesis_envelope")
-        if not isinstance(genesis_envelope, dict):
-            return _reject("create_foundup requires payload.genesis_envelope")
-        if genesis_envelope.get("foundup_id") != foundup_id:
-            return _reject(
-                "create_foundup foundup_id must match genesis envelope"
-            )
-
-        genesis_json = canonical_json(genesis_envelope)
-        request_body = {
-            "job_id": job_id,
-            "tenant_id": tenant_id,
-            "foundup_id": foundup_id,
-            "requested_action": CREATE_ACTION,
-            "creation_mode": creation_mode,
-            "genesis_envelope_digest": genesis_digest,
-            "scaffold_contract_digest": scaffold_digest,
-            "genesis_envelope": json.loads(genesis_json),
-        }
-        request_digest = "sha256:" + hashlib.sha256(
-            canonical_json(request_body).encode("utf-8")
-        ).hexdigest()
+        bindings = _read_create_bindings(job)
+        error = _create_binding_error(bindings, policy_summary)
+        if error is not None:
+            return _reject(error)
         return CreateScaffoldRequestDecision(
-            request=CreateScaffoldRequest(
-                job_id=job_id,
-                tenant_id=tenant_id,
-                foundup_id=foundup_id,
-                creation_mode=creation_mode,
-                genesis_envelope_digest=genesis_digest,
-                scaffold_contract_digest=scaffold_digest,
-                genesis_envelope_json=genesis_json,
-                request_digest=request_digest,
-            ),
+            request=_build_create_request(bindings),
             error_human=None,
         )
-    except (AttributeError, CanonicalizationError, TypeError, ValueError):
+    except Exception:
         return _reject("create_foundup request could not be canonicalized")
 
 

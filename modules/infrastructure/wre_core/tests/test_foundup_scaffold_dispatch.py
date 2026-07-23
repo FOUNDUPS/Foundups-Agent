@@ -11,6 +11,8 @@ from typing import Any
 import pytest
 
 from modules.infrastructure.wre_core.src.foundup_job_consumer import (
+    ConsumerResult,
+    DrainResult,
     FoundUpJobConsumer,
 )
 from modules.infrastructure.wre_core.src.foundup_job_router import (
@@ -142,6 +144,42 @@ def test_nonserializable_adapter_evidence_is_contained() -> None:
     assert result.scaffold_result is None
 
 
+@pytest.mark.parametrize(
+    ("field_name", "malformed"),
+    [
+        ("reason_code", []),
+        ("reason_code", {}),
+        ("reason_code", 7),
+        ("reason_human", []),
+        ("reason_human", {}),
+        ("reason_human", None),
+        ("ok", "true"),
+        ("ok", 1),
+    ],
+)
+def test_malformed_exact_type_adapter_scalars_are_stably_blocked(
+    field_name: str,
+    malformed: Any,
+) -> None:
+    request, plan = _request_and_plan()
+    adapter_result = ScaffoldAdapterResult(
+        ok=True,
+        reason_code="OK_SCAFFOLD_PLAN",
+        reason_human="untrusted-secret",
+        plan=plan,
+    )
+    object.__setattr__(adapter_result, field_name, malformed)
+
+    result = FoundUpJobConsumer(
+        scaffold_adapter=_ValueAdapter(adapter_result)
+    )._dispatch_to_scaffold(_route(request))
+
+    assert result.route_status == RouteStatus.BLOCKED
+    assert result.checkpoint_blocker == "FAIL_SCAFFOLD_ADAPTER_RESULT"
+    assert result.reason == "scaffold adapter returned an invalid result"
+    assert "untrusted-secret" not in str(result.to_dict())
+
+
 def test_raising_result_serializer_is_contained(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -227,6 +265,39 @@ def test_consumer_serialized_scaffold_receipts_are_detached() -> None:
     ]["evidence"] == ["A"]
 
 
+def test_drain_result_detaches_caller_owned_consumer_results() -> None:
+    original = ConsumerResult(
+        job_id="job-alpha",
+        dispatched=False,
+        route_status=RouteStatus.BLOCKED,
+        target_backend=TargetBackend.HERMES_SCAFFOLD,
+        reason="original",
+        scaffold_result={"nested": {"evidence": ["A"]}},
+    )
+    caller_results = [original]
+    drain = DrainResult(
+        results=caller_results,
+        cleared_job_ids=[],
+        retained_job_ids=["job-alpha"],
+        retention_reasons={"job-alpha": "blocked"},
+    )
+
+    original.reason = "mutated"
+    original.scaffold_result["nested"]["evidence"].append("B")
+    caller_results.clear()
+    first_receipt = drain.to_dict()
+    first_receipt["results"][0]["scaffold_result"]["nested"]["evidence"].append(
+        "receipt mutation"
+    )
+
+    assert len(drain.results) == 1
+    assert drain.results[0] is not original
+    assert drain.results[0].reason == "original"
+    assert drain.to_dict()["results"][0]["scaffold_result"]["nested"][
+        "evidence"
+    ] == ["A"]
+
+
 def test_create_boundary_imports_no_hermes_provider_fam_or_writer() -> None:
     imported: list[str] = []
     for module in (
@@ -247,3 +318,16 @@ def test_create_boundary_imports_no_hermes_provider_fam_or_writer() -> None:
     assert "provider" not in import_blob
     assert "fam" not in import_blob
     assert "writer" not in import_blob
+
+
+def test_dispatch_entrypoint_stays_below_wsp62_function_limit() -> None:
+    path = Path(foundup_scaffold_dispatch.__file__)
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    function = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "dispatch_create_scaffold"
+    )
+
+    assert function.end_lineno - function.lineno + 1 <= 75

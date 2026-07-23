@@ -53,7 +53,29 @@ def _valid_envelope(foundup_id: str = "widget_demo") -> dict:
 
 def _registry(tmp_path: Path, ids) -> Path:
     p = tmp_path / "reg.json"
-    p.write_text(json.dumps({"entities": [{"foundup_id": i} for i in ids]}), encoding="utf-8")
+    entities = [
+        {
+            "foundup_id": foundup_id,
+            "display_name": foundup_id,
+            "entity_type": "foundup",
+            "module_path": f"modules/foundups/{foundup_id}",
+            "stage": "incubating",
+            "tier": "F0_DAE",
+            "implementation_status": "SPECIFIED",
+            "token_status": "TOKEN_DEFERRED",
+        }
+        for foundup_id in ids
+    ]
+    p.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "last_updated": "2026-07-23T00:00:00Z",
+                "entities": entities,
+            }
+        ),
+        encoding="utf-8",
+    )
     return p
 
 
@@ -131,7 +153,10 @@ def test_reserved_foundup_id_rejected_as_invalid(tmp_path: Path) -> None:
     assert res.rejection_code == "FAIL_ENVELOPE_NOT_GATE_PASSED"
 
 
-@pytest.mark.parametrize("registry_case", ["missing", "corrupt", "schema", "directory"])
+@pytest.mark.parametrize(
+    "registry_case",
+    ["missing", "corrupt", "schema", "schema_enum", "directory"],
+)
 def test_registry_unavailable_fails_closed_with_stable_redacted_reason(
     tmp_path: Path,
     registry_case: str,
@@ -142,6 +167,26 @@ def test_registry_unavailable_fails_closed_with_stable_redacted_reason(
     elif registry_case == "schema":
         registry_path.write_text(
             json.dumps({"entities": [{"foundup_id": 7}]}),
+            encoding="utf-8",
+        )
+    elif registry_case == "schema_enum":
+        registry_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "last_updated": "2026-07-23T00:00:00Z",
+                    "entities": [
+                        {
+                            "foundup_id": "existing_demo",
+                            "display_name": "Existing Demo",
+                            "entity_type": "not_in_canonical_schema",
+                            "module_path": "modules/foundups/existing_demo",
+                            "implementation_status": "SPECIFIED",
+                            "token_status": "TOKEN_DEFERRED",
+                        }
+                    ],
+                }
+            ),
             encoding="utf-8",
         )
     elif registry_case == "directory":
@@ -175,6 +220,34 @@ def test_planning_is_deterministic_when_created_at_is_omitted(tmp_path: Path) ->
     )
 
     assert first.to_dict() == second.to_dict()
+
+
+def test_happy_registry_fixture_validates_against_canonical_schema(
+    tmp_path: Path,
+) -> None:
+    from jsonschema import Draft202012Validator
+
+    registry = json.loads(_registry(tmp_path, ["existing_demo"]).read_text())
+    schema_path = (
+        Path(create_foundup_dryrun.__file__).resolve().parents[2]
+        / "foundup_registry.schema.json"
+    )
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+
+    assert list(Draft202012Validator(schema).iter_errors(registry)) == []
+
+
+def test_planner_entrypoint_stays_below_wsp62_function_limit() -> None:
+    source = Path(create_foundup_dryrun.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    function = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "plan_create_foundup_dry_run"
+    )
+
+    assert function.end_lineno - function.lineno + 1 <= 75
 
 
 # --------------------------------------------------------------------------- #

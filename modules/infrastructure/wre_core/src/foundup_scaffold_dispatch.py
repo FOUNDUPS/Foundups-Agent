@@ -66,6 +66,67 @@ def _blocked(code: str, human: str) -> ScaffoldDispatchOutcome:
     )
 
 
+def _invalid_adapter_result() -> ScaffoldDispatchOutcome:
+    return _blocked(
+        "FAIL_SCAFFOLD_ADAPTER_RESULT",
+        "scaffold adapter returned an invalid result",
+    )
+
+
+def _serialized_result_is_typed(result: Dict[str, Any]) -> bool:
+    """Require scalar control fields before comparisons or set membership."""
+    return (
+        type(result.get("ok")) is bool
+        and type(result.get("reason_code")) is str
+        and type(result.get("reason_human")) is str
+    )
+
+
+def _consume_serialized_result(
+    serialized: Dict[str, Any],
+    request: CreateScaffoldRequest,
+) -> ScaffoldDispatchOutcome:
+    code = serialized["reason_code"]
+    if serialized["ok"] is not True:
+        if code not in _KNOWN_REJECTIONS:
+            return _invalid_adapter_result()
+        safe_result = ScaffoldAdapterResult(
+            ok=False,
+            reason_code=code,
+            reason_human=stable_reason_human(code),
+        ).to_dict()
+        return ScaffoldDispatchOutcome(
+            dispatched=False,
+            reason_code=code,
+            reason_human=stable_reason_human(code),
+            scaffold_result=safe_result,
+            checkpoint_state="BLOCKED",
+            checkpoint_blocker=code,
+        )
+    if code != "OK_SCAFFOLD_PLAN":
+        return _invalid_adapter_result()
+    plan_validation = validate_scaffold_plan(serialized.get("plan"), request)
+    if not plan_validation.ok:
+        return _blocked(
+            plan_validation.reason_code,
+            stable_reason_human(plan_validation.reason_code),
+        )
+    safe_result = ScaffoldAdapterResult(
+        ok=True,
+        reason_code=code,
+        reason_human=stable_reason_human(code),
+        plan=plan_validation.plan,
+    ).to_dict()
+    return ScaffoldDispatchOutcome(
+        dispatched=True,
+        reason_code=code,
+        reason_human=stable_reason_human(code),
+        scaffold_result=safe_result,
+        checkpoint_state="SIMULATED",
+        checkpoint_result="create_foundup dry-run scaffold plan produced",
+    )
+
+
 def dispatch_create_scaffold(
     adapter: ScaffoldAdapter,
     request: CreateScaffoldRequest,
@@ -87,68 +148,12 @@ def dispatch_create_scaffold(
             "scaffold adapter failed closed",
         )
     if type(raw_result) is not ScaffoldAdapterResult:
-        return _blocked(
-            "FAIL_SCAFFOLD_ADAPTER_RESULT",
-            "scaffold adapter returned an invalid result",
-        )
+        return _invalid_adapter_result()
 
     try:
         serialized = canonical_json_copy(raw_result.to_dict())
     except Exception:
-        return _blocked(
-            "FAIL_SCAFFOLD_ADAPTER_RESULT",
-            "scaffold adapter returned an invalid result",
-        )
-    if not isinstance(serialized, dict):
-        return _blocked(
-            "FAIL_SCAFFOLD_ADAPTER_RESULT",
-            "scaffold adapter returned an invalid result",
-        )
-
-    if raw_result.ok is not True:
-        code = raw_result.reason_code
-        if code not in _KNOWN_REJECTIONS:
-            return _blocked(
-                "FAIL_SCAFFOLD_ADAPTER_RESULT",
-                "scaffold adapter returned an invalid result",
-            )
-        safe_result = ScaffoldAdapterResult(
-            ok=False,
-            reason_code=code,
-            reason_human=stable_reason_human(code),
-        ).to_dict()
-        return ScaffoldDispatchOutcome(
-            dispatched=False,
-            reason_code=code,
-            reason_human=stable_reason_human(code),
-            scaffold_result=safe_result,
-            checkpoint_state="BLOCKED",
-            checkpoint_blocker=code,
-        )
-
-    if raw_result.reason_code != "OK_SCAFFOLD_PLAN":
-        return _blocked(
-            "FAIL_SCAFFOLD_ADAPTER_RESULT",
-            "scaffold adapter returned an invalid result",
-        )
-    plan_validation = validate_scaffold_plan(serialized.get("plan"), request)
-    if not plan_validation.ok:
-        return _blocked(
-            plan_validation.reason_code,
-            stable_reason_human(plan_validation.reason_code),
-        )
-
-    safe_result = ScaffoldAdapterResult(
-        ok=True,
-        reason_code="OK_SCAFFOLD_PLAN",
-        reason_human=stable_reason_human("OK_SCAFFOLD_PLAN"),
-        plan=plan_validation.plan,
-    ).to_dict()
-    return ScaffoldDispatchOutcome(
-        dispatched=True,
-        reason_code="OK_SCAFFOLD_PLAN",
-        reason_human=stable_reason_human("OK_SCAFFOLD_PLAN"),
-        scaffold_result=safe_result,
-        checkpoint_state="SIMULATED",
-        checkpoint_result="create_foundup dry-run scaffold plan produced",
-    )
+        return _invalid_adapter_result()
+    if not isinstance(serialized, dict) or not _serialized_result_is_typed(serialized):
+        return _invalid_adapter_result()
+    return _consume_serialized_result(serialized, request)

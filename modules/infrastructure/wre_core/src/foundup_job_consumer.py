@@ -32,6 +32,7 @@ NAVIGATION:
 
 from __future__ import annotations
 
+import copy
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -90,9 +91,8 @@ class DrainResult:
     """Number of jobs cleared."""
 
     retained_count: int = 0  # Number of jobs retained.
-
     def __post_init__(self) -> None:
-        self.results = list(self.results)
+        self.results = copy.deepcopy(list(self.results))
         self.cleared_job_ids = list(canonical_json_copy(self.cleared_job_ids))
         self.retained_job_ids = list(canonical_json_copy(self.retained_job_ids))
         self.retention_reasons = canonical_json_copy(self.retention_reasons)
@@ -100,7 +100,7 @@ class DrainResult:
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for logging/JSON."""
         return {
-            "results": [r.to_dict() for r in self.results],
+            "results": canonical_json_copy([r.to_dict() for r in self.results]),
             "cleared_job_ids": canonical_json_copy(self.cleared_job_ids),
             "retained_job_ids": canonical_json_copy(self.retained_job_ids),
             "retention_reasons": canonical_json_copy(self.retention_reasons),

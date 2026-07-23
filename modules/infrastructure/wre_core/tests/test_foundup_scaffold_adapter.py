@@ -67,7 +67,16 @@ def _valid_envelope(foundup_id: str = "routing_widget") -> dict:
 
 def _empty_registry(tmp_path: Path) -> Path:
     path = tmp_path / "foundup_registry.json"
-    path.write_text(json.dumps({"entities": []}), encoding="utf-8")
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "last_updated": "2026-07-23T00:00:00Z",
+                "entities": [],
+            }
+        ),
+        encoding="utf-8",
+    )
     return path
 
 

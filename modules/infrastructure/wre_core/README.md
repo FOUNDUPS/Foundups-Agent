@@ -40,6 +40,12 @@ produce stable redacted blocked receipts. The route never sends the action to
 the generic Hermes executor and performs no file, registry, FAM, provider, or
 worktree mutation.
 
+The extracted `dispatch_create_scaffold` and
+`freeze_create_scaffold_request` entrypoints remain below the 75-line WSP 62
+function limit. The inherited `route_foundup_job` is still oversized at 200
+lines; its exact exemption ceiling is 201 lines and a regression test prevents
+growth while broader router decomposition remains separate debt.
+
 ### Core Components (5)
 ```
 wre_core/

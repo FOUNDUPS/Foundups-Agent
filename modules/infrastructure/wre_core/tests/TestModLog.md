@@ -1,5 +1,13 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR2
+
+- Added unhashable/wrong scalar adapter fields, C1/RTL/format controls, router
+  exception redaction, caller-owned `ConsumerResult` detachment, and exact
+  function-size regressions.
+- Direct create suite: 70 passed. Adjacent WRE router/consumer suite: 258
+  passed with 2 unrelated inherited `SyntaxWarning` notices.
+
 ## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR1
 
 - Added immutable A-to-B mutation, receipt aliasing, traversal/control

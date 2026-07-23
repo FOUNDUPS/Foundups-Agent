@@ -1224,9 +1224,6 @@ def route_foundup_job(job: Any) -> RouteEnvelope:
                 policy_summary=policy_summary,
             )
 
-        # === create_foundup Dry-Run Scaffold Contract ===
-        # This action is intentionally distinct from the generic Hermes builder.
-        # The router admits it only with typed lineage and an explicit dry-run.
         create_request: Optional[CreateScaffoldRequest] = None
         if requested_action == "create_foundup":
             create_decision = freeze_create_scaffold_request(job, policy_summary)
@@ -1307,16 +1304,18 @@ def route_foundup_job(job: Any) -> RouteEnvelope:
             scaffold_request=create_request,
         )
 
-    except Exception as e:
-        logger.exception(f"Routing failed: {e}")
+    except Exception:
+        logger.error(
+            "FoundUp job routing failed closed",
+            extra={"event": "foundup_job_routing_failed"},
+        )
         return RouteEnvelope(
-            job_id=getattr(job, "job_id", "") or "",
-            tenant_id=getattr(job, "tenant_id", "") or "",
+            job_id="", tenant_id="",
             target_backend=TargetBackend.NONE,
-            requested_action=getattr(job, "requested_action", "") or "",
+            requested_action="",
             route_status=RouteStatus.FAILED,
             reason_code=RouteReasonCode.FAIL_INTERNAL,
-            reason_human=f"Internal routing error: {str(e)}",
+            reason_human="Internal routing error",
         )
 
 

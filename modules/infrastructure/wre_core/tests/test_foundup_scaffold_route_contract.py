@@ -4,14 +4,22 @@
 
 from __future__ import annotations
 
+import ast
+import logging
 from dataclasses import FrozenInstanceError
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from modules.infrastructure.wre_core.src.foundup_job_router import (
+    RouteReasonCode,
     RouteStatus,
     route_foundup_job,
+)
+from modules.infrastructure.wre_core.src import (
+    foundup_job_router,
+    foundup_scaffold_route_contract,
 )
 from modules.infrastructure.wre_core.src.foundup_scaffold_route_contract import (
     CreateScaffoldRequest,
@@ -74,8 +82,12 @@ def test_route_freezes_canonical_request_and_detaches_nested_state() -> None:
         ("job_id", "../job"),
         ("job_id", "job/name"),
         ("job_id", "job\x00name"),
+        ("job_id", "job\u0085name"),
+        ("job_id", "job\u202ename"),
         ("tenant_id", "..\\tenant"),
         ("tenant_id", "tenant\nname"),
+        ("tenant_id", "tenant\u2066name"),
+        ("tenant_id", "tenant\u200fname"),
         ("foundup_id", "../alpha"),
         ("foundup_id", "alpha/name"),
         ("foundup_id", "alpha\x7fname"),
@@ -107,3 +119,44 @@ def test_nonserializable_genesis_fails_closed_without_raw_value() -> None:
     assert route.route_status == RouteStatus.BLOCKED
     assert route.reason_human == "create_foundup request could not be canonicalized"
     assert route.scaffold_request is None
+
+
+def test_router_internal_failure_redacts_exception_and_logs_only_stable_event(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    class ExplodingJob:
+        @property
+        def job_id(self) -> str:
+            raise RuntimeError("secret-path-and-token")
+
+    with caplog.at_level(logging.ERROR, logger="wre_foundup_job_router"):
+        route = route_foundup_job(ExplodingJob())
+
+    assert route.route_status == RouteStatus.FAILED
+    assert route.reason_code == RouteReasonCode.FAIL_INTERNAL
+    assert route.reason_human == "Internal routing error"
+    assert "secret-path-and-token" not in caplog.text
+    assert "secret-path-and-token" not in str(route.to_dict())
+
+
+def _function_span(module: object, function_name: str) -> int:
+    path = Path(module.__file__)
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    function = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == function_name
+    )
+    return function.end_lineno - function.lineno + 1
+
+
+def test_freeze_entrypoint_stays_below_wsp62_function_limit() -> None:
+    assert _function_span(
+        foundup_scaffold_route_contract,
+        "freeze_create_scaffold_request",
+    ) <= 75
+
+
+def test_inherited_router_debt_has_exact_no_growth_guard() -> None:
+    """The inherited router remains exempt only while it does not exceed round 1."""
+    assert _function_span(foundup_job_router, "route_foundup_job") <= 201

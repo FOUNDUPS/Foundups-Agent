@@ -49,7 +49,11 @@ def _valid_envelope(foundup_id: str = "widget_demo") -> dict:
 @pytest.fixture
 def contract(tmp_path_factory) -> dict:
     reg = tmp_path_factory.mktemp("reg") / "registry.json"
-    reg.write_text('{"entities": []}', encoding="utf-8")
+    reg.write_text(
+        '{"schema_version":"1.0.0","last_updated":"2026-07-23T00:00:00Z",'
+        '"entities":[]}',
+        encoding="utf-8",
+    )
     res = plan_create_foundup_dry_run(_valid_envelope(), registry_path=reg)
     assert res.ok, res.rejection_reason
     return res.scaffold_contract

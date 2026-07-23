@@ -8,7 +8,10 @@ Public API and schema contracts for agent lifecycle management, BuildPlan genera
 side-effect-free scaffold plan. Registry inspection is authoritative and
 fail-closed: missing, unreadable, malformed, or schema-invalid data returns
 `FAIL_REGISTRY_UNAVAILABLE` with stable redacted text. Omitted legacy
-`created_at` values are normalized deterministically.
+`created_at` values are normalized deterministically. Validation uses
+`Draft202012Validator` with the canonical
+`modules/foundups/foundup_registry.schema.json`; the planner does not define a
+second registry schema.
 
 ## Hermes -> Resident RedDog Thin Client
 
