@@ -2,6 +2,20 @@
 
 ## Chronological Change Log
 
+### [2026-07-23] - FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1
+
+- Added frozen, deterministic capability profiles for all five FoundUp
+  actions and a strict read-only projection of existing runtime-binding
+  receipt lineage.
+- Integrated projection admission only for `validate_foundup`: dry-run absent
+  binding remains unbound, valid binding is serialized, and invalid or
+  live-absent binding blocks before Hermes dispatch.
+- Added no model selection, binding, catalog, provider, runtime, router,
+  Hermes, or AI Gateway authority; `model_preference` remains cost-class
+  intent only.
+- Reduced the inherited consumer exemption to 1,110 lines while preserving
+  the existing Hermes dispatch function ceiling.
+
 ### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
 
 - Extracted the create-route decision from the legacy router into

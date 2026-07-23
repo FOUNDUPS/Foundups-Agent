@@ -48,6 +48,25 @@ Inherited router and consumer file/function debt remains under exact,
 non-ratcheting ceilings in `wsp_62_exemptions.yaml`; its owner and decomposition
 target are recorded in `violations.md` and `ROADMAP.md`.
 
+### FoundUp Job Model-Capability Projection
+
+WRE publishes immutable `foundup_job_model_capability_profile.v1` facts for
+the five canonical actions. Create and queue are provider-forbidden;
+build/extract map to the artifact-generation surface; validation maps to the
+read-only audit worker. Capability requirements with no existing production
+authority stay explicitly `null`—the projection never invents modality,
+tool, structured-output, reasoning, selection-mode, or panel defaults.
+
+Only routed `validate_foundup` jobs consume
+`foundup_job_model_capability_projection.v1` in Phase 1. A dry run without a
+binding is truthfully `unbound_dry_run`; live validation requires an exact,
+digest-matching `reddog_model_runtime_binding_receipt.v1`. A valid receipt is
+rehydrated through the AI Gateway contract and projected from its existing
+RedDog bridge payload. Invalid schema, identity, backend, surface, task,
+digest, or lineage blocks before Hermes dispatch. `model_preference` is
+carried only as cost-class intent, and the seam performs no model selection,
+catalog lookup, binding, provider, or runtime call.
+
 ### Core Components (5)
 ```
 wre_core/

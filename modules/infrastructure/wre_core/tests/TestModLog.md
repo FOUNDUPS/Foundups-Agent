@@ -1,5 +1,21 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-23: FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1
+
+- Added exact-schema and deterministic-ID coverage for all five profiles,
+  including explicit-null provider-capable requirements and provider-forbidden
+  create/queue boundaries.
+- Covered dry unbound, live absent, valid bound lineage, exact schema,
+  decision, surface, task, digest, authority, route identity, and backend
+  rejection paths without leaking resolver exceptions.
+- Proved validate-only consumer admission blocks before Hermes when required,
+  preserves dry-run simulation when admitted, serializes the projection, and
+  leaves every other action projection-free.
+- Verification: 57 focused projection/consumer/exemption tests and 270
+  combined WRE routing/scaffold, communication-contract, and AI Gateway
+  runtime-binding/signed-evidence tests passed. Ruff, compileall, and diff
+  checks passed.
+
 ## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_WSP62_REPAIR
 
 - Replaced the obsolete route-function no-growth assertion with a regression

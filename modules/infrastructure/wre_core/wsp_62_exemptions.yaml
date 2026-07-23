@@ -33,7 +33,7 @@ exemptions:
       evidence, receipt emission, and queue retention. Create-scaffold dispatch
       is already isolated; the remaining unrelated flows require a dedicated
       parity decomposition.
-    threshold_override: 1112
+    threshold_override: 1110
     function_threshold_override: 160
     functions:
       - "_dispatch_to_hermes"
@@ -47,7 +47,7 @@ exemptions:
     expires_on: "2026-09-30"
     remediation: "ROADMAP.md#foundup-job-router-and-consumer-wsp62-decomposition"
     no_growth_ceiling:
-      file_lines: 1112
+      file_lines: 1110
       functions:
         _dispatch_to_hermes: 111
         _attach_context_bundle_dry_run: 160

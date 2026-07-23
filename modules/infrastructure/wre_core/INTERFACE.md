@@ -39,6 +39,29 @@ public function and every decision helper are at or below the WSP 62
 75-line function limit; remaining inherited router/consumer debt is governed
 by exact no-growth module exemptions.
 
+### FoundUp Job Model-Capability Projection
+
+`get_foundup_job_model_capability_profile(requested_action)` returns one
+frozen `foundup_job_model_capability_profile.v1` artifact for each canonical
+FoundUp action. Profile IDs are SHA-256 digests of canonical JSON including
+explicit nulls. Provider-capable profile requirements remain `None` until a
+production authority supplies them; create/queue use empty/false/zero values
+only to state that provider capability is not applicable.
+
+`resolve_foundup_job_model_capability_projection(...)` is a deterministic,
+read-only resolver. It accepts only an exact runtime-binding receipt plus its
+canonical artifact digest, calls
+`rehydrate_model_runtime_binding_receipt()`, and maps only keys emitted by
+`to_reddog_bridge_payload()`. Stable decisions are `not_applicable`,
+`unbound_dry_run`, `bound`, and `rejected`; rejection reasons are sorted and
+deduplicated. `provider_call_admission` is always `not_evaluated`.
+
+`FoundUpJobConsumer` invokes this admission seam only for
+`requested_action="validate_foundup"`. Dry-run validation may dispatch while
+unbound, a valid bound projection is serialized on `ConsumerResult`, and a
+rejected or live-unbound projection blocks before Hermes. All other consumer
+actions leave `model_capability_projection=None`.
+
 ### Data Structures
 
 ```python

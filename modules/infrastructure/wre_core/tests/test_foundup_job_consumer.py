@@ -18,7 +18,6 @@ WSP Compliance:
   WSP 97  : Truthful status (dry_run default, no overclaims)
 """
 
-import pytest
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Dict, Any
@@ -187,6 +186,9 @@ class TestHermesDispatch:
         mock_envelope.target_backend = TargetBackend.HERMES_VALIDATOR
         mock_envelope.reason_human = "Routed to hermes_validator"
         mock_envelope.job_id = "job_validator"
+        mock_envelope.tenant_id = "tenant_test"
+        mock_envelope.foundup_id = None
+        mock_envelope.requested_action = "validate_foundup"
         mock_route.return_value = mock_envelope
 
         mock_hermes_result = MagicMock()

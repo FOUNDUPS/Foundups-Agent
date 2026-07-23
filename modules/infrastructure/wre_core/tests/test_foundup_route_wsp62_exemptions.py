@@ -26,7 +26,7 @@ EXPECTED = {
         },
     ),
     WRE_ROOT / "src/foundup_job_consumer.py": (
-        1112,
+        1110,
         {
             "_dispatch_to_hermes": 111,
             "_attach_context_bundle_dry_run": 160,

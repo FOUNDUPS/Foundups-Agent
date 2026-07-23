@@ -19,3 +19,19 @@ ceilings in `wsp_62_exemptions.yaml`:
 
 Target: complete the decomposition before the temporary exemptions expire on
 2026-09-30, without widening any recorded ceiling.
+
+## FoundUp model-capability projection follow-up
+
+Phase 1 projects existing route and runtime-binding authority into
+`validate_foundup` only. Build and extract profiles intentionally keep all
+capability requirements unspecified, and no consumer selection or binding
+path has been added.
+
+Before expanding consumption beyond validation:
+
+- designate a production authority for modality, tool, structured-output,
+  reasoning, selection-mode, and panel-limit requirements;
+- define the selection-receipt handoff without letting a projection select,
+  bind, call a provider, or mutate catalog/runtime state;
+- add action-specific admission tests and preserve exact receipt lineage;
+- keep `model_preference` limited to cost-class intent.
