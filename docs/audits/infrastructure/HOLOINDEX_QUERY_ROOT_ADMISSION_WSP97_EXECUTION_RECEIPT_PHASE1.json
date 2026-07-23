@@ -1,4 +1,8 @@
 {
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "be855d74bab9e78105d0ba0fed4ddc935e053284"
+  },
   "execution_id": "HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1",
   "execution_plane": "wre_runtime",
   "outcome": "completed",

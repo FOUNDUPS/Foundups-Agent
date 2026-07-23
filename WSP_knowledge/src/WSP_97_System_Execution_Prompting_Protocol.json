@@ -1,7 +1,7 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.6",
+    "version": "1.7",
     "status": "active",
     "mantra_stage_count": 7,
     "operator_action_count": 9,
@@ -35,10 +35,39 @@
       "Execute"
     ],
     "validator": {
-      "status": "active_structural_validation",
+      "status": "active_repository_evidence_validation",
       "entrypoint": "tools/wsp97_execution_validator.py",
-      "receipt_schema_version": "1.0",
-      "truth_boundary": "Structural receipt completeness only; evidence references are not resolved and no reasoning quality or runtime side effect is proven."
+      "receipt_schema_version": "wsp97_execution_receipt.v1.1",
+      "repository_context": {
+        "repo_root": "explicit validator input; exact-case Git top-level",
+        "base_commit": "receipt repository_context.base_commit; exact 40-character commit; ancestor of current HEAD",
+        "expected_base": "optional independent caller assertion"
+      },
+      "resolved_evidence": {
+        "action": "retrieve_wsps",
+        "path_contract": "exact POSIX repository-relative tracked WSP_framework/src/WSP_<id>_*.md",
+        "confinement": "reject absolute, drive, UNC, backslash, traversal, fragment, URL, directory, wrong-case, untracked, symlink, junction, and reparse paths",
+        "wsps_applied_cross_check": "every declared WSP requires a retrieved canonical path; retrieved precedents may exceed declarations"
+      },
+      "opaque_evidence": "all evidence outside action_evidence.retrieve_wsps remains opaque and is never opened or fetched",
+      "legacy_mode": "legacy_structural_non_admitting; diagnostic only; never exits compliant",
+      "resource_limits": {
+        "receipt_bytes": 262144,
+        "receipt_mapping_items": 32,
+        "repository_context_mapping_items": 8,
+        "action_evidence_mapping_items": 32,
+        "evidence_list_items": 128,
+        "evidence_item_bytes": 4096,
+        "retrieve_wsp_path_bytes": 512,
+        "retrieve_wsps_items": 64,
+        "aggregate_evidence_bytes": 131072,
+        "git_calls": 72,
+        "git_timeout_seconds": 5.0,
+        "git_accepted_output_bytes_per_stream": 65536
+      },
+      "receipt_preflight": "before root or Git: exact repository_context/base syntax, expected-base syntax/equality, retrieve_wsps count/path/case, and WSP identifier syntax; malformed receipt exits 1, malformed caller expected-base exits 2",
+      "root_preflight": "lstat every supplied root component before exists, directory, resolve, or Git operations; reject symlink, junction, and reparse components",
+      "truth_boundary": "Receipt v1.1 validates structural completeness, canonical tracked Retrieve WSPs paths, and invoking-worktree base ancestry; it does not authenticate non-WSP evidence, reasoning quality, runtime side effects, or an immutable final snapshot."
     },
     "rubik_context": "Rubik = MVP DAE. Currently 'Cubes' (modules) need Qwen/Gemma enhancement to become fully agentic Progressive Web Apps (PWAs) that connect ubiquitously to any blockchain via FoundUp MCPs."
   },

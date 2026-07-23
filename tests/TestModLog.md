@@ -1,5 +1,18 @@
 # TestModLog - shared tests
 
+## 2026-07-24: WSP 97 repository-evidence receipt v1.1
+
+- Files: `tests/test_wsp97_execution_validator.py`, `tests/test_wsp97_repository_evidence.py`
+- Slice: `WSP97_REPOSITORY_EVIDENCE_V11_PHASE1`
+- RED checkpoint: 31 failed, 2 passed, 1 skipped before implementation; the deterministic lstat seam separately failed collection until its helper existed.
+- Bounded-contract amendment RED: 15 failed, 38 passed, 1 capability-only skip.
+- Cheapest-first amendment RED: 16 failed, 56 passed, 1 capability-only skip.
+- Final GREEN: 74 passed, 1 capability-only real-symlink skip after the Holo P0 receipt migration; deterministic POSIX symlink and Windows junction/reparse seams passed.
+- Covers schema admission, base binding/ancestry, exact Git root/path/case, traversal and Windows drive/UNC/backslash denial, WSP declaration cross-checking, opaque non-WSP evidence, legacy non-admission, CLI exits, mirrors, and the four migrated base receipts.
+- POSIX symlink mode and Windows junction/reparse attributes are tested deterministically; a real symlink integration test remains capability-gated.
+- Covers root preflight ordering/no-Git-on-redirect, receipt pre-parse cap, mapping/list/item/string/path/count/aggregate limits, subprocess short-circuit, Git call/time/output bounds, and operational exit `2`.
+- Covers zero-Git rejection for missing/bad context, bad/mismatched bases, lexical path/case failures, invalid WSP IDs, and count/path limits.
+
 ## 2026-07-17: WSP 97 structural execution receipt validator
 
 - File: `tests/test_wsp97_execution_validator.py`
