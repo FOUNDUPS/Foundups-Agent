@@ -26,13 +26,43 @@ import json
 import logging
 import os
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path
+from modules.infrastructure.idle_automation.src.schedule_claim_state import (
+    ScheduleClaim,
+)
+from modules.infrastructure.idle_automation.src.openrouter_catalog_projection import (
+    project_openrouter_catalog_dispatch_outcome,
+)
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
+_OPENROUTER_ROUTINE = "openrouter_catalog_refresh"
+_OPENROUTER_SCHEDULE_ID = "e324884d66c4"
+
+
+def _catalog_dispatch_result(
+    status: str, reason: str
+) -> Dict[str, Any]:
+    return {
+        "success": False,
+        "status": status,
+        "reason": reason,
+        "replayed": False,
+        "receipt_id": None,
+        "candidate_snapshot_id": None,
+    }
+
+
+def _valid_openrouter_catalog_claim(claim: object) -> bool:
+    return (
+        type(claim) is ScheduleClaim
+        and claim.schedule_id == _OPENROUTER_SCHEDULE_ID
+        and claim.routine == _OPENROUTER_ROUTINE
+        and claim.cadence == "daily"
+    )
 
 
 class IdleAutomationDAE:
@@ -335,6 +365,20 @@ class IdleAutomationDAE:
         config["auto_git_push"] = self._parse_bool_env("AUTO_GIT_PUSH", False)
         config["auto_linkedin_post"] = self._parse_bool_env("AUTO_LINKEDIN_POST", False)
         config["auto_self_research"] = self._parse_bool_env("AUTO_SELF_RESEARCH", True)
+        config["auto_openrouter_catalog_refresh"] = self._parse_bool_env(
+            "AUTO_OPENROUTER_CATALOG_REFRESH", False
+        )
+        configured_catalog_root = os.getenv(
+            "OPENROUTER_CATALOG_RUNTIME_ROOT", ""
+        ).strip()
+        config["openrouter_catalog_runtime_root"] = (
+            Path(configured_catalog_root).expanduser()
+            if configured_catalog_root
+            else Path.home()
+            / ".foundups-agent"
+            / "ai_gateway"
+            / "openrouter_catalog"
+        )
 
         # Numeric configurations with bounds
         config["idle_task_timeout"] = self._parse_int_env("IDLE_TASK_TIMEOUT", 300, 30, 3600)
@@ -842,7 +886,7 @@ class IdleAutomationDAE:
             result["skipped_count"] += 1
             result["lease_conflict_count"] += 1
             return True
-        dispatch = await self._dispatch_claimed_routine(claim.routine)
+        dispatch = await self._dispatch_claimed_routine(claim)
         outcome = "success" if dispatch["success"] else dispatch["outcome"]
         try:
             finalized = evaluator.finalize_claim(
@@ -856,14 +900,27 @@ class IdleAutomationDAE:
         self._record_claim_result(evaluator, spec, dispatch, finalized, result)
         return finalized
 
-    async def _dispatch_claimed_routine(self, routine: str) -> Dict[str, Any]:
+    async def _dispatch_claimed_routine(
+        self, claim: ScheduleClaim
+    ) -> Dict[str, Any]:
         """Convert dispatcher exceptions to a bounded durable outcome code."""
         try:
-            response = await self._dispatch_scheduled_routine(routine)
+            if claim.routine == _OPENROUTER_ROUTINE:
+                response = await self._dispatch_openrouter_catalog_claim(
+                    claim
+                )
+                return project_openrouter_catalog_dispatch_outcome(response)
+            else:
+                response = await self._dispatch_scheduled_routine(
+                    claim.routine
+                )
+            success = bool(response.get("success", False))
             return {
-                "success": bool(response.get("success", False)),
+                "success": success,
                 "outcome": "routine_failed",
-                "error": response.get("error"),
+                "error": None
+                if success
+                else response.get("reason", response.get("error")),
             }
         except Exception as exc:
             logger.warning("Scheduled dispatch failed on %s", type(exc).__name__)
@@ -872,6 +929,32 @@ class IdleAutomationDAE:
                 "outcome": "dispatch_error",
                 "error": "Scheduled routine dispatch failed",
             }
+
+    async def _dispatch_openrouter_catalog_claim(
+        self, claim: ScheduleClaim
+    ) -> Dict[str, Any]:
+        """Final default-off boundary for one exact provider refresh claim."""
+        if not _valid_openrouter_catalog_claim(claim):
+            return _catalog_dispatch_result(
+                "BLOCKED_PRECALL", "claim_invalid"
+            )
+        if not self._parse_bool_env(
+            "AUTO_OPENROUTER_CATALOG_REFRESH", False
+        ):
+            return _catalog_dispatch_result(
+                "BLOCKED_PRECALL", "refresh_disabled"
+            )
+        from modules.ai_intelligence.ai_gateway.src.model_openrouter_schedule_adapter import (
+            run_openrouter_catalog_schedule_claim,
+        )
+
+        repo_root = Path(self.module_path).resolve().parents[2]
+        runtime_root = self.config["openrouter_catalog_runtime_root"]
+        return await run_openrouter_catalog_schedule_claim(
+            claim,
+            repo_root=repo_root,
+            runtime_root=runtime_root,
+        )
 
     def _record_claim_result(
         self, evaluator, spec, dispatch, finalized, result

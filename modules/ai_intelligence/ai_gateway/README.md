@@ -114,6 +114,28 @@ boundary against an arbitrary writer with access to that directory.
 The fixed guarded artifact identities are exclusive to this API; manual/direct
 callers must use different attempt and candidate paths.
 
+### Idle daily catalog schedule adapter
+
+`run_openrouter_catalog_schedule_claim(...)` is the narrow bridge from one
+exact idle `ScheduleClaim` to the guarded discovery API. It accepts only the
+canonical `openrouter_catalog_refresh:daily` schedule, a canonical midnight
+UTC 24-hour window, and the exact execution digest. The claim maps to
+`schedule_id="idle:<execution_id>"`, the window start in milliseconds, and an
+inclusive expiry one millisecond before window end.
+
+The adapter returns exactly six bounded fields: `success`, `status`, `reason`,
+`replayed`, `receipt_id`, and `candidate_snapshot_id`. Guard status/reason text
+is never forwarded. Completion succeeds only after exact typed receipt and
+candidate evidence is serialized, canonically rehydrated, and proven to match
+the derived invocation and each other. All malformed, forged, nonterminal, or
+exceptional results become fixed content-free failures; cancellation still
+propagates.
+
+This is candidate-evidence collection only. It performs no catalog bridge,
+model selection, promotion, registry mutation, or runtime binding. Production
+enablement is owned by idle automation and remains default-off. Tests inject
+transport and remain offline.
+
 ## Model Selection Receipts
 
 `src/model_intelligence_selection.py` consumes a `ModelCatalogSnapshot` and

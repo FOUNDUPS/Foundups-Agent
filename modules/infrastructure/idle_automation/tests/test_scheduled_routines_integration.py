@@ -9,7 +9,11 @@ Tests cover:
 - Result recording and status reporting
 """
 
+import asyncio
 import json
+import hashlib
+import sys
+import types
 import pytest
 from datetime import datetime, UTC
 from pathlib import Path
@@ -18,6 +22,55 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from modules.infrastructure.idle_automation.src.schedule_evaluator import (
     ScheduleEvaluator,
 )
+from modules.infrastructure.idle_automation.src.schedule_claim_state import (
+    ScheduleClaim,
+    build_execution_id,
+)
+
+RECEIPT_ID = "model_provider_catalog_discovery_receipt:" + ("a" * 64)
+CANDIDATE_ID = "model_provider_catalog_candidate_snapshot:" + ("b" * 64)
+
+
+def _schedule_claim(
+    *,
+    routine: str = "openrouter_catalog_refresh",
+    cadence: str = "daily",
+) -> ScheduleClaim:
+    start = "2026-07-24T00:00:00+00:00"
+    end = "2026-07-25T00:00:00+00:00"
+    schedule_id = hashlib.sha256(
+        b"openrouter_catalog_refresh:daily"
+    ).hexdigest()[:12]
+    return ScheduleClaim(
+        schedule_id=schedule_id,
+        routine=routine,
+        cadence=cadence,
+        window_start=start,
+        window_end=end,
+        execution_id=build_execution_id(
+            schedule_id, routine, cadence, start, end
+        ),
+        token="opaque-claim-token",
+        claimant_id="idle-dae",
+        lease_expires_at="2026-07-24T01:00:00+00:00",
+        attempt=1,
+    )
+
+
+def _adapter_projection(
+    status: str,
+    reason: str,
+    *,
+    success: bool = False,
+) -> dict:
+    return {
+        "success": success,
+        "status": status,
+        "reason": reason,
+        "replayed": False,
+        "receipt_id": RECEIPT_ID if success else None,
+        "candidate_snapshot_id": CANDIDATE_ID if success else None,
+    }
 
 
 class TestScheduledRoutinesDispatch:
@@ -61,6 +114,28 @@ class TestScheduledRoutinesDispatch:
             dae._save_idle_state = MagicMock()
 
             return dae
+
+    def test_openrouter_runtime_config_defaults_safe(
+        self, mock_dae, monkeypatch, tmp_path
+    ):
+        """Provider refresh is opt-in with one code-owned runtime root."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        monkeypatch.delenv("AUTO_OPENROUTER_CATALOG_REFRESH", raising=False)
+        monkeypatch.delenv("OPENROUTER_CATALOG_RUNTIME_ROOT", raising=False)
+        with patch.object(Path, "home", return_value=tmp_path / "home"):
+            config = IdleAutomationDAE._load_and_validate_config(mock_dae)
+
+        assert config["auto_openrouter_catalog_refresh"] is False
+        assert config["openrouter_catalog_runtime_root"] == (
+            tmp_path
+            / "home"
+            / ".foundups-agent"
+            / "ai_gateway"
+            / "openrouter_catalog"
+        )
 
     @pytest.mark.asyncio
     async def test_execute_scheduled_routines_no_due_schedules(
@@ -277,6 +352,403 @@ class TestScheduledRoutinesDispatch:
         evaluator.record_execution.assert_not_called()
         mock_dae._dispatch_scheduled_routine.assert_awaited_once()
 
+    @pytest.mark.asyncio
+    async def test_claim_dispatch_passes_full_exact_schedule_claim(
+        self, mock_dae
+    ):
+        """The durable claim identity must reach final dispatch intact."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        spec = MagicMock(
+            id="canonical-schedule",
+            routine="openrouter_catalog_refresh",
+            cadence="daily",
+        )
+        claim = _schedule_claim()
+        evaluator = MagicMock()
+        evaluator.claim_schedule.return_value = claim
+        evaluator.finalize_claim.return_value = True
+        mock_dae._dispatch_claimed_routine = AsyncMock(
+            return_value={"success": True, "outcome": "completed"}
+        )
+        result = IdleAutomationDAE._scheduled_routines_result()
+
+        continued = await IdleAutomationDAE._claim_and_dispatch(
+            mock_dae, evaluator, spec, result
+        )
+
+        assert continued is True
+        mock_dae._dispatch_claimed_routine.assert_awaited_once_with(claim)
+
+    @pytest.mark.asyncio
+    async def test_openrouter_final_dispatch_defaults_disabled(
+        self, mock_dae, monkeypatch
+    ):
+        """The last dispatch boundary is opt-in and makes no adapter call."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        adapter_name = (
+            "modules.ai_intelligence.ai_gateway.src."
+            "model_openrouter_schedule_adapter"
+        )
+        adapter = types.ModuleType(adapter_name)
+        adapter.run_openrouter_catalog_schedule_claim = AsyncMock()
+        monkeypatch.setitem(sys.modules, adapter_name, adapter)
+        parsed = []
+
+        def parse_bool(key, default):
+            parsed.append((key, default))
+            return default
+
+        mock_dae._parse_bool_env = parse_bool
+        result = await IdleAutomationDAE._dispatch_openrouter_catalog_claim(
+            mock_dae, _schedule_claim()
+        )
+
+        assert parsed == [("AUTO_OPENROUTER_CATALOG_REFRESH", False)]
+        assert result == {
+            "success": False,
+            "status": "BLOCKED_PRECALL",
+            "reason": "refresh_disabled",
+            "replayed": False,
+            "receipt_id": None,
+            "candidate_snapshot_id": None,
+        }
+        adapter.run_openrouter_catalog_schedule_claim.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_enabled_final_dispatch_passes_exact_claim_and_roots_once(
+        self, mock_dae, monkeypatch, tmp_path
+    ):
+        """Enabled dispatch forwards only code/config-owned roots."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        adapter_name = (
+            "modules.ai_intelligence.ai_gateway.src."
+            "model_openrouter_schedule_adapter"
+        )
+        adapter = types.ModuleType(adapter_name)
+        expected = _adapter_projection(
+            "COMPLETED", "completed", success=True
+        )
+        adapter.run_openrouter_catalog_schedule_claim = AsyncMock(
+            return_value=expected
+        )
+        monkeypatch.setitem(sys.modules, adapter_name, adapter)
+        mock_dae._parse_bool_env = lambda key, default: (
+            True if key == "AUTO_OPENROUTER_CATALOG_REFRESH" else default
+        )
+        repo = tmp_path / "repo"
+        mock_dae.module_path = (
+            repo / "modules/infrastructure/idle_automation"
+        )
+        runtime = tmp_path / "trusted-catalog-runtime"
+        mock_dae.config["openrouter_catalog_runtime_root"] = runtime
+        claim = _schedule_claim()
+
+        result = await IdleAutomationDAE._dispatch_openrouter_catalog_claim(
+            mock_dae, claim
+        )
+
+        assert result == expected
+        adapter.run_openrouter_catalog_schedule_claim.assert_awaited_once_with(
+            claim,
+            repo_root=repo,
+            runtime_root=runtime,
+        )
+
+    @pytest.mark.asyncio
+    async def test_forged_non_daily_claim_stops_before_adapter(
+        self, mock_dae, monkeypatch
+    ):
+        """Persisted/forged cadence cannot reach adapter or provider."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        adapter_name = (
+            "modules.ai_intelligence.ai_gateway.src."
+            "model_openrouter_schedule_adapter"
+        )
+        adapter = types.ModuleType(adapter_name)
+        adapter.run_openrouter_catalog_schedule_claim = AsyncMock()
+        monkeypatch.setitem(sys.modules, adapter_name, adapter)
+        mock_dae._parse_bool_env = lambda key, default: (
+            True if key == "AUTO_OPENROUTER_CATALOG_REFRESH" else default
+        )
+
+        result = await IdleAutomationDAE._dispatch_openrouter_catalog_claim(
+            mock_dae, _schedule_claim(cadence="nightly")
+        )
+
+        assert result == {
+            "success": False,
+            "status": "BLOCKED_PRECALL",
+            "reason": "claim_invalid",
+            "replayed": False,
+            "receipt_id": None,
+            "candidate_snapshot_id": None,
+        }
+        adapter.run_openrouter_catalog_schedule_claim.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("projection", "success", "outcome"),
+        [
+            (
+                _adapter_projection(
+                    "COMPLETED", "completed", success=True
+                ),
+                True,
+                "success",
+            ),
+            (
+                _adapter_projection("FAILED", "transport_failed"),
+                False,
+                "routine_failed",
+            ),
+            (
+                _adapter_projection(
+                    "INDETERMINATE", "replay_state_invalid"
+                ),
+                False,
+                "routine_failed",
+            ),
+            (
+                _adapter_projection(
+                    "BLOCKED_PRECALL", "refresh_disabled"
+                ),
+                False,
+                "routine_failed",
+            ),
+        ],
+    )
+    async def test_provider_projection_finalizes_exact_claim_token(
+        self, mock_dae, projection, success, outcome
+    ):
+        """Only completed evidence finalizes the claim as success."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        claim = _schedule_claim()
+        spec = MagicMock(
+            id=claim.schedule_id,
+            routine=claim.routine,
+            cadence=claim.cadence,
+        )
+        evaluator = MagicMock()
+        evaluator.claim_schedule.return_value = claim
+        evaluator.finalize_claim.return_value = True
+        mock_dae._dispatch_openrouter_catalog_claim = AsyncMock(
+            return_value=projection
+        )
+        result = IdleAutomationDAE._scheduled_routines_result()
+
+        continued = await IdleAutomationDAE._claim_and_dispatch(
+            mock_dae, evaluator, spec, result
+        )
+
+        assert continued is True
+        evaluator.finalize_claim.assert_called_once_with(
+            claim.token,
+            success=success,
+            outcome_code=outcome,
+        )
+        if success:
+            evaluator.record_execution.assert_called_once()
+            assert result["executed_count"] == 1
+        else:
+            evaluator.record_execution.assert_not_called()
+            assert result["failed_count"] == 1
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "projection",
+        [
+            {**_adapter_projection("COMPLETED", "completed", success=True), "success": "false"},
+            {**_adapter_projection("COMPLETED", "completed", success=True), "success": 1},
+            {**_adapter_projection("COMPLETED", "completed", success=True), "status": "FAILED"},
+            {**_adapter_projection("COMPLETED", "wrong", success=True)},
+            {**_adapter_projection("COMPLETED", "completed", success=True), "receipt_id": None},
+            {
+                **_adapter_projection("COMPLETED", "completed", success=True),
+                "candidate_snapshot_id": "forged",
+            },
+            {**_adapter_projection("COMPLETED", "completed", success=True), "extra": True},
+            {
+                key: value
+                for key, value in _adapter_projection(
+                    "COMPLETED", "completed", success=True
+                ).items()
+                if key != "reason"
+            },
+            {
+                **_adapter_projection("COMPLETED", "completed", success=True),
+                "reason": "Bearer sk-secret-must-not-escape",
+            },
+            {
+                **_adapter_projection("COMPLETED", "completed", success=True),
+                "replayed": 1,
+            },
+        ],
+    )
+    async def test_malformed_provider_projection_never_finalizes_success(
+        self, mock_dae, projection
+    ):
+        """Truthy and malformed adapter projections fail closed without content."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        claim = _schedule_claim()
+        spec = MagicMock(
+            id=claim.schedule_id,
+            routine=claim.routine,
+            cadence=claim.cadence,
+        )
+        evaluator = MagicMock()
+        evaluator.claim_schedule.return_value = claim
+        evaluator.finalize_claim.return_value = True
+        mock_dae._dispatch_openrouter_catalog_claim = AsyncMock(
+            return_value=projection
+        )
+        result = IdleAutomationDAE._scheduled_routines_result()
+
+        continued = await IdleAutomationDAE._claim_and_dispatch(
+            mock_dae, evaluator, spec, result
+        )
+
+        assert continued is True
+        evaluator.finalize_claim.assert_called_once_with(
+            claim.token,
+            success=False,
+            outcome_code="routine_failed",
+        )
+        evaluator.record_execution.assert_not_called()
+        assert result["failed_count"] == 1
+        encoded = json.dumps(result)
+        assert "secret" not in encoded
+        assert "Bearer" not in encoded
+        assert "forged" not in encoded
+
+    @pytest.mark.asyncio
+    async def test_openrouter_schedule_claim_dispatch_finalize_concatenation(
+        self, mock_dae, tmp_path, monkeypatch
+    ):
+        """The parser-owned ID survives real claim, dispatch, and finalization."""
+        from modules.infrastructure.idle_automation.src import schedule_evaluator
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        now = datetime(2026, 7, 24, 12, tzinfo=UTC)
+        monkeypatch.setattr(schedule_evaluator, "utc_now", lambda: now)
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        evaluator = ScheduleEvaluator(
+            schedules_path=repo / "memory" / "schedules.json",
+            repo_root=repo,
+            runtime_root=tmp_path / "claim-runtime",
+        )
+        spec = evaluator.add_schedule("run openrouter catalog refresh daily")
+        assert spec is not None
+        assert spec.id == "e324884d66c4"
+        mock_dae._dispatch_openrouter_catalog_claim = AsyncMock(
+            return_value=_adapter_projection(
+                "COMPLETED", "completed", success=True
+            )
+        )
+        result = IdleAutomationDAE._scheduled_routines_result()
+
+        continued = await IdleAutomationDAE._claim_and_dispatch(
+            mock_dae, evaluator, spec, result
+        )
+
+        assert continued is True
+        claim = mock_dae._dispatch_openrouter_catalog_claim.await_args.args[0]
+        assert type(claim) is ScheduleClaim
+        assert claim.schedule_id == spec.id
+        assert claim.routine == "openrouter_catalog_refresh"
+        assert claim.cadence == "daily"
+        assert result["executed_count"] == 1
+        assert result["failed_count"] == 0
+        assert evaluator.get_schedule(spec.id).last_result.startswith("success:")
+
+    @pytest.mark.asyncio
+    async def test_provider_cancellation_leaves_claim_unfinalized(
+        self, mock_dae
+    ):
+        """Cancellation preserves the leased claim for expiry/replay recovery."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        claim = _schedule_claim()
+        spec = MagicMock(
+            id=claim.schedule_id,
+            routine=claim.routine,
+            cadence=claim.cadence,
+        )
+        evaluator = MagicMock()
+        evaluator.claim_schedule.return_value = claim
+        mock_dae._dispatch_openrouter_catalog_claim = AsyncMock(
+            side_effect=asyncio.CancelledError
+        )
+        result = IdleAutomationDAE._scheduled_routines_result()
+
+        with pytest.raises(asyncio.CancelledError):
+            await IdleAutomationDAE._claim_and_dispatch(
+                mock_dae, evaluator, spec, result
+            )
+
+        evaluator.finalize_claim.assert_not_called()
+        evaluator.record_execution.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_provider_finalize_failure_keeps_legacy_last_run_untouched(
+        self, mock_dae
+    ):
+        """Completion without durable token finalization remains unknown."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        claim = _schedule_claim()
+        spec = MagicMock(
+            id=claim.schedule_id,
+            routine=claim.routine,
+            cadence=claim.cadence,
+        )
+        evaluator = MagicMock()
+        evaluator.claim_schedule.return_value = claim
+        evaluator.finalize_claim.return_value = False
+        mock_dae._dispatch_openrouter_catalog_claim = AsyncMock(
+            return_value=_adapter_projection(
+                "COMPLETED", "completed", success=True
+            )
+        )
+        result = IdleAutomationDAE._scheduled_routines_result()
+
+        continued = await IdleAutomationDAE._claim_and_dispatch(
+            mock_dae, evaluator, spec, result
+        )
+
+        assert continued is False
+        evaluator.finalize_claim.assert_called_once_with(
+            claim.token,
+            success=True,
+            outcome_code="success",
+        )
+        evaluator.record_execution.assert_not_called()
+        assert result["finalization_failed_count"] == 1
+
 
 class TestDispatchScheduledRoutine:
     """Test individual routine dispatch."""
@@ -360,6 +832,70 @@ class TestDispatchScheduledRoutine:
 
         assert result["success"] is False
         assert "unknown" in result["error"].lower()
+
+    @pytest.mark.asyncio
+    async def test_claimed_legacy_routine_keeps_native_string_dispatch(
+        self, mock_dae
+    ):
+        """Full claims enter once, but legacy native dispatch stays unchanged."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        claim = _schedule_claim(routine="self_research")
+        mock_dae._dispatch_scheduled_routine = AsyncMock(
+            return_value={"success": True}
+        )
+
+        result = await IdleAutomationDAE._dispatch_claimed_routine(
+            mock_dae, claim
+        )
+
+        assert result["success"] is True
+        mock_dae._dispatch_scheduled_routine.assert_awaited_once_with(
+            "self_research"
+        )
+
+    @pytest.mark.asyncio
+    async def test_claimed_provider_routine_uses_exact_final_boundary(
+        self, mock_dae
+    ):
+        """Provider claims never fall through the legacy routine dispatcher."""
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        claim = _schedule_claim()
+        mock_dae._dispatch_openrouter_catalog_claim = AsyncMock(
+            return_value={
+                "success": False,
+                "status": "BLOCKED_PRECALL",
+                "reason": "refresh_disabled",
+                "replayed": False,
+                "receipt_id": None,
+                "candidate_snapshot_id": None,
+            }
+        )
+        mock_dae._dispatch_scheduled_routine = AsyncMock(
+            return_value={
+                "success": False,
+                "error": "legacy path used",
+            }
+        )
+
+        result = await IdleAutomationDAE._dispatch_claimed_routine(
+            mock_dae, claim
+        )
+
+        assert result == {
+            "success": False,
+            "outcome": "routine_failed",
+            "error": "Provider catalog refresh failed",
+        }
+        mock_dae._dispatch_openrouter_catalog_claim.assert_awaited_once_with(
+            claim
+        )
+        mock_dae._dispatch_scheduled_routine.assert_not_awaited()
 
 
 class TestGetScheduledRoutinesStatus:

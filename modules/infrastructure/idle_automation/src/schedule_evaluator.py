@@ -48,6 +48,11 @@ SUPPORTED_ROUTINES = {
         "description": "Refresh external grant watchlist",
         "aliases": ["grant watchlist", "grant refresh", "grants", "watchlist"],
     },
+    "openrouter_catalog_refresh": {
+        "description": "Refresh bounded OpenRouter catalog candidate evidence",
+        "aliases": ["openrouter catalog refresh"],
+        "cadences": ["daily"],
+    },
 }
 
 # Cadence definitions with preferred execution windows (hour ranges, UTC)
@@ -155,7 +160,11 @@ class ScheduleParser:
                 routine = routine_name
                 break
 
-        if routine is None or cadence not in CADENCE_WINDOWS:
+        if (
+            routine is None
+            or cadence not in CADENCE_WINDOWS
+            or not _routine_allows_cadence(routine, cadence)
+        ):
             return None
 
         return (routine, cadence)
@@ -333,6 +342,9 @@ class ScheduleEvaluator:
             or known.cadence != spec.cadence
             or known.routine not in SUPPORTED_ROUTINES
             or known.cadence not in CADENCE_WINDOWS
+            or not _routine_allows_cadence(
+                known.routine, known.cadence
+            )
         ):
             return None
         window = _schedule_window(known, current)
@@ -393,9 +405,16 @@ def get_supported_phrases() -> List[str]:
     examples = []
     for routine, info in SUPPORTED_ROUTINES.items():
         primary_alias = info["aliases"][0]
-        for cadence in CADENCE_WINDOWS:
+        for cadence in info.get("cadences", CADENCE_WINDOWS):
             examples.append(f"run {primary_alias} {cadence}")
     return examples
+
+
+def _routine_allows_cadence(routine: str, cadence: str) -> bool:
+    info = SUPPORTED_ROUTINES.get(routine)
+    if info is None:
+        return False
+    return cadence in info.get("cadences", CADENCE_WINDOWS)
 
 
 def _default_claim_root(

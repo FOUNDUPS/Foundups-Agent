@@ -1,5 +1,38 @@
 # AI Gateway Module Change Log
 
+## [2026-07-24] - Idle OpenRouter Catalog Schedule Adapter
+
+**Who/Type/Slice:** 0102 Codex / Defensive Reliability /
+OPENROUTER_CATALOG_SCHEDULE_ADAPTER_PHASE1
+
+**What:** Added a daily-only adapter from the exact idle durable claim to the
+existing scheduled replay guard. The adapter derives the invocation, returns an
+exact six-key bounded projection, normalizes all status/reason codes locally,
+and canonically rehydrates typed receipt/candidate evidence before accepting
+completion.
+
+**Truth Boundary:** Default-off idle execution; tests use injected offline
+transport, and trusted runtime evidence remains outside the repository.
+Replay/finalization requires exact evidence lineage. No catalog bridge, model
+selection, promotion, registry mutation, runtime binding, startup hook, or
+general scheduler was added.
+
+**WSP_15 MPS:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 = 19
+(P0).
+
+**MPS rationale/remediation:** A forged exact dataclass could previously
+carry matching oversized identifiers, and raw guard status/reason text could
+cross the adapter. Canonical rehydration, fixed local projection codes, bounded
+six-key output, recursive-data rejection, and cancellation-preserving tests
+close that false-evidence and secret-disclosure boundary.
+
+**Validation:** `174 passed, 1 skipped` focused; `575 passed, 3 skipped`
+combined AI Gateway + IdleAutomation + runtime-artifact-safety scope. All
+validation calls used injected offline transport; no live provider call was
+made.
+
+---
+
 ## [2026-07-24] - Scheduled Provider Discovery Replay Guard
 
 **Who:** 0102 Codex worker, architect-audited lane

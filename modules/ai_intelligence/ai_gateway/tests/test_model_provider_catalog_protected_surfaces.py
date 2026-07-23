@@ -8,8 +8,13 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[4]
 MODULE = REPO / "modules/ai_intelligence/ai_gateway"
+IDLE_PROJECTION = (
+    REPO
+    / "modules/infrastructure/idle_automation/src/openrouter_catalog_projection.py"
+)
 NEW_MODULE_NAMES = {
     "model_openrouter_direct_discovery",
+    "model_openrouter_schedule_adapter",
     "model_openrouter_scheduled_discovery",
     "model_provider_catalog_replay_state",
     "model_provider_catalog_snapshot",
@@ -18,6 +23,7 @@ NEW_MODULE_NAMES = {
 FUNCTION_LIMIT_MODULES = (
     "model_intelligence_catalog.py",
     "model_openrouter_direct_discovery.py",
+    "model_openrouter_schedule_adapter.py",
     "model_openrouter_scheduled_discovery.py",
     "model_provider_catalog_atomic_io.py",
     "model_provider_catalog_artifact_store.py",
@@ -98,6 +104,11 @@ def test_new_surfaces_stay_below_phase_one_size_limits() -> None:
         ).splitlines()
     ) < 500
     assert len(
+        (MODULE / "src/model_openrouter_schedule_adapter.py").read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ) < 250
+    assert len(
         (MODULE / "src/model_provider_catalog_replay_state.py").read_text(
             encoding="utf-8"
         ).splitlines()
@@ -137,6 +148,7 @@ def test_no_implicit_scheduler_or_runtime_hook_was_added() -> None:
 def test_scheduled_guard_has_no_authority_surface_imports() -> None:
     imports = set()
     for name in (
+        "model_openrouter_schedule_adapter.py",
         "model_openrouter_scheduled_discovery.py",
         "model_provider_catalog_replay_state.py",
     ):
@@ -157,6 +169,7 @@ def test_scheduled_guard_has_no_authority_surface_imports() -> None:
 
 def test_manual_surfaces_do_not_import_or_export_scheduled_guard() -> None:
     scheduled_names = (
+        "model_openrouter_schedule_adapter",
         "model_openrouter_scheduled_discovery",
         "model_provider_catalog_replay_state",
     )
@@ -173,3 +186,44 @@ def test_manual_surfaces_do_not_import_or_export_scheduled_guard() -> None:
             for name in scheduled_names
         )
         assert not any(name in source for name in scheduled_names)
+
+
+def test_schedule_adapter_has_no_direct_or_bridge_escape_hatch() -> None:
+    path = MODULE / "src/model_openrouter_schedule_adapter.py"
+    source = path.read_text(encoding="utf-8")
+    imports = _imports(path)
+    forbidden = (
+        "model_openrouter_direct_discovery",
+        "aiohttp",
+        "requests",
+        "urllib",
+        "socket",
+    )
+    assert not any(
+        fragment in imported
+        for imported in imports
+        for fragment in forbidden
+    )
+    assert "discover_openrouter_model_catalog" not in source
+    assert "bridge_candidate_to_canonical_catalog" not in source
+
+
+def test_idle_projection_boundary_stays_pure_and_bounded() -> None:
+    source = IDLE_PROJECTION.read_text(encoding="utf-8")
+    imports = " ".join(_imports(IDLE_PROJECTION))
+    forbidden = (
+        "ai_gateway",
+        "aiohttp",
+        "requests",
+        "urllib",
+        "socket",
+        "subprocess",
+    )
+    assert not any(fragment in imports for fragment in forbidden)
+    assert len(source.splitlines()) < 100
+    tree = ast.parse(source)
+    assert all(
+        node.end_lineno - node.lineno + 1 <= 50
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef))
+    )

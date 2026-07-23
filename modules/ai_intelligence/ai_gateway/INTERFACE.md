@@ -139,6 +139,30 @@ must remain under a trusted-principal-controlled root; the cooperative lock
 does not defend against an arbitrary writer with directory access. Ledger state
 contains no response body, credential, or authorization data.
 
+#### Idle schedule adapter
+
+```python
+await run_openrouter_catalog_schedule_claim(
+    claim,
+    repo_root=...,
+    runtime_root=...,
+    transport=...,
+) -> dict[str, object]
+```
+
+The claim must be the exact durable `ScheduleClaim` type for canonical schedule
+ID `e324884d66c4`, routine `openrouter_catalog_refresh`, cadence `daily`, and a
+canonical midnight-to-midnight UTC window. The adapter derives the guarded
+invocation; callers cannot supply invocation or artifact identities.
+
+The result has exactly six keys: `success`, `status`, `reason`, `replayed`,
+`receipt_id`, and `candidate_snapshot_id`. Only canonically rehydrated
+`DiscoveryReceipt` and `ProviderCatalogCandidateSnapshot` evidence with exact
+invocation and observation lineage can yield `COMPLETED/completed`. Other
+results use fixed local codes and do not expose guard text. The API gathers
+candidate evidence only and has no bridge, selection, promotion, registry, or
+runtime-binding authority.
+
 #### Model Intelligence Selection
 
 ```python

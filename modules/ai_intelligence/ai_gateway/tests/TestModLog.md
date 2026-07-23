@@ -1,5 +1,22 @@
 # AI Gateway TestModLog
 
+## 2026-07-24 - Idle OpenRouter schedule adapter
+
+Scope: offline adversarial validation of the exact daily claim-to-guard bridge.
+
+- Proves canonical claim/invocation mapping and exact six-key output.
+- Proves default-independent injected transport with no live network.
+- Proves fixed local status/reason codes do not expose guard or exception text.
+- Proves receipt and candidate `.to_dict()` evidence is canonically rehydrated
+  before lineage/output.
+- Rejects forged, malformed, matching 10,000-character, recursive, and
+  nonterminal evidence with bounded content-free results.
+- Preserves `CancelledError` and enforces no direct discovery, catalog bridge,
+  selection, promotion, registry, or runtime-binding escape hatch.
+
+Focused cross-module result: `174 passed, 1 skipped`. Combined AI Gateway +
+IdleAutomation + runtime-artifact-safety result: `575 passed, 3 skipped`.
+
 ## 2026-07-24 - Scheduled provider discovery replay guard
 
 Scope: offline-only adversarial verification of scheduled replay admission
