@@ -4,7 +4,7 @@
 
 **WSP Compliance Status**: [OK] WSP 49 (Module Structure), WSP 3 (Enterprise Domain), WSP 27 (DAE Architecture)
 
-**Dependencies**: requests>=2.25.0
+**Dependencies**: requests>=2.25.0; aiohttp>=3.9,<4
 
 ## Model Intelligence Catalog
 
@@ -17,6 +17,35 @@ This layer does not choose a model, call a provider, run benchmarks, or promote
 any model to production. Provider catalog entries and `latest`-style aliases are
 eligible candidates only; later benchmark and verifier receipts must promote
 champion/challenger status.
+
+### Explicit OpenRouter catalog discovery
+
+`src/model_openrouter_direct_discovery.py` can refresh the public OpenRouter
+model listing only through the explicit one-shot script
+`scripts/openrouter_model_catalog_snapshot_once.py`. The request is a fixed,
+unauthenticated `GET`, with redirects disabled, a 15-second total deadline, an
+8 MiB streaming limit, and a 2,048-record limit.
+
+The operator supplies one outside-repository runtime root and two distinct
+paths beneath it: an attempt receipt and a last-known-good candidate snapshot.
+Every admitted call writes pre-call and indeterminate state before transport.
+Only a successfully parsed and normalized response replaces the candidate;
+failed refreshes leave the last-known-good candidate untouched. Provider
+listing metadata remains candidate evidence with unknown availability and
+provider-policy privacy, not selection, promotion, or runtime-binding authority.
+
+Example manual invocation:
+
+```text
+python scripts/openrouter_model_catalog_snapshot_once.py --mode manual \
+  --runtime-root D:/runtime/model-catalog \
+  --attempt-path openrouter-attempt.json \
+  --candidate-path openrouter-candidate.json
+```
+
+Scheduled mode is admission metadata, not an installed scheduler. It additionally
+requires `--schedule-id`, `--scheduled-for-ms`, and `--expires-at-ms`; callers
+must invoke the script explicitly within that inclusive time window.
 
 ## Model Selection Receipts
 

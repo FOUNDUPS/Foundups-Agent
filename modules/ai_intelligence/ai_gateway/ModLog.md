@@ -1,5 +1,29 @@
 # AI Gateway Module Change Log
 
+## [2026-07-23] - Direct Provider Snapshot and Bounded Discovery
+
+**Who:** 0102 Codex worker, architect-audited lane
+**Type:** Provider Evidence / Offline-Bounded Discovery
+**Slice:** DIRECT_PROVIDER_SNAPSHOT_AND_BOUNDED_DISCOVERY_PHASE1
+
+**What:** Added an explicit, unauthenticated OpenRouter model-list refresh with
+strict JSON and record normalization, digest-bound invocation/attempt/candidate
+receipts, freshness-aware rehydration, and an idempotent bridge to the existing
+canonical model catalog builder.
+
+**Truth Boundary:**
+- IMPLEMENTED: manual or pre-authorized scheduled one-shot invocation, fixed
+  GET envelope, redirect/deadline/body/record bounds, duplicate-group poison
+  handling, allowlisted candidate metadata, separate outside-repository attempt
+  and last-known-good artifacts, and offline injected-transport tests.
+- NOT IMPLEMENTED: automatic scheduling, registry mutation, model selection or
+  promotion, runtime binding, RedDog provider evidence, provider credentials,
+  startup imports, or live provider calls in tests.
+
+**WSP References:** WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
+---
+
 ## [2026-07-18] - Signed Aggregate Fusion PANEL Evidence
 
 **Who:** 0102 Codex worker, architect-audited lane
