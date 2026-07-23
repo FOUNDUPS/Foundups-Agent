@@ -128,6 +128,7 @@ def canonical_artifact_digest(value: Mapping[str, Any]) -> str:
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=True,
+        allow_nan=False,
     ).encode("utf-8")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
@@ -298,6 +299,7 @@ def _binding_lineage_valid(
 ) -> bool:
     models = (receipt.principal_model, *receipt.panel_models)
     role_models = tuple(item.model_id for item in receipt.role_bindings)
+    role_names = tuple(item.role for item in receipt.role_bindings)
     providers_match = all(
         "/" in item.model_id
         and item.provider == item.model_id.split("/", 1)[0]
@@ -314,6 +316,9 @@ def _binding_lineage_valid(
         and receipt.policy.task_family == receipt.task_family
         and receipt.policy.authority_receipt_id
         and len(models) == len(set(models))
+        and len(role_models) == len(models)
+        and len(role_models) == len(set(role_models))
+        and len(role_names) == len(set(role_names))
         and set(role_models) == set(models)
         and providers_match
         and all(len(items) == len(models) and all(items) for items in evidence_sets)
@@ -325,6 +330,7 @@ def _binding_lineage_valid(
         and bridge.get("model_catalog_snapshot_id") == receipt.catalog_snapshot_id
         and bridge.get("model_role_bindings")
         == [item.to_dict() for item in receipt.role_bindings]
+        and len(bridge.get("model_role_bindings", ())) == len(models)
     )
 
 

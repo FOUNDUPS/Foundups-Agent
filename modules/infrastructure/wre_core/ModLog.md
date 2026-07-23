@@ -2,6 +2,21 @@
 
 ## Chronological Change Log
 
+### [2026-07-23] - FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1_REPAIR1
+
+- Removed runtime-binding authority from `FoundUpJob.payload`; validate jobs
+  now resolve persisted artifacts only through an injected trusted boundary.
+- Reconstructed a detached canonical validate snapshot before artifact lookup,
+  stripped binding-like ingress keys, and passed only that snapshot to Hermes.
+- Rejected hostile mappings, non-finite/noncanonical JSON, role/model
+  cardinality drift, duplicate role names, and trusted-supply
+  schema/profile/digest mismatches with stable redacted reasons.
+- Documented that receipt rehydration proves integrity while provenance relies
+  on the existing outside-repository confined artifact-supply trust anchor;
+  malicious injected resolvers remain an explicit residual.
+- Added exact temporary WSP 62 governance for inherited oversized WRE
+  interface and chronological documentation.
+
 ### [2026-07-23] - FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1
 
 - Added frozen, deterministic capability profiles for all five FoundUp

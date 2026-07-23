@@ -60,12 +60,20 @@ tool, structured-output, reasoning, selection-mode, or panel defaults.
 Only routed `validate_foundup` jobs consume
 `foundup_job_model_capability_projection.v1` in Phase 1. A dry run without a
 binding is truthfully `unbound_dry_run`; live validation requires an exact,
-digest-matching `reddog_model_runtime_binding_receipt.v1`. A valid receipt is
-rehydrated through the AI Gateway contract and projected from its existing
-RedDog bridge payload. Invalid schema, identity, backend, surface, task,
-digest, or lineage blocks before Hermes dispatch. `model_preference` is
-carried only as cost-class intent, and the seam performs no model selection,
-catalog lookup, binding, provider, or runtime call.
+digest-matching `reddog_model_runtime_binding_receipt.v1` returned by an
+injected trusted resolver. Binding-like fields in `FoundUpJob.payload` are
+ignored and removed from the detached job snapshot sent to Hermes. The
+resolver implementation must use the existing outside-repository confined
+artifact-supply boundary; this consumer performs no file I/O.
+
+A valid receipt is rehydrated through the AI Gateway contract and projected
+from its existing RedDog bridge payload. Invalid schema, identity, backend,
+surface, task, digest, role/model cardinality, or lineage blocks before
+Hermes dispatch. Receipt rehydration proves artifact integrity, while
+provenance trust comes from dependency injection. A malicious implementation
+of that trusted resolver is an explicit residual outside this slice.
+`model_preference` remains cost-class intent, and the seam performs no model
+selection, catalog lookup, binding, provider, or runtime call.
 
 ### Core Components (5)
 ```

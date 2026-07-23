@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 from typing import Any, Mapping, Optional
 
 
@@ -43,33 +44,80 @@ def normalize_exact_binding_receipt(
     value: Any,
 ) -> Optional[dict[str, Any]]:
     """Return detached JSON only when every nested schema is exact."""
-    if not isinstance(value, Mapping):
-        return None
     try:
-        receipt = json.loads(
-            json.dumps(
-                value,
-                sort_keys=True,
-                separators=(",", ":"),
-                ensure_ascii=True,
+        if not isinstance(value, Mapping):
+            return None
+        value.get("schema_version")
+        receipt = _canonical_json_value(value)
+        json.dumps(
+            receipt,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        )
+        if not isinstance(receipt, dict):
+            return None
+        policy = receipt.get("policy")
+        roles = receipt.get("role_bindings")
+        exact = bool(
+            set(receipt) == _BINDING_FIELDS
+            and isinstance(policy, dict)
+            and set(policy) == _POLICY_FIELDS
+            and isinstance(roles, list)
+            and all(
+                isinstance(role, dict)
+                and set(role) == _ROLE_BINDING_FIELDS
+                for role in roles
             )
         )
-    except (TypeError, ValueError):
+        return receipt if exact else None
+    except Exception:
         return None
-    policy = receipt.get("policy")
-    roles = receipt.get("role_bindings")
-    exact = bool(
-        set(receipt) == _BINDING_FIELDS
-        and isinstance(policy, Mapping)
-        and set(policy) == _POLICY_FIELDS
-        and isinstance(roles, list)
-        and all(
-            isinstance(role, Mapping)
-            and set(role) == _ROLE_BINDING_FIELDS
-            for role in roles
+
+
+def normalize_canonical_json_mapping(
+    value: Any,
+) -> Optional[dict[str, Any]]:
+    """Detach one exact JSON mapping; reject hostile or noncanonical values."""
+    try:
+        if not isinstance(value, Mapping):
+            return None
+        value.get("")
+        normalized = _canonical_json_value(value)
+        json.dumps(
+            normalized,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
         )
-    )
-    return receipt if exact else None
+        return normalized if isinstance(normalized, dict) else None
+    except Exception:
+        return None
 
 
-__all__ = ["normalize_exact_binding_receipt"]
+def _canonical_json_value(value: Any) -> Any:
+    value_type = type(value)
+    if value is None or value_type in (str, bool, int):
+        return value
+    if value_type is float:
+        if not math.isfinite(value):
+            raise ValueError("non_finite_json_number")
+        return value
+    if isinstance(value, Mapping):
+        normalized: dict[str, Any] = {}
+        for key, item in value.items():
+            if type(key) is not str or key in normalized:
+                raise TypeError("noncanonical_json_mapping")
+            normalized[key] = _canonical_json_value(item)
+        return normalized
+    if value_type is list:
+        return [_canonical_json_value(item) for item in value]
+    raise TypeError("noncanonical_json_type")
+
+
+__all__ = [
+    "normalize_canonical_json_mapping",
+    "normalize_exact_binding_receipt",
+]

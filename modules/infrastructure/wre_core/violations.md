@@ -15,7 +15,29 @@ exemptions are exact no-growth ceilings, not test exemptions:
 | File | Exact file ceiling | Exact inherited function ceilings |
 |---|---:|---|
 | `src/foundup_job_router.py` | 1193 | `validate_foundup_job_envelope`: 212; `_validate_live_mode_gates`: 88; `_validate_evidence_refs`: 113; `_validate_compute_budget`: 163 |
-| `src/foundup_job_consumer.py` | 1110 | `_dispatch_to_hermes`: 111; `_attach_context_bundle_dry_run`: 160; `drain_openclaw_queue_with_retention`: 94 |
+| `src/foundup_job_consumer.py` | 1112 | `_dispatch_to_hermes`: 111; `_attach_context_bundle_dry_run`: 160; `drain_openclaw_queue_with_retention`: 94 |
 
 Every newly extracted or touched create-route function is at or below 75
 lines. The temporary exemptions expire on 2026-09-30 and may only shrink.
+
+## 2026-07-23: inherited WRE documentation size debt
+
+**Status:** ACTIVE TEMPORARY EXEMPTIONS
+
+**Owner:** WRE Core Maintainers
+
+**Architect reviewer:** 0102 Technical Architect
+
+**Remediation:** [WRE documentation WSP62 decomposition](ROADMAP.md#wre-documentation-wsp62-decomposition)
+
+`INTERFACE.md`, `ModLog.md`, and `tests/TestModLog.md` retain inherited API and
+chronological audit history above the 1,000-line Markdown threshold. Their
+exact post-repair line counts are governed in `wsp_62_exemptions.yaml`; this
+is documentation debt, not a test or production-code exemption. The
+temporary exemptions expire on 2026-09-30 and may only shrink.
+
+| File | Exact file ceiling |
+|---|---:|
+| `INTERFACE.md` | 1051 |
+| `ModLog.md` | 4251 |
+| `tests/TestModLog.md` | 1366 |

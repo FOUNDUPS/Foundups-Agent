@@ -210,7 +210,11 @@ class TestHermesDispatch:
         consumer = FoundUpJobConsumer(dry_run=True)
         result = consumer.consume_one(job)
 
-        mock_execute.assert_called_once_with(job)
+        mock_execute.assert_called_once()
+        execution_job = mock_execute.call_args.args[0]
+        assert execution_job is not job
+        assert execution_job.job_id == job.job_id
+        assert execution_job.requested_action == job.requested_action
         assert result.dispatched is True
         assert result.target_backend == TargetBackend.HERMES_VALIDATOR
         assert result.checkpoint_state == "SIMULATED"

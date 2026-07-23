@@ -62,6 +62,23 @@ unbound, a valid bound projection is serialized on `ConsumerResult`, and a
 rejected or live-unbound projection blocks before Hermes. All other consumer
 actions leave `model_capability_projection=None`.
 
+The consumer constructor accepts a
+`TrustedModelRuntimeBindingResolver(ModelRuntimeBindingLookup)` dependency.
+It returns either `None` or a `TrustedModelRuntimeBindingArtifact` containing
+the persisted receipt mapping, canonical artifact digest, and non-empty
+provenance label. Implementations are trust anchors and must resolve through
+the existing outside-repository confined runtime-binding artifact supply.
+This seam does not read files.
+
+`FoundUpJob.payload` is never consulted for model-binding authority. Any
+binding-like keys there are removed while constructing a detached canonical
+`FoundUpJob` snapshot before the trusted lookup. Projection and Hermes both
+consume that snapshot, closing the mutable-ingress interval. Canonical
+normalization rejects hostile mappings, non-finite numbers, tuples and other
+non-JSON recursive types without exposing exception text. Runtime receipt
+rehydration proves integrity; it cannot establish the honesty of a malicious
+injected resolver, which remains an explicit out-of-scope residual.
+
 ### Data Structures
 
 ```python

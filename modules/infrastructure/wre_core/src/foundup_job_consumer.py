@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-WRE FoundUpJob Consumer — Phase 1B Consumer Seam with Receipt Binding
-
-All dispatch follows a validated ``RouteEnvelope``. Results retain truthful
-dry-run evidence without granting provider, verification, payout, or live
-execution authority.
-"""
-
+"""WRE FoundUpJob consumer with truthful routed dry-run evidence."""
 from __future__ import annotations
 
 import copy
@@ -23,7 +16,8 @@ from .foundup_job_router import (
 )
 from .foundup_job_model_capability_consumer import (
     attach_model_capability_projection as attach_projection,
-    resolve_model_capability_consumer_admission,
+    no_trusted_model_runtime_binding,
+    prepare_validate_model_capability_admission,
 )
 from .foundup_scaffold_adapter import (
     CreateFoundUpDryRunScaffoldAdapter,
@@ -384,6 +378,7 @@ class FoundUpJobConsumer:
         self,
         dry_run: bool = True,
         scaffold_adapter: Optional[ScaffoldAdapter] = None,
+        model_runtime_binding_resolver: Any = None,
     ):
         """
         Initialize consumer.
@@ -391,11 +386,15 @@ class FoundUpJobConsumer:
         Args:
             dry_run: Force dry-run mode for Hermes dispatches. Default True.
             scaffold_adapter: Injected create_foundup dry-run planning boundary.
+            model_runtime_binding_resolver: Trusted persisted-artifact lookup.
         """
         self.dry_run = dry_run
         self.scaffold_adapter = (
             scaffold_adapter or CreateFoundUpDryRunScaffoldAdapter()
         )
+        self.model_runtime_binding_resolver = model_runtime_binding_resolver
+        if self.model_runtime_binding_resolver is None:
+            self.model_runtime_binding_resolver = no_trusted_model_runtime_binding
 
     def consume_one(self, job: Any) -> ConsumerResult:
         """
@@ -428,10 +427,11 @@ class FoundUpJobConsumer:
                 reason=f"Routing exception: {e}",
             )
 
-        admission = resolve_model_capability_consumer_admission(
+        execution_job, admission = prepare_validate_model_capability_admission(
             job=job,
             route_envelope=envelope,
             dry_run_mode=self.dry_run,
+            binding_resolver=self.model_runtime_binding_resolver,
         )
         if admission.blocked and envelope.route_status == RouteStatus.ROUTED:
             return ConsumerResult(**admission.rejection_result_fields(job_id, envelope))
@@ -444,7 +444,9 @@ class FoundUpJobConsumer:
                 TargetBackend.HERMES_BUILDER,
                 TargetBackend.HERMES_VALIDATOR,
             ):
-                return attach_projection(self._dispatch_to_hermes(job, envelope), admission)
+                return attach_projection(
+                    self._dispatch_to_hermes(execution_job, envelope), admission
+                )
 
         # Step 3: Not dispatched (QUEUED, BLOCKED, UNSUPPORTED, FAILED, etc.)
         logger.info(
