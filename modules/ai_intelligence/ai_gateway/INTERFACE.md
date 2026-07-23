@@ -82,8 +82,19 @@ scheduler.
 both attempt and candidate artifacts. Replacement is same-directory and atomic:
 the target is untouched until exact UTF-8 bytes have been flushed and fsynced
 to a validated exclusive temporary file. `AtomicArtifactOps` is injectable for
-offline failure tests; production uses ordinary writes, `os.fsync`, and
-`os.replace`.
+offline failure tests and is a trusted seam. Before replacement, the pathname
+must still be a single-link regular file matching the post-write descriptor
+device/inode, exact size, and expected SHA-256 content digest; unavailable
+identity fails closed. Production retains that descriptor through publication.
+On Windows it renames the exact verified object by native handle and verifies
+the target before release. Detected publication mismatch restores the prior
+bytes/mode or absence, and cleanup does not unlink identity-ambiguous foreign
+substitutes. Non-Windows pathname publication requires an operator-controlled,
+non-shared runtime directory and makes no claim against an arbitrary
+concurrent directory writer. Parent-directory fsync is best-effort.
+
+Redirect history with a non-3xx final response is represented by
+`redirect_history_rejected`; raw 3xx responses remain `redirect_rejected`.
 
 #### Model Intelligence Selection
 

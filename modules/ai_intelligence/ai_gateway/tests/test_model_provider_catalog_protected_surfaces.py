@@ -16,6 +16,7 @@ NEW_MODULE_NAMES = {
 FUNCTION_LIMIT_MODULES = (
     "model_intelligence_catalog.py",
     "model_openrouter_direct_discovery.py",
+    "model_provider_catalog_atomic_io.py",
     "model_provider_catalog_artifact_store.py",
     "model_provider_catalog_snapshot.py",
 )
@@ -74,6 +75,11 @@ def test_new_surfaces_stay_below_phase_one_size_limits() -> None:
     ) < 450
     assert len(
         (MODULE / "src/model_openrouter_direct_discovery.py").read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ) < 400
+    assert len(
+        (MODULE / "src/model_provider_catalog_atomic_io.py").read_text(
             encoding="utf-8"
         ).splitlines()
     ) < 400
