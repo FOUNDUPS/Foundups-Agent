@@ -1,5 +1,16 @@
 # WSP Violations Log - moltbot_bridge
 
+## 2026-07-23: WSP 62 Provider Evidence Review Repair - RESOLVED
+
+**Status**: TEMPORARY EXEMPTION / REMEDIATION TRACKED
+
+The missing backend-architect source exemption is now explicit, temporary,
+review-dated, owner/reviewer assigned, and fixed at the measured 1,618-line
+ceiling. The provider contract, audit runtime, architect test, and audit test
+ceilings were updated to their exact post-repair sizes. The roadmap separately
+tracks provider-store and architect-transaction extraction; no permanent
+exemption or unrelated refactor was introduced.
+
 ## 2026-07-23: WSP 62 Provider Evidence Review - TEMPORARY CEILINGS RECORDED
 
 **Status**: FOLLOW-UP TRACKED

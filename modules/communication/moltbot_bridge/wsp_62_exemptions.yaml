@@ -13,7 +13,7 @@ exemptions:
       Legacy module interface registry. This slice adds one bounded transport
       contract beside its canonical resident-client boundary; splitting the
       historical registry is separate documentation-maintenance work.
-    threshold_override: 1100
+    threshold_override: 1125
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -173,8 +173,8 @@ exemptions:
       Legacy audit-worker integration boundary spanning evidence acquisition,
       model invocation, and receipt composition. This POC preserves its
       reviewed repository and HoloIndex truth checks without a broad rewrite.
-    threshold_override: 2190
-    function_threshold_override: 270
+    threshold_override: 2211
+    function_threshold_override: 282
     functions:
       - "execute_model_backed_repo_code_audit"
       - "_optional_memex_query_artifacts"
@@ -186,13 +186,42 @@ exemptions:
     reviewer: "0102 Technical Architect"
     remediation: "modules/communication/moltbot_bridge/ROADMAP.md#2026-07-18-reddog--holoindex-truth-boundary-follow-ups"
 
+  - file: "wsp_62_exemptions.yaml"
+    reason: >-
+      Module-local WSP 62 registry. Provider-evidence review adds exact,
+      review-dated ceilings for the touched legacy surfaces; splitting the
+      registry would break the canonical module-level exemption lookup.
+    threshold_override: 323
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
+
+  - file: "src/reddog_backend_architect_determination_runtime.py"
+    reason: >-
+      Legacy architect transaction boundary spanning guarded model invocation,
+      determination validation, canonical receipt composition, persistence,
+      and queue-candidate projection. This repair only binds provider evidence
+      into the accepted receipt identity; transaction extraction is tracked
+      separately to avoid mixing lifecycle refactoring into the safety fix.
+    threshold_override: 1618
+    function_threshold_override: 317
+    functions:
+      - "run_reddog_backend_architect_determination_runtime"
+      - "FoundupsFusionArchitectModelRunner.run_architect_determination"
+      - "_receipt"
+    temporary: true
+    review_date: "2026-Q3"
+    reviewer: "0102 Technical Architect"
+    remediation: "modules/communication/moltbot_bridge/ROADMAP.md#reddog-provider-call-evidence-follow-ups"
+
   - file: "src/reddog_provider_call_evidence.py"
     reason: >-
       Focused phase-2a contract and atomic store are colocated so the exact
       validator and state-transition writer cannot drift. Store extraction is
       the first follow-up after both governed Fusion surfaces prove parity.
-    threshold_override: 775
-    function_threshold_override: 90
+    threshold_override: 814
+    function_threshold_override: 123
     functions:
       - "validate_provider_call_evidence"
     temporary: true
@@ -225,7 +254,7 @@ exemptions:
 
   - file: "tests/test_reddog_backend_architect_determination_runtime.py"
     reason: "Legacy architect-input fixture and suite awaiting fixture extraction."
-    threshold_override: 770
+    threshold_override: 842
     function_threshold_override: 80
     functions: ["_build_inputs"]
     temporary: true
@@ -262,8 +291,8 @@ exemptions:
     reason: >-
       Legacy executor regression matrix. Repository-state truth-boundary cases
       were added without mixing production refactoring into the security fix.
-    threshold_override: 2250
-    function_threshold_override: 60
+    threshold_override: 2307
+    function_threshold_override: 63
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -273,7 +302,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9000
+    threshold_override: 8713
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -285,7 +314,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1500
+    threshold_override: 1532
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

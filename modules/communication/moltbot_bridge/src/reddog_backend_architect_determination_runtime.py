@@ -39,6 +39,7 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     validate_reddog_wsp15_allocation_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    ProviderCallAttemptError,
     ProviderCallEvidenceStore,
     canonical_digest as provider_evidence_digest,
     create_precall_evidence,
@@ -243,6 +244,16 @@ class FoundupsFusionArchitectModelRunner:
                 invoke=lambda: run_foundups_fusion(api_key, redacted_user, [], payload),
                 content_from_result=_fusion_architect_content,
                 metadata_from_result=_provider_call_metadata,
+            )
+        except ProviderCallAttemptError as exc:
+            return _model_result_reject(
+                (
+                    ArchitectDeterminationReason.MODEL_TIMEOUT
+                    if exc.timed_out
+                    else "provider_call_evidence_or_fusion_failed"
+                ),
+                provider_call_evidence=exc.evidence.to_dict(),
+                made_network_call=True,
             )
         except TimeoutError:
             persisted = _safe_provider_evidence(store, precall.call_id)
@@ -792,19 +803,28 @@ def run_reddog_backend_architect_determination_runtime(
     summary = str(parsed.get("summary") or "").strip()
     decision_reasons = _normalize_text_list(parsed.get("decision_reasons"))
     queue_candidate = None
-    receipt_stub_id = _digest(
+    accepted_receipt_id = _digest(
         {
             "cycle_id": cycle_id,
             "action": action,
             "next_slice_name": next_slice_name,
             "model_result_digest": model_result.model_result_digest,
             "model_selection_digest": model_selection_digest,
+            "provider_call_id": model_result.provider_call_evidence.get("call_id"),
+            "provider_call_receipt_id": model_result.provider_call_evidence.get(
+                "receipt_id"
+            ),
+            "provider_call_evidence_digest": (
+                provider_evidence_digest(model_result.provider_call_evidence)
+                if model_result.provider_call_evidence
+                else None
+            ),
         }
     )
     if action == ACTION_FIX:
         assert next_slice_name is not None
         queue_candidate = _queue_candidate(
-            source_determination_receipt_id=receipt_stub_id,
+            source_determination_receipt_id=accepted_receipt_id,
             next_slice_name=next_slice_name,
             snapshot=snapshot,
             report_bundle_id=report_bundle_id,
@@ -832,7 +852,7 @@ def run_reddog_backend_architect_determination_runtime(
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
         model_runtime_binding_digest=model_runtime_binding_digest,
         queue_candidate=queue_candidate,
-        determination_receipt_id=receipt_stub_id,
+        determination_receipt_id=accepted_receipt_id,
     )
     persist_result = _persist_receipt(receipt, writer=writer, now_iso=observed_at)
     if not persist_result.accepted:

@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97
+
+- Restricted served provider/model persistence to canonical identifier grammar
+  after the shared runtime secret-shape detector; secrets, credentials,
+  whitespace/control characters, and raw-content shapes now fail closed.
+- Added a static `ProviderCallAttemptError` carrying only canonical local
+  evidence and a timeout bit. Audit and architect runners now report
+  `made_network_call=true` with non-promotable INDETERMINATE lineage even when
+  terminal persistence and recovery reads are unavailable.
+- Bound accepted architect determination/queue-parent identity to provider call
+  ID, provider receipt ID, and canonical evidence digest.
+- Added provider evidence to audit execution rejection results, including
+  invalid-output and post-model repository-change rejections.
+- Recorded exact temporary WSP 62 ceilings for every enlarged legacy source and
+  test surface, including the previously missing 1,618-line architect runtime.
+  Transaction/store extraction remains a separately tracked follow-up.
+- Added adversarial regressions for secret/raw identity smuggling, double store
+  failure truth, architect provider-lineage substitution, and audit failure
+  linkage. Focused provider/architect/audit/WSP62 tests pass 117/117; Fusion
+  progress tests pass 13/13.
+
 ## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A
 
 **WSP Protocol**: WSP 00, 15, 22, 62, 71, 97

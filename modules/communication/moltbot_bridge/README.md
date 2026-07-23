@@ -8,7 +8,12 @@ and count, bounded numeric usage, and only explicitly returned served identity.
 The outside-repository store path is supplied by
 `REDDOG_PROVIDER_CALL_EVIDENCE_STORE_PATH`; absence or a failed PRECALL/arm
 write blocks the provider call. Terminal-write uncertainty remains durably
-`INDETERMINATE` and cannot be promoted or automatically retried.
+`INDETERMINATE` and cannot be promoted or automatically retried. Served
+provider/model values must be canonical identifiers and are rejected if they
+contain secret, credential, control-character, whitespace, or raw-content
+shapes. Post-invocation failures carry the last content-free local evidence to
+the audit/architect result even when terminal persistence and recovery reads
+both fail.
 
 RedDog Fusion progress observability is implemented by `src/reddog_fusion_progress_receipt.py`: bounded hash-chained stage events plus content-free OpenRouter usage and routing receipts. It does not retain prompts, outputs, hidden reasoning, or secrets, and it grants no action authority.
 

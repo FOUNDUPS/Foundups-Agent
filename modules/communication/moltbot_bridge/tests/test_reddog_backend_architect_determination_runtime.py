@@ -42,6 +42,11 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
 )
 from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
     InMemoryProviderCallEvidenceStore,
+    ProviderCallOutcome,
+    ProviderCallReason,
+    arm_provider_call,
+    create_precall_evidence,
+    terminalize_provider_call,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _model_selection,
@@ -76,11 +81,13 @@ class FakeArchitectRunner:
         ok: bool = True,
         quorum: bool = True,
         raise_timeout: bool = False,
+        provider_call_evidence: Mapping[str, Any] | None = None,
     ) -> None:
         self.output = output
         self.ok = ok
         self.quorum = quorum
         self.raise_timeout = raise_timeout
+        self.provider_call_evidence = dict(provider_call_evidence or {})
         self.calls: list[dict[str, Any]] = []
 
     def run_architect_determination(self, *, prompt: str, context: str, binding: Mapping[str, Any], timeout_seconds: int):
@@ -104,6 +111,7 @@ class FakeArchitectRunner:
             review_packet={"fusion_panel_quorum": {"passed": self.quorum}},
             made_network_call=True,
             rejection_reasons=() if self.ok else ("model_failed",),
+            provider_call_evidence=self.provider_call_evidence,
         )
 
 
@@ -274,6 +282,30 @@ def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
     return kwargs
 
 
+def _provider_call_evidence(task_id: str) -> dict[str, Any]:
+    precall = create_precall_evidence(
+        surface=RUNTIME_SURFACE_BACKEND_ARCHITECT,
+        task_id=task_id,
+        work_order_id="work-1",
+        queue_item_id="queue-1",
+        run_id="run-1",
+        cycle_id="cycle-1",
+        requested_provider="openrouter",
+        requested_model="synthetic/model",
+        redacted_input_digest="sha256:" + "a" * 64,
+        model_runtime_binding_receipt_id="binding-1",
+        model_runtime_binding_digest="sha256:" + "b" * 64,
+        request_metadata={"timeout_seconds": 1},
+        started_at_ms=100,
+    )
+    return terminalize_provider_call(
+        arm_provider_call(precall),
+        outcome=ProviderCallOutcome.COMPLETED,
+        reason=ProviderCallReason.PROVIDER_RETURNED,
+        completed_at_ms=101,
+    ).to_dict()
+
+
 def test_backend_architect_runtime_accepts_fix_persists_and_emits_one_queue_candidate() -> None:
     inputs = _build_inputs()
     evidence_ref = inputs["reports"][0]["evidence_refs"][0]
@@ -305,6 +337,49 @@ def test_backend_architect_runtime_accepts_fix_persists_and_emits_one_queue_cand
     assert result.no_openclaw_enqueue_performed is True
     assert result.no_hermes_dispatch_performed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+def test_accepted_receipt_and_queue_parent_bind_provider_evidence_lineage() -> None:
+    inputs = _build_inputs()
+    evidence_ref = inputs["reports"][0]["evidence_refs"][0]
+    output = _model_output(inputs["allocation"], evidence_ref)
+    first = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=FakeArchitectRunner(
+            output,
+            provider_call_evidence=_provider_call_evidence("provider-task-1"),
+        ),
+        now_iso=NOW,
+    )
+    second = run_reddog_backend_architect_determination_runtime(
+        **_runtime_kwargs(inputs),
+        wsp15_allocation_receipt=inputs["allocation"],
+        store=InMemoryArchitectDeterminationStore(),
+        model_runner=FakeArchitectRunner(
+            output,
+            provider_call_evidence=_provider_call_evidence("provider-task-2"),
+        ),
+        now_iso=NOW,
+    )
+
+    assert first.accepted and second.accepted
+    assert first.receipt.provider_call_id != second.receipt.provider_call_id
+    assert (
+        first.receipt.determination_receipt_id
+        != second.receipt.determination_receipt_id
+    )
+    assert first.receipt.queue_candidate is not None
+    assert second.receipt.queue_candidate is not None
+    assert (
+        first.receipt.queue_candidate.source_determination_receipt_id
+        == first.receipt.determination_receipt_id
+    )
+    assert (
+        second.receipt.queue_candidate.source_determination_receipt_id
+        == second.receipt.determination_receipt_id
+    )
 
 
 def test_research_more_persists_without_queue_candidate() -> None:

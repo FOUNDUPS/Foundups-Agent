@@ -58,6 +58,59 @@ def _metadata():
     }
 
 
+@pytest.mark.parametrize(
+    "identity",
+    [
+        "s" "k-" + "a" * 24,
+        "github" "_pat_" + "b" * 24,
+        "Bearer " + "c" * 24,
+        "model output sentence",
+        "model\noutput",
+        '{"model":"raw-content"}',
+    ],
+)
+def test_served_identity_rejects_secret_and_raw_content_shapes(identity: str) -> None:
+    metadata = _metadata()
+    metadata["served_provider"] = identity
+
+    with pytest.raises(ValueError, match="served_identity"):
+        terminalize_provider_call(
+            arm_provider_call(_precall()),
+            outcome=ProviderCallOutcome.COMPLETED,
+            reason=ProviderCallReason.PROVIDER_RETURNED,
+            completed_at_ms=101,
+            served_metadata=metadata,
+        )
+
+
+@pytest.mark.parametrize(
+    ("provider", "model"),
+    [
+        ("openrouter", "moonshotai/kimi-k3"),
+        ("openai", "openai/gpt-5.2-chat:online"),
+        ("synthetic-provider", "vendor/model_name-v1.2+fast"),
+    ],
+)
+def test_served_identity_accepts_canonical_provider_model_ids(
+    provider: str, model: str
+) -> None:
+    metadata = _metadata()
+    metadata["served_provider"] = provider
+    metadata["served_model"] = model
+
+    terminal = terminalize_provider_call(
+        arm_provider_call(_precall()),
+        outcome=ProviderCallOutcome.COMPLETED,
+        reason=ProviderCallReason.PROVIDER_RETURNED,
+        completed_at_ms=101,
+        served_metadata=metadata,
+    )
+
+    assert terminal.served_provider == provider
+    assert terminal.served_model == model
+    assert validate_provider_call_evidence(terminal) == terminal
+
+
 def test_contract_is_content_free_and_exact() -> None:
     terminal = terminalize_provider_call(
         arm_provider_call(_precall()),
@@ -380,6 +433,106 @@ def test_direct_architect_terminal_store_failure_blocks_result(monkeypatch) -> N
     assert not result.ok
     assert result.made_network_call
     assert result.provider_call_evidence["outcome"] == "INDETERMINATE"
+    assert len(calls) == 1
+
+
+class _TerminalWriteAndRecoveryReadFailureStore(
+    InMemoryProviderCallEvidenceStore
+):
+    def __init__(self) -> None:
+        super().__init__(fail_on_transition=2)
+        self.load_calls = 0
+
+    def load(self, call_id: str):
+        self.load_calls += 1
+        raise RuntimeError("store_load_failed")
+
+
+def test_direct_audit_preserves_attempted_lineage_when_terminal_and_load_fail(
+    monkeypatch,
+) -> None:
+    calls = []
+
+    def failing_fusion(*args):
+        calls.append(args)
+        raise RuntimeError("synthetic_provider_failure")
+
+    monkeypatch.setenv("REDDOG_READONLY_AUDIT_RUNTIME_MODE", "foundups_fusion")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(
+        audit_runtime, "_load_foundups_fusion_runner", lambda: failing_fusion
+    )
+    binding_receipt = model_runtime_binding_receipt(
+        runtime_surface=audit_runtime.RUNTIME_SURFACE_READONLY_AUDIT
+    )
+    reasons: list[str] = []
+    topology = audit_runtime._model_runtime_binding(
+        binding_receipt,
+        reasons,
+        expected_surface=audit_runtime.RUNTIME_SURFACE_READONLY_AUDIT,
+    )
+    store = _TerminalWriteAndRecoveryReadFailureStore()
+
+    result = audit_runtime.FoundupsFusionRepoAuditModelRunner(
+        provider_call_evidence_store=store
+    ).run_repo_code_audit(
+        prompt="Return JSON.",
+        context="public evidence",
+        binding={"task_id": "task-double-failure", "model_selection": topology},
+        timeout_seconds=1,
+    )
+
+    assert not result.ok
+    assert result.made_network_call
+    assert result.provider_call_evidence["attempted"] is True
+    assert result.provider_call_evidence["outcome"] == "INDETERMINATE"
+    assert result.provider_call_evidence["call_id"].startswith(
+        "reddog_provider_call:"
+    )
+    assert len(calls) == 1
+
+
+def test_direct_architect_preserves_attempted_lineage_when_terminal_and_load_fail(
+    monkeypatch,
+) -> None:
+    calls = []
+
+    def failing_fusion(*args):
+        calls.append(args)
+        raise RuntimeError("synthetic_provider_failure")
+
+    monkeypatch.setenv("REDDOG_BACKEND_ARCHITECT_RUNTIME_MODE", "foundups_fusion")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(
+        architect_runtime, "_load_foundups_fusion_runner", lambda: failing_fusion
+    )
+    binding_receipt = model_runtime_binding_receipt(
+        runtime_surface=architect_runtime.RUNTIME_SURFACE_BACKEND_ARCHITECT
+    )
+    reasons: list[str] = []
+    topology = architect_runtime._model_runtime_binding(
+        binding_receipt,
+        reasons,
+        expected_surface=architect_runtime.RUNTIME_SURFACE_BACKEND_ARCHITECT,
+    )
+    store = _TerminalWriteAndRecoveryReadFailureStore()
+
+    result = architect_runtime.FoundupsFusionArchitectModelRunner(
+        provider_call_evidence_store=store
+    ).run_architect_determination(
+        prompt="Return JSON.",
+        context="public evidence",
+        binding={"cycle_id": "cycle-double-failure", "model_selection": topology},
+        timeout_seconds=1,
+    )
+
+    assert not result.ok
+    assert result.made_network_call
+    assert result.provider_call_evidence["attempted"] is True
+    assert result.provider_call_evidence["outcome"] == "INDETERMINATE"
+    assert result.provider_call_evidence["call_id"].startswith(
+        "reddog_provider_call:"
+    )
     assert len(calls) == 1
 
 

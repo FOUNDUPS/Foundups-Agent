@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import tempfile
 import threading
 import time
@@ -17,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    redact_runtime_text,
     runtime_operation_lock,
 )
 
@@ -27,7 +29,13 @@ _CALL_DOMAIN = b"reddog-provider-call-id.v1\x00"
 _RECEIPT_DOMAIN = b"reddog-provider-call-receipt-id.v1\x00"
 _REQUEST_DOMAIN = b"reddog-provider-request-envelope.v1\x00"
 _MAX_TEXT = 512
+_MAX_SERVED_IDENTITY = 160
 _MAX_USAGE = 10**12
+_SERVED_IDENTITY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,159}$")
+_ADDITIONAL_SECRET_LIKE = re.compile(
+    r"(?:github_pat_[A-Za-z0-9_]{20,}|hf_[A-Za-z0-9]{16,})",
+    re.IGNORECASE,
+)
 _DIGEST_KEYS = {
     "redacted_input_digest",
     "request_envelope_digest",
@@ -129,6 +137,17 @@ class ProviderCallEvidenceStore(Protocol):
     def start(self, receipt: ProviderCallEvidence) -> ProviderCallEvidence: ...
 
     def transition(self, receipt: ProviderCallEvidence) -> ProviderCallEvidence: ...
+
+
+class ProviderCallAttemptError(RuntimeError):
+    """Static post-invocation failure carrying content-free local evidence."""
+
+    def __init__(
+        self, *, evidence: ProviderCallEvidence, timed_out: bool
+    ) -> None:
+        super().__init__("provider_call_attempt_failed")
+        self.evidence = evidence
+        self.timed_out = timed_out
 
 
 def canonical_digest(payload: Mapping[str, Any], *, domain: bytes = b"") -> str:
@@ -263,8 +282,8 @@ def parse_served_metadata(
         "usage",
     }:
         raise ValueError("served_metadata_schema")
-    provider = _optional_text(value["served_provider"])
-    model = _optional_text(value["served_model"])
+    provider = _optional_served_identity(value["served_provider"])
+    model = _optional_served_identity(value["served_model"])
     if (provider is None) != (model is None):
         raise ValueError("served_identity_incomplete")
     usage_raw = value["usage"]
@@ -335,8 +354,8 @@ def validate_provider_call_evidence(
         raise ValueError("call_id_mismatch")
     if (receipt.served_provider is None) != (receipt.served_model is None):
         raise ValueError("served_identity_incomplete")
-    _optional_text(receipt.served_provider)
-    _optional_text(receipt.served_model)
+    _optional_served_identity(receipt.served_provider)
+    _optional_served_identity(receipt.served_model)
     if not isinstance(receipt.attempted, bool):
         raise ValueError("attempted")
     if type(receipt.started_at_ms) is not int or receipt.started_at_ms < 0:
@@ -575,24 +594,28 @@ def execute_evidenced_provider_call(
     store.transition(armed)
     try:
         result = invoke()
-    except TimeoutError:
-        failed = terminalize_provider_call(
-            armed,
-            outcome=ProviderCallOutcome.FAILED,
-            reason=ProviderCallReason.PROVIDER_TIMEOUT,
-            completed_at_ms=now_ms(),
-        )
-        store.transition(failed)
-        raise
-    except Exception:
-        failed = terminalize_provider_call(
-            armed,
-            outcome=ProviderCallOutcome.FAILED,
-            reason=ProviderCallReason.PROVIDER_FAILED,
-            completed_at_ms=now_ms(),
-        )
-        store.transition(failed)
-        raise
+    except Exception as exc:
+        failure_evidence = armed
+        timed_out = isinstance(exc, TimeoutError)
+        try:
+            failed = terminalize_provider_call(
+                armed,
+                outcome=ProviderCallOutcome.FAILED,
+                reason=(
+                    ProviderCallReason.PROVIDER_TIMEOUT
+                    if timed_out
+                    else ProviderCallReason.PROVIDER_FAILED
+                ),
+                completed_at_ms=now_ms(),
+            )
+            store.transition(failed)
+            failure_evidence = failed
+        except Exception:
+            pass
+        raise ProviderCallAttemptError(
+            evidence=failure_evidence,
+            timed_out=timed_out,
+        ) from exc
     try:
         content = content_from_result(result)
         metadata = metadata_from_result(result)
@@ -722,6 +745,23 @@ def _optional_text(value: Any) -> str | None:
     return _text(value)
 
 
+def _optional_served_identity(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = _text(value)
+    redaction = redact_runtime_text(text, max_chars=_MAX_SERVED_IDENTITY)
+    if (
+        len(text) > _MAX_SERVED_IDENTITY
+        or not _SERVED_IDENTITY.fullmatch(text)
+        or redaction.text != text
+        or redaction.replacements
+        or redaction.truncated
+        or _ADDITIONAL_SECRET_LIKE.search(text)
+    ):
+        raise ValueError("served_identity")
+    return text
+
+
 def _digest(value: Any) -> str:
     text = _text(value)
     if len(text) != 71 or not text.startswith("sha256:"):
@@ -757,6 +797,7 @@ __all__ = [
     "InMemoryProviderCallEvidenceStore",
     "ProviderCallEvidence",
     "ProviderCallEvidenceStore",
+    "ProviderCallAttemptError",
     "ProviderCallOutcome",
     "ProviderCallReason",
     "ProviderCallUsage",

@@ -40,6 +40,7 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     validate_reddog_wsp15_allocation_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
+    ProviderCallAttemptError,
     ProviderCallEvidenceStore,
     canonical_digest as provider_evidence_digest,
     create_precall_evidence,
@@ -423,6 +424,16 @@ class FoundupsFusionRepoAuditModelRunner:
                 content_from_result=_fusion_audit_content,
                 metadata_from_result=_provider_call_metadata,
             )
+        except ProviderCallAttemptError as exc:
+            return _model_reject(
+                (
+                    ReadOnlyAuditTaskRejectReason.MODEL_TIMEOUT
+                    if exc.timed_out
+                    else "provider_call_evidence_or_fusion_failed"
+                ),
+                provider_call_evidence=exc.evidence.to_dict(),
+                made_network_call=True,
+            )
         except TimeoutError:
             persisted = _safe_provider_evidence(store, precall.call_id)
             return _model_reject(
@@ -681,7 +692,11 @@ def execute_model_backed_repo_code_audit(
         return _reject([ReadOnlyAuditTaskRejectReason.MODEL_FAILURE])
     if not model_result.ok:
         reasons = [ReadOnlyAuditTaskRejectReason.MODEL_FAILURE, *model_result.rejection_reasons]
-        return _reject(reasons)
+        return _reject(
+            reasons,
+            provider_call_evidence=model_result.provider_call_evidence,
+            no_model_call_performed=False,
+        )
 
     parsed = _parse_model_output(model_result.content)
     output_reasons = _validate_repo_audit_model_output(
@@ -697,7 +712,11 @@ def execute_model_backed_repo_code_audit(
         ),
     )
     if output_reasons:
-        return _reject(output_reasons)
+        return _reject(
+            output_reasons,
+            provider_call_evidence=model_result.provider_call_evidence,
+            no_model_call_performed=False,
+        )
 
     final_repository_state = _repository_state_bound_to_holo_receipt(
         repo_root=repo_root,
@@ -705,14 +724,22 @@ def execute_model_backed_repo_code_audit(
         timeout_seconds=timeout_seconds,
     )
     if final_repository_state is None:
-        return _reject([ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED])
+        return _reject(
+            [ReadOnlyAuditTaskRejectReason.REPOSITORY_STATE_CHANGED],
+            provider_call_evidence=model_result.provider_call_evidence,
+            no_model_call_performed=False,
+        )
     _final_bound, final_bound_reject = _bound_fallback_snapshots(
         task_context=task_context,
         assignment=assignment,
         repo_root=repo_root,
     )
     if final_bound_reject:
-        return _reject([final_bound_reject])
+        return _reject(
+            [final_bound_reject],
+            provider_call_evidence=model_result.provider_call_evidence,
+            no_model_call_performed=False,
+        )
 
     report = _build_model_report(
         assignment=assignment,
@@ -738,6 +765,7 @@ def execute_model_backed_repo_code_audit(
         report=report,
         evidence=tuple(item.evidence for item in snapshots),
         rejection_reasons=(),
+        provider_call_evidence=model_result.provider_call_evidence,
         no_model_call_performed=False,
         no_shell_command_executed=True,
         no_repo_mutation_performed=True,

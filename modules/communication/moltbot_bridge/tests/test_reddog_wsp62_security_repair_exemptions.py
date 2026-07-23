@@ -30,6 +30,17 @@ EXPECTED_MODULE_FILES = {
     "tests/test_reddog_main_resident_queue_serial_loop_bootstrap.py",
     "tests/test_reddog_signed_worker_dispatch_task_executor.py",
 }
+PROVIDER_EVIDENCE_EXACT_FILES = {
+    "INTERFACE.md",
+    "ModLog.md",
+    "src/reddog_backend_architect_determination_runtime.py",
+    "src/reddog_provider_call_evidence.py",
+    "src/reddog_readonly_0102_audit_worker_runtime.py",
+    "tests/TestModLog.md",
+    "tests/test_reddog_backend_architect_determination_runtime.py",
+    "tests/test_reddog_readonly_audit_task_executor.py",
+    "wsp_62_exemptions.yaml",
+}
 
 
 def _exemptions(path: Path) -> list[dict]:
@@ -72,3 +83,24 @@ def test_root_main_exemption_has_an_exact_security_repair_ceiling() -> None:
     items = _exemptions(REPO_ROOT / "wsp_62_exemptions.yaml")
     main_item = next(item for item in items if item["file"] == "main.py")
     _assert_exact_temporary_exemption(main_item, REPO_ROOT)
+
+
+def test_provider_evidence_exemptions_match_exact_touched_file_sizes() -> None:
+    payload = yaml.safe_load(
+        (MODULE_ROOT / "wsp_62_exemptions.yaml").read_text(encoding="utf-8")
+    )
+    items = {
+        item["file"]: item
+        for item in payload["exemptions"]
+        if item.get("file") in PROVIDER_EVIDENCE_EXACT_FILES
+    }
+
+    assert set(items) == PROVIDER_EVIDENCE_EXACT_FILES
+    for relative_path, item in items.items():
+        target = MODULE_ROOT / relative_path
+        assert item["temporary"] is True
+        assert item["reviewer"] == "0102 Technical Architect"
+        assert item["remediation"]
+        assert item["threshold_override"] == len(
+            target.read_text(encoding="utf-8").splitlines()
+        )

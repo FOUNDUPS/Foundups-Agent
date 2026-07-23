@@ -33,6 +33,11 @@ import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worke
 import modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt as wsp15_allocation
 from modules.communication.moltbot_bridge.src.reddog_provider_call_evidence import (
     InMemoryProviderCallEvidenceStore,
+    ProviderCallOutcome,
+    ProviderCallReason,
+    arm_provider_call,
+    create_precall_evidence,
+    terminalize_provider_call,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executor import (
     AUTHORITATIVE_WORK_STATE_REFRESH_SLICE,
@@ -236,6 +241,30 @@ class _EchoEvidenceModelRunner:
             model_result_digest="sha256:model-result-1",
             made_network_call=True,
         )
+
+
+def _failed_provider_call_evidence(task_id: str) -> dict:
+    precall = create_precall_evidence(
+        surface=RUNTIME_SURFACE_READONLY_AUDIT,
+        task_id=task_id,
+        work_order_id="work-1",
+        queue_item_id="queue-1",
+        run_id="run-1",
+        cycle_id=None,
+        requested_provider="openrouter",
+        requested_model="synthetic/model",
+        redacted_input_digest="sha256:" + "a" * 64,
+        model_runtime_binding_receipt_id="binding-1",
+        model_runtime_binding_digest="sha256:" + "b" * 64,
+        request_metadata={"timeout_seconds": 1},
+        started_at_ms=100,
+    )
+    return terminalize_provider_call(
+        arm_provider_call(precall),
+        outcome=ProviderCallOutcome.FAILED,
+        reason=ProviderCallReason.PROVIDER_FAILED,
+        completed_at_ms=101,
+    ).to_dict()
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -771,6 +800,39 @@ def test_model_backed_repo_code_audit_accepts_strict_evidence_bound_report(tmp_p
     assert result.report["worker_receipt"]["model_receipt_id"] == "model-receipt-1"
     assert result.report["worker_receipt"]["model_route_receipt_id"].startswith("sha256:")
     assert result.report["findings"][0]["evidence_refs"][0] in result.report["evidence_refs"]
+
+
+def test_model_failure_result_carries_provider_call_evidence(tmp_path: Path) -> None:
+    root = _repo(tmp_path)
+    task_id = "task-provider-failure"
+    provider_evidence = _failed_provider_call_evidence(task_id)
+
+    class _FailedEvidenceModelRunner:
+        def run_repo_code_audit(self, **kwargs):
+            return RepoAuditModelResult(
+                ok=False,
+                status="MODEL_REJECT",
+                content="",
+                model_receipt_id=None,
+                model_result_digest="sha256:model-failure",
+                made_network_call=True,
+                rejection_reasons=("provider_call_failed",),
+                provider_call_evidence=provider_evidence,
+            )
+
+    result = execute_reddog_readonly_audit_task(
+        task_context=_model_context(),
+        repo_root=root,
+        task_id=task_id,
+        model_runner=_FailedEvidenceModelRunner(),
+        holoindex_adapter=_FakeQueryAdapter(),
+        codeindex_adapter=_FakeQueryAdapter(),
+    )
+
+    assert result.accepted is False
+    assert result.no_model_call_performed is False
+    assert result.provider_call_evidence == provider_evidence
+    assert result.to_dict()["provider_call_evidence"] == provider_evidence
 
 
 def test_model_backed_audit_consumes_bound_semantic_and_repo_targets(tmp_path: Path) -> None:

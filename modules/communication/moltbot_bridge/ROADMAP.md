@@ -11,6 +11,9 @@
   boundaries after their independent lineage and retry contracts are defined.
 - Next: extract the atomic store from the focused contract module after
   cross-surface parity is stable, retiring the temporary WSP 62 ceiling.
+- Next: extract the backend architect model-call and accepted-receipt
+  composition transaction behind a focused internal boundary, then retire its
+  temporary WSP 62 ceiling without changing determination/queue identities.
 
 ## RedDog execution-valve readiness
 
