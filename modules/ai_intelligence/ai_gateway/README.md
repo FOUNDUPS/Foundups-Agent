@@ -153,6 +153,58 @@ and contradictory co-present claims poison the record. The result has trust clas
 not canonical route admission, endpoint discovery, sampling defaults,
 selection, promotion, runtime binding, or permission to call a provider.
 
+### Endpoint-route evidence and single-call eligibility
+
+`src/model_openrouter_endpoint_payload_projection.py` and
+`src/model_openrouter_endpoint_route_evidence.py` accept only externally
+supplied, bounded OpenRouter endpoint fixtures. They project a strict recognized
+schema, preserve null versus omission, bind exact response bytes and request
+lineage, reject duplicate or prefix-ambiguous endpoint tags, and produce
+immutable provider-asserted evidence for one exact route. They do not perform
+metadata discovery, networking, authentication, or credential access. Pricing
+is a closed allowlist: any unknown additive cost key is rejected even when its
+reported value is zero. Endpoint status is restricted to the current official
+enum; known negative states remain evidence but cannot satisfy the initial
+trusted accepted-status policy `(0,)`.
+
+`src/model_autoresearch_single_call_contracts.py` and
+`src/model_autoresearch_single_call_admission.py` combine that route evidence
+with fresh model-control evidence, one trusted job policy, and one content-bound
+call intent. The resulting `CanonicalSingleCallAdmission` fixes the
+`POST /chat/completions` route, endpoint order, no-fallback and
+required-parameter controls, reasoning effort, exact Decimal price ceiling,
+prompt/completion/context/response bounds, and a single-call limit.
+The policy must contain the exact immutable emitted-control set
+`("max_tokens", "reasoning")`, and admission independently derives the same
+mandatory set. A model-level `supports_max_tokens=false` assertion is an
+explicit contradiction and rejects; an omitted/unknown assertion is accepted
+only when exact endpoint and model parameter evidence both include
+`max_tokens`.
+For the Chat Completions route, `request_control` is exactly the three-key
+wire-control overlay `max_tokens`, `reasoning`, and `provider`.
+`max_completion_tokens` remains the internal admission/budget field and never
+appears in that wire overlay. Route headers, model/intent identity, stream
+policy, and prompt bounds remain separately admission-bound rather than being
+misrepresented as this control object.
+
+OpenRouter `PublicPricing` requires `prompt` and `completion` while `request`
+is optional. Admission preserves `request_price_present`; absence becomes zero
+only under the named, content-digested
+`openrouter_public_pricing_request_optional_absence_as_zero.v1` schema policy.
+This is a local eligibility policy proof, not provider billing or usage proof.
+The named `endpoint_status_policy_accepted` proof means only that the observed
+status was present and belonged to the trusted job policy; it is not proof of
+live or authoritative endpoint availability.
+
+This receipt has `runtime_authority=eligibility_only`. It cannot be consumed as
+permission to call a provider. Availability evidence, task-specific job
+certification, and permission to train on output are independent decisions:
+the current POC admits evaluation-only intent, fails closed when ZDR evidence is
+requested, and never grants output-training permission. Live execution remains
+halted pending authenticated endpoint supply, atomic admission consumption,
+authoritative availability and usage, caller wiring, a pre-buffer response-byte
+bound, and runtime-directory identity.
+
 ## Model Selection Receipts
 
 `src/model_intelligence_selection.py` consumes a `ModelCatalogSnapshot` and

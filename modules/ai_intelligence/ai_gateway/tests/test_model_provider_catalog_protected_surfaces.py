@@ -13,7 +13,11 @@ IDLE_PROJECTION = (
     / "modules/infrastructure/idle_automation/src/openrouter_catalog_projection.py"
 )
 NEW_MODULE_NAMES = {
+    "model_autoresearch_single_call_admission",
+    "model_autoresearch_single_call_contracts",
     "model_openrouter_direct_discovery",
+    "model_openrouter_endpoint_payload_projection",
+    "model_openrouter_endpoint_route_evidence",
     "model_openrouter_schedule_adapter",
     "model_openrouter_scheduled_discovery",
     "model_provider_catalog_replay_state",
@@ -23,8 +27,12 @@ NEW_MODULE_NAMES = {
     "openrouter_model_catalog_snapshot_once",
 }
 FUNCTION_LIMIT_MODULES = (
+    "model_autoresearch_single_call_admission.py",
+    "model_autoresearch_single_call_contracts.py",
     "model_intelligence_catalog.py",
     "model_openrouter_direct_discovery.py",
+    "model_openrouter_endpoint_payload_projection.py",
+    "model_openrouter_endpoint_route_evidence.py",
     "model_openrouter_schedule_adapter.py",
     "model_openrouter_scheduled_discovery.py",
     "model_provider_catalog_atomic_io.py",
@@ -35,6 +43,10 @@ FUNCTION_LIMIT_MODULES = (
     "model_provider_execution_control_projection.py",
 )
 SOURCE_LINE_LIMITS = {
+    "model_autoresearch_single_call_admission.py": 500,
+    "model_autoresearch_single_call_contracts.py": 500,
+    "model_openrouter_endpoint_payload_projection.py": 500,
+    "model_openrouter_endpoint_route_evidence.py": 500,
     "model_provider_catalog_snapshot.py": 450,
     "model_openrouter_direct_discovery.py": 400,
     "model_provider_catalog_atomic_io.py": 400,
@@ -114,6 +126,10 @@ def test_execution_control_surfaces_have_no_network_or_runtime_authority_imports
         "reddog_provider_call_evidence",
     )
     for name in (
+        "model_autoresearch_single_call_admission.py",
+        "model_autoresearch_single_call_contracts.py",
+        "model_openrouter_endpoint_payload_projection.py",
+        "model_openrouter_endpoint_route_evidence.py",
         "model_provider_execution_control_projection.py",
         "model_provider_execution_control_evidence.py",
     ):

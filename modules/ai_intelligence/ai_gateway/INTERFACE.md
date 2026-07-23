@@ -105,6 +105,78 @@ The trust class is `provider_asserted_model_execution_controls`. These APIs do
 not call providers, discover an execution endpoint, select sampling defaults,
 admit a canonical route, rank a model, or grant runtime authority.
 
+#### OpenRouter endpoint-route evidence and single-call eligibility
+
+```python
+parse_and_sanitize_openrouter_endpoint_payload(
+    raw,
+    requested_model_id=...,
+) -> dict
+
+build_endpoint_observation_receipt(...) -> EndpointObservationReceipt
+
+build_openrouter_endpoint_route_evidence(
+    raw=...,
+    observation_receipt=...,
+    endpoint_tag=...,
+    now_ms=...,
+) -> OpenRouterEndpointRouteEvidence
+
+build_canonical_single_call_admission(
+    raw_endpoint_payload=...,
+    endpoint_observation_receipt=...,
+    endpoint_route_evidence=...,
+    model_candidate=...,
+    model_control_evidence=...,
+    policy=...,
+    intent=...,
+    now_ms=...,
+) -> CanonicalSingleCallAdmission
+```
+
+The endpoint payload is supplied by the caller and bounded before strict JSON
+projection; these APIs contain no network or credential boundary. Observation
+and route evidence bind exact bytes, request/response digests, model identity,
+one unambiguous endpoint tag, caps, prices, parameters, nullable controls, and
+freshness. Malformed recognized fields, unsafe secondary price dimensions,
+duplicate tags, and base-tag/prefix collisions fail closed.
+The pricing object is closed to the current explicit allowlist: unknown keys
+fail even when their value is zero. Endpoint status must be omitted or one of
+the current official enum values `0, -1, -2, -3, -5, -10`; known negative
+values remain route evidence.
+
+The admission builder rehydrates both independent evidence sources and binds
+one normalized `CanonicalSingleCallJobPolicy` to one
+`CanonicalSingleCallIntent`. Endpoint-specific prices supersede model-summary
+prices only after exact reconciliation and policy-cap checks. The receipt is
+evaluation-only and `runtime_authority=eligibility_only`; it deliberately does
+not invoke `AIGateway`, a configured runner, a provider caller, or any transport.
+Availability, job certification, and output-training permission are distinct.
+The initial trusted `accepted_endpoint_statuses` policy is exactly `(0,)`.
+`endpoint_status_policy_accepted=true` proves policy membership only; it is not
+authoritative availability evidence, and live availability remains HALTED.
+
+The trusted policy's `required_parameters` must be exactly
+`("max_tokens", "reasoning")`; admission also derives this mandatory set
+independently from the emitted `max_tokens` and `reasoning` controls.
+Both endpoint and model supported-parameter evidence must contain both names.
+An explicit model `reasoning.supports_max_tokens=false` contradicts the emitted
+cap and rejects. Omitted/unknown remains non-contradictory only because the two
+exact supported-parameter sources independently assert `max_tokens`.
+The resulting Chat Completions `request_control` contains exactly
+`max_tokens`, `reasoning`, and `provider`. Its `max_tokens` value is copied from
+the separately retained internal admission/budget field
+`max_completion_tokens`; the internal name is forbidden from the wire-control
+mapping. Route, model, intent, and prompt evidence remain in their dedicated
+receipt fields/digests.
+
+The receipt preserves `request_price_present`. OpenRouter `PublicPricing`
+requires prompt/completion prices and makes request price optional; an absent
+request price is interpreted as zero only under the named
+`openrouter_public_pricing_request_optional_absence_as_zero.v1` code-owned
+schema policy. Its digest and acceptance proof are admission-ID and rehydration
+bound. They do not prove provider billing, usage, or availability.
+
 `ProviderCatalogArtifactStore` is the confined persistence boundary used for
 both attempt and candidate artifacts. Replacement is same-directory and atomic:
 the target is untouched until exact UTF-8 bytes have been flushed and fsynced
