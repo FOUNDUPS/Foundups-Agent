@@ -193,6 +193,28 @@ python holo_index.py --bundle-json --search "task" --bundle-module-hint modules/
 
 Bundle schema ID: `wsp_memory_bundle_v1`
 
+Persistent `--search` and `--bundle-json` requests are admitted before backend
+construction only when the freshness receipt proves the invoking repository
+root, resolved SSD, clean exact HEAD, generation, complete canonical baseline,
+embedding space, and no active/unprovable maintenance. A denied raw CLI search
+exits with code `4`; JSON bundle denial returns content-free `error`,
+`stale_reasons`, and `index_gap_detected` fields. Offline/fast lexical mode
+does not open or read the persistent store and reports degraded/UNKNOWN
+freshness. Raw CLI and bundle lexical paths share the same root-confined,
+bounded, no-follow loader. Oversize NAVIGATION is rejected. WSP metadata is
+repository-local and the supplied SSD is not a lexical metadata source.
+Persistent admission reads only the canonical
+`freshness_receipt_path(ssd)`. An explicit receipt argument must resolve to
+that exact stable-ancestor identity, and a final symlink/reparse point is
+rejected before receipt or backend access.
+Module hints accept only repository-relative components. Traversal, absolute
+paths, links, and reparse points are rejected; nested enumeration has fixed
+entry/depth bounds. Module-domain and WSP discovery fail closed on `cap + 1`
+rather than selecting a partial directory prefix. Nested module-file
+enumeration is complete-or-empty: entry overflow, depth overflow, or a scan
+error returns no module-file evidence, and a complete set is sorted before
+selection.
+
 ### Monitoring / Orchestration
 ```bash
 python holo_index.py --start-holodae

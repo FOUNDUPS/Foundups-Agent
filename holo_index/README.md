@@ -120,6 +120,27 @@ generation-unbound SearchCache, and requires restart rather than crossing
 generations. Owner strict-semantic mode rejects collection/model/encode/query
 failure instead of presenting lexical or exact-symbol fallback as semantic.
 
+Raw persistent `--search` and persistent `--bundle-json` reads use the same
+fail-closed admission proof before constructing a backend. The invoking
+repository root and SSD must match the current receipt; the clean HEAD,
+generation, complete canonical baseline, embedding space, and inactive
+maintenance state must also be proven. Denials expose stable, content-free
+reason codes. Admission derives the receipt only from the resolved SSD; an
+explicit override must canonicalize to that exact path and have no final
+link/reparse component or it fails before reading. `--offline` /
+`--fast-search` bypasses the persistent store and
+is explicitly labeled degraded current-repository lexical retrieval. Raw CLI
+and bundle lexical modes share the same root-confined loader. NAVIGATION is
+rejected if it exceeds its byte cap. WSP metadata is built with bounded reads
+from the invoking repository's authoritative `WSP_framework/src`; the lexical
+path never reads an SSD summary. Module hints are relative-only. Absolute,
+traversal, symlink, and Windows reparse escapes fail closed. Nested module
+enumeration is no-follow and capped; module-domain and WSP discovery inspect
+at most `cap + 1` entries and reject oversized directories instead of using a
+partial filesystem-order-dependent result. Module file discovery applies the
+same complete-or-empty rule to global entry overflow, depth overflow, and scan
+errors, and sorts only a complete verified result.
+
 Maintenance is owned by the trusted host. Startup may route a maintenance
 request through governed WRE dispatch, but neither WRE routing nor the query
 adapter grants a worker direct index-write authority. Use --index or

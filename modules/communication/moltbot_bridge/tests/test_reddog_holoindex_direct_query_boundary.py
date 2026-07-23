@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from holo_index.core.holo_index import HoloIndex
 from holo_index.maintenance_lock import (
     acquire_maintenance_lease,
@@ -17,13 +19,29 @@ from holo_index.storage_contract import (
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     HoloIndexReadOnlyQueryAdapter,
 )
-import modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime as readonly_worker_runtime
 import modules.communication.moltbot_bridge.src.reddog_holoindex_query_adapter as holo_query_adapter
+from holo_index.query_admission import ReadonlyQueryAdmission
 from modules.communication.moltbot_bridge.tests.test_reddog_holoindex_query_boundary import (
     _patch_holo_search,
     _set_repo_head,
     _write_holo_receipt,
 )
+
+
+@pytest.fixture(autouse=True)
+def _admit_existing_direct_diagnostic_fixtures(monkeypatch) -> None:
+    monkeypatch.setattr(
+        holo_query_adapter,
+        "evaluate_readonly_query_admission",
+        lambda **_kwargs: ReadonlyQueryAdmission(
+            allowed=True,
+            error="",
+            reasons=(),
+            freshness="CURRENT",
+            binding={},
+        ),
+    )
+
 
 def test_holoindex_adapter_preserves_typed_storage_error(
     tmp_path: Path,
@@ -57,7 +75,7 @@ def test_holoindex_adapter_preserves_typed_storage_error(
 
 
 def test_holoindex_hit_normalization_preserves_wsp_and_knowledge_buckets() -> None:
-    hits = readonly_worker_runtime._holoindex_hits(
+    hits = holo_query_adapter.holoindex_hits(
         {
             "wsp_hits": [
                 {
@@ -176,6 +194,55 @@ def test_holoindex_direct_adapter_blocks_active_maintenance_before_backend(
     assert result["ok"] is False
     assert result["error"] == "HOLOINDEX_MAINTENANCE_ACTIVE"
     assert result["stale_reasons"] == ["holoindex_maintenance_active"]
+    assert result["hits"] == []
+
+
+def test_holoindex_direct_adapter_blocks_foreign_root_before_backend(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo_root = tmp_path / "lane-a"
+    foreign_root = tmp_path / "lane-b"
+    repo_root.mkdir()
+    foreign_root.mkdir()
+    head_sha = "8" * 40
+    _set_repo_head(repo_root, head_sha)
+    ssd_path = tmp_path / "ssd"
+    receipt_path = ssd_path / "indexes" / "holoindex_freshness_receipt.json"
+    _write_holo_receipt(
+        receipt_path,
+        repo_root=foreign_root,
+        head_sha=head_sha,
+    )
+    monkeypatch.delenv("HOLOINDEX_QUERY_SERVICE_URL", raising=False)
+    monkeypatch.setattr(
+        holo_query_adapter,
+        "_direct_backend_query",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("foreign-root admission must prevent backend access")
+        ),
+    )
+    monkeypatch.setattr(
+        holo_query_adapter,
+        "evaluate_readonly_query_admission",
+        lambda **_kwargs: ReadonlyQueryAdmission(
+            allowed=False,
+            error="STALE_INDEX",
+            reasons=("freshness_repo_root_mismatch",),
+            freshness="STALE",
+            binding={},
+        ),
+    )
+
+    result = HoloIndexReadOnlyQueryAdapter(
+        repo_root=repo_root,
+        ssd_path=ssd_path,
+        freshness_receipt_path=receipt_path,
+    ).query(query="evidence", allowed_paths=(), limit=8)
+
+    assert result["ok"] is False
+    assert result["error"] == "STALE_INDEX"
+    assert result["stale_reasons"] == ["freshness_repo_root_mismatch"]
     assert result["hits"] == []
 
 

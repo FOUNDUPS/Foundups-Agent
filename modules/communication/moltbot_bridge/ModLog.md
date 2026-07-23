@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-24: HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 81, 97
+
+- RedDog's explicit-SSD direct diagnostic now runs the canonical read-only
+  admission proof before constructing a direct backend.
+- Foreign root/SSD, wrong HEAD, missing generation/baseline/embedding proof,
+  and active/unprovable maintenance fail with content-free reasons and zero
+  hits. Both race probes and the receipt path derive from the admitted SSD.
+  An external receipt path is rejected before any receipt read or backend,
+  even when that external receipt would otherwise validate.
+
 ## 2026-07-23: REDDOG_PROVIDER_CALL_EVIDENCE_PHASE2A_REVIEW_REPAIR_ROUND3
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 84, 97

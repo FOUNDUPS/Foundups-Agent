@@ -123,8 +123,14 @@ model work as an index gap. If neither an explicit service nor a live
 private handoff exists, the adapter fails with
 HOLOINDEX_QUERY_SERVICE_NOT_CONFIGURED and never opens local Chroma.
 
-An explicit SSD/receipt argument enables direct host diagnostics only. That
-path is always labeled non-operational and can never return CURRENT. Trusted
+An explicit SSD enables direct host diagnostics only. The freshness receipt is
+derived exclusively from `freshness_receipt_path(ssd)`. An explicitly supplied
+receipt must canonicalize to that exact path and must not be a final-component
+link/reparse point; otherwise the request fails before receipt or backend
+access. The path then runs the same root/SSD/HEAD/generation/baseline/
+maintenance admission proof. Failure returns content-free stale reasons and
+zero hits. An admitted direct result is still labeled non-operational and can
+never return CURRENT. Trusted
 interactive/headless host preflight performs any required semantic full
 refresh before worker dispatch; startup may route that request through
 governed WRE dispatch, but the query adapter has no maintenance surface.

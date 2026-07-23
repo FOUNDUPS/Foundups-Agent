@@ -18,6 +18,7 @@ from holo_index.freshness_receipt import (
     freshness_receipt_path,
 )
 from holo_index.maintenance_lock import maintenance_lock_path, probe_maintenance_lock
+from holo_index.query_admission import evaluate_readonly_query_admission
 from holo_index.storage_contract import (
     HoloIndexStorageError,
     resolve_holoindex_ssd_path,
@@ -284,8 +285,68 @@ def _direct_diagnostic_result(
     )
 
 
+def _direct_admission_failure(
+    *,
+    repo_root: Path,
+    ssd_path: Path,
+    receipt_path: Path | str | None,
+    query: str,
+    started: float,
+) -> Mapping[str, Any] | None:
+    admission = evaluate_readonly_query_admission(
+        repo_root=repo_root,
+        ssd_path=ssd_path,
+        receipt_path=receipt_path,
+    )
+    if admission.allowed:
+        return None
+    return _direct_failure(
+        query=query,
+        started=started,
+        error=admission.error,
+        stale_reasons=admission.reasons,
+    )
+
+
+def _direct_paths(
+    ssd_path_value: Path | str | None,
+) -> tuple[Path, Path]:
+    ssd_path = resolve_holoindex_ssd_path(ssd_path_value)
+    return ssd_path, freshness_receipt_path(ssd_path)
+
+
+def _direct_preflight(
+    repo_root: Path,
+    ssd_path_value: Path | str | None,
+    receipt_path_value: Path | str | None,
+    query: str,
+    started: float,
+) -> tuple[Path, Path, Mapping[str, Any] | None]:
+    ssd_path, receipt_path = _direct_paths(ssd_path_value)
+    failure = _direct_admission_failure(
+        repo_root=repo_root,
+        ssd_path=ssd_path,
+        receipt_path=receipt_path_value,
+        query=query,
+        started=started,
+    )
+    if failure is None:
+        error, reason = _maintenance_block(
+            maintenance_lock_path(ssd_path)
+        )
+        if error:
+            failure = _direct_failure(
+                query=query,
+                started=started,
+                error=error,
+                stale_reasons=[reason],
+            )
+    return ssd_path, receipt_path, failure
+
+
 def _query_direct_diagnostic(
     *,
+    repo_root: Path,
     ssd_path_value: Path | str | None,
     receipt_path_value: Path | str | None,
     query: str,
@@ -294,21 +355,12 @@ def _query_direct_diagnostic(
     started = time.monotonic()
     bounded_limit = max(1, min(int(limit or 8), 20))
     try:
-        ssd_path = resolve_holoindex_ssd_path(ssd_path_value)
-        receipt_path = (
-            Path(receipt_path_value)
-            if receipt_path_value is not None
-            else freshness_receipt_path(ssd_path)
+        ssd_path, receipt_path, preflight_failure = _direct_preflight(
+            repo_root, ssd_path_value, receipt_path_value, query, started
         )
-        lock_path = maintenance_lock_path(receipt_path.parent.parent)
-        maintenance_error, maintenance_reason = _maintenance_block(lock_path)
-        if maintenance_error:
-            return _direct_failure(
-                query=query,
-                started=started,
-                error=maintenance_error,
-                stale_reasons=[maintenance_reason],
-            )
+        if preflight_failure is not None:
+            return preflight_failure
+        lock_path = maintenance_lock_path(ssd_path)
         result, fallback_mode = _direct_backend_query(
             ssd_path=ssd_path,
             query=query,
@@ -415,6 +467,7 @@ class HoloIndexReadOnlyQueryAdapter:
             }
         return _scope_result_hits(
             _query_direct_diagnostic(
+                repo_root=self.repo_root,
                 ssd_path_value=self.ssd_path,
                 receipt_path_value=self.freshness_receipt_path,
                 query=str(query or ""),
