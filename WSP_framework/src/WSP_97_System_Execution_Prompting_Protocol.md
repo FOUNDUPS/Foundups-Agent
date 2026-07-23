@@ -1,7 +1,7 @@
 # WSP 97: System Execution Prompting Protocol
 
 **Status**: ACTIVE
-**Version**: 1.3
+**Version**: 1.7
 **Date**: 2026-03-29
 **Author**: 0102 (System Execution Architect)
 
@@ -368,24 +368,97 @@ worker, or prove execution; WSP 77 owns the governed handoff boundary.
 
 ### 3. Recursive Execution Validation Contract
 
-The active structural validator is `tools/wsp97_execution_validator.py`. It consumes a JSON receipt with:
+The active repository-evidence validator is
+`tools/wsp97_execution_validator.py`. Default admission requires the explicit
+schema string `wsp97_execution_receipt.v1.1` and these fields:
 
+- `repository_context.base_commit`: an exact 40-character Git commit bound to
+  the invoking repository;
 - `execution_id`: stable slice/run identity;
 - `execution_plane`: the classified local, docs, WRE, or runtime plane;
 - `outcome`: `completed`, `blocked`, or `failed`;
-- `action_evidence`: non-empty evidence-reference lists for all 9 canonical operator actions;
+- `action_evidence`: non-empty evidence-reference lists for all 9 canonical
+  operator actions;
 - `wsps_applied`: a non-empty list that includes `WSP_97`;
 - `compliance_evidence`: non-empty references supporting the WSP declaration.
 
-Run it with:
+Only `action_evidence.retrieve_wsps` is repository-resolved. Every item MUST be
+an exact POSIX repository-relative tracked file under
+`WSP_framework/src/WSP_<id>_*.md`. Prose, URLs, absolute/drive/UNC paths,
+backslashes, traversal, fragments, directories, untracked paths, wrong Git
+case, and paths crossing a symlink, junction, or reparse point fail admission.
+Every `wsps_applied` identifier MUST have a corresponding retrieved canonical
+path. Additional retrieved WSP precedents are permitted.
+
+All other action evidence and compliance evidence remain opaque strings. The
+validator never opens their paths, fetches their URLs, or treats their content
+as authenticated.
+
+Run it with an explicit repository root and, when the caller owns the expected
+task base, an independent base assertion:
 
 ```bash
-python tools/wsp97_execution_validator.py <receipt.json> --pretty
+python tools/wsp97_execution_validator.py <receipt.json> \
+  --repo-root . --expected-base <40-character-commit> --pretty
 ```
 
-Exit code `0` means structurally complete, `1` means non-compliant, and `2` means the receipt or contract could not be read. The validator derives the 7 mantra stages from the 9 action-evidence slots and WSP compliance fields.
+The root MUST be the exact-case Git top-level. The receipt base MUST exist as a
+commit, be an ancestor of the current worktree `HEAD`, and equal
+`--expected-base` when supplied. This binds the receipt to the validating
+worktree and base ancestry; it does not authenticate an immutable final
+snapshot or prove that the declared work occurred.
 
-**Truth boundary**: validation proves only structural receipt completeness. Evidence references remain opaque; the validator does not prove reasoning quality, resolve evidence, or prove that runtime side effects occurred.
+Before root resolution, the receipt gate MUST validate the exact
+`repository_context` mapping and lowercase 40-character `base_commit`, caller
+`expected_base` syntax and equality, retrieved-WSP count/path syntax and case,
+and exact `WSP_<digits>` identifiers. Receipt defects and a syntactically valid
+base mismatch exit `1` without Git. A malformed caller `expected_base` is an
+operational invocation error and exits `2` without Git. Missing repository
+context is not structurally complete.
+
+Root inspection MUST `lstat` every supplied path component before any
+existence, directory, resolution, or Git operation. A symlink, junction, or
+reparse component is an operational failure and no Git process may start.
+
+The v1.1 validator is resource-bounded:
+
+| Resource | Maximum |
+|---|---:|
+| Receipt bytes before JSON parsing | 262,144 |
+| Receipt mapping items | 32 |
+| Repository-context mapping items | 8 |
+| Action-evidence mapping items | 32 |
+| Items in one evidence list | 128 |
+| UTF-8 bytes in one evidence string | 4,096 |
+| UTF-8 bytes in one retrieved-WSP path | 512 |
+| Retrieved WSPs | 64 |
+| Aggregate evidence UTF-8 bytes | 131,072 |
+| Git calls per validation | 72 |
+| Seconds per Git subprocess | 5 |
+| Post-run accepted bytes per Git tempfile stream | 65,536 |
+
+Container, item, string, path, count, or aggregate evidence violations stop
+before repository subprocesses and are receipt non-compliance. Exact literal
+`git ls-files` queries validate each WSP path; the validator MUST NOT scan the
+full tracked-file catalog to diagnose case mismatches. Git budget exhaustion,
+timeout, process-start failure, excessive post-run tempfile output, unreadable
+root components, or inability to establish the exact Git root are operational
+errors. Git stdout/stderr are redirected to temporary files, avoiding RAM
+amplification. The 65,536-byte rule is an accepted-output check after process
+exit, not a write-time tempfile cap; the 5-second timeout bounds process
+duration and the tempfiles are discarded after inspection.
+
+Exit code `0` means v1.1 repository-evidence compliant, `1` means
+non-compliant, and `2` means JSON, contract, or repository setup could not be
+read or established. `--legacy-structural` is a separately labeled
+`legacy_structural_non_admitting` diagnostic: it always exits `1`, even when
+the legacy shape is structurally complete. Missing schema and v1.0 receipts are
+never admitted by the default path.
+
+**Truth boundary**: receipt v1.1 proves structural completeness plus the narrow
+repository truth of canonical retrieved WSP files and base ancestry. It does
+not prove reasoning quality, resolve non-WSP evidence, authenticate evidence
+claims, prove runtime side effects, or fetch network resources.
 
 ---
 
@@ -473,8 +546,8 @@ Always reference WSP 97 in your validation tasks and optimize for minimal, preci
   and budget used; role labels alone are not evidence
 - **Mission Success**: Template criteria are targets and count as satisfied only
   when resolvable execution evidence proves them
-- **Recursive Validation**: Agents may emit structural receipts, but self-issued
-  receipts do not authenticate their own contents
+- **Recursive Validation**: Agents may emit repository-bound v1.1 receipts, but
+  self-issued receipts do not authenticate their opaque claims or execution
 
 ### Operational CLI Hook: Connect WRE
 

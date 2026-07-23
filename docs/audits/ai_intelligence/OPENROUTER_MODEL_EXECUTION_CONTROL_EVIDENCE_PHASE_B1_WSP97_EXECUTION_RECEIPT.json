@@ -1,17 +1,19 @@
 {
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "be855d74bab9e78105d0ba0fed4ddc935e053284"
+  },
   "execution_id": "OPENROUTER_MODEL_EXECUTION_CONTROL_EVIDENCE_PHASE_B1",
   "execution_plane": "runtime",
   "outcome": "completed",
   "action_evidence": {
     "retrieve_wsps": [
       "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
-      "WSP_framework/src/WSP_05_WSP_Micro_Coding_Protocol.md",
-      "WSP_framework/src/WSP_06_Module_Test_Audit_Coverage_Verification.md",
       "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
-      "WSP_framework/src/WSP_22_ModLog_and_Roadmap_Protocol.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
       "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
       "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
-      "WSP_framework/src/WSP_81_Cube-Level_DAE_Orchestration_Protocol.md",
+      "WSP_framework/src/WSP_81_Framework_Backup_Governance_Protocol.md",
       "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
     ],
     "retrieve_evidence": [
@@ -53,8 +55,6 @@
   },
   "wsps_applied": [
     "WSP_00",
-    "WSP_05",
-    "WSP_06",
     "WSP_15",
     "WSP_22",
     "WSP_50",
