@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from enum import Enum
@@ -215,15 +216,14 @@ def normalize_openrouter_catalog(
         pricing = record.get("pricing") if isinstance(record.get("pricing"), Mapping) else {}
         supported_parameters = _string_tuple(record.get("supported_parameters"))
         modalities = _modalities_from_openrouter(architecture)
-        provider = model_id.split("/", 1)[0] if "/" in model_id else "openrouter"
         cards.append(
             ModelCapabilityCard(
-                provider=provider,
+                provider="openrouter",
                 model_id=model_id,
                 canonical_model_id=model_id,
                 source="openrouter_catalog",
-                availability=Availability.AVAILABLE,
-                freshness="provider_catalog",
+                availability=Availability.UNKNOWN,
+                freshness="provider_catalog_listing",
                 promotion_state=PromotionState.CANDIDATE,
                 task_families=(),
                 context_window=_positive_int(record.get("context_length")),
@@ -234,7 +234,7 @@ def normalize_openrouter_catalog(
                 supports_reasoning="reasoning" in set(supported_parameters),
                 modalities=modalities,
                 supported_parameters=supported_parameters,
-                privacy_policy="openrouter_provider_policy",
+                privacy_policy="provider_policy_unknown",
             ).normalized()
         )
     return tuple(sorted(cards, key=lambda card: card.canonical_model_id)), tuple(rejected)
@@ -328,7 +328,7 @@ def _string_tuple(value: Any) -> tuple[str, ...]:
 def _positive_int(value: Any) -> int | None:
     try:
         parsed = int(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     return parsed if parsed > 0 else None
 
@@ -336,9 +336,9 @@ def _positive_int(value: Any) -> int | None:
 def _per_million(value: Any) -> float | None:
     try:
         parsed = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
-    if parsed < 0:
+    if not math.isfinite(parsed) or parsed < 0:
         return None
     return round(parsed * 1_000_000, 10)
 
