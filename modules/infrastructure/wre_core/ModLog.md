@@ -2,6 +2,17 @@
 
 ## Chronological Change Log
 
+### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR1
+
+- Froze a canonical `CreateScaffoldRequest` in the `RouteEnvelope`; the
+  consumer now passes that exact immutable snapshot instead of the mutable job.
+- Extracted create-route validation and dispatch into sub-600-line modules,
+  while reducing both legacy oversized host files relative to the prerequisite
+  commit.
+- Canonical-JSON detached adapter and consumer evidence, revalidated returned
+  plan identity and lineage, and contained malformed/raising adapters in
+  stable redacted blocked results.
+
 ### [2026-07-23] - CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 34, 50, 62, 97, 108

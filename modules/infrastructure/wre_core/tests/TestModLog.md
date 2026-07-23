@@ -1,5 +1,15 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1_REPAIR1
+
+- Added immutable A-to-B mutation, receipt aliasing, traversal/control
+  identifier, noncanonical genesis, plan identity/lineage tamper, and
+  malformed/raising/nonserializable adapter regressions.
+- Proved every malformed adapter outcome is a stable blocked
+  `ConsumerResult`, and the generic Hermes executor remains unused.
+- Verification: 50 focused create-boundary/planner tests and 241 adjacent
+  WRE router/consumer tests passed; Ruff and compileall passed.
+
 ## 2026-07-23: CREATE_FOUNDUP_ROUTING_PREREQUISITE_PHASE1
 
 - Extended `test_foundup_job_router.py` with the distinct scaffold backend,

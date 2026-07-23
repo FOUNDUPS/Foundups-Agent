@@ -131,6 +131,52 @@ def test_reserved_foundup_id_rejected_as_invalid(tmp_path: Path) -> None:
     assert res.rejection_code == "FAIL_ENVELOPE_NOT_GATE_PASSED"
 
 
+@pytest.mark.parametrize("registry_case", ["missing", "corrupt", "schema", "directory"])
+def test_registry_unavailable_fails_closed_with_stable_redacted_reason(
+    tmp_path: Path,
+    registry_case: str,
+) -> None:
+    registry_path = tmp_path / "sensitive-registry.json"
+    if registry_case == "corrupt":
+        registry_path.write_text("{not-json", encoding="utf-8")
+    elif registry_case == "schema":
+        registry_path.write_text(
+            json.dumps({"entities": [{"foundup_id": 7}]}),
+            encoding="utf-8",
+        )
+    elif registry_case == "directory":
+        registry_path.mkdir()
+
+    result = plan_create_foundup_dry_run(
+        _valid_envelope(),
+        registry_path=registry_path,
+    )
+
+    assert result.ok is False
+    assert result.rejection_code == "FAIL_REGISTRY_UNAVAILABLE"
+    assert result.rejection_reason == "FoundUp registry unavailable or invalid"
+    assert str(registry_path) not in result.rejection_reason
+    assert result.planned_artifacts == []
+
+
+def test_planning_is_deterministic_when_created_at_is_omitted(tmp_path: Path) -> None:
+    envelope = _valid_envelope()
+    registry_path = _registry(tmp_path, [])
+
+    first = plan_create_foundup_dry_run(
+        envelope,
+        actor_id="tenant-a",
+        registry_path=registry_path,
+    )
+    second = plan_create_foundup_dry_run(
+        envelope,
+        actor_id="tenant-a",
+        registry_path=registry_path,
+    )
+
+    assert first.to_dict() == second.to_dict()
+
+
 # --------------------------------------------------------------------------- #
 # No-alias + dry-run boundary
 # --------------------------------------------------------------------------- #

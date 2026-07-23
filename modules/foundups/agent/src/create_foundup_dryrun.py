@@ -200,13 +200,29 @@ def _revalidate_envelope(envelope: Dict[str, Any]):
         validate_genesis_envelope,
     )
 
-    parsed = FoundUpGenesisEnvelope.from_dict(envelope)
+    normalized = json.loads(
+        json.dumps(
+            envelope,
+            allow_nan=False,
+            ensure_ascii=True,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+    )
+    if not isinstance(normalized, dict):
+        raise ValueError("genesis envelope must be a mapping")
+    normalized.setdefault("created_at", 0.0)
+    parsed = FoundUpGenesisEnvelope.from_dict(normalized)
     result = validate_genesis_envelope(parsed, strict_mode=True)
     return result.is_valid, list(result.errors), parsed
 
 
+class RegistryUnavailableError(RuntimeError):
+    """Raised when the authoritative registry cannot be safely inspected."""
+
+
 def _foundup_id_exists(foundup_id: str, registry_path: Optional[Path]) -> bool:
-    """Read-only registry existence check. Missing registry -> treated as 'no ids'.
+    """Read-only registry existence check that fails closed on unavailable data.
 
     Reads ``foundup_registry.json`` directly (same ``entities[].foundup_id`` shape
     the read-only ``foundup_registry_loader`` validates). We do NOT import the
@@ -219,16 +235,21 @@ def _foundup_id_exists(foundup_id: str, registry_path: Optional[Path]) -> bool:
         # Default production registry: modules/foundups/foundup_registry.json
         path = Path(__file__).resolve().parents[2] / "foundup_registry.json"
     path = Path(path)
-    if not path.exists():
-        return False
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
-        return False
-    entities = data.get("entities", []) if isinstance(data, dict) else []
-    return any(
-        isinstance(e, dict) and e.get("foundup_id") == foundup_id for e in entities
-    )
+        raise RegistryUnavailableError from None
+    if not isinstance(data, dict) or not isinstance(data.get("entities"), list):
+        raise RegistryUnavailableError
+    entities = data["entities"]
+    for entity in entities:
+        if (
+            not isinstance(entity, dict)
+            or not isinstance(entity.get("foundup_id"), str)
+            or not entity["foundup_id"].strip()
+        ):
+            raise RegistryUnavailableError
+    return any(entity["foundup_id"] == foundup_id for entity in entities)
 
 
 def plan_create_foundup_dry_run(
@@ -260,7 +281,13 @@ def plan_create_foundup_dry_run(
             planned_registry_seed=None,
         )
 
-    is_valid, errors, parsed = _revalidate_envelope(envelope or {})
+    try:
+        is_valid, errors, parsed = _revalidate_envelope(envelope or {})
+    except (AttributeError, TypeError, ValueError):
+        return _reject(
+            "FAIL_ENVELOPE_NOT_GATE_PASSED",
+            "genesis envelope validation failed",
+        )
     if not is_valid:
         return _reject(
             "FAIL_ENVELOPE_NOT_GATE_PASSED",
@@ -268,7 +295,14 @@ def plan_create_foundup_dry_run(
         )
 
     foundup_id = parsed.foundup_id
-    if _foundup_id_exists(foundup_id, registry_path):
+    try:
+        foundup_exists = _foundup_id_exists(foundup_id, registry_path)
+    except RegistryUnavailableError:
+        return _reject(
+            "FAIL_REGISTRY_UNAVAILABLE",
+            "FoundUp registry unavailable or invalid",
+        )
+    if foundup_exists:
         return _reject(
             "FAIL_FOUNDUP_ID_EXISTS",
             "foundup_id already exists in registry; create_foundup authors a NEW "

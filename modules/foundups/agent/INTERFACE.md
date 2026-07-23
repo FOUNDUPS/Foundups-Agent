@@ -2,6 +2,14 @@
 
 Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, validated module-path resolution, and the read-only ContextBundle dry-run consumer.
 
+## create_foundup Dry-Run Planner
+
+`plan_create_foundup_dry_run(envelope, actor_id, registry_path)` returns a
+side-effect-free scaffold plan. Registry inspection is authoritative and
+fail-closed: missing, unreadable, malformed, or schema-invalid data returns
+`FAIL_REGISTRY_UNAVAILABLE` with stable redacted text. Omitted legacy
+`created_at` values are normalized deterministically.
+
 ## Hermes -> Resident RedDog Thin Client
 
 `hermes_reddog_resident_client_adapter.py` exposes Hermes as a transport to the

@@ -31,8 +31,12 @@ This README section is the canonical implementation delta for current WRE code.
 `TargetBackend.HERMES_SCAFFOLD`. Admission requires explicit
 `dry_run_mode=True`, `creation_mode="new_scaffold"`, canonical genesis and
 scaffold digests, and a matching `payload.genesis_envelope.foundup_id`.
-`FoundUpJobConsumer` dispatches this backend through an injected scaffold
-adapter backed by the existing dry-run planner; it never sends the action to
+The router freezes those values plus canonical genesis JSON in an immutable
+`CreateScaffoldRequest`. `FoundUpJobConsumer` passes that exact snapshot
+through an injected scaffold adapter backed by the existing dry-run planner,
+then independently checks returned identity and both lineage digests.
+Nested evidence is detached through canonical JSON and malformed adapters
+produce stable redacted blocked receipts. The route never sends the action to
 the generic Hermes executor and performs no file, registry, FAM, provider, or
 worktree mutation.
 

@@ -49,6 +49,10 @@
   factory/serialization round-trip test for
   `creation_mode`, `genesis_envelope_digest`, and
   `scaffold_contract_digest`.
+- Added a legacy serialized-job regression proving absent lineage fields
+  remain readable and round-trip with nullable defaults.
+- Focused lineage file: 2 passed. Adjacent contract/E2E run: 89 passed and 3
+  pre-existing missing-manifest failures remained outside this route.
 - Included in the focused cross-module contract/router/consumer run:
   145 passed.
 

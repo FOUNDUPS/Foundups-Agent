@@ -1,5 +1,13 @@
 # Agent Module TestModLog
 
+## 2026-07-23 - Create planner registry/determinism repair tests
+
+- Proved missing, unreadable, malformed, and schema-invalid registries fail
+  closed with the same redacted `FAIL_REGISTRY_UNAVAILABLE` result.
+- Proved repeated planning is byte-equivalent when legacy genesis input omits
+  `created_at`.
+- Planner plus adjacent scaffold-writer suites: 80 passed.
+
 ## 2026-07-19 - Transport-neutral Hermes grounding tests
 
 - Proved plain-text v2 requests use host identity/scope and submit a verified grounded intent to the canonical resident client.
