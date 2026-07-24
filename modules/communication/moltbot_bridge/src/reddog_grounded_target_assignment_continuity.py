@@ -28,7 +28,9 @@ from modules.communication.moltbot_bridge.src.reddog_repo_audit_fallback_groundi
 )
 
 SCHEMA_VERSION = "reddog_grounded_target_receipt.v1"
-SOURCE_SURFACES = frozenset({"editor_thin_client", "hermes_thin_client", "api_thin_client"})
+SOURCE_SURFACES = frozenset(
+    {"editor_thin_client", "hermes_thin_client", "api_thin_client", "main_resident_host"}
+)
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 REPO_AUDIT_PRUNED_SEGMENTS = frozenset({
     ".agent", ".agents", ".cache", ".chroma", ".claude", ".codex", ".cursor",

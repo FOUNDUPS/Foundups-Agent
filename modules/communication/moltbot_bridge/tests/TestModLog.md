@@ -1,3 +1,18 @@
+## 2026-07-25: Main resident canonical-client review repair
+
+- Added regressions proving status cannot re-arm FIX/queue handoff and
+  status/cancel/resume clients receive only the selected FoundUp scope.
+- Added a real SQLite AgentDB regression for the exact pre-#1310
+  `cycle.v1 + main intent.v1` shape: authenticated status and CAS-cancel pass,
+  while resume remains rejected.
+- Preserved exact audit/architect runtime-binding receipt assertions after
+  rebasing onto the current resident runtime.
+- Extracted the 201-line root preflight into decomposed moltbot-owned
+  functions and asserted the root adapter and critical bootstrap functions
+  remain below their WSP 62 thresholds.
+- Validation after review repair: 159 focused tests passed with one platform
+  skip, including exact WSP 62 no-growth coverage.
+
 ## 2026-07-24: HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
 - Added direct regressions for pre-backend foreign-root denial and rejection
@@ -134,6 +149,14 @@
   post-run assertions to the permanent production-CLOSED verifier boundary.
 - Reconciled current resident fixtures with independently confined runtime
   roots and canonical governed artifact packs; refreshed exact no-growth gates.
+
+## 2026-07-20: Main resident canonical-client migration
+
+- Added main-host v2 grounding/source/origin round-trip coverage.
+- Added fail-closed tests for missing/mismatched host scope, cancel/retry conflicts, control without an existing intent, and grounding failure before client construction.
+- Proved explicit intent status bypasses new grounding and `main.py` no longer references the durable cycle runner directly.
+- Rejected the removed `reddog_intent.v1` main-host compatibility shape.
+- Validation: 125 focused canonical-client, grounding, durable-cycle, and main startup tests passed before independent review.
 
 ## 2026-07-19: REDDOG_HOLOINDEX_V2_RUNTIME_FIXTURE_MIGRATION_PHASE1
 

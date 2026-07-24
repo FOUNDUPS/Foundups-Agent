@@ -20,6 +20,10 @@ from typing import Any, Callable, Mapping, Optional, Sequence
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     validate_grounded_target_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_legacy_main_control import (
+    authorize_legacy_main_record,
+    cancel_legacy_main_record,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
     AgentDbResidentArchitectCycleStore,
     RUNTIME_BOUNDARY_FIELDS,
@@ -29,7 +33,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_
     STATUS_FAILED,
     STATUS_TIMED_OUT,
     resident_intent_digest,
-    run_reddog_resident_architect_durable_agentdb_cycle,
 )
 
 
@@ -38,11 +41,13 @@ TRANSPORT_TO_SOURCE = {
     "editor": "editor_thin_client",
     "hermes": "hermes_thin_client",
     "api": "api_thin_client",
+    "main": "main_resident_host",
 }
 TRANSPORT_TO_ORIGIN = {
     "editor": "extension",
     "hermes": "hermes_agent",
     "api": "api_client",
+    "main": "main.py",
 }
 RESERVED_RUNTIME_KEYS = frozenset(
     {
@@ -142,7 +147,13 @@ class RedDogResidentArchitectClient:
         self._source_surface = surface
         self._origin = TRANSPORT_TO_ORIGIN[self._transport]
         self._store = cycle_store or AgentDbResidentArchitectCycleStore()
-        self._runner = cycle_runner or run_reddog_resident_architect_durable_agentdb_cycle
+        if cycle_runner is None:
+            from modules.communication.moltbot_bridge.src import (
+                reddog_resident_architect_durable_agentdb_cycle as cycle_module,
+            )
+
+            cycle_runner = cycle_module.run_reddog_resident_architect_durable_agentdb_cycle
+        self._runner = cycle_runner
         self._runtime_defaults = defaults
 
     def submit(self, intent: Mapping[str, Any] | None) -> ResidentClientResponse:
@@ -154,15 +165,56 @@ class RedDogResidentArchitectClient:
 
     def status(self, intent_id: str) -> ResidentClientResponse:
         record, reasons = self._authorized_record(intent_id)
+        legacy_main = False
         if reasons:
-            return self._reject("status", str(intent_id or ""), reasons)
+            record, legacy_reasons = authorize_legacy_main_record(
+                self._store,
+                intent_id,
+                authenticated_principal_id=self._principal,
+                authorized_foundup_ids=self._authorized_foundup_ids,
+                transport=self._transport,
+            )
+            if legacy_reasons:
+                return self._reject("status", str(intent_id or ""), reasons)
+            legacy_main = True
         assert record is not None
-        return self._from_record("status", record, accepted=True, canonical_cycle_used=True)
+        return self._from_record(
+            "status",
+            record,
+            accepted=True,
+            canonical_cycle_used=not legacy_main,
+        )
 
     def cancel(self, intent_id: str) -> ResidentClientResponse:
         record, reasons = self._authorized_record(intent_id)
         legacy_cancel = False
         if reasons:
+            record, legacy_main_reasons = authorize_legacy_main_record(
+                self._store,
+                intent_id,
+                authenticated_principal_id=self._principal,
+                authorized_foundup_ids=self._authorized_foundup_ids,
+                transport=self._transport,
+            )
+            if not legacy_main_reasons:
+                assert record is not None
+                updated, cancel_reasons = cancel_legacy_main_record(
+                    self._store,
+                    record,
+                    authorized_intent_id=str(intent_id or "").strip(),
+                )
+                if cancel_reasons or updated is None:
+                    return self._reject(
+                        "cancel",
+                        str(intent_id or ""),
+                        cancel_reasons or (ResidentClientReason.RUNTIME_FAILED,),
+                    )
+                return self._from_record(
+                    "cancel",
+                    updated,
+                    accepted=False,
+                    canonical_cycle_used=False,
+                )
             record, legacy_reasons = self._authorized_legacy_cancel_record(intent_id)
             if legacy_reasons:
                 return self._reject("cancel", str(intent_id or ""), reasons)
@@ -272,7 +324,12 @@ class RedDogResidentArchitectClient:
             )
         except Exception:
             return self._reject(operation, _intent_id(intent), (ResidentClientReason.RUNTIME_FAILED,))
-        data = result.to_dict() if hasattr(result, "to_dict") else dict(result)
+        if hasattr(result, "to_dict"):
+            data = result.to_dict()
+        elif isinstance(result, Mapping):
+            data = dict(result)
+        else:
+            data = dict(vars(result))
         legacy_cancelled = bool(
             legacy_cancel
             and str(data.get("status") or "") == STATUS_CANCELLED

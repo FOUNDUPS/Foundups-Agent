@@ -1081,12 +1081,7 @@ def _intent_bound_model_runtime_bindings(
 def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
     reasons: list[str] = []
     schema = intent.get("schema_version") if isinstance(intent, Mapping) else None
-    main_v1 = bool(
-        schema == "reddog_intent.v1"
-        and intent.get("origin") == "main.py"
-        and intent.get("requested_authority") == "read_only_audit"
-    )
-    if not isinstance(intent, Mapping) or (schema != "reddog_intent.v2" and not main_v1):
+    if not isinstance(intent, Mapping) or schema != "reddog_intent.v2":
         reasons.append(ResidentCycleReason.INTENT_INVALID)
     if not str(intent.get("intent_id") or "").strip():
         reasons.append(ResidentCycleReason.INTENT_INVALID)

@@ -37,7 +37,6 @@ exemptions:
       - "run_reddog_readonly_operational_bootstrap_preflight"
       - "run_reddog_authoritative_work_state_refresh_preflight"
       - "run_reddog_wre_queue_consumer_preflight"
-      - "run_reddog_resident_architect_durable_cycle_preflight"
       - "_run_reddog_startup_blocker_diagnostic"
       - "run_reddog_architect_fix_promotion_preflight"
       - "run_reddog_resident_queue_orchestration_plan_preflight"

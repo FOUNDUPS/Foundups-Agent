@@ -80,6 +80,10 @@ OWNER_SERVICE_ENV = {
     "HOLOINDEX_QUERY_SERVICE_TOKEN": "test-owner-service-token-with-strong-length",
     "REDDOG_HOLOINDEX_AUTO_MAINTENANCE": "0",
 }
+MAIN_RESIDENT_AUTH_ENV = {
+    "REDDOG_AUTHENTICATED_PRINCIPAL_ID": "principal-main-test",
+    "REDDOG_AUTHORIZED_FOUNDUP_IDS": "foundups_agent",
+}
 
 
 @pytest.fixture(autouse=True)
@@ -1198,7 +1202,7 @@ def test_main_preflight_durable_resident_cycle_product_mode_runs_by_default(caps
         "run_reddog_resident_architect_durable_agentdb_cycle",
         return_value=_resident_cycle_result(),
     ) as mocked:
-        with patch.dict("os.environ", {}, clear=True):
+        with patch.dict("os.environ", MAIN_RESIDENT_AUTH_ENV, clear=True):
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
             assert os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] == "sha256:intent-main-resident"
             assert os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] == "1"
@@ -1209,7 +1213,7 @@ def test_main_preflight_durable_resident_cycle_product_mode_runs_by_default(caps
 
     kwargs = mocked.call_args.kwargs
     assert kwargs["requested_operation"] == "main_resident_architect_cycle"
-    assert kwargs["prompt_text"] == "main.py resident RedDog architect cycle"
+    assert "reddog_resident_architect_durable_agentdb_cycle.py" in kwargs["prompt_text"]
     assert kwargs["audit_model_runtime_binding_receipt"]["runtime_surface"] == (
         "reddog_readonly_audit_worker"
     )
@@ -1221,9 +1225,11 @@ def test_main_preflight_durable_resident_cycle_product_mode_runs_by_default(caps
         != kwargs["architect_model_runtime_binding_receipt"]["receipt_id"]
     )
     assert kwargs["external_research_retriever"] is None
-    assert kwargs["red_dog_intent"]["requested_authority"] == "read_only_audit"
+    assert kwargs["red_dog_intent"]["schema_version"] == "reddog_intent.v2"
+    assert kwargs["red_dog_intent"]["source_surface"] == "main_resident_host"
+    assert kwargs["red_dog_intent"]["origin"] == "main.py"
     assert kwargs["red_dog_intent"]["submits_executable_authority"] is False
-    assert kwargs["red_dog_intent"]["cycle_bucket"].startswith("24h:")
+    assert kwargs["red_dog_intent"]["client_request_id"].startswith("sha256:")
     output = capsys.readouterr().out
     assert "[REDDOG-RESIDENT-CYCLE] preflight=PASS" in output
     assert "no_repo_mutation=True" in output
@@ -1260,11 +1266,12 @@ def test_main_preflight_durable_resident_cycle_explicit_enable_overrides_product
     ) as mocked:
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE": "0",
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
-            },
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE": "0",
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
+                },
             clear=True,
         ):
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
@@ -1283,8 +1290,9 @@ def test_main_preflight_durable_resident_cycle_uses_stable_cadence_bucket() -> N
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
                 "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
             },
             clear=True,
@@ -1292,8 +1300,9 @@ def test_main_preflight_durable_resident_cycle_uses_stable_cadence_bucket() -> N
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T18:00:00+00:00",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T18:00:00+00:00",
                 "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
             },
             clear=True,
@@ -1302,7 +1311,7 @@ def test_main_preflight_durable_resident_cycle_uses_stable_cadence_bucket() -> N
 
     first = calls[0]["red_dog_intent"]
     second = calls[1]["red_dog_intent"]
-    assert first["cycle_bucket"] == second["cycle_bucket"]
+    assert first["client_request_id"] == second["client_request_id"]
     assert first["intent_id"] == second["intent_id"]
 
 
@@ -1317,8 +1326,9 @@ def test_main_preflight_durable_resident_cycle_rolls_intent_after_cadence() -> N
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
                 "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
             },
             clear=True,
@@ -1326,8 +1336,9 @@ def test_main_preflight_durable_resident_cycle_rolls_intent_after_cadence() -> N
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-18T09:00:01+00:00",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-18T09:00:01+00:00",
                 "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "24",
             },
             clear=True,
@@ -1336,7 +1347,7 @@ def test_main_preflight_durable_resident_cycle_rolls_intent_after_cadence() -> N
 
     first = calls[0]["red_dog_intent"]
     second = calls[1]["red_dog_intent"]
-    assert first["cycle_bucket"] != second["cycle_bucket"]
+    assert first["client_request_id"] != second["client_request_id"]
     assert first["intent_id"] != second["intent_id"]
 
 
@@ -1350,17 +1361,18 @@ def test_main_preflight_durable_resident_cycle_explicit_intent_disables_cadence_
     ) as mocked:
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:explicit-intent",
-                "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "explicit-request",
+                    "REDDOG_RESIDENT_ARCHITECT_NOW_ISO": "2026-07-17T09:00:00+00:00",
             },
             clear=True,
         ):
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
 
     intent = mocked.call_args.kwargs["red_dog_intent"]
-    assert intent["intent_id"] == "sha256:explicit-intent"
-    assert intent["cycle_bucket"] == ""
+    assert intent["schema_version"] == "reddog_intent.v2"
+    assert intent["client_request_id"] == "explicit-request"
 
 
 def test_main_preflight_durable_resident_cycle_can_disable_cadence_for_legacy_sticky_intent() -> None:
@@ -1373,13 +1385,13 @@ def test_main_preflight_durable_resident_cycle_can_disable_cadence_for_legacy_st
     ) as mocked:
         with patch.dict(
             "os.environ",
-            {"REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "0"},
+                {**MAIN_RESIDENT_AUTH_ENV, "REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS": "0"},
             clear=True,
         ):
             assert main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT) is True
 
     intent = mocked.call_args.kwargs["red_dog_intent"]
-    assert intent["cycle_bucket"] == ""
+    assert intent["schema_version"] == "reddog_intent.v2"
 
 
 def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_path, capsys) -> None:
@@ -1394,12 +1406,16 @@ def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_pat
     ) as mocked:
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "0",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
-                "REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS": "resident main cycle",
-                "REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF": "012",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "0",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
+                    "REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS": (
+                        "Audit modules/communication/moltbot_bridge/src/"
+                        "reddog_resident_architect_client.py."
+                    ),
+                    "REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF": "principal-main-test",
                 "REDDOG_RESIDENT_ARCHITECT_FOUNDUP_ID": "foundups_agent",
                 "REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS": "2",
                 "REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS": "30",
@@ -1424,15 +1440,16 @@ def test_main_preflight_runs_durable_resident_agentdb_cycle_when_enabled(tmp_pat
     assert kwargs["holoindex_receipt_path"] == "O:/state/holo_receipt.json"
     assert kwargs["holoindex_ssd_path"] == "E:/HoloIndex"
     assert kwargs["requested_operation"] == "main_resident_architect_cycle"
-    assert kwargs["prompt_text"] == "resident main cycle"
+    assert "reddog_resident_architect_client.py" in kwargs["prompt_text"]
     assert kwargs["max_claims"] == 2
     assert kwargs["timeout_seconds"] == 30
     assert kwargs["external_research_retriever"] is not None
     intent = kwargs["red_dog_intent"]
-    assert intent["schema_version"] == "reddog_intent.v1"
-    assert intent["intent_id"] == "sha256:intent-main-resident"
+    assert intent["schema_version"] == "reddog_intent.v2"
+    assert intent["source_surface"] == "main_resident_host"
+    assert intent["origin"] == "main.py"
+    assert intent["principal_ref"] == "principal-main-test"
     assert intent["submits_executable_authority"] is False
-    assert intent["requested_authority"] == "read_only_audit"
     output = capsys.readouterr().out
     assert "[REDDOG-RESIDENT-CYCLE] preflight=PASS" in output
     assert "tasks=2" in output
@@ -1486,9 +1503,10 @@ def test_main_preflight_durable_resident_cycle_supplies_memory_context(tmp_path,
     ) as mocked:
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_RESIDENT_BRAIN_STATE_PATH": str(brain_state),
                 "REDDOG_RESIDENT_BREADCRUMBS_PATH": str(breadcrumbs),
                 "REDDOG_RESIDENT_WORKSPACE_MEMORY_NOTES_PATH": str(workspace_notes),
@@ -1504,12 +1522,6 @@ def test_main_preflight_durable_resident_cycle_supplies_memory_context(tmp_path,
     assert kwargs["breadcrumbs"][0]["breadcrumb_id"] == "crumb-1"
     assert len(kwargs["workspace_memory_notes"]) == 1
     assert kwargs["workspace_memory_notes"][0]["note_id"] == "note-1"
-    intent_memory = kwargs["red_dog_intent"]["memory_context"]
-    assert intent_memory["brain_available"] is True
-    assert intent_memory["brain_record_count"] == 7
-    assert intent_memory["breadcrumbs_count"] == 2
-    assert intent_memory["workspace_memory_notes_count"] == 1
-    assert intent_memory["memory_context_digest"].startswith("sha256:")
     output = capsys.readouterr().out
     assert "brain_records=7" in output
     assert "breadcrumbs=2" in output
@@ -1526,9 +1538,10 @@ def test_main_preflight_durable_resident_cycle_memory_context_can_be_disabled() 
     ) as mocked:
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_RESIDENT_BRAIN_CONTEXT": "0",
                 "REDDOG_RESIDENT_BREADCRUMBS_CONTEXT": "0",
             },
@@ -1540,10 +1553,6 @@ def test_main_preflight_durable_resident_cycle_memory_context_can_be_disabled() 
     assert kwargs["brain_state"] is None
     assert kwargs["breadcrumbs"] == ()
     assert kwargs["workspace_memory_notes"] == ()
-    intent_memory = kwargs["red_dog_intent"]["memory_context"]
-    assert intent_memory["brain_available"] is False
-    assert intent_memory["breadcrumbs_count"] == 0
-    assert intent_memory["workspace_memory_notes_count"] == 0
 
 
 def test_main_preflight_resident_cycle_respects_explicit_queue_profile(tmp_path) -> None:
@@ -1558,9 +1567,10 @@ def test_main_preflight_resident_cycle_respects_explicit_queue_profile(tmp_path)
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                 "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
             },
@@ -1582,9 +1592,10 @@ def test_main_preflight_resident_cycle_can_disable_auto_queue_profile(tmp_path) 
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE": "0",
                 "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
             },
@@ -1606,9 +1617,10 @@ def test_main_preflight_resident_cycle_rejects_invalid_auto_queue_profile(tmp_pa
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE": "unsafe_profile",
                 "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
             },
@@ -1633,9 +1645,10 @@ def test_main_preflight_resident_cycle_requires_fix_queue_candidate_for_auto_pro
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
             },
             clear=True,
@@ -1650,9 +1663,10 @@ def test_main_preflight_resident_cycle_requires_fix_queue_candidate_for_auto_pro
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
             },
             clear=True,
@@ -1673,9 +1687,10 @@ def test_main_preflight_resident_cycle_respects_auto_fix_handoff_opt_out(tmp_pat
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF": "0",
                 "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
             },
@@ -1697,9 +1712,10 @@ def test_main_preflight_resident_cycle_does_not_override_explicit_fix_handoff(tm
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
                 "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
                 "REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH": str(external_snapshot),
             },
@@ -1719,10 +1735,11 @@ def test_main_preflight_resident_cycle_reject_is_nonblocking_by_default(capsys) 
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "0",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "0",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
             },
             clear=True,
         ):
@@ -1743,10 +1760,11 @@ def test_main_preflight_resident_cycle_reject_blocks_when_enforced(capsys) -> No
     ):
         with patch.dict(
             "os.environ",
-            {
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
-                "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
-                "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-main-resident",
+                {
+                    **MAIN_RESIDENT_AUTH_ENV,
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
+                    "REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID": "request-main-resident",
             },
             clear=True,
         ):
