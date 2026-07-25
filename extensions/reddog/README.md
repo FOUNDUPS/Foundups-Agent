@@ -1,10 +1,10 @@
 # RedDog
 
-Version: 0.4.11
+Version: 0.4.12
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
 
-Version 0.4.11 routes editor resident sessions through the canonical host-authenticated client, binds principal and FoundUp scope into the full intent digest, and uses revision-CAS resident records whose cancellation and retry state cannot be silently overwritten. Version 0.4.10 exposes bounded Fusion progress and OpenRouter usage receipts; those receipts remain observational, not authority.
+Version 0.4.12 verifies the selected workspace against an extension-pinned RedDog backend manifest and a generated SHA-256 closure of every executable Python entry point and local runtime dependency before grounding or authority work begins. The generator parses imports without importing repository code, uses Git's exact-case tracked paths, resolves package initializers and package-relative dynamic imports, expands declared dynamic file-load scopes, and rejects undeclared dynamic loading. Missing, stale, altered, malformed, junction-backed, or unsafe backend files block locally without querying HoloIndex, calling a model, probing permissions, or emitting a work order. Full activation/ingress/model/action checks run in an extension-owned worker thread; synchronous legacy repair/judgment bridges recheck immediately before their existing synchronous process launch. The gate does not claim an atomic filesystem lock against a hostile local administrator. Version 0.4.11 routes editor resident sessions through the canonical host-authenticated client and revision-CAS resident records.
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode; authority-bearing work is delegated through signed OpenClaw/WRE/Hermes receipts, not through raw webview access.
 
@@ -231,6 +231,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.11.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.12.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.
