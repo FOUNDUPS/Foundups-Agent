@@ -294,7 +294,49 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             )
         self.assertFalse(result["ok"])
         self.assertEqual(result["reason"], "fusion_quorum_lead_missing")
-        self.assertEqual(len(calls), 1)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(
+            result["review_packet"]["fusion_panel_quorum"]["lead_semantic_retry_count"],
+            1,
+        )
+
+    def test_fusion_quorum_semantic_retry_recovers_none_lead(self) -> None:
+        lead_calls = 0
+
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            nonlocal lead_calls
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                lead_calls += 1
+                if lead_calls == 1:
+                    return "None", {"retry_count": 0}
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Panel critic pass" in system:
+                return (
+                    "Challenge: the evidence claim is unsupported and the WSP_15 "
+                    "priority order needs verification.",
+                    {"retry_count": 0},
+                )
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertTrue(result["ok"])
+        self.assertEqual(lead_calls, 2)
+        self.assertEqual(
+            result["review_packet"]["fusion_panel_quorum"]["lead_semantic_retry_count"],
+            1,
+        )
 
     def test_fusion_quorum_requires_critic_challenge_to_framing_and_priority(self) -> None:
         def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
@@ -321,6 +363,51 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertEqual(result["reason"], "fusion_quorum_challenging_critic_missing")
         quorum = result["review_packet"]["fusion_panel_quorum"]
         self.assertEqual(quorum["challenging_critics"], [])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a"])
+
+    def test_fusion_quorum_targeted_critic_retry_can_recover(self) -> None:
+        def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
+            system = str(messages[0]["content"])
+            if "Lead pass" in system:
+                return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
+            if "Adversarial retry" in system:
+                return (
+                    "Challenge: the framing assumes complete evidence and the WSP_15 "
+                    "priority order should defer execution pending verification.",
+                    {"retry_count": 0},
+                )
+            if "Panel critic pass" in system:
+                return "No material challenge: framing and priority appear sound.", {"retry_count": 0}
+            return "## Decision\nProceed\n\n## WSP_15 Priority\nP1", {"retry_count": 0}
+
+        with mock.patch.object(bridge, "_chat_completion", side_effect=fake_chat):
+            result = bridge._run_foundups_fusion(
+                "key",
+                "prompt\n\n### Required direct-read target: docs/present.md\ncontent",
+                [],
+                {
+                    "lead_model": "lead-model",
+                    "panel_models": ["critic-a"],
+                    "required_target_paths": ["docs/present.md"],
+                    "_redacted_evidence_context": "### Required direct-read target: docs/present.md\ncontent",
+                },
+            )
+        self.assertTrue(result["ok"])
+        quorum = result["review_packet"]["fusion_panel_quorum"]
+        self.assertEqual(quorum["challenging_critics"], ["critic-a"])
+        self.assertEqual(quorum["critic_challenge_retry_models"], ["critic-a"])
+
+    def test_no_material_challenge_prefix_never_satisfies_quorum(self) -> None:
+        self.assertFalse(
+            bridge._critic_challenges_framing_and_priority(
+                "No material challenge: the framing, evidence, and WSP_15 priority are sound."
+            )
+        )
+        self.assertFalse(
+            bridge._critic_challenges_framing_and_priority(
+                "The framing and WSP_15 priority are sound; I challenge nothing material."
+            )
+        )
 
     def test_fusion_quorum_passes_with_challenge_and_blocks_synthesis_failure(self) -> None:
         def fake_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG001
@@ -329,7 +416,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
             if "Panel critic pass" in system:
                 return (
-                    "I challenge the framing and the WSP_15 priority order because the "
+                    "Challenge: the framing and the WSP_15 priority order are unsafe because the "
                     "scope may overclaim evidence.",
                     {"retry_count": 0},
                 )
@@ -390,7 +477,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 return "## Decision\nProceed\n\nEvidence docs/present.md:1", {"retry_count": 0}
             if "Panel critic pass" in system:
                 return (
-                    "I challenge the framing and WSP_15 priority because the sequence "
+                    "Challenge: the framing and WSP_15 priority are unsafe because the sequence "
                     "could hide a missing gate.",
                     {"retry_count": 0},
                 )
