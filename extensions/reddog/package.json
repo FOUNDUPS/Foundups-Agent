@@ -2,7 +2,7 @@
   "name": "reddog",
   "displayName": "RedDog - FoundUps Architect",
   "description": "Open the RedDog resident 0102 architect thin client for FoundUps.",
-  "version": "0.4.16",
+  "version": "0.4.17",
   "publisher": "foundups",
   "icon": "icon.png",
   "engines": {
@@ -62,7 +62,7 @@
         "reddog.leadModel": {
           "type": "string",
           "default": "z-ai/glm-5.2",
-          "description": "OpenRouter model slug for the principal/synthesis worker."
+          "description": "Evaluation fallback principal model used only when no receipt-bound production runtime binding is configured."
         },
         "reddog.panelModels": {
           "type": "array",
@@ -75,7 +75,7 @@
           "items": {
             "type": "string"
           },
-          "description": "OpenRouter model slugs for panel critics. The extension forwards at most seven so the Python bridge can run up to six and receipt over-cap truncation."
+          "description": "Evaluation fallback critic models used only when no receipt-bound production runtime binding is configured. The extension forwards at most seven so Python can prove over-cap truncation."
         },
         "reddog.enableResidentArchitectSession": {
           "type": "boolean",

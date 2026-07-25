@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_EXTENSION_RECEIPT_BOUND_MODEL_RUNTIME_BINDING_PHASE1 (0.4.17)
+
+- Added a read-only Python/JavaScript runtime-binding query that rehydrates the existing model binding receipt from its confined outside-repo root.
+- Required nonzero verifier policy, benchmark/promotion/signed-promotion lineage, exact principal/panel role topology, and an external authority receipt.
+- Labeled missing configuration `evaluation_config`; partial, malformed, tampered, wrong-surface, or topology-invalid configuration blocks before OpenRouter.
+- Added model source, runtime-binding status/ID, selection/catalog lineage, task family, and role bindings to Run Trace.
+- No selector, benchmark, HoloIndex, worker, action-authority, shell, or runtime-artifact mutation was added.
+- Version 0.4.16 -> 0.4.17.
+
 ## 2026-07-25 - REDDOG_FUSION_SEMANTIC_RETRY_AND_QUORUM_EVIDENCE_PHASE1 (0.4.16)
 
 - Added one bounded, receipted semantic retry for empty/`None` lead output.

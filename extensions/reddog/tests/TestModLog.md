@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - Receipt-bound model runtime binding (0.4.17)
+
+- Proved unconfigured fallback, valid panel topology, partial configuration, inside-repo rejection, tampered digest, reserved verifier role, role-model mismatch, policy/evidence mismatch, and zero verifier threshold rejection.
+- Proved JavaScript canonical receipt validation, receipt-bound worker projection, explicit evaluation fallback, configured-invalid blocking, tampering rejection, reserved-role rejection, and bridge parsing.
+- Extended the exhaustive extension contract with 0.4.17 model-binding Run Trace metadata.
+
 ## 2026-07-25 - Fusion semantic retry and quorum evidence (0.4.16)
 
 - Proved an empty/`None` lead receives exactly one semantic retry and still blocks if the retry is empty.
