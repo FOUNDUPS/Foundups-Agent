@@ -20,7 +20,7 @@ const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.13';
+const EXTENSION_VERSION = '0.4.14';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1463,7 +1463,7 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
   const seen = new Set();
   const add = (raw) => {
     let value = String(raw || '').trim();
-    if (!value || value.length < 4 || value.length > 180) {
+    if (!value || value.length < 4 || value.length > 500) {
       return;
     }
     value = collapseAsciiWhitespace(value);
@@ -1482,7 +1482,7 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
     if (!stripped || stripped.startsWith('- ') || stripped.startsWith('* ')) {
       continue;
     }
-    if (/^https?:\/\//i.test(stripped) || extractInlinePathTokens(stripped).length) {
+    if (/^https?:\/\//i.test(stripped) || extractInlinePathTokens(stripped).some((token) => repoSet.has(token.toLowerCase()))) {
       continue;
     }
     const conceptBody = semanticHeaderBody(stripped);
