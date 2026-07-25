@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - HoloIndex parent-process watchdog (0.4.21)
+
+- Proved an injected parent waiter terminates the child and a real child exits after its real intermediate parent terminates.
+- Proved supervisor argv carries only the public parent PID, stdin is `DEVNULL`, and no bearer moves to argv.
+
 ## 2026-07-25 - HoloIndex owner probe budget (0.4.20)
 
 - Proved an authenticated semantic health response beyond the legacy one-second socket window is accepted within the new 30-second bound.

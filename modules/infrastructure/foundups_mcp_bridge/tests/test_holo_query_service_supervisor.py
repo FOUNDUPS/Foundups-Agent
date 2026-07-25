@@ -40,14 +40,6 @@ def _available_owner_port(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-class _FakePipe:
-    def __init__(self) -> None:
-        self.closed = False
-
-    def close(self) -> None:
-        self.closed = True
-
-
 class _FakeProcess:
     def __init__(
         self,
@@ -60,7 +52,6 @@ class _FakeProcess:
         self.wait_calls = 0
         self.terminated = False
         self.killed = False
-        self.stdin = _FakePipe()
 
     def poll(self) -> int | None:
         return self.returncode
@@ -146,12 +137,13 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
         OWNER_HOST,
         "--port",
         "9137",
-        "--parent-stdin-watchdog",
+        "--parent-pid",
+        str(supervisor_module.os.getpid()),
     ]
     options = launch["kwargs"]
     assert options["shell"] is False
     assert options["cwd"] == str(tmp_path.resolve())
-    assert options["stdin"] is subprocess.PIPE
+    assert options["stdin"] is subprocess.DEVNULL
     assert options["stdout"] is subprocess.DEVNULL
     assert options["stderr"] is subprocess.DEVNULL
     assert options["env"][SERVICE_TOKEN_ENV] == TOKEN
@@ -161,7 +153,6 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
 
     owner.stop()
     assert process.terminated is True
-    assert process.stdin.closed is True
     assert unregistered
     assert owner.is_ready is False
 

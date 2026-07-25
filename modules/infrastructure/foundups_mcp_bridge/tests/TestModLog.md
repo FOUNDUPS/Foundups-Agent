@@ -1,5 +1,10 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-25] HoloIndex parent-process watchdog
+
+- Replaced pipe-EOF tests with injected and real parent-process termination coverage.
+- Proved the public parent PID is passed in argv, stdin is `DEVNULL`, and existing semantic probe/lifecycle tests remain green.
+
 ## [2026-07-25] HoloIndex owner semantic probe budget
 
 - Added a real delayed loopback health response proving the bounded probe accepts semantic readiness after more than one second.

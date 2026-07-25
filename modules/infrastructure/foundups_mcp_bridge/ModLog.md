@@ -1,5 +1,11 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-25 - HoloIndex parent-process lifecycle correction
+
+- OBSERVED: the blocking stdin watchdog introduced in v0.4.19 allowed the HTTP socket to listen but prevented semantic health from completing beyond 120 seconds on Windows; the same owner without that reader returned CURRENT in about 12 seconds.
+- Replaced the stdin reader with an exact parent-process watcher: Windows waits on a process handle, POSIX observes the original parent relationship, and failed binding exits closed.
+- Restored child stdin to `DEVNULL`; tokens remain environment-only and no query/index authority changed.
+
 ## 2026-07-25 - HoloIndex auto-owner semantic probe budget
 
 - Raised only the auto-owner health-probe socket window from one to 30 seconds after an observed 11.22-second semantic canary repeatedly exhausted the legacy probe.
