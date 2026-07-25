@@ -1,5 +1,17 @@
 # FoundUps Agent - Development Log
 
+## [2026-07-25] Deterministic Codex Tooling Projection
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 97
+
+- Added generated `AGENTS.md`, Codex Skill, and MCP projections with canonical
+  source parity and stale-output checks.
+- Pinned Chrome DevTools MCP to `1.6.0`, rejected sensitive MCP environment
+  projection, preserved unexpected local Skill files, and ignored RedDog VSIX
+  build artifacts.
+- Confined every source/output ancestor to non-linked repository paths and
+  staged the full projection before atomic replacement with rollback.
+
 ## [2026-07-18] RedDog Resident Control Receipt Truth/Auth Phase 1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 91, 97

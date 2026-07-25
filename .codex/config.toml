@@ -1,0 +1,24 @@
+# Generated from .mcp.json by scripts/generate_codex_tooling_projection.py.
+# Edit .mcp.json, then regenerate.
+
+[mcp_servers."chrome-devtools"]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@1.6.0"]
+
+[mcp_servers."chrome-devtools".env]
+"CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS" = "1"
+
+[mcp_servers."holo_index"]
+command = "python"
+args = ["-m", "holo_index.mcp_server"]
+cwd = "."
+
+[mcp_servers."web_search"]
+command = "python"
+args = ["-m", "mcp_servers.web_search.server"]
+cwd = "."
+
+[mcp_servers."wsp_governance"]
+command = "python"
+args = ["-m", "WSP_framework.mcp_server"]
+cwd = "."
