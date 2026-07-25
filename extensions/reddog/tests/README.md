@@ -30,7 +30,7 @@ python -m pytest holo_index/tests/test_repo_audit_discovery.py scripts/tests/tes
 | File | Purpose |
 | --- | --- |
 | `fixtures.js` | Shared prompts and path lists (EXT-ACC-001, denied paths) |
-| `test_backend_compatibility_preflight.js` | Pinned manifest, bridge-integrity, canonical-containment, and content-free failure contracts |
+| `test_backend_compatibility_preflight.js` | Pinned manifest, runtime dependency-closure integrity, intermediate junction rejection, WSP_62 ceilings, canonical containment, and content-free failure contracts |
 | `verify_extension_contract.js` | Single contract runner; ADDENDUM E ~line 518+, ADDENDUM F gate probe ~line 595+ |
 | `verify_repo_audit_grounding.js` | Focused alias, receipt, protected-context non-vacuity, local block, repair-provenance, and defensive-prompt contracts |
 

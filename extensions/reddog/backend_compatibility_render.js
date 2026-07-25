@@ -1,40 +1,59 @@
 'use strict';
 
-function buildInstallStateSection(state, constants) {
-  const s = state && typeof state === 'object' ? state : {};
-  const compatibility = s.backend_compatibility && typeof s.backend_compatibility === 'object'
-    ? s.backend_compatibility
-    : {};
+function compatibilityNumber(value, fallback) {
+  return Number.isInteger(value) ? value : fallback;
+}
+
+function compatibilityReasons(value) {
+  return Array.isArray(value) && value.length ? value.join(', ') : '(none)';
+}
+
+function installIdentityLines(state, constants) {
   return [
     '## RedDog Install State',
-    '- extension_id: ' + (s.extension_id || 'unknown') + ' [OBSERVED]',
-    '- expected_extension_id: ' + (s.expected_extension_id || constants.extensionId) + ' [OBSERVED]',
-    '- extension_version: ' + (s.version || constants.extensionVersion) + ' [OBSERVED]',
-    '- legacy_extension_present: ' + (s.legacy_extension_present === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- duplicate_extension_detected: ' + (s.duplicate_extension_detected === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- stale_install_detected: ' + (s.stale_install_detected === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- legacy_extension_version: ' + (s.legacy_extension_version || 'none') + ' [OBSERVED]',
+    '- extension_id: ' + (state.extension_id || 'unknown') + ' [OBSERVED]',
+    '- expected_extension_id: ' + (state.expected_extension_id || constants.extensionId) + ' [OBSERVED]',
+    '- extension_version: ' + (state.version || constants.extensionVersion) + ' [OBSERVED]',
+    '- legacy_extension_present: ' + (state.legacy_extension_present === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- duplicate_extension_detected: ' + (state.duplicate_extension_detected === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- stale_install_detected: ' + (state.stale_install_detected === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- legacy_extension_version: ' + (state.legacy_extension_version || 'none') + ' [OBSERVED]'
+  ];
+}
+
+function compatibilityLines(compatibility, constants) {
+  return [
     '- backend_compatibility_checked: ' + (compatibility.checked === true ? 'true' : 'false') + ' [OBSERVED]',
     '- backend_compatibility_passed: ' + (compatibility.passed === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- backend_api_version: ' + (
-      Number.isInteger(compatibility.backend_api_version)
-        ? compatibility.backend_api_version
-        : 'unknown'
+    '- backend_api_version: ' + compatibilityNumber(compatibility.backend_api_version, 'unknown') + ' [OBSERVED]',
+    '- extension_backend_api_version: ' + compatibilityNumber(
+      compatibility.extension_backend_api_version,
+      constants.backendApiVersion
     ) + ' [OBSERVED]',
-    '- extension_backend_api_version: ' + (
-      Number.isInteger(compatibility.extension_backend_api_version)
-        ? compatibility.extension_backend_api_version
-        : constants.backendApiVersion
+    '- backend_runtime_integrity_verified: ' + (
+      compatibility.backend_runtime_integrity_verified === true ? 'true' : 'false'
     ) + ' [OBSERVED]',
-    '- backend_compatibility_rejection_reasons: ' + (
-      Array.isArray(compatibility.rejection_reasons) && compatibility.rejection_reasons.length
-        ? compatibility.rejection_reasons.join(', ')
-        : '(none)'
+    '- required_runtime_file_count: ' + compatibilityNumber(
+      compatibility.required_runtime_file_count,
+      0
+    ) + ' [OBSERVED]',
+    '- backend_compatibility_rejection_reasons: ' + compatibilityReasons(
+      compatibility.rejection_reasons
     ) + ' [OBSERVED]',
     '- backend_workspace_root_digest: ' + (
       compatibility.workspace_root_digest || 'unknown'
     ) + ' [OBSERVED]'
-  ].join('\n');
+  ];
+}
+
+function buildInstallStateSection(state, constants) {
+  const value = state && typeof state === 'object' ? state : {};
+  const compatibility = value.backend_compatibility && typeof value.backend_compatibility === 'object'
+    ? value.backend_compatibility
+    : {};
+  return installIdentityLines(value, constants)
+    .concat(compatibilityLines(compatibility, constants))
+    .join('\n');
 }
 
 function resolveFusionWorker(configValue, defaults, panelLimit) {

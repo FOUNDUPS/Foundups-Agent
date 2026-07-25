@@ -4,8 +4,9 @@
 
 ## 2026-07-25 - REDDOG_EXTENSION_BACKEND_COMPATIBILITY_PREFLIGHT_PHASE1 (0.4.12)
 
-- Added an extension-pinned repository backend manifest, per-bridge content digests, and a pure compatibility preflight for the editor thin client.
-- Blocked before grounding, HoloIndex, model, permission, and work-order paths when the selected workspace is stale, incomplete, altered, malformed, junction-escaped, symlinked, or API-incompatible; rechecked before model and action-planning boundaries.
+- Added an extension-pinned repository backend manifest, generated 555-file local Python dependency closure, per-file content digests, and a pure compatibility preflight for the editor thin client.
+- Blocked before grounding, HoloIndex, model, permission, and work-order paths when the selected workspace is stale, incomplete, altered, malformed, junction-backed, symlinked, or API-incompatible; rechecked before model and action-planning boundaries.
+- Split compatibility logic into WSP_62-compliant modules and rejected every unsafe intermediate path component, including in-root Windows junctions.
 - Added allowlisted content-free compatibility telemetry and a visible blocked install state without automatic repair or runtime re-index.
 - Version 0.4.11 -> 0.4.12.
 

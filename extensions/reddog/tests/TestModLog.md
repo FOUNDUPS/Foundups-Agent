@@ -2,7 +2,8 @@
 
 ## 2026-07-25 - Backend compatibility preflight (0.4.12)
 
-- Proved extension-pinned manifest/API/file-contract acceptance, bridge-content integrity, and fail-closed rejection for missing, altered, malformed, oversized, directory-backed, junction-escaped, and symlink-backed backend artifacts.
+- Proved extension-pinned manifest/API/file-contract acceptance, the generated 555-file runtime dependency closure, and fail-closed rejection for omitted/tampered non-bridge dependencies.
+- Proved every intermediate path component rejects in-root and escaping junctions/symlinks, and all new JavaScript modules/functions remain within WSP_62 ceilings.
 - Proved an incompatible workspace stops before work-focus classification, HoloIndex, model, permission, and work-order paths and exposes only bounded compatibility telemetry.
 - Reconciled the exhaustive live-enqueue expectation with the existing stronger
   admission-before-writer rejection order observed on the clean base.

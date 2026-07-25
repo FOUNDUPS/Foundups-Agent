@@ -246,6 +246,23 @@ assert.deepStrictEqual(
   backendCompatibility.REQUIRED_BRIDGE_FILES.slice().sort(),
   'backend bridge digest keys mismatch'
 );
+assert.deepStrictEqual(
+  Object.keys(backendManifest.required_runtime_sha256).sort(),
+  backendManifest.required_runtime_files.slice().sort(),
+  'backend runtime dependency digest keys mismatch'
+);
+assert(
+  backendManifest.required_runtime_files.length >= 500,
+  'backend manifest must bind the generated runtime dependency closure'
+);
+for (const bridgePath of backendCompatibility.REQUIRED_BRIDGE_FILES) {
+  assert(backendManifest.required_runtime_files.includes(bridgePath), 'runtime closure must include ' + bridgePath);
+  assert.strictEqual(
+    backendManifest.required_bridge_sha256[bridgePath],
+    backendManifest.required_runtime_sha256[bridgePath],
+    'bridge/runtime digest mismatch for ' + bridgePath
+  );
+}
 const canonicalManifest = (value) => (
   Array.isArray(value)
     ? value.map(canonicalManifest)
@@ -267,6 +284,7 @@ assert.strictEqual(
 const currentBackendCompatibility = backendCompatibility.runBackendCompatibilityPreflight(root);
 assert.strictEqual(currentBackendCompatibility.passed, true, 'current repository must satisfy the backend contract');
 assert.strictEqual(currentBackendCompatibility.backend_manifest_integrity_verified, true, 'current manifest integrity must pass');
+assert.strictEqual(currentBackendCompatibility.backend_runtime_integrity_verified, true, 'current runtime dependency closure must pass');
 assert.strictEqual(currentBackendCompatibility.no_holoindex_query_performed, true, 'preflight must not query HoloIndex');
 assert.strictEqual(currentBackendCompatibility.no_model_call_performed, true, 'preflight must not call a model');
 assert.strictEqual(currentBackendCompatibility.no_permission_probe_performed, true, 'preflight must not probe permissions');
@@ -621,12 +639,13 @@ Module._resolveFilename = originalResolve;
 const incompatibleBackendResult = orchestrator.buildBackendCompatibilityBlockedResult({
   extension_id: 'secret-extension-id',
   backend_compatibility: {
-    schema_version: 'reddog_backend_compatibility_preflight.v1',
+    schema_version: 'reddog_backend_compatibility_preflight.v2',
     checked: true,
     passed: false,
     backend_api_version: 0,
-    extension_backend_api_version: 1,
+    extension_backend_api_version: 2,
     required_bridge_count: 9,
+    required_runtime_file_count: 555,
     required_repository_marker_count: 3,
     workspace_root_digest: 'sha256:' + '0'.repeat(64),
     rejection_reasons: ['backend_api_version_mismatch', 'secret value must not cross'],

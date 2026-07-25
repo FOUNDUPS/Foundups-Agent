@@ -8,9 +8,16 @@ const path = require('path');
 const preflight = require('../backend_compatibility_preflight');
 const repoRoot = path.resolve(__dirname, '..', '..', '..');
 
-function writeFixture(mutator) {
+function writeFixture(mutator, options) {
+  const opts = options && typeof options === 'object' ? options : {};
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-backend-'));
-  for (const relativePath of preflight.REQUIRED_BRIDGE_FILES) {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, preflight.BACKEND_MANIFEST_PATH), 'utf8')
+  );
+  const runtimeFiles = opts.includeRuntime === false
+    ? preflight.REQUIRED_BRIDGE_FILES
+    : manifest.required_runtime_files;
+  for (const relativePath of runtimeFiles) {
     const target = path.join(root, relativePath);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.copyFileSync(path.join(repoRoot, relativePath), target);
@@ -20,9 +27,6 @@ function writeFixture(mutator) {
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, '# repository marker\n', 'utf8');
   }
-  const manifest = JSON.parse(
-    fs.readFileSync(path.join(repoRoot, preflight.BACKEND_MANIFEST_PATH), 'utf8')
-  );
   if (typeof mutator === 'function') {
     mutator(manifest, root);
   }
@@ -42,11 +46,23 @@ function runFixture(fixture) {
   const result = runFixture(fixture);
   assert.strictEqual(result.passed, true);
   assert.strictEqual(result.backend_manifest_integrity_verified, true);
-  assert.strictEqual(result.backend_api_version, 1);
+  assert.strictEqual(result.backend_runtime_integrity_verified, true);
+  assert.strictEqual(result.backend_api_version, 2);
+  assert.strictEqual(result.required_runtime_file_count >= 500, true);
   assert.strictEqual(result.rejection_reasons.length, 0);
   assert.strictEqual(result.workspace_root_digest.startsWith('sha256:'), true);
   assert.strictEqual(result.backend_evidence_digest.startsWith('sha256:'), true);
   assert.strictEqual(JSON.stringify(result).includes(fixture.root), false);
+  fs.rmSync(fixture.root, { recursive: true, force: true });
+}
+
+{
+  const fixture = writeFixture(null, { includeRuntime: false });
+  const result = runFixture(fixture);
+  assert.strictEqual(result.passed, false);
+  assert(result.rejection_reasons.some(
+    (reason) => reason.startsWith('required_runtime_file_missing_or_unsafe:')
+  ));
   fs.rmSync(fixture.root, { recursive: true, force: true });
 }
 
@@ -103,11 +119,41 @@ for (const invalidRoot of ['', ' ', null, undefined, false, 0]) {
 }
 
 {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, preflight.BACKEND_MANIFEST_PATH), 'utf8')
+  );
+  const dependency = manifest.required_runtime_files.find(
+    (relativePath) => !preflight.REQUIRED_BRIDGE_FILES.includes(relativePath)
+  );
+  assert(dependency, 'runtime manifest must bind at least one non-bridge dependency');
+  const fixture = writeFixture();
+  fs.appendFileSync(path.join(fixture.root, dependency), '\n# dependency tamper\n', 'utf8');
+  const result = runFixture(fixture);
+  assert.strictEqual(result.passed, false);
+  assert(result.rejection_reasons.includes(
+    'required_runtime_file_integrity_mismatch:' + dependency
+  ));
+  fs.rmSync(fixture.root, { recursive: true, force: true });
+}
+
+{
   const fixture = writeFixture();
   fs.rmSync(path.join(fixture.root, preflight.REQUIRED_BRIDGE_FILES[0]));
   const result = runFixture(fixture);
   assert.strictEqual(result.passed, false);
   assert(result.rejection_reasons.some((reason) => reason.startsWith('required_bridge_missing_or_unsafe:')));
+  fs.rmSync(fixture.root, { recursive: true, force: true });
+}
+
+{
+  const fixture = writeFixture();
+  const scripts = path.join(fixture.root, 'scripts');
+  const inRootTarget = path.join(fixture.root, 'scripts-real');
+  fs.renameSync(scripts, inRootTarget);
+  fs.symlinkSync(inRootTarget, scripts, process.platform === 'win32' ? 'junction' : 'dir');
+  const result = runFixture(fixture);
+  assert.strictEqual(result.passed, false);
+  assert.deepStrictEqual(result.rejection_reasons, ['backend_manifest_missing_or_unsafe']);
   fs.rmSync(fixture.root, { recursive: true, force: true });
 }
 
@@ -198,6 +244,40 @@ if (process.platform !== 'win32') {
   const source = fs.readFileSync(path.join(__dirname, '..', 'backend_compatibility_preflight.js'), 'utf8');
   for (const forbidden of ['execFile', 'spawn(', 'subprocess', 'holo_index.py --index']) {
     assert.strictEqual(source.includes(forbidden), false, 'forbidden runtime capability: ' + forbidden);
+  }
+}
+
+function functionSpans(source) {
+  const lines = source.split(/\r?\n/);
+  const spans = [];
+  for (let start = 0; start < lines.length; start += 1) {
+    const match = /^function\s+([A-Za-z0-9_]+)\s*\(/.exec(lines[start]);
+    if (!match) {
+      continue;
+    }
+    let depth = 0;
+    for (let end = start; end < lines.length; end += 1) {
+      depth += (lines[end].match(/{/g) || []).length;
+      depth -= (lines[end].match(/}/g) || []).length;
+      if (end > start && depth === 0) {
+        spans.push({ name: match[1], lines: end - start + 1 });
+        break;
+      }
+    }
+  }
+  return spans;
+}
+
+for (const relativePath of [
+  'backend_compatibility_preflight.js',
+  'backend_compatibility_manifest.js',
+  'backend_compatibility_filesystem.js',
+  'backend_compatibility_render.js'
+]) {
+  const source = fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8');
+  assert(source.split(/\r?\n/).length <= 400, relativePath + ' exceeds WSP_62 file limit');
+  for (const span of functionSpans(source)) {
+    assert(span.lines <= 30, relativePath + ':' + span.name + ' exceeds WSP_62 function limit');
   }
 }
 
