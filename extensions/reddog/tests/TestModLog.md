@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - Authoritative work-state grounding (0.4.13)
+
+- Proved direct current/next-work questions route to a local read-only receipt while audits and implementation requests remain on the grounded reasoning path.
+- Proved revision tamper, stale state, selected-slice mismatch, invalid WSP_15 allocation, missing governed lineage, internal paths, bridge failures, and malformed receipts fail closed.
+- Proved local fast paths are selected before context construction and never call HoloIndex, Fusion, queue mutation, or execution.
+
 ## 2026-07-25 - Backend compatibility preflight (0.4.12)
 
 - Proved extension-pinned manifest/API/executable-contract acceptance, the generated 989-file runtime dependency closure, and fail-closed rejection for omitted/tampered non-bridge dependencies.

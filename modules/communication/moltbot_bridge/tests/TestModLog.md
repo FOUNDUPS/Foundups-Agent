@@ -1,3 +1,11 @@
+## 2026-07-25: Authoritative work-state query
+
+- Added eleven focused regressions for accepted governed state, revision
+  tamper, staleness, selected-slice conflict, invalid WSP 15 allocation,
+  missing governed lineage, repo-internal state, and prohibited imports.
+- Added extension-side classification, bridge-failure, receipt rendering, and
+  no-Fusion ordering coverage.
+
 ## 2026-07-25: Main resident canonical-client review repair
 
 - Added regressions proving status cannot re-arm FIX/queue handoff and

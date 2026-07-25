@@ -26,6 +26,7 @@ BACKEND_API_VERSION = 2
 GRAPH_VERSION = 2
 BRIDGE_FILES = (
     "scripts/advisory_model_once.py",
+    "scripts/reddog_authoritative_work_state_query_once.py",
     "scripts/reddog_extension_live_enqueue_invoke_once.py",
     "scripts/reddog_extension_wre_spine_invoke_once.py",
     "scripts/reddog_github_permission_probe_once.py",
