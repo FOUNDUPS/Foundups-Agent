@@ -1,5 +1,11 @@
 # HoloIndex Package ModLog
 
+## [2026-07-25] REDDOG_HOLOINDEX_SEMANTIC_EVIDENCE_RECEIPT_BINDING_PHASE1
+
+- Added a bounded canonical semantic-evidence serialization over all RedDog-consumable HoloIndex buckets and metadata.
+- Bound the serialization digest and item count into `holoindex_query_receipt.v1`.
+- Preserved query-only behavior; the receipt builder performs no maintenance or indexing.
+
 ## [2026-07-25] REDDOG_HOLOINDEX_AUTHORITY_WORKTREE_QUERY_BINDING_PHASE1
 
 - Added a read-only authority-worktree selector for a configured or deterministic sibling linked worktree. It requires the same Git common directory, a clean authority, and exact workspace HEAD.

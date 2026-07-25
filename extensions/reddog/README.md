@@ -1,8 +1,10 @@
 # RedDog
 
-Version: 0.4.21
+Version: 0.4.22
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
+
+Version 0.4.22 serializes the exact semantic buckets and metadata that RedDog may consume, binds that serialization's SHA-256 digest and item count into the canonical HoloIndex query receipt, and verifies both before semantic evidence enters prompt construction. Mutable outer `raw_result` data is no longer an evidence source. Missing, oversized, malformed, altered, or count-mismatched evidence fails closed before Fusion.
 
 Version 0.4.21 can route semantic queries from a dirty developer checkout to a separate clean, linked, exact-HEAD HoloIndex authority worktree. Selection is read-only and fails closed on a foreign Git common directory, dirty authority, HEAD mismatch, configured-path error, owner-root mismatch, or state change during the query. The query receipt binds the authority-root digest and workspace-overlay state; direct reads continue to use the selected workspace. The host-owned owner fails immediately on an occupied loopback port, terminates when its exact supervisor process exits, and uses a bounded 30-second authenticated semantic startup probe inside the unchanged 300-second total startup budget. RedDog still never creates a worktree or re-indexes HoloIndex during a query.
 
@@ -243,6 +245,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.21.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.22.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

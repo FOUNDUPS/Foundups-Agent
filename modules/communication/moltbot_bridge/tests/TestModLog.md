@@ -1,3 +1,8 @@
+## 2026-07-25: RedDog HoloIndex receipt-bound evidence regression repair
+
+- Updated four older owner-client fixtures to carry the repository-root digest required by the landed authority-root contract.
+- Restored proof of poison-restart, missing-generation, and post-query repository-change behavior without weakening runtime validation.
+
 ## 2026-07-25: RedDog HoloIndex authority-root client proof
 
 - Added transport regressions proving expected-root transmission and foreign-root response rejection.

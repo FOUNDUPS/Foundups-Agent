@@ -1,5 +1,10 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-07-25] REDDOG_HOLOINDEX_SEMANTIC_EVIDENCE_RECEIPT_BINDING_PHASE1
+
+- Added digest-change, exact bucket/metadata serialization, item-count, and ignored-extra-field coverage.
+- Proved semantic evidence changes also change the canonical query receipt ID.
+
 ## [2026-07-25] REDDOG_HOLOINDEX_AUTHORITY_WORKTREE_QUERY_BINDING_PHASE1
 
 - Added authority selection coverage for configured and deterministic roots, dirty workspace overlays, unrelated repositories, dirty authorities, HEAD mismatch, invalid configuration, and workspace fallback.

@@ -412,6 +412,12 @@ def _normalized_response(
 ) -> Mapping[str, Any]:
     state = _response_state(payload)
     _apply_response_contract(state, payload, expected_head, repo_root)
+    raw_hits = payload.get("hits")
+    hits = (
+        [dict(item) for item in raw_hits if isinstance(item, Mapping)]
+        if isinstance(raw_hits, list)
+        else []
+    )
     if state.ok:
         repository_error = _post_query_repository_error(
             repo_root, expected_head, deadline
@@ -429,6 +435,7 @@ def _normalized_response(
         "source": "holoindex_owner_service",
         "query": query,
         "freshness": state.freshness,
+        "hits": hits,
         "raw_result": state.raw_result,
         "error": state.error,
         "latency_ms": int((time.monotonic() - started) * 1000),

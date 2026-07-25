@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from holo_index.freshness_receipt import (
     CollectionFreshness,
     HoloIndexFreshnessReceipt,
@@ -11,8 +13,10 @@ from holo_index.freshness_receipt import (
 )
 from holo_index.query_receipt import (
     SCHEMA_VERSION,
+    SEMANTIC_EVIDENCE_SCHEMA_VERSION,
     SOURCE_CLASS_HOLOINDEX,
     build_query_receipt,
+    canonical_semantic_evidence,
     load_generation_binding,
 )
 
@@ -80,7 +84,83 @@ def test_query_receipt_binds_generation_and_hits() -> None:
     assert receipt["receipt_id"].startswith("sha256:")
     assert receipt["freshness_generation_id"] == "sha256:generation"
     assert receipt["hits"][0]["source_class"] == SOURCE_CLASS_HOLOINDEX
+    assert receipt["semantic_evidence_digest"].startswith("sha256:")
+    assert receipt["semantic_evidence_count"] == 0
     assert receipt["no_holoindex_reindex_performed"] is True
+
+
+def test_canonical_semantic_evidence_binds_buckets_metadata_and_count() -> None:
+    serialized, digest, count = canonical_semantic_evidence(
+        {
+            "code_hits": [
+                {
+                    "path": "holo_index/query_receipt.py",
+                    "preview": "Canonical evidence binding.",
+                }
+            ],
+            "docs_hits": [{"path": "docs/architecture.md", "title": "Architecture"}],
+            "metadata": {"retrieval_mode": "semantic"},
+            "untrusted_extra": [{"path": "ignored.py"}],
+        }
+    )
+
+    assert f'"schema_version":"{SEMANTIC_EVIDENCE_SCHEMA_VERSION}"' in serialized
+    assert '"untrusted_extra"' not in serialized
+    assert digest.startswith("sha256:")
+    assert count == 2
+
+
+def test_canonical_semantic_evidence_rejects_oversized_payload() -> None:
+    with pytest.raises(ValueError, match="semantic_evidence_too_large"):
+        canonical_semantic_evidence(
+            {"code_hits": [{"preview": "x" * 128}]},
+            max_bytes=32,
+        )
+
+
+def test_query_receipt_digest_changes_when_semantic_evidence_changes() -> None:
+    base = {
+        "ok": True,
+        "query": "RedDog operational loop",
+        "freshness": "CURRENT",
+        "hits": [],
+        "raw_result": {
+            "code_hits": [{"path": "holo_index/query_receipt.py", "preview": "before"}]
+        },
+    }
+    binding = {
+        "freshness_generation_id": "sha256:generation",
+        "freshness_receipt_digest": "sha256:freshness",
+        "repo_head_sha": "abc123",
+    }
+
+    before = build_query_receipt(
+        source="holoindex",
+        source_class=SOURCE_CLASS_HOLOINDEX,
+        query="RedDog operational loop",
+        result=base,
+        require_generation=True,
+        generation_binding=binding,
+    )
+    changed = build_query_receipt(
+        source="holoindex",
+        source_class=SOURCE_CLASS_HOLOINDEX,
+        query="RedDog operational loop",
+        result={
+            **base,
+            "raw_result": {
+                "code_hits": [
+                    {"path": "holo_index/query_receipt.py", "preview": "after"}
+                ]
+            },
+        },
+        require_generation=True,
+        generation_binding=binding,
+    )
+
+    assert before["semantic_evidence_count"] == 1
+    assert before["semantic_evidence_digest"] != changed["semantic_evidence_digest"]
+    assert before["receipt_id"] != changed["receipt_id"]
 
 
 def test_fresh_query_without_generation_is_stale_not_fresh() -> None:

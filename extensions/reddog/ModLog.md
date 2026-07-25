@@ -2,6 +2,13 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_HOLOINDEX_SEMANTIC_EVIDENCE_RECEIPT_BINDING_PHASE1 (0.4.22)
+
+- Bound the exact semantic evidence serialization and item count into the canonical HoloIndex query receipt.
+- Made the extension verify and consume only receipt-bound semantic evidence; altered or malformed transport evidence now fails closed.
+- Preserved the read-only authority-worktree, generation, owner-lifecycle, and no-runtime-reindex boundaries.
+- Version 0.4.21 -> 0.4.22.
+
 ## 2026-07-25 - REDDOG_HOLOINDEX_PARENT_PROCESS_WATCHDOG_PHASE1 (0.4.21)
 
 - Replaced the v0.4.19/v0.4.20 blocking stdin reader after live proof showed it starved semantic health while the service remained listening.
