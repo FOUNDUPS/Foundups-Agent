@@ -6,6 +6,7 @@ import json
 import socket
 import subprocess
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ from modules.infrastructure.foundups_mcp_bridge.src import (
     holo_query_service_supervisor as supervisor_module,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (
+    DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
     HEALTH_SCHEMA_VERSION,
     OWNER_HOST,
     OWNER_MODULE,
@@ -95,10 +97,15 @@ def _install_successful_start(
         "_owner_port_available",
         lambda _host, _port: True,
     )
+
+    def fake_health_probe(**kwargs: Any) -> bool:
+        launch.setdefault("probe_timeouts", []).append(kwargs["timeout_seconds"])
+        return kwargs["token"] == TOKEN
+
     monkeypatch.setattr(
         supervisor_module,
         "_authenticated_health_probe",
-        lambda **kwargs: kwargs["token"] == TOKEN,
+        fake_health_probe,
     )
     monkeypatch.setattr(
         supervisor_module.secrets,
@@ -149,6 +156,7 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
     assert options["stderr"] is subprocess.DEVNULL
     assert options["env"][SERVICE_TOKEN_ENV] == TOKEN
     assert SERVICE_URL_ENV not in options["env"]
+    assert launch["probe_timeouts"] == [DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS]
     assert registered
 
     owner.stop()
@@ -537,6 +545,53 @@ def test_health_probe_requires_exact_authenticated_ready_contract() -> None:
             timeout_seconds=1.0,
         )
         assert observed_authorization == [f"Bearer {TOKEN}"]
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+
+def test_health_probe_accepts_semantic_response_beyond_legacy_one_second() -> None:
+    class SlowSemanticHealthHandler(BaseHTTPRequestHandler):
+        def log_message(self, _format: str, *_args: Any) -> None:
+            return
+
+        def do_GET(self) -> None:  # noqa: N802
+            time.sleep(1.1)
+            payload = {
+                "schema_version": HEALTH_SCHEMA_VERSION,
+                "ok": True,
+                "source": "holoindex",
+                "status": "ready",
+                "loopback_only": True,
+                "freshness": "CURRENT",
+                "error": "",
+                "stale_reasons": [],
+                "index_gap_detected": False,
+                "no_holoindex_reindex_performed": True,
+                "retrieval_mode": "semantic",
+                "repo_head_sha": "a" * 40,
+                "freshness_generation_id": "sha256:" + "b" * 64,
+                "freshness_receipt_digest": "sha256:" + "c" * 64,
+            }
+            body = json.dumps(payload).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+    server = ThreadingHTTPServer((OWNER_HOST, 0), SlowSemanticHealthHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        assert DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS == 30.0
+        assert supervisor_module._authenticated_health_probe(
+            host=OWNER_HOST,
+            port=int(server.server_address[1]),
+            token=TOKEN,
+            timeout_seconds=DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
+        )
     finally:
         server.shutdown()
         server.server_close()

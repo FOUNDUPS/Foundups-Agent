@@ -125,7 +125,9 @@ invalidates the handoff, terminates the owner, and kills it after a bounded
 grace period. Startup failures raise HoloQueryServiceSupervisorError with a
 stable secret-free code. An occupied fixed port fails before process spawn,
 and a private stdin watchdog exits an auto-owned child when its supervisor
-process dies. This supported adapter boundary does not itself
+process dies. Authenticated semantic startup probes have a bounded 30-second
+response window inside the 300-second total startup deadline. This supported
+adapter boundary does not itself
 remove OS filesystem/process privileges from a child; the trusted host must
 configure those permissions separately.
 

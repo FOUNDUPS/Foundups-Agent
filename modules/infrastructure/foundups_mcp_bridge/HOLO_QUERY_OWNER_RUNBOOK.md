@@ -151,6 +151,8 @@ The owner intentionally separates cold startup from normal request latency:
 
 - the first authenticated health canary has a 270-second semantic warmup
   budget (configurable only up to 300 seconds);
+- each auto-supervisor health request has a 30-second socket window, bounded
+  by the remaining total startup budget;
 - after a successful canary, health and query work use the ordinary owner query
   budget, which cannot exceed 30 seconds (15 seconds by default); and
 - the supervisor has a 300-second total startup budget in which the child must
