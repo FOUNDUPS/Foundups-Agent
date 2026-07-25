@@ -8,6 +8,8 @@ It is the IDE-side thin-client surface for the resident RedDog backend and the O
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode, not the product identity.
 
+Version 0.4.16 performs at most one semantic lead retry and one targeted adversarial critic retry. A retry is another fully receipted OpenRouter call through the existing redaction-gated bridge; it does not weaken required-evidence, quorum, synthesis, output-validation, or runtime-consumption gates.
+
 Version 0.4.15 recognizes anchored requests to draft or revise ordinary human communication. It overrides manual context, effort, and Fusion selections with `none`, `regular`, and a redaction-gated single model; wraps supplied text as untrusted message data; and skips repository grounding, output-to-action validation, and runtime consumption.
 
 Version 0.4.14 reconciles semantic extraction with low-confidence slash-token handling. Slash-delimited product/subsystem names remain excluded from repo-file targets but no longer suppress the surrounding semantic obligation; lines containing an actual bound repo target retain the existing no-duplicate semantic behavior.

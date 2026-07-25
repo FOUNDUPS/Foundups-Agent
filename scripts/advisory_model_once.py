@@ -444,65 +444,34 @@ def _missing_required_evidence(required_paths: object, evidence_context: object)
     return missing
 
 
+_FRAMING_TERMS = (
+    "framing", "frame", "assumption", "scope", "premise", "question",
+    "evidence", "claim", "finding",
+)
+_PRIORITY_TERMS = ("priority", "wsp_15", "p0", "p1", "p2", "next safest", "sequence", "order")
+
+
 def _critic_challenges_framing_and_priority(text: object) -> bool:
     lowered = str(text or "").lower()
-    if _none_like_model_text(lowered):
+    if _none_like_model_text(lowered) or not lowered.lstrip().startswith("challenge:"):
         return False
-    challenge_terms = (
-        "challenge",
-        "disagree",
-        "unsupported",
-        "missing",
-        "overclaim",
-        "risk",
-        "wrong",
-        "blocker",
-        "major",
-        "fail",
-        "needs_verification",
-    )
-    framing_terms = (
-        "framing",
-        "frame",
-        "assumption",
-        "scope",
-        "premise",
-        "question",
-        "evidence",
-        "claim",
-        "finding",
-    )
-    priority_terms = ("priority", "wsp_15", "p0", "p1", "p2", "next safest", "sequence", "order")
     return (
-        any(term in lowered for term in challenge_terms)
-        and any(term in lowered for term in framing_terms)
-        and any(term in lowered for term in priority_terms)
+        any(term in lowered for term in _FRAMING_TERMS)
+        and any(term in lowered for term in _PRIORITY_TERMS)
     )
 
 
 def _fusion_quorum_packet(
-    *,
-    ok: bool,
-    reason: str,
-    lead_model: str,
-    panel_models: list[str],
-    panel_models_truncated: bool,
-    role_max_tokens: dict[str, Any] | None = None,
-    panel_max_tokens: dict[str, int] | None = None,
-    missing_required_evidence: list[str] | None = None,
-    challenging_critics: list[str] | None = None,
-    abstaining_critics: list[str] | None = None,
+    *, ok: bool, reason: str, lead_model: str, panel_models: list[str],
+    panel_models_truncated: bool, role_max_tokens: dict[str, Any] | None = None,
+    panel_max_tokens: dict[str, int] | None = None, missing_required_evidence: list[str] | None = None,
+    challenging_critics: list[str] | None = None, abstaining_critics: list[str] | None = None,
+    lead_semantic_retry_count: int = 0, critic_challenge_retry_models: list[str] | None = None,
 ) -> dict[str, Any]:
-    quorum = {
-        "applied": True,
-        "passed": ok,
-        "reason": reason,
-        "missing_required_evidence": list(missing_required_evidence or []),
-        "challenging_critics": list(challenging_critics or []),
-        "abstaining_critics": list(abstaining_critics or []),
-        "lead_required": True,
-        "synthesis_requires_quorum": True,
-    }
+    quorum = _fusion_quorum_fields(
+        ok, reason, missing_required_evidence, challenging_critics, abstaining_critics,
+        lead_semantic_retry_count, critic_challenge_retry_models,
+    )
     return {
         "ok": ok,
         "reason": reason,
@@ -519,6 +488,63 @@ def _fusion_quorum_packet(
             "fusion_panel_quorum": quorum,
         },
     }
+
+
+def _fusion_quorum_fields(
+    ok: bool, reason: str, missing: list[str] | None, challenging: list[str] | None,
+    abstaining: list[str] | None, lead_retry_count: int, critic_retry_models: list[str] | None,
+) -> dict[str, Any]:
+    return {
+        "applied": True, "passed": ok, "reason": reason,
+        "missing_required_evidence": list(missing or []),
+        "challenging_critics": list(challenging or []),
+        "abstaining_critics": list(abstaining or []),
+        "lead_required": True,
+        "lead_semantic_retry_count": max(0, int(lead_retry_count)),
+        "critic_challenge_retry_models": list(critic_retry_models or []),
+        "synthesis_requires_quorum": True,
+    }
+
+
+def _adversarial_critic_retry_messages(
+    critic_messages: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    messages = [dict(item) for item in critic_messages]
+    messages[0]["content"] += (
+        "\n\nAdversarial retry: identify one concrete falsifiable evidence gap, "
+        "unsupported framing assumption, or alternative WSP_15 priority/order. "
+        "Start with `Challenge:`. If no defensible challenge exists, start with "
+        "`No material challenge:`; never fabricate a defect."
+    )
+    return messages
+
+
+def _retry_challenging_critic(
+    api_key: str,
+    panel_models: list[str],
+    abstaining_critics: list[str],
+    critic_messages: list[dict[str, str]],
+    panel_max_tokens: dict[str, int],
+    temperature: float,
+    timeout: int,
+) -> tuple[str, str, bool]:
+    candidates = [model for model in panel_models if model not in abstaining_critics] or panel_models
+    model = candidates[0]
+    _progress("panel_retry", "No material critic challenge; one bounded adversarial retry is starting.", role="critic", model=model)
+    _progress("panel_start", "Targeted adversarial critic retry started: " + model, role="panel", model=model)
+    try:
+        text, _retry = _chat_completion(
+            api_key, model, _adversarial_critic_retry_messages(critic_messages),
+            max_tokens=panel_max_tokens[model], temperature=temperature, timeout=timeout, role="critic",
+        )
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError, json.JSONDecodeError):
+        _progress("panel_blocked", "Targeted adversarial critic retry blocked: " + model, role="critic", model=model)
+        return model, "[blocked: adversarial_retry_unavailable]", False
+    if _none_like_model_text(text):
+        _progress("panel_blocked", "Targeted adversarial critic retry abstained: " + model, role="critic", model=model)
+        return model, "[abstained: adversarial_retry_empty_or_none]", False
+    _progress("panel_done", "Targeted adversarial critic retry received: " + model, role="critic", model=model)
+    return model, text, _critic_challenges_framing_and_priority(text)
 
 
 def _empty_fusion_panel_rejection(
@@ -726,6 +752,7 @@ def _run_foundups_fusion_core(
 
     _progress("lead_start", "Lead request started: " + lead_model, role="lead", model=lead_model)
     lead_retry: dict[str, Any] = {"retry_count": 0, "final_retry_reason": None}
+    lead_semantic_retry_count = 0
     try:
         lead_text, lead_retry = _chat_completion(
             api_key,
@@ -743,15 +770,37 @@ def _run_foundups_fusion_core(
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return {"ok": False, "reason": "lead_malformed_response", "lead_model": lead_model}
     if _none_like_model_text(lead_text):
-        return _fusion_quorum_packet(
-            ok=False,
-            reason="fusion_quorum_lead_missing",
-            lead_model=lead_model,
-            panel_models=panel_models,
-            panel_models_truncated=panel_models_truncated,
-            role_max_tokens=role_max_tokens,
-            panel_max_tokens=panel_max_tokens,
+        lead_semantic_retry_count = 1
+        _progress("lead_retry", "Lead returned empty or None; one bounded semantic retry is starting.", role="lead", model=lead_model)
+        _progress("lead_start", "Lead returned empty or None; bounded semantic retry started: " + lead_model, role="lead", model=lead_model)
+        retry_messages = [dict(message) for message in lead_messages]
+        retry_messages[0]["content"] += (
+            "\n\nRecovery pass: the previous response was empty or None. Return the requested "
+            "evidence-grounded lead answer now. Do not discuss the retry."
         )
+        try:
+            lead_text, semantic_retry = _chat_completion(
+                api_key, lead_model, retry_messages, max_tokens=role_max_tokens["lead"],
+                temperature=temperature, timeout=timeout, role="lead",
+            )
+            lead_retry = {
+                "retry_count": int(lead_retry.get("retry_count", 0)) + int(semantic_retry.get("retry_count", 0)),
+                "final_retry_reason": semantic_retry.get("final_retry_reason") or lead_retry.get("final_retry_reason"),
+            }
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError, json.JSONDecodeError):
+            return _fusion_quorum_packet(
+                ok=False, reason="fusion_quorum_lead_retry_unavailable", lead_model=lead_model,
+                panel_models=panel_models, panel_models_truncated=panel_models_truncated,
+                role_max_tokens=role_max_tokens, panel_max_tokens=panel_max_tokens,
+                lead_semantic_retry_count=lead_semantic_retry_count,
+            )
+        if _none_like_model_text(lead_text):
+            return _fusion_quorum_packet(
+                ok=False, reason="fusion_quorum_lead_missing", lead_model=lead_model,
+                panel_models=panel_models, panel_models_truncated=panel_models_truncated,
+                role_max_tokens=role_max_tokens, panel_max_tokens=panel_max_tokens,
+                lead_semantic_retry_count=lead_semantic_retry_count,
+            )
 
     _progress("lead_done", "Lead response received: " + lead_model, role="lead", model=lead_model)
     critic_system = (
@@ -771,6 +820,20 @@ def _run_foundups_fusion_core(
     challenging_critics = [
         model for model, text in panel_results.items() if _critic_challenges_framing_and_priority(text)
     ]
+    critic_challenge_retry_models: list[str] = []
+    if not challenging_critics:
+        retry_model, retry_text, retry_challenged = _retry_challenging_critic(
+            api_key, panel_models, abstaining_critics, critic_messages,
+            panel_max_tokens, temperature, timeout,
+        )
+        critic_challenge_retry_models.append(retry_model)
+        panel_results[retry_model] = (
+            panel_results.get(retry_model, "")[:8000]
+            + "\n\nAdversarial retry:\n"
+            + retry_text
+        )
+        if retry_challenged:
+            challenging_critics = [retry_model]
     if not challenging_critics:
         return _fusion_quorum_packet(
             ok=False,
@@ -782,6 +845,8 @@ def _run_foundups_fusion_core(
             panel_max_tokens=panel_max_tokens,
             challenging_critics=[],
             abstaining_critics=abstaining_critics,
+            lead_semantic_retry_count=lead_semantic_retry_count,
+            critic_challenge_retry_models=critic_challenge_retry_models,
         )
 
     if strict_json_contract:
@@ -820,6 +885,8 @@ def _run_foundups_fusion_core(
             panel_max_tokens=panel_max_tokens,
             challenging_critics=challenging_critics,
             abstaining_critics=abstaining_critics,
+            lead_semantic_retry_count=lead_semantic_retry_count,
+            critic_challenge_retry_models=critic_challenge_retry_models,
         )
 
     _progress("synthesis_done", "Synthesis complete.", role="synthesis", model=lead_model)
@@ -856,6 +923,8 @@ def _run_foundups_fusion_core(
                 "challenging_critics": challenging_critics,
                 "abstaining_critics": abstaining_critics,
                 "lead_required": True,
+                "lead_semantic_retry_count": lead_semantic_retry_count,
+                "critic_challenge_retry_models": critic_challenge_retry_models,
                 "synthesis_requires_quorum": True,
             },
             "retry_count": lead_retry.get("retry_count", 0),

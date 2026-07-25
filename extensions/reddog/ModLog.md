@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_FUSION_SEMANTIC_RETRY_AND_QUORUM_EVIDENCE_PHASE1 (0.4.16)
+
+- Added one bounded, receipted semantic retry for empty/`None` lead output.
+- Added one bounded targeted adversarial critic retry before failing a no-challenge quorum.
+- Prevented `No material challenge:` responses from satisfying the challenge gate.
+- Surfaced lead and critic semantic-retry evidence in Copy MD without prompt, response, or reasoning content.
+- Kept synthesis fail-closed behind required evidence, a substantive lead, and a material challenge.
+- Version 0.4.15 -> 0.4.16.
+
 ## 2026-07-25 - REDDOG_CONVERSATIONAL_DRAFT_ROUTING_PHASE1 (0.4.15)
 
 - Added an anchored conversational reply/message-drafting policy with explicit worker-prompt exclusion.

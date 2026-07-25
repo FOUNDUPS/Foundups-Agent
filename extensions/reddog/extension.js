@@ -21,7 +21,7 @@ const conversationalDraftPolicy = require('./conversational_draft_policy');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.15';
+const EXTENSION_VERSION = '0.4.16';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -111,11 +111,9 @@ const BRIDGE_STAGE_WORK_TRAIL = {
   redaction_start: 'redaction_gate_started',
   redaction_blocked: 'redaction_gate_blocked',
   redaction_pass: 'redaction_gate_passed',
-  lead_start: 'lead_started',
-  lead_done: 'lead_started',
-  panel_start: 'panel_started',
-  panel_done: 'panel_started',
-  panel_blocked: 'panel_started',
+  lead_start: 'lead_started', lead_done: 'lead_started', lead_retry: 'lead_started',
+  panel_start: 'panel_started', panel_done: 'panel_started',
+  panel_blocked: 'panel_started', panel_retry: 'panel_started',
   synthesis_start: 'synthesis_started',
   synthesis_done: 'synthesis_started',
   single_start: 'lead_started',
@@ -132,10 +130,8 @@ const BRIDGE_REPAIR_STAGE_WORK_TRAIL = {
   redaction_pass: 'repair_redaction_passed',
   single_start: 'repair_single_started',
   single_done: 'repair_single_done',
-  lead_start: 'repair_single_started',
-  lead_done: 'repair_single_done',
-  panel_start: 'repair_single_started',
-  panel_done: 'repair_single_started',
+  lead_start: 'repair_single_started', lead_done: 'repair_single_done', lead_retry: 'repair_single_started',
+  panel_start: 'repair_single_started', panel_done: 'repair_single_started', panel_retry: 'repair_single_started',
   synthesis_start: 'repair_single_started',
   synthesis_done: 'repair_single_started'
 };
@@ -148,11 +144,8 @@ const ADVISORY_BRIDGE_STAGES = [
   'redaction_pass',
   'fusion_alias_start',
   'fusion_alias_done',
-  'lead_start',
-  'lead_done',
-  'panel_start',
-  'panel_done',
-  'panel_blocked',
+  'lead_start', 'lead_done', 'lead_retry',
+  'panel_start', 'panel_done', 'panel_blocked', 'panel_retry',
   'synthesis_start',
   'synthesis_done',
   'single_start',
@@ -167,11 +160,10 @@ const REDDOG_STAGE_ACTIONS = {
   redaction_pass: { action: 'nosing', pixel: '<rd>' },
   fusion_alias_start: { action: 'fetching', pixel: '<rd>' },
   fusion_alias_done: { action: 'crystallizing', pixel: '<rd>' },
-  lead_start: { action: 'fetching', pixel: '<rd>' },
-  lead_done: { action: 'herding', pixel: '<rd>' },
-  panel_start: { action: 'herding', pixel: '<rd>' },
-  panel_done: { action: 'herding', pixel: '<rd>' },
-  panel_blocked: { action: 'sitting', pixel: '.rd.' },
+  lead_start: { action: 'fetching', pixel: '<rd>' }, lead_done: { action: 'herding', pixel: '<rd>' },
+  lead_retry: { action: 'fetching', pixel: '<rd>' },
+  panel_start: { action: 'herding', pixel: '<rd>' }, panel_done: { action: 'herding', pixel: '<rd>' },
+  panel_blocked: { action: 'sitting', pixel: '.rd.' }, panel_retry: { action: 'herding', pixel: '<rd>' },
   synthesis_start: { action: 'crystallizing', pixel: '<rd>' },
   synthesis_done: { action: 'pointing', pixel: '>rd>' },
   single_start: { action: 'fetching', pixel: '<rd>' },

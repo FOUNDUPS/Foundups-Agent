@@ -113,6 +113,16 @@ function createFusionProgressCollector() {
 
 function formatFusionProgressReceiptLines(reviewPacket) {
   const rp = reviewPacket && typeof reviewPacket === 'object' ? reviewPacket : {};
+  const quorum = rp.fusion_panel_quorum && typeof rp.fusion_panel_quorum === 'object'
+    ? rp.fusion_panel_quorum
+    : {};
+  const retryModels = Array.isArray(quorum.critic_challenge_retry_models)
+    ? quorum.critic_challenge_retry_models.map(String).filter(Boolean)
+    : [];
+  const quorumLines = [
+    '- fusion_lead_semantic_retries: ' + (Number(quorum.lead_semantic_retry_count) || 0),
+    '- fusion_critic_challenge_retry_models: ' + (retryModels.length ? retryModels.join(', ') : '(none)')
+  ];
   const validation = rp.fusion_progress_receipt_validation && typeof rp.fusion_progress_receipt_validation === 'object'
     ? rp.fusion_progress_receipt_validation
     : null;
@@ -124,7 +134,7 @@ function formatFusionProgressReceiptLines(reviewPacket) {
   const receipts = Array.isArray(rp.fusion_progress_receipts)
     ? rp.fusion_progress_receipts
     : (rp.fusion_progress_receipt && typeof rp.fusion_progress_receipt === 'object' ? [rp.fusion_progress_receipt] : []);
-  if (!receipts.length) return ['- fusion_progress_receipts: 0', ...validationLines];
+  if (!receipts.length) return ['- fusion_progress_receipts: 0', ...validationLines, ...quorumLines];
   const calls = [];
   const receiptIds = [];
   let eventCount = 0;
@@ -155,6 +165,7 @@ function formatFusionProgressReceiptLines(reviewPacket) {
   return [
     '- fusion_progress_receipts: ' + receipts.length,
     ...validationLines,
+    ...quorumLines,
     '- fusion_progress_receipt_ids: ' + (receiptIds.length ? receiptIds.join(', ') : '(none)'),
     '- fusion_progress_events: ' + eventCount,
     '- openrouter_calls_receipted: ' + calls.length,

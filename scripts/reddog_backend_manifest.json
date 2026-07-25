@@ -29,7 +29,7 @@
     "scripts/reddog_resident_architect_session_once.py"
   ],
   "required_bridge_sha256": {
-    "scripts/advisory_model_once.py": "7d3079067fc82442bc271bf0e428b16ea5474a867162b114bfdfe877bd45d2d6",
+    "scripts/advisory_model_once.py": "2bb7e26179935d962b0b150015abb8fec9aa52d8712c1204be92432ecb168d8f",
     "scripts/reddog_authoritative_work_state_query_once.py": "9025d639b057d7f132205bcec029c4f1347f1e6787019ed27840f299caed5bd8",
     "scripts/reddog_extension_live_enqueue_invoke_once.py": "a2fa50ab16847a05501d06a1fa9dc6e4c40fa5e5cf4ec47cdc6c70c7c2ff6bb6",
     "scripts/reddog_extension_wre_spine_invoke_once.py": "aeb957566760154e27f91495a52ad6a6dddcad7d1c61b739198be2f7a4dae9fc",
@@ -1394,7 +1394,7 @@
     "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "356741c8f4f5753078a2c6a2fce4930ad995cf6246c8b467eb585f553228cb46",
     "modules/communication/moltbot_bridge/src/reddog_extension_live_enqueue_invoke.py": "dd3469887000e4ec50bce10ef449cb93842607123610cb2d0cf6105fb12f37d8",
     "modules/communication/moltbot_bridge/src/reddog_extension_wre_operational_spine_invoke.py": "2c953a03e91874bdb5c63b6ce1199f46af24fd8b6187827314c88ca5c208e7fb",
-    "modules/communication/moltbot_bridge/src/reddog_fusion_progress_receipt.py": "02ae46b2371dbfac12080bf0f16c9e793077d6de0519f8dc0a659c50dacadfb3",
+    "modules/communication/moltbot_bridge/src/reddog_fusion_progress_receipt.py": "939bd33e976c93eeb9ae6e341b8fd21593c48ab793bfa73956c29e66e6fb3eab",
     "modules/communication/moltbot_bridge/src/reddog_fusion_progress_validation.py": "29957a3f1a067e0a34ae74dfcc6505eed00635660033468d7a3e2b4ef929d0a9",
     "modules/communication/moltbot_bridge/src/reddog_generic_agent_worktree_writer_dryrun.py": "9b8638e8c6dad059f81872fdfe29d7931d474e702e684d14c558b60a8eb2156f",
     "modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py": "91e7c70934a9872b585499d2f740c69f69b64ef481026caf82047ba2cec05dd2",
@@ -2009,7 +2009,7 @@
     "modules/platform_integration/youtube_shorts_scheduler/src/schedule_tracker.py": "7d0cd5e230f497464a716c9266ca587d8bd7131c10bd58684f8bd47d0528304a",
     "modules/platform_integration/youtube_shorts_scheduler/src/scheduler.py": "6a1e5b3efeb7a663ceb7f23331adbd1e1db9ccaae72f95dd6bac01529e6e00c7",
     "prompt/swarm/m2m_compiler.py": "e12f7c41246cebb2795f66b427b59c6117ba339aa88c7042a6842b21048c2408",
-    "scripts/advisory_model_once.py": "7d3079067fc82442bc271bf0e428b16ea5474a867162b114bfdfe877bd45d2d6",
+    "scripts/advisory_model_once.py": "2bb7e26179935d962b0b150015abb8fec9aa52d8712c1204be92432ecb168d8f",
     "scripts/reddog_authoritative_work_state_query_once.py": "9025d639b057d7f132205bcec029c4f1347f1e6787019ed27840f299caed5bd8",
     "scripts/reddog_extension_live_enqueue_invoke_once.py": "a2fa50ab16847a05501d06a1fa9dc6e4c40fa5e5cf4ec47cdc6c70c7c2ff6bb6",
     "scripts/reddog_extension_wre_spine_invoke_once.py": "aeb957566760154e27f91495a52ad6a6dddcad7d1c61b739198be2f7a4dae9fc",

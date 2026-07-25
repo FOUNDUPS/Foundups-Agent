@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - Fusion semantic retry and quorum evidence (0.4.16)
+
+- Proved an empty/`None` lead receives exactly one semantic retry and still blocks if the retry is empty.
+- Proved an initially non-challenging panel receives one targeted adversarial retry and synthesis runs only after a material challenge.
+- Proved `No material challenge:` cannot satisfy quorum even when it mentions framing and WSP_15 priority.
+- Proved repeated lead/panel progress stages and calls remain valid, digest-bound, content-free receipts.
+
 ## 2026-07-25 - Conversational drafting route (0.4.15)
 
 - Replayed the social reply-rewrite prompt and proved it selects regular single-model drafting with no HoloIndex or repository context.
