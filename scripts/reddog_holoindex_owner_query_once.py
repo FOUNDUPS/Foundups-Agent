@@ -19,7 +19,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from holo_index.query_receipt import build_query_receipt  # noqa: E402
+from holo_index.query_receipt import (  # noqa: E402
+    build_query_receipt,
+    canonical_semantic_evidence,
+)
 from holo_index.authority_worktree import (  # noqa: E402
     HoloIndexAuthoritySelection,
     resolve_holoindex_authority_root,
@@ -194,6 +197,19 @@ def query_once(
                 **_authority_metadata(selection),
             }
         result = _bind_authority(result, final_selection, query)
+        try:
+            semantic_evidence_json, _, _ = canonical_semantic_evidence(
+                result.get("raw_result")
+            )
+        except ValueError as exc:
+            return {
+                **_failure(str(exc), query=query),
+                **_authority_metadata(final_selection),
+            }
+        result = {
+            **dict(result),
+            "semantic_evidence_json": semantic_evidence_json,
+        }
         receipt = build_query_receipt(
             source="holoindex_owner_service",
             source_class="holoindex",

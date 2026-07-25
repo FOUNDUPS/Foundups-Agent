@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - Semantic evidence receipt binding (0.4.22)
+
+- Added canonical evidence serialization, digest, count, tamper, missing-evidence, and mutable-outer-result regressions.
+- Proved RedDog consumes only the receipt-bound evidence serialization before Fusion.
+
 ## 2026-07-25 - HoloIndex parent-process watchdog (0.4.21)
 
 - Proved an injected parent waiter terminates the child and a real child exits after its real intermediate parent terminates.

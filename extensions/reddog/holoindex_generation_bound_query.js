@@ -13,6 +13,8 @@ const HOLOINDEX_SEMANTIC_BUCKETS = [
   'knowledge_hits',
   'work_ledger_hits'
 ];
+const SEMANTIC_EVIDENCE_SCHEMA_VERSION = 'holoindex_semantic_evidence.v1';
+const MAX_SEMANTIC_EVIDENCE_BYTES = 4 * 1024 * 1024;
 
 function failureResult(error, query) {
   return {
@@ -76,6 +78,45 @@ function queryReceiptId(receipt) {
   return 'sha256:' + crypto.createHash('sha256').update(canonicalJson(payload), 'utf8').digest('hex');
 }
 
+function semanticEvidenceDigest(value) {
+  return 'sha256:' + crypto.createHash('sha256').update(String(value || ''), 'utf8').digest('hex');
+}
+
+function verifiedSemanticEvidence(value, receipt) {
+  const serialized = value && typeof value.semantic_evidence_json === 'string'
+    ? value.semantic_evidence_json
+    : '';
+  if (!serialized || Buffer.byteLength(serialized, 'utf8') > MAX_SEMANTIC_EVIDENCE_BYTES) {
+    return null;
+  }
+  if (!/^sha256:[0-9a-f]{64}$/.test(String(receipt.semantic_evidence_digest || ''))
+      || semanticEvidenceDigest(serialized) !== receipt.semantic_evidence_digest
+      || !Number.isInteger(receipt.semantic_evidence_count)
+      || receipt.semantic_evidence_count < 0) {
+    return null;
+  }
+  try {
+    const evidence = JSON.parse(serialized);
+    if (!evidence || typeof evidence !== 'object' || Array.isArray(evidence)
+        || evidence.schema_version !== SEMANTIC_EVIDENCE_SCHEMA_VERSION
+        || !evidence.metadata || typeof evidence.metadata !== 'object'
+        || Array.isArray(evidence.metadata)) {
+      return null;
+    }
+    let count = 0;
+    for (const bucket of HOLOINDEX_SEMANTIC_BUCKETS) {
+      if (!Array.isArray(evidence[bucket])
+          || evidence[bucket].some((item) => !item || typeof item !== 'object' || Array.isArray(item))) {
+        return null;
+      }
+      count += evidence[bucket].length;
+    }
+    return count === receipt.semantic_evidence_count ? evidence : null;
+  } catch (err) {
+    return null;
+  }
+}
+
 function receiptMatchesResult(receipt, value) {
   return receipt.schema_version === 'holoindex_query_receipt.v1'
     && receipt.source === 'holoindex_owner_service'
@@ -98,6 +139,7 @@ function receiptMatchesResult(receipt, value) {
     && receipt.workspace_overlay_present === value.workspace_overlay_present
     && receipt.semantic_evidence_authority === value.semantic_evidence_authority
     && receipt.no_authority_worktree_mutation_performed === true
+    && verifiedSemanticEvidence(value, receipt) !== null
     && typeof receipt.receipt_id === 'string'
     && receipt.receipt_id === queryReceiptId(receipt);
 }
@@ -168,9 +210,11 @@ function parseBundle(bundleOutput) {
 
 function replaceSemanticBuckets(task, ownerResult) {
   const accepted = isAccepted(ownerResult);
-  const raw = accepted && ownerResult.raw_result && typeof ownerResult.raw_result === 'object'
-    ? ownerResult.raw_result
+  const receipt = ownerResult && ownerResult.query_receipt && typeof ownerResult.query_receipt === 'object'
+    ? ownerResult.query_receipt
     : {};
+  const evidence = accepted ? verifiedSemanticEvidence(ownerResult, receipt) : null;
+  const raw = evidence || {};
   for (const bucket of HOLOINDEX_SEMANTIC_BUCKETS) {
     task[bucket] = accepted && Array.isArray(raw[bucket]) ? raw[bucket].slice() : [];
   }
@@ -410,6 +454,8 @@ module.exports = {
   HOLOINDEX_SEMANTIC_BUCKETS,
   failureResult,
   queryReceiptId,
+  semanticEvidenceDigest,
+  verifiedSemanticEvidence,
   isAccepted,
   classifyOwnerBridgeError,
   runOwnerQuery,

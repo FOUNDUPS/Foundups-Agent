@@ -31,6 +31,7 @@ def _success(root: Path) -> dict:
         "source": "holoindex_owner_service",
         "query": "audit pfmall",
         "freshness": "CURRENT",
+        "hits": [{"path": "modules/foundups/pfmall/api.py", "score": 0.9}],
         "raw_result": {"code_hits": [{"path": "modules/foundups/pfmall/api.py"}]},
         "error": "",
         "index_gap_detected": False,
@@ -74,6 +75,11 @@ def test_started_owner_uses_private_handoff_and_cleans_up(tmp_path: Path) -> Non
         tmp_path
     )
     assert result["query_receipt"]["no_authority_worktree_mutation_performed"] is True
+    assert result["query_receipt"]["semantic_evidence_count"] == 1
+    assert result["query_receipt"]["semantic_evidence_digest"].startswith("sha256:")
+    assert result["query_receipt"]["hits"][0]["path"] == "modules/foundups/pfmall/api.py"
+    assert result["query_receipt"]["hits"][0]["score"] == "0.9"
+    assert "modules/foundups/pfmall/api.py" in result["semantic_evidence_json"]
     assert calls["repo_root"] == tmp_path
     assert calls["service_url"].startswith("http://127.0.0.1:")
     assert calls["service_token"] == "x" * 48

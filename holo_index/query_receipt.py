@@ -21,6 +21,18 @@ from holo_index.freshness_receipt import (
 
 
 SCHEMA_VERSION = "holoindex_query_receipt.v1"
+SEMANTIC_EVIDENCE_SCHEMA_VERSION = "holoindex_semantic_evidence.v1"
+MAX_SEMANTIC_EVIDENCE_BYTES = 4 * 1024 * 1024
+SEMANTIC_EVIDENCE_BUCKETS = (
+    "code_hits",
+    "wsp_hits",
+    "test_hits",
+    "skill_hits",
+    "symbol_hits",
+    "docs_hits",
+    "knowledge_hits",
+    "work_ledger_hits",
+)
 SOURCE_CLASS_HOLOINDEX = "holoindex"
 SOURCE_CLASS_CODEINDEX = "codeindex"
 SOURCE_CLASS_MEMEX = "memex"
@@ -81,6 +93,42 @@ class HoloIndexQueryReceipt:
 def digest_json(value: Any) -> str:
     payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def canonical_semantic_evidence(
+    raw_result: Any,
+    *,
+    max_bytes: int = MAX_SEMANTIC_EVIDENCE_BYTES,
+) -> tuple[str, str, int]:
+    """Serialize the exact semantic evidence RedDog may consume."""
+
+    source = raw_result if isinstance(raw_result, Mapping) else {}
+    evidence: dict[str, Any] = {
+        "schema_version": SEMANTIC_EVIDENCE_SCHEMA_VERSION,
+    }
+    count = 0
+    for bucket in SEMANTIC_EVIDENCE_BUCKETS:
+        value = source.get(bucket)
+        items = (
+            [dict(item) for item in value if isinstance(item, Mapping)]
+            if isinstance(value, Sequence) and not isinstance(value, (str, bytes))
+            else []
+        )
+        evidence[bucket] = items
+        count += len(items)
+    metadata = source.get("metadata")
+    evidence["metadata"] = dict(metadata) if isinstance(metadata, Mapping) else {}
+    payload = json.dumps(
+        evidence,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        default=str,
+    )
+    if len(payload.encode("utf-8")) > max(0, int(max_bytes)):
+        raise ValueError("semantic_evidence_too_large")
+    digest = "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    return payload, digest, count
 
 
 def file_digest(path: Path | str) -> str:
@@ -163,7 +211,11 @@ def normalize_query_hits(value: Any, *, source_class: str, limit: int = 8) -> li
             HoloIndexQueryHit(
                 path=path[:240],
                 title=str(item.get("title") or "")[:160],
-                score=item.get("score"),
+                score=(
+                    str(item.get("score"))
+                    if item.get("score") is not None
+                    else ""
+                ),
                 digest=digest[:96],
                 evidence_ref=evidence_ref[:320],
                 source_class=source_class,
@@ -312,6 +364,9 @@ def build_query_receipt(
     )
     generation_id = str(binding.get("freshness_generation_id") or "")
     hits = normalize_query_hits(result.get("hits"), source_class=source_class)
+    _, semantic_evidence_digest, semantic_evidence_count = (
+        canonical_semantic_evidence(result.get("raw_result"))
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "source": str(source or ""),
@@ -332,6 +387,8 @@ def build_query_receipt(
         ),
         "stale_reasons": stale_reasons,
         "no_holoindex_reindex_performed": True,
+        "semantic_evidence_digest": semantic_evidence_digest,
+        "semantic_evidence_count": semantic_evidence_count,
     }
     root_digest = str(binding.get("repo_root_digest") or "")
     if root_digest:
@@ -356,7 +413,11 @@ __all__ = [
     "SOURCE_CLASS_CODEINDEX",
     "SOURCE_CLASS_HOLOINDEX",
     "SOURCE_CLASS_MEMEX",
+    "MAX_SEMANTIC_EVIDENCE_BYTES",
+    "SEMANTIC_EVIDENCE_BUCKETS",
+    "SEMANTIC_EVIDENCE_SCHEMA_VERSION",
     "build_query_receipt",
+    "canonical_semantic_evidence",
     "digest_json",
     "file_digest",
     "generation_binding_from_receipt",

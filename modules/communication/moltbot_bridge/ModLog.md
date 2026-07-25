@@ -1,5 +1,10 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-25: RedDog HoloIndex receipt-bound semantic evidence
+
+- Preserved the owner's bounded flattened hits in the normalized client response so canonical query receipts expose the evidence list they summarize.
+- Kept the full semantic-evidence serialization digest and item count as the enforcement boundary.
+
 ## 2026-07-25: RedDog HoloIndex authority-root client proof
 
 - The loopback owner client now sends the selected repository-root digest, requires the service to echo the same digest, and preserves it in the normalized generation-bound response.
