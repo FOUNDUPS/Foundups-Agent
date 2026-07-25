@@ -1,5 +1,10 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-25: RedDog HoloIndex authority-root client proof
+
+- The loopback owner client now sends the selected repository-root digest, requires the service to echo the same digest, and preserves it in the normalized generation-bound response.
+- Existing pre/post clean-HEAD checks remain in force; a same-HEAD response from a foreign owner root now fails closed.
+
 ## 2026-07-25: REDDOG_WORK_STATE_AUTHORITATIVE_GROUNDING_GATE_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 97

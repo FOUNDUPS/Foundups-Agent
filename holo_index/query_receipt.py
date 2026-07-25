@@ -60,6 +60,13 @@ class HoloIndexQueryReceipt:
     freshness_receipt_digest: str = ""
     freshness_receipt_path: str = ""
     repo_head_sha: str = ""
+    repo_root_digest: str = ""
+    workspace_repo_head_sha: str = ""
+    authority_repo_head_sha: str = ""
+    authority_repo_root_digest: str = ""
+    workspace_overlay_present: bool = False
+    semantic_evidence_authority: str = ""
+    no_authority_worktree_mutation_performed: bool = False
     index_gap_detected: bool = False
     stale_reasons: list[str] = field(default_factory=list)
     no_holoindex_reindex_performed: bool = True
@@ -183,6 +190,32 @@ def _result_binding(
             result.get("freshness_receipt_path") or ""
         ),
         "repo_head_sha": str(result.get("repo_head_sha") or ""),
+        "repo_root_digest": str(result.get("repo_root_digest") or ""),
+    }
+
+
+def _authority_binding(result: Mapping[str, Any]) -> dict[str, Any]:
+    if not result.get("authority_repo_root_digest"):
+        return {}
+    return {
+        "workspace_repo_head_sha": str(
+            result.get("workspace_repo_head_sha") or ""
+        ),
+        "authority_repo_head_sha": str(
+            result.get("authority_repo_head_sha") or ""
+        ),
+        "authority_repo_root_digest": str(
+            result.get("authority_repo_root_digest") or ""
+        ),
+        "workspace_overlay_present": (
+            result.get("workspace_overlay_present") is True
+        ),
+        "semantic_evidence_authority": str(
+            result.get("semantic_evidence_authority") or ""
+        ),
+        "no_authority_worktree_mutation_performed": (
+            result.get("no_authority_worktree_mutation_performed") is True
+        ),
     }
 
 
@@ -300,6 +333,10 @@ def build_query_receipt(
         "stale_reasons": stale_reasons,
         "no_holoindex_reindex_performed": True,
     }
+    root_digest = str(binding.get("repo_root_digest") or "")
+    if root_digest:
+        payload["repo_root_digest"] = root_digest
+    payload.update(_authority_binding(result))
     retrieval_verdict = str(result.get("retrieval_verdict") or "").strip()
     if retrieval_verdict:
         payload["retrieval_verdict"] = retrieval_verdict

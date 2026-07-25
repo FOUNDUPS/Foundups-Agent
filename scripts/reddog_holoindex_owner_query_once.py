@@ -20,6 +20,10 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from holo_index.query_receipt import build_query_receipt  # noqa: E402
+from holo_index.authority_worktree import (  # noqa: E402
+    HoloIndexAuthoritySelection,
+    resolve_holoindex_authority_root,
+)
 from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_query_client import (  # noqa: E402
     query_holoindex_owner,
 )
@@ -78,6 +82,54 @@ def _bounded_request(payload: Mapping[str, Any]) -> tuple[str, int, str]:
     return query, limit, ""
 
 
+def _authority_metadata(
+    selection: HoloIndexAuthoritySelection,
+) -> dict[str, Any]:
+    return {
+        "workspace_repo_head_sha": selection.workspace_head_sha,
+        "authority_repo_head_sha": selection.authority_head_sha,
+        "authority_repo_root_digest": selection.authority_root_digest,
+        "workspace_overlay_present": selection.workspace_overlay_present,
+        "semantic_evidence_authority": (
+            "clean_workspace_head"
+            if selection.source == "workspace"
+            else "committed_head_only"
+        ),
+        "no_authority_worktree_mutation_performed": True,
+    }
+
+
+def _bind_authority(
+    result: Mapping[str, Any],
+    selection: HoloIndexAuthoritySelection,
+    query: str,
+) -> Mapping[str, Any]:
+    metadata = _authority_metadata(selection)
+    if (
+        result.get("ok") is True
+        and result.get("repo_root_digest") != selection.authority_root_digest
+    ):
+        return {
+            **_failure("HOLOINDEX_AUTHORITY_ROOT_MISMATCH", query=query),
+            **metadata,
+        }
+    return {**dict(result), **metadata}
+
+
+def _same_authority(
+    before: HoloIndexAuthoritySelection,
+    after: HoloIndexAuthoritySelection,
+) -> bool:
+    return bool(
+        after.accepted
+        and after.selected_root == before.selected_root
+        and after.workspace_head_sha == before.workspace_head_sha
+        and after.authority_head_sha == before.authority_head_sha
+        and after.authority_root_digest == before.authority_root_digest
+        and after.workspace_overlay_present == before.workspace_overlay_present
+    )
+
+
 def query_once(
     payload: Mapping[str, Any],
     *,
@@ -88,16 +140,26 @@ def query_once(
     ),
     query_owner: Callable[..., Mapping[str, Any]] = query_holoindex_owner,
     cleanup_owner: Callable[..., None] = cleanup_reddog_holoindex_owner,
+    select_authority: Callable[
+        [Path], HoloIndexAuthoritySelection
+    ] = resolve_holoindex_authority_root,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
 
     query, limit, request_error = _bounded_request(payload)
     if request_error:
         return _failure(request_error)
+    selection = select_authority(repo_root)
+    if not selection.accepted:
+        return {
+            **_failure(selection.error or "authority_selection_failed", query=query),
+            **_authority_metadata(selection),
+        }
+    authority_root = selection.selected_root
 
     started_here = False
     try:
-        bootstrap = ensure_owner(repo_root=repo_root, requested=True)
+        bootstrap = ensure_owner(repo_root=authority_root, requested=True)
         status = str(getattr(bootstrap, "status", ""))
         if getattr(bootstrap, "ready", False) is not True:
             return _failure(
@@ -116,7 +178,7 @@ def query_once(
             return _failure("owner_bootstrap_status_invalid", query=query)
 
         result = query_owner(
-            repo_root=repo_root,
+            repo_root=authority_root,
             query=query,
             limit=limit,
             service_url=service_url,
@@ -125,6 +187,13 @@ def query_once(
         )
         if not isinstance(result, Mapping):
             return _failure("owner_response_invalid", query=query)
+        final_selection = select_authority(repo_root)
+        if not _same_authority(selection, final_selection):
+            return {
+                **_failure("REPOSITORY_STATE_CHANGED_DURING_QUERY", query=query),
+                **_authority_metadata(selection),
+            }
+        result = _bind_authority(result, final_selection, query)
         receipt = build_query_receipt(
             source="holoindex_owner_service",
             source_class="holoindex",

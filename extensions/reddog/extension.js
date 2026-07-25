@@ -22,7 +22,7 @@ const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.17';
+const EXTENSION_VERSION = '0.4.18';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -82,7 +82,6 @@ const VALIDATION_FAILED_FOOTER = [
   '## Next safest step',
   'Re-run with narrower context or hand packet to 0102 for review.'
 ].join('\n');
-
 const WORK_TRAIL_ALLOWLIST = new Set([
   'orchestrator_started',
   'repo_context_attached',
@@ -2100,6 +2099,7 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     holoindex_generation_id: meta.holoindex_generation_id || '(none)',
     holoindex_freshness_receipt_digest: meta.holoindex_freshness_receipt_digest || '(none)',
     holoindex_repo_head_sha: meta.holoindex_repo_head_sha || '(none)',
+    holoindex_authority_binding: [meta.holoindex_semantic_evidence_authority || 'unknown', 'overlay=' + (meta.holoindex_workspace_overlay_present === true), meta.holoindex_authority_repo_root_digest || '(none)', 'no_mutation=' + (meta.no_authority_worktree_mutation_performed === true)].join('|'),
     holoindex_query_receipt_id: meta.holoindex_query_receipt_id || '(none)',
     no_holoindex_reindex_performed: meta.no_holoindex_reindex_performed !== undefined ? meta.no_holoindex_reindex_performed : 'unknown',
     code_hits_count: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
@@ -2228,6 +2228,7 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- holoindex_generation_id: ' + scorecard.holoindex_generation_id,
     '- holoindex_freshness_receipt_digest: ' + scorecard.holoindex_freshness_receipt_digest,
     '- holoindex_repo_head_sha: ' + scorecard.holoindex_repo_head_sha,
+    '- holoindex_authority_binding: ' + scorecard.holoindex_authority_binding,
     '- holoindex_query_receipt_id: ' + scorecard.holoindex_query_receipt_id,
     '- no_holoindex_reindex_performed: ' + scorecard.no_holoindex_reindex_performed,
     '- code_hits_count: ' + scorecard.code_hits_count,
@@ -4103,7 +4104,6 @@ const REGULAR_TASK_PATTERNS = [
   /\bui polish\b/i,
   /\bregular mode works\b/i
 ];
-
 const SIMPLE_IDENTITY_FAST_PATH_SLICE = 'REDDOG_SIMPLE_IDENTITY_FAST_PATH_PHASE1';
 const SIMPLE_IDENTITY_BLOCKING_PATTERNS = [
   /\b(?:audit|review|evaluate|fix|implement|author|provide|create|draft|enhance|investigate|compare|test|run|merge|land|dispatch|assign|spawn|execute|work|slice|phase1|phase_1|wsp[_\s-]?\d+|holoindex|openclaw|hermes|wre|authority|permission|valve|pr|pull request)\b/i,

@@ -8,6 +8,7 @@ digest; callers never receive or log changed path names.
 from __future__ import annotations
 
 import hashlib
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,6 +38,13 @@ class RepositoryState:
 def _digest(head_sha: str, status: str) -> str:
     payload = (head_sha + chr(10) + status).encode("utf-8", errors="replace")
     return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+
+def repository_root_digest(repo_root: Path | str) -> str:
+    """Return a public path identity without exposing the repository path."""
+
+    root = os.path.normcase(str(Path(repo_root).resolve(strict=False)))
+    return "sha256:" + hashlib.sha256(root.encode("utf-8")).hexdigest()
 
 
 def _unavailable_state(head_sha: str) -> RepositoryState:
@@ -97,4 +105,5 @@ __all__ = [
     "REPOSITORY_STATE_UNAVAILABLE_CODE",
     "RepositoryState",
     "read_repository_state",
+    "repository_root_digest",
 ]

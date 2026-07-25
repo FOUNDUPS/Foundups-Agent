@@ -1,5 +1,11 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-25 - HoloIndex owner repository-root binding
+
+- Added the canonical repository-root digest to freshness snapshots and owner responses.
+- Owner queries now accept an expected root digest and reject a configured service rooted at a different worktree before semantic retrieval.
+- No owner indexing or repository mutation authority was added.
+
 ## 2026-07-19 - RedDog HoloIndex owner binding probe
 
 - OBSERVED: a canonical seven-collection HoloIndex receipt and owner health

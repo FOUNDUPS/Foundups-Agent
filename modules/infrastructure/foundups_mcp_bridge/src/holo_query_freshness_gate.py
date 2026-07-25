@@ -20,6 +20,7 @@ from holo_index.maintenance_lock import (
     probe_maintenance_lock,
 )
 from holo_index.query_receipt import generation_binding_from_receipt
+from holo_index.repository_state import repository_root_digest
 from holo_index.storage_contract import storage_path_identity
 
 
@@ -53,6 +54,7 @@ def normalize_binding(value: Mapping[str, Any] | None = None) -> dict[str, str]:
             "freshness_receipt_digest",
             "freshness_receipt_path",
             "repo_head_sha",
+            "repo_root_digest",
         )
     }
 
@@ -177,6 +179,7 @@ class HoloQueryFreshnessGate:
         fields = generation_binding_from_receipt(
             None, receipt_path=self.receipt_path
         )
+        fields["repo_root_digest"] = repository_root_digest(self.repo_root)
         return FreshnessSnapshot(
             normalize_binding(fields), "UNKNOWN", (reason,), False, {}
         )
@@ -233,6 +236,7 @@ class HoloQueryFreshnessGate:
                 receipt, receipt_path=self.receipt_path
             )
         )
+        fields["repo_root_digest"] = repository_root_digest(self.repo_root)
         reasons, required, check_ok = self._evaluate_receipt(
             receipt,
             expected_sha,

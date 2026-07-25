@@ -47,5 +47,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
 
     assert checked_in == generated
     assert generator.canonical_manifest_digest(generated) == (
-        "42ef1f334c3d264f2bd11517d2e8b369e807d6238cc9eb4bfaaedb74165e067a"
+        "5ddd124ceef69b55ba9b26b3264433c738b0dd65e9393af9c72cab17c1ad5dab"
     )

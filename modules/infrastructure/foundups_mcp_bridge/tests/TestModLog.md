@@ -1,5 +1,10 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-25] HoloIndex owner repository-root binding
+
+- Added matching-root success and mismatched-root fail-before-backend tests.
+- Re-ran the owner service, HTTP, runtime-safety, embedding, and supervisor suites.
+
 ## [2026-07-20] Receipt-v2 maintenance fixture integrity repair
 
 **WSP Protocol:** WSP 00, 22, 50, 62, 97

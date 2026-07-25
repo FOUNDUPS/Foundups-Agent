@@ -24,7 +24,7 @@ from holo_index.freshness_receipt import (
     freshness_receipt_path,
     load_freshness_receipt,
 )
-from holo_index.repository_state import read_repository_state
+from holo_index.repository_state import read_repository_state, repository_root_digest
 from holo_index.storage_contract import resolve_holoindex_ssd_path
 from .holo_query_freshness_gate import (
     BASELINE_COLLECTIONS,
@@ -52,6 +52,7 @@ ALLOWED_DOC_TYPE_FILTERS = frozenset(
     {"all", "code", "wsp", "test", "skill", "docs", "knowledge"}
 )
 EXPECTED_SHA_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+EXPECTED_ROOT_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 def _default_backend_factory(ssd_path: Path) -> Any:
     from holo_index.core.holo_index import HoloIndex
@@ -161,7 +162,13 @@ def _validate_payload(
         return None, "INVALID_REQUEST"
     if size > max_request_bytes:
         return None, "REQUEST_TOO_LARGE"
-    allowed = {"query", "limit", "doc_type_filter", "expected_repo_head_sha"}
+    allowed = {
+        "query",
+        "limit",
+        "doc_type_filter",
+        "expected_repo_head_sha",
+        "expected_repo_root_digest",
+    }
     if set(payload) - allowed:
         return None, "UNSUPPORTED_REQUEST_FIELDS"
     query_value = payload.get("query")
@@ -179,9 +186,16 @@ def _validate_payload(
     expected_sha = payload.get("expected_repo_head_sha")
     if not isinstance(expected_sha, str) or not EXPECTED_SHA_PATTERN.fullmatch(expected_sha):
         return None, "EXPECTED_REPO_HEAD_SHA_REQUIRED"
+    expected_root = payload.get("expected_repo_root_digest")
+    if expected_root is not None and (
+        not isinstance(expected_root, str)
+        or not EXPECTED_ROOT_DIGEST_PATTERN.fullmatch(expected_root)
+    ):
+        return None, "EXPECTED_REPO_ROOT_DIGEST_REQUIRED"
     return {
         "query": query, "limit": limit, "doc_type_filter": doc_type,
         "expected_repo_head_sha": expected_sha,
+        "expected_repo_root_digest": str(expected_root or ""),
     }, ""
 
 
@@ -428,6 +442,12 @@ def _handle_query(
     if error or request is None:
         return owner._failure(
             error or "INVALID_REQUEST", query=query, started=started
+        )
+    if request["expected_repo_root_digest"] and request[
+        "expected_repo_root_digest"
+    ] != repository_root_digest(owner.repo_root):
+        return owner._failure(
+            "REPO_ROOT_MISMATCH", query=query, started=started
         )
     remaining = max(0.0, deadline - time.monotonic())
     if not owner._request_lock.acquire(timeout=remaining):

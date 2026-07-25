@@ -21,7 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
-from holo_index.repository_state import read_repository_state
+from holo_index.repository_state import read_repository_state, repository_root_digest
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     MIN_BEARER_TOKEN_CHARS,
     TOKEN_TOO_SHORT_ERROR,
@@ -41,6 +41,7 @@ class _OwnerResponseState:
     stale_reasons: list[str]
     raw_result: Mapping[str, Any]
     repo_head_sha: str
+    repo_root_digest: str
     generation_id: str
     receipt_digest: str
     retrieval_mode: str
@@ -53,6 +54,7 @@ class _OwnerQueryContext:
     endpoint: str
     token: str
     expected_head: str
+    expected_root_digest: str
     started: float
     deadline: float
 
@@ -157,12 +159,19 @@ def _service_token(value: str | None) -> tuple[str, str]:
     return token, ""
 
 
-def _request_payload(*, query: str, limit: int, expected_head: str) -> bytes:
+def _request_payload(
+    *,
+    query: str,
+    limit: int,
+    expected_head: str,
+    expected_root_digest: str,
+) -> bytes:
     return json.dumps(
         {
             "query": query,
             "limit": max(1, min(int(limit or 8), 20)),
             "expected_repo_head_sha": expected_head,
+            "expected_repo_root_digest": expected_root_digest,
         },
         separators=(",", ":"),
     ).encode("utf-8")
@@ -327,6 +336,7 @@ def _response_state(payload: Mapping[str, Any]) -> _OwnerResponseState:
         stale_reasons=stale_reasons,
         raw_result=raw_result,
         repo_head_sha=str(payload.get("repo_head_sha") or ""),
+        repo_root_digest=str(payload.get("repo_root_digest") or ""),
         generation_id=str(payload.get("freshness_generation_id") or ""),
         receipt_digest=str(payload.get("freshness_receipt_digest") or ""),
         retrieval_mode=str(payload.get("retrieval_mode") or "").lower(),
@@ -337,6 +347,7 @@ def _apply_response_contract(
     state: _OwnerResponseState,
     payload: Mapping[str, Any],
     expected_head: str,
+    repo_root: Path,
 ) -> None:
     contract_valid = bool(
         payload.get("schema_version") == "holoindex_query_service.v1"
@@ -367,6 +378,11 @@ def _apply_response_contract(
             "stale_repo_head_sha",
         ),
         (
+            state.repo_root_digest != repository_root_digest(repo_root),
+            "REPO_ROOT_MISMATCH",
+            "repository_root_mismatch",
+        ),
+        (
             not state.generation_id or not state.receipt_digest,
             "MISSING_GENERATION_BINDING",
             "",
@@ -395,7 +411,7 @@ def _normalized_response(
     deadline: float,
 ) -> Mapping[str, Any]:
     state = _response_state(payload)
-    _apply_response_contract(state, payload, expected_head)
+    _apply_response_contract(state, payload, expected_head, repo_root)
     if state.ok:
         repository_error = _post_query_repository_error(
             repo_root, expected_head, deadline
@@ -422,6 +438,7 @@ def _normalized_response(
         "freshness_receipt_digest": state.receipt_digest,
         "freshness_receipt_path": "",
         "repo_head_sha": state.repo_head_sha,
+        "repo_root_digest": state.repo_root_digest,
         "retrieval_mode": state.retrieval_mode,
         "no_holoindex_reindex_performed": True,
     }
@@ -511,6 +528,7 @@ def _query_context(
         endpoint=endpoint,
         token=token,
         expected_head=repository_state.head_sha,
+        expected_root_digest=repository_root_digest(repo_root),
         started=started,
         deadline=deadline,
     ), None
@@ -527,6 +545,7 @@ def _execute_owner_request(
             query=context.query,
             limit=limit,
             expected_head=context.expected_head,
+            expected_root_digest=context.expected_root_digest,
         ),
         headers={
             "Authorization": f"Bearer {context.token}",

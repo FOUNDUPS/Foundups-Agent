@@ -1,5 +1,10 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-07-25] REDDOG_HOLOINDEX_AUTHORITY_WORKTREE_QUERY_BINDING_PHASE1
+
+- Added authority selection coverage for configured and deterministic roots, dirty workspace overlays, unrelated repositories, dirty authorities, HEAD mismatch, invalid configuration, and workspace fallback.
+- Added owner request/response root-digest checks, forged-root rejection, post-query revalidation, and source guards against query-path mutation.
+
 ## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
 - Added exact proof tests for foreign worktree receipts, maintenance,
