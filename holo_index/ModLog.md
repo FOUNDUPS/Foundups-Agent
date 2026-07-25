@@ -1,5 +1,11 @@
 # HoloIndex Package ModLog
 
+## [2026-07-25] REDDOG_HOLOINDEX_AUTHORITY_WORKTREE_QUERY_BINDING_PHASE1
+
+- Added a read-only authority-worktree selector for a configured or deterministic sibling linked worktree. It requires the same Git common directory, a clean authority, and exact workspace HEAD.
+- Added a public repository-root digest to generation-bound freshness snapshots and owner responses so a configured loopback owner cannot satisfy a query for a different same-HEAD worktree.
+- Kept maintenance ownership outside the query process: selection performs no worktree creation, Git mutation, collection write, or re-index.
+
 ## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
 - Added a reusable content-free read-only admission decision that reuses the

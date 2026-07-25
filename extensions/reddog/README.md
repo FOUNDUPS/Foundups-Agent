@@ -1,8 +1,10 @@
 # RedDog
 
-Version: 0.4.17
+Version: 0.4.18
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
+
+Version 0.4.18 can route semantic queries from a dirty developer checkout to a separate clean, linked, exact-HEAD HoloIndex authority worktree. Selection is read-only and fails closed on a foreign Git common directory, dirty authority, HEAD mismatch, configured-path error, owner-root mismatch, or state change during the query. The query receipt binds the authority-root digest and workspace-overlay state; direct reads continue to use the selected workspace. RedDog still never creates a worktree or re-indexes HoloIndex during a query.
 
 Version 0.4.17 consumes the existing receipt-bound RedDog architect model runtime binding when its outside-repo artifact is configured. The extension rehydrates the deterministic receipt through Python, checks production policy/evidence counts and role topology, then exposes the principal, panel, roles, catalog, selection, and binding IDs in Run Trace. Missing configuration remains an explicitly labeled evaluation fallback; partial or invalid configuration blocks before OpenRouter.
 
@@ -241,6 +243,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.17.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.18.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

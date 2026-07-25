@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_HOLOINDEX_AUTHORITY_WORKTREE_QUERY_BINDING_PHASE1 (0.4.18)
+
+- Added read-only selection of a configured or deterministic sibling HoloIndex authority worktree only when it is linked to the same Git common directory, clean, and at the workspace's exact HEAD.
+- Bound repository-root digest, workspace-overlay state, authority HEAD, generation, and no-authority-mutation proof into the owner response, canonical query receipt, bundle metadata, and Run Trace.
+- Re-proved workspace and authority state after semantic retrieval; configured-owner root mismatch and any selection change fail closed before evidence acceptance.
+- Preserved the dirty workspace as the direct-read overlay. No query-time worktree creation, checkout, reset, repository mutation, or HoloIndex re-index was added.
+- Version 0.4.17 -> 0.4.18.
+
 ## 2026-07-25 - REDDOG_EXTENSION_RECEIPT_BOUND_MODEL_RUNTIME_BINDING_PHASE1 (0.4.17)
 
 - Added a read-only Python/JavaScript runtime-binding query that rehydrates the existing model binding receipt from its confined outside-repo root.

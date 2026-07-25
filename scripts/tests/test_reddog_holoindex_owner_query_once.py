@@ -5,13 +5,27 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
+from holo_index.authority_worktree import HoloIndexAuthoritySelection
+from holo_index.repository_state import repository_root_digest
 from scripts.reddog_holoindex_owner_query_once import (
     MAX_QUERY_CHARS,
     query_once,
 )
 
 
-def _success() -> dict:
+def _selection(root: Path) -> HoloIndexAuthoritySelection:
+    return HoloIndexAuthoritySelection(
+        accepted=True,
+        selected_root=root,
+        workspace_head_sha="c" * 40,
+        authority_head_sha="c" * 40,
+        authority_root_digest=repository_root_digest(root),
+        workspace_overlay_present=False,
+        source="workspace",
+    )
+
+
+def _success(root: Path) -> dict:
     return {
         "ok": True,
         "source": "holoindex_owner_service",
@@ -24,6 +38,7 @@ def _success() -> dict:
         "freshness_generation_id": "sha256:" + "a" * 64,
         "freshness_receipt_digest": "sha256:" + "b" * 64,
         "repo_head_sha": "c" * 40,
+        "repo_root_digest": repository_root_digest(root),
         "retrieval_mode": "semantic",
         "no_holoindex_reindex_performed": True,
     }
@@ -34,7 +49,7 @@ def test_started_owner_uses_private_handoff_and_cleans_up(tmp_path: Path) -> Non
 
     def query_owner(**kwargs):
         calls.update(kwargs)
-        return _success()
+        return _success(tmp_path)
 
     def cleanup_owner():
         calls["cleaned"] = True
@@ -48,12 +63,17 @@ def test_started_owner_uses_private_handoff_and_cleans_up(tmp_path: Path) -> Non
         resolve_handoff=lambda: ("http://127.0.0.1:8127/holoindex/v1/query", "x" * 48),
         query_owner=query_owner,
         cleanup_owner=cleanup_owner,
+        select_authority=_selection,
     )
 
     assert result["ok"] is True
     assert result["query_receipt"]["schema_version"] == "holoindex_query_receipt.v1"
     assert result["query_receipt"]["freshness_generation_id"] == "sha256:" + "a" * 64
     assert result["query_receipt"]["index_gap_detected"] is False
+    assert result["query_receipt"]["authority_repo_root_digest"] == repository_root_digest(
+        tmp_path
+    )
+    assert result["query_receipt"]["no_authority_worktree_mutation_performed"] is True
     assert calls["repo_root"] == tmp_path
     assert calls["service_url"].startswith("http://127.0.0.1:")
     assert calls["service_token"] == "x" * 48
@@ -66,7 +86,7 @@ def test_configured_owner_uses_environment_contract_without_cleanup(tmp_path: Pa
 
     def query_owner(**kwargs):
         calls.update(kwargs)
-        return _success()
+        return _success(tmp_path)
 
     result = query_once(
         {"query": "audit pfmall"},
@@ -81,11 +101,48 @@ def test_configured_owner_uses_environment_contract_without_cleanup(tmp_path: Pa
         cleanup_owner=lambda: (_ for _ in ()).throw(
             AssertionError("configured owner is not process-owned")
         ),
+        select_authority=_selection,
     )
 
     assert result["ok"] is True
     assert calls["service_url"] is None
     assert calls["service_token"] is None
+
+
+def test_query_runs_against_selected_authority_root(tmp_path: Path) -> None:
+    authority = tmp_path / "authority"
+    authority.mkdir()
+    selection = HoloIndexAuthoritySelection(
+        accepted=True,
+        selected_root=authority,
+        workspace_head_sha="c" * 40,
+        authority_head_sha="c" * 40,
+        authority_root_digest=repository_root_digest(authority),
+        workspace_overlay_present=True,
+        source="configured",
+    )
+    calls: dict = {}
+
+    def query_owner(**kwargs):
+        calls.update(kwargs)
+        return _success(authority)
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **kwargs: SimpleNamespace(
+            ready=kwargs["repo_root"] == authority,
+            status="CONFIGURED",
+            error="",
+        ),
+        query_owner=query_owner,
+        select_authority=lambda _root: selection,
+    )
+
+    assert result["ok"] is True
+    assert calls["repo_root"] == authority
+    assert result["workspace_overlay_present"] is True
+    assert result["semantic_evidence_authority"] == "committed_head_only"
 
 
 def test_bootstrap_failure_fails_closed_before_query(tmp_path: Path) -> None:
@@ -98,12 +155,66 @@ def test_bootstrap_failure_fails_closed_before_query(tmp_path: Path) -> None:
         query_owner=lambda **_kwargs: (_ for _ in ()).throw(
             AssertionError("query must not run after bootstrap failure")
         ),
+        select_authority=_selection,
     )
 
     assert result["ok"] is False
     assert result["error"] == "STALE_INDEX"
     assert result["index_gap_detected"] is True
     assert result["no_holoindex_reindex_performed"] is True
+
+
+def test_authority_selection_failure_precedes_owner_bootstrap(
+    tmp_path: Path,
+) -> None:
+    selection = HoloIndexAuthoritySelection(
+        accepted=False,
+        selected_root=tmp_path,
+        workspace_head_sha="c" * 40,
+        authority_head_sha="",
+        authority_root_digest="",
+        workspace_overlay_present=True,
+        source="configured",
+        rejection_reasons=("HOLOINDEX_AUTHORITY_ROOT_DIRTY",),
+    )
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("owner must not start after authority rejection")
+        ),
+        select_authority=lambda _root: selection,
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "HOLOINDEX_AUTHORITY_ROOT_DIRTY"
+    assert result["workspace_overlay_present"] is True
+    assert result["no_authority_worktree_mutation_performed"] is True
+
+
+def test_authority_change_after_query_discards_result(tmp_path: Path) -> None:
+    accepted = _selection(tmp_path)
+    changed = HoloIndexAuthoritySelection(
+        **{
+            **accepted.__dict__,
+            "workspace_head_sha": "d" * 40,
+            "authority_head_sha": "d" * 40,
+        }
+    )
+    selections = iter((accepted, changed))
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status="CONFIGURED", error=""
+        ),
+        query_owner=lambda **_kwargs: _success(tmp_path),
+        select_authority=lambda _root: next(selections),
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "REPOSITORY_STATE_CHANGED_DURING_QUERY"
+    assert "query_receipt" not in result
 
 
 def test_missing_started_handoff_fails_closed_and_cleans_up(tmp_path: Path) -> None:
@@ -119,6 +230,7 @@ def test_missing_started_handoff_fails_closed_and_cleans_up(tmp_path: Path) -> N
             AssertionError("query must not run without handoff")
         ),
         cleanup_owner=lambda: calls.append("cleaned"),
+        select_authority=_selection,
     )
 
     assert result["ok"] is False
@@ -161,6 +273,7 @@ def test_query_exception_is_secret_free_and_cleanup_runs(tmp_path: Path) -> None
             SecretFailure("secret-token-value")
         ),
         cleanup_owner=lambda: cleaned.append(True),
+        select_authority=_selection,
     )
 
     assert result["ok"] is False

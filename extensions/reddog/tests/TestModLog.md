@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - HoloIndex authority-worktree binding (0.4.18)
+
+- Added clean/dirty, same/foreign Git common-directory, exact/wrong HEAD, configured-path, owner-root forgery, post-query state-change, and no-mutation regressions.
+- Extended the exhaustive extension contract to require root-digest and overlay bindings in both the owner result and canonical query receipt.
+- Retained the exact 8,428-line `extension.js` WSP_62 ceiling.
+
 ## 2026-07-25 - Receipt-bound model runtime binding (0.4.17)
 
 - Proved unconfigured fallback, valid panel topology, partial configuration, inside-repo rejection, tampered digest, reserved verifier role, role-model mismatch, policy/evidence mismatch, and zero verifier threshold rejection.

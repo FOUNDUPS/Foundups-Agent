@@ -16,6 +16,7 @@ from holo_index.freshness_receipt import (
     SCHEMA_VERSION as FRESHNESS_SCHEMA_VERSION,
     _receipt_generation_id,
 )
+from holo_index.repository_state import repository_root_digest
 from holo_index.source_scope import canonical_source_scope_id
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     BASELINE_COLLECTIONS,
@@ -314,6 +315,42 @@ def test_request_contract_is_strict_and_bounded(
         assert result["ok"] is False
         assert result["error"] == expected_error
         assert backend.search_calls == 0
+    finally:
+        owner.close()
+
+
+def test_query_rejects_mismatched_expected_repository_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    backend = _Backend()
+    owner = _service(tmp_path, monkeypatch, backend=backend)
+    try:
+        result = _query(
+            owner,
+            _request(expected_repo_root_digest="sha256:" + "f" * 64),
+        )
+        assert result["ok"] is False
+        assert result["error"] == "REPO_ROOT_MISMATCH"
+        assert backend.search_calls == 0
+    finally:
+        owner.close()
+
+
+def test_query_binds_matching_repository_root_digest(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    owner = _service(tmp_path, monkeypatch)
+    try:
+        result = _query(
+            owner,
+            _request(
+                expected_repo_root_digest=repository_root_digest(tmp_path)
+            ),
+        )
+        assert result["ok"] is True
+        assert result["repo_root_digest"] == repository_root_digest(tmp_path)
     finally:
         owner.close()
 

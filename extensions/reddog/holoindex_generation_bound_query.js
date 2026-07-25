@@ -42,7 +42,14 @@ function hasCurrentOwnerResult(value) {
     && typeof value.freshness_receipt_digest === 'string'
     && value.freshness_receipt_digest.length > 0
     && typeof value.repo_head_sha === 'string'
-    && value.repo_head_sha.length > 0;
+    && value.repo_head_sha.length > 0
+    && /^sha256:[0-9a-f]{64}$/.test(String(value.repo_root_digest || ''))
+    && value.authority_repo_root_digest === value.repo_root_digest
+    && value.workspace_repo_head_sha === value.repo_head_sha
+    && value.authority_repo_head_sha === value.repo_head_sha
+    && typeof value.workspace_overlay_present === 'boolean'
+    && ['clean_workspace_head', 'committed_head_only'].includes(value.semantic_evidence_authority)
+    && value.no_authority_worktree_mutation_performed === true;
 }
 
 function asciiJsonString(value) {
@@ -84,6 +91,13 @@ function receiptMatchesResult(receipt, value) {
     && receipt.freshness_generation_id === value.freshness_generation_id
     && receipt.freshness_receipt_digest === value.freshness_receipt_digest
     && receipt.repo_head_sha === value.repo_head_sha
+    && receipt.repo_root_digest === value.repo_root_digest
+    && receipt.workspace_repo_head_sha === value.workspace_repo_head_sha
+    && receipt.authority_repo_head_sha === value.authority_repo_head_sha
+    && receipt.authority_repo_root_digest === value.authority_repo_root_digest
+    && receipt.workspace_overlay_present === value.workspace_overlay_present
+    && receipt.semantic_evidence_authority === value.semantic_evidence_authority
+    && receipt.no_authority_worktree_mutation_performed === true
     && typeof receipt.receipt_id === 'string'
     && receipt.receipt_id === queryReceiptId(receipt);
 }
@@ -201,6 +215,11 @@ function ownerMetadata(task, priorMeta, ownerResult, raw, accepted) {
     freshness_generation_id: String((ownerResult && ownerResult.freshness_generation_id) || ''),
     freshness_receipt_digest: String((ownerResult && ownerResult.freshness_receipt_digest) || ''),
     repo_head_sha: String((ownerResult && ownerResult.repo_head_sha) || ''),
+    repo_root_digest: String((ownerResult && ownerResult.repo_root_digest) || ''),
+    authority_repo_root_digest: String((ownerResult && ownerResult.authority_repo_root_digest) || ''),
+    workspace_overlay_present: ownerResult && ownerResult.workspace_overlay_present === true,
+    semantic_evidence_authority: String((ownerResult && ownerResult.semantic_evidence_authority) || ''),
+    no_authority_worktree_mutation_performed: ownerResult && ownerResult.no_authority_worktree_mutation_performed === true,
     query_receipt_id: String(receipt.receipt_id || ''),
     no_holoindex_reindex_performed: ownerResult && ownerResult.no_holoindex_reindex_performed === true
   });
@@ -213,6 +232,11 @@ function ownerQuerySummary(metadata, accepted) {
     generation_id: metadata.freshness_generation_id,
     freshness_receipt_digest: metadata.freshness_receipt_digest,
     repo_head_sha: metadata.repo_head_sha,
+    repo_root_digest: metadata.repo_root_digest,
+    authority_repo_root_digest: metadata.authority_repo_root_digest,
+    workspace_overlay_present: metadata.workspace_overlay_present,
+    semantic_evidence_authority: metadata.semantic_evidence_authority,
+    no_authority_worktree_mutation_performed: metadata.no_authority_worktree_mutation_performed,
     query_receipt_id: metadata.query_receipt_id,
     error: metadata.owner_query_error,
     no_holoindex_reindex_performed: metadata.no_holoindex_reindex_performed
@@ -251,6 +275,11 @@ function newMeta(usedOfflineFallback, emptyCoverageDigest) {
     holoindex_generation_id: '',
     holoindex_freshness_receipt_digest: '',
     holoindex_repo_head_sha: '',
+    holoindex_repo_root_digest: '',
+    holoindex_authority_repo_root_digest: '',
+    holoindex_workspace_overlay_present: false,
+    holoindex_semantic_evidence_authority: 'unknown',
+    no_authority_worktree_mutation_performed: false,
     holoindex_query_receipt_id: '',
     no_holoindex_reindex_performed: true,
     routing_active: false,
@@ -282,6 +311,11 @@ function applyOwnerMetadata(meta, bundleMeta, usedOfflineFallback) {
   meta.holoindex_generation_id = String(bundleMeta.freshness_generation_id || '');
   meta.holoindex_freshness_receipt_digest = String(bundleMeta.freshness_receipt_digest || '');
   meta.holoindex_repo_head_sha = String(bundleMeta.repo_head_sha || '');
+  meta.holoindex_repo_root_digest = String(bundleMeta.repo_root_digest || '');
+  meta.holoindex_authority_repo_root_digest = String(bundleMeta.authority_repo_root_digest || '');
+  meta.holoindex_workspace_overlay_present = bundleMeta.workspace_overlay_present === true;
+  meta.holoindex_semantic_evidence_authority = String(bundleMeta.semantic_evidence_authority || 'unknown');
+  meta.no_authority_worktree_mutation_performed = bundleMeta.no_authority_worktree_mutation_performed === true;
   meta.holoindex_query_receipt_id = String(bundleMeta.query_receipt_id || '');
   meta.no_holoindex_reindex_performed = bundleMeta.no_holoindex_reindex_performed === true;
   meta.routing_active = usedOfflineFallback ? false : bundleMeta.routing_active === true;
@@ -360,6 +394,11 @@ function applyRejectedOwnerMeta(meta, ownerResult) {
     holoindex_generation_id: String(value.freshness_generation_id || ''),
     holoindex_freshness_receipt_digest: String(value.freshness_receipt_digest || ''),
     holoindex_repo_head_sha: String(value.repo_head_sha || ''),
+    holoindex_repo_root_digest: String(value.repo_root_digest || ''),
+    holoindex_authority_repo_root_digest: String(value.authority_repo_root_digest || ''),
+    holoindex_workspace_overlay_present: value.workspace_overlay_present === true,
+    holoindex_semantic_evidence_authority: String(value.semantic_evidence_authority || 'unknown'),
+    no_authority_worktree_mutation_performed: value.no_authority_worktree_mutation_performed === true,
     holoindex_query_receipt_id: String(receipt.receipt_id || ''),
     no_holoindex_reindex_performed: value.no_holoindex_reindex_performed === true,
     index_gap_detected: true

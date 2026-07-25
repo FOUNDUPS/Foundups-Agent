@@ -8,6 +8,8 @@ It is the IDE-side thin-client surface for the resident RedDog backend and the O
 
 RedDog is the resident FoundUps architect thin client and 012/0102 interface. Fusion is one internal reasoning mode, not the product identity.
 
+Version 0.4.18 selects `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` when it names a clean linked worktree at the workspace's exact HEAD and Git common directory. If unset, an existing deterministic sibling `<workspace>-holo-authority` is checked; otherwise the workspace remains the authority candidate. The one-shot query bridge re-proves selection after the owner call and accepts semantic evidence only when the service response and canonical query receipt bind the same repository-root digest, HEAD, generation, and no-mutation posture. The raw authority path is never returned.
+
 Version 0.4.17 queries `REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH` within `REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT` before rendering the editor. A valid `reddog_backend_architect` binding replaces evaluation fallback models and carries role topology plus catalog/selection/binding lineage into Run Trace. Unconfigured environments remain evaluation-only; configured-invalid artifacts block before any provider call. The query is read-only and performs no HoloIndex operation, model call, command execution, or artifact mutation.
 
 Version 0.4.16 performs at most one semantic lead retry and one targeted adversarial critic retry. A retry is another fully receipted OpenRouter call through the existing redaction-gated bridge; it does not weaken required-evidence, quorum, synthesis, output-validation, or runtime-consumption gates.

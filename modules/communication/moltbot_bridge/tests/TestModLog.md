@@ -1,3 +1,8 @@
+## 2026-07-25: RedDog HoloIndex authority-root client proof
+
+- Added transport regressions proving expected-root transmission and foreign-root response rejection.
+- Preserved local-store avoidance, loopback authentication, redirect denial, deadline, and direct-query boundary coverage.
+
 ## 2026-07-25: Authoritative work-state query
 
 - Added eleven focused regressions for accepted governed state, revision
