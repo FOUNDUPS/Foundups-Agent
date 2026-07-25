@@ -12,14 +12,17 @@ const {
 } = require('./fusion_progress_receipt');
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
+const backendCompatibility = require('./backend_compatibility_preflight');
+const backendCompatibilityRender = require('./backend_compatibility_render');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.11';
+const EXTENSION_VERSION = '0.4.12';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
 const REDDOG_LEGACY_CONFIG_NAMESPACE = 'foundupsFusion';
+const REDDOG_BACKEND_CLIENT = Object.freeze({ extensionId: REDDOG_EXTENSION_ID, legacyExtensionId: REDDOG_LEGACY_EXTENSION_ID, extensionVersion: EXTENSION_VERSION, backendApiVersion: backendCompatibility.BACKEND_API_VERSION, buildInstallStateSection: (state) => backendCompatibilityRender.buildInstallStateSection(state, REDDOG_BACKEND_CLIENT) });
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -5314,10 +5317,9 @@ const EFFORT_GUIDANCE = {
 
 function activate(context) {
   const installState = detectRedDogInstallState(context);
-  if (installState.stale_install_detected) {
-    vscode.window.showWarningMessage(
-      'RedDog 0.4.4 detected a legacy Foundups Fusion Worker install. Keep only one RedDog extension active after migration.'
-    );
+  const installWarning = backendCompatibility.activationWarning(installState);
+  if (installWarning) {
+    vscode.window.showWarningMessage(installWarning);
   }
   context.subscriptions.push(
     vscode.commands.registerCommand('reddog.open', () => openFusionEditor(context, installState)),
@@ -5355,71 +5357,24 @@ function openFusionEditor(context, installState) {
   panel.webview.html = renderHtml(worker, 'editor', logoUri.toString(), state.installState);
 }
 
-function workspaceRoot() {
-  const folder = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders[0];
-  return folder ? folder.uri.fsPath : process.cwd();
-}
-
-function reddogConfigValue(key, fallback) {
-  const current = vscode.workspace.getConfiguration(REDDOG_CONFIG_NAMESPACE);
-  const legacy = vscode.workspace.getConfiguration(REDDOG_LEGACY_CONFIG_NAMESPACE);
-  const currentValue = current.get(key);
-  if (currentValue !== undefined && currentValue !== null && currentValue !== '') {
-    return currentValue;
-  }
-  const legacyValue = legacy.get(key);
-  if (legacyValue !== undefined && legacyValue !== null && legacyValue !== '') {
-    return legacyValue;
-  }
-  return fallback;
-}
-
-function detectRedDogInstallState(context) {
-  const legacy = vscode.extensions.getExtension(REDDOG_LEGACY_EXTENSION_ID);
-  const current = vscode.extensions.getExtension(REDDOG_EXTENSION_ID);
-  const legacyPresent = !!legacy && legacy.id !== context.extension.id;
-  const duplicateDetected = legacyPresent && !!current;
-  return {
-    extension_id: context.extension.id,
-    expected_extension_id: REDDOG_EXTENSION_ID,
-    legacy_extension_id: REDDOG_LEGACY_EXTENSION_ID,
-    version: EXTENSION_VERSION,
-    duplicate_extension_detected: duplicateDetected,
-    legacy_extension_present: legacyPresent,
-    stale_install_detected: legacyPresent || context.extension.id !== REDDOG_EXTENSION_ID,
-    legacy_extension_version: legacy && legacy.packageJSON ? String(legacy.packageJSON.version || '') : ''
-  };
-}
-
-function buildRedDogInstallStateSection(state) {
-  const s = state && typeof state === 'object' ? state : {};
-  return [
-    '## RedDog Install State',
-    '- extension_id: ' + (s.extension_id || 'unknown') + ' [OBSERVED]',
-    '- expected_extension_id: ' + (s.expected_extension_id || REDDOG_EXTENSION_ID) + ' [OBSERVED]',
-    '- extension_version: ' + (s.version || EXTENSION_VERSION) + ' [OBSERVED]',
-    '- legacy_extension_present: ' + (s.legacy_extension_present === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- duplicate_extension_detected: ' + (s.duplicate_extension_detected === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- stale_install_detected: ' + (s.stale_install_detected === true ? 'true' : 'false') + ' [OBSERVED]',
-    '- legacy_extension_version: ' + (s.legacy_extension_version || 'none') + ' [OBSERVED]'
-  ].join('\n');
-}
+const workspaceRoot = () => backendCompatibility.workspaceRoot(vscode, process.cwd());
+const reddogConfigValue = (key, fallback) => backendCompatibility.configurationValue(
+  vscode, REDDOG_CONFIG_NAMESPACE, REDDOG_LEGACY_CONFIG_NAMESPACE, key, fallback
+);
+const detectRedDogInstallState = (context) => backendCompatibility.detectInstallState(vscode, context, REDDOG_BACKEND_CLIENT);
+const currentBackendCompatibility = () => backendCompatibility.runBackendCompatibilityPreflight(
+  backendCompatibility.workspaceRoot(vscode, '')
+);
+const projectBackendCompatibility = backendCompatibility.projectBackendCompatibility;
+const buildRedDogInstallStateSection = REDDOG_BACKEND_CLIENT.buildInstallStateSection;
+const buildBackendCompatibilityBlockedResult = (state) => backendCompatibility.buildBlockedResult(
+  state, REDDOG_BACKEND_CLIENT
+);
 
 function fusionWorkerFromConfig() {
-  const lead = cleanModel(reddogConfigValue('leadModel', DEFAULT_FUSION_WORKER.lead), DEFAULT_FUSION_WORKER.lead);
-  const configuredPanel = reddogConfigValue('panelModels', DEFAULT_FUSION_WORKER.panel);
-  const panel = Array.isArray(configuredPanel)
-    ? configuredPanel.map((item) => cleanModel(item, '')).filter(Boolean).slice(0, FUSION_PANEL_FORWARD_LIMIT)
-    : DEFAULT_FUSION_WORKER.panel;
-  return {
-    title: DEFAULT_FUSION_WORKER.title,
-    lead,
-    panel
-  };
-}
-
-function cleanModel(value, fallback) {
-  return typeof value === 'string' && value.trim() && value.length <= 120 ? value.trim() : fallback;
+  return backendCompatibilityRender.resolveFusionWorker(
+    reddogConfigValue, DEFAULT_FUSION_WORKER, FUSION_PANEL_FORWARD_LIMIT
+  );
 }
 
 function wireFusionWebview(context, webview, worker, state) {
@@ -5442,6 +5397,24 @@ function wireFusionWebview(context, webview, worker, state) {
       return;
     }
     if (message.command !== 'ask' || typeof message.text !== 'string') {
+      return;
+    }
+
+    state.installState = detectRedDogInstallState(context);
+    if (
+      !state.installState.backend_compatibility
+      || state.installState.backend_compatibility.passed !== true
+    ) {
+      const blockedResult = buildBackendCompatibilityBlockedResult(
+        state.installState
+      );
+      state.lastReviewPacket = blockedResult.review_packet;
+      postStatusAndProgress(
+        webview,
+        null,
+        'Stopped before grounding: RedDog backend compatibility preflight failed.'
+      );
+      webview.postMessage({ command: 'result', result: blockedResult });
       return;
     }
 
@@ -5844,6 +5817,7 @@ function wireFusionWebview(context, webview, worker, state) {
     result.review_packet.fusion_progress_receipts = fusionProgressReceipts;
     result.review_packet.fusion_progress_receipt_validation = fusionProgressValidation;
     const runtimeConsumptionGate = buildRuntimeConsumptionGate(result, validationState, mode, substantiveTask);
+    backendCompatibility.enforceRuntimeGate(runtimeConsumptionGate, currentBackendCompatibility());
     const actionPlanningAllowed = runtimeConsumptionGate.passed === true;
     const residentArchitectSessionEnabled = (
       reddogConfigValue('enableResidentArchitectSession', false) === true
@@ -6077,6 +6051,12 @@ function attachBridgeMetadata(reviewPacket, bridgeMeta) {
 }
 
 function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptionsArg) {
+  const compatibility = currentBackendCompatibility();
+  if (compatibility.passed !== true) {
+    return Promise.resolve(buildBackendCompatibilityBlockedResult({
+      backend_compatibility: compatibility
+    }));
+  }
   return new Promise((resolve) => {
     const root = workspaceRoot();
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
@@ -7895,11 +7875,7 @@ function renderHtml(worker, surface, logoUri, installState) {
   const escapedSurface = escapeHtml(surface);
   const escapedLogoUri = escapeHtml(logoUri || '');
   const state = installState && typeof installState === 'object' ? installState : {};
-  const escapedInstall = escapeHtml(
-    state.stale_install_detected
-      ? 'Legacy extension detected: remove foundups-fusion-worker after migration.'
-      : 'Install state: canonical RedDog extension.'
-  );
+  const escapedInstall = escapeHtml(backendCompatibility.installStatusMessage(state));
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8301,6 +8277,8 @@ module.exports = {
   isDaemonOutputAssessmentRequest,
   parseDaemonOutputAssessment,
   buildDaemonOutputLocalAssessmentResult,
+  buildBackendCompatibilityBlockedResult,
+  projectBackendCompatibility,
   appendContinuationSummaryToWspPrompt,
   buildSanitizedContinuationSummary,
   buildContinuationSummaryCopySection,

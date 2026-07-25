@@ -2,6 +2,13 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_EXTENSION_BACKEND_COMPATIBILITY_PREFLIGHT_PHASE1 (0.4.12)
+
+- Added an extension-pinned repository backend manifest, per-bridge content digests, and a pure compatibility preflight for the editor thin client.
+- Blocked before grounding, HoloIndex, model, permission, and work-order paths when the selected workspace is stale, incomplete, altered, malformed, junction-escaped, symlinked, or API-incompatible; rechecked before model and action-planning boundaries.
+- Added allowlisted content-free compatibility telemetry and a visible blocked install state without automatic repair or runtime re-index.
+- Version 0.4.11 -> 0.4.12.
+
 ## 2026-07-20 - REDDOG_RESIDENT_CYCLE_CAS_ATTESTATION_AND_INTENT_BINDING_PHASE1 (0.4.11)
 
 - Routed editor resident sessions through `RedDogResidentArchitectClient` instead of invoking the backend cycle directly.

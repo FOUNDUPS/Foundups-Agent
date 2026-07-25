@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - Backend compatibility preflight (0.4.12)
+
+- Proved extension-pinned manifest/API/file-contract acceptance, bridge-content integrity, and fail-closed rejection for missing, altered, malformed, oversized, directory-backed, junction-escaped, and symlink-backed backend artifacts.
+- Proved an incompatible workspace stops before work-focus classification, HoloIndex, model, permission, and work-order paths and exposes only bounded compatibility telemetry.
+- Reconciled the exhaustive live-enqueue expectation with the existing stronger
+  admission-before-writer rejection order observed on the clean base.
+
 ## 2026-07-20 - Resident cycle CAS and authenticated editor client (0.4.11)
 
 - Added canonical genesis, full-intent conflict, stale-revision, transition-state tamper, cancellation race, terminal retry, legacy cancel-only, and monotonic attempt-history regressions.

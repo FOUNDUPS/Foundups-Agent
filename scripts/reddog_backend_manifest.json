@@ -1,0 +1,32 @@
+{
+  "schema_version": "reddog_backend_manifest.v1",
+  "product": "foundups-agent-reddog-backend",
+  "backend_api_version": 1,
+  "required_bridge_files": [
+    "scripts/advisory_model_once.py",
+    "scripts/reddog_extension_live_enqueue_invoke_once.py",
+    "scripts/reddog_extension_wre_spine_invoke_once.py",
+    "scripts/reddog_github_permission_probe_once.py",
+    "scripts/reddog_holoindex_owner_query_once.py",
+    "scripts/reddog_judgment_verifier_once.py",
+    "scripts/reddog_operator_wardrobe_selection_once.py",
+    "scripts/reddog_repair_guard_once.py",
+    "scripts/reddog_resident_architect_session_once.py"
+  ],
+  "required_bridge_sha256": {
+    "scripts/advisory_model_once.py": "7d3079067fc82442bc271bf0e428b16ea5474a867162b114bfdfe877bd45d2d6",
+    "scripts/reddog_extension_live_enqueue_invoke_once.py": "a2fa50ab16847a05501d06a1fa9dc6e4c40fa5e5cf4ec47cdc6c70c7c2ff6bb6",
+    "scripts/reddog_extension_wre_spine_invoke_once.py": "aeb957566760154e27f91495a52ad6a6dddcad7d1c61b739198be2f7a4dae9fc",
+    "scripts/reddog_github_permission_probe_once.py": "b56af8b351ce8fbd4fc9e159ce16d3c315b5b0d28b97ef82dbb2813d96aa9069",
+    "scripts/reddog_holoindex_owner_query_once.py": "84f151b0c4cee978c85912acc578de5a18f68d4f09aacd70e3b4b4d79191c858",
+    "scripts/reddog_judgment_verifier_once.py": "720ca9a8e490833774bed5eb489d26f311b954fac528dfc1caba99b7f31aa98f",
+    "scripts/reddog_operator_wardrobe_selection_once.py": "46142fcf1f0db74a93fbcffb2c831c53fcd4c11035fab11b12afe1bd32b5448c",
+    "scripts/reddog_repair_guard_once.py": "4fd4e8b4200363195bab7b9a65b8d1d81deac24340654ac04fc7d4ee12ca9bc8",
+    "scripts/reddog_resident_architect_session_once.py": "68e07b17cc8463ac59a0f53be9cfcecd61dce19d3a495bff20cf4bc9d25a0175"
+  },
+  "required_repository_markers": [
+    "main.py",
+    "holo_index.py",
+    "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+  ]
+}
