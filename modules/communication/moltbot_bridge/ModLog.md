@@ -1,5 +1,20 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-25: REDDOG_WORK_STATE_AUTHORITATIVE_GROUNDING_GATE_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 97
+
+- Added a read-only authoritative work-state query receipt over the existing
+  governed WRE queue consumer.
+- Bound the receipt to the external snapshot bytes, validated stored revision,
+  snapshot freshness, selected slice, active claim/freshness lineage, and the
+  canonical WSP 15 allocation receipt.
+- Rejected missing, stale, conflicting, malformed, repo-internal, and
+  non-governed state without model, HoloIndex, queue, claim, shell, worker,
+  repository, or execution side effects.
+- Query-only HoloIndex preflight observed a root/head/collection freshness gap;
+  it was recorded for governed maintenance and not repaired during this run.
+
 ## 2026-07-25: REDDOG_MAIN_RESIDENT_ARCHITECT_CANONICAL_CLIENT_MIGRATION_REVIEW_REPAIR
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 91, 97

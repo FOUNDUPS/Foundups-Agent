@@ -32,6 +32,8 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert runtime.issubset(tracked)
     assert set(generator.EXECUTABLE_FILES).issubset(runtime)
     assert "holo_index.py" in runtime
+    assert "scripts/reddog_authoritative_work_state_query_once.py" in runtime
+    assert "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py" in runtime
     assert "modules/communication/moltbot_bridge/src/openclaw_dae.py" in runtime
     assert "modules/foundups/src/foundup_registry_loader.py" in runtime
     assert "modules/platform_integration/linkedin_agent/src/linkedin_agent.py" in runtime
@@ -45,5 +47,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
 
     assert checked_in == generated
     assert generator.canonical_manifest_digest(generated) == (
-        "b9ea22776ffe968ca7d649a566d42dab24094a3630b55524deb7ea47ece9fbd0"
+        "f988a5364909fbc2252395269e0a888f5065e0d9aff3b8ae3b05609a0c923675"
     )

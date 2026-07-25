@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_WORK_STATE_AUTHORITATIVE_GROUNDING_GATE_PHASE1 (0.4.13)
+
+- Added a local authoritative work-state route for direct current/next-work questions.
+- Validated external snapshot revision/age, governed queue/claim/freshness lineage, selected-slice consistency, and canonical WSP_15 allocation before reporting work.
+- Returned a digest-bound read-only receipt and failed closed to `NOT_READY` without HoloIndex, model, queue/claim mutation, worker dispatch, shell, or execution.
+- Corrected all local fast paths to skip repository/HoloIndex context assembly before producing their local response.
+- Recorded `HOLOINDEX_REDDOG_WORK_STATE_QUERY_DISCOVERABILITY_GAP_PHASE1`: query-only checks rejected the dirty feature worktree and reported root/head/collection staleness from a clean merged worktree; no runtime re-index was performed.
+- Version 0.4.12 -> 0.4.13.
+
 ## 2026-07-25 - REDDOG_EXTENSION_BACKEND_COMPATIBILITY_PREFLIGHT_PHASE1 (0.4.12)
 
 - Added an extension-pinned repository backend manifest, generated 989-file executable/runtime dependency closure, per-file content digests, and a pure compatibility preflight for the editor thin client.

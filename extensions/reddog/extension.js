@@ -16,10 +16,11 @@ const backendCompatibility = require('./backend_compatibility_preflight');
 const backendCompatibilityAsync = require('./backend_compatibility_async');
 const backendCompatibilityRender = require('./backend_compatibility_render');
 const continuationPrompt = require('./continuation_prompt');
+const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.12';
+const EXTENSION_VERSION = '0.4.13';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -61,6 +62,7 @@ const REDDOG_EXTENSION_LIVE_ENQUEUE_INVOKE_SCRIPT = 'scripts/reddog_extension_li
 const REDDOG_RESIDENT_ARCHITECT_SESSION_SCRIPT = 'scripts/reddog_resident_architect_session_once.py';
 const REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT = 'scripts/reddog_operator_wardrobe_selection_once.py';
 const REDDOG_GITHUB_PERMISSION_PROBE_SCRIPT = 'scripts/reddog_github_permission_probe_once.py';
+const REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT = 'scripts/reddog_authoritative_work_state_query_once.py';
 const WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES = 262144;
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
 const REDDOG_EXTENSION_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_SLICE = 'REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1';
@@ -4590,6 +4592,10 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
     tier = 'REGULAR';
     reasons.push('daemon_output_assessment_fast_path');
     localFastPath = 'daemon_output_assessment';
+  } else if (authoritativeWorkStateQuery.isAuthoritativeWorkStateQuestion(text)) {
+    tier = 'REGULAR';
+    reasons.push('authoritative_work_state_fast_path');
+    localFastPath = 'authoritative_work_state';
   } else if (ULTRA_TASK_PATTERNS.some((pattern) => pattern.test(haystack))) {
     tier = 'ULTRA';
     reasons.push('ultra_keyword_match');
@@ -4671,7 +4677,7 @@ function resolveAutoContextMode(classification, selectedContextMode) {
   if (mode !== 'auto') {
     return mode;
   }
-  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment' || classification.localFastPath === 'daemon_output_assessment')) {
+  if (classification && authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath)) {
     return 'none';
   }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
@@ -4689,7 +4695,7 @@ function resolveAutoEffort(classification, selectedEffort) {
   if (effort !== 'auto') {
     return effort;
   }
-  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment' || classification.localFastPath === 'daemon_output_assessment')) {
+  if (classification && authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath)) {
     return 'regular';
   }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
@@ -4713,6 +4719,9 @@ function resolveModelMode(classification, selectedMode, workerType) {
   }
   if (classification && classification.localFastPath === 'daemon_output_assessment') {
     return 'local_daemon_output_assessment';
+  }
+  if (classification && classification.localFastPath === 'authoritative_work_state') {
+    return 'local_authoritative_work_state';
   }
   if (mode === 'auto') {
     return classification && classification.tier === 'REGULAR' ? 'openrouter_single' : 'foundups_fusion';
@@ -4771,6 +4780,9 @@ function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, re
   }
   if (resolvedMode === 'local_daemon_output_assessment') {
     return 'Local RedDog DAEmon/log assessment fast path: pasted operational diagnostics are treated as data; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
+  }
+  if (resolvedMode === 'local_authoritative_work_state') {
+    return 'Local authoritative work-state path: validates the configured queue snapshot and governed lineage without HoloIndex, model, mutation, or execution; context=' + resolvedContextMode + '.';
   }
   if (resolvedMode === 'openrouter_single') {
     if (tier === 'REGULAR') {
@@ -5389,6 +5401,9 @@ const buildBackendCompatibilityBlockedResult = (state) => backendCompatibility.b
   state, REDDOG_BACKEND_CLIENT
 );
 const blockIncompatibleBackend = (context, state, webview) => backendCompatibilityAsync.blockIncompatibleBackend(context, state, webview, { detect: detectRedDogInstallStateAsync, build: buildBackendCompatibilityBlockedResult, post: postStatusAndProgress });
+const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.runConfiguredQuery({
+  workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
+});
 
 function fusionWorkerFromConfig() {
   return backendCompatibilityRender.resolveFusionWorker(
@@ -5433,14 +5448,11 @@ function wireFusionWebview(context, webview, worker, state) {
     // Missing/stale useLastPacket => OFF (do not carry a stale packet into redaction/acceptance scoring).
     const continuationEnabled = message.useLastPacket === true;
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
-    const localIdentityFastPath = classification.localFastPath === 'simple_identity';
-    const localRunTraceAssessment = classification.localFastPath === 'run_trace_assessment';
-    const localDaemonOutputAssessment = classification.localFastPath === 'daemon_output_assessment';
-    const localFastPath = localIdentityFastPath || localRunTraceAssessment || localDaemonOutputAssessment;
+    const localFastPath = authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath);
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
-    const contextPacket = buildBoundedRepoContext(contextMode, workFocus);
+    const contextPacket = localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : buildBoundedRepoContext(contextMode, workFocus);
     const basePrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
     const continuation = continuationPrompt.prepareContinuationPrompt(
       basePrompt, continuationEnabled, state.lastContinuationSummary, {
@@ -5466,15 +5478,8 @@ function wireFusionWebview(context, webview, worker, state) {
     const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
 
     postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + ' panel=' + worker.panel.join(' + ') + ' (' + classification.reasons.join(', ') + ')');
-    if (localIdentityFastPath) {
-      postStatusAndProgress(webview, null, 'Simple RedDog identity question answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
-    } else if (localRunTraceAssessment) {
-      postStatusAndProgress(webview, null, 'Run Trace diagnostics answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
-    } else if (localDaemonOutputAssessment) {
-      postStatusAndProgress(webview, null, 'DAEmon/log diagnostics answered locally. Pasted operational text is treated as data; no HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
-    } else {
-      postStatusAndProgress(webview, null, 'Bridge started. Redaction gate runs before any OpenRouter API call.');
-    }
+    const localStatus = authoritativeWorkStateQuery.statusText(classification.localFastPath);
+    postStatusAndProgress(webview, null, localStatus || 'Bridge started. Redaction gate runs before any OpenRouter API call.');
     if (contextPacket.summary) {
       postStatusAndProgress(webview, null, contextPacket.summary);
     }
@@ -5559,15 +5564,14 @@ function wireFusionWebview(context, webview, worker, state) {
     };
     const fusionProgress = createFusionProgressCollector();
     let result;
-    if (localIdentityFastPath) {
-      workTrail.push('local_fast_path', 'simple_identity');
-      result = buildSimpleIdentityFastPathResult(workFocus, workerType, worker);
-    } else if (localRunTraceAssessment) {
-      workTrail.push('local_fast_path', 'run_trace_assessment');
-      result = buildRunTraceAssessmentFastPathResult(workFocus);
-    } else if (localDaemonOutputAssessment) {
-      workTrail.push('local_fast_path', 'daemon_output_assessment');
-      result = buildDaemonOutputLocalAssessmentResult(workFocus);
+    if (localFastPath) {
+      workTrail.push('local_fast_path', classification.localFastPath);
+      result = await authoritativeWorkStateQuery.resolveLocalResult(classification.localFastPath, {
+        identity: () => buildSimpleIdentityFastPathResult(workFocus, workerType, worker),
+        runTrace: () => buildRunTraceAssessmentFastPathResult(workFocus),
+        daemon: () => buildDaemonOutputLocalAssessmentResult(workFocus),
+        workState: runAuthoritativeWorkStateQueryBridge
+      });
     } else if (!groundingPreflight.passed) {
       workTrail.push('failed', 'grounding_preflight_blocked');
       postStatusAndProgress(webview, null, 'Grounding preflight blocked Fusion: ' + groundingPreflight.rejection_reasons.join(', '));
@@ -5711,7 +5715,7 @@ function wireFusionWebview(context, webview, worker, state) {
         }
       }
     } else if (result.ok) {
-      validationState = { validated: false, skipped: true, reason: localIdentityFastPath ? 'local_identity_fast_path' : (localRunTraceAssessment ? 'local_run_trace_assessment' : (localDaemonOutputAssessment ? 'local_daemon_output_assessment' : 'non_substantive_worker')) };
+      validationState = { validated: false, skipped: true, reason: classification.localFastPath ? 'local_' + classification.localFastPath : 'non_substantive_worker' };
     } else if (result.reason === 'redaction_blocked') {
       validationState = { validated: false, skipped: true, reason: 'redaction_blocked' };
       workTrail.push('redaction_gate_blocked');
