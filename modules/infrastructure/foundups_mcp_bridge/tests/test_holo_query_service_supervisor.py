@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import socket
 import subprocess
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -28,6 +29,23 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_superviso
 TOKEN = "x" * 64
 
 
+@pytest.fixture(autouse=True)
+def _available_owner_port(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        supervisor_module,
+        "_owner_port_available",
+        lambda _host, _port: True,
+    )
+
+
+class _FakePipe:
+    def __init__(self) -> None:
+        self.closed = False
+
+    def close(self) -> None:
+        self.closed = True
+
+
 class _FakeProcess:
     def __init__(
         self,
@@ -40,6 +58,7 @@ class _FakeProcess:
         self.wait_calls = 0
         self.terminated = False
         self.killed = False
+        self.stdin = _FakePipe()
 
     def poll(self) -> int | None:
         return self.returncode
@@ -71,6 +90,11 @@ def _install_successful_start(
         return process
 
     monkeypatch.setattr(supervisor_module.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(
+        supervisor_module,
+        "_owner_port_available",
+        lambda _host, _port: True,
+    )
     monkeypatch.setattr(
         supervisor_module,
         "_authenticated_health_probe",
@@ -115,11 +139,12 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
         OWNER_HOST,
         "--port",
         "9137",
+        "--parent-stdin-watchdog",
     ]
     options = launch["kwargs"]
     assert options["shell"] is False
     assert options["cwd"] == str(tmp_path.resolve())
-    assert options["stdin"] is subprocess.DEVNULL
+    assert options["stdin"] is subprocess.PIPE
     assert options["stdout"] is subprocess.DEVNULL
     assert options["stderr"] is subprocess.DEVNULL
     assert options["env"][SERVICE_TOKEN_ENV] == TOKEN
@@ -128,6 +153,7 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
 
     owner.stop()
     assert process.terminated is True
+    assert process.stdin.closed is True
     assert unregistered
     assert owner.is_ready is False
 
@@ -360,6 +386,49 @@ def test_token_generation_fails_closed(
         owner.start()
 
     assert error.value.code == expected_code
+
+
+def test_occupied_port_fails_before_process_spawn(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    spawned: list[bool] = []
+    tokens: list[bool] = []
+    monkeypatch.setattr(
+        supervisor_module.secrets,
+        "token_urlsafe",
+        lambda _bytes: tokens.append(True) or TOKEN,
+    )
+    monkeypatch.setattr(
+        supervisor_module,
+        "_owner_port_available",
+        lambda _host, _port: False,
+    )
+    monkeypatch.setattr(
+        supervisor_module.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: spawned.append(True),
+    )
+
+    with pytest.raises(HoloQueryServiceSupervisorError) as error:
+        HoloQueryServiceSupervisor(repo_root=tmp_path).start()
+
+    assert error.value.code == supervisor_module.PORT_IN_USE_ERROR
+    assert spawned == []
+    assert tokens == []
+
+
+def test_port_probe_detects_real_loopback_listener(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.undo()
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+        listener.bind((OWNER_HOST, 0))
+        listener.listen(1)
+        port = int(listener.getsockname()[1])
+        assert supervisor_module._owner_port_available(OWNER_HOST, port) is False
+
+    assert supervisor_module._owner_port_available(OWNER_HOST, port) is True
 
 
 def test_spawn_and_repo_root_failures_use_stable_codes(

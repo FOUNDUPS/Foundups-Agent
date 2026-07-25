@@ -123,7 +123,9 @@ HOLOINDEX_QUERY_SERVICE_URL and the per-process
 HOLOINDEX_QUERY_SERVICE_TOKEN; it never mutates the host environment. stop()
 invalidates the handoff, terminates the owner, and kills it after a bounded
 grace period. Startup failures raise HoloQueryServiceSupervisorError with a
-stable secret-free code. This supported adapter boundary does not itself
+stable secret-free code. An occupied fixed port fails before process spawn,
+and a private stdin watchdog exits an auto-owned child when its supervisor
+process dies. This supported adapter boundary does not itself
 remove OS filesystem/process privileges from a child; the trusted host must
 configure those permissions separately.
 
@@ -221,9 +223,9 @@ restart failure remains non-operational. See
 Scope note: this owner is wired for the listed RedDog operational consumers.
 The legacy `src/holo_tools.py` MCP surface still opens the HoloIndex store
 directly and remains a registered migration item; Phase 1 does not claim that
-all repository consumers cross this boundary. Normal cleanup is bounded, but
-an abrupt host death can orphan the child until OS/supervisor cleanup and token
-rotation.
+all repository consumers cross this boundary. Normal cleanup is bounded, and
+auto-owned children terminate when the supervisor's private stdin pipe closes.
+Manually launched or pre-v0.4.19 owners do not inherit that parent-death proof.
 
 ---
 

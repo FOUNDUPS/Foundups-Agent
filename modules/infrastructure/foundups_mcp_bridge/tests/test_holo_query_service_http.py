@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import http.client
+import io
 import json
+import subprocess
+import sys
 import threading
 from pathlib import Path
 from types import SimpleNamespace
@@ -219,5 +222,68 @@ def test_main_dispatches_to_stdlib_when_fastapi_is_unavailable(
         "create_stdlib_server",
         lambda _owner, **_kwargs: FakeServer(),
     )
-    assert main(["--host", "127.0.0.1", "--port", "8127"]) == 0
-    assert events == ["served", "server_closed", "owner_closed"]
+    monkeypatch.setattr(
+        http_module,
+        "_start_parent_stdin_watchdog",
+        lambda _stream: events.append("watchdog_started"),
+    )
+    assert (
+        main(
+            [
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "8127",
+                "--parent-stdin-watchdog",
+            ]
+        )
+        == 0
+    )
+    assert events == [
+        "watchdog_started",
+        "served",
+        "server_closed",
+        "owner_closed",
+    ]
+
+
+def test_parent_stdin_watchdog_exits_on_pipe_eof() -> None:
+    exits: list[int] = []
+
+    thread = http_module._start_parent_stdin_watchdog(
+        io.BytesIO(b""),
+        terminate_process=exits.append,
+    )
+    thread.join(timeout=1)
+
+    assert exits == [0]
+    assert thread.is_alive() is False
+
+
+def test_parent_stdin_watchdog_exits_real_child_after_pipe_close() -> None:
+    code = (
+        "import sys,time;"
+        "from modules.infrastructure.foundups_mcp_bridge.src."
+        "holo_query_service_http import _start_parent_stdin_watchdog;"
+        "_start_parent_stdin_watchdog(sys.stdin.buffer);"
+        "print('ready',flush=True);"
+        "time.sleep(30)"
+    )
+    process = subprocess.Popen(
+        [sys.executable, "-B", "-c", code],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        shell=False,
+    )
+    try:
+        assert process.stdout is not None
+        assert process.stdout.readline().strip() == "ready"
+        assert process.stdin is not None
+        process.stdin.close()
+        assert process.wait(timeout=3) == 0
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=3)

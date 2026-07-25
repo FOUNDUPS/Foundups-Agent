@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - HoloIndex owner lifecycle hardening (0.4.19)
+
+- Proved occupied loopback ports fail before process spawn.
+- Proved the parent liveness pipe is passed to the owner and closed during shutdown.
+- Proved a real child watchdog exits after parent-pipe EOF.
+
 ## 2026-07-25 - HoloIndex authority-worktree binding (0.4.18)
 
 - Added clean/dirty, same/foreign Git common-directory, exact/wrong HEAD, configured-path, owner-root forgery, post-query state-change, and no-mutation regressions.

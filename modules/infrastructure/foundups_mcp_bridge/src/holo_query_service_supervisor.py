@@ -14,6 +14,7 @@ import json
 import math
 import os
 import secrets
+import socket
 import subprocess
 import sys
 import time
@@ -35,6 +36,7 @@ MAX_HEALTH_RESPONSE_BYTES = 65_536
 TOKEN_ENTROPY_BYTES = 48
 DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS = 300.0
 DEFAULT_OWNER_PROBE_INTERVAL_SECONDS = 0.5
+PORT_IN_USE_ERROR = "HOLOINDEX_QUERY_SERVICE_PORT_IN_USE"
 
 
 class HoloQueryServiceSupervisorError(RuntimeError):
@@ -190,6 +192,29 @@ def _hidden_process_options() -> dict[str, object]:
     }
 
 
+def _owner_port_available(host: str, port: int) -> bool:
+    """Prove the fixed loopback endpoint is free before expensive startup."""
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+                probe.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+            probe.bind((host, int(port)))
+    except OSError:
+        return False
+    return True
+
+
+def _close_parent_watchdog_pipe(process: subprocess.Popen[bytes]) -> None:
+    stream = getattr(process, "stdin", None)
+    if stream is None:
+        return
+    try:
+        stream.close()
+    except (OSError, ValueError):
+        return
+
+
 def _terminate_process(
     process: subprocess.Popen[bytes],
     *,
@@ -198,6 +223,7 @@ def _terminate_process(
     """Bound termination without retaining any lifecycle secret state."""
     if process.poll() is not None:
         return
+    _close_parent_watchdog_pipe(process)
     try:
         process.terminate()
     except OSError:
@@ -259,6 +285,7 @@ def _owner_command(
         OWNER_HOST,
         "--port",
         str(port),
+        "--parent-stdin-watchdog",
     ]
 
 
@@ -324,6 +351,8 @@ class HoloQueryServiceSupervisor:
             raise HoloQueryServiceSupervisorError(
                 "HOLOINDEX_QUERY_SERVICE_REPO_ROOT_UNAVAILABLE"
             )
+        if not _owner_port_available(OWNER_HOST, self.port):
+            raise HoloQueryServiceSupervisorError(PORT_IN_USE_ERROR)
         token = _owner_token()
         owner_environment = _owner_environment(token, self.ssd_path)
         try:
@@ -331,7 +360,7 @@ class HoloQueryServiceSupervisor:
                 _owner_command(self.python_executable, self.port),
                 cwd=str(self.repo_root),
                 env=owner_environment,
-                stdin=subprocess.DEVNULL,
+                stdin=subprocess.PIPE,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 shell=False,
@@ -443,6 +472,7 @@ __all__ = [
     "HoloQueryServiceSupervisor",
     "HoloQueryServiceSupervisorError",
     "OWNER_HOST",
+    "PORT_IN_USE_ERROR",
     "SERVICE_TOKEN_ENV",
     "SERVICE_URL_ENV",
 ]

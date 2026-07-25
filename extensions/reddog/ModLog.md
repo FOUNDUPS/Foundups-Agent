@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_HOLOINDEX_OWNER_LIFECYCLE_HARDENING_PHASE1 (0.4.19)
+
+- Added a pre-spawn exclusive loopback port check so a stale or foreign listener fails immediately instead of consuming the five-minute cold-start budget.
+- Added a supervisor-owned stdin liveness pipe; the private HoloIndex owner exits when the parent process dies and closes the pipe.
+- Preserved process-private bearer handoff, loopback-only binding, read-only query authority, and no runtime re-index behavior.
+- Corrected the authority-path truth boundary: selection metadata is digest-only, while existing semantic-hit paths are unchanged.
+- Version 0.4.18 -> 0.4.19.
+
 ## 2026-07-25 - REDDOG_HOLOINDEX_AUTHORITY_WORKTREE_QUERY_BINDING_PHASE1 (0.4.18)
 
 - Added read-only selection of a configured or deterministic sibling HoloIndex authority worktree only when it is linked to the same Git common directory, clean, and at the workspace's exact HEAD.

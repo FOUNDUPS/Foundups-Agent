@@ -1,5 +1,10 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-25] HoloIndex owner lifecycle hardening
+
+- Added mocked and real-socket port-conflict coverage.
+- Added mocked and real-subprocess parent-pipe EOF cleanup coverage.
+
 ## [2026-07-25] HoloIndex owner repository-root binding
 
 - Added matching-root success and mismatched-root fail-before-backend tests.
