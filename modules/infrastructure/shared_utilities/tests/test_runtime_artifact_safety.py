@@ -13,6 +13,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     redact_runtime_value,
     secure_append_runtime_text,
     secure_read_confined_bytes,
+    secure_read_confined_text,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
@@ -266,3 +267,88 @@ def test_confined_read_rejects_descriptor_final_path_outside_root(
 
     with pytest.raises(ValueError, match="outside_root"):
         secure_read_confined_bytes(source, allowed_root=repo)
+
+
+def test_confined_text_read_uses_one_descriptor_and_enforces_size_limit(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "runtime"
+    root.mkdir()
+    source = root / "events.jsonl"
+    source.write_text("bounded payload", encoding="utf-8")
+    real_open = runtime_artifact_safety.os.open
+    open_calls: list[Path] = []
+
+    def counted_open(path, flags, *args):
+        open_calls.append(Path(path))
+        return real_open(path, flags, *args)
+
+    monkeypatch.setattr(runtime_artifact_safety.os, "open", counted_open)
+
+    assert secure_read_confined_text(
+        source,
+        allowed_root=root,
+        max_bytes=64,
+    ) == "bounded payload"
+    assert open_calls == [source.resolve()]
+    with pytest.raises(ValueError, match="size_limit"):
+        secure_read_confined_text(
+            source,
+            allowed_root=root,
+            max_bytes=4,
+        )
+
+
+def test_confined_text_read_rejects_descriptor_metadata_change(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "runtime"
+    root.mkdir()
+    source = root / "events.jsonl"
+    source.write_text("stable", encoding="utf-8")
+    real_reader = runtime_artifact_safety._read_descriptor_text
+
+    def mutate_timestamp(descriptor: int, size: int) -> str:
+        payload = real_reader(descriptor, size)
+        current = source.stat()
+        os.utime(
+            source,
+            ns=(
+                current.st_atime_ns,
+                current.st_mtime_ns + 1_000_000_000,
+            ),
+        )
+        return payload
+
+    monkeypatch.setattr(
+        runtime_artifact_safety,
+        "_read_descriptor_text",
+        mutate_timestamp,
+    )
+
+    with pytest.raises(ValueError, match="target_changed"):
+        secure_read_confined_text(source, allowed_root=root)
+
+
+def test_confined_text_read_rejects_descriptor_final_path_outside_root(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "runtime"
+    outside = tmp_path / "outside"
+    root.mkdir()
+    outside.mkdir()
+    source = root / "events.jsonl"
+    source.write_text("safe", encoding="utf-8")
+    outside_source = outside / "events.jsonl"
+    outside_source.write_text("outside-marker", encoding="utf-8")
+    monkeypatch.setattr(
+        runtime_artifact_safety,
+        "_descriptor_final_path",
+        lambda _descriptor: outside_source,
+    )
+
+    with pytest.raises(ValueError, match="outside_root"):
+        secure_read_confined_text(source, allowed_root=root)

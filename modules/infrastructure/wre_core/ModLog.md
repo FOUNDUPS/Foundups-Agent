@@ -2,6 +2,13 @@
 
 ## Chronological Change Log
 
+### [2026-07-25] - DAEMON_SELF_AUDIT_RUNTIME_CONSUMER_ALIGNMENT_PHASE1
+
+- Extracted the daemon self-audit runtime-root resolver so producers and
+  consumers use one validated external artifact location.
+- Removed the obsolete tracked escalation JSONL; runtime telemetry remains
+  outside the repository and fail-closed against source-tree placement.
+
 ### [2026-07-23] - FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1_REPAIR1
 
 - Removed runtime-binding authority from `FoundUpJob.payload`; validate jobs

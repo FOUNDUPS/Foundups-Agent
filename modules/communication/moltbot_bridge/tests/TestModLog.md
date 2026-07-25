@@ -1,3 +1,13 @@
+## 2026-07-25: Daemon self-audit runtime nudge alignment
+
+- Proved current external escalation records produce memory events.
+- Proved the obsolete in-repository JSONL is ignored and an in-repository
+  runtime-root injection fails closed.
+- Proved producer/consumer resolver parity across default, resident, relative,
+  and explicit-precedence modes.
+- Proved oversized and identity-changing escalation files fail closed without
+  using an unconfined `Path.read_text` call.
+
 ## 2026-07-25: RedDog HoloIndex receipt-bound evidence regression repair
 
 - Updated four older owner-client fixtures to carry the repository-root digest required by the landed authority-root contract.

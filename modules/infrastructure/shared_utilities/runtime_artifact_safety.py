@@ -346,6 +346,84 @@ def secure_read_confined_bytes(
         os.close(descriptor)
 
 
+def secure_read_confined_text(
+    path: Path | str,
+    *,
+    allowed_root: Path | str,
+    max_bytes: int = 8 * 1024 * 1024,
+) -> str:
+    """Read bounded UTF-8 text from one verified, stable file descriptor."""
+
+    raw = str(path or "").strip()
+    limit = int(max_bytes)
+    if (
+        not raw
+        or "\x00" in raw
+        or raw.startswith(_DEVICE_PATH_PREFIXES)
+        or limit < 0
+    ):
+        raise ValueError("confined_read_path_invalid")
+    root_candidate = Path(os.path.abspath(Path(allowed_root).expanduser()))
+    expected_candidate = Path(raw).expanduser()
+    if not expected_candidate.is_absolute():
+        expected_candidate = root_candidate / expected_candidate
+    expected_candidate = Path(os.path.abspath(expected_candidate))
+    if not _is_relative_to(expected_candidate, root_candidate):
+        raise ValueError("confined_read_path_outside_root")
+    if _contains_link_component(root_candidate) or _contains_link_component(
+        expected_candidate
+    ):
+        raise ValueError("confined_read_path_link_rejected")
+
+    root = _without_windows_extended_prefix(root_candidate.resolve(strict=True))
+    expected = _without_windows_extended_prefix(
+        expected_candidate.resolve(strict=True)
+    )
+    if not _is_relative_to(expected, root):
+        raise ValueError("confined_read_path_outside_root")
+
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(expected, flags)
+    try:
+        before = os.fstat(descriptor)
+        _require_private_regular_file(before)
+        if before.st_size > limit:
+            raise ValueError("confined_read_size_limit")
+        final_path = _descriptor_final_path(descriptor)
+        final_resolved = _without_windows_extended_prefix(final_path.resolve(strict=True))
+        if not _is_relative_to(final_resolved, root):
+            raise ValueError("confined_read_descriptor_outside_root")
+        if os.path.normcase(str(final_resolved)) != os.path.normcase(str(expected)):
+            raise ValueError("confined_read_descriptor_path_mismatch")
+
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        payload = _read_descriptor_text(descriptor, before.st_size)
+        after = os.fstat(descriptor)
+        if (
+            len(payload.encode("utf-8")) != before.st_size
+            or (
+                after.st_dev,
+                after.st_ino,
+                after.st_size,
+                int(getattr(after, "st_nlink", 1)),
+                int(getattr(after, "st_mtime_ns", 0)),
+                int(getattr(after, "st_ctime_ns", 0)),
+            )
+            != (
+                before.st_dev,
+                before.st_ino,
+                before.st_size,
+                1,
+                int(getattr(before, "st_mtime_ns", 0)),
+                int(getattr(before, "st_ctime_ns", 0)),
+            )
+        ):
+            raise ValueError("confined_read_target_changed")
+        return payload
+    finally:
+        os.close(descriptor)
+
+
 def redact_runtime_value(
     value: Any,
     *,
@@ -604,6 +682,7 @@ __all__ = [
     "runtime_operation_lock",
     "secure_append_runtime_text",
     "secure_read_confined_bytes",
+    "secure_read_confined_text",
     "secure_replace_runtime_text",
     "validate_runtime_artifact_path",
     "validate_runtime_root_path",

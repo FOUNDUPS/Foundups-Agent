@@ -92,3 +92,7 @@
   - `python -c "import os; from pathlib import Path; import main; [os.environ.pop(k,None) for k in ['FOUNDUPS_ENV_DUPLICATE_KEYS','FOUNDUPS_ENV_ORPHAN_LINES','FOUNDUPS_ENV_DUPLICATE_OVERWRITES','FOUNDUPS_ENV_MODE','FOUNDUPS_ENV_ACTIVE_FILE']]; print(main.run_env_hygiene_preflight(Path('.')))"`.
   - Result: fallback `legacy_scan` path works when managed stats are absent.
 ====================================================================
+## 2026-07-25 - Stable Descriptor-Confined Runtime Text Reads
+
+- Proved bounded reads use one descriptor and reject oversized input.
+- Proved descriptor metadata changes and final-path escapes fail closed.
