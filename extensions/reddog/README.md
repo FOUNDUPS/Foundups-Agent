@@ -1,8 +1,10 @@
 # RedDog
 
-Version: 0.4.14
+Version: 0.4.15
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
+
+Version 0.4.15 routes anchored conversational reply and message-drafting requests through a redaction-gated single-model path. The route treats pasted text as untrusted data, skips HoloIndex/repository grounding and Fusion, emits only the requested draft, and cannot produce runtime or worker authority.
 
 Version 0.4.14 preserves semantic audit obligations that contain slash-delimited product or subsystem names such as `OpenClaw/WRE/Hermes`. Slash-shaped prose remains excluded from repo-file targets; only lines containing an actual bound repo target retain the existing no-duplicate semantic behavior.
 
@@ -235,6 +237,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.14.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.15.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

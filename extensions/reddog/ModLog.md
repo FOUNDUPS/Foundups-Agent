@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_CONVERSATIONAL_DRAFT_ROUTING_PHASE1 (0.4.15)
+
+- Added an anchored conversational reply/message-drafting policy with explicit worker-prompt exclusion.
+- Forced the route to regular effort, no repository context, and one redaction-gated model even when manual Fusion/context settings are selected.
+- Treated pasted message content as untrusted data and kept all drafting output outside validation, wardrobe, queue, worker, and runtime-consumption authority.
+- Preserved local fast-path model routing through a shared local-mode resolver.
+- Version 0.4.14 -> 0.4.15.
+
 ## 2026-07-25 - REDDOG_TYPED_SEMANTIC_PATH_SUPPRESSION_RECONCILIATION_PHASE1 (0.4.14)
 
 - Preserved semantic audit/evaluation obligations containing slash-delimited product or subsystem names such as `OpenClaw/WRE/Hermes`.

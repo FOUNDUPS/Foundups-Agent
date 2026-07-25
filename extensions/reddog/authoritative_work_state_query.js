@@ -41,6 +41,16 @@ function isLocalFastPath(name) {
   return LOCAL_FAST_PATHS.has(String(name || ''));
 }
 
+function localModelMode(name) {
+  const modes = {
+    simple_identity: 'local_identity_fast_path',
+    run_trace_assessment: 'local_run_trace_assessment',
+    daemon_output_assessment: 'local_daemon_output_assessment',
+    authoritative_work_state: 'local_authoritative_work_state'
+  };
+  return modes[String(name || '')] || null;
+}
+
 function emptyContextPacket() {
   return {
     text: '',
@@ -317,6 +327,7 @@ module.exports = {
   failureReceipt,
   isAuthoritativeWorkStateQuestion,
   isLocalFastPath,
+  localModelMode,
   parseBridgeOutput,
   resolveLocalResult,
   runConfiguredQuery,
