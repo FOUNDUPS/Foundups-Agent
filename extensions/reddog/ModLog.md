@@ -2,6 +2,13 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_TYPED_SEMANTIC_PATH_SUPPRESSION_RECONCILIATION_PHASE1 (0.4.14)
+
+- Preserved semantic audit/evaluation obligations containing slash-delimited product or subsystem names such as `OpenClaw/WRE/Hermes`.
+- Kept slash-shaped prose out of repo-file targets and low-confidence telemetry unchanged.
+- Limited semantic-line suppression to actual bound repo targets, preserving the existing no-duplicate behavior for path-backed audits.
+- Version 0.4.13 -> 0.4.14.
+
 ## 2026-07-25 - REDDOG_WORK_STATE_AUTHORITATIVE_GROUNDING_GATE_PHASE1 (0.4.13)
 
 - Added a local authoritative work-state route for direct current/next-work questions.

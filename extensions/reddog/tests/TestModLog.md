@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - Slash-token semantic suppression reconciliation (0.4.14)
+
+- Replayed the exact `OpenClaw/WRE/Hermes` worker-state prompt and proved it produces a semantic target without a repo-file target.
+- Proved the slash phrase remains in low-confidence telemetry and path-backed audits preserve the existing no-duplicate semantic behavior.
+- Proved the accepted 189-character prompt fits the 500-character semantic query envelope while over-limit targets still fail closed.
+
 ## 2026-07-25 - Authoritative work-state grounding (0.4.13)
 
 - Proved direct current/next-work questions route to a local read-only receipt while audits and implementation requests remain on the grounded reasoning path.
