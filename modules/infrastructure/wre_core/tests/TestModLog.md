@@ -1,5 +1,10 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-25: Daemon self-audit runtime consumer alignment
+
+- Re-ran the daemon runtime-root confinement and secure persistence suite
+  against the shared producer/consumer resolver.
+
 ## 2026-07-23: FOUNDUP_JOB_MODEL_CAPABILITY_PROJECTION_PHASE1_REPAIR1
 
 - Proved self-consistent binding artifacts in job payload are ignored and

@@ -17,7 +17,7 @@ import time
 from dataclasses import asdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from modules.infrastructure.wre_core.src.improvement_job_contract import (
     ImprovementRiskLevel,
@@ -36,6 +36,38 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_daemon_self_audit_runtime_root(
+    repo_root: Path | str,
+    *,
+    environ: Mapping[str, str] | None = None,
+) -> Path:
+    """Resolve the single external runtime root used by self-audit producers and consumers."""
+
+    root = Path(repo_root).resolve()
+    env = os.environ if environ is None else environ
+    explicit = str(env.get("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", "")).strip()
+    resident_root = str(env.get("REDDOG_RESIDENT_RUNTIME_ROOT", "")).strip()
+    if explicit:
+        candidate = Path(explicit)
+        if not candidate.is_absolute():
+            candidate = root.parent / candidate
+    elif resident_root:
+        base = Path(resident_root)
+        if not base.is_absolute():
+            base = root.parent / base
+        candidate = base / "daemon_self_audit"
+    else:
+        slug = re.sub(r"[^a-zA-Z0-9._-]+", "-", root.name).strip("-_")
+        candidate = (
+            root.parent
+            / ".reddog"
+            / "resident"
+            / (slug or "repository")
+            / "daemon_self_audit"
+        )
+    return validate_runtime_root_path(candidate, repo_root=root)
 
 
 @dataclass
@@ -864,27 +896,7 @@ class DaemonSelfAuditLoop:
         self._state_loaded_mtime_ns = self.state_path.stat().st_mtime_ns
 
     def _resolve_runtime_root(self) -> Path:
-        explicit = os.getenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", "").strip()
-        resident_root = os.getenv("REDDOG_RESIDENT_RUNTIME_ROOT", "").strip()
-        if explicit:
-            candidate = Path(explicit)
-            if not candidate.is_absolute():
-                candidate = self.repo_root.parent / candidate
-        elif resident_root:
-            base = Path(resident_root)
-            if not base.is_absolute():
-                base = self.repo_root.parent / base
-            candidate = base / "daemon_self_audit"
-        else:
-            slug = re.sub(r"[^a-zA-Z0-9._-]+", "-", self.repo_root.name).strip("-_")
-            candidate = (
-                self.repo_root.parent
-                / ".reddog"
-                / "resident"
-                / (slug or "repository")
-                / "daemon_self_audit"
-            )
-        return validate_runtime_root_path(candidate, repo_root=self.repo_root)
+        return resolve_daemon_self_audit_runtime_root(self.repo_root)
 
 
 def _validate_jsonl(existing: str) -> None:

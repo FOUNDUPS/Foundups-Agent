@@ -1,5 +1,12 @@
 # HoloIndex Package ModLog
 
+## [2026-07-25] CLI catalog deterministic refresh
+
+- Regenerated the tracked CLI catalog and JSON rolodex from current main,
+  correcting stale command counts and the invalid shared-root skill tally.
+- Preserved the query/index authority split; this was an explicit maintenance
+  action in an isolated clean worktree.
+
 ## [2026-07-25] REDDOG_HOLOINDEX_SEMANTIC_EVIDENCE_RECEIPT_BINDING_PHASE1
 
 - Added a bounded canonical semantic-evidence serialization over all RedDog-consumable HoloIndex buckets and metadata.

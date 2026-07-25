@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-25: Daemon self-audit runtime nudge alignment
+
+- Switched supervisor-escalation memory scans from the obsolete tracked report
+  to the same validated external runtime root used by the daemon producer.
+- Reads now use bounded, descriptor-confined chunks over one stable file
+  identity; links, replacements, oversized files, and invalid UTF-8 fail closed.
+- Kept runtime provenance path-independent and rejected any injected runtime
+  root inside the repository.
+
 ## 2026-07-25: RedDog HoloIndex receipt-bound semantic evidence
 
 - Preserved the owner's bounded flattened hits in the normalized client response so canonical query receipts expose the evidence list they summarize.

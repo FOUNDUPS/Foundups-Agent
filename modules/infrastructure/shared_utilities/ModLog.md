@@ -1,6 +1,13 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-07-25 - Stable Descriptor-Confined Runtime Text Reads
+
+- Added a bounded UTF-8 reader that opens one descriptor, verifies its final
+  path, and rejects link, size, identity, timestamp, or content-length changes.
+- Kept the helper read-only and rooted in the existing runtime-artifact safety
+  boundary.
+
 ## 2026-07-18 - Runtime Artifact Safety and Telemetry Redaction
 
 - Added shared fail-closed runtime-root/path validation, descriptor-bound
