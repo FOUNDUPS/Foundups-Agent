@@ -28,6 +28,11 @@ function fakeChild(output, exitCode) {
 }
 
 async function main() {
+  assert.strictEqual(
+    query.localModelMode('authoritative_work_state'),
+    'local_authoritative_work_state'
+  );
+  assert.strictEqual(query.localModelMode('unknown'), null);
   for (const prompt of [
     'What do we need to work on?',
     'What should RedDog work on next?',

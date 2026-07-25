@@ -17,10 +17,11 @@ const backendCompatibilityAsync = require('./backend_compatibility_async');
 const backendCompatibilityRender = require('./backend_compatibility_render');
 const continuationPrompt = require('./continuation_prompt');
 const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
+const conversationalDraftPolicy = require('./conversational_draft_policy');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.14';
+const EXTENSION_VERSION = '0.4.15';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1753,6 +1754,7 @@ function semanticTargetCoverageDigest(coverage) {
 }
 
 function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
+  if (conversationalDraftPolicy.isConversationalDraftRequest(taskText)) return conversationalDraftPolicy.groundingExemption(taskText);
   const typedTargets = extractTypedTargets(taskText);
   const scorecard = (contextPacket && contextPacket.holoindex_scorecard)
     || extractHoloIndexScorecard(contextMode, contextPacket && contextPacket.holoindex_meta);
@@ -4579,6 +4581,7 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
   let tier = 'HIGH';
   let reasons = [];
   let localFastPath = null;
+  let conversationalDraft = false;
 
   if (isSimpleIdentityQuestion(text)) {
     tier = 'REGULAR';
@@ -4596,6 +4599,8 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
     tier = 'REGULAR';
     reasons.push('authoritative_work_state_fast_path');
     localFastPath = 'authoritative_work_state';
+  } else if (conversationalDraftPolicy.isConversationalDraftRequest(text)) {
+    tier = 'REGULAR'; reasons.push('conversational_draft_single_model'); conversationalDraft = true;
   } else if (ULTRA_TASK_PATTERNS.some((pattern) => pattern.test(haystack))) {
     tier = 'ULTRA';
     reasons.push('ultra_keyword_match');
@@ -4613,13 +4618,14 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
     reasons.push('uncertain_default_high');
   }
 
-  const preferManualPanel = localFastPath ? false : (tier !== 'REGULAR' || worker !== 'smoke_tester');
+  const preferManualPanel = !(localFastPath || conversationalDraft) && (tier !== 'REGULAR' || worker !== 'smoke_tester');
   return {
     tier,
     reasons,
     worker,
     contextMode: mode,
     localFastPath,
+    conversationalDraft,
     preferManualPanel,
     prefersAuditablePanel: preferManualPanel && worker !== 'smoke_tester'
   };
@@ -4674,6 +4680,7 @@ function hasExecutableWorkerPromptBlock(markdown) {
 
 function resolveAutoContextMode(classification, selectedContextMode) {
   const mode = cleanContextMode(selectedContextMode);
+  if (classification && classification.conversationalDraft) return 'none';
   if (mode !== 'auto') {
     return mode;
   }
@@ -4692,6 +4699,7 @@ function resolveAutoContextMode(classification, selectedContextMode) {
 
 function resolveAutoEffort(classification, selectedEffort) {
   const effort = cleanEffort(selectedEffort);
+  if (classification && classification.conversationalDraft) return 'regular';
   if (effort !== 'auto') {
     return effort;
   }
@@ -4711,18 +4719,9 @@ function resolveAutoEffort(classification, selectedEffort) {
 function resolveModelMode(classification, selectedMode, workerType) {
   const mode = cleanMode(selectedMode);
   const worker = cleanWorkerType(workerType);
-  if (classification && classification.localFastPath === 'simple_identity') {
-    return 'local_identity_fast_path';
-  }
-  if (classification && classification.localFastPath === 'run_trace_assessment') {
-    return 'local_run_trace_assessment';
-  }
-  if (classification && classification.localFastPath === 'daemon_output_assessment') {
-    return 'local_daemon_output_assessment';
-  }
-  if (classification && classification.localFastPath === 'authoritative_work_state') {
-    return 'local_authoritative_work_state';
-  }
+  const localMode = authoritativeWorkStateQuery.localModelMode(classification && classification.localFastPath);
+  if (localMode) return localMode;
+  if (classification && classification.conversationalDraft) return 'openrouter_single';
   if (mode === 'auto') {
     return classification && classification.tier === 'REGULAR' ? 'openrouter_single' : 'foundups_fusion';
   }
@@ -4785,6 +4784,7 @@ function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, re
     return 'Local authoritative work-state path: validates the configured queue snapshot and governed lineage without HoloIndex, model, mutation, or execution; context=' + resolvedContextMode + '.';
   }
   if (resolvedMode === 'openrouter_single') {
+    if (classification && classification.conversationalDraft) return 'Conversational drafting: redaction-gated single model; no repository grounding, Fusion panel, or action planning.';
     if (tier === 'REGULAR') {
       return 'Single-model GLM principal: REGULAR-tier work; HoloIndex-grounded wsp_holo (no Fusion panel, Skillz, or git); context=' + resolvedContextMode + '.';
     }
@@ -5446,14 +5446,14 @@ function wireFusionWebview(context, webview, worker, state) {
     const selectedMode = cleanMode(message.mode);
     // Fail-closed: continuation is included this run ONLY when 012 explicitly enabled it.
     // Missing/stale useLastPacket => OFF (do not carry a stale packet into redaction/acceptance scoring).
-    const continuationEnabled = message.useLastPacket === true;
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
+    const continuationEnabled = message.useLastPacket === true && !classification.conversationalDraft;
     const localFastPath = authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath);
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
-    const contextPacket = localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : buildBoundedRepoContext(contextMode, workFocus);
-    const basePrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
+    const contextPacket = localFastPath ? authoritativeWorkStateQuery.emptyContextPacket() : (classification.conversationalDraft ? conversationalDraftPolicy.emptyContextPacket() : buildBoundedRepoContext(contextMode, workFocus));
+    const basePrompt = classification.conversationalDraft ? conversationalDraftPolicy.buildUserPrompt(workFocus) : constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
     const continuation = continuationPrompt.prepareContinuationPrompt(
       basePrompt, continuationEnabled, state.lastContinuationSummary, {
         append: appendContinuationSummaryToWspPrompt,
@@ -5475,15 +5475,16 @@ function wireFusionWebview(context, webview, worker, state) {
         ? contextPacket.required_targets_authoritative_paths.slice()
         : []
     };
-    const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
+    const systemPrompt = classification.conversationalDraft ? conversationalDraftPolicy.systemPrompt() : buildSystemPrompt(workerType, effort, contextPacket.quality);
 
-    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + ' panel=' + worker.panel.join(' + ') + ' (' + classification.reasons.join(', ') + ')');
+    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : ' panel=' + worker.panel.join(' + ')) + ' (' + classification.reasons.join(', ') + ')');
     const localStatus = authoritativeWorkStateQuery.statusText(classification.localFastPath);
-    postStatusAndProgress(webview, null, localStatus || 'Bridge started. Redaction gate runs before any OpenRouter API call.');
+    const routeStatus = localStatus || (classification.conversationalDraft ? conversationalDraftPolicy.statusText() : '');
+    postStatusAndProgress(webview, null, routeStatus || 'Bridge started. Redaction gate runs before any OpenRouter API call.');
     if (contextPacket.summary) {
       postStatusAndProgress(webview, null, contextPacket.summary);
     }
-    postStatusAndProgress(webview, null, '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP task prompt, not raw focus alone).');
+    postStatusAndProgress(webview, null, classification.conversationalDraft ? '0102 isolated the supplied message as untrusted drafting data.' : '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP task prompt, not raw focus alone).');
     const holoScorecard = Object.assign(
       {},
       contextPacket.holoindex_scorecard || extractHoloIndexScorecard(contextMode, contextPacket.holoindex_meta),
@@ -5605,7 +5606,7 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     }
     absorbUnicodeMeta(result);
-    const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localFastPath;
+    const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localFastPath && !classification.conversationalDraft;
     if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
       const outputValidationOptions = {
@@ -5715,7 +5716,7 @@ function wireFusionWebview(context, webview, worker, state) {
         }
       }
     } else if (result.ok) {
-      validationState = { validated: false, skipped: true, reason: classification.localFastPath ? 'local_' + classification.localFastPath : 'non_substantive_worker' };
+      validationState = { validated: false, skipped: true, reason: classification.conversationalDraft ? 'conversational_draft' : (classification.localFastPath ? 'local_' + classification.localFastPath : 'non_substantive_worker') };
     } else if (result.reason === 'redaction_blocked') {
       validationState = { validated: false, skipped: true, reason: 'redaction_blocked' };
       workTrail.push('redaction_gate_blocked');
@@ -5922,7 +5923,7 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     result.work_trail = workTrail.toEvents();
     if (result.ok && result.content) {
-      result.content = routingSummary(workerType, classification, effort, mode, contextMode, worker) + '\n\n' + result.content;
+      result.content = (classification.conversationalDraft ? '' : routingSummary(workerType, classification, effort, mode, contextMode, worker) + '\n\n') + result.content;
       const mojibake = detectMojibake(result.content);
       if (mojibake.detected) {
         result.review_packet.output_validation = Object.assign({}, result.review_packet.output_validation || {}, {

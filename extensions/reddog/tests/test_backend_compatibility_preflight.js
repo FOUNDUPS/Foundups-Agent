@@ -292,6 +292,7 @@ for (const relativePath of [
   'backend_compatibility_async.js',
   'backend_compatibility_worker.js',
   'authoritative_work_state_query.js',
+  'conversational_draft_policy.js',
   'continuation_prompt.js',
   'backend_compatibility_manifest.js',
   'backend_compatibility_filesystem.js',
@@ -307,5 +308,6 @@ for (const relativePath of [
 require('./test_backend_compatibility_contract');
 require('./test_backend_compatibility_async');
 require('./test_authoritative_work_state_query');
+require('./test_conversational_draft_policy');
 
 console.log('backend compatibility preflight tests passed');

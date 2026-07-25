@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - Conversational drafting route (0.4.15)
+
+- Replayed the social reply-rewrite prompt and proved it selects regular single-model drafting with no HoloIndex or repository context.
+- Proved manual Fusion, ULTRA effort, and repository-context selections are overridden for the bounded route.
+- Proved pasted text is wrapped as untrusted data, worker-prompt authoring remains governed, and drafting output cannot pass the runtime-consumption gate.
+- Added WSP_62 file/function checks for the extracted drafting policy.
+
 ## 2026-07-25 - Slash-token semantic suppression reconciliation (0.4.14)
 
 - Replayed the exact `OpenClaw/WRE/Hermes` worker-state prompt and proved it produces a semantic target without a repo-file target.
