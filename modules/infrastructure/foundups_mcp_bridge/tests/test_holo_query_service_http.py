@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import http.client
-import io
 import json
+import os
+import signal
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Mapping
@@ -224,8 +226,8 @@ def test_main_dispatches_to_stdlib_when_fastapi_is_unavailable(
     )
     monkeypatch.setattr(
         http_module,
-        "_start_parent_stdin_watchdog",
-        lambda _stream: events.append("watchdog_started"),
+        "_start_parent_process_watchdog",
+        lambda parent_pid: events.append(f"watchdog_started:{parent_pid}"),
     )
     assert (
         main(
@@ -234,24 +236,45 @@ def test_main_dispatches_to_stdlib_when_fastapi_is_unavailable(
                 "127.0.0.1",
                 "--port",
                 "8127",
-                "--parent-stdin-watchdog",
+                "--parent-pid",
+                "1234",
             ]
         )
         == 0
     )
     assert events == [
-        "watchdog_started",
+        "watchdog_started:1234",
         "served",
         "server_closed",
         "owner_closed",
     ]
 
 
-def test_parent_stdin_watchdog_exits_on_pipe_eof() -> None:
+def test_parent_process_watchdog_exits_after_parent_wait_returns() -> None:
+    exits: list[int] = []
+    waited: list[int] = []
+
+    thread = http_module._start_parent_process_watchdog(
+        1234,
+        wait_for_parent_exit=lambda parent_pid: waited.append(parent_pid),
+        terminate_process=exits.append,
+    )
+    thread.join(timeout=1)
+
+    assert waited == [1234]
+    assert exits == [0]
+    assert thread.is_alive() is False
+
+
+def test_parent_process_watchdog_fails_closed_on_waiter_error() -> None:
     exits: list[int] = []
 
-    thread = http_module._start_parent_stdin_watchdog(
-        io.BytesIO(b""),
+    def fail_waiter(_parent_pid: int) -> None:
+        raise RuntimeError("synthetic watcher failure")
+
+    thread = http_module._start_parent_process_watchdog(
+        1234,
+        wait_for_parent_exit=fail_waiter,
         terminate_process=exits.append,
     )
     thread.join(timeout=1)
@@ -260,30 +283,69 @@ def test_parent_stdin_watchdog_exits_on_pipe_eof() -> None:
     assert thread.is_alive() is False
 
 
-def test_parent_stdin_watchdog_exits_real_child_after_pipe_close() -> None:
-    code = (
-        "import sys,time;"
+def test_parent_process_wait_rejects_mismatched_claimed_parent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    windows_waits: list[int] = []
+    monkeypatch.setattr(http_module.os, "getppid", lambda: 4321)
+    monkeypatch.setattr(http_module.os, "name", "nt")
+    monkeypatch.setattr(
+        http_module,
+        "_wait_for_windows_parent_exit",
+        windows_waits.append,
+    )
+
+    http_module._wait_for_parent_exit(1234)
+
+    assert windows_waits == []
+
+
+def test_parent_process_watchdog_exits_real_child_after_parent_exit(
+    tmp_path: Path,
+) -> None:
+    marker = tmp_path / "parent-exit-observed.txt"
+    child_template = (
+        "import os,time;"
+        "from pathlib import Path;"
         "from modules.infrastructure.foundups_mcp_bridge.src."
-        "holo_query_service_http import _start_parent_stdin_watchdog;"
-        "_start_parent_stdin_watchdog(sys.stdin.buffer);"
-        "print('ready',flush=True);"
+        "holo_query_service_http import _start_parent_process_watchdog;"
+        "_start_parent_process_watchdog({parent_pid},terminate_process="
+        "lambda code:(Path({marker!r}).write_text(str(code)),os._exit(code))[1]);"
         "time.sleep(30)"
     )
-    process = subprocess.Popen(
-        [sys.executable, "-B", "-c", code],
-        stdin=subprocess.PIPE,
+    parent_code = (
+        "import os,subprocess,sys,time;"
+        f"template={child_template!r};"
+        f"code=template.format(parent_pid=os.getpid(),marker={str(marker)!r});"
+        "child=subprocess.Popen([sys.executable,'-B','-c',code],"
+        "stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,"
+        "stderr=subprocess.DEVNULL,shell=False);"
+        "print(child.pid,flush=True);"
+        "time.sleep(0.5)"
+    )
+    parent = subprocess.Popen(
+        [sys.executable, "-B", "-c", parent_code],
+        stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         shell=False,
     )
+    child_pid = 0
     try:
-        assert process.stdout is not None
-        assert process.stdout.readline().strip() == "ready"
-        assert process.stdin is not None
-        process.stdin.close()
-        assert process.wait(timeout=3) == 0
+        assert parent.stdout is not None
+        child_pid = int(parent.stdout.readline().strip())
+        assert parent.wait(timeout=5) == 0
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline and not marker.exists():
+            time.sleep(0.1)
+        assert marker.read_text(encoding="utf-8") == "0"
     finally:
-        if process.poll() is None:
-            process.kill()
-            process.wait(timeout=3)
+        if parent.poll() is None:
+            parent.kill()
+            parent.wait(timeout=3)
+        if child_pid and not marker.exists():
+            try:
+                os.kill(child_pid, signal.SIGTERM)
+            except OSError:
+                pass

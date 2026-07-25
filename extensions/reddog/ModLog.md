@@ -2,6 +2,13 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_HOLOINDEX_PARENT_PROCESS_WATCHDOG_PHASE1 (0.4.21)
+
+- Replaced the v0.4.19/v0.4.20 blocking stdin reader after live proof showed it starved semantic health while the service remained listening.
+- Bound auto-owned child lifetime to the exact supervisor PID/process handle and restored child stdin to `DEVNULL`.
+- Preserved the 30-second semantic probe, 300-second total startup deadline, token secrecy, generation proof, and query-time no-reindex boundary.
+- Version 0.4.20 -> 0.4.21.
+
 ## 2026-07-25 - REDDOG_HOLOINDEX_OWNER_PROBE_BUDGET_PHASE1 (0.4.20)
 
 - Raised only the auto-owner's authenticated health-probe response window from one to 30 seconds after a live semantic canary required 11.22 seconds.

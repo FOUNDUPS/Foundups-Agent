@@ -143,7 +143,7 @@ receipt cannot satisfy this sequence.
 | Backend query times out | Poison owner permanently | Private adapter replaces the owned owner and retries once; external supervisor owns external recovery |
 | Owner startup/health fails after successful refresh | Keep the valid CURRENT receipt but return non-operational | Repair owner lifecycle, then re-run authenticated health; do not needlessly restamp the store |
 | Controlled host exit or cleanup runs | Stop owned process and erase handoff | Treat old token as invalid |
-| Auto-owning host dies abruptly | The v0.4.19+ owner's private stdin watchdog observes EOF and exits; manually launched or pre-v0.4.19 owners have no such proof | Confirm the owned process exited, then re-run authenticated preflight; remediate only a verified legacy/manual owner |
+| Auto-owning host dies abruptly | The v0.4.21+ owner waits on its exact supervisor process and exits; manually launched and pre-v0.4.21 owners have no such proof | Confirm the owned process exited, then re-run authenticated preflight; remediate only a verified legacy/manual owner |
 
 ## Timeout and Transport Boundary
 

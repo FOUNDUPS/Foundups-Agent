@@ -7,8 +7,8 @@ import argparse
 import json
 import os
 import socket
-import sys
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -222,21 +222,54 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--host", default=DEFAULT_BIND_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
-    parser.add_argument("--parent-stdin-watchdog", action="store_true")
+    parser.add_argument("--parent-pid", type=int, default=0)
     return parser
 
 
-def _start_parent_stdin_watchdog(
-    stream: Any,
+def _wait_for_windows_parent_exit(parent_pid: int) -> None:
+    import ctypes
+    from ctypes import wintypes
+
+    synchronize = 0x00100000
+    infinite = 0xFFFFFFFF
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.WaitForSingleObject.argtypes = (wintypes.HANDLE, wintypes.DWORD)
+    kernel32.WaitForSingleObject.restype = wintypes.DWORD
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    kernel32.CloseHandle.restype = wintypes.BOOL
+    handle = kernel32.OpenProcess(synchronize, False, int(parent_pid))
+    if not handle:
+        return
+    try:
+        kernel32.WaitForSingleObject(handle, infinite)
+    finally:
+        kernel32.CloseHandle(handle)
+
+
+def _wait_for_parent_exit(parent_pid: int) -> None:
+    if os.getppid() != parent_pid:
+        return
+    if os.name == "nt":
+        _wait_for_windows_parent_exit(parent_pid)
+        return
+    while os.getppid() == parent_pid:
+        time.sleep(0.25)
+
+
+def _start_parent_process_watchdog(
+    parent_pid: int,
     *,
+    wait_for_parent_exit: Any = _wait_for_parent_exit,
     terminate_process: Any = os._exit,
 ) -> threading.Thread:
-    """Exit the private owner when its supervisor's pipe closes."""
+    """Exit the private owner after its exact supervisor process terminates."""
 
     def wait_for_parent() -> None:
         try:
-            stream.read(1)
-        except (OSError, ValueError):
+            wait_for_parent_exit(parent_pid)
+        except Exception:
             pass
         terminate_process(0)
 
@@ -259,6 +292,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not 1 <= int(args.port) <= 65_535:
         print("HOLOINDEX_QUERY_SERVICE_INVALID_PORT")
         return 2
+    if int(args.parent_pid) < 0:
+        print("HOLOINDEX_QUERY_SERVICE_INVALID_PARENT_PID")
+        return 2
     token = str(os.environ.pop(TOKEN_ENV, "") or "").strip()
     if not token:
         print("HOLOINDEX_QUERY_SERVICE_TOKEN_REQUIRED")
@@ -266,8 +302,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if len(token) < MIN_BEARER_TOKEN_CHARS:
         print(TOKEN_TOO_SHORT_ERROR)
         return 2
-    if args.parent_stdin_watchdog:
-        _start_parent_stdin_watchdog(sys.stdin.buffer)
+    if args.parent_pid:
+        _start_parent_process_watchdog(int(args.parent_pid))
     owner = HoloIndexQueryOwnerService(
         repo_root=Path(__file__).resolve().parents[4],
         bearer_token=token,
@@ -306,7 +342,8 @@ __all__ = [
     "app",
     "create_holo_query_app",
     "create_stdlib_server",
-    "_start_parent_stdin_watchdog",
+    "_start_parent_process_watchdog",
+    "_wait_for_parent_exit",
     "main",
 ]
 

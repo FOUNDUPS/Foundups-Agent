@@ -206,16 +206,6 @@ def _owner_port_available(host: str, port: int) -> bool:
     return True
 
 
-def _close_parent_watchdog_pipe(process: subprocess.Popen[bytes]) -> None:
-    stream = getattr(process, "stdin", None)
-    if stream is None:
-        return
-    try:
-        stream.close()
-    except (OSError, ValueError):
-        return
-
-
 def _terminate_process(
     process: subprocess.Popen[bytes],
     *,
@@ -224,7 +214,6 @@ def _terminate_process(
     """Bound termination without retaining any lifecycle secret state."""
     if process.poll() is not None:
         return
-    _close_parent_watchdog_pipe(process)
     try:
         process.terminate()
     except OSError:
@@ -276,6 +265,7 @@ def _owner_environment(token: str, ssd_path: Path | None) -> dict[str, str]:
 def _owner_command(
     python_executable: str,
     port: int,
+    parent_pid: int,
 ) -> list[str]:
     return [
         python_executable,
@@ -286,7 +276,8 @@ def _owner_command(
         OWNER_HOST,
         "--port",
         str(port),
-        "--parent-stdin-watchdog",
+        "--parent-pid",
+        str(parent_pid),
     ]
 
 
@@ -358,10 +349,10 @@ class HoloQueryServiceSupervisor:
         owner_environment = _owner_environment(token, self.ssd_path)
         try:
             process = subprocess.Popen(
-                _owner_command(self.python_executable, self.port),
+                _owner_command(self.python_executable, self.port, os.getpid()),
                 cwd=str(self.repo_root),
                 env=owner_environment,
-                stdin=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 shell=False,
