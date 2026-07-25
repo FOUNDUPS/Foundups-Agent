@@ -2,7 +2,9 @@
 
 ## 2026-07-25 - Backend compatibility preflight (0.4.12)
 
-- Proved extension-pinned manifest/API/file-contract acceptance, the generated 555-file runtime dependency closure, and fail-closed rejection for omitted/tampered non-bridge dependencies.
+- Proved extension-pinned manifest/API/executable-contract acceptance, the generated 989-file runtime dependency closure, and fail-closed rejection for omitted/tampered non-bridge dependencies.
+- Added independent sentinels for `holo_index.py`, package-initializer relative imports, file-based dynamic loading, and digest-cache invalidation after a runtime file changes.
+- Added exact-case tracked-path parity, package-relative dynamic-import, async event-loop, post-model bridge-gate, and webview-handler non-growth regressions.
 - Proved every intermediate path component rejects in-root and escaping junctions/symlinks, and all new JavaScript modules/functions remain within WSP_62 ceilings.
 - Proved an incompatible workspace stops before work-focus classification, HoloIndex, model, permission, and work-order paths and exposes only bounded compatibility telemetry.
 - Reconciled the exhaustive live-enqueue expectation with the existing stronger

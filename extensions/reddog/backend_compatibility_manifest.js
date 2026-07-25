@@ -2,6 +2,7 @@
 
 const constants = require('./backend_compatibility_constants');
 const filesystem = require('./backend_compatibility_filesystem');
+const runtimeDigestCache = new Map();
 
 function stableUniqueStrings(value) {
   if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) {
@@ -43,6 +44,7 @@ function validDigestMap(value, paths) {
 function manifestContractLists(manifest) {
   return {
     bridges: stableUniqueStrings(manifest.required_bridge_files),
+    executables: stableUniqueStrings(manifest.required_executable_files),
     markers: stableUniqueStrings(manifest.required_repository_markers),
     runtime: stableUniqueStrings(manifest.required_runtime_files)
   };
@@ -70,6 +72,12 @@ function validateManifestLists(manifest, lists, reasons) {
   if (!lists.bridges || !arraysEqual(lists.bridges, constants.REQUIRED_BRIDGE_FILES.slice().sort())) {
     reasons.push('backend_bridge_contract_mismatch');
   }
+  if (
+    !lists.executables
+    || !arraysEqual(lists.executables, constants.REQUIRED_EXECUTABLE_FILES.slice().sort())
+  ) {
+    reasons.push('backend_executable_contract_mismatch');
+  }
   if (!lists.markers || !arraysEqual(lists.markers, constants.REQUIRED_REPOSITORY_MARKERS.slice().sort())) {
     reasons.push('backend_repository_marker_contract_mismatch');
   }
@@ -77,7 +85,7 @@ function validateManifestLists(manifest, lists, reasons) {
     !lists.runtime
     || !lists.runtime.length
     || lists.runtime.length > constants.MAX_RUNTIME_FILES
-    || constants.REQUIRED_BRIDGE_FILES.some((item) => !lists.runtime.includes(item))
+    || constants.REQUIRED_EXECUTABLE_FILES.some((item) => !lists.runtime.includes(item))
   ) {
     reasons.push('backend_runtime_file_contract_mismatch');
   }
@@ -107,6 +115,28 @@ function validateManifest(manifest) {
 
 function invalidManifest(reason, manifestDigest) {
   return { manifest: null, manifestDigest: manifestDigest || '', reason };
+}
+
+function cachedRuntimeDigest(located, expected) {
+  if (!located.identity) {
+    return '';
+  }
+  const cached = runtimeDigestCache.get(located.candidate);
+  return cached
+    && cached.identity === located.identity
+    && cached.expected === expected
+    ? cached.observed
+    : '';
+}
+
+function rememberRuntimeDigest(located, expected, observed) {
+  if (located.identity && observed === expected) {
+    runtimeDigestCache.set(located.candidate, {
+      identity: located.identity,
+      expected,
+      observed
+    });
+  }
 }
 
 function readManifest(rootState, deps) {
@@ -145,13 +175,19 @@ function runtimeFileResult(relativePath, manifest, rootState, deps) {
   if (!located.ok || located.size > constants.MAX_RUNTIME_FILE_BYTES) {
     return { reason: missing + relativePath };
   }
+  const expected = manifest.required_runtime_sha256[relativePath];
+  const cached = cachedRuntimeDigest(located, expected);
+  if (cached) {
+    return { observed: cached, size: located.size, reason: '' };
+  }
   try {
     const raw = deps.fs.readFileSync(located.candidate);
     const observed = filesystem.sha256Hex(
       filesystem.normalizedTextBytes(raw),
       deps.crypto
     );
-    return observed === manifest.required_runtime_sha256[relativePath]
+    rememberRuntimeDigest(located, expected, observed);
+    return observed === expected
       ? { observed, size: raw.length, reason: '' }
       : { observed, size: raw.length, reason: mismatch + relativePath };
   } catch (err) {
@@ -189,6 +225,7 @@ function verifyRepositoryMarkers(rootState, deps) {
 }
 
 module.exports = {
+  clearRuntimeDigestCache: () => runtimeDigestCache.clear(),
   readManifest,
   validateManifest,
   verifyRepositoryMarkers,

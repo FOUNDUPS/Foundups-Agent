@@ -9,7 +9,9 @@ function dependencies(options) {
   return {
     fs: opts.fs || fs,
     path: opts.path || path,
-    crypto: opts.crypto || crypto
+    crypto: opts.crypto || crypto,
+    safeComponents: new Set(),
+    safeCanonicalDirectories: new Set()
   };
 }
 
@@ -59,17 +61,42 @@ function hasUnsafePathComponent(rootState, parts, deps) {
   let current = rootState.root;
   for (const part of parts) {
     current = deps.path.join(current, part);
+    if (deps.safeComponents.has(current)) {
+      continue;
+    }
     const stats = deps.fs.lstatSync(current);
     if (stats.isSymbolicLink()) {
       return true;
     }
+    deps.safeComponents.add(current);
   }
   return false;
 }
 
-function canonicalCandidateIsContained(rootState, candidate, deps) {
-  const relative = deps.path.relative(rootState.canonicalRoot, realpath(deps.fs, candidate));
-  return !!relative && !relative.startsWith('..') && !deps.path.isAbsolute(relative);
+function canonicalDirectoryIsContained(rootState, candidate, deps) {
+  const directory = deps.path.dirname(candidate);
+  if (deps.safeCanonicalDirectories.has(directory)) {
+    return true;
+  }
+  const relative = deps.path.relative(rootState.canonicalRoot, realpath(deps.fs, directory));
+  const contained = !relative.startsWith('..') && !deps.path.isAbsolute(relative);
+  if (contained) {
+    deps.safeCanonicalDirectories.add(directory);
+  }
+  return contained;
+}
+
+function stableFileIdentity(stats) {
+  const values = [
+    stats.size,
+    stats.mtimeMs,
+    stats.ctimeMs,
+    stats.birthtimeMs,
+    stats.dev,
+    stats.ino,
+    stats.mode
+  ];
+  return values.every(Number.isFinite) ? values.join(':') : '';
 }
 
 function containedRegularFile(rootState, relativePath, deps) {
@@ -82,10 +109,16 @@ function containedRegularFile(rootState, relativePath, deps) {
       return { ok: false, candidate: '', reason: 'unsafe_path_component' };
     }
     const stats = deps.fs.lstatSync(located.candidate);
-    if (!stats.isFile() || !canonicalCandidateIsContained(rootState, located.candidate, deps)) {
+    if (!stats.isFile() || !canonicalDirectoryIsContained(rootState, located.candidate, deps)) {
       return { ok: false, candidate: '', reason: 'not_regular_contained_file' };
     }
-    return { ok: true, candidate: located.candidate, size: stats.size, reason: '' };
+    return {
+      ok: true,
+      candidate: located.candidate,
+      size: stats.size,
+      identity: stableFileIdentity(stats),
+      reason: ''
+    };
   } catch (err) {
     return { ok: false, candidate: '', reason: 'missing_or_unreadable' };
   }
@@ -97,5 +130,6 @@ module.exports = {
   normalizedTextBytes,
   safeRoot,
   sha256Hex,
-  sha256Receipt
+  sha256Receipt,
+  stableFileIdentity
 };

@@ -12,6 +12,7 @@ import argparse
 import ast
 import fnmatch
 import hashlib
+import importlib.util
 import json
 import subprocess
 import warnings
@@ -20,9 +21,9 @@ from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = REPO_ROOT / "scripts" / "reddog_backend_manifest.json"
-SCHEMA_VERSION = "reddog_backend_manifest.v2"
+SCHEMA_VERSION = "reddog_backend_manifest.v3"
 BACKEND_API_VERSION = 2
-GRAPH_VERSION = 1
+GRAPH_VERSION = 2
 BRIDGE_FILES = (
     "scripts/advisory_model_once.py",
     "scripts/reddog_extension_live_enqueue_invoke_once.py",
@@ -34,21 +35,40 @@ BRIDGE_FILES = (
     "scripts/reddog_repair_guard_once.py",
     "scripts/reddog_resident_architect_session_once.py",
 )
+EXECUTABLE_FILES = (*BRIDGE_FILES, "holo_index.py")
 REPOSITORY_MARKERS = (
     "main.py",
     "holo_index.py",
     "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
 )
 DYNAMIC_IMPORT_NAMES = frozenset({"__import__", "import_module"})
+DYNAMIC_FILE_LOAD_NAMES = frozenset({"spec_from_file_location", "SourceFileLoader", "run_path"})
 DYNAMIC_IMPORT_GLOBS = {
     "holo_index/qwen_advisor/holodae_coordinator.py": ("modules/**/*_gate.py",),
+    "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py": (
+        "modules/**/executor.py",
+    ),
 }
 DYNAMIC_IMPORT_MODULES = {
+    "modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py": (
+        "scripts.advisory_model_once",
+    ),
+    "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py": (
+        "scripts.advisory_model_once",
+    ),
+    "modules/communication/moltbot_bridge/src/reddog_readonly_0102_audit_worker_runtime.py": (
+        "scripts.advisory_model_once",
+    ),
+    "modules/infrastructure/foundups_mcp_bridge/src/holo_tools.py": (
+        "modules.foundups.src.foundup_registry_loader",
+    ),
     "modules/foundups/agent/src/__init__.py": (
         "modules.foundups.agent.src.hermes_adapter",
         "modules.foundups.agent.src.hermes_model_router",
     ),
 }
+_TRACKED_FILE_CACHE: tuple[str, ...] | None = None
+_TRACKED_FILE_SET_CACHE: frozenset[str] | None = None
 
 
 def _normalized_bytes(path: Path) -> bytes:
@@ -61,8 +81,10 @@ def _digest(path: Path) -> str:
 
 def _resolve_local_module(module_name: str) -> Path | None:
     candidate = REPO_ROOT.joinpath(*module_name.split("."))
+    tracked = _tracked_file_set()
     for path in (candidate.with_suffix(".py"), candidate / "__init__.py"):
-        if path.is_file():
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        if relative in tracked and path.is_file():
             return path
     return None
 
@@ -70,7 +92,7 @@ def _resolve_local_module(module_name: str) -> Path | None:
 def _package_parts(path: Path) -> list[str]:
     relative = path.relative_to(REPO_ROOT)
     parts = list(relative.with_suffix("").parts)
-    return parts if path.name == "__init__.py" else parts[:-1]
+    return parts[:-1]
 
 
 def _parent_initializers(path: Path) -> Iterable[Path]:
@@ -91,13 +113,28 @@ def _called_name(node: ast.Call) -> str:
 
 
 def _tracked_files() -> tuple[str, ...]:
+    global _TRACKED_FILE_CACHE
+    if _TRACKED_FILE_CACHE is not None:
+        return _TRACKED_FILE_CACHE
     output = subprocess.check_output(
         ["git", "ls-files"],
         cwd=REPO_ROOT,
         text=True,
         encoding="utf-8",
     )
-    return tuple(line.strip() for line in output.splitlines() if line.strip())
+    _TRACKED_FILE_CACHE = tuple(
+        line.strip().replace("\\", "/")
+        for line in output.splitlines()
+        if line.strip()
+    )
+    return _TRACKED_FILE_CACHE
+
+
+def _tracked_file_set() -> frozenset[str]:
+    global _TRACKED_FILE_SET_CACHE
+    if _TRACKED_FILE_SET_CACHE is None:
+        _TRACKED_FILE_SET_CACHE = frozenset(_tracked_files())
+    return _TRACKED_FILE_SET_CACHE
 
 
 def _declared_dynamic_paths(relative: str) -> tuple[Path, ...]:
@@ -133,6 +170,28 @@ def _from_import_names(node: ast.ImportFrom, package: list[str]) -> list[str]:
     return names
 
 
+def _dynamic_module_name(
+    value: str, node: ast.Call, package: list[str], relative: str
+) -> str:
+    if not value.startswith("."):
+        return value
+    package_name = ".".join(package)
+    if len(node.args) > 1:
+        package_arg = node.args[1]
+        if isinstance(package_arg, ast.Constant) and isinstance(package_arg.value, str):
+            package_name = package_arg.value
+        elif not isinstance(package_arg, ast.Name) or package_arg.id != "__name__":
+            raise ValueError(
+                f"undeclared_dynamic_relative_package:{relative}:{node.lineno}"
+            )
+    try:
+        return importlib.util.resolve_name(value, package_name)
+    except (ImportError, ValueError) as exc:
+        raise ValueError(
+            f"invalid_dynamic_relative_import:{relative}:{node.lineno}"
+        ) from exc
+
+
 def _imports(tree: ast.AST, path: Path) -> tuple[list[str], list[Path]]:
     package = _package_parts(path)
     names: list[str] = []
@@ -143,14 +202,18 @@ def _imports(tree: ast.AST, path: Path) -> tuple[list[str], list[Path]]:
             names.extend(alias.name for alias in node.names)
         elif isinstance(node, ast.ImportFrom):
             names.extend(_from_import_names(node, package))
-        elif isinstance(node, ast.Call) and _called_name(node) in DYNAMIC_IMPORT_NAMES:
-            if not node.args or not isinstance(node.args[0], ast.Constant):
+        elif isinstance(node, ast.Call):
+            called = _called_name(node)
+            if called in DYNAMIC_FILE_LOAD_NAMES:
                 dynamic_paths.extend(_declared_dynamic_paths(relative))
-                continue
-            value = node.args[0].value
-            if not isinstance(value, str):
-                raise ValueError(f"nonstring_dynamic_import:{relative}:{node.lineno}")
-            names.append(value)
+            elif called in DYNAMIC_IMPORT_NAMES:
+                if not node.args or not isinstance(node.args[0], ast.Constant):
+                    dynamic_paths.extend(_declared_dynamic_paths(relative))
+                    continue
+                value = node.args[0].value
+                if not isinstance(value, str):
+                    raise ValueError(f"nonstring_dynamic_import:{relative}:{node.lineno}")
+                names.append(_dynamic_module_name(value, node, package, relative))
     return names, dynamic_paths
 
 
@@ -161,7 +224,7 @@ def _parse_source(path: Path, relative: str) -> ast.AST:
 
 
 def _dependency_closure() -> tuple[str, ...]:
-    queue = [REPO_ROOT / relative for relative in BRIDGE_FILES]
+    queue = [REPO_ROOT / relative for relative in EXECUTABLE_FILES]
     observed: set[str] = set()
     while queue:
         path = queue.pop()
@@ -193,6 +256,7 @@ def build_manifest() -> dict[str, object]:
         "product": "foundups-agent-reddog-backend",
         "backend_api_version": BACKEND_API_VERSION,
         "runtime_dependency_graph_version": GRAPH_VERSION,
+        "required_executable_files": list(EXECUTABLE_FILES),
         "required_bridge_files": list(BRIDGE_FILES),
         "required_bridge_sha256": {
             relative: runtime_digests[relative]

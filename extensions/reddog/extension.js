@@ -13,7 +13,9 @@ const {
 const semanticGroundingPolicy = require('./semantic_grounding_policy');
 const holoGenerationBoundQuery = require('./holoindex_generation_bound_query');
 const backendCompatibility = require('./backend_compatibility_preflight');
+const backendCompatibilityAsync = require('./backend_compatibility_async');
 const backendCompatibilityRender = require('./backend_compatibility_render');
+const continuationPrompt = require('./continuation_prompt');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
@@ -5180,6 +5182,9 @@ function hasDetermineAnswersBlock(text) {
 //   action 'guard'   -> { ok, has_determine, preserved, keep_original, reason_codes }
 // Fail-closed: any error returns { ok: false } and the caller decides conservatively.
 function runRepairGuard(context, action, prompt, primary, repaired) {
+  if (currentBackendCompatibilitySync().passed !== true) {
+    return { ok: false, reason: 'backend_compatibility_changed_before_repair_guard' };
+  }
   try {
     const root = workspaceRoot();
     const configuredPython = reddogConfigValue('pythonPath', 'python');
@@ -5211,6 +5216,9 @@ function runRepairGuard(context, action, prompt, primary, repaired) {
 // fetched direct-read hits supplied here. It never reindexes, enqueues, executes, or reads
 // the filesystem.
 function runJudgmentVerifier(context, prompt, output, scorecard, directReadHits) {
+  if (currentBackendCompatibilitySync().passed !== true) {
+    return { ok: false, reason: 'backend_compatibility_changed_before_judgment_verifier' };
+  }
   try {
     const root = workspaceRoot();
       const configuredPython = reddogConfigValue('pythonPath', 'python');
@@ -5316,14 +5324,18 @@ const EFFORT_GUIDANCE = {
 };
 
 function activate(context) {
-  const installState = detectRedDogInstallState(context);
-  const installWarning = backendCompatibility.activationWarning(installState);
-  if (installWarning) {
-    vscode.window.showWarningMessage(installWarning);
-  }
+  const installStatePromise = detectRedDogInstallStateAsync(context);
+  installStatePromise.then((installState) => {
+    const warning = backendCompatibility.activationWarning(installState);
+    if (warning) vscode.window.showWarningMessage(warning);
+  });
   context.subscriptions.push(
-    vscode.commands.registerCommand('reddog.open', () => openFusionEditor(context, installState)),
-    vscode.commands.registerCommand('foundupsFusion.open', () => openFusionEditor(context, installState))
+    vscode.commands.registerCommand('reddog.open', async () => (
+      openFusionEditor(context, await installStatePromise)
+    )),
+    vscode.commands.registerCommand('foundupsFusion.open', async () => (
+      openFusionEditor(context, await installStatePromise)
+    ))
   );
 }
 
@@ -5362,7 +5374,13 @@ const reddogConfigValue = (key, fallback) => backendCompatibility.configurationV
   vscode, REDDOG_CONFIG_NAMESPACE, REDDOG_LEGACY_CONFIG_NAMESPACE, key, fallback
 );
 const detectRedDogInstallState = (context) => backendCompatibility.detectInstallState(vscode, context, REDDOG_BACKEND_CLIENT);
-const currentBackendCompatibility = () => backendCompatibility.runBackendCompatibilityPreflight(
+const detectRedDogInstallStateAsync = (context) => backendCompatibilityAsync.detectInstallStateAsync(
+  vscode, context, REDDOG_BACKEND_CLIENT, backendCompatibility
+);
+const currentBackendCompatibility = () => backendCompatibilityAsync.runBackendCompatibilityPreflightAsync(
+  backendCompatibility.workspaceRoot(vscode, '')
+);
+const currentBackendCompatibilitySync = () => backendCompatibility.runBackendCompatibilityPreflight(
   backendCompatibility.workspaceRoot(vscode, '')
 );
 const projectBackendCompatibility = backendCompatibility.projectBackendCompatibility;
@@ -5370,6 +5388,7 @@ const buildRedDogInstallStateSection = REDDOG_BACKEND_CLIENT.buildInstallStateSe
 const buildBackendCompatibilityBlockedResult = (state) => backendCompatibility.buildBlockedResult(
   state, REDDOG_BACKEND_CLIENT
 );
+const blockIncompatibleBackend = (context, state, webview) => backendCompatibilityAsync.blockIncompatibleBackend(context, state, webview, { detect: detectRedDogInstallStateAsync, build: buildBackendCompatibilityBlockedResult, post: postStatusAndProgress });
 
 function fusionWorkerFromConfig() {
   return backendCompatibilityRender.resolveFusionWorker(
@@ -5400,21 +5419,7 @@ function wireFusionWebview(context, webview, worker, state) {
       return;
     }
 
-    state.installState = detectRedDogInstallState(context);
-    if (
-      !state.installState.backend_compatibility
-      || state.installState.backend_compatibility.passed !== true
-    ) {
-      const blockedResult = buildBackendCompatibilityBlockedResult(
-        state.installState
-      );
-      state.lastReviewPacket = blockedResult.review_packet;
-      postStatusAndProgress(
-        webview,
-        null,
-        'Stopped before grounding: RedDog backend compatibility preflight failed.'
-      );
-      webview.postMessage({ command: 'result', result: blockedResult });
+    if (await blockIncompatibleBackend(context, state, webview)) {
       return;
     }
 
@@ -5436,25 +5441,15 @@ function wireFusionWebview(context, webview, worker, state) {
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
     const contextPacket = buildBoundedRepoContext(contextMode, workFocus);
-    let wspTaskPrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
-    // continuation_appended is true only when 012 enabled it AND a stored summary exists.
-    const continuationAppended = continuationEnabled && !!state.lastContinuationSummary;
-    const continuationSourceRunId = continuationAppended && state.lastContinuationSummary
-      ? (state.lastContinuationSummary.previous_run_id || 'unknown')
-      : 'none';
-    const continuationTelemetry = {
-      continuation_enabled: continuationEnabled,
-      continuation_appended: continuationAppended,
-      continuation_source_run_id: continuationSourceRunId
-    };
-    if (continuationAppended) {
-      wspTaskPrompt = appendContinuationSummaryToWspPrompt(wspTaskPrompt, state.lastContinuationSummary);
-      postStatusAndProgress(webview, null, 'Continuation: appended WSP_97-safe summary from last RedDog packet (not raw Copy MD). source_run_id=' + continuationSourceRunId);
-    } else if (!continuationEnabled) {
-      postStatusAndProgress(webview, null, 'Continuation: disabled for this run.');
-    } else {
-      postStatusAndProgress(webview, null, 'Continuation: enabled but no prior RedDog packet stored yet; nothing appended.');
-    }
+    const basePrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
+    const continuation = continuationPrompt.prepareContinuationPrompt(
+      basePrompt, continuationEnabled, state.lastContinuationSummary, {
+        append: appendContinuationSummaryToWspPrompt,
+        post: (text) => postStatusAndProgress(webview, null, text)
+      }
+    );
+    const wspTaskPrompt = continuation.prompt;
+    const continuationTelemetry = continuation.telemetry;
     const promptConstruction = {
       work_focus_digest: redactedDigest(workFocus, 180),
       wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320),
@@ -5817,7 +5812,10 @@ function wireFusionWebview(context, webview, worker, state) {
     result.review_packet.fusion_progress_receipts = fusionProgressReceipts;
     result.review_packet.fusion_progress_receipt_validation = fusionProgressValidation;
     const runtimeConsumptionGate = buildRuntimeConsumptionGate(result, validationState, mode, substantiveTask);
-    backendCompatibility.enforceRuntimeGate(runtimeConsumptionGate, currentBackendCompatibility());
+    backendCompatibility.enforceRuntimeGate(
+      runtimeConsumptionGate,
+      await currentBackendCompatibility()
+    );
     const actionPlanningAllowed = runtimeConsumptionGate.passed === true;
     const residentArchitectSessionEnabled = (
       reddogConfigValue('enableResidentArchitectSession', false) === true
@@ -6050,8 +6048,8 @@ function attachBridgeMetadata(reviewPacket, bridgeMeta) {
   return Object.assign({}, reviewPacket, meta);
 }
 
-function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptionsArg) {
-  const compatibility = currentBackendCompatibility();
+async function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptionsArg) {
+  const compatibility = await currentBackendCompatibility();
   if (compatibility.passed !== true) {
     return Promise.resolve(buildBackendCompatibilityBlockedResult({
       backend_compatibility: compatibility

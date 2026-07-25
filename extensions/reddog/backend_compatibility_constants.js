@@ -1,11 +1,11 @@
 'use strict';
 
-const BACKEND_MANIFEST_SCHEMA = 'reddog_backend_manifest.v2';
+const BACKEND_MANIFEST_SCHEMA = 'reddog_backend_manifest.v3';
 const BACKEND_PRODUCT = 'foundups-agent-reddog-backend';
 const BACKEND_API_VERSION = 2;
 const BACKEND_MANIFEST_PATH = 'scripts/reddog_backend_manifest.json';
-const EXPECTED_MANIFEST_SHA256 = 'ce96ea4e680f32b396a12bbeabbf977b5c975768c07eeaa56dcd00b5849030a7';
-const RUNTIME_DEPENDENCY_GRAPH_VERSION = 1;
+const EXPECTED_MANIFEST_SHA256 = 'b9ea22776ffe968ca7d649a566d42dab24094a3630b55524deb7ea47ece9fbd0';
+const RUNTIME_DEPENDENCY_GRAPH_VERSION = 2;
 const MAX_MANIFEST_BYTES = 256 * 1024;
 const MAX_RUNTIME_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_RUNTIME_FILES = 1024;
@@ -21,6 +21,10 @@ const REQUIRED_BRIDGE_FILES = Object.freeze([
   'scripts/reddog_repair_guard_once.py',
   'scripts/reddog_resident_architect_session_once.py'
 ]);
+const REQUIRED_EXECUTABLE_FILES = Object.freeze([
+  ...REQUIRED_BRIDGE_FILES,
+  'holo_index.py'
+]);
 const REQUIRED_REPOSITORY_MARKERS = Object.freeze([
   'main.py',
   'holo_index.py',
@@ -31,6 +35,7 @@ const MANIFEST_KEYS = Object.freeze([
   'product',
   'backend_api_version',
   'runtime_dependency_graph_version',
+  'required_executable_files',
   'required_bridge_files',
   'required_bridge_sha256',
   'required_runtime_files',
@@ -51,6 +56,7 @@ module.exports = {
   MAX_RUNTIME_FILES,
   MAX_RUNTIME_TOTAL_BYTES,
   REQUIRED_BRIDGE_FILES,
+  REQUIRED_EXECUTABLE_FILES,
   REQUIRED_REPOSITORY_MARKERS,
   RUNTIME_DEPENDENCY_GRAPH_VERSION,
   SHA256_PATTERN

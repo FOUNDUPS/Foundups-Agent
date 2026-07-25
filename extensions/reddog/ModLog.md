@@ -4,7 +4,10 @@
 
 ## 2026-07-25 - REDDOG_EXTENSION_BACKEND_COMPATIBILITY_PREFLIGHT_PHASE1 (0.4.12)
 
-- Added an extension-pinned repository backend manifest, generated 555-file local Python dependency closure, per-file content digests, and a pure compatibility preflight for the editor thin client.
+- Added an extension-pinned repository backend manifest, generated 989-file executable/runtime dependency closure, per-file content digests, and a pure compatibility preflight for the editor thin client.
+- Corrected package-initializer relative-import resolution, bound `holo_index.py` as an executable root, and fail-closed undeclared file-based dynamic loaders.
+- Added exact-case Git tracking and package-relative dynamic-import resolution so manifests regenerate identically on case-sensitive and case-insensitive hosts.
+- Moved activation, ingress, model, and action-boundary closure checks to an extension-owned worker thread; synchronous repair/judgment bridges recheck before launch.
 - Blocked before grounding, HoloIndex, model, permission, and work-order paths when the selected workspace is stale, incomplete, altered, malformed, junction-backed, symlinked, or API-incompatible; rechecked before model and action-planning boundaries.
 - Split compatibility logic into WSP_62-compliant modules and rejected every unsafe intermediate path component, including in-root Windows junctions.
 - Added allowlisted content-free compatibility telemetry and a visible blocked install state without automatic repair or runtime re-index.

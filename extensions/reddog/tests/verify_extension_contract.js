@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const cp = require('child_process');
-const crypto = require('crypto');
 const Module = require('module');
 
 // Keep the exhaustive contract suite fast and deterministic. Production has
@@ -15,15 +14,13 @@ const fixtures = require('./fixtures');
 const root = path.resolve(__dirname, '..', '..', '..');
 const extDir = path.join(root, 'extensions', 'reddog');
 const extensionJs = fs.readFileSync(path.join(extDir, 'extension.js'), 'utf8');
+const continuationPromptJs = fs.readFileSync(path.join(extDir, 'continuation_prompt.js'), 'utf8');
 const fusionProgressJs = fs.readFileSync(path.join(extDir, 'fusion_progress_receipt.js'), 'utf8');
 const fusionProgress = require(path.join(extDir, 'fusion_progress_receipt.js'));
 const holoGenerationBoundQueryJs = fs.readFileSync(path.join(extDir, 'holoindex_generation_bound_query.js'), 'utf8');
 const holoGenerationBoundQuery = require(path.join(extDir, 'holoindex_generation_bound_query.js'));
 const groundedTargetContinuity = require(path.join(extDir, 'grounded_target_continuity.js'));
 const repoDeepDiveFocusPolicy = require(path.join(extDir, 'repo_deep_dive_focus_policy.js'));
-const backendCompatibilityJs = fs.readFileSync(path.join(extDir, 'backend_compatibility_preflight.js'), 'utf8');
-const backendCompatibility = require(path.join(extDir, 'backend_compatibility_preflight.js'));
-const backendManifest = JSON.parse(fs.readFileSync(path.join(root, 'scripts', 'reddog_backend_manifest.json'), 'utf8'));
 const bridgePy = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_once.py'), 'utf8');
 const holoOwnerBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_holoindex_owner_query_once.py'), 'utf8');
 const residentArchitectBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_resident_architect_session_once.py'), 'utf8');
@@ -226,99 +223,6 @@ includes(extensionJs, "title: 'RedDog'", 'webview title must use RedDog');
 includes(readme, 'RedDog is the resident FoundUps architect', 'README product identity statement missing');
 includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
 includes(roadmap, 'RedDog is the resident FoundUps architect', 'ROADMAP product identity statement missing');
-includes(readme, 'extension-pinned RedDog backend manifest', 'README backend compatibility boundary missing');
-includes(iface, 'before target extraction, HoloIndex lookup, model execution, permission probing, or work-order creation', 'INTERFACE preflight ordering missing');
-assert.strictEqual(backendManifest.schema_version, backendCompatibility.BACKEND_MANIFEST_SCHEMA, 'backend manifest schema mismatch');
-assert.strictEqual(backendManifest.product, backendCompatibility.BACKEND_PRODUCT, 'backend manifest product mismatch');
-assert.strictEqual(backendManifest.backend_api_version, backendCompatibility.BACKEND_API_VERSION, 'backend API mismatch');
-assert.deepStrictEqual(
-  backendManifest.required_bridge_files.slice().sort(),
-  backendCompatibility.REQUIRED_BRIDGE_FILES.slice().sort(),
-  'backend bridge contract mismatch'
-);
-assert.deepStrictEqual(
-  backendManifest.required_repository_markers.slice().sort(),
-  backendCompatibility.REQUIRED_REPOSITORY_MARKERS.slice().sort(),
-  'backend repository marker contract mismatch'
-);
-assert.deepStrictEqual(
-  Object.keys(backendManifest.required_bridge_sha256).sort(),
-  backendCompatibility.REQUIRED_BRIDGE_FILES.slice().sort(),
-  'backend bridge digest keys mismatch'
-);
-assert.deepStrictEqual(
-  Object.keys(backendManifest.required_runtime_sha256).sort(),
-  backendManifest.required_runtime_files.slice().sort(),
-  'backend runtime dependency digest keys mismatch'
-);
-assert(
-  backendManifest.required_runtime_files.length >= 500,
-  'backend manifest must bind the generated runtime dependency closure'
-);
-for (const bridgePath of backendCompatibility.REQUIRED_BRIDGE_FILES) {
-  assert(backendManifest.required_runtime_files.includes(bridgePath), 'runtime closure must include ' + bridgePath);
-  assert.strictEqual(
-    backendManifest.required_bridge_sha256[bridgePath],
-    backendManifest.required_runtime_sha256[bridgePath],
-    'bridge/runtime digest mismatch for ' + bridgePath
-  );
-}
-const canonicalManifest = (value) => (
-  Array.isArray(value)
-    ? value.map(canonicalManifest)
-    : (
-      value && typeof value === 'object'
-        ? Object.fromEntries(
-          Object.keys(value).sort().map((key) => [key, canonicalManifest(value[key])])
-        )
-        : value
-    )
-);
-assert.strictEqual(
-  crypto.createHash('sha256').update(
-    JSON.stringify(canonicalManifest(backendManifest))
-  ).digest('hex'),
-  backendCompatibility.EXPECTED_MANIFEST_SHA256,
-  'extension-pinned backend manifest digest mismatch'
-);
-const currentBackendCompatibility = backendCompatibility.runBackendCompatibilityPreflight(root);
-assert.strictEqual(currentBackendCompatibility.passed, true, 'current repository must satisfy the backend contract');
-assert.strictEqual(currentBackendCompatibility.backend_manifest_integrity_verified, true, 'current manifest integrity must pass');
-assert.strictEqual(currentBackendCompatibility.backend_runtime_integrity_verified, true, 'current runtime dependency closure must pass');
-assert.strictEqual(currentBackendCompatibility.no_holoindex_query_performed, true, 'preflight must not query HoloIndex');
-assert.strictEqual(currentBackendCompatibility.no_model_call_performed, true, 'preflight must not call a model');
-assert.strictEqual(currentBackendCompatibility.no_permission_probe_performed, true, 'preflight must not probe permissions');
-assert.strictEqual(currentBackendCompatibility.no_work_order_emitted, true, 'preflight must not emit a work order');
-for (const forbidden of ['child_process', 'execFile', 'spawn(', 'holo_index.py --index']) {
-  assert.strictEqual(backendCompatibilityJs.includes(forbidden), false, 'backend preflight capability forbidden: ' + forbidden);
-}
-const askHandlerStart = extensionJs.indexOf('function wireFusionWebview');
-const askHandlerEnd = extensionJs.indexOf('function killBridgeChild', askHandlerStart);
-const askHandlerSource = extensionJs.slice(askHandlerStart, askHandlerEnd);
-const compatibilityGateIndex = askHandlerSource.indexOf('buildBackendCompatibilityBlockedResult');
-const workFocusIndex = askHandlerSource.indexOf('const workFocus = message.text');
-const classificationIndex = askHandlerSource.indexOf('classifyTaskForRedDog');
-const boundedContextIndex = askHandlerSource.indexOf('buildBoundedRepoContext');
-assert(askHandlerStart >= 0 && askHandlerEnd > askHandlerStart, 'ask handler source must be bounded');
-assert(compatibilityGateIndex >= 0, 'backend compatibility block must be wired into ask handler');
-assert(compatibilityGateIndex < workFocusIndex, 'backend compatibility must gate before work-focus extraction');
-assert(compatibilityGateIndex < classificationIndex, 'backend compatibility must gate before task classification');
-assert(compatibilityGateIndex < boundedContextIndex, 'backend compatibility must gate before repository grounding');
-const callFusionStart = extensionJs.indexOf('function callFusion');
-const callFusionEnd = extensionJs.indexOf('function buildSystemPrompt', callFusionStart);
-const callFusionSource = extensionJs.slice(callFusionStart, callFusionEnd);
-assert(callFusionSource.includes('currentBackendCompatibility()'), 'every model bridge must recheck backend compatibility');
-assert(
-  callFusionSource.indexOf('currentBackendCompatibility()') < callFusionSource.indexOf('new Promise'),
-  'backend compatibility must be checked before model process construction'
-);
-assert(askHandlerSource.includes('backendCompatibility.enforceRuntimeGate'), 'action planning must recheck backend compatibility');
-assert(backendCompatibilityJs.includes('backend_compatibility_changed_before_action_planning'), 'runtime gate must expose backend-change rejection');
-assert(
-  askHandlerSource.indexOf('backendCompatibility.enforceRuntimeGate')
-    < askHandlerSource.indexOf('runGithubPermissionProbeBridge'),
-  'backend compatibility must be rechecked before permission and work-order planning'
-);
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
 includes(fusionProgressJs, "command: 'progress'", 'progress command shape missing');
@@ -635,39 +539,6 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 const orchestrator = require(path.join(extDir, 'extension.js'));
 const semanticGroundingPolicy = require(path.join(extDir, 'semantic_grounding_policy.js'));
 Module._resolveFilename = originalResolve;
-
-const incompatibleBackendResult = orchestrator.buildBackendCompatibilityBlockedResult({
-  extension_id: 'secret-extension-id',
-  backend_compatibility: {
-    schema_version: 'reddog_backend_compatibility_preflight.v2',
-    checked: true,
-    passed: false,
-    backend_api_version: 0,
-    extension_backend_api_version: 2,
-    required_bridge_count: 9,
-    required_runtime_file_count: 555,
-    required_repository_marker_count: 3,
-    workspace_root_digest: 'sha256:' + '0'.repeat(64),
-    rejection_reasons: ['backend_api_version_mismatch', 'secret value must not cross'],
-    product: 'secret-product-value',
-    no_holoindex_query_performed: true,
-    no_model_call_performed: true,
-    no_permission_probe_performed: true,
-    no_work_order_emitted: true,
-    no_repo_mutation_performed: true
-  }
-});
-assert.strictEqual(incompatibleBackendResult.ok, false, 'incompatible backend must block');
-assert.strictEqual(incompatibleBackendResult.reason, 'backend_compatibility_preflight_blocked', 'block reason mismatch');
-assert.strictEqual(incompatibleBackendResult.review_packet.made_network_call, false, 'backend block must remain local');
-assert.strictEqual(incompatibleBackendResult.review_packet.backend_compatibility_preflight.no_holoindex_query_performed, true, 'backend block must not query HoloIndex');
-assert.strictEqual(incompatibleBackendResult.review_packet.backend_compatibility_preflight.no_model_call_performed, true, 'backend block must not call a model');
-assert.strictEqual(incompatibleBackendResult.review_packet.backend_compatibility_preflight.no_permission_probe_performed, true, 'backend block must not probe permissions');
-assert.strictEqual(incompatibleBackendResult.review_packet.backend_compatibility_preflight.no_work_order_emitted, true, 'backend block must not emit work');
-assert(!JSON.stringify(incompatibleBackendResult).includes(root), 'backend block must not expose the workspace path');
-assert(!JSON.stringify(incompatibleBackendResult).includes('secret-product-value'), 'backend block must allowlist compatibility fields');
-assert(!JSON.stringify(incompatibleBackendResult).includes('secret value must not cross'), 'backend block must redact malformed rejection content');
-assert(!JSON.stringify(incompatibleBackendResult).includes('secret-extension-id'), 'backend block must allowlist install-state identifiers');
 
 // REDDOG_HOLO_SEMANTIC_FIRST_PHASE1: mode selection and truth receipts.
 assert.strictEqual(orchestrator.resolveHoloRetrievalMode({}), 'semantic', 'HSF-001: production default must be semantic');
@@ -2230,10 +2101,7 @@ assert.strictEqual(realLiveInvoke.decision, 'EXTENSION_LIVE_ENQUEUE_INVOKE_REJEC
 assert.strictEqual(realLiveInvoke.python_invocation_performed, true, 'one-shot live enqueue bridge marks Python invocation');
 assert.strictEqual(realLiveInvoke.concrete_writer_enabled, false, 'one-shot live enqueue bridge keeps writer disabled');
 assert.strictEqual(realLiveInvoke.openclaw_enqueue_performed, false, 'one-shot live enqueue bridge performs no enqueue');
-assert(
-  realLiveInvoke.rejection_reasons.includes('REJECT_AUTHORITATIVE_LIVE_ENQUEUE_ADMISSION_MISSING'),
-  'one-shot live enqueue bridge preserves admission-before-writer rejection'
-);
+assert(realLiveInvoke.rejection_reasons.includes('REJECT_AUTHORITATIVE_LIVE_ENQUEUE_ADMISSION_MISSING'), 'one-shot live enqueue bridge preserves admission-before-writer rejection');
 
 // REDDOG_EXTENSION_GITHUB_PERMISSION_PROBE_RUNTIME_BRIDGE_PHASE1:
 // extension obtains a read-only GitHub permission snapshot and feeds it to the work-order candidate.
@@ -3637,7 +3505,7 @@ includes(continuationCopy, 'Continuation from last RedDog packet', 'Copy MD may 
 // Backend fail-closed default: continuation is included ONLY on explicit useLastPacket === true.
 includes(extensionJs, 'const continuationEnabled = message.useLastPacket === true', 'backend must fail closed (useLastPacket === true)');
 assert(!extensionJs.includes('message.useLastPacket !== false'), 'legacy permissive default must be removed');
-includes(extensionJs, 'const continuationAppended = continuationEnabled', 'single continuation_appended boolean must gate inclusion');
+includes(continuationPromptJs, 'const appended = enabled && !!summary', 'single continuation_appended boolean must gate inclusion');
 includes(extensionJs, 'Continuation: disabled for this run.', 'UI must show disabled status line');
 includes(extensionJs, 'buildContinuationTelemetrySection', 'Copy MD continuation telemetry section missing');
 includes(extensionJs, 'formatContinuationTelemetryLines', 'Run Trace continuation telemetry lines missing');

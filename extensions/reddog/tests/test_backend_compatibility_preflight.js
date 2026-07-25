@@ -25,7 +25,9 @@ function writeFixture(mutator, options) {
   for (const relativePath of preflight.REQUIRED_REPOSITORY_MARKERS) {
     const target = path.join(root, relativePath);
     fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.writeFileSync(target, '# repository marker\n', 'utf8');
+    if (!runtimeFiles.includes(relativePath)) {
+      fs.writeFileSync(target, '# repository marker\n', 'utf8');
+    }
   }
   if (typeof mutator === 'function') {
     mutator(manifest, root);
@@ -132,6 +134,23 @@ for (const invalidRoot of ['', ' ', null, undefined, false, 0]) {
   assert.strictEqual(result.passed, false);
   assert(result.rejection_reasons.includes(
     'required_runtime_file_integrity_mismatch:' + dependency
+  ));
+  fs.rmSync(fixture.root, { recursive: true, force: true });
+}
+
+for (const runtimePath of [
+  'holo_index.py',
+  'modules/communication/moltbot_bridge/src/openclaw_dae.py',
+  'modules/foundups/src/foundup_registry_loader.py',
+  'modules/platform_integration/linkedin_agent/src/linkedin_agent.py'
+]) {
+  const fixture = writeFixture();
+  assert.strictEqual(runFixture(fixture).passed, true);
+  fs.appendFileSync(path.join(fixture.root, runtimePath), '\n# tampered runtime\n', 'utf8');
+  const result = runFixture(fixture);
+  assert.strictEqual(result.passed, false, runtimePath);
+  assert(result.rejection_reasons.includes(
+    'required_runtime_file_integrity_mismatch:' + runtimePath
   ));
   fs.rmSync(fixture.root, { recursive: true, force: true });
 }
@@ -251,7 +270,7 @@ function functionSpans(source) {
   const lines = source.split(/\r?\n/);
   const spans = [];
   for (let start = 0; start < lines.length; start += 1) {
-    const match = /^function\s+([A-Za-z0-9_]+)\s*\(/.exec(lines[start]);
+    const match = /^(?:async\s+)?function\s+([A-Za-z0-9_]+)\s*\(/.exec(lines[start]);
     if (!match) {
       continue;
     }
@@ -270,6 +289,9 @@ function functionSpans(source) {
 
 for (const relativePath of [
   'backend_compatibility_preflight.js',
+  'backend_compatibility_async.js',
+  'backend_compatibility_worker.js',
+  'continuation_prompt.js',
   'backend_compatibility_manifest.js',
   'backend_compatibility_filesystem.js',
   'backend_compatibility_render.js'
@@ -280,5 +302,8 @@ for (const relativePath of [
     assert(span.lines <= 30, relativePath + ':' + span.name + ' exceeds WSP_62 function limit');
   }
 }
+
+require('./test_backend_compatibility_contract');
+require('./test_backend_compatibility_async');
 
 console.log('backend compatibility preflight tests passed');
