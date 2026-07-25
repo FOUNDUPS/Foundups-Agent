@@ -1,5 +1,10 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-25] HoloIndex owner semantic probe budget
+
+- Added a real delayed loopback health response proving the bounded probe accepts semantic readiness after more than one second.
+- Retained timeout, secret-nondisclosure, port-conflict, and parent-watchdog regressions.
+
 ## [2026-07-25] HoloIndex owner lifecycle hardening
 
 - Added mocked and real-socket port-conflict coverage.

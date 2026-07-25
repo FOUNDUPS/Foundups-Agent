@@ -1,5 +1,10 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-25 - HoloIndex auto-owner semantic probe budget
+
+- Raised only the auto-owner health-probe socket window from one to 30 seconds after an observed 11.22-second semantic canary repeatedly exhausted the legacy probe.
+- Kept the 300-second total startup budget and all semantic, freshness, generation, authentication, cleanup, and no-reindex requirements unchanged.
+
 ## 2026-07-25 - HoloIndex owner lifecycle hardening
 
 - Added a bounded pre-spawn port-availability gate before expensive semantic owner initialization.

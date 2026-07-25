@@ -2,6 +2,12 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-25 - REDDOG_HOLOINDEX_OWNER_PROBE_BUDGET_PHASE1 (0.4.20)
+
+- Raised only the auto-owner's authenticated health-probe response window from one to 30 seconds after a live semantic canary required 11.22 seconds.
+- Preserved the 300-second total startup deadline, exact semantic/generation proof, fail-closed cleanup, process-private token, and query-time no-reindex boundary.
+- Version 0.4.19 -> 0.4.20.
+
 ## 2026-07-25 - REDDOG_HOLOINDEX_OWNER_LIFECYCLE_HARDENING_PHASE1 (0.4.19)
 
 - Added a pre-spawn exclusive loopback port check so a stale or foreign listener fails immediately instead of consuming the five-minute cold-start budget.

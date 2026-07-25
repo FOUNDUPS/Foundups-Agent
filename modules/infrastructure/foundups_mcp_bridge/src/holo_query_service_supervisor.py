@@ -35,6 +35,7 @@ HEALTH_SCHEMA_VERSION = "holoindex_query_service.v1"
 MAX_HEALTH_RESPONSE_BYTES = 65_536
 TOKEN_ENTROPY_BYTES = 48
 DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS = 300.0
+DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS = 30.0
 DEFAULT_OWNER_PROBE_INTERVAL_SECONDS = 0.5
 PORT_IN_USE_ERROR = "HOLOINDEX_QUERY_SERVICE_PORT_IN_USE"
 
@@ -299,7 +300,7 @@ class HoloQueryServiceSupervisor:
         ssd_path: Path | str | None = None,
         port: int = DEFAULT_OWNER_PORT,
         startup_timeout_seconds: float = DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS,
-        probe_timeout_seconds: float = 1.0,
+        probe_timeout_seconds: float = DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
         probe_interval_seconds: float = DEFAULT_OWNER_PROBE_INTERVAL_SECONDS,
         shutdown_timeout_seconds: float = 3.0,
         python_executable: Path | str | None = None,
@@ -471,6 +472,7 @@ __all__ = [
     "DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS",
     "HoloQueryServiceSupervisor",
     "HoloQueryServiceSupervisorError",
+    "DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS",
     "OWNER_HOST",
     "PORT_IN_USE_ERROR",
     "SERVICE_TOKEN_ENV",

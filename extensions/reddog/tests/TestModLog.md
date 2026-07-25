@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-25 - HoloIndex owner probe budget (0.4.20)
+
+- Proved an authenticated semantic health response beyond the legacy one-second socket window is accepted within the new 30-second bound.
+- Re-ran owner lifecycle, manifest, extension, and backend compatibility gates.
+
 ## 2026-07-25 - HoloIndex owner lifecycle hardening (0.4.19)
 
 - Proved occupied loopback ports fail before process spawn.

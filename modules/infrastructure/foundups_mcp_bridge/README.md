@@ -106,6 +106,8 @@ authenticated semantic readiness, can supply a trusted child environment, and
 cleans up the process. Before expensive semantic startup it rejects an occupied
 fixed loopback port. Automatic startup also retains a private stdin liveness
 pipe, so the child exits if an abruptly terminated parent closes the pipe.
+Authenticated semantic readiness probes may use up to 30 seconds within the
+unchanged 300-second total startup deadline.
 Automatic in-process startup keeps the URL/token in a
 private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
 exports the generated secret to the parent environment. See
