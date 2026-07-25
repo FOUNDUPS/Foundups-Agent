@@ -168,6 +168,31 @@ def test_repo_path_is_verified_and_bound_into_v2_intent() -> None:
     assert validation.accepted is True
 
 
+def test_main_resident_host_builds_verified_v2_intent() -> None:
+    result = ground_transport_work_focus(
+        repo_root=REPO_ROOT,
+        work_focus=(
+            "Audit modules/communication/moltbot_bridge/src/"
+            "reddog_resident_architect_client.py."
+        ),
+        foundup_id="foundups_agent",
+        authenticated_principal_id="principal-main-test",
+        source_surface="main_resident_host",
+        client_request_id="main-request-1",
+    )
+
+    assert result.accepted is True
+    assert result.intent["schema_version"] == "reddog_intent.v2"
+    assert result.intent["source_surface"] == "main_resident_host"
+    assert result.intent["origin"] == "main.py"
+    assert result.intent["principal_ref"] == "principal-main-test"
+    assert validate_grounded_target_receipt(
+        result.grounding_receipt,
+        work_focus=result.intent["work_focus"],
+        expected_source_surface="main_resident_host",
+    ).accepted is True
+
+
 def test_semantic_audit_requires_current_generation_and_corroborated_hits() -> None:
     focus = "Audit resident RedDog transport authority and grounding architecture."
 

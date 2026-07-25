@@ -49,6 +49,7 @@ SOURCE_TO_ORIGIN = {
     "editor_thin_client": "extension",
     "hermes_thin_client": "hermes_agent",
     "api_thin_client": "api_client",
+    "main_resident_host": "main.py",
 }
 
 ACTION_RE = re.compile(

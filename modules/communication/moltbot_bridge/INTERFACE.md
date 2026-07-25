@@ -55,9 +55,9 @@ not a second authoritative provider-call identity.
 
 `RedDogResidentArchitectClient` revalidates the authenticated principal, FoundUp scope, grounding receipt, full intent digest, and all nine persisted process-local self-attestations on reconnect. Hash-chained transition history is recomputed internal-integrity telemetry, not signer authority, external authentication, or independently observed effect evidence.
 
-The editor bridge requires host-supplied `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and `REDDOG_AUTHORIZED_FOUNDUP_IDS`, then invokes this canonical client. It cannot call the durable cycle directly.
+The editor bridge and `main.py` resident host require host-supplied `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and `REDDOG_AUTHORIZED_FOUNDUP_IDS`, then invoke this canonical client. The main host first emits a verified `reddog_intent.v2` through `ground_transport_work_focus()` with source `main_resident_host` and origin `main.py`; it cannot call the durable cycle directly. `REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID` controls new-request idempotency, while `REDDOG_RESIDENT_ARCHITECT_INTENT_ID` addresses an existing canonical cycle for status, cancel, or retry.
 
-`CANCELLED` and `DETERMINED` are permanently terminal. Only `FAILED` and `TIMED_OUT` cycles may enter a revision-checked retry, and each retry appends one immutable prior-attempt summary. Legacy v1 rows are accepted only by the canonical cancellation path; they cannot reconnect, resume, or become authority-bearing v2 records.
+`CANCELLED` and `DETERMINED` are permanently terminal. Only `FAILED` and `TIMED_OUT` cycles may enter a revision-checked retry, and each retry appends one immutable prior-attempt summary. Persisted main-host v1 intents in both historical v1 and integrity-valid transitional v2 cycle rows have a main-transport-only status/CAS-cancel compatibility path with exact principal, FoundUp, requested-ID, row-ID, and embedded-ID checks. Historical rows remain status/cancel-only. New v1 submissions and legacy resume remain rejected; no legacy record can become an authority-bearing v2 intent.
 
 Resident model execution requires separate runtime-binding inputs
 for the read-only audit and backend architect surfaces. The audit binding is

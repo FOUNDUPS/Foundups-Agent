@@ -1854,7 +1854,7 @@ def _reddog_resident_architect_intent_id(
     work_focus: str,
     cycle_bucket: str = "",
 ) -> str:
-    explicit = os.getenv("REDDOG_RESIDENT_ARCHITECT_INTENT_ID", "").strip()
+    explicit = os.getenv("REDDOG_RESIDENT_ARCHITECT_CLIENT_REQUEST_ID", "").strip()
     if explicit:
         return explicit
     payload = {
@@ -1897,180 +1897,66 @@ def _reddog_resident_architect_auto_queue_profile(result: Any) -> str:
     return raw if raw in RESIDENT_QUEUE_PROFILES else ""
 
 
-def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bool:
-    """
-    Optionally run one durable AgentDB resident RedDog architect cycle.
+def _run_reddog_main_resident_client(
+    *,
+    repo_root: Path,
+    authenticated_principal: str,
+    authorized_foundups: tuple[str, ...],
+    foundup_id: str,
+    work_focus: str,
+    client_request_id: str,
+    explicit_intent_id: str,
+    runtime_defaults: Mapping[str, Any],
+    cancel_requested: bool,
+    retry_requested: bool,
+) -> Any:
+    """Delegate one main-host request to the transport-neutral runtime module."""
 
-    This is the resident RedDog runtime bridge for main.py. It submits a
-    reddog_intent.v1 request to the durable AgentDB cycle, lets OpenClaw claim
-    read-only audit/research tasks, persists the backend architect
-    determination, and exposes the intent ID for the downstream FIX promotion
-    handoff. It performs no source mutation, shell work, worktree operations,
-    PR creation, HoloIndex re-index, Hermes dispatch, PatternMemory promotion,
-    or live FoundUp enqueue.
-
-    Env:
-        REDDOG_RESIDENT_ARCHITECT_PRODUCT_MODE=1           Auto-run resident cycle when low-level flag unset
-        REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE            Explicit enable/disable override
-        REDDOG_RESIDENT_ARCHITECT_CADENCE_HOURS=24         New intent cadence; 0 disables cadence
-        REDDOG_RESIDENT_ARCHITECT_CYCLE_BUCKET             Optional explicit cadence bucket
-        REDDOG_RESIDENT_ARCHITECT_NOW_ISO                  Optional deterministic runtime clock
-        REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=0 Block startup if rejected
-        REDDOG_RESIDENT_ARCHITECT_INTENT_ID                Optional stable intent ID
-        REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS               Work focus submitted to RedDog
-        REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF            Principal reference, default 012
-        REDDOG_RESIDENT_ARCHITECT_FOUNDUP_ID               FoundUp scope, default foundups_agent
-        REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS               Max OpenClaw claims, default 8
-        REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS          Cycle timeout, default 60
-        REDDOG_RESIDENT_ARCHITECT_RETRY=0                  Retry failed/timed-out cycle; cancelled is terminal
-        REDDOG_RESIDENT_ARCHITECT_CANCEL=0                 Cancel running cycle
-        REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF=1        Auto-arm safe FIX handoff after accepted FIX
-        REDDOG_RESIDENT_ARCHITECT_AUTO_QUEUE_PROFILE        Optional downstream queue profile, default draft-PR
-        REDDOG_RESIDENT_BRAIN_CONTEXT=1                     Attach read-only Brain artifact state metadata
-        REDDOG_RESIDENT_BRAIN_STATE_PATH                    Optional Brain artifact state JSON override
-        REDDOG_RESIDENT_BREADCRUMBS_CONTEXT=1               Attach read-only AgentDB breadcrumb metadata
-        REDDOG_RESIDENT_BREADCRUMBS_PATH                    Optional breadcrumb JSON override
-        REDDOG_RESIDENT_WORKSPACE_MEMORY_NOTES_PATH         Optional workspace memory note JSON
-        REDDOG_RESIDENT_MEMORY_MAX_RECORDS=20               Max breadcrumb/workspace records supplied
-        REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT           Outside-repo root for binding artifacts
-        REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH Exact audit binding artifact
-        REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH Exact architect binding artifact
-        REDDOG_EXTERNAL_RESEARCH_SNAPSHOT_PATH             Approved external snapshot JSON
-        REDDOG_AUTHORITATIVE_WORK_STATE_PATH               Existing work-state JSON
-        HOLOINDEX_FRESHNESS_RECEIPT                        Existing HoloIndex receipt
-        HOLOINDEX_SSD_PATH                                 HoloIndex SSD path
-    """
-
-    if not _reddog_resident_architect_cycle_requested():
-        logger.info("[REDDOG-RESIDENT-CYCLE] Startup preflight disabled")
-        return True
-
-    audit_runtime_binding, architect_runtime_binding, binding_reason = (
-        _reddog_resident_model_runtime_bindings_from_env(repo_root)
+    from modules.communication.moltbot_bridge.src.reddog_main_resident_architect_cycle_bootstrap import (
+        run_main_resident_client,
     )
-    if binding_reason:
-        logger.error("[REDDOG-RESIDENT-CYCLE] Runtime model binding preflight failed: %s", binding_reason)
-        print(f"[REDDOG-RESIDENT-CYCLE] preflight=FAIL reason={binding_reason}")
-        return False
 
-    enforced = os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "0") != "0"
-    principal_ref = os.getenv("REDDOG_RESIDENT_ARCHITECT_PRINCIPAL_REF", "012").strip() or "012"
-    foundup_id = os.getenv("REDDOG_RESIDENT_ARCHITECT_FOUNDUP_ID", "foundups_agent").strip() or "foundups_agent"
-    work_focus = (
-        os.getenv("REDDOG_RESIDENT_ARCHITECT_WORK_FOCUS", "").strip()
-        or "main.py resident RedDog architect cycle"
-    )
-    explicit_intent_id = os.getenv("REDDOG_RESIDENT_ARCHITECT_INTENT_ID", "").strip()
-    cycle_bucket = "" if explicit_intent_id else _reddog_resident_architect_cycle_bucket()
-    intent_id = _reddog_resident_architect_intent_id(
-        principal_ref=principal_ref,
+    return run_main_resident_client(
+        repo_root=repo_root,
+        authenticated_principal=authenticated_principal,
+        authorized_foundups=authorized_foundups,
         foundup_id=foundup_id,
         work_focus=work_focus,
-        cycle_bucket=cycle_bucket,
+        client_request_id=client_request_id,
+        explicit_intent_id=explicit_intent_id,
+        runtime_defaults=runtime_defaults,
+        cancel_requested=cancel_requested,
+        retry_requested=retry_requested,
     )
-    brain_state = _reddog_resident_brain_state_from_artifacts()
-    breadcrumbs = _reddog_resident_breadcrumbs_from_runtime(work_focus=work_focus, foundup_id=foundup_id)
-    workspace_memory_notes = _reddog_resident_workspace_memory_notes_from_env()
-    memory_context = {
-        "brain_available": bool(brain_state),
-        "brain_record_count": int(brain_state.get("record_count", 0)) if brain_state else 0,
-        "breadcrumbs_count": len(breadcrumbs),
-        "workspace_memory_notes_count": len(workspace_memory_notes),
-    }
-    memory_context["memory_context_digest"] = _reddog_digest_payload(memory_context)
-    red_dog_intent = {
-        "schema_version": "reddog_intent.v1",
-        "intent_id": intent_id,
-        "principal_ref": principal_ref,
-        "foundup_id": foundup_id,
-        "work_focus": work_focus,
-        "cycle_bucket": cycle_bucket,
-        "requested_authority": "read_only_audit",
-        "origin": "main.py",
-        "submits_executable_authority": False,
-        "memory_context": memory_context,
-    }
 
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
-            run_reddog_resident_architect_durable_agentdb_cycle,
-        )
 
-        result = run_reddog_resident_architect_durable_agentdb_cycle(
-            repo_root=repo_root,
-            red_dog_intent=red_dog_intent,
-            work_state_path=os.getenv("REDDOG_AUTHORITATIVE_WORK_STATE_PATH", ""),
-            holoindex_receipt_path=os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", ""),
-            holoindex_ssd_path=os.getenv("HOLOINDEX_SSD_PATH", ""),
-            requested_operation="main_resident_architect_cycle",
-            prompt_text=work_focus,
-            breadcrumbs=breadcrumbs,
-            brain_state=brain_state,
-            workspace_memory_notes=workspace_memory_notes,
-            external_research_retriever=_reddog_external_research_retriever_from_env(),
-            audit_model_runtime_binding_receipt=audit_runtime_binding,
-            architect_model_runtime_binding_receipt=architect_runtime_binding,
-            max_claims=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_MAX_CLAIMS", 8),
-            timeout_seconds=_reddog_positive_int_env("REDDOG_RESIDENT_ARCHITECT_TIMEOUT_SECONDS", 60),
-            cancel_requested=os.getenv("REDDOG_RESIDENT_ARCHITECT_CANCEL", "0") != "0",
-            retry_requested=os.getenv("REDDOG_RESIDENT_ARCHITECT_RETRY", "0") != "0",
-        )
-    except Exception as exc:
-        logger.error(f"[REDDOG-RESIDENT-CYCLE] Startup runtime failed: {exc}")
-        if enforced:
-            print(f"[REDDOG-RESIDENT-CYCLE] preflight=FAIL error={type(exc).__name__}")
-            return False
-        print(f"[REDDOG-RESIDENT-CYCLE] preflight=WARN error={type(exc).__name__}")
-        return True
+def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bool:
+    """Run one resident cycle through the decomposed moltbot bootstrap."""
 
-    status = "PASS" if result.accepted else "WARN"
-    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
-    completed = int(result.task_status_counts.get("completed", 0))
-    auto_fix_handoff = (
-        result.accepted
-        and str(result.architect_action or "").strip().upper() == "FIX"
-        and os.getenv("REDDOG_RESIDENT_ARCHITECT_AUTO_FIX_HANDOFF", "1") != "0"
-        and "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" not in os.environ
+    from modules.communication.moltbot_bridge.src.reddog_main_resident_architect_cycle_bootstrap import (
+        MainResidentArchitectHooks,
+        run_main_resident_architect_cycle_preflight,
     )
-    auto_queue_profile = _reddog_resident_architect_auto_queue_profile(result)
-    print(
-        f"[REDDOG-RESIDENT-CYCLE] preflight={status} status={result.status} "
-        f"intent={result.intent_id} cycle={result.cycle_id} snapshot={result.snapshot_id or '(none)'} "
-        f"swarm={result.swarm_id or '(none)'} tasks={len(result.task_ids)} completed={completed} "
-        f"claims={len(result.openclaw_claims)} recovered={result.recovered_existing_cycle} "
-        f"duplicate={result.duplicate_intent_reused} architect_action={result.architect_action or '(none)'} "
-        f"architect_next_slice={result.architect_next_slice or '(none)'} "
-        f"architect_determination={result.architect_determination_id or '(none)'} "
-        f"queue_candidates={result.queue_candidate_count} auto_fix_handoff={auto_fix_handoff} "
-        f"auto_queue_profile={auto_queue_profile or '(none)'} "
-        f"brain_records={memory_context['brain_record_count']} "
-        f"breadcrumbs={memory_context['breadcrumbs_count']} "
-        f"workspace_memory={memory_context['workspace_memory_notes_count']} reasons={reasons}"
-    )
-    print(
-        "[REDDOG-RESIDENT-CYCLE] "
-        f"read_only_authority={result.read_only_authority_only} "
-        f"no_shell={result.no_shell_command_executed} "
-        f"no_repo_mutation={result.no_repo_mutation_performed} "
-        f"no_holoindex_reindex={result.no_holoindex_reindex_performed} "
-        f"no_hermes_dispatch={result.no_hermes_dispatch_performed} "
-        f"no_worktree={result.no_worktree_operation_performed} "
-        f"no_pr={result.no_pr_created} "
-        f"no_pattern_memory={result.no_pattern_memory_promotion_performed} "
-        f"no_live_foundup_enqueue={result.no_live_foundup_enqueue_performed}"
-    )
-    if result.accepted:
-        os.environ["REDDOG_RESIDENT_ARCHITECT_INTENT_ID"] = result.intent_id
-        if auto_fix_handoff:
-            os.environ["REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF"] = "1"
-        if auto_queue_profile:
-            os.environ["REDDOG_RESIDENT_QUEUE_BINDING_PROFILE"] = auto_queue_profile
-        return True
 
-    if enforced:
-        print("[REDDOG-RESIDENT-CYCLE] Startup blocked by REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=1")
-        return False
-    return True
+    hooks = MainResidentArchitectHooks(
+        cycle_requested=_reddog_resident_architect_cycle_requested,
+        model_runtime_bindings=_reddog_resident_model_runtime_bindings_from_env,
+        cycle_bucket=_reddog_resident_architect_cycle_bucket,
+        client_request_id=_reddog_resident_architect_intent_id,
+        brain_state=_reddog_resident_brain_state_from_artifacts,
+        breadcrumbs=_reddog_resident_breadcrumbs_from_runtime,
+        workspace_memory_notes=_reddog_resident_workspace_memory_notes_from_env,
+        payload_digest=_reddog_digest_payload,
+        external_research_retriever=_reddog_external_research_retriever_from_env,
+        positive_int_env=_reddog_positive_int_env,
+        auto_queue_profile=_reddog_resident_architect_auto_queue_profile,
+        run_client=_run_reddog_main_resident_client,
+    )
+    return run_main_resident_architect_cycle_preflight(
+        repo_root,
+        hooks=hooks,
+        logger=logger,
+    )
 
 
 def _reddog_resident_model_runtime_bindings_from_env(

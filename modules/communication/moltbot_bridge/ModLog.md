@@ -1,5 +1,24 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-25: REDDOG_MAIN_RESIDENT_ARCHITECT_CANONICAL_CLIENT_MIGRATION_REVIEW_REPAIR
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 71, 91, 97
+
+- Prevented status/reconnect operations from re-arming FIX promotion or queue
+  handoff, and confined every reconnect to the explicitly selected FoundUp.
+- Added a bounded, main-transport-only compatibility adapter so persisted
+  read-only `reddog_intent.v1` records in both historical v1 and transitional
+  v2 cycles remain observable and cancellable without allowing legacy submit
+  or resume; requested, top-level record, and embedded intent IDs must match
+  before the CAS target is selected.
+- Preserved exact runtime-model binding receipts added after the original
+  slice base, split legacy control from the canonical client, and extracted
+  the resident bootstrap implementation from `main.py` into decomposed
+  functions under the moltbot runtime owner.
+- Restored the prior root-entrypoint no-growth ceiling after the extraction.
+- Enforced the selected FoundUp against the exported helper's authorized scope
+  before grounding or canonical-client construction.
+
 ## 2026-07-24: HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
 **WSP Protocol**: WSP 00, 15, 22, 50, 62, 81, 97
@@ -185,6 +204,17 @@
   canonical store is cross-process atomic under `.operation`.
 - Production remains permanently CLOSED while independent trust-anchor
   verifiers listed by the governed resolver are absent.
+
+## 2026-07-20: REDDOG_MAIN_RESIDENT_ARCHITECT_CANONICAL_CLIENT_MIGRATION_PHASE1
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 71, 91, 97
+
+- Replaced `main.py`'s legacy `reddog_intent.v1` direct cycle invocation with typed v2 grounding and `RedDogResidentArchitectClient`.
+- Added the explicit `main_resident_host -> main.py` source/origin binding across grounding receipt validation and client transport policy.
+- Required host-authenticated principal and FoundUp scope before the resident runtime can be reached; caller role text and implicit `012` defaults no longer establish identity.
+- Separated stable client request IDs from canonical intent IDs, and routed status, cancel, and retry only through an existing canonical intent.
+- Rejected cancel/retry conflicts and control operations without an intent before client, worker, or model invocation.
+- Removed the durable cycle's legacy main-v1 exception while preserving startup order, menu loading, read-only authority, and downstream FIX handoff behavior.
 
 ## 2026-07-20: REDDOG_RESIDENT_CYCLE_CAS_ATTESTATION_AND_INTENT_BINDING_PHASE1
 

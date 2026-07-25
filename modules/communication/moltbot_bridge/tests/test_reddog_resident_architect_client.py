@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
 
+from modules.infrastructure.database.src.agent_db import AgentDB
+from modules.infrastructure.database.src.db_manager import DatabaseManager
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     SCHEMA_VERSION as GROUNDING_SCHEMA_VERSION,
     canonical_digest,
@@ -14,6 +17,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_architect_client i
     ResidentClientReason,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
+    AgentDbResidentArchitectCycleStore,
     resident_intent_digest,
 )
 
@@ -104,6 +108,27 @@ class _Store:
         self.records[intent_id] = record
         return {"ok": True}
 
+    def transition_cycle(
+        self,
+        intent_id,
+        *,
+        expected_revision,
+        expected_statuses,
+        updates,
+        allow_terminal_retry=False,
+    ):
+        del allow_terminal_retry
+        record = dict(self.records[intent_id])
+        if (
+            int(record.get("record_revision", 0)) != int(expected_revision)
+            or str(record.get("status") or "") not in set(expected_statuses)
+        ):
+            return {"ok": False, "reason": "transition_conflict"}
+        record.update(dict(updates))
+        record["record_revision"] = int(expected_revision) + 1
+        self.records[intent_id] = record
+        return {"ok": True, "record": record}
+
     def load_task_ids(self, determination_id):
         return ()
 
@@ -158,6 +183,125 @@ def _client(store=None, runner=None) -> RedDogResidentArchitectClient:
         cycle_store=store or _Store(),
         cycle_runner=runner or _Runner(),
     )
+
+
+def _legacy_main_record(
+    *,
+    principal: str = "principal-012",
+    foundup_id: str = "foundups_agent",
+) -> dict:
+    intent = {
+        "schema_version": "reddog_intent.v1",
+        "intent_id": "sha256:legacy-main-intent",
+        "origin": "main.py",
+        "principal_ref": principal,
+        "foundup_id": foundup_id,
+        "work_focus": "Legacy main resident audit.",
+        "requested_authority": "read_only_audit",
+        "submits_executable_authority": False,
+    }
+    return {
+        "schema_version": "reddog_resident_architect_cycle.v2",
+        "intent_id": intent["intent_id"],
+        "intent_digest": resident_intent_digest(intent),
+        "intent": intent,
+        "cycle_id": "sha256:legacy-main-cycle",
+        "status": "RUNNING",
+        "record_revision": 0,
+        "transition_history": [],
+        "read_only_authority_only": True,
+        "no_shell_command_executed": True,
+        "no_repo_mutation_performed": True,
+        "no_holoindex_reindex_performed": True,
+        "no_hermes_dispatch_performed": True,
+        "no_worktree_operation_performed": True,
+        "no_pr_created": True,
+        "no_pattern_memory_promotion_performed": True,
+        "no_live_foundup_enqueue_performed": True,
+    }
+
+
+def test_real_agentdb_pre1310_main_cycle_supports_status_and_cas_cancel_only(
+    tmp_path, monkeypatch
+) -> None:
+    DatabaseManager.reset_for_tests()
+    monkeypatch.setenv("FOUNDUPS_DB_ENGINE", "sqlite")
+    monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "legacy-main.db"))
+    db = AgentDB()
+    store = AgentDbResidentArchitectCycleStore(agent_db_factory=lambda: db)
+    store._ensure_table(db)
+    intent_id = "sha256:pre1310-main-intent"
+    intent = {
+        "schema_version": "reddog_intent.v1",
+        "intent_id": intent_id,
+        "origin": "main.py",
+        "principal_ref": "principal-012",
+        "foundup_id": "foundups_agent",
+        "work_focus": "Historical main resident audit.",
+        "cycle_bucket": "24h:legacy",
+        "requested_authority": "read_only_audit",
+        "submits_executable_authority": False,
+        "memory_context": {},
+    }
+    record = {
+        "schema_version": "reddog_resident_architect_cycle.v1",
+        "intent_id": intent_id,
+        "cycle_id": "sha256:pre1310-cycle",
+        "status": "RUNNING",
+        "intent": intent,
+        "snapshot_id": None,
+        "determination_id": None,
+        "swarm_id": None,
+        "task_ids": [],
+        "task_status_counts": {},
+        "openclaw_claims": [],
+        "retry_count": 0,
+        "created_at": "2026-07-01T00:00:00+00:00",
+        "updated_at": "2026-07-01T00:00:00+00:00",
+        "rejection_reasons": [],
+        "read_only_authority_only": True,
+    }
+    with db.db.get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO reddog_resident_architect_cycles
+            (intent_id, cycle_id, status, snapshot_id, determination_id, revision, cycle_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                intent_id,
+                record["cycle_id"],
+                record["status"],
+                None,
+                None,
+                0,
+                json.dumps(record, sort_keys=True, separators=(",", ":")),
+                record["updated_at"],
+            ),
+        )
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="main",
+        cycle_store=store,
+    )
+
+    status = client.status(intent_id)
+    cancelled = client.cancel(intent_id)
+    persisted = client.status(intent_id)
+    resumed = client.resume(intent_id)
+
+    assert status.accepted is True
+    assert status.status == "RUNNING"
+    assert status.canonical_resident_cycle_used is False
+    assert cancelled.accepted is False
+    assert cancelled.status == "CANCELLED"
+    assert persisted.accepted is True
+    assert persisted.status == "CANCELLED"
+    assert resumed.accepted is False
+    assert resumed.status == "REJECTED"
+    DatabaseManager.reset_for_tests()
 
 
 def test_submit_calls_canonical_cycle_and_returns_readonly_receipt() -> None:
@@ -290,6 +434,93 @@ def test_foundup_outside_host_authorized_scope_never_reaches_cycle() -> None:
     assert result.accepted is False
     assert ResidentClientReason.FOUNDUP_SCOPE_MISMATCH in result.rejection_reasons
     assert runner.calls == []
+
+
+def test_legacy_main_v1_record_supports_status_and_cancel_only() -> None:
+    store = _Store()
+    runner = _Runner()
+    record = _legacy_main_record()
+    store.records[record["intent_id"]] = record
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="main",
+        cycle_store=store,
+        cycle_runner=runner,
+    )
+
+    status = client.status(record["intent_id"])
+    cancelled = client.cancel(record["intent_id"])
+    resumed = client.resume(record["intent_id"])
+
+    assert status.accepted is True
+    assert status.canonical_resident_cycle_used is False
+    assert cancelled.status == "CANCELLED"
+    assert cancelled.canonical_resident_cycle_used is False
+    assert store.records[record["intent_id"]]["status"] == "CANCELLED"
+    assert resumed.accepted is False
+    assert runner.calls == []
+
+
+def test_legacy_main_v1_record_rejects_wrong_principal_or_foundup_scope() -> None:
+    for record in (
+        _legacy_main_record(principal="other-principal"),
+        _legacy_main_record(foundup_id="other_foundup"),
+    ):
+        store = _Store()
+        store.records[record["intent_id"]] = record
+        client = RedDogResidentArchitectClient(
+            repo_root=REPO_ROOT,
+            authenticated_principal_id="principal-012",
+            authorized_foundup_ids=("foundups_agent",),
+            transport="main",
+            cycle_store=store,
+            cycle_runner=_Runner(),
+        )
+
+        assert client.status(record["intent_id"]).accepted is False
+        assert client.cancel(record["intent_id"]).accepted is False
+        assert store.records[record["intent_id"]]["status"] == "RUNNING"
+
+
+def test_legacy_main_v1_record_rejects_non_main_transport() -> None:
+    store = _Store()
+    record = _legacy_main_record()
+    store.records[record["intent_id"]] = record
+
+    result = _client(store=store).status(record["intent_id"])
+
+    assert result.accepted is False
+    assert ResidentClientReason.REQUEST_INVALID in result.rejection_reasons
+
+
+def test_legacy_main_v1_record_rejects_top_level_intent_substitution() -> None:
+    store = _Store()
+    record = _legacy_main_record()
+    requested_intent_id = str(record["intent_id"])
+    record["intent_id"] = "sha256:cross-record-target"
+    store.records[requested_intent_id] = record
+    store.records[record["intent_id"]] = {
+        **_legacy_main_record(),
+        "intent_id": record["intent_id"],
+        "status": "RUNNING",
+    }
+    client = RedDogResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="main",
+        cycle_store=store,
+        cycle_runner=_Runner(),
+    )
+
+    status = client.status(requested_intent_id)
+    cancelled = client.cancel(requested_intent_id)
+
+    assert status.accepted is False
+    assert cancelled.accepted is False
+    assert store.records["sha256:cross-record-target"]["status"] == "RUNNING"
 
 
 def test_missing_runtime_boundary_attestation_fails_closed() -> None:
