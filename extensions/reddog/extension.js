@@ -18,10 +18,11 @@ const backendCompatibilityRender = require('./backend_compatibility_render');
 const continuationPrompt = require('./continuation_prompt');
 const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
 const conversationalDraftPolicy = require('./conversational_draft_policy');
+const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.16';
+const EXTENSION_VERSION = '0.4.17';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -64,6 +65,7 @@ const REDDOG_RESIDENT_ARCHITECT_SESSION_SCRIPT = 'scripts/reddog_resident_archit
 const REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT = 'scripts/reddog_operator_wardrobe_selection_once.py';
 const REDDOG_GITHUB_PERMISSION_PROBE_SCRIPT = 'scripts/reddog_github_permission_probe_once.py';
 const REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT = 'scripts/reddog_authoritative_work_state_query_once.py';
+const REDDOG_MODEL_RUNTIME_BINDING_QUERY_SCRIPT = 'scripts/reddog_model_runtime_binding_query_once.py';
 const WRE_OPERATIONAL_SPINE_INVOKE_MAX_BYTES = 262144;
 const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
 const REDDOG_EXTENSION_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_SLICE = 'REDDOG_EXTENSION_TO_OPENCLAW_LIVE_ENQUEUE_RUNTIME_BINDING_PHASE1';
@@ -104,7 +106,6 @@ const WORK_TRAIL_ALLOWLIST = new Set([
   'completed',
   'failed'
 ]);
-
 const BRIDGE_STAGE_WORK_TRAIL = {
   bridge_start: 'orchestrator_started',
   env_check: 'orchestrator_started',
@@ -2420,6 +2421,7 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     '- mode selection reason: ' + (rp.mode_selection_reasoning || 'unknown'),
     '- principal model: ' + (rp.principal_model || result.lead_model || 'unknown'),
     '- panel models: ' + panelModels,
+    ...modelRuntimeBindingQuery.runTraceLines(rp),
     '- context mode: ' + (rp.resolved_context || 'unknown')
   ];
   if (contextSummary) {
@@ -4007,7 +4009,6 @@ const DEFAULT_FUSION_WORKER = {
   lead: 'z-ai/glm-5.2',
   panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code', 'moonshotai/kimi-k3']
 };
-
 const REDDOG_ARCHITECT_SYSTEM_PROMPT = [
   'You are 0102 operating as RedDog, the resident FoundUps architect thin-client surface.',
   'Operate in WSP_00: self=0102, role=architect unless a narrower role is supplied, origin=external_principal.',
@@ -5268,6 +5269,7 @@ function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort
     resolved_context: resolvedContextMode,
     principal_model: worker && worker.lead ? worker.lead : undefined,
     panel_models: worker && Array.isArray(worker.panel) ? worker.panel : undefined,
+    ...modelRuntimeBindingQuery.metadata(worker),
     mode_selection_reasoning: modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode),
     work_focus_digest: construction.work_focus_digest,
     wsp_prompt_digest: construction.wsp_prompt_digest,
@@ -5343,8 +5345,9 @@ function activate(context) {
   );
 }
 
-function openFusionEditor(context, installState) {
-  const worker = fusionWorkerFromConfig();
+async function openFusionEditor(context, installState) {
+  const binding = await runModelRuntimeBindingQueryBridge();
+  const worker = modelRuntimeBindingQuery.resolveWorker(fusionWorkerFromConfig(), binding, FUSION_PANEL_RUNTIME_LIMIT);
   const panel = vscode.window.createWebviewPanel(
     'reddog',
     worker.title,
@@ -5396,13 +5399,13 @@ const blockIncompatibleBackend = (context, state, webview) => backendCompatibili
 const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.runConfiguredQuery({
   workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
 });
+const runModelRuntimeBindingQueryBridge = () => modelRuntimeBindingQuery.runConfiguredQuery({ workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_MODEL_RUNTIME_BINDING_QUERY_SCRIPT) });
 
 function fusionWorkerFromConfig() {
   return backendCompatibilityRender.resolveFusionWorker(
     reddogConfigValue, DEFAULT_FUSION_WORKER, FUSION_PANEL_FORWARD_LIMIT
   );
 }
-
 function wireFusionWebview(context, webview, worker, state) {
   webview.onDidReceiveMessage(async (message) => {
     if (!message || typeof message !== 'object') {
@@ -5427,6 +5430,11 @@ function wireFusionWebview(context, webview, worker, state) {
     }
 
     if (await blockIncompatibleBackend(context, state, webview)) {
+      return;
+    }
+    const modelBindingBlock = modelRuntimeBindingQuery.blockedReason(worker);
+    if (modelBindingBlock) {
+      postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);
       return;
     }
 
@@ -5469,7 +5477,7 @@ function wireFusionWebview(context, webview, worker, state) {
     };
     const systemPrompt = classification.conversationalDraft ? conversationalDraftPolicy.systemPrompt() : buildSystemPrompt(workerType, effort, contextPacket.quality);
 
-    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : ' panel=' + worker.panel.join(' + ')) + ' (' + classification.reasons.join(', ') + ')');
+    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + (classification.conversationalDraft ? '' : ' panel=' + worker.panel.join(' + ')) + ' model_source=' + worker.modelBindingSource + ' (' + classification.reasons.join(', ') + ')');
     const localStatus = authoritativeWorkStateQuery.statusText(classification.localFastPath);
     const routeStatus = localStatus || (classification.conversationalDraft ? conversationalDraftPolicy.statusText() : '');
     postStatusAndProgress(webview, null, routeStatus || 'Bridge started. Redaction gate runs before any OpenRouter API call.');

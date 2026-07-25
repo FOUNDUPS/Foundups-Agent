@@ -32,6 +32,7 @@ BRIDGE_FILES = (
     "scripts/reddog_github_permission_probe_once.py",
     "scripts/reddog_holoindex_owner_query_once.py",
     "scripts/reddog_judgment_verifier_once.py",
+    "scripts/reddog_model_runtime_binding_query_once.py",
     "scripts/reddog_operator_wardrobe_selection_once.py",
     "scripts/reddog_repair_guard_once.py",
     "scripts/reddog_resident_architect_session_once.py",
