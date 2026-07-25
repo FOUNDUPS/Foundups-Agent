@@ -1,5 +1,11 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-25 - HoloIndex owner lifecycle hardening
+
+- Added a bounded pre-spawn port-availability gate before expensive semantic owner initialization.
+- Added a private stdin parent-liveness watchdog so abruptly terminated supervisors do not leave orphaned loopback owners.
+- Kept tokens process-private and made no change to query, index, repository, or network authority.
+
 ## 2026-07-25 - HoloIndex owner repository-root binding
 
 - Added the canonical repository-root digest to freshness snapshots and owner responses.

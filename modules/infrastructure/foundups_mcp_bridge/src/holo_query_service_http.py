@@ -7,6 +7,8 @@ import argparse
 import json
 import os
 import socket
+import sys
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -220,7 +222,31 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--host", default=DEFAULT_BIND_HOST)
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
+    parser.add_argument("--parent-stdin-watchdog", action="store_true")
     return parser
+
+
+def _start_parent_stdin_watchdog(
+    stream: Any,
+    *,
+    terminate_process: Any = os._exit,
+) -> threading.Thread:
+    """Exit the private owner when its supervisor's pipe closes."""
+
+    def wait_for_parent() -> None:
+        try:
+            stream.read(1)
+        except (OSError, ValueError):
+            pass
+        terminate_process(0)
+
+    thread = threading.Thread(
+        target=wait_for_parent,
+        name="holoindex-owner-parent-watchdog",
+        daemon=True,
+    )
+    thread.start()
+    return thread
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -240,6 +266,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if len(token) < MIN_BEARER_TOKEN_CHARS:
         print(TOKEN_TOO_SHORT_ERROR)
         return 2
+    if args.parent_stdin_watchdog:
+        _start_parent_stdin_watchdog(sys.stdin.buffer)
     owner = HoloIndexQueryOwnerService(
         repo_root=Path(__file__).resolve().parents[4],
         bearer_token=token,
@@ -278,6 +306,7 @@ __all__ = [
     "app",
     "create_holo_query_app",
     "create_stdlib_server",
+    "_start_parent_stdin_watchdog",
     "main",
 ]
 

@@ -103,7 +103,10 @@ at literal `127.0.0.1` instead of opening Chroma directly. Trusted host
 bootstraps own its lifecycle
 through HoloQueryServiceSupervisor, which generates an ephemeral token, proves
 authenticated semantic readiness, can supply a trusted child environment, and
-cleans up the process. Automatic in-process startup keeps the URL/token in a
+cleans up the process. Before expensive semantic startup it rejects an occupied
+fixed loopback port. Automatic startup also retains a private stdin liveness
+pipe, so the child exits if an abruptly terminated parent closes the pipe.
+Automatic in-process startup keeps the URL/token in a
 private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
 exports the generated secret to the parent environment. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
