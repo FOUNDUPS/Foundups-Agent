@@ -87,6 +87,26 @@ task to have completed successfully. Admission rejects any author already
 claimed by another worker, and terminal completion revalidates the immutable
 admission digest.
 
+### Exact-SHA HoloIndex Maintenance Transactions
+
+- `create_autonomous_task_if_absent(...) -> bool`
+- `claim_holoindex_postmerge_task(...) -> bool`
+- `fail_holoindex_postmerge_task(...) -> bool`
+- `reclaim_expired_holoindex_postmerge_task(...) -> bool`
+- `commit_holoindex_postmerge_completion(...) -> bool`
+
+The claim is a `pending -> assigned` compare-and-swap over the exact serialized
+context. It publishes a one-use claim ID, canonical context digest, and
+expiry in the same transaction. The executor must atomically consume that
+claim through `assigned -> executing` before any effect. Completion is one
+database transaction: validate the executing claim and request digest, insert
+the completion event, resolve the request, and mark the task completed.
+Both terminal updates compare the exact serialized task context and request
+payload observed in that transaction.
+Competing claims and partial completion writes fail closed.
+Expired claims are reclaimed only by exact worker and assignment timestamp,
+then re-enter the coordinator's bounded retry path.
+
 ## SQLite Audit API
 File: `modules/infrastructure/database/src/sqlite_audit.py`
 

@@ -1,5 +1,16 @@
 # HoloIndex Development Roadmap
 
+## [2026-07-26] Exact-SHA Post-Merge Authority Coordination
+
+**Complete in this slice:** separate authority-update and SSD-maintenance
+leases can nest without deadlock; read-only exact-HEAD proof rehydration
+reuses canonical admission; WRE/OpenClaw owns fetch, non-rewind checkout
+advancement, durable tasking, and completion. Query paths remain mutation-free.
+
+**Deferred:** a GitHub/CI post-merge event source may replace periodic remote
+observation. It must reuse the same SHA task identity and authority
+transaction, not add another indexer.
+
 ## [2026-07-24] Root-Bound Read Admission P0
 
 **Complete in this slice:** raw persistent CLI search, persistent bundle

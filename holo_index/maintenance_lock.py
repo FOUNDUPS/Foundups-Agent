@@ -17,6 +17,9 @@ from typing import BinaryIO
 
 
 MAINTENANCE_LOCK_FILENAME = "holoindex_maintenance.lock"
+AUTHORITY_UPDATE_LOCK_FILENAME = "holoindex_authority_update.lock"
+AUTHORITY_BLOCK_MARKER_FILENAME = ".holoindex_authority_blocked"
+AUTHORITY_BLOCK_MARKER_CONTENT = b"holoindex_authority_blocked_v1\n"
 
 
 class MaintenanceLockError(RuntimeError):
@@ -45,6 +48,36 @@ def maintenance_lock_path(ssd_path: Path | str) -> Path:
     """Return the canonical maintenance lease path for a storage root."""
 
     return Path(ssd_path) / "indexes" / MAINTENANCE_LOCK_FILENAME
+
+
+def authority_update_lock_path(ssd_path: Path | str) -> Path:
+    """Return the separate cross-process authority-checkout lease path."""
+    return Path(ssd_path) / "indexes" / AUTHORITY_UPDATE_LOCK_FILENAME
+
+
+def authority_block_marker_path(repo_root: Path | str) -> Path:
+    """Return the fixed fail-closed marker in the authority worktree."""
+    return Path(repo_root) / AUTHORITY_BLOCK_MARKER_FILENAME
+
+
+def authority_block_marker_valid(repo_root: Path | str) -> bool:
+    """Accept only the exact regular marker published by trusted WRE."""
+    marker = authority_block_marker_path(repo_root)
+    try:
+        metadata = marker.lstat()
+        return bool(
+            stat.S_ISREG(metadata.st_mode)
+            and marker.read_bytes() == AUTHORITY_BLOCK_MARKER_CONTENT
+        )
+    except (FileNotFoundError, OSError):
+        return False
+
+
+def acquire_authority_update_lease(
+    ssd_path: Path | str,
+) -> MaintenanceLease:
+    """Acquire the outer authority lease without nesting the SSD writer lease."""
+    return acquire_maintenance_lease(authority_update_lock_path(ssd_path))
 
 
 def _is_contention_error(exc: OSError) -> bool:
@@ -207,12 +240,19 @@ def probe_maintenance_lock(path: Path | str) -> MaintenanceLockProbe:
 
 
 __all__ = [
+    "AUTHORITY_UPDATE_LOCK_FILENAME",
+    "AUTHORITY_BLOCK_MARKER_CONTENT",
+    "AUTHORITY_BLOCK_MARKER_FILENAME",
     "MAINTENANCE_LOCK_FILENAME",
     "MaintenanceLease",
     "MaintenanceLeaseBusy",
     "MaintenanceLockError",
     "MaintenanceLockProbe",
+    "acquire_authority_update_lease",
+    "authority_block_marker_path",
+    "authority_block_marker_valid",
     "acquire_maintenance_lease",
+    "authority_update_lock_path",
     "maintenance_lock_path",
     "probe_maintenance_lock",
 ]

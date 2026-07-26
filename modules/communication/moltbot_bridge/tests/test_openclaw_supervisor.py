@@ -1726,6 +1726,80 @@ def test_maintenance_loop_e2e_self_audit_via_agentdb(tmp_path, monkeypatch):
     assert "self_audit" in result["action_result"]["executor"]
 
 
+def test_postmerge_dispatch_exception_releases_claim_to_retry(tmp_path):
+    task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+    context = {
+        "schema_version": "holoindex_postmerge_coordination_v1",
+        "source": "holoindex_postmerge_coordinator",
+        "target_repo_head_sha": "a" * 40,
+        "authority_root_digest": "sha256:" + ("b" * 64),
+    }
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=MagicMock(),
+        observer=MagicMock(),
+        action_reporter=lambda *_args: None,
+    )
+    plan = {
+        "action": "execute_maintenance_task",
+        "task": {
+            "task_id": task_id,
+            "family": "holoindex_postmerge",
+        },
+    }
+
+    with (
+        patch(
+            "modules.infrastructure.database.src.agent_db.AgentDB"
+        ) as mock_db_class,
+        patch(
+            "modules.communication.moltbot_bridge.scripts.run_task.execute_task",
+            side_effect=RuntimeError("interrupted"),
+        ) as mock_execute,
+    ):
+        mock_db = MagicMock()
+        mock_db_class.return_value = mock_db
+        claimed_context = {
+            **context,
+            "claim_id": "hpmc_test",
+            "claim_binding_digest": "sha256:" + ("c" * 64),
+        }
+        mock_db.get_autonomous_task_by_id.side_effect = [
+            {
+                "task_id": task_id,
+                "status": "pending",
+                "context": context,
+            },
+            {
+                "task_id": task_id,
+                "status": "assigned",
+                "context": claimed_context,
+            },
+        ]
+        mock_db.claim_holoindex_postmerge_task.return_value = "hpmc_test"
+        mock_db.fail_holoindex_postmerge_task.return_value = True
+
+        result = supervisor._execute(plan)
+
+    assert result["ok"] is False
+    assert result["status"] == "execute_error"
+    mock_execute.assert_called_once_with(
+        task_id,
+        repo_root=tmp_path,
+        execution_claim={
+            "claim_id": "hpmc_test",
+            "claim_binding_digest": "sha256:" + ("c" * 64),
+        },
+    )
+    mock_db.fail_holoindex_postmerge_task.assert_called_once_with(
+        task_id,
+        "openclaw_supervisor",
+        claim_id="hpmc_test",
+        claim_binding_digest="sha256:" + ("c" * 64),
+        status="failed",
+    )
+
+
 def test_supervisor_action_reporter_recursively_redacts_nested_secrets(tmp_path):
     reports = []
     supervisor = OpenClawSupervisor(
@@ -1789,3 +1863,63 @@ def test_supervisor_pattern_memory_receives_redacted_context_only(tmp_path):
     assert "second-cookie-secret" not in serialized
     assert "pattern-memory-token" not in serialized
     assert "[REDACTED]" in serialized
+def test_observe_polls_postmerge_coordinator_when_maintenance_enabled(
+    tmp_path,
+    monkeypatch,
+):
+    from modules.infrastructure.idle_automation.src import (
+        holoindex_postmerge_coordinator,
+    )
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+    monkeypatch.setenv("OPENCLAW_MAINTENANCE_ENABLED", "1")
+    calls = []
+    monkeypatch.setattr(
+        holoindex_postmerge_coordinator,
+        "coordinate_holoindex_postmerge",
+        lambda **kwargs: (
+            calls.append(kwargs)
+            or type(
+                "Result",
+                (),
+                {
+                    "to_dict": lambda self: {
+                        "accepted": True,
+                        "status": "QUEUED",
+                    }
+                },
+            )()
+        ),
+    )
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+    )
+    monkeypatch.setattr(
+        supervisor,
+        "_git_summary",
+        lambda: {"branch": "main", "dirty_files": 0},
+    )
+
+    first = supervisor._observe()
+    assert supervisor._holoindex_postmerge_future is not None
+    supervisor._holoindex_postmerge_future.result(timeout=2)
+    second = supervisor._observe()
+
+    assert "holoindex_postmerge" not in first
+    assert second["holoindex_postmerge"]["status"] == "QUEUED"
+    assert calls == [{"repo_root": tmp_path.resolve()}]
+    supervisor.stop()

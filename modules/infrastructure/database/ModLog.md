@@ -1,5 +1,17 @@
 # Database Module - ModLog
 
+## Entry: Exact-SHA HoloIndex Maintenance CAS and Atomic Completion
+**Date**: 2026-07-26
+**What Changed**: Added insert-only task creation, an exact-binding CAS claim,
+bounded retry/requeue transitions, and one transactional HoloIndex
+task/request/completion finalizer, one-use executing claims, and
+exact-timestamp assignment reclaim.
+**Why**: Multiple resident OpenClaw supervisors must not execute or partially
+finalize the same post-merge index refresh.
+**Impact**: One claimant wins; completion receipts cannot exist independently
+of the completed task and resolved request.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 78, WSP 97
+
 ## Entry: Independent Assurance Capacity Reservation Primitive
 **Date**: 2026-07-25
 **What Changed**: Added a dedicated AgentDB reservation table and transactional APIs for independent verifier capacity.

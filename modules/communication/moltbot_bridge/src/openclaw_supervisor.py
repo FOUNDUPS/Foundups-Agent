@@ -28,6 +28,7 @@ import threading
 import time
 import uuid
 from collections import deque
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -1938,6 +1939,9 @@ class OpenClawSupervisor:
         self._self_audit_loop: Any | None = None
         self._event_cursor = 0
         self._restart_attempts: Deque[float] = deque()
+        self._holoindex_postmerge_last_poll = 0.0
+        self._holoindex_postmerge_executor: ThreadPoolExecutor | None = None
+        self._holoindex_postmerge_future: Future[Any] | None = None
 
         # Unified from Supervisor24x7 (P1 2026-03-22)
         self.metrics = SupervisorMetrics()
@@ -2007,6 +2011,13 @@ class OpenClawSupervisor:
     def stop(self) -> None:
         self._stop_event.set()
         self._stop_self_audit()
+        if self._holoindex_postmerge_executor is not None:
+            self._holoindex_postmerge_executor.shutdown(
+                wait=False,
+                cancel_futures=True,
+            )
+            self._holoindex_postmerge_executor = None
+            self._holoindex_postmerge_future = None
 
     def get_metrics(self) -> Dict[str, Any]:
         """Return telemetry metrics (WSP 91 observability)."""
@@ -2331,6 +2342,67 @@ class OpenClawSupervisor:
     #  OBSERVE — poll broker, observer, git, self-audit                   #
     # ------------------------------------------------------------------ #
 
+    def _observe_holoindex_postmerge(self, obs: Dict[str, Any]) -> None:
+        """Collect or schedule one non-blocking post-merge coordination poll."""
+        future = self._holoindex_postmerge_future
+        if future is not None and future.done():
+            try:
+                obs["holoindex_postmerge"] = future.result().to_dict()
+            except Exception as exc:
+                logger.warning(
+                    "[SUPERVISOR] HoloIndex post-merge coordination failed: %s",
+                    type(exc).__name__,
+                )
+                obs["holoindex_postmerge"] = {
+                    "accepted": False,
+                    "status": "REJECTED",
+                    "rejection_reasons": ["coordinator_exception"],
+                }
+            finally:
+                self._holoindex_postmerge_future = None
+
+        postmerge_enabled = os.getenv(
+            "HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED",
+            os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0"),
+        ) == "1"
+        if not postmerge_enabled or self._holoindex_postmerge_future is not None:
+            return
+        try:
+            interval = max(
+                float(
+                    os.getenv(
+                        "HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC",
+                        "300",
+                    )
+                ),
+                30.0,
+            )
+        except ValueError:
+            interval = 300.0
+        current = time.monotonic()
+        if (
+            self._holoindex_postmerge_last_poll > 0.0
+            and current - self._holoindex_postmerge_last_poll < interval
+        ):
+            return
+
+        from modules.infrastructure.idle_automation.src.holoindex_postmerge_coordinator import (
+            coordinate_holoindex_postmerge,
+        )
+
+        self._holoindex_postmerge_last_poll = current
+        if self._holoindex_postmerge_executor is None:
+            self._holoindex_postmerge_executor = ThreadPoolExecutor(
+                max_workers=1,
+                thread_name_prefix="holoindex-postmerge",
+            )
+        self._holoindex_postmerge_future = (
+            self._holoindex_postmerge_executor.submit(
+                coordinate_holoindex_postmerge,
+                repo_root=self.repo_root,
+            )
+        )
+
     def _observe(self) -> Dict[str, Any]:
         broker = self._get_broker()
         observer = self._get_observer()
@@ -2356,6 +2428,8 @@ class OpenClawSupervisor:
             },
             "self_audit_event_count": 0,
         }
+
+        self._observe_holoindex_postmerge(obs)
 
         # Poll DaemonSelfAuditLoop for real events (ported from Supervisor24x7)
         # NOTE: scan_once() returns int (count of events), not an iterable
@@ -2749,30 +2823,113 @@ class OpenClawSupervisor:
             task_id = task.get("task_id")
             family = task.get("family", "unknown")
             result: Dict[str, Any] = {"ok": False, "error": "unknown"}
+            db = None
+            claimed = False
+            claim_id = ""
+            claim_binding_digest = ""
             try:
                 from modules.infrastructure.database.src.agent_db import AgentDB
 
                 db = AgentDB()
                 if task_id:
-                    db.assign_autonomous_task(task_id, "openclaw_supervisor")
+                    if family == "holoindex_postmerge":
+                        from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
+                            SCHEMA_VERSION as POSTMERGE_SCHEMA_VERSION,
+                            SOURCE as POSTMERGE_SOURCE,
+                        )
 
-                    # Dispatch via run_task.execute_task() (same as autonomous tasks)
-                    from modules.communication.moltbot_bridge.scripts.run_task import (
-                        execute_task,
-                    )
+                        persisted = db.get_autonomous_task_by_id(task_id)
+                        context = (
+                            persisted.get("context")
+                            if isinstance(persisted, dict)
+                            else None
+                        )
+                        if isinstance(context, dict):
+                            claim_id = db.claim_holoindex_postmerge_task(
+                                task_id,
+                                "openclaw_supervisor",
+                                expected_source=POSTMERGE_SOURCE,
+                                expected_schema_version=POSTMERGE_SCHEMA_VERSION,
+                                expected_target_repo_head_sha=str(
+                                    context.get("target_repo_head_sha") or ""
+                                ),
+                                expected_authority_root_digest=str(
+                                    context.get("authority_root_digest") or ""
+                                ),
+                            )
+                            claimed = bool(claim_id)
+                            if claimed:
+                                claimed_task = db.get_autonomous_task_by_id(
+                                    task_id
+                                )
+                                claimed_context = (
+                                    claimed_task.get("context")
+                                    if isinstance(claimed_task, dict)
+                                    else None
+                                )
+                                if isinstance(claimed_context, dict):
+                                    claim_binding_digest = str(
+                                        claimed_context.get(
+                                            "claim_binding_digest"
+                                        )
+                                        or ""
+                                    )
+                    else:
+                        claimed = db.assign_autonomous_task(
+                            task_id,
+                            "openclaw_supervisor",
+                        )
+                    if not claimed:
+                        result = {
+                            "ok": False,
+                            "status": "claim_rejected",
+                            "error": "maintenance_task_claim_rejected",
+                            "family": family,
+                        }
+                    else:
+                        # Dispatch via run_task.execute_task() (same as autonomous tasks)
+                        from modules.communication.moltbot_bridge.scripts.run_task import (
+                            execute_task,
+                        )
 
-                    task_result = execute_task(task_id, repo_root=self.repo_root)
-                    result = {
-                        "ok": task_result.get("ok", False),
-                        "status": "completed" if task_result.get("ok") else "task_failed",
-                        "executor": task_result.get("executor", "unknown"),
-                        "detail": task_result.get("detail", "")[:1000],
-                        "execution_time_ms": task_result.get("execution_time_ms", 0),
-                        "family": family,
-                    }
+                        task_result = execute_task(
+                            task_id,
+                            repo_root=self.repo_root,
+                            execution_claim=(
+                                {
+                                    "claim_id": claim_id,
+                                    "claim_binding_digest": (
+                                        claim_binding_digest
+                                    ),
+                                }
+                                if family == "holoindex_postmerge"
+                                else None
+                            ),
+                        )
+                        result = {
+                            "ok": task_result.get("ok", False),
+                            "status": "completed" if task_result.get("ok") else "task_failed",
+                            "executor": task_result.get("executor", "unknown"),
+                            "detail": task_result.get("detail", "")[:1000],
+                            "execution_time_ms": task_result.get("execution_time_ms", 0),
+                            "family": family,
+                        }
                 else:
                     result = {"ok": False, "error": "no_task_id", "family": family}
             except Exception as exc:
+                if (
+                    db is not None
+                    and claimed
+                    and task_id
+                    and family == "holoindex_postmerge"
+                ):
+                    db.fail_holoindex_postmerge_task(
+                        task_id,
+                        "openclaw_supervisor",
+                        claim_id=claim_id,
+                        claim_binding_digest=claim_binding_digest,
+                        status="failed",
+                    )
                 result = {"ok": False, "status": "execute_error", "error": str(exc)[:500], "family": family}
 
             self._action_reporter(

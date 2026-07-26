@@ -129,8 +129,10 @@ These remain deferred until the FoundUp Memex POC and MVP contracts are proven.
   root/SSD/HEAD/generation/baseline/maintenance admission proof before backend
   construction. P1 store namespaces and legacy metadata migration remain owned
   by the HoloIndex roadmap.
-- Complete post-merge activation at the exact merge SHA before treating the
-  persistent semantic store as CURRENT.
+- Completed Phase 1 exact-SHA post-merge activation: durable AgentDB task,
+  OpenClaw CAS claim, authority/SSD leases, atomic completion, and canonical
+  receipt rehydration. CI/webhook-triggered enqueue remains a future event
+  source; the current resident observer is opt-in and bounded.
 - Bind resident governed work orders to process-private owner handoffs without
   adding an indexing surface to the supported query adapter; OS permissions
   remain a separate deployment control.

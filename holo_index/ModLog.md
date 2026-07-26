@@ -1,5 +1,17 @@
 # HoloIndex Package ModLog
 
+## [2026-07-26] Exact-SHA post-merge authority primitives
+
+- Added a separate cross-process authority-update lease that can safely wrap
+  the existing `MaintenanceSession` writer lease.
+- Added read-only canonical freshness rehydration for an explicit expected
+  repository SHA, reusing the existing query-admission result and reason
+  codes.
+- Added an exact-content authority blocker marker primitive for durable
+  fail-closed recovery after an unpublishable supersession invalidation.
+- Preserved the authority split: HoloIndex supplies leases and proof;
+  WRE/OpenClaw owns post-merge task coordination and worktree effects.
+
 ## [2026-07-25] CLI catalog deterministic refresh
 
 - Regenerated the tracked CLI catalog and JSON rolodex from current main,

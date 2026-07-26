@@ -210,6 +210,30 @@ TOCTOU risk. A successful refresh can leave a valid CURRENT receipt even if
 subsequent owner startup/health fails; in that case this operational result is
 still false.
 
+### Exact-SHA Authority Worktree Transaction
+
+`advance_reddog_holoindex_authority()` is the trusted WRE effect boundary for
+post-merge refresh. It acquires a separate cross-process authority-update
+lease, fetches and proves the requested `origin/main` SHA, rejects non-forward
+updates, stops the process-owned query service, switches the dedicated clean
+worktree in detached mode, and invokes the existing maintenance handshake.
+Before any Git effect it re-derives the authority-root digest and common Git
+directory under that lease, rejecting any path substitution since queuing.
+The inner `MaintenanceSession` remains responsible for SSD invalidation,
+refresh, final receipt publication, and its own writer lease.
+
+If main advances during refresh, the owner is stopped and the authority
+checkout advances to the newer unindexed HEAD (or the current generation is
+explicitly invalidated). No stale completion is published.
+If both advancement and canonical invalidation fail, a fixed authority
+blocker marker makes repository-state admission fail closed; only the same
+leased transaction may clear it after switching to the exact target.
+
+`rehydrate_canonical_freshness_proof()` is read-only. It starts no owner and
+opens no persistent index; it reuses canonical query admission to prove exact
+HEAD, repo/SSD identity, baseline collections, maintenance-lock state,
+generation, and receipt digest.
+
 For model-backed cross-lane audits, HoloIndex supplies candidate discovery and
 an exact receipt HEAD while the worker directly reads only its allowlisted
 paths. The worker re-proves that clean exact HEAD after the direct reads and a

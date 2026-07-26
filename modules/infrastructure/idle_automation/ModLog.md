@@ -12,6 +12,28 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-07-26 - Exact-SHA HoloIndex Post-Merge WRE Coordinator
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 87, WSP 97
+
+- Added a durable one-task-per-main-SHA coordinator and exact OpenClaw
+  maintenance route without query-time indexing.
+- Added CAS claim, bounded retry, supersession, and atomic task/request/proof
+  completion semantics.
+- Added a bounded assignment lease so process interruption cannot leave a
+  post-merge task permanently assigned.
+- Added a separate authority-update lease around clean non-rewind detached
+  checkout updates while retaining `MaintenanceSession` as the canonical SSD
+  writer and receipt transaction.
+- Allows recovery only when the trusted blocker marker is the sole dirty
+  authority path; all other dirty worktree states remain rejected.
+- Required canonical exact-HEAD admission proof before reporting `CURRENT`;
+  self-hashed AgentDB events alone are never operational authority.
+- Moved network polling off the synchronous supervisor observation path.
+
+**WSP_15 MPS:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 = 19
+(P0).
+
 ### 2026-07-24 - Daily OpenRouter Catalog Schedule POC
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 62, WSP 97

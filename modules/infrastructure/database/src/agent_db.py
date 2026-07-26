@@ -43,6 +43,39 @@ _ASSURANCE_REQUIRED_FIELDS = (
     "reserved_at",
     "expires_at",
 )
+
+_POSTMERGE_CLAIM_KEYS = frozenset(
+    {
+        "claim_id",
+        "claim_binding_digest",
+        "claim_expires_at",
+    }
+)
+
+
+def _postmerge_claim_binding_digest(
+    *,
+    task_id: str,
+    agent_id: str,
+    context: Mapping[str, Any],
+) -> str:
+    base_context = {
+        str(key): value
+        for key, value in context.items()
+        if key not in _POSTMERGE_CLAIM_KEYS
+    }
+    payload = {
+        "task_id": task_id,
+        "agent_id": agent_id,
+        "context": base_context,
+    }
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    ).encode("ascii")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
 _ASSURANCE_REQUEST_SCHEMA_VERSION = "reddog_assurance_capacity_request.v1"
 _ASSURANCE_MAX_LEASE = timedelta(hours=6)
 _ASSURANCE_MAX_RENEWALS = 3
@@ -1111,6 +1144,23 @@ class AgentDB:
 
         return results
 
+    def get_coordination_event_by_id(self, event_id: str) -> Optional[Dict[str, Any]]:
+        """Get one coordination event with parsed JSON fields."""
+        results = self.db.execute_query(
+            "SELECT * FROM agents_coordination_events WHERE event_id = ?",
+            (event_id,),
+        )
+        if not results:
+            return None
+        row = dict(results[0])
+        for field in ["target_agents", "payload"]:
+            if row.get(field) and isinstance(row[field], str):
+                try:
+                    row[field] = json.loads(row[field])
+                except json.JSONDecodeError:
+                    row[field] = None
+        return row
+
     def resolve_coordination_event(self, event_id: str, status: str = "completed") -> bool:
         """Mark coordination event as resolved."""
         return self.db.execute_write('''
@@ -1152,6 +1202,38 @@ class AgentDB:
                 origin_continuity_id
             ))
             return True
+        except Exception:
+            return False
+
+    def create_autonomous_task_if_absent(
+        self,
+        task_id: str,
+        description: str,
+        required_skills: List[str],
+        estimated_complexity: float,
+        priority_score: float,
+        context: Dict[str, Any] = None,
+        origin_continuity_id: str = None,
+    ) -> bool:
+        """Insert a task without replacing concurrent or already-claimed state."""
+        try:
+            return self.db.execute_write(
+                """
+                INSERT OR IGNORE INTO agents_autonomous_tasks
+                (task_id, description, required_skills, estimated_complexity,
+                 priority_score, context, origin_continuity_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    task_id,
+                    description,
+                    json.dumps(required_skills),
+                    estimated_complexity,
+                    priority_score,
+                    json.dumps(context) if context else None,
+                    origin_continuity_id,
+                ),
+            ) > 0
         except Exception:
             return False
 
@@ -1202,6 +1284,394 @@ class AgentDB:
             WHERE task_id = ?
         ''', (agent_id, datetime.now().isoformat(), task_id)) > 0
 
+    def claim_holoindex_postmerge_task(
+        self,
+        task_id: str,
+        agent_id: str,
+        *,
+        expected_source: str,
+        expected_schema_version: str,
+        expected_target_repo_head_sha: str,
+        expected_authority_root_digest: str,
+        lease_seconds: int = 7500,
+    ) -> str:
+        """Claim one exact-SHA task and return its immutable claim ID."""
+        try:
+            with self.db.get_connection() as conn:
+                row = conn.execute(
+                    """
+                    SELECT status, assigned_to, context
+                    FROM agents_autonomous_tasks
+                    WHERE task_id = ?
+                    """,
+                    (task_id,),
+                ).fetchone()
+                if row is None:
+                    return ""
+                raw_context = str(row.get("context") or "")
+                context = self._parse_task_context(dict(row))
+                target_sha = str(context.get("target_repo_head_sha") or "")
+                authority_digest = str(
+                    context.get("authority_root_digest") or ""
+                )
+                if (
+                    str(row.get("status") or "") != "pending"
+                    or str(row.get("assigned_to") or "").strip()
+                    or context.get("source") != expected_source
+                    or context.get("schema_version") != expected_schema_version
+                    or target_sha != expected_target_repo_head_sha
+                    or task_id != f"holoindex_postmerge_refresh:{target_sha}"
+                    or len(target_sha) != 40
+                    or any(char not in "0123456789abcdef" for char in target_sha)
+                    or authority_digest != expected_authority_root_digest
+                    or not authority_digest.startswith("sha256:")
+                    or len(authority_digest) != 71
+                    or any(
+                        char not in "0123456789abcdef"
+                        for char in authority_digest[7:]
+                    )
+                    or lease_seconds < 1
+                ):
+                    return ""
+                claim_id = "hpmc_" + uuid.uuid4().hex
+                claim_digest = _postmerge_claim_binding_digest(
+                    task_id=task_id,
+                    agent_id=agent_id,
+                    context=context,
+                )
+                now = datetime.now(timezone.utc)
+                claimed_context = dict(context)
+                claimed_context.update(
+                    {
+                        "claim_id": claim_id,
+                        "claim_binding_digest": claim_digest,
+                        "claim_expires_at": (
+                            now + timedelta(seconds=lease_seconds)
+                        ).isoformat(),
+                    }
+                )
+                claimed = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET assigned_to = ?, assigned_at = ?, status = 'assigned',
+                        context = ?
+                    WHERE task_id = ?
+                      AND status = 'pending'
+                      AND (assigned_to IS NULL OR assigned_to = '')
+                      AND context = ?
+                    """,
+                    (
+                        agent_id,
+                        now.isoformat(),
+                        json.dumps(claimed_context),
+                        task_id,
+                        raw_context,
+                    ),
+                ).rowcount
+                return claim_id if claimed == 1 else ""
+        except Exception:
+            return ""
+
+    def start_holoindex_postmerge_execution(
+        self,
+        task_id: str,
+        agent_id: str,
+        *,
+        claim_id: str,
+        claim_binding_digest: str,
+    ) -> bool:
+        """Consume one exact claim before any post-merge authority effect."""
+        try:
+            with self.db.get_connection() as conn:
+                row = conn.execute(
+                    """
+                    SELECT status, assigned_to, context
+                    FROM agents_autonomous_tasks
+                    WHERE task_id = ?
+                    """,
+                    (task_id,),
+                ).fetchone()
+                if row is None:
+                    return False
+                raw_context = str(row.get("context") or "")
+                context = self._parse_task_context(dict(row))
+                recomputed = _postmerge_claim_binding_digest(
+                    task_id=task_id,
+                    agent_id=agent_id,
+                    context=context,
+                )
+                expires_raw = str(context.get("claim_expires_at") or "")
+                try:
+                    expires_at = datetime.fromisoformat(
+                        expires_raw.replace("Z", "+00:00")
+                    )
+                    if expires_at.tzinfo is None:
+                        expires_at = expires_at.replace(tzinfo=timezone.utc)
+                except ValueError:
+                    return False
+                if (
+                    str(row.get("status") or "") != "assigned"
+                    or str(row.get("assigned_to") or "") != agent_id
+                    or context.get("claim_id") != claim_id
+                    or context.get("claim_binding_digest")
+                    != claim_binding_digest
+                    or recomputed != claim_binding_digest
+                    or datetime.now(timezone.utc) >= expires_at
+                ):
+                    return False
+                started = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET status = 'executing'
+                    WHERE task_id = ?
+                      AND status = 'assigned'
+                      AND assigned_to = ?
+                      AND context = ?
+                    """,
+                    (task_id, agent_id, raw_context),
+                ).rowcount
+                return started == 1
+        except Exception:
+            return False
+
+    def fail_holoindex_postmerge_task(
+        self,
+        task_id: str,
+        agent_id: str,
+        *,
+        claim_id: str,
+        claim_binding_digest: str,
+        status: str = "failed",
+    ) -> bool:
+        """Finalize a claimed post-merge task into a bounded failure state."""
+        if status not in {"failed", "superseded"}:
+            return False
+        try:
+            with self.db.get_connection() as conn:
+                row = conn.execute(
+                    """
+                    SELECT status, assigned_to, context
+                    FROM agents_autonomous_tasks
+                    WHERE task_id = ?
+                    """,
+                    (task_id,),
+                ).fetchone()
+                if row is None:
+                    return False
+                raw_context = str(row.get("context") or "")
+                context = self._parse_task_context(dict(row))
+                if (
+                    str(row.get("status") or "")
+                    not in {"assigned", "executing"}
+                    or str(row.get("assigned_to") or "") != agent_id
+                    or context.get("claim_id") != claim_id
+                    or context.get("claim_binding_digest")
+                    != claim_binding_digest
+                    or _postmerge_claim_binding_digest(
+                        task_id=task_id,
+                        agent_id=agent_id,
+                        context=context,
+                    )
+                    != claim_binding_digest
+                ):
+                    return False
+                finalized = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET status = ?, completed_at = ?
+                    WHERE task_id = ?
+                      AND status IN ('assigned', 'executing')
+                      AND assigned_to = ?
+                      AND context = ?
+                    """,
+                    (
+                        status,
+                        datetime.now(timezone.utc).isoformat(),
+                        task_id,
+                        agent_id,
+                        raw_context,
+                    ),
+                ).rowcount
+                return finalized == 1
+        except Exception:
+            return False
+
+    def reclaim_expired_holoindex_postmerge_task(
+        self,
+        task_id: str,
+        agent_id: str,
+        *,
+        expected_assigned_at: str,
+    ) -> bool:
+        """CAS one expired assignment into retryable failure."""
+        return (
+            self.db.execute_write(
+                """
+            UPDATE agents_autonomous_tasks
+            SET status = 'failed', completed_at = ?
+            WHERE task_id = ?
+              AND status IN ('assigned', 'executing')
+                  AND assigned_to = ?
+                  AND assigned_at = ?
+                """,
+                (
+                    datetime.now(timezone.utc).isoformat(),
+                    task_id,
+                    agent_id,
+                    expected_assigned_at,
+                ),
+            )
+            == 1
+        )
+
+    def commit_holoindex_postmerge_completion(
+        self,
+        *,
+        task_id: str,
+        agent_id: str,
+        request_event_id: str,
+        request_payload_digest: str,
+        completion_event_id: str,
+        completion_payload: Dict[str, Any],
+        claim_id: str,
+        claim_binding_digest: str,
+    ) -> bool:
+        """Atomically publish post-merge proof and finalize its task/request."""
+        try:
+            with self.db.get_connection() as conn:
+                task = conn.execute(
+                    """
+                    SELECT status, assigned_to, context
+                    FROM agents_autonomous_tasks
+                    WHERE task_id = ?
+                    """,
+                    (task_id,),
+                ).fetchone()
+                request = conn.execute(
+                    """
+                    SELECT resolution_status, payload
+                    FROM agents_coordination_events
+                    WHERE event_id = ?
+                    """,
+                    (request_event_id,),
+                ).fetchone()
+                existing = conn.execute(
+                    """
+                    SELECT payload
+                    FROM agents_coordination_events
+                    WHERE event_id = ?
+                    """,
+                    (completion_event_id,),
+                ).fetchone()
+                expected_payload_json = json.dumps(completion_payload)
+                task_context_raw = (
+                    str(task.get("context") or "")
+                    if task is not None
+                    else ""
+                )
+                request_payload_raw = (
+                    str(request.get("payload") or "")
+                    if request is not None
+                    else ""
+                )
+                task_context = (
+                    self._parse_task_context(dict(task))
+                    if task is not None
+                    else {}
+                )
+                claim_valid = bool(
+                    task is not None
+                    and task_context.get("claim_id") == claim_id
+                    and task_context.get("claim_binding_digest")
+                    == claim_binding_digest
+                    and _postmerge_claim_binding_digest(
+                        task_id=task_id,
+                        agent_id=agent_id,
+                        context=task_context,
+                    )
+                    == claim_binding_digest
+                )
+
+                if existing is not None:
+                    try:
+                        existing_payload = json.loads(str(existing.get("payload") or ""))
+                    except (TypeError, ValueError):
+                        return False
+                    return bool(
+                        task is not None
+                        and str(task.get("status") or "") == "completed"
+                        and str(task.get("assigned_to") or "") == agent_id
+                        and claim_valid
+                        and request is not None
+                        and str(request.get("resolution_status") or "") == "completed"
+                        and existing_payload == completion_payload
+                    )
+
+                if (
+                    task is None
+                    or str(task.get("status") or "") != "executing"
+                    or str(task.get("assigned_to") or "") != agent_id
+                    or not claim_valid
+                    or request is None
+                    or str(request.get("resolution_status") or "") != "pending"
+                ):
+                    return False
+                try:
+                    request_payload = json.loads(str(request.get("payload") or ""))
+                except (TypeError, ValueError):
+                    return False
+                if (
+                    not isinstance(request_payload, dict)
+                    or request_payload.get("payload_digest") != request_payload_digest
+                ):
+                    return False
+
+                conn.execute(
+                    """
+                    INSERT INTO agents_coordination_events
+                    (event_id, event_type, initiator_agent, target_agents, payload)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        completion_event_id,
+                        "holoindex_postmerge_maintenance_completed",
+                        agent_id,
+                        json.dumps(["wre"]),
+                        expected_payload_json,
+                    ),
+                )
+                request_count = conn.execute(
+                    """
+                    UPDATE agents_coordination_events
+                    SET resolution_status = 'completed'
+                    WHERE event_id = ?
+                      AND resolution_status = 'pending'
+                      AND payload = ?
+                    """,
+                    (request_event_id, request_payload_raw),
+                ).rowcount
+                task_count = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET completed_at = ?, status = 'completed'
+                    WHERE task_id = ?
+                      AND status = 'executing'
+                      AND assigned_to = ?
+                      AND context = ?
+                    """,
+                    (
+                        datetime.now().isoformat(),
+                        task_id,
+                        agent_id,
+                        task_context_raw,
+                    ),
+                ).rowcount
+                if request_count != 1 or task_count != 1:
+                    raise RuntimeError("holoindex_postmerge_completion_conflict")
+                return True
+        except Exception:
+            return False
+
     def complete_autonomous_task(self, task_id: str) -> bool:
         """Mark autonomous task as completed."""
         return self.db.execute_write('''
@@ -1209,6 +1679,47 @@ class AgentDB:
             SET completed_at = ?, status = 'completed'
             WHERE task_id = ?
         ''', (datetime.now().isoformat(), task_id)) > 0
+
+    def schedule_autonomous_task_retry(
+        self,
+        task_id: str,
+        *,
+        context: Dict[str, Any],
+        retry_not_before: str,
+    ) -> bool:
+        """Move a failed task into a durable bounded retry wait state."""
+        return self.db.execute_write(
+            """
+            UPDATE agents_autonomous_tasks
+            SET status = 'retry_wait',
+                context = ?,
+                retry_not_before = ?,
+                assigned_to = NULL,
+                assigned_at = NULL
+            WHERE task_id = ? AND status = 'failed'
+            """,
+            (json.dumps(context), retry_not_before, task_id),
+        ) > 0
+
+    def requeue_autonomous_task(
+        self,
+        task_id: str,
+        *,
+        expected_status: str = "retry_wait",
+    ) -> bool:
+        """Requeue a task only from the caller's exact expected state."""
+        return self.db.execute_write(
+            """
+            UPDATE agents_autonomous_tasks
+            SET status = 'pending',
+                retry_not_before = NULL,
+                assigned_to = NULL,
+                assigned_at = NULL,
+                completed_at = NULL
+            WHERE task_id = ? AND status = ?
+            """,
+            (task_id, expected_status),
+        ) > 0
 
     # ============================================================================
     # INDEPENDENT ASSURANCE CAPACITY RESERVATIONS

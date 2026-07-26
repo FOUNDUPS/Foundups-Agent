@@ -21,6 +21,31 @@ wsp_cycle(input="interface", log=True)
 
 ## Primary Interface
 
+### Exact-SHA HoloIndex Post-Merge Coordination
+
+`coordinate_holoindex_postmerge()` observes `origin/main` from a configured
+clean authority worktree and creates one insert-only AgentDB task per commit
+SHA. It never indexes during query handling and never creates or repairs the
+authority worktree.
+
+The OpenClaw executor must first claim the task through
+`AgentDB.claim_holoindex_postmerge_task()`. The claim CAS binds the serialized
+task context to a one-use claim ID; the effect adapter must consume it through
+`assigned -> executing` and validate the request event before invoking the
+trusted authority transaction. Successful completion is committed
+atomically with the request resolution and exact generation receipt.
+`CURRENT` is returned only after the canonical read-only admission gate
+rehydrates the same HEAD, generation, and freshness-receipt digest.
+Claims have a 7500-second lease, covering the bounded 7200-second maintenance
+timeout plus margin. A crashed or interrupted worker is reclaimed
+by exact assignment timestamp and enters the existing bounded retry policy.
+
+Runtime configuration:
+
+- `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT`: absolute dedicated worktree.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED=1`: enable periodic observation.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC`: minimum 30 seconds.
+
 ### Class: IdleAutomationDAE
 
 ```python
