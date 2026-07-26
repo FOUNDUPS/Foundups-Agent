@@ -18,6 +18,7 @@ import socket
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
@@ -38,6 +39,7 @@ DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS = 300.0
 DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS = 30.0
 DEFAULT_OWNER_PROBE_INTERVAL_SECONDS = 0.5
 PORT_IN_USE_ERROR = "HOLOINDEX_QUERY_SERVICE_PORT_IN_USE"
+BINDING_MISMATCH_ERROR = "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
 
 
 class HoloQueryServiceSupervisorError(RuntimeError):
@@ -46,6 +48,15 @@ class HoloQueryServiceSupervisorError(RuntimeError):
     def __init__(self, code: str) -> None:
         self.code = code
         super().__init__(code)
+
+
+@dataclass(frozen=True)
+class AuthenticatedOwnerHealthProof:
+    """One authenticated health exchange and its actual owner binding."""
+
+    ready: bool
+    rejection: str
+    binding: tuple[str, str, str, str]
 
 
 def _probe_target_is_private(host: str, token: str) -> bool:
@@ -81,10 +92,12 @@ def _health_contract_ready(
     payload: Mapping[str, object],
     *,
     expected_repo_head_sha: str,
+    expected_repo_root_digest: str,
     expected_generation_id: str,
     expected_receipt_digest: str,
 ) -> bool:
     repo_head_sha = str(payload.get("repo_head_sha") or "")
+    repo_root_digest = str(payload.get("repo_root_digest") or "")
     generation_id = str(payload.get("freshness_generation_id") or "")
     receipt_digest = str(payload.get("freshness_receipt_digest") or "")
     contract_checks = (
@@ -99,14 +112,71 @@ def _health_contract_ready(
         payload.get("index_gap_detected") is False,
         payload.get("no_holoindex_reindex_performed") is True,
         payload.get("retrieval_mode") == "semantic",
-        bool(repo_head_sha and generation_id and receipt_digest),
+        bool(repo_head_sha and repo_root_digest and generation_id and receipt_digest),
     )
     binding_checks = (
         not expected_repo_head_sha or repo_head_sha == expected_repo_head_sha,
+        not expected_repo_root_digest
+        or repo_root_digest == expected_repo_root_digest,
         not expected_generation_id or generation_id == expected_generation_id,
         not expected_receipt_digest or receipt_digest == expected_receipt_digest,
     )
     return all(contract_checks + binding_checks)
+
+
+def _health_binding(payload: Mapping[str, object] | None) -> tuple[str, str, str, str]:
+    value = payload if isinstance(payload, Mapping) else {}
+    return (
+        str(value.get("repo_head_sha") or ""),
+        str(value.get("repo_root_digest") or ""),
+        str(value.get("freshness_generation_id") or ""),
+        str(value.get("freshness_receipt_digest") or ""),
+    )
+
+
+def _authenticated_health_exchange(
+    *,
+    host: str,
+    port: int,
+    token: str,
+    timeout_seconds: float,
+    expected_repo_head_sha: str = "",
+    expected_repo_root_digest: str = "",
+    expected_generation_id: str = "",
+    expected_receipt_digest: str = "",
+) -> AuthenticatedOwnerHealthProof:
+    """Return one authenticated ready/rejection decision with actual binding."""
+    unavailable = AuthenticatedOwnerHealthProof(False, "", ("", "", "", ""))
+    if not _probe_target_is_private(host, token):
+        return unavailable
+    connection = http.client.HTTPConnection(
+        host,
+        int(port),
+        timeout=max(0.01, float(timeout_seconds)),
+    )
+    try:
+        payload = _read_health_payload(connection, token)
+        binding = _health_binding(payload)
+        if payload is not None and _health_contract_ready(
+            payload,
+            expected_repo_head_sha=expected_repo_head_sha,
+            expected_repo_root_digest=expected_repo_root_digest,
+            expected_generation_id=expected_generation_id,
+            expected_receipt_digest=expected_receipt_digest,
+        ):
+            return AuthenticatedOwnerHealthProof(True, "", binding)
+        rejection = _health_rejection_code(payload) or _health_binding_rejection_code(
+            payload,
+            expected_repo_head_sha=expected_repo_head_sha,
+            expected_repo_root_digest=expected_repo_root_digest,
+            expected_generation_id=expected_generation_id,
+            expected_receipt_digest=expected_receipt_digest,
+        )
+        return AuthenticatedOwnerHealthProof(False, rejection, binding)
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
+        return unavailable
+    finally:
+        connection.close()
 
 
 def _authenticated_health_probe(
@@ -116,32 +186,21 @@ def _authenticated_health_probe(
     token: str,
     timeout_seconds: float,
     expected_repo_head_sha: str = "",
+    expected_repo_root_digest: str = "",
     expected_generation_id: str = "",
     expected_receipt_digest: str = "",
 ) -> bool:
-    """Return true only for the exact authenticated owner-ready contract."""
-    if not _probe_target_is_private(host, token):
-        return False
-    connection = http.client.HTTPConnection(
-        host,
-        int(port),
-        timeout=max(0.01, float(timeout_seconds)),
-    )
-    try:
-        payload = _read_health_payload(connection, token)
-        return bool(
-            payload is not None
-            and _health_contract_ready(
-                payload,
-                expected_repo_head_sha=expected_repo_head_sha,
-                expected_generation_id=expected_generation_id,
-                expected_receipt_digest=expected_receipt_digest,
-            )
-        )
-    except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
-        return False
-    finally:
-        connection.close()
+    """Compatibility wrapper for one exact authenticated owner-ready proof."""
+    return _authenticated_health_exchange(
+        host=host,
+        port=port,
+        token=token,
+        timeout_seconds=timeout_seconds,
+        expected_repo_head_sha=expected_repo_head_sha,
+        expected_repo_root_digest=expected_repo_root_digest,
+        expected_generation_id=expected_generation_id,
+        expected_receipt_digest=expected_receipt_digest,
+    ).ready
 
 
 def _health_rejection_code(payload: Mapping[str, object] | None) -> str:
@@ -164,20 +223,62 @@ def _health_rejection_code(payload: Mapping[str, object] | None) -> str:
     return error if valid and error in terminal else ""
 
 
-def _authenticated_health_rejection(
-    *, host: str, port: int, token: str, timeout_seconds: float
+def _health_binding_rejection_code(
+    payload: Mapping[str, object] | None,
+    *,
+    expected_repo_head_sha: str,
+    expected_repo_root_digest: str,
+    expected_generation_id: str,
+    expected_receipt_digest: str,
 ) -> str:
-    if not _probe_target_is_private(host, token):
+    """Reject an authenticated ready owner that proves a different binding."""
+    value = payload if isinstance(payload, Mapping) else {}
+    if not _health_contract_ready(
+        value,
+        expected_repo_head_sha="",
+        expected_repo_root_digest="",
+        expected_generation_id="",
+        expected_receipt_digest="",
+    ):
         return ""
-    connection = http.client.HTTPConnection(
-        host, int(port), timeout=max(0.01, float(timeout_seconds))
+    actual = _health_binding(value)
+    expected = (
+        expected_repo_head_sha,
+        expected_repo_root_digest,
+        expected_generation_id,
+        expected_receipt_digest,
     )
-    try:
-        return _health_rejection_code(_read_health_payload(connection, token))
-    except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
-        return ""
-    finally:
-        connection.close()
+    return (
+        BINDING_MISMATCH_ERROR
+        if any(
+            wanted and wanted != observed
+            for wanted, observed in zip(expected, actual)
+        )
+        else ""
+    )
+
+
+def _authenticated_health_rejection(
+    *,
+    host: str,
+    port: int,
+    token: str,
+    timeout_seconds: float,
+    expected_repo_head_sha: str = "",
+    expected_repo_root_digest: str = "",
+    expected_generation_id: str = "",
+    expected_receipt_digest: str = "",
+) -> str:
+    return _authenticated_health_exchange(
+        host=host,
+        port=port,
+        token=token,
+        timeout_seconds=timeout_seconds,
+        expected_repo_head_sha=expected_repo_head_sha,
+        expected_repo_root_digest=expected_repo_root_digest,
+        expected_generation_id=expected_generation_id,
+        expected_receipt_digest=expected_receipt_digest,
+    ).rejection
 
 
 def _hidden_process_options() -> dict[str, object]:
@@ -321,6 +422,7 @@ class HoloQueryServiceSupervisor:
         self._process: subprocess.Popen[bytes] | None = None
         self._token = ""
         self._ready = False
+        self._verified_binding: tuple[str, str, str, str] = ("", "", "", "")
         self._atexit_registered = False
 
     @property
@@ -337,6 +439,11 @@ class HoloQueryServiceSupervisor:
             and self._process.poll() is None
             and self._token
         )
+
+    @property
+    def verified_binding(self) -> tuple[str, str, str, str]:
+        """Return the exact binding proven by the successful startup health check."""
+        return self._verified_binding
 
     def _spawn(self) -> subprocess.Popen[bytes]:
         if not self.repo_root.is_dir():
@@ -368,9 +475,28 @@ class HoloQueryServiceSupervisor:
         self._token = token
         return process
 
-    def start(self) -> "HoloQueryServiceSupervisor":
+    def start(
+        self,
+        *,
+        expected_repo_head_sha: str = "",
+        expected_repo_root_digest: str = "",
+        expected_generation_id: str = "",
+        expected_receipt_digest: str = "",
+    ) -> "HoloQueryServiceSupervisor":
         """Start, authenticate, and prove the owner ready or fail closed."""
-        if self.is_ready:
+        requested_binding = (
+            expected_repo_head_sha,
+            expected_repo_root_digest,
+            expected_generation_id,
+            expected_receipt_digest,
+        )
+        if self.is_ready and all(
+            not requested or requested == verified
+            for requested, verified in zip(
+                requested_binding,
+                self._verified_binding,
+            )
+        ):
             return self
         self.stop()
         self._process = self._spawn()
@@ -386,27 +512,27 @@ class HoloQueryServiceSupervisor:
                     raise HoloQueryServiceSupervisorError(
                         "HOLOINDEX_QUERY_SERVICE_STARTUP_TIMEOUT"
                     )
-                if _authenticated_health_probe(
+                proof = _authenticated_health_exchange(
                     host=OWNER_HOST,
                     port=self.port,
                     token=self._token,
                     timeout_seconds=min(self.probe_timeout_seconds, remaining),
-                ):
+                    expected_repo_head_sha=expected_repo_head_sha,
+                    expected_repo_root_digest=expected_repo_root_digest,
+                    expected_generation_id=expected_generation_id,
+                    expected_receipt_digest=expected_receipt_digest,
+                )
+                if proof.ready:
                     if self._process.poll() is not None:
                         raise HoloQueryServiceSupervisorError(
                             "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
                         )
                     self._ready = True
+                    self._verified_binding = proof.binding
                     self._register_cleanup()
                     return self
-                rejection = _authenticated_health_rejection(
-                    host=OWNER_HOST,
-                    port=self.port,
-                    token=self._token,
-                    timeout_seconds=min(self.probe_timeout_seconds, remaining),
-                )
-                if rejection:
-                    raise HoloQueryServiceSupervisorError(rejection)
+                if proof.rejection:
+                    raise HoloQueryServiceSupervisorError(proof.rejection)
                 time.sleep(min(self.probe_interval_seconds, remaining))
         except BaseException:
             self.stop()
@@ -439,6 +565,7 @@ class HoloQueryServiceSupervisor:
         process, self._process = self._process, None
         self._ready = False
         self._token = ""
+        self._verified_binding = ("", "", "", "")
         if self._atexit_registered:
             atexit.unregister(self.stop)
             self._atexit_registered = False
@@ -458,6 +585,8 @@ class HoloQueryServiceSupervisor:
 
 
 __all__ = [
+    "AuthenticatedOwnerHealthProof",
+    "BINDING_MISMATCH_ERROR",
     "DEFAULT_OWNER_PORT",
     "DEFAULT_OWNER_PROBE_INTERVAL_SECONDS",
     "DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS",

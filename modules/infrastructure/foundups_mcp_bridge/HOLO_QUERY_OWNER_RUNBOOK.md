@@ -122,8 +122,11 @@ The maintenance handshake performs this exact sequence:
    source.
 10. Re-prove the same clean HEAD, reload the atomic receipt, and validate its
     repository/store identities and generation.
-11. Start the private owner bound to that exact SHA and generation; require its
-    authenticated semantic canary.
+11. Start the private owner with the exact SHA, repository-root digest,
+    generation, and receipt digest supplied to one authenticated semantic
+    startup exchange. Retain the actual returned binding with the live process;
+    do not launch a duplicate semantic canary merely to export the
+    process-private handoff.
 
 Refresh/index/proof failures preserve a non-current state and return a stable
 secret-free code. If refresh and receipt publication succeed but subsequent
