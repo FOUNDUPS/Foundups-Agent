@@ -38,6 +38,9 @@ BRIDGE_FILES = (
     "scripts/reddog_resident_architect_session_once.py",
 )
 EXECUTABLE_FILES = (*BRIDGE_FILES, "holo_index.py")
+STATIC_RUNTIME_FILES = (
+    "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
+)
 REPOSITORY_MARKERS = (
     "main.py",
     "holo_index.py",
@@ -248,7 +251,17 @@ def _dependency_closure() -> tuple[str, ...]:
 
 
 def build_manifest() -> dict[str, object]:
-    runtime_files = _dependency_closure()
+    runtime_files = tuple(
+        sorted({*_dependency_closure(), *STATIC_RUNTIME_FILES})
+    )
+    missing_static = [
+        relative
+        for relative in STATIC_RUNTIME_FILES
+        if relative not in _tracked_file_set()
+        or not (REPO_ROOT / relative).is_file()
+    ]
+    if missing_static:
+        raise FileNotFoundError(",".join(missing_static))
     runtime_digests = {
         relative: _digest(REPO_ROOT / relative)
         for relative in runtime_files

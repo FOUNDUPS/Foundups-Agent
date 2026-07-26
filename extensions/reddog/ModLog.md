@@ -2,6 +2,14 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-27 - WRE_CHECKOUT_LOCAL_SKILL_RESOLUTION_PHASE1 (0.4.25)
+
+- Pinned the regenerated 1,001-file backend manifest after WRE Skillz
+  resolution became checkout-local and bound the authoritative registry.
+- Preserved the backend API and runtime graph versions; this release adds no
+  editor-side execution authority.
+- Version 0.4.24 -> 0.4.25.
+
 ## 2026-07-27 - REDDOG_HOLOINDEX_OWNER_COLD_START_RETRY_PHASE1 (0.4.24)
 
 - Added one bounded restart for explicit transient failures from the

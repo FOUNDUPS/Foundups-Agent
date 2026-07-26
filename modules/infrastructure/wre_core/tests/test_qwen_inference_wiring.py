@@ -129,13 +129,17 @@ def test_execute_skill_with_qwen_mock():
     print("  - Graceful fallback implemented if unavailable")
 
 
-def test_resolve_skill_file_falls_back_to_skillz_directory():
-    """Registry path drift: resolve_skill_file() still finds the real skill file."""
+def test_resolve_skill_file_uses_authoritative_registry_location():
+    """The portable registry points directly at the executable Skillz file."""
     skills_loader = WRESkillsLoader()
 
     skill_path = skills_loader.resolve_skill_file("qwen_gitpush")
+    configured = skills_loader._resolve_registered_location(
+        skills_loader.registry["skills"]["qwen_gitpush"]["location"]
+    )
 
     assert skill_path.exists()
+    assert skill_path.parent == configured
     assert skill_path.name == "SKILLz.md"
     assert "git_push_dae" in str(skill_path)
     assert "skillz" in str(skill_path).lower()

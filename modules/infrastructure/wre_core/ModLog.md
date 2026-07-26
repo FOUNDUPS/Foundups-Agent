@@ -1,7 +1,7 @@
 # WRE Core - ModLog
-
 ## Chronological Change Log
-
+### [2026-07-27] - WRE_CHECKOUT_LOCAL_SKILL_RESOLUTION_PHASE1
+- Corrected the loader root, made 28 manifest-bound registry paths authoritative, and rejected absolute, traversing, fallback, or canonical cross-checkout Skillz resolution.
 ### [2026-07-25] - WRE_INDEPENDENT_ASSURANCE_CAPACITY_ADMISSION_PHASE1
 
 - Required the autonomous slice verifier request to carry a durable,

@@ -55,6 +55,14 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
     generated = generator.build_manifest()
 
     assert checked_in == generated
+    assert (
+        "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
+        in generated["required_runtime_files"]
+    )
+    assert (
+        "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
+        in generated["required_runtime_sha256"]
+    )
     assert generator.canonical_manifest_digest(generated) == (
-        "9d670c2f8ac3f23083930082e029a8a95ac5f50f745aca2d13229ca8db5202f5"
+        "a180e3c983d765d818e433f7c55eabdb2738b5f9c9abdba17331e26b0362a1e0"
     )

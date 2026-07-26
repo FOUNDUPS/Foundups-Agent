@@ -1,7 +1,7 @@
 # TestModLog - wre_core/tests
-
+## 2026-07-27: Checkout-local Skillz resolution
+- Proved authoritative local resolution plus portable, UNC, device, drive-relative, traversal, symlink escape, no-fallback, and linked-worktree behavior.
 ## 2026-07-26: Independent assurance verifier lineage
-
 - Proved the autonomous verifier accepts only the immutable assurance
   admission digest and exact author/verifier reservation lineage.
 - Proved renewable lease state cannot substitute a different admission,

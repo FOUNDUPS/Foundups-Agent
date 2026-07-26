@@ -4,7 +4,7 @@
   "total_skills": 28,
   "skills": {
     "suno_stt_lyrics_extract": {
-      "location": "O:\\Foundups-Agent\\modules\\platform_integration\\antifafm_broadcaster\\skillz\\suno_stt_extract.json",
+      "location": "modules/platform_integration/antifafm_broadcaster/skillz/suno_stt_extract.json",
       "agents": ["qwen", "gemma"],
       "intent_type": "GENERAL",
       "version": "1.1.0",
@@ -14,7 +14,7 @@
       "description": "Automated lyrics extraction from Suno via Whisper STT with SQLite dedup"
     },
     "antifafm_add_video": {
-      "location": "O:\\Foundups-Agent\\modules\\platform_integration\\antifafm_broadcaster\\skillz\\add_video_link.json",
+      "location": "modules/platform_integration/antifafm_broadcaster/skillz/add_video_link.json",
       "agents": ["qwen"],
       "intent_type": "DECISION",
       "version": "1.0.0",
@@ -24,7 +24,7 @@
       "description": "Managing Directors add YouTube videos to broadcast background library"
     },
     "gemma_pqn_data_processor": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\gemma_pqn_data_processor",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
       "agents": [
         "gemma"
       ],
@@ -34,7 +34,7 @@
       "wsp_chain": []
     },
     "gemma_pqn_emergence_detector": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\gemma_pqn_emergence_detector",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_emergence_detector",
       "agents": [
         "gemma"
       ],
@@ -44,7 +44,7 @@
       "wsp_chain": []
     },
     "qwen_google_research_integrator": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\qwen_google_research_integrator",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_google_research_integrator",
       "agents": [
         "qwen"
       ],
@@ -54,7 +54,7 @@
       "wsp_chain": []
     },
     "qwen_pqn_research_coordinator": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\qwen_pqn_research_coordinator",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_pqn_research_coordinator",
       "agents": [
         "qwen"
       ],
@@ -66,7 +66,7 @@
       ]
     },
     "qwen_wsp_compliance_auditor": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\qwen_wsp_compliance_auditor",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_wsp_compliance_auditor",
       "agents": [
         "qwen"
       ],
@@ -87,7 +87,7 @@
       ]
     },
     "qwen_gitpush": {
-      "location": "O:\\Foundups-Agent\\modules\\infrastructure\\git_push_dae\\skills\\qwen_gitpush",
+      "location": "modules/infrastructure/git_push_dae/skillz/qwen_gitpush",
       "agents": [
         "qwen",
         "gemma"
@@ -102,7 +102,7 @@
       ]
     },
     "gemma_domain_trainer_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\gemma_domain_trainer_prototype",
+      "location": ".claude/skills/gemma_domain_trainer_prototype",
       "agents": [
         "gemma"
       ],
@@ -114,7 +114,7 @@
       ]
     },
     "gemma_noise_detector_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\gemma_noise_detector_prototype",
+      "location": ".claude/skills/gemma_noise_detector_prototype",
       "agents": [
         "gemma"
       ],
@@ -124,7 +124,7 @@
       "wsp_chain": []
     },
     "qwen_cleanup_strategist_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_cleanup_strategist_prototype",
+      "location": ".claude/skills/qwen_cleanup_strategist_prototype",
       "agents": [
         "qwen"
       ],
@@ -139,7 +139,7 @@
       ]
     },
     "qwen_roadmap_auditor_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_roadmap_auditor_prototype",
+      "location": ".claude/skills/qwen_roadmap_auditor_prototype",
       "agents": [
         "qwen"
       ],
@@ -155,7 +155,7 @@
       ]
     },
     "qwen_training_data_miner_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_training_data_miner_prototype",
+      "location": ".claude/skills/qwen_training_data_miner_prototype",
       "agents": [
         "qwen"
       ],
@@ -170,7 +170,7 @@
       ]
     },
     "qwen_wsp_enhancement": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_wsp_enhancement",
+      "location": ".claude/skills/qwen_wsp_enhancement",
       "agents": [
         "qwen",
         "gemma"
@@ -190,7 +190,7 @@
       ]
     },
     "unicode_daemon_monitor_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\unicode_daemon_monitor_prototype",
+      "location": ".claude/skills/unicode_daemon_monitor_prototype",
       "agents": [
         "qwen",
         "gemma"
@@ -209,7 +209,7 @@
       ]
     },
     "youtube_dae": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\youtube_dae",
+      "location": ".claude/skills/youtube_dae",
       "agents": [
         "qwen",
         "gemma"
@@ -220,7 +220,7 @@
       "wsp_chain": []
     },
     "youtube_moderation_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\youtube_moderation_prototype",
+      "location": ".claude/skills/youtube_moderation_prototype",
       "agents": [
         "qwen",
         "gemma"
@@ -231,7 +231,7 @@
       "wsp_chain": []
     },
     "qwen_holo_output_skill": {
-      "location": "O:\\Foundups-Agent\\holo_index\\skills\\qwen_holo_output_skill",
+      "location": "holo_index/skills/qwen_holo_output_skill",
       "agents": [
         "qwen"
       ],
@@ -248,7 +248,7 @@
       ]
     },
     "openclaw_intent_router": {
-      "location": "O:\\Foundups-Agent\\modules\\communication\\moltbot_bridge\\skillz\\openclaw_intent_router",
+      "location": "modules/communication/moltbot_bridge/skillz/openclaw_intent_router",
       "agents": [
         "gemma"
       ],
@@ -263,7 +263,7 @@
       ]
     },
     "openclaw_executor": {
-      "location": "O:\\Foundups-Agent\\modules\\communication\\moltbot_bridge\\skillz\\openclaw_executor",
+      "location": "modules/communication/moltbot_bridge/skillz/openclaw_executor",
       "agents": [
         "qwen",
         "gemma"
@@ -281,7 +281,7 @@
       ]
     },
     "linkedin_agentic_reply": {
-      "location": "O:\\Foundups-Agent\\modules\\platform_integration\\linkedin_agent\\skillz\\linkedin_agentic_reply",
+      "location": "modules/platform_integration/linkedin_agent/skillz/linkedin_agentic_reply",
       "agents": [
         "qwen",
         "gemma"
@@ -300,7 +300,7 @@
       "description": "Agentic LinkedIn reply wardrobe with selected-post reading and model-routed drafting"
     },
     "m2m_compile_gate": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_compile_gate",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_compile_gate",
       "agents": [
         "qwen",
         "gemma"
@@ -318,7 +318,7 @@
       ]
     },
     "m2m_stage_promote_safe": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_stage_promote_safe",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_stage_promote_safe",
       "agents": [
         "qwen",
         "gemma"
@@ -335,7 +335,7 @@
       ]
     },
     "m2m_qwen_runtime_health": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_qwen_runtime_health",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_qwen_runtime_health",
       "agents": [
         "qwen",
         "gemma"
@@ -352,7 +352,7 @@
       ]
     },
     "m2m_holo_retrieval_benchmark": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_holo_retrieval_benchmark",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_holo_retrieval_benchmark",
       "agents": [
         "qwen",
         "gemma"
@@ -369,7 +369,7 @@
       ]
     },
     "strategic_diligence_gate": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\strategic_diligence_gate",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/strategic_diligence_gate",
       "agents": [
         "qwen",
         "gemma"
@@ -387,7 +387,7 @@
       ]
     },
     "data_architecture_audit": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\data_architecture_audit",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/data_architecture_audit",
       "agents": [
         "qwen",
         "gemma"
@@ -405,7 +405,7 @@
       "description": "WSP 78 compliance auditing of FoundUps data architecture"
     },
     "qwen_bulk_import_migration": {
-      "location": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\skillz\\qwen_bulk_import_migration",
+      "location": "modules/infrastructure/wre_core/skillz/qwen_bulk_import_migration",
       "agents": [
         "qwen",
         "gemma"

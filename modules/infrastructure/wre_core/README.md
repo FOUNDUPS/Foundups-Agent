@@ -23,6 +23,16 @@ This module now enforces the following runtime behavior:
 
 This README section is the canonical implementation delta for current WRE code.
 
+### Checkout-Local Skill Resolution
+
+`WRESkillsLoader` anchors every registered skill location to the exact checkout
+that loaded the WRE runtime. Registry locations are portable, repository-relative
+paths. Absolute paths, parent traversal, and resolved symlink or junction escapes
+fail closed before a skill can be loaded. This prevents an isolated worker from
+executing Skillz instructions from a shared or foreign checkout.
+Registered locations are authoritative; filesystem discovery cannot silently
+substitute another same-named implementation.
+
 ## Architecture
 
 ### create_foundup Dry-Run Routing
