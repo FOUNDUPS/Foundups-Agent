@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys
-import io
 
 """
 # === UTF-8 ENFORCEMENT (WSP 90) ===
@@ -20,11 +18,102 @@ WSP 78: Agent Memory Database
 Shared agent memory and state management.
 """
 
+import hashlib
 import json
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional, Any
+from typing import Any, Callable, Dict, List, Mapping, Optional
+
 from .db_manager import DatabaseManager
+
+
+_ASSURANCE_REQUIRED_FIELDS = (
+    "reservation_id",
+    "work_order_id",
+    "queue_item_id",
+    "author_task_id",
+    "author_principal_id",
+    "verifier_task_id",
+    "verifier_principal_id",
+    "capability",
+    "worker_runtime",
+    "operational_snapshot_id",
+    "wsp15_allocation_receipt_id",
+    "lease_id",
+    "reserved_at",
+    "expires_at",
+)
+_ASSURANCE_REQUEST_SCHEMA_VERSION = "reddog_assurance_capacity_request.v1"
+_ASSURANCE_MAX_LEASE = timedelta(hours=6)
+_ASSURANCE_MAX_RENEWALS = 3
+_ASSURANCE_TERMINAL_STATUSES = {
+    "ACCEPT",
+    "REJECT",
+    "VERIFIED",
+    "FAILED",
+    "CANCELLED",
+}
+_ASSURANCE_VERIFIER_ROLE = "independent_slice_verifier"
+
+
+class _AssuranceReservationRejected(Exception):
+    """Internal rollback signal for expected assurance-admission rejection."""
+
+    def __init__(self, *reasons: str):
+        super().__init__(",".join(reasons))
+        self.reasons = tuple(reasons)
+
+
+def _parse_assurance_utc_timestamp(value: Any, field_name: str) -> tuple[datetime, str]:
+    """Parse an aware timestamp and return a canonical UTC ISO value."""
+    text = str(value or "").strip()
+    if not text:
+        raise _AssuranceReservationRejected(f"missing_{field_name}")
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise _AssuranceReservationRejected(f"invalid_{field_name}") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise _AssuranceReservationRejected(f"{field_name}_not_utc_aware")
+    normalized = parsed.astimezone(timezone.utc)
+    return normalized, normalized.isoformat().replace("+00:00", "Z")
+
+
+def _assurance_digest(payload: Mapping[str, Any]) -> str:
+    canonical = json.dumps(
+        dict(payload),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _is_sha256_digest(value: Any) -> bool:
+    text = str(value or "").strip().lower()
+    if text.startswith("sha256:"):
+        text = text.removeprefix("sha256:")
+    return len(text) == 64 and all(character in "0123456789abcdef" for character in text)
+
+
+def _normalize_sha256_digest(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    return text if text.startswith("sha256:") else f"sha256:{text}"
+
+
+def _assurance_result(
+    *,
+    accepted: bool,
+    status: str,
+    rejection_reasons: tuple[str, ...] | list[str] = (),
+    reservation: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    return {
+        "accepted": accepted,
+        "status": status,
+        "rejection_reasons": list(rejection_reasons),
+        "reservation": dict(reservation) if reservation is not None else None,
+    }
 
 
 class AgentDB:
@@ -37,9 +126,16 @@ class AgentDB:
     - Error learning (WSP 48)
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        *,
+        assurance_now_provider: Callable[[], datetime] | None = None,
+    ):
         """Initialize agent database."""
         self.db = DatabaseManager()
+        self._assurance_now_provider = (
+            assurance_now_provider or (lambda: datetime.now(timezone.utc))
+        )
         self._init_tables()
 
     def _init_tables(self) -> None:
@@ -150,10 +246,58 @@ class AgentDB:
                     discovered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     context JSON,
                     assigned_to TEXT,
-                    assigned_at DATETIME
+                    assigned_at DATETIME,
+                    retry_not_before TIMESTAMP
                 )
 
             ''')
+
+            # Independent assurance capacity reservations.
+            #
+            # This is deliberately separate from collaboration signals. The
+            # reservation and verifier-task claim must commit atomically.
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS agents_independent_assurance_reservations (
+                    reservation_id TEXT PRIMARY KEY,
+                    request_schema_version TEXT NOT NULL,
+                    work_order_id TEXT NOT NULL,
+                    queue_item_id TEXT NOT NULL,
+                    author_task_id TEXT NOT NULL,
+                    author_principal_id TEXT NOT NULL,
+                    verifier_task_id TEXT NOT NULL UNIQUE,
+                    verifier_principal_id TEXT NOT NULL,
+                    capability TEXT NOT NULL,
+                    worker_runtime TEXT NOT NULL,
+                    operational_snapshot_id TEXT NOT NULL,
+                    wsp15_allocation_receipt_id TEXT NOT NULL,
+                    lease_id TEXT NOT NULL UNIQUE,
+                    reserved_at TIMESTAMP NOT NULL,
+                    expires_at TIMESTAMP NOT NULL,
+                    reservation_digest TEXT NOT NULL UNIQUE,
+                    admission_reservation_digest TEXT NOT NULL,
+                    admission_reserved_at TIMESTAMP NOT NULL,
+                    renewal_count INTEGER NOT NULL DEFAULT 0,
+                    status TEXT NOT NULL,
+                    terminal_receipt_id TEXT,
+                    terminal_receipt_digest TEXT,
+                    terminal_status TEXT,
+                    completed_at TIMESTAMP,
+                    revoked_at TIMESTAMP,
+                    revocation_reason TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE (work_order_id, author_task_id),
+                    FOREIGN KEY (author_task_id) REFERENCES agents_autonomous_tasks(task_id),
+                    FOREIGN KEY (verifier_task_id) REFERENCES agents_autonomous_tasks(task_id)
+                )
+            ''')
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_assurance_reservation_status "
+                "ON agents_independent_assurance_reservations(status)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_assurance_reservation_expiry "
+                "ON agents_independent_assurance_reservations(expires_at)"
+            )
 
             # Index refresh tracking
             conn.execute('''
@@ -318,6 +462,15 @@ class AgentDB:
                 "status": "TEXT DEFAULT 'pending'",
                 "completed_at": "DATETIME",
                 "origin_continuity_id": "TEXT",  # Gateway Continuity Layer
+                "retry_not_before": "TIMESTAMP",
+            },
+        )
+        self._ensure_table_columns(
+            "agents_independent_assurance_reservations",
+            {
+                "admission_reservation_digest": "TEXT",
+                "admission_reserved_at": "TEXT",
+                "renewal_count": "INTEGER DEFAULT 0",
             },
         )
 
@@ -333,6 +486,22 @@ class AgentDB:
         )
 
         with self.db.get_connection() as conn:
+            conn.execute(
+                """
+                UPDATE agents_independent_assurance_reservations
+                SET admission_reservation_digest = reservation_digest
+                WHERE admission_reservation_digest IS NULL
+                   OR admission_reservation_digest = ''
+                """
+            )
+            conn.execute(
+                """
+                UPDATE agents_independent_assurance_reservations
+                SET admission_reserved_at = reserved_at
+                WHERE admission_reserved_at IS NULL
+                   OR admission_reserved_at = ''
+                """
+            )
             conn.execute("""
                 UPDATE agents_autonomous_tasks
                 SET status = 'pending'
@@ -1040,6 +1209,1011 @@ class AgentDB:
             SET completed_at = ?, status = 'completed'
             WHERE task_id = ?
         ''', (datetime.now().isoformat(), task_id)) > 0
+
+    # ============================================================================
+    # INDEPENDENT ASSURANCE CAPACITY RESERVATIONS
+    # ============================================================================
+
+    @staticmethod
+    def _parse_task_context(task: Mapping[str, Any]) -> Dict[str, Any]:
+        context = task.get("context")
+        if isinstance(context, Mapping):
+            return dict(context)
+        if isinstance(context, str):
+            try:
+                parsed = json.loads(context)
+            except (TypeError, ValueError) as exc:
+                raise _AssuranceReservationRejected("task_context_invalid") from exc
+            if isinstance(parsed, Mapping):
+                return dict(parsed)
+        raise _AssuranceReservationRejected("task_context_missing")
+
+    @staticmethod
+    def _load_assurance_reservation(
+        conn: Any,
+        reservation_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        row = conn.execute(
+            """
+            SELECT *
+            FROM agents_independent_assurance_reservations
+            WHERE reservation_id = ?
+            """,
+            (reservation_id,),
+        ).fetchone()
+        return dict(row) if row is not None else None
+
+    @staticmethod
+    def _validate_assurance_task_binding(
+        *,
+        task: Mapping[str, Any],
+        task_kind: str,
+        expected: Mapping[str, str],
+    ) -> None:
+        context = AgentDB._parse_task_context(task)
+        signed_dispatch = context.get("signed_authority_worker_dispatch_receipt")
+        signed_dispatch = (
+            dict(signed_dispatch) if isinstance(signed_dispatch, Mapping) else {}
+        )
+        allocation = context.get("wsp15_allocation_receipt")
+        allocation = dict(allocation) if isinstance(allocation, Mapping) else {}
+        role = str(
+            context.get("worker_role")
+            or context.get("role")
+            or context.get("task_role")
+            or ""
+        ).strip()
+        principal = str(
+            context.get("worker_principal_id")
+            or context.get("principal_id")
+            or ""
+        ).strip()
+
+        if task_kind == "verifier":
+            if role != _ASSURANCE_VERIFIER_ROLE:
+                raise _AssuranceReservationRejected("verifier_task_role_mismatch")
+            required_skills = task.get("required_skills")
+            if isinstance(required_skills, str):
+                try:
+                    required_skills = json.loads(required_skills)
+                except (TypeError, ValueError) as exc:
+                    raise _AssuranceReservationRejected(
+                        "verifier_task_required_skills_invalid"
+                    ) from exc
+            skill_names = (
+                {str(skill).strip() for skill in required_skills}
+                if isinstance(required_skills, list)
+                else set()
+            )
+            if (
+                expected["capability"] not in skill_names
+                and f"capability:{expected['capability']}" not in skill_names
+            ):
+                raise _AssuranceReservationRejected(
+                    "verifier_task_capability_mismatch"
+                )
+        elif role == _ASSURANCE_VERIFIER_ROLE:
+            raise _AssuranceReservationRejected("author_task_role_invalid")
+
+        if principal != expected[f"{task_kind}_principal_id"]:
+            raise _AssuranceReservationRejected(
+                f"{task_kind}_task_principal_id_mismatch"
+            )
+
+        task_bindings = {
+            "work_order_id": str(
+                context.get("work_order_id")
+                or signed_dispatch.get("work_order_id")
+                or ""
+            ).strip(),
+            "queue_item_id": str(context.get("queue_item_id") or "").strip(),
+            "operational_snapshot_id": str(
+                context.get("operational_snapshot_id") or ""
+            ).strip(),
+            "wsp15_allocation_receipt_id": str(
+                context.get("wsp15_allocation_receipt_id")
+                or allocation.get("receipt_id")
+                or signed_dispatch.get("wsp15_allocation_receipt_id")
+                or ""
+            ).strip(),
+        }
+        for field_name, actual_value in task_bindings.items():
+            if actual_value != expected[field_name]:
+                raise _AssuranceReservationRejected(
+                    f"{task_kind}_task_{field_name}_mismatch"
+                )
+
+        if task_kind == "verifier":
+            for field_name in ("capability", "worker_runtime"):
+                if str(context.get(field_name) or "").strip() != expected[field_name]:
+                    raise _AssuranceReservationRejected(
+                        f"verifier_task_{field_name}_mismatch"
+                    )
+
+    @staticmethod
+    def _expire_assurance_row(
+        conn: Any,
+        reservation: Mapping[str, Any],
+        *,
+        now_utc: datetime,
+        now_iso: str,
+    ) -> Dict[str, Any]:
+        if str(reservation.get("status") or "") != "RESERVED":
+            return dict(reservation)
+        expires_at, _ = _parse_assurance_utc_timestamp(
+            reservation.get("expires_at"),
+            "expires_at",
+        )
+        if expires_at > now_utc:
+            return dict(reservation)
+
+        updated = conn.execute(
+            """
+            UPDATE agents_independent_assurance_reservations
+            SET status = 'EXPIRED', completed_at = ?
+            WHERE reservation_id = ? AND status = 'RESERVED'
+            """,
+            (now_iso, reservation["reservation_id"]),
+        ).rowcount
+        if updated:
+            task_updated = conn.execute(
+                """
+                UPDATE agents_autonomous_tasks
+                SET status = 'expired', completed_at = ?
+                WHERE task_id = ? AND status = 'assigned' AND assigned_to = ?
+                """,
+                (
+                    now_iso,
+                    reservation["verifier_task_id"],
+                    reservation["verifier_principal_id"],
+                ),
+            ).rowcount
+            if task_updated != 1:
+                raise _AssuranceReservationRejected(
+                    "verifier_task_expiration_transition_failed"
+                )
+        refreshed = AgentDB._load_assurance_reservation(
+            conn,
+            str(reservation["reservation_id"]),
+        )
+        return refreshed or dict(reservation)
+
+    def reserve_independent_assurance(
+        self,
+        request: Mapping[str, Any],
+    ) -> Mapping[str, Any]:
+        """Atomically reserve independent assurance capacity and claim its task."""
+        if not isinstance(request, Mapping):
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("request_not_mapping",),
+            )
+
+        normalized = {
+            field_name: str(request.get(field_name) or "").strip()
+            for field_name in _ASSURANCE_REQUIRED_FIELDS
+        }
+        supplied_schema_version = str(request.get("schema_version") or "").strip()
+        normalized["schema_version"] = (
+            supplied_schema_version or _ASSURANCE_REQUEST_SCHEMA_VERSION
+        )
+        missing = tuple(
+            f"missing_{field_name}"
+            for field_name, value in normalized.items()
+            if not value
+        )
+        if missing:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=missing,
+            )
+        if normalized["schema_version"] != _ASSURANCE_REQUEST_SCHEMA_VERSION:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("request_schema_version_unsupported",),
+            )
+        if normalized["author_task_id"] == normalized["verifier_task_id"]:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("author_verifier_task_equality",),
+            )
+        if normalized["author_principal_id"] == normalized["verifier_principal_id"]:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("author_verifier_principal_equality",),
+            )
+
+        original_digest_payload = {
+            field_name: normalized[field_name]
+            for field_name in _ASSURANCE_REQUIRED_FIELDS
+        }
+        if supplied_schema_version:
+            original_digest_payload["schema_version"] = normalized["schema_version"]
+        original_request_digest = _assurance_digest(original_digest_payload)
+
+        try:
+            reserved_at, normalized["reserved_at"] = _parse_assurance_utc_timestamp(
+                normalized["reserved_at"],
+                "reserved_at",
+            )
+            expires_at, normalized["expires_at"] = _parse_assurance_utc_timestamp(
+                normalized["expires_at"],
+                "expires_at",
+            )
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+
+        now_utc = self._assurance_now_provider().astimezone(timezone.utc)
+        if expires_at <= now_utc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_expired",),
+            )
+        if reserved_at > now_utc + timedelta(minutes=5):
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reserved_at_in_future",),
+            )
+        if expires_at <= reserved_at:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("invalid_reservation_window",),
+            )
+        if expires_at - reserved_at > _ASSURANCE_MAX_LEASE:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_window_exceeds_maximum",),
+            )
+
+        digest_payload = {
+            field_name: normalized[field_name]
+            for field_name in _ASSURANCE_REQUIRED_FIELDS
+        }
+        if supplied_schema_version:
+            digest_payload["schema_version"] = normalized["schema_version"]
+        normalized_request_digest = _assurance_digest(digest_payload)
+        supplied_digest = str(request.get("reservation_digest") or "").strip().lower()
+        if not supplied_digest:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_digest_missing",),
+            )
+        normalized_supplied_digest = (
+            _normalize_sha256_digest(supplied_digest)
+        )
+        if normalized_supplied_digest not in {
+            original_request_digest,
+            normalized_request_digest,
+        }:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_digest_mismatch",),
+            )
+        reservation_digest = normalized_supplied_digest
+
+        try:
+            with self.db.get_connection() as conn:
+                author_task = conn.execute(
+                    "SELECT * FROM agents_autonomous_tasks WHERE task_id = ?",
+                    (normalized["author_task_id"],),
+                ).fetchone()
+                verifier_task = conn.execute(
+                    "SELECT * FROM agents_autonomous_tasks WHERE task_id = ?",
+                    (normalized["verifier_task_id"],),
+                ).fetchone()
+                if author_task is None:
+                    raise _AssuranceReservationRejected("author_task_not_found")
+                if verifier_task is None:
+                    raise _AssuranceReservationRejected("verifier_task_not_found")
+                if (
+                    str(author_task.get("status") or "") != "pending"
+                    or str(author_task.get("assigned_to") or "").strip()
+                ):
+                    raise _AssuranceReservationRejected(
+                        "author_task_not_pending"
+                    )
+
+                self._validate_assurance_task_binding(
+                    task=author_task,
+                    task_kind="author",
+                    expected=normalized,
+                )
+                self._validate_assurance_task_binding(
+                    task=verifier_task,
+                    task_kind="verifier",
+                    expected=normalized,
+                )
+
+                claim_count = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET status = 'assigned', assigned_to = ?, assigned_at = ?
+                    WHERE task_id = ?
+                      AND status = 'pending'
+                      AND (assigned_to IS NULL OR assigned_to = '')
+                    """,
+                    (
+                        normalized["verifier_principal_id"],
+                        normalized["reserved_at"],
+                        normalized["verifier_task_id"],
+                    ),
+                ).rowcount
+                if claim_count != 1:
+                    raise _AssuranceReservationRejected(
+                        "verifier_task_not_pending"
+                    )
+
+                conn.execute(
+                    """
+                    INSERT INTO agents_independent_assurance_reservations (
+                        reservation_id,
+                        request_schema_version,
+                        work_order_id,
+                        queue_item_id,
+                        author_task_id,
+                        author_principal_id,
+                        verifier_task_id,
+                        verifier_principal_id,
+                        capability,
+                        worker_runtime,
+                        operational_snapshot_id,
+                        wsp15_allocation_receipt_id,
+                        lease_id,
+                        reserved_at,
+                        expires_at,
+                        reservation_digest,
+                        admission_reservation_digest,
+                        admission_reserved_at,
+                        renewal_count,
+                        status
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'RESERVED')
+                    """,
+                    (
+                        normalized["reservation_id"],
+                        normalized["schema_version"],
+                        normalized["work_order_id"],
+                        normalized["queue_item_id"],
+                        normalized["author_task_id"],
+                        normalized["author_principal_id"],
+                        normalized["verifier_task_id"],
+                        normalized["verifier_principal_id"],
+                        normalized["capability"],
+                        normalized["worker_runtime"],
+                        normalized["operational_snapshot_id"],
+                        normalized["wsp15_allocation_receipt_id"],
+                        normalized["lease_id"],
+                        normalized["reserved_at"],
+                        normalized["expires_at"],
+                        reservation_digest,
+                        reservation_digest,
+                        normalized["reserved_at"],
+                    ),
+                )
+                reservation = self._load_assurance_reservation(
+                    conn,
+                    normalized["reservation_id"],
+                )
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+        except Exception:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_conflict_or_database_error",),
+            )
+
+        return _assurance_result(
+            accepted=True,
+            status="RESERVED",
+            reservation=reservation,
+        )
+
+    def renew_independent_assurance(
+        self,
+        request: Mapping[str, Any],
+    ) -> Mapping[str, Any]:
+        """Renew one expired verifier lease without changing its admission scope."""
+
+        if not isinstance(request, Mapping):
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("request_not_mapping",),
+            )
+        normalized = {
+            field_name: str(request.get(field_name) or "").strip()
+            for field_name in _ASSURANCE_REQUIRED_FIELDS
+        }
+        normalized["schema_version"] = str(
+            request.get("schema_version") or ""
+        ).strip()
+        missing = tuple(
+            f"missing_{field_name}"
+            for field_name, value in normalized.items()
+            if not value
+        )
+        if missing:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=missing,
+            )
+        if normalized["schema_version"] != _ASSURANCE_REQUEST_SCHEMA_VERSION:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("request_schema_version_unsupported",),
+            )
+        try:
+            renewal_count = int(request.get("renewal_count"))
+        except (TypeError, ValueError):
+            renewal_count = -1
+        if renewal_count < 1 or renewal_count > _ASSURANCE_MAX_RENEWALS:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("renewal_count_invalid",),
+            )
+        original_digest_payload = {
+            field_name: normalized[field_name]
+            for field_name in _ASSURANCE_REQUIRED_FIELDS
+        }
+        original_digest_payload["schema_version"] = normalized["schema_version"]
+        original_digest_payload["renewal_count"] = renewal_count
+        original_request_digest = _assurance_digest(original_digest_payload)
+        try:
+            reserved_at, normalized["reserved_at"] = _parse_assurance_utc_timestamp(
+                normalized["reserved_at"],
+                "reserved_at",
+            )
+            expires_at, normalized["expires_at"] = _parse_assurance_utc_timestamp(
+                normalized["expires_at"],
+                "expires_at",
+            )
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+        now_utc = self._assurance_now_provider().astimezone(timezone.utc)
+        if (
+            expires_at <= now_utc
+            or reserved_at > now_utc + timedelta(minutes=5)
+            or expires_at <= reserved_at
+        ):
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("invalid_renewal_window",),
+            )
+        if expires_at - reserved_at > _ASSURANCE_MAX_LEASE:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_window_exceeds_maximum",),
+            )
+
+        digest_payload = {
+            field_name: normalized[field_name]
+            for field_name in _ASSURANCE_REQUIRED_FIELDS
+        }
+        digest_payload["schema_version"] = normalized["schema_version"]
+        digest_payload["renewal_count"] = renewal_count
+        supplied_digest = _normalize_sha256_digest(
+            str(request.get("reservation_digest") or "").strip().lower()
+        )
+        normalized_request_digest = _assurance_digest(digest_payload)
+        if (
+            not supplied_digest
+            or supplied_digest
+            not in {original_request_digest, normalized_request_digest}
+        ):
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_digest_mismatch",),
+            )
+
+        immutable_fields = tuple(
+            field_name
+            for field_name in _ASSURANCE_REQUIRED_FIELDS
+            if field_name not in {"lease_id", "reserved_at", "expires_at"}
+        )
+        try:
+            with self.db.get_connection() as conn:
+                reservation = self._load_assurance_reservation(
+                    conn,
+                    normalized["reservation_id"],
+                )
+                if reservation is None:
+                    raise _AssuranceReservationRejected(
+                        "reservation_not_found"
+                    )
+                if str(reservation.get("status") or "") != "EXPIRED":
+                    raise _AssuranceReservationRejected(
+                        "reservation_not_expired"
+                    )
+                if (
+                    str(reservation.get("request_schema_version") or "")
+                    != normalized["schema_version"]
+                ):
+                    raise _AssuranceReservationRejected(
+                        "renewal_schema_version_mismatch"
+                    )
+                existing_renewal_count = int(
+                    reservation.get("renewal_count") or 0
+                )
+                if renewal_count != existing_renewal_count + 1:
+                    raise _AssuranceReservationRejected(
+                        "renewal_count_mismatch"
+                    )
+                admission_reserved_at, _ = _parse_assurance_utc_timestamp(
+                    reservation.get("admission_reserved_at"),
+                    "admission_reserved_at",
+                )
+                if (
+                    expires_at - admission_reserved_at
+                    > _ASSURANCE_MAX_LEASE
+                ):
+                    raise _AssuranceReservationRejected(
+                        "renewal_horizon_exceeds_maximum"
+                    )
+                for field_name in immutable_fields:
+                    stored_name = (
+                        "request_schema_version"
+                        if field_name == "schema_version"
+                        else field_name
+                    )
+                    if str(reservation.get(stored_name) or "") != normalized[
+                        field_name
+                    ]:
+                        raise _AssuranceReservationRejected(
+                            f"renewal_{field_name}_mismatch"
+                        )
+                author_task = conn.execute(
+                    "SELECT status FROM agents_autonomous_tasks WHERE task_id = ?",
+                    (normalized["author_task_id"],),
+                ).fetchone()
+                verifier_task = conn.execute(
+                    "SELECT status FROM agents_autonomous_tasks WHERE task_id = ?",
+                    (normalized["verifier_task_id"],),
+                ).fetchone()
+                if (
+                    author_task is None
+                    or str(author_task["status"]) != "completed"
+                ):
+                    raise _AssuranceReservationRejected(
+                        "author_task_not_completed"
+                    )
+                if (
+                    verifier_task is None
+                    or str(verifier_task["status"]) != "expired"
+                ):
+                    raise _AssuranceReservationRejected(
+                        "verifier_task_not_expired"
+                    )
+                updated = conn.execute(
+                    """
+                    UPDATE agents_independent_assurance_reservations
+                    SET lease_id = ?,
+                        reserved_at = ?,
+                        expires_at = ?,
+                        reservation_digest = ?,
+                        renewal_count = ?,
+                        status = 'RESERVED',
+                        completed_at = NULL
+                    WHERE reservation_id = ? AND status = 'EXPIRED'
+                    """,
+                    (
+                        normalized["lease_id"],
+                        normalized["reserved_at"],
+                        normalized["expires_at"],
+                        supplied_digest,
+                        renewal_count,
+                        normalized["reservation_id"],
+                    ),
+                ).rowcount
+                if updated != 1:
+                    raise _AssuranceReservationRejected(
+                        "reservation_renewal_race_lost"
+                    )
+                task_updated = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET status = 'assigned',
+                        assigned_to = ?,
+                        assigned_at = ?,
+                        completed_at = NULL
+                    WHERE task_id = ? AND status = 'expired'
+                    """,
+                    (
+                        normalized["verifier_principal_id"],
+                        normalized["reserved_at"],
+                        normalized["verifier_task_id"],
+                    ),
+                ).rowcount
+                if task_updated != 1:
+                    raise _AssuranceReservationRejected(
+                        "verifier_task_renewal_transition_failed"
+                    )
+                renewed = self._load_assurance_reservation(
+                    conn,
+                    normalized["reservation_id"],
+                )
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+        except Exception:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("renewal_conflict_or_database_error",),
+            )
+        return _assurance_result(
+            accepted=True,
+            status="RESERVED",
+            reservation=renewed,
+        )
+
+    def get_independent_assurance_reservation(
+        self,
+        reservation_id: str,
+    ) -> Optional[Mapping[str, Any]]:
+        """Rehydrate a reservation and expire elapsed active leases."""
+        normalized_id = str(reservation_id or "").strip()
+        if not normalized_id:
+            return None
+        now_utc = self._assurance_now_provider().astimezone(timezone.utc)
+        now_iso = now_utc.isoformat().replace("+00:00", "Z")
+        try:
+            with self.db.get_connection() as conn:
+                reservation = self._load_assurance_reservation(conn, normalized_id)
+                if reservation is None:
+                    return None
+                reservation = self._expire_assurance_row(
+                    conn,
+                    reservation,
+                    now_utc=now_utc,
+                    now_iso=now_iso,
+                )
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+        status = str(reservation.get("status") or "UNKNOWN")
+        return _assurance_result(
+            accepted=status == "RESERVED",
+            status=status,
+            rejection_reasons=() if status == "RESERVED" else (f"reservation_{status.lower()}",),
+            reservation=reservation,
+        )
+
+    def get_independent_assurance_reservation_for_task(
+        self,
+        task_id: str,
+        *,
+        task_kind: str,
+    ) -> Optional[Mapping[str, Any]]:
+        """Rehydrate the active reservation bound to one author/verifier task."""
+
+        normalized_task_id = str(task_id or "").strip()
+        query = {
+            "author": """
+                SELECT reservation_id
+                FROM agents_independent_assurance_reservations
+                WHERE author_task_id = ?
+                ORDER BY created_at DESC
+                LIMIT 1
+            """,
+            "verifier": """
+                SELECT reservation_id
+                FROM agents_independent_assurance_reservations
+                WHERE verifier_task_id = ?
+                ORDER BY created_at DESC
+                LIMIT 1
+            """,
+        }.get(str(task_kind or "").strip().lower())
+        if not normalized_task_id or query is None:
+            return None
+        try:
+            with self.db.get_connection() as conn:
+                row = conn.execute(query, (normalized_task_id,)).fetchone()
+        except Exception:
+            return None
+        if row is None:
+            return None
+        reservation_id = (
+            row["reservation_id"] if hasattr(row, "keys") else row[0]
+        )
+        return self.get_independent_assurance_reservation(str(reservation_id))
+
+    def complete_independent_assurance(
+        self,
+        reservation_id: str,
+        *,
+        admission_reservation_digest: str,
+        terminal_receipt_id: str,
+        terminal_receipt_digest: str,
+        status: str,
+        now_iso: str,
+    ) -> Mapping[str, Any]:
+        """Bind a terminal verifier receipt and release its reservation once."""
+        normalized_id = str(reservation_id or "").strip()
+        admission_digest = _normalize_sha256_digest(
+            admission_reservation_digest
+        )
+        receipt_id = str(terminal_receipt_id or "").strip()
+        receipt_digest = _normalize_sha256_digest(terminal_receipt_digest)
+        terminal_status = str(status or "").strip().upper()
+        reasons = []
+        if not normalized_id:
+            reasons.append("missing_reservation_id")
+        if not _is_sha256_digest(admission_digest):
+            reasons.append("invalid_admission_reservation_digest")
+        if not receipt_id:
+            reasons.append("missing_terminal_receipt_id")
+        if not _is_sha256_digest(receipt_digest):
+            reasons.append("invalid_terminal_receipt_digest")
+        if terminal_status not in _ASSURANCE_TERMINAL_STATUSES:
+            reasons.append("invalid_terminal_status")
+        try:
+            now_utc, canonical_now = _parse_assurance_utc_timestamp(now_iso, "now_iso")
+        except _AssuranceReservationRejected as exc:
+            reasons.extend(exc.reasons)
+            now_utc = datetime.now(timezone.utc)
+            canonical_now = ""
+        if reasons:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=tuple(reasons),
+            )
+
+        try:
+            with self.db.get_connection() as conn:
+                reservation = self._load_assurance_reservation(conn, normalized_id)
+                if reservation is None:
+                    raise _AssuranceReservationRejected("reservation_not_found")
+                if (
+                    str(
+                        reservation.get("admission_reservation_digest")
+                        or reservation.get("reservation_digest")
+                        or ""
+                    )
+                    != admission_digest
+                ):
+                    raise _AssuranceReservationRejected(
+                        "admission_reservation_digest_mismatch"
+                    )
+                reservation = self._expire_assurance_row(
+                    conn,
+                    reservation,
+                    now_utc=now_utc,
+                    now_iso=canonical_now,
+                )
+                if reservation["status"] != "RESERVED":
+                    raise _AssuranceReservationRejected("reservation_not_active")
+                updated = conn.execute(
+                    """
+                    UPDATE agents_independent_assurance_reservations
+                    SET status = ?,
+                        terminal_receipt_id = ?,
+                        terminal_receipt_digest = ?,
+                        terminal_status = ?,
+                        completed_at = ?
+                    WHERE reservation_id = ? AND status = 'RESERVED'
+                    """,
+                    (
+                        terminal_status,
+                        receipt_id,
+                        receipt_digest,
+                        terminal_status,
+                        canonical_now,
+                        normalized_id,
+                    ),
+                ).rowcount
+                if updated != 1:
+                    raise _AssuranceReservationRejected("reservation_not_active")
+                task_updated = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET status = 'completed', completed_at = ?
+                    WHERE task_id = ? AND status = 'assigned' AND assigned_to = ?
+                    """,
+                    (
+                        canonical_now,
+                        reservation["verifier_task_id"],
+                        reservation["verifier_principal_id"],
+                    ),
+                ).rowcount
+                if task_updated != 1:
+                    raise _AssuranceReservationRejected(
+                        "verifier_task_terminal_transition_failed"
+                    )
+                completed = self._load_assurance_reservation(conn, normalized_id)
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+        except Exception:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_completion_database_error",),
+            )
+        return _assurance_result(
+            accepted=True,
+            status=terminal_status,
+            reservation=completed,
+        )
+
+    def revoke_independent_assurance(
+        self,
+        reservation_id: str,
+        *,
+        reason: str,
+        now_iso: str,
+    ) -> Mapping[str, Any]:
+        """Revoke one active reservation and make its verifier task non-claimable."""
+        normalized_id = str(reservation_id or "").strip()
+        normalized_reason = str(reason or "").strip()
+        try:
+            _, canonical_now = _parse_assurance_utc_timestamp(now_iso, "now_iso")
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+        if not normalized_id or not normalized_reason:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=tuple(
+                    reason_name
+                    for condition, reason_name in (
+                        (not normalized_id, "missing_reservation_id"),
+                        (not normalized_reason, "missing_revocation_reason"),
+                    )
+                    if condition
+                ),
+            )
+
+        try:
+            with self.db.get_connection() as conn:
+                reservation = self._load_assurance_reservation(conn, normalized_id)
+                if reservation is None:
+                    raise _AssuranceReservationRejected("reservation_not_found")
+                updated = conn.execute(
+                    """
+                    UPDATE agents_independent_assurance_reservations
+                    SET status = 'REVOKED',
+                        revoked_at = ?,
+                        revocation_reason = ?,
+                        completed_at = ?
+                    WHERE reservation_id = ? AND status = 'RESERVED'
+                    """,
+                    (
+                        canonical_now,
+                        normalized_reason,
+                        canonical_now,
+                        normalized_id,
+                    ),
+                ).rowcount
+                if updated != 1:
+                    raise _AssuranceReservationRejected("reservation_not_active")
+                task_updated = conn.execute(
+                    """
+                    UPDATE agents_autonomous_tasks
+                    SET status = 'cancelled', completed_at = ?
+                    WHERE task_id = ? AND status = 'assigned' AND assigned_to = ?
+                    """,
+                    (
+                        canonical_now,
+                        reservation["verifier_task_id"],
+                        reservation["verifier_principal_id"],
+                    ),
+                ).rowcount
+                if task_updated != 1:
+                    raise _AssuranceReservationRejected(
+                        "verifier_task_revocation_transition_failed"
+                    )
+                revoked = self._load_assurance_reservation(conn, normalized_id)
+        except _AssuranceReservationRejected as exc:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=exc.reasons,
+            )
+        except Exception:
+            return _assurance_result(
+                accepted=False,
+                status="REJECTED",
+                rejection_reasons=("reservation_revocation_database_error",),
+            )
+        return _assurance_result(
+            accepted=True,
+            status="REVOKED",
+            reservation=revoked,
+        )
+
+    def expire_independent_assurance_reservations(
+        self,
+        *,
+        now_iso: str,
+    ) -> Mapping[str, Any]:
+        """Expire every elapsed active reservation in one transaction."""
+        try:
+            now_utc, canonical_now = _parse_assurance_utc_timestamp(now_iso, "now_iso")
+        except _AssuranceReservationRejected as exc:
+            return {
+                "accepted": False,
+                "status": "REJECTED",
+                "rejection_reasons": list(exc.reasons),
+                "expired_reservation_ids": [],
+            }
+
+        expired_ids = []
+        try:
+            with self.db.get_connection() as conn:
+                candidates = conn.execute(
+                    """
+                    SELECT *
+                    FROM agents_independent_assurance_reservations
+                    WHERE status = 'RESERVED' AND expires_at <= ?
+                    ORDER BY reservation_id
+                    """,
+                    (canonical_now,),
+                ).fetchall()
+                for candidate in candidates:
+                    refreshed = self._expire_assurance_row(
+                        conn,
+                        candidate,
+                        now_utc=now_utc,
+                        now_iso=canonical_now,
+                    )
+                    if refreshed["status"] == "EXPIRED":
+                        expired_ids.append(refreshed["reservation_id"])
+        except _AssuranceReservationRejected as exc:
+            return {
+                "accepted": False,
+                "status": "REJECTED",
+                "rejection_reasons": list(exc.reasons),
+                "expired_reservation_ids": [],
+            }
+        return {
+            "accepted": True,
+            "status": "EXPIRED" if expired_ids else "NOOP",
+            "rejection_reasons": [],
+            "expired_reservation_ids": expired_ids,
+        }
 
     # ============================================================================
     # INDEX REFRESH TRACKING (HoloIndex Automation)

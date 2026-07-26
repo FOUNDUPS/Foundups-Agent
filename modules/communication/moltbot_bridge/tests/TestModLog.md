@@ -1,3 +1,17 @@
+## 2026-07-26: Independent assurance capacity admission
+
+- Proved the bootstrap persists assurance admission and yields before bounded
+  author or verifier execution.
+- Proved queue-stage workers cannot claim or materialize the bounded coding
+  stage, while separately claimed author and verifier tasks complete the
+  chain in order.
+- Proved author failure revokes held assurance and stage-ready expired
+  verifier capacity uses one bounded renewal.
+- Added review regressions for rejected upstream stages, missing stores,
+  renewed admission-digest lineage, and terminal receipt bindings.
+- Verified the modified bridge, AgentDB, and WRE integration set with 405
+  passing tests and three platform skips before final static validation.
+
 ## 2026-07-25: Daemon self-audit runtime nudge alignment
 
 - Proved current external escalation records produce memory events.

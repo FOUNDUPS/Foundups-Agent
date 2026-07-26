@@ -2,6 +2,33 @@
 
 ## Public API
 
+### Independent assurance capacity admission
+
+The resident queue inserts `assurance_capacity_admission` after isolated
+worktree creation and before `bounded_worker_pilot`.
+`ResidentQueueAssuranceCapacityAdmissionHandler` requires the AgentDB
+dispatch to contain one author task and one distinct
+`independent_slice_verification` task. It atomically reserves the verifier
+through `AgentDB.reserve_independent_assurance()` or returns
+`BLOCKED_ASSURANCE_CAPACITY` with a durable retry time. No code stage runs
+without the reservation.
+
+Successful admission is a yield boundary. The queue-stage owner persists the
+admission result and returns without running `bounded_worker_pilot` or
+`slice_verifier`. OpenClaw separately claims the bounded author task; the
+reserved verifier remains assigned to its distinct principal until the exact
+slice-verifier stage is ready. Author failure revokes the reservation and
+cancels the verifier task. An expired verifier lease may be renewed only at
+that ready stage, with a bounded renewal count and maximum lease horizon.
+
+The slice-verifier request binds the reservation ID, immutable admission
+digest, verifier task, author principal, verifier principal, work order,
+operational snapshot, and WSP 15 allocation. Renewed leases cannot replace
+that lineage. The verifier stage rehydrates the durable reservation and
+terminally completes it only when the receipt repeats the same bindings. CI,
+CodeQL, and red-team checks are additional evidence; they do not replace the
+independent verifier reservation.
+
 ### Generic provider-call evidence
 
 `create_precall_evidence()`, `arm_provider_call()`, and

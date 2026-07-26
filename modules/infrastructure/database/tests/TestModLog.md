@@ -1,5 +1,22 @@
 # Database Module - Test Evolution Log
 
+## Entry: Independent Assurance Reservation Tests
+**Date**: 2026-07-25
+**Test File**: `test_agent_db_independent_assurance.py`
+**Coverage**:
+- Atomic concurrent claim with exactly one winner.
+- Separate author/work-order and verifier-task uniqueness paths.
+- Author/verifier task and principal separation.
+- Capability, runtime, snapshot, allocation and role binding.
+- Restart rehydration, deterministic digest rejection, expiry and revocation.
+- Immutable admission-digest preservation, bounded renewal count and lease
+  horizon, forged-renewal rejection, and author-completion prerequisites.
+- Cumulative six-hour admission horizon across every renewal.
+- Exactly-once terminal receipt binding, admission-digest revalidation, and
+  verifier-task lifecycle transitions.
+- Additive legacy migration for nullable `retry_not_before`.
+**WSP References**: WSP 5, WSP 15, WSP 78, WSP 97
+
 ## Entry: Quantum Compatibility Test Suite Created
 **Date**: 2025-09-27
 **Test File**: `test_quantum_compatibility.py`

@@ -69,6 +69,7 @@ SECRET_MARKERS = (
     "token=",
     "password=",
 )
+FAIL_ASSURANCE_RESERVATION = "FAIL_ASSURANCE_RESERVATION"
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,9 @@ class AutonomousSliceVerifierReceipt:
     slice_name: str
     verifier_id: str
     worker_id: str
+    assurance_reservation_id: str
+    assurance_reservation_digest: str
+    verifier_task_id: str
     base_sha: str
     head_sha: str
     changed_paths: List[str]
@@ -379,12 +383,25 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
     verifier_id = str(req.get("verifier_id") or "")
     base_sha = str(req.get("base_sha") or "")
     head_sha = str(req.get("head_sha") or "")
+    assurance_reservation_id = str(
+        req.get("assurance_reservation_id") or ""
+    )
+    assurance_reservation_digest = str(
+        req.get("assurance_reservation_digest") or ""
+    )
+    verifier_task_id = str(req.get("verifier_task_id") or "")
 
     reasons: List[str] = []
     if not all([work_order_id, slice_name, worker_id, verifier_id]):
         reasons.append(FAIL_REQUIRED_FIELD)
     if worker_id and verifier_id and worker_id == verifier_id:
         reasons.append(FAIL_SELF_VERIFICATION)
+    if (
+        not assurance_reservation_id.startswith("assurance-reservation-")
+        or not _is_digest(assurance_reservation_digest)
+        or not verifier_task_id.startswith("reddog-worker-dispatch-")
+    ):
+        reasons.append(FAIL_ASSURANCE_RESERVATION)
     if not _is_head_sha(base_sha) or not _is_head_sha(head_sha) or base_sha == head_sha:
         reasons.append(FAIL_HEAD_SHA)
 
@@ -446,6 +463,9 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         "slice_name": slice_name,
         "verifier_id": verifier_id,
         "worker_id": worker_id,
+        "assurance_reservation_id": assurance_reservation_id,
+        "assurance_reservation_digest": assurance_reservation_digest,
+        "verifier_task_id": verifier_task_id,
         "base_sha": base_sha,
         "head_sha": head_sha,
         "changed_paths": sorted(changed_paths),
@@ -467,6 +487,9 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         slice_name=slice_name,
         verifier_id=verifier_id,
         worker_id=worker_id,
+        assurance_reservation_id=assurance_reservation_id,
+        assurance_reservation_digest=assurance_reservation_digest,
+        verifier_task_id=verifier_task_id,
         base_sha=base_sha,
         head_sha=head_sha,
         changed_paths=sorted(changed_paths),
@@ -500,6 +523,7 @@ __all__ = [
     "AUTONOMOUS_SLICE_VERIFIER_REJECT",
     "AutonomousSliceVerifierReceipt",
     "AutonomousSliceVerifierResult",
+    "FAIL_ASSURANCE_RESERVATION",
     "FAIL_DIFF_EVIDENCE",
     "FAIL_HEAD_SHA",
     "FAIL_HOLOINDEX_EVIDENCE",

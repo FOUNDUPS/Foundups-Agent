@@ -24,6 +24,21 @@
 
 ## Public API
 
+### Independent autonomous slice verification
+
+`verify_autonomous_slice_runtime()` requires an accepted, durable independent
+assurance reservation when a request declares assurance lineage. The request,
+the current reservation, and the terminal verifier receipt must agree on the
+reservation ID, immutable admission digest, verifier task and principal,
+author principal, work order, operational snapshot, and WSP 15 allocation.
+
+The verifier is not the bounded author and is not the resident queue-stage
+owner. It receives the already-produced worktree artifact only after the
+author task has completed. A verifier result can advance draft publication
+only after AgentDB terminally binds that exact result to the reservation.
+CI, CodeQL, and red-team results remain supporting evidence and cannot
+substitute for the independently reserved verifier.
+
 ### create_foundup Scaffold Route
 
 `route_foundup_job()` admits `create_foundup` only to `HERMES_SCAFFOLD` with explicit dry-run, `new_scaffold`, canonical genesis/scaffold digests, and matching genesis/job identity. Its frozen `RouteEnvelope.scaffold_request` is the canonical immutable request passed to `ScaffoldAdapter.plan(request)`; no mutable job crosses that boundary. The consumer canonical-JSON detaches evidence, revalidates returned identity and both lineage digests, returns `SIMULATED` evidence only on success, and maps malformed adapters to stable redacted blocked results. It never calls the generic Hermes executor, a live writer/provider, registry mutation, or worktree API.

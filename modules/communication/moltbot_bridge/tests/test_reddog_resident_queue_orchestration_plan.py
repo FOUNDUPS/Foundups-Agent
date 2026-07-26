@@ -101,6 +101,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "worktree_create": {
             "decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT",
         },
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
+        },
         "bounded_worker_pilot": {
             "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT",
         },

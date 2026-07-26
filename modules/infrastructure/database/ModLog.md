@@ -1,5 +1,22 @@
 # Database Module - ModLog
 
+## Entry: Independent Assurance Capacity Reservation Primitive
+**Date**: 2026-07-25
+**What Changed**: Added a dedicated AgentDB reservation table and transactional APIs for independent verifier capacity.
+**Why**: RedDog/WRE must reserve an independent verifier before coding work can advance, without relying on in-memory collaboration signals.
+**Impact**:
+- Atomically claims an existing pending verifier task and records its lease-bound reservation.
+- Rejects author/verifier identity overlap and task-context binding mismatches.
+- Rehydrates reservations across process restarts.
+- Binds terminal verifier receipts exactly once and handles expiry/revocation fail-closed.
+- Preserves an immutable admission digest across bounded lease renewals and
+  rejects renewal after author failure, before author completion, or beyond
+  the renewal-count and total-horizon limits.
+- Requires the author task to remain pending and unclaimed at admission, and
+  requires the immutable admission digest again at terminal completion.
+- Adds the nullable `retry_not_before` autonomous-task migration for deferred capacity admission.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 78, WSP 97
+
 ## Entry: Quantum Enhancement Phase 1 Implementation
 **What Changed**: Added quantum computing capabilities to AgentDB
 **Why**: Enable Grover's O(√N) search and quantum attention mechanisms

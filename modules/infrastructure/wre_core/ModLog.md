@@ -2,6 +2,16 @@
 
 ## Chronological Change Log
 
+### [2026-07-25] - WRE_INDEPENDENT_ASSURANCE_CAPACITY_ADMISSION_PHASE1
+
+- Required the autonomous slice verifier request to carry a durable,
+  digest-bound independent assurance reservation.
+- Bound verifier task identity and reservation lineage into terminal verifier
+  evidence so downstream publication cannot substitute an unreserved review.
+- Required the immutable admission digest rather than a renewable lease
+  digest, allowing bounded lease renewal without weakening original
+  author/verifier separation.
+
 ### [2026-07-25] - DAEMON_SELF_AUDIT_RUNTIME_CONSUMER_ALIGNMENT_PHASE1
 
 - Extracted the daemon self-audit runtime-root resolver so producers and

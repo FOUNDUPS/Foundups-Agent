@@ -73,6 +73,7 @@ _RESERVED_BOOTSTRAP_KWARGS = frozenset(
 _OPENCLAW_QUEUE_RUNTIME = "openclaw"
 _OPENCLAW_QUEUE_CAPABILITY = "candidate_queue_review"
 _OPENCLAW_QUEUE_STAGE_CAPABILITY = "queue_stage_progress"
+_OPENCLAW_INDEPENDENT_VERIFIER_CAPABILITY = "independent_slice_verification"
 _SIGNED_0102_RUNTIME = "0102"
 _SIGNED_0102_BOUNDED_CODE_CAPABILITY = "bounded_code_change"
 _BOUNDED_WORKER_PILOT_STAGE = "bounded_worker_pilot"
@@ -81,7 +82,6 @@ _ARTIFACT_GENERATOR_MODE_FOUNDUPS_FUSION = "foundups_fusion"
 _QUEUE_CHAIN_COMPLETE_ACTION = "STOP_QUEUE_CHAIN_COMPLETE"
 _POST_BOUNDED_QUEUE_STAGES = frozenset(
     {
-        "slice_verifier",
         "verified_draft_pr_publish",
         "verified_outcome_ratchet",
         "model_feedback_admission",
@@ -129,127 +129,152 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
     ) -> Mapping[str, Any]:
         """Run one claimed OpenClaw candidate task through the queue loop."""
 
-        context = _mapping(task_context)
-        intent = _mapping(worker_dispatch_intent)
         _ = signed_authority_receipt
-        reasons: list[str] = []
-
-        worker_runtime = str(intent.get("worker_runtime") or context.get("worker_runtime") or "")
-        capability = str(intent.get("capability") or context.get("capability") or "")
-        target_kind = _target_kind(worker_runtime=worker_runtime, capability=capability)
-        if target_kind is None:
-            if worker_runtime not in {_OPENCLAW_QUEUE_RUNTIME, _SIGNED_0102_RUNTIME}:
-                reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_WORKER_RUNTIME)
-            if capability not in {
-                _OPENCLAW_QUEUE_CAPABILITY,
-                _OPENCLAW_QUEUE_STAGE_CAPABILITY,
-                _SIGNED_0102_BOUNDED_CODE_CAPABILITY,
-            }:
-                reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_CAPABILITY)
-            if not reasons:
-                reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_CAPABILITY)
-
-        queue_item_id = str(context.get("queue_item_id") or "").strip()
-        if not queue_item_id:
-            reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_ITEM_MISSING)
-        if (
-            not self.config.runtime_allowed_root
-            or not self.config.work_state_path
-            or not self.config.chain_results_path
-            or not self.config.authority_profile_path
-        ):
-            reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CONFIG_MISSING)
-        if any(key in _RESERVED_BOOTSTRAP_KWARGS for key in self.config.bootstrap_kwargs):
-            reasons.append(SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_KWARG_CONFLICT)
-        if target_kind == "0102_bounded_code_change":
-            reasons.extend(_bounded_code_stage_reasons(self.config, queue_item_id=queue_item_id))
-        if target_kind == "openclaw_queue_stage_progress":
-            reasons.extend(_queue_stage_progress_reasons(self.config, queue_item_id=queue_item_id))
+        target_kind, queue_item_id, reasons = _validate_runner_request(
+            self.config,
+            task_context=task_context,
+            worker_dispatch_intent=worker_dispatch_intent,
+        )
         if reasons:
             return _reject(task_id, reasons)
 
-        bootstrap = self._bootstrap or _load_bootstrap()
         try:
-            result = bootstrap(
-                repo_root=Path(self.config.repo_root or repo_root),
-                runtime_allowed_root=self.config.runtime_allowed_root,
-                work_state_path=self.config.work_state_path,
-                chain_results_path=self.config.chain_results_path,
-                authority_profile_path=self.config.authority_profile_path,
-                requested_queue_item_id=queue_item_id,
-                now_iso=self.config.now_iso,
-                now_epoch=self.config.now_epoch,
-                max_steps=self.config.max_steps,
-                **dict(self.config.bootstrap_kwargs),
+            result = _invoke_bootstrap(
+                self.config,
+                bootstrap=self._bootstrap or _load_bootstrap(),
+                repo_root=repo_root,
+                queue_item_id=queue_item_id,
             )
         except Exception:
             return _reject(task_id, [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_EXCEPTION])
 
-        payload = _mapping(result)
-        if hasattr(result, "to_dict"):
-            payload = _mapping(result.to_dict())
-        if payload.get("accepted") is not True:
-            return _reject(
-                task_id,
-                [
-                    SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_REJECTED,
-                    *_string_list(payload.get("rejection_reasons")),
-                ],
-                bootstrap_result=payload,
-            )
-        if _unsafe_bootstrap_effect_detected(payload):
-            return _reject(
-                task_id,
-                [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE],
-                bootstrap_result=payload,
-            )
-        dispatched = set(_string_list(payload.get("dispatched_stages")))
-        if (
-            target_kind == "0102_bounded_code_change"
-            and _BOUNDED_WORKER_PILOT_STAGE not in dispatched
-        ):
-            return _reject(
-                task_id,
-                [SignedWorkerQueueSerialLoopRunnerReason.CODE_ASSIGNED_STAGE_NOT_DISPATCHED],
-                bootstrap_result=payload,
-            )
-        queue_chain_complete = str(payload.get("next_action") or "") == _QUEUE_CHAIN_COMPLETE_ACTION
-        assigned_stage_complete = target_kind == "0102_bounded_code_change"
+        payload = _mapping(result.to_dict() if hasattr(result, "to_dict") else result)
+        rejection = _bootstrap_rejection(task_id, target_kind, payload)
+        return rejection or _accepted_runner_result(
+            task_id, queue_item_id, target_kind, payload
+        )
 
-        return {
-            "accepted": True,
-            "decision": SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT,
-            "receipt_id": _receipt_id(task_id, queue_item_id, payload),
-            "queue_item_id": queue_item_id,
-            "bootstrap_result": dict(payload),
-            "queue_chain_complete": queue_chain_complete,
-            "assigned_stage_complete": assigned_stage_complete,
-            "queue_chain_requeue_required": (not queue_chain_complete and not assigned_stage_complete),
-            "rejection_reasons": [],
-            "no_source_repo_mutation_performed": True,
-            "no_shell_command_executed": True,
-            "no_holoindex_reindex_performed": (
-                payload.get("no_holoindex_reindex_performed") is True
-            ),
-            "no_hermes_dispatch_performed": (
-                payload.get("no_hermes_dispatch_performed") is True
-            ),
-            "no_worktree_operation_performed": payload.get("no_worktree_created") is True,
-            "no_pr_created": payload.get("no_pr_created") is True,
-            "no_live_foundup_enqueue_performed": True,
-            "no_pattern_memory_write_performed": (
-                payload.get("no_pattern_memory_write_performed") is True
-            ),
-            "no_reward_settlement_performed": (
-                payload.get("no_reward_settlement_performed") is True
-            ),
-            "worker_process_spawn_count": _nonnegative_count(
-                payload.get("worker_process_spawn_count")
-            ),
-            "shell_command_count": _nonnegative_count(
-                payload.get("shell_command_count")
-            ),
-        }
+
+def _validate_runner_request(
+    config: SignedWorkerQueueSerialLoopRunnerConfig,
+    *,
+    task_context: Mapping[str, Any],
+    worker_dispatch_intent: Mapping[str, Any],
+) -> tuple[str | None, str, list[str]]:
+    context = _mapping(task_context)
+    intent = _mapping(worker_dispatch_intent)
+    runtime = str(intent.get("worker_runtime") or context.get("worker_runtime") or "")
+    capability = str(intent.get("capability") or context.get("capability") or "")
+    target_kind = _target_kind(worker_runtime=runtime, capability=capability)
+    reasons: list[str] = []
+    if target_kind is None:
+        if runtime not in {_OPENCLAW_QUEUE_RUNTIME, _SIGNED_0102_RUNTIME}:
+            reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_WORKER_RUNTIME)
+        reasons.append(SignedWorkerQueueSerialLoopRunnerReason.UNSUPPORTED_CAPABILITY)
+    queue_item_id = str(context.get("queue_item_id") or "").strip()
+    if not queue_item_id:
+        reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_ITEM_MISSING)
+    if not all(
+        (config.runtime_allowed_root, config.work_state_path, config.chain_results_path,
+         config.authority_profile_path)
+    ):
+        reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CONFIG_MISSING)
+    if any(key in _RESERVED_BOOTSTRAP_KWARGS for key in config.bootstrap_kwargs):
+        reasons.append(SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_KWARG_CONFLICT)
+    stage_checks = {
+        "0102_bounded_code_change": _bounded_code_stage_reasons,
+        "openclaw_queue_stage_progress": _queue_stage_progress_reasons,
+        "openclaw_independent_slice_verification": _independent_verifier_stage_reasons,
+    }
+    if target_kind in stage_checks:
+        reasons.extend(stage_checks[target_kind](config, queue_item_id=queue_item_id))
+    return target_kind, queue_item_id, list(dict.fromkeys(reasons))
+
+
+def _invoke_bootstrap(
+    config: SignedWorkerQueueSerialLoopRunnerConfig,
+    *,
+    bootstrap: BootstrapCallable,
+    repo_root: Path,
+    queue_item_id: str,
+) -> Any:
+    return bootstrap(
+        repo_root=Path(config.repo_root or repo_root),
+        runtime_allowed_root=config.runtime_allowed_root,
+        work_state_path=config.work_state_path,
+        chain_results_path=config.chain_results_path,
+        authority_profile_path=config.authority_profile_path,
+        requested_queue_item_id=queue_item_id,
+        now_iso=config.now_iso,
+        now_epoch=config.now_epoch,
+        max_steps=config.max_steps,
+        **dict(config.bootstrap_kwargs),
+    )
+
+
+def _bootstrap_rejection(
+    task_id: str,
+    target_kind: str | None,
+    payload: Mapping[str, Any],
+) -> Mapping[str, Any] | None:
+    if payload.get("accepted") is not True:
+        return _reject(
+            task_id,
+            [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_REJECTED,
+             *_string_list(payload.get("rejection_reasons"))],
+            bootstrap_result=payload,
+        )
+    if _unsafe_bootstrap_effect_detected(payload):
+        return _reject(
+            task_id,
+            [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_UNSAFE],
+            bootstrap_result=payload,
+        )
+    dispatched = set(_string_list(payload.get("dispatched_stages")))
+    if target_kind == "0102_bounded_code_change" and _BOUNDED_WORKER_PILOT_STAGE not in dispatched:
+        return _reject(
+            task_id,
+            [SignedWorkerQueueSerialLoopRunnerReason.CODE_ASSIGNED_STAGE_NOT_DISPATCHED],
+            bootstrap_result=payload,
+        )
+    return None
+
+
+def _accepted_runner_result(
+    task_id: str,
+    queue_item_id: str,
+    target_kind: str | None,
+    payload: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    chain_complete = str(payload.get("next_action") or "") == _QUEUE_CHAIN_COMPLETE_ACTION
+    assigned_complete = target_kind in {
+        "0102_bounded_code_change",
+        "openclaw_independent_slice_verification",
+    }
+    return {
+        "accepted": True,
+        "decision": SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT,
+        "receipt_id": _receipt_id(task_id, queue_item_id, payload),
+        "queue_item_id": queue_item_id,
+        "bootstrap_result": dict(payload),
+        "queue_chain_complete": chain_complete,
+        "assigned_stage_complete": assigned_complete,
+        "queue_chain_requeue_required": payload.get("queue_chain_requeue_required") is True
+        or (not chain_complete and not assigned_complete),
+        "retry_at": str(payload.get("retry_at") or "") or None,
+        "rejection_reasons": [],
+        "no_source_repo_mutation_performed": True,
+        "no_shell_command_executed": True,
+        "no_holoindex_reindex_performed": payload.get("no_holoindex_reindex_performed") is True,
+        "no_hermes_dispatch_performed": payload.get("no_hermes_dispatch_performed") is True,
+        "no_worktree_operation_performed": payload.get("no_worktree_created") is True,
+        "no_pr_created": payload.get("no_pr_created") is True,
+        "no_live_foundup_enqueue_performed": True,
+        "no_pattern_memory_write_performed": payload.get("no_pattern_memory_write_performed") is True,
+        "no_reward_settlement_performed": payload.get("no_reward_settlement_performed") is True,
+        "worker_process_spawn_count": _nonnegative_count(payload.get("worker_process_spawn_count")),
+        "shell_command_count": _nonnegative_count(payload.get("shell_command_count")),
+    }
 
 
 def _load_bootstrap() -> BootstrapCallable:
@@ -357,6 +382,11 @@ def _target_kind(*, worker_runtime: str, capability: str) -> str | None:
         return "openclaw_candidate_queue_review"
     if worker_runtime == _OPENCLAW_QUEUE_RUNTIME and capability == _OPENCLAW_QUEUE_STAGE_CAPABILITY:
         return "openclaw_queue_stage_progress"
+    if (
+        worker_runtime == _OPENCLAW_QUEUE_RUNTIME
+        and capability == _OPENCLAW_INDEPENDENT_VERIFIER_CAPABILITY
+    ):
+        return "openclaw_independent_slice_verification"
     if worker_runtime == _SIGNED_0102_RUNTIME and capability == _SIGNED_0102_BOUNDED_CODE_CAPABILITY:
         return "0102_bounded_code_change"
     return None
@@ -409,6 +439,26 @@ def _queue_stage_progress_reasons(
         not plan
         or plan.get("accepted") is not True
         or str(plan.get("current_stage") or "") not in _POST_BOUNDED_QUEUE_STAGES
+    ):
+        reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_STAGE_NOT_READY)
+    return reasons
+
+
+def _independent_verifier_stage_reasons(
+    config: SignedWorkerQueueSerialLoopRunnerConfig,
+    *,
+    queue_item_id: str,
+) -> list[str]:
+    reasons: list[str] = []
+    if config.max_steps != 1:
+        reasons.append(
+            SignedWorkerQueueSerialLoopRunnerReason.QUEUE_STAGE_MAX_STEPS_INVALID
+        )
+    plan = _read_current_plan(config, queue_item_id=queue_item_id)
+    if (
+        not plan
+        or plan.get("accepted") is not True
+        or str(plan.get("current_stage") or "") != "slice_verifier"
     ):
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_STAGE_NOT_READY)
     return reasons

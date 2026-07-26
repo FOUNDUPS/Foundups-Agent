@@ -43,9 +43,6 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
 )
-from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
-    QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT,
-)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
 )
@@ -127,6 +124,42 @@ def _snapshot() -> dict[str, object]:
     }
 
 
+def _reservation() -> dict[str, object]:
+    return {
+        "reservation_id": "assurance-reservation-" + "1" * 20,
+        "reservation_digest": "sha256:" + "0" * 64,
+        "admission_reservation_digest": "sha256:" + "0" * 64,
+        "status": "reserved",
+        "work_order_id": WORK_ORDER_ID,
+        "author_task_id": "reddog-worker-dispatch-" + "1" * 16,
+        "author_principal_id": "worker:author",
+        "verifier_task_id": "reddog-worker-dispatch-" + "2" * 16,
+        "verifier_principal_id": "worker:verifier",
+    }
+
+
+class _ReservationStore:
+    def get_independent_assurance_reservation(self, reservation_id: str):
+        assert reservation_id == _reservation()["reservation_id"]
+        return _reservation()
+
+    def complete_independent_assurance(self, reservation_id: str, **kwargs):
+        assert reservation_id == _reservation()["reservation_id"]
+        assert kwargs["terminal_receipt_id"]
+        assert str(kwargs["terminal_receipt_digest"]).startswith("sha256:")
+        return {"accepted": True, "status": "completed"}
+
+
+class _RenewedReservationStore(_ReservationStore):
+    def get_independent_assurance_reservation(self, reservation_id: str):
+        assert reservation_id == _reservation()["reservation_id"]
+        return {
+            **_reservation(),
+            "reservation_digest": "sha256:" + "1" * 64,
+            "renewal_count": 1,
+        }
+
+
 def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
     stage_results: dict[str, object] = {
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
@@ -138,6 +171,10 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "executor_plan": {"decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT},
         "execution_valve": {"decision": QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT},
         "worktree_create": {"decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT},
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
+            "reservation": _reservation(),
+        },
         BOUNDED_WORKER_PILOT_STAGE_KEY: _queue_pilot_result(),
     }
     stage_results.update(stage_overrides)
@@ -162,6 +199,7 @@ def _handler(
     repo_root: Path | None = None,
     slice_verifier_request_binding_enabled: bool = False,
     holoindex_evidence: dict[str, object] | None = None,
+    assurance_reservation_store: object | None = None,
 ):
     return build_reddog_resident_queue_slice_verifier_stage_handler(
         chain_results_store=chain_store,
@@ -172,6 +210,9 @@ def _handler(
         repo_root=repo_root,
         slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
         holoindex_evidence=holoindex_evidence,
+        assurance_reservation_store=(
+            assurance_reservation_store or _ReservationStore()
+        ),
     )
 
 
@@ -363,6 +404,29 @@ def test_dispatcher_records_slice_verifier_and_advances_to_draft_pr_publish() ->
     assert stage["no_pattern_memory_write_performed"] is True
     assert stage["no_reward_settlement_performed"] is True
     assert stage["no_holoindex_reindex_performed"] is True
+
+
+def test_renewed_verifier_binds_terminal_receipt_to_admission_digest() -> None:
+    chain_store = _seeded_store()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            SLICE_VERIFIER_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                assurance_reservation_store=_RenewedReservationStore(),
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is True
+    stage = chain_store.load()["stage_results"][SLICE_VERIFIER_STAGE_KEY]
+    receipt = stage["verifier_result"]["receipt"]
+    assert receipt["assurance_reservation_digest"] == _digest("0")
+    assert stage["assurance_reservation_terminal_result"]["accepted"] is True
 
 
 def test_missing_bounded_worker_stage_rejects_direct_handler_call() -> None:

@@ -38,6 +38,36 @@ def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
 
 
+def _reservation() -> dict[str, object]:
+    return {
+        "reservation_id": "assurance-reservation-" + "1" * 20,
+        "reservation_digest": _digest("0"),
+        "admission_reservation_digest": _digest("0"),
+        "status": "reserved",
+        "work_order_id": WORK_ORDER_ID,
+        "author_task_id": "reddog-worker-dispatch-" + "1" * 16,
+        "author_principal_id": "worker:author",
+        "verifier_task_id": "reddog-worker-dispatch-" + "2" * 16,
+        "verifier_principal_id": "worker:verifier",
+    }
+
+
+class _ReservationStore:
+    def get_independent_assurance_reservation(self, reservation_id: str):
+        assert reservation_id == _reservation()["reservation_id"]
+        return _reservation()
+
+
+class _RenewedReservationStore:
+    def get_independent_assurance_reservation(self, reservation_id: str):
+        assert reservation_id == _reservation()["reservation_id"]
+        return {
+            **_reservation(),
+            "reservation_digest": _digest("1"),
+            "renewal_count": 1,
+        }
+
+
 def _signed_receipt_chain() -> dict[str, object]:
     return {
         "accepted": True,
@@ -113,6 +143,10 @@ def _stage_results(tmp_path: Path, **overrides: object) -> dict[str, object]:
                 "worktree_path": str(tmp_path / "resident-worktree"),
             }
         },
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
+            "reservation": _reservation(),
+        },
         "bounded_worker_pilot": _queue_pilot_result(),
     }
     payload.update(overrides)
@@ -124,6 +158,7 @@ def test_builds_evidence_producer_request_from_queue_chain_state(tmp_path: Path)
         work_order=_work_order(),
         stage_results=_stage_results(tmp_path),
         repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
     )
 
     assert result.accepted is True
@@ -152,11 +187,27 @@ def test_builds_evidence_producer_request_from_queue_chain_state(tmp_path: Path)
     assert result.no_holoindex_reindex_performed is True
 
 
+def test_renewed_lease_preserves_original_admission_digest(tmp_path: Path) -> None:
+    result = build_resident_queue_slice_verifier_request(
+        work_order=_work_order(),
+        stage_results=_stage_results(tmp_path),
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_RenewedReservationStore(),
+    )
+
+    assert result.accepted is True
+    assert (
+        result.evidence_producer_request["assurance_reservation_digest"]
+        == _digest("0")
+    )
+
+
 def test_missing_slice_verifier_plan_rejects_before_request(tmp_path: Path) -> None:
     result = build_resident_queue_slice_verifier_request(
         work_order=_work_order(slice_verifier_plan={}),
         stage_results=_stage_results(tmp_path),
         repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
     )
 
     assert result.accepted is False
@@ -175,6 +226,7 @@ def test_rejected_bounded_worker_pilot_blocks_request(tmp_path: Path) -> None:
             ),
         ),
         repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
     )
 
     assert result.accepted is False
@@ -187,6 +239,7 @@ def test_missing_signed_receipt_chain_blocks_request(tmp_path: Path) -> None:
         work_order=_work_order(slice_verifier_plan=plan, bounded_worker_plan={}),
         stage_results=_stage_results(tmp_path),
         repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
     )
 
     assert result.accepted is False
@@ -199,6 +252,7 @@ def test_uses_pilot_written_artifacts_when_plan_expected_paths_are_absent(tmp_pa
         work_order=_work_order(slice_verifier_plan=plan),
         stage_results=_stage_results(tmp_path),
         repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
     )
 
     assert result.accepted is True

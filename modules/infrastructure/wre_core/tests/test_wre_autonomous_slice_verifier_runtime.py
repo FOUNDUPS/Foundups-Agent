@@ -25,6 +25,9 @@ def valid_request() -> dict:
         "slice_name": "WRE_AUTONOMOUS_SLICE_VERIFIER_RUNTIME_PHASE1",
         "worker_id": "worker:author-1",
         "verifier_id": "worker:verifier-1",
+        "assurance_reservation_id": "assurance-reservation-" + "1" * 20,
+        "assurance_reservation_digest": _digest("0"),
+        "verifier_task_id": "reddog-worker-dispatch-" + "2" * 16,
         "base_sha": BASE_SHA,
         "head_sha": HEAD_SHA,
         "allowed_path_patterns": [

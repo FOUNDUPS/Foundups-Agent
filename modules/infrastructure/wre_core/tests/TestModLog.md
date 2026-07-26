@@ -1,5 +1,14 @@
 # TestModLog - wre_core/tests
 
+## 2026-07-26: Independent assurance verifier lineage
+
+- Proved the autonomous verifier accepts only the immutable assurance
+  admission digest and exact author/verifier reservation lineage.
+- Proved renewable lease state cannot substitute a different admission,
+  task, principal, work order, snapshot, or WSP 15 allocation.
+- Kept terminal verifier evidence separate from author execution and
+  queue-stage ownership.
+
 ## 2026-07-25: Daemon self-audit runtime consumer alignment
 
 - Re-ran the daemon runtime-root confinement and secure persistence suite

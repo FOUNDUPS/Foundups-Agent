@@ -50,6 +50,9 @@ SIGNED_WORKER_QUEUE_LOOP_BINDING_REJECT = "SIGNED_WORKER_QUEUE_LOOP_BINDING_REJE
 OPENCLAW_SIGNED_WORKER_RUNTIME = "openclaw"
 OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY = "candidate_queue_review"
 OPENCLAW_QUEUE_STAGE_PROGRESS_CAPABILITY = "queue_stage_progress"
+OPENCLAW_INDEPENDENT_SLICE_VERIFICATION_CAPABILITY = (
+    "independent_slice_verification"
+)
 SIGNED_0102_WORKER_RUNTIME = "0102"
 SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY = "bounded_code_change"
 
@@ -122,6 +125,22 @@ def is_openclaw_queue_stage_progress_signed_worker_context(context: Mapping[str,
         and str(context.get("worker_runtime") or "").strip().lower() == OPENCLAW_SIGNED_WORKER_RUNTIME
         and str(context.get("capability") or "").strip().lower()
         == OPENCLAW_QUEUE_STAGE_PROGRESS_CAPABILITY
+    )
+
+
+def is_openclaw_independent_verifier_signed_worker_context(
+    context: Mapping[str, Any] | None,
+) -> bool:
+    """Return True only for the reserved independent verifier task."""
+
+    if not isinstance(context, Mapping):
+        return False
+    return (
+        str(context.get("source") or "") == SIGNED_WORKER_DISPATCH_TASK_SOURCE
+        and str(context.get("worker_runtime") or "").strip().lower()
+        == OPENCLAW_SIGNED_WORKER_RUNTIME
+        and str(context.get("capability") or "").strip().lower()
+        == OPENCLAW_INDEPENDENT_SLICE_VERIFICATION_CAPABILITY
     )
 
 
@@ -225,6 +244,9 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
     worker_dispatch_writer = _build_worker_dispatch_writer(env)
     if worker_dispatch_writer is not None:
         bootstrap_kwargs["worker_dispatch_writer"] = worker_dispatch_writer
+    assurance_reservation_store = _build_assurance_reservation_store(env)
+    if assurance_reservation_store is not None:
+        bootstrap_kwargs["assurance_reservation_store"] = assurance_reservation_store
     config = SignedWorkerQueueSerialLoopRunnerConfig(
         work_state_path=str(work_state_path),
         chain_results_path=str(chain_results_path),
@@ -394,6 +416,12 @@ def _build_worker_dispatch_writer(env: Mapping[str, str]) -> Any:
     return AgentDbSignedWorkerDispatchTaskWriter()
 
 
+def _build_assurance_reservation_store(env: Mapping[str, str]) -> Any:
+    from modules.infrastructure.database.src.agent_db import AgentDB
+
+    return AgentDB()
+
+
 def _stripped(value: Any) -> str:
     return str(value or "").strip()
 
@@ -415,6 +443,7 @@ def _optional_runtime_file_path(
 
 __all__ = [
     "OPENCLAW_CANDIDATE_QUEUE_REVIEW_CAPABILITY",
+    "OPENCLAW_INDEPENDENT_SLICE_VERIFICATION_CAPABILITY",
     "OPENCLAW_QUEUE_STAGE_PROGRESS_CAPABILITY",
     "OPENCLAW_SIGNED_WORKER_RUNTIME",
     "SIGNED_0102_BOUNDED_CODE_CHANGE_CAPABILITY",
@@ -426,6 +455,7 @@ __all__ = [
     "SignedWorkerOpenClawQueueLoopBindingResult",
     "build_reddog_signed_worker_queue_loop_runner_from_env",
     "is_0102_bounded_code_change_signed_worker_context",
+    "is_openclaw_independent_verifier_signed_worker_context",
     "is_openclaw_candidate_signed_worker_context",
     "is_openclaw_queue_stage_progress_signed_worker_context",
 ]

@@ -75,6 +75,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized
     _valve,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT,
     WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
     WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
     with_queue_wsp15_allocation,
@@ -184,6 +185,7 @@ def _seeded_store(bundle: dict, **stage_overrides: object) -> InMemoryResidentQu
         "executor_plan": {"decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT},
         "execution_valve": {"decision": QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT},
         WORKTREE_CREATE_STAGE_KEY: bundle["queue_worktree_create_result"],
+        "assurance_capacity_admission": ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT,
     }
     stage_results.update(stage_overrides)
     return InMemoryResidentQueueChainResultsStore(

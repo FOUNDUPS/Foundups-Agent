@@ -37,9 +37,12 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 
 RESIDENT_QUEUE_SERIAL_LOOP_COMPLETE = "RESIDENT_QUEUE_SERIAL_LOOP_COMPLETE"
 RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED = "RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED"
+RESIDENT_QUEUE_SERIAL_LOOP_BLOCKED_ASSURANCE_CAPACITY = (
+    "BLOCKED_ASSURANCE_CAPACITY"
+)
 RESIDENT_QUEUE_SERIAL_LOOP_REJECT = "RESIDENT_QUEUE_SERIAL_LOOP_REJECT"
 
-MAX_RESIDENT_QUEUE_SERIAL_LOOP_STEPS = 16
+MAX_RESIDENT_QUEUE_SERIAL_LOOP_STEPS = 24
 
 FAIL_EXPLICIT_LOOP_MISSING = "FAIL_EXPLICIT_RESIDENT_QUEUE_SERIAL_LOOP_MISSING"
 FAIL_MAX_STEPS_INVALID = "FAIL_MAX_STEPS_INVALID"
@@ -59,6 +62,8 @@ class ResidentQueueSerialLoopResult:
     next_action: Optional[str] = None
     final_plan: Optional[ResidentQueueOrchestrationPlan] = None
     dispatch_results: tuple[ResidentQueueNextStageDispatchResult, ...] = ()
+    queue_chain_requeue_required: bool = False
+    retry_at: Optional[str] = None
     no_default_handler_used: bool = True
     no_dependency_created_by_loop: bool = True
     no_signing_performed_by_loop: bool = True
@@ -195,9 +200,26 @@ def run_reddog_resident_queue_serial_loop(
                 dispatch_results=tuple(dispatch_results),
             )
         dispatch_results.append(dispatch)
-        if dispatch.dispatched_stage:
+        if (
+            dispatch.dispatched_stage
+            and dispatch.record_result is not None
+        ):
             dispatched.append(dispatch.dispatched_stage)
-
+        if dispatch.deferred:
+            return ResidentQueueSerialLoopResult(
+                accepted=True,
+                status=(
+                    dispatch.defer_reason
+                    or RESIDENT_QUEUE_SERIAL_LOOP_BLOCKED_ASSURANCE_CAPACITY
+                ),
+                steps_run=len(dispatch_results),
+                dispatched_stages=tuple(dispatched),
+                next_action=dispatch.next_action,
+                final_plan=dispatch.plan or current_plan,
+                dispatch_results=tuple(dispatch_results),
+                queue_chain_requeue_required=True,
+                retry_at=dispatch.retry_at,
+            )
         current_plan = _plan(
             work_state_snapshot=work_state_snapshot,
             store=store,
@@ -241,6 +263,7 @@ __all__ = [
     "FAIL_PLAN_NOT_READY",
     "MAX_RESIDENT_QUEUE_SERIAL_LOOP_STEPS",
     "RESIDENT_QUEUE_SERIAL_LOOP_COMPLETE",
+    "RESIDENT_QUEUE_SERIAL_LOOP_BLOCKED_ASSURANCE_CAPACITY",
     "RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED",
     "RESIDENT_QUEUE_SERIAL_LOOP_REJECT",
     "ResidentQueueSerialLoopResult",

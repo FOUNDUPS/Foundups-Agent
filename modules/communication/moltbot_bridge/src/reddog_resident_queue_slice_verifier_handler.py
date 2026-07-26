@@ -16,9 +16,13 @@ or re-index HoloIndex.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol
 
+from modules.communication.moltbot_bridge.src.reddog_openclaw_assurance_capacity import (
+    canonical_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     ResidentQueueChainResultsStore,
 )
@@ -52,6 +56,11 @@ FAIL_EVIDENCE_PRODUCER_REJECTED = "FAIL_EVIDENCE_PRODUCER_REJECTED"
 FAIL_WORK_ORDER_ID_MISSING = "FAIL_WORK_ORDER_ID_MISSING"
 FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
 FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED = "FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED"
+FAIL_ASSURANCE_RESERVATION_MISSING = "FAIL_ASSURANCE_RESERVATION_MISSING"
+FAIL_ASSURANCE_RESERVATION_MISMATCH = "FAIL_ASSURANCE_RESERVATION_MISMATCH"
+FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING = (
+    "FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING"
+)
 
 
 class ResidentQueueSliceVerifierWorkOrderResolver(Protocol):
@@ -121,6 +130,8 @@ class ResidentQueueSliceVerifierStageHandler:
     repo_root: Path | None = None
     slice_verifier_request_binding_enabled: bool = False
     holoindex_evidence: Mapping[str, Any] | None = None
+    assurance_reservation_store: Any = None
+    trusted_now: datetime | None = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != SLICE_VERIFIER_STAGE_KEY:
@@ -140,6 +151,12 @@ class ResidentQueueSliceVerifierStageHandler:
         bounded_worker_pilot = _mapping(stage_results.get(BOUNDED_WORKER_PILOT_STAGE_KEY))
         if not bounded_worker_pilot:
             return _reject(FAIL_BOUNDED_WORKER_PILOT_STAGE_MISSING)
+        reservation, reservation_reason = _verified_assurance_reservation(
+            stage_results=stage_results,
+            reservation_store=self.assurance_reservation_store,
+        )
+        if reservation_reason:
+            return _reject(reservation_reason)
 
         verifier_request = _mapping(self.verifier_request)
         evidence_producer_request = _mapping(self.evidence_producer_request)
@@ -171,6 +188,7 @@ class ResidentQueueSliceVerifierStageHandler:
                 stage_results=stage_results,
                 repo_root=self.repo_root,
                 holoindex_evidence=self.holoindex_evidence,
+                assurance_reservation_store=self.assurance_reservation_store,
             )
             slice_verifier_request_binding_result = bound.to_dict()
             if bound.accepted is not True:
@@ -204,12 +222,72 @@ class ResidentQueueSliceVerifierStageHandler:
                 diff_evidence=produced.diff_evidence,
                 test_evidence=produced.test_evidence,
             )
+        verifier_request = {
+            **dict(verifier_request),
+            "worker_id": str(reservation.get("author_principal_id") or ""),
+            "verifier_id": str(
+                reservation.get("verifier_principal_id") or ""
+            ),
+            "assurance_reservation_id": str(
+                reservation.get("reservation_id") or ""
+            ),
+            "assurance_reservation_digest": str(
+                reservation.get("admission_reservation_digest")
+                or reservation.get("reservation_digest")
+                or ""
+            ),
+            "verifier_task_id": str(
+                reservation.get("verifier_task_id") or ""
+            ),
+        }
 
         result = invoke_reddog_wre_queue_authorized_slice_verifier(
             explicit_queue_authorized_slice_verifier_requested=True,
             queue_bounded_worker_pilot_result=bounded_worker_pilot,
             verifier_request=verifier_request,
         ).to_dict()
+        terminal_receipt = _mapping(
+            _mapping(result.get("verifier_result")).get("receipt")
+        )
+        if terminal_receipt:
+            if not _terminal_receipt_matches_reservation(
+                terminal_receipt,
+                reservation=reservation,
+            ):
+                return _reject(
+                    FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING
+                )
+            completed = _mapping(
+                self.assurance_reservation_store.complete_independent_assurance(
+                    str(reservation.get("reservation_id") or ""),
+                    admission_reservation_digest=str(
+                        reservation.get("admission_reservation_digest")
+                        or reservation.get("reservation_digest")
+                        or ""
+                    ),
+                    terminal_receipt_id=str(
+                        terminal_receipt.get("receipt_id") or ""
+                    ),
+                    terminal_receipt_digest=str(
+                        terminal_receipt.get("receipt_digest")
+                        or canonical_digest(terminal_receipt)
+                    ),
+                    status=(
+                        "ACCEPT"
+                        if terminal_receipt.get("accepted") is True
+                        else "REJECT"
+                    ),
+                    now_iso=(self.trusted_now or datetime.now(timezone.utc))
+                    .astimezone(timezone.utc)
+                    .replace(microsecond=0)
+                    .isoformat(),
+                )
+            )
+            if completed.get("accepted") is not True:
+                return _reject(
+                    FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING
+                )
+            result["assurance_reservation_terminal_result"] = dict(completed)
         if evidence_producer_result is not None:
             result["evidence_producer_result"] = evidence_producer_result
             command_results = evidence_producer_result.get("command_results")
@@ -232,6 +310,13 @@ def _verifier_request_from_evidence(
         "slice_name": str(request.get("slice_name") or ""),
         "worker_id": str(request.get("worker_id") or ""),
         "verifier_id": str(request.get("verifier_id") or ""),
+        "assurance_reservation_id": str(
+            request.get("assurance_reservation_id") or ""
+        ),
+        "assurance_reservation_digest": str(
+            request.get("assurance_reservation_digest") or ""
+        ),
+        "verifier_task_id": str(request.get("verifier_task_id") or ""),
         "base_sha": str(request.get("base_sha") or ""),
         "head_sha": str(request.get("head_sha") or ""),
         "allowed_path_patterns": list(_list(request.get("allowed_path_patterns"))),
@@ -256,6 +341,72 @@ def _verifier_request_from_evidence(
     return verifier_request
 
 
+def _verified_assurance_reservation(
+    *,
+    stage_results: Mapping[str, Mapping[str, Any]],
+    reservation_store: Any,
+) -> tuple[Mapping[str, Any], str]:
+    admission = _mapping(stage_results.get("assurance_capacity_admission"))
+    recorded = _mapping(admission.get("reservation"))
+    reservation_id = str(recorded.get("reservation_id") or "")
+    if (
+        admission.get("decision") != "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+        or not reservation_id
+        or reservation_store is None
+    ):
+        return {}, FAIL_ASSURANCE_RESERVATION_MISSING
+    durable = _mapping(
+        reservation_store.get_independent_assurance_reservation(
+            reservation_id
+        )
+    )
+    if _mapping(durable.get("reservation")):
+        durable = _mapping(durable.get("reservation"))
+    if (
+        not durable
+        or str(durable.get("status") or "").lower() != "reserved"
+        or str(
+            durable.get("admission_reservation_digest")
+            or durable.get("reservation_digest")
+            or ""
+        )
+        != str(recorded.get("reservation_digest") or "")
+        or str(durable.get("author_task_id") or "")
+        == str(durable.get("verifier_task_id") or "")
+        or str(durable.get("author_principal_id") or "")
+        == str(durable.get("verifier_principal_id") or "")
+    ):
+        return {}, FAIL_ASSURANCE_RESERVATION_MISMATCH
+    return durable, ""
+
+
+def _terminal_receipt_matches_reservation(
+    receipt: Mapping[str, Any],
+    *,
+    reservation: Mapping[str, Any],
+) -> bool:
+    admission_digest = str(
+        reservation.get("admission_reservation_digest")
+        or reservation.get("reservation_digest")
+        or ""
+    )
+    expected = {
+        "assurance_reservation_id": str(
+            reservation.get("reservation_id") or ""
+        ),
+        "assurance_reservation_digest": admission_digest,
+        "verifier_task_id": str(reservation.get("verifier_task_id") or ""),
+        "worker_id": str(reservation.get("author_principal_id") or ""),
+        "verifier_id": str(reservation.get("verifier_principal_id") or ""),
+        "work_order_id": str(reservation.get("work_order_id") or ""),
+    }
+    return all(
+        expected_value
+        and str(receipt.get(field_name) or "") == expected_value
+        for field_name, expected_value in expected.items()
+    )
+
+
 def build_reddog_resident_queue_slice_verifier_stage_handler(
     *,
     chain_results_store: ResidentQueueChainResultsStore,
@@ -266,6 +417,8 @@ def build_reddog_resident_queue_slice_verifier_stage_handler(
     repo_root: Path | None = None,
     slice_verifier_request_binding_enabled: bool = False,
     holoindex_evidence: Mapping[str, Any] | None = None,
+    assurance_reservation_store: Any = None,
+    trusted_now: datetime | None = None,
 ) -> ResidentQueueSliceVerifierStageHandler:
     """Build the injected slice-verifier handler for the dispatcher."""
 
@@ -278,12 +431,17 @@ def build_reddog_resident_queue_slice_verifier_stage_handler(
         repo_root=repo_root,
         slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
         holoindex_evidence=holoindex_evidence,
+        assurance_reservation_store=assurance_reservation_store,
+        trusted_now=trusted_now,
     )
 
 
 __all__ = [
     "BOUNDED_WORKER_PILOT_STAGE_KEY",
     "FAIL_BOUNDED_WORKER_PILOT_STAGE_MISSING",
+    "FAIL_ASSURANCE_RESERVATION_MISMATCH",
+    "FAIL_ASSURANCE_RESERVATION_MISSING",
+    "FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING",
     "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_STAGE_MISMATCH",
     "FAIL_EVIDENCE_COMMAND_RUNNER_MISSING",
