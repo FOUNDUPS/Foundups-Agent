@@ -89,14 +89,31 @@ def _install_successful_start(
         lambda _host, _port: True,
     )
 
-    def fake_health_probe(**kwargs: Any) -> bool:
+    def fake_health_exchange(**kwargs: Any):
         launch.setdefault("probe_timeouts", []).append(kwargs["timeout_seconds"])
-        return kwargs["token"] == TOKEN
+        launch.setdefault("probe_bindings", []).append(
+            (
+                kwargs["expected_repo_head_sha"],
+                kwargs["expected_repo_root_digest"],
+                kwargs["expected_generation_id"],
+                kwargs["expected_receipt_digest"],
+            )
+        )
+        return supervisor_module.AuthenticatedOwnerHealthProof(
+            ready=kwargs["token"] == TOKEN,
+            rejection="",
+            binding=(
+                kwargs["expected_repo_head_sha"] or ("a" * 40),
+                kwargs["expected_repo_root_digest"] or ("sha256:" + ("d" * 64)),
+                kwargs["expected_generation_id"] or ("sha256:" + ("b" * 64)),
+                kwargs["expected_receipt_digest"] or ("sha256:" + ("c" * 64)),
+            ),
+        )
 
     monkeypatch.setattr(
         supervisor_module,
-        "_authenticated_health_probe",
-        fake_health_probe,
+        "_authenticated_health_exchange",
+        fake_health_exchange,
     )
     monkeypatch.setattr(
         supervisor_module.secrets,
@@ -149,12 +166,42 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
     assert options["env"][SERVICE_TOKEN_ENV] == TOKEN
     assert SERVICE_URL_ENV not in options["env"]
     assert launch["probe_timeouts"] == [DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS]
+    assert launch["probe_bindings"] == [("", "", "", "")]
     assert registered
 
     owner.stop()
     assert process.terminated is True
     assert unregistered
     assert owner.is_ready is False
+
+
+def test_start_proves_exact_binding_in_its_single_authoritative_health_loop(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    process = _FakeProcess()
+    launch = _install_successful_start(monkeypatch, process)
+    monkeypatch.setattr(supervisor_module.atexit, "register", lambda _callback: None)
+    monkeypatch.setattr(supervisor_module.atexit, "unregister", lambda _callback: None)
+    expected = (
+        "a" * 40,
+        "sha256:" + ("d" * 64),
+        "sha256:" + ("b" * 64),
+        "sha256:" + ("c" * 64),
+    )
+
+    owner = HoloQueryServiceSupervisor(repo_root=tmp_path).start(
+        expected_repo_head_sha=expected[0],
+        expected_repo_root_digest=expected[1],
+        expected_generation_id=expected[2],
+        expected_receipt_digest=expected[3],
+    )
+
+    assert owner.is_ready is True
+    assert owner.verified_binding == expected
+    assert launch["probe_bindings"] == [expected]
+    owner.stop()
+    assert owner.verified_binding == ("", "", "", "")
 
 
 def test_start_passes_explicit_ssd_path_and_is_idempotent(
@@ -218,13 +265,10 @@ def test_startup_timeout_terminates_owner_and_never_exposes_token_in_error(
     monkeypatch.setattr(supervisor_module.subprocess, "Popen", fake_popen)
     monkeypatch.setattr(
         supervisor_module,
-        "_authenticated_health_probe",
-        lambda **_kwargs: False,
-    )
-    monkeypatch.setattr(
-        supervisor_module,
-        "_authenticated_health_rejection",
-        lambda **_kwargs: "",
+        "_authenticated_health_exchange",
+        lambda **_kwargs: supervisor_module.AuthenticatedOwnerHealthProof(
+            False, "", ("", "", "", "")
+        ),
     )
     monkeypatch.setattr(
         supervisor_module.secrets,
@@ -269,13 +313,10 @@ def test_startup_stops_immediately_on_authenticated_stale_owner(
     )
     monkeypatch.setattr(
         supervisor_module,
-        "_authenticated_health_probe",
-        lambda **_kwargs: False,
-    )
-    monkeypatch.setattr(
-        supervisor_module,
-        "_authenticated_health_rejection",
-        lambda **_kwargs: "REPO_HEAD_MISMATCH",
+        "_authenticated_health_exchange",
+        lambda **_kwargs: supervisor_module.AuthenticatedOwnerHealthProof(
+            False, "REPO_HEAD_MISMATCH", ("", "", "", "")
+        ),
     )
     monkeypatch.setattr(
         supervisor_module.secrets,
@@ -310,6 +351,48 @@ def test_health_rejection_accepts_only_terminal_authenticated_contract() -> None
     assert supervisor_module._health_rejection_code({**base, "schema_version": "wrong"}) == ""
 
 
+def test_health_rejection_treats_authenticated_ready_binding_mismatch_as_terminal(
+) -> None:
+    payload = {
+        "schema_version": HEALTH_SCHEMA_VERSION,
+        "ok": True,
+        "source": "holoindex",
+        "status": "ready",
+        "loopback_only": True,
+        "freshness": "CURRENT",
+        "error": "",
+        "stale_reasons": [],
+        "index_gap_detected": False,
+        "no_holoindex_reindex_performed": True,
+        "retrieval_mode": "semantic",
+        "repo_head_sha": "a" * 40,
+        "repo_root_digest": "sha256:" + ("d" * 64),
+        "freshness_generation_id": "sha256:" + ("b" * 64),
+        "freshness_receipt_digest": "sha256:" + ("c" * 64),
+    }
+
+    assert (
+        supervisor_module._health_binding_rejection_code(
+            payload,
+            expected_repo_head_sha="d" * 40,
+            expected_repo_root_digest="sha256:" + ("d" * 64),
+            expected_generation_id="sha256:" + ("b" * 64),
+            expected_receipt_digest="sha256:" + ("c" * 64),
+        )
+        == supervisor_module.BINDING_MISMATCH_ERROR
+    )
+    assert (
+        supervisor_module._health_binding_rejection_code(
+            payload,
+            expected_repo_head_sha="a" * 40,
+            expected_repo_root_digest="sha256:" + ("d" * 64),
+            expected_generation_id="sha256:" + ("b" * 64),
+            expected_receipt_digest="sha256:" + ("c" * 64),
+        )
+        == ""
+    )
+
+
 def test_startup_fails_closed_when_spawned_owner_exits(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -341,13 +424,22 @@ def test_startup_fails_if_owner_exits_after_health_response(
         lambda _bytes: TOKEN,
     )
 
-    def exit_during_probe(**_kwargs: Any) -> bool:
+    def exit_during_probe(**_kwargs: Any):
         process.returncode = 9
-        return True
+        return supervisor_module.AuthenticatedOwnerHealthProof(
+            True,
+            "",
+            (
+                "a" * 40,
+                "sha256:" + ("d" * 64),
+                "sha256:" + ("b" * 64),
+                "sha256:" + ("c" * 64),
+            ),
+        )
 
     monkeypatch.setattr(
         supervisor_module,
-        "_authenticated_health_probe",
+        "_authenticated_health_exchange",
         exit_during_probe,
     )
     owner = HoloQueryServiceSupervisor(repo_root=tmp_path)
@@ -512,6 +604,7 @@ def test_health_probe_requires_exact_authenticated_ready_contract() -> None:
                     "no_holoindex_reindex_performed": True,
                     "retrieval_mode": "semantic",
                     "repo_head_sha": "a" * 40,
+                    "repo_root_digest": "sha256:" + ("d" * 64),
                     "freshness_generation_id": "sha256:generation",
                     "freshness_receipt_digest": "sha256:receipt",
                 }
@@ -562,6 +655,7 @@ def test_health_probe_accepts_semantic_response_beyond_legacy_one_second() -> No
                 "no_holoindex_reindex_performed": True,
                 "retrieval_mode": "semantic",
                 "repo_head_sha": "a" * 40,
+                "repo_root_digest": "sha256:" + ("d" * 64),
                 "freshness_generation_id": "sha256:" + "b" * 64,
                 "freshness_receipt_digest": "sha256:" + "c" * 64,
             }
@@ -606,6 +700,7 @@ def _binding_health_handler() -> type[BaseHTTPRequestHandler]:
                     "no_holoindex_reindex_performed": True,
                     "retrieval_mode": "semantic",
                     "repo_head_sha": "a" * 40,
+                    "repo_root_digest": "sha256:" + ("d" * 64),
                     "freshness_generation_id": "sha256:generation",
                     "freshness_receipt_digest": "sha256:receipt",
                 }
@@ -635,6 +730,7 @@ def test_health_probe_rejects_expected_binding_mismatch() -> None:
             token=TOKEN,
             timeout_seconds=1.0,
             expected_repo_head_sha="b" * 40,
+            expected_repo_root_digest="sha256:" + ("d" * 64),
             expected_generation_id="sha256:generation",
         )
         assert not supervisor_module._authenticated_health_probe(
@@ -643,6 +739,16 @@ def test_health_probe_rejects_expected_binding_mismatch() -> None:
             token=TOKEN,
             timeout_seconds=1.0,
             expected_repo_head_sha="a" * 40,
+            expected_repo_root_digest="sha256:" + ("e" * 64),
+            expected_generation_id="sha256:generation",
+        )
+        assert not supervisor_module._authenticated_health_probe(
+            host=OWNER_HOST,
+            port=server.server_address[1],
+            token=TOKEN,
+            timeout_seconds=1.0,
+            expected_repo_head_sha="a" * 40,
+            expected_repo_root_digest="sha256:" + ("d" * 64),
             expected_generation_id="sha256:generation",
             expected_receipt_digest="sha256:other",
         )

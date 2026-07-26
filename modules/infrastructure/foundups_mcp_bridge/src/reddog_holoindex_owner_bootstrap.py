@@ -8,9 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
 
+from holo_index.repository_state import repository_root_digest
 from holo_index.storage_contract import resolve_holoindex_ssd_path
 
 from .holo_query_service_supervisor import (
+    DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
     SERVICE_TOKEN_ENV,
     SERVICE_URL_ENV,
     HoloQueryServiceSupervisor,
@@ -31,10 +33,10 @@ AUTO_START_DISABLED_ERROR = "HOLOINDEX_QUERY_SERVICE_AUTO_START_DISABLED"
 BOOTSTRAP_FAILED_ERROR = "HOLOINDEX_QUERY_SERVICE_BOOTSTRAP_FAILED"
 CONFIGURED_INVALID_ERROR = "HOLOINDEX_QUERY_SERVICE_CONFIGURED_INVALID"
 CONFIGURED_UNREADY_ERROR = "HOLOINDEX_QUERY_SERVICE_CONFIGURED_UNREADY"
-# The owner health contract includes one semantic canary. A cold-but-ready
-# local owner has been observed just above one second, so the final binding
-# proof needs a bounded response window distinct from ordinary query latency.
-CONFIGURED_HEALTH_TIMEOUT_SECONDS = 5.0
+# The owner health contract runs a semantic canary. Keep the exact-binding
+# proof aligned with the supervisor rather than imposing a shorter timeout
+# than the query service itself permits.
+CONFIGURED_HEALTH_TIMEOUT_SECONDS = DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS
 MIN_CONFIGURED_TOKEN_CHARS = 32
 QUERY_PATH = "/holoindex/v1/query"
 PHASE1_BIND_HOST = "127.0.0.1"
@@ -42,7 +44,7 @@ PHASE1_BIND_HOST = "127.0.0.1"
 _OWNER_LOCK = threading.RLock()
 _OWNER_SUPERVISOR: HoloQueryServiceSupervisor | None = None
 _OWNER_HANDOFF: tuple[str, str] | None = None
-_OWNER_EXPECTED_BINDING: tuple[str, str, str] = ("", "", "")
+_OWNER_EXPECTED_BINDING: tuple[str, str, str, str] = ("", "", "", "")
 
 
 @dataclass(frozen=True)
@@ -59,6 +61,7 @@ def _configured_owner_health_ready(
     service_url: str,
     token: str,
     expected_repo_head_sha: str = "",
+    expected_repo_root_digest: str = "",
     expected_generation_id: str = "",
     expected_receipt_digest: str = "",
 ) -> bool:
@@ -77,6 +80,8 @@ def _configured_owner_health_ready(
     }
     if expected_repo_head_sha:
         probe_kwargs["expected_repo_head_sha"] = expected_repo_head_sha
+    if expected_repo_root_digest:
+        probe_kwargs["expected_repo_root_digest"] = expected_repo_root_digest
     if expected_generation_id:
         probe_kwargs["expected_generation_id"] = expected_generation_id
     if expected_receipt_digest:
@@ -108,6 +113,7 @@ def _service_endpoint_is_valid(service_url: str) -> bool:
 def _configured_service_result(
     *,
     expected_repo_head_sha: str = "",
+    expected_repo_root_digest: str = "",
     expected_generation_id: str = "",
     expected_receipt_digest: str = "",
 ) -> RedDogHoloIndexOwnerBootstrapResult | None:
@@ -131,6 +137,7 @@ def _configured_service_result(
         service_url=url,
         token=token,
         expected_repo_head_sha=expected_repo_head_sha,
+        expected_repo_root_digest=expected_repo_root_digest,
         expected_generation_id=expected_generation_id,
         expected_receipt_digest=expected_receipt_digest,
     ):
@@ -149,10 +156,11 @@ def _validated_owner_handoff(
     supervisor: HoloQueryServiceSupervisor,
     *,
     expected_repo_head_sha: str = "",
+    expected_repo_root_digest: str = "",
     expected_generation_id: str = "",
     expected_receipt_digest: str = "",
 ) -> tuple[str, str]:
-    """Read and prove a supervisor handoff without exporting its secret."""
+    """Read a handoff whose exact binding was proven during supervisor startup."""
     handoff = supervisor.environment_for_child({})
     service_url = str(handoff.get(SERVICE_URL_ENV) or "").strip()
     token = str(handoff.get(SERVICE_TOKEN_ENV) or "").strip()
@@ -161,12 +169,16 @@ def _validated_owner_handoff(
         or len(token) < MIN_CONFIGURED_TOKEN_CHARS
     ):
         raise HoloQueryServiceSupervisorError(CONFIGURED_INVALID_ERROR)
-    if not _configured_owner_health_ready(
-        service_url=service_url,
-        token=token,
-        expected_repo_head_sha=expected_repo_head_sha,
-        expected_generation_id=expected_generation_id,
-        expected_receipt_digest=expected_receipt_digest,
+    expected_binding = (
+        expected_repo_head_sha,
+        expected_repo_root_digest,
+        expected_generation_id,
+        expected_receipt_digest,
+    )
+    verified_binding = supervisor.verified_binding
+    if not supervisor.is_ready or any(
+        expected and expected != verified
+        for expected, verified in zip(expected_binding, verified_binding)
     ):
         raise HoloQueryServiceSupervisorError(CONFIGURED_UNREADY_ERROR)
     return service_url, token
@@ -201,23 +213,29 @@ def restart_reddog_holoindex_owner(
         supervisor.stop()
         _OWNER_SUPERVISOR = None
         _OWNER_HANDOFF = None
-        _OWNER_EXPECTED_BINDING = ("", "", "")
+        _OWNER_EXPECTED_BINDING = ("", "", "", "")
         restarted = ensure_reddog_holoindex_owner(
             repo_root=repo_root,
             requested=True,
             expected_repo_head_sha=expected[0],
-            expected_generation_id=expected[1],
-            expected_receipt_digest=expected[2],
+            expected_generation_id=expected[2],
+            expected_receipt_digest=expected[3],
         )
         return _OWNER_HANDOFF if restarted.ready else None
 
 
 def _requested_binding(
+    repo_root: Path | str,
     repo_head_sha: str,
     generation_id: str,
     receipt_digest: str,
-) -> tuple[str, str, str]:
-    return repo_head_sha, generation_id, receipt_digest
+) -> tuple[str, str, str, str]:
+    return (
+        repo_head_sha,
+        repository_root_digest(Path(repo_root)),
+        generation_id,
+        receipt_digest,
+    )
 
 
 def _stop_owned_owner() -> None:
@@ -228,12 +246,12 @@ def _stop_owned_owner() -> None:
         supervisor.stop()
     _OWNER_SUPERVISOR = None
     _OWNER_HANDOFF = None
-    _OWNER_EXPECTED_BINDING = ("", "", "")
+    _OWNER_EXPECTED_BINDING = ("", "", "", "")
 
 
 def _reuse_owned_owner(
     *,
-    expected_binding: tuple[str, str, str],
+    expected_binding: tuple[str, str, str, str],
 ) -> RedDogHoloIndexOwnerBootstrapResult | None:
     """Return REUSED only after the live owner matches and reproves binding."""
     global _OWNER_HANDOFF
@@ -254,8 +272,9 @@ def _reuse_owned_owner(
         _OWNER_HANDOFF = _validated_owner_handoff(
             supervisor,
             expected_repo_head_sha=expected_binding[0],
-            expected_generation_id=expected_binding[1],
-            expected_receipt_digest=expected_binding[2],
+            expected_repo_root_digest=expected_binding[1],
+            expected_generation_id=expected_binding[2],
+            expected_receipt_digest=expected_binding[3],
         )
     except Exception:
         _stop_owned_owner()
@@ -266,7 +285,7 @@ def _reuse_owned_owner(
 def _start_owned_owner(
     *,
     repo_root: Path | str,
-    expected_binding: tuple[str, str, str],
+    expected_binding: tuple[str, str, str, str],
 ) -> RedDogHoloIndexOwnerBootstrapResult:
     """Start, authenticate, and retain one process-private owner."""
     global _OWNER_EXPECTED_BINDING, _OWNER_HANDOFF, _OWNER_SUPERVISOR
@@ -277,12 +296,18 @@ def _start_owned_owner(
             repo_root=repo_root,
             ssd_path=ssd_path,
         )
-        supervisor.start()
+        supervisor.start(
+            expected_repo_head_sha=expected_binding[0],
+            expected_repo_root_digest=expected_binding[1],
+            expected_generation_id=expected_binding[2],
+            expected_receipt_digest=expected_binding[3],
+        )
         handoff = _validated_owner_handoff(
             supervisor,
             expected_repo_head_sha=expected_binding[0],
-            expected_generation_id=expected_binding[1],
-            expected_receipt_digest=expected_binding[2],
+            expected_repo_root_digest=expected_binding[1],
+            expected_generation_id=expected_binding[2],
+            expected_receipt_digest=expected_binding[3],
         )
     except HoloQueryServiceSupervisorError as exc:
         if supervisor is not None:
@@ -321,6 +346,7 @@ def ensure_reddog_holoindex_owner(
             status=OWNER_NOT_REQUESTED,
         )
     expected_binding = _requested_binding(
+        repo_root,
         expected_repo_head_sha,
         expected_generation_id,
         expected_receipt_digest,
@@ -331,6 +357,7 @@ def ensure_reddog_holoindex_owner(
             return reused
         configured_result = _configured_service_result(
             expected_repo_head_sha=expected_repo_head_sha,
+            expected_repo_root_digest=expected_binding[1],
             expected_generation_id=expected_generation_id,
             expected_receipt_digest=expected_receipt_digest,
         )
@@ -355,7 +382,7 @@ def cleanup_reddog_holoindex_owner(*, restore_environment: bool = True) -> None:
     with _OWNER_LOCK:
         supervisor, _OWNER_SUPERVISOR = _OWNER_SUPERVISOR, None
         _OWNER_HANDOFF = None
-        _OWNER_EXPECTED_BINDING = ("", "", "")
+        _OWNER_EXPECTED_BINDING = ("", "", "", "")
         if supervisor is not None:
             supervisor.stop()
 

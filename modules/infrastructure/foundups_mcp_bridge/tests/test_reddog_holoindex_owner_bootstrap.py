@@ -34,14 +34,29 @@ class _FakeSupervisor:
         self.ssd_path = Path(ssd_path)
         self.started = False
         self.stopped = False
+        self.verified_binding = ("", "", "", "")
         self.__class__.instances.append(self)
 
     @property
     def is_ready(self) -> bool:
         return self.started and not self.stopped
 
-    def start(self) -> "_FakeSupervisor":
+    def start(
+        self,
+        *,
+        expected_repo_head_sha: str = "",
+        expected_repo_root_digest: str = "",
+        expected_generation_id: str = "",
+        expected_receipt_digest: str = "",
+    ) -> "_FakeSupervisor":
         self.started = True
+        self.stopped = False
+        self.verified_binding = (
+            expected_repo_head_sha,
+            expected_repo_root_digest,
+            expected_generation_id,
+            expected_receipt_digest,
+        )
         return self
 
     def environment_for_child(
@@ -59,6 +74,7 @@ class _FakeSupervisor:
 
     def stop(self) -> None:
         self.stopped = True
+        self.verified_binding = ("", "", "", "")
 
 
 @pytest.fixture(autouse=True)
@@ -171,7 +187,60 @@ def test_final_binding_probe_allows_bounded_semantic_canary_latency(
         expected_receipt_digest="sha256:" + ("c" * 64),
     )
     assert observed == [bootstrap.CONFIGURED_HEALTH_TIMEOUT_SECONDS]
-    assert 1.1 <= observed[0] <= 5.0
+    assert observed[0] == bootstrap.DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS
+
+
+def test_private_handoff_uses_binding_proven_during_supervisor_startup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    health = Mock(side_effect=AssertionError("handoff must not rerun semantic health"))
+    monkeypatch.setattr(bootstrap, "_configured_owner_health_ready", health)
+    supervisor = _FakeSupervisor(repo_root=tmp_path, ssd_path=tmp_path)
+    supervisor.start(
+        expected_repo_head_sha="a" * 40,
+        expected_repo_root_digest="sha256:" + ("d" * 64),
+        expected_generation_id="sha256:" + ("b" * 64),
+        expected_receipt_digest="sha256:" + ("c" * 64),
+    )
+
+    handoff = bootstrap._validated_owner_handoff(
+        supervisor,
+        expected_repo_head_sha="a" * 40,
+        expected_repo_root_digest="sha256:" + ("d" * 64),
+        expected_generation_id="sha256:" + ("b" * 64),
+        expected_receipt_digest="sha256:" + ("c" * 64),
+    )
+
+    assert handoff == (SAFE_URL, SAFE_TOKEN)
+    health.assert_not_called()
+
+
+def test_private_handoff_fails_closed_when_supervisor_proved_another_binding(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    health = Mock(side_effect=AssertionError("handoff must not rerun semantic health"))
+    monkeypatch.setattr(bootstrap, "_configured_owner_health_ready", health)
+    supervisor = _FakeSupervisor(repo_root=tmp_path, ssd_path=tmp_path)
+    supervisor.start(
+        expected_repo_head_sha="d" * 40,
+        expected_repo_root_digest="sha256:" + ("a" * 64),
+        expected_generation_id="sha256:" + ("e" * 64),
+        expected_receipt_digest="sha256:" + ("f" * 64),
+    )
+
+    with pytest.raises(HoloQueryServiceSupervisorError) as exc_info:
+        bootstrap._validated_owner_handoff(
+            supervisor,
+            expected_repo_head_sha="a" * 40,
+            expected_repo_root_digest="sha256:" + ("d" * 64),
+            expected_generation_id="sha256:" + ("b" * 64),
+            expected_receipt_digest="sha256:" + ("c" * 64),
+        )
+
+    assert exc_info.value.code == bootstrap.CONFIGURED_UNREADY_ERROR
+    health.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -233,6 +302,7 @@ def test_configured_service_requires_authenticated_semantic_health(
         service_url=SAFE_URL,
         token=SAFE_TOKEN,
         expected_repo_head_sha="",
+        expected_repo_root_digest=bootstrap.repository_root_digest(tmp_path),
         expected_generation_id="",
         expected_receipt_digest="",
     )
@@ -309,6 +379,47 @@ def test_owner_starts_once_and_reuses_process_lifetime_instance(
         SAFE_URL,
         SAFE_TOKEN,
     )
+
+
+def test_changed_exact_binding_replaces_owned_process_instead_of_reusing_it(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    first_binding = (
+        "a" * 40,
+        bootstrap.repository_root_digest(tmp_path),
+        "sha256:" + ("b" * 64),
+        "sha256:" + ("c" * 64),
+    )
+    second_binding = (
+        "d" * 40,
+        bootstrap.repository_root_digest(tmp_path),
+        "sha256:" + ("e" * 64),
+        "sha256:" + ("f" * 64),
+    )
+    first = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path,
+        requested=True,
+        expected_repo_head_sha=first_binding[0],
+        expected_generation_id=first_binding[2],
+        expected_receipt_digest=first_binding[3],
+    )
+    first_owner = _FakeSupervisor.instances[0]
+
+    second = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path,
+        requested=True,
+        expected_repo_head_sha=second_binding[0],
+        expected_generation_id=second_binding[2],
+        expected_receipt_digest=second_binding[3],
+    )
+
+    assert first.status == bootstrap.OWNER_STARTED
+    assert second.status == bootstrap.OWNER_STARTED
+    assert first_owner.stopped is True
+    assert len(_FakeSupervisor.instances) == 2
+    assert _FakeSupervisor.instances[-1].verified_binding == second_binding
 
 
 def test_auto_owner_secret_is_not_inherited_by_unrelated_subprocess(
@@ -393,7 +504,7 @@ def test_private_resolver_does_not_health_probe_a_live_busy_owner(
     assert first.stopped is False
     assert len(_FakeSupervisor.instances) == 1
     assert handoff == (SAFE_URL, SAFE_TOKEN)
-    assert health.call_count == 1
+    health.assert_not_called()
 
 
 def test_explicit_private_restart_replaces_failed_handoff(
@@ -444,7 +555,7 @@ def test_supervisor_failure_returns_only_stable_error_code(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FailingSupervisor(_FakeSupervisor):
-        def start(self) -> "_FakeSupervisor":
+        def start(self, **_kwargs) -> "_FakeSupervisor":
             raise HoloQueryServiceSupervisorError(
                 "HOLOINDEX_QUERY_SERVICE_STARTUP_TIMEOUT"
             )

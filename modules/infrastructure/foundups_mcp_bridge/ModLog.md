@@ -1,5 +1,23 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-26 - HoloIndex exact-binding startup proof consolidation
+
+- OBSERVED: exact-HEAD maintenance succeeded, but automatic owner bootstrap
+  intermittently failed because it ran a second semantic health canary after
+  the supervisor had already proved readiness; the duplicate five-second
+  probe passed only 7/10 repeated live starts.
+- The supervisor startup loop now proves the requested repository HEAD,
+  repository-root digest, generation, and freshness-receipt digest in one
+  authoritative authenticated health exchange and retains the actual returned
+  binding with the live process.
+- The process-private handoff validates process liveness, endpoint/token
+  shape, and the retained exact binding without issuing a duplicate semantic
+  query. Ten repeated live starts passed after the correction. Query-time
+  pre/post freshness proof, authentication, loopback restriction, and
+  no-reindex authority remain unchanged.
+- An authenticated ready owner proving a different binding is now a terminal
+  startup rejection instead of consuming the full retry window.
+
 ## 2026-07-25 - HoloIndex parent-process lifecycle correction
 
 - OBSERVED: the blocking stdin watchdog introduced in v0.4.19 allowed the HTTP socket to listen but prevented semantic health from completing beyond 120 seconds on Windows; the same owner without that reader returned CURRENT in about 12 seconds.
