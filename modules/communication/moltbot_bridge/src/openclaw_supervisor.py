@@ -322,6 +322,25 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
     task_id, context, task_reject = _signed_worker_claimed_task_context(db, task)
     if task_reject is not None:
         return task_reject
+    return _signed_worker_execute_claimed_task(
+        repo_root=repo_root,
+        db=db,
+        task_id=task_id,
+        context=context,
+        signed_worker_runner=signed_worker_runner,
+    )
+
+
+def _signed_worker_execute_claimed_task(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    signed_worker_runner: Any | None,
+) -> Dict[str, Any]:
+    """Resolve the runner, execute the claimed task, and persist its result."""
+
     effective_runner, runner_reject = _signed_worker_effective_runner(
         repo_root=repo_root, db=db, task_id=task_id, context=context,
         signed_worker_runner=signed_worker_runner,
