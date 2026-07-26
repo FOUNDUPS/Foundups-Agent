@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.24
+Version: 0.4.25
+
+Version 0.4.25 pins the checkout-local WRE Skillz loader and regenerated
+backend dependency manifest. Isolated workers now reject registry locations
+that are absolute, traverse parents, or canonically escape their assigned
+checkout.
 
 Version 0.4.24 gives the process-private HoloIndex semantic owner one bounded
 restart after an explicit cold-start lifecycle failure. Configured owners are
@@ -256,6 +261,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.24.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.25.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

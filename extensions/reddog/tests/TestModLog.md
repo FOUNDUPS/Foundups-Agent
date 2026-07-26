@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-27 - Checkout-local WRE Skillz compatibility (0.4.25)
+
+- Proved the regenerated manifest and extension-pinned digest bind both the
+  checkout-local WRE loader and its authoritative registry.
+- Re-ran backend compatibility, extension contract, and packaging checks.
+
 ## 2026-07-27 - HoloIndex owner cold-start retry (0.4.24)
 
 - Proved one transient process-private owner restart can recover semantic

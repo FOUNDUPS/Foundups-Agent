@@ -1,5 +1,9 @@
 # RedDog Interface
 
+Version 0.4.25 pins the regenerated backend manifest after WRE Skillz
+resolution became checkout-local. Backend compatibility now requires the
+portable registry and loader that reject cross-checkout execution paths.
+
 Version 0.4.24 retries the process-private HoloIndex semantic owner once after
 an explicit transient startup or semantic-backend lifecycle failure. It never
 restarts a configured owner, never re-indexes during a query, and never retries

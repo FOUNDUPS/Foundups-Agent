@@ -599,11 +599,11 @@ class DiscoveredSkill:
     has_evals: bool = False
 ```
 
-#### WRESkillsLoader Hygiene Methods
+#### WRESkillsLoader Hygiene and Checkout-Binding Methods
 
 ```python
 class WRESkillsLoader:
-    """Extended with Skills 2.0 hygiene enforcement."""
+    """Skills 2.0 hygiene with authoritative checkout-bound skill paths."""
 
     def check_skill_hygiene(self, skill_name: str) -> SkillHygieneStatus:
         """

@@ -8,7 +8,7 @@ WSP Compliance: WSP 5 (Test Coverage), WSP 96 (WRE Skills)
 
 import pytest
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from datetime import datetime, timezone, timedelta
 
 from modules.infrastructure.wre_core.skillz.wre_skills_loader import (
@@ -141,22 +141,22 @@ retirement_date: null
             "version": "2.0",
             "skills": {
                 "valid_skill": {
-                    "location": str(tmp_skill_dir / "skillz" / "valid_skill"),
+                    "location": "skillz/valid_skill",
                     "primary_agent": "qwen",
                     "promotion_state": "production",
                 },
                 "retired_skill": {
-                    "location": str(tmp_skill_dir / "skillz" / "retired_skill"),
+                    "location": "skillz/retired_skill",
                     "primary_agent": "qwen",
                     "promotion_state": "production",
                 },
                 "invalid_category_skill": {
-                    "location": str(tmp_skill_dir / "skillz" / "invalid_category_skill"),
+                    "location": "skillz/invalid_category_skill",
                     "primary_agent": "qwen",
                     "promotion_state": "production",
                 },
                 "no_category_skill": {
-                    "location": str(tmp_skill_dir / "skillz" / "no_category_skill"),
+                    "location": "skillz/no_category_skill",
                     "primary_agent": "qwen",
                     "promotion_state": "production",
                 },
@@ -166,9 +166,10 @@ retirement_date: null
         registry_path = tmp_skill_dir / "skills_registry_v2.json"
         registry_path.write_text(json.dumps(registry))
 
-        loader = WRESkillsLoader(registry_path=registry_path)
-        loader.repo_root = tmp_skill_dir
-        return loader
+        return WRESkillsLoader(
+            registry_path=registry_path,
+            repo_root=tmp_skill_dir,
+        )
 
     def test_check_skill_hygiene_valid(self, loader_with_registry):
         """Valid skill passes hygiene check."""
@@ -255,6 +256,151 @@ retirement_date: null
         status = loader_with_registry.check_skill_hygiene("no_category_skill")
         assert status.is_healthy is False
         assert status.missing_category is True
+
+
+class TestCheckoutLocalSkillResolution:
+    """Skill execution paths must stay inside the loader's exact checkout."""
+
+    @staticmethod
+    def _loader(tmp_path, skill_name, location):
+        registry_path = tmp_path / "skills_registry_v2.json"
+        registry_path.write_text(
+            json.dumps(
+                {
+                    "version": "2.0",
+                    "skills": {
+                        skill_name: {
+                            "location": location,
+                            "primary_agent": "qwen",
+                        }
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        return WRESkillsLoader(
+            registry_path=registry_path,
+            repo_root=tmp_path,
+        )
+
+    def test_default_repo_root_is_loader_checkout(self):
+        loader = WRESkillsLoader()
+
+        assert loader.repo_root == Path(__file__).resolve().parents[4]
+
+    def test_checked_in_registry_locations_are_portable(self):
+        loader = WRESkillsLoader()
+
+        for skill_info in loader.registry["skills"].values():
+            location = skill_info["location"]
+            assert not PureWindowsPath(location).drive
+            assert not PureWindowsPath(location).is_absolute()
+            assert not PurePosixPath(location).is_absolute()
+            assert ".." not in PurePosixPath(location).parts
+
+    def test_relative_location_resolves_inside_injected_checkout(self, tmp_path):
+        skill_dir = tmp_path / "skillz" / "local_skill"
+        skill_dir.mkdir(parents=True)
+        expected = skill_dir / "SKILLz.md"
+        expected.write_text("# Local skill\n", encoding="utf-8")
+        loader = self._loader(tmp_path, "local_skill", "skillz/local_skill")
+
+        assert loader.resolve_skill_file("local_skill") == expected.resolve()
+
+    def test_absolute_location_cannot_cross_into_another_checkout(self, tmp_path):
+        checkout = tmp_path / "checkout"
+        checkout.mkdir()
+        foreign = tmp_path / "foreign" / "skillz" / "foreign_skill"
+        foreign.mkdir(parents=True)
+        (foreign / "SKILLz.md").write_text("# Foreign skill\n", encoding="utf-8")
+        loader = self._loader(
+            checkout,
+            "foreign_skill",
+            str(foreign),
+        )
+
+        with pytest.raises(ValueError, match="checkout-relative"):
+            loader.resolve_skill_file("foreign_skill")
+
+    def test_parent_traversal_location_fails_closed(self, tmp_path):
+        loader = self._loader(
+            tmp_path,
+            "escaping_skill",
+            "../foreign/escaping_skill",
+        )
+
+        with pytest.raises(ValueError, match="checkout-relative"):
+            loader.resolve_skill_file("escaping_skill")
+
+    @pytest.mark.parametrize(
+        "location",
+        [
+            "C:foreign/skill",
+            "C:/foreign/skill",
+            r"\\server\share\skill",
+            r"\\?\C:\foreign\skill",
+            r"\rooted\skill",
+            "/foreign/skill",
+        ],
+    )
+    def test_windows_and_posix_absolute_forms_fail_closed(
+        self,
+        tmp_path,
+        location,
+    ):
+        loader = self._loader(tmp_path, "escaping_skill", location)
+
+        with pytest.raises(ValueError, match="checkout-relative"):
+            loader.resolve_skill_file("escaping_skill")
+
+    def test_missing_registered_location_cannot_use_same_name_fallback(
+        self,
+        tmp_path,
+    ):
+        decoy = (
+            tmp_path
+            / "modules"
+            / "test_domain"
+            / "test_module"
+            / "skillz"
+            / "local_skill"
+        )
+        decoy.mkdir(parents=True)
+        (decoy / "SKILLz.md").write_text("# Decoy\n", encoding="utf-8")
+        loader = self._loader(
+            tmp_path,
+            "local_skill",
+            "registered/missing/local_skill",
+        )
+
+        with pytest.raises(FileNotFoundError) as exc_info:
+            loader.resolve_skill_file("local_skill")
+
+        assert "registered" in str(exc_info.value)
+        assert "test_domain" not in str(exc_info.value)
+
+    def test_symlinked_location_cannot_escape_checkout(self, tmp_path):
+        outside = tmp_path / "outside"
+        outside.mkdir()
+        checkout = tmp_path / "checkout"
+        checkout.mkdir()
+        link = checkout / "linked_skill"
+        try:
+            link.symlink_to(outside, target_is_directory=True)
+        except OSError:
+            pytest.skip("directory symlinks are unavailable on this host")
+        loader = self._loader(checkout, "linked_skill", "linked_skill")
+
+        with pytest.raises(ValueError, match="escapes"):
+            loader.resolve_skill_file("linked_skill")
+
+    def test_production_skill_resolves_inside_current_checkout(self):
+        loader = WRESkillsLoader()
+
+        resolved = loader.resolve_skill_file("qwen_gitpush")
+
+        resolved.relative_to(loader.repo_root)
+        assert resolved.name == "SKILLz.md"
 
 
 class TestIsRetired:

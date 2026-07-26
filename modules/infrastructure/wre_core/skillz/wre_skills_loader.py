@@ -7,7 +7,7 @@ WSP Compliance: WSP 77 (Agent Coordination), WSP 50 (Pre-Action Verification)
 
 import json
 import yaml
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -69,19 +69,35 @@ class WRESkillsLoader:
     - Caching (avoid repeated file reads)
     """
 
-    def __init__(self, registry_path: Optional[Path] = None):
+    def __init__(
+        self,
+        registry_path: Optional[Path] = None,
+        repo_root: Optional[Path] = None,
+    ):
         """
         Initialize skills loader
 
         Args:
             registry_path: Path to skills_registry.json
+            repo_root: Checkout root that owns every executable skill path
         """
+        self.repo_root = (
+            Path(repo_root).resolve()
+            if repo_root is not None
+            else Path(__file__).resolve().parents[4]
+        )
         if registry_path is None:
-            self.registry_path = Path(__file__).parent / "skills_registry_v2.json"
+            self.registry_path = Path(__file__).resolve().with_name(
+                "skills_registry_v2.json"
+            )
         else:
-            self.registry_path = Path(registry_path)
+            configured_registry = Path(registry_path)
+            self.registry_path = (
+                configured_registry
+                if configured_registry.is_absolute()
+                else self.repo_root / configured_registry
+            ).resolve()
 
-        self.repo_root = Path(__file__).parent.parent.parent.parent
         self.registry = self._load_registry()
         self.skill_cache: Dict[str, str] = {}  # skill_name -> full_content
 
@@ -344,50 +360,56 @@ class WRESkillsLoader:
         """
         Build candidate SKILL file paths for a registry entry.
 
-        Some registry locations still point at legacy `skills/` directories while
-        the real implementation now lives in `skillz/`. Prefer the configured
-        location first, then scan common in-repo skill locations as a wiring
-        fallback instead of silently degrading to synthetic prompt content.
+        Registry locations are authoritative. Discovery of unregistered skills
+        is owned by WRESkillsDiscovery and cannot substitute executable content.
         """
         candidates: List[Path] = []
         seen: set[str] = set()
 
         def _append(path: Path) -> None:
-            path_str = str(path)
+            resolved = path.resolve()
+            try:
+                resolved.relative_to(self.repo_root)
+            except ValueError:
+                return
+            path_str = str(resolved)
             if path_str not in seen:
                 seen.add(path_str)
-                candidates.append(path)
+                candidates.append(resolved)
 
         if skill_info:
-            configured = Path(str(skill_info["location"]))
-            if not configured.is_absolute():
-                configured = self.repo_root / configured
+            configured = self._resolve_registered_location(
+                skill_info.get("location")
+            )
             _append(configured / "SKILLz.md")
             _append(configured / "SKILL.md")
 
-            configured_str = str(configured)
-            if "\\skills\\" in configured_str or "/skills/" in configured_str:
-                alt_dir = Path(
-                    configured_str.replace("\\skills\\", "\\skillz\\").replace("/skills/", "/skillz/")
-                )
-                _append(alt_dir / "SKILLz.md")
-                _append(alt_dir / "SKILL.md")
-
-        search_patterns = [
-            f"modules/*/*/skillz/{skill_name}/SKILLz.md",
-            f"modules/*/*/skillz/{skill_name}/SKILL.md",
-            f"modules/*/*/skills/{skill_name}/SKILLz.md",
-            f"modules/*/*/skills/{skill_name}/SKILL.md",
-            f".claude/skills/{skill_name}/SKILLz.md",
-            f".claude/skills/{skill_name}/SKILL.md",
-            f"holo_index/skills/{skill_name}/SKILLz.md",
-            f"holo_index/skills/{skill_name}/SKILL.md",
-        ]
-        for pattern in search_patterns:
-            for match in self.repo_root.glob(pattern):
-                _append(match)
-
         return candidates
+
+    def _resolve_registered_location(self, value: Any) -> Path:
+        """Resolve one portable registry location inside this exact checkout."""
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Skill registry location must be a relative path")
+        raw = value.strip()
+        windows_path = PureWindowsPath(raw)
+        normalized = raw.replace("\\", "/")
+        posix_path = PurePosixPath(normalized)
+        if (
+            windows_path.drive
+            or windows_path.is_absolute()
+            or posix_path.is_absolute()
+            or ".." in posix_path.parts
+            or normalized in {".", ""}
+        ):
+            raise ValueError("Skill registry location must stay checkout-relative")
+        resolved = (self.repo_root / Path(*posix_path.parts)).resolve()
+        try:
+            resolved.relative_to(self.repo_root)
+        except ValueError as exc:
+            raise ValueError(
+                "Skill registry location escapes the active checkout"
+            ) from exc
+        return resolved
 
     def inject_skill_into_prompt(
         self,
