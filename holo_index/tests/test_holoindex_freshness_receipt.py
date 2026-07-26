@@ -26,8 +26,13 @@ from holo_index.freshness_receipt import (
     write_freshness_receipt,
 )
 from holo_index.maintenance_lock import (
+    AUTHORITY_BLOCK_MARKER_CONTENT,
     MaintenanceLeaseBusy,
+    acquire_authority_update_lease,
     acquire_maintenance_lease,
+    authority_block_marker_path,
+    authority_block_marker_valid,
+    authority_update_lock_path,
     maintenance_lock_path,
     probe_maintenance_lock,
 )
@@ -782,6 +787,29 @@ def test_acquiring_lease_does_not_rewrite_freshness_receipt(tmp_path: Path) -> N
         assert receipt_path.read_bytes() == before
 
     assert receipt_path.read_bytes() == before
+
+
+def test_authority_and_maintenance_leases_are_distinct_and_can_nest(
+    tmp_path: Path,
+) -> None:
+    assert authority_update_lock_path(tmp_path) != maintenance_lock_path(tmp_path)
+
+    with acquire_authority_update_lease(tmp_path):
+        with acquire_maintenance_lease(maintenance_lock_path(tmp_path)):
+            assert authority_update_lock_path(tmp_path).exists()
+            assert maintenance_lock_path(tmp_path).exists()
+        assert probe_maintenance_lock(maintenance_lock_path(tmp_path)).clear
+
+
+def test_authority_block_marker_requires_exact_regular_content(
+    tmp_path: Path,
+) -> None:
+    marker = authority_block_marker_path(tmp_path)
+    assert not authority_block_marker_valid(tmp_path)
+    marker.write_bytes(b"wrong")
+    assert not authority_block_marker_valid(tmp_path)
+    marker.write_bytes(AUTHORITY_BLOCK_MARKER_CONTENT)
+    assert authority_block_marker_valid(tmp_path)
 
 
 def test_maintenance_invalidation_preserves_only_unplanned_proof(

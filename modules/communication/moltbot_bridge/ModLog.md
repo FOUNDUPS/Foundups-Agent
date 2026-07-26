@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-26: OpenClaw exact-SHA HoloIndex maintenance route
+
+- Added a dedicated low-risk maintenance family for post-merge HoloIndex work.
+- OpenClaw now uses an exact-binding CAS claim; competing supervisors cannot
+  execute the same SHA task.
+- Each claim carries an immutable context digest and one-use execution ID;
+  direct or duplicate invocation is rejected before authority effects.
+- OpenClaw passes that capability explicitly through `run_task`; the executor
+  will not recover it implicitly from AgentDB for an untrusted caller.
+- The domain executor owns atomic finalization, so generic `run_task`
+  completion/failure writes cannot split the receipt transaction.
+- Dispatch exceptions immediately release the exact claim into retryable
+  failure; process crashes are recovered by the coordinator's bounded lease.
+- Moved remote polling to one bounded background worker so the supervisor
+  observation loop never waits on `git fetch`.
+
 ## 2026-07-25: Independent assurance capacity admission
 
 - Inserted a durable assurance-capacity gate between worktree creation and

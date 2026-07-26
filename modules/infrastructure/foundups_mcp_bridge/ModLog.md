@@ -1,5 +1,18 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-26 - HoloIndex authority update transaction
+
+- Added a distinct cross-process authority-update lease around exact-SHA,
+  non-rewind detached worktree updates.
+- Re-derives the queued authority-root digest and shared Git identity inside
+  that lease before any fetch, switch, owner, or index effect.
+- Reused the existing trusted maintenance handshake and `MaintenanceSession`
+  for SSD mutation and atomic freshness publication.
+- Added fail-closed supersession cleanup so a newly stale owner is stopped and
+  no completion is published for an obsolete SHA.
+- Added a durable authority blocker marker when both newer-HEAD advancement
+  and canonical receipt invalidation fail.
+
 ## 2026-07-26 - HoloIndex exact-binding startup proof consolidation
 
 - OBSERVED: exact-HEAD maintenance succeeded, but automatic owner bootstrap

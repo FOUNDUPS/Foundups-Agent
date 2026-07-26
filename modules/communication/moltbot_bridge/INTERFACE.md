@@ -707,6 +707,20 @@ Current operational rule:
 - when the repair budget is exhausted, the supervisor escalates instead of retrying indefinitely
 - the supervisor advances a DAEmon follow cursor every cycle so repair decisions are tied to observed runtime history
 - IronClaw runtime readiness is validated at startup before resident/runtime bootstrap when IronClaw is the selected backend
+- optional post-merge HoloIndex observation runs on one background worker;
+  OpenClaw claims each exact-SHA task with compare-and-swap semantics and the
+  domain executor owns atomic completion
+- the one-use claim ID and context digest are passed explicitly through
+  `execute_task`; CLI or in-process calls without that capability stop before
+  the authority transaction
+
+Post-merge HoloIndex configuration:
+
+- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED=1` enables the observer.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC` sets its bounded polling
+  interval (minimum 30 seconds).
+- `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` selects the absolute dedicated clean
+  authority worktree.
 
 ### PQN Runtime Control
 

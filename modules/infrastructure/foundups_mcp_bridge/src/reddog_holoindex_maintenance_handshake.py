@@ -86,6 +86,7 @@ class RedDogHoloIndexOperationalResult:
     error: str = ""
     repo_head_sha: str = ""
     generation_id: str = ""
+    freshness_receipt_digest: str = ""
     freshness_reasons: tuple[str, ...] = ()
 
 
@@ -198,12 +199,17 @@ def _run_full_refresh(
 def _ready_result(
     *, refreshed: bool, state: RepositoryState, receipt: HoloIndexFreshnessReceipt
 ) -> RedDogHoloIndexOperationalResult:
+    binding = generation_binding_from_receipt(
+        receipt,
+        receipt_path=freshness_receipt_path(receipt.ssd_path),
+    )
     return RedDogHoloIndexOperationalResult(
         ready=True,
         status=OPERATIONAL_REFRESHED if refreshed else OPERATIONAL_READY,
         refreshed=refreshed,
         repo_head_sha=state.head_sha,
         generation_id=receipt.generation_id,
+        freshness_receipt_digest=str(binding["freshness_receipt_digest"]),
     )
 
 

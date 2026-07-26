@@ -24,6 +24,7 @@ def _result(*, ready: bool):
         error="" if ready else "HOLOINDEX_MAINTENANCE_REQUIRED",
         repo_head_sha="a" * 40,
         generation_id="sha256:generation" if ready else "",
+        freshness_receipt_digest="sha256:receipt" if ready else "",
         freshness_reasons=() if ready else ("missing_freshness_receipt",),
     )
 
@@ -99,7 +100,7 @@ def test_exact_startup_route_precedes_generic_wre_skill(
     monkeypatch.setattr(
         run_task,
         "_try_startup_maintenance_dispatch",
-        lambda *_args: {
+        lambda *_args, **_kwargs: {
             "ok": True,
             "detail": "verified",
             "executor": "startup:holo_index",
@@ -119,3 +120,64 @@ def test_exact_startup_route_precedes_generic_wre_skill(
     )
     assert result["ok"] is True
     assert result["executor"] == "startup:holo_index"
+
+
+def test_postmerge_task_routes_to_exact_sha_executor(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    from modules.infrastructure.idle_automation.src import (
+        holoindex_postmerge_executor,
+    )
+
+    task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+
+    class FakeDB:
+        def get_autonomous_tasks(self, **_kwargs):
+            return [
+                {
+                    "task_id": task_id,
+                    "description": "exact SHA refresh",
+                    "required_skills": ["holo-search"],
+                    "context": {
+                        "source": "holoindex_postmerge_coordinator",
+                        "target_repo_head_sha": "a" * 40,
+                        "claim_id": "hpmc_test",
+                        "claim_binding_digest": "sha256:" + ("c" * 64),
+                    },
+                }
+            ]
+
+        def complete_autonomous_task(self, _task_id):
+            raise AssertionError("domain executor owns atomic finalization")
+
+    monkeypatch.setattr(agent_db, "AgentDB", FakeDB)
+    monkeypatch.setattr(
+        holoindex_postmerge_executor,
+        "execute_holoindex_postmerge_task",
+        lambda **kwargs: {
+            "ok": kwargs["task_id"] == task_id,
+            "detail": "verified",
+            "executor": "wre:holoindex_postmerge",
+            "finalization_owned": True,
+        },
+    )
+    monkeypatch.setattr(
+        run_task,
+        "_try_wre_dispatch",
+        lambda *_args: (_ for _ in ()).throw(
+            AssertionError("generic WRE must not preempt post-merge maintenance")
+        ),
+    )
+
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        execution_claim={
+            "claim_id": "hpmc_test",
+            "claim_binding_digest": "sha256:" + ("c" * 64),
+        },
+    )
+
+    assert result["ok"] is True
+    assert result["executor"] == "wre:holoindex_postmerge"

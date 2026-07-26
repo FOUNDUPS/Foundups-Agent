@@ -22,7 +22,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
@@ -35,6 +35,7 @@ def execute_task(
     repo_root: Path | None = None,
     *,
     signed_worker_runner: Any | None = None,
+    execution_claim: Mapping[str, str] | None = None,
 ) -> Dict[str, Any]:
     """
     Execute a single autonomous task from AgentDB.
@@ -103,10 +104,17 @@ def execute_task(
     if (
         not result["ok"]
         and result["detail"] == "no_executor_matched"
-        and source == "startup_maintenance_gate"
+        and source
+        in {
+            "startup_maintenance_gate",
+            "holoindex_postmerge_coordinator",
+        }
     ):
         startup_result = _try_startup_maintenance_dispatch(
-            repo_root, task_id, context
+            repo_root,
+            task_id,
+            context,
+            execution_claim=execution_claim,
         )
         if startup_result is not None:
             result = startup_result
@@ -141,7 +149,14 @@ def execute_task(
             result["ok"] = False
             result["detail"] = json.dumps(persist_result, default=str)[:1000]
 
-    if result["ok"]:
+    if result.get("finalization_owned"):
+        logger.info(
+            "[RUN_TASK] Task %s finalization owned by executor=%s (%dms)",
+            task_id,
+            result["executor"],
+            elapsed_ms,
+        )
+    elif result["ok"]:
         db.complete_autonomous_task(task_id)
         logger.info("[RUN_TASK] Task %s completed (executor=%s, %dms)", task_id, result["executor"], elapsed_ms)
         if _emit_start is not None and emit_success:
@@ -488,6 +503,7 @@ def _dispatch_holoindex_maintenance(repo_root: Path) -> Dict[str, Any]:
             "error": result.error,
             "repo_head_sha": result.repo_head_sha,
             "generation_id": result.generation_id,
+            "freshness_receipt_digest": result.freshness_receipt_digest,
             "freshness_reasons": list(result.freshness_reasons),
         }
         return {
@@ -601,7 +617,11 @@ def _run_training_batch() -> Dict[str, Any]:
 
 
 def _try_startup_maintenance_dispatch(
-    repo_root: Path, task_id: str, context: dict
+    repo_root: Path,
+    task_id: str,
+    context: dict,
+    *,
+    execution_claim: Mapping[str, str] | None = None,
 ) -> Dict[str, Any] | None:
     """
     Execute startup maintenance tasks queued by startup_maintenance_gate.
@@ -614,6 +634,24 @@ def _try_startup_maintenance_dispatch(
 
     Returns structured result or None if not a recognized startup task.
     """
+    if (
+        context.get("source") == "holoindex_postmerge_coordinator"
+        and task_id.startswith("holoindex_postmerge_refresh:")
+    ):
+        from modules.infrastructure.idle_automation.src.holoindex_postmerge_executor import (
+            execute_holoindex_postmerge_task,
+        )
+
+        logger.info(
+            "[RUN_TASK] Post-merge dispatch: exact-SHA HoloIndex maintenance"
+        )
+        return execute_holoindex_postmerge_task(
+            repo_root=repo_root,
+            task_id=task_id,
+            context=context,
+            execution_claim=execution_claim,
+        )
+
     if task_id == "startup_refresh_holo_index":
         logger.info("[RUN_TASK] Startup dispatch: HoloIndex maintenance handshake")
         return _dispatch_holoindex_maintenance(repo_root)

@@ -336,6 +336,7 @@ class TestStartupTaskExecution:
                 error="",
                 repo_head_sha="a" * 40,
                 generation_id=f"sha256:{'b' * 64}",
+                freshness_receipt_digest=f"sha256:{'c' * 64}",
                 freshness_reasons=(),
             ),
         ) as mock_ensure:
@@ -360,6 +361,7 @@ class TestStartupTaskExecution:
             "error": "",
             "repo_head_sha": "a" * 40,
             "generation_id": f"sha256:{'b' * 64}",
+            "freshness_receipt_digest": f"sha256:{'c' * 64}",
             "freshness_reasons": [],
         }
         assert result["structured_result"] == expected_receipt

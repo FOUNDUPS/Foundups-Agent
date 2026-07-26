@@ -29,6 +29,10 @@ wsp_cycle(input="idle_automation", log=True)
 - **Daily OpenRouter Catalog Refresh POC**: Exact daily claim, default-off final
   boundary, trusted external evidence root, replay-protected six-key adapter
   projection, and fail-closed exact-token finalization
+- **Exact-SHA HoloIndex Post-Merge Maintenance**: Non-blocking OpenClaw
+  observation, one durable task per `origin/main` SHA, CAS worker claim,
+  cross-process authority/SSD leases, non-rewind checkout update, atomic
+  completion, and canonical receipt rehydration
 
 ### WSP 62 Near-Term Remediation
 

@@ -15,8 +15,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
-import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -49,9 +47,16 @@ ALLOWED_TASK_FAMILIES = {
     "startup_maintenance": {
         "description": "Startup maintenance gate tasks",
         "risk": "low",
-        "sources": ["startup_maintenance_gate"],  # Maps to run_task.py dispatch path 4
+        "sources": ["startup_maintenance_gate"],
         "required_skills": [],
         "executor": "startup_maintenance_dispatch",
+    },
+    "holoindex_postmerge": {
+        "description": "Exact-SHA post-merge HoloIndex authority maintenance",
+        "risk": "low",
+        "sources": ["holoindex_postmerge_coordinator"],
+        "required_skills": ["holo-search"],
+        "executor": "holoindex_postmerge_dispatch",
     },
 }
 
@@ -315,6 +320,7 @@ def _get_verification_method(family: str) -> str:
         "self_audit_fix": "check_audit_event_resolved",
         "grant_review": "check_task_completed_in_agentdb",
         "startup_maintenance": "check_task_completed_in_agentdb",
+        "holoindex_postmerge": "check_exact_sha_completion_receipt",
     }
     return verification_methods.get(family, "check_task_completed")
 

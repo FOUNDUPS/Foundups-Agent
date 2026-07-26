@@ -207,6 +207,20 @@ Persistent admission reads only the canonical
 `freshness_receipt_path(ssd)`. An explicit receipt argument must resolve to
 that exact stable-ancestor identity, and a final symlink/reparse point is
 rejected before receipt or backend access.
+`rehydrate_canonical_freshness_proof()` exposes the same gate for a caller
+that already holds an expected 40-character repository SHA. It rejects a
+malformed or mismatched expected SHA before receipt loading and returns only
+the existing `ReadonlyQueryAdmission` binding; it never starts an owner,
+opens Chroma, writes a receipt, or reindexes.
+
+HoloIndex also exposes a separate authority-update lease beside the canonical
+maintenance lease. WRE may hold the outer lease while changing a dedicated
+authority checkout; `MaintenanceSession` independently owns the inner SSD
+writer lease and atomic freshness publication.
+The fixed `.holoindex_authority_blocked` marker is a durable fail-closed
+fallback when neither a newer checkout nor canonical invalidation can be
+published. Only exact regular marker content is recognized for recovery.
+
 Module hints accept only repository-relative components. Traversal, absolute
 paths, links, and reparse points are rejected; nested enumeration has fixed
 entry/depth bounds. Module-domain and WSP discovery fail closed on `cap + 1`

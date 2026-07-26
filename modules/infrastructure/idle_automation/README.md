@@ -16,6 +16,11 @@ wsp_cycle(input="012", log=True)
 
 The Idle Automation module provides autonomous background tasks that execute when the system enters idle states. This includes automatic Git commits, social media posting, and system maintenance tasks.
 
+System maintenance includes an opt-in exact-SHA HoloIndex coordinator. It
+observes `origin/main` off the supervisor's synchronous path, queues one
+durable OpenClaw task per SHA, and delegates all indexing to the trusted
+authority-worktree transaction. Query workers remain read-only.
+
 ## WSP Compliance
 
 - **WSP 3**: Infrastructure domain - system automation and maintenance
