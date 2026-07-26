@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.22
+Version: 0.4.23
+
+Version 0.4.23 refreshes the extension-pinned backend dependency manifest
+against the exact post-merge HoloIndex maintenance runtime. The integrity gate
+remains fail-closed: RedDog accepts the backend only when all 1,000 generated
+runtime dependencies match their normalized SHA-256 digests.
 
 This local Cursor/VS Code extension opens the RedDog resident FoundUps architect thin client as an editor webview tab.
 
@@ -245,6 +250,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.22.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.23.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

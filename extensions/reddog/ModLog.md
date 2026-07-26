@@ -2,6 +2,16 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-27 - REDDOG_BACKEND_MANIFEST_POSTMERGE_REFRESH_PHASE1 (0.4.23)
+
+- Regenerated the backend dependency closure after exact-SHA HoloIndex
+  post-merge maintenance landed.
+- Pinned all 1,000 runtime files and the new canonical manifest digest without
+  weakening fail-closed compatibility validation.
+- Added generator sentinels for the maintenance lock, query admission,
+  OpenClaw supervisor, task runner, AgentDB, and post-merge coordinator.
+- Version 0.4.22 -> 0.4.23.
+
 ## 2026-07-25 - REDDOG_HOLOINDEX_SEMANTIC_EVIDENCE_RECEIPT_BINDING_PHASE1 (0.4.22)
 
 - Bound the exact semantic evidence serialization and item count into the canonical HoloIndex query receipt.

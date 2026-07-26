@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-27 - Backend manifest post-merge refresh (0.4.23)
+
+- Recomputed the generated dependency closure and pinned its canonical digest.
+- Added regression sentinels for the exact-SHA HoloIndex maintenance runtime.
+- Re-ran generator, backend preflight, extension contract, and package
+  integrity checks.
+
 ## 2026-07-25 - Semantic evidence receipt binding (0.4.22)
 
 - Added canonical evidence serialization, digest, count, tamper, missing-evidence, and mutable-outer-result regressions.

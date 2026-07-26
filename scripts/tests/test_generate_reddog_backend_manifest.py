@@ -37,6 +37,15 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert "modules/communication/moltbot_bridge/src/openclaw_dae.py" in runtime
     assert "modules/foundups/src/foundup_registry_loader.py" in runtime
     assert "modules/platform_integration/linkedin_agent/src/linkedin_agent.py" in runtime
+    assert "holo_index/maintenance_lock.py" in runtime
+    assert "holo_index/query_admission.py" in runtime
+    assert "modules/communication/moltbot_bridge/scripts/run_task.py" in runtime
+    assert "modules/communication/moltbot_bridge/src/openclaw_supervisor.py" in runtime
+    assert "modules/infrastructure/database/src/agent_db.py" in runtime
+    assert (
+        "modules/infrastructure/idle_automation/src/"
+        "holoindex_postmerge_coordinator.py"
+    ) in runtime
     assert "modules/infrastructure/database/src/Database.py" not in runtime
     assert "modules/infrastructure/database/src/database.py" in runtime
 
@@ -47,5 +56,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
 
     assert checked_in == generated
     assert generator.canonical_manifest_digest(generated) == (
-        "6db7bb66e8ceea1c22a46f1c36acef23aeb17d3128a620ca08d5e421b867e7c6"
+        "b7fe5903c87f03bed2d2254046c39eb27367d042983b83e1c167dee930ef40da"
     )

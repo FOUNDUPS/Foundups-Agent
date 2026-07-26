@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.23 pins the generated backend compatibility manifest to the exact
+post-merge HoloIndex maintenance runtime. Any missing, added-to-closure, or
+content-mismatched dependency blocks before grounding, HoloIndex query, model
+execution, or worker authority.
+
 ## Purpose
 
 `reddog` is a local Cursor/VS Code extension whose user-facing product name is RedDog. It opens the resident 0102 FoundUps architect thin client and retains the redaction-gated OpenRouter bridge through `scripts/advisory_model_once.py`.
