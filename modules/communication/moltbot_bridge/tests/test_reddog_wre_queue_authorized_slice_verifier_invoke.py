@@ -93,6 +93,9 @@ def _verifier_request() -> dict:
         "slice_name": "REDDOG_WRE_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_PHASE1",
         "worker_id": "worker:author",
         "verifier_id": "worker:verifier",
+        "assurance_reservation_id": "assurance-reservation-test",
+        "assurance_reservation_digest": _digest("d"),
+        "verifier_task_id": "reddog-worker-dispatch-independent-verifier",
         "base_sha": BASE_SHA,
         "head_sha": HEAD_SHA,
         "allowed_path_patterns": [
