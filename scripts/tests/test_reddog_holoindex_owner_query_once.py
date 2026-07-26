@@ -166,8 +166,273 @@ def test_bootstrap_failure_fails_closed_before_query(tmp_path: Path) -> None:
 
     assert result["ok"] is False
     assert result["error"] == "STALE_INDEX"
+    assert result["owner_attempts"] == 1
+    assert result["owner_retry_performed"] is False
     assert result["index_gap_detected"] is True
     assert result["no_holoindex_reindex_performed"] is True
+
+
+def test_transient_bootstrap_exit_retries_once_then_succeeds(
+    tmp_path: Path,
+) -> None:
+    bootstraps = iter(
+        (
+            SimpleNamespace(
+                ready=False,
+                status="FAILED",
+                error="HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
+            ),
+            SimpleNamespace(ready=True, status="STARTED", error=""),
+        )
+    )
+    cleanup_calls: list[str] = []
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: next(bootstraps),
+        resolve_handoff=lambda: (
+            "http://127.0.0.1:8127/holoindex/v1/query",
+            "x" * 48,
+        ),
+        query_owner=lambda **_kwargs: _success(tmp_path),
+        cleanup_owner=lambda: cleanup_calls.append("cleaned"),
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is True
+    assert result["owner_attempts"] == 2
+    assert result["owner_retry_performed"] is True
+    assert (
+        result["owner_retry_reason"]
+        == "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
+    )
+    assert result["no_holoindex_reindex_performed"] is True
+    assert cleanup_calls == ["cleaned", "cleaned"]
+
+
+def test_process_owned_semantic_failure_retries_once_then_succeeds(
+    tmp_path: Path,
+) -> None:
+    results = iter(
+        (
+            {
+                "ok": False,
+                "error": "SEMANTIC_BACKEND_UNAVAILABLE",
+                "raw_result": {},
+                "no_holoindex_reindex_performed": True,
+            },
+            _success(tmp_path),
+        )
+    )
+    cleanup_calls: list[str] = []
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status="STARTED", error=""
+        ),
+        resolve_handoff=lambda: (
+            "http://127.0.0.1:8127/holoindex/v1/query",
+            "x" * 48,
+        ),
+        query_owner=lambda **_kwargs: next(results),
+        cleanup_owner=lambda: cleanup_calls.append("cleaned"),
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is True
+    assert result["owner_attempts"] == 2
+    assert result["owner_retry_performed"] is True
+    assert result["owner_retry_reason"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+    assert cleanup_calls == ["cleaned", "cleaned"]
+
+
+def test_poisoned_process_owned_query_retries_once_then_succeeds(
+    tmp_path: Path,
+) -> None:
+    results = iter(
+        (
+            {
+                "ok": False,
+                "error": "QUERY_OWNER_POISONED",
+                "raw_result": {},
+                "no_holoindex_reindex_performed": True,
+            },
+            _success(tmp_path),
+        )
+    )
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status="STARTED", error=""
+        ),
+        resolve_handoff=lambda: (
+            "http://127.0.0.1:8127/holoindex/v1/query",
+            "x" * 48,
+        ),
+        query_owner=lambda **_kwargs: next(results),
+        cleanup_owner=lambda: None,
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is True
+    assert result["owner_attempts"] == 2
+    assert result["owner_retry_reason"] == "QUERY_OWNER_POISONED"
+
+
+def test_reused_process_owned_query_is_cleaned_before_retry(
+    tmp_path: Path,
+) -> None:
+    statuses = iter(("REUSED", "STARTED"))
+    results = iter(
+        (
+            {
+                "ok": False,
+                "error": "SEMANTIC_BACKEND_UNAVAILABLE",
+                "raw_result": {},
+                "no_holoindex_reindex_performed": True,
+            },
+            _success(tmp_path),
+        )
+    )
+    cleanup_calls: list[str] = []
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status=next(statuses), error=""
+        ),
+        resolve_handoff=lambda: (
+            "http://127.0.0.1:8127/holoindex/v1/query",
+            "x" * 48,
+        ),
+        query_owner=lambda **_kwargs: next(results),
+        cleanup_owner=lambda: cleanup_calls.append("cleaned"),
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is True
+    assert result["owner_attempts"] == 2
+    assert cleanup_calls == ["cleaned", "cleaned"]
+
+
+def test_two_transient_query_failures_stop_at_retry_ceiling(
+    tmp_path: Path,
+) -> None:
+    query_calls: list[str] = []
+    cleanup_calls: list[str] = []
+
+    def unavailable(**_kwargs):
+        query_calls.append("query")
+        return {
+            "ok": False,
+            "source": "holoindex_owner_service",
+            "query": "audit pfmall",
+            "freshness": "STALE",
+            "raw_result": {},
+            "error": "SEMANTIC_BACKEND_UNAVAILABLE",
+            "index_gap_detected": True,
+            "stale_reasons": ["semantic_backend_unavailable"],
+            "no_holoindex_reindex_performed": True,
+        }
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status="STARTED", error=""
+        ),
+        resolve_handoff=lambda: (
+            "http://127.0.0.1:8127/holoindex/v1/query",
+            "x" * 48,
+        ),
+        query_owner=unavailable,
+        cleanup_owner=lambda: cleanup_calls.append("cleaned"),
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+    assert result["owner_attempts"] == 2
+    assert result["owner_retry_performed"] is True
+    assert len(query_calls) == 2
+    assert cleanup_calls == ["cleaned", "cleaned"]
+
+
+def test_configured_owner_semantic_failure_is_not_restarted(
+    tmp_path: Path,
+) -> None:
+    query_calls: list[str] = []
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=lambda **_kwargs: SimpleNamespace(
+            ready=True, status="CONFIGURED", error=""
+        ),
+        query_owner=lambda **_kwargs: (
+            query_calls.append("query")
+            or {
+                "ok": False,
+                "source": "holoindex_owner_service",
+                "query": "audit pfmall",
+                "freshness": "STALE",
+                "raw_result": {},
+                "error": "SEMANTIC_BACKEND_UNAVAILABLE",
+                "index_gap_detected": True,
+                "stale_reasons": ["semantic_backend_unavailable"],
+                "no_holoindex_reindex_performed": True,
+            }
+        ),
+        cleanup_owner=lambda: (_ for _ in ()).throw(
+            AssertionError("configured owner must not be stopped")
+        ),
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is False
+    assert result["error"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+    assert result["owner_attempts"] == 1
+    assert result["owner_retry_performed"] is False
+    assert query_calls == ["query"]
+
+
+def test_two_transient_bootstrap_failures_stop_at_retry_ceiling(
+    tmp_path: Path,
+) -> None:
+    ensure_calls: list[str] = []
+    cleanup_calls: list[str] = []
+
+    def ensure(**_kwargs):
+        ensure_calls.append("ensure")
+        return SimpleNamespace(
+            ready=False,
+            status="FAILED",
+            error="HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
+        )
+
+    result = query_once(
+        {"query": "audit pfmall"},
+        repo_root=tmp_path,
+        ensure_owner=ensure,
+        cleanup_owner=lambda: cleanup_calls.append("cleaned"),
+        query_owner=lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("query must not run after bootstrap failure")
+        ),
+        select_authority=_selection,
+    )
+
+    assert result["ok"] is False
+    assert result["owner_attempts"] == 2
+    assert result["owner_retry_performed"] is True
+    assert result["no_holoindex_reindex_performed"] is True
+    assert ensure_calls == ["ensure", "ensure"]
+    assert cleanup_calls == ["cleaned"]
 
 
 def test_authority_selection_failure_precedes_owner_bootstrap(

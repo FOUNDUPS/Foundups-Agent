@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-27 - HoloIndex owner cold-start retry (0.4.24)
+
+- Proved one transient process-private owner restart can recover semantic
+  grounding and that a second failure stops at the retry ceiling.
+- Proved configured owners are never restarted and stale failures remain
+  single-attempt.
+- Proved retry telemetry reaches bundle metadata and Copy MD Run Trace.
+
 ## 2026-07-27 - Backend manifest post-merge refresh (0.4.23)
 
 - Recomputed the generated dependency closure and pinned its canonical digest.

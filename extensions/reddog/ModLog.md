@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-27 - REDDOG_HOLOINDEX_OWNER_COLD_START_RETRY_PHASE1 (0.4.24)
+
+- Added one bounded restart for explicit transient failures from the
+  process-private HoloIndex semantic owner.
+- Kept configured owners, stale state, authority mismatches, malformed
+  evidence, and exhausted retries fail-closed without runtime re-indexing.
+- Added owner attempt, retry, and reason telemetry to Run Trace.
+- Version 0.4.23 -> 0.4.24.
+
 ## 2026-07-27 - REDDOG_BACKEND_MANIFEST_POSTMERGE_REFRESH_PHASE1 (0.4.23)
 
 - Regenerated the backend dependency closure after exact-SHA HoloIndex

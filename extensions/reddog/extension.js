@@ -22,7 +22,7 @@ const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.23';
+const EXTENSION_VERSION = '0.4.24';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -2094,6 +2094,9 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     holoindex_owner_query_required: meta.holoindex_owner_query_required !== undefined ? meta.holoindex_owner_query_required : 'unknown',
     holoindex_owner_query_ok: meta.holoindex_owner_query_ok !== undefined ? meta.holoindex_owner_query_ok : 'unknown',
     holoindex_owner_query_error: meta.holoindex_owner_query_error !== undefined ? meta.holoindex_owner_query_error : 'unknown',
+    holoindex_owner_attempts: meta.holoindex_owner_attempts !== undefined ? meta.holoindex_owner_attempts : 0,
+    holoindex_owner_retry_performed: meta.holoindex_owner_retry_performed === true,
+    holoindex_owner_retry_reason: meta.holoindex_owner_retry_reason || '(none)',
     holoindex_query_source: meta.holoindex_query_source || 'unknown',
     holoindex_freshness: meta.holoindex_freshness || 'UNKNOWN',
     holoindex_generation_id: meta.holoindex_generation_id || '(none)',
@@ -2134,14 +2137,9 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     required_targets_total: meta.required_targets_total !== undefined ? meta.required_targets_total : 'unknown',
     required_targets_recalled: meta.required_targets_recalled !== undefined ? meta.required_targets_recalled : 'unknown',
     required_targets_missing: Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : 'unknown',
-    // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: whether the required list was (partly) derived
-    // from free-form work-focus / M2M / Read-first shapes, and which shapes contributed.
     work_focus_targets_derived: meta.work_focus_targets_derived !== undefined ? meta.work_focus_targets_derived : 'unknown',
     work_focus_target_derivation_sources: Array.isArray(meta.work_focus_target_derivation_sources) ? meta.work_focus_target_derivation_sources : 'unknown',
-    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: low-confidence prose fragments
-    // dropped from the required list (do NOT affect target_recall_ok).
     work_focus_targets_dropped_low_confidence: Array.isArray(meta.work_focus_targets_dropped_low_confidence) ? meta.work_focus_targets_dropped_low_confidence : 'unknown',
-    // REDDOG_TYPED_TARGET_EXTRACTION_PHASE1: channel counts; only repo_file targets feed direct-read.
     typed_target_extraction_applied: meta.typed_target_extraction_applied !== undefined ? meta.typed_target_extraction_applied : 'unknown',
     repo_file_targets_count: meta.repo_file_targets_count !== undefined ? meta.repo_file_targets_count : 'unknown',
     semantic_targets_count: meta.semantic_targets_count !== undefined ? meta.semantic_targets_count : 'unknown',
@@ -2166,7 +2164,6 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     grounding_preflight_applied: meta.grounding_preflight_applied !== undefined ? meta.grounding_preflight_applied : 'unknown',
     grounding_preflight_passed: meta.grounding_preflight_passed !== undefined ? meta.grounding_preflight_passed : 'unknown',
     grounding_preflight_rejection_reasons: Array.isArray(meta.grounding_preflight_rejection_reasons) ? meta.grounding_preflight_rejection_reasons : 'unknown',
-    // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: final-context proof.
     // required_targets_recalled (above) = fetched/available from the bundle; the fields
     // below = actually visible to the model AFTER the 42K cut. Different layers; must
     // not be conflated. Values default to 'unknown' when no required list was present.
@@ -2223,6 +2220,9 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- holoindex_owner_query_required: ' + scorecard.holoindex_owner_query_required,
     '- holoindex_owner_query_ok: ' + scorecard.holoindex_owner_query_ok,
     '- holoindex_owner_query_error: ' + (scorecard.holoindex_owner_query_error || '(none)'),
+    '- holoindex_owner_attempts: ' + scorecard.holoindex_owner_attempts,
+    '- holoindex_owner_retry_performed: ' + scorecard.holoindex_owner_retry_performed,
+    '- holoindex_owner_retry_reason: ' + scorecard.holoindex_owner_retry_reason,
     '- holoindex_query_source: ' + scorecard.holoindex_query_source,
     '- holoindex_freshness: ' + scorecard.holoindex_freshness,
     '- holoindex_generation_id: ' + scorecard.holoindex_generation_id,

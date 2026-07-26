@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.24 retries the process-private HoloIndex semantic owner once after
+an explicit transient startup or semantic-backend lifecycle failure. It never
+restarts a configured owner, never re-indexes during a query, and never retries
+stale, malformed, or authority-mismatched evidence. Run Trace exposes attempts,
+whether a retry occurred, and its allowlisted reason.
+
 Version 0.4.23 pins the generated backend compatibility manifest to the exact
 post-merge HoloIndex maintenance runtime. Any missing, added-to-closure, or
 content-mismatched dependency blocks before grounding, HoloIndex query, model
