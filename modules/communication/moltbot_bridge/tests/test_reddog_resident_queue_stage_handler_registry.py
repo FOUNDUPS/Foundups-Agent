@@ -37,6 +37,7 @@ ALL_STAGE_KEYS = (
     "executor_plan",
     "execution_valve",
     "worktree_create",
+    "assurance_capacity_admission",
     "bounded_worker_pilot",
     "slice_verifier",
     "verified_draft_pr_publish",
@@ -115,6 +116,7 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
         revocation_oracle=dummy,
         work_order_resolver=dummy,
         worker_dispatch_writer=dummy,
+        assurance_reservation_store=dummy,
         repo_root=tmp_path,
         valve_environment=GovernedExecutionValveEnvironment(values={}),
         governed_use_time_authority_resolver=dummy,
@@ -304,6 +306,7 @@ def test_registry_registers_slice_verifier_from_evidence_producer_dependencies(t
         repo_root=tmp_path,
         evidence_producer_request={"explicit_evidence_production_requested": True},
         evidence_command_runner=dummy,
+        assurance_reservation_store=dummy,
         now_iso=NOW_ISO,
     )
 
@@ -321,6 +324,7 @@ def test_registry_registers_slice_verifier_from_request_binding_dependencies(tmp
         work_order_resolver=dummy,
         repo_root=tmp_path,
         evidence_command_runner=dummy,
+        assurance_reservation_store=dummy,
         slice_verifier_request_binding_enabled=True,
         now_iso=NOW_ISO,
     )

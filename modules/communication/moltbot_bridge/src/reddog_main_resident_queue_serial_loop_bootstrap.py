@@ -94,6 +94,8 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     chain_results_path: Optional[str]
     store_revision: Optional[str]
     rejection_reasons: tuple[str, ...]
+    queue_chain_requeue_required: bool = False
+    retry_at: Optional[str] = None
     runtime_dependency_bundle_status: str = REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED
     runtime_dependency_bundle_requested: bool = False
     no_signing_performed: bool = True
@@ -191,6 +193,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     ratchet_pattern_memory_sink: Any = None,
     pattern_memory_admission_sink: Any = None,
     worker_dispatch_writer: Any = None,
+    assurance_reservation_store: Any = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
@@ -568,6 +571,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         admission_request=admission_request,
         pattern_memory_admission_sink=pattern_memory_admission_sink,
         worker_dispatch_writer=worker_dispatch_writer,
+        assurance_reservation_store=assurance_reservation_store,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))
@@ -1741,6 +1745,8 @@ def _from_loop(
         runtime_dependency_bundle_status=runtime_dependency_bundle_status,
         runtime_dependency_bundle_requested=runtime_dependency_bundle_requested,
         rejection_reasons=tuple(loop.rejection_reasons),
+        queue_chain_requeue_required=loop.queue_chain_requeue_required,
+        retry_at=loop.retry_at,
         no_signature_verification_performed="authority_verification" not in loop.dispatched_stages,
         no_worktree_created="worktree_create" not in loop.dispatched_stages,
         no_bounded_task_execution_performed="bounded_worker_pilot" not in loop.dispatched_stages,

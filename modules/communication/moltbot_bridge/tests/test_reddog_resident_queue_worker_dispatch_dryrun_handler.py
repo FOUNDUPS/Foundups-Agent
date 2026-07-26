@@ -226,7 +226,7 @@ def test_dispatcher_records_worker_dispatch_dryrun_and_advances_to_work_order_in
     stage = store.load()["stage_results"][WORKER_DISPATCH_DRYRUN_STAGE_KEY]
     assert stage["accepted"] is True
     assert stage["decision"] == SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT
-    assert stage["receipt"]["dispatch_intent_count"] == 2
+    assert stage["receipt"]["dispatch_intent_count"] == 3
     intents = stage["receipt"]["dispatch_intents"]
     assert sum(1 for intent in intents if intent["capability"] == "bounded_code_change") == 1
     assert any(

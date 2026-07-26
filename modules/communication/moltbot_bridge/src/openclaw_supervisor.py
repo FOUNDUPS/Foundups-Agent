@@ -24,13 +24,12 @@ import hashlib
 import logging
 import os
 import subprocess
-import sys
 import threading
 import time
 import uuid
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Deque, Dict, List, Mapping, Optional, Sequence
@@ -314,7 +313,12 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
     )
     if rejected is not None:
         return rejected
-    assert db is not None
+    if db is None:
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            rejection_reasons=(SignedWorkerOpenClawClaimReason.AGENTDB_FAILURE,),
+        )
     task_id, context, task_reject = _signed_worker_claimed_task_context(db, task)
     if task_reject is not None:
         return task_reject
@@ -378,13 +382,20 @@ def _signed_worker_claim_pending_task(
                 detail=str(healthcheck.get("status") or "")[:300],
             )
         db = (agent_db_factory or AgentDB)()
-        task = _claim_pending_reddog_signed_worker_dispatch_task(
-            db=db, agent_id=agent_id, source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
-            include_0102_readonly=(signed_worker_runner is not None or _signed_0102_readonly_tasks_enabled_from_env()),
-            include_0102_bounded_code=_signed_0102_bounded_code_tasks_enabled_from_env(),
-            include_queue_stage_progress=_openclaw_queue_stage_tasks_enabled_from_env(),
-            env=os.environ, repo_root=repo_root,
+        task = _claim_reserved_independent_verifier_task(
+            db=db,
+            source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+            env=os.environ,
+            repo_root=repo_root,
         )
+        if task is None:
+            task = _claim_pending_reddog_signed_worker_dispatch_task(
+                db=db, agent_id=agent_id, source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+                include_0102_readonly=(signed_worker_runner is not None or _signed_0102_readonly_tasks_enabled_from_env()),
+                include_0102_bounded_code=_signed_0102_bounded_code_tasks_enabled_from_env(),
+                include_queue_stage_progress=_openclaw_queue_stage_tasks_enabled_from_env(),
+                env=os.environ, repo_root=repo_root,
+            )
         return db, task, None
     except Exception as exc:
         return None, None, _signed_worker_claim_result(
@@ -444,12 +455,58 @@ def _signed_worker_reject_claimed_task(
             final_reasons.append(
                 SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED
             )
+        _revoke_author_assurance_after_failure(
+            db=db,
+            task_id=task_id,
+            context=context,
+            reasons=tuple(final_reasons),
+        )
     return _signed_worker_claim_result(
         accepted=False, status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
         task_id=task_id, worker_role=str(source.get("worker_role") or ""),
         worker_runtime=str(source.get("worker_runtime") or ""),
         capability=str(source.get("capability") or ""),
         rejection_reasons=tuple(final_reasons), effect_source=source or None,
+    )
+
+
+def _revoke_author_assurance_after_failure(
+    *,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    reasons: Sequence[str],
+) -> None:
+    """Release reserved verifier capacity when its bounded author fails."""
+
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_0102_bounded_code_change_signed_worker_context,
+    )
+
+    if not is_0102_bounded_code_change_signed_worker_context(context):
+        return
+    durable = db.get_independent_assurance_reservation_for_task(
+        task_id,
+        task_kind="author",
+    )
+    reservation = (
+        durable.get("reservation")
+        if isinstance(durable, Mapping)
+        else None
+    )
+    if (
+        not isinstance(reservation, Mapping)
+        or str(reservation.get("status") or "") != "RESERVED"
+    ):
+        return
+    reason = "author_task_failed"
+    filtered = [str(value) for value in reasons if str(value or "").strip()]
+    if filtered:
+        reason += ":" + ",".join(filtered)[:240]
+    db.revoke_independent_assurance(
+        str(reservation.get("reservation_id") or ""),
+        reason=reason,
+        now_iso=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -466,9 +523,16 @@ def _signed_worker_finalize_claimed_task(
     runner_result = run_result.runner_result if isinstance(run_result.runner_result, Mapping) else {}
     requeue = runner_result.get("queue_chain_requeue_required") is True
     status = SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED if requeue else SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
+    task_status = "pending" if requeue else "completed"
+    if (
+        not requeue
+        and str(run_result.capability or "")
+        == "independent_slice_verification"
+    ):
+        task_status = "completed_reserved"
     if not _persist_reddog_signed_worker_dispatch_task_result(
         db, task_id, context=context, claim_status=status, run_result=source,
-        task_status="pending" if requeue else "completed",
+        task_status=task_status,
     ):
         return _signed_worker_reject_claimed_task(
             db=db, task_id=task_id, context=context, effect_source=source,
@@ -686,7 +750,7 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
     with db.db.get_connection() as conn:
         rows = conn.execute(
             """
-            SELECT task_id, context FROM agents_autonomous_tasks
+            SELECT task_id, context, retry_not_before FROM agents_autonomous_tasks
             WHERE status = 'pending' AND discovered_by = ?
             ORDER BY priority_score DESC, discovered_at ASC
             LIMIT 50
@@ -699,6 +763,13 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
         context: Any = None
         raw_context: Any = None
         for candidate in rows:
+            retry_not_before = (
+                candidate["retry_not_before"]
+                if hasattr(candidate, "keys")
+                else candidate[2]
+            )
+            if not _retry_window_open(retry_not_before):
+                continue
             raw_candidate = candidate["context"] if hasattr(candidate, "keys") else candidate[1]
             try:
                 candidate_context = json.loads(raw_candidate) if isinstance(raw_candidate, str) else raw_candidate
@@ -752,6 +823,163 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
         except Exception:
             context = None
     return {"task_id": task_id, "context": context}
+
+
+def _claim_reserved_independent_verifier_task(
+    *,
+    db: Any,
+    source: str,
+    env: Mapping[str, str],
+    repo_root: Path | str | None,
+) -> Optional[Dict[str, Any]]:
+    """Return the already-reserved verifier task only at its exact queue stage."""
+
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_openclaw_independent_verifier_signed_worker_context,
+    )
+
+    _renew_expired_independent_verifier_for_ready_stage(
+        db=db,
+        source=source,
+        env=env,
+        repo_root=repo_root,
+    )
+    with db.db.get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT task_id, context, assigned_to
+            FROM agents_autonomous_tasks
+            WHERE status = 'assigned' AND discovered_by = ?
+            ORDER BY priority_score DESC, discovered_at ASC
+            LIMIT 50
+            """,
+            (source,),
+        ).fetchall()
+    for row in rows:
+        raw_context = row["context"] if hasattr(row, "keys") else row[1]
+        try:
+            context = (
+                json.loads(raw_context)
+                if isinstance(raw_context, str)
+                else raw_context
+            )
+        except (TypeError, ValueError):
+            continue
+        if not is_openclaw_independent_verifier_signed_worker_context(context):
+            continue
+        if not _openclaw_independent_verifier_ready_from_env(
+            context,
+            env,
+            repo_root=repo_root,
+        ):
+            continue
+        task_id = str(row["task_id"] if hasattr(row, "keys") else row[0])
+        durable = db.get_independent_assurance_reservation_for_task(
+            task_id,
+            task_kind="verifier",
+        )
+        reservation = (
+            durable.get("reservation")
+            if isinstance(durable, Mapping)
+            else None
+        )
+        if not isinstance(reservation, Mapping):
+            continue
+        assigned_to = str(
+            row["assigned_to"] if hasattr(row, "keys") else row[2]
+        )
+        if (
+            durable.get("accepted") is not True
+            or assigned_to
+            != str(reservation.get("verifier_principal_id") or "")
+        ):
+            continue
+        return {"task_id": task_id, "context": context}
+    return None
+
+
+def _renew_expired_independent_verifier_for_ready_stage(
+    *,
+    db: Any,
+    source: str,
+    env: Mapping[str, str],
+    repo_root: Path | str | None,
+) -> None:
+    """Renew one expired verifier lease only when its exact stage is ready."""
+
+    from modules.communication.moltbot_bridge.src.reddog_openclaw_assurance_capacity import (
+        build_assurance_renewal_request,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_openclaw_independent_verifier_signed_worker_context,
+    )
+
+    with db.db.get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT task_id, context
+            FROM agents_autonomous_tasks
+            WHERE status = 'expired' AND discovered_by = ?
+            ORDER BY priority_score DESC, discovered_at ASC
+            LIMIT 50
+            """,
+            (source,),
+        ).fetchall()
+    raw_now = str(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO") or "").strip()
+    try:
+        trusted_now = (
+            datetime.fromisoformat(raw_now.replace("Z", "+00:00"))
+            if raw_now
+            else datetime.now(timezone.utc)
+        )
+    except ValueError:
+        return
+    if trusted_now.tzinfo is None:
+        trusted_now = trusted_now.replace(tzinfo=timezone.utc)
+    for row in rows:
+        task_id = str(row["task_id"] if hasattr(row, "keys") else row[0])
+        raw_context = row["context"] if hasattr(row, "keys") else row[1]
+        try:
+            context = (
+                json.loads(raw_context)
+                if isinstance(raw_context, str)
+                else raw_context
+            )
+        except (TypeError, ValueError):
+            continue
+        if (
+            not is_openclaw_independent_verifier_signed_worker_context(
+                context
+            )
+            or not _openclaw_independent_verifier_ready_from_env(
+                context,
+                env,
+                repo_root=repo_root,
+            )
+        ):
+            continue
+        durable = db.get_independent_assurance_reservation_for_task(
+            task_id,
+            task_kind="verifier",
+        )
+        reservation = (
+            durable.get("reservation")
+            if isinstance(durable, Mapping)
+            else None
+        )
+        if (
+            not isinstance(reservation, Mapping)
+            or str(reservation.get("status") or "") != "EXPIRED"
+        ):
+            continue
+        renewal = db.renew_independent_assurance(
+            build_assurance_renewal_request(
+                reservation,
+                now=trusted_now,
+            )
+        )
+        if renewal.get("accepted") is True:
+            return
 
 
 def _mark_reddog_readonly_audit_task_failed(db: Any, task_id: str) -> None:
@@ -820,6 +1048,7 @@ def _signed_worker_runner_result_summary(payload: Mapping[str, Any]) -> dict[str
         "queue_chain_complete": payload.get("queue_chain_complete") is True,
         "assigned_stage_complete": payload.get("assigned_stage_complete") is True,
         "queue_chain_requeue_required": payload.get("queue_chain_requeue_required") is True,
+        "retry_at": str(payload.get("retry_at") or ""),
         "rejection_reasons": _signed_worker_receipt_reasons(
             tuple(payload.get("rejection_reasons") or ())
         ),
@@ -903,17 +1132,36 @@ def _commit_signed_worker_task_result(
     base_context["signed_worker_task_result_receipts"] = bounded
     context_json = json.dumps(base_context, sort_keys=True)
     if task_status == "pending":
+        runner_summary = receipt.get("runner_result_summary")
+        if not isinstance(runner_summary, Mapping):
+            runner_summary = {}
+        retry_at = str(
+            runner_summary.get("retry_at") or ""
+        ) or None
         query = (
             "UPDATE agents_autonomous_tasks SET context = ?, status = 'pending', "
-            "assigned_to = NULL, assigned_at = NULL WHERE task_id = ? "
+            "assigned_to = NULL, assigned_at = NULL, retry_not_before = ? "
+            "WHERE task_id = ? "
             "AND status = 'assigned'"
         )
+        updated = db.db.execute_write(
+            query, (context_json, retry_at, task_id)
+        )
+        return updated == 1
     elif task_status in {"completed", "failed"}:
         query = (
             "UPDATE agents_autonomous_tasks SET context = ?, status = ?, "
-            "completed_at = CURRENT_TIMESTAMP WHERE task_id = ? AND status = 'assigned'"
+            "completed_at = CURRENT_TIMESTAMP, retry_not_before = NULL "
+            "WHERE task_id = ? AND status = 'assigned'"
         )
         updated = db.db.execute_write(query, (context_json, task_status, task_id))
+        return updated == 1
+    elif task_status == "completed_reserved":
+        query = (
+            "UPDATE agents_autonomous_tasks SET context = ?, "
+            "retry_not_before = NULL WHERE task_id = ? AND status = 'completed'"
+        )
+        updated = db.db.execute_write(query, (context_json, task_id))
         return updated == 1
     else:
         query = "UPDATE agents_autonomous_tasks SET context = ? WHERE task_id = ?"
@@ -1459,7 +1707,6 @@ def _openclaw_queue_stage_progress_ready_from_env(
         and plan.status == RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY
         and str(plan.current_stage or "")
         in {
-            "slice_verifier",
             "verified_draft_pr_publish",
             "verified_outcome_ratchet",
             "model_feedback_admission",
@@ -1469,9 +1716,81 @@ def _openclaw_queue_stage_progress_ready_from_env(
     )
 
 
+def _openclaw_independent_verifier_ready_from_env(
+    context: Mapping[str, Any] | None,
+    env: Mapping[str, str],
+    *,
+    repo_root: Path | str | None = None,
+) -> bool:
+    """Return True only when the reserved verifier owns the current stage."""
+
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+        resident_queue_runtime_file_path,
+    )
+
+    if not isinstance(context, Mapping):
+        return False
+    work_state_path = _resident_queue_runtime_input_path(
+        env,
+        repo_root=repo_root,
+        env_name="REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+        resolver=resident_queue_runtime_file_path,
+    )
+    chain_results_path = _resident_queue_runtime_input_path(
+        env,
+        repo_root=repo_root,
+        env_name="REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH",
+        resolver=resident_queue_runtime_file_path,
+    )
+    if not work_state_path or not chain_results_path:
+        return False
+    queue_item_id = str(context.get("queue_item_id") or "").strip()
+    if not queue_item_id:
+        return False
+    try:
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
+            RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY,
+            plan_reddog_resident_queue_orchestration,
+        )
+
+        plan = plan_reddog_resident_queue_orchestration(
+            _read_json_mapping(Path(work_state_path)),
+            chain_results=_resident_queue_stage_results(
+                _read_json_mapping(Path(chain_results_path))
+            ),
+            requested_queue_item_id=queue_item_id,
+            now_iso=str(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO") or ""),
+        )
+    except Exception:
+        return False
+    return (
+        plan.accepted is True
+        and plan.status == RESIDENT_QUEUE_ORCHESTRATION_PLAN_READY
+        and str(plan.current_stage or "") == "slice_verifier"
+    )
+
+
 def _read_json_mapping(path: Path) -> Mapping[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, Mapping) else {}
+
+
+def _retry_window_open(value: Any, *, now: datetime | None = None) -> bool:
+    """Return whether a portable ISO retry deadline is due."""
+
+    text = str(value or "").strip()
+    if not text:
+        return True
+    try:
+        retry_at = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if retry_at.tzinfo is None:
+        retry_at = retry_at.replace(tzinfo=timezone.utc)
+    trusted_now = now or datetime.now(timezone.utc)
+    if trusted_now.tzinfo is None:
+        trusted_now = trusted_now.replace(tzinfo=timezone.utc)
+    return retry_at.astimezone(timezone.utc) <= trusted_now.astimezone(timezone.utc)
 
 
 def _resident_queue_runtime_input_path(
@@ -1523,8 +1842,17 @@ def _has_pending_reddog_signed_worker_dispatch_task(
     include_0102_bounded_code = _signed_0102_bounded_code_tasks_enabled_from_env()
     include_queue_stage_progress = _openclaw_queue_stage_tasks_enabled_from_env()
     db = AgentDB()
+    if _claim_reserved_independent_verifier_task(
+        db=db,
+        source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        env=os.environ,
+        repo_root=repo_root,
+    ) is not None:
+        return True
     for task in db.get_autonomous_tasks(status="pending", limit=limit):
         if str(task.get("discovered_by") or "") != SIGNED_WORKER_DISPATCH_TASK_SOURCE:
+            continue
+        if not _retry_window_open(task.get("retry_not_before")):
             continue
         context = task.get("context")
         normalized = context if isinstance(context, dict) else None
@@ -2404,7 +2732,6 @@ class OpenClawSupervisor:
             result: Dict[str, Any] = {"ok": False, "error": "unknown"}
             try:
                 from modules.infrastructure.database.src.agent_db import AgentDB
-                from .openclaw_maintenance_selector import write_maintenance_report
 
                 db = AgentDB()
                 if task_id:

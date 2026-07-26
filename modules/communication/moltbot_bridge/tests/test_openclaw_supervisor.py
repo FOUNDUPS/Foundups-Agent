@@ -1,12 +1,17 @@
 import json
 import os
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from modules.communication.moltbot_bridge.src import openclaw_supervisor as supervisor_module
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     OpenClawSupervisor,
     SupervisorState,
+)
+from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+    SIGNED_WORKER_DISPATCH_TASK_SOURCE,
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
@@ -82,6 +87,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "executor_plan": {"decision": "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"},
         "execution_valve": {"decision": "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"},
         "worktree_create": {"decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"},
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+        },
         "bounded_worker_pilot": {
             "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
         },
@@ -357,7 +365,9 @@ def test_run_cycle_claims_signed_0102_bounded_code_task_with_profile_runtime_pat
     repo = tmp_path / "repo"
     repo.mkdir()
     runtime_root = tmp_path / "resident-runtime"
-    _write_runtime_queue_state(runtime_root, accepted_through="worktree_create")
+    _write_runtime_queue_state(
+        runtime_root, accepted_through="assurance_capacity_admission"
+    )
     broker = MagicMock()
     broker.get_runtime_status.side_effect = lambda dae_id: {
         "registered": True,
@@ -420,7 +430,111 @@ def test_run_cycle_claims_signed_0102_bounded_code_task_with_profile_runtime_pat
     assert result["verify"]["completed_task_ids"] == ("task-code",)
 
 
-def test_run_cycle_claims_queue_stage_progress_task_with_profile_runtime_paths(tmp_path):
+def test_author_failure_revokes_reserved_independent_assurance(monkeypatch) -> None:
+    db = MagicMock()
+    db.get_independent_assurance_reservation_for_task.return_value = {
+        "accepted": True,
+        "reservation": {
+            "reservation_id": "assurance-reservation-1",
+            "status": "RESERVED",
+        },
+    }
+    db.revoke_independent_assurance.return_value = {"accepted": True}
+    monkeypatch.setattr(
+        supervisor_module,
+        "_persist_reddog_signed_worker_dispatch_task_result",
+        lambda *args, **kwargs: True,
+    )
+    context = {
+        "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "worker_runtime": "0102",
+        "capability": "bounded_code_change",
+    }
+
+    result = supervisor_module._signed_worker_reject_claimed_task(
+        db=db,
+        task_id="author-task-1",
+        context=context,
+        reasons=("runner_declined",),
+    )
+
+    assert result["accepted"] is False
+    db.get_independent_assurance_reservation_for_task.assert_called_once_with(
+        "author-task-1",
+        task_kind="author",
+    )
+    db.revoke_independent_assurance.assert_called_once()
+    args, kwargs = db.revoke_independent_assurance.call_args
+    assert args == ("assurance-reservation-1",)
+    assert kwargs["reason"].startswith("author_task_failed:runner_declined")
+    assert kwargs["now_iso"]
+
+
+def test_supervisor_renews_one_expired_verifier_only_when_stage_ready(
+    monkeypatch,
+) -> None:
+    db = MagicMock()
+    conn = db.db.get_connection.return_value.__enter__.return_value
+    context = {
+        "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "worker_runtime": "openclaw",
+        "capability": "independent_slice_verification",
+    }
+    conn.execute.return_value.fetchall.return_value = [
+        {
+            "task_id": "verifier-task-1",
+            "context": json.dumps(context, sort_keys=True),
+        }
+    ]
+    db.get_independent_assurance_reservation_for_task.return_value = {
+        "accepted": True,
+        "reservation": {
+            "request_schema_version": "reddog_assurance_capacity_request.v1",
+            "reservation_id": "assurance-reservation-1",
+            "work_order_id": "work-order-1",
+            "queue_item_id": "queue-1",
+            "author_task_id": "author-task-1",
+            "author_principal_id": "author-0102",
+            "verifier_task_id": "verifier-task-1",
+            "verifier_principal_id": "verifier-openclaw",
+            "capability": "independent_slice_verification",
+            "worker_runtime": "openclaw",
+            "operational_snapshot_id": "snapshot-1",
+            "wsp15_allocation_receipt_id": "allocation-1",
+            "status": "EXPIRED",
+            "renewal_count": 0,
+        },
+    }
+    db.renew_independent_assurance.return_value = {"accepted": True}
+    monkeypatch.setattr(
+        supervisor_module,
+        "_openclaw_independent_verifier_ready_from_env",
+        lambda context, env, repo_root: True,
+    )
+    now_iso = datetime(2026, 7, 14, tzinfo=timezone.utc).isoformat()
+
+    supervisor_module._renew_expired_independent_verifier_for_ready_stage(
+        db=db,
+        source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        env={"REDDOG_RESIDENT_QUEUE_NOW_ISO": now_iso},
+        repo_root="O:/Foundups-Agent",
+    )
+
+    db.get_independent_assurance_reservation_for_task.assert_called_once_with(
+        "verifier-task-1",
+        task_kind="verifier",
+    )
+    db.renew_independent_assurance.assert_called_once()
+    renewal = db.renew_independent_assurance.call_args.args[0]
+    assert renewal["reservation_id"] == "assurance-reservation-1"
+    assert renewal["renewal_count"] == 1
+    assert renewal["reserved_at"] == now_iso
+    assert str(renewal["reservation_digest"]).startswith("sha256:")
+
+
+def test_run_cycle_does_not_claim_queue_stage_progress_for_bounded_worker_stage(
+    tmp_path,
+):
     from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
         SIGNED_WORKER_DISPATCH_TASK_SOURCE,
     )
@@ -484,11 +598,12 @@ def test_run_cycle_claims_queue_stage_progress_task_with_profile_runtime_paths(t
         mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
         result = supervisor.run_cycle()
 
-    assert result["plan"]["action"] == "claim_signed_worker_tasks_until_idle"
-    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_called_once_with(
-        max_claims=1
-    )
-    assert result["verify"]["completed_task_ids"] == ("task-stage",)
+    assert result["triage"] == {
+        "kind": "idle",
+        "reason": "resident_openclaw_healthy",
+    }
+    assert "plan" not in result
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_not_called()
 
 
 def test_run_cycle_does_not_claim_queue_stage_task_when_profile_runtime_files_missing(tmp_path):

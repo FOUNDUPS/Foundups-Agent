@@ -28,6 +28,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_ve
     AUTHORITY_VERIFICATION_STAGE_KEY,
     build_reddog_resident_queue_authority_verification_stage_handler,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_assurance_capacity_admission_handler import (
+    ASSURANCE_CAPACITY_ADMISSION_STAGE_KEY,
+    build_reddog_resident_queue_assurance_capacity_admission_stage_handler,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_worker_pilot_handler import (
     BOUNDED_WORKER_PILOT_STAGE_KEY,
     build_reddog_resident_queue_bounded_worker_pilot_stage_handler,
@@ -88,7 +92,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_worktree_cre
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
-    ExecutionValveEnvironment,
     GovernedExecutionValveEnvironment,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
@@ -235,6 +238,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     admission_request: Optional[Mapping[str, Any]] = None,
     pattern_memory_admission_sink: Any = None,
     worker_dispatch_writer: Any = None,
+    assurance_reservation_store: Any = None,
     worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
 ) -> ResidentQueueStageHandlerRegistry:
     """Build a handler map from explicitly injected dependencies."""
@@ -407,6 +411,20 @@ def build_reddog_resident_queue_stage_handler_registry(
     _add_if_ready(
         handlers,
         missing,
+        ASSURANCE_CAPACITY_ADMISSION_STAGE_KEY,
+        _missing(
+            ("assurance_reservation_store", assurance_reservation_store),
+        ),
+        lambda: build_reddog_resident_queue_assurance_capacity_admission_stage_handler(
+            work_state_snapshot=work_state_snapshot,
+            chain_results_store=chain_results_store,
+            reservation_store=assurance_reservation_store,
+            now=now_datetime,
+        ),
+    )
+    _add_if_ready(
+        handlers,
+        missing,
         BOUNDED_WORKER_PILOT_STAGE_KEY,
         _bounded_worker_pilot_missing(
             work_order_resolver=work_order_resolver,
@@ -444,6 +462,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
             work_order_resolver=work_order_resolver,
             repo_root=root,
+            assurance_reservation_store=assurance_reservation_store,
         ),
         lambda: build_reddog_resident_queue_slice_verifier_stage_handler(
             chain_results_store=chain_results_store,
@@ -454,6 +473,8 @@ def build_reddog_resident_queue_stage_handler_registry(
             repo_root=root,
             slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
             holoindex_evidence=holoindex_evidence,
+            assurance_reservation_store=assurance_reservation_store,
+            trusted_now=now_datetime,
         ),
     )
     _add_if_ready(
@@ -573,16 +594,22 @@ def _slice_verifier_missing(
     slice_verifier_request_binding_enabled: bool,
     work_order_resolver: Any,
     repo_root: Optional[Path],
+    assurance_reservation_store: Any,
 ) -> tuple[str, ...]:
     if verifier_request:
-        return ()
+        return _missing(
+            ("assurance_reservation_store", assurance_reservation_store),
+        )
     if evidence_producer_request and evidence_command_runner is not None:
-        return ()
+        return _missing(
+            ("assurance_reservation_store", assurance_reservation_store),
+        )
     if slice_verifier_request_binding_enabled:
         return _missing(
             ("work_order_resolver", work_order_resolver),
             ("repo_root", repo_root),
             ("evidence_command_runner", evidence_command_runner),
+            ("assurance_reservation_store", assurance_reservation_store),
         )
     reasons: list[str] = []
     if not verifier_request:

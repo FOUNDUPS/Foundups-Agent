@@ -66,6 +66,27 @@ File: `modules/infrastructure/database/src/agent_db.py`
 - `record_error(error_hash, error_type, solution)`
 - `get_error_solution(error_hash) -> dict | None`
 
+### Independent Assurance Reservations
+
+- `reserve_independent_assurance(request) -> dict`
+- `get_independent_assurance_reservation(reservation_id) -> dict`
+- `get_independent_assurance_reservation_for_task(task_id, task_kind=...) -> dict`
+- `renew_independent_assurance(request) -> dict`
+- `complete_independent_assurance(reservation_id, admission_reservation_digest=..., ...) -> dict`
+- `revoke_independent_assurance(reservation_id, ...) -> dict`
+- `expire_independent_assurance_reservations() -> dict`
+
+Reservation admission atomically claims one pending verifier task and inserts
+one digest-bound lease. Author and verifier principals must differ. Snapshot,
+work order, queue item, WSP 15 allocation, runtime, capability, and task
+bindings are revalidated from the persisted task contexts. Completion,
+revocation, expiration, replay, and competing reservations fail closed.
+Renewal preserves the immutable admission digest, is limited to three
+renewals and a six-hour total lease horizon, and requires the original author
+task to have completed successfully. Admission rejects any author already
+claimed by another worker, and terminal completion revalidates the immutable
+admission digest.
+
 ## SQLite Audit API
 File: `modules/infrastructure/database/src/sqlite_audit.py`
 

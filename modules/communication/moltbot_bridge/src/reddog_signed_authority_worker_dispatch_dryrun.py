@@ -220,6 +220,14 @@ def _build_intents(
     active_bounded_code_workers = 1 if coding_count > 0 else 0
     for index in range(active_bounded_code_workers):
         roles.append((f"coding_worker_{index + 1}", "0102", "bounded_code_change"))
+    if coding_count > 0 and worker_plan.get("independent_verifier_required") is True:
+        roles.append(
+            (
+                "independent_slice_verifier",
+                "openclaw",
+                "independent_slice_verification",
+            )
+        )
     if worker_plan.get("openclaw_candidate") is True and coding_count <= 0:
         roles.append(("openclaw_candidate", "openclaw", "candidate_queue_review"))
     if coding_count > 0:

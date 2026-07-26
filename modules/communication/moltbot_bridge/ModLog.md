@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-25: Independent assurance capacity admission
+
+- Inserted a durable assurance-capacity gate between worktree creation and
+  bounded coding in the resident RedDog queue.
+- Bound author and independent verifier task identities, WSP 15 allocation,
+  operational snapshot, work order, and reservation digest through the slice
+  verifier receipt.
+- Deferred unavailable capacity with a persisted retry window instead of
+  busy-looping or treating CI as an independent reviewer.
+- Made successful admission a persisted yield boundary so the queue-stage
+  owner cannot execute either the author or verifier stage.
+- Added separate OpenClaw claims for the bounded author and reserved verifier,
+  author-failure revocation, and stage-gated bounded verifier-lease renewal.
+- Hardened review findings by requiring exact accepted upstream decisions,
+  rejecting already-claimed authors, binding renewed verification to the
+  immutable admission digest, and validating terminal receipt lineage before
+  releasing capacity.
+- Kept HoloIndex query-only and blocked code execution when assurance
+  admission, rehydration, or terminal receipt binding fails.
+
 ## 2026-07-25: Daemon self-audit runtime nudge alignment
 
 - Switched supervisor-escalation memory scans from the obsolete tracked report

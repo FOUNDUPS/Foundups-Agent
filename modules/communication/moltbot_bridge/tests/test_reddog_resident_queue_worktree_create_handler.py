@@ -24,7 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
     invoke_reddog_resident_queue_next_stage_dispatch,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
-    NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE,
+    NEXT_QUEUE_ASSURANCE_CAPACITY_ADMISSION,
     NEXT_QUEUE_WORKTREE_CREATE_INVOKE,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worktree_create_handler import (
@@ -46,9 +46,6 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
-)
-from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
-    QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_executor_plan_dryrun import (
     QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT,
@@ -381,7 +378,7 @@ def test_dispatcher_records_worktree_create_and_advances_to_bounded_worker_pilot
     assert result.accepted is True
     assert result.decision == RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT
     assert result.dispatched_stage == WORKTREE_CREATE_STAGE_KEY
-    assert result.next_action == NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE
+    assert result.next_action == NEXT_QUEUE_ASSURANCE_CAPACITY_ADMISSION
     assert resolver.calls == [
         {
             "work_order_id": WORK_ORDER_ID,

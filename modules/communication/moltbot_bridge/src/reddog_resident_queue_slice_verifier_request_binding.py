@@ -29,6 +29,8 @@ FAIL_WORKTREE_CREATE_MISSING = "FAIL_WORKTREE_CREATE_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_MISSING = "FAIL_BOUNDED_WORKER_PILOT_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_REJECTED = "FAIL_BOUNDED_WORKER_PILOT_REJECTED"
 FAIL_SIGNED_RECEIPT_CHAIN_MISSING = "FAIL_SIGNED_RECEIPT_CHAIN_MISSING"
+FAIL_ASSURANCE_RESERVATION_MISSING = "FAIL_ASSURANCE_RESERVATION_MISSING"
+FAIL_ASSURANCE_RESERVATION_MISMATCH = "FAIL_ASSURANCE_RESERVATION_MISMATCH"
 
 
 @dataclass(frozen=True)
@@ -57,6 +59,7 @@ def build_resident_queue_slice_verifier_request(
     stage_results: Mapping[str, Mapping[str, Any]],
     repo_root: Path,
     holoindex_evidence: Mapping[str, Any] | None = None,
+    assurance_reservation_store: Any = None,
 ) -> ResidentQueueSliceVerifierRequestBindingResult:
     """Build an evidence-producer request from resident queue chain state."""
 
@@ -101,10 +104,44 @@ def build_resident_queue_slice_verifier_request(
     if not signed_receipt_chain:
         reasons.append(FAIL_SIGNED_RECEIPT_CHAIN_MISSING)
 
+    admission = _mapping(stage_results.get("assurance_capacity_admission"))
+    recorded_reservation = _mapping(admission.get("reservation"))
+    reservation_id = str(recorded_reservation.get("reservation_id") or "")
+    durable_reservation = {}
+    if (
+        admission.get("decision") != "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+        or not reservation_id
+        or assurance_reservation_store is None
+    ):
+        reasons.append(FAIL_ASSURANCE_RESERVATION_MISSING)
+    else:
+        durable_reservation = _mapping(
+            assurance_reservation_store.get_independent_assurance_reservation(
+                reservation_id
+            )
+        )
+        if _mapping(durable_reservation.get("reservation")):
+            durable_reservation = _mapping(
+                durable_reservation.get("reservation")
+            )
+        durable_admission_digest = str(
+            durable_reservation.get("admission_reservation_digest")
+            or durable_reservation.get("reservation_digest")
+            or ""
+        )
+        if (
+            not durable_reservation
+            or str(durable_reservation.get("status") or "").upper()
+            != "RESERVED"
+            or durable_admission_digest
+            != str(recorded_reservation.get("reservation_digest") or "")
+            or str(durable_reservation.get("work_order_id") or "")
+            != str(work_order.get("work_order_id") or "")
+        ):
+            reasons.append(FAIL_ASSURANCE_RESERVATION_MISMATCH)
+
     for field_name in (
         "slice_name",
-        "worker_id",
-        "verifier_id",
         "base_sha",
         "head_sha",
         "required_checks",
@@ -132,8 +169,21 @@ def build_resident_queue_slice_verifier_request(
         "explicit_evidence_production_requested": True,
         "work_order_id": str(work_order.get("work_order_id") or ""),
         "slice_name": str(plan.get("slice_name") or ""),
-        "worker_id": str(plan.get("worker_id") or ""),
-        "verifier_id": str(plan.get("verifier_id") or ""),
+        "worker_id": str(durable_reservation.get("author_principal_id") or ""),
+        "verifier_id": str(
+            durable_reservation.get("verifier_principal_id") or ""
+        ),
+        "assurance_reservation_id": str(
+            durable_reservation.get("reservation_id") or ""
+        ),
+        "assurance_reservation_digest": str(
+            durable_reservation.get("admission_reservation_digest")
+            or durable_reservation.get("reservation_digest")
+            or ""
+        ),
+        "verifier_task_id": str(
+            durable_reservation.get("verifier_task_id") or ""
+        ),
         "base_sha": str(plan.get("base_sha") or ""),
         "head_sha": str(plan.get("head_sha") or ""),
         "repo_root": str(repo_root),
@@ -206,6 +256,8 @@ def _dedupe(values: list[str]) -> list[str]:
 
 __all__ = [
     "FAIL_AUTHORITY_RUNTIME_MISSING",
+    "FAIL_ASSURANCE_RESERVATION_MISMATCH",
+    "FAIL_ASSURANCE_RESERVATION_MISSING",
     "FAIL_AUTHORITY_VERIFICATION_MISSING",
     "FAIL_BOUNDED_WORKER_PILOT_MISSING",
     "FAIL_BOUNDED_WORKER_PILOT_REJECTED",

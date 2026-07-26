@@ -286,7 +286,20 @@ def publish_reddog_signed_worker_dispatch_runtime(
     if deduped_reasons:
         return _reject(deduped_reasons)
 
-    tasks = tuple(_build_task(queue_item=queue_item, dryrun_receipt=receipt, intent=intent) for intent in intents)
+    operational_snapshot_id = str(
+        work_state_snapshot.get("snapshot_id")
+        or work_state_snapshot.get("operational_snapshot_id")
+        or _digest(work_state_snapshot)
+    )
+    tasks = tuple(
+        _build_task(
+            queue_item=queue_item,
+            dryrun_receipt=receipt,
+            intent=intent,
+            operational_snapshot_id=operational_snapshot_id,
+        )
+        for intent in intents
+    )
     runtime_receipt = _receipt(
         accepted=True,
         receipt=receipt,
@@ -381,6 +394,7 @@ def _build_task(
     queue_item: Mapping[str, Any],
     dryrun_receipt: Mapping[str, Any],
     intent: Mapping[str, Any],
+    operational_snapshot_id: str,
 ) -> SignedWorkerDispatchTaskSpec:
     runtime = str(intent["worker_runtime"])
     capability = str(intent["capability"])
@@ -390,15 +404,22 @@ def _build_task(
         "queue_item_id": queue_item["queue_item_id"],
         "intent_id": intent["intent_id"],
     }
+    task_id = "reddog-worker-dispatch-" + _digest(task_seed).removeprefix("sha256:")[:16]
     priority = str(dryrun_receipt.get("wsp15_priority") or "P2")
     context = {
         "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
         "schema_version": WORKER_DISPATCH_RUNTIME_SCHEMA_VERSION,
         "slice_name": "REDDOG_OPENCLAW_HERMES_0102_WORKER_DISPATCH_RUNTIME_PHASE1",
         "queue_item_id": str(queue_item["queue_item_id"]),
+        "work_order_id": str(dryrun_receipt.get("work_order_id") or ""),
+        "operational_snapshot_id": str(operational_snapshot_id),
+        "wsp15_allocation_receipt_id": str(
+            dryrun_receipt.get("wsp15_allocation_receipt_id") or ""
+        ),
         "selected_slice": str(queue_item.get("slice_id") or ""),
         "worker_runtime": runtime,
         "worker_role": role,
+        "worker_principal_id": f"agentdb-task:{task_id}",
         "capability": capability,
         "signed_authority_worker_dispatch_receipt": dict(dryrun_receipt),
         "worker_dispatch_intent": dict(intent),
@@ -411,6 +432,7 @@ def _build_task(
             "executor_plan",
             "execution_valve",
             "worktree_create",
+            "assurance_capacity_admission",
             "bounded_worker_pilot",
             "slice_verifier",
         ],
@@ -422,7 +444,7 @@ def _build_task(
         },
     }
     return SignedWorkerDispatchTaskSpec(
-        task_id="reddog-worker-dispatch-" + _digest(task_seed).removeprefix("sha256:")[:16],
+        task_id=task_id,
         description=f"RedDog signed worker dispatch: {role} ({runtime}/{capability})",
         required_skills=(
             SIGNED_WORKER_DISPATCH_TASK_SKILL,

@@ -38,20 +38,11 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
 )
-from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
-    QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT,
-)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_executor_plan_dryrun import (
     QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT,
-)
-from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_slice_verifier_invoke import (
-    QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT,
-)
-from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verified_draft_pr_publish_invoke import (
-    QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_verified_outcome_ratchet_invoke import (
     QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT,
@@ -75,6 +66,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized
     _ratchet_request,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT,
     WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
     WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
     with_queue_wsp15_allocation,
@@ -136,6 +128,7 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "executor_plan": {"decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT},
         "execution_valve": {"decision": QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT},
         "worktree_create": {"decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT},
+        "assurance_capacity_admission": ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT,
         "bounded_worker_pilot": _queue_pilot_result(),
         "slice_verifier": _queue_verifier_result(),
         VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY: _queue_publish_result(),

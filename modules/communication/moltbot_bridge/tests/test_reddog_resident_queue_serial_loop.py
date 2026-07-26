@@ -98,6 +98,10 @@ STAGE_ACCEPT_VALUES = {
     "executor_plan": ("decision", QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT),
     "execution_valve": ("decision", QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT),
     "worktree_create": ("decision", QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT),
+    "assurance_capacity_admission": (
+        "decision",
+        "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
+    ),
     "bounded_worker_pilot": ("decision", QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT),
     "slice_verifier": ("decision", QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT),
     "verified_draft_pr_publish": ("decision", QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT),
