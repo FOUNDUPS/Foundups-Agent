@@ -42,6 +42,15 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
 
 MAX_QUERY_CHARS = 16_000
 MAX_LIMIT = 20
+MAX_OWNER_ATTEMPTS = 2
+PROCESS_OWNED_STATUSES = frozenset({OWNER_STARTED, OWNER_REUSED})
+TRANSIENT_OWNER_ERRORS = frozenset(
+    {
+        "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
+        "QUERY_OWNER_POISONED",
+        "SEMANTIC_BACKEND_UNAVAILABLE",
+    }
+)
 
 
 def _failure(error: str, *, query: str = "") -> dict[str, Any]:
@@ -55,6 +64,20 @@ def _failure(error: str, *, query: str = "") -> dict[str, Any]:
         "index_gap_detected": True,
         "stale_reasons": ["holoindex_owner_query_failed"],
         "no_holoindex_reindex_performed": True,
+    }
+
+
+def _with_retry_telemetry(
+    result: Mapping[str, Any],
+    *,
+    attempts: int,
+    retry_reason: str,
+) -> dict[str, Any]:
+    return {
+        **dict(result),
+        "owner_attempts": attempts,
+        "owner_retry_performed": attempts > 1,
+        "owner_retry_reason": retry_reason,
     }
 
 
@@ -161,51 +184,98 @@ def query_once(
     authority_root = selection.selected_root
 
     started_here = False
+    attempts = 0
+    retry_reason = ""
     try:
-        bootstrap = ensure_owner(repo_root=authority_root, requested=True)
-        status = str(getattr(bootstrap, "status", ""))
-        if getattr(bootstrap, "ready", False) is not True:
-            return _failure(
-                str(getattr(bootstrap, "error", "") or "owner_bootstrap_failed"),
-                query=query,
-            )
-        started_here = status == OWNER_STARTED
-        service_url: str | None = None
-        service_token: str | None = None
-        if status in {OWNER_STARTED, OWNER_REUSED}:
-            handoff = resolve_handoff()
-            if handoff is None:
-                return _failure("owner_handoff_missing", query=query)
-            service_url, service_token = handoff
-        elif status != OWNER_CONFIGURED:
-            return _failure("owner_bootstrap_status_invalid", query=query)
+        while attempts < MAX_OWNER_ATTEMPTS:
+            attempts += 1
+            bootstrap = ensure_owner(repo_root=authority_root, requested=True)
+            status = str(getattr(bootstrap, "status", ""))
+            if getattr(bootstrap, "ready", False) is not True:
+                error = str(
+                    getattr(bootstrap, "error", "") or "owner_bootstrap_failed"
+                )
+                if attempts == 1 and error in TRANSIENT_OWNER_ERRORS:
+                    retry_reason = error
+                    cleanup_owner()
+                    continue
+                return _with_retry_telemetry(
+                    _failure(error, query=query),
+                    attempts=attempts,
+                    retry_reason=retry_reason,
+                )
+            process_owned = status in PROCESS_OWNED_STATUSES
+            started_here = status == OWNER_STARTED
+            service_url: str | None = None
+            service_token: str | None = None
+            if process_owned:
+                handoff = resolve_handoff()
+                if handoff is None:
+                    return _with_retry_telemetry(
+                        _failure("owner_handoff_missing", query=query),
+                        attempts=attempts,
+                        retry_reason=retry_reason,
+                    )
+                service_url, service_token = handoff
+            elif status != OWNER_CONFIGURED:
+                return _with_retry_telemetry(
+                    _failure("owner_bootstrap_status_invalid", query=query),
+                    attempts=attempts,
+                    retry_reason=retry_reason,
+                )
 
-        result = query_owner(
-            repo_root=authority_root,
-            query=query,
-            limit=limit,
-            service_url=service_url,
-            service_token=service_token,
-            timeout_seconds=60.0,
-        )
-        if not isinstance(result, Mapping):
-            return _failure("owner_response_invalid", query=query)
+            result = query_owner(
+                repo_root=authority_root,
+                query=query,
+                limit=limit,
+                service_url=service_url,
+                service_token=service_token,
+                timeout_seconds=60.0,
+            )
+            if not isinstance(result, Mapping):
+                return _with_retry_telemetry(
+                    _failure("owner_response_invalid", query=query),
+                    attempts=attempts,
+                    retry_reason=retry_reason,
+                )
+            error = str(result.get("error") or "")
+            if (
+                attempts == 1
+                and process_owned
+                and error in TRANSIENT_OWNER_ERRORS
+            ):
+                retry_reason = error
+                cleanup_owner()
+                started_here = False
+                continue
+            break
+
         final_selection = select_authority(repo_root)
         if not _same_authority(selection, final_selection):
-            return {
-                **_failure("REPOSITORY_STATE_CHANGED_DURING_QUERY", query=query),
-                **_authority_metadata(selection),
-            }
+            return _with_retry_telemetry(
+                {
+                    **_failure(
+                        "REPOSITORY_STATE_CHANGED_DURING_QUERY", query=query
+                    ),
+                    **_authority_metadata(selection),
+                },
+                attempts=attempts,
+                retry_reason=retry_reason,
+            )
         result = _bind_authority(result, final_selection, query)
         try:
             semantic_evidence_json, _, _ = canonical_semantic_evidence(
                 result.get("raw_result")
             )
         except ValueError as exc:
-            return {
-                **_failure(str(exc), query=query),
-                **_authority_metadata(final_selection),
-            }
+            return _with_retry_telemetry(
+                {
+                    **_failure(str(exc), query=query),
+                    **_authority_metadata(final_selection),
+                },
+                attempts=attempts,
+                retry_reason=retry_reason,
+            )
         result = {
             **dict(result),
             "semantic_evidence_json": semantic_evidence_json,
@@ -217,9 +287,17 @@ def query_once(
             result=result,
             require_generation=True,
         )
-        return {**dict(result), "query_receipt": dict(receipt)}
+        return _with_retry_telemetry(
+            {**dict(result), "query_receipt": dict(receipt)},
+            attempts=attempts,
+            retry_reason=retry_reason,
+        )
     except Exception as exc:
-        return _failure(type(exc).__name__, query=query)
+        return _with_retry_telemetry(
+            _failure(type(exc).__name__, query=query),
+            attempts=max(1, attempts),
+            retry_reason=retry_reason,
+        )
     finally:
         if started_here:
             cleanup_owner()

@@ -254,6 +254,9 @@ function ownerMetadata(task, priorMeta, ownerResult, raw, accepted) {
     owner_query_required: true,
     owner_query_ok: accepted,
     owner_query_error: String((ownerResult && ownerResult.error) || ''),
+    owner_query_attempts: Number((ownerResult && ownerResult.owner_attempts) || 0),
+    owner_query_retry_performed: ownerResult && ownerResult.owner_retry_performed === true,
+    owner_query_retry_reason: String((ownerResult && ownerResult.owner_retry_reason) || ''),
     owner_query_source: String((ownerResult && ownerResult.source) || 'holoindex_owner_service'),
     freshness: String((ownerResult && ownerResult.freshness) || 'UNKNOWN'),
     freshness_generation_id: String((ownerResult && ownerResult.freshness_generation_id) || ''),
@@ -283,6 +286,9 @@ function ownerQuerySummary(metadata, accepted) {
     no_authority_worktree_mutation_performed: metadata.no_authority_worktree_mutation_performed,
     query_receipt_id: metadata.query_receipt_id,
     error: metadata.owner_query_error,
+    attempts: metadata.owner_query_attempts,
+    retry_performed: metadata.owner_query_retry_performed,
+    retry_reason: metadata.owner_query_retry_reason,
     no_holoindex_reindex_performed: metadata.no_holoindex_reindex_performed
   };
 }
@@ -314,6 +320,9 @@ function newMeta(usedOfflineFallback, emptyCoverageDigest) {
     holoindex_owner_query_required: false,
     holoindex_owner_query_ok: false,
     holoindex_owner_query_error: 'unknown',
+    holoindex_owner_attempts: 0,
+    holoindex_owner_retry_performed: false,
+    holoindex_owner_retry_reason: '',
     holoindex_query_source: 'unknown',
     holoindex_freshness: 'UNKNOWN',
     holoindex_generation_id: '',
@@ -350,6 +359,9 @@ function applyOwnerMetadata(meta, bundleMeta, usedOfflineFallback) {
   meta.holoindex_owner_query_required = bundleMeta.owner_query_required === true;
   meta.holoindex_owner_query_ok = bundleMeta.owner_query_ok === true;
   meta.holoindex_owner_query_error = String(bundleMeta.owner_query_error || '');
+  meta.holoindex_owner_attempts = Number(bundleMeta.owner_query_attempts || 0);
+  meta.holoindex_owner_retry_performed = bundleMeta.owner_query_retry_performed === true;
+  meta.holoindex_owner_retry_reason = String(bundleMeta.owner_query_retry_reason || '');
   meta.holoindex_query_source = String(bundleMeta.owner_query_source || 'unknown');
   meta.holoindex_freshness = String(bundleMeta.freshness || 'UNKNOWN');
   meta.holoindex_generation_id = String(bundleMeta.freshness_generation_id || '');
@@ -433,6 +445,9 @@ function applyRejectedOwnerMeta(meta, ownerResult) {
     holoindex_owner_query_required: true,
     holoindex_owner_query_ok: false,
     holoindex_owner_query_error: String(value.error || 'unknown'),
+    holoindex_owner_attempts: Number(value.owner_attempts || 0),
+    holoindex_owner_retry_performed: value.owner_retry_performed === true,
+    holoindex_owner_retry_reason: String(value.owner_retry_reason || ''),
     holoindex_query_source: String(value.source || 'holoindex_owner_service'),
     holoindex_freshness: String(value.freshness || 'UNKNOWN'),
     holoindex_generation_id: String(value.freshness_generation_id || ''),
