@@ -6,8 +6,6 @@ import ast
 import json
 from pathlib import Path
 
-import pytest
-
 from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
     AUTHORITATIVE_REFRESH_APPLIED,
     AUTHORITATIVE_REFRESH_REJECTED,
@@ -212,6 +210,55 @@ def test_duplicate_active_claim_rejects_without_appending_queue_item() -> None:
     assert "durable_worker_claim_already_exists" in result.receipt.rejection_reasons
     assert store.load()["worker_claims"][0]["claim_id"] == "existing"
     assert store.load()["wre_queue_items"] == []
+
+
+def test_refresh_preserves_architect_fix_replay_and_publication_history() -> None:
+    promotion = {
+        "publication_id": "sha256:" + "a" * 64,
+        "proposal_authenticity_attestation_id": "attestation:1",
+    }
+    publication = {
+        "publication_id": promotion["publication_id"],
+        "state": "COMMITTED",
+    }
+    store = InMemoryAuthoritativeWorkStateStore(
+        {
+            "revision": "rev-1",
+            "worker_claims": [],
+            "wre_queue_items": [],
+            "architect_fix_promotions": [promotion],
+            "architect_fix_publications": [publication],
+        }
+    )
+
+    result = _refresh(store)
+
+    assert result.accepted is True
+    snapshot = store.load()
+    assert snapshot["architect_fix_promotions"] == [promotion]
+    assert snapshot["architect_fix_publications"] == [publication]
+
+
+def test_refresh_rejects_while_architect_fix_publication_is_pending() -> None:
+    store = InMemoryAuthoritativeWorkStateStore(
+        {
+            "revision": "rev-1",
+            "worker_claims": [],
+            "wre_queue_items": [],
+            "architect_fix_publications": [
+                {
+                    "publication_id": "sha256:" + "a" * 64,
+                    "state": "STATE_PREPARED",
+                }
+            ],
+        }
+    )
+
+    result = _refresh(store)
+
+    assert result.accepted is False
+    assert "architect_fix_publication_pending" in result.receipt.rejection_reasons
+    assert store.load()["revision"] == "rev-1"
 
 
 def test_commit_failure_is_fail_closed_and_returns_no_authority() -> None:

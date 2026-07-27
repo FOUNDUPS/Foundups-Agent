@@ -134,6 +134,9 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH": "signer_service_run_packet.json",
     "REDDOG_SIGNER_SOCKET_PATH": "reddog_signer.sock",
     "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": "resident_queue_chain_results.json",
+    "REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH": (
+        "architect_fix_inert_profile.json"
+    ),
     "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": "authority_profile.json",
     "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPTS_PATH": (
         "resident_queue_control_loop_receipts.jsonl"

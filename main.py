@@ -2122,7 +2122,8 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH            Outside-repo runtime binding receipt JSON
         REDDOG_MEMEX_SUPPLY_RECEIPT_PATH                     Outside-repo Memex supply JSON
         REDDOG_AUTHORITY_PROFILE_SOURCE_PATH                 Outside-repo authority seed JSON
-        REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo promoted profile JSON
+        REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH              Outside-repo inert promoted profile JSON
+        REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo active authority profile JSON
         HOLOINDEX_FRESHNESS_RECEIPT                          Current HoloIndex freshness receipt
         REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
         REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
@@ -2269,6 +2270,11 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         "REDDOG_AUTHORITY_PROFILE_SEED_PATH",
     )
     authority_profile_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
+        "REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH",
+    )
+    active_authority_profile_path = resident_queue_runtime_file_path(
         os.environ,
         repo_root,
         "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
@@ -3017,13 +3023,32 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         return True
 
     enforced = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") != "0"
+    if (
+        authority_profile_path
+        and active_authority_profile_path
+        and Path(authority_profile_path).resolve()
+        == Path(active_authority_profile_path).resolve()
+    ):
+        print(
+            "[REDDOG-FIX-PROMOTION] preflight="
+            f"{'FAIL' if enforced else 'WARN'} "
+            "reason=inert_profile_aliases_active_authority_profile"
+        )
+        return not enforced
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
             run_reddog_main_architect_fix_promotion_bootstrap,
         )
+        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
+            resident_queue_runtime_root_path,
+        )
 
         result = run_reddog_main_architect_fix_promotion_bootstrap(
             repo_root=repo_root,
+            runtime_root=resident_queue_runtime_root_path(
+                os.environ,
+                repo_root,
+            ),
             work_state_path=work_state_path,
             architect_determination_path=architect_determination_path,
             model_selection_receipt_path=model_selection_receipt_path,
@@ -3055,10 +3080,12 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         f"selected_slice={result.selected_slice or '(none)'} reasons={reasons}"
     )
     if result.accepted and result.authority_profile_path:
-        os.environ["REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH"] = result.authority_profile_path
+        os.environ["REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH"] = (
+            result.authority_profile_path
+        )
         print(
             f"[REDDOG-FIX-PROMOTION] receipt={result.promotion_receipt_id} "
-            f"revision={result.committed_revision}"
+            f"revision={result.committed_revision} authority=INERT"
         )
         return True
 

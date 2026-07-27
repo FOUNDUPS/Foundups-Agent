@@ -39,21 +39,21 @@ re-verifies both the principal-signed signer policy and RedDog proposal
 attestation at promotion use time. The canonical authority-profile source
 receipt is recomputed, so identity, scope, operation, or permission changes are
 rejected alongside test-only mode, signer substitution, expiry, and revocation.
-Successful authoritative work-state CAS persists the attestation ID as the
-durable replay guard, including across process restart. The attestation,
+Successful authoritative work-state publication persists the attestation ID as
+a restart-durable replay guard. The attestation,
 policy-authorization, and signer-runtime context IDs/digests are bound into the
 claim, queue item, promotion record, promotion receipt, and promoted authority
 profile. There is no process-local authority registry or serializable promotion
 capability. Production startup remains fail closed until it receives the
 attestation, a current signer-runtime configuration, and an independently
 administered principal-key resolver.
-
-`reddog_architect_fix_promotion_transaction.py` isolates record construction,
-authority-profile projection, replay detection, and authoritative state CAS
-from the validation boundary. The current bootstrap prewrites the outside-repo
-profile and performs best-effort rollback when CAS rejects. Crash-recoverable
-two-phase profile/state publication remains SPECIFIED_NOT_IMPLEMENTED and is a
-hard gate before production signer input supply is enabled.
+`reddog_architect_fix_promotion_transaction.py` isolates record construction
+and publication; `reddog_architect_fix_promotion_publication.py` confines all
+artifacts and runs `STATE_PREPARED -> PROFILE_PUBLISHED -> COMMITTED`. PREPARED
+contains no executable claim or queue item. Recovery binds every staged digest,
+revision, attestation, and record; tampering, drift, and altered retries fail.
+COMMITTED proves local integrity, not late-bound publication authentication. `main.py` writes the distinct `architect_fix_inert_profile.json` artifact, rejects aliasing with `authority_profile.json`, and never activates it for the resident authority chain.
+A signer-owned commitment and authenticated activation covering the immutable publication tuple remain SPECIFIED_NOT_IMPLEMENTED.
 
 The signer-service configuration and runtime wiring can provision one exact
 proposal policy only with a fresh, principal-signed, domain-separated policy

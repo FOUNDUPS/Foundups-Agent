@@ -38,6 +38,8 @@ MODULE_PATH = (
     / "reddog_authority_profile_source_artifact_supply.py"
 )
 NOW = 1_800_000_000
+PERMISSION_DIGEST = "sha256:" + ("a" * 64)
+SUBJECT_DIGEST = "sha256:" + ("b" * 64)
 
 
 def _principal() -> PrincipalAuthorityRecord:
@@ -47,7 +49,7 @@ def _principal() -> PrincipalAuthorityRecord:
         principal_public_key=_PRINCIPAL_PUBLIC_KEY,
         repo_scope=("FOUNDUPS/Foundups-Agent",),
         foundup_scope=("paccess_001",),
-        verified_subject_digest="sha256:verified-subject",
+        verified_subject_digest=SUBJECT_DIGEST,
         reward_account="reward:paccess",
         owner_dae="dae:paccess",
     )
@@ -55,7 +57,7 @@ def _principal() -> PrincipalAuthorityRecord:
 
 def _snapshot(**overrides) -> PermissionSnapshot:
     payload = {
-        "evidence_digest": "sha256:permission",
+        "evidence_digest": PERMISSION_DIGEST,
         "expires_at": NOW + 3600,
         "can_write": True,
         "can_admin": False,
@@ -76,7 +78,7 @@ def _seed(**overrides):
         "allowed_paths": ["modules/foundups/paccess_001/**"],
         "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
         "requested_operation": "create_foundup",
-        "permission_snapshot_digest": "sha256:permission",
+        "permission_snapshot_digest": PERMISSION_DIGEST,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
         "issued_at": NOW,
@@ -269,6 +271,59 @@ def test_supplier_rejects_holoindex_gap_authority(tmp_path: Path) -> None:
     assert AuthorityProfileSourceSupplyReason.HOLOINDEX_EVIDENCE_INVALID in result.rejection_reasons
 
 
+def test_supplier_rejects_nested_secret_field_before_write(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+    seed = _seed(extra_runtime={"private_key": "must-not-persist"})
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=seed,
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=output,
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert any(
+        reason.startswith(AuthorityProfileSourceSupplyReason.SECRET_FIELD)
+        for reason in result.rejection_reasons
+    )
+    assert not output.exists()
+
+
+def test_supplier_rejects_unknown_metadata_and_malformed_digest(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+    seed = _seed(
+        metadata={"value": "sk-example-secret"},
+        private_key_digest="raw-private-key-material",
+    )
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=seed,
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=output,
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert any(
+        reason.startswith(AuthorityProfileSourceSupplyReason.UNKNOWN_FIELD)
+        for reason in result.rejection_reasons
+    )
+    assert any(
+        reason.startswith(AuthorityProfileSourceSupplyReason.DIGEST_FORMAT)
+        for reason in result.rejection_reasons
+    )
+    assert not output.exists()
+
+
 def test_supplier_rejects_principal_foundup_scope_mismatch(tmp_path: Path) -> None:
     principal = PrincipalAuthorityRecord(
         principal_id="github:mjtrout",
@@ -276,7 +331,7 @@ def test_supplier_rejects_principal_foundup_scope_mismatch(tmp_path: Path) -> No
         principal_public_key="pub:principal",
         repo_scope=("FOUNDUPS/Foundups-Agent",),
         foundup_scope=("other_foundup",),
-        verified_subject_digest="sha256:verified-subject",
+        verified_subject_digest=SUBJECT_DIGEST,
     )
 
     result = run_reddog_authority_profile_source_artifact_supply(

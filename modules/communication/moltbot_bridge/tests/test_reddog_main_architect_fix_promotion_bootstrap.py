@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -23,6 +24,8 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
     _work_state,
 )
 from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_test_helpers import (
+    StaticPrincipalKeyResolver,
+    build_proposal_runtime_inputs,
     run_main_bootstrap_with_test_authority as run_reddog_main_architect_fix_promotion_bootstrap,
 )
 from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
@@ -120,6 +123,7 @@ def test_bootstrap_promotes_fix_and_writes_authority_profile(tmp_path: Path) -> 
     ):
         result = run_reddog_main_architect_fix_promotion_bootstrap(
             repo_root=repo,
+            runtime_root=tmp_path / "runtime",
             work_state_path=files["work_state"],
             architect_determination_path=files["determination"],
             model_selection_receipt_path=files["model_selection"],
@@ -151,6 +155,75 @@ def test_bootstrap_promotes_fix_and_writes_authority_profile(tmp_path: Path) -> 
     assert not (repo / ".reddog").exists()
 
 
+def test_bootstrap_exact_retry_reconstructs_committed_promotion(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    determination = json.loads(
+        files["determination"].read_text(encoding="utf-8")
+    )
+    profile = json.loads(
+        files["authority_profile_source"].read_text(encoding="utf-8")
+    )
+    now_epoch = int(datetime.fromisoformat(NOW).timestamp())
+    attestation, config, resolver = build_proposal_runtime_inputs(
+        determination,
+        profile,
+        now_epoch=now_epoch,
+        nonce="proposal-promotion-retry-0001",
+    )
+    assert isinstance(resolver, StaticPrincipalKeyResolver)
+    kwargs = {
+        "repo_root": repo,
+        "runtime_root": tmp_path / "runtime",
+        "work_state_path": files["work_state"],
+        "architect_determination_path": files["determination"],
+        "model_selection_receipt_path": files["model_selection"],
+        "memex_supply_receipt_path": files["memex_supply"],
+        "authority_profile_source_path": files["authority_profile_source"],
+        "authority_profile_output_path": files["authority_profile_output"],
+        "holoindex_receipt_path": files["holoindex_receipt"],
+        "proposal_authenticity_attestation": attestation,
+        "signer_runtime_config": config,
+        "principal_key_resolver": resolver,
+        "worker_id": "reddog-main-test",
+        "now_iso": NOW,
+    }
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_architect_proposal_admission_contract."
+            "current_architect_proposal_admission_policy",
+            return_value=ready_proposal_policy(),
+        ),
+    ):
+        first = run_reddog_main_architect_fix_promotion_bootstrap(**kwargs)
+        retry_kwargs = {
+            **kwargs,
+            "now_iso": (
+                datetime.fromisoformat(NOW) + timedelta(seconds=1)
+            ).isoformat(),
+        }
+        second = run_reddog_main_architect_fix_promotion_bootstrap(
+            **retry_kwargs
+        )
+
+    assert first.accepted is True
+    assert second.accepted is True
+    assert second.queue_item_id == first.queue_item_id
+    state = json.loads(files["work_state"].read_text(encoding="utf-8"))
+    assert len(state["wre_queue_items"]) == 1
+    assert len(state["worker_claims"]) == 1
+    assert len(state["architect_fix_promotions"]) == 1
+    assert len(state["architect_fix_publications"]) == 1
+
+
 def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     files = _runtime_files(tmp_path)
@@ -170,6 +243,7 @@ def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Pat
     ):
         result = run_reddog_main_architect_fix_promotion_bootstrap(
             repo_root=repo,
+            runtime_root=tmp_path / "runtime",
             work_state_path=files["work_state"],
             architect_determination_path=files["determination"],
             model_selection_receipt_path=files["model_selection"],
@@ -197,6 +271,7 @@ def test_bootstrap_rejects_authority_profile_output_inside_repo(tmp_path: Path) 
 
     result = run_reddog_main_architect_fix_promotion_bootstrap(
         repo_root=repo,
+        runtime_root=tmp_path / "runtime",
         work_state_path=files["work_state"],
         architect_determination_path=files["determination"],
         model_selection_receipt_path=files["model_selection"],
@@ -211,6 +286,34 @@ def test_bootstrap_rejects_authority_profile_output_inside_repo(tmp_path: Path) 
     assert result.accepted is False
     assert result.status == REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY
     assert "authority_profile_output_path_inside_repo" in result.rejection_reasons
+
+
+def test_bootstrap_rejects_output_outside_trusted_runtime_root(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+
+    result = run_reddog_main_architect_fix_promotion_bootstrap(
+        repo_root=repo,
+        runtime_root=tmp_path / "runtime",
+        work_state_path=files["work_state"],
+        architect_determination_path=files["determination"],
+        model_selection_receipt_path=files["model_selection"],
+        memex_supply_receipt_path=files["memex_supply"],
+        authority_profile_source_path=files["authority_profile_source"],
+        authority_profile_output_path=tmp_path / "other" / "authority_profile.json",
+        holoindex_receipt_path=files["holoindex_receipt"],
+        worker_id="reddog-main-test",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert (
+        "authority_profile_output_path_outside_resident_runtime_root"
+        in result.rejection_reasons
+    )
+    assert not (tmp_path / "other" / "authority_profile.json").exists()
 
 
 def test_bootstrap_rejects_when_active_holo_owner_serves_another_generation(
@@ -228,6 +331,7 @@ def test_bootstrap_rejects_when_active_holo_owner_serves_another_generation(
 
     result = run_reddog_main_architect_fix_promotion_bootstrap(
         repo_root=repo,
+        runtime_root=tmp_path / "runtime",
         work_state_path=files["work_state"],
         architect_determination_path=files["determination"],
         model_selection_receipt_path=files["model_selection"],
@@ -244,7 +348,7 @@ def test_bootstrap_rejects_when_active_holo_owner_serves_another_generation(
     assert not files["authority_profile_output"].exists()
 
 
-def test_bootstrap_restores_previous_profile_when_promotion_rejects_after_prewrite(
+def test_bootstrap_preserves_previous_profile_when_promotion_rejects(
     tmp_path: Path,
 ) -> None:
     repo = _repo(tmp_path)
@@ -256,9 +360,6 @@ def test_bootstrap_restores_previous_profile_when_promotion_rejects_after_prewri
     )
 
     def reject_after_prewrite(**kwargs):
-        kwargs["authority_profile_precommit_writer"](
-            {"receipt_id": "sha256:uncommitted-profile"}
-        )
         return type(
             "PromotionResult",
             (),
@@ -286,6 +387,7 @@ def test_bootstrap_restores_previous_profile_when_promotion_rejects_after_prewri
     ):
         result = run_reddog_main_architect_fix_promotion_bootstrap(
             repo_root=repo,
+            runtime_root=tmp_path / "runtime",
             work_state_path=files["work_state"],
             architect_determination_path=files["determination"],
             model_selection_receipt_path=files["model_selection"],
@@ -303,7 +405,7 @@ def test_bootstrap_restores_previous_profile_when_promotion_rejects_after_prewri
     ) == previous
 
 
-def test_bootstrap_does_not_overwrite_newer_profile_when_rollback_cas_fails(
+def test_bootstrap_does_not_overwrite_newer_profile_when_promotion_rejects(
     tmp_path: Path,
 ) -> None:
     repo = _repo(tmp_path)
@@ -316,9 +418,6 @@ def test_bootstrap_does_not_overwrite_newer_profile_when_rollback_cas_fails(
     )
 
     def reject_after_external_replacement(**kwargs):
-        kwargs["authority_profile_precommit_writer"](
-            {"receipt_id": "sha256:uncommitted-profile"}
-        )
         files["authority_profile_output"].write_text(
             json.dumps(newer, sort_keys=True),
             encoding="utf-8",
@@ -350,6 +449,7 @@ def test_bootstrap_does_not_overwrite_newer_profile_when_rollback_cas_fails(
     ):
         result = run_reddog_main_architect_fix_promotion_bootstrap(
             repo_root=repo,
+            runtime_root=tmp_path / "runtime",
             work_state_path=files["work_state"],
             architect_determination_path=files["determination"],
             model_selection_receipt_path=files["model_selection"],
@@ -362,7 +462,6 @@ def test_bootstrap_does_not_overwrite_newer_profile_when_rollback_cas_fails(
         )
 
     assert result.accepted is False
-    assert "authority_profile_rollback_failed" in result.rejection_reasons
     assert json.loads(
         files["authority_profile_output"].read_text(encoding="utf-8")
     ) == newer
@@ -412,6 +511,41 @@ def test_main_preflight_does_not_promote_without_process_local_authority(tmp_pat
     assert not (runtime_root / "authority_profile.json").exists()
 
 
+def test_main_preflight_rejects_inert_profile_aliasing_active_authority(
+    tmp_path: Path,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    aliased = runtime_root / "authority_profile.json"
+    with (
+        patch.dict(
+            "os.environ",
+            {
+                "REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME": "1",
+                "REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH": str(aliased),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(aliased),
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
+                "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
+                "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
+                "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
+            },
+            clear=True,
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap."
+            "run_reddog_main_architect_fix_promotion_bootstrap",
+        ) as promote,
+    ):
+        assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+        promote.assert_not_called()
+
+    assert not aliased.exists()
+
+
 def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_promotion(tmp_path: Path) -> None:
     import main
 
@@ -442,7 +576,7 @@ def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_pro
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -474,6 +608,13 @@ def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_pro
                 clear=True,
             ):
                 assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+                assert (
+                    "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH"
+                    not in main.os.environ
+                )
+                assert main.os.environ[
+                    "REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH"
+                ] == str(runtime_root / "architect_fix_inert_profile.json")
 
     handoff.assert_called_once()
     handoff_kwargs = handoff.call_args.kwargs
@@ -488,7 +629,7 @@ def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_pro
     assert promote_kwargs["memex_supply_receipt_path"] == str(runtime_root / "memex_supply_receipt.json")
     assert promote_kwargs["model_selection_receipt_path"] == str(model_selection)
     assert promote_kwargs["authority_profile_source_path"] == str(authority_source)
-    assert promote_kwargs["authority_profile_output_path"] == str(runtime_root / "authority_profile.json")
+    assert promote_kwargs["authority_profile_output_path"] == str(runtime_root / "architect_fix_inert_profile.json")
 
 
 def test_main_preflight_model_selection_supply_runs_before_promotion(tmp_path: Path) -> None:
@@ -521,7 +662,7 @@ def test_main_preflight_model_selection_supply_runs_before_promotion(tmp_path: P
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -615,7 +756,7 @@ def test_main_preflight_model_runtime_binding_supply_runs_after_model_selection(
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -716,7 +857,7 @@ def test_main_preflight_model_autoresearch_plan_supply_runs_before_promotion(
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -807,7 +948,7 @@ def test_main_preflight_defaults_autoresearch_feedback_to_existing_cycle_feedbac
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -890,7 +1031,7 @@ def test_main_preflight_explicit_autoresearch_feedback_path_overrides_cycle_feed
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -1010,7 +1151,7 @@ def test_main_preflight_model_autoresearch_campaign_execution_supply_runs_before
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -1158,7 +1299,7 @@ def test_main_preflight_model_autoresearch_campaign_gate_supply_runs_before_prom
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -1251,7 +1392,7 @@ def test_main_preflight_model_autoresearch_cycle_feedback_chain_runs_before_prom
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -1435,7 +1576,7 @@ def test_main_preflight_model_autoresearch_cycle_receipt_supply_runs_before_prom
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -1562,7 +1703,7 @@ def test_main_preflight_model_autoresearch_cycle_feedback_admission_runs_before_
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -1745,7 +1886,7 @@ def test_main_preflight_authority_source_supply_runs_before_promotion(tmp_path: 
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },
@@ -1869,7 +2010,7 @@ def test_main_preflight_profile_runs_artifact_supply_chain_before_promotion(tmp_
             "queue_item_id": "queue-1",
             "claim_id": "claim-1",
             "selected_slice": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-            "authority_profile_path": str(runtime_root / "authority_profile.json"),
+            "authority_profile_path": str(runtime_root / "architect_fix_inert_profile.json"),
             "committed_revision": "sha256:revision",
             "rejection_reasons": (),
         },

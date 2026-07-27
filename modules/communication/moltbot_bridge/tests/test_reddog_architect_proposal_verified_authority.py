@@ -248,7 +248,7 @@ def test_failed_profile_write_allows_verified_retry() -> None:
     }
     rejected, _ = _promote(
         **common,
-        authority_profile_precommit_writer=lambda _profile: (_ for _ in ()).throw(
+        authority_profile_publication_publisher=lambda _request: (_ for _ in ()).throw(
             OSError("profile-write-failed")
         ),
     )
@@ -361,6 +361,7 @@ def test_production_bootstrap_without_authority_fails_before_side_effects(
     ):
         result = run_reddog_main_architect_fix_promotion_bootstrap(
             repo_root=repo,
+            runtime_root=tmp_path / "runtime",
             work_state_path=files["work_state"],
             architect_determination_path=files["determination"],
             model_selection_receipt_path=files["model_selection"],

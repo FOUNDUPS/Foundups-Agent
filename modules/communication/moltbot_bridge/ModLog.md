@@ -1,4 +1,5 @@
 # ModLog - moltbot_bridge
+## 2026-07-27: REDDOG_ARCHITECT_FIX_PROMOTION_TWO_PHASE_PUBLICATION_PHASE1 - Replaced profile prewrite/rollback with confined PREPARED -> PROFILE_PUBLISHED -> COMMITTED recovery; bound journal, profile/state digests, attestation, and revision; preserved history and rejected secret fields. COMMITTED is local publication integrity, not authority authentication. `main.py` writes a distinct inert artifact and rejects aliasing with the active profile; activation awaits a signer-owned commitment over the late-bound tuple (WSP 00, 15, 22, 50, 62, 97).
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1
 - Added direct promotion-time verification of the principal signature over the
   exact signer policy and the RedDog signature over the exact proposal payload.
@@ -15,9 +16,8 @@
   identity fields come only from verified authorization, and the source
   receipt is recomputed. WSP 15 promotion and queue CAS remain the mutation engine.
 - Decomposed promotion record/profile/state assembly into a bounded transaction
-  module. The inherited prewrite-then-CAS profile publication still relies on
-  bootstrap rollback; crash-recoverable two-phase publication remains a hard
-  gate before production authority inputs are wired.
+  module. The inherited prewrite-then-CAS limitation was subsequently closed
+  by `REDDOG_ARCHITECT_FIX_PROMOTION_TWO_PHASE_PUBLICATION_PHASE1`.
 - Kept startup fail closed: `main.py` does not choose its own trust key and
   cannot promote without an attestation, production signer-runtime config, and
   independently supplied principal-key resolver. Production signer-to-startup

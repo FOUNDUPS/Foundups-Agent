@@ -342,7 +342,7 @@ def _authority_profile(**overrides: Any) -> dict[str, Any]:
         "allowed_paths": ["modules/communication/moltbot_bridge/**"],
         "denied_paths": ["modules/communication/moltbot_bridge/secrets/**"],
         "requested_operation": "feature_slice",
-        "permission_snapshot_digest": "sha256:permission",
+        "permission_snapshot_digest": "sha256:" + ("a" * 64),
         "identity_nonce": "identity-nonce-1",
         "work_authority_nonce": "workauth-nonce-1",
         "issued_at": 1000,
@@ -548,6 +548,13 @@ def _runtime_binding(
 
 def _promote(**overrides: Any):
     store = overrides.pop("store", InMemoryAuthoritativeWorkStateStore(_work_state()))
+
+    def publish(request):
+        return store.commit(
+            request.updated_work_state,
+            expected_revision=request.expected_work_state_revision,
+        )
+
     args = {
         "architect_determination": _determination(),
         "work_state_store": store,
@@ -558,7 +565,7 @@ def _promote(**overrides: Any):
         "now_iso": NOW,
         "current_repo_head_sha": REPO_HEAD,
         "current_holoindex_receipt": _holo_receipt(),
-        "authority_profile_precommit_writer": lambda profile: None,
+        "authority_profile_publication_publisher": publish,
     }
     result = invoke_promotion_with_test_authority(
         promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order,
@@ -604,14 +611,14 @@ def test_promotes_fix_determination_to_queue_item_and_authority_profile() -> Non
     assert queue_result.selected_slice == "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
 
 
-def test_promotion_derives_work_order_id_from_queue_and_ignores_caller_value() -> None:
+def test_promotion_rejects_caller_supplied_work_order_id() -> None:
     result, _ = _promote(authority_profile=_authority_profile(work_order_id="caller-controlled"))
 
-    assert result.accepted is True
-    assert result.receipt is not None
-    assert result.authority_profile is not None
-    assert result.authority_profile["work_order_id"] != "caller-controlled"
-    assert result.authority_profile["operational_context_binding"]["work_order_id"] == result.authority_profile["work_order_id"]
+    assert result.accepted is False
+    assert any(
+        "unknown_field:work_order_id" in reason
+        for reason in result.rejection_reasons
+    )
 
 
 def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> None:
@@ -842,20 +849,20 @@ def test_rejects_changed_holoindex_generation_before_store_mutation() -> None:
     assert store.load()["wre_queue_items"] == []
 
 
-def test_precommit_profile_failure_leaves_authoritative_queue_empty() -> None:
+def test_publication_failure_leaves_authoritative_queue_empty() -> None:
     store = InMemoryAuthoritativeWorkStateStore(_work_state())
 
-    def fail_profile_write(_profile: Mapping[str, Any]) -> None:
+    def fail_publication(_request) -> str:
         raise OSError("simulated profile write failure")
 
     result, _ = _promote(
         store=store,
-        authority_profile_precommit_writer=fail_profile_write,
+        authority_profile_publication_publisher=fail_publication,
     )
 
     assert result.accepted is False
     assert (
-        promotion.ArchitectFixPromotionReason.AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED
+        promotion.ArchitectFixPromotionReason.STORE_REJECTED
         in result.rejection_reasons
     )
     assert store.load()["wre_queue_items"] == []
