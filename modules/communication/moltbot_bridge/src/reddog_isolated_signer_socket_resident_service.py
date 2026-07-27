@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import socket
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -102,11 +103,14 @@ def serve_reddog_isolated_signer_socket_bounded(
     if reasons:
         return _reject(*reasons)
     assert resolved is not None
-    limit_reasons = _validate_limits(timeout_s, max_request_bytes, max_response_bytes)
+    limit_reasons = validate_resident_signer_socket_limits(
+        max_requests=max_requests,
+        timeout_s=timeout_s,
+        max_request_bytes=max_request_bytes,
+        max_response_bytes=max_response_bytes,
+    )
     if limit_reasons:
         return _reject(*limit_reasons, socket_path=str(resolved))
-    if not isinstance(max_requests, int) or max_requests < 1 or max_requests > 128:
-        return _reject(FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID, socket_path=str(resolved))
     if not hasattr(socket, "AF_UNIX"):
         return _reject(FAIL_SIGNER_SERVICE_SOCKET_UNAVAILABLE, socket_path=str(resolved))
 
@@ -204,6 +208,37 @@ def _validate_limits(
     return tuple(reasons)
 
 
+def validate_resident_signer_socket_limits(
+    *,
+    max_requests: object,
+    timeout_s: object,
+    max_request_bytes: object,
+    max_response_bytes: object,
+) -> tuple[str, ...]:
+    """Validate the exact bounded-service limits without opening a socket."""
+
+    reasons: list[str] = []
+    if type(max_requests) is not int or not 1 <= max_requests <= 128:
+        reasons.append(FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID)
+    if (
+        isinstance(timeout_s, bool)
+        or not isinstance(timeout_s, (int, float))
+        or not math.isfinite(float(timeout_s))
+    ):
+        reasons.append(FAIL_SIGNER_SERVICE_TIMEOUT_INVALID)
+    if type(max_request_bytes) is not int:
+        reasons.append(FAIL_SIGNER_SERVICE_REQUEST_LIMIT_INVALID)
+    if type(max_response_bytes) is not int:
+        reasons.append(FAIL_SIGNER_SERVICE_RESPONSE_LIMIT_INVALID)
+    if reasons:
+        return tuple(dict.fromkeys(reasons))
+    return _validate_limits(
+        float(timeout_s),
+        max_request_bytes,
+        max_response_bytes,
+    )
+
+
 def _read_bounded(connection: socket.socket, max_request_bytes: int) -> bytes:
     chunks: list[bytes] = []
     total = 0
@@ -271,4 +306,5 @@ __all__ = [
     "SIGNER_SOCKET_RESIDENT_SERVICE_REJECT",
     "SIGNER_SOCKET_RESIDENT_SERVICE_SERVED",
     "serve_reddog_isolated_signer_socket_bounded",
+    "validate_resident_signer_socket_limits",
 ]

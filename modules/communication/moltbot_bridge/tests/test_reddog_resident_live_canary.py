@@ -178,7 +178,7 @@ def test_valid_json_signature_tamper_blocks_before_runner(tmp_path: Path) -> Non
     repo, runtime = _roots(tmp_path)
     _write_pre_state(repo, runtime)
     control = _control_receipt(repo)
-    _write_control_receipt_and_head(runtime, control)
+    _write_control_receipt_and_head(repo, runtime, control)
     control["status"] = "TAMPERED"
     (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
         json.dumps(control) + "\n", encoding="utf-8"
@@ -207,7 +207,7 @@ def test_canary_blocks_when_signer_anchor_is_ahead_of_resident_chain(
 
     repo, runtime = _roots(tmp_path)
     first = _control_receipt(repo)
-    _write_control_receipt_and_head(runtime, first)
+    _write_control_receipt_and_head(repo, runtime, first)
     second = build_resident_control_loop_receipt(
         result={
             "accepted": True,
@@ -230,7 +230,11 @@ def test_canary_blocks_when_signer_anchor_is_ahead_of_resident_chain(
     config = json.loads(
         (runtime / "signer_service_config.json").read_text(encoding="utf-8")
     )
-    store = AtomicSignerControlLoopAnchorStore(config["control_loop_anchor_path"])
+    store = AtomicSignerControlLoopAnchorStore(
+        config["control_loop_anchor_path"],
+        runtime_root=config["signer_runtime_root"],
+        repo_root=repo,
+    )
     state = store.load()
     unsigned = {
         key: value
@@ -280,7 +284,7 @@ def test_signed_chain_suffix_truncation_blocks_before_runner(tmp_path: Path) -> 
             path=path, result=base_result, repo_root=repo,
             created_at=f"2026-07-14T00:00:0{index}Z",
             cycle_id=f"truncate-cycle-{index}", nonce=f"truncate-nonce-{index}",
-            signing_context=_SIGNING_CONTEXT, require_authentication=True,
+            signing_context=_SIGNING_CONTEXT, require_authentication=True, runtime_root=path.parent,
             head_state_path=runtime / "authority_runtime_state.json",
         )
     first_line = path.read_text(encoding="utf-8").splitlines()[0]
@@ -305,7 +309,7 @@ def test_head_consumed_evidence_tamper_blocks_before_runner(tmp_path: Path) -> N
     repo, runtime = _roots(tmp_path)
     _write_pre_state(repo, runtime)
     control = _control_receipt(repo)
-    _write_control_receipt_and_head(runtime, control)
+    _write_control_receipt_and_head(repo, runtime, control)
     state_path = runtime / "authority_runtime_state.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
     state["control_receipt_head"]["consumed_child_evidence_digests"] = [
@@ -379,7 +383,7 @@ def test_canary_rejects_control_receipt_stream_replacement(tmp_path: Path) -> No
     original = control("canary-prefix-cycle", "canary-prefix-nonce")
     replacement = control("canary-replacement-cycle", "canary-replacement-nonce")
     path = runtime / "resident_queue_control_loop_receipts.jsonl"
-    _write_control_receipt_and_head(runtime, original)
+    _write_control_receipt_and_head(repo, runtime, original)
 
     def runner(_: Path) -> dict[str, object]:
         path.write_text(json.dumps(replacement) + "\n", encoding="utf-8")

@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import base64
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -34,6 +35,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
     run_reddog_signer_socket_service_runtime_bootstrap,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
+    SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import ResolveResult, hash_reference
 
@@ -134,8 +138,23 @@ def _resolver(private_key) -> FakeResolver:
 
 
 def _config(public_key: str, *, socket_path: Path, **overrides: object) -> dict[str, object]:
+    signer_runtime = (
+        socket_path.parent.parent / f"{socket_path.parent.name}-signer-state"
+    )
     values: dict[str, object] = {
+        "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+        "runtime_root": str(socket_path.parent),
+        "signer_runtime_root": str(signer_runtime),
         "socket_path": str(socket_path),
+        "control_loop_anchor_path": str(signer_runtime / "anchor.json"),
+        "control_loop_authority_policy": {
+            "issuer_principal_id": "github:012",
+            "signer_public_key": public_key,
+            "key_epoch": "epoch-1",
+            "consensus_receipt_digest": "sha256:" + ("1" * 64),
+            "authority_profile_digest": "sha256:" + ("2" * 64),
+            "authority_profile_source_receipt_id": "sha256:" + ("3" * 64),
+        },
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
         "allow_test_only_key_material": False,
         "permission_snapshot_fresh": True,
@@ -311,12 +330,182 @@ def test_bootstrap_rejects_missing_relative_inside_and_unreadable_config(tmp_pat
     assert FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE in unreadable.rejection_reasons
 
 
+def test_bootstrap_rejects_hard_linked_config_before_runtime_call(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    source = _write_json(
+        tmp_path / "outside.json",
+        _config(public_key, socket_path=runtime / "signer.sock"),
+    )
+    linked = runtime / "signer-service.json"
+    linked.parent.mkdir(parents=True)
+    try:
+        os.link(source, linked)
+    except OSError as exc:
+        pytest.skip(f"hard-link creation unavailable: {exc}")
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=linked,
+        resolver=_resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE in result.rejection_reasons
+    assert service.calls == []
+
+
+def test_bootstrap_rejects_config_runtime_root_mismatch(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    config = _config(public_key, socket_path=runtime / "signer.sock")
+    config["runtime_root"] = str(tmp_path / "other-runtime")
+    path = _write_json(runtime / "signer-service.json", config)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=path,
+        resolver=_resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert service.calls == []
+
+
+@pytest.mark.parametrize("escaped_field", ("socket_path", "control_loop_anchor_path"))
+def test_bootstrap_rejects_runtime_artifact_outside_declared_root(
+    tmp_path: Path,
+    escaped_field: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config = _config(
+        _public_text(private_key),
+        socket_path=runtime / "signer.sock",
+    )
+    config[escaped_field] = str(tmp_path / "outside" / "escaped")
+    path = _write_json(runtime / "signer-service.json", config)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=path,
+        resolver=_resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert service.calls == []
+
+
+def test_bootstrap_rejects_nested_control_anchor(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config = _config(
+        _public_text(private_key),
+        socket_path=runtime / "signer.sock",
+    )
+    signer_runtime = Path(str(config["signer_runtime_root"]))
+    config["control_loop_anchor_path"] = str(
+        signer_runtime / "nested" / "anchor.json"
+    )
+    path = _write_json(runtime / "signer-service.json", config)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=path,
+        resolver=_resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert service.calls == []
+
+
+@pytest.mark.parametrize(
+    "missing_key",
+    ("control_loop_anchor_path", "control_loop_authority_policy"),
+)
+def test_bootstrap_rejects_v2_config_without_control_authority_binding(
+    tmp_path: Path,
+    missing_key: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config = _config(
+        _public_text(private_key),
+        socket_path=runtime / "signer.sock",
+    )
+    config.pop(missing_key)
+    path = _write_json(runtime / "signer-service.json", config)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=path,
+        resolver=_resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert service.calls == []
+
+
+def test_bootstrap_rejects_overlapping_resident_and_signer_roots(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config = _config(
+        _public_text(private_key),
+        socket_path=runtime / "signer.sock",
+    )
+    config["signer_runtime_root"] = str(runtime)
+    config["control_loop_anchor_path"] = str(runtime / "anchor.json")
+    path = _write_json(runtime / "signer-service.json", config)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=path,
+        resolver=_resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert service.calls == []
+
+
 def test_bootstrap_rejects_malformed_runtime_shape_and_preserves_runtime_reject(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
     private_key = _private_key()
     public_key = _public_text(private_key)
     malformed = _write_json(runtime / "malformed.json", {"key_provider_profile": []})
+    wrong_schema = _write_json(
+        runtime / "wrong-schema.json",
+        _config(
+            public_key,
+            socket_path=runtime / "wrong-schema.sock",
+            schema_version="reddog_signer_service_config.v1",
+        ),
+    )
     rejected = _write_json(
         runtime / "rejected.json",
         _config(
@@ -332,6 +521,12 @@ def test_bootstrap_rejects_malformed_runtime_shape_and_preserves_runtime_reject(
         resolver=_resolver(private_key),
         serve_bounded=CapturingBoundedService(),
     )
+    wrong_schema_result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=wrong_schema,
+        resolver=_resolver(private_key),
+        serve_bounded=CapturingBoundedService(),
+    )
     rejected_result = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=repo,
         config_path=rejected,
@@ -340,6 +535,7 @@ def test_bootstrap_rejects_malformed_runtime_shape_and_preserves_runtime_reject(
     )
 
     assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in malformed_result.rejection_reasons
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in wrong_schema_result.rejection_reasons
     assert FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED in rejected_result.rejection_reasons
     assert rejected_result.runtime_result is not None
     assert rejected_result.runtime_result["accepted"] is False

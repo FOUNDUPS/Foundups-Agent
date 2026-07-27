@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 import hashlib
 import hmac
+import json
+import os
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -489,10 +491,17 @@ def test_signer_boundary_attestation_is_required() -> None:
 
 def test_json_store_commits_authority_receipt(tmp_path) -> None:
     request = _request()
-    path = tmp_path / "authority-state.json"
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    path = runtime / "authority-state.json"
     result = issue_delegated_authority_runtime(
         request=request,
-        store=AtomicJsonAuthorityRuntimeStore(path, allowed_root=tmp_path),
+        store=AtomicJsonAuthorityRuntimeStore(
+            path,
+            allowed_root=runtime,
+            repo_root=repo,
+        ),
         signer=_MockSigner(),
         principal_resolver=_PrincipalResolver(_principal()),
         snapshot_resolver=_SnapshotResolver({request.permission_snapshot_digest: _snapshot()}),
@@ -508,13 +517,20 @@ def test_json_store_commits_authority_receipt(tmp_path) -> None:
 def test_json_store_compare_and_swap_is_serialized_across_store_instances(
     tmp_path,
 ) -> None:
-    path = tmp_path / "authority-state.json"
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    path = runtime / "authority-state.json"
     barrier = threading.Barrier(2)
 
     def commit(index: int) -> str:
         barrier.wait(timeout=5)
         try:
-            AtomicJsonAuthorityRuntimeStore(path, allowed_root=tmp_path).commit(
+            AtomicJsonAuthorityRuntimeStore(
+                path,
+                allowed_root=runtime,
+                repo_root=repo,
+            ).commit(
                 {"writer": index}, expected_revision=None
             )
         except RuntimeError as exc:
@@ -525,9 +541,11 @@ def test_json_store_compare_and_swap_is_serialized_across_store_instances(
         outcomes = list(executor.map(commit, (1, 2)))
 
     assert sorted(outcomes) == ["committed", "revision_conflict"]
-    assert AtomicJsonAuthorityRuntimeStore(path, allowed_root=tmp_path).load()[
-        "writer"
-    ] in {1, 2}
+    assert AtomicJsonAuthorityRuntimeStore(
+        path,
+        allowed_root=runtime,
+        repo_root=repo,
+    ).load()["writer"] in {1, 2}
 
 
 def test_json_store_fsyncs_parent_directory_after_atomic_replace(
@@ -543,33 +561,132 @@ def test_json_store_fsyncs_parent_directory_after_atomic_replace(
         "_fsync_parent_directory",
         lambda path: observed.append(path),
     )
-    target = tmp_path / "authority-state.json"
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority-state.json"
 
-    AtomicJsonAuthorityRuntimeStore(target, allowed_root=tmp_path).commit(
+    AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    ).commit(
         {"writer": 1}, expected_revision=None
     )
 
-    assert observed == [tmp_path]
+    assert observed == [runtime]
+
+
+def test_json_store_parent_swap_cannot_redirect_atomic_replace(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    target = runtime / "authority-state.json"
+    displaced = tmp_path / "runtime-displaced"
+    swap_attempted = False
+    swap_succeeded = False
+
+    def attempt_swap() -> None:
+        nonlocal swap_attempted, swap_succeeded
+        if not swap_attempted:
+            swap_attempted = True
+            try:
+                runtime.rename(displaced)
+                runtime.symlink_to(outside, target_is_directory=True)
+                swap_succeeded = True
+            except OSError:
+                pass
+
+    if os.name == "nt":
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_windows as windows_store,
+        )
+
+        real_windows_rename = windows_store._rename_handle
+
+        def adversarial_windows_rename(*args, **kwargs):
+            attempt_swap()
+            return real_windows_rename(*args, **kwargs)
+
+        monkeypatch.setattr(
+            windows_store,
+            "_rename_handle",
+            adversarial_windows_rename,
+        )
+    else:
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_posix as posix_store,
+        )
+
+        real_replace = posix_store._replace_entry
+
+        def adversarial_replace(*args, **kwargs):
+            attempt_swap()
+            return real_replace(*args, **kwargs)
+
+        monkeypatch.setattr(posix_store, "_replace_entry", adversarial_replace)
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    rejection: ValueError | None = None
+    try:
+        try:
+            store.commit({"writer": 1}, expected_revision=None)
+        except ValueError as exc:
+            rejection = exc
+    finally:
+        if swap_succeeded:
+            runtime.unlink()
+            displaced.rename(runtime)
+
+    assert swap_attempted is True
+    if swap_succeeded:
+        assert rejection is not None
+        assert "parent_changed" in str(rejection)
+        assert not target.exists()
+    else:
+        assert rejection is None
+        assert json.loads(target.read_text(encoding="utf-8"))["writer"] == 1
+    assert not (outside / target.name).exists()
 
 
 def test_json_store_load_rejects_symlink_state_file(tmp_path: Path) -> None:
-    target = tmp_path / "target.json"
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "target.json"
     target.write_text("{}", encoding="utf-8")
-    link = tmp_path / "authority-state.json"
+    link = runtime / "authority-state.json"
     try:
         link.symlink_to(target)
     except OSError as exc:
         pytest.skip(f"symlink creation unavailable: {exc}")
 
     with pytest.raises(ValueError, match="symlink_forbidden|path_link_rejected"):
-        AtomicJsonAuthorityRuntimeStore(link, allowed_root=tmp_path).load()
+        AtomicJsonAuthorityRuntimeStore(
+            link,
+            allowed_root=runtime,
+            repo_root=repo,
+        ).load()
 
 
 def test_json_store_load_rejects_linked_parent_state_file(tmp_path: Path) -> None:
-    target = tmp_path / "target"
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "target"
     target.mkdir()
     (target / "authority.json").write_text("{}", encoding="utf-8")
-    linked = tmp_path / "linked"
+    linked = runtime / "linked"
     try:
         linked.symlink_to(target, target_is_directory=True)
     except OSError as exc:
@@ -577,8 +694,545 @@ def test_json_store_load_rejects_linked_parent_state_file(tmp_path: Path) -> Non
 
     with pytest.raises((OSError, ValueError)):
         AtomicJsonAuthorityRuntimeStore(
-            linked / "authority.json", allowed_root=tmp_path
+            linked / "authority.json",
+            allowed_root=runtime,
+            repo_root=repo,
         ).load()
+
+
+def test_json_store_load_rejects_hard_linked_state_file(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    outside = tmp_path / "outside.json"
+    outside.write_text("{}", encoding="utf-8")
+    linked = runtime / "authority.json"
+    try:
+        os.link(outside, linked)
+    except OSError as exc:
+        pytest.skip(f"hard-link creation unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="target_link_count"):
+        AtomicJsonAuthorityRuntimeStore(
+            linked,
+            allowed_root=runtime,
+            repo_root=repo,
+        ).load()
+
+
+def test_json_store_windows_rejects_hard_linked_temporary_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if os.name != "nt":
+        pytest.skip("Windows handle replacement only")
+    from modules.communication.moltbot_bridge.src import (
+        reddog_authority_runtime_store_windows as windows_store,
+    )
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    captured = tmp_path / "captured.json"
+    real_write = windows_store._write_handle
+
+    def write_and_link(handle: int, payload: bytes) -> None:
+        real_write(handle, payload)
+        os.link(windows_store._handle_path(handle), captured)
+
+    monkeypatch.setattr(windows_store, "_write_handle", write_and_link)
+
+    with pytest.raises(ValueError, match="temp_link_count"):
+        AtomicJsonAuthorityRuntimeStore(
+            target,
+            allowed_root=runtime,
+            repo_root=repo,
+        ).commit({"writer": 1}, expected_revision=None)
+
+    assert not target.exists()
+    assert captured.exists()
+    assert captured.read_bytes() == b"\x00" * captured.stat().st_size
+
+
+def test_json_store_atomic_failure_preserves_previous_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    revision = store.commit({"writer": 1}, expected_revision=None)
+
+    def reject_replace(*args, **kwargs) -> None:
+        raise OSError("injected")
+
+    if os.name == "nt":
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_windows as windows_store,
+        )
+
+        monkeypatch.setattr(
+            windows_store,
+            "_rename_handle",
+            reject_replace,
+        )
+    else:
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_posix as posix_store,
+        )
+
+        monkeypatch.setattr(
+            posix_store,
+            "_write_descriptor",
+            reject_replace,
+        )
+
+    with pytest.raises(OSError, match="injected"):
+        store.commit({"writer": 2}, expected_revision=revision)
+
+    assert store.load()["writer"] == 1
+
+
+def test_json_store_rejects_intervening_revision_before_replace(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    revision = store.commit({"writer": 1}, expected_revision=None)
+
+    if os.name == "nt":
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_windows as platform_store,
+        )
+    else:
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_posix as platform_store,
+        )
+
+    original = platform_store._require_target_revision if os.name == "nt" else (
+        platform_store._require_target_witness
+    )
+    calls = 0
+
+    def mutate_before_second_check(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            external = {"writer": "external"}
+            external["revision"] = hashlib.sha256(
+                json.dumps(
+                    external,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    ensure_ascii=True,
+                ).encode("utf-8")
+            ).hexdigest()
+            target.write_text(
+                json.dumps(external, sort_keys=True),
+                encoding="utf-8",
+            )
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(
+        platform_store,
+        "_require_target_revision" if os.name == "nt" else "_require_target_witness",
+        mutate_before_second_check,
+    )
+
+    with pytest.raises(RuntimeError, match="revision_conflict"):
+        store.commit({"writer": 2}, expected_revision=revision)
+
+    assert store.load()["writer"] == "external"
+
+
+def test_json_store_rejects_target_alias_created_at_replace_seam(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    captured = tmp_path / "captured-authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    revision = store.commit({"writer": 1}, expected_revision=None)
+
+    if os.name == "nt":
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_windows as platform_store,
+        )
+    else:
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_posix as platform_store,
+        )
+    original = platform_store._require_backup_identity
+    injected = False
+
+    def alias_before_identity_check(*args, **kwargs):
+        nonlocal injected
+        if not injected:
+            injected = True
+            os.link(target, captured)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(
+        platform_store,
+        "_require_backup_identity",
+        alias_before_identity_check,
+    )
+
+    with pytest.raises((RuntimeError, ValueError)):
+        store.commit({"writer": 2}, expected_revision=revision)
+
+    assert injected is True
+    assert json.loads(captured.read_text(encoding="utf-8"))["writer"] == 1
+    captured.unlink()
+    assert store.load()["writer"] == 1
+
+
+def test_json_store_recovers_interrupted_backup_and_temp(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    revision = store.commit({"writer": 1}, expected_revision=None)
+    backup = runtime / f".{target.name}.{'a' * 32}.bak"
+    temp = runtime / f".{target.name}.{'b' * 32}.tmp"
+    os.link(target, backup)
+    temp.write_text("interrupted", encoding="utf-8")
+
+    next_revision = store.commit({"writer": 2}, expected_revision=revision)
+
+    assert store.load() == {"writer": 2, "revision": next_revision}
+    assert not backup.exists()
+    assert not temp.exists()
+
+
+def test_json_store_recovers_only_revision_valid_lone_backup(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    revision = store.commit({"writer": 1}, expected_revision=None)
+    backup = runtime / f".{target.name}.{'c' * 32}.bak"
+    os.replace(target, backup)
+    if os.name != "nt":
+        os.chmod(backup, 0)
+
+    with pytest.raises(
+        ValueError,
+        match="recovery_revision_required",
+    ):
+        store.load()
+
+    assert backup.exists()
+    next_revision = store.commit({"writer": 2}, expected_revision=revision)
+
+    assert store.load() == {"writer": 2, "revision": next_revision}
+    assert target.exists()
+    assert not backup.exists()
+
+
+def test_json_store_rejects_self_consistent_but_unauthorized_lone_backup(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "authority.json"
+    backup = runtime / f".{target.name}.{'d' * 32}.bak"
+    forged = {"writer": "forged"}
+    forged["revision"] = hashlib.sha256(
+        json.dumps(
+            forged,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")
+    ).hexdigest()
+    backup.write_text(
+        json.dumps(forged),
+        encoding="utf-8",
+    )
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+
+    with pytest.raises(RuntimeError, match="revision_conflict"):
+        store.commit({"writer": 2}, expected_revision="e" * 64)
+
+    assert not target.exists()
+    assert backup.exists()
+
+
+def test_json_store_rejects_linked_lone_recovery_backup(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    revision = store.commit({"writer": 1}, expected_revision=None)
+    backup = runtime / f".{target.name}.{'f' * 32}.bak"
+    os.replace(target, backup)
+    alias = tmp_path / "backup-alias.json"
+    os.link(backup, alias)
+
+    with pytest.raises(
+        (ValueError, RuntimeError),
+        match="(link_count|snapshot_invalid|revision_conflict)",
+    ):
+        store.commit({"writer": 2}, expected_revision=revision)
+
+    assert not target.exists()
+    assert backup.exists()
+    assert alias.exists()
+
+
+def test_json_store_rejects_oversized_lone_recovery_backup_before_json_read(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "authority.json"
+    backup = runtime / f".{target.name}.{'1' * 32}.bak"
+    with backup.open("wb") as handle:
+        handle.truncate((8 * 1024 * 1024) + 1)
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+
+    with pytest.raises(
+        (ValueError, RuntimeError),
+        match="(snapshot_invalid|target_too_large|revision_conflict)",
+    ):
+        store.commit({"writer": 2}, expected_revision="2" * 64)
+
+    assert not target.exists()
+    assert backup.exists()
+
+
+def test_json_store_nonce_revision_remains_recoverable_with_exact_commitment(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    store.commit({"writer": 1}, expected_revision=None)
+    assert store.consume_verified_work_authority_nonce("nonce-001") is True
+    committed = store.load()
+    nonce_revision = committed["revision"]
+    backup = runtime / f".{target.name}.{'e' * 32}.bak"
+    os.replace(target, backup)
+    if os.name != "nt":
+        os.chmod(backup, 0)
+
+    next_revision = store.commit(
+        {
+            "writer": 2,
+            "verified_work_authority_nonces": ["nonce-001"],
+        },
+        expected_revision=nonce_revision,
+    )
+
+    assert store.load() == {
+        "writer": 2,
+        "verified_work_authority_nonces": ["nonce-001"],
+        "revision": next_revision,
+    }
+
+
+def test_json_store_post_replace_verification_failure_restores_previous_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    target = runtime / "authority.json"
+    store = AtomicJsonAuthorityRuntimeStore(
+        target,
+        allowed_root=runtime,
+        repo_root=repo,
+    )
+    revision = store.commit({"writer": 1}, expected_revision=None)
+
+    if os.name == "nt":
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_windows as platform_store,
+        )
+
+        original = platform_store._verify_or_scrub
+        calls = 0
+
+        def reject_after_replace(handle: int, size: int) -> None:
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise ValueError("injected_post_replace_failure")
+            original(handle, size)
+
+        monkeypatch.setattr(platform_store, "_verify_or_scrub", reject_after_replace)
+    else:
+        from modules.communication.moltbot_bridge.src import (
+            reddog_authority_runtime_store_posix as platform_store,
+        )
+
+        original = platform_store._require_entry_identity
+        calls = 0
+
+        def reject_after_replace(*args, **kwargs) -> None:
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise ValueError("injected_post_replace_failure")
+            original(*args, **kwargs)
+
+        monkeypatch.setattr(
+            platform_store,
+            "_require_entry_identity",
+            reject_after_replace,
+        )
+
+    with pytest.raises(ValueError, match="injected_post_replace_failure"):
+        store.commit({"writer": 2}, expected_revision=revision)
+
+    assert store.load()["writer"] == 1
+
+
+def test_json_store_rejects_nonexistent_target_outside_allowed_root(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    outside = tmp_path / "outside" / "authority.json"
+
+    with pytest.raises(ValueError, match="outside_runtime_root"):
+        AtomicJsonAuthorityRuntimeStore(
+            outside,
+            allowed_root=runtime,
+            repo_root=repo,
+        )
+
+    assert not outside.exists()
+
+
+def test_json_store_rejects_relative_security_roots(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+
+    with pytest.raises(ValueError, match="repo_root_not_absolute"):
+        AtomicJsonAuthorityRuntimeStore(
+            runtime / "authority.json",
+            allowed_root=runtime,
+            repo_root=Path("relative-repo"),
+        )
+    with pytest.raises(ValueError, match="store_root_not_absolute"):
+        AtomicJsonAuthorityRuntimeStore(
+            runtime / "authority.json",
+            allowed_root=Path("relative-runtime"),
+            repo_root=repo,
+        )
+
+
+def test_json_store_rejects_runtime_root_inside_or_around_repo(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    with pytest.raises(ValueError, match="(?:path|root)_inside_repo"):
+        AtomicJsonAuthorityRuntimeStore(
+            repo / "runtime" / "authority.json",
+            allowed_root=repo / "runtime",
+            repo_root=repo,
+        )
+    with pytest.raises(ValueError, match="root_contains_repo"):
+        AtomicJsonAuthorityRuntimeStore(
+            tmp_path / "authority.json",
+            allowed_root=tmp_path,
+            repo_root=repo,
+        )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        r"\\?\C:\runtime\authority.json",
+        r"\\.\C:\runtime\authority.json",
+        r"//?\\C:\\runtime\\authority.json",
+        r"//server/share/runtime/authority.json",
+        r"\??\C:\runtime\authority.json",
+    ],
+)
+def test_json_store_rejects_windows_device_paths(
+    tmp_path: Path,
+    path: str,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+
+    with pytest.raises(ValueError, match="path_invalid"):
+        AtomicJsonAuthorityRuntimeStore(
+            path,
+            allowed_root=runtime,
+            repo_root=repo,
+        )
 
 
 def test_result_contains_no_secret_or_signing_material_labels() -> None:

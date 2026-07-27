@@ -199,6 +199,27 @@ def resident_queue_runtime_root_path(env: Mapping[str, str], repo_root: Path | s
     return str(validate_runtime_root_path(runtime_root, repo_root=root))
 
 
+def resident_queue_signer_runtime_root_path(
+    env: Mapping[str, str],
+    repo_root: Path | str,
+) -> str:
+    """Return the signer-owned root kept separate from resident runtime state."""
+
+    root = Path(repo_root).resolve()
+    raw = str(env.get("REDDOG_SIGNER_RUNTIME_ROOT") or "").strip()
+    if raw:
+        path = Path(raw)
+        if not path.is_absolute():
+            path = root.parent / path
+        return str(validate_runtime_root_path(path, repo_root=root))
+    resident = resident_queue_runtime_root_path(env, root)
+    if not resident:
+        return ""
+    resident_path = Path(resident)
+    signer_root = resident_path.parent / f"{resident_path.name}-signer-state"
+    return str(validate_runtime_root_path(signer_root, repo_root=root))
+
+
 def resident_queue_runtime_file_path(
     env: Mapping[str, str],
     repo_root: Path | str,
@@ -365,5 +386,6 @@ __all__ = [
     "resident_queue_runtime_file_path",
     "resident_queue_runtime_flag_enabled",
     "resident_queue_runtime_root_path",
+    "resident_queue_signer_runtime_root_path",
     "resident_queue_worktree_runner_mode",
 ]

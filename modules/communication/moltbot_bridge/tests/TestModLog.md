@@ -1,3 +1,27 @@
+## 2026-07-27: REDDOG_AUTHORITY_RUNTIME_STORE_CONFINEMENT_PHASE1
+- Added missing/outside-root, repository ancestry, mixed namespace, symlink,
+  hard-link, parent-swap, concurrent compare-and-swap, nonce-consumption,
+  signer-config/anchor, and live-canary regressions for explicit root binding.
+- Added rejected-alias payload scrubbing, post-replace rollback, exact receipt
+  runtime-root propagation, schema-v2 control-authority, root-separation, and
+  direct-child config regressions. The affected bridge suite passed 157 tests
+  with seven platform skips; shared safety, startup, and WSP 62 gates passed
+  38 more tests with one platform skip.
+- Added intervening-revision rejection, interrupted-write recovery, escaped
+  socket, and nested-anchor regressions; the expanded bridge gate passed 168
+  tests with seven platform skips before final independent review.
+- Added exact-expected-revision recovery, self-consistent forged-backup
+  rejection, linked/oversized backup rejection, and post-nonce revision
+  recovery regressions. Required run-packet fixtures now carry the canonical
+  runtime, signer, anchor, and authority-policy bindings and reject every
+  missing or malformed nested binding or provider profile. Config supply now
+  proves that malformed Ed25519 public keys fail before write and that every
+  accepted config passes canonical run-packet admission. Final local gates:
+  210 bridge tests passed with eight platform skips, 14 shared-safety tests
+  passed with one platform skip, 21 startup tests passed, three WSP 62 checks
+  passed, 42 red-team tests passed, and 200 Windows authority commits left no
+  temporary or backup artifacts.
+
 ## 2026-07-27: Architect proposal executability admission
 - Added adversarial coverage for valid-but-blocked prerequisite slices,
   produced-capability self-authorization, model readiness forgery, INDEX_GAP

@@ -5,19 +5,27 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import os
 from pathlib import Path
 
+import pytest
+
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID,
+    FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID,
     FAIL_SIGNER_CONFIG_LIMITS_INVALID,
     FAIL_SIGNER_CONFIG_OP_REF_INVALID,
     FAIL_SIGNER_CONFIG_OP_REF_REUSED,
     FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID,
     FAIL_SIGNER_CONFIG_PEER_POLICY_INVALID,
     FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID,
+    FAIL_SIGNER_CONFIG_WRITE_FAILED,
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
     SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT,
     run_reddog_signer_socket_service_config_supply,
@@ -33,6 +41,8 @@ MODULE_PATH = (
     / "src"
     / "reddog_signer_socket_service_config_supply.py"
 )
+_PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
+_REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -44,9 +54,9 @@ def _repo(tmp_path: Path) -> Path:
 def _authority_profile(**overrides: object) -> dict[str, object]:
     profile: dict[str, object] = {
         "principal_id": "github:mjtrout",
-        "principal_public_key": "ed25519-pub-v1:principal",
+        "principal_public_key": _PRINCIPAL_PUBLIC_KEY,
         "reddog_id": "reddog:foundups-agent",
-        "reddog_public_key": "ed25519-pub-v1:reddog",
+        "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "permission_snapshot_digest": "sha256:" + "1" * 64,
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:" + "2" * 64,
@@ -59,8 +69,11 @@ def _authority_profile(**overrides: object) -> dict[str, object]:
 
 
 def _kwargs(repo: Path, runtime: Path, **overrides: object) -> dict[str, object]:
+    signer_runtime = runtime.parent / f"{runtime.name}-signer-state"
     values: dict[str, object] = {
         "repo_root": repo,
+        "runtime_root": runtime,
+        "signer_runtime_root": signer_runtime,
         "authority_profile": _authority_profile(),
         "output_path": runtime / "signer-service.json",
         "socket_path": runtime / "reddog-signer.sock",
@@ -94,6 +107,10 @@ def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) ->
 
     payload = json.loads((runtime / "signer-service.json").read_text(encoding="utf-8"))
     assert payload["schema_version"] == SIGNER_SERVICE_CONFIG_SCHEMA_VERSION
+    assert payload["runtime_root"] == str(runtime.resolve())
+    assert payload["signer_runtime_root"] == str(
+        (runtime.parent / f"{runtime.name}-signer-state").resolve()
+    )
     assert payload["provider_mode"] == "WSP71_PERMISSIONED"
     assert payload["allow_test_only_key_material"] is False
     assert payload["permission_snapshot_fresh"] is True
@@ -101,7 +118,7 @@ def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) ->
     control_policy = payload["control_loop_authority_policy"]
     assert control_policy == {
         "issuer_principal_id": "github:mjtrout",
-        "signer_public_key": "ed25519-pub-v1:reddog",
+        "signer_public_key": _REDDOG_PUBLIC_KEY,
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:" + "2" * 64,
         "authority_profile_digest": control_policy["authority_profile_digest"],
@@ -127,13 +144,13 @@ def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) ->
         "principal-identity",
         "reddog-work-authority",
     ]
-    assert profiles[0]["expected_public_key"] == "ed25519-pub-v1:principal"
+    assert profiles[0]["expected_public_key"] == _PRINCIPAL_PUBLIC_KEY
     assert profiles[0]["expected_key_fingerprint"] == public_key_fingerprint(
-        "ed25519-pub-v1:principal"
+        _PRINCIPAL_PUBLIC_KEY
     )
-    assert profiles[1]["expected_public_key"] == "ed25519-pub-v1:reddog"
+    assert profiles[1]["expected_public_key"] == _REDDOG_PUBLIC_KEY
     assert profiles[1]["expected_key_fingerprint"] == public_key_fingerprint(
-        "ed25519-pub-v1:reddog"
+        _REDDOG_PUBLIC_KEY
     )
     serialized = json.dumps(payload, sort_keys=True)
     assert "ed25519-private-raw-b64-v1" not in serialized
@@ -151,7 +168,9 @@ def test_config_supply_rejects_invalid_authority_profile_and_key_reuse(tmp_path:
         **_kwargs(
             repo,
             runtime,
-            authority_profile=_authority_profile(reddog_public_key="ed25519-pub-v1:principal"),
+            authority_profile=_authority_profile(
+                reddog_public_key=_PRINCIPAL_PUBLIC_KEY
+            ),
         )
     )
 
@@ -162,6 +181,28 @@ def test_config_supply_rejects_invalid_authority_profile_and_key_reuse(tmp_path:
     )
     assert reused.accepted is False
     assert FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":key_reuse" in reused.rejection_reasons
+
+
+def test_config_supply_rejects_malformed_public_key_before_write(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authority_profile=_authority_profile(
+                reddog_public_key="ed25519-pub-v1:not-a-key"
+            ),
+        )
+    )
+
+    assert result.accepted is False
+    assert (
+        FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":runtime_config"
+        in result.rejection_reasons
+    )
+    assert not (runtime / "signer-service.json").exists()
 
 
 def test_config_supply_rejects_inside_repo_or_existing_socket_paths(tmp_path: Path) -> None:
@@ -184,6 +225,112 @@ def test_config_supply_rejects_inside_repo_or_existing_socket_paths(tmp_path: Pa
     assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in inside_output.rejection_reasons
     assert FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID in inside_socket.rejection_reasons
     assert FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID in existing.rejection_reasons
+
+
+def test_config_supply_rejects_paths_outside_bound_runtime_root(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    outside = tmp_path / "outside"
+
+    output = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(repo, runtime, output_path=outside / "signer-service.json")
+    )
+    anchor = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            control_loop_anchor_path=outside / "anchor.json",
+        )
+    )
+
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in output.rejection_reasons
+    assert FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID in anchor.rejection_reasons
+
+
+def test_config_supply_rejects_nested_config_output_path(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            output_path=runtime / "nested" / "signer-service.json",
+        )
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID in result.rejection_reasons
+
+
+def test_config_supply_rejects_nested_socket_or_anchor_path(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    signer_runtime = tmp_path / "runtime-signer-state"
+
+    socket = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            socket_path=runtime / "nested" / "reddog-signer.sock",
+        )
+    )
+    anchor = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            control_loop_anchor_path=signer_runtime / "nested" / "anchor.json",
+        )
+    )
+
+    assert FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID in socket.rejection_reasons
+    assert (
+        FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID
+        in anchor.rejection_reasons
+    )
+
+
+def test_config_supply_rejects_shared_resident_and_signer_runtime_root(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    state = tmp_path / "state"
+    runtime = state / "resident"
+
+    for signer_root in (runtime, runtime / "signer", state):
+        result = run_reddog_signer_socket_service_config_supply(
+            **_kwargs(repo, runtime, signer_runtime_root=signer_root)
+        )
+        assert not result.accepted
+        assert (
+            FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID
+            in result.rejection_reasons
+        )
+
+
+def test_config_supply_rejects_hard_linked_output_without_mutating_source(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    outside = tmp_path / "outside.json"
+    outside.write_text('{"sentinel":true}\n', encoding="utf-8")
+    output = runtime / "signer-service.json"
+    try:
+        os.link(outside, output)
+    except OSError as exc:
+        pytest.skip(f"hard-link creation unavailable: {exc}")
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(repo, runtime, output_path=output)
+    )
+
+    assert not result.accepted
+    assert result.rejection_reasons == (FAIL_SIGNER_CONFIG_WRITE_FAILED,)
+    assert outside.read_text(encoding="utf-8") == '{"sentinel":true}\n'
 
 
 def test_config_supply_rejects_bad_or_reused_op_refs(tmp_path: Path) -> None:

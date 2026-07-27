@@ -14,24 +14,37 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
-import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
+    atomic_replace_confined_mapping,
+)
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
+    validate_resident_signer_socket_limits,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
+    SignerSocketServiceRuntimeWiringConfig,
+    validate_signer_socket_service_runtime_config,
+)
 from modules.infrastructure.secrets_mcp.src.vault_resolver import parse_op_reference
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
+)
 
 
 SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT = "SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT"
 SIGNER_SERVICE_CONFIG_SUPPLY_REJECT = "SIGNER_SERVICE_CONFIG_SUPPLY_REJECT"
-SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v1"
+SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v2"
 
 FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID = "signer_config_authority_profile_invalid"
 FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID = "signer_config_output_path_invalid"
@@ -91,6 +104,8 @@ class SignerServiceConfigSupplyResult:
 def run_reddog_signer_socket_service_config_supply(
     *,
     repo_root: Path | str,
+    runtime_root: Path | str,
+    signer_runtime_root: Path | str,
     authority_profile: Mapping[str, Any] | None,
     output_path: Path | str | None,
     socket_path: Path | str | None,
@@ -114,21 +129,15 @@ def run_reddog_signer_socket_service_config_supply(
     profile = _mapping(authority_profile)
     reasons: list[str] = []
     reasons.extend(_authority_profile_reasons(profile))
-    out, output_reasons = _resolve_output_path(root, output_path)
-    reasons.extend(output_reasons)
-    sock, socket_reasons = _resolve_socket_path(root, socket_path)
-    reasons.extend(socket_reasons)
-    anchor_value = control_loop_anchor_path
-    if anchor_value is None and out is not None:
-        anchor_value = (
-            out.parent.parent
-            / f"{out.parent.name}-signer-state"
-            / "signer_control_loop_anchor.json"
-        )
-    anchor, anchor_reasons = _resolve_outside_repo(
-        root, anchor_value, FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID
+    runtime, signer_runtime, out, sock, anchor, path_reasons = _runtime_artifact_paths(
+        root,
+        runtime_root,
+        signer_runtime_root,
+        output_path,
+        socket_path,
+        control_loop_anchor_path,
     )
-    reasons.extend(anchor_reasons)
+    reasons.extend(path_reasons)
     op_refs = (
         principal_signing_key_ref,
         principal_audit_mac_key_ref,
@@ -147,9 +156,13 @@ def run_reddog_signer_socket_service_config_supply(
     assert out is not None
     assert sock is not None
     assert anchor is not None
+    assert runtime is not None
+    assert signer_runtime is not None
     assert peer_policy is not None
     config = _config(
         authority_profile=profile,
+        runtime_root=runtime,
+        signer_runtime_root=signer_runtime,
         socket_path=sock,
         principal_signing_key_ref=principal_signing_key_ref,
         principal_audit_mac_key_ref=principal_audit_mac_key_ref,
@@ -164,6 +177,27 @@ def run_reddog_signer_socket_service_config_supply(
         reddog_signer_agent_id=reddog_signer_agent_id,
         control_loop_anchor_path=anchor,
     )
+    runtime_config_reasons = validate_signer_socket_service_runtime_config(
+        SignerSocketServiceRuntimeWiringConfig(
+            repo_root=root,
+            runtime_root=runtime,
+            signer_runtime_root=signer_runtime,
+            socket_path=sock,
+            peer_policy=config["peer_policy"],
+            provider_mode=str(config["provider_mode"]),
+            allow_test_only_key_material=False,
+            permission_snapshot_fresh=True,
+            max_requests=config["max_requests"],
+            timeout_s=config["timeout_s"],
+            max_request_bytes=config["max_request_bytes"],
+            max_response_bytes=config["max_response_bytes"],
+            key_provider_profiles=tuple(config["key_provider_profiles"]),
+            control_loop_anchor_path=anchor,
+            control_loop_authority_policy=config["control_loop_authority_policy"],
+        )
+    )
+    if runtime_config_reasons:
+        return _reject((FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":runtime_config",))
     config_digest = _digest(config)
     receipt = {
         "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
@@ -181,7 +215,10 @@ def run_reddog_signer_socket_service_config_supply(
     }
     receipt["config_supply_receipt_id"] = _digest(receipt)
     try:
-        _write_json_atomic(out, config)
+        with runtime_operation_lock(str(out) + ".operation"):
+            atomic_replace_confined_mapping(
+                out, config, repo_root=root, allowed_root=runtime
+            )
     except Exception:
         return _reject((FAIL_SIGNER_CONFIG_WRITE_FAILED,))
     return SignerServiceConfigSupplyResult(
@@ -198,9 +235,89 @@ def run_reddog_signer_socket_service_config_supply(
     )
 
 
+def _runtime_artifact_paths(
+    repo_root: Path,
+    runtime_root: Path | str,
+    signer_runtime_root: Path | str,
+    output_path: Path | str | None,
+    socket_path: Path | str | None,
+    anchor_path: Path | str | None,
+) -> tuple[Path | None, Path | None, Path | None, Path | None, Path | None, list[str]]:
+    reasons: list[str] = []
+
+    def resolve(
+        value: Path | str | None,
+        root: Path | None,
+        reason: str,
+    ) -> Path | None:
+        if not value or root is None:
+            reasons.append(reason)
+            return None
+        try:
+            return validate_runtime_artifact_path(
+                value,
+                repo_root=repo_root,
+                allowed_root=root,
+            )
+        except ValueError:
+            reasons.append(reason)
+            return None
+
+    try:
+        runtime = validate_runtime_root_path(runtime_root, repo_root=repo_root)
+    except ValueError:
+        runtime = None
+        reasons.append(FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID)
+    try:
+        signer_runtime = validate_runtime_root_path(
+            signer_runtime_root,
+            repo_root=repo_root,
+        )
+    except ValueError:
+        signer_runtime = None
+        reasons.append(FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID)
+    if (
+        runtime is not None
+        and signer_runtime is not None
+        and (
+            signer_runtime == runtime
+            or runtime in signer_runtime.parents
+            or signer_runtime in runtime.parents
+        )
+    ):
+        reasons.append(FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID)
+    out = resolve(output_path, runtime, FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID)
+    sock = resolve(socket_path, runtime, FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID)
+    if out is not None and (
+        out.parent != runtime
+        or (out.exists() and not out.is_file())
+    ):
+        reasons.append(FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID)
+        out = None
+    if sock is not None and (
+        sock.parent != runtime
+        or sock.exists()
+    ):
+        reasons.append(FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID)
+        sock = None
+    if anchor_path is None and signer_runtime is not None:
+        anchor_path = signer_runtime / "signer_control_loop_anchor.json"
+    anchor = resolve(
+        anchor_path,
+        signer_runtime,
+        FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID,
+    )
+    if anchor is not None and anchor.parent != signer_runtime:
+        reasons.append(FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID)
+        anchor = None
+    return runtime, signer_runtime, out, sock, anchor, reasons
+
+
 def _config(
     *,
     authority_profile: Mapping[str, Any],
+    runtime_root: Path,
+    signer_runtime_root: Path,
     socket_path: Path,
     principal_signing_key_ref: str,
     principal_audit_mac_key_ref: str,
@@ -221,6 +338,8 @@ def _config(
     key_epoch = str(authority_profile["key_epoch"])
     return {
         "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+        "runtime_root": str(runtime_root),
+        "signer_runtime_root": str(signer_runtime_root),
         "socket_path": str(socket_path),
         "control_loop_anchor_path": str(control_loop_anchor_path),
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
@@ -295,45 +414,6 @@ def _is_sha256_digest(value: object) -> bool:
     )
 
 
-def _resolve_output_path(repo_root: Path, value: Path | str | None) -> tuple[Path | None, list[str]]:
-    path, reasons = _resolve_outside_repo(repo_root, value, FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID)
-    if reasons:
-        return None, reasons
-    assert path is not None
-    if path.exists() and not path.is_file():
-        return None, [FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID]
-    return path, []
-
-
-def _resolve_socket_path(repo_root: Path, value: Path | str | None) -> tuple[Path | None, list[str]]:
-    path, reasons = _resolve_outside_repo(repo_root, value, FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID)
-    if reasons:
-        return None, reasons
-    assert path is not None
-    if path.exists():
-        return None, [FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID]
-    return path, []
-
-
-def _resolve_outside_repo(
-    repo_root: Path,
-    value: Path | str | None,
-    reason: str,
-) -> tuple[Path | None, list[str]]:
-    if not value:
-        return None, [reason]
-    text = str(value)
-    if "\x00" in text or text.startswith("\\\\?\\") or text.startswith("//?/"):
-        return None, [reason]
-    path = Path(value)
-    if not path.is_absolute():
-        return None, [reason]
-    resolved = path.resolve()
-    if _is_inside(resolved, repo_root):
-        return None, [reason]
-    return resolved, []
-
-
 def _op_ref_reasons(values: Sequence[str]) -> list[str]:
     refs = tuple(str(value or "").strip() for value in values)
     reasons: list[str] = []
@@ -374,36 +454,18 @@ def _limit_reasons(
     max_request_bytes: int,
     max_response_bytes: int,
 ) -> list[str]:
-    if (
-        not isinstance(max_requests, int)
-        or max_requests < 2
-        or max_requests > 128
-        or timeout_s <= 0
-        or timeout_s > 30
-        or max_request_bytes < 1024
-        or max_request_bytes > 262144
-        or max_response_bytes < 1024
-        or max_response_bytes > 262144
-    ):
+    if validate_resident_signer_socket_limits(
+        max_requests=max_requests,
+        timeout_s=timeout_s,
+        max_request_bytes=max_request_bytes,
+        max_response_bytes=max_response_bytes,
+    ) or type(max_requests) is not int or max_requests < 2:
         return [FAIL_SIGNER_CONFIG_LIMITS_INVALID]
     return []
 
 
 def _mapping(value: Mapping[str, Any] | None) -> Mapping[str, Any]:
     return value if isinstance(value, Mapping) else {}
-
-
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-            json.dump(payload, handle, sort_keys=True, indent=2)
-            handle.write("\n")
-        os.replace(tmp_name, path)
-    finally:
-        if os.path.exists(tmp_name):
-            os.unlink(tmp_name)
 
 
 def _reject(reasons: Sequence[str]) -> SignerServiceConfigSupplyResult:
@@ -428,12 +490,6 @@ def _digest(payload: Mapping[str, Any]) -> str:
 
 def _dedupe(values: Sequence[str]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(str(value) for value in values if str(value)))
-
-
-def _is_inside(child: Path, parent: Path) -> bool:
-    child_r = child.resolve()
-    parent_r = parent.resolve()
-    return child_r == parent_r or parent_r in child_r.parents
 
 
 def _ascii_string(value: object) -> bool:

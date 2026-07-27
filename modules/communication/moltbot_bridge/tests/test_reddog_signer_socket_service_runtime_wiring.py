@@ -21,6 +21,9 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resi
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
 )
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    ControlLoopAuthorityPolicy,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
     public_key_fingerprint,
@@ -37,6 +40,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     FAIL_SIGNER_RUNTIME_CONFIG_INVALID,
+    FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,
     FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,
     FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
     FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID,
@@ -179,6 +183,8 @@ def _policy(**overrides: object) -> PeerCredentialPolicy:
 def _config(public_key: str, **overrides: object) -> SignerSocketServiceRuntimeWiringConfig:
     values = {
         "repo_root": "O:/Foundups-Agent",
+        "runtime_root": "O:/tmp",
+        "signer_runtime_root": "O:/tmp-signer-state",
         "socket_path": "O:/tmp/reddog-signer.sock",
         "key_provider_profile": _profile(public_key),
         "peer_policy": _policy(),
@@ -189,6 +195,15 @@ def _config(public_key: str, **overrides: object) -> SignerSocketServiceRuntimeW
         "timeout_s": 2.5,
         "max_request_bytes": 4096,
         "max_response_bytes": 8192,
+        "control_loop_anchor_path": "O:/tmp-signer-state/anchor.json",
+        "control_loop_authority_policy": {
+            "issuer_principal_id": "github:012",
+            "signer_public_key": public_key,
+            "key_epoch": "epoch-1",
+            "consensus_receipt_digest": "sha256:" + ("1" * 64),
+            "authority_profile_digest": "sha256:" + ("2" * 64),
+            "authority_profile_source_receipt_id": "sha256:" + ("3" * 64),
+        },
     }
     values.update(overrides)
     return SignerSocketServiceRuntimeWiringConfig(**values)
@@ -393,6 +408,159 @@ def test_default_provider_mode_rejects_before_service_call() -> None:
     assert result.accepted is False
     assert result.status == SIGNER_SOCKET_RUNTIME_WIRING_REJECT
     assert FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED in result.rejection_reasons
+    assert service.calls == []
+
+
+def test_runtime_wiring_rejects_linked_control_anchor_path(
+    tmp_path: Path,
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    signer_runtime = tmp_path / "signer-runtime"
+    signer_runtime.mkdir()
+    real = signer_runtime / "real"
+    real.mkdir()
+    linked = signer_runtime / "linked"
+    try:
+        linked.symlink_to(real, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            repo_root=repo,
+            runtime_root=runtime,
+            signer_runtime_root=signer_runtime,
+            control_loop_anchor_path=linked / "anchor.json",
+        ),
+        _resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID in result.rejection_reasons
+    assert service.calls == []
+
+
+def test_runtime_wiring_rejects_socket_outside_declared_runtime_root(
+    tmp_path: Path,
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "resident"
+    signer_runtime = tmp_path / "signer"
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            repo_root=repo,
+            runtime_root=runtime,
+            signer_runtime_root=signer_runtime,
+            socket_path=tmp_path / "outside" / "escaped.sock",
+            control_loop_anchor_path=signer_runtime / "anchor.json",
+        ),
+        _resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_RUNTIME_CONFIG_INVALID in result.rejection_reasons
+    assert service.calls == []
+
+
+def test_wsp71_runtime_wiring_requires_control_anchor_and_policy() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+            control_loop_anchor_path=None,
+            control_loop_authority_policy=None,
+        ),
+        _resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_RUNTIME_CONFIG_INVALID in result.rejection_reasons
+    assert service.calls == []
+
+
+def test_runtime_wiring_rejects_malformed_typed_control_policy() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    service = CapturingBoundedService()
+    malformed = ControlLoopAuthorityPolicy(
+        issuer_principal_id=1,  # type: ignore[arg-type]
+        signer_public_key=public_key,
+        key_epoch="epoch-1",
+        consensus_receipt_digest="sha256:" + ("1" * 64),
+        authority_profile_digest="sha256:" + ("2" * 64),
+        authority_profile_source_receipt_id="sha256:" + ("3" * 64),
+    )
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+            control_loop_authority_policy=malformed,
+        ),
+        _resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_RUNTIME_CONFIG_INVALID in result.rejection_reasons
+    assert service.calls == []
+
+
+@pytest.mark.parametrize("relation", ["same", "nested", "ancestor"])
+def test_runtime_wiring_rejects_overlapping_runtime_roots(
+    tmp_path: Path,
+    relation: str,
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    state = tmp_path / "state"
+    runtime = state / "resident"
+    signer_runtime = {
+        "same": runtime,
+        "nested": runtime / "signer",
+        "ancestor": state,
+    }[relation]
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            repo_root=repo,
+            runtime_root=runtime,
+            signer_runtime_root=signer_runtime,
+            socket_path=runtime / "reddog-signer.sock",
+            control_loop_anchor_path=signer_runtime / "anchor.json",
+        ),
+        _resolver(private_key),
+        serve_bounded=service,
+    )
+
+    assert not result.accepted
+    assert FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID in result.rejection_reasons
     assert service.calls == []
 
 

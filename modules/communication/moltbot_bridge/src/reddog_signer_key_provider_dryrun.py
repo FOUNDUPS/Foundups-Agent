@@ -20,6 +20,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    decode_ed25519_public_key,
     encode_ed25519_public_key,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
@@ -167,16 +168,11 @@ def build_test_only_signer_backend_from_provider(
         resolver=resolver,
     ):
         return _reject(FAIL_PROVIDER_MOCK_IN_PRODUCTION, profile=profile)
-    if not _profile_ascii_and_complete(profile):
-        return _reject(FAIL_PROVIDER_PROFILE_INVALID, profile=profile)
+    profile_rejection = validate_signer_key_provider_profile(profile)
+    if profile_rejection is not None:
+        return _reject(profile_rejection, profile=profile)
     if not permission_snapshot_fresh:
         return _reject(FAIL_PROVIDER_PERMISSION_DENIED, profile=profile)
-    if profile.signing_key_ref == profile.audit_mac_key_ref:
-        return _reject(FAIL_PROVIDER_REFERENCE_FORBIDDEN, profile=profile)
-    if not parse_op_reference(profile.signing_key_ref) or not parse_op_reference(profile.audit_mac_key_ref):
-        return _reject(FAIL_PROVIDER_REFERENCE_INVALID, profile=profile)
-    if profile.ttl_seconds <= 0:
-        return _reject(FAIL_PROVIDER_TTL_EXPIRED, profile=profile)
 
     signing_result = _resolve(profile.signing_key_ref, profile.signer_agent_id, resolver)
     if not signing_result.success:
@@ -402,6 +398,28 @@ def _profile_ascii_and_complete(profile: SignerKeyProviderProfile) -> bool:
     return _assert_ascii_deep(payload)
 
 
+def validate_signer_key_provider_profile(
+    profile: object,
+) -> str | None:
+    """Return the provider rejection code for invalid static profile data."""
+
+    if not isinstance(profile, SignerKeyProviderProfile):
+        return FAIL_PROVIDER_PROFILE_INVALID
+    if not _profile_ascii_and_complete(profile):
+        return FAIL_PROVIDER_PROFILE_INVALID
+    if profile.signing_key_ref == profile.audit_mac_key_ref:
+        return FAIL_PROVIDER_REFERENCE_FORBIDDEN
+    if not parse_op_reference(profile.signing_key_ref) or not parse_op_reference(
+        profile.audit_mac_key_ref
+    ):
+        return FAIL_PROVIDER_REFERENCE_INVALID
+    if profile.ttl_seconds <= 0:
+        return FAIL_PROVIDER_TTL_EXPIRED
+    if decode_ed25519_public_key(profile.expected_public_key) is None:
+        return FAIL_PROVIDER_PROFILE_INVALID
+    return None
+
+
 def _assert_ascii_deep(value: object) -> bool:
     if isinstance(value, str):
         return all(ord(char) < 128 for char in value)
@@ -437,4 +455,5 @@ __all__ = [
     "SignerKeyProviderProfile",
     "build_signer_backend_from_provider",
     "build_test_only_signer_backend_from_provider",
+    "validate_signer_key_provider_profile",
 ]

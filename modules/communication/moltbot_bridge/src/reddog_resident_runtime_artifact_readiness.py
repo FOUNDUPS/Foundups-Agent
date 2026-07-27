@@ -34,6 +34,13 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_au
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
+    SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
+)
 
 
 REQUIRED_RUNTIME_ARTIFACTS = (
@@ -42,7 +49,9 @@ REQUIRED_RUNTIME_ARTIFACTS = (
     "signer_service_config.json", "signer_service_run_packet.json",
 )
 _SIGNER_CONFIG_FIELDS = {
-    "schema_version", "socket_path", "provider_mode", "allow_test_only_key_material",
+    "schema_version", "runtime_root", "signer_runtime_root", "socket_path",
+    "control_loop_anchor_path", "control_loop_authority_policy",
+    "provider_mode", "allow_test_only_key_material",
     "permission_snapshot_fresh", "max_requests", "timeout_s", "max_request_bytes",
     "max_response_bytes", "key_provider_profiles", "peer_policy",
 }
@@ -223,15 +232,14 @@ def _signer_config_reasons(
         reasons.append("signer_config_field_set_invalid")
     if _forbidden_serialized_keys(config):
         reasons.append("signer_config_forbidden_key_present")
-    if config.get("schema_version") != "reddog_signer_service_config.v1":
+    if config.get("schema_version") != SIGNER_SERVICE_CONFIG_SCHEMA_VERSION:
         reasons.append("signer_config_schema_invalid")
     if config.get("provider_mode") != "WSP71_PERMISSIONED":
         reasons.append("signer_provider_mode_invalid")
     if config.get("allow_test_only_key_material") is not False:
         reasons.append("signer_test_key_material_forbidden")
-    socket_path = Path(str(config.get("socket_path") or "")).resolve()
-    if _inside(socket_path, repo) or socket_path != (runtime / "reddog_signer.sock").resolve():
-        reasons.append("signer_socket_path_invalid")
+    reasons.extend(_signer_runtime_path_reasons(repo, runtime, config))
+    reasons.extend(_signer_control_policy_reasons(profile, config))
     expected = (
         ("principal-identity", profile.get("principal_public_key")),
         ("reddog-work-authority", profile.get("reddog_public_key")),
@@ -273,6 +281,71 @@ def _signer_config_reasons(
     # challenge currently authenticates the signer peer.
     reasons.append("signer_client_peer_handshake_verifier_missing")
     return reasons
+
+
+def _signer_runtime_path_reasons(
+    repo: Path,
+    runtime: Path,
+    config: Mapping[str, Any],
+) -> list[str]:
+    reasons: list[str] = []
+    try:
+        configured_runtime = validate_runtime_root_path(
+            config.get("runtime_root"),
+            repo_root=repo,
+        )
+        signer_runtime = validate_runtime_root_path(
+            config.get("signer_runtime_root"),
+            repo_root=repo,
+        )
+        socket_path = validate_runtime_artifact_path(
+            config.get("socket_path"),
+            repo_root=repo,
+            allowed_root=configured_runtime,
+        )
+        anchor_path = validate_runtime_artifact_path(
+            config.get("control_loop_anchor_path"),
+            repo_root=repo,
+            allowed_root=signer_runtime,
+        )
+    except (TypeError, ValueError):
+        return ["signer_runtime_path_invalid"]
+    roots_overlap = (
+        signer_runtime == configured_runtime
+        or configured_runtime in signer_runtime.parents
+        or signer_runtime in configured_runtime.parents
+    )
+    if configured_runtime != runtime or roots_overlap:
+        reasons.append("signer_runtime_root_binding_invalid")
+    if socket_path != runtime / "reddog_signer.sock":
+        reasons.append("signer_socket_path_invalid")
+    if anchor_path.parent != signer_runtime:
+        reasons.append("signer_control_loop_anchor_path_invalid")
+    return reasons
+
+
+def _signer_control_policy_reasons(
+    profile: Mapping[str, Any],
+    config: Mapping[str, Any],
+) -> list[str]:
+    policy = config.get("control_loop_authority_policy")
+    if not isinstance(policy, Mapping):
+        return ["signer_control_loop_authority_policy_invalid"]
+    expected = {
+        "issuer_principal_id": profile.get("principal_id"),
+        "signer_public_key": profile.get("reddog_public_key"),
+        "key_epoch": profile.get("key_epoch"),
+        "consensus_receipt_digest": profile.get("consensus_receipt_digest"),
+        "authority_profile_digest": _digest(profile),
+        "authority_profile_source_receipt_id": profile.get(
+            "authority_profile_source_receipt_id"
+        ),
+    }
+    if set(policy) != set(expected):
+        return ["signer_control_loop_authority_policy_field_set_invalid"]
+    if any(policy.get(key) != value for key, value in expected.items()):
+        return ["signer_control_loop_authority_policy_binding_mismatch"]
+    return []
 
 
 def _signer_packet_reasons(

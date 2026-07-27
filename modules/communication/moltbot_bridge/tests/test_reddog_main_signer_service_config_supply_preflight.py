@@ -9,6 +9,12 @@ from unittest.mock import patch
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    public_key_fingerprint,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
@@ -19,6 +25,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_prof
     PROFILE_SIGNED_0102_BOUNDED_CODE,
     resident_queue_runtime_file_path,
 )
+
+_PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
+_REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -60,9 +69,9 @@ def clean_signer_supply_env(monkeypatch) -> None:
 def _authority_profile(**overrides: object) -> dict[str, object]:
     profile: dict[str, object] = {
         "principal_id": "github:mjtrout",
-        "principal_public_key": "ed25519-pub-v1:principal",
+        "principal_public_key": _PRINCIPAL_PUBLIC_KEY,
         "reddog_id": "reddog:foundups-agent",
-        "reddog_public_key": "ed25519-pub-v1:reddog",
+        "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "permission_snapshot_digest": "sha256:" + "1" * 64,
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:" + "c" * 64,
@@ -81,12 +90,27 @@ def _write_json(path: Path, payload: object) -> Path:
 
 
 def _signer_config(socket_path: Path) -> dict[str, object]:
+    runtime_root = socket_path.parent.resolve()
+    signer_runtime_root = (
+        runtime_root.parent / f"{runtime_root.name}-signer-state"
+    ).resolve()
     return {
         "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
-        "socket_path": str(socket_path),
+        "runtime_root": str(runtime_root),
+        "signer_runtime_root": str(signer_runtime_root),
+        "socket_path": str(socket_path.resolve()),
+        "control_loop_anchor_path": str(signer_runtime_root / "anchor.json"),
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
         "allow_test_only_key_material": False,
         "permission_snapshot_fresh": True,
+        "control_loop_authority_policy": {
+            "issuer_principal_id": "github:mjtrout",
+            "signer_public_key": _REDDOG_PUBLIC_KEY,
+            "key_epoch": "epoch-1",
+            "consensus_receipt_digest": "sha256:" + "c" * 64,
+            "authority_profile_digest": "sha256:" + "b" * 64,
+            "authority_profile_source_receipt_id": "sha256:" + "a" * 64,
+        },
         "max_requests": 3,
         "timeout_s": 2.5,
         "max_request_bytes": 4096,
@@ -97,8 +121,10 @@ def _signer_config(socket_path: Path) -> dict[str, object]:
                 "signer_agent_id": "signer:principal",
                 "signing_key_ref": "op://prod-vault/principal/private",
                 "audit_mac_key_ref": "op://prod-vault/principal/audit",
-                "expected_public_key": "ed25519-pub-v1:principal",
-                "expected_key_fingerprint": "sha256:principal",
+                "expected_public_key": _PRINCIPAL_PUBLIC_KEY,
+                "expected_key_fingerprint": public_key_fingerprint(
+                    _PRINCIPAL_PUBLIC_KEY
+                ),
                 "expected_key_epoch": "epoch-1",
                 "permission_snapshot_digest": "sha256:permission",
                 "ttl_seconds": 60,
@@ -108,8 +134,10 @@ def _signer_config(socket_path: Path) -> dict[str, object]:
                 "signer_agent_id": "signer:reddog",
                 "signing_key_ref": "op://prod-vault/reddog/private",
                 "audit_mac_key_ref": "op://prod-vault/reddog/audit",
-                "expected_public_key": "ed25519-pub-v1:reddog",
-                "expected_key_fingerprint": "sha256:reddog",
+                "expected_public_key": _REDDOG_PUBLIC_KEY,
+                "expected_key_fingerprint": public_key_fingerprint(
+                    _REDDOG_PUBLIC_KEY
+                ),
                 "expected_key_epoch": "epoch-1",
                 "permission_snapshot_digest": "sha256:permission",
                 "ttl_seconds": 60,

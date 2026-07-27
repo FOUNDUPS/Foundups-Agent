@@ -235,7 +235,7 @@ def load_reddog_main_resident_queue_runtime_dependency_bundle(
         return _reject(*principal_reasons)
 
     authority_store = AtomicJsonAuthorityRuntimeStore(
-        authority_path, allowed_root=runtime_root
+        authority_path, allowed_root=runtime_root, repo_root=root
     )
     signer = FailClosedSignerClient()
     signer_mode = "fail_closed"

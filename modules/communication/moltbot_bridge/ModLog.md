@@ -1,4 +1,43 @@
 # ModLog - moltbot_bridge
+## 2026-07-27: REDDOG_AUTHORITY_RUNTIME_STORE_CONFINEMENT_PHASE1
+- Required every atomic authority runtime store to bind an explicit repository
+  root and runtime root, then revalidate the target before reads, writes, and
+  atomic replacement.
+- Rejected missing out-of-root targets, hard links, repository-contained or
+  repository-containing roots, Windows namespaces, and linked path components;
+  atomic replacement now pins the verified parent against swap races.
+- Split the platform replacement adapters, scrubbed rejected temporary payloads,
+  restored the previous authority snapshot after post-replace verification
+  failure, and rejected POSIX parent relocation before accepting a write.
+- Bound authority commits to a platform-level revision witness, recovered
+  interrupted authority artifacts only when the caller supplies the exact
+  expected revision, and made snapshot revisions independent of a prior
+  embedded revision.
+- Moved Linux payload staging to an `O_TMPFILE` unnamed inode with mode-zero
+  rename, descriptor-backed rollback, and inode/directory fsync. Unsupported
+  filesystems fail closed rather than falling back to pathname temp files.
+- Kept the security boundary explicit: descriptor and compare-and-swap checks
+  protect cooperative runtime access, while hostile same-principal filesystem
+  writers remain excluded by the signer service's distinct OS-principal
+  isolation contract.
+- Preserved the exact authenticated runtime root through control-receipt reads
+  and appends, required schema-v2 signer anchor and authority-policy bindings,
+  confined socket/anchor paths at supply, bootstrap, and public runtime wiring,
+  and aligned readiness around the same direct-child root contract.
+- Required run-packet supply to pass the same canonical schema-v2 config
+  rehydration as the signer bootstrap, so an accepted launch artifact cannot
+  omit runtime roots, signer roots, the control anchor, or a fully validated
+  authority policy, peer policy, and signer profile set. Canonical profile
+  validation is shared by config supply, run-packet admission, and provider
+  admission; malformed public keys, bounded service limits, and
+  policy-to-profile identity are rejected before config write or launch
+  acceptance, with strict finite JSON numbers and string-only policy bindings
+  for both mapping and typed runtime inputs.
+- Threaded independent repository/runtime roots through queue dependencies,
+  signer config, control-loop heads, signer anchors, and live-canary verification
+  without enabling proposal authority, queue promotion, worker execution, or repository
+  mutation (WSP 00, 15, 22, 50, 62, 97).
+
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_AUTHENTICITY_ATTESTATION_PHASE1
 - Added a domain-separated architect-proposal Ed25519 attestation that binds
   the complete proposal, determination, queue candidate, snapshot, exact SHA,
