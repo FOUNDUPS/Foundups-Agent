@@ -27,12 +27,18 @@ name. INDEX_GAP blocks ordinary code work; the only phase-one exception is a
 HoloIndex maintenance slice whose exact non-wildcard paths equal the supporting
 direct-read paths.
 
-The receipt's SHA is integrity evidence, not authentication. Production policy
-therefore keeps `architect_proposal_admission_authenticity` unavailable until a
-trusted verifier is implemented. Promotion also remains blocked by the
-code-owned incomplete trust anchors documented in the execution-valve roadmap.
-Tests may inject a complete policy to validate the queue mechanics; callers
-cannot inject that policy into the production promotion seam.
+The receipt's SHA is integrity evidence, not authentication.
+`reddog_architect_proposal_authenticity.py` defines a domain-separated Ed25519
+attestation, an exact signer-owned proposal policy, transactional signer-side
+nonce reservation, and strict serialized-attestation integrity validation.
+The validated attestation is still evidence, not authority. It is not accepted
+by proposal admission, the candidate gate, or promotion.
+
+Production policy still keeps `architect_proposal_admission_authenticity`
+unavailable because startup does not provision an independent pre-promotion
+signer policy, authoritative key and revocation resolver, durable proposal
+nonce store, trusted verification context, opaque authority proof, attestation
+artifact, or transactional queue binding.
 
 ### Resident queue exact-SHA commit stage
 
