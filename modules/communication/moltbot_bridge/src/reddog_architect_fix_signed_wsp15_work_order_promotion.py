@@ -55,8 +55,16 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_tra
     ArchitectFixPromotionTransactionInputs,
     execute_architect_fix_promotion_transaction,
 )
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    ArchitectFixPromotionPublicationRequest,
+)
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified_authority import (
     verify_architect_proposal_promotion_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
+    authority_profile_malformed_digest_paths,
+    authority_profile_secret_field_paths,
+    authority_profile_unknown_field_paths,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     SignerSocketServiceRuntimeWiringConfig,
@@ -119,8 +127,8 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     claim_ttl_seconds: int = 3600,
     current_repo_head_sha: str | None = None,
     current_holoindex_receipt: Any = None,
-    authority_profile_precommit_writer: (
-        Callable[[Mapping[str, Any]], None] | None
+    authority_profile_publication_publisher: (
+        Callable[[ArchitectFixPromotionPublicationRequest], str] | None
     ) = None,
     current_proposal_revoked_key_epochs: frozenset[str] = frozenset(),
 ) -> ArchitectFixPromotionResult:
@@ -151,12 +159,32 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
     ):
         reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
+    selected_slice = str(determination.get("next_slice_name") or "")
+    duplicate_queue = bool(
+        selected_slice
+        and _duplicate_queue(
+            current,
+            selected_slice=selected_slice,
+            determination_id=determination_id,
+        )
+    )
+    retry_attestation_id = str(
+        proposal_authenticity_attestation.get("attestation_id") or ""
+    )
+    if duplicate_queue and not any(
+        isinstance(item, Mapping)
+        and str(item.get("proposal_authenticity_attestation_id") or "")
+        == retry_attestation_id
+        for item in current.get("architect_fix_promotions") or ()
+    ):
+        return _reject([ArchitectFixPromotionReason.DUPLICATE_QUEUE_ITEM])
     proposal_admission, proposal_codes = validate_architect_fix_proposal_admission(
         determination=determination,
         candidate=candidate,
         current_work_state=current,
         current_repo_head_sha=current_repo_head_sha,
         current_holoindex_receipt=current_holoindex_receipt,
+        committed_retry_attestation_id=retry_attestation_id,
     )
     if PROPOSAL_ADMISSION_INVALID in proposal_codes:
         reasons.append(ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID)
@@ -164,9 +192,9 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         reasons.append(ArchitectFixPromotionReason.REPO_HEAD_MISMATCH)
     if HOLOINDEX_BINDING_MISMATCH in proposal_codes:
         reasons.append(ArchitectFixPromotionReason.HOLOINDEX_BINDING_MISMATCH)
-    if authority_profile_precommit_writer is None:
+    if authority_profile_publication_publisher is None:
         reasons.append(
-            ArchitectFixPromotionReason.AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED
+            ArchitectFixPromotionReason.PUBLICATION_COORDINATOR_MISSING
         )
     allocation = _mapping(candidate.get("wsp15_allocation_receipt"))
     allocation_validation = validate_reddog_wsp15_allocation_receipt(allocation)
@@ -191,10 +219,6 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     holoindex_evidence = _mapping(authority_profile.get("holoindex_evidence"))
     if not holoindex_evidence:
         reasons.append(ArchitectFixPromotionReason.HOLOINDEX_EVIDENCE_MISSING)
-
-    selected_slice = str(determination.get("next_slice_name") or "")
-    if selected_slice and _duplicate_queue(current, selected_slice=selected_slice, determination_id=determination_id):
-        reasons.append(ArchitectFixPromotionReason.DUPLICATE_QUEUE_ITEM)
 
     if reasons:
         return _reject(reasons)
@@ -231,14 +255,21 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         return _reject(
             [ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID]
         )
-    assert authority_profile_precommit_writer is not None
+    if duplicate_queue and not any(
+        isinstance(item, Mapping)
+        and str(item.get("proposal_authenticity_attestation_id") or "")
+        == proposal_authority.attestation_id
+        for item in current.get("architect_fix_promotions") or ()
+    ):
+        return _reject([ArchitectFixPromotionReason.DUPLICATE_QUEUE_ITEM])
+    assert authority_profile_publication_publisher is not None
     return execute_architect_fix_promotion_transaction(
         ArchitectFixPromotionTransactionInputs(
             schema_version=ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION,
             accept_status=ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT,
             current=current,
             store=work_state_store,
-            profile_writer=authority_profile_precommit_writer,
+            publication_publisher=authority_profile_publication_publisher,
             authority_profile=authority_profile,
             determination=determination,
             candidate=candidate,
@@ -389,7 +420,27 @@ def _validate_authority_profile(profile: Mapping[str, Any]) -> list[str]:
         for field in _AUTHORITY_PROFILE_REQUIRED
         if field not in profile or profile.get(field) in (None, "", (), [], {})
     ]
-    return [ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE + ":" + field for field in missing]
+    reasons = [
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE + ":" + field
+        for field in missing
+    ]
+    reasons.extend(
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_SECRET_FIELD + ":" + path
+        for path in authority_profile_secret_field_paths(profile)
+    )
+    reasons.extend(
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+        + ":unknown_field:"
+        + path
+        for path in authority_profile_unknown_field_paths(profile, seed=False)
+    )
+    reasons.extend(
+        ArchitectFixPromotionReason.AUTHORITY_PROFILE_INCOMPLETE
+        + ":digest_format:"
+        + path
+        for path in authority_profile_malformed_digest_paths(profile)
+    )
+    return reasons
 
 
 def _duplicate_queue(snapshot: Mapping[str, Any], *, selected_slice: str, determination_id: str) -> bool:

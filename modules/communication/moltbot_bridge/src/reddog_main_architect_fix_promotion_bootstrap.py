@@ -29,17 +29,21 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_signed_wsp15_
     ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT,
     promote_reddog_architect_fix_to_signed_wsp15_work_order,
 )
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    AtomicArchitectFixPromotionPublisher,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     SignerSocketServiceRuntimeWiringConfig,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PrincipalKeyResolver,
 )
-from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
-    AtomicJsonAuthoritativeWorkStateStore,
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
+    AtomicJsonAuthorityRuntimeStore,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
+    validate_runtime_root_path,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_bootstrap import (
     verify_reddog_holoindex_owner_binding,
@@ -86,6 +90,7 @@ class RedDogMainArchitectFixPromotionBootstrapResult:
 @dataclass(frozen=True)
 class _PromotionBootstrapInputs:
     root: Path
+    runtime_root: Path
     work_state_file: Path
     output_path: Path
     determination: Mapping[str, Any]
@@ -105,6 +110,7 @@ class _PromotionBootstrapInputs:
 def run_reddog_main_architect_fix_promotion_bootstrap(
     *,
     repo_root: Path | str,
+    runtime_root: Path | str | None,
     work_state_path: Path | str | None,
     architect_determination_path: Path | str | None,
     model_selection_receipt_path: Path | str | None,
@@ -124,6 +130,13 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
 
     root = Path(repo_root).resolve()
     reasons: list[str] = []
+    try:
+        trusted_runtime_root = validate_runtime_root_path(
+            runtime_root,
+            repo_root=root,
+        )
+    except Exception:
+        return _not_ready(("resident_runtime_root_invalid",))
 
     work_state_file, work_state_reasons = _resolve_existing_file_outside_repo(
         root,
@@ -185,6 +198,12 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
         inside_reason="authority_profile_output_path_inside_repo",
     )
     reasons.extend(output_reasons)
+    for label, path in (
+        ("work_state", work_state_file),
+        ("authority_profile_output", output_path),
+    ):
+        if path is not None and not _is_inside(path, trusted_runtime_root):
+            reasons.append(f"{label}_path_outside_resident_runtime_root")
 
     if reasons:
         return _not_ready(reasons)
@@ -203,6 +222,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     return _run_locked_promotion(
         _PromotionBootstrapInputs(
             root=root,
+            runtime_root=trusted_runtime_root,
             work_state_file=work_state_file,
             output_path=output_path,
             determination=determination,
@@ -246,48 +266,47 @@ def _run_locked_promotion(
 
 
 def _run_profile_transaction(inputs, repo_head, holoindex_receipt):
-    store = AtomicJsonAuthoritativeWorkStateStore(inputs.work_state_file)
-    with runtime_operation_lock(str(inputs.output_path) + ".operation"):
-        previous = (
-            inputs.output_path.read_bytes()
-            if inputs.output_path.exists()
-            else None
+    store = AtomicJsonAuthorityRuntimeStore(
+        inputs.work_state_file,
+        allowed_root=inputs.runtime_root,
+        repo_root=inputs.root,
+    )
+    publisher = AtomicArchitectFixPromotionPublisher(
+        repo_root=inputs.root,
+        runtime_root=inputs.runtime_root,
+        authority_profile_path=inputs.output_path,
+        work_state_store=store,
+    )
+    try:
+        publisher.recover()
+    except Exception as exc:
+        return _not_ready(
+            ("architect_fix_publication_recovery_failed", exc.__class__.__name__)
         )
-        written_digest: list[str] = []
-
-        def precommit_writer(profile: Mapping[str, Any]) -> None:
-            _write_json_atomic_unlocked(inputs.output_path, profile)
-            written_digest[:] = [_file_digest(inputs.output_path)]
-
-        result = promote_reddog_architect_fix_to_signed_wsp15_work_order(
-            architect_determination=inputs.determination,
-            work_state_store=store,
-            authority_profile=inputs.authority_profile,
-            model_selection_receipt=inputs.model_selection,
-            model_runtime_binding_receipt=inputs.model_runtime_binding,
-            memex_supply_receipt=inputs.memex_supply,
-            proposal_authenticity_attestation=inputs.proposal_attestation,
-            signer_runtime_config=inputs.signer_runtime_config,
-            principal_key_resolver=inputs.principal_key_resolver,
-            current_proposal_revoked_key_epochs=inputs.revoked_key_epochs,
-            worker_id=inputs.worker_id,
-            now_iso=inputs.now_iso,
-            current_repo_head_sha=repo_head,
-            current_holoindex_receipt=holoindex_receipt,
-            authority_profile_precommit_writer=precommit_writer,
-        )
-        if not result.accepted:
-            reasons = list(
+    result = promote_reddog_architect_fix_to_signed_wsp15_work_order(
+        architect_determination=inputs.determination,
+        work_state_store=store,
+        authority_profile=inputs.authority_profile,
+        model_selection_receipt=inputs.model_selection,
+        model_runtime_binding_receipt=inputs.model_runtime_binding,
+        memex_supply_receipt=inputs.memex_supply,
+        proposal_authenticity_attestation=inputs.proposal_attestation,
+        signer_runtime_config=inputs.signer_runtime_config,
+        principal_key_resolver=inputs.principal_key_resolver,
+        current_proposal_revoked_key_epochs=inputs.revoked_key_epochs,
+        worker_id=inputs.worker_id,
+        now_iso=inputs.now_iso,
+        current_repo_head_sha=repo_head,
+        current_holoindex_receipt=holoindex_receipt,
+        authority_profile_publication_publisher=publisher.publish,
+    )
+    if not result.accepted:
+        return _not_ready(
+            list(
                 result.rejection_reasons
                 or ("architect_fix_promotion_rejected",)
             )
-            if written_digest and not _restore_output_unlocked(
-                inputs.output_path,
-                previous,
-                expected_current_digest=written_digest[0],
-            ):
-                reasons.append("authority_profile_rollback_failed")
-            return _not_ready(reasons)
+        )
     return _applied_result(result, inputs.output_path)
 
 
@@ -414,61 +433,6 @@ def _probe_atomic_output(path: Path) -> list[str]:
     except Exception:
         return ["authority_profile_output_not_writable"]
     return []
-
-
-def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-            json.dump(payload, handle, sort_keys=True, indent=2)
-            handle.write("\n")
-        os.replace(tmp_name, path)
-    finally:
-        if os.path.exists(tmp_name):
-            os.unlink(tmp_name)
-
-
-def _file_digest(path: Path) -> str:
-    import hashlib
-
-    try:
-        return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
-    except OSError:
-        return ""
-
-
-def _restore_output_unlocked(
-    path: Path,
-    previous: bytes | None,
-    *,
-    expected_current_digest: str,
-) -> bool:
-    if (
-        not expected_current_digest
-        or _file_digest(path) != expected_current_digest
-    ):
-        return False
-    try:
-        if previous is None:
-            path.unlink(missing_ok=True)
-            return True
-        path.parent.mkdir(parents=True, exist_ok=True)
-        fd, tmp_name = tempfile.mkstemp(
-            prefix=f".{path.name}.", suffix=".restore", dir=str(path.parent)
-        )
-        try:
-            with os.fdopen(fd, "wb") as handle:
-                handle.write(previous)
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(tmp_name, path)
-        finally:
-            if os.path.exists(tmp_name):
-                os.unlink(tmp_name)
-        return True
-    except Exception:
-        return False
 
 
 def _not_ready(reasons: tuple[str, ...] | list[str]) -> RedDogMainArchitectFixPromotionBootstrapResult:

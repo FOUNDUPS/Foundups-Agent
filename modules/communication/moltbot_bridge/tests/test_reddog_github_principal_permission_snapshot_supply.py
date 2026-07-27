@@ -72,8 +72,8 @@ def _seed(permission_digest: str) -> dict[str, object]:
         "key_epoch": "epoch-1",
         "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
         "required_policy_gates": ["signed_work_order_authority", "execution_valve"],
-        "consensus_receipt_digest": "sha256:consensus",
-        "sovereign_authorization_digest": "sha256:012-token",
+        "consensus_receipt_digest": "sha256:" + "c" * 64,
+        "sovereign_authorization_digest": "sha256:" + "d" * 64,
         "holoindex_evidence": {
             "holoindex_query": "RedDog authority profile",
             "holoindex_status": "bundle_json_ok",

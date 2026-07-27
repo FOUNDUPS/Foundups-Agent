@@ -644,8 +644,9 @@ def refresh_authoritative_work_state_runtime(
             report=report,
             freshness=freshness,
         )
-
     current = store.load()
+    if any(isinstance(item, Mapping) and item.get("state") != "COMMITTED" for item in (current.get("architect_fix_publications") or [])):
+        return _reject(now_iso=now_iso, reasons=("architect_fix_publication_pending",), report=report, freshness=freshness)
     selected = report.prework_packet.chosen_slice
     if not selected:
         queue_sync = WREQueueSyncReceipt(
@@ -703,10 +704,8 @@ def refresh_authoritative_work_state_runtime(
             selected_slice=selected,
             rejection_reasons=(),
         )
-
     records = _authoritative_records(report)
-    previous_claims = [dict(claim) for claim in (current.get("worker_claims") or []) if isinstance(claim, Mapping)]
-    previous_queue = [dict(item) for item in (current.get("wre_queue_items") or []) if isinstance(item, Mapping)]
+    preserved = {key: [dict(item) for item in (current.get(key) or []) if isinstance(item, Mapping)] for key in ("worker_claims", "wre_queue_items", "architect_fix_promotions", "architect_fix_publications")}
     snapshot = {
         "schema_version": WORK_STATE_SCHEMA_VERSION,
         "updated_at": now_iso,
@@ -719,14 +718,15 @@ def refresh_authoritative_work_state_runtime(
         "selected_slice": selected,
         "slices": [record.to_dict() for record in records],
         "freshness_receipts": [freshness.to_dict()],
-        "worker_claims": previous_claims + ([durable_claim.to_dict()] if durable_claim else []),
-        "wre_queue_items": previous_queue + [item.to_dict() for item in queue_items],
+        "worker_claims": preserved["worker_claims"] + ([durable_claim.to_dict()] if durable_claim else []),
+        "wre_queue_items": preserved["wre_queue_items"] + [item.to_dict() for item in queue_items],
+        "architect_fix_promotions": preserved["architect_fix_promotions"],
+        "architect_fix_publications": preserved["architect_fix_publications"],
         "queue_sync_receipts": [queue_sync.to_dict()],
         "no_holoindex_mutation_performed": True,
         "no_worker_spawn_performed": True,
         "no_execution_performed": True,
     }
-
     try:
         revision = store.commit(snapshot, expected_revision=current.get("revision"))
     except Exception as exc:  # noqa: BLE001 - commit backend errors are fail-closed.

@@ -7,6 +7,10 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    ArchitectFixPromotionPublicationRequest,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_profile import (
     ArchitectFixPromotionProfileInputs,
     promoted_authority_profile,
@@ -15,6 +19,7 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_rec
     ArchitectFixPromotionReason,
     ArchitectFixPromotionReceipt,
     ArchitectFixPromotionRecordInputs,
+    ArchitectFixPromotionRecords,
     ArchitectFixPromotionResult,
     build_architect_fix_promotion_records,
     canonical_digest,
@@ -36,7 +41,9 @@ class ArchitectFixPromotionTransactionInputs:
     accept_status: str
     current: Mapping[str, Any]
     store: AuthoritativeWorkStateStore
-    profile_writer: Callable[[Mapping[str, Any]], None]
+    publication_publisher: Callable[
+        [ArchitectFixPromotionPublicationRequest], str
+    ]
     authority_profile: Mapping[str, Any]
     determination: Mapping[str, Any]
     candidate: Mapping[str, Any]
@@ -71,31 +78,49 @@ def execute_architect_fix_promotion_transaction(
 ) -> ArchitectFixPromotionResult:
     """Build, persist, and return one verified promotion transaction."""
 
+    digests = _digests(inputs)
     if _attestation_consumed(
         inputs.current, inputs.proposal_authority.attestation_id
     ):
-        return _reject(
-            inputs, ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
-        )
-    digests = _digests(inputs)
+        return _reconstruct_committed_result(inputs, digests=digests)
     records = _build_records(inputs, digests)
     profile = _build_profile(inputs, digests, records)
-    updated = _updated_state(inputs, records)
+    publication_id = _publication_id(inputs, records)
+    profile = {
+        **profile,
+        "promotion_publication_id": publication_id,
+    }
+    profile_digest = canonical_digest(profile)
+    updated = _updated_state(
+        inputs,
+        digests,
+        records,
+        publication_id=publication_id,
+        profile_digest=profile_digest,
+    )
     try:
-        inputs.profile_writer(profile)
-    except Exception:
-        return _reject(
-            inputs,
-            ArchitectFixPromotionReason.AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED,
-        )
-    try:
-        revision = inputs.store.commit(
-            updated, expected_revision=inputs.current.get("revision")
+        revision = inputs.publication_publisher(
+            ArchitectFixPromotionPublicationRequest(
+                publication_id=publication_id,
+                proposal_authenticity_attestation_id=(
+                    inputs.proposal_authority.attestation_id
+                ),
+                authority_profile=profile,
+                updated_work_state=updated,
+                expected_work_state_revision=inputs.current.get("revision"),
+            )
         )
     except Exception:
         return _reject(inputs, ArchitectFixPromotionReason.STORE_REJECTED)
     committed = inputs.store.load()
-    receipt = _build_receipt(inputs, digests, records, revision)
+    receipt = _build_receipt(
+        inputs,
+        digests,
+        records,
+        revision,
+        publication_id=publication_id,
+        profile_digest=profile_digest,
+    )
     return ArchitectFixPromotionResult(
         accepted=True,
         status=inputs.accept_status,
@@ -104,6 +129,179 @@ def execute_architect_fix_promotion_transaction(
         authority_profile=profile,
         work_state_snapshot=committed,
     )
+
+
+def _reconstruct_committed_result(
+    inputs: ArchitectFixPromotionTransactionInputs,
+    *,
+    digests: _PromotionDigests,
+) -> ArchitectFixPromotionResult:
+    promotions = [
+        item
+        for item in inputs.current.get("architect_fix_promotions") or ()
+        if isinstance(item, Mapping)
+        and str(item.get("proposal_authenticity_attestation_id") or "")
+        == inputs.proposal_authority.attestation_id
+    ]
+    if len(promotions) != 1:
+        return _reject(
+            inputs, ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
+        )
+    promotion = promotions[0]
+    publication_id = str(promotion.get("publication_id") or "")
+    claim_id = str(promotion.get("claim_id") or "")
+    queue_item_id = str(promotion.get("queue_item_id") or "")
+    publications = _matching_records(
+        inputs.current,
+        "architect_fix_publications",
+        "publication_id",
+        publication_id,
+    )
+    claims = _matching_records(
+        inputs.current,
+        "worker_claims",
+        "claim_id",
+        claim_id,
+    )
+    queues = _matching_records(
+        inputs.current,
+        "wre_queue_items",
+        "queue_item_id",
+        queue_item_id,
+    )
+    sync_receipts = [
+        item
+        for item in inputs.current.get("queue_sync_receipts") or ()
+        if isinstance(item, Mapping)
+        and queue_item_id in {
+            str(value) for value in item.get("queue_item_ids") or ()
+        }
+    ]
+    if (
+        len(publications) != 1
+        or len(claims) != 1
+        or len(queues) != 1
+        or len(sync_receipts) != 1
+    ):
+        return _reject(
+            inputs, ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
+        )
+    records = ArchitectFixPromotionRecords(
+        claim_id=claim_id,
+        queue_item_id=queue_item_id,
+        claim=dict(claims[0]),
+        queue_item=dict(queues[0]),
+        sync_receipt=dict(sync_receipts[0]),
+        evidence_refs=tuple(
+            str(item) for item in queues[0].get("evidence_refs") or ()
+        ),
+    )
+    profile = _build_profile(inputs, digests, records)
+    profile = {
+        **profile,
+        "promotion_publication_id": publication_id,
+    }
+    profile_digest = canonical_digest(profile)
+    expected_publication_id = _publication_id(inputs, records)
+    regenerated = _build_records(inputs, digests)
+    if (
+        publication_id != expected_publication_id
+        or (
+            regenerated.claim_id == claim_id
+            and regenerated.queue_item_id == queue_item_id
+            and (
+                canonical_digest(regenerated.claim)
+                != canonical_digest(claims[0])
+                or canonical_digest(regenerated.queue_item)
+                != canonical_digest(queues[0])
+            )
+        )
+    ):
+        return _reject(
+            inputs, ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
+        )
+    publications = _matching_records(
+        inputs.current,
+        "architect_fix_publications",
+        "publication_id",
+        publication_id,
+    )
+    if (
+        len(publications) != 1
+        or publications[0].get("state")
+        not in {"STATE_PREPARED", "COMMITTED"}
+        or promotion.get("authority_profile_digest") != profile_digest
+        or publications[0].get("authority_profile_digest") != profile_digest
+        or promotion.get("proposal_authenticity_attestation_id")
+        != inputs.proposal_authority.attestation_id
+    ):
+        return _reject(
+            inputs, ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
+        )
+    replay_state = json.loads(json.dumps(inputs.current, sort_keys=True))
+    replay_state.pop("revision", None)
+    replay_state["architect_fix_publications"] = [
+        dict(item)
+        for item in replay_state.get("architect_fix_publications") or ()
+        if isinstance(item, Mapping)
+        and str(item.get("publication_id") or "") != publication_id
+    ]
+    if not replay_state["architect_fix_publications"]:
+        replay_state.pop("architect_fix_publications", None)
+    try:
+        revision = inputs.publication_publisher(
+            ArchitectFixPromotionPublicationRequest(
+                publication_id=publication_id,
+                proposal_authenticity_attestation_id=(
+                    inputs.proposal_authority.attestation_id
+                ),
+                authority_profile=profile,
+                updated_work_state=replay_state,
+                expected_work_state_revision=inputs.current.get("revision"),
+            )
+        )
+    except Exception:
+        return _reject(inputs, ArchitectFixPromotionReason.STORE_REJECTED)
+    committed = inputs.store.load()
+    committed_publications = _matching_records(
+        committed,
+        "architect_fix_publications",
+        "publication_id",
+        publication_id,
+    )
+    if (
+        len(committed_publications) != 1
+        or committed_publications[0].get("state") != "COMMITTED"
+    ):
+        return _reject(inputs, ArchitectFixPromotionReason.STORE_REJECTED)
+    return ArchitectFixPromotionResult(
+        accepted=True,
+        status=inputs.accept_status,
+        receipt=_build_receipt(
+            inputs,
+            digests,
+            records,
+            revision,
+            publication_id=publication_id,
+            profile_digest=profile_digest,
+        ),
+        rejection_reasons=(),
+        authority_profile=profile,
+        work_state_snapshot=committed,
+    )
+
+
+def _matching_records(
+    snapshot: Mapping[str, Any],
+    collection: str,
+    field: str,
+    value: str,
+) -> list[Mapping[str, Any]]:
+    return [
+        item
+        for item in snapshot.get(collection) or ()
+        if isinstance(item, Mapping) and str(item.get(field) or "") == value
+    ]
 
 
 def _digests(
@@ -206,7 +404,14 @@ def _verified_identity(
     }
 
 
-def _updated_state(inputs, records):
+def _updated_state(
+    inputs,
+    digests,
+    records,
+    *,
+    publication_id: str,
+    profile_digest: str,
+):
     authority = inputs.proposal_authority
     promotion_record = {
         "schema_version": inputs.schema_version,
@@ -219,11 +424,14 @@ def _updated_state(inputs, records):
         ),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "proposal_admission_receipt_id": inputs.proposal_admission["receipt_id"],
+        "proposal_admission_digest": digests.proposal_admission,
         "proposal_authenticity_attestation_id": authority.attestation_id,
         "proposal_authenticity_attestation_digest": authority.attestation_digest,
         "proposal_policy_authorization_id": authority.policy_authorization_id,
         "proposal_policy_authorization_digest": authority.policy_authorization_digest,
         "proposal_signer_runtime_context_digest": authority.signer_runtime_context_digest,
+        "publication_id": publication_id,
+        "authority_profile_digest": profile_digest,
         "created_at": inputs.now_iso,
     }
     return _append_queue_state(
@@ -235,9 +443,23 @@ def _updated_state(inputs, records):
     )
 
 
-def _build_receipt(inputs, digests, records, revision):
+def _build_receipt(
+    inputs,
+    digests,
+    records,
+    revision,
+    *,
+    publication_id: str,
+    profile_digest: str,
+):
     authority = inputs.proposal_authority
-    seed = _receipt_seed(inputs, records, revision)
+    seed = _receipt_seed(
+        inputs,
+        records,
+        revision,
+        publication_id=publication_id,
+        profile_digest=profile_digest,
+    )
     return ArchitectFixPromotionReceipt(
         schema_version=inputs.schema_version,
         promotion_receipt_id=(
@@ -272,11 +494,20 @@ def _build_receipt(inputs, digests, records, revision):
         model_runtime_binding_digest=digests.model_runtime_binding,
         memex_supply_receipt_id=inputs.memex_supply["receipt_id"],
         memex_supply_digest=digests.memex_supply,
+        publication_id=publication_id,
+        authority_profile_digest=profile_digest,
         committed_revision=revision,
     )
 
 
-def _receipt_seed(inputs, records, revision):
+def _receipt_seed(
+    inputs,
+    records,
+    revision,
+    *,
+    publication_id: str,
+    profile_digest: str,
+):
     authority = inputs.proposal_authority
     return {
         "determination_receipt_id": inputs.determination_id,
@@ -293,12 +524,30 @@ def _receipt_seed(inputs, records, revision):
         "proposal_policy_authorization_id": authority.policy_authorization_id,
         "proposal_policy_authorization_digest": authority.policy_authorization_digest,
         "proposal_signer_runtime_context_digest": authority.signer_runtime_context_digest,
+        "publication_id": publication_id,
+        "authority_profile_digest": profile_digest,
         "committed_revision": revision,
     }
 
 
+def _publication_id(inputs, records) -> str:
+    return canonical_digest(
+        {
+            "proposal_authenticity_attestation_id": (
+                inputs.proposal_authority.attestation_id
+            ),
+            "queue_item_id": records.queue_item_id,
+            "claim_id": records.claim_id,
+            "admitted_work_state_revision": inputs.proposal_admission.get(
+                "work_state_revision"
+            ),
+        }
+    )
+
+
 def _append_queue_state(snapshot, *, claim, queue_item, sync_receipt, promotion_record):
     updated = json.loads(json.dumps(snapshot, sort_keys=True, default=str))
+    updated.pop("revision", None)
     collections = {
         "worker_claims": claim,
         "wre_queue_items": queue_item,

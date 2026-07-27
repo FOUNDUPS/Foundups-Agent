@@ -71,7 +71,7 @@ def test_seed_supply_writes_seed_consumable_by_source_supplier_and_promotion(tmp
     seed = json.loads(Path(seed_result.output_path or "").read_text(encoding="utf-8"))
     assert seed["schema_version"] == "reddog_authority_profile_seed.v1"
     assert seed["principal_id"] == "github:mjtrout"
-    assert seed["permission_snapshot_digest"] == "sha256:permission"
+    assert seed["permission_snapshot_digest"] == "sha256:" + "a" * 64
     assert seed["holoindex_evidence"]["index_gap_detected"] is False
     assert seed["no_holoindex_reindex_performed"] is True
 

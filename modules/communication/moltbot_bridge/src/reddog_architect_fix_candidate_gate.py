@@ -73,6 +73,7 @@ def validate_architect_fix_proposal_admission(
     current_work_state: Mapping[str, Any],
     current_repo_head_sha: str | None,
     current_holoindex_receipt: Any,
+    committed_retry_attestation_id: str = "",
 ) -> tuple[ArchitectProposalExecutabilityReceipt | None, tuple[str, ...]]:
     raw = determination.get("proposal_admission")
     try:
@@ -88,6 +89,7 @@ def validate_architect_fix_proposal_admission(
         current_work_state=current_work_state,
         current_repo_head_sha=current_repo_head_sha,
         current_holoindex_receipt=current_holoindex_receipt,
+        committed_retry_attestation_id=committed_retry_attestation_id,
     )
     if reevaluate_architect_proposal_execution_readiness(receipt):
         reasons.append(PROPOSAL_ADMISSION_INVALID)
@@ -105,7 +107,19 @@ def _lineage_reasons(
     current_work_state: Mapping[str, Any],
     current_repo_head_sha: str | None,
     current_holoindex_receipt: Any,
+    committed_retry_attestation_id: str,
 ) -> list[str]:
+    work_state_revision_matches = (
+        receipt.work_state_revision
+        == str(current_work_state.get("revision") or "")
+        or _is_exact_publication_retry(
+            receipt=receipt,
+            determination=determination,
+            candidate=candidate,
+            current_work_state=current_work_state,
+            attestation_id=committed_retry_attestation_id,
+        )
+    )
     expected = (
         receipt.accepted is True
         and receipt.admissible_to_authoritative_queue is True
@@ -123,8 +137,7 @@ def _lineage_reasons(
         == str(determination.get("wsp15_allocation_receipt_id") or "")
         and receipt.wsp15_allocation_digest
         == str(determination.get("wsp15_allocation_digest") or "")
-        and receipt.work_state_revision
-        == str(current_work_state.get("revision") or "")
+        and work_state_revision_matches
         and str(candidate.get("status") or "").upper() == "CANDIDATE"
         and receipt.receipt_id
         == str(candidate.get("proposal_admission_receipt_id") or "")
@@ -141,6 +154,47 @@ def _lineage_reasons(
     ):
         reasons.append(HOLOINDEX_BINDING_MISMATCH)
     return reasons
+
+
+def _is_exact_publication_retry(
+    *,
+    receipt: ArchitectProposalExecutabilityReceipt,
+    determination: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    current_work_state: Mapping[str, Any],
+    attestation_id: str,
+) -> bool:
+    """Allow a signed retry of one exact prepared or committed proposal."""
+
+    if not attestation_id:
+        return False
+    determination_id = str(determination.get("determination_receipt_id") or "")
+    promotions = [
+        item
+        for item in current_work_state.get("architect_fix_promotions") or ()
+        if isinstance(item, Mapping)
+        and str(item.get("architect_determination_receipt_id") or "")
+        == determination_id
+        and str(item.get("proposal_admission_receipt_id") or "")
+        == receipt.receipt_id
+        and str(item.get("proposal_admission_digest") or "")
+        == _digest(receipt.to_dict())
+        and str(item.get("proposal_authenticity_attestation_id") or "")
+        == attestation_id
+    ]
+    if len(promotions) != 1:
+        return False
+    publication_id = str(promotions[0].get("publication_id") or "")
+    publications = [
+        item
+        for item in current_work_state.get("architect_fix_publications") or ()
+        if isinstance(item, Mapping)
+        and str(item.get("publication_id") or "") == publication_id
+        and item.get("state") in {"STATE_PREPARED", "COMMITTED"}
+        and str(item.get("proposal_authenticity_attestation_id") or "")
+        == attestation_id
+    ]
+    return bool(publication_id) and len(publications) == 1
 
 
 def _valid_determination_id(

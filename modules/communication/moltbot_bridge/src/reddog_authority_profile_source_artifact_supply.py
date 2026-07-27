@@ -28,6 +28,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     HIGH_AUTHORITY_VALVE_STATES,
     PrincipalAuthorityRecord,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
+    authority_profile_malformed_digest_paths,
+    authority_profile_secret_field_paths,
+    authority_profile_unknown_field_paths,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
 )
@@ -86,6 +91,9 @@ class AuthorityProfileSourceSupplyReason:
     KEY_REUSE = "authority_profile_principal_reddog_key_reuse"
     OUTPUT_PATH_INVALID = "authority_profile_source_output_path_invalid"
     OUTPUT_WRITE_FAILED = "authority_profile_source_output_write_failed"
+    SECRET_FIELD = "authority_profile_secret_field_rejected"
+    UNKNOWN_FIELD = "authority_profile_unknown_field_rejected"
+    DIGEST_FORMAT = "authority_profile_digest_format_invalid"
 
 
 @dataclass(frozen=True)
@@ -135,6 +143,18 @@ def run_reddog_authority_profile_source_artifact_supply(
         reasons.append(AuthorityProfileSourceSupplyReason.SEED_MISSING)
     elif not _ascii_deep(seed):
         reasons.append(AuthorityProfileSourceSupplyReason.SEED_NON_ASCII)
+    reasons.extend(
+        f"{AuthorityProfileSourceSupplyReason.SECRET_FIELD}:{path}"
+        for path in authority_profile_secret_field_paths(seed)
+    )
+    reasons.extend(
+        f"{AuthorityProfileSourceSupplyReason.UNKNOWN_FIELD}:{path}"
+        for path in authority_profile_unknown_field_paths(seed, seed=True)
+    )
+    reasons.extend(
+        f"{AuthorityProfileSourceSupplyReason.DIGEST_FORMAT}:{path}"
+        for path in authority_profile_malformed_digest_paths(seed)
+    )
     missing = [field for field in _REQUIRED_SEED_FIELDS if field not in seed or seed.get(field) in (None, "", (), [])]
     if missing:
         reasons.extend(
