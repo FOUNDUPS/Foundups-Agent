@@ -45,10 +45,15 @@ FID = "paccess_001"
 def test_atomic_runtime_nonce_consume_allows_exactly_one_concurrent_winner(
     tmp_path: Path,
 ) -> None:
+    repo = _repo(tmp_path)
     path = tmp_path / "runtime" / "authority_state.json"
     stores = [
         AuthorityRuntimeWorkAuthorityNonceStore(
-            AtomicJsonAuthorityRuntimeStore(path, allowed_root=path.parent)
+            AtomicJsonAuthorityRuntimeStore(
+                path,
+                allowed_root=path.parent,
+                repo_root=repo,
+            )
         )
         for _ in range(8)
     ]
@@ -62,7 +67,11 @@ def test_atomic_runtime_nonce_consume_allows_exactly_one_concurrent_winner(
 
     assert results.count(True) == 1
     assert results.count(False) == 7
-    state = AtomicJsonAuthorityRuntimeStore(path, allowed_root=path.parent).load()
+    state = AtomicJsonAuthorityRuntimeStore(
+        path,
+        allowed_root=path.parent,
+        repo_root=repo,
+    ).load()
     assert state["verified_work_authority_nonces"] == ["authoritative-use-nonce"]
 
 

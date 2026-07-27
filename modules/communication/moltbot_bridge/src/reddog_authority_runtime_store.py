@@ -5,22 +5,43 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import tempfile
 import threading
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, Mapping, Optional, Protocol, Tuple
+from typing import Any, Dict, Iterator, Mapping, Optional, Protocol, Tuple
 
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store_posix import (
+    posix_atomic_replace,
+    recover_posix_interrupted_files,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store_windows import (
+    close_windows_handle,
+    open_windows_directory_without_delete_share,
+    recover_windows_interrupted_files,
+    windows_atomic_replace,
+)
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
 )
+
+_NO_REVISION_CHECK = object()
 
 
 def _canonical_digest(payload: Mapping[str, Any]) -> str:
-    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    unsigned = dict(payload)
+    unsigned.pop("revision", None)
+    raw = json.dumps(
+        unsigned,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
@@ -105,20 +126,46 @@ class InMemoryAuthorityRuntimeStore:
 class AtomicJsonAuthorityRuntimeStore:
     """Single-file authority store using durable atomic replace."""
 
-    def __init__(self, path: str | Path, *, allowed_root: str | Path) -> None:
-        self.path = Path(os.path.abspath(Path(path).expanduser()))
-        self.allowed_root = Path(os.path.abspath(Path(allowed_root).expanduser()))
+    def __init__(
+        self,
+        path: str | Path,
+        *,
+        allowed_root: str | Path,
+        repo_root: str | Path,
+    ) -> None:
+        repo_candidate = Path(repo_root).expanduser()
+        root_candidate = Path(allowed_root).expanduser()
+        if not repo_candidate.is_absolute():
+            raise ValueError("authority_runtime_store_repo_root_not_absolute")
+        if not root_candidate.is_absolute():
+            raise ValueError("authority_runtime_store_root_not_absolute")
+        self.repo_root = repo_candidate.resolve()
+        self.allowed_root = validate_runtime_root_path(
+            root_candidate,
+            repo_root=self.repo_root,
+        )
+        self.path = self._validated_path(path)
 
     def load(self) -> Dict[str, Any]:
         with runtime_operation_lock(str(self.path) + ".operation"):
             return self._load_unlocked()
 
-    def _load_unlocked(self) -> Dict[str, Any]:
-        if not self.path.exists():
+    def _load_unlocked(
+        self,
+        *,
+        expected_recovery_revision: object = _NO_REVISION_CHECK,
+    ) -> Dict[str, Any]:
+        target = self._validated_path(self.path)
+        self._recover_interrupted_write(
+            target,
+            expected_revision=expected_recovery_revision,
+        )
+        target = self._validated_path(self.path)
+        if not target.exists():
             return {}
         return dict(
             read_reddog_runtime_json_mapping(
-                self.path,
+                target,
                 allowed_root=self.allowed_root,
             )
         )
@@ -127,10 +174,15 @@ class AtomicJsonAuthorityRuntimeStore:
         self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]
     ) -> str:
         with runtime_operation_lock(str(self.path) + ".operation"):
-            current = self._load_unlocked()
+            current = self._load_unlocked(
+                expected_recovery_revision=expected_revision,
+            )
             if current.get("revision") != expected_revision:
                 raise RuntimeError("revision_conflict")
-            return self._write_snapshot(snapshot)
+            return self._write_snapshot(
+                snapshot,
+                expected_revision=expected_revision,
+            )
 
     def consume_verified_work_authority_nonce(self, nonce: str) -> bool:
         with runtime_operation_lock(str(self.path) + ".operation"):
@@ -140,32 +192,161 @@ class AtomicJsonAuthorityRuntimeStore:
                 return False
             updated = dict(current)
             updated["verified_work_authority_nonces"] = [*seen, nonce]
-            self._write_snapshot(updated)
+            self._write_snapshot(
+                updated,
+                expected_revision=current.get("revision"),
+            )
             return True
 
-    def _write_snapshot(self, snapshot: Mapping[str, Any]) -> str:
+    def _write_snapshot(
+        self,
+        snapshot: Mapping[str, Any],
+        *,
+        expected_revision: Optional[str],
+    ) -> str:
         committed = json.loads(json.dumps(snapshot, sort_keys=True))
         revision = _canonical_digest(committed)
         committed["revision"] = revision
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._atomic_write(committed)
+        target = self._validated_path(self.path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target = self._validated_path(target)
+        self._atomic_write(
+            target,
+            committed,
+            expected_revision=expected_revision,
+        )
         return revision
 
-    def _atomic_write(self, committed: Mapping[str, Any]) -> None:
-        fd, tmp_name = tempfile.mkstemp(
-            prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent)
+    def _atomic_write(
+        self,
+        target: Path,
+        committed: Mapping[str, Any],
+        *,
+        expected_revision: Optional[str],
+    ) -> None:
+        atomic_replace_confined_mapping(
+            target,
+            committed,
+            allowed_root=self.allowed_root,
+            repo_root=self.repo_root,
+            expected_revision=expected_revision,
         )
+
+    def _recover_interrupted_write(
+        self,
+        target: Path,
+        *,
+        expected_revision: object,
+    ) -> None:
+        if not target.parent.exists():
+            return
+        recovery_revision = (
+            expected_revision
+            if isinstance(expected_revision, str) and expected_revision
+            else None
+        )
+        with _stable_parent_directory(target.parent) as parent_handle:
+            if os.name == "nt":
+                recover_windows_interrupted_files(
+                    target,
+                    expected_revision=recovery_revision,
+                )
+            else:
+                recover_posix_interrupted_files(
+                    parent_handle,
+                    target.name,
+                    expected_revision=recovery_revision,
+                )
+
+    def _validated_path(self, path: str | Path) -> Path:
+        target = validate_runtime_artifact_path(
+            path,
+            repo_root=self.repo_root,
+            allowed_root=self.allowed_root,
+        )
+        expected = getattr(self, "path", target)
+        if os.path.normcase(str(target)) != os.path.normcase(str(expected)):
+            raise ValueError("authority_runtime_store_path_changed")
+        return target
+
+
+def atomic_replace_confined_mapping(
+    path: Path | str,
+    payload: Mapping[str, Any],
+    *,
+    allowed_root: Path | str,
+    repo_root: Path | str,
+    expected_revision: object = _NO_REVISION_CHECK,
+) -> Path:
+    """Atomically replace one JSON mapping under an explicit runtime root."""
+
+    root = validate_runtime_root_path(allowed_root, repo_root=repo_root)
+    target = validate_runtime_artifact_path(
+        path,
+        repo_root=repo_root,
+        allowed_root=root,
+    )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target = validate_runtime_artifact_path(
+        target,
+        repo_root=repo_root,
+        allowed_root=root,
+    )
+    encoded = (json.dumps(payload, sort_keys=True, indent=2) + "\n").encode("utf-8")
+    check_revision = expected_revision is not _NO_REVISION_CHECK
+    with _stable_parent_directory(target.parent) as parent_handle:
+        if os.name == "nt":
+            windows_atomic_replace(
+                parent_handle,
+                target,
+                encoded,
+                check_revision=check_revision,
+                expected_revision=(
+                    None if expected_revision is _NO_REVISION_CHECK
+                    else expected_revision
+                ),
+            )
+        else:
+            posix_atomic_replace(
+                parent_handle,
+                target.parent,
+                target.name,
+                encoded,
+                check_revision=check_revision,
+                expected_revision=(
+                    None if expected_revision is _NO_REVISION_CHECK
+                    else expected_revision
+                ),
+            )
+        if os.name == "nt":
+            validate_runtime_artifact_path(
+                target,
+                repo_root=repo_root,
+                allowed_root=root,
+            )
+            _fsync_parent_directory(target.parent)
+    return target
+
+
+@contextmanager
+def _stable_parent_directory(path: Path) -> Iterator[int]:
+    if os.name == "nt":
+        handle = open_windows_directory_without_delete_share(path)
         try:
-            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-                json.dump(committed, handle, sort_keys=True, indent=2)
-                handle.write("\n")
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(tmp_name, self.path)
-            _fsync_parent_directory(self.path.parent)
+            yield handle
         finally:
-            if os.path.exists(tmp_name):
-                os.unlink(tmp_name)
+            close_windows_handle(handle)
+        return
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags)
+    try:
+        opened = os.fstat(descriptor)
+        expected = os.stat(path, follow_symlinks=False)
+        if (opened.st_dev, opened.st_ino) != (expected.st_dev, expected.st_ino):
+            raise ValueError("authority_runtime_store_parent_changed")
+        yield descriptor
+    finally:
+        os.close(descriptor)
 
 
 def _fsync_parent_directory(path: Path) -> None:
@@ -188,4 +369,5 @@ __all__ = [
     "InMemoryAuthorityRuntimeStore",
     "PrincipalAuthorityRecord",
     "PrincipalAuthorityResolver",
+    "atomic_replace_confined_mapping",
 ]

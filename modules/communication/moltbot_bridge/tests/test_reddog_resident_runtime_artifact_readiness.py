@@ -59,8 +59,29 @@ def test_unsigned_seven_artifact_pack_is_not_execution_authority(tmp_path: Path)
     signer = next(item for item in result.checks if item.filename == "signer_service_config.json")
     assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in valve.rejection_reasons
     assert "signer_client_peer_handshake_verifier_missing" in signer.rejection_reasons
+    assert "signer_config_schema_invalid" not in signer.rejection_reasons
     assert result.authorization_mode == "signed_work_authority_consensus"
     assert result.authorization_binding_digest and result.authorization_binding_digest.startswith("sha256:")
+
+
+def test_readiness_rejects_overlapping_signer_runtime_root(
+    tmp_path: Path,
+) -> None:
+    repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    config_path = runtime / "signer_service_config.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    signer_root = runtime / "signer"
+    config["signer_runtime_root"] = str(signer_root)
+    config["control_loop_anchor_path"] = str(signer_root / "anchor.json")
+    config_path.write_text(json.dumps(config, sort_keys=True), encoding="utf-8")
+
+    result = _validate(repo, runtime)
+
+    signer = next(
+        item for item in result.checks
+        if item.filename == "signer_service_config.json"
+    )
+    assert "signer_runtime_root_binding_invalid" in signer.rejection_reasons
 
 
 def test_linked_runtime_root_cannot_supply_artifacts(tmp_path: Path) -> None:

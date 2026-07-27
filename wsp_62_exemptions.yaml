@@ -62,7 +62,7 @@ exemptions:
       functions:
         run_reddog_wre_queue_consumer_preflight: 60
         run_reddog_resident_queue_next_stage_dispatch_preflight: 84
-        run_reddog_resident_queue_serial_loop_preflight: 614
+        run_reddog_resident_queue_serial_loop_preflight: 617
 
   - file: "ModLog.md"
     reason: >-

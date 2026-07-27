@@ -258,13 +258,16 @@ def _roots(
         if filename == "authority_profile.json":
             payload = dict(_AUTHORITY_PROFILE)
         (runtime / filename).write_text(json.dumps(payload), encoding="utf-8")
-    anchor_path = (
-        runtime.parent
-        / f"{runtime.name}-signer-state"
-        / "signer_control_loop_anchor.json"
-    )
+    signer_runtime = runtime.parent / f"{runtime.name}-signer-state"
+    anchor_path = signer_runtime / "signer_control_loop_anchor.json"
     (runtime / "signer_service_config.json").write_text(
-        json.dumps({"control_loop_anchor_path": str(anchor_path)}),
+        json.dumps(
+            {
+                "control_loop_anchor_path": str(anchor_path),
+                "runtime_root": str(runtime),
+                "signer_runtime_root": str(signer_runtime),
+            }
+        ),
         encoding="utf-8",
     )
     (runtime / "authority_profile_source.json").write_text(
@@ -442,13 +445,17 @@ def _control_receipt(repo: Path, **changes: object) -> dict[str, object]:
 
 
 def _write_control_receipt_and_head(
-    runtime: Path, control: dict[str, object]
+    repo: Path,
+    runtime: Path,
+    control: dict[str, object],
 ) -> None:
     (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
         json.dumps(control) + "\n", encoding="utf-8"
     )
     store, state, _ = load_control_receipt_head(
-        runtime / "authority_runtime_state.json"
+        runtime / "authority_runtime_state.json",
+        runtime_root=runtime,
+        repo_root=repo,
     )
     head = build_control_receipt_head(
         receipt=control,
@@ -464,7 +471,11 @@ def _write_control_receipt_and_head(
     config = json.loads(
         (runtime / "signer_service_config.json").read_text(encoding="utf-8")
     )
-    anchor = AtomicSignerControlLoopAnchorStore(config["control_loop_anchor_path"])
+    anchor = AtomicSignerControlLoopAnchorStore(
+        config["control_loop_anchor_path"],
+        runtime_root=config["signer_runtime_root"],
+        repo_root=repo,
+    )
     unsigned = {
         key: value
         for key, value in control.items()
@@ -554,7 +565,7 @@ def _runner(
                     chain["receipts"][-1]["store_revision"] = revision
         (runtime / "resident_queue_chain_results.json").write_text(json.dumps(chain), encoding="utf-8")
         control = _control_receipt(repo, **(receipt_changes or {}))
-        _write_control_receipt_and_head(runtime, control)
+        _write_control_receipt_and_head(repo, runtime, control)
         return {"accepted": True, "status": "PASS", "receipt_id": result_receipt_id or control["receipt_id"]}
 
     return run

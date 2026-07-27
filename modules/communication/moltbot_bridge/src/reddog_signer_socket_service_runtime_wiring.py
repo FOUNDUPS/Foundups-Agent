@@ -24,6 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resi
     SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
     IsolatedSignerSocketResidentServiceResult,
     serve_reddog_isolated_signer_socket_bounded,
+    validate_resident_signer_socket_limits,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     DEFAULT_SIGNER_SOCKET_MAX_REQUEST_BYTES,
@@ -34,14 +35,17 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_serv
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
+    PROVIDER_MODE_WSP71_PERMISSIONED,
     SignerKeyProviderProfile,
     SignerKeyResolver,
     build_signer_backend_from_provider,
+    validate_signer_key_provider_profile,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     RuntimeRejectCode,
     SigningRequest,
     SigningResponse,
+    public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
@@ -53,6 +57,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor 
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     KernelPeerCredentialAttestor,
     PeerCredentialPolicy,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_artifact_path,
+    validate_runtime_root_path,
 )
 
 
@@ -80,6 +88,8 @@ class SignerSocketServiceRuntimeWiringConfig:
     """Signer-owned runtime service wiring configuration."""
 
     repo_root: Path | str
+    runtime_root: Path | str
+    signer_runtime_root: Path | str
     socket_path: Path | str | None
     peer_policy: PeerCredentialPolicy | Mapping[str, Any]
     key_provider_profile: SignerKeyProviderProfile | Mapping[str, Any] | None = None
@@ -129,13 +139,14 @@ def run_reddog_signer_socket_service_runtime_wiring(
 ) -> SignerSocketServiceRuntimeWiringResult:
     """Build a signer backend and serve a bounded signer socket service."""
 
-    if not isinstance(config, SignerSocketServiceRuntimeWiringConfig):
-        return _reject(FAIL_SIGNER_RUNTIME_CONFIG_INVALID)
+    config_reasons = validate_signer_socket_service_runtime_config(config)
+    if config_reasons:
+        return _reject(*config_reasons)
     profiles, profile_reasons = _profiles(config)
     if profile_reasons:
         return _reject(*profile_reasons)
     policy = _peer_policy(config.peer_policy)
-    if policy is None or not _peer_policy_valid(policy):
+    if policy is None:
         return _reject(FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID)
     anchor_store, anchor_reasons = _control_loop_anchor_store(config)
     if anchor_reasons:
@@ -143,8 +154,6 @@ def run_reddog_signer_socket_service_runtime_wiring(
     control_authority_policy = _control_loop_authority_policy(
         config.control_loop_authority_policy
     )
-    if config.control_loop_anchor_path is not None and control_authority_policy is None:
-        return _reject(FAIL_SIGNER_RUNTIME_CONFIG_INVALID)
 
     backend, key_receipt, key_reasons = _build_backend(
         profiles,
@@ -201,6 +210,72 @@ def run_reddog_signer_socket_service_runtime_wiring(
     )
 
 
+def validate_signer_socket_service_runtime_config(
+    config: object,
+) -> tuple[str, ...]:
+    """Validate all non-secret signer runtime config before launch."""
+
+    if not isinstance(config, SignerSocketServiceRuntimeWiringConfig):
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    if not _socket_path_valid(config):
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    _, profile_reasons = _profiles(config)
+    if profile_reasons:
+        return profile_reasons
+    profiles, _ = _profiles(config)
+    profile_public_keys = [profile.expected_public_key for profile in profiles]
+    if len(profile_public_keys) != len(set(profile_public_keys)):
+        return (FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,)
+    policy = _peer_policy(config.peer_policy)
+    if policy is None or not _peer_policy_valid(policy):
+        return (FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID,)
+    anchor_store, anchor_reasons = _control_loop_anchor_store(config)
+    if anchor_reasons:
+        return anchor_reasons
+    control_authority_policy = _control_loop_authority_policy(
+        config.control_loop_authority_policy
+    )
+    if config.control_loop_anchor_path is not None and control_authority_policy is None:
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    if (
+        config.provider_mode == PROVIDER_MODE_WSP71_PERMISSIONED
+        and (anchor_store is None or control_authority_policy is None)
+    ):
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    if (
+        control_authority_policy is not None
+        and control_authority_policy.signer_public_key
+        not in set(profile_public_keys)
+    ):
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    limit_reasons = validate_resident_signer_socket_limits(
+        max_requests=config.max_requests,
+        timeout_s=config.timeout_s,
+        max_request_bytes=config.max_request_bytes,
+        max_response_bytes=config.max_response_bytes,
+    )
+    if limit_reasons:
+        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    return ()
+
+
+def _socket_path_valid(config: SignerSocketServiceRuntimeWiringConfig) -> bool:
+    try:
+        repo_root = Path(config.repo_root).resolve()
+        runtime_root = validate_runtime_root_path(
+            config.runtime_root,
+            repo_root=repo_root,
+        )
+        socket_path = validate_runtime_artifact_path(
+            config.socket_path,
+            repo_root=repo_root,
+            allowed_root=runtime_root,
+        )
+    except (OSError, TypeError, ValueError):
+        return False
+    return socket_path.parent == runtime_root
+
+
 @dataclass(frozen=True)
 class _RoutingSignerBackend(IsolatedSignerBackend):
     backends: Mapping[str, IsolatedSignerBackend]
@@ -234,7 +309,12 @@ def _profiles(
     profiles: list[SignerKeyProviderProfile] = []
     for raw in raw_profiles:
         profile = _profile(raw)
-        if profile is None:
+        if (
+            profile is None
+            or validate_signer_key_provider_profile(profile) is not None
+            or public_key_fingerprint(profile.expected_public_key)
+            != profile.expected_key_fingerprint
+        ):
             return [], (FAIL_SIGNER_RUNTIME_PROFILE_INVALID,)
         profiles.append(profile)
     return profiles, ()
@@ -295,13 +375,35 @@ def _control_loop_anchor_store(
         return None, ()
     try:
         repo_root = Path(config.repo_root).resolve()
+        runtime_root = validate_runtime_root_path(
+            config.runtime_root,
+            repo_root=repo_root,
+        )
+        signer_runtime_root = validate_runtime_root_path(
+            config.signer_runtime_root,
+            repo_root=repo_root,
+        )
+        if (
+            signer_runtime_root == runtime_root
+            or runtime_root in signer_runtime_root.parents
+            or signer_runtime_root in runtime_root.parents
+        ):
+            return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
         path = Path(config.control_loop_anchor_path)
         if not path.is_absolute():
             return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
-        resolved = path.resolve()
+        resolved = validate_runtime_artifact_path(
+            path,
+            repo_root=repo_root,
+            allowed_root=signer_runtime_root,
+        )
         if resolved == repo_root or repo_root in resolved.parents:
             return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
-        return AtomicSignerControlLoopAnchorStore(resolved), ()
+        return AtomicSignerControlLoopAnchorStore(
+            path,
+            runtime_root=signer_runtime_root,
+            repo_root=repo_root,
+        ), ()
     except Exception:
         return None, (FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID,)
 
@@ -310,12 +412,13 @@ def _control_loop_authority_policy(
     value: ControlLoopAuthorityPolicy | Mapping[str, Any] | None,
 ) -> ControlLoopAuthorityPolicy | None:
     if isinstance(value, ControlLoopAuthorityPolicy):
-        return value
-    if not isinstance(value, Mapping):
-        return None
-    try:
-        policy = ControlLoopAuthorityPolicy(**dict(value))
-    except Exception:
+        policy = value
+    elif isinstance(value, Mapping):
+        try:
+            policy = ControlLoopAuthorityPolicy(**dict(value))
+        except Exception:
+            return None
+    else:
         return None
     values = (
         policy.issuer_principal_id,
@@ -405,8 +508,8 @@ def _peer_policy_valid(policy: PeerCredentialPolicy) -> bool:
     return all(isinstance(gid, int) and gid >= 0 for gid in policy.allowed_gids)
 
 
-def _ascii(value: str) -> bool:
-    return all(ord(char) < 128 for char in value)
+def _ascii(value: object) -> bool:
+    return isinstance(value, str) and all(ord(char) < 128 for char in value)
 
 
 def _reject(
@@ -440,4 +543,5 @@ __all__ = [
     "SignerSocketServiceRuntimeWiringConfig",
     "SignerSocketServiceRuntimeWiringResult",
     "run_reddog_signer_socket_service_runtime_wiring",
+    "validate_signer_socket_service_runtime_config",
 ]

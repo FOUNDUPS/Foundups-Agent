@@ -27,6 +27,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
+    rehydrate_signer_socket_service_runtime_config,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    secure_read_confined_text,
+    validate_runtime_root_path,
+)
 
 SIGNER_SERVICE_RUN_PACKET_SUPPLY_ACCEPT = "SIGNER_SERVICE_RUN_PACKET_SUPPLY_ACCEPT"
 SIGNER_SERVICE_RUN_PACKET_SUPPLY_REJECT = "SIGNER_SERVICE_RUN_PACKET_SUPPLY_REJECT"
@@ -180,17 +187,33 @@ def _read_config(
         return None, None, None, reasons
     assert path is not None
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        runtime_root = validate_runtime_root_path(path.parent, repo_root=repo_root)
+        payload = json.loads(
+            secure_read_confined_text(
+                path,
+                allowed_root=runtime_root,
+                max_bytes=256 * 1024,
+            ),
+            parse_constant=_reject_json_constant,
+        )
     except Exception:
         return None, None, None, (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
-    if not isinstance(payload, dict) or _config_reasons(repo_root, payload):
+    if not isinstance(payload, dict) or _config_reasons(
+        repo_root,
+        path.parent,
+        payload,
+    ):
         return None, None, None, (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     digest = "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     return payload, digest, path, ()
 
 
-def _config_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, ...]:
+def _config_reasons(
+    repo_root: Path,
+    expected_runtime_root: Path,
+    payload: Mapping[str, Any],
+) -> tuple[str, ...]:
     if payload.get("schema_version") != SIGNER_SERVICE_CONFIG_SCHEMA_VERSION:
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     if payload.get("provider_mode") != PROVIDER_MODE_WSP71_PERMISSIONED:
@@ -198,6 +221,12 @@ def _config_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, .
     if payload.get("allow_test_only_key_material") is not False:
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     if payload.get("permission_snapshot_fresh") is not True:
+        return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
+    if rehydrate_signer_socket_service_runtime_config(
+        repo_root,
+        expected_runtime_root,
+        dict(payload),
+    ) is None:
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     socket_path = str(payload.get("socket_path") or "")
     if "\x00" in socket_path or socket_path.startswith("\\\\?\\") or socket_path.startswith("//?/"):
@@ -213,6 +242,10 @@ def _config_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, .
     if not _ascii_deep(payload):
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     return ()
+
+
+def _reject_json_constant(value: str) -> None:
+    raise ValueError(f"non_finite_json_constant:{value}")
 
 
 def _resolve_existing_file(

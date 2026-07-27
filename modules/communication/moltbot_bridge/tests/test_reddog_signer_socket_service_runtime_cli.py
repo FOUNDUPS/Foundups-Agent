@@ -24,6 +24,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     PROVIDER_MODE_WSP71_PERMISSIONED,
     SIGNING_KEY_PREFIX,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
+    SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli import (
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT,
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT,
@@ -130,8 +133,23 @@ def _repo(tmp_path: Path) -> Path:
 
 
 def _config(public_key: str, *, socket_path: Path) -> dict[str, object]:
+    signer_runtime = (
+        socket_path.parent.parent / f"{socket_path.parent.name}-signer-state"
+    )
     return {
+        "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+        "runtime_root": str(socket_path.parent),
+        "signer_runtime_root": str(signer_runtime),
         "socket_path": str(socket_path),
+        "control_loop_anchor_path": str(signer_runtime / "anchor.json"),
+        "control_loop_authority_policy": {
+            "issuer_principal_id": "github:012",
+            "signer_public_key": public_key,
+            "key_epoch": "epoch-1",
+            "consensus_receipt_digest": "sha256:" + ("1" * 64),
+            "authority_profile_digest": "sha256:" + ("2" * 64),
+            "authority_profile_source_receipt_id": "sha256:" + ("3" * 64),
+        },
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
         "allow_test_only_key_material": False,
         "permission_snapshot_fresh": True,

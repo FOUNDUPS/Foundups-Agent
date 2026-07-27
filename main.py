@@ -3350,6 +3350,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_pattern_memory_admission_db_path,
             resident_queue_runtime_file_path,
             resident_queue_runtime_root_path,
+            resident_queue_signer_runtime_root_path,
             resident_queue_worktree_runner_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
@@ -3488,6 +3489,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
             signer_config = run_reddog_signer_socket_service_config_supply(
                 repo_root=repo_root,
+                runtime_root=resident_queue_runtime_root_path(os.environ, repo_root),
+                signer_runtime_root=resident_queue_signer_runtime_root_path(os.environ, repo_root),
                 authority_profile=(
                     authority_profile_payload
                     if isinstance(authority_profile_payload, Mapping)
@@ -3962,6 +3965,7 @@ def _reddog_record_queue_control_result(repo_root: Path, result: Mapping[str, An
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
             resident_queue_runtime_file_path,
             resident_queue_runtime_flag_enabled,
+            resident_queue_runtime_root_path,
         )
 
         if resident_queue_runtime_flag_enabled(
@@ -3975,7 +3979,11 @@ def _reddog_record_queue_control_result(repo_root: Path, result: Mapping[str, An
             )
             if receipt_path:
                 _reddog_persist_queue_control_receipt(
-                    repo_root, recorded, receipt_path, resident_queue_runtime_file_path
+                    repo_root,
+                    recorded,
+                    receipt_path,
+                    resident_queue_runtime_file_path,
+                    resident_queue_runtime_root_path,
                 )
     except Exception as exc:
         recorded["accepted"] = False
@@ -4013,6 +4021,7 @@ def _reddog_persist_queue_control_receipt(
     recorded: Dict[str, Any],
     receipt_path: Path,
     runtime_file_path: Any,
+    runtime_root_path: Any,
 ) -> None:
     from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
         append_resident_control_loop_receipt,
@@ -4046,6 +4055,7 @@ def _reddog_persist_queue_control_receipt(
         created_at=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         signing_context=signing_context,
         require_authentication=True,
+        runtime_root=runtime_root_path(os.environ, repo_root),
         head_state_path=runtime_file_path(
             os.environ, repo_root, "REDDOG_AUTHORITY_RUNTIME_STATE_PATH"
         ),

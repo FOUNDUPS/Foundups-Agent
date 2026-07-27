@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
 
 
-_DEVICE_PATH_PREFIXES = ("\\\\", "//?/", "//./")
 _WINDOWS_RESERVED_NAMES = {
     "CON",
     "PRN",
@@ -23,6 +22,7 @@ _WINDOWS_RESERVED_NAMES = {
     *(f"COM{index}" for index in range(1, 10)),
     *(f"LPT{index}" for index in range(1, 10)),
 }
+_UNSAFE_RUNTIME_NAMESPACE = re.compile(r"^(?://|/\?\?/|GLOBALROOT/)", re.IGNORECASE)
 _PRIVATE_KEY_BLOCK = re.compile(
     r"-----BEGIN [^-\r\n]*PRIVATE KEY-----.*?"
     r"(?:-----END [^-\r\n]*PRIVATE KEY-----|\Z)",
@@ -76,7 +76,7 @@ def validate_runtime_artifact_path(
     """Resolve a writable artifact path outside source and within its runtime root."""
 
     raw = str(path or "").strip()
-    if not raw or "\x00" in raw or raw.startswith(_DEVICE_PATH_PREFIXES):
+    if not raw or "\x00" in raw or _UNSAFE_RUNTIME_NAMESPACE.match(raw.replace("\\", "/")):
         raise ValueError("runtime_artifact_path_invalid")
     _validate_path_components(raw)
 
@@ -305,7 +305,7 @@ def secure_read_confined_bytes(
     """Read a source file only after its descriptor proves root confinement."""
 
     raw = str(path or "").strip()
-    if not raw or "\x00" in raw or raw.startswith(_DEVICE_PATH_PREFIXES):
+    if not raw or "\x00" in raw or _UNSAFE_RUNTIME_NAMESPACE.match(raw.replace("\\", "/")):
         raise ValueError("confined_read_path_invalid")
     root_candidate = Path(os.path.abspath(Path(allowed_root).expanduser()))
     expected_candidate = Path(raw).expanduser()
@@ -330,8 +330,7 @@ def secure_read_confined_bytes(
     descriptor = os.open(expected, flags)
     try:
         metadata = os.fstat(descriptor)
-        if not stat.S_ISREG(metadata.st_mode):
-            raise ValueError("confined_read_target_not_regular")
+        _require_private_regular_file(metadata)
         final_path = _descriptor_final_path(descriptor)
         final_resolved = _without_windows_extended_prefix(final_path.resolve(strict=True))
         if not _is_relative_to(final_resolved, root):
@@ -359,7 +358,7 @@ def secure_read_confined_text(
     if (
         not raw
         or "\x00" in raw
-        or raw.startswith(_DEVICE_PATH_PREFIXES)
+        or _UNSAFE_RUNTIME_NAMESPACE.match(raw.replace("\\", "/"))
         or limit < 0
     ):
         raise ValueError("confined_read_path_invalid")

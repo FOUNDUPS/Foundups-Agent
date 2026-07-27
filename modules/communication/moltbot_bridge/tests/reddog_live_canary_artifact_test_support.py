@@ -13,6 +13,9 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_resolver_
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     run_reddog_execution_valve_environment_supply,
 )
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     run_reddog_signer_socket_service_config_supply,
 )
@@ -33,6 +36,8 @@ from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_seria
 PERMISSION_DIGEST = "sha256:" + "a" * 64
 CONSENSUS_DIGEST = "sha256:" + "b" * 64
 SOVEREIGN_DIGEST = "sha256:" + "c" * 64
+PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
+REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
 
 
 def write_live_canary_artifacts(
@@ -114,8 +119,8 @@ def _profile(
 ) -> dict:
     return {
         "principal_id": "github:mjtrout", "principal_provider": "github",
-        "principal_public_key": "ed25519-pub-v1:principal",
-        "reddog_id": "reddog:canary", "reddog_public_key": "ed25519-pub-v1:reddog",
+        "principal_public_key": PRINCIPAL_PUBLIC_KEY,
+        "reddog_id": "reddog:canary", "reddog_public_key": REDDOG_PUBLIC_KEY,
         "repo_full_name": "FOUNDUPS/Foundups-Agent", "foundup_id": "paccess_001",
         "allowed_paths": ["modules/foundups/paccess_001/**"], "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
         "requested_operation": "feature_slice", "permission_snapshot_digest": PERMISSION_DIGEST,
@@ -148,7 +153,7 @@ def _resolver_inputs(now: int) -> tuple[dict, dict]:
         "can_write": True, "can_admin": False, "repo_full_name": "FOUNDUPS/Foundups-Agent",
     }, {
         "principal_id": "github:mjtrout", "principal_provider": "github",
-        "principal_public_key": "ed25519-pub-v1:principal",
+        "principal_public_key": PRINCIPAL_PUBLIC_KEY,
         "repo_scope": ["FOUNDUPS/Foundups-Agent"], "foundup_scope": ["paccess_001"],
         "verified_subject_digest": "sha256:verified",
     })
@@ -167,7 +172,11 @@ def _write_valve(repo: Path, runtime: Path, work: dict, profile: dict, queue_id:
 
 def _write_signer(repo: Path, runtime: Path, profile: dict) -> None:
     config = run_reddog_signer_socket_service_config_supply(
-        repo_root=repo, authority_profile=profile, output_path=runtime / "signer_service_config.json",
+        repo_root=repo,
+        runtime_root=runtime,
+        signer_runtime_root=runtime.parent / f"{runtime.name}-signer-state",
+        authority_profile=profile,
+        output_path=runtime / "signer_service_config.json",
         socket_path=runtime / "reddog_signer.sock",
         principal_signing_key_ref="op://vault/principal/private",
         principal_audit_mac_key_ref="op://vault/principal/audit",

@@ -1,7 +1,6 @@
 """Operator harness for one guarded resident RedDog live canary.
 
 Slice: REDDOG_RESIDENT_LIVE_CANARY_PHASE1
-
 This module does not implement queue orchestration.  It validates the operator
 boundary for the existing highest guarded resident profile and, only after an
 explicit confirmation, delegates once to ``main.py``'s bounded resident control
@@ -325,7 +324,7 @@ def _verified_post_control_receipts(
             allowed_root=context.runtime_root,
         )
         verify_live_canary_control_prestate(
-            runtime_root=context.runtime_root,
+            repo_root=context.repo_root, runtime_root=context.runtime_root,
             receipts=post_receipts,
             authority_profile=profile,
             authority_profile_source=source,
@@ -333,7 +332,7 @@ def _verified_post_control_receipts(
                 context.environ.get("REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID")
                 or ""
             ),
-            signer_anchor_path=_signer_anchor_path(context),
+            **_signer_anchor_binding(context),
         )
     except (KeyError, TypeError, ValueError):
         blockers.append("control_receipt_stream_auth_or_integrity_invalid")
@@ -358,29 +357,30 @@ def _verify_control_receipts(
             context.environ.get("REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID") or ""
         )
         verify_live_canary_control_prestate(
-            runtime_root=context.runtime_root,
+            repo_root=context.repo_root, runtime_root=context.runtime_root,
             receipts=receipts,
             authority_profile=profile,
             authority_profile_source=source,
             expected_source_receipt_id=expected_source,
-            signer_anchor_path=_signer_anchor_path(context),
+            **_signer_anchor_binding(context),
         )
     except (KeyError, TypeError, ValueError):
         blockers.append("control_receipt_prestate_auth_or_integrity_invalid")
 
 
-def _signer_anchor_path(context: _CanaryContext) -> Path:
+def _signer_anchor_binding(context: _CanaryContext) -> dict[str, Path]:
     config = _read_json_mapping(
         context.runtime_root / "signer_service_config.json",
         allowed_root=context.runtime_root,
     )
     value = str(config.get("control_loop_anchor_path") or "").strip()
-    if not value:
+    root_value = str(config.get("signer_runtime_root") or "").strip()
+    if not value or not root_value:
         raise ValueError("signer_control_loop_anchor_path_missing")
-    path = Path(value)
-    if not path.is_absolute():
+    path, root = Path(value), Path(root_value)
+    if not path.is_absolute() or not root.is_absolute():
         raise ValueError("signer_control_loop_anchor_path_invalid")
-    return path.resolve()
+    return {"signer_anchor_path": path, "signer_anchor_root": root}
 
 
 def _read_control_receipt_stream(
