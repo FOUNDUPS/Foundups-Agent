@@ -7,10 +7,11 @@
   injected monotonic high-water authority outside the nonce-state rollback
   domain. Production requires a matching configuration-bound durability
   receipt and rejects the volatile in-memory implementation. The signed
-  authority identifier, MAC, sequence, revision, shared cross-session runtime
-  operation lock, and one-step crash roll-forward make rollback, deletion,
-  mismatched authority, lock-path substitution, and tampering fail closed while
-  bounded retention prevents unbounded growth.
+  authority identifier, MAC, sequence, revision, distinct proposal-transaction
+  lock, and one-step crash roll-forward make rollback, deletion, mismatched
+  authority, nested-lock deadlock, lock-path substitution, and tampering fail
+  closed while bounded retention prevents unbounded growth. Windows uses the
+  shared machine-global runtime mutex; POSIX keeps the confined lock primitive.
 - Required the proposal payload identity, signer key, key epoch, consensus
   receipt, authority-profile source, and TTL to match the supplied authority
   profile before a signer configuration can be written, with a fixed
@@ -27,12 +28,17 @@
   signer backend.
 - Restricted a proposal-enabled signer backend to the proposal domain only.
   Unknown, generic, and control-loop signing operations cannot reuse that
-  private key during the proposal service run.
+  private key during the proposal service run. Removed architect-proposal
+  parameters from the public key-provider API; only the verified internal
+  runtime constructor can attach the canonical proposal policy and nonce store.
 - Consumed principal policy authorization before exposing the signer backend.
   Reservation and commit independently reject expired authorization. A service
   rejection or exception after signing cannot roll authorization back or reuse
-  it on another launch. Runtime receipts distinguish signer-state file I/O from
-  the separately attested absence of repository file I/O.
+  it on another launch. Runtime receipts stop claiming no file I/O once
+  injected proposal trust, key, or replay dependencies have been invoked.
+- Rejected proposal-enabled signer run packets until production principal and
+  replay adapters are composed into the CLI sidecar, rather than emitting an
+  accepted packet that the shipped CLI must reject.
 - Preserved the authority boundary: this slice provisions signer policy and
   durable replay state only. It does not derive proposal facts from
   authoritative work state, produce an attestation in the resident loop,

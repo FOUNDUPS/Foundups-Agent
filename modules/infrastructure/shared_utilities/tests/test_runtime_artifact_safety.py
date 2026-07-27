@@ -19,6 +19,11 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 
+def test_windows_runtime_mutex_uses_machine_global_namespace() -> None:
+    name = runtime_artifact_safety._windows_runtime_mutex_name("a" * 64)
+    assert name == "Global\\FoundupsRuntime-" + "a" * 64
+
+
 def test_runtime_artifact_path_rejects_source_and_runtime_root_escape(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     runtime = tmp_path / "runtime"

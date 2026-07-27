@@ -641,7 +641,7 @@ def test_result_serialization_contains_no_secret_material_or_backend() -> None:
     assert SIGNING_KEY_PREFIX not in text
     assert AUDIT_KEY_PREFIX not in text
     assert "0123456789abcdef" not in text
-    assert result.no_file_io_performed is True
+    assert result.no_file_io_performed is False
     assert result.no_holoindex_reindex_performed is True
 
 

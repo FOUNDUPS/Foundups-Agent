@@ -173,7 +173,11 @@ class AtomicProposalAuthenticityNonceStore:
                 "proposal_authenticity_high_water_store_invalid"
             )
         self._high_water_store = high_water_store
-        self._operation_lock_identity = str(self._store.path) + ".operation"
+        # This transaction lock must differ from AtomicJsonAuthorityRuntimeStore's
+        # own ".operation" lock because one mutation calls that store while held.
+        self._operation_lock_identity = (
+            str(self._store.path) + ".proposal-transaction"
+        )
         self._clock = clock
         self._clock_skew_seconds = clock_skew_seconds
         self._retention_seconds = retention_seconds

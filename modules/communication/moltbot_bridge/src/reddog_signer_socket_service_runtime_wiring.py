@@ -3,10 +3,11 @@
 Slice: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_WIRING_PHASE1
 
 This module composes the existing signer key-provider boundary, kernel peer
-credential attestor, and bounded signer socket service. It is intentionally
-dependency-injected: no environment parsing, file IO, process spawning, repo
-mutation, OpenClaw/Hermes dispatch, PR publication, reward settlement, or
-HoloIndex re-indexing happens here.
+credential attestor, and bounded signer socket service. It does not parse the
+environment, spawn processes, mutate repository files, dispatch OpenClaw or
+Hermes, publish PRs, settle rewards, or re-index HoloIndex. Injected resolvers
+and replay authorities may perform signer-runtime I/O; proposal mode also
+persists the canonical signer-owned nonce state.
 """
 
 from __future__ import annotations
@@ -52,6 +53,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     PROVIDER_MODE_WSP71_PERMISSIONED,
     SignerKeyProviderProfile,
     SignerKeyResolver,
+    _build_proposal_signer_backend_from_verified_runtime,
     build_signer_backend_from_provider,
     validate_signer_key_provider_profile,
 )
@@ -157,7 +159,6 @@ class SignerSocketServiceRuntimeWiringResult:
     max_requests: int = 0
     no_env_parsed: bool = True
     no_file_io_performed: bool = True
-    no_repo_file_io_performed: bool = True
     no_process_spawned: bool = True
     no_repo_mutation_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -402,6 +403,9 @@ def run_reddog_signer_socket_service_runtime_wiring(
         proposal_replay_high_water_store_id=(
             proposal_replay_high_water_store_id
         ),
+        proposal_replay_high_water_durability_receipt_id=str(
+            config.proposal_replay_high_water_durability_receipt_id or ""
+        ),
         repo_root=Path(config.repo_root).resolve(),
         signer_runtime_root=validate_runtime_root_path(
             config.signer_runtime_root,
@@ -413,7 +417,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             *key_reasons,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
-            no_file_io_performed=(proposal_policy is None),
+            no_file_io_performed=False,
         )
     authorization_reservation = _reserve_policy_authorization(
         proposal_nonce_store,
@@ -480,7 +484,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
         key_provider_receipt=key_receipt,
         service_result=service_receipt,
         max_requests=config.max_requests,
-        no_file_io_performed=(proposal_policy is None),
+        no_file_io_performed=False,
     )
 
 
@@ -684,6 +688,7 @@ def _build_backend(
     proposal_nonce_store_path: Path | None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None,
     proposal_replay_high_water_store_id: str | None,
+    proposal_replay_high_water_durability_receipt_id: str,
     repo_root: Path,
     signer_runtime_root: Path,
 ) -> tuple[
@@ -695,55 +700,58 @@ def _build_backend(
     receipts: list[dict[str, Any]] = []
     backends: dict[str, IsolatedSignerBackend] = {}
     for profile in profiles:
-        key_result = build_signer_backend_from_provider(
+        if _is_proposal_signer_profile(
             profile,
-            resolver,
-            provider_mode=provider_mode,
-            allow_test_only_key_material=allow_test_only_key_material,
-            permission_snapshot_fresh=permission_snapshot_fresh,
-            control_loop_anchor_store=control_loop_anchor_store,
-            control_loop_authority_policy=(
-                control_loop_authority_policy
-                if control_loop_authority_policy is not None
-                and profile.expected_public_key
-                == control_loop_authority_policy.signer_public_key
-                else None
-            ),
-            proposal_authority_policy=(
-                proposal_authority_policy
-                if _is_proposal_signer_profile(
-                    profile,
-                    proposal_authority_policy,
+            proposal_authority_policy,
+        ):
+            if (
+                proposal_policy_authorization is None
+                or proposal_nonce_store_path is None
+                or proposal_replay_high_water_store is None
+                or proposal_replay_high_water_store_id is None
+            ):
+                return None, None, _key_provider_receipt(False, receipts), (
+                    FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
                 )
-                else None
-            ),
-            proposal_nonce_store_path=(
-                proposal_nonce_store_path
-                if _is_proposal_signer_profile(
-                    profile,
-                    proposal_authority_policy,
-                )
-                else None
-            ),
-            proposal_replay_high_water_store=(
-                proposal_replay_high_water_store
-                if _is_proposal_signer_profile(
-                    profile,
-                    proposal_authority_policy,
-                )
-                else None
-            ),
-            proposal_replay_high_water_store_id=(
-                proposal_replay_high_water_store_id
-                if _is_proposal_signer_profile(
-                    profile,
-                    proposal_authority_policy,
-                )
-                else None
-            ),
-            proposal_nonce_store_allowed_root=signer_runtime_root,
-            proposal_nonce_store_repo_root=repo_root,
-        )
+            key_result = _build_proposal_signer_backend_from_verified_runtime(
+                profile,
+                resolver,
+                provider_mode=provider_mode,
+                allow_test_only_key_material=allow_test_only_key_material,
+                permission_snapshot_fresh=permission_snapshot_fresh,
+                proposal_authority_policy=proposal_authority_policy,
+                proposal_policy_authorization=(
+                    proposal_policy_authorization
+                ),
+                proposal_nonce_store_path=proposal_nonce_store_path,
+                proposal_replay_high_water_store=(
+                    proposal_replay_high_water_store
+                ),
+                proposal_replay_high_water_store_id=(
+                    proposal_replay_high_water_store_id
+                ),
+                proposal_replay_high_water_durability_receipt_id=(
+                    proposal_replay_high_water_durability_receipt_id
+                ),
+                proposal_nonce_store_allowed_root=signer_runtime_root,
+                proposal_nonce_store_repo_root=repo_root,
+            )
+        else:
+            key_result = build_signer_backend_from_provider(
+                profile,
+                resolver,
+                provider_mode=provider_mode,
+                allow_test_only_key_material=allow_test_only_key_material,
+                permission_snapshot_fresh=permission_snapshot_fresh,
+                control_loop_anchor_store=control_loop_anchor_store,
+                control_loop_authority_policy=(
+                    control_loop_authority_policy
+                    if control_loop_authority_policy is not None
+                    and profile.expected_public_key
+                    == control_loop_authority_policy.signer_public_key
+                    else None
+                ),
+            )
         receipt = key_result.to_receipt()
         receipts.append(receipt)
         if not key_result.ok or key_result.backend is None:

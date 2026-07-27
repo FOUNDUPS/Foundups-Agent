@@ -6,6 +6,7 @@ import base64
 import dataclasses
 import hashlib
 import hmac
+import inspect
 import json
 import multiprocessing
 import sqlite3
@@ -59,6 +60,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     PROVIDER_MODE_WSP71_PERMISSIONED,
     SIGNING_KEY_PREFIX,
     SignerKeyProviderProfile,
+    build_signer_backend_from_provider,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     PeerCredentialPolicy,
@@ -86,6 +88,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     architect_proposal_security_context_digest,
     run_reddog_signer_socket_service_runtime_wiring,
     validate_signer_socket_service_runtime_config,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
+    FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
+    run_reddog_signer_socket_service_run_packet_supply,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import (
     ResolveResult,
@@ -688,6 +694,12 @@ def test_atomic_nonce_store_survives_restart_and_rejects_replay(
         store_path,
         **_nonce_store_kwargs(repo, runtime),
     )
+    assert first._operation_lock_identity == (
+        str(store_path.resolve()) + ".proposal-transaction"
+    )
+    assert first._operation_lock_identity != (
+        str(store_path.resolve()) + ".operation"
+    )
 
     reservation = first.reserve(
         "nonce-1",
@@ -1055,6 +1067,15 @@ def test_ed25519_signature_decoder_rejects_noncanonical_suffix() -> None:
     assert decode_ed25519_signature(canonical + "=") is None
 
 
+def test_public_key_provider_has_no_proposal_authority_parameters() -> None:
+    parameters = inspect.signature(
+        build_signer_backend_from_provider
+    ).parameters
+    assert "proposal_authority_policy" not in parameters
+    assert "proposal_nonce_store" not in parameters
+    assert "proposal_nonce_store_path" not in parameters
+
+
 def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     tmp_path: Path,
 ) -> None:
@@ -1107,6 +1128,15 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     assert nonce_path.parent == (tmp_path / "signer-state").resolve()
     assert result.proposal_nonce_store_path == str(nonce_path)
     assert not nonce_path.exists()
+    run_packet = run_reddog_signer_socket_service_run_packet_supply(
+        repo_root=repo,
+        config_path=runtime / "signer-service.json",
+        output_path=tmp_path / "proposal-run-packet.json",
+    )
+    assert run_packet.accepted is False
+    assert run_packet.rejection_reasons == (
+        FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
+    )
 
     rehydrated = rehydrate_signer_socket_service_runtime_config(
         repo,
@@ -1504,7 +1534,6 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
 
     assert result.accepted is True
     assert result.no_file_io_performed is False
-    assert result.no_repo_file_io_performed is True
     backend = captured["backend"]
     assert backend.proposal_authority_policy == policy
     assert isinstance(
@@ -1655,7 +1684,6 @@ def test_runtime_consumes_policy_authorization_nonce_once(
         FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     )
     assert second.no_file_io_performed is False
-    assert second.no_repo_file_io_performed is True
 
 
 def test_runtime_requires_matching_independent_high_water_authority(
@@ -1711,8 +1739,6 @@ def test_runtime_requires_matching_independent_high_water_authority(
     )
     assert missing.no_file_io_performed is False
     assert mismatched.no_file_io_performed is False
-    assert missing.no_repo_file_io_performed is True
-    assert mismatched.no_repo_file_io_performed is True
 
 
 def test_runtime_never_reuses_authorization_after_service_signs_then_raises(

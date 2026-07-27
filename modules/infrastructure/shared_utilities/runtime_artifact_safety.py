@@ -639,7 +639,7 @@ def _exclusive_lock(path: Path) -> Iterator[None]:
         close_handle = kernel32.CloseHandle
         close_handle.argtypes = [wintypes.HANDLE]
         close_handle.restype = wintypes.BOOL
-        handle = create_mutex(None, False, f"Local\\FoundupsRuntime-{lock_key}")
+        handle = create_mutex(None, False, _windows_runtime_mutex_name(lock_key))
         if not handle:
             raise OSError("runtime_artifact_mutex_create_failed")
         wait_result = wait_for_single(handle, 0xFFFFFFFF)
@@ -672,6 +672,12 @@ def _exclusive_lock(path: Path) -> Iterator[None]:
             fcntl.flock(descriptor, fcntl.LOCK_UN)
     finally:
         os.close(descriptor)
+
+
+def _windows_runtime_mutex_name(lock_key: str) -> str:
+    """Return one machine-global mutex name for cross-session serialization."""
+
+    return f"Global\\FoundupsRuntime-{lock_key}"
 
 
 __all__ = [

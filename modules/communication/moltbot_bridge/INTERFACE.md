@@ -62,8 +62,19 @@ also requires the exact serialized config digest from outside the config file.
 Unsigned, expired, altered, self-consistently re-digested,
 profile/key-substituted, replayed, rolled-back, deleted,
 high-water-mismatched, and out-of-root inputs fail closed. Runtime receipts
-report signer-state file I/O truthfully and separately attest that no repository
-file I/O occurred.
+stop claiming that no file I/O occurred once injected proposal trust, key, or
+replay dependencies have been invoked. Effects performed by injected
+dependencies remain outside this receipt's direct observation.
+
+The public generic key-provider API has no architect-proposal policy or nonce
+parameters. Proposal backend construction is an internal runtime-only path
+reached after principal authorization, replay-authority, durability-receipt,
+and path validation. It always constructs the canonical atomic nonce store;
+callers cannot inject a volatile proposal nonce store through the public
+provider boundary. Proposal-enabled configuration is intentionally rejected by
+the signer run-packet supplier until production principal resolution and
+durable replay-authority composition exist in the CLI sidecar. Direct runtime
+and bootstrap injection remain the tested integration seams in this slice.
 
 Production policy still keeps `architect_proposal_admission_authenticity`
 unavailable because the resident proposal path does not yet derive the exact
@@ -72,8 +83,8 @@ policy authorization, configure a production principal-key resolver, request
 proposal signing, supply the independently administered production high-water
 authority and an authenticated durability receipt issuer/verifier, resolve
 independent key/revocation/freshness trust, produce an opaque process-local
-authority proof, or consume the attestation transactionally during queue
-promotion.
+authority proof, compose those adapters into the signer-owned CLI sidecar, or
+consume the attestation transactionally during queue promotion.
 
 ### Resident queue exact-SHA commit stage
 
