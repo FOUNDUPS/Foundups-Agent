@@ -95,6 +95,45 @@ def test_main_preflight_requires_host_authenticated_scope_before_runtime(
     assert "authenticated_scope_missing_or_mismatched" in capsys.readouterr().out
 
 
+@pytest.mark.parametrize(
+    ("enforced", "expected_result", "expected_status"),
+    (
+        (False, True, "WARN"),
+        (True, False, "FAIL"),
+    ),
+)
+def test_missing_runtime_bindings_block_cycle_but_only_enforced_mode_blocks_menu(
+    monkeypatch,
+    capsys,
+    enforced: bool,
+    expected_result: bool,
+    expected_status: str,
+) -> None:
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "1")
+    monkeypatch.setenv(
+        "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED",
+        "1" if enforced else "0",
+    )
+
+    with (
+        patch.object(
+            main,
+            "_reddog_resident_model_runtime_bindings_from_env",
+            return_value=(None, None, "missing_model_runtime_binding_root"),
+        ),
+        patch.object(main, "_run_reddog_main_resident_client") as runtime,
+    ):
+        assert (
+            main.run_reddog_resident_architect_durable_cycle_preflight(REPO_ROOT)
+            is expected_result
+        )
+
+    runtime.assert_not_called()
+    output = capsys.readouterr().out
+    assert f"[REDDOG-RESIDENT-CYCLE] preflight={expected_status}" in output
+    assert "reason=missing_model_runtime_binding_root" in output
+
+
 def test_main_preflight_rejects_principal_cross_check_mismatch(monkeypatch) -> None:
     monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "1")
     monkeypatch.setenv("REDDOG_AUTHENTICATED_PRINCIPAL_ID", "principal-main-test")

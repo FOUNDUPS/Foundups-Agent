@@ -170,6 +170,10 @@ rejects a missing, malformed, rejected, wrong-surface, or pair-mismatched
 receipt before index/provider access or persistence. Selection receipts alone
 do not authorize either call.
 
+At interactive startup, a missing or invalid binding disables the resident
+cycle without blocking the main menu unless
+`REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=1`.
+
 Model identities and panel topology come only from the exact validated runtime
 receipt. Same-surface substitution is rejected against task, assignment, WSP
 15, and durable-intent bindings. The runners have no model fallback list.

@@ -1,5 +1,6 @@
+## 2026-07-27: Main-menu resident binding preflight regression
+- Proved missing bindings skip the client and return WARN/True by default versus FAIL/False when enforced; the focused startup suite passed 92 tests with one platform skip.
 ## 2026-07-26: Independent assurance capacity admission
-
 - Proved the bootstrap persists assurance admission and yields before bounded
   author or verifier execution.
 - Proved queue-stage workers cannot claim or materialize the bounded coding
@@ -13,7 +14,6 @@
   passing tests and three platform skips before final static validation.
 
 ## 2026-07-25: Daemon self-audit runtime nudge alignment
-
 - Proved current external escalation records produce memory events.
 - Proved the obsolete in-repository JSONL is ignored and an in-repository
   runtime-root injection fails closed.

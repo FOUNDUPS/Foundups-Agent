@@ -1081,6 +1081,7 @@ def test_main_resident_runtime_artifact_preflight_rejects_before_cycle(
         "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": str(runtime_root),
         "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(audit_path),
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(architect_path),
+        "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
     }
     if case == "absent":
         env.pop("REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH")
@@ -1110,7 +1111,6 @@ def test_main_resident_runtime_artifact_preflight_rejects_before_cycle(
         env["REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH"] = str(
             REPO_ROOT / "main.py"
         )
-
     monkeypatch.setattr(
         main,
         "_reddog_resident_model_runtime_bindings_from_env",
@@ -1158,6 +1158,7 @@ def test_main_resident_runtime_artifact_preflight_rejects_symlink_before_cycle(
         "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": str(runtime_root),
         "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(audit_path),
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(architect_path),
+        "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
     }
     monkeypatch.setattr(
         main,
@@ -1175,7 +1176,6 @@ def test_main_resident_runtime_artifact_preflight_rejects_symlink_before_cycle(
     output = capsys.readouterr().out
     assert "reason=model_runtime_binding_artifact_invalid" in output
     assert str(tmp_path) not in output
-
 
 def test_main_preflight_durable_resident_cycle_disabled_is_inert() -> None:
     import main

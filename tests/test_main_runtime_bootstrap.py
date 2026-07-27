@@ -251,6 +251,95 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
     ]
 
 
+def test_main_missing_resident_bindings_warns_and_still_loads_menu(monkeypatch):
+    monkeypatch.setenv("OPENCLAW_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    monkeypatch.setenv("WSP_FRAMEWORK_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_ENABLED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "0")
+
+    passing_preflights = {
+        name: MagicMock(return_value=True)
+        for name in (
+            "run_env_hygiene_preflight",
+            "run_brain_artifact_preflight",
+            "run_ironclaw_runtime_preflight",
+            "run_openclaw_security_preflight",
+            "run_dependency_security_preflight",
+            "run_wre_dashboard_preflight",
+            "run_wsp_framework_preflight",
+            "run_git_main_merge_sentinel_preflight",
+            "run_reddog_authoritative_work_state_refresh_preflight",
+            "run_reddog_architect_fix_promotion_preflight",
+            "run_reddog_wre_queue_consumer_preflight",
+            "run_reddog_resident_queue_orchestration_plan_preflight",
+            "run_reddog_resident_queue_next_stage_dispatch_preflight",
+            "run_reddog_resident_queue_control_loop_preflight",
+            "run_reddog_readonly_operational_bootstrap_preflight",
+            "bootstrap_runtime_dae_launches",
+        )
+    }
+
+    with patch.multiple(main, **passing_preflights), patch.object(
+        main,
+        "_reddog_resident_model_runtime_bindings_from_env",
+        return_value=(None, None, "missing_model_runtime_binding_root"),
+    ), patch.object(main, "_run_reddog_main_resident_client") as resident_client, patch(
+        "modules.infrastructure.cli.src.main_menu.run_main_menu"
+    ) as run_main_menu:
+        main.main()
+
+    resident_client.assert_not_called()
+    run_main_menu.assert_called_once()
+
+
+def test_main_missing_resident_bindings_enforced_stops_before_later_stages(
+    monkeypatch,
+):
+    monkeypatch.setenv("OPENCLAW_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    monkeypatch.setenv("WSP_FRAMEWORK_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_ENABLED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "1")
+
+    pre_resident_preflights = {
+        name: MagicMock(return_value=True)
+        for name in (
+            "run_env_hygiene_preflight",
+            "run_brain_artifact_preflight",
+            "run_ironclaw_runtime_preflight",
+            "run_openclaw_security_preflight",
+            "run_dependency_security_preflight",
+            "run_wre_dashboard_preflight",
+            "run_wsp_framework_preflight",
+            "run_git_main_merge_sentinel_preflight",
+            "run_reddog_authoritative_work_state_refresh_preflight",
+        )
+    }
+    later_stage = MagicMock(return_value=True)
+
+    with patch.multiple(main, **pre_resident_preflights), patch.object(
+        main,
+        "_reddog_resident_model_runtime_bindings_from_env",
+        return_value=(None, None, "missing_model_runtime_binding_root"),
+    ), patch.object(main, "_run_reddog_main_resident_client") as resident_client, patch.object(
+        main,
+        "run_reddog_architect_fix_promotion_preflight",
+        later_stage,
+    ), patch(
+        "modules.infrastructure.cli.src.main_menu.run_main_menu"
+    ) as run_main_menu:
+        main.main()
+
+    resident_client.assert_not_called()
+    later_stage.assert_not_called()
+    run_main_menu.assert_not_called()
+
+
 def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch):
     calls: list[str] = []
 
