@@ -199,7 +199,7 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         env.get("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS")
     )
     try:
-        max_steps = int(max_steps_raw) if max_steps_raw else 1
+        max_steps = int(max_steps_raw) if max_steps_raw else 2
     except ValueError:
         max_steps = 0
     if max_steps < 1:

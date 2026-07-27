@@ -104,6 +104,7 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     no_worktree_created: bool = True
     no_bounded_task_execution_performed: bool = True
     no_bounded_file_edit_performed: bool = True
+    no_exact_sha_commit_performed: bool = True
     no_slice_verification_performed: bool = True
     no_verified_draft_pr_publish_performed: bool = True
     no_verified_outcome_ratchet_performed: bool = True
@@ -554,6 +555,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         artifact_generation_request=artifact_generation_request,
         artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
         artifact_generator=resolved_artifact_generator,
+        commit_runner=draft_pr_runner,
+        commit_evidence_runner=resolved_evidence_command_runner,
         holoindex_evidence=holoindex_evidence,
         verifier_request=verifier_request,
         evidence_producer_request=evidence_producer_request,
@@ -1751,6 +1754,7 @@ def _from_loop(
         no_worktree_created="worktree_create" not in loop.dispatched_stages,
         no_bounded_task_execution_performed="bounded_worker_pilot" not in loop.dispatched_stages,
         no_bounded_file_edit_performed="bounded_worker_pilot" not in loop.dispatched_stages,
+        no_exact_sha_commit_performed="exact_sha_commit" not in loop.dispatched_stages,
         no_slice_verification_performed="slice_verifier" not in loop.dispatched_stages,
         no_verified_draft_pr_publish_performed=(
             "verified_draft_pr_publish" not in loop.dispatched_stages

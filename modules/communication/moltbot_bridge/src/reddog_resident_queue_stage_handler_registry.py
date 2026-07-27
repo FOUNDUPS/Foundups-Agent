@@ -47,6 +47,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_executor_pla
     EXECUTOR_PLAN_STAGE_KEY,
     build_reddog_resident_queue_executor_plan_stage_handler,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_exact_sha_commit_handler import (
+    EXACT_SHA_COMMIT_STAGE_KEY,
+    build_reddog_resident_queue_exact_sha_commit_stage_handler,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_held_out_regression_gate_handler import (
     HELD_OUT_REGRESSION_GATE_STAGE_KEY,
     build_reddog_resident_queue_held_out_regression_gate_stage_handler,
@@ -220,6 +224,8 @@ def build_reddog_resident_queue_stage_handler_registry(
     artifact_generation_request: Optional[Mapping[str, Any]] = None,
     artifact_generation_request_binding_enabled: bool = False,
     artifact_generator: Any = None,
+    commit_runner: Any = None,
+    commit_evidence_runner: Any = None,
     operation_cwd: Optional[Path] = None,
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
     verifier_request: Optional[Mapping[str, Any]] = None,
@@ -449,6 +455,24 @@ def build_reddog_resident_queue_stage_handler_registry(
             artifact_generation_request=artifact_generation_request,
             artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
             artifact_generator=artifact_generator,
+        ),
+    )
+    _add_if_ready(
+        handlers,
+        missing,
+        EXACT_SHA_COMMIT_STAGE_KEY,
+        _missing(
+            ("work_order_resolver", work_order_resolver),
+            ("commit_runner", commit_runner),
+            ("commit_evidence_runner", commit_evidence_runner),
+            ("repo_root", root),
+        ),
+        lambda: build_reddog_resident_queue_exact_sha_commit_stage_handler(
+            chain_results_store=chain_results_store,
+            work_order_resolver=work_order_resolver,
+            commit_runner=commit_runner,
+            evidence_command_runner=commit_evidence_runner,
+            repo_root=root or Path("."),
         ),
     )
     _add_if_ready(

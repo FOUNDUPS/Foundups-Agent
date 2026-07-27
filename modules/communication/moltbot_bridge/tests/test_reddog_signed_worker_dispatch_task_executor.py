@@ -61,6 +61,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     _draft_pr_publish_request,
     _ed25519_signing_material,
+    _FakeExactShaEvidenceRunner,
     _FakeWorktreeRunner,
     _held_out_gate_request,
     _outcome_ratchet_request,
@@ -251,6 +252,48 @@ class _FakeEnvDraftPrRunner:
     def create_draft_pr(self, *, branch_name: str, base_branch: str, title: str, body: str):
         self.calls.append(("create_draft_pr", branch_name, base_branch, title, body))
         return "https://github.com/FOUNDUPS/Foundups-Agent/pull/4242"
+
+
+class _FakeEnvCommitDraftPrRunner(_FakeEnvDraftPrRunner):
+    evidence_runner: _FakeExactShaEvidenceRunner | None = None
+
+    def commit_all(self, *, worktree_path: Path, add_paths, message: str):
+        self.calls.append(
+            ("commit_all", str(worktree_path), tuple(add_paths), message)
+        )
+        if self.evidence_runner is None:
+            return {"ok": False, "returncode": 1, "stdout": "", "stderr": ""}
+        self.evidence_runner.head = "a" * 40
+        self.evidence_runner.parent = "b" * 40
+        self.evidence_runner.dirty = False
+        self.evidence_runner.commit_message = message
+        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
+
+
+def _patch_exact_sha_commit_runtime(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    branch_name: str,
+) -> _FakeExactShaEvidenceRunner:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_resident_queue_serial_loop_bootstrap as bootstrap_module,
+    )
+    from modules.foundups.agent.src import worktree_pr_runner
+
+    evidence_runner = _FakeExactShaEvidenceRunner(branch_name=branch_name)
+    _FakeEnvCommitDraftPrRunner.evidence_runner = evidence_runner
+    monkeypatch.setattr(
+        worktree_pr_runner,
+        "RealWorktreeRunner",
+        _FakeEnvCommitDraftPrRunner,
+    )
+    monkeypatch.setattr(
+        bootstrap_module,
+        "_build_evidence_command_runner",
+        lambda *args, **kwargs: (evidence_runner, ()),
+    )
+    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
+    return evidence_runner
 
 
 class _FakeBinding:
@@ -509,6 +552,12 @@ def _claim_reserved_author_and_verifier(
 ) -> tuple[dict[str, object], dict[str, object]]:
     """Run the separately owned author and verifier tasks after admission."""
 
+    work_order_payload = json.loads(work_orders.read_text(encoding="utf-8"))
+    first_work_order = next(iter(work_order_payload["work_orders"].values()))
+    _patch_exact_sha_commit_runtime(
+        monkeypatch,
+        branch_name=str(first_work_order["branch_name"]),
+    )
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(chain.parent))
@@ -523,7 +572,7 @@ def _claim_reserved_author_and_verifier(
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
 
@@ -1709,6 +1758,10 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
         and task["context"].get("capability")
         == "independent_slice_verification"
     )
+    _patch_exact_sha_commit_runtime(
+        monkeypatch,
+        branch_name=str(work_order["branch_name"]),
+    )
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
@@ -1723,7 +1776,7 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_ARTIFACT_GENERATOR_MODE", "foundups_fusion")
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
 
     from modules.communication.moltbot_bridge.src import (
@@ -1922,8 +1975,8 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_pu
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED
     assert result["task_id"] == task_id
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "pending"
-    assert len(_FakeEnvDraftPrRunner.instances) == 1
-    draft_runner = _FakeEnvDraftPrRunner.instances[0]
+    assert len(_FakeEnvDraftPrRunner.instances) == 3
+    draft_runner = _FakeEnvDraftPrRunner.instances[-1]
     assert draft_runner.repo_root == repo.resolve()
     assert draft_runner.timeout_s == 88
     assert [call[0] for call in draft_runner.calls] == ["push_branch", "create_draft_pr"]
@@ -2422,7 +2475,7 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
         for instance in _FakeEnvDraftPrRunner.instances
         for call in instance.calls
     ]
-    assert draft_pr_calls == ["push_branch", "create_draft_pr"]
+    assert draft_pr_calls == ["commit_all", "push_branch", "create_draft_pr"]
     assert outcome_store.exists()
     with sqlite3.connect(pattern_memory_db) as conn:
         count = conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0]
@@ -2530,6 +2583,10 @@ def test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness(
     assert seed.accepted is True
     assert seed.dispatched_stages[-1] == "assurance_capacity_admission"
 
+    _patch_exact_sha_commit_runtime(
+        monkeypatch,
+        branch_name=str(work_order["branch_name"]),
+    )
     pending = [
         task
         for task in AgentDB().get_autonomous_tasks(status="pending", limit=10)

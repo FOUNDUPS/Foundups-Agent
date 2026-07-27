@@ -2,6 +2,16 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-27 - REDDOG_RESIDENT_QUEUE_EXACT_SHA_COMMIT_STAGE_PHASE1 (0.4.26)
+
+- Added the backend exact-SHA commit stage between bounded authoring and
+  independently assigned verification.
+- Pinned exact base, parent, head, tree, work-order, branch, worktree, and path
+  evidence; rejected pre-staged, extra, changed, or unbound work.
+- Revalidated the canonical commit receipt before verifier admission.
+- Regenerated and pinned the 1,002-file backend dependency manifest.
+- Version 0.4.25 -> 0.4.26.
+
 ## 2026-07-27 - WRE_CHECKOUT_LOCAL_SKILL_RESOLUTION_PHASE1 (0.4.25)
 
 - Pinned the regenerated 1,001-file backend manifest after WRE Skillz

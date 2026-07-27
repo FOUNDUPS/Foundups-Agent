@@ -103,6 +103,7 @@ STAGE_ACCEPT_VALUES = {
         "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
     ),
     "bounded_worker_pilot": ("decision", QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT),
+    "exact_sha_commit": ("decision", "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT"),
     "slice_verifier": ("decision", QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT),
     "verified_draft_pr_publish": ("decision", QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT),
     "verified_outcome_ratchet": ("decision", QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT),

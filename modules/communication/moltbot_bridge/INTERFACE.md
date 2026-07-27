@@ -2,6 +2,25 @@
 
 ## Public API
 
+### Resident queue exact-SHA commit stage
+
+The resident queue runs `exact_sha_commit` after `bounded_worker_pilot` and
+before `slice_verifier`. The bounded author owns both the write and commit
+steps in one claim; the reserved independent verifier remains a separate
+AgentDB assignment.
+
+`ResidentQueueExactShaCommitStageHandler` accepts only the worktree, branch,
+work order, and exact artifact set already bound by the worktree and bounded
+worker receipts. It rejects a pre-staged index, undeclared dirty or untracked
+paths, changed artifact content, a protected or mismatched branch, and a
+mismatched base. It invokes only the injected `commit_all()` operation, then
+verifies the exact parent/head/tree/path set and clean state.
+
+The resulting `reddog_resident_queue_exact_sha_commit_receipt.v1` is
+canonically revalidated before the verifier request is built. The stage does
+not push, publish a PR, merge, re-index HoloIndex, write PatternMemory, or
+settle rewards.
+
 ### Independent assurance capacity admission
 
 The resident queue inserts `assurance_capacity_admission` after isolated

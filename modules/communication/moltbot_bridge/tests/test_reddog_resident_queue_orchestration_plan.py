@@ -107,6 +107,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "bounded_worker_pilot": {
             "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT",
         },
+        "exact_sha_commit": {
+            "decision": "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT",
+        },
         "slice_verifier": {
             "decision": "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT",
         },
@@ -162,6 +165,19 @@ def test_accepted_authority_request_advances_to_authority_runtime() -> None:
     assert result.current_stage == "authority_runtime"
     assert result.next_action == planner.NEXT_QUEUE_AUTHORITY_RUNTIME_INVOKE
     assert result.accepted_stages == ("queue_consumer", "authority_request")
+
+
+def test_bounded_worker_advances_to_exact_sha_commit_before_verifier() -> None:
+    result = planner.plan_reddog_resident_queue_orchestration(
+        _snapshot(),
+        now_iso=NOW,
+        chain_results=_accepted_results_through("bounded_worker_pilot"),
+    )
+
+    assert result.accepted is True
+    assert result.current_stage == "exact_sha_commit"
+    assert result.next_action == planner.NEXT_QUEUE_EXACT_SHA_COMMIT
+    assert "slice_verifier" not in result.accepted_stages
 
 
 def test_rejected_stage_fails_closed_and_does_not_skip_forward() -> None:

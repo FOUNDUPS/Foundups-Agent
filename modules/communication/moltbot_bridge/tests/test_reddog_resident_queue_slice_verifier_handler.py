@@ -60,6 +60,12 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_worktr
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authority_work_order_invoke import (
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_slice_verifier_request_binding import (
+    _exact_sha_commit_receipt,
+)
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_slice_verifier_invoke import (
     ARTIFACT,
     WORK_ORDER_ID,
@@ -160,6 +166,20 @@ class _RenewedReservationStore(_ReservationStore):
         }
 
 
+def _exact_sha_commit_stage(worktree_path: str) -> dict[str, object]:
+    work_order_digest = canonical_full_work_order_digest(_work_order())
+    return {
+        "decision": "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT",
+        "accepted": True,
+        "effect_commit_state": "COMMITTED",
+        "reconciliation_required": False,
+        "commit_receipt": _exact_sha_commit_receipt(
+            worktree_path,
+            work_order_digest=work_order_digest,
+        ),
+    }
+
+
 def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
     stage_results: dict[str, object] = {
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
@@ -168,7 +188,16 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
         "worker_dispatch_runtime": WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
         "work_order_invocation": {"decision": QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT},
-        "executor_plan": {"decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT},
+        "executor_plan": {
+            "decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT,
+            "executor_plan_result": {
+                "plan": {
+                    "work_order_digest": canonical_full_work_order_digest(
+                        _work_order()
+                    )
+                },
+            },
+        },
         "execution_valve": {"decision": QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT},
         "worktree_create": {"decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT},
         "assurance_capacity_admission": {
@@ -176,6 +205,7 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
             "reservation": _reservation(),
         },
         BOUNDED_WORKER_PILOT_STAGE_KEY: _queue_pilot_result(),
+        "exact_sha_commit": _exact_sha_commit_stage("O:/tmp/reddog-worker"),
     }
     stage_results.update(stage_overrides)
     return InMemoryResidentQueueChainResultsStore(
@@ -351,6 +381,7 @@ def _binding_store(tmp_path: Path, **stage_overrides: object) -> InMemoryResiden
                 "worktree_path": str(worktree),
             }
         },
+        exact_sha_commit=_exact_sha_commit_stage(str(worktree.resolve())),
         **stage_overrides,
     )
 

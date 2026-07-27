@@ -26,6 +26,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _draft_pr_publish_request,
     _ed25519_signing_material,
     _ed25519_signing_material_with_socket_backend,
+    _FakeExactShaEvidenceRunner,
     _FakeWorktreeRunner,
     _pilot_bounded_worker_plan,
     _pilot_allowed_paths,
@@ -112,6 +113,22 @@ class _FakeProfileWorktreeRunner:
         self.calls.append(("create_draft_pr", branch_name, base_branch, title))
         _ = body
         return "https://github.com/FOUNDUPS/Foundups-Agent/pull/4242"
+
+
+class _FakeEnvCommitDraftPrRunner(_FakeEnvDraftPrRunner):
+    evidence_runner: _FakeExactShaEvidenceRunner | None = None
+
+    def commit_all(self, *, worktree_path: Path, add_paths, message: str):
+        self.calls.append(
+            ("commit_all", str(worktree_path), tuple(add_paths), message)
+        )
+        if self.evidence_runner is None:
+            return {"ok": False, "returncode": 1, "stdout": "", "stderr": ""}
+        self.evidence_runner.head = "a" * 40
+        self.evidence_runner.parent = "b" * 40
+        self.evidence_runner.dirty = False
+        self.evidence_runner.commit_message = message
+        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
 
 
 def test_profile_materializer_default_does_not_conflict_with_explicit_work_orders() -> None:
@@ -701,6 +718,10 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     capsys,
 ) -> None:
     import main
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_resident_queue_serial_loop_bootstrap as bootstrap_module,
+    )
+    from modules.foundups.agent.src import worktree_pr_runner
 
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
@@ -766,6 +787,20 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     assert worktree.exists()
     assert not (worktree / PILOT_ARTIFACT).exists()
 
+    evidence_runner = _FakeExactShaEvidenceRunner(
+        branch_name=str(work_order["branch_name"])
+    )
+    _FakeEnvCommitDraftPrRunner.evidence_runner = evidence_runner
+    monkeypatch.setattr(
+        worktree_pr_runner,
+        "RealWorktreeRunner",
+        _FakeEnvCommitDraftPrRunner,
+    )
+    monkeypatch.setattr(
+        bootstrap_module,
+        "_build_evidence_command_runner",
+        lambda *args, **kwargs: (evidence_runner, ()),
+    )
     calls = _patch_fusion_artifact_generator(monkeypatch)
     pilot_payloads = _pilot_payloads(repo, worktree, work_order)
     generic_writer = _write_runtime_json(
@@ -812,6 +847,8 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     )
     monkeypatch.setenv("REDDOG_HOLOINDEX_EVIDENCE_PATH", str(holoindex))
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
+    monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
 
     assert main.run_reddog_openclaw_signed_worker_claim_loop_preflight(repo) is True
 
@@ -856,10 +893,12 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     capsys,
 ) -> None:
     import main
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_resident_queue_serial_loop_bootstrap as bootstrap_module,
+    )
     from modules.foundups.agent.src import worktree_pr_runner
 
     _FakeEnvDraftPrRunner.instances.clear()
-    monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeEnvDraftPrRunner)
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
@@ -922,6 +961,20 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     assert seed.accepted is True
     assert seed.dispatched_stages[-1] == "assurance_capacity_admission"
 
+    evidence_runner = _FakeExactShaEvidenceRunner(
+        branch_name=str(work_order["branch_name"])
+    )
+    _FakeEnvCommitDraftPrRunner.evidence_runner = evidence_runner
+    monkeypatch.setattr(
+        worktree_pr_runner,
+        "RealWorktreeRunner",
+        _FakeEnvCommitDraftPrRunner,
+    )
+    monkeypatch.setattr(
+        bootstrap_module,
+        "_build_evidence_command_runner",
+        lambda *args, **kwargs: (evidence_runner, ()),
+    )
     calls = _patch_fusion_artifact_generator(monkeypatch)
     pilot_payloads = _pilot_payloads(repo, worktree, work_order)
     generic_writer = _write_runtime_json(
@@ -1012,7 +1065,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     monkeypatch.setenv("REDDOG_HELD_OUT_GATE_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
-    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "1")
+    monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
 
     with patch(
@@ -1066,7 +1119,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
         for instance in _FakeEnvDraftPrRunner.instances
         for call in instance.calls
     ]
-    assert draft_pr_calls == ["push_branch", "create_draft_pr"]
+    assert draft_pr_calls == ["commit_all", "push_branch", "create_draft_pr"]
     assert outcome_store.exists()
     with sqlite3.connect(pattern_memory_db) as conn:
         count = conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0]

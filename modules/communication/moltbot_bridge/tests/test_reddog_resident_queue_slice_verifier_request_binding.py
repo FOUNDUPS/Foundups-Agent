@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifier_request_binding import (
     FAIL_BOUNDED_WORKER_PILOT_REJECTED,
+    FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH,
+    FAIL_EXACT_SHA_COMMIT_MISSING,
+    FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID,
     FAIL_SIGNED_RECEIPT_CHAIN_MISSING,
     FAIL_SLICE_VERIFIER_PLAN_MISSING,
     SLICE_VERIFIER_REQUEST_BINDING_ACCEPT,
@@ -15,6 +20,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifi
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
     QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_REJECT,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_slice_verifier_invoke import (
     ARTIFACT,
@@ -36,6 +44,54 @@ MODULE_PATH = (
 
 def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
+
+
+def _canonical_digest(value: object) -> str:
+    raw = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("ascii")).hexdigest()
+
+
+def _exact_sha_commit_receipt(
+    worktree_path: str,
+    *,
+    work_order_digest: str,
+) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema_version": "reddog_resident_queue_exact_sha_commit_receipt.v1",
+        "work_order_id": WORK_ORDER_ID,
+        "queue_item_id": "queue-1",
+        "selected_slice": "slice-1",
+        "base_sha": "b" * 40,
+        "head_sha": "a" * 40,
+        "parent_sha": "b" * 40,
+        "tree_sha": "c" * 40,
+        "branch_name": "feat/reddog-exact-sha",
+        "worktree_path": worktree_path,
+        "changed_paths": [ARTIFACT],
+        "bounded_worker_receipt_id": "bounded_wt_pilot_1234",
+        "bounded_worker_receipt_digest": _digest("d"),
+        "worktree_create_result_digest": _digest("e"),
+        "commit_message_digest": _digest("f"),
+        "work_order_digest": work_order_digest,
+        "commit_attempt_key": _digest("2"),
+        "chain_state_digest": _digest("3"),
+        "effect_commit_state": "COMMITTED",
+        "reconciliation_required": False,
+        "reconciled_existing_commit": False,
+        "main_checkout_untouched": True,
+        "no_push_performed": True,
+        "no_pr_created": True,
+        "no_merge_performed": True,
+        "no_holoindex_reindex_performed": True,
+        "no_pattern_memory_write_performed": True,
+        "no_reward_settlement_performed": True,
+    }
+    return {"receipt_id": _canonical_digest(payload), **payload}
 
 
 def _reservation() -> dict[str, object]:
@@ -117,7 +173,16 @@ def _work_order(**overrides: object) -> dict[str, object]:
     return payload
 
 
-def _stage_results(tmp_path: Path, **overrides: object) -> dict[str, object]:
+def _stage_results(
+    tmp_path: Path,
+    *,
+    bound_work_order: dict[str, object] | None = None,
+    **overrides: object,
+) -> dict[str, object]:
+    worktree_path = str((tmp_path / "resident-worktree").resolve())
+    work_order_digest = canonical_full_work_order_digest(
+        bound_work_order or _work_order()
+    )
     payload = {
         "authority_runtime": {
             "authority_result": {
@@ -140,7 +205,7 @@ def _stage_results(tmp_path: Path, **overrides: object) -> dict[str, object]:
         },
         "worktree_create": {
             "worktree_create_result": {
-                "worktree_path": str(tmp_path / "resident-worktree"),
+                "worktree_path": worktree_path,
             }
         },
         "assurance_capacity_admission": {
@@ -148,6 +213,24 @@ def _stage_results(tmp_path: Path, **overrides: object) -> dict[str, object]:
             "reservation": _reservation(),
         },
         "bounded_worker_pilot": _queue_pilot_result(),
+        "executor_plan": {
+            "decision": "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT",
+            "executor_plan_result": {
+                "plan": {
+                    "work_order_digest": work_order_digest,
+                },
+            },
+        },
+        "exact_sha_commit": {
+            "decision": "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT",
+            "accepted": True,
+            "effect_commit_state": "COMMITTED",
+            "reconciliation_required": False,
+            "commit_receipt": _exact_sha_commit_receipt(
+                worktree_path,
+                work_order_digest=work_order_digest,
+            ),
+        },
     }
     payload.update(overrides)
     return payload
@@ -173,6 +256,7 @@ def test_builds_evidence_producer_request_from_queue_chain_state(tmp_path: Path)
     assert request["signed_receipt_chain"] == _signed_receipt_chain()
     assert request["worktree_receipt"]["receipt_id"] == "bounded_wt_pilot_1234"
     assert request["bounded_worker_pilot_receipt"]["written_artifacts"] == [ARTIFACT]
+    assert request["exact_sha_commit_receipt"]["head_sha"] == "a" * 40
     assert request["pattern_memory_write_performed"] is False
     assert request["draft_pr_published"] is False
     assert request["merge_performed"] is False
@@ -246,11 +330,86 @@ def test_missing_signed_receipt_chain_blocks_request(tmp_path: Path) -> None:
     assert FAIL_SIGNED_RECEIPT_CHAIN_MISSING in result.rejection_reasons
 
 
-def test_uses_pilot_written_artifacts_when_plan_expected_paths_are_absent(tmp_path: Path) -> None:
-    plan = _slice_verifier_plan(expected_changed_paths=[])
+def test_missing_exact_sha_commit_blocks_request(tmp_path: Path) -> None:
+    result = build_resident_queue_slice_verifier_request(
+        work_order=_work_order(),
+        stage_results=_stage_results(tmp_path, exact_sha_commit={}),
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+
+    assert result.accepted is False
+    assert FAIL_EXACT_SHA_COMMIT_MISSING in result.rejection_reasons
+
+
+def test_planned_head_cannot_override_actual_commit_receipt(tmp_path: Path) -> None:
+    plan = _slice_verifier_plan(head_sha="d" * 40)
     result = build_resident_queue_slice_verifier_request(
         work_order=_work_order(slice_verifier_plan=plan),
         stage_results=_stage_results(tmp_path),
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+
+    assert result.accepted is False
+    assert FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH in result.rejection_reasons
+
+
+def test_tampered_commit_receipt_cannot_reach_verifier(tmp_path: Path) -> None:
+    stages = _stage_results(tmp_path)
+    stages["exact_sha_commit"]["commit_receipt"]["head_sha"] = "d" * 40
+
+    result = build_resident_queue_slice_verifier_request(
+        work_order=_work_order(),
+        stage_results=stages,
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+
+    assert result.accepted is False
+    assert FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID in result.rejection_reasons
+
+
+def test_changed_executor_work_order_digest_cannot_reach_verifier(
+    tmp_path: Path,
+) -> None:
+    stages = _stage_results(tmp_path)
+    stages["executor_plan"]["executor_plan_result"]["plan"][
+        "work_order_digest"
+    ] = _digest("9")
+
+    result = build_resident_queue_slice_verifier_request(
+        work_order=_work_order(),
+        stage_results=stages,
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+
+    assert result.accepted is False
+    assert FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH in result.rejection_reasons
+
+
+def test_head_sha_is_not_required_in_pre_execution_plan(tmp_path: Path) -> None:
+    plan = _slice_verifier_plan()
+    plan.pop("head_sha")
+    work_order = _work_order(slice_verifier_plan=plan)
+    result = build_resident_queue_slice_verifier_request(
+        work_order=work_order,
+        stage_results=_stage_results(tmp_path, bound_work_order=work_order),
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+
+    assert result.accepted is True
+    assert result.evidence_producer_request["head_sha"] == "a" * 40
+
+
+def test_uses_pilot_written_artifacts_when_plan_expected_paths_are_absent(tmp_path: Path) -> None:
+    plan = _slice_verifier_plan(expected_changed_paths=[])
+    work_order = _work_order(slice_verifier_plan=plan)
+    result = build_resident_queue_slice_verifier_request(
+        work_order=work_order,
+        stage_results=_stage_results(tmp_path, bound_work_order=work_order),
         repo_root=tmp_path / "repo",
         assurance_reservation_store=_ReservationStore(),
     )

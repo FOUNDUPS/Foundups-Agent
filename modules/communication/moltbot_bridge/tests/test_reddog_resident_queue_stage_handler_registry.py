@@ -39,6 +39,7 @@ ALL_STAGE_KEYS = (
     "worktree_create",
     "assurance_capacity_admission",
     "bounded_worker_pilot",
+    "exact_sha_commit",
     "slice_verifier",
     "verified_draft_pr_publish",
     "verified_outcome_ratchet",
@@ -124,6 +125,8 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
         generic_writer_dryrun_result={"accepted": True},
         governed_shell_dryrun_result={"accepted": True},
         artifact_contents={"README.md": "content"},
+        commit_runner=dummy,
+        commit_evidence_runner=dummy,
         verifier_request={"verifier_id": "verifier-1"},
         publish_request={"publish_id": "publish-1"},
         draft_pr_runner=dummy,
@@ -187,6 +190,8 @@ def test_registry_rejects_empty_mapping_dependencies() -> None:
     assert "missing_dependency:artifact_contents" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:artifact_generation_request" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:artifact_generator" in registry.missing_stage_reasons["bounded_worker_pilot"]
+    assert "missing_dependency:commit_runner" in registry.missing_stage_reasons["exact_sha_commit"]
+    assert "missing_dependency:commit_evidence_runner" in registry.missing_stage_reasons["exact_sha_commit"]
     assert "missing_dependency:verifier_request" in registry.missing_stage_reasons["slice_verifier"]
     assert "missing_dependency:evidence_producer_request" in registry.missing_stage_reasons["slice_verifier"]
     assert "missing_dependency:evidence_command_runner" in registry.missing_stage_reasons["slice_verifier"]
@@ -209,6 +214,25 @@ def test_registry_registers_bounded_worker_pilot_from_artifact_generation_depend
 
     assert "bounded_worker_pilot" in registry.registered_stage_keys
     assert "bounded_worker_pilot" not in registry.missing_stage_reasons
+
+
+def test_registry_registers_exact_sha_commit_only_with_explicit_runners(
+    tmp_path: Path,
+) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        repo_root=tmp_path,
+        commit_runner=dummy,
+        commit_evidence_runner=dummy,
+        now_iso=NOW_ISO,
+    )
+
+    assert "exact_sha_commit" in registry.registered_stage_keys
+    assert "exact_sha_commit" not in registry.missing_stage_reasons
     assert registry.no_default_runner_created is True
 
 
