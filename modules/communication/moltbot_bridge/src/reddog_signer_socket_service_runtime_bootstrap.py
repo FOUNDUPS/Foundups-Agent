@@ -14,12 +14,15 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     SignerKeyResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    ProposalReplayHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
@@ -27,8 +30,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     ServeSignerSocketBounded,
     SignerSocketServiceRuntimeWiringConfig,
+    architect_proposal_security_context_digest,
     run_reddog_signer_socket_service_runtime_wiring,
     validate_signer_socket_service_runtime_config,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    PrincipalKeyResolver,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_text,
@@ -84,6 +91,8 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     serve_bounded: ServeSignerSocketBounded,
     ready_callback: Optional[Callable[[], None]] = None,
     expected_config_digest: str | None = None,
+    principal_key_resolver: PrincipalKeyResolver | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
@@ -132,6 +141,10 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         resolver,
         serve_bounded=serve_bounded,
         ready_callback=ready_callback,
+        principal_key_resolver=principal_key_resolver,
+        proposal_replay_high_water_store=(
+            proposal_replay_high_water_store
+        ),
     )
     runtime_receipt = runtime.to_dict()
     if runtime.accepted is not True:
@@ -228,9 +241,14 @@ def rehydrate_signer_socket_service_runtime_config(
             return None
         if payload.get("schema_version") != SIGNER_SERVICE_CONFIG_SCHEMA_VERSION:
             return None
-        if not payload.get("control_loop_anchor_path") or not isinstance(
-            payload.get("control_loop_authority_policy"),
-            dict,
+        if not payload.get("control_loop_anchor_path"):
+            return None
+        if (
+            not isinstance(
+                payload.get("control_loop_authority_policy"),
+                dict,
+            )
+            and payload.get("proposal_authority_policy") is None
         ):
             return None
         runtime_root = validate_runtime_root_path(
@@ -266,10 +284,14 @@ def rehydrate_signer_socket_service_runtime_config(
             "proposal_policy_authorization"
         )
         proposal_nonce_path_value = payload.get("proposal_nonce_store_path")
+        proposal_high_water_store_id = payload.get(
+            "proposal_replay_high_water_store_id"
+        )
         if not (
             (proposal_policy is None)
             == (proposal_policy_authorization is None)
             == (proposal_nonce_path_value is None)
+            == (proposal_high_water_store_id is None)
         ):
             return None
         proposal_nonce_path = None
@@ -286,6 +308,14 @@ def rehydrate_signer_socket_service_runtime_config(
             )
             if proposal_nonce_path.parent != signer_runtime_root:
                 return None
+            if (
+                not isinstance(proposal_high_water_store_id, str)
+                or not proposal_high_water_store_id.strip()
+                or not proposal_high_water_store_id.isascii()
+            ):
+                return None
+        else:
+            proposal_high_water_store_id = None
         peer_policy = payload["peer_policy"]
         key_profile = payload.get("key_provider_profile")
         key_profiles = payload.get("key_provider_profiles") or ()
@@ -319,11 +349,23 @@ def rehydrate_signer_socket_service_runtime_config(
             max_response_bytes=payload.get("max_response_bytes"),
             key_provider_profiles=key_profiles,
             control_loop_anchor_path=anchor_path,
-            control_loop_authority_policy=payload["control_loop_authority_policy"],
+            control_loop_authority_policy=payload.get(
+                "control_loop_authority_policy"
+            ),
             proposal_authority_policy=proposal_policy,
             proposal_policy_authorization=proposal_policy_authorization,
             proposal_nonce_store_path=proposal_nonce_path,
+            proposal_replay_high_water_store_id=(
+                proposal_high_water_store_id
+            ),
         )
+        if proposal_policy is not None:
+            config = replace(
+                config,
+                proposal_security_context_digest=(
+                    architect_proposal_security_context_digest(config)
+                ),
+            )
     except Exception:
         return None
     if validate_signer_socket_service_runtime_config(config):

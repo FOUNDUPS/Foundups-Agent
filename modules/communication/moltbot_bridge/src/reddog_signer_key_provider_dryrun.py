@@ -32,9 +32,12 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
     ArchitectProposalSignerPolicy,
     ProposalAuthenticityNonceStore,
+    architect_proposal_replay_store_binding_digest,
+    architect_proposal_signer_instance_id,
 )
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     AtomicProposalAuthenticityNonceStore,
+    ProposalReplayHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     ControlLoopAnchorStore,
@@ -161,6 +164,8 @@ def build_test_only_signer_backend_from_provider(
     proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
     proposal_nonce_store: ProposalAuthenticityNonceStore | None = None,
     proposal_nonce_store_path: Path | str | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
+    proposal_replay_high_water_store_id: str | None = None,
     proposal_nonce_store_allowed_root: Path | str | None = None,
     proposal_nonce_store_repo_root: Path | str | None = None,
 ) -> SignerKeyProviderDryRunResult:
@@ -213,8 +218,20 @@ def build_test_only_signer_backend_from_provider(
         return _reject(FAIL_PROVIDER_FINGERPRINT_MISMATCH, profile=profile, signing=signing_result, audit=audit_result)
     effective_proposal_nonce_store = proposal_nonce_store
     if proposal_nonce_store_path is not None:
+        try:
+            high_water_store_matches = bool(
+                proposal_replay_high_water_store is not None
+                and proposal_replay_high_water_store_id
+                and hmac.compare_digest(
+                    proposal_replay_high_water_store.store_id,
+                    proposal_replay_high_water_store_id,
+                )
+            )
+        except Exception:
+            high_water_store_matches = False
         if (
             proposal_nonce_store is not None
+            or not high_water_store_matches
             or proposal_nonce_store_allowed_root is None
             or proposal_nonce_store_repo_root is None
         ):
@@ -231,6 +248,18 @@ def build_test_only_signer_backend_from_provider(
                     allowed_root=proposal_nonce_store_allowed_root,
                     repo_root=proposal_nonce_store_repo_root,
                     integrity_key=audit_key,
+                    high_water_store=proposal_replay_high_water_store,
+                    replay_store_binding_digest=(
+                        architect_proposal_replay_store_binding_digest(
+                            architect_proposal_signer_instance_id(
+                                proposal_nonce_store_allowed_root,
+                                profile.expected_public_key,
+                                profile.expected_key_epoch,
+                            ),
+                            proposal_nonce_store_path,
+                            proposal_replay_high_water_store_id,
+                        )
+                    ),
                 )
             )
         except (OSError, TypeError, ValueError):
@@ -277,6 +306,8 @@ def build_signer_backend_from_provider(
     proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
     proposal_nonce_store: ProposalAuthenticityNonceStore | None = None,
     proposal_nonce_store_path: Path | str | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
+    proposal_replay_high_water_store_id: str | None = None,
     proposal_nonce_store_allowed_root: Path | str | None = None,
     proposal_nonce_store_repo_root: Path | str | None = None,
 ) -> SignerKeyProviderDryRunResult:
@@ -293,6 +324,12 @@ def build_signer_backend_from_provider(
         proposal_authority_policy=proposal_authority_policy,
         proposal_nonce_store=proposal_nonce_store,
         proposal_nonce_store_path=proposal_nonce_store_path,
+        proposal_replay_high_water_store=(
+            proposal_replay_high_water_store
+        ),
+        proposal_replay_high_water_store_id=(
+            proposal_replay_high_water_store_id
+        ),
         proposal_nonce_store_allowed_root=(
             proposal_nonce_store_allowed_root
         ),

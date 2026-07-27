@@ -5,8 +5,10 @@ from __future__ import annotations
 import base64
 import dataclasses
 import hashlib
+import hmac
 import json
 import multiprocessing
+import sqlite3
 import threading
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -23,12 +25,15 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     build_architect_proposal_policy_authorization_payload,
     canonical_architect_proposal_policy_authorization_input,
     canonical_architect_proposal_signing_input,
+    architect_proposal_replay_store_binding_digest,
+    architect_proposal_signer_instance_id,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY,
     REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    decode_ed25519_signature,
     encode_ed25519_public_key,
     encode_ed25519_signature,
 )
@@ -41,6 +46,8 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resi
 )
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     AtomicProposalAuthenticityNonceStore,
+    InMemoryProposalReplayHighWaterStore,
+    ProposalReplayHighWater,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -49,11 +56,15 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     AUDIT_KEY_PREFIX,
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
+    PROVIDER_MODE_WSP71_PERMISSIONED,
     SIGNING_KEY_PREFIX,
     SignerKeyProviderProfile,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     PeerCredentialPolicy,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_signer_socket_service_config_supply as config_supply,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     FAIL_SIGNER_CONFIG_PROPOSAL_NONCE_PATH_INVALID,
@@ -72,6 +83,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,
     SignerSocketServiceRuntimeWiringConfig,
+    architect_proposal_security_context_digest,
     run_reddog_signer_socket_service_runtime_wiring,
     validate_signer_socket_service_runtime_config,
 )
@@ -86,6 +98,122 @@ pytest.importorskip("cryptography")
 NOW = int(time.time())
 PRINCIPAL_PUBLIC = encode_ed25519_public_key(bytes(range(32)))
 INTEGRITY_KEY = b"proposal-integrity-key-32-bytes!"
+HIGH_WATER_STORE_ID = "proposal-replay-authority:test"
+
+
+class _SqliteProposalReplayHighWaterStore:
+    """Cross-process test authority kept outside the signer-state directory."""
+
+    def __init__(self, path: Path | str) -> None:
+        self._path = str(Path(path))
+        Path(self._path).parent.mkdir(parents=True, exist_ok=True)
+        with sqlite3.connect(self._path) as connection:
+            connection.execute(
+                "CREATE TABLE IF NOT EXISTS replay_high_water ("
+                "binding_digest TEXT PRIMARY KEY,"
+                "sequence INTEGER NOT NULL,"
+                "state_revision TEXT NOT NULL)"
+            )
+
+    @property
+    def store_id(self) -> str:
+        return HIGH_WATER_STORE_ID
+
+    def load(
+        self,
+        replay_store_binding_digest: str,
+    ) -> ProposalReplayHighWater | None:
+        with sqlite3.connect(self._path) as connection:
+            row = connection.execute(
+                "SELECT sequence, state_revision FROM replay_high_water "
+                "WHERE binding_digest = ?",
+                (replay_store_binding_digest,),
+            ).fetchone()
+        return (
+            ProposalReplayHighWater(
+                sequence=int(row[0]),
+                state_revision=str(row[1]),
+            )
+            if row is not None
+            else None
+        )
+
+    def advance(
+        self,
+        replay_store_binding_digest: str,
+        *,
+        expected: ProposalReplayHighWater | None,
+        next_value: ProposalReplayHighWater,
+    ) -> None:
+        with sqlite3.connect(
+            self._path,
+            timeout=10.0,
+            isolation_level=None,
+        ) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT sequence, state_revision FROM replay_high_water "
+                "WHERE binding_digest = ?",
+                (replay_store_binding_digest,),
+            ).fetchone()
+            current = (
+                ProposalReplayHighWater(
+                    sequence=int(row[0]),
+                    state_revision=str(row[1]),
+                )
+                if row is not None
+                else None
+            )
+            if current != expected:
+                connection.execute("ROLLBACK")
+                raise RuntimeError("proposal_replay_high_water_conflict")
+            if next_value.sequence != (
+                current.sequence + 1 if current is not None else 1
+            ):
+                connection.execute("ROLLBACK")
+                raise ValueError("proposal_replay_high_water_invalid")
+            connection.execute(
+                "INSERT INTO replay_high_water "
+                "(binding_digest, sequence, state_revision) VALUES (?, ?, ?) "
+                "ON CONFLICT(binding_digest) DO UPDATE SET "
+                "sequence = excluded.sequence, "
+                "state_revision = excluded.state_revision",
+                (
+                    replay_store_binding_digest,
+                    next_value.sequence,
+                    next_value.state_revision,
+                ),
+            )
+            connection.execute("COMMIT")
+
+
+class _FailOnceProposalReplayHighWaterStore:
+    def __init__(self, store_id: str) -> None:
+        self._delegate = InMemoryProposalReplayHighWaterStore(store_id)
+        self._failed = False
+
+    @property
+    def store_id(self) -> str:
+        return self._delegate.store_id
+
+    def load(self, replay_store_binding_digest: str):
+        return self._delegate.load(replay_store_binding_digest)
+
+    def advance(
+        self,
+        replay_store_binding_digest: str,
+        *,
+        expected: ProposalReplayHighWater | None,
+        next_value: ProposalReplayHighWater,
+    ) -> None:
+        if not self._failed:
+            self._failed = True
+            raise OSError("simulated_high_water_outage")
+        self._delegate.advance(
+            replay_store_binding_digest,
+            expected=expected,
+            next_value=next_value,
+        )
 
 
 def _private_key():
@@ -172,6 +300,7 @@ def _profile(
 ) -> dict[str, object]:
     return {
         "principal_id": "github:mjtrout",
+        "principal_provider": "github",
         "principal_public_key": principal_public_key,
         "reddog_id": "reddog:foundups-agent",
         "reddog_public_key": public_key,
@@ -182,11 +311,30 @@ def _profile(
     }
 
 
+class _PrincipalKeyResolver:
+    def __init__(self, public_key: str) -> None:
+        self._public_key = public_key
+
+    def resolve(
+        self,
+        principal_id: str,
+        principal_provider: str,
+    ) -> str | None:
+        if (
+            principal_id == "github:mjtrout"
+            and principal_provider == "github"
+        ):
+            return self._public_key
+        return None
+
+
 def _policy_authorization(
     policy: ArchitectProposalSignerPolicy,
     *,
     principal_private,
     public_key: str,
+    signer_runtime_root: Path,
+    security_context_digest: str,
     profile: dict[str, object] | None = None,
     issued_at: int = NOW - 5,
     expires_at: int = NOW + 120,
@@ -198,6 +346,7 @@ def _policy_authorization(
     payload = build_architect_proposal_policy_authorization_payload(
         policy,
         principal_id=str(authority_profile["principal_id"]),
+        principal_provider=str(authority_profile["principal_provider"]),
         principal_public_key=str(
             authority_profile["principal_public_key"]
         ),
@@ -207,6 +356,24 @@ def _policy_authorization(
         authority_profile_source_receipt_id=str(
             authority_profile["authority_profile_source_receipt_id"]
         ),
+        signer_instance_id=architect_proposal_signer_instance_id(
+            signer_runtime_root,
+            public_key,
+            str(authority_profile["key_epoch"]),
+        ),
+        replay_store_binding_digest=(
+            architect_proposal_replay_store_binding_digest(
+                architect_proposal_signer_instance_id(
+                    signer_runtime_root,
+                    public_key,
+                    str(authority_profile["key_epoch"]),
+                ),
+                signer_runtime_root
+                / "architect_proposal_nonce_store.json",
+                HIGH_WATER_STORE_ID,
+            )
+        ),
+        security_context_digest=security_context_digest,
         nonce="proposal-policy-authorization-nonce-1",
         issued_at=issued_at,
         expires_at=expires_at,
@@ -226,10 +393,8 @@ def _policy_authorization(
 
 def _provider_profiles(
     *,
-    principal_private,
     reddog_private,
-) -> tuple[SignerKeyProviderProfile, SignerKeyProviderProfile]:
-    principal_public = _public_text(principal_private)
+) -> tuple[SignerKeyProviderProfile]:
     reddog_public = _public_text(reddog_private)
     common = {
         "expected_key_epoch": "epoch-1",
@@ -237,17 +402,6 @@ def _provider_profiles(
         "ttl_seconds": 60,
     }
     return (
-        SignerKeyProviderProfile(
-            signer_profile_id="principal-identity",
-            signer_agent_id="signer:principal",
-            signing_key_ref="op://test/principal/private",
-            audit_mac_key_ref="op://test/principal/audit",
-            expected_public_key=principal_public,
-            expected_key_fingerprint=public_key_fingerprint(
-                principal_public
-            ),
-            **common,
-        ),
         SignerKeyProviderProfile(
             signer_profile_id="reddog-work-authority",
             signer_agent_id="signer:reddog",
@@ -296,14 +450,18 @@ def _peer() -> SignerPeerAttestation:
 
 
 def _reserve_nonce_process(
-    values: tuple[str, str, str, int],
+    values: tuple[str, str, str, str, int],
 ) -> bool:
-    repo, runtime, nonce, expires_at = values
+    repo, runtime, high_water_path, nonce, expires_at = values
     store = AtomicProposalAuthenticityNonceStore(
         Path(runtime) / "proposal-nonces.json",
         allowed_root=runtime,
         repo_root=repo,
         integrity_key=INTEGRITY_KEY,
+        replay_store_binding_digest="sha256:" + "b" * 64,
+        high_water_store=_SqliteProposalReplayHighWaterStore(
+            high_water_path
+        ),
     )
     return bool(
         store.reserve(
@@ -312,6 +470,26 @@ def _reserve_nonce_process(
             subject="github:mjtrout",
         )
     )
+
+
+def _nonce_store_kwargs(
+    repo: Path,
+    runtime: Path,
+    *,
+    high_water_store=None,
+) -> dict[str, object]:
+    return {
+        "allowed_root": runtime,
+        "repo_root": repo,
+        "integrity_key": INTEGRITY_KEY,
+        "replay_store_binding_digest": "sha256:" + "b" * 64,
+        "high_water_store": (
+            high_water_store
+            or _SqliteProposalReplayHighWaterStore(
+                runtime.parent / "proposal-high-water.sqlite3"
+            )
+        ),
+    }
 
 
 def _config_kwargs(
@@ -326,10 +504,70 @@ def _config_kwargs(
         public_key,
         principal_public_key=_public_text(principal_private),
     )
+    signer_runtime = runtime.parent / "signer-state"
+    peer_policy, peer_reasons = config_supply._peer_policy(
+        {1001: "github:mjtrout"},
+        (),
+    )
+    assert not peer_reasons and peer_policy is not None
+    unsigned_config = config_supply._config(
+        authority_profile=profile,
+        runtime_root=runtime.resolve(),
+        signer_runtime_root=signer_runtime.resolve(),
+        socket_path=(runtime / "reddog-signer.sock").resolve(),
+        principal_signing_key_ref="op://prod/principal/private",
+        principal_audit_mac_key_ref="op://prod/principal/audit",
+        reddog_signing_key_ref="op://prod/reddog/private",
+        reddog_audit_mac_key_ref="op://prod/reddog/audit",
+        peer_policy=peer_policy,
+        max_requests=2,
+        timeout_s=5.0,
+        max_request_bytes=16384,
+        max_response_bytes=16384,
+        principal_signer_agent_id="signer:principal",
+        reddog_signer_agent_id="signer:reddog",
+        control_loop_anchor_path=(
+            signer_runtime / "signer_control_loop_anchor.json"
+        ).resolve(),
+        proposal_authority_policy=policy,
+        proposal_policy_authorization=None,
+        proposal_nonce_store_path=(
+            signer_runtime / "architect_proposal_nonce_store.json"
+        ).resolve(),
+        proposal_replay_high_water_store_id=HIGH_WATER_STORE_ID,
+    )
+    security_context_digest = architect_proposal_security_context_digest(
+        SignerSocketServiceRuntimeWiringConfig(
+            repo_root=repo,
+            runtime_root=runtime.resolve(),
+            signer_runtime_root=signer_runtime.resolve(),
+            socket_path=(runtime / "reddog-signer.sock").resolve(),
+            peer_policy=peer_policy,
+            provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+            allow_test_only_key_material=False,
+            permission_snapshot_fresh=True,
+            max_requests=2,
+            timeout_s=5.0,
+            max_request_bytes=16384,
+            max_response_bytes=16384,
+            key_provider_profiles=tuple(
+                unsigned_config["key_provider_profiles"]
+            ),
+            control_loop_anchor_path=(
+                signer_runtime / "signer_control_loop_anchor.json"
+            ).resolve(),
+            proposal_authority_policy=policy,
+            proposal_nonce_store_path=(
+                signer_runtime
+                / "architect_proposal_nonce_store.json"
+            ).resolve(),
+            proposal_replay_high_water_store_id=HIGH_WATER_STORE_ID,
+        )
+    )
     values: dict[str, object] = {
         "repo_root": repo,
         "runtime_root": runtime,
-        "signer_runtime_root": runtime.parent / "signer-state",
+        "signer_runtime_root": signer_runtime,
         "authority_profile": profile,
         "output_path": runtime / "signer-service.json",
         "socket_path": runtime / "reddog-signer.sock",
@@ -339,17 +577,72 @@ def _config_kwargs(
         "reddog_audit_mac_key_ref": "op://prod/reddog/audit",
         "peer_uid_to_principal": {1001: "github:mjtrout"},
         "proposal_authority_policy": policy,
+        "proposal_replay_high_water_store_id": HIGH_WATER_STORE_ID,
         "proposal_policy_authorization": _policy_authorization(
             policy,
             principal_private=principal_private,
             public_key=public_key,
+            signer_runtime_root=signer_runtime,
+            security_context_digest=security_context_digest,
             profile=profile,
+        ),
+        "principal_key_resolver": _PrincipalKeyResolver(
+            _public_text(principal_private)
         ),
         "now_epoch": NOW,
         "max_requests": 2,
     }
     values.update(overrides)
     return values
+
+
+def _runtime_proposal_config(
+    *,
+    repo: Path,
+    runtime: Path,
+    signer_runtime: Path,
+    policy: ArchitectProposalSignerPolicy,
+    principal_private,
+    reddog_private,
+) -> SignerSocketServiceRuntimeWiringConfig:
+    profiles = _provider_profiles(reddog_private=reddog_private)
+    provisional = SignerSocketServiceRuntimeWiringConfig(
+        repo_root=repo,
+        runtime_root=runtime,
+        signer_runtime_root=signer_runtime,
+        socket_path=runtime / "signer.sock",
+        peer_policy=PeerCredentialPolicy(
+            uid_to_principal={1001: "github:mjtrout"},
+            allowed_gids=(),
+        ),
+        key_provider_profiles=profiles,
+        provider_mode=PROVIDER_MODE_TEST_ONLY_DRYRUN,
+        allow_test_only_key_material=True,
+        permission_snapshot_fresh=True,
+        control_loop_anchor_path=(
+            signer_runtime / "signer_control_loop_anchor.json"
+        ),
+        proposal_authority_policy=policy,
+        proposal_nonce_store_path=(
+            signer_runtime / "architect_proposal_nonce_store.json"
+        ),
+        proposal_replay_high_water_store_id=HIGH_WATER_STORE_ID,
+    )
+    security_digest = architect_proposal_security_context_digest(
+        provisional
+    )
+    authorization = _policy_authorization(
+        policy,
+        principal_private=principal_private,
+        public_key=_public_text(reddog_private),
+        signer_runtime_root=signer_runtime,
+        security_context_digest=security_digest,
+    )
+    return dataclasses.replace(
+        provisional,
+        proposal_policy_authorization=authorization,
+        proposal_security_context_digest=security_digest,
+    )
 
 
 def test_atomic_nonce_store_survives_restart_and_rejects_replay(
@@ -361,9 +654,7 @@ def test_atomic_nonce_store_survives_restart_and_rejects_replay(
     store_path = runtime / "proposal-nonces.json"
     first = AtomicProposalAuthenticityNonceStore(
         store_path,
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
     )
 
     reservation = first.reserve(
@@ -376,9 +667,7 @@ def test_atomic_nonce_store_survives_restart_and_rejects_replay(
 
     restarted = AtomicProposalAuthenticityNonceStore(
         store_path,
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
     )
     assert (
         restarted.reserve(
@@ -402,15 +691,11 @@ def test_atomic_nonce_store_rollback_and_racing_reservations(
     store_path = runtime / "proposal-nonces.json"
     first = AtomicProposalAuthenticityNonceStore(
         store_path,
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
     )
     second = AtomicProposalAuthenticityNonceStore(
         store_path,
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
     )
     initial = first.reserve(
         "rollback-nonce",
@@ -458,9 +743,13 @@ def test_atomic_nonce_store_rejects_repo_path_and_malformed_state(
     with pytest.raises(ValueError):
         AtomicProposalAuthenticityNonceStore(
             repo / "nonce.json",
-            allowed_root=repo,
+            allowed_root=runtime,
             repo_root=repo,
             integrity_key=INTEGRITY_KEY,
+            replay_store_binding_digest="sha256:" + "b" * 64,
+            high_water_store=InMemoryProposalReplayHighWaterStore(
+                HIGH_WATER_STORE_ID
+            ),
         )
 
     store_path = runtime / "proposal-nonces.json"
@@ -468,9 +757,7 @@ def test_atomic_nonce_store_rejects_repo_path_and_malformed_state(
     store_path.write_text('{"schema_version":"wrong"}', encoding="utf-8")
     store = AtomicProposalAuthenticityNonceStore(
         store_path,
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
     )
     with pytest.raises(ValueError):
         store.reserve(
@@ -489,9 +776,7 @@ def test_atomic_nonce_store_rejects_structurally_valid_state_tampering(
     store_path = runtime / "proposal-nonces.json"
     store = AtomicProposalAuthenticityNonceStore(
         store_path,
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
     )
     reservation = store.reserve(
         "tamper-nonce",
@@ -509,9 +794,7 @@ def test_atomic_nonce_store_rejects_structurally_valid_state_tampering(
 
     restarted = AtomicProposalAuthenticityNonceStore(
         store_path,
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
     )
     with pytest.raises(
         ValueError,
@@ -533,9 +816,7 @@ def test_atomic_nonce_store_prunes_expired_crash_state_and_is_bounded(
     now = [NOW]
     store = AtomicProposalAuthenticityNonceStore(
         runtime / "proposal-nonces.json",
-        allowed_root=runtime,
-        repo_root=repo,
-        integrity_key=INTEGRITY_KEY,
+        **_nonce_store_kwargs(repo, runtime),
         clock=lambda: now[0],
         clock_skew_seconds=2,
         retention_seconds=4,
@@ -576,9 +857,22 @@ def test_atomic_nonce_store_serializes_cross_process_reservation(
     repo = tmp_path / "repo"
     runtime = tmp_path / "signer-state"
     repo.mkdir()
+    high_water_path = tmp_path / "proposal-high-water.sqlite3"
     jobs = [
-        (str(repo), str(runtime), "process-race", NOW + 60),
-        (str(repo), str(runtime), "process-race", NOW + 60),
+        (
+            str(repo),
+            str(runtime),
+            str(high_water_path),
+            "process-race",
+            NOW + 60,
+        ),
+        (
+            str(repo),
+            str(runtime),
+            str(high_water_path),
+            "process-race",
+            NOW + 60,
+        ),
     ]
     with ProcessPoolExecutor(
         max_workers=2,
@@ -586,6 +880,116 @@ def test_atomic_nonce_store_serializes_cross_process_reservation(
     ) as executor:
         results = list(executor.map(_reserve_nonce_process, jobs))
     assert sum(results) == 1
+
+
+def test_atomic_nonce_store_rejects_state_rollback_and_deletion(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "signer-state"
+    repo.mkdir()
+    store_path = runtime / "proposal-nonces.json"
+    high_water = InMemoryProposalReplayHighWaterStore(
+        HIGH_WATER_STORE_ID
+    )
+    store = AtomicProposalAuthenticityNonceStore(
+        store_path,
+        **_nonce_store_kwargs(
+            repo,
+            runtime,
+            high_water_store=high_water,
+        ),
+    )
+    first = store.reserve(
+        "nonce-1",
+        expires_at=NOW + 60,
+        subject="github:mjtrout",
+    )
+    assert first
+    store.commit(first)
+    old_state = store_path.read_bytes()
+
+    second = store.reserve(
+        "nonce-2",
+        expires_at=NOW + 60,
+        subject="github:mjtrout",
+    )
+    assert second
+    store.commit(second)
+    current_state = store_path.read_bytes()
+
+    store_path.write_bytes(old_state)
+    with pytest.raises(ValueError, match="rollback_detected"):
+        store.reserve(
+            "nonce-3",
+            expires_at=NOW + 60,
+            subject="github:mjtrout",
+        )
+
+    store_path.write_bytes(current_state)
+    store_path.unlink()
+    with pytest.raises(ValueError, match="rollback_detected"):
+        store.reserve(
+            "nonce-4",
+            expires_at=NOW + 60,
+            subject="github:mjtrout",
+        )
+
+    store_path.write_bytes(current_state)
+
+
+def test_atomic_nonce_store_recovers_state_commit_before_high_water_advance(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "signer-state"
+    repo.mkdir()
+    high_water = _FailOnceProposalReplayHighWaterStore(
+        HIGH_WATER_STORE_ID
+    )
+    store_path = runtime / "proposal-nonces.json"
+    store = AtomicProposalAuthenticityNonceStore(
+        store_path,
+        **_nonce_store_kwargs(
+            repo,
+            runtime,
+            high_water_store=high_water,
+        ),
+    )
+
+    with pytest.raises(OSError, match="simulated_high_water_outage"):
+        store.reserve(
+            "crash-window-nonce",
+            expires_at=NOW + 60,
+            subject="github:mjtrout",
+        )
+
+    restarted = AtomicProposalAuthenticityNonceStore(
+        store_path,
+        **_nonce_store_kwargs(
+            repo,
+            runtime,
+            high_water_store=high_water,
+        ),
+    )
+    assert (
+        restarted.reserve(
+            "crash-window-nonce",
+            expires_at=NOW + 60,
+            subject="github:mjtrout",
+        )
+        is None
+    )
+    recovered = high_water.load("sha256:" + "b" * 64)
+    assert recovered is not None
+    assert recovered.sequence == 1
+
+
+def test_ed25519_signature_decoder_rejects_noncanonical_suffix() -> None:
+    canonical = encode_ed25519_signature(b"s" * 64)
+    assert decode_ed25519_signature(canonical) == b"s" * 64
+    assert decode_ed25519_signature(canonical + "A") is None
+    assert decode_ed25519_signature(canonical + "=") is None
 
 
 def test_config_supply_binds_exact_policy_and_confined_nonce_store(
@@ -599,15 +1003,19 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     runtime = tmp_path / "runtime"
     repo.mkdir()
 
-    result = run_reddog_signer_socket_service_config_supply(
-        **_config_kwargs(
-            repo,
-            runtime,
-            public_key,
-            policy,
-            principal_private,
-        )
+    kwargs = _config_kwargs(
+        repo,
+        runtime,
+        public_key,
+        policy,
+        principal_private,
     )
+    authorization = kwargs["proposal_policy_authorization"]
+    assert isinstance(
+        authorization,
+        ArchitectProposalPolicyAuthorization,
+    )
+    result = run_reddog_signer_socket_service_config_supply(**kwargs)
 
     assert result.accepted is True
     assert result.proposal_policy_configured is True
@@ -619,20 +1027,18 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
         config["proposal_authority_policy"]["expected_payload"]
         == policy.expected_payload.to_dict()
     )
-    assert result.profile_count == 2
+    assert result.profile_count == 1
     assert [
         item["signer_profile_id"]
         for item in config["key_provider_profiles"]
-    ] == ["principal-identity", "reddog-work-authority"]
+    ] == ["reddog-work-authority"]
+    assert "principal/private" not in json.dumps(config, sort_keys=True)
+    assert "control_loop_authority_policy" not in config
     assert (
         config["proposal_policy_authorization"][
             "proposal_policy_digest"
         ]
-        == _policy_authorization(
-            policy,
-            principal_private=principal_private,
-            public_key=public_key,
-        ).proposal_policy_digest
+        == authorization.proposal_policy_digest
     )
     nonce_path = Path(config["proposal_nonce_store_path"])
     assert nonce_path.parent == (tmp_path / "signer-state").resolve()
@@ -647,6 +1053,41 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     )
     assert rehydrated is not None
     assert rehydrated.proposal_nonce_store_path == nonce_path
+    assert (
+        rehydrated.proposal_replay_high_water_store_id
+        == HIGH_WATER_STORE_ID
+    )
+    assert hmac.compare_digest(
+        architect_proposal_security_context_digest(rehydrated),
+        str(rehydrated.proposal_security_context_digest),
+    )
+    bootstrap = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=runtime / "signer-service.json",
+        resolver=_Resolver(private_key),
+        serve_bounded=lambda **kwargs: (
+            IsolatedSignerSocketResidentServiceResult(
+                accepted=True,
+                status=SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
+                rejection_reasons=(),
+                socket_path=str(kwargs["socket_path"]),
+                requests_handled=0,
+                response_digests=(),
+                socket_removed=True,
+            )
+        ),
+        expected_config_digest=result.config_digest,
+        principal_key_resolver=_PrincipalKeyResolver(
+            _public_text(principal_private)
+        ),
+        proposal_replay_high_water_store=(
+            InMemoryProposalReplayHighWaterStore(
+                HIGH_WATER_STORE_ID
+            )
+        ),
+    )
+    assert bootstrap.rejection_reasons == ()
+    assert bootstrap.accepted is True
 
 
 def test_config_supply_requires_valid_principal_signed_policy_authorization(
@@ -734,6 +1175,14 @@ def test_config_supply_requires_valid_principal_signed_policy_authorization(
             policy,
             principal_private=principal_private,
             public_key=public_key,
+            signer_runtime_root=(
+                tmp_path / "expired" / ".." / "signer-state"
+            ).resolve(),
+            security_context_digest=str(
+                expired_kwargs[
+                    "proposal_policy_authorization"
+                ].security_context_digest
+            ),
             issued_at=NOW - 400,
             expires_at=NOW - 1,
         )
@@ -745,6 +1194,76 @@ def test_config_supply_requires_valid_principal_signed_policy_authorization(
     assert expired.rejection_reasons == (
         FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     )
+
+
+def test_config_supply_rejects_self_asserted_principal_and_config_substitution(
+    tmp_path: Path,
+) -> None:
+    reddog_private = _private_key()
+    attacker_private = _private_key()
+    trusted_private = _private_key()
+    public_key = _public_text(reddog_private)
+    policy = ArchitectProposalSignerPolicy(_payload(public_key))
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    self_asserted = _config_kwargs(
+        repo,
+        tmp_path / "self-asserted",
+        public_key,
+        policy,
+        attacker_private,
+    )
+    self_asserted["principal_key_resolver"] = _PrincipalKeyResolver(
+        _public_text(trusted_private)
+    )
+    rejected = run_reddog_signer_socket_service_config_supply(
+        **self_asserted
+    )
+    assert rejected.accepted is False
+    assert rejected.rejection_reasons == (
+        FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+    )
+
+    missing_resolver = _config_kwargs(
+        repo,
+        tmp_path / "missing-resolver",
+        public_key,
+        policy,
+        trusted_private,
+    )
+    missing_resolver.pop("principal_key_resolver")
+    rejected = run_reddog_signer_socket_service_config_supply(
+        **missing_resolver
+    )
+    assert rejected.accepted is False
+    assert rejected.rejection_reasons == (
+        FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+    )
+
+    for field, replacement in (
+        ("max_requests", 3),
+        ("reddog_signing_key_ref", "op://prod/reddog/other-private"),
+        ("signer_runtime_root", tmp_path / "other-signer-state"),
+    ):
+        substituted = _config_kwargs(
+            repo,
+            tmp_path / ("substituted-" + field),
+            public_key,
+            policy,
+            trusted_private,
+        )
+        substituted[field] = replacement
+        result = run_reddog_signer_socket_service_config_supply(
+            **substituted
+        )
+        assert result.accepted is False
+        assert (
+            FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID
+            in result.rejection_reasons
+            or FAIL_SIGNER_CONFIG_PROPOSAL_NONCE_PATH_INVALID
+            in result.rejection_reasons
+        )
 
 
 @pytest.mark.parametrize(
@@ -803,7 +1322,12 @@ class _Resolver:
     def __init__(self, private_key, principal_private=None) -> None:
         self._values = {
             "op://test/reddog/private": _private_key_secret(private_key),
+            "op://prod/reddog/private": _private_key_secret(private_key),
             "op://test/reddog/audit": (
+                AUDIT_KEY_PREFIX
+                + base64.b64encode(b"a" * 32).decode("ascii")
+            ),
+            "op://prod/reddog/audit": (
                 AUDIT_KEY_PREFIX
                 + base64.b64encode(b"a" * 32).decode("ascii")
             ),
@@ -814,7 +1338,14 @@ class _Resolver:
                     "op://test/principal/private": (
                         _private_key_secret(principal_private)
                     ),
+                    "op://prod/principal/private": (
+                        _private_key_secret(principal_private)
+                    ),
                     "op://test/principal/audit": (
+                        AUDIT_KEY_PREFIX
+                        + base64.b64encode(b"p" * 32).decode("ascii")
+                    ),
+                    "op://prod/principal/audit": (
                         AUDIT_KEY_PREFIX
                         + base64.b64encode(b"p" * 32).decode("ascii")
                     ),
@@ -848,6 +1379,9 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
     signer_runtime = tmp_path / "signer-state"
     repo.mkdir()
     captured: dict[str, object] = {}
+    proposal_high_water_store = InMemoryProposalReplayHighWaterStore(
+        HIGH_WATER_STORE_ID
+    )
 
     def serve(**kwargs):
         captured.update(kwargs)
@@ -861,44 +1395,23 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
             socket_removed=True,
         )
 
-    profiles = _provider_profiles(
+    config = _runtime_proposal_config(
+        repo=repo,
+        runtime=runtime,
+        signer_runtime=signer_runtime,
+        policy=policy,
         principal_private=principal_private,
         reddog_private=private_key,
-    )
-    authority_profile = _profile(
-        public_key,
-        principal_public_key=_public_text(principal_private),
-    )
-    authorization = _policy_authorization(
-        policy,
-        principal_private=principal_private,
-        public_key=public_key,
-        profile=authority_profile,
-    )
-    config = SignerSocketServiceRuntimeWiringConfig(
-        repo_root=repo,
-        runtime_root=runtime,
-        signer_runtime_root=signer_runtime,
-        socket_path=runtime / "signer.sock",
-        peer_policy=PeerCredentialPolicy(
-            uid_to_principal={1001: "github:mjtrout"},
-            allowed_gids=(),
-        ),
-        key_provider_profiles=profiles,
-        provider_mode=PROVIDER_MODE_TEST_ONLY_DRYRUN,
-        allow_test_only_key_material=True,
-        permission_snapshot_fresh=True,
-        control_loop_anchor_path=None,
-        control_loop_authority_policy=None,
-        proposal_authority_policy=policy,
-        proposal_policy_authorization=authorization,
-        proposal_nonce_store_path=signer_runtime / "proposal-nonces.json",
     )
 
     result = run_reddog_signer_socket_service_runtime_wiring(
         config,
-        _Resolver(private_key, principal_private),
+        _Resolver(private_key),
         serve_bounded=serve,
+        principal_key_resolver=_PrincipalKeyResolver(
+            _public_text(principal_private)
+        ),
+        proposal_replay_high_water_store=proposal_high_water_store,
     )
 
     assert result.accepted is True
@@ -915,10 +1428,23 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
     restarted = dataclasses.replace(
         backend,
         proposal_nonce_store=AtomicProposalAuthenticityNonceStore(
-            signer_runtime / "proposal-nonces.json",
+            signer_runtime / "architect_proposal_nonce_store.json",
             allowed_root=signer_runtime,
             repo_root=repo,
             integrity_key=b"a" * 32,
+            high_water_store=proposal_high_water_store,
+            replay_store_binding_digest=(
+                architect_proposal_replay_store_binding_digest(
+                    architect_proposal_signer_instance_id(
+                        signer_runtime,
+                        public_key,
+                        "epoch-1",
+                    ),
+                    signer_runtime
+                    / "architect_proposal_nonce_store.json",
+                    HIGH_WATER_STORE_ID,
+                )
+            ),
         ),
     )
     replay = restarted.sign(
@@ -979,6 +1505,181 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
     assert failed.signature == ""
     assert failed.audit_mac == ""
     assert fail_store.rolled_back is True
+
+
+def test_runtime_consumes_policy_authorization_nonce_once(
+    tmp_path: Path,
+) -> None:
+    reddog_private = _private_key()
+    principal_private = _private_key()
+    public_key = _public_text(reddog_private)
+    policy = ArchitectProposalSignerPolicy(_payload(public_key))
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    signer_runtime = tmp_path / "signer-state"
+    repo.mkdir()
+    config = _runtime_proposal_config(
+        repo=repo,
+        runtime=runtime,
+        signer_runtime=signer_runtime,
+        policy=policy,
+        principal_private=principal_private,
+        reddog_private=reddog_private,
+    )
+
+    def serve(**kwargs):
+        return IsolatedSignerSocketResidentServiceResult(
+            accepted=True,
+            status=SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
+            rejection_reasons=(),
+            socket_path=str(kwargs["socket_path"]),
+            requests_handled=0,
+            response_digests=(),
+            socket_removed=True,
+        )
+
+    principal_resolver = _PrincipalKeyResolver(
+        _public_text(principal_private)
+    )
+    high_water_store = InMemoryProposalReplayHighWaterStore(
+        HIGH_WATER_STORE_ID
+    )
+    first = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _Resolver(reddog_private),
+        serve_bounded=serve,
+        principal_key_resolver=principal_resolver,
+        proposal_replay_high_water_store=high_water_store,
+    )
+    second = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _Resolver(reddog_private),
+        serve_bounded=serve,
+        principal_key_resolver=principal_resolver,
+        proposal_replay_high_water_store=high_water_store,
+    )
+
+    assert first.accepted is True
+    assert second.accepted is False
+    assert second.rejection_reasons == (
+        FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+    )
+
+
+def test_runtime_requires_matching_independent_high_water_authority(
+    tmp_path: Path,
+) -> None:
+    reddog_private = _private_key()
+    principal_private = _private_key()
+    policy = ArchitectProposalSignerPolicy(
+        _payload(_public_text(reddog_private))
+    )
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    signer_runtime = tmp_path / "signer-state"
+    repo.mkdir()
+    config = _runtime_proposal_config(
+        repo=repo,
+        runtime=runtime,
+        signer_runtime=signer_runtime,
+        policy=policy,
+        principal_private=principal_private,
+        reddog_private=reddog_private,
+    )
+    common = {
+        "serve_bounded": lambda **kwargs: pytest.fail(
+            "signer service reached without matching high-water authority"
+        ),
+        "principal_key_resolver": _PrincipalKeyResolver(
+            _public_text(principal_private)
+        ),
+    }
+
+    missing = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _Resolver(reddog_private),
+        **common,
+    )
+    mismatched = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _Resolver(reddog_private),
+        proposal_replay_high_water_store=(
+            InMemoryProposalReplayHighWaterStore("wrong-authority")
+        ),
+        **common,
+    )
+
+    assert missing.accepted is False
+    assert mismatched.accepted is False
+    assert missing.rejection_reasons == (
+        FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+    )
+    assert mismatched.rejection_reasons == (
+        FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+    )
+
+
+def test_runtime_never_reuses_authorization_after_service_signs_then_raises(
+    tmp_path: Path,
+) -> None:
+    reddog_private = _private_key()
+    principal_private = _private_key()
+    public_key = _public_text(reddog_private)
+    policy = ArchitectProposalSignerPolicy(_payload(public_key))
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    signer_runtime = tmp_path / "signer-state"
+    repo.mkdir()
+    config = _runtime_proposal_config(
+        repo=repo,
+        runtime=runtime,
+        signer_runtime=signer_runtime,
+        policy=policy,
+        principal_private=principal_private,
+        reddog_private=reddog_private,
+    )
+    high_water = InMemoryProposalReplayHighWaterStore(
+        HIGH_WATER_STORE_ID
+    )
+    service_calls = 0
+    signed = []
+
+    def sign_then_raise(**kwargs):
+        nonlocal service_calls
+        service_calls += 1
+        signed.append(
+            kwargs["backend"].sign(
+                _signing_request(policy.expected_payload),
+                _peer(),
+            )
+        )
+        raise RuntimeError("service_failed_after_signing")
+
+    principal_resolver = _PrincipalKeyResolver(
+        _public_text(principal_private)
+    )
+    first = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _Resolver(reddog_private),
+        serve_bounded=sign_then_raise,
+        principal_key_resolver=principal_resolver,
+        proposal_replay_high_water_store=high_water,
+    )
+    second = run_reddog_signer_socket_service_runtime_wiring(
+        config,
+        _Resolver(reddog_private),
+        serve_bounded=sign_then_raise,
+        principal_key_resolver=principal_resolver,
+        proposal_replay_high_water_store=high_water,
+    )
+
+    assert signed and signed[0].accepted is True
+    assert first.accepted is False
+    assert second.accepted is False
+    assert service_calls == 1
+    assert second.rejection_reasons == (
+        FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+    )
 
 
 def test_bootstrap_rejects_tampered_serialized_proposal_policy(
@@ -1093,67 +1794,44 @@ def test_runtime_config_rejects_partial_or_mismatched_proposal_wiring(
     runtime = tmp_path / "runtime"
     signer_runtime = tmp_path / "signer-state"
     repo.mkdir()
-    profiles = _provider_profiles(
+    policy = ArchitectProposalSignerPolicy(_payload(public_key))
+    valid = _runtime_proposal_config(
+        repo=repo,
+        runtime=runtime,
+        signer_runtime=signer_runtime,
+        policy=policy,
         principal_private=principal_private,
         reddog_private=private_key,
     )
-    policy = ArchitectProposalSignerPolicy(_payload(public_key))
-    authorization = _policy_authorization(
-        policy,
-        principal_private=principal_private,
-        public_key=public_key,
+    missing_store = dataclasses.replace(
+        valid,
+        proposal_nonce_store_path=None,
     )
-    base = {
-        "repo_root": repo,
-        "runtime_root": runtime,
-        "signer_runtime_root": signer_runtime,
-        "socket_path": runtime / "signer.sock",
-        "peer_policy": PeerCredentialPolicy(
-            uid_to_principal={1001: "github:mjtrout"},
-            allowed_gids=(),
-        ),
-        "key_provider_profiles": profiles,
-        "provider_mode": PROVIDER_MODE_TEST_ONLY_DRYRUN,
-        "allow_test_only_key_material": True,
-        "permission_snapshot_fresh": True,
-        "proposal_policy_authorization": authorization,
-    }
-    missing_store = SignerSocketServiceRuntimeWiringConfig(
-        **base,
-        proposal_authority_policy=policy,
-    )
-    mismatched_key = SignerSocketServiceRuntimeWiringConfig(
-        **base,
+    mismatched_key = dataclasses.replace(
+        valid,
         proposal_authority_policy=ArchitectProposalSignerPolicy(
             _payload(other_key)
         ),
-        proposal_nonce_store_path=signer_runtime / "proposal-nonces.json",
     )
-    substituted_profile = SignerSocketServiceRuntimeWiringConfig(
-        **{
-            **base,
-            "key_provider_profiles": (
-                profiles[0],
-                dataclasses.replace(
-                    profiles[1],
-                    signer_profile_id="principal-identity",
-                ),
+    substituted_profile = dataclasses.replace(
+        valid,
+        key_provider_profiles=(
+            dataclasses.replace(
+                valid.key_provider_profiles[0],
+                signer_profile_id="principal-identity",
             ),
-        },
-        proposal_authority_policy=policy,
-        proposal_nonce_store_path=signer_runtime / "proposal-nonces.json",
+        ),
     )
-    excessive_ttl = SignerSocketServiceRuntimeWiringConfig(
-        **base,
+    excessive_ttl = dataclasses.replace(
+        valid,
         proposal_authority_policy=ArchitectProposalSignerPolicy(
             _payload(public_key),
             max_ttl_seconds=301,
         ),
-        proposal_nonce_store_path=signer_runtime / "proposal-nonces.json",
     )
 
     assert validate_signer_socket_service_runtime_config(missing_store) == (
-        FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+        FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     )
     assert validate_signer_socket_service_runtime_config(mismatched_key) == (
         FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,

@@ -5,15 +5,18 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
+import stat
+import threading
 import time
+from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Iterator, Mapping, Protocol, runtime_checkable
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
 )
-
-
 PROPOSAL_NONCE_STORE_SCHEMA_VERSION = (
     "reddog_architect_proposal_nonce_store.v1"
 )
@@ -23,6 +26,78 @@ DEFAULT_PROPOSAL_NONCE_RETENTION_SECONDS = 300
 DEFAULT_PROPOSAL_NONCE_MAX_ENTRIES = 2048
 _MIN_INTEGRITY_KEY_BYTES = 16
 _STATE_MAC_PREFIX = "proposal-nonce-state-mac-v1:"
+
+
+@dataclass(frozen=True)
+class ProposalReplayHighWater:
+    sequence: int
+    state_revision: str
+
+
+@runtime_checkable
+class ProposalReplayHighWaterStore(Protocol):
+    """Independent monotonic authority outside the nonce-state rollback domain."""
+
+    @property
+    def store_id(self) -> str: ...
+
+    def load(
+        self,
+        replay_store_binding_digest: str,
+    ) -> ProposalReplayHighWater | None: ...
+
+    def advance(
+        self,
+        replay_store_binding_digest: str,
+        *,
+        expected: ProposalReplayHighWater | None,
+        next_value: ProposalReplayHighWater,
+    ) -> None: ...
+
+
+class InMemoryProposalReplayHighWaterStore:
+    """Thread-safe independent high-water authority for deterministic tests."""
+
+    def __init__(self, store_id: str = "in-memory:test-only") -> None:
+        if not _text(store_id) or not store_id.isascii():
+            raise ValueError("proposal_replay_high_water_store_id_invalid")
+        self._store_id = store_id
+        self._values: dict[str, ProposalReplayHighWater] = {}
+        self._lock = threading.Lock()
+
+    @property
+    def store_id(self) -> str:
+        return self._store_id
+
+    def load(
+        self,
+        replay_store_binding_digest: str,
+    ) -> ProposalReplayHighWater | None:
+        with self._lock:
+            return self._values.get(replay_store_binding_digest)
+
+    def advance(
+        self,
+        replay_store_binding_digest: str,
+        *,
+        expected: ProposalReplayHighWater | None,
+        next_value: ProposalReplayHighWater,
+    ) -> None:
+        with self._lock:
+            current = self._values.get(replay_store_binding_digest)
+            if current != expected:
+                raise RuntimeError(
+                    "proposal_replay_high_water_conflict"
+                )
+            if (
+                next_value.sequence
+                != (current.sequence + 1 if current is not None else 1)
+                or not _text(next_value.state_revision)
+            ):
+                raise ValueError(
+                    "proposal_replay_high_water_invalid"
+                )
+            self._values[replay_store_binding_digest] = next_value
 
 
 class AtomicProposalAuthenticityNonceStore:
@@ -35,6 +110,8 @@ class AtomicProposalAuthenticityNonceStore:
         allowed_root: Path | str,
         repo_root: Path | str,
         integrity_key: bytes,
+        replay_store_binding_digest: str,
+        high_water_store: ProposalReplayHighWaterStore,
         clock: Callable[[], float] = time.time,
         clock_skew_seconds: int = (
             DEFAULT_PROPOSAL_NONCE_CLOCK_SKEW_SECONDS
@@ -65,7 +142,23 @@ class AtomicProposalAuthenticityNonceStore:
             allowed_root=allowed_root,
             repo_root=repo_root,
         )
+        if not _sha256(replay_store_binding_digest):
+            raise ValueError(
+                "proposal_authenticity_nonce_replay_binding_invalid"
+            )
         self._integrity_key = integrity_key
+        self._replay_store_binding_digest = (
+            replay_store_binding_digest
+        )
+        if not isinstance(
+            high_water_store,
+            ProposalReplayHighWaterStore,
+        ):
+            raise ValueError(
+                "proposal_authenticity_high_water_store_invalid"
+            )
+        self._high_water_store = high_water_store
+        self._operation_lock_path = Path(str(self._store.path) + ".lock")
         self._clock = clock
         self._clock_skew_seconds = clock_skew_seconds
         self._retention_seconds = retention_seconds
@@ -192,20 +285,69 @@ class AtomicProposalAuthenticityNonceStore:
         ],
     ) -> Any:
         for _ in range(_MAX_COMMIT_RETRIES):
-            state = self._store.load()
-            updated, result = mutation(state)
-            if updated is state:
-                return result
-            try:
-                self._store.commit(
-                    _seal_state(updated, self._integrity_key),
-                    expected_revision=state.get("revision"),
-                )
-                return result
-            except RuntimeError as exc:
-                if str(exc) != "revision_conflict":
-                    raise
+            with _cross_session_file_lock(self._operation_lock_path):
+                state, high_water = self._load_state()
+                updated, result = mutation(state)
+                if updated is state:
+                    return result
+                try:
+                    state_revision = self._store.commit(
+                        _seal_state(updated, self._integrity_key),
+                        expected_revision=state.get("revision"),
+                    )
+                    next_value = ProposalReplayHighWater(
+                        sequence=int(updated["sequence"]),
+                        state_revision=state_revision,
+                    )
+                    self._high_water_store.advance(
+                        self._replay_store_binding_digest,
+                        expected=high_water,
+                        next_value=next_value,
+                    )
+                    return result
+                except RuntimeError as exc:
+                    if str(exc) not in {
+                        "revision_conflict",
+                        "proposal_replay_high_water_conflict",
+                    }:
+                        raise
         raise RuntimeError("proposal_authenticity_nonce_store_conflict")
+
+    def _load_state(
+        self,
+    ) -> tuple[dict[str, Any], ProposalReplayHighWater | None]:
+        state = self._store.load()
+        high_water = self._high_water_store.load(
+            self._replay_store_binding_digest
+        )
+        if not state:
+            if high_water is None:
+                return {}, None
+            raise ValueError(
+                "proposal_authenticity_nonce_store_rollback_detected"
+            )
+        _validate_state_integrity(state, self._integrity_key)
+        state_value = ProposalReplayHighWater(
+            sequence=int(state.get("sequence") or 0),
+            state_revision=str(state.get("revision") or ""),
+        )
+        if high_water == state_value:
+            return state, high_water
+        expected_sequence = (
+            high_water.sequence + 1
+            if high_water is not None
+            else 1
+        )
+        if state_value.sequence != expected_sequence:
+            raise ValueError(
+                "proposal_authenticity_nonce_store_rollback_detected"
+            )
+        self._high_water_store.advance(
+            self._replay_store_binding_digest,
+            expected=high_water,
+            next_value=state_value,
+        )
+        return state, state_value
 
 
 def _validated_entries(
@@ -220,8 +362,11 @@ def _validated_entries(
         raise ValueError("proposal_authenticity_nonce_store_schema_invalid")
     raw_consumed = state.get("consumed")
     raw_reserved = state.get("reservations")
-    if not isinstance(raw_consumed, Mapping) or not isinstance(
-        raw_reserved, Mapping
+    if (
+        type(state.get("sequence")) is not int
+        or int(state["sequence"]) < 1
+        or not isinstance(raw_consumed, Mapping)
+        or not isinstance(raw_reserved, Mapping)
     ):
         raise ValueError("proposal_authenticity_nonce_store_state_invalid")
     consumed = _entry_mapping(raw_consumed, consumed=True)
@@ -258,6 +403,7 @@ def _entry_mapping(
 def _base_state(state: Mapping[str, Any]) -> dict[str, Any]:
     allowed = {
         "schema_version",
+        "sequence",
         "consumed",
         "reservations",
         "revision",
@@ -265,7 +411,10 @@ def _base_state(state: Mapping[str, Any]) -> dict[str, Any]:
     }
     if state and not set(state).issubset(allowed):
         raise ValueError("proposal_authenticity_nonce_store_state_invalid")
-    return {"schema_version": PROPOSAL_NONCE_STORE_SCHEMA_VERSION}
+    return {
+        "schema_version": PROPOSAL_NONCE_STORE_SCHEMA_VERSION,
+        "sequence": int(state.get("sequence") or 0) + 1,
+    }
 
 
 def _nonce_key(subject: str, nonce: str) -> str:
@@ -349,6 +498,42 @@ def _state_mac(state: Mapping[str, Any], integrity_key: bytes) -> str:
     ).hexdigest()
 
 
+@contextmanager
+def _cross_session_file_lock(path: Path) -> Iterator[None]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    flags = os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags, 0o600)
+    try:
+        file_stat = os.fstat(descriptor)
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise ValueError(
+                "proposal_authenticity_nonce_lock_invalid"
+            )
+        if file_stat.st_size == 0:
+            os.write(descriptor, b"\0")
+            os.fsync(descriptor)
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        if os.name == "nt":
+            import msvcrt
+
+            msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
+            try:
+                yield
+            finally:
+                os.lseek(descriptor, 0, os.SEEK_SET)
+                msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(descriptor, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
+    finally:
+        os.close(descriptor)
+
+
 def _digest(value: Any) -> str:
     raw = json.dumps(
         value,
@@ -364,10 +549,20 @@ def _text(value: Any) -> str:
     return value.strip() if isinstance(value, str) else ""
 
 
+def _sha256(value: Any) -> bool:
+    text = _text(value)
+    return len(text) == 71 and text.startswith("sha256:") and all(
+        char in "0123456789abcdef" for char in text[7:]
+    )
+
+
 __all__ = [
     "AtomicProposalAuthenticityNonceStore",
     "DEFAULT_PROPOSAL_NONCE_CLOCK_SKEW_SECONDS",
     "DEFAULT_PROPOSAL_NONCE_MAX_ENTRIES",
     "DEFAULT_PROPOSAL_NONCE_RETENTION_SECONDS",
+    "InMemoryProposalReplayHighWaterStore",
+    "ProposalReplayHighWater",
+    "ProposalReplayHighWaterStore",
     "PROPOSAL_NONCE_STORE_SCHEMA_VERSION",
 ]

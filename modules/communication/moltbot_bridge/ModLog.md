@@ -3,31 +3,38 @@
 - Extended the existing signer config, bootstrap, key-provider, and runtime
   wiring so one exact architect-proposal signer policy can be provisioned only
   against the configured RedDog signer profile.
-- Added a signer-owned atomic proposal nonce store under the isolated signer
-  runtime root. Every state is MAC-bound to the signer audit key and revision
-  checked; bounded retention recovers expired crash reservations without
-  allowing still-valid replay or unbounded state growth.
+- Added a signer-owned atomic proposal nonce store bound to an independently
+  injected monotonic high-water authority outside the nonce-state rollback
+  domain. The signed authority identifier, MAC, sequence, revision,
+  cross-session file lock, and one-step crash roll-forward make rollback,
+  deletion, mismatched authority, and tampering fail closed while bounded
+  retention prevents unbounded growth.
 - Required the proposal payload identity, signer key, key epoch, consensus
   receipt, authority-profile source, and TTL to match the supplied authority
   profile before a signer configuration can be written, with a fixed
   protocol-level TTL ceiling and an exact RedDog signer profile.
 - Required a fresh principal-signed, domain-separated authorization over the
-  exact proposal policy. The signer resolves both WSP71 key profiles to prove
-  their configured public keys, but exposes only the RedDog 0102 proposal
-  backend; the principal key remains verification-only and cannot become a
-  generic socket signing oracle.
+  exact proposal policy, signer instance, replay namespace, and normalized
+  runtime security context. An independent principal resolver supplies only
+  the trusted public verification key; WSP71 resolves only the RedDog 0102
+  proposal profile, so no principal private key enters the proposal service.
 - Rehydrated and revalidated the exact serialized proposal policy at bootstrap;
   launch requires an expected digest supplied outside the config file, and
   partial, unsigned, expired, tampered, self-consistently re-digested,
   mismatched-key, profile-substituted, or out-of-root pairs never reach the
   signer backend.
-- Restricted a proposal-enabled signer backend to the proposal domain plus its
-  separately configured control-loop domain. Unknown and generic signing
-  operations cannot reuse that private key during the proposal service run.
+- Restricted a proposal-enabled signer backend to the proposal domain only.
+  Unknown, generic, and control-loop signing operations cannot reuse that
+  private key during the proposal service run.
+- Consumed principal policy authorization before exposing the signer backend.
+  A service rejection or exception after signing cannot roll authorization
+  back or reuse it on another launch.
 - Preserved the authority boundary: this slice provisions signer policy and
   durable replay state only. It does not derive proposal facts from
   authoritative work state, produce an attestation in the resident loop,
   produce the principal policy authorization in the resident loop,
+  configure the production principal-key resolver,
+  supply the independently administered production high-water authority,
   satisfy the proposal-admission capability, promote a queue item, execute a
   worker, or grant merge authority (WSP 00, 15, 22, 50, 62, 97).
 

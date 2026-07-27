@@ -12,6 +12,7 @@ import hashlib
 import json
 import threading
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any, Mapping, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
@@ -110,11 +111,15 @@ class ArchitectProposalPolicyAuthorization:
     authorization_id: str
     proposal_policy_digest: str
     principal_id: str
+    principal_provider: str
     principal_public_key: str
     reddog_id: str
     reddog_public_key: str
     key_epoch: str
     authority_profile_source_receipt_id: str
+    signer_instance_id: str
+    replay_store_binding_digest: str
+    security_context_digest: str
     nonce: str
     issued_at: int
     expires_at: int
@@ -333,15 +338,52 @@ def architect_proposal_signer_policy_digest(
     )
 
 
+def architect_proposal_signer_instance_id(
+    signer_runtime_root: Path | str,
+    reddog_public_key: str,
+    key_epoch: str,
+) -> str:
+    """Bind one proposal signer instance to its key and runtime root."""
+
+    root = Path(signer_runtime_root).resolve()
+    return "reddog-proposal-signer:" + _digest(
+        {
+            "key_epoch": _text(key_epoch),
+            "reddog_public_key": _text(reddog_public_key),
+            "signer_runtime_root": str(root),
+        }
+    )[7:39]
+
+
+def architect_proposal_replay_store_binding_digest(
+    signer_instance_id: str,
+    nonce_store_path: Path | str,
+    high_water_store_id: str,
+) -> str:
+    """Bind authorization replay to state plus an independent high-water authority."""
+
+    return _digest(
+        {
+            "high_water_store_id": _text(high_water_store_id),
+            "nonce_store_path": str(Path(nonce_store_path).resolve()),
+            "signer_instance_id": _text(signer_instance_id),
+        }
+    )
+
+
 def build_architect_proposal_policy_authorization_payload(
     policy: ArchitectProposalSignerPolicy,
     *,
     principal_id: str,
+    principal_provider: str,
     principal_public_key: str,
     reddog_id: str,
     reddog_public_key: str,
     key_epoch: str,
     authority_profile_source_receipt_id: str,
+    signer_instance_id: str,
+    replay_store_binding_digest: str,
+    security_context_digest: str,
     nonce: str,
     issued_at: int,
     expires_at: int,
@@ -354,6 +396,7 @@ def build_architect_proposal_policy_authorization_payload(
             policy
         ),
         "principal_id": _text(principal_id),
+        "principal_provider": _text(principal_provider),
         "principal_public_key": _text(principal_public_key),
         "reddog_id": _text(reddog_id),
         "reddog_public_key": _text(reddog_public_key),
@@ -361,6 +404,11 @@ def build_architect_proposal_policy_authorization_payload(
         "authority_profile_source_receipt_id": _text(
             authority_profile_source_receipt_id
         ),
+        "signer_instance_id": _text(signer_instance_id),
+        "replay_store_binding_digest": _text(
+            replay_store_binding_digest
+        ),
+        "security_context_digest": _text(security_context_digest),
         "nonce": _text(nonce),
         "issued_at": int(issued_at),
         "expires_at": int(expires_at),
@@ -389,6 +437,10 @@ def verify_architect_proposal_policy_authorization(
     *,
     policy: ArchitectProposalSignerPolicy,
     authority_profile: Mapping[str, Any],
+    trusted_principal_public_key: str,
+    expected_signer_instance_id: str,
+    expected_replay_store_binding_digest: str,
+    expected_security_context_digest: str,
     now_epoch: int,
 ) -> ArchitectProposalPolicyAuthorization:
     """Verify a principal signature over one exact signer policy."""
@@ -401,11 +453,15 @@ def verify_architect_proposal_policy_authorization(
         "authorization_id",
         "proposal_policy_digest",
         "principal_id",
+        "principal_provider",
         "principal_public_key",
         "reddog_id",
         "reddog_public_key",
         "key_epoch",
         "authority_profile_source_receipt_id",
+        "signer_instance_id",
+        "replay_store_binding_digest",
+        "security_context_digest",
         "nonce",
         "issued_at",
         "expires_at",
@@ -422,6 +478,9 @@ def verify_architect_proposal_policy_authorization(
             policy
         ),
         "principal_id": _text(authority_profile.get("principal_id")),
+        "principal_provider": _text(
+            authority_profile.get("principal_provider")
+        ),
         "principal_public_key": _text(
             authority_profile.get("principal_public_key")
         ),
@@ -433,10 +492,23 @@ def verify_architect_proposal_policy_authorization(
         "authority_profile_source_receipt_id": _text(
             authority_profile.get("authority_profile_source_receipt_id")
         ),
+        "signer_instance_id": _text(expected_signer_instance_id),
+        "replay_store_binding_digest": _text(
+            expected_replay_store_binding_digest
+        ),
+        "security_context_digest": _text(
+            expected_security_context_digest
+        ),
     }
     if any(raw.get(key) != expected for key, expected in expected_bindings.items()):
         raise ValueError(
             "architect_proposal_policy_authorization_binding_mismatch"
+        )
+    if raw["principal_public_key"] != _text(
+        trusted_principal_public_key
+    ):
+        raise ValueError(
+            "architect_proposal_policy_authorization_principal_untrusted"
         )
     ttl = int(raw["expires_at"]) - int(raw["issued_at"])
     if (
@@ -485,11 +557,15 @@ def _validate_policy_authorization_payload(
         "authorization_id",
         "proposal_policy_digest",
         "principal_id",
+        "principal_provider",
         "principal_public_key",
         "reddog_id",
         "reddog_public_key",
         "key_epoch",
         "authority_profile_source_receipt_id",
+        "signer_instance_id",
+        "replay_store_binding_digest",
+        "security_context_digest",
         "nonce",
         "issued_at",
         "expires_at",
@@ -507,6 +583,8 @@ def _validate_policy_authorization_payload(
     for field in (
         "proposal_policy_digest",
         "authority_profile_source_receipt_id",
+        "replay_store_binding_digest",
+        "security_context_digest",
     ):
         if not _sha256(payload.get(field)):
             raise ValueError(
@@ -515,10 +593,12 @@ def _validate_policy_authorization_payload(
     for field in (
         "authorization_id",
         "principal_id",
+        "principal_provider",
         "principal_public_key",
         "reddog_id",
         "reddog_public_key",
         "key_epoch",
+        "signer_instance_id",
         "nonce",
     ):
         if not isinstance(payload.get(field), str) or not _text(
@@ -890,6 +970,8 @@ __all__ = [
     "ProposalAuthenticityNonceStore",
     "attest_architect_proposal",
     "architect_proposal_signer_policy_digest",
+    "architect_proposal_signer_instance_id",
+    "architect_proposal_replay_store_binding_digest",
     "build_architect_proposal_policy_authorization_payload",
     "build_architect_proposal_authenticity_payload",
     "canonical_architect_proposal_signing_input",

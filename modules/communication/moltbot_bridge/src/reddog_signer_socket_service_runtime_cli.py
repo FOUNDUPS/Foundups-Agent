@@ -26,7 +26,14 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     ServeSignerSocketBounded,
 )
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    ProposalReplayHighWaterStore,
+)
 from modules.infrastructure.secrets_mcp.src.op_cli_secret_resolver import OpCliSecretResolver
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    FailClosedPrincipalKeyResolver,
+    PrincipalKeyResolver,
+)
 
 
 SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT = "SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT"
@@ -73,6 +80,8 @@ def run_reddog_signer_socket_service_runtime_cli(
     resolver_factory: ResolverFactory = OpCliSecretResolver,
     serve_bounded: ServeSignerSocketBounded = serve_reddog_isolated_signer_socket_bounded,
     emit: Callable[[str], None] = print,
+    principal_key_resolver: PrincipalKeyResolver | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
 ) -> int:
     """Run the signer service CLI and emit an audit-safe JSON receipt."""
 
@@ -90,6 +99,13 @@ def run_reddog_signer_socket_service_runtime_cli(
         resolver=resolver,  # type: ignore[arg-type]
         serve_bounded=serve_bounded,
         expected_config_digest=args.expected_config_digest,
+        principal_key_resolver=(
+            principal_key_resolver
+            or FailClosedPrincipalKeyResolver()
+        ),
+        proposal_replay_high_water_store=(
+            proposal_replay_high_water_store
+        ),
     )
     emit(_receipt_json(result))
     return 0 if result.accepted else 2
