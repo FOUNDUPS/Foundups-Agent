@@ -16,8 +16,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     ControlLoopAnchorStore,
@@ -35,6 +36,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningRequest,
     SigningResponse,
     public_key_fingerprint,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
+    ArchitectProposalSignerPolicy,
+    PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
+    PROPOSAL_AUTHENTICITY_SIGNING_PREFIX,
+    ProposalAuthenticityNonceStore,
+    validate_proposal_signing_request,
 )
 
 
@@ -56,6 +64,18 @@ REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISSING = (
 )
 REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISMATCH = (
     "REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISMATCH"
+)
+REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISSING = (
+    "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISSING"
+)
+REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISMATCH = (
+    "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISMATCH"
+)
+REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING = (
+    "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING"
+)
+REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY = (
+    "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY"
 )
 
 CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
@@ -120,6 +140,9 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     audit_mac_builder: SignerAuditMacBuilder
     control_loop_anchor_store: ControlLoopAnchorStore | None = None
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None
+    proposal_authority_policy: ArchitectProposalSignerPolicy | None = None
+    proposal_nonce_store: ProposalAuthenticityNonceStore | None = None
+    proposal_clock: Callable[[], float] = time.time
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         reason = _signer_request_rejection(self, request, peer)
@@ -130,11 +153,22 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         )
         if reason:
             return _reject(reason)
+        proposal_reservation, reason = _prepare_proposal_signing(self, request)
+        if reason:
+            return _reject(reason)
         response, reason = _sign_response(
             self, request, peer, control_payload is not None
         )
         if reason:
+            _rollback_proposal_reservation(self, proposal_reservation)
             return _reject(reason)
+        if proposal_reservation is not None:
+            try:
+                assert self.proposal_nonce_store is not None
+                self.proposal_nonce_store.commit(proposal_reservation)
+            except Exception:
+                _rollback_proposal_reservation(self, proposal_reservation)
+                return _reject(REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY)
         if control_payload is not None and preparation is not None:
             try:
                 self.control_loop_anchor_store.commit(
@@ -163,8 +197,17 @@ def _signer_request_rejection(
         return REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH
     if not request.signing_input:
         return REJECT_ED25519_SIGNER_REQUEST_INVALID
-    is_control = request.requested_operation == CONTROL_LOOP_SIGNING_OPERATION
-    if is_control is not request.signing_input.startswith(CONTROL_LOOP_SIGNING_PREFIX):
+    domain_pairs = (
+        (
+            request.requested_operation == CONTROL_LOOP_SIGNING_OPERATION,
+            request.signing_input.startswith(CONTROL_LOOP_SIGNING_PREFIX),
+        ),
+        (
+            request.requested_operation == PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
+            request.signing_input.startswith(PROPOSAL_AUTHENTICITY_SIGNING_PREFIX),
+        ),
+    )
+    if any(operation is not prefix for operation, prefix in domain_pairs):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
     try:
         derived = encode_ed25519_public_key(_public_bytes_from_private_key(backend.private_key))
@@ -192,6 +235,48 @@ def _prepare_control_signing(
     except Exception:
         return None, None, REJECT_ED25519_SIGNER_CONTROL_ANCHOR_REJECTED
     return payload, preparation, ""
+
+
+def _prepare_proposal_signing(
+    backend: Ed25519SignerBackend,
+    request: SigningRequest,
+) -> tuple[str | None, str]:
+    if request.requested_operation != PROPOSAL_AUTHENTICITY_SIGNING_OPERATION:
+        return None, ""
+    if backend.proposal_authority_policy is None:
+        return None, REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISSING
+    payload = validate_proposal_signing_request(
+        request,
+        backend.proposal_authority_policy,
+        now_epoch=int(backend.proposal_clock()),
+    )
+    if payload is None:
+        return None, REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISMATCH
+    if backend.proposal_nonce_store is None:
+        return None, REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING
+    try:
+        reservation = backend.proposal_nonce_store.reserve(
+            str(payload["nonce"]),
+            expires_at=int(payload["expires_at"]),
+            subject=str(payload["requester_principal_id"]),
+        )
+    except Exception:
+        reservation = None
+    if not reservation:
+        return None, REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY
+    return reservation, ""
+
+
+def _rollback_proposal_reservation(
+    backend: Ed25519SignerBackend,
+    reservation: str | None,
+) -> None:
+    if reservation is None or backend.proposal_nonce_store is None:
+        return
+    try:
+        backend.proposal_nonce_store.rollback(reservation)
+    except Exception:
+        pass
 
 
 def _sign_response(
@@ -400,6 +485,10 @@ __all__ = [
     "REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH",
     "REJECT_ED25519_SIGNER_KEY_INVALID",
     "REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH",
+    "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISMATCH",
+    "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISSING",
+    "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY",
+    "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING",
     "REJECT_ED25519_SIGNER_REQUEST_INVALID",
     "REJECT_ED25519_SIGNER_SIGN_FAILED",
     "SignerAuditMacBuilder",

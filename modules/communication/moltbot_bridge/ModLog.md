@@ -1,4 +1,20 @@
 # ModLog - moltbot_bridge
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_AUTHENTICITY_ATTESTATION_PHASE1
+- Added a domain-separated architect-proposal Ed25519 attestation that binds
+  the complete proposal, determination, queue candidate, snapshot, exact SHA,
+  work state, HoloIndex, WSP 15, policy, path/test/gate, principal, RedDog,
+  signer-key, consensus, nonce, and expiry context.
+- Required an exact immutable signer-owned proposal policy and transactional
+  nonce reservation; malformed, partial, expired, replayed, cross-domain, or
+  policy-mismatched requests fail before signing.
+- Added strict serialized-attestation integrity validation for exact fields,
+  signatures, TTL, and key-epoch revocation. The returned typed attestation is
+  evidence only and cannot satisfy proposal admission or promotion.
+- Kept independent trust-root resolution, startup signer provisioning, durable
+  replay state, opaque authority proof, attestation artifact supply, and
+  production promotion wiring explicitly unimplemented. This slice creates no
+  queue item and performs no repository effect (WSP 00, 15, 22, 50, 64, 97).
+
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_EXECUTABILITY_ADMISSION_PHASE1
 - Added a deterministic post-Fusion proposal admission receipt that binds the
   audit finding, operational snapshot, repository HEAD, work-state revision,
