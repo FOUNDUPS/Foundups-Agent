@@ -2,6 +2,38 @@
 
 ## Public API
 
+### Architect proposal validity and execution readiness
+
+`evaluate_architect_proposal_executability()` runs after backend Fusion output
+validation and before a FIX becomes an architect queue candidate. It requires
+an audit-supported `REUSE_EXISTING`, `EXTEND_EXISTING`, or separately gated
+`CREATE_NEW` decision plus exact paths, tests, policy gates, capabilities,
+expected evidence, and stop conditions.
+
+The resulting
+`reddog_architect_proposal_executability_admission.v1` receipt separates
+proposal validity from current execution readiness. A valid prerequisite slice
+may persist as `BLOCKED_CANDIDATE`; it does not mutate the authoritative queue.
+Model-supplied readiness booleans and capabilities produced by the proposed
+slice are never current authority.
+
+`promote_reddog_architect_fix_to_signed_wsp15_work_order()` canonically
+rehydrates the receipt and rechecks current trust anchors, platform, repository
+HEAD, HoloIndex generation/freshness receipt, authoritative work-state
+revision, snapshot, audit bundle, canonical candidate identity, and WSP 15
+lineage. Only `CANDIDATE` plus `READY` may enter the queue. The authorized base
+is the immutable repository SHA from the admission receipt, not a moving branch
+name. INDEX_GAP blocks ordinary code work; the only phase-one exception is a
+HoloIndex maintenance slice whose exact non-wildcard paths equal the supporting
+direct-read paths.
+
+The receipt's SHA is integrity evidence, not authentication. Production policy
+therefore keeps `architect_proposal_admission_authenticity` unavailable until a
+trusted verifier is implemented. Promotion also remains blocked by the
+code-owned incomplete trust anchors documented in the execution-valve roadmap.
+Tests may inject a complete policy to validate the queue mechanics; callers
+cannot inject that policy into the production promotion seam.
+
 ### Resident queue exact-SHA commit stage
 
 The resident queue runs `exact_sha_commit` after `bounded_worker_pilot` and

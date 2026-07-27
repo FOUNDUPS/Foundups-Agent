@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY,
@@ -15,10 +17,14 @@ from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotio
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _authority_profile,
     _determination,
+    _holo_receipt,
     _memex_supply,
     _model_selection,
     _runtime_binding,
     _work_state,
+)
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    ready_proposal_policy,
 )
 
 
@@ -34,9 +40,21 @@ MODULE_PATH = (
 NOW = "2026-07-16T00:00:00+00:00"
 
 
+@pytest.fixture(autouse=True)
+def _current_holo_owner_binding(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "verify_reddog_holoindex_owner_binding",
+        lambda **_kwargs: True,
+    )
+
+
 def _repo(tmp_path: Path) -> Path:
     path = tmp_path / "repo"
     path.mkdir()
+    (path / ".git").mkdir()
+    (path / ".git" / "HEAD").write_text("sha256:repo-head\n", encoding="utf-8")
     return path
 
 
@@ -65,24 +83,51 @@ def _runtime_files(tmp_path: Path) -> dict[str, Path]:
             _authority_profile(),
         ),
         "authority_profile_output": tmp_path / "runtime" / "authority_profile.json",
+        "holoindex_receipt": _write_json(
+            tmp_path,
+            "holoindex_freshness_receipt.json",
+            _holo_receipt().to_dict(),
+        ),
     }
+
+
+def _holo_receipt_file(tmp_path: Path) -> Path:
+    return _write_json(
+        tmp_path,
+        "holoindex_freshness_receipt.json",
+        _holo_receipt().to_dict(),
+    )
 
 
 def test_bootstrap_promotes_fix_and_writes_authority_profile(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     files = _runtime_files(tmp_path)
 
-    result = run_reddog_main_architect_fix_promotion_bootstrap(
-        repo_root=repo,
-        work_state_path=files["work_state"],
-        architect_determination_path=files["determination"],
-        model_selection_receipt_path=files["model_selection"],
-        memex_supply_receipt_path=files["memex_supply"],
-        authority_profile_source_path=files["authority_profile_source"],
-        authority_profile_output_path=files["authority_profile_output"],
-        worker_id="reddog-main-test",
-        now_iso=NOW,
-    )
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_architect_proposal_admission_contract."
+            "current_architect_proposal_admission_policy",
+            return_value=ready_proposal_policy(),
+        ),
+    ):
+        result = run_reddog_main_architect_fix_promotion_bootstrap(
+            repo_root=repo,
+            work_state_path=files["work_state"],
+            architect_determination_path=files["determination"],
+            model_selection_receipt_path=files["model_selection"],
+            memex_supply_receipt_path=files["memex_supply"],
+            authority_profile_source_path=files["authority_profile_source"],
+            authority_profile_output_path=files["authority_profile_output"],
+            holoindex_receipt_path=files["holoindex_receipt"],
+            worker_id="reddog-main-test",
+            now_iso=NOW,
+        )
 
     assert result.accepted is True
     assert result.status == REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED
@@ -108,18 +153,32 @@ def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Pat
     repo = _repo(tmp_path)
     files = _runtime_files(tmp_path)
 
-    result = run_reddog_main_architect_fix_promotion_bootstrap(
-        repo_root=repo,
-        work_state_path=files["work_state"],
-        architect_determination_path=files["determination"],
-        model_selection_receipt_path=files["model_selection"],
-        model_runtime_binding_receipt_path=files["model_runtime_binding"],
-        memex_supply_receipt_path=files["memex_supply"],
-        authority_profile_source_path=files["authority_profile_source"],
-        authority_profile_output_path=files["authority_profile_output"],
-        worker_id="reddog-main-test",
-        now_iso=NOW,
-    )
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_architect_proposal_admission_contract."
+            "current_architect_proposal_admission_policy",
+            return_value=ready_proposal_policy(),
+        ),
+    ):
+        result = run_reddog_main_architect_fix_promotion_bootstrap(
+            repo_root=repo,
+            work_state_path=files["work_state"],
+            architect_determination_path=files["determination"],
+            model_selection_receipt_path=files["model_selection"],
+            model_runtime_binding_receipt_path=files["model_runtime_binding"],
+            memex_supply_receipt_path=files["memex_supply"],
+            authority_profile_source_path=files["authority_profile_source"],
+            authority_profile_output_path=files["authority_profile_output"],
+            holoindex_receipt_path=files["holoindex_receipt"],
+            worker_id="reddog-main-test",
+            now_iso=NOW,
+        )
 
     assert result.accepted is True
     promoted_profile = json.loads(files["authority_profile_output"].read_text(encoding="utf-8"))
@@ -142,6 +201,7 @@ def test_bootstrap_rejects_authority_profile_output_inside_repo(tmp_path: Path) 
         memex_supply_receipt_path=files["memex_supply"],
         authority_profile_source_path=files["authority_profile_source"],
         authority_profile_output_path=repo / "authority_profile.json",
+        holoindex_receipt_path=files["holoindex_receipt"],
         worker_id="reddog-main-test",
         now_iso=NOW,
     )
@@ -151,6 +211,161 @@ def test_bootstrap_rejects_authority_profile_output_inside_repo(tmp_path: Path) 
     assert "authority_profile_output_path_inside_repo" in result.rejection_reasons
 
 
+def test_bootstrap_rejects_when_active_holo_owner_serves_another_generation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    monkeypatch.setattr(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "verify_reddog_holoindex_owner_binding",
+        lambda **_kwargs: False,
+    )
+
+    result = run_reddog_main_architect_fix_promotion_bootstrap(
+        repo_root=repo,
+        work_state_path=files["work_state"],
+        architect_determination_path=files["determination"],
+        model_selection_receipt_path=files["model_selection"],
+        memex_supply_receipt_path=files["memex_supply"],
+        authority_profile_source_path=files["authority_profile_source"],
+        authority_profile_output_path=files["authority_profile_output"],
+        holoindex_receipt_path=files["holoindex_receipt"],
+        worker_id="reddog-main-test",
+        now_iso=NOW,
+    )
+
+    assert result.accepted is False
+    assert "holoindex_owner_binding_not_current" in result.rejection_reasons
+    assert not files["authority_profile_output"].exists()
+
+
+def test_bootstrap_restores_previous_profile_when_promotion_rejects_after_prewrite(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    previous = {"receipt_id": "sha256:previous-profile"}
+    files["authority_profile_output"].write_text(
+        json.dumps(previous, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    def reject_after_prewrite(**kwargs):
+        kwargs["authority_profile_precommit_writer"](
+            {"receipt_id": "sha256:uncommitted-profile"}
+        )
+        return type(
+            "PromotionResult",
+            (),
+            {
+                "accepted": False,
+                "status": "ARCHITECT_FIX_WSP15_PROMOTION_REJECT",
+                "authority_profile": None,
+                "receipt": None,
+                "rejection_reasons": ("authoritative_work_state_commit_rejected",),
+            },
+        )()
+
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap."
+            "promote_reddog_architect_fix_to_signed_wsp15_work_order",
+            side_effect=reject_after_prewrite,
+        ),
+    ):
+        result = run_reddog_main_architect_fix_promotion_bootstrap(
+            repo_root=repo,
+            work_state_path=files["work_state"],
+            architect_determination_path=files["determination"],
+            model_selection_receipt_path=files["model_selection"],
+            memex_supply_receipt_path=files["memex_supply"],
+            authority_profile_source_path=files["authority_profile_source"],
+            authority_profile_output_path=files["authority_profile_output"],
+            holoindex_receipt_path=files["holoindex_receipt"],
+            worker_id="reddog-main-test",
+            now_iso=NOW,
+        )
+
+    assert result.accepted is False
+    assert json.loads(
+        files["authority_profile_output"].read_text(encoding="utf-8")
+    ) == previous
+
+
+def test_bootstrap_does_not_overwrite_newer_profile_when_rollback_cas_fails(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    previous = {"receipt_id": "sha256:previous-profile"}
+    newer = {"receipt_id": "sha256:newer-profile"}
+    files["authority_profile_output"].write_text(
+        json.dumps(previous, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    def reject_after_external_replacement(**kwargs):
+        kwargs["authority_profile_precommit_writer"](
+            {"receipt_id": "sha256:uncommitted-profile"}
+        )
+        files["authority_profile_output"].write_text(
+            json.dumps(newer, sort_keys=True),
+            encoding="utf-8",
+        )
+        return type(
+            "PromotionResult",
+            (),
+            {
+                "accepted": False,
+                "status": "ARCHITECT_FIX_WSP15_PROMOTION_REJECT",
+                "authority_profile": None,
+                "receipt": None,
+                "rejection_reasons": ("authoritative_work_state_commit_rejected",),
+            },
+        )()
+
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap."
+            "promote_reddog_architect_fix_to_signed_wsp15_work_order",
+            side_effect=reject_after_external_replacement,
+        ),
+    ):
+        result = run_reddog_main_architect_fix_promotion_bootstrap(
+            repo_root=repo,
+            work_state_path=files["work_state"],
+            architect_determination_path=files["determination"],
+            model_selection_receipt_path=files["model_selection"],
+            memex_supply_receipt_path=files["memex_supply"],
+            authority_profile_source_path=files["authority_profile_source"],
+            authority_profile_output_path=files["authority_profile_output"],
+            holoindex_receipt_path=files["holoindex_receipt"],
+            worker_id="reddog-main-test",
+            now_iso=NOW,
+        )
+
+    assert result.accepted is False
+    assert "authority_profile_rollback_failed" in result.rejection_reasons
+    assert json.loads(
+        files["authority_profile_output"].read_text(encoding="utf-8")
+    ) == newer
+
+
 def test_main_preflight_auto_runs_when_all_artifacts_are_present(tmp_path: Path) -> None:
     import main
 
@@ -158,22 +373,36 @@ def test_main_preflight_auto_runs_when_all_artifacts_are_present(tmp_path: Path)
     files = _runtime_files(tmp_path)
     runtime_root = tmp_path / "runtime"
 
-    with patch.dict(
-        "os.environ",
-        {
+    with (
+        patch.dict(
+            "os.environ",
+            {
             "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(files["work_state"]),
             "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(files["determination"]),
             "REDDOG_MODEL_SELECTION_RECEIPT_PATH": str(files["model_selection"]),
             "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(files["memex_supply"]),
             "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(files["authority_profile_source"]),
+            "HOLOINDEX_FRESHNESS_RECEIPT": str(files["holoindex_receipt"]),
             "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
             "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
             "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "0",
             "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "0",
             "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY": "0",
             "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "0",
-        },
-        clear=True,
+            },
+            clear=True,
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_architect_proposal_admission_contract."
+            "current_architect_proposal_admission_policy",
+            return_value=ready_proposal_policy(),
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
     ):
         assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
         assert main.os.environ["REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH"] == str(
@@ -233,6 +462,7 @@ def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_pro
                     "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "1",
                     "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "sha256:intent-handoff",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MODEL_SELECTION_RECEIPT_PATH": str(model_selection),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -311,6 +541,7 @@ def test_main_preflight_model_selection_supply_runs_before_promotion(tmp_path: P
                     "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -409,6 +640,7 @@ def test_main_preflight_model_runtime_binding_supply_runs_after_model_selection(
                         "REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY": "1",
                         "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                         "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                        "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                         "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                         "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -506,6 +738,7 @@ def test_main_preflight_model_autoresearch_plan_supply_runs_before_promotion(
                     "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -596,6 +829,7 @@ def test_main_preflight_defaults_autoresearch_feedback_to_existing_cycle_feedbac
                     "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -678,6 +912,7 @@ def test_main_preflight_explicit_autoresearch_feedback_path_overrides_cycle_feed
                     "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -798,6 +1033,7 @@ def test_main_preflight_model_autoresearch_campaign_execution_supply_runs_before
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -946,6 +1182,7 @@ def test_main_preflight_model_autoresearch_campaign_gate_supply_runs_before_prom
                     "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1041,6 +1278,7 @@ def test_main_preflight_model_autoresearch_cycle_feedback_chain_runs_before_prom
                     "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION": "0",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1222,6 +1460,7 @@ def test_main_preflight_model_autoresearch_cycle_receipt_supply_runs_before_prom
                     "REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1349,6 +1588,7 @@ def test_main_preflight_model_autoresearch_cycle_feedback_admission_runs_before_
                     "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_PATH": str(authority_source),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1525,6 +1765,7 @@ def test_main_preflight_authority_source_supply_runs_before_promotion(tmp_path: 
                     "REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY": "1",
                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": str(determination),
+                    "HOLOINDEX_FRESHNESS_RECEIPT": str(_holo_receipt_file(tmp_path)),
                     "REDDOG_MODEL_SELECTION_RECEIPT_PATH": str(model_selection),
                     "REDDOG_MEMEX_SUPPLY_RECEIPT_PATH": str(memex),
                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1664,6 +1905,9 @@ def test_main_preflight_profile_runs_artifact_supply_chain_before_promotion(tmp_
                                     "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                                     "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
                                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
+                                    "HOLOINDEX_FRESHNESS_RECEIPT": str(
+                                        _holo_receipt_file(tmp_path)
+                                    ),
                                     "REDDOG_RESIDENT_ARCHITECT_INTENT_ID": "intent-profile",
                                     "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH": str(tmp_path / "catalog.json"),
                                     "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH": str(tmp_path / "evidence.json"),
@@ -1860,7 +2104,6 @@ def test_module_has_no_execution_network_or_reindex_imports() -> None:
         "http",
         "socket",
         "sqlite3",
-        "holo_index",
         "git",
     }
     banned_calls = {"eval", "exec", "compile", "__import__"}

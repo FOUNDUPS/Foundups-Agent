@@ -1,4 +1,37 @@
 # ModLog - moltbot_bridge
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_EXECUTABILITY_ADMISSION_PHASE1
+- Added a deterministic post-Fusion proposal admission receipt that binds the
+  audit finding, operational snapshot, repository HEAD, work-state revision,
+  HoloIndex generation/freshness, WSP 15 allocation, reuse decision, paths,
+  tests, policy gates, capabilities, expected evidence, and stop conditions.
+- Separated proposal validity from execution readiness so prerequisite work is
+  retained as `BLOCKED_CANDIDATE` without becoming authoritative queue work.
+- Revalidated current trust anchors, platform, HEAD, HoloIndex freshness
+  receipt, canonical candidate/determination IDs, and work-state revision in
+  the existing signed WSP 15 promotion seam; model readiness claims,
+  underdeclared effect capabilities, and produced capabilities cannot
+  self-authorize.
+- Restricted stale-index admission to direct-read-grounded HoloIndex
+  maintenance whose exact non-wildcard write paths equal the cited direct-read
+  paths; ordinary coding, live Windows canaries, merge, and external effects
+  remain fail closed.
+- Bound claims, queue items, and authority profiles to one immutable base SHA,
+  and held repository-promotion plus profile locks across profile snapshot,
+  prewrite, queue commit, and rollback. Rollback is digest-CAS guarded and
+  reports failure rather than overwriting a newer profile.
+- Required the live HoloIndex query owner to prove the exact repository root,
+  HEAD, generation, and on-disk freshness-receipt digest inside the promotion
+  lock; an arbitrary valid historical receipt path is insufficient.
+- Certified that SHA-bound proposal receipts provide integrity but not
+  authenticity. Production admission remains blocked on a separate trusted
+  proposal-authenticity verifier; no caller-supplied policy can enter the
+  promotion side-effect boundary.
+- Split prompt, contract, and evaluator modules to honor WSP 62 and lowered
+  the inherited architect runtime/test no-growth ceilings (WSP 00, 15, 22, 50,
+  62, 97).
+- Reconciled the stale WSP 62 ceilings left by merged exact-SHA commit PR #1398
+  to its already-landed file and test sizes; no #1398 runtime code was changed.
+
 ## 2026-07-27: REDDOG_RESIDENT_QUEUE_EXACT_SHA_COMMIT_STAGE_PHASE1
 - Inserted an exact-SHA commit stage between the bounded author and the
   independent verifier in the resident RedDog queue.

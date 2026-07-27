@@ -6,6 +6,7 @@ import ast
 import json
 from pathlib import Path
 from typing import Any, Mapping
+from unittest.mock import patch
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
     Availability,
@@ -48,6 +49,18 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ARCHITECT_DETERMINATION_ACCEPT,
     ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
 )
+from modules.communication.moltbot_bridge.src import (
+    reddog_architect_proposal_executability_admission as proposal_admission,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executability_admission import (
+    LIVE_EXECUTION_CAPABILITIES,
+)
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    ready_proposal_policy,
+)
+from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
+    build_fresh_holoindex_receipt,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
     plan_reddog_wre_queue_consumer_dry_run,
@@ -69,6 +82,15 @@ MODULE_PATH = (
 )
 NOW = "2026-07-16T00:00:00+00:00"
 SNAPSHOT_ID = "sha256:snapshot-1"
+REPO_HEAD = "sha256:repo-head"
+
+
+def _holo_receipt():
+    return build_fresh_holoindex_receipt(
+        repo_root=REPO_ROOT,
+        head_sha=REPO_HEAD,
+        generated_at=NOW,
+    )
 
 
 def _allocation() -> dict[str, Any]:
@@ -95,32 +117,96 @@ def _work_state() -> dict[str, Any]:
     }
 
 
-def _determination(*, action: str = ACTION_FIX, allocation: Mapping[str, Any] | None = None) -> dict[str, Any]:
-    allocation = allocation or _allocation()
-    determination_id = "sha256:architect-determination-1"
-    candidate = {
-        "schema_version": ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
-        "queue_candidate_id": "sha256:queue-candidate-1",
-        "source_determination_receipt_id": determination_id,
+def _proposal_admission(
+    allocation: Mapping[str, Any],
+    *,
+    admissible: bool = True,
+    readiness: str = "READY",
+) -> dict[str, Any]:
+    holo_receipt = _holo_receipt()
+    policy = ready_proposal_policy()
+    payload = {
+        "schema_version": proposal_admission.PROPOSAL_ADMISSION_SCHEMA_VERSION,
+        "accepted": True,
+        "proposal_validity": "VALID",
+        "execution_readiness": readiness,
+        "admissible_to_authoritative_queue": admissible,
+        "action": ACTION_FIX,
         "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-        "status": "CANDIDATE",
-        "evidence_refs": ["file:docs/audit.md:1"],
-        "wsp15_allocation_receipt": dict(allocation),
+        "task_summary_digest": "sha256:task-summary",
+        "reuse_decision": "EXTEND_EXISTING",
+        "requested_operation": "bounded_code_change",
+        "target_runtime": "reddog_resident_queue",
+        "target_effect_plane": "REPOSITORY_CODE_CHANGE",
+        "allowed_paths": [
+            "modules/communication/moltbot_bridge/src/reddog_next_operational_slice.py"
+        ],
+        "denied_paths": [".github/workflows/**", ".env"],
+        "required_tests": [
+            "pytest modules/communication/moltbot_bridge/tests/test_reddog_next_operational_slice.py"
+        ],
+        "required_policy_gates": ["WSP_50", "WSP_97"],
+        "required_capabilities": list(LIVE_EXECUTION_CAPABILITIES),
+        "produced_capabilities": [],
+        "expected_evidence": ["exact_sha_test_receipt"],
+        "stop_conditions": ["stop_before_merge"],
+        "missing_preconditions": (
+            [] if admissible else ["canonical_signer_client_peer_handshake_verifier_missing"]
+        ),
+        "decision_reasons": [],
+        "supporting_finding_ids": ["repo-code-audit-finding"],
+        "supporting_direct_read_paths": [],
+        "snapshot_receipt_id": SNAPSHOT_ID,
+        "snapshot_content_digest": "sha256:snapshot-content",
+        "repo_head_sha": REPO_HEAD,
+        "work_state_revision": "sha256:work-state-rev-1",
+        "holoindex_generation_id": holo_receipt.generation_id,
+        "holoindex_freshness_receipt_digest": proposal_admission._digest(
+            holo_receipt.to_dict()
+        ),
+        "index_gap_detected": False,
+        "direct_read_grounded": False,
+        "holoindex_maintenance_exception_applied": False,
+        "report_bundle_id": "sha256:report-bundle",
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": canonical_reddog_wsp15_allocation_digest(
+            allocation
+        ),
+        "policy_digest": proposal_admission._digest(policy.to_dict()),
+        "rejection_reasons": [],
         "no_queue_mutation_performed": True,
         "no_execution_performed": True,
-        "no_worker_spawn_performed": True,
-        "no_openclaw_enqueue_performed": True,
-        "no_hermes_dispatch_performed": True,
         "no_repo_mutation_performed": True,
+        "no_holoindex_reindex_performed": True,
     }
-    return {
+    payload["receipt_id"] = proposal_admission._digest(payload)
+    return payload
+
+
+def _determination(
+    *,
+    action: str = ACTION_FIX,
+    allocation: Mapping[str, Any] | None = None,
+    proposal_ready: bool = True,
+) -> dict[str, Any]:
+    allocation = allocation or _allocation()
+    admission = _proposal_admission(
+        allocation,
+        admissible=proposal_ready,
+        readiness="READY" if proposal_ready else "IMPLEMENTATION_BLOCKED",
+    )
+    next_slice = (
+        "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+        if action == ACTION_FIX
+        else None
+    )
+    base = {
         "schema_version": "reddog_architect_determination_receipt.v1",
-        "determination_receipt_id": determination_id,
         "cycle_id": "sha256:cycle-1",
         "accepted": True,
         "status": ARCHITECT_DETERMINATION_ACCEPT,
         "action": action,
-        "next_slice_name": candidate["slice_id"] if action == ACTION_FIX else None,
+        "next_slice_name": next_slice,
         "summary": "Promote one verified FIX slice.",
         "snapshot_receipt_id": SNAPSHOT_ID,
         "snapshot_content_digest": "sha256:snapshot-content",
@@ -131,13 +217,112 @@ def _determination(*, action: str = ACTION_FIX, allocation: Mapping[str, Any] | 
         "audit_report_digests": ["sha256:report-1"],
         "model_result_digest": "sha256:model-result",
         "model_receipt_id": "model-receipt-1",
+        "model_selection_receipt_id": None,
+        "model_selection_digest": None,
+        "model_runtime_binding_receipt_id": None,
+        "model_runtime_binding_digest": None,
+        "provider_call_id": None,
+        "provider_call_receipt_id": None,
+        "provider_call_evidence_digest": None,
         "fusion_quorum_passed": True,
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
-        "wsp15_allocation_digest": canonical_reddog_wsp15_allocation_digest(allocation),
-        "queue_candidate": candidate if action == ACTION_FIX else None,
+        "wsp15_allocation_digest": canonical_reddog_wsp15_allocation_digest(
+            allocation
+        ),
         "decision_reasons": ["FIX is the next verified bridge."],
         "rejection_reasons": [],
     }
+    determination_id = proposal_admission._digest(
+        {
+            "cycle_id": base["cycle_id"],
+            "action": base["action"],
+            "next_slice_name": base["next_slice_name"],
+            "model_result_digest": base["model_result_digest"],
+            "model_selection_digest": base["model_selection_digest"],
+            "provider_call_id": base["provider_call_id"],
+            "provider_call_receipt_id": base["provider_call_receipt_id"],
+            "provider_call_evidence_digest": base[
+                "provider_call_evidence_digest"
+            ],
+            "proposal_admission_receipt_id": admission["receipt_id"],
+        }
+    )
+    candidate_seed = {
+        "source_determination_receipt_id": determination_id,
+        "slice_id": next_slice,
+        "snapshot_receipt_id": SNAPSHOT_ID,
+        "report_bundle_id": base["report_bundle_id"],
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "proposal_admission_receipt_id": admission["receipt_id"],
+    }
+    candidate = {
+        "schema_version": ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+        "queue_candidate_id": proposal_admission._digest(candidate_seed),
+        "source_determination_receipt_id": determination_id,
+        "slice_id": next_slice,
+        "status": "CANDIDATE" if proposal_ready else "BLOCKED_CANDIDATE",
+        "evidence_refs": ["file:docs/audit.md:1"],
+        "wsp15_allocation_receipt": dict(allocation),
+        "proposal_admission_receipt_id": admission["receipt_id"],
+        "proposal_admission_digest": promotion._digest(admission),
+        "no_queue_mutation_performed": True,
+        "no_execution_performed": True,
+        "no_worker_spawn_performed": True,
+        "no_openclaw_enqueue_performed": True,
+        "no_hermes_dispatch_performed": True,
+        "no_repo_mutation_performed": True,
+    }
+    return {
+        **base,
+        "determination_receipt_id": determination_id,
+        "proposal_admission": admission if action == ACTION_FIX else None,
+        "queue_candidate": candidate if action == ACTION_FIX else None,
+    }
+
+
+def _rebind_determination_admission(
+    determination: Mapping[str, Any],
+    admission_updates: Mapping[str, Any],
+) -> dict[str, Any]:
+    rebound = json.loads(json.dumps(determination, sort_keys=True))
+    admission = dict(rebound["proposal_admission"])
+    admission.update(admission_updates)
+    admission.pop("receipt_id", None)
+    admission["receipt_id"] = proposal_admission._digest(admission)
+    determination_seed = {
+        "cycle_id": rebound.get("cycle_id"),
+        "action": rebound.get("action"),
+        "next_slice_name": rebound.get("next_slice_name"),
+        "model_result_digest": rebound.get("model_result_digest"),
+        "model_selection_digest": rebound.get("model_selection_digest"),
+        "provider_call_id": rebound.get("provider_call_id"),
+        "provider_call_receipt_id": rebound.get("provider_call_receipt_id"),
+        "provider_call_evidence_digest": rebound.get(
+            "provider_call_evidence_digest"
+        ),
+        "proposal_admission_receipt_id": admission["receipt_id"],
+    }
+    determination_id = proposal_admission._digest(determination_seed)
+    candidate = dict(rebound["queue_candidate"])
+    candidate["source_determination_receipt_id"] = determination_id
+    candidate["proposal_admission_receipt_id"] = admission["receipt_id"]
+    candidate["proposal_admission_digest"] = promotion._digest(admission)
+    candidate["queue_candidate_id"] = proposal_admission._digest(
+        {
+            "source_determination_receipt_id": determination_id,
+            "slice_id": candidate["slice_id"],
+            "snapshot_receipt_id": rebound["snapshot_receipt_id"],
+            "report_bundle_id": rebound["report_bundle_id"],
+            "wsp15_allocation_receipt_id": rebound[
+                "wsp15_allocation_receipt_id"
+            ],
+            "proposal_admission_receipt_id": admission["receipt_id"],
+        }
+    )
+    rebound["proposal_admission"] = admission
+    rebound["determination_receipt_id"] = determination_id
+    rebound["queue_candidate"] = candidate
+    return rebound
 
 
 def _authority_profile(**overrides: Any) -> dict[str, Any]:
@@ -366,9 +551,21 @@ def _promote(**overrides: Any):
         "memex_supply_receipt": _memex_supply(),
         "worker_id": "reddog-worker-1",
         "now_iso": NOW,
+        "current_repo_head_sha": REPO_HEAD,
+        "current_holoindex_receipt": _holo_receipt(),
+        "authority_profile_precommit_writer": lambda profile: None,
     }
     args.update(overrides)
-    return promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order(**args), store
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_architect_proposal_admission_contract."
+        "current_architect_proposal_admission_policy",
+        return_value=ready_proposal_policy(),
+    ):
+        result = promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order(
+            **args
+        )
+    return result, store
 
 
 def test_promotes_fix_determination_to_queue_item_and_authority_profile() -> None:
@@ -552,6 +749,161 @@ def test_rejects_conflicting_wsp15_allocation_before_store_mutation() -> None:
 
     assert result.accepted is False
     assert promotion.ArchitectFixPromotionReason.WSP15_ALLOCATION_MISMATCH in result.rejection_reasons
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_valid_but_execution_blocked_candidate_before_store_mutation() -> None:
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        architect_determination=_determination(proposal_ready=False),
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID
+        in result.rejection_reasons
+    )
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_tampered_proposal_admission_before_store_mutation() -> None:
+    determination = _determination()
+    determination["proposal_admission"]["allowed_paths"] = ["modules/other/**"]
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        architect_determination=determination,
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID
+        in result.rejection_reasons
+    )
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_rehashed_underdeclared_effect_capabilities() -> None:
+    determination = _rebind_determination_admission(
+        _determination(),
+        {"required_capabilities": []},
+    )
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        architect_determination=determination,
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID
+        in result.rejection_reasons
+    )
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_noncanonical_queue_candidate_id() -> None:
+    determination = _determination()
+    determination["queue_candidate"]["queue_candidate_id"] = "sha256:forged"
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        architect_determination=determination,
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED
+        in result.rejection_reasons
+    )
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_changed_holoindex_generation_before_store_mutation() -> None:
+    current = _holo_receipt().to_dict()
+    current["generation_id"] = "sha256:different-generation"
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        current_holoindex_receipt=current,
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.HOLOINDEX_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_precommit_profile_failure_leaves_authoritative_queue_empty() -> None:
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    def fail_profile_write(_profile: Mapping[str, Any]) -> None:
+        raise OSError("simulated profile write failure")
+
+    result, _ = _promote(
+        store=store,
+        authority_profile_precommit_writer=fail_profile_write,
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED
+        in result.rejection_reasons
+    )
+    assert store.load()["wre_queue_items"] == []
+    assert store.load()["worker_claims"] == []
+
+
+def test_exact_authorized_base_sha_is_bound_across_promotion_outputs() -> None:
+    result, store = _promote()
+
+    assert result.accepted is True
+    assert result.authority_profile is not None
+    assert result.authority_profile["base_ref"] == REPO_HEAD
+    assert result.authority_profile["authorized_base_sha"] == REPO_HEAD
+    binding = result.authority_profile["operational_context_binding"]
+    assert binding["authorized_base_sha"] == REPO_HEAD
+    snapshot = store.load()
+    assert snapshot["worker_claims"][0]["authorized_base_sha"] == REPO_HEAD
+    assert snapshot["wre_queue_items"][0]["authorized_base_sha"] == REPO_HEAD
+
+
+def test_rejects_changed_repository_head_before_store_mutation() -> None:
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+
+    result, _ = _promote(
+        store=store,
+        current_repo_head_sha="sha256:different-head",
+    )
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.REPO_HEAD_MISMATCH
+        in result.rejection_reasons
+    )
+    assert store.load()["wre_queue_items"] == []
+
+
+def test_rejects_changed_work_state_revision_before_store_mutation() -> None:
+    changed = _work_state()
+    changed["revision"] = "sha256:different-work-state"
+    store = InMemoryAuthoritativeWorkStateStore(changed)
+
+    result, _ = _promote(store=store)
+
+    assert result.accepted is False
+    assert (
+        promotion.ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID
+        in result.rejection_reasons
+    )
     assert store.load()["wre_queue_items"] == []
 
 

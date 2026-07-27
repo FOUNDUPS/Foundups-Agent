@@ -59,6 +59,10 @@ from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_te
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    architect_model_output as _model_output,
+    runtime_kwargs as _runtime_kwargs,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -266,31 +270,6 @@ def _reports(plan) -> tuple[dict[str, Any], ...]:
             }
         )
     return tuple(reports)
-
-
-def _model_output(allocation: Mapping[str, Any], evidence_ref: str, *, action: str = ACTION_FIX) -> dict[str, Any]:
-    return {
-        "action": action,
-        "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1" if action != "STOP" else None,
-        "summary": "Verified reports support one next backend runtime slice.",
-        "decision_reasons": ["selected verified P0 runtime gap"],
-        "evidence_refs": [evidence_ref],
-        "wsp15_allocation_receipt_id": allocation["receipt_id"],
-    }
-
-
-def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
-    kwargs = {
-        "snapshot": inputs["snapshot"],
-        "context_view": inputs["context_view"],
-        "evidence_bundle": inputs["evidence_bundle"],
-        "fusion_gate": inputs["fusion_gate"],
-        "report_collection": inputs["report_collection"],
-        "reports": inputs["reports"],
-    }
-    if inputs["architect_runtime_binding"] is not None:
-        kwargs["model_runtime_binding_receipt"] = inputs["architect_runtime_binding"]
-    return kwargs
 
 
 def _provider_call_evidence_from_binding(

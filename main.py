@@ -2123,6 +2123,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         REDDOG_MEMEX_SUPPLY_RECEIPT_PATH                     Outside-repo Memex supply JSON
         REDDOG_AUTHORITY_PROFILE_SOURCE_PATH                 Outside-repo authority seed JSON
         REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo promoted profile JSON
+        HOLOINDEX_FRESHNESS_RECEIPT                          Current HoloIndex freshness receipt
         REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
         REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
         REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=0             Materialize model selection receipt from signed evidence
@@ -2218,6 +2219,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         repo_root,
         "REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH",
     )
+    holoindex_receipt_path = os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", "")
     model_autoresearch_plan_receipt_path = resident_queue_runtime_file_path(
         os.environ,
         repo_root,
@@ -3005,6 +3007,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             model_selection_receipt_path,
             memex_supply_receipt_path,
             authority_profile_source_path,
+            holoindex_receipt_path,
         )
     ) and bool(authority_profile_path)
     raw_requested = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME")
@@ -3030,6 +3033,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             memex_supply_receipt_path=memex_supply_receipt_path,
             authority_profile_source_path=authority_profile_source_path,
             authority_profile_output_path=authority_profile_path,
+            holoindex_receipt_path=holoindex_receipt_path,
             worker_id=os.getenv(
                 "REDDOG_ARCHITECT_FIX_PROMOTION_WORKER_ID",
                 "reddog-main-architect-fix-promotion",

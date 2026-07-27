@@ -196,6 +196,44 @@ def resolve_reddog_holoindex_owner_handoff() -> tuple[str, str] | None:
     return restart_reddog_holoindex_owner(failed_handoff=failed_handoff)
 
 
+def verify_reddog_holoindex_owner_binding(
+    *,
+    repo_root: Path | str,
+    expected_repo_head_sha: str,
+    expected_generation_id: str,
+    expected_receipt_digest: str,
+) -> bool:
+    """Verify that the active query owner serves one exact generation."""
+
+    expected_binding = _requested_binding(
+        repo_root,
+        expected_repo_head_sha,
+        expected_generation_id,
+        expected_receipt_digest,
+    )
+    with _OWNER_LOCK:
+        supervisor = _OWNER_SUPERVISOR
+        if (
+            supervisor is not None
+            and _OWNER_HANDOFF is not None
+            and supervisor.is_ready
+        ):
+            return supervisor.verified_binding == expected_binding
+
+        service_url = os.environ.get(SERVICE_URL_ENV, "").strip()
+        token = os.environ.get(SERVICE_TOKEN_ENV, "").strip()
+        if not service_url or not token:
+            return False
+        return _configured_owner_health_ready(
+            service_url=service_url,
+            token=token,
+            expected_repo_head_sha=expected_binding[0],
+            expected_repo_root_digest=expected_binding[1],
+            expected_generation_id=expected_binding[2],
+            expected_receipt_digest=expected_binding[3],
+        )
+
+
 def restart_reddog_holoindex_owner(
     *,
     failed_handoff: tuple[str, str],
@@ -400,4 +438,5 @@ __all__ = [
     "ensure_reddog_holoindex_owner",
     "restart_reddog_holoindex_owner",
     "resolve_reddog_holoindex_owner_handoff",
+    "verify_reddog_holoindex_owner_binding",
 ]

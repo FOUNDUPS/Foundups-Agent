@@ -1,5 +1,10 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-27] Promotion-time owner binding
+
+- Proved configured-owner exact binding without process startup.
+- Proved an owned query owner serving another generation is rejected.
+
 ## [2026-07-25] HoloIndex parent-process watchdog
 
 - Replaced pipe-EOF tests with injected and real parent-process termination coverage.

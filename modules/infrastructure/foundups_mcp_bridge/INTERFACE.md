@@ -2,6 +2,13 @@
 
 ## Public API
 
+### `verify_reddog_holoindex_owner_binding(...) -> bool`
+
+Read-only promotion-time proof that the already-running private query owner
+serves the exact repository root, repository HEAD, HoloIndex generation, and
+on-disk freshness-receipt digest supplied by the caller. It never starts an
+owner or re-indexes; absent or mismatched owner state returns `False`.
+
 ### FoundUpsMCPBridge
 
 Main bridge class for MCP tool access.

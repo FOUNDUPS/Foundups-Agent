@@ -63,13 +63,14 @@ class _CycleStore:
 
 
 def _cycle(**overrides: Any) -> dict[str, Any]:
+    determination_id = _determination()["determination_receipt_id"]
     record = {
         "schema_version": "reddog_resident_architect_cycle.v1",
         "intent_id": INTENT_ID,
         "cycle_id": CYCLE_ID,
         "status": STATUS_DETERMINED,
         "architect_action": "FIX",
-        "architect_determination_id": "sha256:architect-determination-1",
+        "architect_determination_id": determination_id,
         "initial_bootstrap": {
             "memex_snapshot_supply_receipt": _memex_supply(),
         },
@@ -108,7 +109,9 @@ def test_handoff_writes_determination_and_memex_artifacts_outside_repo(tmp_path:
     assert result.memex_supply_receipt_path == str((runtime / "memex_supply_receipt.json").resolve())
     determination = json.loads(Path(result.architect_determination_path).read_text(encoding="utf-8"))
     memex = json.loads(Path(result.memex_supply_receipt_path).read_text(encoding="utf-8"))
-    assert determination["determination_receipt_id"] == "sha256:architect-determination-1"
+    assert determination["determination_receipt_id"] == _determination()[
+        "determination_receipt_id"
+    ]
     assert memex["schema_version"] == "reddog_operational_memex_snapshot_supply_receipt.v1"
     assert memex["receipt_id"] == "sha256:memex-supply"
     assert result.no_signing_performed is True

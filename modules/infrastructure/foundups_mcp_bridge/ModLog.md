@@ -1,5 +1,13 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-27 - Promotion-time HoloIndex owner binding
+
+- Added a read-only exact-binding verifier for RedDog promotion gates.
+- The verifier accepts only an already-running owned or configured query owner
+  that proves the expected repository root, HEAD, generation, and on-disk
+  freshness-receipt digest.
+- No owner startup, HoloIndex mutation, re-index, or query authority was added.
+
 ## 2026-07-26 - HoloIndex authority update transaction
 
 - Added a distinct cross-process authority-update lease around exact-SHA,
