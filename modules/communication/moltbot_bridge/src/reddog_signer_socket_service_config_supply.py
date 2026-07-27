@@ -156,6 +156,7 @@ def run_reddog_signer_socket_service_config_supply(
     ) = None,
     proposal_nonce_store_path: Path | str | None = None,
     proposal_replay_high_water_store_id: str | None = None,
+    proposal_replay_high_water_durability_receipt_id: str | None = None,
     now_epoch: int | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
 ) -> SignerServiceConfigSupplyResult:
@@ -206,6 +207,7 @@ def run_reddog_signer_socket_service_config_supply(
         proposal_authority_policy,
         proposal_nonce_store_path,
         proposal_replay_high_water_store_id,
+        proposal_replay_high_water_durability_receipt_id,
         reddog_signer_agent_id,
     )
     reasons.extend(proposal_reasons)
@@ -243,6 +245,9 @@ def run_reddog_signer_socket_service_config_supply(
         proposal_replay_high_water_store_id=(
             proposal_replay_high_water_store_id
         ),
+        proposal_replay_high_water_durability_receipt_id=(
+            proposal_replay_high_water_durability_receipt_id
+        ),
     )
     provisional_runtime_config = SignerSocketServiceRuntimeWiringConfig(
         repo_root=root,
@@ -270,6 +275,9 @@ def run_reddog_signer_socket_service_config_supply(
         proposal_nonce_store_path=proposal_nonce_path,
         proposal_replay_high_water_store_id=(
             proposal_replay_high_water_store_id
+        ),
+        proposal_replay_high_water_durability_receipt_id=(
+            proposal_replay_high_water_durability_receipt_id
         ),
     )
     try:
@@ -486,6 +494,7 @@ def _proposal_runtime_inputs(
     policy: ArchitectProposalSignerPolicy | None,
     nonce_store_path: Path | str | None,
     high_water_store_id: str | None,
+    high_water_durability_receipt_id: str | None,
     reddog_signer_agent_id: str,
 ) -> tuple[Path | None, str | None, list[str]]:
     if policy is None:
@@ -494,7 +503,11 @@ def _proposal_runtime_inputs(
             None,
             (
                 []
-                if nonce_store_path is None and high_water_store_id is None
+                if (
+                    nonce_store_path is None
+                    and high_water_store_id is None
+                    and high_water_durability_receipt_id is None
+                )
                 else [FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_INVALID]
             ),
         )
@@ -502,6 +515,7 @@ def _proposal_runtime_inputs(
         not isinstance(policy, ArchitectProposalSignerPolicy)
         or signer_runtime_root is None
         or not _ascii_string(high_water_store_id)
+        or not _is_sha256_digest(high_water_durability_receipt_id)
         or reddog_signer_agent_id
         != REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID
     ):
@@ -628,6 +642,7 @@ def _config(
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None,
     proposal_nonce_store_path: Path | None,
     proposal_replay_high_water_store_id: str | None,
+    proposal_replay_high_water_durability_receipt_id: str | None,
 ) -> dict[str, Any]:
     principal_public = str(authority_profile["principal_public_key"])
     reddog_public = str(authority_profile["reddog_public_key"])
@@ -687,6 +702,9 @@ def _config(
     if proposal_authority_policy is not None:
         assert proposal_nonce_store_path is not None
         assert proposal_replay_high_water_store_id is not None
+        assert (
+            proposal_replay_high_water_durability_receipt_id is not None
+        )
         config["key_provider_profiles"] = [
             config["key_provider_profiles"][1]
         ]
@@ -705,6 +723,9 @@ def _config(
         config["proposal_replay_high_water_store_id"] = (
             proposal_replay_high_water_store_id
         )
+        config[
+            "proposal_replay_high_water_durability_receipt_id"
+        ] = proposal_replay_high_water_durability_receipt_id
         if proposal_policy_authorization is not None:
             config["proposal_policy_authorization"] = (
                 proposal_policy_authorization.to_dict()

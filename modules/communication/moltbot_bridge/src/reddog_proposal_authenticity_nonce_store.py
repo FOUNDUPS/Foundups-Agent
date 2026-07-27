@@ -5,18 +5,19 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-import os
-import stat
 import threading
 import time
-from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Iterator, Mapping, Protocol, runtime_checkable
+from typing import Any, Callable, Mapping, Protocol, runtime_checkable
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
 )
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
+
 PROPOSAL_NONCE_STORE_SCHEMA_VERSION = (
     "reddog_architect_proposal_nonce_store.v1"
 )
@@ -40,6 +41,12 @@ class ProposalReplayHighWaterStore(Protocol):
 
     @property
     def store_id(self) -> str: ...
+
+    @property
+    def durable(self) -> bool: ...
+
+    @property
+    def durability_receipt_id(self) -> str | None: ...
 
     def load(
         self,
@@ -68,6 +75,14 @@ class InMemoryProposalReplayHighWaterStore:
     @property
     def store_id(self) -> str:
         return self._store_id
+
+    @property
+    def durable(self) -> bool:
+        return False
+
+    @property
+    def durability_receipt_id(self) -> None:
+        return None
 
     def load(
         self,
@@ -158,7 +173,7 @@ class AtomicProposalAuthenticityNonceStore:
                 "proposal_authenticity_high_water_store_invalid"
             )
         self._high_water_store = high_water_store
-        self._operation_lock_path = Path(str(self._store.path) + ".lock")
+        self._operation_lock_identity = str(self._store.path) + ".operation"
         self._clock = clock
         self._clock_skew_seconds = clock_skew_seconds
         self._retention_seconds = retention_seconds
@@ -184,6 +199,8 @@ class AtomicProposalAuthenticityNonceStore:
 
         def mutate(state: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
             now_epoch = int(self._clock())
+            if expiry <= now_epoch:
+                return state, None
             consumed, reserved = _validated_entries(
                 state,
                 integrity_key=self._integrity_key,
@@ -236,6 +253,10 @@ class AtomicProposalAuthenticityNonceStore:
                 raise ValueError(
                     "proposal_authenticity_nonce_reservation_invalid"
                 )
+            if int(entry["expires_at"]) <= int(self._clock()):
+                raise ValueError(
+                    "proposal_authenticity_nonce_reservation_expired"
+                )
             key = _nonce_key(
                 _text(entry.get("subject")),
                 _text(entry.get("nonce")),
@@ -285,7 +306,7 @@ class AtomicProposalAuthenticityNonceStore:
         ],
     ) -> Any:
         for _ in range(_MAX_COMMIT_RETRIES):
-            with _cross_session_file_lock(self._operation_lock_path):
+            with runtime_operation_lock(self._operation_lock_identity):
                 state, high_water = self._load_state()
                 updated, result = mutation(state)
                 if updated is state:
@@ -496,42 +517,6 @@ def _state_mac(state: Mapping[str, Any], integrity_key: bytes) -> str:
         raw,
         hashlib.sha256,
     ).hexdigest()
-
-
-@contextmanager
-def _cross_session_file_lock(path: Path) -> Iterator[None]:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    flags = os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(path, flags, 0o600)
-    try:
-        file_stat = os.fstat(descriptor)
-        if not stat.S_ISREG(file_stat.st_mode):
-            raise ValueError(
-                "proposal_authenticity_nonce_lock_invalid"
-            )
-        if file_stat.st_size == 0:
-            os.write(descriptor, b"\0")
-            os.fsync(descriptor)
-        os.lseek(descriptor, 0, os.SEEK_SET)
-        if os.name == "nt":
-            import msvcrt
-
-            msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
-            try:
-                yield
-            finally:
-                os.lseek(descriptor, 0, os.SEEK_SET)
-                msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
-        else:
-            import fcntl
-
-            fcntl.flock(descriptor, fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(descriptor, fcntl.LOCK_UN)
-    finally:
-        os.close(descriptor)
 
 
 def _digest(value: Any) -> str:

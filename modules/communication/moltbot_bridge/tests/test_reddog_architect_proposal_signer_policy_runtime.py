@@ -99,6 +99,7 @@ NOW = int(time.time())
 PRINCIPAL_PUBLIC = encode_ed25519_public_key(bytes(range(32)))
 INTEGRITY_KEY = b"proposal-integrity-key-32-bytes!"
 HIGH_WATER_STORE_ID = "proposal-replay-authority:test"
+HIGH_WATER_DURABILITY_RECEIPT_ID = "sha256:" + "d" * 64
 
 
 class _SqliteProposalReplayHighWaterStore:
@@ -118,6 +119,14 @@ class _SqliteProposalReplayHighWaterStore:
     @property
     def store_id(self) -> str:
         return HIGH_WATER_STORE_ID
+
+    @property
+    def durable(self) -> bool:
+        return True
+
+    @property
+    def durability_receipt_id(self) -> str:
+        return HIGH_WATER_DURABILITY_RECEIPT_ID
 
     def load(
         self,
@@ -195,6 +204,14 @@ class _FailOnceProposalReplayHighWaterStore:
     @property
     def store_id(self) -> str:
         return self._delegate.store_id
+
+    @property
+    def durable(self) -> bool:
+        return False
+
+    @property
+    def durability_receipt_id(self) -> None:
+        return None
 
     def load(self, replay_store_binding_digest: str):
         return self._delegate.load(replay_store_binding_digest)
@@ -535,6 +552,9 @@ def _config_kwargs(
             signer_runtime / "architect_proposal_nonce_store.json"
         ).resolve(),
         proposal_replay_high_water_store_id=HIGH_WATER_STORE_ID,
+        proposal_replay_high_water_durability_receipt_id=(
+            HIGH_WATER_DURABILITY_RECEIPT_ID
+        ),
     )
     security_context_digest = architect_proposal_security_context_digest(
         SignerSocketServiceRuntimeWiringConfig(
@@ -562,6 +582,9 @@ def _config_kwargs(
                 / "architect_proposal_nonce_store.json"
             ).resolve(),
             proposal_replay_high_water_store_id=HIGH_WATER_STORE_ID,
+            proposal_replay_high_water_durability_receipt_id=(
+                HIGH_WATER_DURABILITY_RECEIPT_ID
+            ),
         )
     )
     values: dict[str, object] = {
@@ -578,6 +601,9 @@ def _config_kwargs(
         "peer_uid_to_principal": {1001: "github:mjtrout"},
         "proposal_authority_policy": policy,
         "proposal_replay_high_water_store_id": HIGH_WATER_STORE_ID,
+        "proposal_replay_high_water_durability_receipt_id": (
+            HIGH_WATER_DURABILITY_RECEIPT_ID
+        ),
         "proposal_policy_authorization": _policy_authorization(
             policy,
             principal_private=principal_private,
@@ -627,6 +653,9 @@ def _runtime_proposal_config(
             signer_runtime / "architect_proposal_nonce_store.json"
         ),
         proposal_replay_high_water_store_id=HIGH_WATER_STORE_ID,
+        proposal_replay_high_water_durability_receipt_id=(
+            HIGH_WATER_DURABILITY_RECEIPT_ID
+        ),
     )
     security_digest = architect_proposal_security_context_digest(
         provisional
@@ -880,6 +909,7 @@ def test_atomic_nonce_store_serializes_cross_process_reservation(
     ) as executor:
         results = list(executor.map(_reserve_nonce_process, jobs))
     assert sum(results) == 1
+    assert not (runtime / "proposal-nonces.json.lock").exists()
 
 
 def test_atomic_nonce_store_rejects_state_rollback_and_deletion(
@@ -985,6 +1015,38 @@ def test_atomic_nonce_store_recovers_state_commit_before_high_water_advance(
     assert recovered.sequence == 1
 
 
+def test_atomic_nonce_store_rechecks_expiry_at_reserve_and_commit(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "signer-state"
+    repo.mkdir()
+    now = [NOW]
+    store = AtomicProposalAuthenticityNonceStore(
+        runtime / "proposal-nonces.json",
+        **_nonce_store_kwargs(repo, runtime),
+        clock=lambda: now[0],
+    )
+
+    assert (
+        store.reserve(
+            "already-expired",
+            expires_at=NOW,
+            subject="github:mjtrout",
+        )
+        is None
+    )
+    reservation = store.reserve(
+        "expires-before-commit",
+        expires_at=NOW + 1,
+        subject="github:mjtrout",
+    )
+    assert reservation
+    now[0] = NOW + 1
+    with pytest.raises(ValueError, match="reservation_expired"):
+        store.commit(reservation)
+
+
 def test_ed25519_signature_decoder_rejects_noncanonical_suffix() -> None:
     canonical = encode_ed25519_signature(b"s" * 64)
     assert decode_ed25519_signature(canonical) == b"s" * 64
@@ -1061,6 +1123,31 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
         architect_proposal_security_context_digest(rehydrated),
         str(rehydrated.proposal_security_context_digest),
     )
+    rejected_in_memory = (
+        run_reddog_signer_socket_service_runtime_bootstrap(
+            repo_root=repo,
+            config_path=runtime / "signer-service.json",
+            resolver=_Resolver(private_key),
+            serve_bounded=lambda **kwargs: pytest.fail(
+                "production signer accepted volatile replay authority"
+            ),
+            expected_config_digest=result.config_digest,
+            principal_key_resolver=_PrincipalKeyResolver(
+                _public_text(principal_private)
+            ),
+            proposal_replay_high_water_store=(
+                InMemoryProposalReplayHighWaterStore(
+                    HIGH_WATER_STORE_ID
+                )
+            ),
+        )
+    )
+    assert rejected_in_memory.accepted is False
+    assert (
+        FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID
+        in rejected_in_memory.rejection_reasons
+    )
+
     bootstrap = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=repo,
         config_path=runtime / "signer-service.json",
@@ -1081,8 +1168,8 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
             _public_text(principal_private)
         ),
         proposal_replay_high_water_store=(
-            InMemoryProposalReplayHighWaterStore(
-                HIGH_WATER_STORE_ID
+            _SqliteProposalReplayHighWaterStore(
+                tmp_path / "production-high-water.sqlite3"
             )
         ),
     )
@@ -1415,6 +1502,8 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
     )
 
     assert result.accepted is True
+    assert result.no_file_io_performed is False
+    assert result.no_repo_file_io_performed is True
     backend = captured["backend"]
     assert backend.proposal_authority_policy == policy
     assert isinstance(
@@ -1564,6 +1653,8 @@ def test_runtime_consumes_policy_authorization_nonce_once(
     assert second.rejection_reasons == (
         FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
     )
+    assert second.no_file_io_performed is False
+    assert second.no_repo_file_io_performed is True
 
 
 def test_runtime_requires_matching_independent_high_water_authority(
@@ -1617,6 +1708,10 @@ def test_runtime_requires_matching_independent_high_water_authority(
     assert mismatched.rejection_reasons == (
         FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
     )
+    assert missing.no_file_io_performed is False
+    assert mismatched.no_file_io_performed is False
+    assert missing.no_repo_file_io_performed is True
+    assert mismatched.no_repo_file_io_performed is True
 
 
 def test_runtime_never_reuses_authorization_after_service_signs_then_raises(
@@ -1675,6 +1770,7 @@ def test_runtime_never_reuses_authorization_after_service_signs_then_raises(
 
     assert signed and signed[0].accepted is True
     assert first.accepted is False
+    assert first.no_file_io_performed is False
     assert second.accepted is False
     assert service_calls == 1
     assert second.rejection_reasons == (
@@ -1704,6 +1800,19 @@ def test_bootstrap_rejects_tampered_serialized_proposal_policy(
     assert result.accepted is True
     config_path = runtime / "signer-service.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
+    malformed_digest = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=config_path,
+        resolver=_Resolver(private_key),
+        serve_bounded=lambda **kwargs: pytest.fail(
+            "malformed digest reached signer service"
+        ),
+        expected_config_digest=123,  # type: ignore[arg-type]
+    )
+    assert malformed_digest.accepted is False
+    assert malformed_digest.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
+    )
     replacement_proposal = {
         **{
             "receipt_id": "sha256:" + "1" * 64,

@@ -141,6 +141,7 @@ class SignerSocketServiceRuntimeWiringConfig:
     proposal_policy_authorization: ArchitectProposalPolicyAuthorization | Mapping[str, Any] | None = None
     proposal_nonce_store_path: Path | str | None = None
     proposal_replay_high_water_store_id: str | None = None
+    proposal_replay_high_water_durability_receipt_id: str | None = None
     proposal_security_context_digest: str | None = None
 
 
@@ -156,6 +157,7 @@ class SignerSocketServiceRuntimeWiringResult:
     max_requests: int = 0
     no_env_parsed: bool = True
     no_file_io_performed: bool = True
+    no_repo_file_io_performed: bool = True
     no_process_spawned: bool = True
     no_repo_mutation_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
@@ -212,7 +214,14 @@ def architect_proposal_security_context_digest(
     high_water_store_id = str(
         config.proposal_replay_high_water_store_id or ""
     ).strip()
-    if not high_water_store_id or not _ascii(high_water_store_id):
+    durability_receipt_id = str(
+        config.proposal_replay_high_water_durability_receipt_id or ""
+    ).strip()
+    if (
+        not high_water_store_id
+        or not _ascii(high_water_store_id)
+        or not _is_sha256_digest(durability_receipt_id)
+    ):
         raise ValueError("architect_proposal_security_context_invalid")
     control_anchor_path = validate_runtime_artifact_path(
         config.control_loop_anchor_path,
@@ -264,6 +273,9 @@ def architect_proposal_security_context_digest(
         },
         "proposal_nonce_store_path": str(nonce_path),
         "proposal_replay_high_water_store_id": high_water_store_id,
+        "proposal_replay_high_water_durability_receipt_id": (
+            durability_receipt_id
+        ),
     }
     raw = json.dumps(
         payload,
@@ -316,7 +328,8 @@ def run_reddog_signer_socket_service_runtime_wiring(
     )
     if proposal_policy is not None and proposal_authorization is None:
         return _reject(
-            FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID
+            FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+            no_file_io_performed=False,
         )
     (
         proposal_nonce_store_path,
@@ -327,7 +340,10 @@ def run_reddog_signer_socket_service_runtime_wiring(
         proposal_policy=proposal_policy,
     )
     if proposal_store_reasons:
-        return _reject(*proposal_store_reasons)
+        return _reject(
+            *proposal_store_reasons,
+            no_file_io_performed=(proposal_policy is None),
+        )
     if proposal_policy is not None:
         try:
             high_water_authority_valid = bool(
@@ -339,12 +355,34 @@ def run_reddog_signer_socket_service_runtime_wiring(
                     proposal_replay_high_water_store.store_id,
                     str(proposal_replay_high_water_store_id),
                 )
+                and (
+                    config.provider_mode
+                    != PROVIDER_MODE_WSP71_PERMISSIONED
+                    or (
+                        proposal_replay_high_water_store.durable is True
+                        and _is_sha256_digest(
+                            proposal_replay_high_water_store
+                            .durability_receipt_id
+                        )
+                        and hmac.compare_digest(
+                            str(
+                                proposal_replay_high_water_store
+                                .durability_receipt_id
+                            ),
+                            str(
+                                config
+                                .proposal_replay_high_water_durability_receipt_id
+                            ),
+                        )
+                    )
+                )
             )
         except Exception:
             high_water_authority_valid = False
         if not high_water_authority_valid:
             return _reject(
-                FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID
+                FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+                no_file_io_performed=False,
             )
 
     backend, proposal_nonce_store, key_receipt, key_reasons = _build_backend(
@@ -371,7 +409,12 @@ def run_reddog_signer_socket_service_runtime_wiring(
         ),
     )
     if key_reasons:
-        return _reject(*key_reasons, key_provider_receipt=key_receipt, max_requests=config.max_requests)
+        return _reject(
+            *key_reasons,
+            key_provider_receipt=key_receipt,
+            max_requests=config.max_requests,
+            no_file_io_performed=(proposal_policy is None),
+        )
     authorization_reservation = _reserve_policy_authorization(
         proposal_nonce_store,
         proposal_authorization,
@@ -381,6 +424,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
+            no_file_io_performed=False,
         )
     if not _commit_policy_authorization(
         proposal_nonce_store,
@@ -390,6 +434,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
+            no_file_io_performed=False,
         )
 
     try:
@@ -409,12 +454,14 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_SERVICE_REJECTED,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
+            no_file_io_performed=False,
         )
     if not isinstance(service, IsolatedSignerSocketResidentServiceResult):
         return _reject(
             FAIL_SIGNER_RUNTIME_SERVICE_INVALID,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
+            no_file_io_performed=False,
         )
     service_receipt = service.to_dict()
     if service.accepted is not True or service.status != SIGNER_SOCKET_RESIDENT_SERVICE_SERVED:
@@ -423,6 +470,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             key_provider_receipt=key_receipt,
             service_result=service_receipt,
             max_requests=config.max_requests,
+            no_file_io_performed=False,
         )
 
     return SignerSocketServiceRuntimeWiringResult(
@@ -432,6 +480,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
         key_provider_receipt=key_receipt,
         service_result=service_receipt,
         max_requests=config.max_requests,
+        no_file_io_performed=(proposal_policy is None),
     )
 
 
@@ -918,11 +967,15 @@ def _proposal_nonce_store(
     high_water_store_id = str(
         config.proposal_replay_high_water_store_id or ""
     ).strip()
+    durability_receipt_id = str(
+        config.proposal_replay_high_water_durability_receipt_id or ""
+    ).strip()
     security_digest = config.proposal_security_context_digest
     if (
         proposal_policy is None
         and path is None
         and not high_water_store_id
+        and not durability_receipt_id
         and security_digest is None
     ):
         return None, None, ()
@@ -932,6 +985,7 @@ def _proposal_nonce_store(
         path is None
         or not high_water_store_id
         or not _ascii(high_water_store_id)
+        or not _is_sha256_digest(durability_receipt_id)
         or not _is_sha256_digest(security_digest)
     ):
         return None, None, (
@@ -1092,6 +1146,7 @@ def _reject(
     key_provider_receipt: Optional[dict[str, Any]] = None,
     service_result: Optional[dict[str, Any]] = None,
     max_requests: int = 0,
+    no_file_io_performed: bool = True,
 ) -> SignerSocketServiceRuntimeWiringResult:
     return SignerSocketServiceRuntimeWiringResult(
         accepted=False,
@@ -1100,6 +1155,7 @@ def _reject(
         key_provider_receipt=key_provider_receipt or {},
         service_result=service_result,
         max_requests=max_requests,
+        no_file_io_performed=no_file_io_performed,
     )
 
 

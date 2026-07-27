@@ -43,26 +43,37 @@ and the socket exposes only that proposal-domain backend. The signer validates
 the exact payload and consumes a MAC-authenticated, bounded nonce store before
 returning an accepted signature. Replay rollback is checked against an
 independently injected monotonic high-water authority outside the nonce-state
-rollback domain. The signed replay binding includes that authority's immutable
-identifier, and runtime rejects a mismatched or missing authority. One atomic
-state document, a cross-session file lock, compare-and-swap commits, and
-one-step crash roll-forward prevent split-file ambiguity. The principal policy
-authorization is durably consumed before the backend is exposed; service
-failure never restores it. Runtime recomputes the signed security-context
-digest over paths, peer policy, limits, key profile, policy, and replay
-namespace. Startup also requires the exact serialized config digest from
-outside the config file. Unsigned, expired, altered, self-consistently
-re-digested, profile/key-substituted, replayed, rolled-back, deleted,
-high-water-mismatched, and out-of-root inputs fail closed.
+rollback domain. Production mode additionally requires that injected authority
+to be supplied by trusted signer-runtime composition, declare durable storage,
+and present the exact SHA-256 durability receipt bound into signer
+configuration and its normalized security-context digest; the in-memory test
+store is rejected. This slice validates capability and receipt agreement at
+that injection boundary; it does not issue or independently authenticate the
+durability receipt. The signed replay binding includes the authority's
+immutable identifier. Runtime rejects a mismatched, missing, or volatile
+authority. One atomic state document, the shared cross-session runtime
+operation lock, compare-and-swap commits, and one-step crash roll-forward
+prevent split-file ambiguity. Nonce freshness is checked at reservation and
+again at durable commit. The principal policy authorization is durably
+consumed before the backend is exposed; service failure never restores it.
+Runtime recomputes the signed security-context digest over paths, peer policy,
+limits, key profile, policy, durability receipt, and replay namespace. Startup
+also requires the exact serialized config digest from outside the config file.
+Unsigned, expired, altered, self-consistently re-digested,
+profile/key-substituted, replayed, rolled-back, deleted,
+high-water-mismatched, and out-of-root inputs fail closed. Runtime receipts
+report signer-state file I/O truthfully and separately attest that no repository
+file I/O occurred.
 
 Production policy still keeps `architect_proposal_admission_authenticity`
 unavailable because the resident proposal path does not yet derive the exact
 signer policy from authoritative work state, produce its principal-signed
 policy authorization, configure a production principal-key resolver, request
 proposal signing, supply the independently administered production high-water
-authority, resolve independent key/revocation/freshness trust, produce an
-opaque process-local authority proof, or consume the attestation
-transactionally during queue promotion.
+authority and an authenticated durability receipt issuer/verifier, resolve
+independent key/revocation/freshness trust, produce an opaque process-local
+authority proof, or consume the attestation transactionally during queue
+promotion.
 
 ### Resident queue exact-SHA commit stage
 

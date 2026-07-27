@@ -5,10 +5,12 @@
   against the configured RedDog signer profile.
 - Added a signer-owned atomic proposal nonce store bound to an independently
   injected monotonic high-water authority outside the nonce-state rollback
-  domain. The signed authority identifier, MAC, sequence, revision,
-  cross-session file lock, and one-step crash roll-forward make rollback,
-  deletion, mismatched authority, and tampering fail closed while bounded
-  retention prevents unbounded growth.
+  domain. Production requires a matching configuration-bound durability
+  receipt and rejects the volatile in-memory implementation. The signed
+  authority identifier, MAC, sequence, revision, shared cross-session runtime
+  operation lock, and one-step crash roll-forward make rollback, deletion,
+  mismatched authority, lock-path substitution, and tampering fail closed while
+  bounded retention prevents unbounded growth.
 - Required the proposal payload identity, signer key, key epoch, consensus
   receipt, authority-profile source, and TTL to match the supplied authority
   profile before a signer configuration can be written, with a fixed
@@ -27,14 +29,17 @@
   Unknown, generic, and control-loop signing operations cannot reuse that
   private key during the proposal service run.
 - Consumed principal policy authorization before exposing the signer backend.
-  A service rejection or exception after signing cannot roll authorization
-  back or reuse it on another launch.
+  Reservation and commit independently reject expired authorization. A service
+  rejection or exception after signing cannot roll authorization back or reuse
+  it on another launch. Runtime receipts distinguish signer-state file I/O from
+  the separately attested absence of repository file I/O.
 - Preserved the authority boundary: this slice provisions signer policy and
   durable replay state only. It does not derive proposal facts from
   authoritative work state, produce an attestation in the resident loop,
   produce the principal policy authorization in the resident loop,
   configure the production principal-key resolver,
-  supply the independently administered production high-water authority,
+  supply the independently administered production high-water authority and
+  its durability receipt,
   satisfy the proposal-admission capability, promote a queue item, execute a
   worker, or grant merge authority (WSP 00, 15, 22, 50, 62, 97).
 

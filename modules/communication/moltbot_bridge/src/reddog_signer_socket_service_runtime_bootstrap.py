@@ -107,6 +107,14 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         return _reject(*read_reasons, config_path=str(path))
     assert payload is not None
     assert digest is not None
+    if expected_config_digest is not None and not _is_sha256_digest(
+        expected_config_digest
+    ):
+        return _reject(
+            FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
+            config_path=str(path),
+            config_digest=digest,
+        )
     if (
         expected_config_digest is not None
         and not hmac.compare_digest(expected_config_digest, digest)
@@ -287,11 +295,17 @@ def rehydrate_signer_socket_service_runtime_config(
         proposal_high_water_store_id = payload.get(
             "proposal_replay_high_water_store_id"
         )
+        proposal_high_water_durability_receipt_id = payload.get(
+            "proposal_replay_high_water_durability_receipt_id"
+        )
         if not (
             (proposal_policy is None)
             == (proposal_policy_authorization is None)
             == (proposal_nonce_path_value is None)
             == (proposal_high_water_store_id is None)
+            == (
+                proposal_high_water_durability_receipt_id is None
+            )
         ):
             return None
         proposal_nonce_path = None
@@ -312,10 +326,14 @@ def rehydrate_signer_socket_service_runtime_config(
                 not isinstance(proposal_high_water_store_id, str)
                 or not proposal_high_water_store_id.strip()
                 or not proposal_high_water_store_id.isascii()
+                or not _is_sha256_digest(
+                    proposal_high_water_durability_receipt_id
+                )
             ):
                 return None
         else:
             proposal_high_water_store_id = None
+            proposal_high_water_durability_receipt_id = None
         peer_policy = payload["peer_policy"]
         key_profile = payload.get("key_provider_profile")
         key_profiles = payload.get("key_provider_profiles") or ()
@@ -358,6 +376,9 @@ def rehydrate_signer_socket_service_runtime_config(
             proposal_replay_high_water_store_id=(
                 proposal_high_water_store_id
             ),
+            proposal_replay_high_water_durability_receipt_id=(
+                proposal_high_water_durability_receipt_id
+            ),
         )
         if proposal_policy is not None:
             config = replace(
@@ -390,6 +411,15 @@ def _reject(
         config_path=config_path,
         config_digest=config_digest,
         runtime_result=runtime_result,
+    )
+
+
+def _is_sha256_digest(value: object) -> bool:
+    text = value if isinstance(value, str) else ""
+    return (
+        len(text) == 71
+        and text.startswith("sha256:")
+        and all(char in "0123456789abcdef" for char in text[7:])
     )
 
 
