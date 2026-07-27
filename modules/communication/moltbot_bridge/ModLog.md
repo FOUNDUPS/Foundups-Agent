@@ -37,7 +37,9 @@
   Reservation and commit independently reject expired authorization. A service
   rejection or exception after signing cannot roll authorization back or reuse
   it on another launch. Runtime receipts stop claiming no file I/O once
-  injected proposal trust, key, or replay dependencies have been invoked.
+  injected proposal trust, key, or replay dependencies have been invoked, and
+  all other unobservable negative side-effect attestations become false after
+  any injected dependency call.
 - Rejected proposal-enabled signer run packets until production principal and
   replay adapters are composed into the CLI sidecar, rather than emitting an
   accepted packet that the shipped CLI must reject.

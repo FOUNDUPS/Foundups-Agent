@@ -55,7 +55,9 @@ authority. One atomic state document, a canonical transaction lock beside that
 document under the signer-owned runtime root, compare-and-swap commits, and
 one-step crash roll-forward prevent split-file ambiguity. The transaction lock
 is descriptor-path verified and does not depend on process-local temporary
-directories. Nonce freshness is checked at reservation and again at durable
+directories. Descriptor verification supports Windows and Linux with procfs;
+other POSIX environments fail closed. Nonce freshness is checked at durable
+reservation and again at durable
 commit. The principal policy authorization is durably
 consumed before the backend is exposed; service failure never restores it.
 Runtime recomputes the signed security-context digest over paths, peer policy,
@@ -65,8 +67,10 @@ Unsigned, expired, altered, self-consistently re-digested,
 profile/key-substituted, replayed, rolled-back, deleted,
 high-water-mismatched, and out-of-root inputs fail closed. Runtime receipts
 stop claiming that no file I/O occurred once injected proposal trust, key, or
-replay dependencies have been invoked. Effects performed by injected
-dependencies remain outside this receipt's direct observation.
+replay dependencies have been invoked. Once any injected dependency is called,
+every negative side-effect attestation that the runtime cannot directly
+observe is false; the receipt does not infer purity from the dependency
+interface.
 
 The public generic key-provider API has no architect-proposal policy or nonce
 parameters. Proposal backend construction is an internal runtime-only path

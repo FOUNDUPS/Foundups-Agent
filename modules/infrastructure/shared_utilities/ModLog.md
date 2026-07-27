@@ -9,7 +9,8 @@
 - Preserved the existing identity digest and POSIX confined lock-file behavior.
 - Added a descriptor-verified confined lock-file primitive for authorities
   that require one canonical runtime-root lock independent of temporary
-  directory configuration.
+  directory configuration. Descriptor verification is supported on Windows
+  and Linux with procfs; other POSIX environments fail closed.
 
 ## 2026-07-25 - Stable Descriptor-Confined Runtime Text Reads
 

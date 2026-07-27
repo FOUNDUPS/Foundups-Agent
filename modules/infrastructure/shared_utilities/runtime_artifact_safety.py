@@ -6,6 +6,7 @@ import hashlib
 import os
 import re
 import stat
+import sys
 import tempfile
 import unicodedata
 from contextlib import contextmanager
@@ -632,6 +633,12 @@ def _descriptor_final_path(descriptor: int) -> Path:
         if length <= 0 or length >= len(buffer):
             raise OSError("runtime_artifact_final_path_unavailable")
         return _without_windows_extended_prefix(Path(buffer.value))
+    return _linux_descriptor_final_path(descriptor)
+
+
+def _linux_descriptor_final_path(descriptor: int) -> Path:
+    if not sys.platform.startswith("linux"):
+        raise OSError("runtime_artifact_final_path_unsupported_platform")
     proc_path = Path(f"/proc/self/fd/{descriptor}")
     if proc_path.exists():
         return proc_path.resolve(strict=True)

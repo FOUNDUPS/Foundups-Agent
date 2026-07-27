@@ -25,6 +25,15 @@ def test_windows_runtime_mutex_uses_machine_global_namespace() -> None:
     assert name == "Global\\FoundupsRuntime-" + "a" * 64
 
 
+def test_descriptor_final_path_rejects_unsupported_posix_platform(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(runtime_artifact_safety.sys, "platform", "darwin")
+
+    with pytest.raises(OSError, match="unsupported_platform"):
+        runtime_artifact_safety._linux_descriptor_final_path(0)
+
+
 def test_confined_runtime_operation_lock_uses_canonical_runtime_file(
     tmp_path: Path,
 ) -> None:

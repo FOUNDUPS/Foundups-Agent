@@ -330,7 +330,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
     if proposal_policy is not None and proposal_authorization is None:
         return _reject(
             FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
-            no_file_io_performed=False,
+            injected_dependency_effects_unobserved=True,
         )
     (
         proposal_nonce_store_path,
@@ -343,7 +343,9 @@ def run_reddog_signer_socket_service_runtime_wiring(
     if proposal_store_reasons:
         return _reject(
             *proposal_store_reasons,
-            no_file_io_performed=(proposal_policy is None),
+            injected_dependency_effects_unobserved=(
+                proposal_policy is not None
+            ),
         )
     if proposal_policy is not None:
         try:
@@ -383,7 +385,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
         if not high_water_authority_valid:
             return _reject(
                 FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
-                no_file_io_performed=False,
+                injected_dependency_effects_unobserved=True,
             )
 
     backend, proposal_nonce_store, key_receipt, key_reasons = _build_backend(
@@ -417,7 +419,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             *key_reasons,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
-            no_file_io_performed=False,
+            injected_dependency_effects_unobserved=True,
         )
     authorization_reservation = _reserve_policy_authorization(
         proposal_nonce_store,
@@ -428,7 +430,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
-            no_file_io_performed=False,
+            injected_dependency_effects_unobserved=True,
         )
     if not _commit_policy_authorization(
         proposal_nonce_store,
@@ -438,7 +440,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
-            no_file_io_performed=False,
+            injected_dependency_effects_unobserved=True,
         )
 
     try:
@@ -458,14 +460,14 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_SERVICE_REJECTED,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
-            no_file_io_performed=False,
+            injected_dependency_effects_unobserved=True,
         )
     if not isinstance(service, IsolatedSignerSocketResidentServiceResult):
         return _reject(
             FAIL_SIGNER_RUNTIME_SERVICE_INVALID,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
-            no_file_io_performed=False,
+            injected_dependency_effects_unobserved=True,
         )
     service_receipt = service.to_dict()
     if service.accepted is not True or service.status != SIGNER_SOCKET_RESIDENT_SERVICE_SERVED:
@@ -474,7 +476,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             key_provider_receipt=key_receipt,
             service_result=service_receipt,
             max_requests=config.max_requests,
-            no_file_io_performed=False,
+            injected_dependency_effects_unobserved=True,
         )
 
     return SignerSocketServiceRuntimeWiringResult(
@@ -484,7 +486,15 @@ def run_reddog_signer_socket_service_runtime_wiring(
         key_provider_receipt=key_receipt,
         service_result=service_receipt,
         max_requests=config.max_requests,
+        no_env_parsed=False,
         no_file_io_performed=False,
+        no_process_spawned=False,
+        no_repo_mutation_performed=False,
+        no_openclaw_enqueue_performed=False,
+        no_hermes_dispatch_performed=False,
+        no_pr_created=False,
+        no_reward_settlement_performed=False,
+        no_holoindex_reindex_performed=False,
     )
 
 
@@ -1155,7 +1165,9 @@ def _reject(
     service_result: Optional[dict[str, Any]] = None,
     max_requests: int = 0,
     no_file_io_performed: bool = True,
+    injected_dependency_effects_unobserved: bool = False,
 ) -> SignerSocketServiceRuntimeWiringResult:
+    no_unobserved_effect = not injected_dependency_effects_unobserved
     return SignerSocketServiceRuntimeWiringResult(
         accepted=False,
         status=SIGNER_SOCKET_RUNTIME_WIRING_REJECT,
@@ -1163,7 +1175,17 @@ def _reject(
         key_provider_receipt=key_provider_receipt or {},
         service_result=service_result,
         max_requests=max_requests,
-        no_file_io_performed=no_file_io_performed,
+        no_env_parsed=no_unobserved_effect,
+        no_file_io_performed=(
+            no_file_io_performed and no_unobserved_effect
+        ),
+        no_process_spawned=no_unobserved_effect,
+        no_repo_mutation_performed=no_unobserved_effect,
+        no_openclaw_enqueue_performed=no_unobserved_effect,
+        no_hermes_dispatch_performed=no_unobserved_effect,
+        no_pr_created=no_unobserved_effect,
+        no_reward_settlement_performed=no_unobserved_effect,
+        no_holoindex_reindex_performed=no_unobserved_effect,
     )
 
 
