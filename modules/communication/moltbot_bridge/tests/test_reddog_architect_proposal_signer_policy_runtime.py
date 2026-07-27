@@ -479,6 +479,7 @@ def _reserve_nonce_process(
         high_water_store=_SqliteProposalReplayHighWaterStore(
             high_water_path
         ),
+        clock=lambda: expires_at - 60,
     )
     return bool(
         store.reserve(
@@ -494,6 +495,7 @@ def _nonce_store_kwargs(
     runtime: Path,
     *,
     high_water_store=None,
+    clock=None,
 ) -> dict[str, object]:
     return {
         "allowed_root": runtime,
@@ -506,6 +508,7 @@ def _nonce_store_kwargs(
                 runtime.parent / "proposal-high-water.sqlite3"
             )
         ),
+        "clock": clock or (lambda: NOW),
     }
 
 
@@ -845,8 +848,7 @@ def test_atomic_nonce_store_prunes_expired_crash_state_and_is_bounded(
     now = [NOW]
     store = AtomicProposalAuthenticityNonceStore(
         runtime / "proposal-nonces.json",
-        **_nonce_store_kwargs(repo, runtime),
-        clock=lambda: now[0],
+        **_nonce_store_kwargs(repo, runtime, clock=lambda: now[0]),
         clock_skew_seconds=2,
         retention_seconds=4,
         max_entries=2,
@@ -1024,8 +1026,7 @@ def test_atomic_nonce_store_rechecks_expiry_at_reserve_and_commit(
     now = [NOW]
     store = AtomicProposalAuthenticityNonceStore(
         runtime / "proposal-nonces.json",
-        **_nonce_store_kwargs(repo, runtime),
-        clock=lambda: now[0],
+        **_nonce_store_kwargs(repo, runtime, clock=lambda: now[0]),
     )
 
     assert (
