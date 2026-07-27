@@ -7,6 +7,9 @@
   to the machine-global mutex namespace so signer-side serialization remains
   effective across service and interactive Windows sessions.
 - Preserved the existing identity digest and POSIX confined lock-file behavior.
+- Added a descriptor-verified confined lock-file primitive for authorities
+  that require one canonical runtime-root lock independent of temporary
+  directory configuration.
 
 ## 2026-07-25 - Stable Descriptor-Confined Runtime Text Reads
 

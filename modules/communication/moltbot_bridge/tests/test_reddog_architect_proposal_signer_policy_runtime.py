@@ -10,6 +10,7 @@ import inspect
 import json
 import multiprocessing
 import sqlite3
+import tempfile
 import threading
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -473,9 +474,11 @@ def _peer() -> SignerPeerAttestation:
 
 
 def _reserve_nonce_process(
-    values: tuple[str, str, str, str, int],
+    values: tuple[str, str, str, str, int, str],
 ) -> bool:
-    repo, runtime, high_water_path, nonce, expires_at = values
+    repo, runtime, high_water_path, nonce, expires_at, temp_root = values
+    Path(temp_root).mkdir(parents=True, exist_ok=True)
+    tempfile.tempdir = temp_root
     store = AtomicProposalAuthenticityNonceStore(
         Path(runtime) / "proposal-nonces.json",
         allowed_root=runtime,
@@ -694,10 +697,10 @@ def test_atomic_nonce_store_survives_restart_and_rejects_replay(
         store_path,
         **_nonce_store_kwargs(repo, runtime),
     )
-    assert first._operation_lock_identity == (
-        str(store_path.resolve()) + ".proposal-transaction"
+    assert first._transaction_lock_path == Path(
+        str(store_path.resolve()) + ".proposal-transaction.lock"
     )
-    assert first._operation_lock_identity != (
+    assert first._transaction_lock_path != Path(
         str(store_path.resolve()) + ".operation"
     )
 
@@ -908,6 +911,7 @@ def test_atomic_nonce_store_serializes_cross_process_reservation(
             str(high_water_path),
             "process-race",
             NOW + 60,
+            str(tmp_path / "temp-a"),
         ),
         (
             str(repo),
@@ -915,6 +919,7 @@ def test_atomic_nonce_store_serializes_cross_process_reservation(
             str(high_water_path),
             "process-race",
             NOW + 60,
+            str(tmp_path / "temp-b"),
         ),
     ]
     with ProcessPoolExecutor(
@@ -924,6 +929,8 @@ def test_atomic_nonce_store_serializes_cross_process_reservation(
         results = list(executor.map(_reserve_nonce_process, jobs))
     assert sum(results) == 1
     assert not (runtime / "proposal-nonces.json.lock").exists()
+    transaction_lock = runtime / "proposal-nonces.json.proposal-transaction.lock"
+    assert transaction_lock.is_file()
 
 
 def test_atomic_nonce_store_rejects_state_rollback_and_deletion(

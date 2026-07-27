@@ -9,6 +9,7 @@ import pytest
 
 from modules.infrastructure.shared_utilities import runtime_artifact_safety
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    confined_runtime_operation_lock,
     redact_runtime_text,
     redact_runtime_value,
     secure_append_runtime_text,
@@ -22,6 +23,65 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 def test_windows_runtime_mutex_uses_machine_global_namespace() -> None:
     name = runtime_artifact_safety._windows_runtime_mutex_name("a" * 64)
     assert name == "Global\\FoundupsRuntime-" + "a" * 64
+
+
+def test_confined_runtime_operation_lock_uses_canonical_runtime_file(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    repo.mkdir()
+    lock_path = runtime / "authority.transaction.lock"
+
+    with confined_runtime_operation_lock(
+        lock_path,
+        repo_root=repo,
+        allowed_root=runtime,
+    ):
+        assert lock_path.is_file()
+
+    assert lock_path.read_bytes() == b"\0"
+
+
+def test_confined_runtime_operation_lock_persists_and_recovers_after_failure(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    repo.mkdir()
+    lock_path = runtime / "authority.transaction.lock"
+
+    with pytest.raises(RuntimeError, match="injected"):
+        with confined_runtime_operation_lock(
+            lock_path,
+            repo_root=repo,
+            allowed_root=runtime,
+        ):
+            raise RuntimeError("injected")
+
+    assert lock_path.is_file()
+    with confined_runtime_operation_lock(
+        lock_path,
+        repo_root=repo,
+        allowed_root=runtime,
+    ):
+        assert lock_path.is_file()
+    assert lock_path.read_bytes() == b"\0"
+
+
+def test_confined_runtime_operation_lock_rejects_repository_path(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    with pytest.raises(ValueError, match="inside_repo"):
+        with confined_runtime_operation_lock(
+            repo / "authority.transaction.lock",
+            repo_root=repo,
+            allowed_root=repo,
+        ):
+            raise AssertionError("unreachable")
 
 
 def test_runtime_artifact_path_rejects_source_and_runtime_root_escape(tmp_path: Path) -> None:

@@ -10,8 +10,10 @@
   authority identifier, MAC, sequence, revision, distinct proposal-transaction
   lock, and one-step crash roll-forward make rollback, deletion, mismatched
   authority, nested-lock deadlock, lock-path substitution, and tampering fail
-  closed while bounded retention prevents unbounded growth. Windows uses the
-  shared machine-global runtime mutex; POSIX keeps the confined lock primitive.
+  closed while bounded retention prevents unbounded growth. The proposal
+  transaction lock is a descriptor-verified file beside the canonical nonce
+  state, so Windows sessions and POSIX processes with different temporary
+  namespaces serialize against the same signer-owned runtime artifact.
 - Required the proposal payload identity, signer key, key epoch, consensus
   receipt, authority-profile source, and TTL to match the supplied authority
   profile before a signer configuration can be written, with a fixed

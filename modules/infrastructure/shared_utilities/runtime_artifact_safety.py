@@ -253,6 +253,62 @@ def runtime_operation_lock(identity: Path | str) -> Iterator[None]:
         yield
 
 
+@contextmanager
+def confined_runtime_operation_lock(
+    path: Path | str,
+    *,
+    repo_root: Path | str,
+    allowed_root: Path | str,
+) -> Iterator[None]:
+    """Lock one canonical runtime file after confinement and descriptor checks."""
+
+    target = validate_runtime_artifact_path(
+        path,
+        repo_root=repo_root,
+        allowed_root=allowed_root,
+    )
+    target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    target = validate_runtime_artifact_path(
+        target,
+        repo_root=repo_root,
+        allowed_root=allowed_root,
+    )
+    descriptor, _ = _open_runtime_file(target)
+    try:
+        opened_stat = os.fstat(descriptor)
+        _require_private_regular_file(opened_stat)
+        final_path = _descriptor_final_path(descriptor)
+        _verify_descriptor_path(
+            final_path,
+            expected=target,
+            repo_root=repo_root,
+            allowed_root=allowed_root,
+        )
+        if opened_stat.st_size == 0:
+            os.write(descriptor, b"\0")
+            os.fsync(descriptor)
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        if os.name == "nt":
+            import msvcrt
+
+            msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
+            try:
+                yield
+            finally:
+                os.lseek(descriptor, 0, os.SEEK_SET)
+                msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(descriptor, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
+    finally:
+        os.close(descriptor)
+
+
 def redact_runtime_text(value: object, *, max_chars: int = 4096) -> RuntimeTextRedaction:
     """Normalize, bound, and redact secret-shaped text before runtime persistence."""
 
@@ -682,6 +738,7 @@ def _windows_runtime_mutex_name(lock_key: str) -> str:
 
 __all__ = [
     "RuntimeTextRedaction",
+    "confined_runtime_operation_lock",
     "redact_runtime_text",
     "redact_runtime_value",
     "runtime_operation_lock",

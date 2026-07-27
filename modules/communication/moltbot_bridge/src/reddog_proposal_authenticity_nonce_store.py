@@ -15,7 +15,7 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
     AtomicJsonAuthorityRuntimeStore,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    runtime_operation_lock,
+    confined_runtime_operation_lock,
 )
 
 PROPOSAL_NONCE_STORE_SCHEMA_VERSION = (
@@ -157,6 +157,8 @@ class AtomicProposalAuthenticityNonceStore:
             allowed_root=allowed_root,
             repo_root=repo_root,
         )
+        self._repo_root = Path(repo_root).resolve()
+        self._allowed_root = Path(allowed_root).resolve()
         if not _sha256(replay_store_binding_digest):
             raise ValueError(
                 "proposal_authenticity_nonce_replay_binding_invalid"
@@ -175,8 +177,8 @@ class AtomicProposalAuthenticityNonceStore:
         self._high_water_store = high_water_store
         # This transaction lock must differ from AtomicJsonAuthorityRuntimeStore's
         # own ".operation" lock because one mutation calls that store while held.
-        self._operation_lock_identity = (
-            str(self._store.path) + ".proposal-transaction"
+        self._transaction_lock_path = Path(
+            str(self._store.path) + ".proposal-transaction.lock"
         )
         self._clock = clock
         self._clock_skew_seconds = clock_skew_seconds
@@ -310,7 +312,11 @@ class AtomicProposalAuthenticityNonceStore:
         ],
     ) -> Any:
         for _ in range(_MAX_COMMIT_RETRIES):
-            with runtime_operation_lock(self._operation_lock_identity):
+            with confined_runtime_operation_lock(
+                self._transaction_lock_path,
+                repo_root=self._repo_root,
+                allowed_root=self._allowed_root,
+            ):
                 state, high_water = self._load_state()
                 updated, result = mutation(state)
                 if updated is state:

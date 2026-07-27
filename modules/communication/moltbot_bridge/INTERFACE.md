@@ -51,10 +51,12 @@ store is rejected. This slice validates capability and receipt agreement at
 that injection boundary; it does not issue or independently authenticate the
 durability receipt. The signed replay binding includes the authority's
 immutable identifier. Runtime rejects a mismatched, missing, or volatile
-authority. One atomic state document, the shared cross-session runtime
-operation lock, compare-and-swap commits, and one-step crash roll-forward
-prevent split-file ambiguity. Nonce freshness is checked at reservation and
-again at durable commit. The principal policy authorization is durably
+authority. One atomic state document, a canonical transaction lock beside that
+document under the signer-owned runtime root, compare-and-swap commits, and
+one-step crash roll-forward prevent split-file ambiguity. The transaction lock
+is descriptor-path verified and does not depend on process-local temporary
+directories. Nonce freshness is checked at reservation and again at durable
+commit. The principal policy authorization is durably
 consumed before the backend is exposed; service failure never restores it.
 Runtime recomputes the signed security-context digest over paths, peer policy,
 limits, key profile, policy, durability receipt, and replay namespace. Startup
