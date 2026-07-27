@@ -43,6 +43,16 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
 
 ## RedDog execution-valve readiness
 
+- Architect proposal admission is complete: audit-supported validity is
+  recorded separately from current execution readiness, and signed WSP 15
+  promotion rechecks the canonical admission receipt, current repository HEAD,
+  HoloIndex freshness receipt, work-state revision, platform, and code-owned
+  trust-anchor capabilities.
+  Valid prerequisite work may remain a blocked candidate; it cannot enter the
+  authoritative queue until a fresh determination observes the capability.
+  SHA-bound proposal receipts are integrity-only; a trusted proposal-admission
+  authenticity verifier remains required before production readiness can ever
+  become `READY`.
 - Phase 1 safety wiring complete locally: token-free canonical supplier,
   bootstrap-to-handler canonical routing, secure use-time reload, signed
   authority re-verification, process-local single-use effect admissions, and

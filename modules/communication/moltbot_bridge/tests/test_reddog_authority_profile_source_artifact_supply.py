@@ -6,17 +6,11 @@ import ast
 import json
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src import (
-    reddog_architect_fix_signed_wsp15_work_order_promotion as promotion,
-)
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply import (
     AUTHORITY_PROFILE_SOURCE_SUPPLY_ACCEPT,
     AUTHORITY_PROFILE_SOURCE_SUPPLY_REJECT,
     AuthorityProfileSourceSupplyReason,
     run_reddog_authority_profile_source_artifact_supply,
-)
-from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
-    InMemoryAuthoritativeWorkStateStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     PrincipalAuthorityRecord,
@@ -28,10 +22,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_WORKTREE_CREATE,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
-    _determination,
-    _memex_supply,
-    _model_selection,
-    _work_state,
+    _promote,
 )
 
 
@@ -133,15 +124,7 @@ def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Pa
     assert profile["no_holoindex_reindex_performed"] is True
     assert profile["source_authority_basis"]["permission_snapshot_can_write"] is True
 
-    promoted = promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order(
-        architect_determination=_determination(),
-        work_state_store=InMemoryAuthoritativeWorkStateStore(_work_state()),
-        authority_profile=profile,
-        model_selection_receipt=_model_selection(),
-        memex_supply_receipt=_memex_supply(),
-        worker_id="reddog-worker-1",
-        now_iso="2026-07-16T00:00:00+00:00",
-    )
+    promoted, _ = _promote(authority_profile=profile)
     assert promoted.accepted is True
     assert promoted.authority_profile is not None
     assert promoted.authority_profile["authority_profile_source_receipt_id"] == profile[

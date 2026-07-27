@@ -1,3 +1,19 @@
+## 2026-07-27: Architect proposal executability admission
+- Added adversarial coverage for valid-but-blocked prerequisite slices,
+  produced-capability self-authorization, model readiness forgery, INDEX_GAP
+  handling, HoloIndex maintenance exceptions, Windows live-canary blocking,
+  path traversal, receipt tampering, rehashed capability under-declaration,
+  noncanonical candidate IDs, current-HEAD drift, current-Holo generation
+  drift, exact base-SHA binding, precommit-write atomicity, profile rollback,
+  rollback compare-and-swap, active-owner generation mismatch, work-state
+  revision drift, and mutation-free module imports.
+- Updated backend architect and signed WSP 15 promotion fixtures to carry the
+  canonical proposal-admission lineage while keeping production trust-anchor
+  discovery fail closed.
+- Focused and startup/runtime validation: 276 passed, one platform skip, and
+  one pre-existing Memex assertion deselected after reproducing it on clean
+  `origin/main`. Simulator CI parity passed 302 tests; red-team passed 42.
+
 ## 2026-07-27: Main-menu resident binding preflight regression
 - Proved missing bindings skip the client and return WARN/True by default versus FAIL/False when enforced; the focused startup suite passed 92 tests with one platform skip.
 ## 2026-07-26: Independent assurance capacity admission

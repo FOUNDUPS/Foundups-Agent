@@ -50,6 +50,9 @@ from modules.communication.moltbot_bridge.tests.provider_call_evidence_test_help
     architect_provider_call_evidence,
     audit_provider_call_evidence,
 )
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    architect_model_output,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -230,14 +233,11 @@ class _ArchitectRunner:
         self.calls.append({"prompt": prompt, "context": context, "binding": dict(binding)})
         parsed = json.loads(prompt)
         evidence_ref = parsed["reports"][0]["evidence_refs"][0]
-        content = {
-            "action": "FIX",
-            "next_slice_name": "REDDOG_RESIDENT_RUNTIME_NEXT_PHASE1",
-            "summary": "All read-only audit reports support one next resident runtime slice.",
-            "decision_reasons": ["selected highest priority verified read-only audit finding"],
-            "evidence_refs": [evidence_ref],
-            "wsp15_allocation_receipt_id": parsed["wsp15_allocation_receipt_id"],
-        }
+        content = architect_model_output(
+            {"receipt_id": parsed["wsp15_allocation_receipt_id"]},
+            evidence_ref,
+            slice_name="REDDOG_RESIDENT_RUNTIME_NEXT_PHASE1",
+        )
         return ArchitectModelResult(
             ok=True,
             status="MODEL_OK",

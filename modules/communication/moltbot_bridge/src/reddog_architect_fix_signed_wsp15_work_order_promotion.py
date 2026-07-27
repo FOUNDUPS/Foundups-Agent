@@ -19,7 +19,7 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     SelectionDecision,
@@ -40,6 +40,23 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ACTION_FIX,
     ARCHITECT_DETERMINATION_ACCEPT,
     ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_profile import (
+    ArchitectFixPromotionProfileInputs,
+    promoted_authority_profile,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_candidate_gate import (
+    CANDIDATE_MALFORMED,
+    HOLOINDEX_BINDING_MISMATCH,
+    PROPOSAL_ADMISSION_INVALID,
+    REPO_HEAD_MISMATCH,
+    validate_architect_fix_candidate,
+    validate_architect_fix_proposal_admission,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    ArchitectFixPromotionRecordInputs,
+    build_architect_fix_promotion_records,
+    canonical_digest as _digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
@@ -75,6 +92,16 @@ class ArchitectFixPromotionReason:
     AUTHORITY_PROFILE_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_MISSING"
     AUTHORITY_PROFILE_INCOMPLETE = "REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_INCOMPLETE"
     HOLOINDEX_EVIDENCE_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_HOLOINDEX_EVIDENCE_MISSING"
+    PROPOSAL_ADMISSION_INVALID = (
+        "REJECT_ARCHITECT_FIX_PROMOTION_PROPOSAL_ADMISSION_INVALID"
+    )
+    HOLOINDEX_BINDING_MISMATCH = (
+        "REJECT_ARCHITECT_FIX_PROMOTION_HOLOINDEX_BINDING_MISMATCH"
+    )
+    REPO_HEAD_MISMATCH = "REJECT_ARCHITECT_FIX_PROMOTION_REPO_HEAD_MISMATCH"
+    AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED = (
+        "REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED"
+    )
     DUPLICATE_QUEUE_ITEM = "REJECT_ARCHITECT_FIX_PROMOTION_DUPLICATE_QUEUE_ITEM"
     STORE_REJECTED = "REJECT_ARCHITECT_FIX_PROMOTION_STORE_REJECTED"
 
@@ -117,6 +144,8 @@ class ArchitectFixPromotionReceipt:
     freshness_receipt_id: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
+    proposal_admission_receipt_id: str
+    proposal_admission_digest: str
     model_catalog_snapshot_id: str
     model_selection_receipt_id: str
     model_selection_digest: str
@@ -190,6 +219,11 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     worker_id: str,
     now_iso: str,
     claim_ttl_seconds: int = 3600,
+    current_repo_head_sha: str | None = None,
+    current_holoindex_receipt: Any = None,
+    authority_profile_precommit_writer: (
+        Callable[[Mapping[str, Any]], None] | None
+    ) = None,
 ) -> ArchitectFixPromotionResult:
     """Commit one architect FIX queue item and return its signer authority profile."""
 
@@ -213,8 +247,28 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     if not candidate:
         reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MISSING)
 
-    candidate_reasons = _validate_candidate(candidate, determination)
-    reasons.extend(candidate_reasons)
+    if CANDIDATE_MALFORMED in validate_architect_fix_candidate(
+        candidate, determination,
+        schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+    ):
+        reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
+    proposal_admission, proposal_codes = validate_architect_fix_proposal_admission(
+        determination=determination,
+        candidate=candidate,
+        current_work_state=current,
+        current_repo_head_sha=current_repo_head_sha,
+        current_holoindex_receipt=current_holoindex_receipt,
+    )
+    if PROPOSAL_ADMISSION_INVALID in proposal_codes:
+        reasons.append(ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID)
+    if REPO_HEAD_MISMATCH in proposal_codes:
+        reasons.append(ArchitectFixPromotionReason.REPO_HEAD_MISMATCH)
+    if HOLOINDEX_BINDING_MISMATCH in proposal_codes:
+        reasons.append(ArchitectFixPromotionReason.HOLOINDEX_BINDING_MISMATCH)
+    if authority_profile_precommit_writer is None:
+        reasons.append(
+            ArchitectFixPromotionReason.AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED
+        )
     allocation = _mapping(candidate.get("wsp15_allocation_receipt"))
     allocation_validation = validate_reddog_wsp15_allocation_receipt(allocation)
     if not allocation_validation.accepted:
@@ -249,6 +303,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     assert freshness_id
     assert selection_payload
     assert memex_payload
+    assert proposal_admission is not None
     assert selected_slice
     now = _parse_iso(now_iso)
     expires_at = (now + timedelta(seconds=int(claim_ttl_seconds))).isoformat()
@@ -256,115 +311,61 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     model_runtime_binding_digest = _digest(model_runtime_binding_receipt) if runtime_binding_payload else None
     memex_supply_digest = _digest(memex_supply_receipt)
     allocation_digest = canonical_reddog_wsp15_allocation_digest(allocation)
+    proposal_admission_digest = _digest(proposal_admission.to_dict())
 
-    claim_seed = {
-        "selected_slice": selected_slice,
-        "determination_receipt_id": determination_id,
-        "model_selection_receipt_id": selection_payload["receipt_id"],
-        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
-        "memex_supply_receipt_id": memex_payload["receipt_id"],
-        "worker_id": worker_id,
-        "claimed_at": now_iso,
-        "freshness_receipt_id": freshness_id,
-    }
-    claim_id = _digest(claim_seed)
-    queue_seed = {
-        "slice_id": selected_slice,
-        "claim_id": claim_id,
-        "worker_id": worker_id,
-        "enqueued_at": now_iso,
-        "determination_receipt_id": determination_id,
-        "wsp15_allocation_receipt_id": allocation["receipt_id"],
-        "model_selection_receipt_id": selection_payload["receipt_id"],
-        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
-        "memex_supply_receipt_id": memex_payload["receipt_id"],
-    }
-    queue_item_id = _digest(queue_seed)
-
-    claim = {
-        "claim_id": claim_id,
-        "slice_id": selected_slice,
-        "worker_id": worker_id,
-        "lane_id": "reddog_operational",
-        "claimed_at": now_iso,
-        "expires_at": expires_at,
-        "reconciliation_report_id": str(current.get("reconciliation_report_id") or determination_id),
-        "freshness_receipt_id": freshness_id,
-        "status": "ACTIVE",
-        "source_determination_receipt_id": determination_id,
-        "model_selection_receipt_id": selection_payload["receipt_id"],
-        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
-        "memex_supply_receipt_id": memex_payload["receipt_id"],
-    }
-    evidence_refs = tuple(
-        dict.fromkeys(
-            [
-                f"claim:{claim_id}",
-                f"freshness:{freshness_id}",
-                f"wsp15_allocation:{allocation['receipt_id']}",
-                f"architect_determination:{determination_id}",
-                f"model_selection:{selection_payload['receipt_id']}",
-                *(
-                    [f"model_runtime_binding:{runtime_binding_payload['receipt_id']}"]
-                    if runtime_binding_payload
-                    else []
-                ),
-                f"memex_supply:{memex_payload['receipt_id']}",
-                *[str(ref) for ref in candidate.get("evidence_refs") or ()],
-            ]
+    records = build_architect_fix_promotion_records(
+        ArchitectFixPromotionRecordInputs(
+            selected_slice=selected_slice,
+            determination_id=determination_id,
+            worker_id=worker_id,
+            now_iso=now_iso,
+            expires_at=expires_at,
+            freshness_receipt_id=freshness_id,
+            reconciliation_report_id=str(
+                current.get("reconciliation_report_id") or determination_id
+            ),
+            proposal_admission_receipt_id=proposal_admission.receipt_id,
+            proposal_admission_digest=proposal_admission_digest,
+            authorized_base_sha=proposal_admission.repo_head_sha,
+            model_selection_digest=model_selection_digest,
+            model_runtime_binding_digest=model_runtime_binding_digest or "",
+            memex_supply_digest=memex_supply_digest,
+            candidate=candidate,
+            allocation=allocation,
+            model_selection=selection_payload,
+            model_runtime_binding=runtime_binding_payload,
+            memex_supply=memex_payload,
         )
     )
-    queue_item = {
-        "queue_item_id": queue_item_id,
-        "slice_id": selected_slice,
-        "claim_id": claim_id,
-        "worker_id": worker_id,
-        "status": "QUEUED",
-        "enqueued_at": now_iso,
-        "evidence_refs": list(evidence_refs),
-        "wsp15_allocation_receipt": dict(allocation),
-        "source_determination_receipt_id": determination_id,
-        "source_queue_candidate_id": str(candidate.get("queue_candidate_id") or ""),
-        "model_catalog_snapshot_id": selection_payload["catalog_snapshot_id"],
-        "model_selection_receipt_id": selection_payload["receipt_id"],
-        "model_selection_digest": model_selection_digest,
-        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
-        "model_runtime_binding_digest": model_runtime_binding_digest or "",
-        "memex_supply_receipt_id": memex_payload["receipt_id"],
-        "memex_supply_digest": memex_supply_digest,
-        "no_execution_performed": True,
-    }
-    sync_receipt = {
-        "sync_id": _digest({"queue_item_id": queue_item_id, "claim_id": claim_id}),
-        "status": "WRE_QUEUE_SYNCED",
-        "queue_item_ids": [queue_item_id],
-        "selected_slice": selected_slice,
-        "rejection_reasons": [],
-        "source": ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION,
-        "no_execution_performed": True,
-    }
+    claim_id = records.claim_id
+    queue_item_id = records.queue_item_id
 
-    promoted_profile = _promoted_authority_profile(
-        authority_profile=authority_profile,
-        determination=determination,
-        allocation=allocation,
-        model_selection_receipt=model_selection_receipt,
-        model_selection=selection_payload,
-        model_selection_digest=model_selection_digest,
-        model_runtime_binding_receipt=model_runtime_binding_receipt,
-        model_runtime_binding=runtime_binding_payload,
-        model_runtime_binding_digest=model_runtime_binding_digest,
-        memex_supply=memex_payload,
-        memex_supply_digest=memex_supply_digest,
-        queue_item_id=queue_item_id,
-        claim_id=claim_id,
-        holoindex_evidence=holoindex_evidence,
+    promoted_profile = promoted_authority_profile(
+        ArchitectFixPromotionProfileInputs(
+            authority_profile=authority_profile,
+            determination=determination,
+            allocation=allocation,
+            model_selection_receipt=model_selection_receipt,
+            model_selection=selection_payload,
+            model_selection_digest=model_selection_digest,
+            model_runtime_binding_receipt=model_runtime_binding_receipt,
+            model_runtime_binding=runtime_binding_payload,
+            model_runtime_binding_digest=model_runtime_binding_digest,
+            memex_supply=memex_payload,
+            memex_supply_digest=memex_supply_digest,
+            proposal_admission=proposal_admission.to_dict(),
+            proposal_admission_digest=proposal_admission_digest,
+            work_order_id=_work_order_id(queue_item_id),
+            queue_item_id=queue_item_id,
+            claim_id=claim_id,
+            holoindex_evidence=holoindex_evidence,
+        )
     )
     updated = _append_queue_state(
         current,
-        claim=claim,
-        queue_item=queue_item,
-        sync_receipt=sync_receipt,
+        claim=records.claim,
+        queue_item=records.queue_item,
+        sync_receipt=records.sync_receipt,
         promotion_record={
             "schema_version": ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION,
             "architect_determination_receipt_id": determination_id,
@@ -373,9 +374,18 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             "model_selection_receipt_id": selection_payload["receipt_id"],
             "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
             "memex_supply_receipt_id": memex_payload["receipt_id"],
+            "proposal_admission_receipt_id": proposal_admission.receipt_id,
             "created_at": now_iso,
         },
     )
+
+    try:
+        assert authority_profile_precommit_writer is not None
+        authority_profile_precommit_writer(promoted_profile)
+    except Exception:
+        return _reject(
+            [ArchitectFixPromotionReason.AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED]
+        )
 
     try:
         committed_revision = work_state_store.commit(updated, expected_revision=current.get("revision"))
@@ -390,6 +400,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         "model_selection_receipt_id": selection_payload["receipt_id"],
         "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
         "memex_supply_receipt_id": memex_payload["receipt_id"],
+        "proposal_admission_receipt_id": proposal_admission.receipt_id,
         "committed_revision": committed_revision,
     }
     receipt = ArchitectFixPromotionReceipt(
@@ -405,6 +416,8 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         freshness_receipt_id=freshness_id,
         wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
         wsp15_allocation_digest=allocation_digest,
+        proposal_admission_receipt_id=proposal_admission.receipt_id,
+        proposal_admission_digest=proposal_admission_digest,
         model_catalog_snapshot_id=selection_payload["catalog_snapshot_id"],
         model_selection_receipt_id=selection_payload["receipt_id"],
         model_selection_digest=model_selection_digest,
@@ -437,11 +450,6 @@ def _mapping(value: Any) -> Mapping[str, Any]:
     return value if isinstance(value, Mapping) else {}
 
 
-def _digest(payload: Any) -> str:
-    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
-    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-
 def _parse_iso(value: str) -> datetime:
     text = str(value or "").strip()
     if text.endswith("Z"):
@@ -470,27 +478,6 @@ def _freshness_receipt_id(snapshot: Mapping[str, Any]) -> str:
         if receipt_id and receipt.get("fresh") is True and (not preferred or receipt_id == preferred):
             return receipt_id
     return ""
-
-
-def _validate_candidate(candidate: Mapping[str, Any], determination: Mapping[str, Any]) -> list[str]:
-    reasons: list[str] = []
-    if not candidate:
-        return reasons
-    if candidate.get("schema_version") != ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION:
-        reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
-    if str(candidate.get("source_determination_receipt_id") or "") != str(
-        determination.get("determination_receipt_id") or ""
-    ):
-        reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
-    if str(candidate.get("slice_id") or "") != str(determination.get("next_slice_name") or ""):
-        reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
-    if str(candidate.get("status") or "").upper() != "CANDIDATE":
-        reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
-    if candidate.get("no_execution_performed") is not True:
-        reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
-    if not _mapping(candidate.get("wsp15_allocation_receipt")):
-        reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MALFORMED)
-    return reasons
 
 
 def _validate_model_selection(selection: Mapping[str, Any], reasons: list[str]) -> Mapping[str, Any]:
@@ -597,141 +584,6 @@ def _duplicate_queue(snapshot: Mapping[str, Any], *, selected_slice: str, determ
         if str(claim.get("slice_id") or "") == selected_slice and str(claim.get("status") or "").upper() == "ACTIVE":
             return True
     return False
-
-
-def _promoted_authority_profile(
-    *,
-    authority_profile: Mapping[str, Any],
-    determination: Mapping[str, Any],
-    allocation: Mapping[str, Any],
-    model_selection_receipt: Mapping[str, Any],
-    model_selection: Mapping[str, Any],
-    model_selection_digest: str,
-    model_runtime_binding_receipt: Mapping[str, Any] | None,
-    model_runtime_binding: Mapping[str, Any],
-    model_runtime_binding_digest: str | None,
-    memex_supply: Mapping[str, Any],
-    memex_supply_digest: str,
-    queue_item_id: str,
-    claim_id: str,
-    holoindex_evidence: Mapping[str, Any],
-) -> Mapping[str, Any]:
-    profile = dict(authority_profile)
-    determination_id = str(determination["determination_receipt_id"])
-    work_order_id = _work_order_id(queue_item_id)
-    binding = _promoted_operational_binding(
-        determination=determination,
-        allocation=allocation,
-        model_selection_receipt=model_selection_receipt,
-        model_selection=model_selection,
-        model_selection_digest=model_selection_digest,
-        model_runtime_binding_receipt=model_runtime_binding_receipt,
-        model_runtime_binding=model_runtime_binding,
-        model_runtime_binding_digest=model_runtime_binding_digest,
-        memex_supply=memex_supply,
-        memex_supply_digest=memex_supply_digest,
-        work_order_id=work_order_id,
-        queue_item_id=queue_item_id,
-        claim_id=claim_id,
-        holoindex_evidence=holoindex_evidence,
-    )
-    profile.update(
-        _promoted_profile_updates(
-            profile=profile,
-            determination=determination,
-            binding=binding,
-            allocation=allocation,
-            model_selection_receipt=model_selection_receipt,
-            model_selection=model_selection,
-            model_selection_digest=model_selection_digest,
-            model_runtime_binding=model_runtime_binding,
-            model_runtime_binding_digest=model_runtime_binding_digest,
-            memex_supply=memex_supply,
-            memex_supply_digest=memex_supply_digest,
-            work_order_id=work_order_id,
-            holoindex_evidence=holoindex_evidence,
-        )
-    )
-    if model_runtime_binding:
-        profile["model_runtime_binding_receipt"] = dict(model_runtime_binding_receipt or {})
-        profile["model_runtime_binding_runtime_surface"] = model_runtime_binding["runtime_surface"]
-        profile["model_runtime_binding_principal_model"] = model_runtime_binding["principal_model"]
-        profile["model_runtime_binding_panel_models"] = list(model_runtime_binding["panel_models"])
-        profile["model_runtime_binding_role_bindings"] = list(model_runtime_binding["role_bindings"])
-    return profile
-
-
-def _promoted_operational_binding(**values: Any) -> dict[str, Any]:
-    determination = values["determination"]
-    model_selection = values["model_selection"]
-    model_runtime_binding = values["model_runtime_binding"]
-    memex_supply = values["memex_supply"]
-    determination_id = str(determination["determination_receipt_id"])
-    binding = {
-        "work_order_id": values["work_order_id"],
-        "snapshot_receipt_id": str(determination.get("snapshot_receipt_id") or ""),
-        "context_view_id": str(determination.get("context_view_id") or ""),
-        "evidence_bundle_id": str(determination.get("evidence_bundle_id") or ""),
-        "determination_id": determination_id,
-        "readonly_audit_decision_id": determination_id,
-        "architect_determination_receipt_id": determination_id,
-        "queue_item_id": values["queue_item_id"],
-        "claim_id": values["claim_id"],
-        "wsp15_allocation_receipt": dict(values["allocation"]),
-        "model_catalog_snapshot_id": model_selection["catalog_snapshot_id"],
-        "model_selection_receipt_id": model_selection["receipt_id"],
-        "model_selection_digest": values["model_selection_digest"],
-        "model_selection_receipt": dict(values["model_selection_receipt"]),
-        "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
-        "model_runtime_binding_digest": values["model_runtime_binding_digest"] or "",
-        "memex_supply_receipt_id": memex_supply["receipt_id"],
-        "memex_supply_digest": values["memex_supply_digest"],
-        "holoindex_evidence": dict(values["holoindex_evidence"]),
-    }
-    if model_runtime_binding:
-        binding.update(
-            {
-                "model_runtime_binding_receipt": dict(values["model_runtime_binding_receipt"] or {}),
-                "model_runtime_binding_runtime_surface": model_runtime_binding["runtime_surface"],
-                "model_runtime_binding_principal_model": model_runtime_binding["principal_model"],
-                "model_runtime_binding_panel_models": list(model_runtime_binding["panel_models"]),
-                "model_runtime_binding_role_bindings": list(model_runtime_binding["role_bindings"]),
-            }
-        )
-    return binding
-
-
-def _promoted_profile_updates(**values: Any) -> dict[str, Any]:
-    profile = values["profile"]
-    determination = values["determination"]
-    binding = values["binding"]
-    model_selection = values["model_selection"]
-    model_runtime_binding = values["model_runtime_binding"]
-    memex_supply = values["memex_supply"]
-    determination_id = str(determination["determination_receipt_id"])
-    return {
-            "work_order_id": values["work_order_id"],
-            "task_summary": str(
-                profile.get("task_summary")
-                or f"RedDog architect FIX promotion for {determination.get('next_slice_name')}."
-            ),
-            "wsp15_allocation_receipt": dict(values["allocation"]),
-            "snapshot_receipt_id": binding["snapshot_receipt_id"],
-            "context_view_id": binding["context_view_id"],
-            "evidence_bundle_id": binding["evidence_bundle_id"],
-            "readonly_audit_decision_id": determination_id,
-            "determination_id": determination_id,
-            "model_catalog_snapshot_id": model_selection["catalog_snapshot_id"],
-            "model_selection_receipt_id": model_selection["receipt_id"],
-            "model_selection_digest": values["model_selection_digest"],
-            "model_selection_receipt": dict(values["model_selection_receipt"]),
-            "model_runtime_binding_receipt_id": model_runtime_binding.get("receipt_id", ""),
-            "model_runtime_binding_digest": values["model_runtime_binding_digest"] or "",
-            "memex_supply_receipt_id": memex_supply["receipt_id"],
-            "memex_supply_digest": values["memex_supply_digest"],
-            "operational_context_binding": binding,
-            "holoindex_evidence": dict(values["holoindex_evidence"]),
-    }
 
 
 def _work_order_id(queue_item_id: str) -> str:

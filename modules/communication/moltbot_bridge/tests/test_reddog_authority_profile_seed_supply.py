@@ -7,12 +7,6 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src import (
-    reddog_architect_fix_signed_wsp15_work_order_promotion as promotion,
-)
-from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
-    InMemoryAuthoritativeWorkStateStore,
-)
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supply import (
     AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT,
     AUTHORITY_PROFILE_SEED_SUPPLY_REJECT,
@@ -26,7 +20,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed
     _determination,
     _memex_supply,
     _model_selection,
-    _work_state,
+    _promote,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_source_artifact_supply import (
     _principal,
@@ -92,15 +86,7 @@ def test_seed_supply_writes_seed_consumable_by_source_supplier_and_promotion(tmp
     assert source.accepted is True
 
     profile = json.loads(source_path.read_text(encoding="utf-8"))
-    promoted = promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order(
-        architect_determination=_determination(),
-        work_state_store=InMemoryAuthoritativeWorkStateStore(_work_state()),
-        authority_profile=profile,
-        model_selection_receipt=_model_selection(),
-        memex_supply_receipt=_memex_supply(),
-        worker_id="reddog-seed-test",
-        now_iso="2026-07-16T00:00:00+00:00",
-    )
+    promoted, _ = _promote(authority_profile=profile)
     assert promoted.accepted is True
     assert promoted.authority_profile is not None
     assert promoted.authority_profile["seed_supply_receipt_id"] == seed["seed_supply_receipt_id"]

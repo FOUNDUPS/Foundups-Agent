@@ -27,6 +27,18 @@ from modules.communication.moltbot_bridge.src.reddog_context_snapshot_fusion_ass
     FUSION_ASSIGNMENT_GATE_PASSED,
     FusionAssignmentGateDecision,
 )
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executability_admission import (
+    ArchitectProposalAdmissionPolicy,
+    ArchitectProposalExecutabilityReceipt,
+    current_architect_proposal_admission_policy,
+    evaluate_architect_proposal_executability,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_prompt import (
+    VALIDATION_INVALID_OUTPUT,
+    VALIDATION_WSP15_MISMATCH,
+    build_architect_proposal_prompt,
+    validate_architect_proposal_output,
+)
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     ContextView,
     EvidenceBundle,
@@ -104,6 +116,9 @@ class ArchitectDeterminationReason:
     MODEL_SELECTION_RECEIPT = "REJECT_ARCHITECT_DETERMINATION_MODEL_SELECTION_RECEIPT"
     MODEL_RUNTIME_BINDING_RECEIPT = "REJECT_ARCHITECT_DETERMINATION_MODEL_RUNTIME_BINDING_RECEIPT"
     PROVIDER_CALL_EVIDENCE = "REJECT_ARCHITECT_DETERMINATION_PROVIDER_CALL_EVIDENCE"
+    PROPOSAL_EXECUTABILITY_ADMISSION = (
+        "REJECT_ARCHITECT_DETERMINATION_PROPOSAL_EXECUTABILITY_ADMISSION"
+    )
 
 
 @dataclass(frozen=True)
@@ -312,6 +327,8 @@ class ArchitectQueueCandidate:
     status: str
     evidence_refs: tuple[str, ...]
     wsp15_allocation_receipt: Mapping[str, Any]
+    proposal_admission_receipt_id: str
+    proposal_admission_digest: str
     no_queue_mutation_performed: bool = True
     no_execution_performed: bool = True
     no_worker_spawn_performed: bool = True
@@ -354,6 +371,7 @@ class ArchitectDeterminationReceipt:
     fusion_quorum_passed: bool
     wsp15_allocation_receipt_id: Optional[str]
     wsp15_allocation_digest: Optional[str]
+    proposal_admission: Optional[ArchitectProposalExecutabilityReceipt]
     queue_candidate: Optional[ArchitectQueueCandidate]
     decision_reasons: tuple[str, ...]
     rejection_reasons: tuple[str, ...]
@@ -579,6 +597,7 @@ def run_reddog_backend_architect_determination_runtime(
     model_runner: ArchitectModelRunner | None = None,
     model_selection_receipt: Mapping[str, Any] | None = None,
     model_runtime_binding_receipt: Mapping[str, Any] | None = None,
+    proposal_admission_policy: ArchitectProposalAdmissionPolicy | None = None,
     now_iso: str | None = None,
     timeout_seconds: int = 60,
 ) -> BackendArchitectDeterminationResult:
@@ -679,13 +698,16 @@ def run_reddog_backend_architect_determination_runtime(
     assert fusion_gate is not None
     assert report_collection is not None
     assert cycle_id is not None
+    proposal_policy = proposal_admission_policy or current_architect_proposal_admission_policy()
     runner = model_runner if model_runner is not None else FoundupsFusionArchitectModelRunner()
     try:
-        prompt = _build_architect_prompt(
+        prompt = build_architect_proposal_prompt(
             snapshot=snapshot,
-            report_collection=report_collection,
-            reports=reports,
+            report_bundle_id=report_bundle_id,
+            report_views=[_report_prompt_view(report) for report in reports],
             wsp15_allocation_receipt=wsp15_allocation_receipt,
+            proposal_admission_policy=proposal_policy,
+            max_chars=DEFAULT_MAX_PROMPT_CHARS,
         )
         context = _build_architect_context(
             context_view=context_view,
@@ -760,36 +782,22 @@ def run_reddog_backend_architect_determination_runtime(
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
 
-    provider_call_evidence = _canonical_provider_call_evidence(
-        model_result.provider_call_evidence
-    )
-    model_result = replace(
-        model_result,
-        provider_call_evidence=provider_call_evidence,
-    )
-    if not model_result.ok:
-        reasons.append(ArchitectDeterminationReason.MODEL_FAILURE)
-        reasons.extend(model_result.rejection_reasons)
-    elif not _provider_call_evidence_matches_architect(
-        provider_call_evidence,
+    model_result, assurance_reasons = _validated_model_assurance(
+        model_result=model_result,
         binding=binding,
         cycle_id=cycle_id,
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
         model_runtime_binding_digest=model_runtime_binding_digest,
-    ):
-        reasons.append(ArchitectDeterminationReason.PROVIDER_CALL_EVIDENCE)
-    if not _fusion_quorum_passed(model_result.review_packet):
-        reasons.append(ArchitectDeterminationReason.FUSION_QUORUM_NOT_PASSED)
-
-    parsed = _parse_model_output(model_result.content)
-    output_reasons: list[str] = []
-    _validate_model_output(
-        parsed,
-        reports=reports,
-        wsp15_allocation_receipt_id=allocation_receipt_id,
-        output_reasons=output_reasons,
     )
-    reasons.extend(output_reasons)
+    reasons.extend(assurance_reasons)
+    parsed, proposal_admission, proposal_reasons = _validated_proposal(
+        model_result=model_result,
+        snapshot=snapshot,
+        reports=reports,
+        report_bundle_id=report_bundle_id, allocation=wsp15_allocation_receipt,
+        allocation_receipt_id=allocation_receipt_id, policy=proposal_policy,
+    )
+    reasons.extend(proposal_reasons)
     if reasons:
         receipt = _receipt(
             accepted=False,
@@ -812,6 +820,7 @@ def run_reddog_backend_architect_determination_runtime(
             model_selection_digest=model_selection_digest,
             model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
             model_runtime_binding_digest=model_runtime_binding_digest,
+            proposal_admission=proposal_admission,
         )
         persist_result = _persist_rejected(receipt)
         return _result(receipt=receipt, persist_result=persist_result)
@@ -837,16 +846,21 @@ def run_reddog_backend_architect_determination_runtime(
                 if model_result.provider_call_evidence
                 else None
             ),
+            "proposal_admission_receipt_id": (
+                proposal_admission.receipt_id if proposal_admission else None
+            ),
         }
     )
     if action == ACTION_FIX:
         assert next_slice_name is not None
+        assert proposal_admission is not None
         queue_candidate = _queue_candidate(
             source_determination_receipt_id=accepted_receipt_id,
             next_slice_name=next_slice_name,
             snapshot=snapshot,
             report_bundle_id=report_bundle_id,
             wsp15_allocation_receipt=wsp15_allocation_receipt,
+            proposal_admission=proposal_admission,
         )
     receipt = _receipt(
         accepted=True,
@@ -869,6 +883,7 @@ def run_reddog_backend_architect_determination_runtime(
         model_selection_digest=model_selection_digest,
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
         model_runtime_binding_digest=model_runtime_binding_digest,
+        proposal_admission=proposal_admission,
         queue_candidate=queue_candidate,
         determination_receipt_id=accepted_receipt_id,
     )
@@ -895,6 +910,7 @@ def run_reddog_backend_architect_determination_runtime(
             model_selection_digest=model_selection_digest,
             model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
             model_runtime_binding_digest=model_runtime_binding_digest,
+            proposal_admission=proposal_admission,
         )
         return _result(receipt=failed, persist_result=persist_result)
     return _result(receipt=receipt, persist_result=persist_result)
@@ -1118,80 +1134,67 @@ def _parse_model_output(content: str) -> Mapping[str, Any]:
     return {}
 
 
-def _validate_model_output(
-    output: Mapping[str, Any],
+def _validated_model_assurance(
     *,
+    model_result: ArchitectModelResult,
+    binding: Mapping[str, Any],
+    cycle_id: str,
+    model_runtime_binding_receipt_id: str | None,
+    model_runtime_binding_digest: str | None,
+) -> tuple[ArchitectModelResult, tuple[str, ...]]:
+    evidence = _canonical_provider_call_evidence(model_result.provider_call_evidence)
+    normalized = replace(model_result, provider_call_evidence=evidence)
+    reasons: list[str] = []
+    if not normalized.ok:
+        reasons.append(ArchitectDeterminationReason.MODEL_FAILURE)
+        reasons.extend(normalized.rejection_reasons)
+    elif not _provider_call_evidence_matches_architect(
+        evidence, binding=binding, cycle_id=cycle_id,
+        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
+        model_runtime_binding_digest=model_runtime_binding_digest,
+    ):
+        reasons.append(ArchitectDeterminationReason.PROVIDER_CALL_EVIDENCE)
+    if not _fusion_quorum_passed(normalized.review_packet):
+        reasons.append(ArchitectDeterminationReason.FUSION_QUORUM_NOT_PASSED)
+    return normalized, _dedupe(reasons)
+
+
+def _validated_proposal(
+    *,
+    model_result: ArchitectModelResult,
+    snapshot: OperationalContextSnapshot,
     reports: Sequence[Mapping[str, Any]],
-    wsp15_allocation_receipt_id: Optional[str],
-    output_reasons: list[str],
-) -> None:
-    if not output:
-        output_reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
-        return
-    action = str(output.get("action") or "").strip().upper()
-    next_slice = str(output.get("next_slice_name") or "").strip()
-    summary = str(output.get("summary") or "").strip()
-    evidence_refs = _normalize_text_list(output.get("evidence_refs"))
-    model_allocation_id = str(output.get("wsp15_allocation_receipt_id") or "").strip()
-    if action not in ALLOWED_ACTIONS:
-        output_reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
-    if action in {ACTION_FIX, ACTION_RESEARCH_MORE, ACTION_REVISE} and not _valid_slice_name(next_slice):
-        output_reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
-    if action == ACTION_STOP and next_slice:
-        output_reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
-    if not summary:
-        output_reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
-    if not evidence_refs:
-        output_reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
-    report_refs = set(_all_report_evidence_refs(reports))
-    if evidence_refs and not set(evidence_refs).issubset(report_refs):
-        output_reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
-    if not model_allocation_id or model_allocation_id != wsp15_allocation_receipt_id:
-        output_reasons.append(ArchitectDeterminationReason.WSP15_RECEIPT_MISMATCH)
+    report_bundle_id: str | None,
+    allocation: Mapping[str, Any],
+    allocation_receipt_id: str | None,
+    policy: ArchitectProposalAdmissionPolicy,
+) -> tuple[Mapping[str, Any], ArchitectProposalExecutabilityReceipt | None, tuple[str, ...]]:
+    parsed = _parse_model_output(model_result.content)
+    validation = validate_architect_proposal_output(
+        parsed, reports=reports,
+        wsp15_allocation_receipt_id=allocation_receipt_id,
+    )
+    reasons: list[str] = []
+    if VALIDATION_INVALID_OUTPUT in validation:
+        reasons.append(ArchitectDeterminationReason.INVALID_MODEL_OUTPUT)
+    if VALIDATION_WSP15_MISMATCH in validation:
+        reasons.append(ArchitectDeterminationReason.WSP15_RECEIPT_MISMATCH)
+    if reasons:
+        return parsed, None, _dedupe(reasons)
+    admission = evaluate_architect_proposal_executability(
+        model_output=parsed, snapshot=snapshot, reports=reports,
+        report_bundle_id=report_bundle_id, wsp15_allocation_receipt=allocation,
+        policy=policy,
+    )
+    if not admission.accepted:
+        reasons.append(ArchitectDeterminationReason.PROPOSAL_EXECUTABILITY_ADMISSION)
+        reasons.extend(admission.rejection_reasons)
+    return parsed, admission, _dedupe(reasons)
 
 
 def _fusion_quorum_passed(review_packet: Mapping[str, Any]) -> bool:
     quorum = review_packet.get("fusion_panel_quorum")
     return isinstance(quorum, Mapping) and quorum.get("passed") is True
-
-
-def _build_architect_prompt(
-    *,
-    snapshot: OperationalContextSnapshot,
-    report_collection: ReadOnlyAuditReportCollectionResult,
-    reports: Sequence[Mapping[str, Any]],
-    wsp15_allocation_receipt: Mapping[str, Any],
-) -> str:
-    payload = {
-        "task": "Return one backend RedDog architect determination as strict JSON only.",
-        "allowed_actions": list(ALLOWED_ACTIONS),
-        "required_json_fields": [
-            "action",
-            "next_slice_name",
-            "summary",
-            "decision_reasons",
-            "evidence_refs",
-            "wsp15_allocation_receipt_id",
-        ],
-        "rules": [
-            "Use FIX only when exactly one next implementation slice should be queued.",
-            "Use RESEARCH_MORE when evidence is insufficient.",
-            "Use REVISE when prior work should be corrected before new implementation.",
-            "Use STOP when no next work should be queued.",
-            "Use only evidence_refs present in the supplied audit reports.",
-            "Echo the supplied WSP15 allocation receipt id exactly.",
-        ],
-        "snapshot_receipt_id": snapshot.snapshot_receipt_id,
-        "snapshot_content_digest": snapshot.snapshot_content_digest,
-        "report_collection": {
-            "status": report_collection.status,
-            "report_count": report_collection.report_count,
-            "bundle_id": _report_bundle_id(report_collection),
-        },
-        "wsp15_allocation_receipt_id": wsp15_allocation_receipt.get("receipt_id"),
-        "reports": [_report_prompt_view(report) for report in reports],
-    }
-    return _budgeted_canonical_json(payload, max_chars=DEFAULT_MAX_PROMPT_CHARS)
 
 
 def _build_architect_context(
@@ -1228,6 +1231,7 @@ def _queue_candidate(
     snapshot: OperationalContextSnapshot,
     report_bundle_id: Optional[str],
     wsp15_allocation_receipt: Mapping[str, Any],
+    proposal_admission: ArchitectProposalExecutabilityReceipt,
 ) -> ArchitectQueueCandidate:
     payload = {
         "source_determination_receipt_id": source_determination_receipt_id,
@@ -1235,20 +1239,28 @@ def _queue_candidate(
         "snapshot_receipt_id": snapshot.snapshot_receipt_id,
         "report_bundle_id": report_bundle_id,
         "wsp15_allocation_receipt_id": wsp15_allocation_receipt.get("receipt_id"),
+        "proposal_admission_receipt_id": proposal_admission.receipt_id,
     }
     return ArchitectQueueCandidate(
         schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
         queue_candidate_id=_digest(payload),
         source_determination_receipt_id=source_determination_receipt_id,
         slice_id=next_slice_name,
-        status="CANDIDATE",
+        status=(
+            "CANDIDATE"
+            if proposal_admission.admissible_to_authoritative_queue
+            else "BLOCKED_CANDIDATE"
+        ),
         evidence_refs=(
             f"architect_determination:{source_determination_receipt_id}",
             f"snapshot:{snapshot.snapshot_receipt_id}",
             f"report_bundle:{report_bundle_id}",
             f"wsp15_allocation:{wsp15_allocation_receipt.get('receipt_id')}",
+            f"proposal_admission:{proposal_admission.receipt_id}",
         ),
         wsp15_allocation_receipt=dict(wsp15_allocation_receipt),
+        proposal_admission_receipt_id=proposal_admission.receipt_id,
+        proposal_admission_digest=_digest(proposal_admission.to_dict()),
     )
 
 
@@ -1310,6 +1322,7 @@ def _receipt(
     model_selection_digest: Optional[str] = None,
     model_runtime_binding_receipt_id: Optional[str] = None,
     model_runtime_binding_digest: Optional[str] = None,
+    proposal_admission: ArchitectProposalExecutabilityReceipt | None = None,
     queue_candidate: ArchitectQueueCandidate | None = None,
     determination_receipt_id: Optional[str] = None,
 ) -> ArchitectDeterminationReceipt:
@@ -1332,12 +1345,8 @@ def _receipt(
         "model_selection_digest": model_selection_digest,
         "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
         "model_runtime_binding_digest": model_runtime_binding_digest,
-        "provider_call_id": (
-            model_result.provider_call_evidence.get("call_id") if model_result else None
-        ),
-        "provider_call_receipt_id": (
-            model_result.provider_call_evidence.get("receipt_id") if model_result else None
-        ),
+        "provider_call_id": model_result.provider_call_evidence.get("call_id") if model_result else None,
+        "provider_call_receipt_id": model_result.provider_call_evidence.get("receipt_id") if model_result else None,
         "provider_call_evidence_digest": (
             provider_evidence_digest(model_result.provider_call_evidence)
             if model_result and model_result.provider_call_evidence
@@ -1346,6 +1355,7 @@ def _receipt(
         "fusion_quorum_passed": _fusion_quorum_passed(model_result.review_packet) if model_result else False,
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
+        "proposal_admission_receipt_id": proposal_admission.receipt_id if proposal_admission else None,
         "queue_candidate_id": queue_candidate.queue_candidate_id if queue_candidate else None,
         "decision_reasons": tuple(decision_reasons),
         "rejection_reasons": tuple(rejection_reasons),
@@ -1373,12 +1383,8 @@ def _receipt(
         model_selection_digest=model_selection_digest,
         model_runtime_binding_receipt_id=model_runtime_binding_receipt_id,
         model_runtime_binding_digest=model_runtime_binding_digest,
-        provider_call_id=(
-            model_result.provider_call_evidence.get("call_id") if model_result else None
-        ),
-        provider_call_receipt_id=(
-            model_result.provider_call_evidence.get("receipt_id") if model_result else None
-        ),
+        provider_call_id=model_result.provider_call_evidence.get("call_id") if model_result else None,
+        provider_call_receipt_id=model_result.provider_call_evidence.get("receipt_id") if model_result else None,
         provider_call_evidence_digest=(
             provider_evidence_digest(model_result.provider_call_evidence)
             if model_result and model_result.provider_call_evidence
@@ -1387,6 +1393,7 @@ def _receipt(
         fusion_quorum_passed=_fusion_quorum_passed(model_result.review_packet) if model_result else False,
         wsp15_allocation_receipt_id=allocation_receipt_id,
         wsp15_allocation_digest=allocation_digest,
+        proposal_admission=proposal_admission,
         queue_candidate=queue_candidate,
         decision_reasons=tuple(decision_reasons),
         rejection_reasons=tuple(rejection_reasons),
@@ -1566,14 +1573,6 @@ def _report_digests(reports: Sequence[Mapping[str, Any]]) -> tuple[str, ...]:
     return tuple(sorted(digests))
 
 
-def _all_report_evidence_refs(reports: Sequence[Mapping[str, Any]]) -> tuple[str, ...]:
-    refs: list[str] = []
-    for report in reports:
-        if isinstance(report, Mapping):
-            refs.extend(_normalize_text_list(report.get("evidence_refs")))
-    return tuple(dict.fromkeys(refs))
-
-
 def _normalize_text_list(value: Any) -> tuple[str, ...]:
     if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
         return ()
@@ -1582,11 +1581,6 @@ def _normalize_text_list(value: Any) -> tuple[str, ...]:
 
 def _dedupe(values: Sequence[str]) -> tuple[str, ...]:
     return tuple(dict.fromkeys(str(value) for value in values if str(value).strip()))
-
-
-def _valid_slice_name(value: str) -> bool:
-    text = str(value or "").strip()
-    return bool(text) and text == text.upper() and all(ch.isalnum() or ch == "_" for ch in text)
 
 
 def _snapshot_expired(valid_until: str, now_iso: str) -> bool:

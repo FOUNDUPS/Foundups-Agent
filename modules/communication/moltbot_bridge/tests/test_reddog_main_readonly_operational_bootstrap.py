@@ -58,6 +58,9 @@ from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_te
 from modules.communication.moltbot_bridge.tests.provider_call_evidence_test_helpers import (
     architect_provider_call_evidence,
 )
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    architect_model_output,
+)
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_owner_bootstrap as owner_bootstrap,
 )
@@ -201,14 +204,11 @@ class _FakeArchitectRunner:
         )
         prompt_payload = json.loads(prompt)
         evidence_ref = prompt_payload["reports"][0]["evidence_refs"][0]
-        content = {
-            "action": ACTION_FIX,
-            "next_slice_name": "REDDOG_RUNTIME_RECONCILER_PHASE1",
-            "summary": "Collected read-only reports support one backend runtime fix.",
-            "decision_reasons": ["selected verified runtime reconciler gap"],
-            "evidence_refs": [evidence_ref],
-            "wsp15_allocation_receipt_id": prompt_payload["wsp15_allocation_receipt_id"],
-        }
+        content = architect_model_output(
+            {"receipt_id": prompt_payload["wsp15_allocation_receipt_id"]},
+            evidence_ref,
+            slice_name="REDDOG_RUNTIME_RECONCILER_PHASE1",
+        )
         return ArchitectModelResult(
             ok=True,
             status="MODEL_OK",

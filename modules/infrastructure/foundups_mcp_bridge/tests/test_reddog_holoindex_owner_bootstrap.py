@@ -149,6 +149,54 @@ def test_explicit_loopback_service_bypasses_auto_start(
     constructor.assert_not_called()
 
 
+def test_verify_binding_uses_configured_owner_health_without_starting(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(SERVICE_URL_ENV, SAFE_URL)
+    monkeypatch.setenv(SERVICE_TOKEN_ENV, SAFE_TOKEN)
+    health = Mock(return_value=True)
+    monkeypatch.setattr(bootstrap, "_configured_owner_health_ready", health)
+
+    assert bootstrap.verify_reddog_holoindex_owner_binding(
+        repo_root=tmp_path,
+        expected_repo_head_sha="a" * 40,
+        expected_generation_id="sha256:" + ("b" * 64),
+        expected_receipt_digest="sha256:" + ("c" * 64),
+    )
+
+    health.assert_called_once_with(
+        service_url=SAFE_URL,
+        token=SAFE_TOKEN,
+        expected_repo_head_sha="a" * 40,
+        expected_repo_root_digest=bootstrap.repository_root_digest(tmp_path),
+        expected_generation_id="sha256:" + ("b" * 64),
+        expected_receipt_digest="sha256:" + ("c" * 64),
+    )
+
+
+def test_verify_binding_rejects_owned_owner_serving_another_generation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+    started = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=tmp_path,
+        requested=True,
+        expected_repo_head_sha="a" * 40,
+        expected_generation_id="sha256:" + ("b" * 64),
+        expected_receipt_digest="sha256:" + ("c" * 64),
+    )
+    assert started.ready is True
+
+    assert not bootstrap.verify_reddog_holoindex_owner_binding(
+        repo_root=tmp_path,
+        expected_repo_head_sha="a" * 40,
+        expected_generation_id="sha256:" + ("d" * 64),
+        expected_receipt_digest="sha256:" + ("c" * 64),
+    )
+
+
 def test_configured_health_wrapper_uses_authenticated_loopback_probe(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
