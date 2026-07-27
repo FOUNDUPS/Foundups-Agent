@@ -34,11 +34,26 @@ nonce reservation, and strict serialized-attestation integrity validation.
 The validated attestation is still evidence, not authority. It is not accepted
 by proposal admission, the candidate gate, or promotion.
 
+The signer-service configuration and runtime wiring can provision one exact
+proposal policy only with a fresh, principal-signed, domain-separated policy
+authorization. WSP71 resolves both configured key profiles and proves their
+public-key bindings, but only the RedDog 0102 backend is placed in the socket
+routing table; the principal key is verification-only. The signer validates
+the exact payload and consumes a MAC-authenticated, bounded nonce store
+confined to the isolated signer runtime root before returning an accepted
+signature. Proposal-enabled keys accept only proposal and separately
+configured control-loop domains. Startup also requires an expected config
+digest delivered outside the config file. Unsigned, expired, altered,
+self-consistently re-digested, profile/key-substituted, replayed, and
+out-of-root inputs fail closed.
+
 Production policy still keeps `architect_proposal_admission_authenticity`
-unavailable because startup does not provision an independent pre-promotion
-signer policy, authoritative key and revocation resolver, durable proposal
-nonce store, trusted verification context, opaque authority proof, attestation
-artifact, or transactional queue binding.
+unavailable because the resident proposal path does not yet derive the exact
+signer policy from authoritative work state, produce its principal-signed
+policy authorization, request proposal signing, resolve
+independent key/revocation/freshness trust, produce an opaque process-local
+authority proof, or consume the attestation transactionally during queue
+promotion.
 
 ### Resident queue exact-SHA commit stage
 

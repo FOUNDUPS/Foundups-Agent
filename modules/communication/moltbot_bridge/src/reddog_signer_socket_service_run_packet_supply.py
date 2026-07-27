@@ -126,6 +126,8 @@ def run_reddog_signer_socket_service_run_packet_supply(
         str(root),
         "--config",
         str(config_resolved),
+        "--expected-config-digest",
+        config_digest,
         "--op-executable",
         str(op_executable),
         "--op-timeout-s",
@@ -226,6 +228,7 @@ def _config_reasons(
         repo_root,
         expected_runtime_root,
         dict(payload),
+        expected_config_digest=_digest(payload),
     ) is None:
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     socket_path = str(payload.get("socket_path") or "")

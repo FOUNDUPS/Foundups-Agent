@@ -56,6 +56,10 @@ def build_reddog_signer_socket_service_runtime_cli_parser() -> argparse.Argument
     )
     parser.add_argument("--repo-root", required=True, help="Repository root used for path containment checks.")
     parser.add_argument("--config", required=True, help="Outside-repo signer service JSON config.")
+    parser.add_argument(
+        "--expected-config-digest",
+        help="Launch-authorized sha256 digest for proposal-enabled config.",
+    )
     parser.add_argument("--op-executable", default="op", help="1Password CLI executable path/name.")
     parser.add_argument("--op-timeout-s", type=float, default=10.0, help="op read timeout in seconds.")
     parser.add_argument("--ttl-seconds", type=int, default=300, help="Credential TTL for resolver receipts.")
@@ -85,6 +89,7 @@ def run_reddog_signer_socket_service_runtime_cli(
         config_path=Path(args.config),
         resolver=resolver,  # type: ignore[arg-type]
         serve_bounded=serve_bounded,
+        expected_config_digest=args.expected_config_digest,
     )
     emit(_receipt_json(result))
     return 0 if result.accepted else 2

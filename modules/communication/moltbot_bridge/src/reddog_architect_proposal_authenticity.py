@@ -33,6 +33,12 @@ PROPOSAL_AUTHENTICITY_SCHEMA_VERSION = (
 PROPOSAL_AUTHENTICITY_SIGNING_OPERATION = "attest_architect_proposal"
 PROPOSAL_AUTHENTICITY_SIGNING_PREFIX = "reddog-architect-proposal.v1."
 PROPOSAL_AUTHENTICITY_SIGNER_ROLE = "reddog_architect"
+PROPOSAL_POLICY_AUTHORIZATION_SCHEMA_VERSION = (
+    "reddog_architect_proposal_policy_authorization.v1"
+)
+PROPOSAL_POLICY_AUTHORIZATION_PREFIX = (
+    "reddog-architect-proposal-policy-authorization.v1."
+)
 DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS = 300
 
 
@@ -94,6 +100,28 @@ class ArchitectProposalSignerPolicy:
 
     expected_payload: ArchitectProposalAuthenticityPayload
     max_ttl_seconds: int = DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
+
+
+@dataclass(frozen=True)
+class ArchitectProposalPolicyAuthorization:
+    """Principal-signed authorization for one exact signer policy."""
+
+    schema_version: str
+    authorization_id: str
+    proposal_policy_digest: str
+    principal_id: str
+    principal_public_key: str
+    reddog_id: str
+    reddog_public_key: str
+    key_epoch: str
+    authority_profile_source_receipt_id: str
+    nonce: str
+    issued_at: int
+    expires_at: int
+    signature: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass(frozen=True)
@@ -288,6 +316,238 @@ def canonical_architect_proposal_signing_input(
 ) -> str:
     raw = payload.to_dict() if hasattr(payload, "to_dict") else dict(payload)
     return PROPOSAL_AUTHENTICITY_SIGNING_PREFIX + _canonical_json(raw)
+
+
+def architect_proposal_signer_policy_digest(
+    policy: ArchitectProposalSignerPolicy,
+) -> str:
+    """Return the canonical digest of one exact proposal signer policy."""
+
+    if not _proposal_policy_valid(policy):
+        raise ValueError("architect_proposal_signer_policy_invalid")
+    return _digest(
+        {
+            "expected_payload": policy.expected_payload.to_dict(),
+            "max_ttl_seconds": int(policy.max_ttl_seconds),
+        }
+    )
+
+
+def build_architect_proposal_policy_authorization_payload(
+    policy: ArchitectProposalSignerPolicy,
+    *,
+    principal_id: str,
+    principal_public_key: str,
+    reddog_id: str,
+    reddog_public_key: str,
+    key_epoch: str,
+    authority_profile_source_receipt_id: str,
+    nonce: str,
+    issued_at: int,
+    expires_at: int,
+) -> dict[str, Any]:
+    """Build the unsigned, principal-authorized policy payload."""
+
+    values = {
+        "schema_version": PROPOSAL_POLICY_AUTHORIZATION_SCHEMA_VERSION,
+        "proposal_policy_digest": architect_proposal_signer_policy_digest(
+            policy
+        ),
+        "principal_id": _text(principal_id),
+        "principal_public_key": _text(principal_public_key),
+        "reddog_id": _text(reddog_id),
+        "reddog_public_key": _text(reddog_public_key),
+        "key_epoch": _text(key_epoch),
+        "authority_profile_source_receipt_id": _text(
+            authority_profile_source_receipt_id
+        ),
+        "nonce": _text(nonce),
+        "issued_at": int(issued_at),
+        "expires_at": int(expires_at),
+    }
+    values["authorization_id"] = (
+        "reddog_architect_proposal_policy_authorization_"
+        + _digest(values)[7:39]
+    )
+    _validate_policy_authorization_payload(values)
+    return values
+
+
+def canonical_architect_proposal_policy_authorization_input(
+    value: Mapping[str, Any],
+) -> str:
+    """Return the domain-separated principal-signing input."""
+
+    payload = dict(value)
+    payload.pop("signature", None)
+    _validate_policy_authorization_payload(payload)
+    return PROPOSAL_POLICY_AUTHORIZATION_PREFIX + _canonical_json(payload)
+
+
+def verify_architect_proposal_policy_authorization(
+    value: Mapping[str, Any],
+    *,
+    policy: ArchitectProposalSignerPolicy,
+    authority_profile: Mapping[str, Any],
+    now_epoch: int,
+) -> ArchitectProposalPolicyAuthorization:
+    """Verify a principal signature over one exact signer policy."""
+
+    if not isinstance(value, Mapping):
+        raise ValueError("architect_proposal_policy_authorization_invalid")
+    raw = dict(value)
+    expected_fields = {
+        "schema_version",
+        "authorization_id",
+        "proposal_policy_digest",
+        "principal_id",
+        "principal_public_key",
+        "reddog_id",
+        "reddog_public_key",
+        "key_epoch",
+        "authority_profile_source_receipt_id",
+        "nonce",
+        "issued_at",
+        "expires_at",
+        "signature",
+    }
+    if set(raw) != expected_fields:
+        raise ValueError(
+            "architect_proposal_policy_authorization_fields_invalid"
+        )
+    signature = _text(raw.pop("signature"))
+    _validate_policy_authorization_payload(raw)
+    expected_bindings = {
+        "proposal_policy_digest": architect_proposal_signer_policy_digest(
+            policy
+        ),
+        "principal_id": _text(authority_profile.get("principal_id")),
+        "principal_public_key": _text(
+            authority_profile.get("principal_public_key")
+        ),
+        "reddog_id": _text(authority_profile.get("reddog_id")),
+        "reddog_public_key": _text(
+            authority_profile.get("reddog_public_key")
+        ),
+        "key_epoch": _text(authority_profile.get("key_epoch")),
+        "authority_profile_source_receipt_id": _text(
+            authority_profile.get("authority_profile_source_receipt_id")
+        ),
+    }
+    if any(raw.get(key) != expected for key, expected in expected_bindings.items()):
+        raise ValueError(
+            "architect_proposal_policy_authorization_binding_mismatch"
+        )
+    ttl = int(raw["expires_at"]) - int(raw["issued_at"])
+    if (
+        int(raw["issued_at"]) > int(now_epoch)
+        or int(raw["expires_at"]) <= int(now_epoch)
+        or ttl <= 0
+        or ttl > DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
+    ):
+        raise ValueError(
+            "architect_proposal_policy_authorization_expired"
+        )
+    signing_input = (
+        canonical_architect_proposal_policy_authorization_input(raw)
+    )
+    if not Ed25519SignatureVerifier().verify(
+        str(raw["principal_public_key"]),
+        signing_input,
+        signature,
+    ):
+        raise ValueError(
+            "architect_proposal_policy_authorization_signature_invalid"
+        )
+    return ArchitectProposalPolicyAuthorization(
+        **raw,
+        signature=signature,
+    )
+
+
+def rehydrate_architect_proposal_authenticity_payload(
+    value: Mapping[str, Any],
+) -> ArchitectProposalAuthenticityPayload:
+    """Rehydrate one exact proposal payload without accepting an attestation."""
+
+    if not isinstance(value, Mapping):
+        raise ValueError("architect_proposal_authenticity_payload_invalid")
+    payload = dict(value)
+    _validate_payload_shape(payload)
+    return ArchitectProposalAuthenticityPayload(**payload)
+
+
+def _validate_policy_authorization_payload(
+    payload: Mapping[str, Any],
+) -> None:
+    fields = {
+        "schema_version",
+        "authorization_id",
+        "proposal_policy_digest",
+        "principal_id",
+        "principal_public_key",
+        "reddog_id",
+        "reddog_public_key",
+        "key_epoch",
+        "authority_profile_source_receipt_id",
+        "nonce",
+        "issued_at",
+        "expires_at",
+    }
+    if set(payload) != fields:
+        raise ValueError(
+            "architect_proposal_policy_authorization_fields_invalid"
+        )
+    if payload.get("schema_version") != (
+        PROPOSAL_POLICY_AUTHORIZATION_SCHEMA_VERSION
+    ):
+        raise ValueError(
+            "architect_proposal_policy_authorization_schema_invalid"
+        )
+    for field in (
+        "proposal_policy_digest",
+        "authority_profile_source_receipt_id",
+    ):
+        if not _sha256(payload.get(field)):
+            raise ValueError(
+                "architect_proposal_policy_authorization_digest_invalid"
+            )
+    for field in (
+        "authorization_id",
+        "principal_id",
+        "principal_public_key",
+        "reddog_id",
+        "reddog_public_key",
+        "key_epoch",
+        "nonce",
+    ):
+        if not isinstance(payload.get(field), str) or not _text(
+            payload.get(field)
+        ):
+            raise ValueError(
+                "architect_proposal_policy_authorization_value_missing"
+            )
+    if not _ascii_deep(payload):
+        raise ValueError(
+            "architect_proposal_policy_authorization_non_ascii"
+        )
+    unsigned = dict(payload)
+    supplied_id = str(unsigned.pop("authorization_id"))
+    expected_id = (
+        "reddog_architect_proposal_policy_authorization_"
+        + _digest(unsigned)[7:39]
+    )
+    if supplied_id != expected_id:
+        raise ValueError(
+            "architect_proposal_policy_authorization_id_invalid"
+        )
+    if (
+        type(payload.get("issued_at")) is not int
+        or type(payload.get("expires_at")) is not int
+    ):
+        raise ValueError(
+            "architect_proposal_policy_authorization_time_invalid"
+        )
 
 
 def attest_architect_proposal(
@@ -613,6 +873,7 @@ def _ascii_deep(value: Any) -> bool:
 
 
 __all__ = [
+    "ArchitectProposalPolicyAuthorization",
     "ArchitectProposalAuthenticityAttestation",
     "ArchitectProposalAuthenticityPayload",
     "ArchitectProposalSignerPolicy",
@@ -624,10 +885,17 @@ __all__ = [
     "PROPOSAL_AUTHENTICITY_SIGNER_ROLE",
     "PROPOSAL_AUTHENTICITY_SIGNING_OPERATION",
     "PROPOSAL_AUTHENTICITY_SIGNING_PREFIX",
+    "PROPOSAL_POLICY_AUTHORIZATION_PREFIX",
+    "PROPOSAL_POLICY_AUTHORIZATION_SCHEMA_VERSION",
     "ProposalAuthenticityNonceStore",
     "attest_architect_proposal",
+    "architect_proposal_signer_policy_digest",
+    "build_architect_proposal_policy_authorization_payload",
     "build_architect_proposal_authenticity_payload",
     "canonical_architect_proposal_signing_input",
+    "canonical_architect_proposal_policy_authorization_input",
+    "rehydrate_architect_proposal_authenticity_payload",
     "validate_proposal_signing_request",
+    "verify_architect_proposal_policy_authorization",
     "verify_architect_proposal_attestation_integrity",
 ]

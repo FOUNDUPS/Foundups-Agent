@@ -1,4 +1,36 @@
 # ModLog - moltbot_bridge
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_SIGNER_POLICY_RUNTIME_PHASE1
+- Extended the existing signer config, bootstrap, key-provider, and runtime
+  wiring so one exact architect-proposal signer policy can be provisioned only
+  against the configured RedDog signer profile.
+- Added a signer-owned atomic proposal nonce store under the isolated signer
+  runtime root. Every state is MAC-bound to the signer audit key and revision
+  checked; bounded retention recovers expired crash reservations without
+  allowing still-valid replay or unbounded state growth.
+- Required the proposal payload identity, signer key, key epoch, consensus
+  receipt, authority-profile source, and TTL to match the supplied authority
+  profile before a signer configuration can be written, with a fixed
+  protocol-level TTL ceiling and an exact RedDog signer profile.
+- Required a fresh principal-signed, domain-separated authorization over the
+  exact proposal policy. The signer resolves both WSP71 key profiles to prove
+  their configured public keys, but exposes only the RedDog 0102 proposal
+  backend; the principal key remains verification-only and cannot become a
+  generic socket signing oracle.
+- Rehydrated and revalidated the exact serialized proposal policy at bootstrap;
+  launch requires an expected digest supplied outside the config file, and
+  partial, unsigned, expired, tampered, self-consistently re-digested,
+  mismatched-key, profile-substituted, or out-of-root pairs never reach the
+  signer backend.
+- Restricted a proposal-enabled signer backend to the proposal domain plus its
+  separately configured control-loop domain. Unknown and generic signing
+  operations cannot reuse that private key during the proposal service run.
+- Preserved the authority boundary: this slice provisions signer policy and
+  durable replay state only. It does not derive proposal facts from
+  authoritative work state, produce an attestation in the resident loop,
+  produce the principal policy authorization in the resident loop,
+  satisfy the proposal-admission capability, promote a queue item, execute a
+  worker, or grant merge authority (WSP 00, 15, 22, 50, 62, 97).
+
 ## 2026-07-27: REDDOG_AUTHORITY_RUNTIME_STORE_CONFINEMENT_PHASE1
 - Required every atomic authority runtime store to bind an explicit repository
   root and runtime root, then revalidate the target before reads, writes, and

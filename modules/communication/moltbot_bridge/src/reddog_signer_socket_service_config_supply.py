@@ -14,12 +14,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     atomic_replace_confined_mapping,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
+    ArchitectProposalPolicyAuthorization,
+    ArchitectProposalSignerPolicy,
+    DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS,
+    verify_architect_proposal_policy_authorization,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
     validate_resident_signer_socket_limits,
@@ -31,6 +38,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
+    REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID,
     SignerSocketServiceRuntimeWiringConfig,
     validate_signer_socket_service_runtime_config,
 )
@@ -56,6 +64,15 @@ FAIL_SIGNER_CONFIG_OP_REF_INVALID = "signer_config_op_ref_invalid"
 FAIL_SIGNER_CONFIG_OP_REF_REUSED = "signer_config_op_ref_reused"
 FAIL_SIGNER_CONFIG_PEER_POLICY_INVALID = "signer_config_peer_policy_invalid"
 FAIL_SIGNER_CONFIG_LIMITS_INVALID = "signer_config_limits_invalid"
+FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_INVALID = (
+    "signer_config_proposal_policy_invalid"
+)
+FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID = (
+    "signer_config_proposal_policy_authorization_invalid"
+)
+FAIL_SIGNER_CONFIG_PROPOSAL_NONCE_PATH_INVALID = (
+    "signer_config_proposal_nonce_path_invalid"
+)
 FAIL_SIGNER_CONFIG_WRITE_FAILED = "signer_config_write_failed"
 
 _REQUIRED_AUTHORITY_FIELDS = (
@@ -84,6 +101,9 @@ class SignerServiceConfigSupplyResult:
     reddog_id: str | None
     profile_count: int
     rejection_reasons: tuple[str, ...]
+    proposal_policy_configured: bool = False
+    proposal_attestation_id: str | None = None
+    proposal_nonce_store_path: str | None = None
     no_secret_values_written: bool = True
     no_secret_values_resolved: bool = True
     no_signer_started: bool = True
@@ -122,6 +142,12 @@ def run_reddog_signer_socket_service_config_supply(
     principal_signer_agent_id: str = "signer:principal",
     reddog_signer_agent_id: str = "signer:reddog",
     control_loop_anchor_path: Path | str | None = None,
+    proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
+    proposal_policy_authorization: (
+        ArchitectProposalPolicyAuthorization | Mapping[str, Any] | None
+    ) = None,
+    proposal_nonce_store_path: Path | str | None = None,
+    now_epoch: int | None = None,
 ) -> SignerServiceConfigSupplyResult:
     """Write one signer CLI config from existing authority artifacts."""
 
@@ -148,6 +174,33 @@ def run_reddog_signer_socket_service_config_supply(
     peer_policy, peer_reasons = _peer_policy(peer_uid_to_principal, allowed_gids)
     reasons.extend(peer_reasons)
     reasons.extend(_limit_reasons(max_requests, timeout_s, max_request_bytes, max_response_bytes))
+    try:
+        authorization_now = int(
+            now_epoch if now_epoch is not None else time.time()
+        )
+    except (TypeError, ValueError):
+        authorization_now = 0
+        reasons.append(
+            FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID
+        )
+    verified_proposal_authorization, authorization_reasons = (
+        _proposal_policy_authorization(
+            profile,
+            proposal_authority_policy,
+            proposal_policy_authorization,
+            now_epoch=authorization_now,
+        )
+    )
+    reasons.extend(authorization_reasons)
+    proposal_nonce_path, proposal_reasons = _proposal_runtime_inputs(
+        root,
+        signer_runtime,
+        profile,
+        proposal_authority_policy,
+        proposal_nonce_store_path,
+        reddog_signer_agent_id,
+    )
+    reasons.extend(proposal_reasons)
 
     deduped = _dedupe(reasons)
     if deduped:
@@ -176,7 +229,11 @@ def run_reddog_signer_socket_service_config_supply(
         principal_signer_agent_id=principal_signer_agent_id,
         reddog_signer_agent_id=reddog_signer_agent_id,
         control_loop_anchor_path=anchor,
+        proposal_authority_policy=proposal_authority_policy,
+        proposal_policy_authorization=verified_proposal_authorization,
+        proposal_nonce_store_path=proposal_nonce_path,
     )
+    profile_count = len(tuple(config["key_provider_profiles"]))
     runtime_config_reasons = validate_signer_socket_service_runtime_config(
         SignerSocketServiceRuntimeWiringConfig(
             repo_root=root,
@@ -194,6 +251,11 @@ def run_reddog_signer_socket_service_config_supply(
             key_provider_profiles=tuple(config["key_provider_profiles"]),
             control_loop_anchor_path=anchor,
             control_loop_authority_policy=config["control_loop_authority_policy"],
+            proposal_authority_policy=config.get("proposal_authority_policy"),
+            proposal_policy_authorization=config.get(
+                "proposal_policy_authorization"
+            ),
+            proposal_nonce_store_path=config.get("proposal_nonce_store_path"),
         )
     )
     if runtime_config_reasons:
@@ -207,7 +269,16 @@ def run_reddog_signer_socket_service_config_supply(
         "control_loop_anchor_path": str(anchor),
         "principal_id": str(profile["principal_id"]),
         "reddog_id": str(profile["reddog_id"]),
-        "profile_count": 2,
+        "profile_count": profile_count,
+        "proposal_policy_configured": proposal_authority_policy is not None,
+        "proposal_attestation_id": (
+            proposal_authority_policy.expected_payload.attestation_id
+            if proposal_authority_policy is not None
+            else None
+        ),
+        "proposal_nonce_store_path": (
+            str(proposal_nonce_path) if proposal_nonce_path is not None else None
+        ),
         "no_secret_values_written": True,
         "no_secret_values_resolved": True,
         "no_signer_started": True,
@@ -230,8 +301,17 @@ def run_reddog_signer_socket_service_config_supply(
         socket_path=str(sock),
         principal_id=str(profile["principal_id"]),
         reddog_id=str(profile["reddog_id"]),
-        profile_count=2,
+        profile_count=profile_count,
         rejection_reasons=(),
+        proposal_policy_configured=proposal_authority_policy is not None,
+        proposal_attestation_id=(
+            proposal_authority_policy.expected_payload.attestation_id
+            if proposal_authority_policy is not None
+            else None
+        ),
+        proposal_nonce_store_path=(
+            str(proposal_nonce_path) if proposal_nonce_path is not None else None
+        ),
     )
 
 
@@ -313,6 +393,107 @@ def _runtime_artifact_paths(
     return runtime, signer_runtime, out, sock, anchor, reasons
 
 
+def _proposal_runtime_inputs(
+    repo_root: Path,
+    signer_runtime_root: Path | None,
+    authority_profile: Mapping[str, Any],
+    policy: ArchitectProposalSignerPolicy | None,
+    nonce_store_path: Path | str | None,
+    reddog_signer_agent_id: str,
+) -> tuple[Path | None, list[str]]:
+    if policy is None:
+        return (
+            None,
+            (
+                []
+                if nonce_store_path is None
+                else [FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_INVALID]
+            ),
+        )
+    if (
+        not isinstance(policy, ArchitectProposalSignerPolicy)
+        or signer_runtime_root is None
+        or reddog_signer_agent_id
+        != REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID
+    ):
+        return None, [FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_INVALID]
+    payload = policy.expected_payload
+    identity_matches = (
+        payload.requester_principal_id
+        == str(authority_profile.get("principal_id") or "")
+        and payload.reddog_id
+        == str(authority_profile.get("reddog_id") or "")
+        and payload.signer_public_key
+        == str(authority_profile.get("reddog_public_key") or "")
+        and payload.key_epoch
+        == str(authority_profile.get("key_epoch") or "")
+        and payload.consensus_receipt_digest
+        == str(authority_profile.get("consensus_receipt_digest") or "")
+        and payload.authority_profile_source_receipt_id
+        == str(
+            authority_profile.get("authority_profile_source_receipt_id")
+            or ""
+        )
+    )
+    ttl = int(payload.expires_at) - int(payload.issued_at)
+    if (
+        not identity_matches
+        or policy.max_ttl_seconds <= 0
+        or policy.max_ttl_seconds
+        > DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
+        or ttl <= 0
+        or ttl > int(policy.max_ttl_seconds)
+    ):
+        return None, [FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_INVALID]
+    target_value = (
+        nonce_store_path
+        if nonce_store_path is not None
+        else signer_runtime_root / "architect_proposal_nonce_store.json"
+    )
+    try:
+        target = validate_runtime_artifact_path(
+            target_value,
+            repo_root=repo_root,
+            allowed_root=signer_runtime_root,
+        )
+    except (OSError, TypeError, ValueError):
+        return None, [FAIL_SIGNER_CONFIG_PROPOSAL_NONCE_PATH_INVALID]
+    if target.parent != signer_runtime_root or (
+        target.exists() and not target.is_file()
+    ):
+        return None, [FAIL_SIGNER_CONFIG_PROPOSAL_NONCE_PATH_INVALID]
+    return target, []
+
+
+def _proposal_policy_authorization(
+    authority_profile: Mapping[str, Any],
+    policy: ArchitectProposalSignerPolicy | None,
+    value: ArchitectProposalPolicyAuthorization | Mapping[str, Any] | None,
+    *,
+    now_epoch: int,
+) -> tuple[ArchitectProposalPolicyAuthorization | None, list[str]]:
+    if policy is None:
+        return (
+            None,
+            []
+            if value is None
+            else [FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID],
+        )
+    raw = value.to_dict() if hasattr(value, "to_dict") else value
+    if not isinstance(raw, Mapping):
+        return None, [FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID]
+    try:
+        verified = verify_architect_proposal_policy_authorization(
+            raw,
+            policy=policy,
+            authority_profile=authority_profile,
+            now_epoch=now_epoch,
+        )
+    except (TypeError, ValueError):
+        return None, [FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID]
+    return verified, []
+
+
 def _config(
     *,
     authority_profile: Mapping[str, Any],
@@ -331,12 +512,15 @@ def _config(
     principal_signer_agent_id: str,
     reddog_signer_agent_id: str,
     control_loop_anchor_path: Path,
+    proposal_authority_policy: ArchitectProposalSignerPolicy | None,
+    proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None,
+    proposal_nonce_store_path: Path | None,
 ) -> dict[str, Any]:
     principal_public = str(authority_profile["principal_public_key"])
     reddog_public = str(authority_profile["reddog_public_key"])
     permission_digest = str(authority_profile["permission_snapshot_digest"])
     key_epoch = str(authority_profile["key_epoch"])
-    return {
+    config = {
         "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
         "runtime_root": str(runtime_root),
         "signer_runtime_root": str(signer_runtime_root),
@@ -387,6 +571,24 @@ def _config(
         ],
         "peer_policy": dict(peer_policy),
     }
+    if proposal_authority_policy is not None:
+        assert proposal_nonce_store_path is not None
+        assert proposal_policy_authorization is not None
+        config["proposal_authority_policy"] = {
+            "expected_payload": (
+                proposal_authority_policy.expected_payload.to_dict()
+            ),
+            "max_ttl_seconds": int(
+                proposal_authority_policy.max_ttl_seconds
+            ),
+        }
+        config["proposal_nonce_store_path"] = str(
+            proposal_nonce_store_path
+        )
+        config["proposal_policy_authorization"] = (
+            proposal_policy_authorization.to_dict()
+        )
+    return config
 
 
 def _authority_profile_reasons(profile: Mapping[str, Any]) -> list[str]:
@@ -516,6 +718,9 @@ __all__ = [
     "FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID",
     "FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID",
     "FAIL_SIGNER_CONFIG_PEER_POLICY_INVALID",
+    "FAIL_SIGNER_CONFIG_PROPOSAL_NONCE_PATH_INVALID",
+    "FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_AUTHORIZATION_INVALID",
+    "FAIL_SIGNER_CONFIG_PROPOSAL_POLICY_INVALID",
     "FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID",
     "FAIL_SIGNER_CONFIG_WRITE_FAILED",
     "SIGNER_SERVICE_CONFIG_SCHEMA_VERSION",

@@ -17,6 +17,7 @@ import binascii
 import hashlib
 import hmac
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
@@ -27,6 +28,13 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     ControlLoopAuthorityPolicy,
     Ed25519SignerBackend,
     SignerAuditMacBuilder,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
+    ArchitectProposalSignerPolicy,
+    ProposalAuthenticityNonceStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    AtomicProposalAuthenticityNonceStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     ControlLoopAnchorStore,
@@ -150,6 +158,11 @@ def build_test_only_signer_backend_from_provider(
     permission_snapshot_fresh: bool = False,
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
+    proposal_nonce_store: ProposalAuthenticityNonceStore | None = None,
+    proposal_nonce_store_path: Path | str | None = None,
+    proposal_nonce_store_allowed_root: Path | str | None = None,
+    proposal_nonce_store_repo_root: Path | str | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Validate a signer profile and build an Ed25519 signer backend.
 
@@ -198,6 +211,35 @@ def build_test_only_signer_backend_from_provider(
     fingerprint = public_key_fingerprint(public_key)
     if fingerprint != profile.expected_key_fingerprint:
         return _reject(FAIL_PROVIDER_FINGERPRINT_MISMATCH, profile=profile, signing=signing_result, audit=audit_result)
+    effective_proposal_nonce_store = proposal_nonce_store
+    if proposal_nonce_store_path is not None:
+        if (
+            proposal_nonce_store is not None
+            or proposal_nonce_store_allowed_root is None
+            or proposal_nonce_store_repo_root is None
+        ):
+            return _reject(
+                FAIL_PROVIDER_PROFILE_INVALID,
+                profile=profile,
+                signing=signing_result,
+                audit=audit_result,
+            )
+        try:
+            effective_proposal_nonce_store = (
+                AtomicProposalAuthenticityNonceStore(
+                    proposal_nonce_store_path,
+                    allowed_root=proposal_nonce_store_allowed_root,
+                    repo_root=proposal_nonce_store_repo_root,
+                    integrity_key=audit_key,
+                )
+            )
+        except (OSError, TypeError, ValueError):
+            return _reject(
+                FAIL_PROVIDER_PROFILE_INVALID,
+                profile=profile,
+                signing=signing_result,
+                audit=audit_result,
+            )
 
     return SignerKeyProviderDryRunResult(
         ok=True,
@@ -217,6 +259,8 @@ def build_test_only_signer_backend_from_provider(
             audit_mac_builder=_HmacAuditMacBuilder(audit_key),
             control_loop_anchor_store=control_loop_anchor_store,
             control_loop_authority_policy=control_loop_authority_policy,
+            proposal_authority_policy=proposal_authority_policy,
+            proposal_nonce_store=effective_proposal_nonce_store,
         ),
     )
 
@@ -230,6 +274,11 @@ def build_signer_backend_from_provider(
     permission_snapshot_fresh: bool = False,
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
+    proposal_nonce_store: ProposalAuthenticityNonceStore | None = None,
+    proposal_nonce_store_path: Path | str | None = None,
+    proposal_nonce_store_allowed_root: Path | str | None = None,
+    proposal_nonce_store_repo_root: Path | str | None = None,
 ) -> SignerKeyProviderDryRunResult:
     """Compatibility wrapper with the production-capable boundary name."""
 
@@ -241,6 +290,13 @@ def build_signer_backend_from_provider(
         permission_snapshot_fresh=permission_snapshot_fresh,
         control_loop_anchor_store=control_loop_anchor_store,
         control_loop_authority_policy=control_loop_authority_policy,
+        proposal_authority_policy=proposal_authority_policy,
+        proposal_nonce_store=proposal_nonce_store,
+        proposal_nonce_store_path=proposal_nonce_store_path,
+        proposal_nonce_store_allowed_root=(
+            proposal_nonce_store_allowed_root
+        ),
+        proposal_nonce_store_repo_root=proposal_nonce_store_repo_root,
     )
 
 
