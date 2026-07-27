@@ -1,7 +1,7 @@
 # ModLog - moltbot_bridge
-
+## 2026-07-27: REDDOG_MAIN_MENU_BINDING_PREFLIGHT_BOUNDARY_FIX
+- Missing or invalid model bindings now stop the resident cycle but block interactive startup only under explicit enforced mode; WARN/FAIL and menu-continuity regressions cover the boundary (WSP 00, 5, 15, 22, 50, 64, 97).
 ## 2026-07-26: OpenClaw exact-SHA HoloIndex maintenance route
-
 - Added a dedicated low-risk maintenance family for post-merge HoloIndex work.
 - OpenClaw now uses an exact-binding CAS claim; competing supervisors cannot
   execute the same SHA task.
