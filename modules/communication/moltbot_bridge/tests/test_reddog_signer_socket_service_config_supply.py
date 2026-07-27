@@ -54,6 +54,7 @@ def _repo(tmp_path: Path) -> Path:
 def _authority_profile(**overrides: object) -> dict[str, object]:
     profile: dict[str, object] = {
         "principal_id": "github:mjtrout",
+        "principal_provider": "github",
         "principal_public_key": _PRINCIPAL_PUBLIC_KEY,
         "reddog_id": "reddog:foundups-agent",
         "reddog_public_key": _REDDOG_PUBLIC_KEY,

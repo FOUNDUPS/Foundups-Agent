@@ -3,14 +3,19 @@
 Slice: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_WIRING_PHASE1
 
 This module composes the existing signer key-provider boundary, kernel peer
-credential attestor, and bounded signer socket service. It is intentionally
-dependency-injected: no environment parsing, file IO, process spawning, repo
-mutation, OpenClaw/Hermes dispatch, PR publication, reward settlement, or
-HoloIndex re-indexing happens here.
+credential attestor, and bounded signer socket service. It does not parse the
+environment, spawn processes, mutate repository files, dispatch OpenClaw or
+Hermes, publish PRs, settle rewards, or re-index HoloIndex. Injected resolvers
+and replay authorities may perform signer-runtime I/O; proposal mode also
+persists the canonical signer-owned nonce state.
 """
 
 from __future__ import annotations
 
+import hashlib
+import hmac
+import json
+import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -33,11 +38,22 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_serv
     DEFAULT_SIGNER_SOCKET_SERVICE_MAX_RESPONSE_BYTES,
     DEFAULT_SIGNER_SOCKET_SERVICE_TIMEOUT_S,
 )
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
+    ArchitectProposalPolicyAuthorization,
+    ArchitectProposalSignerPolicy,
+    DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS,
+    ProposalAuthenticityNonceStore,
+    architect_proposal_replay_store_binding_digest,
+    architect_proposal_signer_instance_id,
+    rehydrate_architect_proposal_authenticity_payload,
+    verify_architect_proposal_policy_authorization,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_TEST_ONLY_DRYRUN,
     PROVIDER_MODE_WSP71_PERMISSIONED,
     SignerKeyProviderProfile,
     SignerKeyResolver,
+    _build_proposal_signer_backend_from_verified_runtime,
     build_signer_backend_from_provider,
     validate_signer_key_provider_profile,
 )
@@ -57,6 +73,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor 
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
     KernelPeerCredentialAttestor,
     PeerCredentialPolicy,
+)
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    ProposalReplayHighWaterStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    FailClosedPrincipalKeyResolver,
+    PrincipalKeyResolver,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
@@ -78,6 +101,19 @@ FAIL_SIGNER_RUNTIME_SERVICE_INVALID = "FAIL_SIGNER_RUNTIME_SERVICE_INVALID"
 FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID = (
     "FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID"
 )
+FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID = (
+    "FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID"
+)
+FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID = (
+    "FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID"
+)
+FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID = (
+    "FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID"
+)
+REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID = "signer:reddog"
+REDDOG_WORK_AUTHORITY_SIGNER_PROFILE_ID = "reddog-work-authority"
+PRINCIPAL_IDENTITY_SIGNER_AGENT_ID = "signer:principal"
+PRINCIPAL_IDENTITY_SIGNER_PROFILE_ID = "principal-identity"
 
 
 ServeSignerSocketBounded = Callable[..., IsolatedSignerSocketResidentServiceResult]
@@ -103,6 +139,12 @@ class SignerSocketServiceRuntimeWiringConfig:
     key_provider_profiles: tuple[SignerKeyProviderProfile | Mapping[str, Any], ...] = ()
     control_loop_anchor_path: Path | str | None = None
     control_loop_authority_policy: ControlLoopAuthorityPolicy | Mapping[str, Any] | None = None
+    proposal_authority_policy: ArchitectProposalSignerPolicy | Mapping[str, Any] | None = None
+    proposal_policy_authorization: ArchitectProposalPolicyAuthorization | Mapping[str, Any] | None = None
+    proposal_nonce_store_path: Path | str | None = None
+    proposal_replay_high_water_store_id: str | None = None
+    proposal_replay_high_water_durability_receipt_id: str | None = None
+    proposal_security_context_digest: str | None = None
 
 
 @dataclass(frozen=True)
@@ -130,12 +172,130 @@ class SignerSocketServiceRuntimeWiringResult:
         return asdict(self)
 
 
+def architect_proposal_security_context_digest(
+    config: SignerSocketServiceRuntimeWiringConfig,
+) -> str:
+    """Digest the normalized signer configuration excluding its authorization."""
+
+    if not isinstance(config, SignerSocketServiceRuntimeWiringConfig):
+        raise ValueError("architect_proposal_security_context_invalid")
+    profiles, profile_reasons = _profiles(config)
+    peer_policy = _peer_policy(config.peer_policy)
+    proposal_policy = _proposal_authority_policy(
+        config.proposal_authority_policy
+    )
+    control_policy = _control_loop_authority_policy(
+        config.control_loop_authority_policy
+    )
+    if (
+        profile_reasons
+        or peer_policy is None
+        or proposal_policy is None
+    ):
+        raise ValueError("architect_proposal_security_context_invalid")
+    repo_root = Path(config.repo_root).resolve()
+    runtime_root = validate_runtime_root_path(
+        config.runtime_root,
+        repo_root=repo_root,
+    )
+    signer_root = validate_runtime_root_path(
+        config.signer_runtime_root,
+        repo_root=repo_root,
+    )
+    socket_path = validate_runtime_artifact_path(
+        config.socket_path,
+        repo_root=repo_root,
+        allowed_root=runtime_root,
+    )
+    nonce_path = validate_runtime_artifact_path(
+        config.proposal_nonce_store_path,
+        repo_root=repo_root,
+        allowed_root=signer_root,
+    )
+    high_water_store_id = str(
+        config.proposal_replay_high_water_store_id or ""
+    ).strip()
+    durability_receipt_id = str(
+        config.proposal_replay_high_water_durability_receipt_id or ""
+    ).strip()
+    if (
+        not high_water_store_id
+        or not _ascii(high_water_store_id)
+        or not _is_sha256_digest(durability_receipt_id)
+    ):
+        raise ValueError("architect_proposal_security_context_invalid")
+    control_anchor_path = validate_runtime_artifact_path(
+        config.control_loop_anchor_path,
+        repo_root=repo_root,
+        allowed_root=signer_root,
+    )
+    payload = {
+        "schema_version": "reddog_architect_proposal_security_context.v1",
+        "repo_root": str(repo_root),
+        "runtime_root": str(runtime_root),
+        "signer_runtime_root": str(signer_root),
+        "socket_path": str(socket_path),
+        "provider_mode": str(config.provider_mode),
+        "allow_test_only_key_material": bool(
+            config.allow_test_only_key_material
+        ),
+        "permission_snapshot_fresh": bool(
+            config.permission_snapshot_fresh
+        ),
+        "max_requests": int(config.max_requests),
+        "timeout_s": float(config.timeout_s),
+        "max_request_bytes": int(config.max_request_bytes),
+        "max_response_bytes": int(config.max_response_bytes),
+        "peer_policy": {
+            "uid_to_principal": {
+                str(uid): principal
+                for uid, principal in sorted(
+                    peer_policy.uid_to_principal.items()
+                )
+            },
+            "allowed_gids": sorted(peer_policy.allowed_gids),
+            "transport": peer_policy.transport,
+            "credential_source_prefix": (
+                peer_policy.credential_source_prefix
+            ),
+        },
+        "key_provider_profiles": [
+            asdict(profile) for profile in profiles
+        ],
+        "control_loop_anchor_path": str(control_anchor_path),
+        "control_loop_authority_policy": (
+            asdict(control_policy) if control_policy is not None else None
+        ),
+        "proposal_authority_policy": {
+            "expected_payload": (
+                proposal_policy.expected_payload.to_dict()
+            ),
+            "max_ttl_seconds": int(proposal_policy.max_ttl_seconds),
+        },
+        "proposal_nonce_store_path": str(nonce_path),
+        "proposal_replay_high_water_store_id": high_water_store_id,
+        "proposal_replay_high_water_durability_receipt_id": (
+            durability_receipt_id
+        ),
+    }
+    raw = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(raw).hexdigest()
+
+
 def run_reddog_signer_socket_service_runtime_wiring(
     config: SignerSocketServiceRuntimeWiringConfig,
     resolver: SignerKeyResolver,
     *,
     serve_bounded: ServeSignerSocketBounded = serve_reddog_isolated_signer_socket_bounded,
     ready_callback: Optional[Callable[[], None]] = None,
+    principal_key_resolver: PrincipalKeyResolver | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
 ) -> SignerSocketServiceRuntimeWiringResult:
     """Build a signer backend and serve a bounded signer socket service."""
 
@@ -154,8 +314,81 @@ def run_reddog_signer_socket_service_runtime_wiring(
     control_authority_policy = _control_loop_authority_policy(
         config.control_loop_authority_policy
     )
+    proposal_policy = _proposal_authority_policy(
+        config.proposal_authority_policy
+    )
+    proposal_authorization = _proposal_policy_authorization(
+        config,
+        profiles=profiles,
+        proposal_policy=proposal_policy,
+        principal_key_resolver=(
+            principal_key_resolver
+            or FailClosedPrincipalKeyResolver()
+        ),
+        require_trusted_principal=True,
+    )
+    if proposal_policy is not None and proposal_authorization is None:
+        return _reject(
+            FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+            injected_dependency_effects_unobserved=True,
+        )
+    (
+        proposal_nonce_store_path,
+        proposal_replay_high_water_store_id,
+        proposal_store_reasons,
+    ) = _proposal_nonce_store(
+        config,
+        proposal_policy=proposal_policy,
+    )
+    if proposal_store_reasons:
+        return _reject(
+            *proposal_store_reasons,
+            injected_dependency_effects_unobserved=(
+                proposal_policy is not None
+            ),
+        )
+    if proposal_policy is not None:
+        try:
+            high_water_authority_valid = bool(
+                isinstance(
+                    proposal_replay_high_water_store,
+                    ProposalReplayHighWaterStore,
+                )
+                and hmac.compare_digest(
+                    proposal_replay_high_water_store.store_id,
+                    str(proposal_replay_high_water_store_id),
+                )
+                and (
+                    config.provider_mode
+                    != PROVIDER_MODE_WSP71_PERMISSIONED
+                    or (
+                        proposal_replay_high_water_store.durable is True
+                        and _is_sha256_digest(
+                            proposal_replay_high_water_store
+                            .durability_receipt_id
+                        )
+                        and hmac.compare_digest(
+                            str(
+                                proposal_replay_high_water_store
+                                .durability_receipt_id
+                            ),
+                            str(
+                                config
+                                .proposal_replay_high_water_durability_receipt_id
+                            ),
+                        )
+                    )
+                )
+            )
+        except Exception:
+            high_water_authority_valid = False
+        if not high_water_authority_valid:
+            return _reject(
+                FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+                injected_dependency_effects_unobserved=True,
+            )
 
-    backend, key_receipt, key_reasons = _build_backend(
+    backend, proposal_nonce_store, key_receipt, key_reasons = _build_backend(
         profiles,
         resolver,
         provider_mode=config.provider_mode,
@@ -163,9 +396,52 @@ def run_reddog_signer_socket_service_runtime_wiring(
         permission_snapshot_fresh=config.permission_snapshot_fresh,
         control_loop_anchor_store=anchor_store,
         control_loop_authority_policy=control_authority_policy,
+        proposal_authority_policy=proposal_policy,
+        proposal_policy_authorization=proposal_authorization,
+        proposal_nonce_store_path=proposal_nonce_store_path,
+        proposal_replay_high_water_store=(
+            proposal_replay_high_water_store
+        ),
+        proposal_replay_high_water_store_id=(
+            proposal_replay_high_water_store_id
+        ),
+        proposal_replay_high_water_durability_receipt_id=str(
+            config.proposal_replay_high_water_durability_receipt_id or ""
+        ),
+        repo_root=Path(config.repo_root).resolve(),
+        signer_runtime_root=validate_runtime_root_path(
+            config.signer_runtime_root,
+            repo_root=Path(config.repo_root).resolve(),
+        ),
     )
     if key_reasons:
-        return _reject(*key_reasons, key_provider_receipt=key_receipt, max_requests=config.max_requests)
+        return _reject(
+            *key_reasons,
+            key_provider_receipt=key_receipt,
+            max_requests=config.max_requests,
+            injected_dependency_effects_unobserved=True,
+        )
+    authorization_reservation = _reserve_policy_authorization(
+        proposal_nonce_store,
+        proposal_authorization,
+    )
+    if proposal_authorization is not None and not authorization_reservation:
+        return _reject(
+            FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+            key_provider_receipt=key_receipt,
+            max_requests=config.max_requests,
+            injected_dependency_effects_unobserved=True,
+        )
+    if not _commit_policy_authorization(
+        proposal_nonce_store,
+        authorization_reservation,
+    ):
+        return _reject(
+            FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+            key_provider_receipt=key_receipt,
+            max_requests=config.max_requests,
+            injected_dependency_effects_unobserved=True,
+        )
 
     try:
         service = serve_bounded(
@@ -184,12 +460,14 @@ def run_reddog_signer_socket_service_runtime_wiring(
             FAIL_SIGNER_RUNTIME_SERVICE_REJECTED,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
+            injected_dependency_effects_unobserved=True,
         )
     if not isinstance(service, IsolatedSignerSocketResidentServiceResult):
         return _reject(
             FAIL_SIGNER_RUNTIME_SERVICE_INVALID,
             key_provider_receipt=key_receipt,
             max_requests=config.max_requests,
+            injected_dependency_effects_unobserved=True,
         )
     service_receipt = service.to_dict()
     if service.accepted is not True or service.status != SIGNER_SOCKET_RESIDENT_SERVICE_SERVED:
@@ -198,6 +476,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             key_provider_receipt=key_receipt,
             service_result=service_receipt,
             max_requests=config.max_requests,
+            injected_dependency_effects_unobserved=True,
         )
 
     return SignerSocketServiceRuntimeWiringResult(
@@ -207,6 +486,15 @@ def run_reddog_signer_socket_service_runtime_wiring(
         key_provider_receipt=key_receipt,
         service_result=service_receipt,
         max_requests=config.max_requests,
+        no_env_parsed=False,
+        no_file_io_performed=False,
+        no_process_spawned=False,
+        no_repo_mutation_performed=False,
+        no_openclaw_enqueue_performed=False,
+        no_hermes_dispatch_performed=False,
+        no_pr_created=False,
+        no_reward_settlement_performed=False,
+        no_holoindex_reindex_performed=False,
     )
 
 
@@ -235,11 +523,21 @@ def validate_signer_socket_service_runtime_config(
     control_authority_policy = _control_loop_authority_policy(
         config.control_loop_authority_policy
     )
-    if config.control_loop_anchor_path is not None and control_authority_policy is None:
+    if (
+        config.control_loop_anchor_path is not None
+        and control_authority_policy is None
+        and config.proposal_authority_policy is None
+    ):
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
     if (
         config.provider_mode == PROVIDER_MODE_WSP71_PERMISSIONED
-        and (anchor_store is None or control_authority_policy is None)
+        and (
+            anchor_store is None
+            or (
+                control_authority_policy is None
+                and config.proposal_authority_policy is None
+            )
+        )
     ):
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
     if (
@@ -248,6 +546,72 @@ def validate_signer_socket_service_runtime_config(
         not in set(profile_public_keys)
     ):
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
+    proposal_policy = _proposal_authority_policy(
+        config.proposal_authority_policy
+    )
+    if (
+        config.proposal_authority_policy is not None
+        and proposal_policy is None
+    ):
+        return (FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,)
+    proposal_authorization = _proposal_policy_authorization(
+        config,
+        profiles=profiles,
+        proposal_policy=proposal_policy,
+        principal_key_resolver=None,
+        require_trusted_principal=False,
+    )
+    if (
+        (proposal_policy is None)
+        != (config.proposal_policy_authorization is None)
+        or (
+            proposal_policy is not None
+            and proposal_authorization is None
+        )
+    ):
+        return (
+            FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+        )
+    _, _, proposal_store_reasons = _proposal_nonce_store(
+        config,
+        proposal_policy=proposal_policy,
+    )
+    if proposal_store_reasons:
+        return proposal_store_reasons
+    if proposal_policy is not None:
+        try:
+            expected_security_digest = (
+                architect_proposal_security_context_digest(config)
+            )
+        except (OSError, TypeError, ValueError):
+            return (
+                FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+            )
+        if not hmac.compare_digest(
+            str(config.proposal_security_context_digest or ""),
+            expected_security_digest,
+        ):
+            return (
+                FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
+            )
+        if len(profiles) != 1:
+            return (FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,)
+        proposal_profiles = [
+            profile
+            for profile in profiles
+            if (
+                profile.signer_profile_id
+                == REDDOG_WORK_AUTHORITY_SIGNER_PROFILE_ID
+                and profile.signer_agent_id
+                == REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID
+                and profile.expected_public_key
+                == proposal_policy.expected_payload.signer_public_key
+                and profile.expected_key_epoch
+                == proposal_policy.expected_payload.key_epoch
+            )
+        ]
+        if len(proposal_profiles) != 1:
+            return (FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,)
     limit_reasons = validate_resident_signer_socket_limits(
         max_requests=config.max_requests,
         timeout_s=config.timeout_s,
@@ -329,34 +693,84 @@ def _build_backend(
     permission_snapshot_fresh: bool,
     control_loop_anchor_store: ControlLoopAnchorStore | None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None,
-) -> tuple[Optional[IsolatedSignerBackend], dict[str, Any], tuple[str, ...]]:
+    proposal_authority_policy: ArchitectProposalSignerPolicy | None,
+    proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None,
+    proposal_nonce_store_path: Path | None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None,
+    proposal_replay_high_water_store_id: str | None,
+    proposal_replay_high_water_durability_receipt_id: str,
+    repo_root: Path,
+    signer_runtime_root: Path,
+) -> tuple[
+    Optional[IsolatedSignerBackend],
+    ProposalAuthenticityNonceStore | None,
+    dict[str, Any],
+    tuple[str, ...],
+]:
     receipts: list[dict[str, Any]] = []
     backends: dict[str, IsolatedSignerBackend] = {}
     for profile in profiles:
-        key_result = build_signer_backend_from_provider(
+        if _is_proposal_signer_profile(
             profile,
-            resolver,
-            provider_mode=provider_mode,
-            allow_test_only_key_material=allow_test_only_key_material,
-            permission_snapshot_fresh=permission_snapshot_fresh,
-            control_loop_anchor_store=control_loop_anchor_store,
-            control_loop_authority_policy=(
-                control_loop_authority_policy
-                if control_loop_authority_policy is not None
-                and profile.expected_public_key
-                == control_loop_authority_policy.signer_public_key
-                else None
-            ),
-        )
+            proposal_authority_policy,
+        ):
+            if (
+                proposal_policy_authorization is None
+                or proposal_nonce_store_path is None
+                or proposal_replay_high_water_store is None
+                or proposal_replay_high_water_store_id is None
+            ):
+                return None, None, _key_provider_receipt(False, receipts), (
+                    FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
+                )
+            key_result = _build_proposal_signer_backend_from_verified_runtime(
+                profile,
+                resolver,
+                provider_mode=provider_mode,
+                allow_test_only_key_material=allow_test_only_key_material,
+                permission_snapshot_fresh=permission_snapshot_fresh,
+                proposal_authority_policy=proposal_authority_policy,
+                proposal_policy_authorization=(
+                    proposal_policy_authorization
+                ),
+                proposal_nonce_store_path=proposal_nonce_store_path,
+                proposal_replay_high_water_store=(
+                    proposal_replay_high_water_store
+                ),
+                proposal_replay_high_water_store_id=(
+                    proposal_replay_high_water_store_id
+                ),
+                proposal_replay_high_water_durability_receipt_id=(
+                    proposal_replay_high_water_durability_receipt_id
+                ),
+                proposal_nonce_store_allowed_root=signer_runtime_root,
+                proposal_nonce_store_repo_root=repo_root,
+            )
+        else:
+            key_result = build_signer_backend_from_provider(
+                profile,
+                resolver,
+                provider_mode=provider_mode,
+                allow_test_only_key_material=allow_test_only_key_material,
+                permission_snapshot_fresh=permission_snapshot_fresh,
+                control_loop_anchor_store=control_loop_anchor_store,
+                control_loop_authority_policy=(
+                    control_loop_authority_policy
+                    if control_loop_authority_policy is not None
+                    and profile.expected_public_key
+                    == control_loop_authority_policy.signer_public_key
+                    else None
+                ),
+            )
         receipt = key_result.to_receipt()
         receipts.append(receipt)
         if not key_result.ok or key_result.backend is None:
-            return None, _key_provider_receipt(False, receipts), (
+            return None, None, _key_provider_receipt(False, receipts), (
                 FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
             )
         public_key = str(key_result.public_key or "")
         if public_key in backends:
-            return None, _key_provider_receipt(False, receipts), (
+            return None, None, _key_provider_receipt(False, receipts), (
                 FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,
             )
         backends[public_key] = key_result.backend
@@ -365,7 +779,12 @@ def _build_backend(
         backend = next(iter(backends.values()))
     else:
         backend = _RoutingSignerBackend(backends)
-    return backend, _key_provider_receipt(True, receipts), ()
+    nonce_store = (
+        getattr(backend, "proposal_nonce_store", None)
+        if proposal_policy_authorization is not None
+        else None
+    )
+    return backend, nonce_store, _key_provider_receipt(True, receipts), ()
 
 
 def _control_loop_anchor_store(
@@ -438,6 +857,234 @@ def _control_loop_authority_policy(
         if not _is_sha256_digest(digest):
             return None
     return policy
+
+
+def _proposal_authority_policy(
+    value: ArchitectProposalSignerPolicy | Mapping[str, Any] | None,
+) -> ArchitectProposalSignerPolicy | None:
+    if isinstance(value, ArchitectProposalSignerPolicy):
+        return (
+            value
+            if 0 < int(value.max_ttl_seconds)
+            <= DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
+            else None
+        )
+    if not isinstance(value, Mapping):
+        return None
+    expected = value.get("expected_payload")
+    try:
+        payload = rehydrate_architect_proposal_authenticity_payload(
+            expected if isinstance(expected, Mapping) else {}
+        )
+        max_ttl = int(value.get("max_ttl_seconds"))
+    except (TypeError, ValueError):
+        return None
+    if (
+        max_ttl <= 0
+        or max_ttl > DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
+    ):
+        return None
+    return ArchitectProposalSignerPolicy(
+        expected_payload=payload,
+        max_ttl_seconds=max_ttl,
+    )
+
+
+def _proposal_policy_authorization(
+    config: SignerSocketServiceRuntimeWiringConfig,
+    *,
+    profiles: list[SignerKeyProviderProfile],
+    proposal_policy: ArchitectProposalSignerPolicy | None,
+    principal_key_resolver: PrincipalKeyResolver | None,
+    require_trusted_principal: bool,
+) -> ArchitectProposalPolicyAuthorization | None:
+    value = config.proposal_policy_authorization
+    if proposal_policy is None:
+        return None if value is None else None
+    raw = value.to_dict() if hasattr(value, "to_dict") else value
+    if not isinstance(raw, Mapping):
+        return None
+    proposal_profiles = [
+        profile
+        for profile in profiles
+        if _is_proposal_signer_profile(profile, proposal_policy)
+    ]
+    if len(proposal_profiles) != 1:
+        return None
+    signer_root = Path(config.signer_runtime_root).resolve()
+    nonce_path = config.proposal_nonce_store_path
+    high_water_store_id = str(
+        config.proposal_replay_high_water_store_id or ""
+    ).strip()
+    if nonce_path is None or not high_water_store_id:
+        return None
+    signer_instance_id = architect_proposal_signer_instance_id(
+        signer_root,
+        proposal_profiles[0].expected_public_key,
+        proposal_profiles[0].expected_key_epoch,
+    )
+    replay_binding = architect_proposal_replay_store_binding_digest(
+        signer_instance_id,
+        nonce_path,
+        high_water_store_id,
+    )
+    principal_id = str(raw.get("principal_id") or "")
+    principal_provider = str(raw.get("principal_provider") or "")
+    trusted_principal_key = str(
+        raw.get("principal_public_key") or ""
+    )
+    if require_trusted_principal:
+        if principal_key_resolver is None:
+            return None
+        try:
+            trusted_principal_key = str(
+                principal_key_resolver.resolve(
+                    principal_id,
+                    principal_provider,
+                )
+                or ""
+            )
+        except Exception:
+            return None
+    authority_profile = {
+        "principal_id": proposal_policy.expected_payload.requester_principal_id,
+        "principal_provider": principal_provider,
+        "principal_public_key": str(
+            raw.get("principal_public_key") or ""
+        ),
+        "reddog_id": proposal_policy.expected_payload.reddog_id,
+        "reddog_public_key": proposal_profiles[0].expected_public_key,
+        "key_epoch": proposal_policy.expected_payload.key_epoch,
+        "authority_profile_source_receipt_id": (
+            proposal_policy.expected_payload.authority_profile_source_receipt_id
+        ),
+    }
+    try:
+        return verify_architect_proposal_policy_authorization(
+            raw,
+            policy=proposal_policy,
+            authority_profile=authority_profile,
+            trusted_principal_public_key=trusted_principal_key,
+            expected_signer_instance_id=signer_instance_id,
+            expected_replay_store_binding_digest=replay_binding,
+            expected_security_context_digest=str(
+                config.proposal_security_context_digest or ""
+            ),
+            now_epoch=int(time.time()),
+        )
+    except (TypeError, ValueError):
+        return None
+
+
+def _proposal_nonce_store(
+    config: SignerSocketServiceRuntimeWiringConfig,
+    *,
+    proposal_policy: ArchitectProposalSignerPolicy | None,
+) -> tuple[Path | None, Path | None, tuple[str, ...]]:
+    path = config.proposal_nonce_store_path
+    high_water_store_id = str(
+        config.proposal_replay_high_water_store_id or ""
+    ).strip()
+    durability_receipt_id = str(
+        config.proposal_replay_high_water_durability_receipt_id or ""
+    ).strip()
+    security_digest = config.proposal_security_context_digest
+    if (
+        proposal_policy is None
+        and path is None
+        and not high_water_store_id
+        and not durability_receipt_id
+        and security_digest is None
+    ):
+        return None, None, ()
+    if proposal_policy is None:
+        return None, None, (FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID,)
+    if (
+        path is None
+        or not high_water_store_id
+        or not _ascii(high_water_store_id)
+        or not _is_sha256_digest(durability_receipt_id)
+        or not _is_sha256_digest(security_digest)
+    ):
+        return None, None, (
+            FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+        )
+    try:
+        repo_root = Path(config.repo_root).resolve()
+        signer_root = validate_runtime_root_path(
+            config.signer_runtime_root,
+            repo_root=repo_root,
+        )
+        target = validate_runtime_artifact_path(
+            path,
+            repo_root=repo_root,
+            allowed_root=signer_root,
+        )
+    except (OSError, TypeError, ValueError):
+        return None, None, (
+            FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+        )
+    if (
+        target.parent != signer_root
+        or target
+        != (signer_root / "architect_proposal_nonce_store.json")
+    ):
+        return None, None, (
+            FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
+        )
+    return target, high_water_store_id, ()
+
+
+def _reserve_policy_authorization(
+    store: ProposalAuthenticityNonceStore | None,
+    authorization: ArchitectProposalPolicyAuthorization | None,
+) -> str | None:
+    if authorization is None:
+        return None
+    if store is None:
+        return None
+    try:
+        return store.reserve(
+            authorization.nonce,
+            expires_at=authorization.expires_at,
+            subject=(
+                "proposal-policy-authorization:"
+                + authorization.principal_id
+            ),
+        )
+    except Exception:
+        return None
+
+
+def _commit_policy_authorization(
+    store: ProposalAuthenticityNonceStore | None,
+    reservation: str | None,
+) -> bool:
+    if store is None and reservation is None:
+        return True
+    if store is None or not reservation:
+        return False
+    try:
+        store.commit(reservation)
+        return True
+    except Exception:
+        return False
+
+
+def _is_proposal_signer_profile(
+    profile: SignerKeyProviderProfile,
+    policy: ArchitectProposalSignerPolicy | None,
+) -> bool:
+    return bool(
+        policy is not None
+        and profile.signer_profile_id
+        == REDDOG_WORK_AUTHORITY_SIGNER_PROFILE_ID
+        and profile.signer_agent_id
+        == REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID
+        and profile.expected_public_key
+        == policy.expected_payload.signer_public_key
+        and profile.expected_key_epoch == policy.expected_payload.key_epoch
+    )
 
 
 def _is_sha256_digest(value: object) -> bool:
@@ -517,7 +1164,10 @@ def _reject(
     key_provider_receipt: Optional[dict[str, Any]] = None,
     service_result: Optional[dict[str, Any]] = None,
     max_requests: int = 0,
+    no_file_io_performed: bool = True,
+    injected_dependency_effects_unobserved: bool = False,
 ) -> SignerSocketServiceRuntimeWiringResult:
+    no_unobserved_effect = not injected_dependency_effects_unobserved
     return SignerSocketServiceRuntimeWiringResult(
         accepted=False,
         status=SIGNER_SOCKET_RUNTIME_WIRING_REJECT,
@@ -525,6 +1175,17 @@ def _reject(
         key_provider_receipt=key_provider_receipt or {},
         service_result=service_result,
         max_requests=max_requests,
+        no_env_parsed=no_unobserved_effect,
+        no_file_io_performed=(
+            no_file_io_performed and no_unobserved_effect
+        ),
+        no_process_spawned=no_unobserved_effect,
+        no_repo_mutation_performed=no_unobserved_effect,
+        no_openclaw_enqueue_performed=no_unobserved_effect,
+        no_hermes_dispatch_performed=no_unobserved_effect,
+        no_pr_created=no_unobserved_effect,
+        no_reward_settlement_performed=no_unobserved_effect,
+        no_holoindex_reindex_performed=no_unobserved_effect,
     )
 
 
@@ -535,13 +1196,21 @@ __all__ = [
     "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE",
     "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED",
     "FAIL_SIGNER_RUNTIME_PEER_POLICY_INVALID",
+    "FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID",
+    "FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID",
+    "FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_INVALID",
     "FAIL_SIGNER_RUNTIME_PROFILE_INVALID",
     "FAIL_SIGNER_RUNTIME_SERVICE_INVALID",
     "FAIL_SIGNER_RUNTIME_SERVICE_REJECTED",
+    "PRINCIPAL_IDENTITY_SIGNER_AGENT_ID",
+    "PRINCIPAL_IDENTITY_SIGNER_PROFILE_ID",
+    "REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID",
+    "REDDOG_WORK_AUTHORITY_SIGNER_PROFILE_ID",
     "SIGNER_SOCKET_RUNTIME_WIRING_REJECT",
     "SIGNER_SOCKET_RUNTIME_WIRING_SERVED",
     "SignerSocketServiceRuntimeWiringConfig",
     "SignerSocketServiceRuntimeWiringResult",
+    "architect_proposal_security_context_digest",
     "run_reddog_signer_socket_service_runtime_wiring",
     "validate_signer_socket_service_runtime_config",
 ]

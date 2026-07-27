@@ -6,6 +6,12 @@ import ast
 import json
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    public_key_fingerprint,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
@@ -36,6 +42,8 @@ MODULE_PATH = (
     / "src"
     / "reddog_signer_socket_service_healthcheck.py"
 )
+_PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
+_REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -51,9 +59,26 @@ def _write_json(path: Path, payload: object) -> Path:
 
 
 def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
+    runtime_root = socket_path.parent.resolve()
+    signer_runtime_root = (
+        runtime_root.parent / f"{runtime_root.name}-signer-state"
+    ).resolve()
     payload: dict[str, object] = {
         "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
-        "socket_path": str(socket_path),
+        "runtime_root": str(runtime_root),
+        "signer_runtime_root": str(signer_runtime_root),
+        "socket_path": str(socket_path.resolve()),
+        "control_loop_anchor_path": str(
+            signer_runtime_root / "signer_control_loop_anchor.json"
+        ),
+        "control_loop_authority_policy": {
+            "issuer_principal_id": "github:mjtrout",
+            "signer_public_key": _REDDOG_PUBLIC_KEY,
+            "key_epoch": "epoch-1",
+            "consensus_receipt_digest": "sha256:" + "1" * 64,
+            "authority_profile_digest": "sha256:" + "2" * 64,
+            "authority_profile_source_receipt_id": "sha256:" + "3" * 64,
+        },
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
         "allow_test_only_key_material": False,
         "permission_snapshot_fresh": True,
@@ -67,10 +92,12 @@ def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
                 "signer_agent_id": "signer:principal",
                 "signing_key_ref": "op://prod-vault/principal/private",
                 "audit_mac_key_ref": "op://prod-vault/principal/audit",
-                "expected_public_key": "pub:principal",
-                "expected_key_fingerprint": "sha256:principal",
+                "expected_public_key": _PRINCIPAL_PUBLIC_KEY,
+                "expected_key_fingerprint": public_key_fingerprint(
+                    _PRINCIPAL_PUBLIC_KEY
+                ),
                 "expected_key_epoch": "epoch-1",
-                "permission_snapshot_digest": "sha256:permission",
+                "permission_snapshot_digest": "sha256:" + "4" * 64,
                 "ttl_seconds": 60,
             },
             {
@@ -78,10 +105,12 @@ def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
                 "signer_agent_id": "signer:reddog",
                 "signing_key_ref": "op://prod-vault/reddog/private",
                 "audit_mac_key_ref": "op://prod-vault/reddog/audit",
-                "expected_public_key": "pub:reddog",
-                "expected_key_fingerprint": "sha256:reddog",
+                "expected_public_key": _REDDOG_PUBLIC_KEY,
+                "expected_key_fingerprint": public_key_fingerprint(
+                    _REDDOG_PUBLIC_KEY
+                ),
                 "expected_key_epoch": "epoch-1",
-                "permission_snapshot_digest": "sha256:permission",
+                "permission_snapshot_digest": "sha256:" + "4" * 64,
                 "ttl_seconds": 60,
             },
         ],
@@ -153,7 +182,7 @@ def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_pa
     assert result.config_digest and result.config_digest.startswith("sha256:")
     assert result.socket_path == str((runtime / "signer.sock").resolve())
     assert result.signer_profile_id == "reddog-work-authority"
-    assert result.signer_public_key == "pub:reddog"
+    assert result.signer_public_key == _REDDOG_PUBLIC_KEY
     assert result.requester_principal_id == "github:mjtrout"
     assert result.request_digest and result.request_digest.startswith("sha256:")
     assert result.response_digest and result.response_digest.startswith("sha256:")
@@ -205,6 +234,9 @@ def test_healthcheck_rejects_missing_profile_and_signer_rejection(tmp_path: Path
     runtime = tmp_path / "runtime"
     no_reddog = _config(runtime / "signer.sock")
     no_reddog["key_provider_profiles"] = [no_reddog["key_provider_profiles"][0]]
+    no_reddog["control_loop_authority_policy"]["signer_public_key"] = (
+        _PRINCIPAL_PUBLIC_KEY
+    )
     missing_profile = run_reddog_signer_socket_service_healthcheck(
         repo_root=repo,
         run_packet_path=_packet(repo, runtime, config_payload=no_reddog),

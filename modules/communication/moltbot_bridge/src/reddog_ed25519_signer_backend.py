@@ -77,6 +77,9 @@ REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING = (
 REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY = (
     "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY"
 )
+REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY = (
+    "REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY"
+)
 
 CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
 CONTROL_LOOP_SIGNING_PREFIX = "reddog-control-loop.v2."
@@ -209,6 +212,12 @@ def _signer_request_rejection(
     )
     if any(operation is not prefix for operation, prefix in domain_pairs):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
+    if backend.proposal_authority_policy is not None:
+        allowed_operations = {PROPOSAL_AUTHENTICITY_SIGNING_OPERATION}
+        if backend.control_loop_authority_policy is not None:
+            allowed_operations.add(CONTROL_LOOP_SIGNING_OPERATION)
+        if request.requested_operation not in allowed_operations:
+            return REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY
     try:
         derived = encode_ed25519_public_key(_public_bytes_from_private_key(backend.private_key))
     except Exception:
@@ -487,6 +496,7 @@ __all__ = [
     "REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH",
     "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISMATCH",
     "REJECT_ED25519_SIGNER_PROPOSAL_AUTHORITY_POLICY_MISSING",
+    "REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY",
     "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY",
     "REJECT_ED25519_SIGNER_PROPOSAL_NONCE_STORE_MISSING",
     "REJECT_ED25519_SIGNER_REQUEST_INVALID",

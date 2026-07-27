@@ -12,13 +12,17 @@ Hermes, publish PRs, settle rewards, or re-index HoloIndex.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     SignerKeyResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    ProposalReplayHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
@@ -26,8 +30,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     ServeSignerSocketBounded,
     SignerSocketServiceRuntimeWiringConfig,
+    architect_proposal_security_context_digest,
     run_reddog_signer_socket_service_runtime_wiring,
     validate_signer_socket_service_runtime_config,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    PrincipalKeyResolver,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_text,
@@ -44,6 +52,9 @@ FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_
 FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO = "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO"
 FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE = "FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE"
 FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED = "FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED"
+FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH = (
+    "FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH"
+)
 FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED = "FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED"
 
 
@@ -79,6 +90,9 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     resolver: SignerKeyResolver,
     serve_bounded: ServeSignerSocketBounded,
     ready_callback: Optional[Callable[[], None]] = None,
+    expected_config_digest: str | None = None,
+    principal_key_resolver: PrincipalKeyResolver | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
@@ -93,11 +107,35 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         return _reject(*read_reasons, config_path=str(path))
     assert payload is not None
     assert digest is not None
+    if expected_config_digest is not None and not _is_sha256_digest(
+        expected_config_digest
+    ):
+        return _reject(
+            FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
+            config_path=str(path),
+            config_digest=digest,
+        )
+    if (
+        expected_config_digest is not None
+        and not hmac.compare_digest(expected_config_digest, digest)
+    ) or (
+        payload.get("proposal_authority_policy") is not None
+        and (
+            expected_config_digest is None
+            or not hmac.compare_digest(expected_config_digest, digest)
+        )
+    ):
+        return _reject(
+            FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
+            config_path=str(path),
+            config_digest=digest,
+        )
 
     config = rehydrate_signer_socket_service_runtime_config(
         root,
         path.parent,
         payload,
+        expected_config_digest=expected_config_digest,
     )
     if config is None:
         return _reject(
@@ -111,6 +149,10 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         resolver,
         serve_bounded=serve_bounded,
         ready_callback=ready_callback,
+        principal_key_resolver=principal_key_resolver,
+        proposal_replay_high_water_store=(
+            proposal_replay_high_water_store
+        ),
     )
     runtime_receipt = runtime.to_dict()
     if runtime.accepted is not True:
@@ -181,15 +223,40 @@ def rehydrate_signer_socket_service_runtime_config(
     repo_root: Path,
     expected_runtime_root: Path,
     payload: dict[str, Any],
+    *,
+    expected_config_digest: str | None = None,
 ) -> Optional[SignerSocketServiceRuntimeWiringConfig]:
     """Validate and rehydrate the canonical schema-v2 signer config."""
 
     try:
+        canonical = json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+        actual_digest = (
+            "sha256:"
+            + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        )
+        if payload.get("proposal_authority_policy") is not None and (
+            expected_config_digest is None
+            or not hmac.compare_digest(
+                expected_config_digest,
+                actual_digest,
+            )
+        ):
+            return None
         if payload.get("schema_version") != SIGNER_SERVICE_CONFIG_SCHEMA_VERSION:
             return None
-        if not payload.get("control_loop_anchor_path") or not isinstance(
-            payload.get("control_loop_authority_policy"),
-            dict,
+        if not payload.get("control_loop_anchor_path"):
+            return None
+        if (
+            not isinstance(
+                payload.get("control_loop_authority_policy"),
+                dict,
+            )
+            and payload.get("proposal_authority_policy") is None
         ):
             return None
         runtime_root = validate_runtime_root_path(
@@ -220,6 +287,53 @@ def rehydrate_signer_socket_service_runtime_config(
         )
         if socket_path.parent != runtime_root or anchor_path.parent != signer_runtime_root:
             return None
+        proposal_policy = payload.get("proposal_authority_policy")
+        proposal_policy_authorization = payload.get(
+            "proposal_policy_authorization"
+        )
+        proposal_nonce_path_value = payload.get("proposal_nonce_store_path")
+        proposal_high_water_store_id = payload.get(
+            "proposal_replay_high_water_store_id"
+        )
+        proposal_high_water_durability_receipt_id = payload.get(
+            "proposal_replay_high_water_durability_receipt_id"
+        )
+        if not (
+            (proposal_policy is None)
+            == (proposal_policy_authorization is None)
+            == (proposal_nonce_path_value is None)
+            == (proposal_high_water_store_id is None)
+            == (
+                proposal_high_water_durability_receipt_id is None
+            )
+        ):
+            return None
+        proposal_nonce_path = None
+        if proposal_policy is not None:
+            if not isinstance(proposal_policy, dict) or not isinstance(
+                proposal_policy_authorization,
+                dict,
+            ):
+                return None
+            proposal_nonce_path = validate_runtime_artifact_path(
+                proposal_nonce_path_value,
+                repo_root=repo_root,
+                allowed_root=signer_runtime_root,
+            )
+            if proposal_nonce_path.parent != signer_runtime_root:
+                return None
+            if (
+                not isinstance(proposal_high_water_store_id, str)
+                or not proposal_high_water_store_id.strip()
+                or not proposal_high_water_store_id.isascii()
+                or not _is_sha256_digest(
+                    proposal_high_water_durability_receipt_id
+                )
+            ):
+                return None
+        else:
+            proposal_high_water_store_id = None
+            proposal_high_water_durability_receipt_id = None
         peer_policy = payload["peer_policy"]
         key_profile = payload.get("key_provider_profile")
         key_profiles = payload.get("key_provider_profiles") or ()
@@ -253,8 +367,26 @@ def rehydrate_signer_socket_service_runtime_config(
             max_response_bytes=payload.get("max_response_bytes"),
             key_provider_profiles=key_profiles,
             control_loop_anchor_path=anchor_path,
-            control_loop_authority_policy=payload["control_loop_authority_policy"],
+            control_loop_authority_policy=payload.get(
+                "control_loop_authority_policy"
+            ),
+            proposal_authority_policy=proposal_policy,
+            proposal_policy_authorization=proposal_policy_authorization,
+            proposal_nonce_store_path=proposal_nonce_path,
+            proposal_replay_high_water_store_id=(
+                proposal_high_water_store_id
+            ),
+            proposal_replay_high_water_durability_receipt_id=(
+                proposal_high_water_durability_receipt_id
+            ),
         )
+        if proposal_policy is not None:
+            config = replace(
+                config,
+                proposal_security_context_digest=(
+                    architect_proposal_security_context_digest(config)
+                ),
+            )
     except Exception:
         return None
     if validate_signer_socket_service_runtime_config(config):
@@ -282,6 +414,15 @@ def _reject(
     )
 
 
+def _is_sha256_digest(value: object) -> bool:
+    text = value if isinstance(value, str) else ""
+    return (
+        len(text) == 71
+        and text.startswith("sha256:")
+        and all(char in "0123456789abcdef" for char in text[7:])
+    )
+
+
 def _is_inside(child: Path, parent: Path) -> bool:
     child_r = child.resolve()
     parent_r = parent.resolve()
@@ -289,6 +430,7 @@ def _is_inside(child: Path, parent: Path) -> bool:
 
 
 __all__ = [
+    "FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH",
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED",
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO",
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING",

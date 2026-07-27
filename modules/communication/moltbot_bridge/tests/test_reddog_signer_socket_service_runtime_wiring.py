@@ -88,6 +88,20 @@ class FakeResolver:
         )
 
 
+class RepoMutatingResolver(FakeResolver):
+    def __init__(
+        self,
+        values: dict[str, str],
+        marker_path: Path,
+    ) -> None:
+        super().__init__(values)
+        self.marker_path = marker_path
+
+    def resolve(self, reference: str, requester_id: str | None = None) -> ResolveResult:
+        self.marker_path.write_text("injected effect", encoding="utf-8")
+        return super().resolve(reference, requester_id)
+
+
 class CapturingBoundedService:
     def __init__(self, result: IsolatedSignerSocketResidentServiceResult | object | None = None) -> None:
         self.result = result
@@ -249,8 +263,9 @@ def test_runtime_wiring_composes_provider_attestor_and_bounded_service() -> None
     assert result.key_provider_receipt["ok"] is True
     assert result.service_result["status"] == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
     assert result.max_requests == 3
-    assert result.no_env_parsed is True
-    assert result.no_process_spawned is True
+    assert result.no_env_parsed is False
+    assert result.no_process_spawned is False
+    assert result.no_repo_mutation_performed is False
     assert len(service.calls) == 1
     assert service.calls[0]["max_requests"] == 3
     assert service.calls[0]["timeout_s"] == 2.5
@@ -258,6 +273,44 @@ def test_runtime_wiring_composes_provider_attestor_and_bounded_service() -> None
     response = backend.sign(_request(public_key), _peer())
     assert response.accepted is True
     assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+
+
+def test_runtime_receipt_does_not_overclaim_injected_dependency_effects(
+    tmp_path: Path,
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    signer_runtime = tmp_path / "signer-runtime"
+    repo.mkdir()
+    marker = repo / "resolver-side-effect.txt"
+    resolver = RepoMutatingResolver(_resolver(private_key).values, marker)
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            public_key,
+            repo_root=repo,
+            runtime_root=runtime,
+            signer_runtime_root=signer_runtime,
+            socket_path=runtime / "reddog-signer.sock",
+            control_loop_anchor_path=signer_runtime / "anchor.json",
+        ),
+        resolver,
+        serve_bounded=CapturingBoundedService(),
+    )
+
+    assert result.accepted is True
+    assert marker.is_file()
+    assert result.no_env_parsed is False
+    assert result.no_file_io_performed is False
+    assert result.no_process_spawned is False
+    assert result.no_repo_mutation_performed is False
+    assert result.no_openclaw_enqueue_performed is False
+    assert result.no_hermes_dispatch_performed is False
+    assert result.no_pr_created is False
+    assert result.no_reward_settlement_performed is False
+    assert result.no_holoindex_reindex_performed is False
 
 
 def test_runtime_wiring_accepts_wsp71_permissioned_provider_mode_without_test_override() -> None:
@@ -641,8 +694,10 @@ def test_result_serialization_contains_no_secret_material_or_backend() -> None:
     assert SIGNING_KEY_PREFIX not in text
     assert AUDIT_KEY_PREFIX not in text
     assert "0123456789abcdef" not in text
-    assert result.no_file_io_performed is True
-    assert result.no_holoindex_reindex_performed is True
+    assert result.no_file_io_performed is False
+    assert result.no_process_spawned is False
+    assert result.no_repo_mutation_performed is False
+    assert result.no_holoindex_reindex_performed is False
 
 
 def test_module_has_no_env_shell_file_repo_openclaw_hermes_or_holoindex_surface() -> None:

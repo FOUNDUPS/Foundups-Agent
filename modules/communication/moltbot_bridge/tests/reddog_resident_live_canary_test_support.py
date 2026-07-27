@@ -122,7 +122,7 @@ _AUTHORITY_PROFILE_SOURCE = {
     "schema_version": "reddog_authority_profile_source.v1",
     "principal_id": "github:mjtrout",
     "principal_provider": "github",
-    "principal_public_key": "ed25519-pub-v1:" + "B" * 43,
+    "principal_public_key": encode_ed25519_public_key(b"B" * 32),
     "reddog_id": "reddog:architect",
     "reddog_public_key": _PUBLIC_KEY,
     "repo_full_name": "FOUNDUPS/Foundups-Agent",

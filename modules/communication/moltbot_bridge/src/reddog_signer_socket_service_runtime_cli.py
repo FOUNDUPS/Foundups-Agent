@@ -26,7 +26,14 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
     ServeSignerSocketBounded,
 )
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    ProposalReplayHighWaterStore,
+)
 from modules.infrastructure.secrets_mcp.src.op_cli_secret_resolver import OpCliSecretResolver
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    FailClosedPrincipalKeyResolver,
+    PrincipalKeyResolver,
+)
 
 
 SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT = "SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT"
@@ -56,6 +63,10 @@ def build_reddog_signer_socket_service_runtime_cli_parser() -> argparse.Argument
     )
     parser.add_argument("--repo-root", required=True, help="Repository root used for path containment checks.")
     parser.add_argument("--config", required=True, help="Outside-repo signer service JSON config.")
+    parser.add_argument(
+        "--expected-config-digest",
+        help="Launch-authorized sha256 digest for proposal-enabled config.",
+    )
     parser.add_argument("--op-executable", default="op", help="1Password CLI executable path/name.")
     parser.add_argument("--op-timeout-s", type=float, default=10.0, help="op read timeout in seconds.")
     parser.add_argument("--ttl-seconds", type=int, default=300, help="Credential TTL for resolver receipts.")
@@ -69,6 +80,8 @@ def run_reddog_signer_socket_service_runtime_cli(
     resolver_factory: ResolverFactory = OpCliSecretResolver,
     serve_bounded: ServeSignerSocketBounded = serve_reddog_isolated_signer_socket_bounded,
     emit: Callable[[str], None] = print,
+    principal_key_resolver: PrincipalKeyResolver | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
 ) -> int:
     """Run the signer service CLI and emit an audit-safe JSON receipt."""
 
@@ -85,6 +98,14 @@ def run_reddog_signer_socket_service_runtime_cli(
         config_path=Path(args.config),
         resolver=resolver,  # type: ignore[arg-type]
         serve_bounded=serve_bounded,
+        expected_config_digest=args.expected_config_digest,
+        principal_key_resolver=(
+            principal_key_resolver
+            or FailClosedPrincipalKeyResolver()
+        ),
+        proposal_replay_high_water_store=(
+            proposal_replay_high_water_store
+        ),
     )
     emit(_receipt_json(result))
     return 0 if result.accepted else 2

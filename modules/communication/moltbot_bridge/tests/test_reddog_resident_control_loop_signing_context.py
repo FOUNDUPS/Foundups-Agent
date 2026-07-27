@@ -8,6 +8,9 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_signing_context import (
     build_control_loop_receipt_signing_context,
 )
@@ -18,9 +21,9 @@ def _source_profile(**overrides: object) -> dict[str, object]:
         "schema_version": "reddog_authority_profile_source.v1",
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
-        "principal_public_key": "ed25519-pub-v1:" + "B" * 43,
+        "principal_public_key": encode_ed25519_public_key(b"B" * 32),
         "reddog_id": "reddog:architect",
-        "reddog_public_key": "ed25519-pub-v1:" + "A" * 43,
+        "reddog_public_key": encode_ed25519_public_key(b"A" * 32),
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
         "allowed_paths": ["modules/foundups/paccess_001/src/**"],

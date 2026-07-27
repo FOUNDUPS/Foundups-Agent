@@ -34,11 +34,63 @@ nonce reservation, and strict serialized-attestation integrity validation.
 The validated attestation is still evidence, not authority. It is not accepted
 by proposal admission, the candidate gate, or promotion.
 
+The signer-service configuration and runtime wiring can provision one exact
+proposal policy only with a fresh, principal-signed, domain-separated policy
+authorization. An independently injected principal resolver supplies the
+trusted public verification key; proposal mode never resolves or loads the
+principal private key. WSP71 resolves only the RedDog 0102 proposal profile,
+and the socket exposes only that proposal-domain backend. The signer validates
+the exact payload and consumes a MAC-authenticated, bounded nonce store before
+returning an accepted signature. Replay rollback is checked against an
+independently injected monotonic high-water authority outside the nonce-state
+rollback domain. Production mode additionally requires that injected authority
+to be supplied by trusted signer-runtime composition, declare durable storage,
+and present the exact SHA-256 durability receipt bound into signer
+configuration and its normalized security-context digest; the in-memory test
+store is rejected. This slice validates capability and receipt agreement at
+that injection boundary; it does not issue or independently authenticate the
+durability receipt. The signed replay binding includes the authority's
+immutable identifier. Runtime rejects a mismatched, missing, or volatile
+authority. One atomic state document, a canonical transaction lock beside that
+document under the signer-owned runtime root, compare-and-swap commits, and
+one-step crash roll-forward prevent split-file ambiguity. The transaction lock
+is descriptor-path verified and does not depend on process-local temporary
+directories. Descriptor verification supports Windows and Linux with procfs;
+other POSIX environments fail closed. Nonce freshness is checked at durable
+reservation and again at durable
+commit. The principal policy authorization is durably
+consumed before the backend is exposed; service failure never restores it.
+Runtime recomputes the signed security-context digest over paths, peer policy,
+limits, key profile, policy, durability receipt, and replay namespace. Startup
+also requires the exact serialized config digest from outside the config file.
+Unsigned, expired, altered, self-consistently re-digested,
+profile/key-substituted, replayed, rolled-back, deleted,
+high-water-mismatched, and out-of-root inputs fail closed. Runtime receipts
+stop claiming that no file I/O occurred once injected proposal trust, key, or
+replay dependencies have been invoked. Once any injected dependency is called,
+every negative side-effect attestation that the runtime cannot directly
+observe is false; the receipt does not infer purity from the dependency
+interface.
+
+The public generic key-provider API has no architect-proposal policy or nonce
+parameters. Proposal backend construction is an internal runtime-only path
+reached after principal authorization, replay-authority, durability-receipt,
+and path validation. It always constructs the canonical atomic nonce store;
+callers cannot inject a volatile proposal nonce store through the public
+provider boundary. Proposal-enabled configuration is intentionally rejected by
+the signer run-packet supplier until production principal resolution and
+durable replay-authority composition exist in the CLI sidecar. Direct runtime
+and bootstrap injection remain the tested integration seams in this slice.
+
 Production policy still keeps `architect_proposal_admission_authenticity`
-unavailable because startup does not provision an independent pre-promotion
-signer policy, authoritative key and revocation resolver, durable proposal
-nonce store, trusted verification context, opaque authority proof, attestation
-artifact, or transactional queue binding.
+unavailable because the resident proposal path does not yet derive the exact
+signer policy from authoritative work state, produce its principal-signed
+policy authorization, configure a production principal-key resolver, request
+proposal signing, supply the independently administered production high-water
+authority and an authenticated durability receipt issuer/verifier, resolve
+independent key/revocation/freshness trust, produce an opaque process-local
+authority proof, compose those adapters into the signer-owned CLI sidecar, or
+consume the attestation transactionally during queue promotion.
 
 ### Resident queue exact-SHA commit stage
 

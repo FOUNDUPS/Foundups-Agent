@@ -1,6 +1,17 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-07-27 - Cross-Session Runtime Operation Lock
+
+- Moved the Windows runtime-operation mutex from the session-local namespace
+  to the machine-global mutex namespace so signer-side serialization remains
+  effective across service and interactive Windows sessions.
+- Preserved the existing identity digest and POSIX confined lock-file behavior.
+- Added a descriptor-verified confined lock-file primitive for authorities
+  that require one canonical runtime-root lock independent of temporary
+  directory configuration. Descriptor verification is supported on Windows
+  and Linux with procfs; other POSIX environments fail closed.
+
 ## 2026-07-25 - Stable Descriptor-Confined Runtime Text Reads
 
 - Added a bounded UTF-8 reader that opens one descriptor, verifies its final

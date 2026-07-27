@@ -46,6 +46,9 @@ FAIL_SIGNER_RUN_PACKET_OP_EXECUTABLE_INVALID = "signer_run_packet_op_executable_
 FAIL_SIGNER_RUN_PACKET_LIMITS_INVALID = "signer_run_packet_limits_invalid"
 FAIL_SIGNER_RUN_PACKET_SESSION_INVALID = "signer_run_packet_session_invalid"
 FAIL_SIGNER_RUN_PACKET_WRITE_FAILED = "signer_run_packet_write_failed"
+FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE = (
+    "signer_run_packet_proposal_runtime_adapters_unavailable"
+)
 
 _CLI_MODULE = (
     "modules.communication.moltbot_bridge.src."
@@ -115,6 +118,12 @@ def run_reddog_signer_socket_service_run_packet_supply(
     assert config_digest is not None
     assert config_resolved is not None
     assert output_resolved is not None
+    if config.get("proposal_authority_policy") is not None:
+        return _reject(
+            (
+                FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
+            )
+        )
     socket_path = Path(str(config["socket_path"])).resolve()
     profiles = tuple(config.get("key_provider_profiles") or ())
     executable = str(python_executable or sys.executable)
@@ -126,6 +135,8 @@ def run_reddog_signer_socket_service_run_packet_supply(
         str(root),
         "--config",
         str(config_resolved),
+        "--expected-config-digest",
+        config_digest,
         "--op-executable",
         str(op_executable),
         "--op-timeout-s",
@@ -226,6 +237,7 @@ def _config_reasons(
         repo_root,
         expected_runtime_root,
         dict(payload),
+        expected_config_digest=_digest(payload),
     ) is None:
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     socket_path = str(payload.get("socket_path") or "")
