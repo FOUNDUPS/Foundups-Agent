@@ -78,6 +78,7 @@ _SIGNED_0102_RUNTIME = "0102"
 _SIGNED_0102_BOUNDED_CODE_CAPABILITY = "bounded_code_change"
 _BOUNDED_WORKER_PILOT_STAGE = "bounded_worker_pilot"
 _BOUNDED_WORKER_PILOT_ACTION = "RUN_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE"
+_EXACT_SHA_COMMIT_STAGE = "exact_sha_commit"
 _ARTIFACT_GENERATOR_MODE_FOUNDUPS_FUSION = "foundups_fusion"
 _QUEUE_CHAIN_COMPLETE_ACTION = "STOP_QUEUE_CHAIN_COMPLETE"
 _POST_BOUNDED_QUEUE_STAGES = frozenset(
@@ -144,6 +145,7 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
                 bootstrap=self._bootstrap or _load_bootstrap(),
                 repo_root=repo_root,
                 queue_item_id=queue_item_id,
+                target_kind=target_kind,
             )
         except Exception:
             return _reject(task_id, [SignedWorkerQueueSerialLoopRunnerReason.BOOTSTRAP_EXCEPTION])
@@ -197,7 +199,11 @@ def _invoke_bootstrap(
     bootstrap: BootstrapCallable,
     repo_root: Path,
     queue_item_id: str,
+    target_kind: str | None,
 ) -> Any:
+    assigned_max_steps = (
+        2 if target_kind == "0102_bounded_code_change" else 1
+    )
     return bootstrap(
         repo_root=Path(config.repo_root or repo_root),
         runtime_allowed_root=config.runtime_allowed_root,
@@ -207,7 +213,7 @@ def _invoke_bootstrap(
         requested_queue_item_id=queue_item_id,
         now_iso=config.now_iso,
         now_epoch=config.now_epoch,
-        max_steps=config.max_steps,
+        max_steps=assigned_max_steps,
         **dict(config.bootstrap_kwargs),
     )
 
@@ -231,7 +237,10 @@ def _bootstrap_rejection(
             bootstrap_result=payload,
         )
     dispatched = set(_string_list(payload.get("dispatched_stages")))
-    if target_kind == "0102_bounded_code_change" and _BOUNDED_WORKER_PILOT_STAGE not in dispatched:
+    if target_kind == "0102_bounded_code_change" and not {
+        _BOUNDED_WORKER_PILOT_STAGE,
+        _EXACT_SHA_COMMIT_STAGE,
+    }.issubset(dispatched):
         return _reject(
             task_id,
             [SignedWorkerQueueSerialLoopRunnerReason.CODE_ASSIGNED_STAGE_NOT_DISPATCHED],
@@ -398,7 +407,7 @@ def _bounded_code_stage_reasons(
     queue_item_id: str,
 ) -> list[str]:
     reasons: list[str] = []
-    if config.max_steps != 1:
+    if config.max_steps < 2:
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CODE_STAGE_MAX_STEPS_INVALID)
 
     kwargs = dict(config.bootstrap_kwargs)
@@ -431,7 +440,7 @@ def _queue_stage_progress_reasons(
     queue_item_id: str,
 ) -> list[str]:
     reasons: list[str] = []
-    if config.max_steps != 1:
+    if config.max_steps < 1:
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.QUEUE_STAGE_MAX_STEPS_INVALID)
 
     plan = _read_current_plan(config, queue_item_id=queue_item_id)
@@ -450,7 +459,7 @@ def _independent_verifier_stage_reasons(
     queue_item_id: str,
 ) -> list[str]:
     reasons: list[str] = []
-    if config.max_steps != 1:
+    if config.max_steps < 1:
         reasons.append(
             SignedWorkerQueueSerialLoopRunnerReason.QUEUE_STAGE_MAX_STEPS_INVALID
         )

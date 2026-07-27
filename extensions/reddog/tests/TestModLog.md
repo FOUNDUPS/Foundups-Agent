@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-27 - Exact-SHA commit compatibility (0.4.26)
+
+- Covered exact-base enforcement, scoped commit evidence, crash
+  reconciliation, work-order lineage, canonical verifier admission, and
+  separated author/verifier claims.
+
 ## 2026-07-27 - Checkout-local WRE Skillz compatibility (0.4.25)
 
 - Proved the regenerated manifest and extension-pinned digest bind both the

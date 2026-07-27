@@ -192,7 +192,7 @@ def _config(
     tmp_path: Path,
     *,
     bootstrap_kwargs=None,
-    max_steps: int = 1,
+    max_steps: int = 2,
 ) -> SignedWorkerQueueSerialLoopRunnerConfig:
     return SignedWorkerQueueSerialLoopRunnerConfig(
         repo_root=tmp_path / "repo",
@@ -282,6 +282,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         },
         "bounded_worker_pilot": {
             "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
+        },
+        "exact_sha_commit": {
+            "decision": "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT"
         },
         "slice_verifier": {
             "decision": "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT"
@@ -1012,7 +1015,11 @@ def test_queue_serial_loop_runner_accepts_0102_bounded_code_only_at_artifact_sta
     config = _write_queue_stage_files(
         tmp_path, through_stage="assurance_capacity_admission"
     )
-    bootstrap = _FakeBootstrap(_bootstrap_payload(dispatched_stages=("bounded_worker_pilot",)))
+    bootstrap = _FakeBootstrap(
+        _bootstrap_payload(
+            dispatched_stages=("bounded_worker_pilot", "exact_sha_commit")
+        )
+    )
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=bootstrap)
     context = _context(worker_runtime="0102", role="coding_worker_1", capability="bounded_code_change")
 
@@ -1027,7 +1034,7 @@ def test_queue_serial_loop_runner_accepts_0102_bounded_code_only_at_artifact_sta
     assert result["accepted"] is True, result
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert bootstrap.calls[0]["requested_queue_item_id"] == "queue-1"
-    assert bootstrap.calls[0]["max_steps"] == 1
+    assert bootstrap.calls[0]["max_steps"] == 2
     assert bootstrap.calls[0]["artifact_generator_mode"] == "foundups_fusion"
     assert result["assigned_stage_complete"] is True
     assert result["queue_chain_complete"] is False
@@ -1042,7 +1049,11 @@ def test_queue_serial_loop_runner_accepts_0102_bounded_code_with_artifact_reques
             through_stage="assurance_capacity_admission",
         artifact_request_binding=True,
     )
-    bootstrap = _FakeBootstrap(_bootstrap_payload(dispatched_stages=("bounded_worker_pilot",)))
+    bootstrap = _FakeBootstrap(
+        _bootstrap_payload(
+            dispatched_stages=("bounded_worker_pilot", "exact_sha_commit")
+        )
+    )
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=bootstrap)
     context = _context(worker_runtime="0102", role="coding_worker_1", capability="bounded_code_change")
 
@@ -1072,7 +1083,7 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_without_generation_s
         authority_profile_path=config.authority_profile_path,
         now_iso=config.now_iso,
         now_epoch=config.now_epoch,
-        max_steps=1,
+        max_steps=2,
         bootstrap_kwargs={
             "work_order_materializer_mode": "authority_profile",
             "artifact_generator_mode": "foundups_fusion",
@@ -1123,7 +1134,7 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_static_artifacts(tmp
         authority_profile_path=config.authority_profile_path,
         now_iso=config.now_iso,
         now_epoch=config.now_epoch,
-        max_steps=1,
+        max_steps=2,
         bootstrap_kwargs={
             **dict(config.bootstrap_kwargs),
             "artifact_contents_path": str(tmp_path / "artifact_contents.json"),
@@ -1177,7 +1188,7 @@ def test_queue_serial_loop_runner_rejects_queue_stage_worker_before_assurance_st
 def test_queue_serial_loop_runner_accepts_independent_verifier_after_bounded_stage(
     tmp_path: Path,
 ) -> None:
-    config = _write_queue_stage_files(tmp_path, through_stage="bounded_worker_pilot")
+    config = _write_queue_stage_files(tmp_path, through_stage="exact_sha_commit")
     bootstrap = _FakeBootstrap(
         _bootstrap_payload(
             dispatched_stages=("slice_verifier",),

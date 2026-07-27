@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.26 pins the exact-SHA commit stage between bounded authoring and
+independent verification. The backend requires an executor-bound work-order
+digest, an exact base SHA, a clean scoped index, and a canonically validated
+base/head/path receipt before verification.
+
 Version 0.4.25 pins the regenerated backend manifest after WRE Skillz
 resolution became checkout-local. Backend compatibility now requires the
 portable registry and loader that reject cross-checkout execution paths.

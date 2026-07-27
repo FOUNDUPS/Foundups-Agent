@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.25
+Version: 0.4.26
+
+Version 0.4.26 pins the resident queue exact-SHA commit stage. A bounded
+author now writes and commits the authorized path set before a separately
+assigned verifier receives the canonical base/head receipt.
 
 Version 0.4.25 pins the checkout-local WRE Skillz loader and regenerated
 backend dependency manifest. Isolated workers now reject registry locations
@@ -261,6 +265,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.25.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.26.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

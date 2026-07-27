@@ -1,4 +1,19 @@
 # ModLog - moltbot_bridge
+## 2026-07-27: REDDOG_RESIDENT_QUEUE_EXACT_SHA_COMMIT_STAGE_PHASE1
+- Inserted an exact-SHA commit stage between the bounded author and the
+  independent verifier in the resident RedDog queue.
+- Reused the existing injected `RealWorktreeRunner.commit_all()` operation;
+  the stage rejects pre-staged or extra paths, validates the bounded artifact
+  digest, commits only the authorized path set, and proves exact base, parent,
+  head, tree, branch, and clean-worktree state.
+- Bound a deterministic commit-attempt trailer for crash reconciliation and
+  required downstream canonical receipt revalidation so serialized base,
+  head, path, or worktree tampering cannot reach verification.
+- Assigned write plus commit to one bounded author claim while preserving the
+  independent verifier as a distinct AgentDB claim and principal.
+- Kept push, PR publication, merge, HoloIndex mutation, PatternMemory writes,
+  and reward settlement outside this stage (WSP 00, 15, 22, 50, 64, 97).
+
 ## 2026-07-27: REDDOG_MAIN_MENU_BINDING_PREFLIGHT_BOUNDARY_FIX
 - Missing or invalid model bindings now stop the resident cycle but block interactive startup only under explicit enforced mode; WARN/FAIL and menu-continuity regressions cover the boundary (WSP 00, 5, 15, 22, 50, 64, 97).
 ## 2026-07-26: OpenClaw exact-SHA HoloIndex maintenance route

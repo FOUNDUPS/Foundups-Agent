@@ -16,6 +16,13 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_exact_sha_commit_handler import (
+    validate_exact_sha_commit_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+
 
 SLICE_VERIFIER_REQUEST_BINDING_ACCEPT = "SLICE_VERIFIER_REQUEST_BINDING_ACCEPT"
 SLICE_VERIFIER_REQUEST_BINDING_REJECT = "SLICE_VERIFIER_REQUEST_BINDING_REJECT"
@@ -28,6 +35,10 @@ FAIL_SIGNED_AUTHORITY_MISSING = "FAIL_SIGNED_AUTHORITY_MISSING"
 FAIL_WORKTREE_CREATE_MISSING = "FAIL_WORKTREE_CREATE_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_MISSING = "FAIL_BOUNDED_WORKER_PILOT_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_REJECTED = "FAIL_BOUNDED_WORKER_PILOT_REJECTED"
+FAIL_EXACT_SHA_COMMIT_MISSING = "FAIL_EXACT_SHA_COMMIT_MISSING"
+FAIL_EXACT_SHA_COMMIT_REJECTED = "FAIL_EXACT_SHA_COMMIT_REJECTED"
+FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID = "FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID"
+FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH = "FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH"
 FAIL_SIGNED_RECEIPT_CHAIN_MISSING = "FAIL_SIGNED_RECEIPT_CHAIN_MISSING"
 FAIL_ASSURANCE_RESERVATION_MISSING = "FAIL_ASSURANCE_RESERVATION_MISSING"
 FAIL_ASSURANCE_RESERVATION_MISMATCH = "FAIL_ASSURANCE_RESERVATION_MISMATCH"
@@ -98,6 +109,18 @@ def build_resident_queue_slice_verifier_request(
     elif pilot_result.get("accepted") is not True:
         reasons.append(FAIL_BOUNDED_WORKER_PILOT_REJECTED)
 
+    commit_stage = _mapping(stage_results.get("exact_sha_commit"))
+    commit_receipt = _mapping(commit_stage.get("commit_receipt"))
+    if not commit_stage or not commit_receipt:
+        reasons.append(FAIL_EXACT_SHA_COMMIT_MISSING)
+    elif (
+        commit_stage.get("decision") != "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT"
+        or commit_stage.get("accepted") is not True
+        or commit_stage.get("effect_commit_state") != "COMMITTED"
+        or commit_stage.get("reconciliation_required") is not False
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_REJECTED)
+
     signed_receipt_chain = _mapping(plan.get("signed_receipt_chain")) or _mapping(
         _mapping(work_order.get("bounded_worker_plan")).get("signed_receipt_chain")
     )
@@ -142,12 +165,60 @@ def build_resident_queue_slice_verifier_request(
 
     for field_name in (
         "slice_name",
-        "base_sha",
-        "head_sha",
         "required_checks",
     ):
         if field_name not in plan or plan.get(field_name) in (None, "", (), [], {}):
             reasons.append(f"{FAIL_SLICE_VERIFIER_PLAN_INVALID}:{field_name}")
+
+    commit_base_sha = str(commit_receipt.get("base_sha") or "")
+    commit_head_sha = str(commit_receipt.get("head_sha") or "")
+    commit_paths = _string_list(commit_receipt.get("changed_paths"))
+    commit_worktree_path = str(commit_receipt.get("worktree_path") or "")
+    try:
+        current_work_order_digest = canonical_full_work_order_digest(work_order)
+    except (TypeError, ValueError):
+        current_work_order_digest = ""
+    executor_stage = _mapping(stage_results.get("executor_plan"))
+    executor_result = _mapping(executor_stage.get("executor_plan_result"))
+    executor_plan = _mapping(executor_result.get("plan"))
+    executor_work_order_digest = str(
+        executor_plan.get("work_order_digest") or ""
+    )
+    if commit_receipt and (
+        not validate_exact_sha_commit_receipt(commit_receipt)
+        or len(commit_base_sha) != 40
+        or len(commit_head_sha) != 40
+        or commit_base_sha == commit_head_sha
+        or not commit_paths
+        or not commit_worktree_path
+        or not str(commit_receipt.get("receipt_id") or "").startswith("sha256:")
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID)
+    if commit_receipt and (
+        str(commit_receipt.get("work_order_id") or "")
+        != str(work_order.get("work_order_id") or "")
+        or str(commit_receipt.get("bounded_worker_receipt_id") or "")
+        != str(pilot_receipt.get("receipt_id") or "")
+        or Path(commit_worktree_path).resolve() != Path(worktree_path).resolve()
+        or not current_work_order_digest
+        or str(commit_receipt.get("work_order_digest") or "")
+        != current_work_order_digest
+        or executor_work_order_digest != current_work_order_digest
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    plan_base_sha = str(plan.get("base_sha") or "")
+    if plan_base_sha and plan_base_sha != commit_base_sha:
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    plan_head_sha = str(plan.get("head_sha") or "")
+    if plan_head_sha and plan_head_sha != commit_head_sha:
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    plan_expected_paths = _string_list(plan.get("expected_changed_paths"))
+    if plan_expected_paths and sorted(plan_expected_paths) != sorted(commit_paths):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    if pilot_receipt and sorted(_string_list(pilot_receipt.get("written_artifacts"))) != sorted(
+        commit_paths
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
 
     if reasons:
         return _reject(reasons)
@@ -162,9 +233,7 @@ def build_resident_queue_slice_verifier_request(
         ),
     }
     evidence = _mapping(holoindex_evidence) or _mapping(work_order.get("holoindex_evidence"))
-    expected_paths = _string_list(plan.get("expected_changed_paths")) or _string_list(
-        pilot_receipt.get("written_artifacts")
-    )
+    expected_paths = commit_paths
     request = {
         "explicit_evidence_production_requested": True,
         "work_order_id": str(work_order.get("work_order_id") or ""),
@@ -184,8 +253,8 @@ def build_resident_queue_slice_verifier_request(
         "verifier_task_id": str(
             durable_reservation.get("verifier_task_id") or ""
         ),
-        "base_sha": str(plan.get("base_sha") or ""),
-        "head_sha": str(plan.get("head_sha") or ""),
+        "base_sha": commit_base_sha,
+        "head_sha": commit_head_sha,
         "repo_root": str(repo_root),
         "worktree_path": worktree_path,
         "operation_cwd": str(plan.get("operation_cwd") or worktree_path),
@@ -199,6 +268,7 @@ def build_resident_queue_slice_verifier_request(
         "signed_receipt_chain": dict(signed_receipt_chain),
         "worktree_receipt": dict(pilot_receipt),
         "bounded_worker_pilot_receipt": dict(pilot_receipt),
+        "exact_sha_commit_receipt": dict(commit_receipt),
         "holoindex_evidence": dict(evidence),
         "pattern_memory_write_performed": False,
         "draft_pr_published": False,
@@ -261,6 +331,10 @@ __all__ = [
     "FAIL_AUTHORITY_VERIFICATION_MISSING",
     "FAIL_BOUNDED_WORKER_PILOT_MISSING",
     "FAIL_BOUNDED_WORKER_PILOT_REJECTED",
+    "FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH",
+    "FAIL_EXACT_SHA_COMMIT_MISSING",
+    "FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID",
+    "FAIL_EXACT_SHA_COMMIT_REJECTED",
     "FAIL_SIGNED_AUTHORITY_MISSING",
     "FAIL_SIGNED_RECEIPT_CHAIN_MISSING",
     "FAIL_SLICE_VERIFIER_PLAN_INVALID",
