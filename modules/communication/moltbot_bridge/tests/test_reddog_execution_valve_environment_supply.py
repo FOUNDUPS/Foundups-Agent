@@ -6,6 +6,12 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_publication_state_projection,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     SCHEMA_VERSION,
     run_reddog_execution_valve_environment_supply,
@@ -50,6 +56,32 @@ def _inputs() -> tuple[dict, dict, dict, dict]:
     assert result.accepted and result.authority_profile
     work_state = store.load()
     promoted = dict(result.authority_profile)
+    publication_id = str(promoted["promotion_publication_id"])
+    promotion = next(
+        item
+        for item in work_state["architect_fix_promotions"]
+        if item["publication_id"] == publication_id
+    )
+    projection = architect_fix_publication_state_projection(
+        work_state,
+        publication_id=publication_id,
+    )
+    next_state = {key: value for key, value in work_state.items() if key != "revision"}
+    next_state["architect_fix_publications"] = [
+        {
+            "schema_version": "reddog_architect_fix_promotion_publication.v1",
+            "publication_id": publication_id,
+            "state": "COMMITTED",
+            "proposal_authenticity_attestation_id": promotion[
+                "proposal_authenticity_attestation_id"
+            ],
+            "authority_profile_digest": canonical_digest(promoted),
+            "active_work_state_digest": canonical_digest(projection),
+            "base_work_state_digest": None,
+        }
+    ]
+    store.commit(next_state, expected_revision=work_state["revision"])
+    work_state = store.load()
     permission = {
         "evidence_digest": PERMISSION_DIGEST,
         "expires_at": NOW + 600,
@@ -129,6 +161,31 @@ def test_supply_rejects_authority_splicing(tmp_path: Path) -> None:
     result = _supply(tmp_path, authority_profile=profile)
 
     assert result.accepted is False
+
+
+def test_supply_rejects_prepared_publication_before_any_effect(
+    tmp_path: Path,
+) -> None:
+    work_state, profile, _, _ = _inputs()
+    queue_item_id = work_state["wre_queue_items"][0]["queue_item_id"]
+    prepared_state = json.loads(json.dumps(work_state, sort_keys=True))
+    prepared_state["architect_fix_publications"][0]["state"] = "STATE_PREPARED"
+    prepared_state["architect_fix_publications"][0]["base_work_state_digest"] = (
+        "sha256:" + "1" * 64
+    )
+    output_path = (tmp_path / "runtime" / "execution_valve_env.json").resolve()
+
+    result = _supply(
+        tmp_path,
+        work_state=prepared_state,
+        authority_profile=profile,
+        queue_item_id=queue_item_id,
+        output_path=output_path,
+    )
+
+    assert result.accepted is False
+    assert "architect_fix_publication_not_committed" in result.rejection_reasons
+    assert not output_path.exists()
 
 
 def test_supply_rejects_inside_repo_and_symlink_output(tmp_path: Path) -> None:

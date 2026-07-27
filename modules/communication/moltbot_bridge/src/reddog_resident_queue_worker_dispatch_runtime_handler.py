@@ -11,7 +11,7 @@ files, create PRs, write PatternMemory, settle rewards, or re-index HoloIndex.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_REJECT,
@@ -28,7 +28,12 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     NEXT_QUEUE_WORKER_DISPATCH_RUNTIME,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_dryrun_handler import (
+    AUTHORITY_RUNTIME_STAGE_KEY,
+    AUTHORITY_VERIFICATION_STAGE_KEY,
     WORKER_DISPATCH_DRYRUN_STAGE_KEY,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    WorkerDispatchAuthorityVerificationContext,
 )
 
 
@@ -37,6 +42,10 @@ WORKER_DISPATCH_RUNTIME_STAGE_KEY = "worker_dispatch_runtime"
 FAIL_DISPATCH_RUNTIME_STAGE_MISMATCH = "FAIL_DISPATCH_RUNTIME_STAGE_MISMATCH"
 FAIL_DISPATCH_RUNTIME_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_RUNTIME_NEXT_ACTION_MISMATCH"
 FAIL_WORKER_DISPATCH_DRYRUN_STAGE_MISSING = "FAIL_WORKER_DISPATCH_DRYRUN_STAGE_MISSING"
+FAIL_AUTHORITY_RUNTIME_STAGE_MISSING = "FAIL_WORKER_DISPATCH_AUTHORITY_RUNTIME_STAGE_MISSING"
+FAIL_AUTHORITY_VERIFICATION_STAGE_MISSING = (
+    "FAIL_WORKER_DISPATCH_AUTHORITY_VERIFICATION_STAGE_MISSING"
+)
 FAIL_QUEUE_ITEM_MISSING = "FAIL_WORKER_DISPATCH_RUNTIME_QUEUE_ITEM_MISSING"
 FAIL_WORKER_DISPATCH_WRITER_MISSING = "FAIL_WORKER_DISPATCH_RUNTIME_WRITER_MISSING"
 
@@ -94,6 +103,8 @@ class ResidentQueueWorkerDispatchRuntimeStageHandler:
     work_state_snapshot: Mapping[str, Any]
     chain_results_store: ResidentQueueChainResultsStore
     writer: Optional[SignedWorkerDispatchTaskWriter]
+    authority_verification_context: WorkerDispatchAuthorityVerificationContext
+    work_state_supplier: Optional[Callable[[], Mapping[str, Any]]] = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != WORKER_DISPATCH_RUNTIME_STAGE_KEY:
@@ -115,13 +126,32 @@ class ResidentQueueWorkerDispatchRuntimeStageHandler:
         dryrun = _mapping(stage_results.get(WORKER_DISPATCH_DRYRUN_STAGE_KEY))
         if not dryrun:
             return _reject(FAIL_WORKER_DISPATCH_DRYRUN_STAGE_MISSING)
-        queue_item = _queue_item(_mapping(self.work_state_snapshot), request.queue_item_id)
+        authority_runtime = _mapping(stage_results.get(AUTHORITY_RUNTIME_STAGE_KEY))
+        if not authority_runtime:
+            return _reject(FAIL_AUTHORITY_RUNTIME_STAGE_MISSING)
+        authority_verification = _mapping(
+            stage_results.get(AUTHORITY_VERIFICATION_STAGE_KEY)
+        )
+        if not authority_verification:
+            return _reject(FAIL_AUTHORITY_VERIFICATION_STAGE_MISSING)
+        try:
+            current_state = (
+                self.work_state_supplier()
+                if self.work_state_supplier is not None
+                else self.work_state_snapshot
+            )
+        except Exception:
+            return _reject(FAIL_QUEUE_ITEM_MISSING)
+        queue_item = _queue_item(_mapping(current_state), request.queue_item_id)
         if not queue_item:
             return _reject(FAIL_QUEUE_ITEM_MISSING, f"queue_item_id:{request.queue_item_id}")
 
         return publish_reddog_signed_worker_dispatch_runtime(
             worker_dispatch_dryrun_result=dryrun,
-            work_state_snapshot=self.work_state_snapshot,
+            queue_authority_runtime_result=authority_runtime,
+            queue_authority_verification_result=authority_verification,
+            authority_verification_context=self.authority_verification_context,
+            work_state_snapshot=current_state,
             queue_item_id=str(request.queue_item_id or ""),
             writer=self.writer,
         ).to_dict()
@@ -132,6 +162,10 @@ def build_reddog_resident_queue_worker_dispatch_runtime_stage_handler(
     work_state_snapshot: Mapping[str, Any],
     chain_results_store: ResidentQueueChainResultsStore,
     writer: SignedWorkerDispatchTaskWriter,
+    authority_verification_context: WorkerDispatchAuthorityVerificationContext,
+    work_state_supplier: Optional[
+        Callable[[], Mapping[str, Any]]
+    ] = None,
 ) -> ResidentQueueWorkerDispatchRuntimeStageHandler:
     """Build the injected signed worker-dispatch runtime handler."""
 
@@ -139,12 +173,16 @@ def build_reddog_resident_queue_worker_dispatch_runtime_stage_handler(
         work_state_snapshot=work_state_snapshot,
         chain_results_store=chain_results_store,
         writer=writer,
+        authority_verification_context=authority_verification_context,
+        work_state_supplier=work_state_supplier,
     )
 
 
 __all__ = [
     "FAIL_DISPATCH_RUNTIME_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_RUNTIME_STAGE_MISMATCH",
+    "FAIL_AUTHORITY_RUNTIME_STAGE_MISSING",
+    "FAIL_AUTHORITY_VERIFICATION_STAGE_MISSING",
     "FAIL_QUEUE_ITEM_MISSING",
     "FAIL_WORKER_DISPATCH_DRYRUN_STAGE_MISSING",
     "FAIL_WORKER_DISPATCH_WRITER_MISSING",

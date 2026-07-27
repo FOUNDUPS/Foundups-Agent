@@ -1,5 +1,4 @@
 """Tests for REDDOG_SIGNED_WORKER_TASK_OPENCLAW_CLAIM_RUNTIME_PHASE1."""
-
 from __future__ import annotations
 
 import ast
@@ -30,9 +29,6 @@ from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     _signed_worker_claim_loop_result,
     claim_reddog_signed_worker_dispatch_task_once,
     claim_reddog_signed_worker_dispatch_tasks_until_idle,
-)
-from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
-    SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
     SIGNED_WORKER_DISPATCH_TASK_EXECUTOR_ACCEPT,
@@ -84,6 +80,8 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _write_runtime_json,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import publish_bound_worker_dispatch
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import worker_dispatch_dryrun_result
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
 )
@@ -362,59 +360,9 @@ def _valid_readonly_allocation(
     ).to_dict()
 
 
-def _intent(allocation=None, **overrides):
-    allocation = allocation or _allocation()
-    payload = {
-        "intent_id": "worker_dispatch_intent_openclaw_candidate",
-        "role": "openclaw_candidate",
-        "worker_runtime": "openclaw",
-        "capability": "candidate_queue_review",
-        "work_order_id": "wo-1",
-        "foundup_id": "paccess_001",
-        "requested_operation": "create_foundup",
-        "wsp15_allocation_receipt_id": allocation["receipt_id"],
-        "wsp15_allocation_digest": _digest(allocation),
-        "dry_run_only": True,
-        "no_worker_spawn_performed": True,
-        "no_openclaw_enqueue_performed": True,
-        "no_hermes_dispatch_performed": True,
-    }
-    payload.update(overrides)
-    return payload
-
-
 def _dryrun_result(allocation=None, intent=None):
-    allocation = allocation or _allocation()
-    intent = intent or _intent(allocation)
-    receipt = {
-        "receipt_id": "signed_authority_worker_dispatch_abc",
-        "work_order_id": "wo-1",
-        "foundup_id": "paccess_001",
-        "requested_operation": "create_foundup",
-        "wsp15_allocation_receipt_id": allocation["receipt_id"],
-        "wsp15_allocation_digest": _digest(allocation),
-        "wsp15_priority": allocation["priority"],
-        "wsp15_mps_total": allocation["mps_total"],
-        "wsp15_reasoning_tier": allocation["reasoning_tier"],
-        "model_runtime_binding_receipt_id": str(intent.get("model_runtime_binding_receipt_id") or ""),
-        "model_runtime_binding_digest": str(intent.get("model_runtime_binding_digest") or ""),
-        "dispatch_intent_count": 1,
-        "dispatch_intents": [intent],
-        "no_worker_spawn_performed": True,
-        "no_queue_mutation_performed": True,
-        "no_worktree_created": True,
-        "no_shell_command_executed": True,
-        "no_openclaw_enqueue_performed": True,
-        "no_hermes_dispatch_performed": True,
-        "no_repo_mutation_performed": True,
-        "no_holoindex_reindex_performed": True,
-    }
-    return {
-        "accepted": True,
-        "decision": SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
-        "rejection_reasons": [],
-        "receipt": receipt,
-    }
+    assert intent is None
+    return worker_dispatch_dryrun_result(allocation or _allocation())
 
 
 def _snapshot(allocation=None, **queue_overrides):
@@ -433,15 +381,37 @@ def _snapshot(allocation=None, **queue_overrides):
 
 
 def _task_context():
-    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
+    result = publish_bound_worker_dispatch(
         worker_dispatch_dryrun_result=_dryrun_result(),
         work_state_snapshot=_snapshot(),
         queue_item_id="queue-1",
         writer=_CollectingWriter(),
     )
     assert result.accepted is True
-    task = result.tasks[0]
-    return dict(task.context)
+    return _context_with_intent_overrides(
+        result.tasks[0].context,
+        {
+            "intent_id": "worker_dispatch_intent_openclaw_candidate",
+            "role": "openclaw_candidate",
+            "worker_runtime": "openclaw",
+            "capability": "candidate_queue_review",
+        },
+    )
+
+
+def _context_with_intent_overrides(context, overrides):
+    updated = dict(context)
+    intent = {**dict(updated["worker_dispatch_intent"]), **overrides}
+    receipt = dict(updated["signed_authority_worker_dispatch_receipt"])
+    receipt["dispatch_intents"] = [intent]
+    updated.update(
+        worker_runtime=intent["worker_runtime"],
+        worker_role=intent["role"],
+        capability=intent["capability"],
+        worker_dispatch_intent=intent,
+        signed_authority_worker_dispatch_receipt=receipt,
+    )
+    return updated
 
 
 def _task_context_with_model_runtime_binding(
@@ -457,44 +427,68 @@ def _task_context_with_model_runtime_binding(
         "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
         "model_runtime_binding_digest": allocation["model_runtime_binding_digest"],
     }
-    intent = _intent(allocation, **binding_refs, **(intent_overrides or {}))
-    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+    result = publish_bound_worker_dispatch(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation),
         work_state_snapshot=_snapshot(allocation, **binding_refs),
         queue_item_id="queue-1",
         writer=_CollectingWriter(),
     )
     assert result.accepted is True
-    context = dict(result.tasks[0].context)
+    context = _context_with_intent_overrides(
+        result.tasks[0].context,
+        intent_overrides or {},
+    )
     context["model_runtime_binding_receipt"] = runtime_binding
     return context, runtime_binding
 
 
 def _publish_agentdb_task(**intent_overrides) -> str:
-    allocation = _allocation()
-    intent = _intent(allocation, **intent_overrides)
-    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
-        work_state_snapshot=_snapshot(allocation),
-        queue_item_id="queue-1",
-        writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
+    defaults = {
+        "intent_id": "worker_dispatch_intent_openclaw_candidate",
+        "role": "openclaw_candidate",
+        "worker_runtime": "openclaw",
+        "capability": "candidate_queue_review",
+    }
+    return _publish_agentdb_task_with_allocation(
+        _allocation(),
+        **{**defaults, **intent_overrides},
     )
-    assert result.accepted is True
-    assert result.receipt is not None
-    return result.receipt.task_ids[0]
 
 
 def _publish_agentdb_task_with_allocation(allocation, **intent_overrides) -> str:
-    intent = _intent(allocation, **intent_overrides)
-    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+    result = publish_bound_worker_dispatch(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation),
         work_state_snapshot=_snapshot(allocation),
         queue_item_id="queue-1",
-        writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
+        writer=_CollectingWriter(),
     )
     assert result.accepted is True
     assert result.receipt is not None
-    return result.receipt.task_ids[0]
+    base = result.tasks[0]
+    context = _context_with_intent_overrides(base.context, intent_overrides)
+    intent = context["worker_dispatch_intent"]
+    task_id = "reddog-worker-dispatch-" + _digest(
+        {"intent_id": intent["intent_id"], "context": context}
+    )[7:23]
+    spec = runtime.SignedWorkerDispatchTaskSpec(
+        task_id=task_id,
+        description=f"RedDog signed worker dispatch test fixture: {intent['role']}",
+        required_skills=(
+            runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL,
+            f"runtime:{intent['worker_runtime']}",
+            f"capability:{intent['capability']}",
+        ),
+        estimated_complexity=base.estimated_complexity,
+        priority_score=base.priority_score,
+        context=context,
+        origin_continuity_id=base.origin_continuity_id,
+    )
+    writer_result = runtime.AgentDbSignedWorkerDispatchTaskWriter().enqueue_signed_worker_dispatch_tasks(
+        (spec,),
+        result.receipt,
+    )
+    assert writer_result["ok"] is True
+    return task_id
 
 
 def _pending_signed_task_id(capability: str) -> str:
@@ -833,15 +827,8 @@ def test_signed_0102_readonly_runner_receives_model_runtime_binding_receipt(
 def test_signed_0102_readonly_runner_rejects_bounded_code_change(tmp_path: Path) -> None:
     repo = _repo_with_readonly_target(tmp_path)
     allocation = _valid_readonly_allocation()
-    intent = _intent(
-        allocation,
-        intent_id="worker_dispatch_intent_coding_worker_1",
-        role="coding_worker_1",
-        worker_runtime="0102",
-        capability="bounded_code_change",
-    )
-    context = runtime.publish_reddog_signed_worker_dispatch_runtime(
-        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation, intent=intent),
+    context = publish_bound_worker_dispatch(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation),
         work_state_snapshot=_snapshot(allocation),
         queue_item_id="queue-1",
         writer=_CollectingWriter(),
@@ -1605,7 +1592,7 @@ def test_openclaw_queue_stage_does_not_materialize_bounded_artifact(
         assurance_reservation_store=_assurance_store(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -1733,7 +1720,7 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
         assurance_reservation_store=_assurance_store(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -1936,7 +1923,7 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_draft_pr_pu
         assurance_reservation_store=_assurance_store(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -2094,7 +2081,7 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_verified_outcome_rat
         worktree_runner=worktree_runner,
         draft_pr_runner=draft_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=13,
     )
@@ -2341,7 +2328,7 @@ def test_openclaw_claim_loop_drains_env_bound_queue_chain_with_requeues(
         assurance_reservation_store=_assurance_store(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=10,
     )
@@ -2576,7 +2563,7 @@ def test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness(
         assurance_reservation_store=_assurance_store(),
         worktree_runner=_FakeWorktreeRunner(),
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=10,
     )

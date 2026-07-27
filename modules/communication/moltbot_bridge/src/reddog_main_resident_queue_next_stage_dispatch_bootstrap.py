@@ -25,10 +25,10 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
-
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import AtomicJsonAuthoritativeWorkStateStore
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
     invoke_reddog_resident_queue_next_stage_dispatch,
@@ -151,8 +151,8 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
         allowed_root=runtime_root,
     )
     registry = build_reddog_resident_queue_stage_handler_registry(
-        work_state_snapshot=snapshot,
-        chain_results_store=store,
+        work_state_snapshot=snapshot, chain_results_store=store,
+        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(Path(work_state_path) if Path(work_state_path).is_absolute() else root / Path(work_state_path)),
         authority_profile=profile,
         work_order_resolver=work_order_resolver,
         now_iso=now_iso or "",

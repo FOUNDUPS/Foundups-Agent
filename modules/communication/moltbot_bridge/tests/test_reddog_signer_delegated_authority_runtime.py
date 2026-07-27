@@ -317,6 +317,36 @@ def test_changed_signed_runtime_binding_digest_rejects() -> None:
     assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
 
 
+def test_changed_signed_architect_publication_binding_rejects() -> None:
+    result, signer, store, snapshot_resolver = _issue(
+        architect_fix_publication_receipt_id="sha256:" + "4" * 64,
+        architect_fix_publication_binding_digest="sha256:" + "5" * 64,
+    )
+
+    assert result.accepted is True
+    assert result.identity and result.work_authority
+    issued = store.load()["issued_authorities"][result.work_authority["work_order_id"]]
+    assert issued["architect_fix_publication_receipt_id"] == "sha256:" + "4" * 64
+    result.work_authority[
+        "architect_fix_publication_binding_digest"
+    ] = "sha256:" + "6" * 64
+
+    verified = verify_delegated_work_authority(
+        work_authority=result.work_authority,
+        identity=result.identity,
+        signature_verifier=signer,
+        principal_key_resolver=_PrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=_NoRevocation(),
+        now=_NOW,
+        required_valve_state=_VALVE,
+    )
+
+    assert verified.accepted is False
+    assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
+
+
 def test_malformed_runtime_binding_field_rejects_before_signing() -> None:
     result, _, _, _ = _issue(model_runtime_binding_receipt_id="not-a-runtime-binding")
 

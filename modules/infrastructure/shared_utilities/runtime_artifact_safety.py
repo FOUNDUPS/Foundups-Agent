@@ -9,7 +9,7 @@ import stat
 import sys
 import tempfile
 import unicodedata
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
@@ -274,40 +274,42 @@ def confined_runtime_operation_lock(
         repo_root=repo_root,
         allowed_root=allowed_root,
     )
-    descriptor, _ = _open_runtime_file(target)
-    try:
-        opened_stat = os.fstat(descriptor)
-        _require_private_regular_file(opened_stat)
-        final_path = _descriptor_final_path(descriptor)
-        _verify_descriptor_path(
-            final_path,
-            expected=target,
-            repo_root=repo_root,
-            allowed_root=allowed_root,
-        )
-        if opened_stat.st_size == 0:
-            os.write(descriptor, b"\0")
-            os.fsync(descriptor)
-        os.lseek(descriptor, 0, os.SEEK_SET)
-        if os.name == "nt":
-            import msvcrt
+    initialization_lock = _exclusive_lock(target) if os.name == "nt" else nullcontext()
+    with initialization_lock:
+        descriptor, _ = _open_runtime_file(target)
+        try:
+            opened_stat = os.fstat(descriptor)
+            _require_private_regular_file(opened_stat)
+            final_path = _descriptor_final_path(descriptor)
+            _verify_descriptor_path(
+                final_path,
+                expected=target,
+                repo_root=repo_root,
+                allowed_root=allowed_root,
+            )
+            if opened_stat.st_size == 0:
+                os.write(descriptor, b"\0")
+                os.fsync(descriptor)
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            if os.name == "nt":
+                import msvcrt
 
-            msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
-            try:
-                yield
-            finally:
-                os.lseek(descriptor, 0, os.SEEK_SET)
-                msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
-        else:
-            import fcntl
+                msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
+                try:
+                    yield
+                finally:
+                    os.lseek(descriptor, 0, os.SEEK_SET)
+                    msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
 
-            fcntl.flock(descriptor, fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(descriptor, fcntl.LOCK_UN)
-    finally:
-        os.close(descriptor)
+                fcntl.flock(descriptor, fcntl.LOCK_EX)
+                try:
+                    yield
+                finally:
+                    fcntl.flock(descriptor, fcntl.LOCK_UN)
+        finally:
+            os.close(descriptor)
 
 
 def redact_runtime_text(value: object, *, max_chars: int = 4096) -> RuntimeTextRedaction:
@@ -536,8 +538,14 @@ def _contains_secret_shape(text: str) -> bool:
 
 
 def _is_relative_to(path: Path, parent: Path) -> bool:
+    candidate = Path(
+        os.path.normcase(str(_without_windows_extended_prefix(path)))
+    )
+    root = Path(
+        os.path.normcase(str(_without_windows_extended_prefix(parent)))
+    )
     try:
-        path.relative_to(parent)
+        candidate.relative_to(root)
         return True
     except ValueError:
         return False

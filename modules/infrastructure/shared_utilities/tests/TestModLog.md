@@ -96,3 +96,10 @@
 
 - Proved bounded reads use one descriptor and reject oversized input.
 - Proved descriptor metadata changes and final-path escapes fail closed.
+## 2026-07-28 - Windows Confined Lock Initialization Race
+
+- Added mixed-case, not-yet-created runtime-root and extended-length prefix
+  coverage for Windows containment validation.
+- Repeated the spawned-process proposal nonce reservation regression 200
+  times to prove one accepted reservation and no initialization-write or
+  namespace-normalization race.

@@ -18,9 +18,10 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
-    DelegatedAuthorityRuntimeRequest,
     HIGH_AUTHORITY_OPERATIONS,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_materialization import materialize_delegated_authority_request
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import is_sha256
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
     canonical_work_order_base_ref,
@@ -45,6 +46,9 @@ FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY = "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY"
 FAIL_WSP15_ALLOCATION_BINDING = "FAIL_WSP15_ALLOCATION_BINDING"
 FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
 FAIL_WORK_ORDER_BINDING = "FAIL_WORK_ORDER_BINDING"
+FAIL_ARCHITECT_FIX_PUBLICATION_BINDING = (
+    "FAIL_ARCHITECT_FIX_PUBLICATION_BINDING"
+)
 
 _REQUIRED_PROFILE_FIELDS = (
     "principal_id",
@@ -92,6 +96,8 @@ class QueueAuthorityRequestDryRunReceipt:
     model_runtime_binding_digest: Optional[str]
     memex_supply_receipt_id: Optional[str]
     memex_supply_digest: Optional[str]
+    architect_fix_publication_receipt_id: Optional[str]
+    architect_fix_publication_binding_digest: Optional[str]
     delegated_authority_request_digest: str
     signer_invoked: bool = False
     signature_verified: bool = False
@@ -278,6 +284,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     queue_consumer_result: Mapping[str, Any],
     authority_profile: Mapping[str, Any] | None,
     work_order: Mapping[str, Any] | None = None,
+    architect_fix_publication_binding: Mapping[str, Any] | None = None,
 ) -> QueueAuthorityRequestDryRunResult:
     """Build a signer-runtime request from a validated queue-consumer receipt."""
 
@@ -339,6 +346,16 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         profile.get("consensus_receipt_digest") and profile.get("sovereign_authorization_digest")
     ):
         reasons.append(FAIL_HIGH_AUTHORITY_COSIGN)
+    publication_binding = _mapping(architect_fix_publication_binding)
+    publication_id = str(publication_binding.get("publication_id") or "")
+    publication_binding_digest = str(
+        publication_binding.get("binding_digest") or ""
+    )
+    if (publication_id or publication_binding_digest) and not (
+        is_sha256(publication_id)
+        and is_sha256(publication_binding_digest)
+    ):
+        reasons.append(FAIL_ARCHITECT_FIX_PUBLICATION_BINDING)
 
     deduped = _dedupe(reasons)
     if deduped:
@@ -351,45 +368,21 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     model_runtime_binding_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
     memex_supply_receipt_id = str(queue_receipt.get("memex_supply_receipt_id") or "")
     memex_supply_digest = str(queue_receipt.get("memex_supply_digest") or "")
-    request = DelegatedAuthorityRuntimeRequest(
-        work_order_id=str(profile.get("work_order_id") or _work_order_id(queue_item_id)),
+    work_order_id = str(
+        profile.get("work_order_id") or _work_order_id(queue_item_id)
+    )
+    request = materialize_delegated_authority_request(
+        profile=profile,
+        queue_receipt=queue_receipt,
+        work_order_id=work_order_id,
         work_order_digest=work_order_digest,
         base_ref=base_ref,
-        principal_id=str(profile["principal_id"]),
-        principal_provider=str(profile["principal_provider"]),
-        principal_public_key=str(profile["principal_public_key"]),
-        reddog_id=str(profile["reddog_id"]),
-        reddog_public_key=str(profile["reddog_public_key"]),
-        repo_full_name=str(profile["repo_full_name"]),
         foundup_id=foundup_id,
         allowed_paths=allowed_paths,
         denied_paths=denied_paths,
-        requested_operation=operation,
-        permission_snapshot_digest=str(profile["permission_snapshot_digest"]),
-        wsp15_allocation_receipt_id=str(queue_receipt.get("wsp15_allocation_receipt_id") or ""),
-        wsp15_allocation_digest=str(queue_receipt.get("wsp15_allocation_digest") or ""),
-        wsp15_priority=str(queue_receipt.get("wsp15_priority") or ""),
-        wsp15_mps_total=int(queue_receipt.get("wsp15_mps_total")),
-        wsp15_reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
-        model_selection_receipt_id=model_selection_receipt_id or None,
-        model_selection_digest=model_selection_digest or None,
-        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or None,
-        model_runtime_binding_digest=model_runtime_binding_digest or None,
-        memex_supply_receipt_id=memex_supply_receipt_id or None,
-        memex_supply_digest=memex_supply_digest or None,
-        identity_nonce=str(profile["identity_nonce"]),
-        work_authority_nonce=str(profile["work_authority_nonce"]),
-        issued_at=int(profile["issued_at"]),
-        identity_expires_at=int(profile["identity_expires_at"]),
-        work_authority_expires_at=int(profile["work_authority_expires_at"]),
-        valve_state_required=str(profile["valve_state_required"]),
-        key_epoch=str(profile["key_epoch"]),
-        consensus_receipt_digest=(
-            str(profile["consensus_receipt_digest"]) if profile.get("consensus_receipt_digest") else None
-        ),
-        sovereign_authorization_digest=(
-            str(profile["sovereign_authorization_digest"]) if profile.get("sovereign_authorization_digest") else None
-        ),
+        operation=operation,
+        publication_id=publication_id,
+        publication_binding_digest=publication_binding_digest,
     )
     request_dict = request.to_dict()
     request_digest = _digest(request_dict)
@@ -421,6 +414,10 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         model_runtime_binding_digest=model_runtime_binding_digest or None,
         memex_supply_receipt_id=memex_supply_receipt_id or None,
         memex_supply_digest=memex_supply_digest or None,
+        architect_fix_publication_receipt_id=publication_id or None,
+        architect_fix_publication_binding_digest=(
+            publication_binding_digest or None
+        ),
         delegated_authority_request_digest=request_digest,
     )
     return QueueAuthorityRequestDryRunResult(
@@ -435,6 +432,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
 
 __all__ = [
     "FAIL_ALLOWED_PATH_SCOPE",
+    "FAIL_ARCHITECT_FIX_PUBLICATION_BINDING",
     "FAIL_DENIED_PATH_SCOPE",
     "FAIL_HIGH_AUTHORITY_COSIGN",
     "FAIL_PROFILE_MISSING",

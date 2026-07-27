@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -66,6 +67,7 @@ _RESERVED_BOOTSTRAP_KWARGS = frozenset(
         "requested_queue_item_id",
         "now_iso",
         "now_epoch",
+        "trusted_now_epoch",
         "max_steps",
     }
 )
@@ -95,7 +97,6 @@ _POST_BOUNDED_QUEUE_STAGES = frozenset(
 @dataclass(frozen=True)
 class SignedWorkerQueueSerialLoopRunnerConfig:
     """Configuration for invoking the resident queue serial-loop bootstrap."""
-
     work_state_path: Path | str
     chain_results_path: Path | str
     authority_profile_path: Path | str
@@ -103,13 +104,13 @@ class SignedWorkerQueueSerialLoopRunnerConfig:
     repo_root: Optional[Path | str] = None
     now_iso: Optional[str] = None
     now_epoch: Optional[int] = None
+    trusted_now_epoch: Callable[[], int] = time.time
     max_steps: int = 1
     bootstrap_kwargs: Mapping[str, Any] = field(default_factory=dict)
 
 
 class RedDogSignedWorkerQueueSerialLoopRunner:
     """OpenClaw candidate runner backed by the resident queue serial loop."""
-
     def __init__(
         self,
         config: SignedWorkerQueueSerialLoopRunnerConfig,
@@ -191,8 +192,6 @@ def _validate_runner_request(
     if target_kind in stage_checks:
         reasons.extend(stage_checks[target_kind](config, queue_item_id=queue_item_id))
     return target_kind, queue_item_id, list(dict.fromkeys(reasons))
-
-
 def _invoke_bootstrap(
     config: SignedWorkerQueueSerialLoopRunnerConfig,
     *,
@@ -213,11 +212,10 @@ def _invoke_bootstrap(
         requested_queue_item_id=queue_item_id,
         now_iso=config.now_iso,
         now_epoch=config.now_epoch,
+        trusted_now_epoch=config.trusted_now_epoch,
         max_steps=assigned_max_steps,
         **dict(config.bootstrap_kwargs),
     )
-
-
 def _bootstrap_rejection(
     task_id: str,
     target_kind: str | None,

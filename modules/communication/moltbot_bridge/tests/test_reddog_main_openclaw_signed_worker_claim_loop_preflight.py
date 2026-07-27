@@ -633,7 +633,7 @@ def test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage(
         assurance_reservation_store=_assurance_store(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=10,
     )
@@ -778,7 +778,7 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
         assurance_reservation_store=_assurance_store(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=10,
     )
@@ -954,7 +954,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
         assurance_reservation_store=_assurance_store(),
         worktree_runner=worktree_runner,
         now_iso=BOOTSTRAP_NOW,
-        now_epoch=1000,
+        now_epoch=1000, trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=10,
     )

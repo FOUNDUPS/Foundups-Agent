@@ -19,6 +19,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    recorded_authority_verification_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -89,9 +92,11 @@ def _work_authority(allocation=None, **overrides):
     return payload
 
 
-def _verification_result(**overrides):
+def _verification_result(work_authority=None, **overrides):
+    work_authority = work_authority or _work_authority()
     payload = {
         "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+        "verified_work_authority_digest": _digest(work_authority),
         "verification_result": {
             "accepted": True,
             "reason_codes": [],
@@ -104,28 +109,81 @@ def _verification_result(**overrides):
 
 def _runtime_result(allocation=None, **overrides):
     allocation = allocation or _allocation()
+    work_authority = _work_authority(allocation)
     payload = {
         "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
         "authority_result": {
             "accepted": True,
-            "receipt": {"status": AUTHORITY_ISSUED, "receipt_id": "auth-1"},
-            "work_authority": _work_authority(allocation),
+            "receipt": {
+                "status": AUTHORITY_ISSUED,
+                "receipt_id": "auth-1",
+                "work_authority_digest": _digest(work_authority),
+            },
+            "work_authority": work_authority,
         },
     }
     payload.update(overrides)
+    authority = payload.get("authority_result", {})
+    work_authority = authority.get("work_authority")
+    receipt = authority.get("receipt")
+    if isinstance(work_authority, dict) and isinstance(receipt, dict):
+        receipt["work_authority_digest"] = _digest(work_authority)
     return payload
 
 
 def _plan(allocation=None, **overrides):
     allocation = allocation or _allocation()
+    runtime_result = overrides.pop(
+        "queue_authority_runtime_result",
+        _runtime_result(allocation),
+    )
+    work_authority = runtime_result.get("authority_result", {}).get(
+        "work_authority",
+        _work_authority(allocation),
+    )
+    verification_result = overrides.pop(
+        "queue_authority_verification_result",
+        _verification_result(work_authority),
+    )
+    binding = recorded_authority_verification_binding(
+        runtime_result,
+        verification_result,
+    )
+    if binding:
+        verification_result = {**verification_result, **binding}
     args = {
         "explicit_signed_authority_worker_dispatch_dryrun_requested": True,
-        "queue_authority_verification_result": _verification_result(),
-        "queue_authority_runtime_result": _runtime_result(allocation),
+        "queue_authority_verification_result": verification_result,
+        "queue_authority_runtime_result": runtime_result,
         "wsp15_allocation_receipt": allocation,
     }
     args.update(overrides)
     return dispatch.plan_reddog_signed_authority_worker_dispatch_dry_run(**args)
+
+
+def test_rejects_verified_authority_substitution() -> None:
+    allocation = _allocation()
+    runtime_result = _runtime_result(allocation)
+    verified_authority = runtime_result["authority_result"]["work_authority"]
+    substituted_authority = dict(verified_authority)
+    substituted_authority["requested_operation"] = "different_operation"
+    runtime_result["authority_result"]["work_authority"] = substituted_authority
+    runtime_result["authority_result"]["receipt"]["work_authority_digest"] = _digest(
+        substituted_authority
+    )
+
+    result = _plan(
+        allocation,
+        queue_authority_runtime_result=runtime_result,
+        queue_authority_verification_result=_verification_result(verified_authority),
+    )
+
+    assert result.accepted is False
+    assert (
+        dispatch.SignedAuthorityWorkerDispatchDryRunReason.AUTHORITY_VERIFICATION_DIGEST_MISMATCH
+        in result.rejection_reasons
+    )
+    assert result.receipt is None
 
 
 def test_accepts_verified_signed_authority_and_emits_wsp15_worker_intents() -> None:
@@ -147,6 +205,17 @@ def test_accepts_verified_signed_authority_and_emits_wsp15_worker_intents() -> N
     assert result.receipt.dispatch_intents[-1].capability == "queue_stage_progress"
     assert {intent.worker_runtime for intent in result.receipt.dispatch_intents} == {"0102", "openclaw"}
     assert result.receipt.wsp15_allocation_digest == _digest(_allocation())
+    assert result.receipt.verified_work_authority_digest.startswith("sha256:")
+    assert result.receipt.authority_verification_receipt_id.startswith(
+        "reddog_authority_verification:"
+    )
+    assert result.receipt.authority_verification_receipt_digest.startswith(
+        "sha256:"
+    )
+    assert {
+        intent.verified_work_authority_digest
+        for intent in result.receipt.dispatch_intents
+    } == {result.receipt.verified_work_authority_digest}
     assert result.receipt.no_worker_spawn_performed is True
     assert result.receipt.no_openclaw_enqueue_performed is True
     assert result.receipt.no_hermes_dispatch_performed is True
@@ -280,8 +349,15 @@ def test_rejects_receipt_id_mismatch() -> None:
     allocation = _allocation()
     runtime = _runtime_result(allocation)
     runtime["authority_result"]["work_authority"]["wsp15_allocation_receipt_id"] = "sha256:other"
+    work_authority = runtime["authority_result"]["work_authority"]
+    runtime["authority_result"]["receipt"]["work_authority_digest"] = _digest(
+        work_authority
+    )
 
-    result = _plan(queue_authority_runtime_result=runtime)
+    result = _plan(
+        queue_authority_runtime_result=runtime,
+        queue_authority_verification_result=_verification_result(work_authority),
+    )
 
     assert result.accepted is False
     assert dispatch.SignedAuthorityWorkerDispatchDryRunReason.WSP15_RECEIPT_ID_MISMATCH in result.rejection_reasons

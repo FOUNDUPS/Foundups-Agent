@@ -61,6 +61,13 @@ PROVIDER_EVIDENCE_EXACT_FILES = {
     "tests/test_reddog_resident_architect_durable_agentdb_cycle.py",
     "wsp_62_exemptions.yaml",
 }
+PUBLICATION_MODULE_FILES = {
+    "src/reddog_architect_fix_promotion_publication.py",
+    "src/reddog_architect_fix_promotion_publication_validation.py",
+}
+BOUNDED_AUTHORITY_BINDING_FILES = {
+    "src/reddog_worker_dispatch_authority_binding.py",
+}
 
 
 def _exemptions(path: Path) -> list[dict]:
@@ -142,3 +149,18 @@ def test_provider_evidence_exemptions_match_exact_touched_file_sizes() -> None:
             assert item["no_growth_ceiling"].get("functions", {}) == (
                 _oversized_function_sizes(target)
             )
+
+
+def test_architect_publication_modules_need_no_wsp62_exemption() -> None:
+    for relative_path in PUBLICATION_MODULE_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
+        for name, size in _named_sizes(target).items():
+            assert size <= (200 if name == "AtomicArchitectFixPromotionPublisher" else 50)
+
+
+def test_new_authority_binding_modules_are_bounded_without_exemption() -> None:
+    for relative_path in BOUNDED_AUTHORITY_BINDING_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
+        assert all(size <= 50 for size in _named_sizes(target).values())

@@ -63,7 +63,6 @@ class SignedWorkerOpenClawQueueLoopBindingReason:
     CHAIN_RESULTS_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_CHAIN_RESULTS_PATH_MISSING"
     AUTHORITY_PROFILE_PATH_MISSING = "REJECT_SIGNED_WORKER_QUEUE_LOOP_AUTHORITY_PROFILE_PATH_MISSING"
     MAX_STEPS_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS_INVALID"
-    NOW_EPOCH_INVALID = "REJECT_SIGNED_WORKER_QUEUE_LOOP_NOW_EPOCH_INVALID"
     DRAFT_PR_RUNNER_MODE_UNSUPPORTED = (
         "REJECT_SIGNED_WORKER_QUEUE_LOOP_DRAFT_PR_RUNNER_MODE_UNSUPPORTED"
     )
@@ -205,13 +204,6 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
     if max_steps < 1:
         reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.MAX_STEPS_INVALID)
 
-    now_epoch_raw = _stripped(env.get("REDDOG_RESIDENT_QUEUE_NOW_EPOCH"))
-    try:
-        now_epoch = int(now_epoch_raw) if now_epoch_raw else None
-    except ValueError:
-        now_epoch = None
-        reasons.append(SignedWorkerOpenClawQueueLoopBindingReason.NOW_EPOCH_INVALID)
-
     draft_pr_runner, draft_pr_reasons = _build_draft_pr_runner(
         repo_root=repo_root,
         env=env,
@@ -254,7 +246,7 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
         runtime_allowed_root=resident_queue_runtime_root_path(env, repo_root),
         repo_root=Path(repo_root).resolve(),
         now_iso=_stripped(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO")) or None,
-        now_epoch=now_epoch,
+        now_epoch=None,
         max_steps=max_steps,
         bootstrap_kwargs=bootstrap_kwargs,
     )

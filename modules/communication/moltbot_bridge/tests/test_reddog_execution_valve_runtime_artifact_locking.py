@@ -30,7 +30,7 @@ from modules.communication.moltbot_bridge.src import (
     reddog_github_principal_permission_snapshot_supply as github_artifact_supply,
 )
 from modules.communication.moltbot_bridge.src import (
-    reddog_main_architect_fix_promotion_bootstrap as promoted_profile_supply,
+    reddog_architect_fix_promotion_publication as promoted_profile_supply,
 )
 from modules.communication.moltbot_bridge.src import (
     reddog_main_resident_queue_runtime_dependency_bundle as dependency_bundle,
@@ -64,7 +64,7 @@ _USE_TIME_ARTIFACTS = (
 _PRODUCTION_WRITERS = (
     ("work_state_store", work_state_supply, "authoritative_work_state.json", "store"),
     ("profile_source", profile_source_supply, "authority_profile.json", "helper"),
-    ("profile_promoted", promoted_profile_supply, "authority_profile.json", "helper"),
+    ("profile_promoted", promoted_profile_supply, "authority_profile.json", "profile"),
     ("github_permissions", github_artifact_supply, "permission_snapshots.json", "helper"),
     ("github_principals", github_artifact_supply, "principal_authority_records.json", "helper"),
     ("resolver_permissions", resolver_artifact_supply, "permission_snapshots.json", "helper"),
@@ -104,6 +104,17 @@ def _invoke_production_writer(
             payload,
             expected_revision=None,
         )
+        return
+    if writer_kind == "profile":
+        repo = target.parent.parent / f"{target.parent.name}-repo"
+        (repo / ".git").mkdir(parents=True, exist_ok=True)
+        publisher = module.AtomicArchitectFixPromotionPublisher(
+            repo_root=repo,
+            runtime_root=target.parent,
+            authority_profile_path=target,
+            work_state_store=object(),
+        )
+        module._write_profile_mapping(publisher, target, payload)
         return
     module._write_json_atomic(target, payload)
 

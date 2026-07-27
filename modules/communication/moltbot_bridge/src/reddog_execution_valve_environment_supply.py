@@ -16,6 +16,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_committed_publication_reasons,
+)
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
@@ -155,6 +158,14 @@ def _lineage(
         reasons.append("work_state_schema_invalid")
     queue, claim, allocation, expected, queue_reasons = _queue_lineage(work_state, queue_item_id)
     reasons.extend(queue_reasons)
+    reasons.extend(
+        architect_fix_committed_publication_reasons(
+            work_state,
+            profile,
+            queue_item_id=str(queue.get("queue_item_id") or ""),
+            claim_id=str(claim.get("claim_id") or ""),
+        )
+    )
     binding, authority_reasons = _authority_binding(profile, expected)
     reasons.extend(authority_reasons)
     snapshot, principal, resolver_reasons = _resolver_records(profile, permissions, principals)

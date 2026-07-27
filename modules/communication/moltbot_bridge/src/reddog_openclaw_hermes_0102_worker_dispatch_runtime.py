@@ -20,8 +20,18 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Any, Mapping, Optional, Protocol, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_publication_effect_binding import (
+    signed_publication_effect_binding_reasons,
+)
 from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
+    WORKER_DISPATCH_INTENT_FIELDS,
+    WORKER_DISPATCH_RECEIPT_FIELDS,
+    derive_worker_dispatch_roles,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    WorkerDispatchAuthorityVerificationContext,
+    authenticated_recorded_authority_binding,
 )
 
 
@@ -58,9 +68,17 @@ class WorkerDispatchRuntimeReason:
     RECEIPT_MISSING = "REJECT_WORKER_DISPATCH_DRYRUN_RECEIPT_MISSING"
     INTENTS_MISSING = "REJECT_WORKER_DISPATCH_INTENTS_MISSING"
     INTENT_UNSAFE = "REJECT_WORKER_DISPATCH_INTENT_UNSAFE"
+    DISPATCH_SCHEMA_MISMATCH = "REJECT_WORKER_DISPATCH_SCHEMA_MISMATCH"
     QUEUE_ITEM_MISSING = "REJECT_WORKER_DISPATCH_QUEUE_ITEM_MISSING"
     WSP15_BINDING_MISMATCH = "REJECT_WORKER_DISPATCH_WSP15_BINDING_MISMATCH"
     MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_WORKER_DISPATCH_MODEL_RUNTIME_BINDING_MISMATCH"
+    WORKER_PLAN_BINDING_MISMATCH = "REJECT_WORKER_DISPATCH_WORKER_PLAN_BINDING_MISMATCH"
+    ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH = (
+        "REJECT_WORKER_DISPATCH_ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH"
+    )
+    AUTHORITY_VERIFICATION_BINDING_MISMATCH = (
+        "REJECT_WORKER_DISPATCH_AUTHORITY_VERIFICATION_BINDING_MISMATCH"
+    )
     WRITER_MISSING = "REJECT_WORKER_DISPATCH_WRITER_MISSING"
     WRITER_REJECTED = "REJECT_WORKER_DISPATCH_WRITER_REJECTED"
     IDEMPOTENCY_REPLAY = "REJECT_WORKER_DISPATCH_IDEMPOTENCY_REPLAY"
@@ -101,6 +119,11 @@ class SignedWorkerDispatchRuntimeReceipt:
     wsp15_allocation_digest: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
+    architect_fix_publication_receipt_id: str
+    architect_fix_publication_binding_digest: str
+    verified_work_authority_digest: str
+    authority_verification_receipt_id: str
+    authority_verification_receipt_digest: str
     task_ids: tuple[str, ...]
     intent_ids: tuple[str, ...]
     worker_runtimes: tuple[str, ...]
@@ -240,6 +263,9 @@ class AgentDbSignedWorkerDispatchTaskWriter:
 def publish_reddog_signed_worker_dispatch_runtime(
     *,
     worker_dispatch_dryrun_result: Mapping[str, Any],
+    queue_authority_runtime_result: Mapping[str, Any],
+    queue_authority_verification_result: Mapping[str, Any],
+    authority_verification_context: WorkerDispatchAuthorityVerificationContext,
     work_state_snapshot: Mapping[str, Any],
     queue_item_id: str,
     writer: Optional[SignedWorkerDispatchTaskWriter],
@@ -259,6 +285,8 @@ def publish_reddog_signed_worker_dispatch_runtime(
     intents = tuple(_mapping(intent) for intent in _list(receipt.get("dispatch_intents")))
     if not intents:
         reasons.append(WorkerDispatchRuntimeReason.INTENTS_MISSING)
+    if not _exact_dispatch_schema(receipt, intents):
+        reasons.append(WorkerDispatchRuntimeReason.DISPATCH_SCHEMA_MISMATCH)
 
     queue_item = _queue_item(work_state_snapshot, queue_item_id)
     if not queue_item:
@@ -269,6 +297,18 @@ def publish_reddog_signed_worker_dispatch_runtime(
         reasons.append(WorkerDispatchRuntimeReason.WSP15_BINDING_MISMATCH)
     if not _model_runtime_binding_matches_queue_item(receipt, queue_item):
         reasons.append(WorkerDispatchRuntimeReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    if not _worker_plan_matches_intents(receipt, queue_item):
+        reasons.append(WorkerDispatchRuntimeReason.WORKER_PLAN_BINDING_MISMATCH)
+    publication_reasons = signed_publication_effect_binding_reasons(
+        work_state_snapshot,
+        receipt,
+        queue_item_id=queue_item_id,
+        claim_id=str(queue_item.get("claim_id") or ""),
+    )
+    if publication_reasons:
+        reasons.append(
+            WorkerDispatchRuntimeReason.ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH
+        )
 
     if seen_intent_ids is not None:
         for intent in intents:
@@ -285,6 +325,21 @@ def publish_reddog_signed_worker_dispatch_runtime(
     deduped_reasons = _dedupe(reasons)
     if deduped_reasons:
         return _reject(deduped_reasons)
+    authority_binding = authenticated_recorded_authority_binding(
+        context=authority_verification_context,
+        authority_runtime_result=queue_authority_runtime_result,
+        authority_verification_result=queue_authority_verification_result,
+        dryrun_receipt=receipt,
+    )
+    if not authority_binding:
+        return _reject(
+            [WorkerDispatchRuntimeReason.AUTHORITY_VERIFICATION_BINDING_MISMATCH]
+        )
+    work_authority = _mapping(
+        _mapping(
+            _mapping(queue_authority_runtime_result).get("authority_result")
+        ).get("work_authority")
+    )
 
     operational_snapshot_id = str(
         work_state_snapshot.get("snapshot_id")
@@ -297,6 +352,7 @@ def publish_reddog_signed_worker_dispatch_runtime(
             dryrun_receipt=receipt,
             intent=intent,
             operational_snapshot_id=operational_snapshot_id,
+            work_authority=work_authority,
         )
         for intent in intents
     )
@@ -360,6 +416,21 @@ def _receipt(
         "status": status,
         "source_dispatch_receipt_id": str(receipt.get("receipt_id") or ""),
         "queue_item_id": str(queue_item.get("queue_item_id") or ""),
+        "architect_fix_publication_receipt_id": str(
+            receipt.get("architect_fix_publication_receipt_id") or ""
+        ),
+        "architect_fix_publication_binding_digest": str(
+            receipt.get("architect_fix_publication_binding_digest") or ""
+        ),
+        "verified_work_authority_digest": str(
+            receipt.get("verified_work_authority_digest") or ""
+        ),
+        "authority_verification_receipt_id": str(
+            receipt.get("authority_verification_receipt_id") or ""
+        ),
+        "authority_verification_receipt_digest": str(
+            receipt.get("authority_verification_receipt_digest") or ""
+        ),
         "task_ids": [task.task_id for task in tasks],
         "intent_ids": list(intent_ids),
         "rejection_reasons": list(reasons),
@@ -380,6 +451,21 @@ def _receipt(
         wsp15_allocation_digest=str(receipt.get("wsp15_allocation_digest") or ""),
         model_runtime_binding_receipt_id=str(receipt.get("model_runtime_binding_receipt_id") or ""),
         model_runtime_binding_digest=str(receipt.get("model_runtime_binding_digest") or ""),
+        architect_fix_publication_receipt_id=str(
+            receipt.get("architect_fix_publication_receipt_id") or ""
+        ),
+        architect_fix_publication_binding_digest=str(
+            receipt.get("architect_fix_publication_binding_digest") or ""
+        ),
+        verified_work_authority_digest=str(
+            receipt.get("verified_work_authority_digest") or ""
+        ),
+        authority_verification_receipt_id=str(
+            receipt.get("authority_verification_receipt_id") or ""
+        ),
+        authority_verification_receipt_digest=str(
+            receipt.get("authority_verification_receipt_digest") or ""
+        ),
         task_ids=tuple(task.task_id for task in tasks),
         intent_ids=intent_ids,
         worker_runtimes=tuple(sorted({str(_mapping(intent).get("worker_runtime") or "") for intent in _list(receipt.get("dispatch_intents"))})),
@@ -395,6 +481,7 @@ def _build_task(
     dryrun_receipt: Mapping[str, Any],
     intent: Mapping[str, Any],
     operational_snapshot_id: str,
+    work_authority: Mapping[str, Any],
 ) -> SignedWorkerDispatchTaskSpec:
     runtime = str(intent["worker_runtime"])
     capability = str(intent["capability"])
@@ -421,11 +508,31 @@ def _build_task(
         "worker_role": role,
         "worker_principal_id": f"agentdb-task:{task_id}",
         "capability": capability,
-        "signed_authority_worker_dispatch_receipt": dict(dryrun_receipt),
-        "worker_dispatch_intent": dict(intent),
+        "signed_authority_worker_dispatch_receipt": _canonical_receipt(dryrun_receipt),
+        "worker_dispatch_intent": _canonical_intent(intent),
+        "authorized_principal_id": str(work_authority["principal_id"]),
+        "authorized_reddog_id": str(work_authority["reddog_id"]),
         "wsp15_allocation_receipt": dict(_mapping(queue_item.get("wsp15_allocation_receipt"))),
         "model_runtime_binding_receipt_id": str(dryrun_receipt.get("model_runtime_binding_receipt_id") or ""),
         "model_runtime_binding_digest": str(dryrun_receipt.get("model_runtime_binding_digest") or ""),
+        "architect_fix_publication_receipt_id": str(
+            dryrun_receipt.get("architect_fix_publication_receipt_id") or ""
+        ),
+        "architect_fix_publication_binding_digest": str(
+            dryrun_receipt.get(
+                "architect_fix_publication_binding_digest"
+            )
+            or ""
+        ),
+        "verified_work_authority_digest": str(
+            dryrun_receipt.get("verified_work_authority_digest") or ""
+        ),
+        "authority_verification_receipt_id": str(
+            dryrun_receipt.get("authority_verification_receipt_id") or ""
+        ),
+        "authority_verification_receipt_digest": str(
+            dryrun_receipt.get("authority_verification_receipt_digest") or ""
+        ),
         "execution_allowed_by_dispatch_runtime": False,
         "requires_downstream_stages": [
             "work_order_invocation",
@@ -489,7 +596,64 @@ def _intent_safe(intent: Mapping[str, Any], receipt: Mapping[str, Any]) -> bool:
     for key in ("model_runtime_binding_receipt_id", "model_runtime_binding_digest"):
         if str(intent.get(key) or "") != str(receipt.get(key) or ""):
             return False
+    for key in (
+        "architect_fix_publication_receipt_id",
+        "architect_fix_publication_binding_digest",
+        "verified_work_authority_digest",
+        "authority_verification_receipt_id",
+        "authority_verification_receipt_digest",
+    ):
+        if str(intent.get(key) or "") != str(receipt.get(key) or ""):
+            return False
     return True
+
+
+def _exact_dispatch_schema(
+    receipt: Mapping[str, Any],
+    intents: Sequence[Mapping[str, Any]],
+) -> bool:
+    return (
+        set(receipt) == WORKER_DISPATCH_RECEIPT_FIELDS
+        and all(set(intent) == WORKER_DISPATCH_INTENT_FIELDS for intent in intents)
+    )
+
+
+def _canonical_intent(intent: Mapping[str, Any]) -> dict[str, Any]:
+    return {field: intent[field] for field in WORKER_DISPATCH_INTENT_FIELDS}
+
+
+def _canonical_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
+    projected = {
+        field: receipt[field]
+        for field in WORKER_DISPATCH_RECEIPT_FIELDS
+        if field != "dispatch_intents"
+    }
+    projected["dispatch_intents"] = [
+        _canonical_intent(_mapping(intent))
+        for intent in _list(receipt["dispatch_intents"])
+    ]
+    return projected
+
+
+def _worker_plan_matches_intents(
+    receipt: Mapping[str, Any],
+    queue_item: Mapping[str, Any],
+) -> bool:
+    allocation = _mapping(queue_item.get("wsp15_allocation_receipt"))
+    expected = derive_worker_dispatch_roles(allocation)
+    intents = tuple(_mapping(value) for value in _list(receipt.get("dispatch_intents")))
+    actual = tuple(
+        (
+            str(intent.get("role") or ""),
+            str(intent.get("worker_runtime") or ""),
+            str(intent.get("capability") or ""),
+        )
+        for intent in intents
+    )
+    return (
+        int(receipt.get("dispatch_intent_count") or -1) == len(intents)
+        and actual == expected
+    )
 
 
 def _wsp15_matches_queue_item(receipt: Mapping[str, Any], queue_item: Mapping[str, Any]) -> bool:

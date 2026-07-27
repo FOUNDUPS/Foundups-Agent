@@ -17,9 +17,12 @@ HoloIndex.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, Mapping
+from dataclasses import dataclass, field
+from typing import Any, Callable, Mapping, Optional
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_publication_effect_binding import (
+    committed_publication_effect_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     ResidentQueueChainResultsStore,
 )
@@ -41,6 +44,9 @@ AUTHORITY_REQUEST_STAGE_KEY = "authority_request"
 FAIL_DISPATCH_STAGE_MISMATCH = "FAIL_DISPATCH_STAGE_MISMATCH"
 FAIL_DISPATCH_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_NEXT_ACTION_MISMATCH"
 FAIL_AUTHORITY_REQUEST_STAGE_MISSING = "FAIL_AUTHORITY_REQUEST_STAGE_MISSING"
+FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED = (
+    "FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED"
+)
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -77,6 +83,47 @@ def _reject(*reasons: str) -> dict[str, Any]:
     }
 
 
+def _publication_binding_valid(
+    state: Mapping[str, Any],
+    profile: Mapping[str, Any],
+    authority_request: Mapping[str, Any],
+) -> bool:
+    receipt = _mapping(authority_request.get("receipt"))
+    payload = _mapping(authority_request.get("delegated_authority_request"))
+    queue_item_id = str(receipt.get("queue_item_id") or "")
+    queue_item = next(
+        (
+            item
+            for item in state.get("wre_queue_items") or ()
+            if isinstance(item, Mapping)
+            and str(item.get("queue_item_id") or "") == queue_item_id
+        ),
+        {},
+    )
+    claim_id = str(_mapping(queue_item).get("claim_id") or "")
+    try:
+        expected = committed_publication_effect_binding(
+            state,
+            profile,
+            queue_item_id=queue_item_id,
+            claim_id=claim_id,
+        )
+    except (RuntimeError, ValueError):
+        return False
+    actual_id = str(
+        payload.get("architect_fix_publication_receipt_id") or ""
+    )
+    actual_digest = str(
+        payload.get("architect_fix_publication_binding_digest") or ""
+    )
+    if expected is None:
+        return not actual_id and not actual_digest
+    return (
+        actual_id == expected["publication_id"]
+        and actual_digest == expected["binding_digest"]
+    )
+
+
 @dataclass(frozen=True)
 class ResidentQueueAuthorityRuntimeStageHandler:
     """Callable handler for the resident queue `authority_runtime` stage."""
@@ -88,6 +135,9 @@ class ResidentQueueAuthorityRuntimeStageHandler:
     snapshot_resolver: Any
     now: int
     leeway_s: int = 60
+    work_state_snapshot: Mapping[str, Any] = field(default_factory=dict)
+    authority_profile: Mapping[str, Any] = field(default_factory=dict)
+    work_state_supplier: Optional[Callable[[], Mapping[str, Any]]] = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != AUTHORITY_RUNTIME_STAGE_KEY:
@@ -107,6 +157,20 @@ class ResidentQueueAuthorityRuntimeStageHandler:
         authority_request = _mapping(stage_results.get(AUTHORITY_REQUEST_STAGE_KEY))
         if not authority_request:
             return _reject(FAIL_AUTHORITY_REQUEST_STAGE_MISSING)
+        try:
+            current_state = (
+                self.work_state_supplier()
+                if self.work_state_supplier is not None
+                else _mapping(self.work_state_snapshot)
+            )
+        except Exception:
+            return _reject(FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED)
+        if not _publication_binding_valid(
+            current_state,
+            _mapping(self.authority_profile),
+            authority_request,
+        ):
+            return _reject(FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED)
 
         return invoke_reddog_wre_queue_authority_runtime(
             explicit_queue_authority_runtime_requested=True,
@@ -129,6 +193,11 @@ def build_reddog_resident_queue_authority_runtime_stage_handler(
     snapshot_resolver: Any,
     now: int,
     leeway_s: int = 60,
+    work_state_snapshot: Mapping[str, Any] | None = None,
+    authority_profile: Mapping[str, Any] | None = None,
+    work_state_supplier: Optional[
+        Callable[[], Mapping[str, Any]]
+    ] = None,
 ) -> ResidentQueueAuthorityRuntimeStageHandler:
     """Build the injected handler for the resident queue dispatcher."""
 
@@ -140,6 +209,9 @@ def build_reddog_resident_queue_authority_runtime_stage_handler(
         snapshot_resolver=snapshot_resolver,
         now=now,
         leeway_s=leeway_s,
+        work_state_snapshot=work_state_snapshot or {},
+        authority_profile=authority_profile or {},
+        work_state_supplier=work_state_supplier,
     )
 
 
@@ -147,6 +219,7 @@ __all__ = [
     "AUTHORITY_REQUEST_STAGE_KEY",
     "AUTHORITY_RUNTIME_STAGE_KEY",
     "FAIL_AUTHORITY_REQUEST_STAGE_MISSING",
+    "FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED",
     "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_STAGE_MISMATCH",
     "ResidentQueueAuthorityRuntimeStageHandler",

@@ -276,6 +276,29 @@ def test_missing_authority_payload_rejects() -> None:
     assert QueueAuthorityVerificationInvokeReason.AUTHORITY_PAYLOAD_MISSING in result.rejection_reasons
 
 
+def test_authority_receipt_digest_mismatch_rejects_before_verification() -> None:
+    runtime, signer = _runtime_result()
+    payload = runtime.to_dict()
+    payload["authority_result"]["receipt"]["work_authority_digest"] = "sha256:" + "0" * 64
+
+    result = invoke_reddog_wre_queue_authority_verification(
+        explicit_queue_authority_verification_requested=True,
+        queue_authority_runtime_result=payload,
+        signature_verifier=signer,
+        principal_key_resolver=_PrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=_SnapshotResolver(),
+        revocation_oracle=_NoRevocation(),
+        now=NOW,
+        required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
+    )
+
+    assert result.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_REJECT
+    assert QueueAuthorityVerificationInvokeReason.AUTHORITY_DIGEST_MISMATCH in (
+        result.rejection_reasons
+    )
+
+
 def test_verifies_issued_authority_without_execution() -> None:
     runtime, signer = _runtime_result()
 
@@ -295,6 +318,15 @@ def test_verifies_issued_authority_without_execution() -> None:
     assert result.rejection_reasons == []
     assert result.verification_result is not None
     assert result.verification_result.accepted is True
+    assert result.verified_work_authority_digest == (
+        runtime.authority_result.receipt.work_authority_digest
+    )
+    assert result.authority_verification_receipt_id is not None
+    assert result.authority_verification_receipt_id.startswith(
+        "reddog_authority_verification:"
+    )
+    assert result.authority_verification_receipt_digest is not None
+    assert result.authority_verification_receipt_digest.startswith("sha256:")
     assert result.no_signing_performed is True
     assert result.no_authority_issued is True
     assert result.no_worker_spawn_performed is True

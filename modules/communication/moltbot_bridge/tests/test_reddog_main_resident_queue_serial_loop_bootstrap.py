@@ -1559,6 +1559,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -1662,6 +1663,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
@@ -1790,6 +1792,7 @@ def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_
         principal_authority_records_path=principals,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
@@ -1833,6 +1836,7 @@ def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path
         signer_socket_connector=_accepted_socket_signer,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
@@ -1885,6 +1889,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=3,
     )
@@ -1961,6 +1966,7 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
         worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=3,
     )
@@ -2040,6 +2046,7 @@ def test_bootstrap_rejects_legacy_token_environment_before_execution_valve(
         worker_dispatch_writer=worker_dispatch_writer,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=8,
     )
@@ -2100,6 +2107,7 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=8,
     )
@@ -2177,6 +2185,7 @@ def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_p
         artifact_generator=artifact_generator,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2221,6 +2230,7 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=9,
     )
@@ -2336,6 +2346,7 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2419,6 +2430,7 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2506,6 +2518,7 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
         slice_verifier_request_binding_enabled=True,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -2594,6 +2607,7 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -2686,6 +2700,7 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
         artifact_generator=artifact_generator,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2777,6 +2792,7 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -2874,6 +2890,7 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=13,
     )
@@ -2966,6 +2983,7 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
         draft_pr_publish_request_binding_enabled=True,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=13,
     )
@@ -3058,6 +3076,7 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -3263,6 +3282,7 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -3345,6 +3365,7 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -3439,6 +3460,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=13,
     )
@@ -3528,6 +3550,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -3570,6 +3593,7 @@ def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=9,
     )
@@ -3661,6 +3685,7 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=6,
     )
@@ -3811,6 +3836,7 @@ def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_i
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=7,
     )
@@ -4292,7 +4318,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 88
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
-    assert mocked.call_args.kwargs["now_epoch"] == 1000
+    assert mocked.call_args.kwargs["now_epoch"] != 1000
+    assert callable(mocked.call_args.kwargs["trusted_now_epoch"])
+    assert mocked.call_args.kwargs["trusted_now_epoch"]() != 1000
     assert mocked.call_args.kwargs["max_steps"] == 1
 
 

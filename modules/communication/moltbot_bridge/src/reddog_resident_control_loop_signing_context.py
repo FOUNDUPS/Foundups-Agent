@@ -6,6 +6,9 @@ import json
 from pathlib import Path
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_committed_publication_reasons,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
     decode_ed25519_public_key,
@@ -39,6 +42,7 @@ def build_control_loop_receipt_signing_context(
     authority_profile_source_path: Path | str | None,
     signer_socket_path: Path | str | None,
     expected_authority_profile_source_receipt_id: str | None,
+    authoritative_work_state_path: Path | str | None = None,
     signer_socket_timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
     signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     signer_socket_connector: Any = None,
@@ -52,6 +56,11 @@ def build_control_loop_receipt_signing_context(
     )
     _validate_source_authority_basis(source_profile)
     validate_promoted_authority_profile_source(profile, source_profile)
+    _validate_architect_fix_publication(
+        repo_root,
+        profile,
+        authoritative_work_state_path,
+    )
     fields = _validated_authority_profile_fields(profile)
     built = build_reddog_isolated_signer_socket_client(
         repo_root=repo_root,
@@ -73,6 +82,31 @@ def build_control_loop_receipt_signing_context(
         authority_profile_digest="sha256:" + _digest(profile),
         authority_profile_source_receipt_id=source_receipt_id,
     )
+
+
+def _validate_architect_fix_publication(
+    repo_root: Path | str,
+    profile: Mapping[str, Any],
+    work_state_path: Path | str | None,
+) -> None:
+    if not work_state_path:
+        raise ValueError(
+            "resident_control_loop_architect_publication_state_required"
+        )
+    work_state = _load_authority_profile(repo_root, work_state_path)
+    binding = profile.get("operational_context_binding")
+    if not isinstance(binding, Mapping):
+        binding = {}
+    reasons = architect_fix_committed_publication_reasons(
+        work_state,
+        profile,
+        queue_item_id=str(binding.get("queue_item_id") or ""),
+        claim_id=str(binding.get("claim_id") or ""),
+    )
+    if reasons:
+        raise ValueError(
+            "resident_control_loop_architect_publication_not_committed"
+        )
 
 
 def _validated_authority_profile_fields(profile: Mapping[str, Any]) -> dict[str, str]:

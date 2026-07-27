@@ -270,6 +270,7 @@ def _public_text(private_key) -> str:
 
 
 def _payload(public_key: str, **overrides: object):
+    now = int(time.time())
     proposal = {
         "receipt_id": "sha256:" + "1" * 64,
         "snapshot_receipt_id": "snapshot-1",
@@ -310,8 +311,8 @@ def _payload(public_key: str, **overrides: object):
         "consensus_receipt_digest": "sha256:" + "8" * 64,
         "authority_profile_source_receipt_id": "sha256:" + "9" * 64,
         "nonce": "proposal-runtime-nonce-1",
-        "issued_at": NOW - 5,
-        "expires_at": NOW + 120,
+        "issued_at": now - 5,
+        "expires_at": now + 120,
     }
     values.update(overrides)
     return build_architect_proposal_authenticity_payload(**values)
@@ -360,9 +361,10 @@ def _policy_authorization(
     signer_runtime_root: Path,
     security_context_digest: str,
     profile: dict[str, object] | None = None,
-    issued_at: int = NOW - 5,
-    expires_at: int = NOW + 120,
+    issued_at: int | None = None,
+    expires_at: int | None = None,
 ) -> ArchitectProposalPolicyAuthorization:
+    now = int(time.time())
     authority_profile = profile or _profile(
         public_key,
         principal_public_key=_public_text(principal_private),
@@ -399,8 +401,8 @@ def _policy_authorization(
         ),
         security_context_digest=security_context_digest,
         nonce="proposal-policy-authorization-nonce-1",
-        issued_at=issued_at,
-        expires_at=expires_at,
+        issued_at=issued_at if issued_at is not None else now - 5,
+        expires_at=expires_at if expires_at is not None else now + 120,
     )
     signature = encode_ed25519_signature(
         principal_private.sign(
@@ -529,6 +531,17 @@ def _config_kwargs(
     principal_private,
     **overrides: object,
 ) -> dict[str, object]:
+    runtime.mkdir(parents=True, exist_ok=True)
+    (runtime / "authoritative_work_state.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "reddog_authoritative_work_state.v1",
+                "architect_fix_promotions": [],
+                "architect_fix_publications": [],
+            }
+        ),
+        encoding="utf-8",
+    )
     profile = _profile(
         public_key,
         principal_public_key=_public_text(principal_private),
@@ -604,6 +617,9 @@ def _config_kwargs(
         "runtime_root": runtime,
         "signer_runtime_root": signer_runtime,
         "authority_profile": profile,
+        "authoritative_work_state_path": (
+            runtime / "authoritative_work_state.json"
+        ),
         "output_path": runtime / "signer-service.json",
         "socket_path": runtime / "reddog-signer.sock",
         "principal_signing_key_ref": "op://prod/principal/private",
@@ -627,7 +643,7 @@ def _config_kwargs(
         "principal_key_resolver": _PrincipalKeyResolver(
             _public_text(principal_private)
         ),
-        "now_epoch": NOW,
+        "now_epoch": int(time.time()),
         "max_requests": 2,
     }
     values.update(overrides)
@@ -1108,7 +1124,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     )
     result = run_reddog_signer_socket_service_config_supply(**kwargs)
 
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     assert result.proposal_policy_configured is True
     assert result.proposal_attestation_id == policy.expected_payload.attestation_id
     config = json.loads(
@@ -1539,7 +1555,7 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
         proposal_replay_high_water_store=proposal_high_water_store,
     )
 
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     assert result.no_file_io_performed is False
     backend = captured["backend"]
     assert backend.proposal_authority_policy == policy
@@ -1549,7 +1565,7 @@ def test_runtime_wiring_injects_policy_and_durable_store_into_backend(
     )
 
     first = backend.sign(_signing_request(policy.expected_payload), _peer())
-    assert first.accepted is True
+    assert first.accepted is True, first.rejection_reasons
 
     restarted = dataclasses.replace(
         backend,
@@ -1685,7 +1701,7 @@ def test_runtime_consumes_policy_authorization_nonce_once(
         proposal_replay_high_water_store=high_water_store,
     )
 
-    assert first.accepted is True
+    assert first.accepted is True, first.rejection_reasons
     assert second.accepted is False
     assert second.rejection_reasons == (
         FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
@@ -1831,7 +1847,7 @@ def test_bootstrap_rejects_tampered_serialized_proposal_policy(
             principal_private,
         )
     )
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     config_path = runtime / "signer-service.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     malformed_digest = run_reddog_signer_socket_service_runtime_bootstrap(

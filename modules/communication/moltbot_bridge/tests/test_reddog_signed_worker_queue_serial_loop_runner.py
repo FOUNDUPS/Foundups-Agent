@@ -409,6 +409,9 @@ def test_runtime_binding_builds_runner_from_explicit_env(tmp_path: Path) -> None
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert bootstrap.calls[0]["requested_queue_item_id"] == "queue-1"
     assert bootstrap.calls[0]["work_order_materializer_mode"] == "authority_profile"
+    assert bootstrap.calls[0]["now_epoch"] is None
+    assert callable(bootstrap.calls[0]["trusted_now_epoch"])
+    assert bootstrap.calls[0]["trusted_now_epoch"]() != 1000
 
 
 def test_runtime_binding_profile_enables_runner_without_explicit_runner_flag(tmp_path: Path) -> None:

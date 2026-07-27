@@ -49,6 +49,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
 )
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    recorded_authority_verification_binding,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -123,25 +126,37 @@ def _work_authority(allocation: dict[str, object] | None = None, **overrides: ob
 
 def _runtime_result(allocation: dict[str, object] | None = None) -> dict[str, object]:
     allocation = allocation or _allocation()
+    work_authority = _work_authority(allocation)
     return {
         "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
         "authority_result": {
             "accepted": True,
-            "receipt": {"status": AUTHORITY_ISSUED, "receipt_id": "auth-1"},
-            "work_authority": _work_authority(allocation),
+            "receipt": {
+                "status": AUTHORITY_ISSUED,
+                "receipt_id": "auth-1",
+                "work_authority_digest": _digest(work_authority),
+            },
+            "work_authority": work_authority,
         },
     }
 
 
-def _verification_result() -> dict[str, object]:
-    return {
+def _verification_result(
+    allocation: dict[str, object] | None = None,
+) -> dict[str, object]:
+    runtime = _runtime_result(allocation)
+    work_authority = runtime["authority_result"]["work_authority"]
+    result = {
         "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+        "verified_work_authority_digest": _digest(work_authority),
         "verification_result": {
             "accepted": True,
             "reason_codes": [],
             "work_order_id": "wo-1",
         },
     }
+    result.update(recorded_authority_verification_binding(runtime, result))
+    return result
 
 
 def _snapshot(allocation: dict[str, object] | None = None, *, queue_item_id: str = "queue-1") -> dict[str, object]:
@@ -188,7 +203,7 @@ def _store(allocation: dict[str, object] | None = None) -> InMemoryResidentQueue
             "stage_results": {
                 "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
                 AUTHORITY_RUNTIME_STAGE_KEY: _runtime_result(allocation),
-                AUTHORITY_VERIFICATION_STAGE_KEY: _verification_result(),
+                AUTHORITY_VERIFICATION_STAGE_KEY: _verification_result(allocation),
             },
         }
     )

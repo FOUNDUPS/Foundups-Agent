@@ -3185,7 +3185,6 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission snapshot JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal authority JSON
         REDDOG_WORK_ORDERS_PATH                              Outside-repo canonical work-order JSON
-        REDDOG_RESIDENT_QUEUE_NOW_EPOCH                      Optional runtime epoch for authority checks
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
     """
 
@@ -3336,11 +3335,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         max_steps = int(os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "1"))
     except ValueError:
         max_steps = 0
-    try:
-        now_epoch_value = os.getenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "")
-        now_epoch = int(now_epoch_value) if now_epoch_value else None
-    except ValueError:
-        now_epoch = None
     try:
         signer_socket_timeout_value = os.getenv("REDDOG_SIGNER_SOCKET_TIMEOUT_S", "")
         signer_socket_timeout_s = float(signer_socket_timeout_value) if signer_socket_timeout_value else 5.0
@@ -3518,11 +3512,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 repo_root=repo_root,
                 runtime_root=resident_queue_runtime_root_path(os.environ, repo_root),
                 signer_runtime_root=resident_queue_signer_runtime_root_path(os.environ, repo_root),
-                authority_profile=(
-                    authority_profile_payload
-                    if isinstance(authority_profile_payload, Mapping)
-                    else None
-                ),
+                authority_profile=authority_profile_payload
+                if isinstance(authority_profile_payload, Mapping)
+                else None,
+                authoritative_work_state_path=resident_queue_runtime_file_path(os.environ, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or None,
                 output_path=config_output_path or None,
                 socket_path=config_socket_path or None,
                 principal_signing_key_ref=str(
@@ -3731,6 +3724,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             if candidate_valve_path.exists():
                 valve_environment_path = profile_valve_environment_path
 
+        trusted_authority_clock = time.time
+        now_epoch = int(trusted_authority_clock()) if authority_state_path else None
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
@@ -3826,6 +3821,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             worker_dispatch_writer=worker_dispatch_writer,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
+            trusted_now_epoch=trusted_authority_clock,
             max_steps=max_steps,
         )
     except Exception as exc:
@@ -4071,6 +4067,9 @@ def _reddog_persist_queue_control_receipt(
         ),
         expected_authority_profile_source_receipt_id=os.getenv(
             "REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID", ""
+        ),
+        authoritative_work_state_path=runtime_file_path(
+            os.environ, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH"
         ),
         signer_socket_timeout_s=timeout_s,
         signer_socket_max_response_bytes=max_response_bytes,

@@ -2236,6 +2236,63 @@ def test_main_preflight_enforced_blocks_rejection() -> None:
             assert main.run_reddog_architect_fix_promotion_preflight(REPO_ROOT) is False
 
 
+@pytest.mark.parametrize(
+    ("enforced", "expected", "status"),
+    (
+        ("0", True, "preflight=WARN"),
+        ("1", False, "Startup blocked"),
+    ),
+)
+def test_main_preflight_recovery_failure_respects_enforcement(
+    enforced: str,
+    expected: bool,
+    status: str,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    import main
+
+    result = type(
+        "Result",
+        (),
+        {
+            "accepted": False,
+            "status": REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY,
+            "promotion_receipt_id": None,
+            "queue_item_id": None,
+            "claim_id": None,
+            "selected_slice": None,
+            "authority_profile_path": None,
+            "committed_revision": None,
+            "rejection_reasons": (
+                "architect_fix_publication_recovery_failed",
+                "RuntimeError",
+            ),
+        },
+    )()
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_architect_fix_promotion_bootstrap."
+        "run_reddog_main_architect_fix_promotion_bootstrap",
+        return_value=result,
+    ):
+        with patch.dict(
+            "os.environ",
+            {
+                "REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME": "1",
+                "REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED": enforced,
+            },
+            clear=True,
+        ):
+            assert (
+                main.run_reddog_architect_fix_promotion_preflight(REPO_ROOT)
+                is expected
+            )
+
+    output = capsys.readouterr().out
+    assert "architect_fix_publication_recovery_failed" in output
+    assert status in output
+
+
 def test_module_has_no_execution_network_or_reindex_imports() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     banned_import_roots = {

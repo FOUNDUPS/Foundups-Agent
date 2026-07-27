@@ -10,6 +10,12 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_publication_state_projection,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_public_key,
 )
@@ -17,6 +23,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     public_key_fingerprint,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
+    FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID,
     FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID,
     FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID,
     FAIL_SIGNER_CONFIG_LIMITS_INVALID,
@@ -70,12 +77,26 @@ def _authority_profile(**overrides: object) -> dict[str, object]:
 
 
 def _kwargs(repo: Path, runtime: Path, **overrides: object) -> dict[str, object]:
+    runtime.mkdir(parents=True, exist_ok=True)
+    state_path = runtime / "authoritative_work_state.json"
+    if not state_path.exists():
+        state_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": "reddog_authoritative_work_state.v1",
+                    "architect_fix_promotions": [],
+                    "architect_fix_publications": [],
+                }
+            ),
+            encoding="utf-8",
+        )
     signer_runtime = runtime.parent / f"{runtime.name}-signer-state"
     values: dict[str, object] = {
         "repo_root": repo,
         "runtime_root": runtime,
         "signer_runtime_root": signer_runtime,
         "authority_profile": _authority_profile(),
+        "authoritative_work_state_path": state_path,
         "output_path": runtime / "signer-service.json",
         "socket_path": runtime / "reddog-signer.sock",
         "principal_signing_key_ref": "op://prod-vault/principal/private",
@@ -156,6 +177,252 @@ def test_config_supply_writes_multi_profile_signer_cli_config(tmp_path: Path) ->
     serialized = json.dumps(payload, sort_keys=True)
     assert "ed25519-private-raw-b64-v1" not in serialized
     assert "audit-mac-test-key-b64-v1" not in serialized
+
+
+@pytest.mark.parametrize("include_marker", (True, False))
+def test_config_supply_rejects_prepared_architect_publication(
+    tmp_path: Path,
+    include_marker: bool,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    publication_id = "sha256:" + "4" * 64
+    queue_item_id = "sha256:" + "5" * 64
+    claim_id = "sha256:" + "6" * 64
+    attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
+    profile_overrides = {
+        "proposal_authenticity_attestation_id": attestation_id,
+        "operational_context_binding": {
+            "queue_item_id": queue_item_id,
+            "claim_id": claim_id,
+        },
+    }
+    if include_marker:
+        profile_overrides["promotion_publication_id"] = publication_id
+    profile = _authority_profile(**profile_overrides)
+    promotion = {
+        "publication_id": publication_id,
+        "queue_item_id": queue_item_id,
+        "claim_id": claim_id,
+        "authority_profile_digest": canonical_digest(profile),
+        "proposal_authenticity_attestation_id": attestation_id,
+    }
+    work_state = {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "architect_fix_promotions": [promotion],
+        "wre_queue_items": [
+            {"queue_item_id": queue_item_id, "claim_id": claim_id}
+        ],
+        "worker_claims": [{"claim_id": claim_id}],
+    }
+    projection = architect_fix_publication_state_projection(
+        work_state,
+        publication_id=publication_id,
+    )
+    work_state["architect_fix_publications"] = [
+        {
+            "schema_version": "reddog_architect_fix_promotion_publication.v1",
+            "publication_id": publication_id,
+            "state": "STATE_PREPARED",
+            "proposal_authenticity_attestation_id": attestation_id,
+            "authority_profile_digest": canonical_digest(profile),
+            "active_work_state_digest": canonical_digest(projection),
+            "base_work_state_digest": "sha256:" + "8" * 64,
+        }
+    ]
+    runtime.mkdir()
+    (runtime / "authoritative_work_state.json").write_text(
+        json.dumps(work_state),
+        encoding="utf-8",
+    )
+
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authority_profile=profile,
+        )
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
+        result.rejection_reasons
+    )
+    assert not (runtime / "signer-service.json").exists()
+
+
+def test_config_supply_uses_selected_state_not_stale_default(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    publication_id = "sha256:" + "4" * 64
+    queue_item_id = "sha256:" + "5" * 64
+    claim_id = "sha256:" + "6" * 64
+    attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
+    profile = _authority_profile(
+        proposal_authenticity_attestation_id=attestation_id,
+        operational_context_binding={
+            "queue_item_id": queue_item_id,
+            "claim_id": claim_id,
+        },
+    )
+    state = {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "architect_fix_promotions": [{
+            "publication_id": publication_id,
+            "queue_item_id": queue_item_id,
+            "claim_id": claim_id,
+            "authority_profile_digest": canonical_digest(profile),
+            "proposal_authenticity_attestation_id": attestation_id,
+        }],
+        "wre_queue_items": [{"queue_item_id": queue_item_id, "claim_id": claim_id}],
+        "worker_claims": [{"claim_id": claim_id}],
+    }
+    projection = architect_fix_publication_state_projection(
+        state,
+        publication_id=publication_id,
+    )
+    publication = {
+        "schema_version": "reddog_architect_fix_promotion_publication.v1",
+        "publication_id": publication_id,
+        "state": "COMMITTED",
+        "proposal_authenticity_attestation_id": attestation_id,
+        "authority_profile_digest": canonical_digest(profile),
+        "active_work_state_digest": canonical_digest(projection),
+        "base_work_state_digest": None,
+    }
+    default_state = {**state, "architect_fix_publications": [publication]}
+    selected_state = {
+        **state,
+        "architect_fix_publications": [{
+            **publication,
+            "state": "STATE_PREPARED",
+            "base_work_state_digest": "sha256:" + "8" * 64,
+        }],
+    }
+    kwargs = _kwargs(repo, runtime, authority_profile=profile)
+    (runtime / "authoritative_work_state.json").write_text(
+        json.dumps(default_state),
+        encoding="utf-8",
+    )
+    selected_path = runtime / "selected_work_state.json"
+    selected_path.write_text(json.dumps(selected_state), encoding="utf-8")
+    kwargs["authoritative_work_state_path"] = selected_path
+
+    result = run_reddog_signer_socket_service_config_supply(**kwargs)
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
+    assert not (runtime / "signer-service.json").exists()
+
+
+def test_config_supply_rejects_architect_profile_with_marker_and_binding_stripped(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    publication_id = "sha256:" + "4" * 64
+    queue_item_id = "sha256:" + "5" * 64
+    claim_id = "sha256:" + "6" * 64
+    attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
+    original = _authority_profile(
+        promotion_publication_id=publication_id,
+        proposal_authenticity_attestation_id=attestation_id,
+        operational_context_binding={
+            "queue_item_id": queue_item_id,
+            "claim_id": claim_id,
+        },
+    )
+    attacker_profile = dict(original)
+    attacker_profile.pop("promotion_publication_id")
+    attacker_profile.pop("operational_context_binding")
+    state = {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "architect_fix_promotions": [{
+            "publication_id": publication_id,
+            "queue_item_id": queue_item_id,
+            "claim_id": claim_id,
+            "authority_profile_digest": canonical_digest(original),
+            "proposal_authenticity_attestation_id": attestation_id,
+        }],
+        "architect_fix_publications": [],
+    }
+    kwargs = _kwargs(repo, runtime, authority_profile=attacker_profile)
+    (runtime / "authoritative_work_state.json").write_text(
+        json.dumps(state),
+        encoding="utf-8",
+    )
+
+    result = run_reddog_signer_socket_service_config_supply(**kwargs)
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
+    assert not (runtime / "signer-service.json").exists()
+
+
+def test_config_supply_rejects_missing_durable_authoritative_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    kwargs = _kwargs(repo, runtime)
+    (runtime / "authoritative_work_state.json").unlink()
+
+    result = run_reddog_signer_socket_service_config_supply(**kwargs)
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
+        result.rejection_reasons
+    )
+    assert not (runtime / "signer-service.json").exists()
+
+
+def test_config_supply_rejects_injected_state_that_differs_from_durable_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    kwargs = _kwargs(
+        repo,
+        runtime,
+        authoritative_work_state={
+            "schema_version": "reddog_authoritative_work_state.v1",
+            "architect_fix_promotions": [],
+            "architect_fix_publications": [],
+            "work_state_revision": 1,
+        },
+    )
+
+    result = run_reddog_signer_socket_service_config_supply(**kwargs)
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in (
+        result.rejection_reasons
+    )
+    assert not (runtime / "signer-service.json").exists()
+
+
+def test_config_supply_accepts_injected_state_that_matches_durable_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    durable_state = {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "architect_fix_promotions": [],
+        "architect_fix_publications": [],
+    }
+    result = run_reddog_signer_socket_service_config_supply(
+        **_kwargs(
+            repo,
+            runtime,
+            authoritative_work_state=durable_state,
+        )
+    )
+
+    assert result.accepted is True
+    assert (runtime / "signer-service.json").exists()
 
 
 def test_config_supply_rejects_invalid_authority_profile_and_key_reuse(tmp_path: Path) -> None:

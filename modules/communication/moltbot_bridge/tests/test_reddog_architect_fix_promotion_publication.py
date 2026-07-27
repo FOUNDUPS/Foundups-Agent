@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -105,6 +106,51 @@ def _request(
     )
 
 
+def _write_unanchored_packets(
+    publisher: AtomicArchitectFixPromotionPublisher,
+    request: ArchitectFixPromotionPublicationRequest,
+    *,
+    profile: dict,
+    active_state: dict,
+) -> None:
+    profile_digest = canonical_digest(profile)
+    active_digest = canonical_digest(
+        architect_fix_publication_state_projection(
+            active_state,
+            publication_id=request.publication_id,
+        )
+    )
+    stage = {
+        "schema_version": "reddog_architect_fix_staged_profile.v1",
+        "publication_id": request.publication_id,
+        "proposal_authenticity_attestation_id": (
+            request.proposal_authenticity_attestation_id
+        ),
+        "authority_profile_digest": profile_digest,
+        "active_work_state_digest": active_digest,
+        "expected_work_state_revision": request.expected_work_state_revision,
+        "authority_profile": profile,
+        "active_work_state": active_state,
+    }
+    stage["receipt_id"] = canonical_digest(stage)
+    journal = {
+        "schema_version": "reddog_architect_fix_promotion_publication.v1",
+        "publication_id": request.publication_id,
+        "phase": "INTENT_PREPARED",
+        "proposal_authenticity_attestation_id": (
+            request.proposal_authenticity_attestation_id
+        ),
+        "authority_profile_digest": profile_digest,
+        "active_work_state_digest": active_digest,
+        "expected_work_state_revision": request.expected_work_state_revision,
+        "prepared_revision": None,
+        "committed_revision": None,
+    }
+    journal["receipt_id"] = canonical_digest(journal)
+    publisher.stage_path.write_text(json.dumps(stage), encoding="utf-8")
+    publisher.journal_path.write_text(json.dumps(journal), encoding="utf-8")
+
+
 def test_publication_commits_state_then_profile_and_cleans_journal(
     tmp_path: Path,
 ) -> None:
@@ -157,12 +203,13 @@ def test_restart_discards_unanchored_artifacts_before_state_commit(
     ] == "COMMITTED"
 
 
-def test_restart_completes_profile_when_state_commit_precedes_crash(
+def test_restart_rolls_back_prepared_state_before_authenticated_retry(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     runtime, store, publisher = _runtime(tmp_path)
     request = _request(store)
+    original = (runtime / "work_state.json").read_bytes()
 
     monkeypatch.setattr(
         publisher,
@@ -178,7 +225,8 @@ def test_restart_completes_profile_when_state_commit_precedes_crash(
         authority_profile_path=runtime / "authority_profile.json",
         work_state_store=store,
     )
-    assert recovered.recover() is False
+    assert recovered.recover() is True
+    assert (runtime / "work_state.json").read_bytes() == original
     assert not (runtime / "authority_profile.json").exists()
     recovered.publish(request)
     assert json.loads(
@@ -219,6 +267,44 @@ def test_restart_finishes_cleanup_when_profile_was_already_published(
     assert json.loads(
         (runtime / "authority_profile.json").read_text(encoding="utf-8")
     ) == request.authority_profile
+
+
+@pytest.mark.parametrize("missing", (None, "stage", "journal"))
+def test_restart_rehydrates_cache_after_committed_state_crash(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    missing: str | None,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    monkeypatch.setattr(
+        publisher,
+        "_publish_profile_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(SimulatedCrash()),
+    )
+
+    with pytest.raises(SimulatedCrash):
+        publisher.publish(request)
+
+    assert store.load()["architect_fix_publications"][0]["state"] == "COMMITTED"
+    assert not (runtime / "authority_profile.json").exists()
+    if missing == "stage":
+        publisher.stage_path.unlink()
+    elif missing == "journal":
+        publisher.journal_path.unlink()
+    recovered = AtomicArchitectFixPromotionPublisher(
+        repo_root=tmp_path / "repo",
+        runtime_root=runtime,
+        authority_profile_path=runtime / "authority_profile.json",
+        work_state_store=store,
+    )
+
+    assert recovered.recover() is True
+    assert json.loads(
+        (runtime / "authority_profile.json").read_text(encoding="utf-8")
+    ) == request.authority_profile
+    assert not recovered.stage_path.exists()
+    assert not recovered.journal_path.exists()
 
 
 def test_tampered_stage_fails_closed_after_state_commit(
@@ -324,6 +410,103 @@ def test_unanchored_stale_request_does_not_poison_publication_lane(
     assert not recovered.stage_path.exists()
 
 
+def test_unanchored_stage_cannot_delete_committed_immutable_profile(
+    tmp_path: Path,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    committed_request = _request(store)
+    publisher.publish(committed_request)
+    artifact = next(runtime.glob("*.immutable.json"))
+    artifact_before = artifact.read_bytes()
+    authoritative_before = (runtime / "work_state.json").read_bytes()
+    unanchored = _request(
+        store,
+        publication_id="sha256:" + "7" * 64,
+    )
+    active_digest = canonical_digest(
+        architect_fix_publication_state_projection(
+            unanchored.updated_work_state,
+            publication_id=unanchored.publication_id,
+        )
+    )
+    stage = {
+        "schema_version": "reddog_architect_fix_staged_profile.v1",
+        "publication_id": unanchored.publication_id,
+        "proposal_authenticity_attestation_id": (
+            unanchored.proposal_authenticity_attestation_id
+        ),
+        "authority_profile_digest": canonical_digest(
+            committed_request.authority_profile
+        ),
+        "active_work_state_digest": active_digest,
+        "expected_work_state_revision": store.load()["revision"],
+        "authority_profile": dict(committed_request.authority_profile),
+        "active_work_state": dict(unanchored.updated_work_state),
+    }
+    stage["receipt_id"] = canonical_digest(stage)
+    journal = {
+        "schema_version": "reddog_architect_fix_promotion_publication.v1",
+        "publication_id": unanchored.publication_id,
+        "phase": "INTENT_PREPARED",
+        "proposal_authenticity_attestation_id": (
+            unanchored.proposal_authenticity_attestation_id
+        ),
+        "authority_profile_digest": stage["authority_profile_digest"],
+        "active_work_state_digest": active_digest,
+        "expected_work_state_revision": stage["expected_work_state_revision"],
+        "prepared_revision": None,
+        "committed_revision": None,
+    }
+    journal["receipt_id"] = canonical_digest(journal)
+    publisher.stage_path.write_text(json.dumps(stage), encoding="utf-8")
+    publisher.journal_path.write_text(json.dumps(journal), encoding="utf-8")
+
+    assert publisher.recover() is True
+    assert artifact.read_bytes() == artifact_before
+    assert (runtime / "work_state.json").read_bytes() == authoritative_before
+    assert not publisher.stage_path.exists()
+    assert not publisher.journal_path.exists()
+
+
+def test_attacker_rehashed_unanchored_packets_have_zero_effects(
+    tmp_path: Path,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    authoritative_before = (runtime / "work_state.json").read_bytes()
+    profile = {
+        **request.authority_profile,
+        "queue_item_id": "sha256:" + "9" * 64,
+    }
+    active = json.loads(json.dumps(request.updated_work_state, sort_keys=True))
+    active["architect_fix_promotions"][0]["queue_item_id"] = profile[
+        "queue_item_id"
+    ]
+    active["architect_fix_promotions"][0][
+        "authority_profile_digest"
+    ] = canonical_digest(profile)
+    active["wre_queue_items"] = [
+        {
+            "queue_item_id": profile["queue_item_id"],
+            "claim_id": active["architect_fix_promotions"][0]["claim_id"],
+        }
+    ]
+    _write_unanchored_packets(
+        publisher,
+        request,
+        profile=profile,
+        active_state=active,
+    )
+
+    assert publisher.recover() is True
+    assert (runtime / "work_state.json").read_bytes() == authoritative_before
+    assert not (runtime / "authority_profile.json").exists()
+    assert store.load().get("wre_queue_items") is None
+    assert store.load().get("worker_claims") is None
+    assert not publisher.stage_path.exists()
+    assert not publisher.journal_path.exists()
+
+
 def test_request_without_bound_publication_record_is_rejected(
     tmp_path: Path,
 ) -> None:
@@ -425,11 +608,12 @@ def test_retry_with_altered_profile_fails_closed(tmp_path: Path) -> None:
     assert publisher.publish(request) == store.load()["revision"]
 
 
-def test_fully_rehashed_unanchored_stage_and_journal_never_mint_authority(
+def test_fully_rehashed_prepared_stage_and_journal_never_mint_authority(
     tmp_path: Path,
 ) -> None:
     runtime, store, publisher = _runtime(tmp_path)
     request = _request(store)
+    original = (runtime / "work_state.json").read_bytes()
     profile = {
         **request.authority_profile,
         "queue_item_id": "sha256:" + "5" * 64,
@@ -473,17 +657,46 @@ def test_fully_rehashed_unanchored_stage_and_journal_never_mint_authority(
         "active_work_state": active,
     }
     stage["receipt_id"] = canonical_digest(stage)
+    current = store.load()
+    prepared = json.loads(json.dumps(current, sort_keys=True))
+    prepared.pop("revision", None)
+    prepared["architect_fix_publications"] = [
+        {
+            "schema_version": (
+                "reddog_architect_fix_promotion_publication.v1"
+            ),
+            "publication_id": request.publication_id,
+            "state": "STATE_PREPARED",
+            "proposal_authenticity_attestation_id": (
+                request.proposal_authenticity_attestation_id
+            ),
+            "authority_profile_digest": profile_digest,
+            "active_work_state_digest": stage[
+                "active_work_state_digest"
+            ],
+            "base_work_state_digest": canonical_digest(
+                {
+                    key: value
+                    for key, value in current.items()
+                    if key != "revision"
+                }
+            ),
+        }
+    ]
+    store.commit(prepared, expected_revision=current["revision"])
     journal = {
         "schema_version": "reddog_architect_fix_promotion_publication.v1",
         "publication_id": request.publication_id,
-        "phase": "INTENT_PREPARED",
+        "phase": "STATE_PREPARED",
         "proposal_authenticity_attestation_id": (
             request.proposal_authenticity_attestation_id
         ),
         "authority_profile_digest": profile_digest,
         "active_work_state_digest": stage["active_work_state_digest"],
-        "expected_work_state_revision": store.load()["revision"],
-        "prepared_revision": None,
+        "expected_work_state_revision": stage[
+            "expected_work_state_revision"
+        ],
+        "prepared_revision": store.load()["revision"],
         "committed_revision": None,
     }
     journal["receipt_id"] = canonical_digest(journal)
@@ -491,10 +704,104 @@ def test_fully_rehashed_unanchored_stage_and_journal_never_mint_authority(
     publisher.journal_path.write_text(json.dumps(journal), encoding="utf-8")
 
     assert publisher.recover() is True
+    assert (runtime / "work_state.json").read_bytes() == original
     assert not (runtime / "authority_profile.json").exists()
     assert store.load().get("wre_queue_items") is None
+    assert store.load().get("worker_claims") is None
+    assert store.load().get("architect_fix_publications") is None
     assert not publisher.stage_path.exists()
     assert not publisher.journal_path.exists()
+
+
+@pytest.mark.parametrize("missing", ("stage", "journal"))
+def test_missing_recovery_artifact_rolls_back_prepared_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    missing: str,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    original = (runtime / "work_state.json").read_bytes()
+    monkeypatch.setattr(
+        publisher,
+        "_publish_profile",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(SimulatedCrash()),
+    )
+    with pytest.raises(SimulatedCrash):
+        publisher.publish(request)
+    target = publisher.stage_path if missing == "stage" else publisher.journal_path
+    target.unlink()
+
+    recovered = AtomicArchitectFixPromotionPublisher(
+        repo_root=tmp_path / "repo",
+        runtime_root=runtime,
+        authority_profile_path=runtime / "authority_profile.json",
+        work_state_store=store,
+    )
+
+    assert recovered.recover() is True
+    assert (runtime / "work_state.json").read_bytes() == original
+    assert not recovered.stage_path.exists()
+    assert not recovered.journal_path.exists()
+    assert not (runtime / "authority_profile.json").exists()
+
+
+def test_repeated_recovery_is_idempotent(tmp_path: Path) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    stage = {
+        "schema_version": "reddog_architect_fix_staged_profile.v1",
+        "publication_id": request.publication_id,
+        "proposal_authenticity_attestation_id": (
+            request.proposal_authenticity_attestation_id
+        ),
+        "authority_profile_digest": canonical_digest(
+            request.authority_profile
+        ),
+        "active_work_state_digest": canonical_digest(
+            architect_fix_publication_state_projection(
+                request.updated_work_state,
+                publication_id=request.publication_id,
+            )
+        ),
+        "expected_work_state_revision": request.expected_work_state_revision,
+        "authority_profile": dict(request.authority_profile),
+        "active_work_state": dict(request.updated_work_state),
+    }
+    stage["receipt_id"] = canonical_digest(stage)
+    publisher.stage_path.write_text(json.dumps(stage), encoding="utf-8")
+
+    assert publisher.recover() is True
+    after = (runtime / "work_state.json").read_bytes()
+    assert publisher.recover() is False
+    assert (runtime / "work_state.json").read_bytes() == after
+
+
+def test_concurrent_exact_publishers_commit_one_publication(
+    tmp_path: Path,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    second = AtomicArchitectFixPromotionPublisher(
+        repo_root=tmp_path / "repo",
+        runtime_root=runtime,
+        authority_profile_path=runtime / "authority_profile.json",
+        work_state_store=store,
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        revisions = tuple(
+            executor.map(
+                lambda item: item.publish(request),
+                (publisher, second),
+            )
+        )
+
+    assert len(set(revisions)) == 1
+    state = store.load()
+    assert len(state["architect_fix_publications"]) == 1
+    assert state["architect_fix_publications"][0]["state"] == "COMMITTED"
+    assert len(state["architect_fix_promotions"]) == 1
 
 
 def test_signed_retry_completes_after_final_cas_failure(
@@ -519,7 +826,7 @@ def test_signed_retry_completes_after_final_cas_failure(
     assert store.load()["architect_fix_publications"][0][
         "state"
     ] == "STATE_PREPARED"
-    assert (runtime / "authority_profile.json").exists()
+    assert not (runtime / "authority_profile.json").exists()
 
     monkeypatch.setattr(store, "commit", real_commit)
     recovered = AtomicArchitectFixPromotionPublisher(
@@ -528,11 +835,58 @@ def test_signed_retry_completes_after_final_cas_failure(
         authority_profile_path=runtime / "authority_profile.json",
         work_state_store=store,
     )
-    assert recovered.recover() is False
+    assert recovered.recover() is True
     recovered.publish(request)
     assert store.load()["architect_fix_publications"][0][
         "state"
     ] == "COMMITTED"
+
+
+def test_concurrent_refresh_after_profile_artifact_rolls_back_safely(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    real_commit = store.commit
+    calls = 0
+
+    def refresh_before_final_cas(snapshot, *, expected_revision):
+        nonlocal calls
+        calls += 1
+        if calls != 2:
+            return real_commit(
+                snapshot,
+                expected_revision=expected_revision,
+            )
+        current = store.load()
+        refreshed = json.loads(json.dumps(current, sort_keys=True))
+        refreshed.pop("revision", None)
+        refreshed["refresh_marker"] = "preserved"
+        real_commit(refreshed, expected_revision=current["revision"])
+        raise RuntimeError("revision_conflict")
+
+    monkeypatch.setattr(store, "commit", refresh_before_final_cas)
+    with pytest.raises(RuntimeError, match="revision_conflict"):
+        publisher.publish(request)
+
+    assert not (runtime / "authority_profile.json").exists()
+    assert list(runtime.glob("*.immutable.json"))
+    monkeypatch.setattr(store, "commit", real_commit)
+    recovered = AtomicArchitectFixPromotionPublisher(
+        repo_root=tmp_path / "repo",
+        runtime_root=runtime,
+        authority_profile_path=runtime / "authority_profile.json",
+        work_state_store=store,
+    )
+
+    assert recovered.recover() is True
+    state = store.load()
+    assert state["refresh_marker"] == "preserved"
+    assert state.get("architect_fix_publications") is None
+    assert list(runtime.glob("*.immutable.json"))
+    assert not recovered.stage_path.exists()
+    assert not recovered.journal_path.exists()
 
 
 def test_committed_publication_rejects_non_null_base_digest(
