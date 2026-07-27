@@ -1,3 +1,20 @@
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1
+- Added adversarial regressions for self-minted principal keys, altered proposal
+  and policy signatures, caller identity/path/operation/permission substitution,
+  test-only signer mode, stale/revoked/current-binding drift, signer-context
+  substitution, missing trust, and file-backed replay after process restart.
+- Proved that both signed IDs/digests and the signer-runtime context digest
+  reach the claim, queue item, promotion record, receipt, authority profile,
+  and operational context. Modernized authority-source fixtures to use valid
+  Ed25519 identities and complete SHA-256 receipt digests.
+- Proved failed profile/store writes permit a valid retry while successful CAS
+  persists one replay guard. AST checks ensure the promotion verifier has no
+  process registry, execution, network, socket, or subprocess surface.
+- Focused authority, signer-policy, promotion, bootstrap, authority-supply,
+  execution-valve, and WSP 62 gates passed 197 tests. The full legacy bridge
+  sweep reached 4,254 passes and 19 skips; all 45 failures occur on the
+  exact parent and remain environment/order-dependent outside this slice.
+
 ## 2026-07-27: REDDOG_AUTHORITY_RUNTIME_STORE_CONFINEMENT_PHASE1
 - Added missing/outside-root, repository ancestry, mixed namespace, symlink,
   hard-link, parent-swap, concurrent compare-and-swap, nonce-consumption,

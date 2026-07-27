@@ -12,16 +12,18 @@ import pytest
 from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY,
-    run_reddog_main_architect_fix_promotion_bootstrap,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
-    _authority_profile,
     _determination,
     _holo_receipt,
     _memex_supply,
     _model_selection,
     _runtime_binding,
+    _authority_profile,
     _work_state,
+)
+from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_test_helpers import (
+    run_main_bootstrap_with_test_authority as run_reddog_main_architect_fix_promotion_bootstrap,
 )
 from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
     ready_proposal_policy,
@@ -366,7 +368,7 @@ def test_bootstrap_does_not_overwrite_newer_profile_when_rollback_cas_fails(
     ) == newer
 
 
-def test_main_preflight_auto_runs_when_all_artifacts_are_present(tmp_path: Path) -> None:
+def test_main_preflight_does_not_promote_without_process_local_authority(tmp_path: Path) -> None:
     import main
 
     repo = _repo(tmp_path)
@@ -403,13 +405,11 @@ def test_main_preflight_auto_runs_when_all_artifacts_are_present(tmp_path: Path)
             "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
             return_value="sha256:repo-head",
         ),
-    ):
-        assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
-        assert main.os.environ["REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH"] == str(
-            runtime_root / "authority_profile.json"
-        )
+        ):
+            assert main.run_reddog_architect_fix_promotion_preflight(repo) is True
+            assert "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH" not in main.os.environ
 
-    assert (runtime_root / "authority_profile.json").exists()
+    assert not (runtime_root / "authority_profile.json").exists()
 
 
 def test_main_preflight_handoff_materializes_resident_cycle_artifacts_before_promotion(tmp_path: Path) -> None:

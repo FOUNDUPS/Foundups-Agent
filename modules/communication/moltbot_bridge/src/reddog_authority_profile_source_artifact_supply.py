@@ -295,7 +295,9 @@ def _profile(
         body["owner_dae"] = principal.owner_dae
     if principal.principal_wallet:
         body["principal_wallet"] = principal.principal_wallet
-    body["authority_profile_source_receipt_id"] = _digest(body)
+    body["authority_profile_source_receipt_id"] = (
+        canonical_authority_profile_source_digest(body)
+    )
     return body
 
 
@@ -428,6 +430,14 @@ def _digest(payload: Mapping[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def canonical_authority_profile_source_digest(
+    payload: Mapping[str, Any],
+) -> str:
+    """Return the canonical digest of a profile before receipt insertion."""
+
+    return _digest(payload)
+
+
 def _reject(reasons: Sequence[str]) -> AuthorityProfileSourceSupplyResult:
     return AuthorityProfileSourceSupplyResult(
         accepted=False,
@@ -452,5 +462,6 @@ __all__ = [
     "AUTHORITY_PROFILE_SOURCE_SUPPLY_REJECT",
     "AuthorityProfileSourceSupplyReason",
     "AuthorityProfileSourceSupplyResult",
+    "canonical_authority_profile_source_digest",
     "run_reddog_authority_profile_source_artifact_supply",
 ]

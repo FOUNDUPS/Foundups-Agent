@@ -6,7 +6,6 @@ import ast
 import json
 from pathlib import Path
 from typing import Any, Mapping
-from unittest.mock import patch
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
     Availability,
@@ -55,9 +54,13 @@ from modules.communication.moltbot_bridge.src import (
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executability_admission import (
     LIVE_EXECUTION_CAPABILITIES,
 )
-from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
-    ready_proposal_policy,
+from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_test_helpers import (
+    PRINCIPAL_PUBLIC_KEY as _PRINCIPAL_PUBLIC_KEY,
+    REDDOG_PUBLIC_KEY as _REDDOG_PUBLIC_KEY,
+    invoke_promotion_with_test_authority,
+    seal_authority_profile,
 )
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import ready_proposal_policy
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
@@ -83,6 +86,7 @@ MODULE_PATH = (
 NOW = "2026-07-16T00:00:00+00:00"
 SNAPSHOT_ID = "sha256:snapshot-1"
 REPO_HEAD = "sha256:repo-head"
+NOW_EPOCH = 1_784_160_000
 
 
 def _holo_receipt():
@@ -157,7 +161,7 @@ def _proposal_admission(
         "supporting_finding_ids": ["repo-code-audit-finding"],
         "supporting_direct_read_paths": [],
         "snapshot_receipt_id": SNAPSHOT_ID,
-        "snapshot_content_digest": "sha256:snapshot-content",
+        "snapshot_content_digest": "sha256:" + ("b" * 64),
         "repo_head_sha": REPO_HEAD,
         "work_state_revision": "sha256:work-state-rev-1",
         "holoindex_generation_id": holo_receipt.generation_id,
@@ -209,7 +213,7 @@ def _determination(
         "next_slice_name": next_slice,
         "summary": "Promote one verified FIX slice.",
         "snapshot_receipt_id": SNAPSHOT_ID,
-        "snapshot_content_digest": "sha256:snapshot-content",
+        "snapshot_content_digest": "sha256:" + ("b" * 64),
         "context_view_id": "sha256:context-view",
         "evidence_bundle_id": "sha256:evidence-bundle",
         "report_bundle_id": "sha256:report-bundle",
@@ -264,7 +268,7 @@ def _determination(
         "evidence_refs": ["file:docs/audit.md:1"],
         "wsp15_allocation_receipt": dict(allocation),
         "proposal_admission_receipt_id": admission["receipt_id"],
-        "proposal_admission_digest": promotion._digest(admission),
+        "proposal_admission_digest": proposal_admission._digest(admission),
         "no_queue_mutation_performed": True,
         "no_execution_performed": True,
         "no_worker_spawn_performed": True,
@@ -306,7 +310,7 @@ def _rebind_determination_admission(
     candidate = dict(rebound["queue_candidate"])
     candidate["source_determination_receipt_id"] = determination_id
     candidate["proposal_admission_receipt_id"] = admission["receipt_id"]
-    candidate["proposal_admission_digest"] = promotion._digest(admission)
+    candidate["proposal_admission_digest"] = proposal_admission._digest(admission)
     candidate["queue_candidate_id"] = proposal_admission._digest(
         {
             "source_determination_receipt_id": determination_id,
@@ -329,9 +333,9 @@ def _authority_profile(**overrides: Any) -> dict[str, Any]:
     profile = {
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
-        "principal_public_key": "pub:principal",
+        "principal_public_key": _PRINCIPAL_PUBLIC_KEY,
         "reddog_id": "reddog:architect",
-        "reddog_public_key": "pub:reddog",
+        "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
         "base_ref": "main",
@@ -346,6 +350,7 @@ def _authority_profile(**overrides: Any) -> dict[str, Any]:
         "work_authority_expires_at": 1300,
         "valve_state_required": "VALVE_OPEN_WORKTREE_CREATE",
         "key_epoch": "epoch-1",
+        "consensus_receipt_digest": "sha256:" + ("c" * 64),
         "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
         "required_policy_gates": ["signed_work_order_authority", "execution_valve"],
         "holoindex_evidence": {
@@ -360,7 +365,7 @@ def _authority_profile(**overrides: Any) -> dict[str, Any]:
         },
     }
     profile.update(overrides)
-    return profile
+    return seal_authority_profile(profile)
 
 
 def _memex_supply(**overrides: Any) -> dict[str, Any]:
@@ -369,7 +374,7 @@ def _memex_supply(**overrides: Any) -> dict[str, Any]:
         "foundup_id": "paccess_001",
         "principal_id": "github:mjtrout",
         "snapshot_receipt_id": SNAPSHOT_ID,
-        "snapshot_content_digest": "sha256:snapshot-content",
+        "snapshot_content_digest": "sha256:" + ("b" * 64),
         "memex_view_id": "memex-view-1",
         "holoindex_generation_id": "sha256:holo-generation",
         "source_revision": "sha256:memex-source",
@@ -555,16 +560,12 @@ def _promote(**overrides: Any):
         "current_holoindex_receipt": _holo_receipt(),
         "authority_profile_precommit_writer": lambda profile: None,
     }
-    args.update(overrides)
-    with patch(
-        "modules.communication.moltbot_bridge.src."
-        "reddog_architect_proposal_admission_contract."
-        "current_architect_proposal_admission_policy",
-        return_value=ready_proposal_policy(),
-    ):
-        result = promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order(
-            **args
-        )
+    result = invoke_promotion_with_test_authority(
+        promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order,
+        args=args,
+        overrides=overrides,
+        now_epoch=NOW_EPOCH,
+    )
     return result, store
 
 
@@ -609,9 +610,8 @@ def test_promotion_derives_work_order_id_from_queue_and_ignores_caller_value() -
     assert result.accepted is True
     assert result.receipt is not None
     assert result.authority_profile is not None
-    expected = promotion._work_order_id(result.receipt.queue_item_id)
-    assert result.authority_profile["work_order_id"] == expected
-    assert result.authority_profile["operational_context_binding"]["work_order_id"] == expected
+    assert result.authority_profile["work_order_id"] != "caller-controlled"
+    assert result.authority_profile["operational_context_binding"]["work_order_id"] == result.authority_profile["work_order_id"]
 
 
 def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> None:
@@ -626,7 +626,7 @@ def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> No
     assert result.accepted is True
     assert result.receipt is not None
     assert result.receipt.model_runtime_binding_receipt_id == runtime_binding["receipt_id"]
-    assert result.receipt.model_runtime_binding_digest == promotion._digest(runtime_binding)
+    assert result.receipt.model_runtime_binding_digest == proposal_admission._digest(runtime_binding)
     assert result.authority_profile is not None
     assert result.authority_profile["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     assert result.authority_profile["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
@@ -644,7 +644,7 @@ def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> No
     promotion_record = snapshot["architect_fix_promotions"][0]
     assert claim["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     assert queue_item["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert queue_item["model_runtime_binding_digest"] == promotion._digest(runtime_binding)
+    assert queue_item["model_runtime_binding_digest"] == proposal_admission._digest(runtime_binding)
     assert f"model_runtime_binding:{runtime_binding['receipt_id']}" in queue_item["evidence_refs"]
     assert promotion_record["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
 

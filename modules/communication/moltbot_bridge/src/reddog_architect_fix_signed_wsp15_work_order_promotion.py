@@ -15,11 +15,8 @@ rewards, or re-index HoloIndex.
 
 from __future__ import annotations
 
-import hashlib
-import json
-from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Mapping, Optional
+from typing import Any, Callable, Mapping
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import (
     SelectionDecision,
@@ -41,10 +38,6 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ARCHITECT_DETERMINATION_ACCEPT,
     ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
 )
-from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_profile import (
-    ArchitectFixPromotionProfileInputs,
-    promoted_authority_profile,
-)
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_candidate_gate import (
     CANDIDATE_MALFORMED,
     HOLOINDEX_BINDING_MISMATCH,
@@ -54,9 +47,22 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_candidate_gat
     validate_architect_fix_proposal_admission,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
-    ArchitectFixPromotionRecordInputs,
-    build_architect_fix_promotion_records,
-    canonical_digest as _digest,
+    ArchitectFixPromotionReason,
+    ArchitectFixPromotionReceipt,
+    ArchitectFixPromotionResult,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_transaction import (
+    ArchitectFixPromotionTransactionInputs,
+    execute_architect_fix_promotion_transaction,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified_authority import (
+    verify_architect_proposal_promotion_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
+    SignerSocketServiceRuntimeWiringConfig,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    PrincipalKeyResolver,
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
@@ -69,41 +75,6 @@ ARCHITECT_FIX_WSP15_PROMOTION_REJECT = "ARCHITECT_FIX_WSP15_PROMOTION_REJECT"
 ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION = (
     "reddog_architect_fix_wsp15_work_order_promotion.v1"
 )
-
-
-class ArchitectFixPromotionReason:
-    WORK_STATE_SCHEMA = "REJECT_ARCHITECT_FIX_PROMOTION_WORK_STATE_SCHEMA"
-    WORK_STATE_FRESHNESS = "REJECT_ARCHITECT_FIX_PROMOTION_WORK_STATE_FRESHNESS"
-    DETERMINATION_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_DETERMINATION_MISSING"
-    DETERMINATION_NOT_ACCEPTED = "REJECT_ARCHITECT_FIX_PROMOTION_DETERMINATION_NOT_ACCEPTED"
-    DETERMINATION_NOT_FIX = "REJECT_ARCHITECT_FIX_PROMOTION_DETERMINATION_NOT_FIX"
-    QUEUE_CANDIDATE_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_QUEUE_CANDIDATE_MISSING"
-    QUEUE_CANDIDATE_MALFORMED = "REJECT_ARCHITECT_FIX_PROMOTION_QUEUE_CANDIDATE_MALFORMED"
-    WSP15_ALLOCATION_INVALID = "REJECT_ARCHITECT_FIX_PROMOTION_WSP15_ALLOCATION_INVALID"
-    WSP15_ALLOCATION_MISMATCH = "REJECT_ARCHITECT_FIX_PROMOTION_WSP15_ALLOCATION_MISMATCH"
-    MODEL_SELECTION_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_SELECTION_MISSING"
-    MODEL_SELECTION_INVALID = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_SELECTION_INVALID"
-    MODEL_SELECTION_NOT_PRODUCTION = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_SELECTION_NOT_PRODUCTION"
-    MODEL_RUNTIME_BINDING_INVALID = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_RUNTIME_BINDING_INVALID"
-    MODEL_RUNTIME_BINDING_NOT_BOUND = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_RUNTIME_BINDING_NOT_BOUND"
-    MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_ARCHITECT_FIX_PROMOTION_MODEL_RUNTIME_BINDING_MISMATCH"
-    MEMEX_SUPPLY_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_MEMEX_SUPPLY_MISSING"
-    MEMEX_SUPPLY_INVALID = "REJECT_ARCHITECT_FIX_PROMOTION_MEMEX_SUPPLY_INVALID"
-    AUTHORITY_PROFILE_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_MISSING"
-    AUTHORITY_PROFILE_INCOMPLETE = "REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_INCOMPLETE"
-    HOLOINDEX_EVIDENCE_MISSING = "REJECT_ARCHITECT_FIX_PROMOTION_HOLOINDEX_EVIDENCE_MISSING"
-    PROPOSAL_ADMISSION_INVALID = (
-        "REJECT_ARCHITECT_FIX_PROMOTION_PROPOSAL_ADMISSION_INVALID"
-    )
-    HOLOINDEX_BINDING_MISMATCH = (
-        "REJECT_ARCHITECT_FIX_PROMOTION_HOLOINDEX_BINDING_MISMATCH"
-    )
-    REPO_HEAD_MISMATCH = "REJECT_ARCHITECT_FIX_PROMOTION_REPO_HEAD_MISMATCH"
-    AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED = (
-        "REJECT_ARCHITECT_FIX_PROMOTION_AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED"
-    )
-    DUPLICATE_QUEUE_ITEM = "REJECT_ARCHITECT_FIX_PROMOTION_DUPLICATE_QUEUE_ITEM"
-    STORE_REJECTED = "REJECT_ARCHITECT_FIX_PROMOTION_STORE_REJECTED"
 
 
 _AUTHORITY_PROFILE_REQUIRED = (
@@ -125,87 +96,11 @@ _AUTHORITY_PROFILE_REQUIRED = (
     "work_authority_expires_at",
     "valve_state_required",
     "key_epoch",
+    "consensus_receipt_digest",
+    "authority_profile_source_receipt_id",
     "required_tests",
     "required_policy_gates",
 )
-
-
-@dataclass(frozen=True)
-class ArchitectFixPromotionReceipt:
-    schema_version: str
-    promotion_receipt_id: str
-    status: str
-    architect_determination_receipt_id: str
-    source_queue_candidate_id: str
-    queue_item_id: str
-    claim_id: str
-    selected_slice: str
-    worker_id: str
-    freshness_receipt_id: str
-    wsp15_allocation_receipt_id: str
-    wsp15_allocation_digest: str
-    proposal_admission_receipt_id: str
-    proposal_admission_digest: str
-    model_catalog_snapshot_id: str
-    model_selection_receipt_id: str
-    model_selection_digest: str
-    memex_supply_receipt_id: str
-    memex_supply_digest: str
-    committed_revision: Optional[str]
-    model_runtime_binding_receipt_id: Optional[str] = None
-    model_runtime_binding_digest: Optional[str] = None
-    no_signing_performed: bool = True
-    no_worker_spawn_performed: bool = True
-    no_worktree_created: bool = True
-    no_shell_command_executed: bool = True
-    no_openclaw_enqueue_performed: bool = True
-    no_hermes_dispatch_performed: bool = True
-    no_repo_mutation_performed: bool = True
-    authoritative_work_state_mutation_performed: bool = True
-    no_holoindex_reindex_performed: bool = True
-    no_pr_created: bool = True
-    no_pattern_memory_write_performed: bool = True
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True)
-class ArchitectFixPromotionResult:
-    accepted: bool
-    status: str
-    receipt: Optional[ArchitectFixPromotionReceipt]
-    rejection_reasons: tuple[str, ...]
-    authority_profile: Optional[Mapping[str, Any]] = None
-    work_state_snapshot: Optional[Mapping[str, Any]] = None
-    no_signing_performed: bool = True
-    no_worker_spawn_performed: bool = True
-    no_worktree_created: bool = True
-    no_shell_command_executed: bool = True
-    no_openclaw_enqueue_performed: bool = True
-    no_hermes_dispatch_performed: bool = True
-    no_holoindex_reindex_performed: bool = True
-    no_pr_created: bool = True
-    no_pattern_memory_write_performed: bool = True
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "accepted": self.accepted,
-            "status": self.status,
-            "receipt": self.receipt.to_dict() if self.receipt else None,
-            "rejection_reasons": list(self.rejection_reasons),
-            "authority_profile": dict(self.authority_profile or {}),
-            "work_state_snapshot": dict(self.work_state_snapshot or {}),
-            "no_signing_performed": self.no_signing_performed,
-            "no_worker_spawn_performed": self.no_worker_spawn_performed,
-            "no_worktree_created": self.no_worktree_created,
-            "no_shell_command_executed": self.no_shell_command_executed,
-            "no_openclaw_enqueue_performed": self.no_openclaw_enqueue_performed,
-            "no_hermes_dispatch_performed": self.no_hermes_dispatch_performed,
-            "no_holoindex_reindex_performed": self.no_holoindex_reindex_performed,
-            "no_pr_created": self.no_pr_created,
-            "no_pattern_memory_write_performed": self.no_pattern_memory_write_performed,
-        }
 
 
 def promote_reddog_architect_fix_to_signed_wsp15_work_order(
@@ -215,6 +110,9 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     authority_profile: Mapping[str, Any],
     model_selection_receipt: Mapping[str, Any],
     memex_supply_receipt: Mapping[str, Any],
+    proposal_authenticity_attestation: Mapping[str, Any],
+    signer_runtime_config: SignerSocketServiceRuntimeWiringConfig,
+    principal_key_resolver: PrincipalKeyResolver,
     model_runtime_binding_receipt: Mapping[str, Any] | None = None,
     worker_id: str,
     now_iso: str,
@@ -224,6 +122,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     authority_profile_precommit_writer: (
         Callable[[Mapping[str, Any]], None] | None
     ) = None,
+    current_proposal_revoked_key_epochs: frozenset[str] = frozenset(),
 ) -> ArchitectFixPromotionResult:
     """Commit one architect FIX queue item and return its signer authority profile."""
 
@@ -306,134 +205,59 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     assert proposal_admission is not None
     assert selected_slice
     now = _parse_iso(now_iso)
-    expires_at = (now + timedelta(seconds=int(claim_ttl_seconds))).isoformat()
-    model_selection_digest = _digest(model_selection_receipt)
-    model_runtime_binding_digest = _digest(model_runtime_binding_receipt) if runtime_binding_payload else None
-    memex_supply_digest = _digest(memex_supply_receipt)
-    allocation_digest = canonical_reddog_wsp15_allocation_digest(allocation)
-    proposal_admission_digest = _digest(proposal_admission.to_dict())
-
-    records = build_architect_fix_promotion_records(
-        ArchitectFixPromotionRecordInputs(
+    try:
+        expires_at = (
+            now + timedelta(seconds=int(claim_ttl_seconds))
+        ).isoformat()
+    except (TypeError, ValueError, OverflowError):
+        return _reject(
+            [ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID]
+        )
+    try:
+        proposal_authority = verify_architect_proposal_promotion_authority(
+            attestation=proposal_authenticity_attestation,
+            proposal_admission=proposal_admission.to_dict(),
+            determination=determination,
+            queue_candidate=candidate,
+            authority_profile=authority_profile,
+            signer_runtime_config=signer_runtime_config,
+            principal_key_resolver=principal_key_resolver,
+            now_epoch=int(now.timestamp()),
+            revoked_key_epochs=frozenset(
+                current_proposal_revoked_key_epochs
+            ),
+        )
+    except Exception:
+        return _reject(
+            [ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID]
+        )
+    assert authority_profile_precommit_writer is not None
+    return execute_architect_fix_promotion_transaction(
+        ArchitectFixPromotionTransactionInputs(
+            schema_version=ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION,
+            accept_status=ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT,
+            current=current,
+            store=work_state_store,
+            profile_writer=authority_profile_precommit_writer,
+            authority_profile=authority_profile,
+            determination=determination,
+            candidate=candidate,
+            allocation=allocation,
+            model_selection_receipt=model_selection_receipt,
+            model_selection=selection_payload,
+            model_runtime_binding_receipt=model_runtime_binding_receipt,
+            model_runtime_binding=runtime_binding_payload,
+            memex_supply=memex_payload,
+            proposal_admission=proposal_admission.to_dict(),
+            proposal_authority=proposal_authority,
             selected_slice=selected_slice,
             determination_id=determination_id,
             worker_id=worker_id,
             now_iso=now_iso,
             expires_at=expires_at,
             freshness_receipt_id=freshness_id,
-            reconciliation_report_id=str(
-                current.get("reconciliation_report_id") or determination_id
-            ),
-            proposal_admission_receipt_id=proposal_admission.receipt_id,
-            proposal_admission_digest=proposal_admission_digest,
-            authorized_base_sha=proposal_admission.repo_head_sha,
-            model_selection_digest=model_selection_digest,
-            model_runtime_binding_digest=model_runtime_binding_digest or "",
-            memex_supply_digest=memex_supply_digest,
-            candidate=candidate,
-            allocation=allocation,
-            model_selection=selection_payload,
-            model_runtime_binding=runtime_binding_payload,
-            memex_supply=memex_payload,
-        )
-    )
-    claim_id = records.claim_id
-    queue_item_id = records.queue_item_id
-
-    promoted_profile = promoted_authority_profile(
-        ArchitectFixPromotionProfileInputs(
-            authority_profile=authority_profile,
-            determination=determination,
-            allocation=allocation,
-            model_selection_receipt=model_selection_receipt,
-            model_selection=selection_payload,
-            model_selection_digest=model_selection_digest,
-            model_runtime_binding_receipt=model_runtime_binding_receipt,
-            model_runtime_binding=runtime_binding_payload,
-            model_runtime_binding_digest=model_runtime_binding_digest,
-            memex_supply=memex_payload,
-            memex_supply_digest=memex_supply_digest,
-            proposal_admission=proposal_admission.to_dict(),
-            proposal_admission_digest=proposal_admission_digest,
-            work_order_id=_work_order_id(queue_item_id),
-            queue_item_id=queue_item_id,
-            claim_id=claim_id,
             holoindex_evidence=holoindex_evidence,
         )
-    )
-    updated = _append_queue_state(
-        current,
-        claim=records.claim,
-        queue_item=records.queue_item,
-        sync_receipt=records.sync_receipt,
-        promotion_record={
-            "schema_version": ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION,
-            "architect_determination_receipt_id": determination_id,
-            "queue_item_id": queue_item_id,
-            "claim_id": claim_id,
-            "model_selection_receipt_id": selection_payload["receipt_id"],
-            "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
-            "memex_supply_receipt_id": memex_payload["receipt_id"],
-            "proposal_admission_receipt_id": proposal_admission.receipt_id,
-            "created_at": now_iso,
-        },
-    )
-
-    try:
-        assert authority_profile_precommit_writer is not None
-        authority_profile_precommit_writer(promoted_profile)
-    except Exception:
-        return _reject(
-            [ArchitectFixPromotionReason.AUTHORITY_PROFILE_PRECOMMIT_WRITE_FAILED]
-        )
-
-    try:
-        committed_revision = work_state_store.commit(updated, expected_revision=current.get("revision"))
-    except Exception:
-        return _reject([ArchitectFixPromotionReason.STORE_REJECTED])
-    committed = work_state_store.load()
-
-    receipt_seed = {
-        "determination_receipt_id": determination_id,
-        "queue_item_id": queue_item_id,
-        "claim_id": claim_id,
-        "model_selection_receipt_id": selection_payload["receipt_id"],
-        "model_runtime_binding_receipt_id": runtime_binding_payload.get("receipt_id", ""),
-        "memex_supply_receipt_id": memex_payload["receipt_id"],
-        "proposal_admission_receipt_id": proposal_admission.receipt_id,
-        "committed_revision": committed_revision,
-    }
-    receipt = ArchitectFixPromotionReceipt(
-        schema_version=ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION,
-        promotion_receipt_id="architect_fix_promotion_" + _digest(receipt_seed).removeprefix("sha256:")[:16],
-        status=ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT,
-        architect_determination_receipt_id=determination_id,
-        source_queue_candidate_id=str(candidate.get("queue_candidate_id") or ""),
-        queue_item_id=queue_item_id,
-        claim_id=claim_id,
-        selected_slice=selected_slice,
-        worker_id=worker_id,
-        freshness_receipt_id=freshness_id,
-        wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
-        wsp15_allocation_digest=allocation_digest,
-        proposal_admission_receipt_id=proposal_admission.receipt_id,
-        proposal_admission_digest=proposal_admission_digest,
-        model_catalog_snapshot_id=selection_payload["catalog_snapshot_id"],
-        model_selection_receipt_id=selection_payload["receipt_id"],
-        model_selection_digest=model_selection_digest,
-        model_runtime_binding_receipt_id=runtime_binding_payload.get("receipt_id") or None,
-        model_runtime_binding_digest=model_runtime_binding_digest,
-        memex_supply_receipt_id=memex_payload["receipt_id"],
-        memex_supply_digest=memex_supply_digest,
-        committed_revision=committed_revision,
-    )
-    return ArchitectFixPromotionResult(
-        accepted=True,
-        status=ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT,
-        receipt=receipt,
-        rejection_reasons=(),
-        authority_profile=promoted_profile,
-        work_state_snapshot=committed,
     )
 
 
@@ -584,37 +408,6 @@ def _duplicate_queue(snapshot: Mapping[str, Any], *, selected_slice: str, determ
         if str(claim.get("slice_id") or "") == selected_slice and str(claim.get("status") or "").upper() == "ACTIVE":
             return True
     return False
-
-
-def _work_order_id(queue_item_id: str) -> str:
-    return "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
-
-
-def _append_queue_state(
-    snapshot: Mapping[str, Any],
-    *,
-    claim: Mapping[str, Any],
-    queue_item: Mapping[str, Any],
-    sync_receipt: Mapping[str, Any],
-    promotion_record: Mapping[str, Any],
-) -> dict[str, Any]:
-    updated = json.loads(json.dumps(snapshot, sort_keys=True, default=str))
-    updated["worker_claims"] = [
-        dict(item) for item in updated.get("worker_claims", []) if isinstance(item, Mapping)
-    ] + [dict(claim)]
-    updated["wre_queue_items"] = [
-        dict(item) for item in updated.get("wre_queue_items", []) if isinstance(item, Mapping)
-    ] + [dict(queue_item)]
-    updated["queue_sync_receipts"] = [
-        dict(item) for item in updated.get("queue_sync_receipts", []) if isinstance(item, Mapping)
-    ] + [dict(sync_receipt)]
-    updated["architect_fix_promotions"] = [
-        dict(item) for item in updated.get("architect_fix_promotions", []) if isinstance(item, Mapping)
-    ] + [dict(promotion_record)]
-    updated["selected_slice"] = str(queue_item.get("slice_id") or updated.get("selected_slice") or "")
-    updated["no_execution_performed"] = True
-    updated["no_holoindex_mutation_performed"] = True
-    return updated
 
 
 __all__ = [
