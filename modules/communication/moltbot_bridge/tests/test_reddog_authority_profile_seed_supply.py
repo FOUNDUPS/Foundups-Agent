@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ast
 import json
-from dataclasses import asdict
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supply import (
@@ -17,6 +16,8 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_source_ar
     run_reddog_authority_profile_source_artifact_supply,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _PRINCIPAL_PUBLIC_KEY,
+    _REDDOG_PUBLIC_KEY,
     _determination,
     _memex_supply,
     _model_selection,
@@ -50,7 +51,7 @@ def _supply(tmp_path: Path, **overrides):
         "permission_snapshot": _snapshot(),
         "output_path": tmp_path / "runtime" / "authority_profile_seed.json",
         "reddog_id": "reddog:architect",
-        "reddog_public_key": "pub:reddog",
+        "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "now_epoch": NOW,
     }
     params.update(overrides)
@@ -60,8 +61,8 @@ def _supply(tmp_path: Path, **overrides):
 def test_seed_supply_writes_seed_consumable_by_source_supplier_and_promotion(tmp_path: Path) -> None:
     seed_result = _supply(
         tmp_path,
-        consensus_receipt_digest="sha256:consensus",
-        sovereign_authorization_digest="sha256:sovereign",
+        consensus_receipt_digest="sha256:" + ("c" * 64),
+        sovereign_authorization_digest="sha256:" + ("d" * 64),
     )
 
     assert seed_result.accepted is True
@@ -101,7 +102,7 @@ def test_seed_supply_rejects_missing_reddog_public_key(tmp_path: Path) -> None:
 
 
 def test_seed_supply_rejects_principal_reddog_key_reuse(tmp_path: Path) -> None:
-    result = _supply(tmp_path, reddog_public_key="pub:principal")
+    result = _supply(tmp_path, reddog_public_key=_PRINCIPAL_PUBLIC_KEY)
 
     assert result.accepted is False
     assert AuthorityProfileSeedSupplyReason.PRINCIPAL_REDDOG_KEY_REUSE in result.rejection_reasons

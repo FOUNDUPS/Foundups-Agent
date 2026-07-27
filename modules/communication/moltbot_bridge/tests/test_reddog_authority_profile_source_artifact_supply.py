@@ -22,6 +22,8 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_WORKTREE_CREATE,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _PRINCIPAL_PUBLIC_KEY,
+    _REDDOG_PUBLIC_KEY,
     _promote,
 )
 
@@ -42,7 +44,7 @@ def _principal() -> PrincipalAuthorityRecord:
     return PrincipalAuthorityRecord(
         principal_id="github:mjtrout",
         principal_provider="github",
-        principal_public_key="pub:principal",
+        principal_public_key=_PRINCIPAL_PUBLIC_KEY,
         repo_scope=("FOUNDUPS/Foundups-Agent",),
         foundup_scope=("paccess_001",),
         verified_subject_digest="sha256:verified-subject",
@@ -68,7 +70,7 @@ def _seed(**overrides):
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
         "reddog_id": "reddog:architect",
-        "reddog_public_key": "pub:reddog",
+        "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
         "allowed_paths": ["modules/foundups/paccess_001/**"],
@@ -84,8 +86,8 @@ def _seed(**overrides):
         "key_epoch": "epoch-1",
         "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
         "required_policy_gates": ["signed_work_order_authority", "execution_valve"],
-        "consensus_receipt_digest": "sha256:consensus",
-        "sovereign_authorization_digest": "sha256:012-token",
+        "consensus_receipt_digest": "sha256:" + ("c" * 64),
+        "sovereign_authorization_digest": "sha256:" + ("d" * 64),
         "holoindex_evidence": {
             "holoindex_query": "RedDog architect FIX promotion",
             "holoindex_status": "bundle_json_ok",
@@ -119,7 +121,7 @@ def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Pa
         "sha256:"
     )
     profile = json.loads(output.read_text(encoding="utf-8"))
-    assert profile["principal_public_key"] == "pub:principal"
+    assert profile["principal_public_key"] == _PRINCIPAL_PUBLIC_KEY
     assert profile["no_signing_performed"] is True
     assert profile["no_holoindex_reindex_performed"] is True
     assert profile["source_authority_basis"]["permission_snapshot_can_write"] is True

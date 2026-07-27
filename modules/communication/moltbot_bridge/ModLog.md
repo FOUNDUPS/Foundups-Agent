@@ -1,4 +1,29 @@
 # ModLog - moltbot_bridge
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1
+- Added direct promotion-time verification of the principal signature over the
+  exact signer policy and the RedDog signature over the exact proposal payload.
+  The verifier reconstructs current proposal and signer-runtime bindings and
+  resolves the principal key independently; caller-supplied trust keys,
+  caller-profile identity/scope substitution, test-only signer mode, stale
+  policies, signer-context substitution, and altered signatures fail closed.
+- Removed the first draft's forgeable opaque-proof registry and process-local
+  one-use state. Successful authoritative work-state CAS now persists the
+  attestation ID as the durable replay guard, including after process restart.
+  Failed profile or work-state writes do not consume the signed evidence.
+- Bound signed receipt IDs/digests and signer-runtime context into the worker
+  claim, queue item, records, receipts, authority profile, and context. Profile
+  identity fields come only from verified authorization, and the source
+  receipt is recomputed. WSP 15 promotion and queue CAS remain the mutation engine.
+- Decomposed promotion record/profile/state assembly into a bounded transaction
+  module. The inherited prewrite-then-CAS profile publication still relies on
+  bootstrap rollback; crash-recoverable two-phase publication remains a hard
+  gate before production authority inputs are wired.
+- Kept startup fail closed: `main.py` does not choose its own trust key and
+  cannot promote without an attestation, production signer-runtime config, and
+  independently supplied principal-key resolver. Production signer-to-startup
+  input supply and current revocation-state composition remain
+  SPECIFIED_NOT_IMPLEMENTED (WSP 00, 15, 22, 50, 62, 97).
+
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_SIGNER_POLICY_RUNTIME_PHASE1
 - Extended the existing signer config, bootstrap, key-provider, and runtime
   wiring so one exact architect-proposal signer policy can be provisioned only

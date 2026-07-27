@@ -60,7 +60,7 @@ def _inputs() -> tuple[dict, dict, dict, dict]:
     principal = {
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
-        "principal_public_key": "pub:principal",
+        "principal_public_key": promoted["principal_public_key"],
         "repo_scope": ["FOUNDUPS/Foundups-Agent"],
         "foundup_scope": ["paccess_001"],
         "verified_subject_digest": "sha256:verified",

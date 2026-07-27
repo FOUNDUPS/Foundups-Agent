@@ -13,6 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_seed_supp
     run_reddog_authority_profile_seed_supply_bootstrap,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _REDDOG_PUBLIC_KEY,
     _determination,
     _memex_supply,
     _model_selection,
@@ -66,7 +67,9 @@ def test_bootstrap_materializes_authority_profile_seed(tmp_path: Path) -> None:
         permission_snapshot_path=files["snapshot"],
         output_path=files["output"],
         reddog_id="reddog:architect",
-        reddog_public_key="pub:reddog",
+        reddog_public_key=_REDDOG_PUBLIC_KEY,
+        consensus_receipt_digest="sha256:" + ("c" * 64),
+        sovereign_authorization_digest="sha256:" + ("d" * 64),
         now_epoch=NOW,
     )
 
@@ -75,7 +78,7 @@ def test_bootstrap_materializes_authority_profile_seed(tmp_path: Path) -> None:
     assert result.seed_supply_receipt_id and result.seed_supply_receipt_id.startswith("sha256:")
     seed = json.loads(files["output"].read_text(encoding="utf-8"))
     assert seed["principal_id"] == "github:mjtrout"
-    assert seed["reddog_public_key"] == "pub:reddog"
+    assert seed["reddog_public_key"] == _REDDOG_PUBLIC_KEY
     assert seed["no_signing_performed"] is True
     assert seed["no_holoindex_reindex_performed"] is True
 

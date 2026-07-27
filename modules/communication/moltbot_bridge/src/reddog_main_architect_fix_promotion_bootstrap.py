@@ -29,6 +29,12 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_signed_wsp15_
     ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT,
     promote_reddog_architect_fix_to_signed_wsp15_work_order,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import (
+    SignerSocketServiceRuntimeWiringConfig,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    PrincipalKeyResolver,
+)
 from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
     AtomicJsonAuthoritativeWorkStateStore,
 )
@@ -77,6 +83,25 @@ class RedDogMainArchitectFixPromotionBootstrapResult:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class _PromotionBootstrapInputs:
+    root: Path
+    work_state_file: Path
+    output_path: Path
+    determination: Mapping[str, Any]
+    model_selection: Mapping[str, Any]
+    model_runtime_binding: Mapping[str, Any] | None
+    memex_supply: Mapping[str, Any]
+    authority_profile: Mapping[str, Any]
+    holoindex_file: Path
+    proposal_attestation: Mapping[str, Any]
+    signer_runtime_config: SignerSocketServiceRuntimeWiringConfig | None
+    principal_key_resolver: PrincipalKeyResolver | None
+    revoked_key_epochs: frozenset[str]
+    worker_id: str
+    now_iso: str
+
+
 def run_reddog_main_architect_fix_promotion_bootstrap(
     *,
     repo_root: Path | str,
@@ -88,6 +113,10 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     authority_profile_output_path: Path | str | None,
     holoindex_receipt_path: Path | str | None,
     model_runtime_binding_receipt_path: Path | str | None = None,
+    proposal_authenticity_attestation: Mapping[str, Any] | None = None,
+    signer_runtime_config: SignerSocketServiceRuntimeWiringConfig | None = None,
+    principal_key_resolver: PrincipalKeyResolver | None = None,
+    current_proposal_revoked_key_epochs: frozenset[str] = frozenset(),
     worker_id: str = "reddog-main-architect-fix-promotion",
     now_iso: str | None = None,
 ) -> RedDogMainArchitectFixPromotionBootstrapResult:
@@ -171,74 +200,104 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     output_probe_reasons = _probe_atomic_output(output_path)
     if output_probe_reasons:
         return _not_ready(output_probe_reasons)
+    return _run_locked_promotion(
+        _PromotionBootstrapInputs(
+            root=root,
+            work_state_file=work_state_file,
+            output_path=output_path,
+            determination=determination,
+            model_selection=model_selection,
+            model_runtime_binding=model_runtime_binding,
+            memex_supply=memex_supply,
+            authority_profile=authority_profile,
+            holoindex_file=holoindex_file,
+            proposal_attestation=proposal_authenticity_attestation or {},
+            signer_runtime_config=signer_runtime_config,
+            principal_key_resolver=principal_key_resolver,
+            revoked_key_epochs=frozenset(current_proposal_revoked_key_epochs),
+            worker_id=worker_id,
+            now_iso=now_iso or datetime.now(timezone.utc).isoformat(),
+        )
+    )
 
-    store = AtomicJsonAuthoritativeWorkStateStore(work_state_file)
-    with runtime_operation_lock(str(root) + ".architect-fix-promotion"):
+
+def _run_locked_promotion(
+    inputs: _PromotionBootstrapInputs,
+) -> RedDogMainArchitectFixPromotionBootstrapResult:
+    with runtime_operation_lock(str(inputs.root) + ".architect-fix-promotion"):
         try:
-            current_holoindex_receipt = load_freshness_receipt(holoindex_file)
+            receipt = load_freshness_receipt(inputs.holoindex_file)
         except Exception:
             return _not_ready(("malformed_holoindex_freshness_receipt",))
-        current_repo_head_sha = read_git_head_sha(root)
-        owner_binding = generation_binding_from_receipt(
-            current_holoindex_receipt,
-            receipt_path=holoindex_file,
+        repo_head = read_git_head_sha(inputs.root)
+        owner = generation_binding_from_receipt(
+            receipt, receipt_path=inputs.holoindex_file
         )
         if not verify_reddog_holoindex_owner_binding(
-            repo_root=root,
-            expected_repo_head_sha=current_repo_head_sha,
-            expected_generation_id=current_holoindex_receipt.generation_id,
+            repo_root=inputs.root,
+            expected_repo_head_sha=repo_head,
+            expected_generation_id=receipt.generation_id,
             expected_receipt_digest=str(
-                owner_binding.get("freshness_receipt_digest") or ""
+                owner.get("freshness_receipt_digest") or ""
             ),
         ):
             return _not_ready(("holoindex_owner_binding_not_current",))
+        return _run_profile_transaction(inputs, repo_head, receipt)
 
-        with runtime_operation_lock(str(output_path) + ".operation"):
-            previous_output = (
-                output_path.read_bytes() if output_path.exists() else None
+
+def _run_profile_transaction(inputs, repo_head, holoindex_receipt):
+    store = AtomicJsonAuthoritativeWorkStateStore(inputs.work_state_file)
+    with runtime_operation_lock(str(inputs.output_path) + ".operation"):
+        previous = (
+            inputs.output_path.read_bytes()
+            if inputs.output_path.exists()
+            else None
+        )
+        written_digest: list[str] = []
+
+        def precommit_writer(profile: Mapping[str, Any]) -> None:
+            _write_json_atomic_unlocked(inputs.output_path, profile)
+            written_digest[:] = [_file_digest(inputs.output_path)]
+
+        result = promote_reddog_architect_fix_to_signed_wsp15_work_order(
+            architect_determination=inputs.determination,
+            work_state_store=store,
+            authority_profile=inputs.authority_profile,
+            model_selection_receipt=inputs.model_selection,
+            model_runtime_binding_receipt=inputs.model_runtime_binding,
+            memex_supply_receipt=inputs.memex_supply,
+            proposal_authenticity_attestation=inputs.proposal_attestation,
+            signer_runtime_config=inputs.signer_runtime_config,
+            principal_key_resolver=inputs.principal_key_resolver,
+            current_proposal_revoked_key_epochs=inputs.revoked_key_epochs,
+            worker_id=inputs.worker_id,
+            now_iso=inputs.now_iso,
+            current_repo_head_sha=repo_head,
+            current_holoindex_receipt=holoindex_receipt,
+            authority_profile_precommit_writer=precommit_writer,
+        )
+        if not result.accepted:
+            reasons = list(
+                result.rejection_reasons
+                or ("architect_fix_promotion_rejected",)
             )
-            written_digest: list[str] = []
-
-            def precommit_writer(profile: Mapping[str, Any]) -> None:
-                _write_json_atomic_unlocked(output_path, profile)
-                written_digest[:] = [_file_digest(output_path)]
-
-            result = promote_reddog_architect_fix_to_signed_wsp15_work_order(
-                architect_determination=determination,
-                work_state_store=store,
-                authority_profile=authority_profile,
-                model_selection_receipt=model_selection,
-                model_runtime_binding_receipt=model_runtime_binding,
-                memex_supply_receipt=memex_supply,
-                worker_id=worker_id,
-                now_iso=now_iso or datetime.now(timezone.utc).isoformat(),
-                current_repo_head_sha=current_repo_head_sha,
-                current_holoindex_receipt=current_holoindex_receipt,
-                authority_profile_precommit_writer=precommit_writer,
-            )
-            if (
-                not result.accepted
-                or result.status != ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT
+            if written_digest and not _restore_output_unlocked(
+                inputs.output_path,
+                previous,
+                expected_current_digest=written_digest[0],
             ):
-                rollback_failed = bool(
-                    written_digest
-                ) and not _restore_output_unlocked(
-                    output_path,
-                    previous_output,
-                    expected_current_digest=written_digest[0],
-                )
-                rejection_reasons = list(
-                    result.rejection_reasons
-                    or ("architect_fix_promotion_rejected",)
-                )
-                if rollback_failed:
-                    rejection_reasons.append(
-                        "authority_profile_rollback_failed"
-                    )
-                return _not_ready(rejection_reasons)
-    if result.authority_profile is None or result.receipt is None:
-        return _not_ready(("architect_fix_promotion_missing_profile",))
+                reasons.append("authority_profile_rollback_failed")
+            return _not_ready(reasons)
+    return _applied_result(result, inputs.output_path)
 
+
+def _applied_result(result, output_path):
+    if (
+        result.status != ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT
+        or result.authority_profile is None
+        or result.receipt is None
+    ):
+        return _not_ready(("architect_fix_promotion_missing_profile",))
     return RedDogMainArchitectFixPromotionBootstrapResult(
         accepted=True,
         status=REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,

@@ -31,8 +31,29 @@ The receipt's SHA is integrity evidence, not authentication.
 `reddog_architect_proposal_authenticity.py` defines a domain-separated Ed25519
 attestation, an exact signer-owned proposal policy, transactional signer-side
 nonce reservation, and strict serialized-attestation integrity validation.
-The validated attestation is still evidence, not authority. It is not accepted
-by proposal admission, the candidate gate, or promotion.
+The public validated attestation remains evidence, not authority.
+`reddog_architect_proposal_verified_authority.py` adds the promotion boundary:
+it rebuilds the exact proposal payload from current records, reconstructs the
+active isolated-signer context, resolves the principal key independently, and
+re-verifies both the principal-signed signer policy and RedDog proposal
+attestation at promotion use time. The canonical authority-profile source
+receipt is recomputed, so identity, scope, operation, or permission changes are
+rejected alongside test-only mode, signer substitution, expiry, and revocation.
+Successful authoritative work-state CAS persists the attestation ID as the
+durable replay guard, including across process restart. The attestation,
+policy-authorization, and signer-runtime context IDs/digests are bound into the
+claim, queue item, promotion record, promotion receipt, and promoted authority
+profile. There is no process-local authority registry or serializable promotion
+capability. Production startup remains fail closed until it receives the
+attestation, a current signer-runtime configuration, and an independently
+administered principal-key resolver.
+
+`reddog_architect_fix_promotion_transaction.py` isolates record construction,
+authority-profile projection, replay detection, and authoritative state CAS
+from the validation boundary. The current bootstrap prewrites the outside-repo
+profile and performs best-effort rollback when CAS rejects. Crash-recoverable
+two-phase profile/state publication remains SPECIFIED_NOT_IMPLEMENTED and is a
+hard gate before production signer input supply is enabled.
 
 The signer-service configuration and runtime wiring can provision one exact
 proposal policy only with a fresh, principal-signed, domain-separated policy
@@ -88,9 +109,11 @@ signer policy from authoritative work state, produce its principal-signed
 policy authorization, configure a production principal-key resolver, request
 proposal signing, supply the independently administered production high-water
 authority and an authenticated durability receipt issuer/verifier, resolve
-independent key/revocation/freshness trust, produce an opaque process-local
-authority proof, compose those adapters into the signer-owned CLI sidecar, or
-consume the attestation transactionally during queue promotion.
+independent key/revocation/freshness trust, or supply the current attestation,
+signer-runtime configuration, and principal-key resolver into `main.py`.
+Direct runtime injection is tested, but the startup adapter deliberately fails
+closed without all three inputs. Serialized signatures remain evidence that is
+re-verified against current runtime trust; they are never authority by presence.
 
 ### Resident queue exact-SHA commit stage
 

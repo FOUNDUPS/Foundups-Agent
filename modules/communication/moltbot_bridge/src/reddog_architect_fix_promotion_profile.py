@@ -9,6 +9,7 @@ from typing import Any, Mapping
 @dataclass(frozen=True)
 class ArchitectFixPromotionProfileInputs:
     authority_profile: Mapping[str, Any]
+    verified_authority_identity: Mapping[str, Any]
     determination: Mapping[str, Any]
     allocation: Mapping[str, Any]
     model_selection_receipt: Mapping[str, Any]
@@ -21,6 +22,11 @@ class ArchitectFixPromotionProfileInputs:
     memex_supply_digest: str
     proposal_admission: Mapping[str, Any]
     proposal_admission_digest: str
+    proposal_authenticity_attestation_id: str
+    proposal_authenticity_attestation_digest: str
+    proposal_policy_authorization_id: str
+    proposal_policy_authorization_digest: str
+    proposal_signer_runtime_context_digest: str
     work_order_id: str
     queue_item_id: str
     claim_id: str
@@ -30,7 +36,10 @@ class ArchitectFixPromotionProfileInputs:
 def promoted_authority_profile(
     inputs: ArchitectFixPromotionProfileInputs,
 ) -> Mapping[str, Any]:
-    profile = dict(inputs.authority_profile)
+    profile = {
+        **inputs.authority_profile,
+        **inputs.verified_authority_identity,
+    }
     binding = _operational_binding(inputs)
     profile.update(_profile_updates(inputs, binding))
     if inputs.model_runtime_binding:
@@ -72,6 +81,7 @@ def _operational_binding(
         "proposal_admission_receipt_id": inputs.proposal_admission["receipt_id"],
         "proposal_admission_digest": inputs.proposal_admission_digest,
         "proposal_admission": dict(inputs.proposal_admission),
+        **_proposal_authority_binding(inputs),
         "holoindex_evidence": dict(inputs.holoindex_evidence),
     }
     if runtime:
@@ -115,8 +125,31 @@ def _profile_updates(
         "proposal_admission_receipt_id": inputs.proposal_admission["receipt_id"],
         "proposal_admission_digest": inputs.proposal_admission_digest,
         "proposal_admission": dict(inputs.proposal_admission),
+        **_proposal_authority_binding(inputs),
         "operational_context_binding": binding,
         "holoindex_evidence": dict(inputs.holoindex_evidence),
+    }
+
+
+def _proposal_authority_binding(
+    inputs: ArchitectFixPromotionProfileInputs,
+) -> dict[str, str]:
+    return {
+        "proposal_authenticity_attestation_id": (
+            inputs.proposal_authenticity_attestation_id
+        ),
+        "proposal_authenticity_attestation_digest": (
+            inputs.proposal_authenticity_attestation_digest
+        ),
+        "proposal_policy_authorization_id": (
+            inputs.proposal_policy_authorization_id
+        ),
+        "proposal_policy_authorization_digest": (
+            inputs.proposal_policy_authorization_digest
+        ),
+        "proposal_signer_runtime_context_digest": (
+            inputs.proposal_signer_runtime_context_digest
+        ),
     }
 
 
