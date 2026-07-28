@@ -78,6 +78,11 @@ Requests are size-, query-, result-, and
 timeout-bounded. The service serializes one cached semantic backend and has no
 indexing API.
 
+On Windows, a supervisor running inside the current repository virtualenv
+launches the base Python interpreter as its direct child and prepends only that
+virtualenv's resolved site-packages directory. This avoids the transient venv
+redirector without weakening the exact-parent lifecycle watchdog.
+
 The first authenticated health canary has a separate 270-second cold-model
 warmup budget. Once warm, health and query work use the ordinary owner budget
 (15 seconds by default, never more than 30); the supervising process has a

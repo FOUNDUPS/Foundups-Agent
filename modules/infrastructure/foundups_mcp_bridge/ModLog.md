@@ -1,5 +1,17 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-29 - Windows virtualenv owner launch correction
+
+- OBSERVED: RedDog's repository virtualenv launched the HoloIndex owner through
+  a transient Windows redirector, so the real service process did not have the
+  supervisor as its direct parent and the fail-closed watchdog exited before
+  semantic health could complete.
+- The supervisor now launches the base interpreter as its direct child only
+  for the current Windows virtualenv and explicitly carries that virtualenv's
+  approved site-packages path.
+- Exact parent-process monitoring, authenticated loopback health, generation
+  binding, and no-reindex authority are unchanged.
+
 ## 2026-07-27 - Promotion-time HoloIndex owner binding
 
 - Added a read-only exact-binding verifier for RedDog promotion gates.
