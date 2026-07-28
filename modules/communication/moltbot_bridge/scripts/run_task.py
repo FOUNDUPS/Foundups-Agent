@@ -24,6 +24,14 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_run_task_support import (
+    complete_task as _complete_task,
+    fail_task as _fail_task,
+    no_executor_matched as _no_executor_matched,
+    no_executor_result as _no_executor_result,
+    start_runtime_emitter as _start_runtime_emitter,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
@@ -231,81 +239,6 @@ def _finalize_task_result(
     else:
         _fail_task(db, task_id, result, emitters)
     return result
-
-
-def _start_runtime_emitter(
-    task_id: str, source: str, description: str
-) -> tuple[Any, Any, Any]:
-    try:
-        from modules.infrastructure.dae_daemon.src.runtime_emitter import (
-            emit_failure, emit_start, emit_success,
-        )
-        started = emit_start(
-            "run_task", "task_dispatch", task_id=task_id,
-            details={"source": source, "description": description[:80]},
-        )
-        return started, emit_success, emit_failure
-    except Exception:
-        return None, None, None
-
-
-def _complete_task(
-    db: Any,
-    task_id: str,
-    result: Mapping[str, Any],
-    elapsed_ms: int,
-    emitters: tuple[Any, Any, Any],
-) -> None:
-    db.complete_autonomous_task(task_id)
-    logger.info(
-        "[RUN_TASK] Task %s completed (executor=%s, %dms)",
-        task_id, result["executor"], elapsed_ms,
-    )
-    started, emit_success, _ = emitters
-    if started is not None and emit_success:
-        try:
-            emit_success(
-                "run_task", "task_dispatch", started, task_id=task_id,
-                details={"executor": result["executor"]},
-            )
-        except Exception:
-            pass
-
-
-def _fail_task(
-    db: Any,
-    task_id: str,
-    result: Mapping[str, Any],
-    emitters: tuple[Any, Any, Any],
-) -> None:
-    try:
-        db.db.execute_write(
-            "UPDATE agents_autonomous_tasks SET status = 'failed' WHERE task_id = ?",
-            (task_id,),
-        )
-    except Exception as fail_exc:
-        logger.warning("[RUN_TASK] Could not mark task %s as failed: %s", task_id, fail_exc)
-    logger.warning(
-        "[RUN_TASK] Task %s failed: %s (executor=%s)",
-        task_id, str(result["detail"])[:200], result["executor"],
-    )
-    started, _, emit_failure = emitters
-    if started is not None and emit_failure:
-        try:
-            emit_failure(
-                "run_task", "task_dispatch", started, str(result["detail"])[:200],
-                task_id=task_id, details={"executor": result["executor"]},
-            )
-        except Exception:
-            pass
-
-
-def _no_executor_result() -> Dict[str, Any]:
-    return {"ok": False, "detail": "no_executor_matched", "executor": "none"}
-
-
-def _no_executor_matched(result: Mapping[str, Any]) -> bool:
-    return result.get("ok") is not True and result.get("detail") == "no_executor_matched"
 
 
 def _try_reddog_readonly_audit_dispatch(

@@ -69,6 +69,12 @@ PUBLICATION_MODULE_FILES = {
 BOUNDED_AUTHORITY_BINDING_FILES = {
     "src/reddog_worker_dispatch_authority_binding.py",
 }
+CURRENT_SECURITY_RUNTIME_FILES = {
+    "scripts/run_task.py",
+    "src/reddog_run_task_support.py",
+    "src/reddog_work_authority_nonce_store.py",
+    "src/reddog_work_order_signature_verifier.py",
+}
 
 
 def _exemptions(path: Path) -> list[dict]:
@@ -165,3 +171,14 @@ def test_new_authority_binding_modules_are_bounded_without_exemption() -> None:
         target = MODULE_ROOT / relative_path
         assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
         assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_current_security_runtime_files_stay_under_domain_limit() -> None:
+    for relative_path in CURRENT_SECURITY_RUNTIME_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
+        oversized = _oversized_function_sizes(target)
+        if relative_path == "scripts/run_task.py":
+            assert oversized == {"_try_wre_dispatch": 66}
+        else:
+            assert oversized == {}
