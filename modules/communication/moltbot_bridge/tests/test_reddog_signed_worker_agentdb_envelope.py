@@ -460,8 +460,9 @@ def test_run_task_signed_markers_never_fall_through_to_wre(
     else:
         _rewrite_context(task_id, lambda context: context.clear())
         assert db.db.execute_write(
-            "UPDATE agents_autonomous_tasks SET required_skills = ? WHERE task_id = ?",
-            (json.dumps(["attacker_skill"]), task_id),
+            "UPDATE agents_autonomous_tasks "
+            "SET required_skills = ?, discovered_by = ? WHERE task_id = ?",
+            (json.dumps(["attacker_skill"]), "attacker", task_id),
         ) == 1
     assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
     monkeypatch.setenv(
@@ -480,6 +481,37 @@ def test_run_task_signed_markers_never_fall_through_to_wre(
     assert result["executor"] == "reddog:signed_worker_dispatch"
     assert "routing_binding_mismatch" in result["detail"]
     assert runner.calls == []
+
+
+def test_competing_preverification_claim_is_never_overwritten(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    _rewrite_context(task_id, lambda context: context.update(source="attacker"))
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+
+    def competing_claim(*, db, task_id):
+        assert db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET status = 'executing' "
+            "WHERE task_id = ? AND status = 'assigned'",
+            (task_id,),
+        ) == 1
+        return None
+
+    monkeypatch.setattr(
+        run_task_runtime,
+        "admit_signed_worker_execution_once",
+        competing_claim,
+    )
+    result = execute_task(task_id, repo_root=tmp_path)
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["ok"] is False
+    assert result["finalization_owned"] is True
+    assert result["executor"] == "reddog:signed_worker_dispatch"
+    assert stored is not None and stored["status"] == "executing"
 
 
 def test_tampered_expired_verifier_never_renews_assurance(

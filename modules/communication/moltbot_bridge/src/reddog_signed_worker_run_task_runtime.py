@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
+    SIGNED_WORKER_TASK_PREFIX,
     admit_signed_worker_execution_once,
     bind_execution_admission,
 )
@@ -32,9 +33,19 @@ def execute_signed_worker_from_agentdb(
 ) -> Mapping[str, Any] | None:
     """Verify, claim once, and execute one signed-origin AgentDB task."""
     if not _has_signed_marker(
-        context, required_skills, source=source, discovered_by=discovered_by
+        task_id,
+        context,
+        required_skills,
+        source=source,
+        discovered_by=discovered_by,
     ):
         return None
+    admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
+    if admission is None:
+        result = _rejected("reddog_signed_worker_execution_already_claimed")
+        result["finalization_owned"] = True
+        return result
+    admitted_context = bind_execution_admission(context, admission)
     try:
         verified_context = _verify_context(
             repo_root=repo_root,
@@ -46,10 +57,17 @@ def execute_signed_worker_from_agentdb(
             env=env,
         )
     except (ImportError, TypeError, ValueError) as exc:
-        return _rejected(f"reddog_signed_worker_authority_rejected: {exc}")
+        return _finalize_owned_execution(
+            db=db,
+            task_id=task_id,
+            context=admitted_context,
+            result=_rejected(f"reddog_signed_worker_authority_rejected: {exc}"),
+        )
     return _claim_and_execute(
-        repo_root=repo_root, db=db, task_id=task_id,
-        verified_context=verified_context,
+        repo_root=repo_root,
+        db=db,
+        task_id=task_id,
+        verified_context=bind_execution_admission(verified_context, admission),
         signed_worker_runner=signed_worker_runner,
         env=env,
     )
@@ -64,12 +82,6 @@ def _claim_and_execute(
     signed_worker_runner: Any | None,
     env: Mapping[str, str],
 ) -> Mapping[str, Any]:
-    admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
-    if admission is None:
-        result = _rejected("reddog_signed_worker_execution_already_claimed")
-        result["finalization_owned"] = True
-        return result
-    admitted_context = bind_execution_admission(verified_context, admission)
     try:
         effective_runner, binding_reject = _runner(
             repo_root=repo_root,
@@ -82,7 +94,7 @@ def _claim_and_execute(
             else dict(_execute(
                 repo_root=repo_root,
                 task_id=task_id,
-                context=admitted_context,
+                context=verified_context,
                 runner=effective_runner,
             ))
         )
@@ -92,7 +104,7 @@ def _claim_and_execute(
             f"reddog_signed_worker_dispatch_error:{type(exc).__name__}"
         )
     return _finalize_owned_execution(
-        db=db, task_id=task_id, context=admitted_context, result=result
+        db=db, task_id=task_id, context=verified_context, result=result
     )
 
 
@@ -204,6 +216,7 @@ def _execute(
 
 
 def _has_signed_marker(
+    task_id: str,
     context: Mapping[str, Any],
     required_skills: Sequence[str],
     *,
@@ -211,7 +224,8 @@ def _has_signed_marker(
     discovered_by: str,
 ) -> bool:
     return (
-        discovered_by == SIGNED_SOURCE
+        task_id.startswith(SIGNED_WORKER_TASK_PREFIX)
+        or discovered_by == SIGNED_SOURCE
         or SIGNED_SKILL in required_skills
         or source == SIGNED_SOURCE
         or "signed_worker_agentdb_envelope" in context

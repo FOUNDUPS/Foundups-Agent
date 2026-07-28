@@ -12,6 +12,7 @@ from typing import Any, Callable, Mapping
 
 CLAIM_SCHEMA = "reddog_signed_worker_execution_claim.v1"
 USE_SCHEMA = "reddog_signed_worker_execution_use.v1"
+SIGNED_WORKER_TASK_PREFIX = "reddog-worker-dispatch-"
 
 
 @dataclass(frozen=True)
@@ -128,7 +129,7 @@ def _claim_inputs(
     token: str,
     now_iso: str,
 ) -> tuple[str, str, Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]] | None:
-    if row is None:
+    if row is None or not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
         return None
     payload = dict(row)
     assigned_to = str(payload.get("assigned_to") or "").strip()
@@ -139,7 +140,7 @@ def _claim_inputs(
         context = json.loads(raw_context)
     except (TypeError, ValueError):
         return None
-    if not isinstance(context, Mapping) or "signed_worker_agentdb_envelope" not in context:
+    if not isinstance(context, Mapping):
         return None
     token_digest = _digest_text(token)
     claim = _receipt(
@@ -192,6 +193,7 @@ def _canonical_json(value: Any) -> str:
 
 __all__ = [
     "CLAIM_SCHEMA",
+    "SIGNED_WORKER_TASK_PREFIX",
     "USE_SCHEMA",
     "SignedWorkerExecutionAdmission",
     "admit_signed_worker_execution_once",
