@@ -21,6 +21,20 @@ assignee, claim receipt, one-use receipt and preclaim context digest. Requeue
 clears assignment ownership; terminal transitions retain it. Any concurrent
 row, context or receipt change fails closed.
 
+## Signed Worker Result Ledger
+File: `modules/infrastructure/database/src/signed_worker_result_ledger.py`
+
+### Public Functions
+- `validated_result_history(context) -> Mapping[str, Any]`
+- `validate_result_history_ledger(connection, task_id, context) -> bool`
+- `persist_result_history_ledger(connection, task_id, context, *, claim_receipt_id, use_receipt_id) -> bool`
+
+The ledger is independently durable from mutable autonomous-task context.
+Each bounded retry result is appended in the same transaction as exact-CAS
+task finalization. Both supervisor and direct task admission require the full
+context history to match the ledger before execution. Fully re-hashed,
+truncated, reordered, or substituted histories fail closed.
+
 ## DatabaseManager
 File: `modules/infrastructure/database/src/db_manager.py`
 

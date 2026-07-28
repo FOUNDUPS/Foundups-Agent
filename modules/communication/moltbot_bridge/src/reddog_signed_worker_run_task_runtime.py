@@ -15,6 +15,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_cla
 from modules.infrastructure.database.src.signed_worker_execution_store import (
     finalize_signed_worker_execution,
 )
+from modules.infrastructure.database.src.signed_worker_result_ledger import (
+    validated_result_history,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -60,6 +63,10 @@ def execute_signed_worker_from_agentdb(
             discovered_by=admission.discovered_by,
             env=env,
         )
+        verified_context = {
+            **dict(verified_context),
+            **validated_result_history(claimed_context),
+        }
     except (ImportError, TypeError, ValueError) as exc:
         return _finalize_owned_execution(
             db=db,

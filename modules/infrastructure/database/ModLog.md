@@ -1,5 +1,16 @@
 # Database Module - ModLog
 
+## Entry: Durable Signed-Worker Result Continuity
+**Date**: 2026-07-28
+**What Changed**: Added a bounded append-only AgentDB result ledger and bound
+signed-worker claim admission and exact finalization to it.
+**Why**: A hash chain stored only inside mutable task context can be truncated
+or completely recomputed by the same writer. Retry continuity needs an
+independent durable comparison before either supervisor or direct execution.
+**Impact**: Result append and task transition commit atomically; forged,
+truncated or divergent context histories reject before a runner call.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 62, WSP 78, WSP 97
+
 ## Entry: Held Publication and Exact Signed-Worker Finalization
 **Date**: 2026-07-28
 **What Changed**: Restricted generic assignment to `pending -> assigned` and

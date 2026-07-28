@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -81,6 +82,31 @@ def _set_nested(
     for key in path[:-1]:
         cursor = cursor[key]  # type: ignore[index]
     cursor[path[-1]] = value  # type: ignore[index]
+
+
+def _test_digest(value: object) -> str:
+    raw = json.dumps(
+        value, sort_keys=True, separators=(",", ":"),
+        ensure_ascii=True, default=str,
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _rechain_context_history(context: dict[str, object]) -> None:
+    history = context["signed_worker_task_result_receipts"]
+    assert isinstance(history, list)
+    normalized: list[dict[str, str]] = []
+    for raw in history:
+        assert isinstance(raw, dict)
+        entry = {
+            "claim_status": str(raw.get("claim_status") or ""),
+            "receipt_id": str(raw.get("receipt_id") or ""),
+            "receipt_digest": str(raw.get("receipt_digest") or ""),
+            "previous_history_digest": _test_digest(normalized),
+        }
+        entry["history_entry_digest"] = _test_digest(entry)
+        normalized.append(entry)
+    context["signed_worker_task_result_receipts"] = normalized
 
 
 def test_run_task_rebuilds_canonical_context_before_runner_selection(
@@ -207,6 +233,12 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
     assert result["finalization_owned"] is True
     assert result["detail"] == "reddog_signed_worker_finalization_conflict"
     assert stored is not None and stored["status"] == "cancelled"
+    rows = db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    )
+    assert rows == []
 
 
 def test_execution_claim_consumes_token_without_persisting_raw_value() -> None:
@@ -565,6 +597,110 @@ def test_supervisor_rejects_tampered_earlier_requeue_result_history(
     assert rejected["accepted"] is False
     assert runner.calls == []
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+
+
+def test_supervisor_rejects_fully_rehashed_result_history(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+    for _ in range(2):
+        assert claim_reddog_signed_worker_dispatch_task_once(
+            repo_root=tmp_path,
+            signed_worker_runner=_FakeRunner(requeue_required=True),
+            authority_verification_context=(
+                worker_dispatch_authority_verification_context()
+            ),
+        )["accepted"] is True
+
+    def forge(context: dict[str, object]) -> None:
+        history = context["signed_worker_task_result_receipts"]
+        assert isinstance(history, list) and isinstance(history[0], dict)
+        history[0]["receipt_digest"] = "sha256:" + ("f" * 64)
+        _rechain_context_history(context)
+
+    _rewrite_context(task_id, forge)
+    runner = _FakeRunner()
+    rejected = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert rejected["accepted"] is False
+    assert runner.calls == []
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+
+
+def test_direct_run_rejects_rehashed_truncated_result_history(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    for _ in range(2):
+        assert claim_reddog_signed_worker_dispatch_task_once(
+            repo_root=tmp_path,
+            signed_worker_runner=_FakeRunner(requeue_required=True),
+            authority_verification_context=(
+                worker_dispatch_authority_verification_context()
+            ),
+        )["accepted"] is True
+
+    def truncate(context: dict[str, object]) -> None:
+        history = context["signed_worker_task_result_receipts"]
+        assert isinstance(history, list)
+        context["signed_worker_task_result_receipts"] = [history[-1]]
+        _rechain_context_history(context)
+
+    _rewrite_context(task_id, truncate)
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+    runner = _FakeRunner()
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+    )
+
+    assert result["ok"] is False
+    assert runner.calls == []
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+
+
+def test_direct_run_preserves_agentdb_anchored_result_history(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    assert claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=True),
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )["accepted"] is True
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+    )
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["ok"] is True
+    assert stored is not None and stored["status"] == "completed"
+    assert len(stored["context"]["signed_worker_task_result_receipts"]) == 1
+    rows = db.db.execute_query(
+        "SELECT attempt_sequence FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    )
+    assert rows == [{"attempt_sequence": 1}]
 
 
 @pytest.mark.parametrize("authority_failure", ("expired", "revoked"))

@@ -186,6 +186,56 @@ def _write_unanchored_packets(
     publisher.journal_path.write_text(json.dumps(journal), encoding="utf-8")
 
 
+def _forge_committed_packets(
+    store: AtomicJsonAuthorityRuntimeStore,
+    publisher: AtomicArchitectFixPromotionPublisher,
+) -> None:
+    stage = json.loads(publisher.stage_path.read_text(encoding="utf-8"))
+    journal = json.loads(publisher.journal_path.read_text(encoding="utf-8"))
+    profile = {**stage["authority_profile"], "attacker_note": "forged"}
+    profile_digest = canonical_digest(profile)
+    active = json.loads(json.dumps(stage["active_work_state"]))
+    active["architect_fix_promotions"][0][
+        "authority_profile_digest"
+    ] = profile_digest
+    active_digest = canonical_digest(
+        architect_fix_publication_state_projection(
+            active,
+            publication_id=stage["publication_id"],
+        )
+    )
+    stage.update(
+        authority_profile=profile,
+        authority_profile_digest=profile_digest,
+        active_work_state=active,
+        active_work_state_digest=active_digest,
+    )
+    stage["receipt_id"] = canonical_digest(
+        {key: value for key, value in stage.items() if key != "receipt_id"}
+    )
+    journal.update(
+        authority_profile_digest=profile_digest,
+        active_work_state_digest=active_digest,
+    )
+    journal["receipt_id"] = canonical_digest(
+        {key: value for key, value in journal.items() if key != "receipt_id"}
+    )
+    current = store.load()
+    forged = json.loads(json.dumps(current))
+    forged.pop("revision", None)
+    forged["architect_fix_promotions"][0][
+        "authority_profile_digest"
+    ] = profile_digest
+    forged["architect_fix_publications"][0].update(
+        authority_profile_digest=profile_digest,
+        active_work_state_digest=active_digest,
+    )
+    store.commit(forged, expected_revision=current["revision"])
+    publisher._write(publisher.stage_path, stage)
+    publisher._write(publisher.journal_path, journal)
+    publisher._write(publisher._profile_artifact_path(profile_digest), profile)
+
+
 def test_publication_commits_state_then_profile_and_cleans_journal(
     tmp_path: Path,
 ) -> None:
@@ -305,7 +355,7 @@ def test_restart_finishes_cleanup_when_profile_was_already_published(
 
 
 @pytest.mark.parametrize("missing", (None, "stage", "journal"))
-def test_restart_rehydrates_cache_after_committed_state_crash(
+def test_restart_requires_authenticated_retry_after_committed_state_crash(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     missing: str | None,
@@ -335,11 +385,38 @@ def test_restart_rehydrates_cache_after_committed_state_crash(
     )
 
     assert recovered.recover() is True
+    assert not (runtime / "authority_profile.json").exists()
+    recovered.publish(request)
     assert json.loads(
         (runtime / "authority_profile.json").read_text(encoding="utf-8")
     ) == request.authority_profile
     assert not recovered.stage_path.exists()
     assert not recovered.journal_path.exists()
+
+
+def test_recovery_never_publishes_fully_rehashed_committed_packets(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+    monkeypatch.setattr(
+        publisher,
+        "_publish_profile_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(SimulatedCrash()),
+    )
+    with pytest.raises(SimulatedCrash):
+        publisher.publish(request)
+    _forge_committed_packets(store, publisher)
+    forged_state = (runtime / "work_state.json").read_bytes()
+
+    assert publisher.recover() is True
+    assert (runtime / "work_state.json").read_bytes() == forged_state
+    assert not (runtime / "authority_profile.json").exists()
+    assert not publisher.stage_path.exists()
+    assert not publisher.journal_path.exists()
+    with pytest.raises(RuntimeError, match="state_binding_invalid"):
+        publisher.publish(request)
 
 
 def test_tampered_stage_fails_closed_after_state_commit(

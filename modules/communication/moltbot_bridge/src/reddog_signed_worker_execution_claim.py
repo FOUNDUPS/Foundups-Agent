@@ -9,6 +9,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable, Mapping
 
+from modules.infrastructure.database.src.signed_worker_result_ledger import (
+    validate_result_history_ledger,
+)
+
 
 CLAIM_SCHEMA = "reddog_signed_worker_execution_claim.v1"
 USE_SCHEMA = "reddog_signed_worker_execution_use.v1"
@@ -60,57 +64,93 @@ def _commit_execution_admission(
 
     try:
         with db.db.get_connection() as conn:
-            row = conn.execute(
-                """
-                SELECT status, assigned_to, context, required_skills, discovered_by
-                FROM agents_autonomous_tasks
-                WHERE task_id = ?
-                """,
-                (task_id,),
-            ).fetchone()
-            inputs = _claim_inputs(row, task_id=task_id, token=token, now_iso=now_iso)
-            if inputs is None:
-                return None
-            (
-                raw_context,
-                raw_skills,
-                assigned_to,
-                context,
-                required_skills,
-                discovered_by,
-                claim_receipt,
-                use_receipt,
-            ) = inputs
-            updated_context = dict(context)
-            updated_context["signed_worker_execution_claim"] = claim_receipt
-            updated_context["signed_worker_execution_use"] = use_receipt
-            changed = conn.execute(
-                """
-                UPDATE agents_autonomous_tasks
-                SET status = 'executing', context = ?
-                WHERE task_id = ? AND status = 'assigned'
-                  AND assigned_to = ? AND context = ?
-                  AND required_skills = ? AND discovered_by = ?
-                """,
-                (
-                    _canonical_json(updated_context),
-                    task_id,
-                    assigned_to,
-                    raw_context,
-                    raw_skills,
-                    discovered_by,
-                ),
-            ).rowcount
-            if changed != 1:
-                return None
+            return _admit_selected_row(
+                conn, task_id=task_id, token=token, now_iso=now_iso
+            )
     except Exception:
         return None
+
+
+def _admit_selected_row(
+    connection: Any, *, task_id: str, token: str, now_iso: str
+) -> SignedWorkerExecutionAdmission | None:
+    row = connection.execute(
+        "SELECT status, assigned_to, context, required_skills, discovered_by "
+        "FROM agents_autonomous_tasks WHERE task_id = ?",
+        (task_id,),
+    ).fetchone()
+    inputs = _claim_inputs(row, task_id=task_id, token=token, now_iso=now_iso)
+    if inputs is None:
+        return None
+    raw_context, raw_skills, assigned_to, context = inputs[:4]
+    required_skills, discovered_by, claim, use = inputs[4:]
+    if not validate_result_history_ledger(connection, task_id, context):
+        _reject_invalid_history(
+            connection, task_id=task_id, assigned_to=assigned_to,
+            raw_context=raw_context, raw_skills=raw_skills,
+            discovered_by=discovered_by, now_iso=now_iso,
+        )
+        return None
+    if not _commit_claim_row(
+        connection, task_id=task_id, assigned_to=assigned_to,
+        raw_context=raw_context, raw_skills=raw_skills,
+        discovered_by=discovered_by, context=context, claim=claim, use=use,
+    ):
+        return None
     return SignedWorkerExecutionAdmission(
-        claim_receipt=claim_receipt,
-        use_receipt=use_receipt,
-        claimed_context=dict(context),
-        required_skills=required_skills,
-        discovered_by=discovered_by,
+        claim_receipt=claim, use_receipt=use, claimed_context=dict(context),
+        required_skills=required_skills, discovered_by=discovered_by,
+    )
+
+
+def _commit_claim_row(
+    connection: Any, *, task_id: str, assigned_to: str,
+    raw_context: str, raw_skills: str, discovered_by: str,
+    context: Mapping[str, Any], claim: Mapping[str, Any], use: Mapping[str, Any],
+) -> bool:
+    updated = dict(context)
+    updated["signed_worker_execution_claim"] = claim
+    updated["signed_worker_execution_use"] = use
+    changed = connection.execute(
+        "UPDATE agents_autonomous_tasks SET status = 'executing', context = ? "
+        "WHERE task_id = ? AND status = 'assigned' AND assigned_to = ? "
+        "AND context = ? AND required_skills = ? AND discovered_by = ?",
+        (
+            _canonical_json(updated), task_id, assigned_to, raw_context,
+            raw_skills, discovered_by,
+        ),
+    ).rowcount
+    return changed == 1
+
+
+def _reject_invalid_history(
+    connection: Any,
+    *,
+    task_id: str,
+    assigned_to: str,
+    raw_context: str,
+    raw_skills: str,
+    discovered_by: str,
+    now_iso: str,
+) -> None:
+    """Terminally reject a still-owned task whose durable history diverged."""
+
+    connection.execute(
+        """
+        UPDATE agents_autonomous_tasks
+        SET status = 'failed', completed_at = ?
+        WHERE task_id = ? AND status = 'assigned'
+          AND assigned_to = ? AND context = ?
+          AND required_skills = ? AND discovered_by = ?
+        """,
+        (
+            now_iso,
+            task_id,
+            assigned_to,
+            raw_context,
+            raw_skills,
+            discovered_by,
+        ),
     )
 
 

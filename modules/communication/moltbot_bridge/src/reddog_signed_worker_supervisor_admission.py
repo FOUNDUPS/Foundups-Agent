@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -18,6 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admissi
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
     admit_signed_worker_execution_once,
     bind_execution_admission,
+)
+from modules.infrastructure.database.src.signed_worker_result_ledger import (
+    validated_result_history,
 )
 
 
@@ -65,73 +66,13 @@ def admit_signed_worker_for_supervisor(
     try:
         verified = {
             **dict(verified),
-            **_validated_result_history(claimed),
+            **validated_result_history(claimed),
         }
     except ValueError as exc:
         return SignedWorkerSupervisorAdmission("REJECTED", admitted, str(exc))
     return SignedWorkerSupervisorAdmission(
         "ADMITTED", bind_execution_admission(verified, admission)
     )
-
-
-def _validated_result_history(
-    context: Mapping[str, Any],
-) -> Mapping[str, Any]:
-    last = context.get("signed_worker_task_last_result")
-    history = context.get("signed_worker_task_result_receipts")
-    if last is None and history is None:
-        return {}
-    if not isinstance(last, Mapping) or not isinstance(history, list):
-        raise ValueError("signed_worker_result_history_malformed")
-    last_body = dict(last)
-    supplied_digest = str(last_body.pop("receipt_digest", "") or "")
-    if supplied_digest != _digest(last_body):
-        raise ValueError("signed_worker_last_result_digest_mismatch")
-    if not 1 <= len(history) <= 10:
-        raise ValueError("signed_worker_result_history_count_invalid")
-    normalized = []
-    for item in history:
-        if not isinstance(item, Mapping) or set(item) != {
-            "claim_status", "receipt_id", "receipt_digest",
-            "previous_history_digest", "history_entry_digest",
-        }:
-            raise ValueError("signed_worker_result_history_item_invalid")
-        entry = {key: str(item.get(key) or "") for key in item}
-        supplied_entry_digest = entry.pop("history_entry_digest")
-        if (
-            not entry["claim_status"]
-            or not _is_digest(entry["receipt_digest"])
-            or not _is_digest(entry["previous_history_digest"])
-            or not _is_digest(supplied_entry_digest)
-            or entry["previous_history_digest"] != _digest(normalized)
-            or supplied_entry_digest != _digest(entry)
-        ):
-            raise ValueError("signed_worker_result_history_item_invalid")
-        entry["history_entry_digest"] = supplied_entry_digest
-        normalized.append(entry)
-    if any(
-        normalized[-1][key] != str(last.get(key) or "")
-        for key in ("claim_status", "receipt_id", "receipt_digest")
-    ):
-        raise ValueError("signed_worker_result_history_tail_mismatch")
-    return {
-        "signed_worker_task_last_result": dict(last),
-        "signed_worker_task_result_receipts": normalized,
-    }
-
-
-def _digest(payload: Any) -> str:
-    raw = json.dumps(
-        payload, sort_keys=True, separators=(",", ":"),
-        ensure_ascii=True, default=str,
-    )
-    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-
-def _is_digest(value: Any) -> bool:
-    text = str(value or "").removeprefix("sha256:")
-    return len(text) == 64 and all(char in "0123456789abcdef" for char in text)
-
 
 __all__ = [
     "SignedWorkerSupervisorAdmission",

@@ -220,10 +220,6 @@ def _recover_without_stage(
     if record.get("state") != PUBLICATION_COMMITTED:
         raise RuntimeError("architect_fix_publication_stage_missing")
     _validate_committed_snapshot(current, record)
-    _publish_profile_cache_digest(
-        publisher,
-        journal["authority_profile_digest"],
-    )
     publisher._remove(publisher.journal_path)
     return True
 
@@ -248,7 +244,6 @@ def _recover_with_stage(
     if record.get("state") != PUBLICATION_COMMITTED:
         raise RuntimeError("architect_fix_publication_recovery_binding_invalid")
     _validate_committed_snapshot(current, record)
-    publisher._publish_profile_cache(stage)
     publisher._remove(publisher.stage_path)
     publisher._remove(publisher.journal_path)
     return True

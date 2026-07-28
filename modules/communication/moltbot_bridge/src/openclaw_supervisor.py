@@ -1135,9 +1135,14 @@ def _commit_signed_worker_task_result(
     )
     admitted_context = dict(base_context)
     history = base_context.get("signed_worker_task_result_receipts")
-    bounded = _rechain_signed_worker_history(
-        [item for item in history or [] if isinstance(item, Mapping)][-9:]
-    )
+    if history is not None and (
+        not isinstance(history, list)
+        or any(not isinstance(item, Mapping) for item in history)
+    ):
+        return False
+    bounded = [dict(item) for item in history or []]
+    if len(bounded) >= 10:
+        return False
     entry = {
         "claim_status": receipt["claim_status"],
         "receipt_id": receipt["receipt_id"],
@@ -1162,21 +1167,6 @@ def _commit_signed_worker_task_result(
         target_status=task_status,
         retry_not_before=retry_at,
     )
-
-def _rechain_signed_worker_history(
-    history: Sequence[Mapping[str, Any]],
-) -> list[dict[str, str]]:
-    chained: list[dict[str, str]] = []
-    for item in history:
-        entry = {
-            "claim_status": str(item.get("claim_status") or ""),
-            "receipt_id": str(item.get("receipt_id") or ""),
-            "receipt_digest": str(item.get("receipt_digest") or ""),
-            "previous_history_digest": _stable_digest(chained),
-        }
-        entry["history_entry_digest"] = _stable_digest(entry)
-        chained.append(entry)
-    return chained
 
 
 def _readonly_assignment_id(context: Dict[str, Any]) -> str:

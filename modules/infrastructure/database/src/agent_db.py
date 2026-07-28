@@ -285,6 +285,25 @@ class AgentDB:
 
             ''')
 
+            # Independently durable signed-worker retry/result continuity.
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS agents_signed_worker_result_history (
+                    task_id TEXT NOT NULL,
+                    attempt_sequence INTEGER NOT NULL,
+                    claim_receipt_id TEXT NOT NULL,
+                    use_receipt_id TEXT NOT NULL,
+                    claim_status TEXT NOT NULL,
+                    result_receipt_id TEXT NOT NULL,
+                    result_receipt_digest TEXT NOT NULL,
+                    previous_history_digest TEXT NOT NULL,
+                    history_entry_digest TEXT NOT NULL,
+                    recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (task_id, attempt_sequence),
+                    UNIQUE (task_id, claim_receipt_id),
+                    UNIQUE (task_id, use_receipt_id)
+                )
+            ''')
+
             # Independent assurance capacity reservations.
             #
             # This is deliberately separate from collaboration signals. The

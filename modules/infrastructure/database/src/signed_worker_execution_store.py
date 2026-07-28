@@ -7,6 +7,10 @@ import json
 from datetime import datetime
 from typing import Any, Mapping
 
+from modules.infrastructure.database.src.signed_worker_result_ledger import (
+    persist_result_history_ledger,
+)
+
 
 _TARGET_STATUSES = {"completed", "failed", "pending", "completed_reserved"}
 
@@ -92,13 +96,24 @@ def _commit_final_state(
                 or final_context.get("signed_worker_execution_use") != use
             ):
                 return False
-            return _update_final_row(
+            updated = _update_final_row(
                 connection, row=dict(row), task_id=task_id,
                 assigned_to=assigned_to, raw_context=raw_context,
                 final_context=final_context, expected_status=expected_status,
                 persisted_status=persisted_status,
                 retry_not_before=retry_not_before,
             )
+            if not updated:
+                return False
+            if not persist_result_history_ledger(
+                connection,
+                task_id,
+                final_context,
+                claim_receipt_id=str(claim.get("receipt_id") or ""),
+                use_receipt_id=str(use.get("receipt_id") or ""),
+            ):
+                raise RuntimeError("signed_worker_result_ledger_rejected")
+            return True
     except Exception:
         return False
 
