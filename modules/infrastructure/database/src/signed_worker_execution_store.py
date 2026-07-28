@@ -6,19 +6,15 @@ import json
 from datetime import datetime
 from typing import Any, Mapping
 
-from modules.infrastructure.database.src.signed_worker_assurance_completion import (
-    complete_assurance_reservation,
-)
+from .signed_worker_assurance_completion import complete_assurance_reservation
 from modules.infrastructure.database.src.signed_worker_execution_binding import (
     assurance_request_matches,
     canonical_digest,
     finalization_binding,
-    finalization_status_matches,
-    result_context_matches_authenticated,
+    validated_result_context,
 )
-from modules.infrastructure.database.src.signed_worker_result_ledger import (
-    persist_result_history_ledger,
-)
+from .signed_worker_finalization_status import finalization_status_matches
+from .signed_worker_result_ledger import persist_result_history_ledger
 
 
 _TARGET_STATUSES = {"completed", "failed", "pending"}
@@ -45,14 +41,15 @@ def finalize_signed_worker_execution(
     """Persist a result only for the exact admitted owner and context."""
 
     binding = finalization_binding(
-        task_id,
-        context.get("signed_worker_execution_claim"),
-        context.get("signed_worker_execution_use"),
+        task_id, context.get("signed_worker_execution_claim"),
+        context.get("signed_worker_execution_use")
     )
     status = target_status or ("completed" if accepted is True else "failed")
     if binding is None or status not in _TARGET_STATUSES:
         return False
-    if not finalization_status_matches(accepted, status, assurance_completion):
+    if not finalization_status_matches(
+        accepted, status, assurance_completion, result_context
+    ):
         return False
     assigned_to, claim, use = binding
     return _commit_final_state(
@@ -107,18 +104,19 @@ def _apply_final_state(
     authenticated = _matching_context(
         row, assigned_to, claim, use, expected_status="executing"
     )
-    final_context = dict(result_context)
+    supplied_context = dict(result_context)
     if (
         authenticated is None
-        or final_context.get("signed_worker_execution_claim") != claim
-        or final_context.get("signed_worker_execution_use") != use
+        or supplied_context.get("signed_worker_execution_claim") != claim
+        or supplied_context.get("signed_worker_execution_use") != use
     ):
         return False
     raw_context, authenticated_context = authenticated
+    final_context = validated_result_context(authenticated_context, supplied_context)
     if (
-        not result_context_matches_authenticated(authenticated_context, final_context)
+        final_context is None
         or not assurance_request_matches(
-            authenticated_context, final_context, assurance_completion
+            authenticated_context, supplied_context, assurance_completion
         )
     ):
         return False

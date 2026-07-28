@@ -7,6 +7,7 @@ import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -29,8 +30,12 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envel
     verify_reddog_signed_worker_agentdb_envelope,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
+    EXECUTION_LEASE_SECONDS,
     admit_signed_worker_execution_once,
     bind_execution_admission,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_recovery import (
+    recover_expired_signed_worker_executions,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
     append_signed_worker_result_history,
@@ -165,6 +170,11 @@ def test_run_task_rebuilds_canonical_context_before_runner_selection(
     assert canonical["worker_runtime"] == "openclaw"
     assert canonical["worker_role"] == "openclaw_candidate"
     assert canonical["capability"] == "candidate_queue_review"
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "completed"
+    assert stored["context"]["worker_runtime"] == "openclaw"
+    assert stored["context"]["worker_role"] == "openclaw_candidate"
+    assert stored["context"]["capability"] == "candidate_queue_review"
 
 
 def test_run_task_signed_success_uses_exact_finalization_cas(
@@ -326,6 +336,131 @@ def test_execution_claim_consumes_token_without_persisting_raw_value() -> None:
         admission.claim_receipt["token_digest"]
     )
     assert admit_signed_worker_execution_once(db=db, task_id=task_id) is None
+
+
+def test_restart_recovers_expired_execution_without_replaying_worker() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    admission = admit_signed_worker_execution_once(
+        db=db,
+        task_id=task_id,
+        now_factory=lambda: claimed_at,
+    )
+    assert admission is not None
+    assert admission.claim_receipt["lease_expires_at"] == (
+        claimed_at + timedelta(seconds=EXECUTION_LEASE_SECONDS)
+    ).isoformat()
+
+    DatabaseManager.reset_for_tests()
+    restarted = AgentDB()
+    recovered = recover_expired_signed_worker_executions(
+        restarted,
+        now_factory=lambda: (
+            claimed_at
+            + timedelta(seconds=EXECUTION_LEASE_SECONDS + 1)
+        ),
+    )
+
+    assert recovered["accepted"] is True
+    assert recovered["recovered_task_ids"] == [task_id]
+    assert recovered["no_worker_effect_replayed"] is True
+    stored = restarted.get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "failed"
+    receipt = stored["context"]["signed_worker_task_last_result"]
+    assert receipt["decision"] == "EXECUTION_LEASE_RECOVERED"
+    assert receipt["accepted"] is False
+    assert receipt["effect_commit_state"] == "INDETERMINATE"
+    assert receipt["no_source_repo_mutation_performed"] is False
+    rows = restarted.db.execute_query(
+        "SELECT attempt_sequence FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    )
+    assert rows == [{"attempt_sequence": 1}]
+
+    repeated = recover_expired_signed_worker_executions(
+        restarted,
+        now_factory=lambda: (
+            claimed_at
+            + timedelta(seconds=EXECUTION_LEASE_SECONDS + 2)
+        ),
+    )
+    assert repeated["accepted"] is True
+    assert repeated["recovered_task_ids"] == []
+
+
+def test_unexpired_execution_is_not_recovered() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    assert admit_signed_worker_execution_once(
+        db=db,
+        task_id=task_id,
+        now_factory=lambda: claimed_at,
+    ) is not None
+
+    result = recover_expired_signed_worker_executions(
+        db,
+        now_factory=lambda: claimed_at + timedelta(seconds=30),
+    )
+
+    assert result["accepted"] is True
+    assert result["recovered_task_ids"] == []
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "executing"
+
+
+def test_execution_recovery_database_scan_failure_rejects() -> None:
+    class _BrokenDatabase:
+        def get_connection(self):
+            raise RuntimeError("database unavailable")
+
+    result = recover_expired_signed_worker_executions(
+        SimpleNamespace(db=_BrokenDatabase()),
+    )
+
+    assert result["accepted"] is False
+    assert result["rejected_task_ids"] == ["database_scan_failed"]
+    assert result["no_worker_effect_replayed"] is True
+
+
+def test_concurrent_expired_execution_recovery_commits_one_result() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    assert admit_signed_worker_execution_once(
+        db=db,
+        task_id=task_id,
+        now_factory=lambda: claimed_at,
+    ) is not None
+    recovered_at = claimed_at + timedelta(
+        seconds=EXECUTION_LEASE_SECONDS + 1
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(
+            pool.map(
+                lambda _: recover_expired_signed_worker_executions(
+                    AgentDB(),
+                    now_factory=lambda: recovered_at,
+                ),
+                range(2),
+            )
+        )
+
+    assert all(result["accepted"] is True for result in results)
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "failed"
+    rows = db.db.execute_query(
+        "SELECT attempt_sequence FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    )
+    assert rows == [{"attempt_sequence": 1}]
 
 
 def test_concurrent_direct_run_task_executes_signed_worker_once(
@@ -929,6 +1064,52 @@ def test_public_finalizer_requires_exactly_one_new_result_entry() -> None:
         "WHERE task_id = ?",
         (task_id,),
     ) == []
+
+
+def test_public_finalizer_rejects_accepted_caller_selected_identity() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
+    assert admission is not None
+    authenticated = bind_execution_admission(
+        admission.claimed_context,
+        admission,
+    )
+    attacker_context = {
+        **authenticated,
+        "worker_role": "attacker_role",
+        "worker_runtime": "hermes",
+        "capability": "unbounded_repo_write",
+    }
+    receipt = build_signed_worker_task_result_receipt(
+        base_context=attacker_context,
+        claim_status="DIRECT_ACCEPT",
+        result={
+            "accepted": True,
+            "decision": "ATTACKER_ACCEPT",
+            "worker_role": "attacker_role",
+            "worker_runtime": "hermes",
+            "capability": "unbounded_repo_write",
+        },
+    )
+    result_context = append_signed_worker_result_history(
+        attacker_context,
+        receipt,
+    )
+
+    assert execution_store_module.finalize_signed_worker_execution(
+        db,
+        task_id,
+        context=authenticated,
+        accepted=True,
+        result_context=result_context,
+    ) is False
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "executing"
+    assert stored["context"]["worker_role"] == authenticated["worker_role"]
+    assert stored["context"]["worker_runtime"] == authenticated["worker_runtime"]
+    assert stored["context"]["capability"] == authenticated["capability"]
 
 
 def test_public_finalizer_rejects_non_genesis_first_history_link() -> None:

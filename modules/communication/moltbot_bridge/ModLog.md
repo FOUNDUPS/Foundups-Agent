@@ -1,4 +1,14 @@
 # ModLog - moltbot_bridge
+- Exact-SHA review hardening now protects the full signed-worker namespace
+  from generic creation/retry/requeue as well as completion. Result
+  finalization derives capability from the signed envelope, persists
+  canonical identity after verified execution, retains exact admitted
+  identity for pre-verification failure, and binds task/claim/assurance
+  terminal states. Independent verifier `REJECT` completion is rehydrated
+  from its durable AgentDB stage even when the chain-results writer rejects
+  the stage result. Claims now carry a 15-minute lease; supervisor recovery
+  never replays an unknown worker effect, rolls forward only exact negative
+  assurance, and refuses digest-only positive assurance.
 - Follow-up hardening accepts an exact all-pending batch only when durable
   publication is already APPLIED, closing the post-activation return-crash
   window. Mixed-status, partial, or field-mismatched recovery remains rejected.

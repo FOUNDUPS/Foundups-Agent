@@ -25,6 +25,16 @@ from modules.infrastructure.database.src.signed_worker_execution_store import (
 from modules.communication.moltbot_bridge.src.reddog_openclaw_assurance_capacity import (
     build_assurance_renewal_request,
 )
+from modules.communication.moltbot_bridge.src import (
+    reddog_signed_worker_run_task_runtime as run_task_runtime,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
+    EXECUTION_LEASE_SECONDS,
+    admit_signed_worker_execution_once,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_recovery import (
+    recover_expired_signed_worker_executions,
+)
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
     append_signed_worker_result_history,
     build_signed_worker_task_result_receipt,
@@ -114,6 +124,47 @@ def _seed_tasks(
     )
 
 
+def _seed_signed_verifier_task(
+    database: AgentDB,
+    *,
+    task_id: str,
+) -> None:
+    context = {
+        "worker_role": "independent_slice_verifier",
+        "worker_principal_id": "verifier-0201",
+        "queue_item_id": "queue-1",
+        "capability": "independent_slice_verification",
+        "worker_runtime": "openclaw",
+        "operational_snapshot_id": "snapshot-1",
+        "signed_authority_worker_dispatch_receipt": {
+            "work_order_id": "work-1",
+            "wsp15_allocation_receipt_id": "wsp15-1",
+        },
+        "wsp15_allocation_receipt": {"receipt_id": "wsp15-1"},
+    }
+    assert database.db.execute_write(
+        "INSERT INTO agents_autonomous_tasks "
+        "(task_id, description, required_skills, estimated_complexity, "
+        "priority_score, discovered_by, context, status) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')",
+        (
+            task_id,
+            "signed verifier",
+            json.dumps(
+                [
+                    "reddog_signed_worker_dispatch",
+                    "runtime:openclaw",
+                    "capability:independent_slice_verification",
+                ]
+            ),
+            0.5,
+            19.0,
+            "reddog_signed_worker_dispatch_runtime",
+            json.dumps(context, sort_keys=True),
+        ),
+    ) == 1
+
+
 def _request(**overrides: Any) -> dict[str, Any]:
     request = {
         "schema_version": "reddog_assurance_capacity_request.v1",
@@ -158,6 +209,10 @@ def _digest(payload: Any) -> str:
 
 def _prepare_assurance_finalization(
     database: AgentDB,
+    *,
+    top_level_capability: str = "independent_slice_verification",
+    envelope_capability: str = "",
+    terminal_status: str = "VERIFIED",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     capability = "independent_slice_verification"
     _seed_tasks(database, capability=capability)
@@ -169,6 +224,15 @@ def _prepare_assurance_finalization(
     task = database.get_autonomous_task_by_id("verifier-task")
     assert task is not None
     base_context = dict(task["context"])
+    base_context["capability"] = top_level_capability
+    if envelope_capability:
+        base_context["signed_worker_agentdb_envelope"] = {
+            "worker_dispatch_intent": {
+                "role": "independent_slice_verifier",
+                "worker_runtime": "openclaw",
+                "capability": envelope_capability,
+            }
+        }
     token_digest = "sha256:" + "a" * 64
     claim = {
         "task_id": "verifier-task",
@@ -202,7 +266,7 @@ def _prepare_assurance_finalization(
     completion = build_assurance_completion_request(
         reservation=reservation,
         terminal_receipt=terminal_receipt,
-        terminal_status="VERIFIED",
+        terminal_status=terminal_status,
         completed_at=_iso(),
     )
     staged = database.stage_independent_assurance_completion(completion)
@@ -229,6 +293,213 @@ def _prepare_assurance_finalization(
         receipt,
     )
     return admitted_context, result_context
+
+
+def _prepare_signed_verifier_recovery(
+    database: AgentDB,
+    *,
+    terminal_status: str,
+) -> tuple[str, datetime]:
+    task_id = "reddog-worker-dispatch-verifier-recovery"
+    _create_task(
+        database,
+        task_id="author-task",
+        role="coding_worker",
+        principal_id="author-0102",
+        capability="independent_slice_verification",
+    )
+    _seed_signed_verifier_task(database, task_id=task_id)
+    reserved = database.reserve_independent_assurance(
+        _request(
+            verifier_task_id=task_id,
+            capability="independent_slice_verification",
+        )
+    )
+    assert reserved["accepted"] is True
+    claimed_at = datetime.fromisoformat(
+        str(
+            reserved["reservation"].get("admission_reserved_at")
+            or reserved["reservation"]["reserved_at"]
+        ).replace("Z", "+00:00")
+    )
+    assert admit_signed_worker_execution_once(
+        db=database,
+        task_id=task_id,
+        now_factory=lambda: claimed_at,
+    ) is not None
+    completion = build_assurance_completion_request(
+        reservation=reserved["reservation"],
+        terminal_receipt={
+            "receipt_id": "verification-recovery-1",
+            "receipt_digest": "sha256:" + "c" * 64,
+        },
+        terminal_status=terminal_status,
+        completed_at=(claimed_at + timedelta(seconds=10)).isoformat(),
+    )
+    assert database.stage_independent_assurance_completion(completion)[
+        "accepted"
+    ] is True
+    return task_id, claimed_at
+
+
+def test_negative_verifier_completion_rehydrates_from_durable_stage(
+    agent_db: AgentDB,
+) -> None:
+    admitted, _ = _prepare_assurance_finalization(
+        agent_db,
+        terminal_status="REJECT",
+    )
+
+    result = run_task_runtime._finalize_owned_execution(
+        db=agent_db,
+        task_id="verifier-task",
+        context=admitted,
+        result={
+            "ok": False,
+            "detail": "independent_verifier_rejected",
+            "executor": "reddog:signed_worker_dispatch",
+        },
+    )
+
+    assert result["ok"] is False
+    assert result["detail"] == "independent_verifier_rejected"
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "failed"
+    receipt = task["context"]["signed_worker_task_last_result"]
+    assert receipt["assurance_completion_request"]["terminal_status"] == "REJECT"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "REJECT"
+
+
+def test_restart_rolls_forward_durable_negative_verifier_stage(
+    agent_db: AgentDB,
+) -> None:
+    task_id, claimed_at = _prepare_signed_verifier_recovery(
+        agent_db,
+        terminal_status="REJECT",
+    )
+
+    DatabaseManager.reset_for_tests()
+    restarted = AgentDB()
+    recovery = recover_expired_signed_worker_executions(
+        restarted,
+        now_factory=lambda: (
+            claimed_at
+            + timedelta(seconds=EXECUTION_LEASE_SECONDS + 1)
+        ),
+    )
+
+    assert recovery["accepted"] is True
+    assert recovery["recovered_task_ids"] == [task_id]
+    task = restarted.get_autonomous_task_by_id(task_id)
+    assert task is not None and task["status"] == "failed"
+    assert task["context"]["signed_worker_task_last_result"][
+        "assurance_completion_request"
+    ]["terminal_status"] == "REJECT"
+    reservation = restarted.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "REJECT"
+
+
+def test_restart_refuses_digest_only_positive_verifier_stage(
+    agent_db: AgentDB,
+) -> None:
+    task_id, claimed_at = _prepare_signed_verifier_recovery(
+        agent_db,
+        terminal_status="VERIFIED",
+    )
+
+    DatabaseManager.reset_for_tests()
+    restarted = AgentDB()
+    recovery = recover_expired_signed_worker_executions(
+        restarted,
+        now_factory=lambda: (
+            claimed_at
+            + timedelta(seconds=EXECUTION_LEASE_SECONDS + 1)
+        ),
+    )
+
+    assert recovery["accepted"] is False
+    assert recovery["rejected_task_ids"] == [task_id]
+    task = restarted.get_autonomous_task_by_id(task_id)
+    assert task is not None and task["status"] == "executing"
+    reservation = restarted.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+
+
+def test_restart_rejects_corrupt_durable_verifier_stage(
+    agent_db: AgentDB,
+) -> None:
+    task_id, claimed_at = _prepare_signed_verifier_recovery(
+        agent_db,
+        terminal_status="REJECT",
+    )
+    assert agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations "
+        "SET staged_completion_digest = ? WHERE reservation_id = ?",
+        ("sha256:" + "f" * 64, "assurance-1"),
+    ) == 1
+
+    DatabaseManager.reset_for_tests()
+    restarted = AgentDB()
+    recovery = recover_expired_signed_worker_executions(
+        restarted,
+        now_factory=lambda: (
+            claimed_at
+            + timedelta(seconds=EXECUTION_LEASE_SECONDS + 1)
+        ),
+    )
+
+    assert recovery["accepted"] is False
+    assert recovery["rejected_task_ids"] == [task_id]
+    task = restarted.get_autonomous_task_by_id(task_id)
+    assert task is not None and task["status"] == "executing"
+    reservation = restarted.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+
+
+def test_post_rehydration_runner_rejection_persists_canonical_identity(
+    agent_db: AgentDB,
+) -> None:
+    admitted, _ = _prepare_assurance_finalization(
+        agent_db,
+        top_level_capability="candidate_queue_review",
+        envelope_capability="independent_slice_verification",
+        terminal_status="REJECT",
+    )
+    canonical = {
+        **admitted,
+        "worker_role": "independent_slice_verifier",
+        "worker_runtime": "openclaw",
+        "capability": "independent_slice_verification",
+        "worker_dispatch_intent": {
+            "role": "independent_slice_verifier",
+            "worker_runtime": "openclaw",
+            "capability": "independent_slice_verification",
+        },
+    }
+
+    result = run_task_runtime._finalize_owned_execution(
+        db=agent_db,
+        task_id="verifier-task",
+        context=canonical,
+        result={
+            "ok": False,
+            "detail": "runner_rejected_after_rehydration",
+            "executor": "reddog:signed_worker_dispatch",
+        },
+    )
+
+    assert result["ok"] is False
+    assert result["detail"] == "runner_rejected_after_rehydration"
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "failed"
+    assert task["context"]["worker_role"] == "independent_slice_verifier"
+    assert task["context"]["worker_runtime"] == "openclaw"
+    assert task["context"]["capability"] == "independent_slice_verification"
 
 
 def test_reserve_claims_pending_verifier_and_rehydrates_after_restart(
@@ -740,6 +1011,29 @@ def test_finalizer_rejects_authenticated_capability_reclassification(
     assert rows == []
 
 
+def test_signed_envelope_assurance_cannot_be_hidden_by_top_level_context(
+    agent_db: AgentDB,
+) -> None:
+    admitted, result_context = _prepare_assurance_finalization(
+        agent_db,
+        top_level_capability="candidate_queue_review",
+        envelope_capability="independent_slice_verification",
+    )
+
+    assert finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+    ) is False
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "executing"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+
+
 @pytest.mark.parametrize(
     ("accepted", "target_status", "terminal_status"),
     (
@@ -778,6 +1072,34 @@ def test_finalizer_rejects_contradictory_assurance_terminal_state(
     assert reservation["reservation"]["status"] == "RESERVED"
 
 
+def test_finalizer_rejects_receipt_status_contradiction(
+    agent_db: AgentDB,
+) -> None:
+    admitted, result_context = _prepare_assurance_finalization(agent_db)
+    completion = result_context["signed_worker_task_last_result"][
+        "assurance_completion_request"
+    ]
+    result_context["signed_worker_task_last_result"] = {
+        **result_context["signed_worker_task_last_result"],
+        "accepted": False,
+        "claim_status": "REJECT",
+    }
+
+    assert finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+        assurance_completion=completion,
+    ) is False
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "executing"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+
+
 def test_revoked_reservation_is_terminal_and_verifier_is_cancelled(
     agent_db: AgentDB,
 ) -> None:
@@ -797,6 +1119,28 @@ def test_revoked_reservation_is_terminal_and_verifier_is_cancelled(
     assert loaded["accepted"] is False
     assert loaded["status"] == "REVOKED"
     assert agent_db.get_autonomous_task_by_id("verifier-task")["status"] == "cancelled"
+
+
+def test_revocation_cancels_an_executing_signed_verifier(
+    agent_db: AgentDB,
+) -> None:
+    task_id, _ = _prepare_signed_verifier_recovery(
+        agent_db,
+        terminal_status="REJECT",
+    )
+
+    revoked = agent_db.revoke_independent_assurance(
+        "assurance-1",
+        reason="authority_revoked_during_execution",
+        now_iso=_iso(),
+    )
+
+    assert revoked["accepted"] is True
+    task = agent_db.get_autonomous_task_by_id(task_id)
+    assert task is not None and task["status"] == "cancelled"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "REVOKED"
 
 
 def test_get_expires_elapsed_reservation_and_verifier_task(

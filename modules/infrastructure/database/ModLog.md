@@ -1,5 +1,21 @@
 # Database Module - ModLog
 
+## Entry: Reserved Namespace and Crash-Safe Signed-Worker Finalization
+**Date**: 2026-07-28
+**What Changed**: Generic task creation, insert-if-absent, retry, requeue, and
+completion now reject the signed-worker namespace. Finalization canonicalizes
+identity from the verified signed envelope, binds task status to the result
+and assurance receipts, and rehydrates verifier completion from the durable
+staging row. Signed execution claims carry a bounded lease.
+**Why**: A generic `INSERT OR REPLACE` could overwrite signed tasks; mutable
+top-level identity could hide assurance requirements; negative verifier
+results and process crashes could strand an executing row.
+**Impact**: Caller-selected identity cannot persist on accepted work, negative
+verification terminalizes after restart, contradictory states reject, and an
+expired effect-unknown execution is never replayed automatically. Positive
+digest-only assurance remains blocked pending full evidence recovery.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
 ## Entry: Durable Signed-Worker Result Continuity
 **Date**: 2026-07-28
 **What Changed**: Added an unbounded append-only AgentDB result ledger, a

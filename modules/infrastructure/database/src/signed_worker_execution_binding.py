@@ -14,8 +14,6 @@ _RESULT_CONTEXT_FIELDS = frozenset(
         "signed_worker_task_result_receipts",
     }
 )
-_POSITIVE_ASSURANCE_STATUSES = frozenset({"ACCEPT", "VERIFIED"})
-_NEGATIVE_ASSURANCE_STATUSES = frozenset({"REJECT", "FAILED", "CANCELLED"})
 
 
 def finalization_binding(
@@ -53,13 +51,7 @@ def assurance_request_matches(
 ) -> bool:
     """Require verifier finalization to carry its receipt-bound request."""
 
-    intent = authenticated_context.get("worker_dispatch_intent")
-    intent = dict(intent) if isinstance(intent, Mapping) else {}
-    capability = str(
-        authenticated_context.get("capability")
-        or intent.get("capability")
-        or ""
-    )
+    capability = _authoritative_identity(authenticated_context)["capability"]
     required = capability == _ASSURANCE_CAPABILITY
     if required != (request is not None):
         return False
@@ -70,54 +62,41 @@ def assurance_request_matches(
     return receipt.get("assurance_completion_request") == dict(request)
 
 
-def result_context_matches_authenticated(
+def validated_result_context(
     authenticated_context: Mapping[str, Any],
     result_context: Mapping[str, Any],
-) -> bool:
-    """Allow only canonical identity repair and result-history extension."""
+) -> dict[str, Any] | None:
+    """Return canonical result context or reject caller-selected identity."""
 
-    authenticated_base = _normalized_identity_context(authenticated_context)
-    result_base = _normalized_identity_context(result_context)
-    if _without_result_fields(result_base) != _without_result_fields(
-        authenticated_base
-    ):
-        return False
     receipt = result_context.get("signed_worker_task_last_result")
     if not isinstance(receipt, Mapping):
-        return False
-    identity = (
-        _authoritative_identity(authenticated_context)
-        if receipt.get("accepted") is True
-        else _top_level_identity(authenticated_context)
+        return None
+    canonical_result = (
+        _top_level_identity(result_context)
+        == _authoritative_identity(result_context)
     )
+    if canonical_result:
+        authenticated_base = _normalized_identity_context(authenticated_context)
+        result_base = _normalized_identity_context(result_context)
+        if _without_result_fields(result_base) != _without_result_fields(
+            authenticated_base
+        ):
+            return None
+        identity = _authoritative_identity(authenticated_context)
+        final_context = result_base
+    else:
+        if (
+            receipt.get("accepted") is True
+            or _without_result_fields(result_context)
+            != _without_result_fields(authenticated_context)
+        ):
+            return None
+        identity = _top_level_identity(authenticated_context)
+        final_context = dict(result_context)
     for field in ("worker_role", "worker_runtime", "capability"):
         if str(receipt.get(field) or "") != identity[field]:
-            return False
-    return True
-
-
-def finalization_status_matches(
-    accepted: bool,
-    target_status: str,
-    assurance_completion: Mapping[str, Any] | None,
-) -> bool:
-    """Reject contradictory task and assurance terminal states."""
-
-    if target_status == "pending":
-        return accepted is True and assurance_completion is None
-    if target_status == "completed" and accepted is not True:
-        return False
-    if target_status == "failed" and accepted is not False:
-        return False
-    if assurance_completion is None:
-        return True
-    terminal = str(assurance_completion.get("terminal_status") or "").upper()
-    expected = (
-        _POSITIVE_ASSURANCE_STATUSES
-        if target_status == "completed"
-        else _NEGATIVE_ASSURANCE_STATUSES
-    )
-    return terminal in expected
+            return None
+    return final_context
 
 
 def _normalized_identity_context(context: Mapping[str, Any]) -> dict[str, Any]:
@@ -182,7 +161,6 @@ def _is_digest(value: Any) -> bool:
 __all__ = [
     "assurance_request_matches",
     "canonical_digest",
-    "finalization_status_matches",
     "finalization_binding",
-    "result_context_matches_authenticated",
+    "validated_result_context",
 ]

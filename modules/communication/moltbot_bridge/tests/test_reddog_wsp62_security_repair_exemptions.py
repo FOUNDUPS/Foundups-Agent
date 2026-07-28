@@ -81,6 +81,7 @@ BOUNDED_DATABASE_SECURITY_FILES = {
     "modules/infrastructure/database/src/signed_worker_assurance_staging.py",
     "modules/infrastructure/database/src/signed_worker_execution_binding.py",
     "modules/infrastructure/database/src/signed_worker_execution_store.py",
+    "modules/infrastructure/database/src/signed_worker_finalization_status.py",
     "modules/infrastructure/database/src/signed_worker_result_history.py",
     "modules/infrastructure/database/src/signed_worker_result_ledger.py",
 }
@@ -90,6 +91,7 @@ BOUNDED_SIGNED_WORKER_RESULT_FILES = {
 }
 TOUCHED_SIGNED_WORKER_RUNTIME_FILES = {
     "src/reddog_signed_worker_execution_claim.py",
+    "src/reddog_signed_worker_execution_recovery.py",
     "src/reddog_signed_worker_run_task_runtime.py",
     "src/reddog_signed_worker_supervisor_admission.py",
 }

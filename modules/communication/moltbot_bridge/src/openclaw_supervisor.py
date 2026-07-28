@@ -445,6 +445,19 @@ def _signed_worker_claim_pending_task(
                 detail=str(healthcheck.get("status") or "")[:300],
             )
         db = (agent_db_factory or AgentDB)()
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_recovery import (
+            recover_expired_signed_worker_executions,
+        )
+        recovery = recover_expired_signed_worker_executions(db)
+        if recovery.get("accepted") is not True:
+            return db, None, _signed_worker_claim_result(
+                accepted=False,
+                status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+                rejection_reasons=(
+                    SignedWorkerOpenClawClaimReason.AGENTDB_FAILURE,
+                ),
+                detail="signed_worker_execution_recovery_rejected",
+            )
         task = _claim_reserved_independent_verifier_task(
             db=db,
             source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
@@ -1000,12 +1013,23 @@ def _persist_reddog_signed_worker_dispatch_task_result(
         from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
             build_signed_worker_task_result_receipt,
         )
+        from modules.infrastructure.database.src.signed_worker_assurance_staging import (
+            rehydrate_staged_assurance_completion,
+        )
+        claim = base_context.get("signed_worker_execution_claim")
+        claim = dict(claim) if isinstance(claim, Mapping) else {}
+        durable_completion = rehydrate_staged_assurance_completion(
+            db.db,
+            task_id=task_id,
+            assigned_to=str(claim.get("assigned_to") or ""),
+        )
         receipt = build_signed_worker_task_result_receipt(
             base_context=base_context,
             claim_status=claim_status,
             result=result,
             runner_result=runner_result,
             rejection_reasons=rejection_reasons,
+            assurance_completion=durable_completion,
         )
         return _commit_signed_worker_task_result(
             db, task_id, base_context, receipt, task_status=task_status

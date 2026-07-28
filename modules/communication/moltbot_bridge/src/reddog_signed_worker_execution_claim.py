@@ -6,7 +6,7 @@ import hashlib
 import json
 import secrets
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping
 
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
@@ -19,6 +19,9 @@ from modules.infrastructure.database.src.signed_worker_execution_store import (
 
 CLAIM_SCHEMA = "reddog_signed_worker_execution_claim.v1"
 USE_SCHEMA = "reddog_signed_worker_execution_use.v1"
+EXECUTION_LEASE_SECONDS = 900
+
+
 @dataclass(frozen=True)
 class SignedWorkerExecutionAdmission:
     """Receipts produced by the single winning execution CAS."""
@@ -50,6 +53,10 @@ def admit_signed_worker_execution_once(
         task_id=task_id,
         token=token,
         now_iso=now.astimezone(timezone.utc).isoformat(),
+        lease_expires_at=(
+            now.astimezone(timezone.utc)
+            + timedelta(seconds=EXECUTION_LEASE_SECONDS)
+        ).isoformat(),
     )
 
 
@@ -59,27 +66,43 @@ def _commit_execution_admission(
     task_id: str,
     token: str,
     now_iso: str,
+    lease_expires_at: str,
 ) -> SignedWorkerExecutionAdmission | None:
     """Commit the one winning assigned-to-executing transition."""
 
     try:
         with db.db.get_connection() as conn:
             return _admit_selected_row(
-                conn, task_id=task_id, token=token, now_iso=now_iso
+                conn,
+                task_id=task_id,
+                token=token,
+                now_iso=now_iso,
+                lease_expires_at=lease_expires_at,
             )
     except Exception:
         return None
 
 
 def _admit_selected_row(
-    connection: Any, *, task_id: str, token: str, now_iso: str
+    connection: Any,
+    *,
+    task_id: str,
+    token: str,
+    now_iso: str,
+    lease_expires_at: str,
 ) -> SignedWorkerExecutionAdmission | None:
     row = connection.execute(
         "SELECT status, assigned_to, context, required_skills, discovered_by "
         "FROM agents_autonomous_tasks WHERE task_id = ?",
         (task_id,),
     ).fetchone()
-    inputs = _claim_inputs(row, task_id=task_id, token=token, now_iso=now_iso)
+    inputs = _claim_inputs(
+        row,
+        task_id=task_id,
+        token=token,
+        now_iso=now_iso,
+        lease_expires_at=lease_expires_at,
+    )
     if inputs is None:
         return None
     raw_context, raw_skills, assigned_to, context = inputs[:4]
@@ -179,7 +202,12 @@ _ClaimInputs = tuple[
 
 
 def _claim_inputs(
-    row: Any, *, task_id: str, token: str, now_iso: str
+    row: Any,
+    *,
+    task_id: str,
+    token: str,
+    now_iso: str,
+    lease_expires_at: str,
 ) -> _ClaimInputs:
     if row is None or not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
         return None
@@ -195,6 +223,7 @@ def _claim_inputs(
         discovered_by=discovered_by,
         token=token,
         now_iso=now_iso,
+        lease_expires_at=lease_expires_at,
     )
     return (
         raw_context, raw_skills, assigned_to, context, required_skills,
@@ -247,6 +276,7 @@ def _execution_receipts(
     discovered_by: str,
     token: str,
     now_iso: str,
+    lease_expires_at: str,
 ) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
     token_digest = _digest_text(token)
     claim = _receipt(
@@ -259,6 +289,7 @@ def _execution_receipts(
             "discovered_by": discovered_by,
             "token_digest": token_digest,
             "claimed_at": now_iso,
+            "lease_expires_at": lease_expires_at,
             "status": "CLAIMED",
         }
     )
@@ -301,6 +332,7 @@ def _canonical_json(value: Any) -> str:
 
 __all__ = [
     "CLAIM_SCHEMA",
+    "EXECUTION_LEASE_SECONDS",
     "SIGNED_WORKER_TASK_PREFIX",
     "USE_SCHEMA",
     "SignedWorkerExecutionAdmission",

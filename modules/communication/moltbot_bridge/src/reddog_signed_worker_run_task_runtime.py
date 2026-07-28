@@ -22,6 +22,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receip
 from modules.infrastructure.database.src.signed_worker_execution_store import (
     finalize_signed_worker_execution,
 )
+from modules.infrastructure.database.src.signed_worker_assurance_staging import (
+    rehydrate_staged_assurance_completion,
+)
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
     validated_result_history,
 )
@@ -136,23 +139,16 @@ def _finalize_owned_execution(
     final = dict(result)
     final["finalization_owned"] = True
     try:
-        runner_payload = final.get("structured_result")
-        runner_payload = (
-            dict(runner_payload) if isinstance(runner_payload, Mapping) else {}
-        )
-        nested = runner_payload.get("runner_result")
-        nested = dict(nested) if isinstance(nested, Mapping) else {}
+        runner_payload, nested = _runner_result_payload(final)
         requeue = final.get("ok") is True and (
             nested.get("queue_chain_requeue_required") is True
         )
-        receipt = build_signed_worker_task_result_receipt(
-            base_context=context,
-            claim_status=(
-                DIRECT_REQUEUED
-                if requeue
-                else DIRECT_ACCEPT if final.get("ok") is True else DIRECT_REJECT
-            ),
-            result=final,
+        receipt = _build_result_receipt(
+            db=db,
+            task_id=task_id,
+            context=context,
+            final=final,
+            requeue=requeue,
         )
         result_context = append_signed_worker_result_history(context, receipt)
         assurance_completion = receipt.get("assurance_completion_request")
@@ -179,6 +175,42 @@ def _finalize_owned_execution(
         **_rejected("reddog_signed_worker_finalization_conflict"),
         "finalization_owned": True,
     }
+
+
+def _runner_result_payload(
+    result: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    raw = result.get("structured_result")
+    runner = dict(raw) if isinstance(raw, Mapping) else {}
+    nested = runner.get("runner_result")
+    return runner, dict(nested) if isinstance(nested, Mapping) else {}
+
+
+def _build_result_receipt(
+    *,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    final: Mapping[str, Any],
+    requeue: bool,
+) -> Mapping[str, Any]:
+    claim = context.get("signed_worker_execution_claim")
+    claim = dict(claim) if isinstance(claim, Mapping) else {}
+    durable_completion = rehydrate_staged_assurance_completion(
+        db.db,
+        task_id=task_id,
+        assigned_to=str(claim.get("assigned_to") or ""),
+    )
+    return build_signed_worker_task_result_receipt(
+        base_context=context,
+        claim_status=(
+            DIRECT_REQUEUED
+            if requeue
+            else DIRECT_ACCEPT if final.get("ok") is True else DIRECT_REJECT
+        ),
+        result=final,
+        assurance_completion=durable_completion,
+    )
 
 
 def _verify_context(

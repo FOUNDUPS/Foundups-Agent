@@ -1192,6 +1192,8 @@ class AgentDB:
             origin_continuity_id: Optional continuity ID from the work that discovered this task.
                                   Enables background correlation when task is executed later.
         """
+        if is_signed_worker_task_id(task_id):
+            return False
         try:
             self.db.execute_write('''
                 INSERT OR REPLACE INTO agents_autonomous_tasks
@@ -1219,6 +1221,8 @@ class AgentDB:
         origin_continuity_id: str = None,
     ) -> bool:
         """Insert a task without replacing concurrent or already-claimed state."""
+        if is_signed_worker_task_id(task_id):
+            return False
         try:
             return self.db.execute_write(
                 """
@@ -1693,6 +1697,8 @@ class AgentDB:
         retry_not_before: str,
     ) -> bool:
         """Move a failed task into a durable bounded retry wait state."""
+        if is_signed_worker_task_id(task_id):
+            return False
         return self.db.execute_write(
             """
             UPDATE agents_autonomous_tasks
@@ -1713,6 +1719,8 @@ class AgentDB:
         expected_status: str = "retry_wait",
     ) -> bool:
         """Requeue a task only from the caller's exact expected state."""
+        if is_signed_worker_task_id(task_id):
+            return False
         return self.db.execute_write(
             """
             UPDATE agents_autonomous_tasks
@@ -2577,7 +2585,9 @@ class AgentDB:
                     """
                     UPDATE agents_autonomous_tasks
                     SET status = 'cancelled', completed_at = ?
-                    WHERE task_id = ? AND status = 'assigned' AND assigned_to = ?
+                    WHERE task_id = ?
+                      AND status IN ('assigned', 'executing')
+                      AND assigned_to = ?
                     """,
                     (
                         canonical_now,

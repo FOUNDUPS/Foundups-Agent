@@ -14,7 +14,7 @@ From `modules.infrastructure.database`:
 File: `modules/infrastructure/database/src/signed_worker_execution_store.py`
 
 ### Public Function
-- `finalize_signed_worker_execution(db, task_id, *, context, accepted, result_context, target_status=None, retry_not_before=None) -> bool`
+- `finalize_signed_worker_execution(db, task_id, *, context, accepted, result_context, target_status=None, retry_not_before=None, assurance_completion=None) -> bool`
 
 The finalizer updates only the exact executing task row bound to the admitted
 assignee, claim receipt, one-use receipt and preclaim context digest. Requeue
@@ -23,6 +23,14 @@ row, context or receipt change fails closed.
 `result_context` is mandatory and must contain exactly one new canonical
 result-history entry. Missing or unchanged history never reaches a terminal
 or requeue state.
+
+Signed-worker execution claims include a fixed 15-minute lease. The OpenClaw
+supervisor runs a bounded recovery scan before claiming more work. An expired
+claim is never retried automatically: exact durable negative assurance may
+roll forward through the same finalizer, other effect-unknown executions
+become failed, and digest-only positive assurance remains blocked. Generic
+create, retry, requeue, and completion APIs reject the reserved
+`reddog-worker-dispatch-` namespace.
 
 ## Signed Worker Result Ledger
 File: `modules/infrastructure/database/src/signed_worker_result_ledger.py`

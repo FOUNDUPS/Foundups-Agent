@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any, Mapping
 
 from .signed_worker_assurance_request import (
@@ -59,6 +60,90 @@ def stage_assurance_completion(
     return changed == 1
 
 
+def rehydrate_staged_assurance_completion(
+    database: Any,
+    *,
+    task_id: str,
+    assigned_to: str,
+) -> dict[str, str] | None:
+    """Return the single durable staged request bound to an executing verifier."""
+
+    if not task_id or not assigned_to:
+        return None
+    selected = _staged_request_rows(
+        database,
+        task_id=task_id,
+        assigned_to=assigned_to,
+    )
+    if selected is None:
+        return None
+    reservation, task_row = selected
+    if (
+        task_row.get("status") != "executing"
+        or task_row.get("assigned_to") != assigned_to
+    ):
+        return None
+    return _validated_staged_request(
+        reservation,
+        task_id=task_id,
+        assigned_to=assigned_to,
+    )
+
+
+def _staged_request_rows(
+    database: Any,
+    *,
+    task_id: str,
+    assigned_to: str,
+) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    try:
+        with database.get_connection() as connection:
+            rows = connection.execute(
+                "SELECT * FROM agents_independent_assurance_reservations "
+                "WHERE verifier_task_id = ? AND verifier_principal_id = ? "
+                "AND status = 'RESERVED' AND staged_completion_json IS NOT NULL "
+                "AND staged_completion_digest IS NOT NULL",
+                (task_id, assigned_to),
+            ).fetchall()
+            task = connection.execute(
+                "SELECT status, assigned_to FROM agents_autonomous_tasks "
+                "WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+    except Exception:
+        return None
+    if len(rows) != 1 or task is None:
+        return None
+    return dict(rows[0]), dict(task)
+
+
+def _validated_staged_request(
+    reservation: Mapping[str, Any],
+    *,
+    task_id: str,
+    assigned_to: str,
+) -> dict[str, str] | None:
+    try:
+        request = json.loads(str(reservation.get("staged_completion_json") or ""))
+    except (TypeError, ValueError):
+        return None
+    normalized = validated_assurance_completion_request(
+        request,
+        task_id=task_id,
+        assigned_to=assigned_to,
+    )
+    if (
+        normalized is None
+        or canonical_request_json(normalized)
+        != reservation.get("staged_completion_json")
+        or canonical_request_digest(normalized)
+        != reservation.get("staged_completion_digest")
+        or not _reservation_accepts(reservation, normalized)
+    ):
+        return None
+    return normalized
+
+
 def _reservation(connection: Any, reservation_id: str) -> dict[str, Any]:
     row = connection.execute(
         "SELECT * FROM agents_independent_assurance_reservations "
@@ -95,4 +180,7 @@ def _reservation_accepts(
     )
 
 
-__all__ = ["stage_assurance_completion"]
+__all__ = [
+    "rehydrate_staged_assurance_completion",
+    "stage_assurance_completion",
+]

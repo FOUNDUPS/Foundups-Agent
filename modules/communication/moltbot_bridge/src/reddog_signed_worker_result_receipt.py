@@ -22,6 +22,7 @@ def build_signed_worker_task_result_receipt(
     result: Mapping[str, Any],
     runner_result: Mapping[str, Any] | None = None,
     rejection_reasons: Sequence[str] = (),
+    assurance_completion: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build one canonical full receipt without persisting it."""
     result_payload = dict(result)
@@ -47,13 +48,18 @@ def build_signed_worker_task_result_receipt(
             canonical_digest(result_payload) if result_supplied else ""
         ),
         "runner_result_summary": _runner_summary(runner_payload),
+        "effect_commit_state": str(
+            result_payload.get("effect_commit_state") or ""
+        ),
         **_effect_fields(result_payload, supplied=result_supplied),
     }
-    assurance_completion = assurance_completion_request_from_runner(
-        runner_payload
+    completion = (
+        dict(assurance_completion)
+        if isinstance(assurance_completion, Mapping)
+        else assurance_completion_request_from_runner(runner_payload)
     )
-    if assurance_completion:
-        receipt["assurance_completion_request"] = assurance_completion
+    if completion:
+        receipt["assurance_completion_request"] = completion
     receipt["receipt_digest"] = canonical_digest(receipt)
     return receipt
 
