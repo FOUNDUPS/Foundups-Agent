@@ -65,6 +65,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import build_work_order_materialization_binding
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
@@ -736,15 +737,14 @@ def _materialize_work_orders_from_authority_profile(
 
     queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
     queue_item_id = str(queue_receipt.get("queue_item_id") or "")
-    materialization_binding_seed = {
-        "schema_version": "reddog_work_order_materialization_binding_seed.v1",
-        "work_order_id": str(
+    materialization_binding_seed = build_work_order_materialization_binding(
+        work_order_id=str(
             authority_profile.get("work_order_id")
             or "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
         ),
-        "base_ref": authority_profile.get("base_ref"),
-        "queue_consumer_receipt_digest": _canonical_digest(queue_receipt),
-    }
+        base_ref=str(authority_profile.get("base_ref") or ""),
+        queue_consumer_receipt=queue_receipt,
+    )
     authority_request = plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=queue_result.to_dict(),
         authority_profile=authority_profile,

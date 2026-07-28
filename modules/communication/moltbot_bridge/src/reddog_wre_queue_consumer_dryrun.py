@@ -17,6 +17,11 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Mapping, Optional
 
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_receipt import (
+    WREQueueConsumerDryRunReceipt,
+    build_queue_consumer_receipt,
+)
+
 
 WRE_QUEUE_CONSUMER_DRYRUN_READY = "WRE_QUEUE_CONSUMER_DRYRUN_READY"
 WRE_QUEUE_CONSUMER_DRYRUN_REJECT = "WRE_QUEUE_CONSUMER_DRYRUN_REJECT"
@@ -38,44 +43,6 @@ FAIL_REQUESTED_QUEUE_NOT_FOUND = "FAIL_REQUESTED_QUEUE_NOT_FOUND"
 FAIL_QUEUE_GOVERNED_LINEAGE = "FAIL_QUEUE_GOVERNED_LINEAGE"
 
 WORK_STATE_SCHEMA_VERSION = "reddog_authoritative_work_state.v1"
-
-
-@dataclass(frozen=True)
-class WREQueueConsumerDryRunReceipt:
-    """Receipt for one validated authoritative queue item."""
-
-    receipt_id: str
-    queue_item_id: str
-    slice_id: str
-    claim_id: str
-    worker_id: str
-    freshness_receipt_id: str
-    wsp15_allocation_receipt_id: str
-    wsp15_allocation_digest: str
-    wsp15_priority: str
-    wsp15_mps_total: int
-    reasoning_tier: str
-    next_required_gate: str
-    model_selection_receipt_id: Optional[str] = None
-    model_selection_digest: Optional[str] = None
-    model_runtime_binding_receipt_id: Optional[str] = None
-    model_runtime_binding_digest: Optional[str] = None
-    memex_supply_receipt_id: Optional[str] = None
-    memex_supply_digest: Optional[str] = None
-    execution_ready: bool = False
-    no_queue_mutation_performed: bool = True
-    no_worker_spawn_performed: bool = True
-    no_worktree_created: bool = True
-    no_shell_command_executed: bool = True
-    no_openclaw_enqueue_performed: bool = True
-    no_hermes_dispatch_performed: bool = True
-    no_repo_mutation_performed: bool = True
-    no_holoindex_reindex_performed: bool = True
-    no_pr_created: bool = True
-    no_reward_settlement_performed: bool = True
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
 
 
 @dataclass(frozen=True)
@@ -291,6 +258,11 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "claim_id": claim_id,
         "worker_id": worker_id,
         "freshness_receipt_id": freshness_receipt_id,
+        "operational_snapshot_id": str(
+            snapshot.get("snapshot_id")
+            or snapshot.get("operational_snapshot_id")
+            or _digest(snapshot)
+        ),
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
         "wsp15_priority": allocation_priority,
@@ -304,26 +276,7 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "memex_supply_digest": str(selected.get("memex_supply_digest") or ""),
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     }
-    receipt = WREQueueConsumerDryRunReceipt(
-        receipt_id="wre_queue_consumer_" + _digest(receipt_seed).removeprefix("sha256:")[:16],
-        queue_item_id=queue_item_id,
-        slice_id=slice_id,
-        claim_id=claim_id,
-        worker_id=worker_id,
-        freshness_receipt_id=freshness_receipt_id,
-        wsp15_allocation_receipt_id=allocation_receipt_id,
-        wsp15_allocation_digest=allocation_digest,
-        wsp15_priority=allocation_priority,
-        wsp15_mps_total=allocation_total,
-        reasoning_tier=allocation_tier,
-        model_selection_receipt_id=str(selected.get("model_selection_receipt_id") or "") or None,
-        model_selection_digest=str(selected.get("model_selection_digest") or "") or None,
-        model_runtime_binding_receipt_id=str(selected.get("model_runtime_binding_receipt_id") or "") or None,
-        model_runtime_binding_digest=str(selected.get("model_runtime_binding_digest") or "") or None,
-        memex_supply_receipt_id=str(selected.get("memex_supply_receipt_id") or "") or None,
-        memex_supply_digest=str(selected.get("memex_supply_digest") or "") or None,
-        next_required_gate=NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
-    )
+    receipt = build_queue_consumer_receipt(receipt_seed)
     return WREQueueConsumerDryRunResult(
         accepted=True,
         status=WRE_QUEUE_CONSUMER_DRYRUN_READY,

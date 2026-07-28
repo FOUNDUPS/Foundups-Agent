@@ -2,6 +2,20 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-28 - REDDOG_SIGNED_QUEUE_LINEAGE_AND_STARTUP_VERIFIER_BINDING_PHASE1 (0.4.27)
+
+- Bound the canonical queue-consumer receipt digest and operational snapshot
+  through delegated authority, signature verification, AgentDB envelopes, and
+  use-time worker dispatch.
+- Preserved the configured Ed25519 verifier and confined authority paths as an
+  immutable process-local startup context instead of rebuilding trust from
+  mutable environment variables.
+- Regenerated and pinned the 1,026-file backend dependency manifest. Raised
+  only the explicit runtime-file count cap from 1,024 to 1,100; per-file,
+  total-byte, digest, path, and schema checks remain unchanged.
+- Added no editor-side shell, worker, repository, publication, or merge
+  authority. Version 0.4.26 -> 0.4.27.
+
 ## 2026-07-27 - REDDOG_RESIDENT_QUEUE_EXACT_SHA_COMMIT_STAGE_PHASE1 (0.4.26)
 
 - Added the backend exact-SHA commit stage between bounded authoring and

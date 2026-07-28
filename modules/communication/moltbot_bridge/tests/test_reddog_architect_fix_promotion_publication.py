@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 from pathlib import Path
 
 import pytest
@@ -18,6 +18,9 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_rec
 )
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_store import (
+    AtomicJsonAuthoritativeWorkStateStore,
 )
 
 
@@ -60,6 +63,38 @@ def _runtime(
         work_state_store=store,
     )
     return runtime, store, publisher
+
+
+def test_refresh_and_publication_stores_share_one_writer_fence(
+    tmp_path: Path,
+) -> None:
+    runtime, publication_store, _publisher = _runtime(tmp_path)
+    refresh_store = AtomicJsonAuthoritativeWorkStateStore(
+        runtime / "work_state.json",
+        allowed_root=runtime,
+        repo_root=tmp_path / "repo",
+    )
+    current = publication_store.load()
+    publication_update = {
+        key: value for key, value in current.items() if key != "revision"
+    }
+    publication_update["publication_marker"] = "committed"
+
+    executor = ThreadPoolExecutor(max_workers=1)
+    try:
+        with refresh_store.locked_snapshot():
+            future = executor.submit(
+                publication_store.commit,
+                publication_update,
+                expected_revision=current["revision"],
+            )
+            with pytest.raises(FutureTimeout):
+                future.result(timeout=0.1)
+        assert future.result(timeout=2) != current["revision"]
+    finally:
+        executor.shutdown(wait=True)
+    assert publication_store.lock_path == refresh_store.lock_path
+    assert publication_store.load()["publication_marker"] == "committed"
 
 
 def _request(

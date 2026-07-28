@@ -106,6 +106,7 @@ def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRunti
         denied_paths=tuple(str(item) for item in payload.get("denied_paths") or ()),
         requested_operation=str(payload["requested_operation"]),
         permission_snapshot_digest=str(payload["permission_snapshot_digest"]),
+        queue_consumer_receipt_digest=str(payload["queue_consumer_receipt_digest"]),
         wsp15_allocation_receipt_id=str(payload["wsp15_allocation_receipt_id"]),
         wsp15_allocation_digest=str(payload["wsp15_allocation_digest"]),
         wsp15_priority=str(payload["wsp15_priority"]),

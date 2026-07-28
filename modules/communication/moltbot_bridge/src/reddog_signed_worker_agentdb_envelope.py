@@ -8,7 +8,7 @@ import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
     load_reddog_main_resident_queue_runtime_dependency_bundle,
@@ -31,6 +31,15 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     invoke_reddog_wre_queue_authority_verification,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
+    WREQueueConsumerDryRunReceipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    WORK_ORDER_MATERIALIZATION_BINDING_FIELDS,
+    WORK_ORDER_MATERIALIZATION_BINDING_SCHEMA,
+    build_work_order_materialization_binding,
+    canonical_full_work_order_digest,
+)
 
 
 SIGNED_WORKER_AGENTDB_ENVELOPE_SCHEMA = "reddog_signed_worker_agentdb_envelope.v1"
@@ -45,12 +54,17 @@ _ENVELOPE_FIELDS = frozenset(
         "wsp15_allocation_receipt",
         "signed_authority_worker_dispatch_receipt",
         "worker_dispatch_intent",
+        "queue_consumer_receipt",
+        "work_order_materialization_binding",
         "agentdb_task_binding",
     }
 )
 _RUNTIME_FIELDS = frozenset({"decision", "authority_result"})
 _AUTHORITY_FIELDS = frozenset(
     {"accepted", "receipt", "identity", "work_authority"}
+)
+_QUEUE_CONSUMER_RECEIPT_FIELDS = frozenset(
+    WREQueueConsumerDryRunReceipt.__dataclass_fields__
 )
 _TASK_BINDING_FIELDS = frozenset(
     {
@@ -93,6 +107,43 @@ class VerifiedSignedWorkerAgentDbEnvelope:
     authority_verification_result: Mapping[str, Any]
 
 
+@dataclass(frozen=True)
+class WorkerDispatchAuthorityVerificationConfig:
+    """Process-local inputs needed to rehydrate claim-time authority."""
+
+    repo_root: str
+    runtime_allowed_root: str
+    authority_state_path: str
+    permission_snapshots_path: str
+    principal_authority_records_path: str
+    signature_verifier_backend: str
+
+
+def capture_worker_dispatch_authority_verification_config(
+    *,
+    repo_root: Path | str,
+    runtime_allowed_root: Path | str,
+    authority_state_path: Path | str | None,
+    permission_snapshots_path: Path | str | None,
+    principal_authority_records_path: Path | str | None,
+    signature_verifier_backend: str | None,
+) -> WorkerDispatchAuthorityVerificationConfig | None:
+    """Capture startup-resolved public verifier inputs for the claim stage."""
+
+    if not authority_state_path:
+        return None
+    return WorkerDispatchAuthorityVerificationConfig(
+        repo_root=str(Path(repo_root).resolve()),
+        runtime_allowed_root=str(runtime_allowed_root or ""),
+        authority_state_path=str(authority_state_path),
+        permission_snapshots_path=str(permission_snapshots_path or ""),
+        principal_authority_records_path=str(
+            principal_authority_records_path or ""
+        ),
+        signature_verifier_backend=str(signature_verifier_backend or ""),
+    )
+
+
 def canonical_reddog_signed_worker_task_id(
     *, source_dispatch_receipt_id: str, queue_item_id: str, intent_id: str
 ) -> str:
@@ -111,6 +162,8 @@ def build_reddog_signed_worker_agentdb_envelope(
     wsp15_allocation_receipt: Mapping[str, Any],
     dispatch_receipt: Mapping[str, Any],
     dispatch_intent: Mapping[str, Any],
+    queue_consumer_receipt: Mapping[str, Any],
+    work_order_materialization_binding: Mapping[str, Any],
     task_binding: Mapping[str, Any],
 ) -> Mapping[str, Any]:
     """Build the restart envelope without inventing a second trust primitive."""
@@ -127,6 +180,16 @@ def build_reddog_signed_worker_agentdb_envelope(
             dispatch_receipt
         ),
         "worker_dispatch_intent": _canonical_intent(dispatch_intent),
+        "queue_consumer_receipt": _exact_mapping(
+            queue_consumer_receipt,
+            _QUEUE_CONSUMER_RECEIPT_FIELDS,
+            "queue_consumer_receipt",
+        ),
+        "work_order_materialization_binding": _exact_mapping(
+            work_order_materialization_binding,
+            WORK_ORDER_MATERIALIZATION_BINDING_FIELDS,
+            "work_order_materialization_binding",
+        ),
         "agentdb_task_binding": binding,
     }
 
@@ -154,6 +217,16 @@ def verify_reddog_signed_worker_agentdb_envelope(
         WORKER_DISPATCH_INTENT_FIELDS,
         "dispatch_intent",
     )
+    queue_receipt = _exact_mapping(
+        payload.get("queue_consumer_receipt"),
+        _QUEUE_CONSUMER_RECEIPT_FIELDS,
+        "queue_consumer_receipt",
+    )
+    work_order_binding = _exact_mapping(
+        payload.get("work_order_materialization_binding"),
+        WORK_ORDER_MATERIALIZATION_BINDING_FIELDS,
+        "work_order_materialization_binding",
+    )
     binding = _exact_mapping(
         payload.get("agentdb_task_binding"),
         _TASK_BINDING_FIELDS,
@@ -164,7 +237,18 @@ def verify_reddog_signed_worker_agentdb_envelope(
     if not _constant_mapping_equal(recorded_receipt, planned_receipt):
         raise SignedWorkerAgentDbEnvelopeError("dispatch_receipt_mismatch")
     planned_intent = _selected_intent(planned_receipt, recorded_intent)
-    _verify_task_binding(task_id, binding, planned_receipt, planned_intent)
+    _verify_work_order_binding(
+        runtime=runtime,
+        queue_receipt=queue_receipt,
+        work_order_binding=work_order_binding,
+    )
+    _verify_task_binding(
+        task_id,
+        binding,
+        planned_receipt,
+        planned_intent,
+        queue_receipt,
+    )
     context = _canonical_context(
         envelope=payload,
         binding=binding,
@@ -172,6 +256,7 @@ def verify_reddog_signed_worker_agentdb_envelope(
         allocation=allocation,
         receipt=planned_receipt,
         intent=planned_intent,
+        queue_receipt=queue_receipt,
     )
     return VerifiedSignedWorkerAgentDbEnvelope(
         task_id=task_id,
@@ -182,37 +267,23 @@ def verify_reddog_signed_worker_agentdb_envelope(
     )
 
 
-def build_worker_dispatch_authority_context_from_env(
-    *, repo_root: Path | str, env: Mapping[str, str]
+def build_worker_dispatch_authority_context(
+    *,
+    config: WorkerDispatchAuthorityVerificationConfig,
+    trusted_now_epoch: Callable[[], int] | None = None,
 ) -> WorkerDispatchAuthorityVerificationContext:
-    """Build the existing authority verifier dependencies for restart checks."""
+    """Rehydrate verifier dependencies from explicit startup-resolved inputs."""
 
-    root = Path(repo_root).resolve()
-    runtime_root = resident_queue_runtime_root_path(env, root)
-    paths = {
-        key: resident_queue_runtime_file_path(env, root, env_name)
-        for key, env_name in (
-            ("authority_state_path", "REDDOG_AUTHORITY_RUNTIME_STATE_PATH"),
-            ("permission_snapshots_path", "REDDOG_PERMISSION_SNAPSHOTS_PATH"),
-            (
-                "principal_authority_records_path",
-                "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
-            ),
-        )
-    }
+    clock = trusted_now_epoch or (lambda: int(time.time()))
     bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
-        repo_root=root,
-        runtime_allowed_root=runtime_root or None,
-        authority_state_path=paths["authority_state_path"] or None,
-        permission_snapshots_path=paths["permission_snapshots_path"] or None,
-        principal_authority_records_path=(
-            paths["principal_authority_records_path"] or None
-        ),
-        signature_verifier_backend=str(
-            env.get("REDDOG_SIGNATURE_VERIFIER_BACKEND") or ""
-        )
+        repo_root=config.repo_root,
+        runtime_allowed_root=config.runtime_allowed_root or None,
+        authority_state_path=config.authority_state_path or None,
+        permission_snapshots_path=config.permission_snapshots_path or None,
+        principal_authority_records_path=config.principal_authority_records_path
         or None,
-        now_epoch=int(time.time()),
+        signature_verifier_backend=config.signature_verifier_backend or None,
+        now_epoch=int(clock()),
     )
     if bundle.accepted is not True or not bundle.requested:
         raise SignedWorkerAgentDbEnvelopeError(
@@ -224,9 +295,34 @@ def build_worker_dispatch_authority_context_from_env(
         nonce_store=bundle.nonce_store,
         snapshot_resolver=bundle.snapshot_resolver,
         revocation_oracle=bundle.revocation_oracle,
-        trusted_now_epoch=lambda: int(time.time()),
+        trusted_now_epoch=clock,
         required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
     )
+
+
+def build_worker_dispatch_authority_context_from_env(
+    *, repo_root: Path | str, env: Mapping[str, str]
+) -> WorkerDispatchAuthorityVerificationContext:
+    """Compatibility adapter for non-startup callers without explicit context."""
+
+    root = Path(repo_root).resolve()
+    config = WorkerDispatchAuthorityVerificationConfig(
+        repo_root=str(root),
+        runtime_allowed_root=resident_queue_runtime_root_path(env, root),
+        authority_state_path=resident_queue_runtime_file_path(
+            env, root, "REDDOG_AUTHORITY_RUNTIME_STATE_PATH"
+        ),
+        permission_snapshots_path=resident_queue_runtime_file_path(
+            env, root, "REDDOG_PERMISSION_SNAPSHOTS_PATH"
+        ),
+        principal_authority_records_path=resident_queue_runtime_file_path(
+            env, root, "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH"
+        ),
+        signature_verifier_backend=str(
+            env.get("REDDOG_SIGNATURE_VERIFIER_BACKEND") or ""
+        ),
+    )
+    return build_worker_dispatch_authority_context(config=config)
 
 
 def _fresh_verification(
@@ -296,10 +392,11 @@ def _verify_task_binding(
     binding: Mapping[str, Any],
     receipt: Mapping[str, Any],
     intent: Mapping[str, Any],
+    queue_receipt: Mapping[str, Any],
 ) -> None:
     expected = canonical_reddog_signed_worker_task_id(
         source_dispatch_receipt_id=str(receipt.get("receipt_id") or ""),
-        queue_item_id=str(binding.get("queue_item_id") or ""),
+        queue_item_id=str(queue_receipt.get("queue_item_id") or ""),
         intent_id=str(intent.get("intent_id") or ""),
     )
     if not hmac.compare_digest(task_id, expected):
@@ -309,9 +406,43 @@ def _verify_task_binding(
         and binding.get("task_id") == task_id
         and binding.get("source_dispatch_receipt_id") == receipt.get("receipt_id")
         and binding.get("origin_continuity_id") == receipt.get("work_order_id")
+        and binding.get("queue_item_id") == queue_receipt.get("queue_item_id")
+        and binding.get("selected_slice") == queue_receipt.get("slice_id")
+        and binding.get("operational_snapshot_id")
+        == queue_receipt.get("operational_snapshot_id")
     )
     if not required:
         raise SignedWorkerAgentDbEnvelopeError("task_binding_mismatch")
+
+
+def _verify_work_order_binding(
+    *,
+    runtime: Mapping[str, Any],
+    queue_receipt: Mapping[str, Any],
+    work_order_binding: Mapping[str, Any],
+) -> None:
+    authority = _mapping(runtime.get("authority_result"))
+    work_authority = _mapping(authority.get("work_authority"))
+    expected = build_work_order_materialization_binding(
+        work_order_id=str(work_authority.get("work_order_id") or ""),
+        base_ref=str(work_authority.get("base_ref") or ""),
+        queue_consumer_receipt=queue_receipt,
+    )
+    if (
+        work_order_binding.get("schema_version")
+        != WORK_ORDER_MATERIALIZATION_BINDING_SCHEMA
+        or not _constant_mapping_equal(work_order_binding, expected)
+        or not hmac.compare_digest(
+            canonical_full_work_order_digest(queue_receipt),
+            str(work_authority.get("queue_consumer_receipt_digest") or ""),
+        )
+        or str(queue_receipt.get("queue_item_id") or "") == ""
+        or str(queue_receipt.get("slice_id") or "") == ""
+        or str(queue_receipt.get("freshness_receipt_id") or "") == ""
+    ):
+        raise SignedWorkerAgentDbEnvelopeError(
+            "work_order_materialization_binding_mismatch"
+        )
 
 
 def _canonical_context(
@@ -322,6 +453,7 @@ def _canonical_context(
     allocation: Mapping[str, Any],
     receipt: Mapping[str, Any],
     intent: Mapping[str, Any],
+    queue_receipt: Mapping[str, Any],
 ) -> Mapping[str, Any]:
     authority = _mapping(runtime.get("authority_result"))
     work_authority = _mapping(authority.get("work_authority"))
@@ -330,11 +462,11 @@ def _canonical_context(
         "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
         "schema_version": WORKER_DISPATCH_RUNTIME_SCHEMA_VERSION,
         "slice_name": "REDDOG_OPENCLAW_HERMES_0102_WORKER_DISPATCH_RUNTIME_PHASE1",
-        "queue_item_id": str(binding["queue_item_id"]),
+        "queue_item_id": str(queue_receipt["queue_item_id"]),
         "work_order_id": str(receipt["work_order_id"]),
-        "operational_snapshot_id": str(binding["operational_snapshot_id"]),
+        "operational_snapshot_id": str(queue_receipt["operational_snapshot_id"]),
         "wsp15_allocation_receipt_id": str(receipt["wsp15_allocation_receipt_id"]),
-        "selected_slice": str(binding["selected_slice"]),
+        "selected_slice": str(queue_receipt["slice_id"]),
         "worker_runtime": str(intent["worker_runtime"]),
         "worker_role": str(intent["role"]),
         "worker_principal_id": f"agentdb-task:{task_id}",
@@ -458,8 +590,11 @@ __all__ = [
     "WORKER_DISPATCH_RUNTIME_SCHEMA_VERSION",
     "SignedWorkerAgentDbEnvelopeError",
     "VerifiedSignedWorkerAgentDbEnvelope",
+    "WorkerDispatchAuthorityVerificationConfig",
     "build_reddog_signed_worker_agentdb_envelope",
+    "build_worker_dispatch_authority_context",
     "build_worker_dispatch_authority_context_from_env",
+    "capture_worker_dispatch_authority_verification_config",
     "canonical_reddog_signed_worker_task_id",
     "verify_reddog_signed_worker_agentdb_envelope",
 ]

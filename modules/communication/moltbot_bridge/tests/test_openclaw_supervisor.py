@@ -511,6 +511,11 @@ def test_supervisor_renews_one_expired_verifier_only_when_stage_ready(
         "_openclaw_independent_verifier_ready_from_env",
         lambda context, env, repo_root: True,
     )
+    monkeypatch.setattr(
+        supervisor_module,
+        "_rehydrate_signed_worker_agentdb_context",
+        lambda **kwargs: kwargs["context"],
+    )
     now_iso = datetime(2026, 7, 14, tzinfo=timezone.utc).isoformat()
 
     supervisor_module._renew_expired_independent_verifier_for_ready_stage(
@@ -1052,6 +1057,46 @@ def test_plan_ai_analysis_exception_stores_error(tmp_path):
     assert "Holo unavailable" in ai_analysis["error"]
     # Plan should still complete even with AI analysis error
     assert result["plan"]["action"] == "execute_autonomous_task"
+
+
+def test_triage_never_routes_signed_origin_task_to_generic_executor(
+    tmp_path,
+    monkeypatch,
+):
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+    }
+    observer = MagicMock()
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda *_: None,
+    )
+    signed_origin = {
+        "task_id": "signed-task-with-stripped-context",
+        "status": "pending",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "required_skills": ["attacker_skill"],
+        "context": {},
+    }
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [signed_origin]
+    monkeypatch.setenv("OPENCLAW_AUTO_TASKS_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASKS_ENABLED", "0")
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result.get("action") != "execute_autonomous_task"
+    assert db.get_autonomous_tasks.called
 
 
 # --------------------------------------------------------------------------- #

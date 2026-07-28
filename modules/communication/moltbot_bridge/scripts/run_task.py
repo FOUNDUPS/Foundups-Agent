@@ -29,6 +29,9 @@ sys.path.insert(0, str(REPO_ROOT))
 
 logger = logging.getLogger(__name__)
 
+_SIGNED_WORKER_DISPATCH_TASK_SOURCE = "reddog_signed_worker_dispatch_runtime"
+_SIGNED_WORKER_DISPATCH_TASK_SKILL = "reddog_signed_worker_dispatch"
+
 
 def execute_task(
     task_id: str,
@@ -66,6 +69,7 @@ def execute_task(
     required_skills = task.get("required_skills", [])
     context = task.get("context", {})
     source = context.get("source", "") if isinstance(context, dict) else ""
+    discovered_by = str(task.get("discovered_by") or "")
     description = task.get("description", "")
 
     logger.info("[RUN_TASK] Executing task %s: %s (skills=%s, source=%s)", task_id, description[:80], required_skills, source)
@@ -95,6 +99,7 @@ def execute_task(
             context,
             required_skills,
             source,
+            discovered_by,
             signed_worker_runner,
         )
         if signed_worker_result is not None:
@@ -261,9 +266,20 @@ def _try_reddog_signed_worker_dispatch(
     context: dict,
     required_skills: list,
     source: str,
+    discovered_by: str,
     signed_worker_runner: Any | None,
 ) -> Dict[str, Any] | None:
     """Execute exact RedDog signed worker-dispatch tasks before WRE fallback."""
+
+    signed_origin = discovered_by == _SIGNED_WORKER_DISPATCH_TASK_SOURCE
+    signed_marker_present = (
+        signed_origin
+        or _SIGNED_WORKER_DISPATCH_TASK_SKILL in required_skills
+        or source == _SIGNED_WORKER_DISPATCH_TASK_SOURCE
+        or "signed_worker_agentdb_envelope" in context
+    )
+    if not signed_marker_present:
+        return None
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
@@ -277,21 +293,21 @@ def _try_reddog_signed_worker_dispatch(
             execute_reddog_signed_worker_dispatch_task,
         )
     except ImportError as e:
-        logger.debug("[RUN_TASK] RedDog signed-worker executor unavailable: %s", e)
-        return None
-
-    signed_marker_present = (
-        SIGNED_WORKER_DISPATCH_TASK_SKILL in required_skills
-        or source == SIGNED_WORKER_DISPATCH_TASK_SOURCE
-        or "signed_worker_agentdb_envelope" in context
-    )
-    if not signed_marker_present:
-        return None
+        logger.warning("[RUN_TASK] Signed-worker executor unavailable: %s", e)
+        return {
+            "ok": False,
+            "detail": f"signed_worker_executor_unavailable: {e}",
+            "executor": "reddog:signed_worker_dispatch",
+        }
 
     try:
         if (
-            SIGNED_WORKER_DISPATCH_TASK_SKILL not in required_skills
+            SIGNED_WORKER_DISPATCH_TASK_SOURCE
+            != _SIGNED_WORKER_DISPATCH_TASK_SOURCE
+            or not signed_origin
+            or SIGNED_WORKER_DISPATCH_TASK_SKILL not in required_skills
             or source != SIGNED_WORKER_DISPATCH_TASK_SOURCE
+            or "signed_worker_agentdb_envelope" not in context
         ):
             raise SignedWorkerAgentDbEnvelopeError(
                 "signed_worker_task_routing_binding_mismatch"

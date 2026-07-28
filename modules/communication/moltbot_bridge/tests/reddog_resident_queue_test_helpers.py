@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,13 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
     derive_worker_dispatch_roles,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    build_work_order_materialization_binding,
+    canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
+    plan_reddog_wre_queue_consumer_dry_run,
 )
 
 
@@ -62,6 +70,13 @@ _TEST_PRINCIPAL_SECRET = b"worker-dispatch-principal"
 _TEST_REDDOG_SECRET = b"worker-dispatch-reddog"
 _TEST_WORK_ORDER_DIGEST = "sha256:" + "1" * 64
 _TEST_PERMISSION_SNAPSHOT_DIGEST = "sha256:" + "2" * 64
+_TEST_FRESHNESS_RECEIPT_ID = "fresh-worker-dispatch-1"
+_TEST_CLAIM_ID = "claim-worker-dispatch-1"
+_TEST_WORKER_ID = "reddog-main-bootstrap"
+_TEST_SLICE_ID = "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+_TEST_DETERMINATION_ID = "sha256:determination"
+_TEST_MODEL_SELECTION_ID = "sha256:model-selection"
+_TEST_MEMEX_SUPPLY_ID = "sha256:memex-supply"
 
 
 class _WorkerDispatchSignatureVerifier:
@@ -158,8 +173,123 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
     return item
 
 
+def governed_worker_dispatch_snapshot(
+    snapshot: dict[str, Any],
+) -> dict[str, Any]:
+    """Add the minimum real queue lineage required by the signed worker path."""
+
+    governed = deepcopy(snapshot)
+    queue_items = governed.get("wre_queue_items")
+    if not isinstance(queue_items, list) or not queue_items:
+        return governed
+    queue = queue_items[0]
+    queue.setdefault("slice_id", _TEST_SLICE_ID)
+    queue.setdefault("claim_id", _TEST_CLAIM_ID)
+    queue.setdefault("worker_id", _TEST_WORKER_ID)
+    queue.setdefault("no_execution_performed", True)
+    queue.setdefault("source_determination_receipt_id", _TEST_DETERMINATION_ID)
+    queue.setdefault("model_selection_receipt_id", _TEST_MODEL_SELECTION_ID)
+    queue.setdefault("model_selection_digest", "sha256:model-selection")
+    queue.setdefault("memex_supply_receipt_id", _TEST_MEMEX_SUPPLY_ID)
+    queue.setdefault("memex_supply_digest", "sha256:memex-supply")
+
+    allocation = queue.get("wsp15_allocation_receipt") or {}
+    allocation_id = str(allocation.get("receipt_id") or "")
+    runtime_id = str(queue.get("model_runtime_binding_receipt_id") or "")
+    refs = [
+        str(ref)
+        for ref in queue.get("evidence_refs") or ()
+    ]
+    refs.extend(
+        [
+            f"claim:{queue['claim_id']}",
+            f"freshness:{_TEST_FRESHNESS_RECEIPT_ID}",
+            f"wsp15_allocation:{allocation_id}",
+            f"architect_determination:{queue['source_determination_receipt_id']}",
+            f"model_selection:{queue['model_selection_receipt_id']}",
+            f"memex_supply:{queue['memex_supply_receipt_id']}",
+        ]
+    )
+    if runtime_id:
+        refs.append(f"model_runtime_binding:{runtime_id}")
+    queue["evidence_refs"] = list(dict.fromkeys(refs))
+
+    governed.setdefault(
+        "freshness_receipts",
+        [{"receipt_id": _TEST_FRESHNESS_RECEIPT_ID, "fresh": True}],
+    )
+    governed.setdefault(
+        "worker_claims",
+        [
+            {
+                "claim_id": str(queue["claim_id"]),
+                "slice_id": str(queue["slice_id"]),
+                "worker_id": str(queue["worker_id"]),
+                "status": "ACTIVE",
+                "expires_at": "2030-01-01T00:00:00+00:00",
+                "freshness_receipt_id": _TEST_FRESHNESS_RECEIPT_ID,
+                "lane_id": "reddog_operational",
+                "reconciliation_report_id": "sha256:reconciliation",
+                "source_determination_receipt_id": str(
+                    queue["source_determination_receipt_id"]
+                ),
+                "model_selection_receipt_id": str(
+                    queue["model_selection_receipt_id"]
+                ),
+                "model_runtime_binding_receipt_id": runtime_id,
+                "memex_supply_receipt_id": str(queue["memex_supply_receipt_id"]),
+            }
+        ],
+    )
+    return governed
+
+
+def worker_dispatch_work_order_digest(
+    snapshot: dict[str, Any],
+    *,
+    work_order_id: str = "wo-1",
+    base_ref: str = "main",
+    queue_item_id: str = "queue-1",
+) -> str:
+    """Derive the signed digest from the authoritative queue receipt."""
+
+    result = plan_reddog_wre_queue_consumer_dry_run(
+        snapshot,
+        now_iso="2026-07-16T00:00:00+00:00",
+        requested_queue_item_id=queue_item_id,
+        require_governed_lineage=True,
+    )
+    if not result.accepted or result.receipt is None:
+        raise AssertionError(result.rejection_reasons)
+    binding = build_work_order_materialization_binding(
+        work_order_id=work_order_id,
+        base_ref=base_ref,
+        queue_consumer_receipt=result.receipt.to_dict(),
+    )
+    return canonical_full_work_order_digest(binding)
+
+
+def worker_dispatch_queue_receipt_digest(
+    snapshot: dict[str, Any],
+    *,
+    queue_item_id: str = "queue-1",
+) -> str:
+    result = plan_reddog_wre_queue_consumer_dry_run(
+        snapshot,
+        now_iso="2026-07-16T00:00:00+00:00",
+        requested_queue_item_id=queue_item_id,
+        require_governed_lineage=True,
+    )
+    if not result.accepted or result.receipt is None:
+        raise AssertionError(result.rejection_reasons)
+    return canonical_full_work_order_digest(result.receipt.to_dict())
+
+
 def worker_dispatch_authority_stages(
     allocation: dict[str, Any],
+    *,
+    work_state_snapshot: dict[str, Any] | None = None,
+    queue_item_id: str = "queue-1",
     **work_authority_overrides: Any,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build mutually bound authority/verification stages for runtime tests."""
@@ -179,9 +309,24 @@ def worker_dispatch_authority_stages(
         _TEST_PRINCIPAL_SECRET,
         canonical_signing_input(identity, "reddog-identity.v1"),
     )
+    work_order_id = str(work_authority_overrides.get("work_order_id") or "wo-1")
+    base_ref = str(work_authority_overrides.get("base_ref") or "main")
+    work_order_digest = _TEST_WORK_ORDER_DIGEST
+    queue_receipt_digest = "sha256:" + "4" * 64
+    if work_state_snapshot is not None:
+        work_order_digest = worker_dispatch_work_order_digest(
+            work_state_snapshot,
+            work_order_id=work_order_id,
+            base_ref=base_ref,
+            queue_item_id=queue_item_id,
+        )
+        queue_receipt_digest = worker_dispatch_queue_receipt_digest(
+            work_state_snapshot,
+            queue_item_id=queue_item_id,
+        )
     work_authority = {
         "work_order_id": "wo-1",
-        "work_order_digest": _TEST_WORK_ORDER_DIGEST,
+        "work_order_digest": work_order_digest,
         "base_ref": "main",
         "principal_id": "github:mjtrout",
         "reddog_id": "reddog:worker-dispatch",
@@ -191,6 +336,7 @@ def worker_dispatch_authority_stages(
         "denied_paths": [],
         "requested_operation": "create_foundup",
         "permission_snapshot_digest": _TEST_PERMISSION_SNAPSHOT_DIGEST,
+        "queue_consumer_receipt_digest": queue_receipt_digest,
         "wsp15_allocation_receipt_id": allocation["receipt_id"],
         "wsp15_allocation_digest": canonical_digest(allocation),
         "wsp15_priority": allocation["priority"],
@@ -400,6 +546,8 @@ def publish_bound_worker_dispatch(**kwargs: Any):
     }
     authority_runtime, authority_verification = worker_dispatch_authority_stages(
         allocation,
+        work_state_snapshot=snapshot,
+        queue_item_id=str(call_args.get("queue_item_id") or "queue-1"),
         **signed_optional,
     )
     from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (

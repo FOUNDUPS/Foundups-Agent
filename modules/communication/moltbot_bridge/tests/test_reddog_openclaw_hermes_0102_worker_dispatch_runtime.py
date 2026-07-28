@@ -26,6 +26,7 @@ from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_b
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    governed_worker_dispatch_snapshot,
     worker_dispatch_authority_verification_context,
     worker_dispatch_authority_stages,
     with_architect_fix_publication,
@@ -40,6 +41,13 @@ MODULE_PATH = (
     / "moltbot_bridge"
     / "src"
     / "reddog_openclaw_hermes_0102_worker_dispatch_runtime.py"
+)
+RUNTIME_MODULE_PATHS = (
+    MODULE_PATH,
+    MODULE_PATH.with_name("reddog_signed_worker_dispatch_runtime_types.py"),
+    MODULE_PATH.with_name("reddog_signed_worker_dispatch_runtime_validation.py"),
+    MODULE_PATH.with_name("reddog_signed_worker_dispatch_task_builder.py"),
+    MODULE_PATH.with_name("reddog_signed_worker_dispatch_agentdb_writer.py"),
 )
 
 
@@ -96,10 +104,18 @@ def _allocation(**overrides):
     return payload
 
 
-def _authority_stages(allocation=None, **work_authority_overrides):
+def _authority_stages(
+    allocation=None,
+    *,
+    work_state_snapshot=None,
+    queue_item_id="queue-1",
+    **work_authority_overrides,
+):
     allocation = allocation or _allocation()
     return worker_dispatch_authority_stages(
         allocation,
+        work_state_snapshot=work_state_snapshot,
+        queue_item_id=queue_item_id,
         wsp15_priority=allocation["priority"],
         wsp15_mps_total=allocation["mps_total"],
         wsp15_reasoning_tier=allocation["reasoning_tier"],
@@ -108,7 +124,11 @@ def _authority_stages(allocation=None, **work_authority_overrides):
 
 
 def _authority_refs(allocation=None):
-    _, verification = _authority_stages(allocation)
+    allocation = allocation or _allocation()
+    _, verification = _authority_stages(
+        allocation,
+        work_state_snapshot=_snapshot(allocation),
+    )
     return {
         key: verification[key]
         for key in (
@@ -203,7 +223,11 @@ def _publish(**kwargs):
         if queue_items
         else _allocation()
     )
-    authority_runtime, authority_verification = _authority_stages(allocation)
+    authority_runtime, authority_verification = _authority_stages(
+        allocation,
+        work_state_snapshot=snapshot,
+        queue_item_id=str(kwargs.get("queue_item_id") or "queue-1"),
+    )
     kwargs.setdefault("queue_authority_runtime_result", authority_runtime)
     kwargs.setdefault(
         "queue_authority_verification_result",
@@ -232,10 +256,10 @@ def _snapshot(allocation=None, **queue_overrides):
         "wsp15_allocation_receipt": allocation,
     }
     queue_item.update(queue_overrides)
-    return {
+    return governed_worker_dispatch_snapshot({
         "schema_version": "reddog_authoritative_work_state.v1",
         "wre_queue_items": [queue_item],
-    }
+    })
 
 
 def test_publishes_signed_worker_dispatch_intents_as_pending_tasks() -> None:
@@ -448,6 +472,35 @@ def test_rejects_operation_substitution_with_recomputed_local_receipts() -> None
     assert writer.calls == []
 
 
+def test_rejects_work_state_change_after_queue_authority_was_signed() -> None:
+    allocation = _allocation()
+    original_snapshot = _snapshot(allocation)
+    authority_runtime, authority_verification = _authority_stages(
+        allocation,
+        work_state_snapshot=original_snapshot,
+    )
+    changed_snapshot = json.loads(json.dumps(original_snapshot))
+    changed_snapshot["attacker_selected_state"] = "forged-after-signing"
+    writer = _FakeWriter()
+
+    result = runtime.publish_reddog_signed_worker_dispatch_runtime(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation),
+        queue_authority_runtime_result=authority_runtime,
+        queue_authority_verification_result=authority_verification,
+        authority_verification_context=worker_dispatch_authority_verification_context(),
+        work_state_snapshot=changed_snapshot,
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert result.accepted is False
+    assert (
+        runtime.WorkerDispatchRuntimeReason.WORK_ORDER_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+    assert writer.calls == []
+
+
 def test_rejects_worker_role_substitution_against_authoritative_plan() -> None:
     allocation = _allocation()
     dryrun = _dryrun_result(allocation)
@@ -652,7 +705,6 @@ def test_prepared_architect_publication_cannot_enqueue_agentdb_tasks() -> None:
 def test_committed_architect_binding_is_revalidated_before_enqueue() -> None:
     allocation = _allocation()
     base = _snapshot(allocation, claim_id="claim-1")
-    base["worker_claims"] = [{"claim_id": "claim-1"}]
     committed, profile, queue_id, claim_id = with_architect_fix_publication(
         base,
         {},
@@ -670,6 +722,8 @@ def test_committed_architect_binding_is_revalidated_before_enqueue() -> None:
     }
     authority_runtime, authority_verification = _authority_stages(
         allocation,
+        work_state_snapshot=committed,
+        queue_item_id=queue_id,
         **refs,
     )
     refs.update(
@@ -733,8 +787,10 @@ def test_committed_architect_binding_is_revalidated_before_enqueue() -> None:
 def test_carries_signed_model_runtime_binding_into_agentdb_task_context() -> None:
     allocation = _allocation()
     refs = _runtime_binding_refs()
+    snapshot = _snapshot(allocation, **refs)
     authority_runtime, authority_verification = _authority_stages(
         allocation,
+        work_state_snapshot=snapshot,
         **refs,
     )
     refs.update(
@@ -763,7 +819,7 @@ def test_carries_signed_model_runtime_binding_into_agentdb_task_context() -> Non
 
     result = _publish(
         worker_dispatch_dryrun_result=dryrun,
-        work_state_snapshot=_snapshot(allocation, **refs),
+        work_state_snapshot=snapshot,
         queue_item_id="queue-1",
         writer=writer,
         queue_authority_runtime_result=authority_runtime,
@@ -939,8 +995,6 @@ def test_result_is_deterministic_and_json_serializable() -> None:
 
 
 def test_module_ast_boundaries() -> None:
-    source = MODULE_PATH.read_text(encoding="utf-8")
-    tree = ast.parse(source)
     forbidden_text = (
         "subprocess",
         "requests",
@@ -952,21 +1006,32 @@ def test_module_ast_boundaries() -> None:
         "run_task.py",
         "pattern_memory_sink",
     )
-    for token in forbidden_text:
-        assert token not in source
+    for path in RUNTIME_MODULE_PATHS:
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        assert len(source.splitlines()) <= 675
+        for token in forbidden_text:
+            assert token not in source
+        _assert_bounded_runtime_ast(tree)
 
+
+def _assert_bounded_runtime_ast(tree: ast.AST) -> None:
     imported = set()
     calls = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            assert node.end_lineno - node.lineno + 1 <= 50
+        elif isinstance(node, ast.ClassDef):
+            assert node.end_lineno - node.lineno + 1 <= 200
+        elif isinstance(node, ast.Import):
             imported.update(alias.name.split(".")[0] for alias in node.names)
         elif isinstance(node, ast.ImportFrom):
             imported.add((node.module or "").split(".")[0])
         elif isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name):
-                calls.add(node.func.id)
-            elif isinstance(node.func, ast.Attribute):
-                calls.add(node.func.attr)
-
+            calls.add(
+                node.func.id
+                if isinstance(node.func, ast.Name)
+                else getattr(node.func, "attr", "")
+            )
     assert not (imported & {"subprocess", "requests", "socket", "urllib", "shutil"})
     assert not (calls & {"eval", "exec", "compile", "system", "popen", "run", "Popen"})

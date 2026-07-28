@@ -376,6 +376,7 @@ def build_reddog_resident_queue_stage_handler_registry(
                 leeway_s=leeway_s,
             ),
             work_state_store=authoritative_work_state_store,
+            now=now_datetime,
         ),
     )
     _add_if_ready(

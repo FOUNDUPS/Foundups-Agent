@@ -119,6 +119,7 @@ def _build(now: int = 1000):
         "denied_paths": [],
         "requested_operation": "create_foundup",
         "permission_snapshot_digest": digest,
+        "queue_consumer_receipt_digest": "sha256:" + ("b" * 64),
         "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
         "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
         "wsp15_priority": "P0",

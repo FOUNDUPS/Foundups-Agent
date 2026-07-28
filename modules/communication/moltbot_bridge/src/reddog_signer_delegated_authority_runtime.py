@@ -214,6 +214,7 @@ class DelegatedAuthorityRuntimeRequest:
     denied_paths: Tuple[str, ...]
     requested_operation: str
     permission_snapshot_digest: str
+    queue_consumer_receipt_digest: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
     wsp15_priority: str
@@ -446,7 +447,13 @@ def issue_delegated_authority_runtime(
     if not snapshot.grants(request.requested_operation, request.repo_full_name):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_INSUFFICIENT])
     if (
-        not request.wsp15_allocation_receipt_id.startswith("sha256:")
+        not request.queue_consumer_receipt_digest.startswith("sha256:")
+        or len(request.queue_consumer_receipt_digest) != 71
+        or not all(
+            char in "0123456789abcdef"
+            for char in request.queue_consumer_receipt_digest.removeprefix("sha256:")
+        )
+        or not request.wsp15_allocation_receipt_id.startswith("sha256:")
         or not request.wsp15_allocation_digest.startswith("sha256:")
         or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
         or type(request.wsp15_mps_total) is not int
@@ -559,6 +566,7 @@ def issue_delegated_authority_runtime(
         "denied_paths": list(request.denied_paths),
         "requested_operation": request.requested_operation,
         "permission_snapshot_digest": request.permission_snapshot_digest,
+        "queue_consumer_receipt_digest": request.queue_consumer_receipt_digest,
         "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
         "wsp15_allocation_digest": request.wsp15_allocation_digest,
         "wsp15_priority": request.wsp15_priority,

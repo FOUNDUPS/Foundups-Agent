@@ -25,7 +25,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    runtime_operation_lock,
+    confined_runtime_operation_lock,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
@@ -145,9 +145,14 @@ class AtomicJsonAuthorityRuntimeStore:
             repo_root=self.repo_root,
         )
         self.path = self._validated_path(path)
+        self.lock_path = validate_runtime_artifact_path(
+            self.path.with_name(self.path.name + ".operation.lock"),
+            repo_root=self.repo_root,
+            allowed_root=self.allowed_root,
+        )
 
     def load(self) -> Dict[str, Any]:
-        with runtime_operation_lock(str(self.path) + ".operation"):
+        with self._operation_lock():
             return self._load_unlocked()
 
     def _load_unlocked(
@@ -173,7 +178,7 @@ class AtomicJsonAuthorityRuntimeStore:
     def commit(
         self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]
     ) -> str:
-        with runtime_operation_lock(str(self.path) + ".operation"):
+        with self._operation_lock():
             current = self._load_unlocked(
                 expected_recovery_revision=expected_revision,
             )
@@ -185,7 +190,7 @@ class AtomicJsonAuthorityRuntimeStore:
             )
 
     def consume_verified_work_authority_nonce(self, nonce: str) -> bool:
-        with runtime_operation_lock(str(self.path) + ".operation"):
+        with self._operation_lock():
             current = self._load_unlocked()
             seen = current.get("verified_work_authority_nonces", [])
             if not isinstance(seen, list) or nonce in set(map(str, seen)):
@@ -197,6 +202,13 @@ class AtomicJsonAuthorityRuntimeStore:
                 expected_revision=current.get("revision"),
             )
             return True
+
+    def _operation_lock(self) -> Iterator[None]:
+        return confined_runtime_operation_lock(
+            self.lock_path,
+            repo_root=self.repo_root,
+            allowed_root=self.allowed_root,
+        )
 
     def _write_snapshot(
         self,

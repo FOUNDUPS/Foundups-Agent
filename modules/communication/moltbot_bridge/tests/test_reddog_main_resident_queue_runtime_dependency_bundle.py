@@ -137,6 +137,7 @@ def _authority_request_result() -> dict[str, object]:
             "denied_paths": [],
             "requested_operation": "create_foundup",
             "permission_snapshot_digest": "sha256:snap-1",
+            "queue_consumer_receipt_digest": "sha256:" + ("4" * 64),
             "identity_nonce": "identity-nonce-0001",
             "work_authority_nonce": "workauth-nonce-0001",
             "issued_at": NOW - 5,

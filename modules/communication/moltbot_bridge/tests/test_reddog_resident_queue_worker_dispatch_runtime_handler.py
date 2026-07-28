@@ -36,6 +36,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dis
     derive_worker_dispatch_roles,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    governed_worker_dispatch_snapshot,
     worker_dispatch_authority_verification_context,
     worker_dispatch_authority_stages,
 )
@@ -80,7 +81,7 @@ def _allocation():
 
 def _snapshot():
     allocation = _allocation()
-    return {
+    return governed_worker_dispatch_snapshot({
         "schema_version": "reddog_authoritative_work_state.v1",
         "wre_queue_items": [
             {
@@ -90,7 +91,7 @@ def _snapshot():
                 "wsp15_allocation_receipt": allocation,
             }
         ],
-    }
+    })
 
 
 def _dryrun_stage():
@@ -162,7 +163,10 @@ def _dryrun_stage():
 
 
 def _authority_stages():
-    return worker_dispatch_authority_stages(_allocation())
+    return worker_dispatch_authority_stages(
+        _allocation(),
+        work_state_snapshot=_snapshot(),
+    )
 
 
 def _stage_results():

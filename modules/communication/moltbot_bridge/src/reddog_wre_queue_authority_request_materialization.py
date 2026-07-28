@@ -7,6 +7,9 @@ from typing import Any, Mapping, Sequence
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     DelegatedAuthorityRuntimeRequest,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
 
 
 def materialize_delegated_authority_request(
@@ -82,6 +85,9 @@ def _receipt_fields(
     publication_binding_digest: str,
 ) -> dict[str, Any]:
     return {
+        "queue_consumer_receipt_digest": canonical_full_work_order_digest(
+            queue_receipt
+        ),
         "wsp15_allocation_receipt_id": _text(
             queue_receipt, "wsp15_allocation_receipt_id"
         ),

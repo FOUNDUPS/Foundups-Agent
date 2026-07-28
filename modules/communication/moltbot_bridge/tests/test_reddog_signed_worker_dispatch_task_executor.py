@@ -84,6 +84,7 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import worker_dispatch_dryrun_result
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     configure_signed_worker_claim_authority_env,
+    governed_worker_dispatch_snapshot,
     install_signed_worker_envelope_test_authority,
     publish_agentdb_task_for_intent,
 )
@@ -380,10 +381,10 @@ def _snapshot(allocation=None, **queue_overrides):
         "wsp15_allocation_receipt": allocation,
     }
     queue_item.update(queue_overrides)
-    return {
+    return governed_worker_dispatch_snapshot({
         "schema_version": "reddog_authoritative_work_state.v1",
         "wre_queue_items": [queue_item],
-    }
+    })
 
 
 def _task_context():
@@ -1583,7 +1584,7 @@ def test_openclaw_queue_stage_does_not_materialize_bounded_artifact(
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
-    assert seed.accepted is True
+    assert seed.accepted is True, seed.rejection_reasons
     assert seed.dispatched_stages[-1] == "assurance_capacity_admission", (
         seed.queue_chain_requeue_required,
         seed.retry_at,
@@ -2988,3 +2989,4 @@ def test_signed_worker_executor_ast_has_no_shell_network_or_runtime_mutation() -
     assert "exec" not in calls
     assert "system" not in attrs
     assert "popen" not in attrs
+    governed_worker_dispatch_snapshot,

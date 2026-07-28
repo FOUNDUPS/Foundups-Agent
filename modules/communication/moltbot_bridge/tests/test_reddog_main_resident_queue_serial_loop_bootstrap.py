@@ -2637,6 +2637,10 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
     snapshot = _snapshot()
     snapshot["wre_queue_items"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
     snapshot["wre_queue_items"][0]["model_runtime_binding_digest"] = _canonical_digest(runtime_binding)
+    snapshot["worker_claims"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    snapshot["wre_queue_items"][0]["evidence_refs"].append(
+        f"model_runtime_binding:{runtime_binding['receipt_id']}"
+    )
     state = _write_runtime_json(tmp_path, "work_state.json", snapshot)
     profile = _write_runtime_json(
         tmp_path,
@@ -4152,6 +4156,26 @@ def test_main_serial_loop_preflight_profile_materializes_authority_resolver_stor
     assert (
         mocked.call_args.kwargs["signature_verifier_backend"]
         == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    verifier_config = (
+        main.run_reddog_resident_queue_serial_loop_preflight
+        .authority_verification_config
+    )
+    assert (
+        verifier_config.signature_verifier_backend
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    assert verifier_config.runtime_allowed_root == str(runtime_root)
+    assert verifier_config.authority_state_path == str(
+        runtime_root / "authority_runtime_state.json"
+    )
+    assert verifier_config.principal_authority_records_path == str(
+        principal_records
+    )
+    assert verifier_config.permission_snapshots_path == str(permission_snapshots)
+    assert (
+        "authority_verification_config"
+        not in main.run_reddog_resident_queue_serial_loop_preflight.last_result
     )
     principal_store = json.loads(principal_records.read_text(encoding="utf-8"))
     snapshot_store = json.loads(permission_snapshots.read_text(encoding="utf-8"))

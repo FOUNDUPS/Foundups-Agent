@@ -122,6 +122,7 @@ class AtomicJsonAuthoritativeWorkStateStore:
                 committed,
                 allowed_root=self.allowed_root,
                 repo_root=self.repo_root,
+                expected_revision=expected_revision,
             )
             return revision
 

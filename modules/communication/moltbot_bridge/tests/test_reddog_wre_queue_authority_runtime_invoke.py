@@ -320,6 +320,7 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         denied_paths=tuple(request["denied_paths"]),
         requested_operation=str(request["requested_operation"]),
         permission_snapshot_digest=str(request["permission_snapshot_digest"]),
+        queue_consumer_receipt_digest=str(request["queue_consumer_receipt_digest"]),
         wsp15_allocation_receipt_id=str(request["wsp15_allocation_receipt_id"]),
         wsp15_allocation_digest=str(request["wsp15_allocation_digest"]),
         wsp15_priority=str(request["wsp15_priority"]),

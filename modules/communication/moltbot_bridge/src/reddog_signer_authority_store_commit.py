@@ -68,6 +68,7 @@ def _issued_record(
         "identity_digest": identity_digest,
         "work_authority_digest": work_authority_digest,
         "work_order_digest": request.work_order_digest,
+        "queue_consumer_receipt_digest": request.queue_consumer_receipt_digest,
         "base_ref": request.base_ref,
         "principal_id": request.principal_id,
         "reddog_id": request.reddog_id,

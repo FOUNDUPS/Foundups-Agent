@@ -11,6 +11,7 @@ import pytest
 
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src import (
+    openclaw_supervisor as supervisor_module,
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
 )
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
@@ -165,6 +166,14 @@ def test_run_task_rebuilds_canonical_context_before_runner_selection(
         (
             (
                 "signed_worker_agentdb_envelope",
+                "queue_consumer_receipt",
+                "operational_snapshot_id",
+            ),
+            "sha256:" + ("f" * 64),
+        ),
+        (
+            (
+                "signed_worker_agentdb_envelope",
                 "agentdb_task_binding",
                 "task_id",
             ),
@@ -274,7 +283,10 @@ def test_claim_rejects_invalid_use_time_authority_before_runner_selection(
     assert runner.calls == []
 
 
-@pytest.mark.parametrize("tamper", ("source", "required_skills"))
+@pytest.mark.parametrize(
+    "tamper",
+    ("source", "required_skills", "all_mutable_markers"),
+)
 def test_run_task_signed_markers_never_fall_through_to_wre(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -284,7 +296,13 @@ def test_run_task_signed_markers_never_fall_through_to_wre(
     db = AgentDB()
     if tamper == "source":
         _rewrite_context(task_id, lambda context: context.update(source="attacker"))
+    elif tamper == "required_skills":
+        assert db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET required_skills = ? WHERE task_id = ?",
+            (json.dumps(["attacker_skill"]), task_id),
+        ) == 1
     else:
+        _rewrite_context(task_id, lambda context: context.clear())
         assert db.db.execute_write(
             "UPDATE agents_autonomous_tasks SET required_skills = ? WHERE task_id = ?",
             (json.dumps(["attacker_skill"]), task_id),
@@ -306,3 +324,61 @@ def test_run_task_signed_markers_never_fall_through_to_wre(
     assert result["executor"] == "reddog:signed_worker_dispatch"
     assert "routing_binding_mismatch" in result["detail"]
     assert runner.calls == []
+
+
+def test_tampered_expired_verifier_never_renews_assurance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_independent_slice_verifier",
+        role="independent_slice_verifier",
+        worker_runtime="openclaw",
+        capability="independent_slice_verification",
+    )
+    _rewrite_context(
+        task_id,
+        lambda context: _set_nested(
+            context,
+            (
+                "signed_worker_agentdb_envelope",
+                "worker_dispatch_intent",
+                "capability",
+            ),
+            "attacker_capability",
+        ),
+    )
+    db = AgentDB()
+    assert db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET status = 'expired' WHERE task_id = ?",
+        (task_id,),
+    ) == 1
+    effects: list[str] = []
+    monkeypatch.setattr(
+        db,
+        "get_independent_assurance_reservation_for_task",
+        lambda *_args, **_kwargs: effects.append("reservation-read"),
+    )
+    monkeypatch.setattr(
+        db,
+        "renew_independent_assurance",
+        lambda *_args, **_kwargs: effects.append("renewal"),
+    )
+    monkeypatch.setattr(
+        supervisor_module,
+        "_openclaw_independent_verifier_ready_from_env",
+        lambda *_args, **_kwargs: True,
+    )
+
+    supervisor_module._renew_expired_independent_verifier_for_ready_stage(
+        db=db,
+        source=runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        env={"REDDOG_RESIDENT_QUEUE_NOW_ISO": "2026-07-16T00:00:00+00:00"},
+        repo_root=tmp_path,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert effects == []
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "expired"

@@ -11,6 +11,7 @@ files, create PRs, write PatternMemory, settle rewards, or re-index HoloIndex.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
@@ -112,6 +113,7 @@ class ResidentQueueWorkerDispatchRuntimeStageHandler:
     writer: Optional[SignedWorkerDispatchTaskWriter]
     authority_verification_context: WorkerDispatchAuthorityVerificationContext
     work_state_store: Optional[AuthoritativeWorkStateStore] = None
+    now: Optional[datetime] = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != WORKER_DISPATCH_RUNTIME_STAGE_KEY:
@@ -159,6 +161,7 @@ class ResidentQueueWorkerDispatchRuntimeStageHandler:
                     work_state_snapshot=current_state,
                     queue_item_id=str(request.queue_item_id or ""),
                     writer=self.writer,
+                    now=self.now,
                 ).to_dict()
         except Exception:
             return _reject(FAIL_QUEUE_ITEM_MISSING)
@@ -171,6 +174,7 @@ def build_reddog_resident_queue_worker_dispatch_runtime_stage_handler(
     writer: SignedWorkerDispatchTaskWriter,
     authority_verification_context: WorkerDispatchAuthorityVerificationContext,
     work_state_store: Optional[AuthoritativeWorkStateStore] = None,
+    now: Optional[datetime] = None,
 ) -> ResidentQueueWorkerDispatchRuntimeStageHandler:
     """Build the injected signed worker-dispatch runtime handler."""
 
@@ -180,6 +184,7 @@ def build_reddog_resident_queue_worker_dispatch_runtime_stage_handler(
         writer=writer,
         authority_verification_context=authority_verification_context,
         work_state_store=work_state_store,
+        now=now,
     )
 
 
