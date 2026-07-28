@@ -64,5 +64,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         in generated["required_runtime_sha256"]
     )
     assert generator.canonical_manifest_digest(generated) == (
-        "f5f00079076b0a82fdd9fda53589dc29921378dba9d11424afcb9e25f897a653"
+        "1d949674440ed7da77609a430bc69f1ba67b5e33cdce7c9f930f777d554d95da"
     )
