@@ -10,6 +10,17 @@ From `modules.infrastructure.database`:
 - `audit_sqlite_file`
 - `run_sqlite_audit`
 
+## Signed Worker Execution Store
+File: `modules/infrastructure/database/src/signed_worker_execution_store.py`
+
+### Public Function
+- `finalize_signed_worker_execution(db, task_id, *, context, accepted, result_context=None, target_status=None, retry_not_before=None) -> bool`
+
+The finalizer updates only the exact executing task row bound to the admitted
+assignee, claim receipt, one-use receipt and preclaim context digest. Requeue
+clears assignment ownership; terminal transitions retain it. Any concurrent
+row, context or receipt change fails closed.
+
 ## DatabaseManager
 File: `modules/infrastructure/database/src/db_manager.py`
 

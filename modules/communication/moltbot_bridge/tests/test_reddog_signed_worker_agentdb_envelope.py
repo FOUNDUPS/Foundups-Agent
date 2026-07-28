@@ -178,22 +178,24 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
     task_id = _publish_agentdb_task()
     db = AgentDB()
     assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
-    original = AgentDB.finalize_signed_worker_execution
+    original = run_task_runtime.finalize_signed_worker_execution
 
-    def conflict(self, selected_task_id, *, context, accepted):
-        assert self.db.execute_write(
+    def conflict(db, selected_task_id, *, context, accepted):
+        assert db.db.execute_write(
             "UPDATE agents_autonomous_tasks SET status = 'cancelled' "
             "WHERE task_id = ? AND status = 'executing'",
             (selected_task_id,),
         ) == 1
         return original(
-            self,
+            db,
             selected_task_id,
             context=context,
             accepted=accepted,
         )
 
-    monkeypatch.setattr(AgentDB, "finalize_signed_worker_execution", conflict)
+    monkeypatch.setattr(
+        run_task_runtime, "finalize_signed_worker_execution", conflict
+    )
     result = execute_task(
         task_id,
         repo_root=tmp_path,
@@ -516,6 +518,39 @@ def test_supervisor_rejects_malformed_requeue_result_history(
         task_id,
         lambda context: context["signed_worker_task_last_result"].update(
             receipt_digest="sha256:" + ("0" * 64)
+        ),
+    )
+    runner = _FakeRunner()
+    rejected = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert rejected["accepted"] is False
+    assert runner.calls == []
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+
+
+def test_supervisor_rejects_tampered_earlier_requeue_result_history(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+    for _ in range(2):
+        result = claim_reddog_signed_worker_dispatch_task_once(
+            repo_root=tmp_path,
+            signed_worker_runner=_FakeRunner(requeue_required=True),
+            authority_verification_context=(
+                worker_dispatch_authority_verification_context()
+            ),
+        )
+        assert result["accepted"] is True
+    _rewrite_context(
+        task_id,
+        lambda context: context["signed_worker_task_result_receipts"][0].update(
+            receipt_digest="sha256:not-a-digest"
         ),
     )
     runner = _FakeRunner()

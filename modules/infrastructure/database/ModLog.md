@@ -3,11 +3,12 @@
 ## Entry: Held Publication and Exact Signed-Worker Finalization
 **Date**: 2026-07-28
 **What Changed**: Restricted generic assignment to `pending -> assigned` and
-added an exact assignee, claim/use receipt, context-digest and stored-row CAS
-for signed-worker terminal completion.
+added a bounded exact-CAS execution store that binds signed-worker completion
+to the assignee, claim/use receipts, preclaim context digest and stored row.
 **Why**: Publication-held tasks must not become claimable before durable
 authority reaches APPLIED, and signed-worker results must not be finalized by
-the generic task update after a concurrent state change.
+the generic task update after a concurrent state change. Keeping the
+transaction outside `AgentDB` avoids growing the existing database monolith.
 **Impact**: Held task IDs cannot bypass publication admission; successful and
 failed signed executions finalize only the exact admitted row, while
 conflicting state remains unchanged.

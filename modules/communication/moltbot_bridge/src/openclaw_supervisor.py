@@ -538,8 +538,11 @@ def _signed_worker_reject_claimed_task(
 def _fail_closed_executing_signed_worker_task(
     *, db: Any, task_id: str, context: Mapping[str, Any]
 ) -> None:
-    db.finalize_signed_worker_execution(
-        task_id, context=context, accepted=False
+    from modules.infrastructure.database.src.signed_worker_execution_store import (
+        finalize_signed_worker_execution,
+    )
+    finalize_signed_worker_execution(
+        db, task_id, context=context, accepted=False
     )
 
 
@@ -1127,14 +1130,22 @@ def _commit_signed_worker_task_result(
     db: Any, task_id: str, base_context: Dict[str, Any],
     receipt: Mapping[str, Any], *, task_status: str | None,
 ) -> bool:
+    from modules.infrastructure.database.src.signed_worker_execution_store import (
+        finalize_signed_worker_execution,
+    )
     admitted_context = dict(base_context)
     history = base_context.get("signed_worker_task_result_receipts")
-    bounded = [item for item in history or [] if isinstance(item, Mapping)][-9:]
-    bounded.append({
+    bounded = _rechain_signed_worker_history(
+        [item for item in history or [] if isinstance(item, Mapping)][-9:]
+    )
+    entry = {
         "claim_status": receipt["claim_status"],
         "receipt_id": receipt["receipt_id"],
         "receipt_digest": receipt["receipt_digest"],
-    })
+        "previous_history_digest": _stable_digest(bounded),
+    }
+    entry["history_entry_digest"] = _stable_digest(entry)
+    bounded.append(entry)
     base_context["signed_worker_task_last_result"] = dict(receipt)
     base_context["signed_worker_task_result_receipts"] = bounded
     runner_summary = receipt.get("runner_result_summary")
@@ -1143,14 +1154,29 @@ def _commit_signed_worker_task_result(
         if isinstance(runner_summary, Mapping)
         else None
     )
-    return db.finalize_signed_worker_execution(
-        task_id,
+    return finalize_signed_worker_execution(
+        db, task_id,
         context=admitted_context,
         accepted=task_status != "failed",
         result_context=base_context,
         target_status=task_status,
         retry_not_before=retry_at,
     )
+
+def _rechain_signed_worker_history(
+    history: Sequence[Mapping[str, Any]],
+) -> list[dict[str, str]]:
+    chained: list[dict[str, str]] = []
+    for item in history:
+        entry = {
+            "claim_status": str(item.get("claim_status") or ""),
+            "receipt_id": str(item.get("receipt_id") or ""),
+            "receipt_digest": str(item.get("receipt_digest") or ""),
+            "previous_history_digest": _stable_digest(chained),
+        }
+        entry["history_entry_digest"] = _stable_digest(entry)
+        chained.append(entry)
+    return chained
 
 
 def _readonly_assignment_id(context: Dict[str, Any]) -> str:

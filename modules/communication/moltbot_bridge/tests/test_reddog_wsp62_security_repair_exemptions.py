@@ -75,6 +75,9 @@ CURRENT_SECURITY_RUNTIME_FILES = {
     "src/reddog_work_authority_nonce_store.py",
     "src/reddog_work_order_signature_verifier.py",
 }
+BOUNDED_DATABASE_SECURITY_FILES = {
+    "modules/infrastructure/database/src/signed_worker_execution_store.py",
+}
 
 
 def _exemptions(path: Path) -> list[dict]:
@@ -182,3 +185,10 @@ def test_current_security_runtime_files_stay_under_domain_limit() -> None:
             assert oversized == {"_try_wre_dispatch": 66}
         else:
             assert oversized == {}
+
+
+def test_new_database_security_files_are_bounded_without_exemption() -> None:
+    for relative_path in BOUNDED_DATABASE_SECURITY_FILES:
+        target = REPO_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
+        assert all(size <= 50 for size in _named_sizes(target).values())

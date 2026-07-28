@@ -92,14 +92,27 @@ def _validated_result_history(
     normalized = []
     for item in history:
         if not isinstance(item, Mapping) or set(item) != {
-            "claim_status", "receipt_id", "receipt_digest"
+            "claim_status", "receipt_id", "receipt_digest",
+            "previous_history_digest", "history_entry_digest",
         }:
             raise ValueError("signed_worker_result_history_item_invalid")
         entry = {key: str(item.get(key) or "") for key in item}
-        if not entry["claim_status"] or not entry["receipt_digest"].startswith("sha256:"):
+        supplied_entry_digest = entry.pop("history_entry_digest")
+        if (
+            not entry["claim_status"]
+            or not _is_digest(entry["receipt_digest"])
+            or not _is_digest(entry["previous_history_digest"])
+            or not _is_digest(supplied_entry_digest)
+            or entry["previous_history_digest"] != _digest(normalized)
+            or supplied_entry_digest != _digest(entry)
+        ):
             raise ValueError("signed_worker_result_history_item_invalid")
+        entry["history_entry_digest"] = supplied_entry_digest
         normalized.append(entry)
-    if any(normalized[-1][key] != str(last.get(key) or "") for key in normalized[-1]):
+    if any(
+        normalized[-1][key] != str(last.get(key) or "")
+        for key in ("claim_status", "receipt_id", "receipt_digest")
+    ):
         raise ValueError("signed_worker_result_history_tail_mismatch")
     return {
         "signed_worker_task_last_result": dict(last),
@@ -107,12 +120,17 @@ def _validated_result_history(
     }
 
 
-def _digest(payload: Mapping[str, Any]) -> str:
+def _digest(payload: Any) -> str:
     raw = json.dumps(
-        dict(payload), sort_keys=True, separators=(",", ":"),
+        payload, sort_keys=True, separators=(",", ":"),
         ensure_ascii=True, default=str,
     )
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _is_digest(value: Any) -> bool:
+    text = str(value or "").removeprefix("sha256:")
+    return len(text) == 64 and all(char in "0123456789abcdef" for char in text)
 
 
 __all__ = [

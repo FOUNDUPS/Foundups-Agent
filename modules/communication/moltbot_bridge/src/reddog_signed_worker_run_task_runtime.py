@@ -12,6 +12,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_cla
     admit_signed_worker_execution_once,
     bind_execution_admission,
 )
+from modules.infrastructure.database.src.signed_worker_execution_store import (
+    finalize_signed_worker_execution,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -118,9 +121,9 @@ def _finalize_owned_execution(
 ) -> Mapping[str, Any]:
     final = dict(result)
     final["finalization_owned"] = True
-    operation = getattr(db, "finalize_signed_worker_execution", None)
     try:
-        finalized = callable(operation) and operation(
+        finalized = finalize_signed_worker_execution(
+            db,
             task_id,
             context=context,
             accepted=final.get("ok") is True,

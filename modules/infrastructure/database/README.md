@@ -13,6 +13,7 @@ This module provides:
 - `src/db_manager.py`: unified backend manager (WSP 78 runtime entrypoint)
 - `src/module_db.py`: prefixed table helper for module-owned tables
 - `src/agent_db.py`: agent memory/coordination schema and helpers
+- `src/signed_worker_execution_store.py`: exact-CAS signed-worker finalization
 - `src/sqlite_audit.py`: repeatable SQLite health/inventory report utility
 
 ## What This Module Is Not
