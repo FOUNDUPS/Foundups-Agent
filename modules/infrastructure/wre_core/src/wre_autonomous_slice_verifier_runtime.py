@@ -20,6 +20,9 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
     optional_authority_binding_values_valid,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    signed_authority_envelope_digest_matches,
+)
 
 AUTONOMOUS_SLICE_VERIFIER_ACCEPT = "AUTONOMOUS_SLICE_VERIFIER_ACCEPT"
 AUTONOMOUS_SLICE_VERIFIER_REJECT = "AUTONOMOUS_SLICE_VERIFIER_REJECT"
@@ -263,12 +266,7 @@ def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str) -> bool:
 
 
 def _signed_authority_ok(signed_authority: Mapping[str, Any]) -> bool:
-    if signed_authority.get("accepted") is not True:
-        return False
-    digest = signed_authority.get("signature_gate_digest") or signed_authority.get(
-        "signed_work_authority_digest"
-    )
-    return _is_digest(digest)
+    return signed_authority_envelope_digest_matches(signed_authority)
 
 
 def _receipt_chain_ok(receipt_chain: Mapping[str, Any]) -> bool:
@@ -372,7 +370,7 @@ def _memex_binding_ok(req: Mapping[str, Any]) -> tuple[bool, Optional[str], str]
     raw_pairs = tuple(
         pair
         for pair in (_memex_binding_pair(candidate) for candidate in candidates)
-        if pair[0] or pair[1]
+        if pair[0] not in (None, "") or pair[1] not in (None, "")
     )
     if not raw_pairs:
         return True, None, ""

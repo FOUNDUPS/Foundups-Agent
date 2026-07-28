@@ -1192,6 +1192,37 @@ def test_rejects_memex_binding_conflict_before_nonce_or_writer_effect() -> None:
     assert accepted.accepted is True
 
 
+def test_rejects_legacy_dispatch_without_explicit_memex_fields_before_effect() -> None:
+    allocation = _allocation()
+    dryrun = _dryrun_result(allocation)
+    receipt = dict(dryrun["receipt"])
+    receipt.pop("memex_supply_receipt_id")
+    receipt.pop("memex_supply_digest")
+    receipt["dispatch_intents"] = [
+        {
+            key: value
+            for key, value in intent.items()
+            if key not in {"memex_supply_receipt_id", "memex_supply_digest"}
+        }
+        for intent in receipt["dispatch_intents"]
+    ]
+    writer = _FakeWriter()
+
+    result = _publish(
+        worker_dispatch_dryrun_result={**dryrun, "receipt": receipt},
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert result.accepted is False
+    assert (
+        runtime.WorkerDispatchRuntimeReason.DISPATCH_SCHEMA_MISMATCH
+        in result.rejection_reasons
+    )
+    assert writer.calls == []
+
+
 def test_agentdb_writer_publishes_tasks_atomically() -> None:
     result = _publish(
         worker_dispatch_dryrun_result=_dryrun_result(),

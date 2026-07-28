@@ -115,25 +115,13 @@ def _request(
     queue_item_id: str,
 ) -> ValidatedDispatchRequest:
     dryrun = mapping(dryrun_result)
-    receipt = _with_optional_memex(mapping(dryrun.get("receipt")))
-    intents = tuple(
-        _with_optional_memex(mapping(intent))
-        for intent in sequence(receipt.get("dispatch_intents"))
-    )
-    receipt["dispatch_intents"] = list(intents)
+    receipt = mapping(dryrun.get("receipt"))
+    intents = tuple(mapping(intent) for intent in sequence(receipt.get("dispatch_intents")))
     return ValidatedDispatchRequest(
         receipt=receipt,
         intents=intents,
         queue_item=_queue_item(snapshot, queue_item_id),
     )
-
-
-def _with_optional_memex(value: Mapping[str, Any]) -> dict[str, Any]:
-    normalized = dict(value)
-    normalized.setdefault("memex_supply_receipt_id", "")
-    normalized.setdefault("memex_supply_digest", "")
-    return normalized
-
 
 def _basic_reasons(
     dryrun_result: Mapping[str, Any],

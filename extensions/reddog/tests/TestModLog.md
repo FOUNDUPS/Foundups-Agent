@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-28 - Signed Memex dispatch compatibility (0.4.29)
+
+- Proved exact Memex lineage survives signed dispatch and independent review.
+- Proved post-signing substitution, malformed pairs, queue conflicts, falsy
+  non-string values, and pre-schema serialized dispatches fail before effects.
+- Revalidated the generated 1,060-file manifest and exact extension pin.
+
 ## 2026-07-28 - Signed-worker security repair compatibility (0.4.28)
 
 - Proved canonical envelope verification yields a process-local sealed proof

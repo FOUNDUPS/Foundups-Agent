@@ -19,6 +19,9 @@ from typing import Any, Dict, Mapping
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_exact_sha_commit_handler import (
     validate_exact_sha_commit_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    work_authority_digest_matches,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
 )
@@ -32,6 +35,7 @@ FAIL_SLICE_VERIFIER_PLAN_INVALID = "FAIL_SLICE_VERIFIER_PLAN_INVALID"
 FAIL_AUTHORITY_RUNTIME_MISSING = "FAIL_AUTHORITY_RUNTIME_MISSING"
 FAIL_AUTHORITY_VERIFICATION_MISSING = "FAIL_AUTHORITY_VERIFICATION_MISSING"
 FAIL_SIGNED_AUTHORITY_MISSING = "FAIL_SIGNED_AUTHORITY_MISSING"
+FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH = "FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH"
 FAIL_WORKTREE_CREATE_MISSING = "FAIL_WORKTREE_CREATE_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_MISSING = "FAIL_BOUNDED_WORKER_PILOT_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_REJECTED = "FAIL_BOUNDED_WORKER_PILOT_REJECTED"
@@ -87,6 +91,11 @@ def build_resident_queue_slice_verifier_request(
         reasons.append(FAIL_AUTHORITY_RUNTIME_MISSING)
     if not work_authority:
         reasons.append(FAIL_SIGNED_AUTHORITY_MISSING)
+    elif not work_authority_digest_matches(
+        work_authority,
+        authority_receipt.get("work_authority_digest"),
+    ):
+        reasons.append(FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH)
 
     authority_verification = _mapping(stage_results.get("authority_verification"))
     verification = _mapping(authority_verification.get("verification_result"))
@@ -226,11 +235,7 @@ def build_resident_queue_slice_verifier_request(
     signed_authority = {
         **dict(work_authority),
         "accepted": True,
-        "signature_gate_digest": str(
-            authority_receipt.get("work_authority_digest")
-            or authority_receipt.get("receipt_id")
-            or ""
-        ),
+        "signature_gate_digest": str(authority_receipt["work_authority_digest"]),
     }
     evidence = _mapping(holoindex_evidence) or _mapping(work_order.get("holoindex_evidence"))
     expected_paths = commit_paths
@@ -336,6 +341,7 @@ __all__ = [
     "FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID",
     "FAIL_EXACT_SHA_COMMIT_REJECTED",
     "FAIL_SIGNED_AUTHORITY_MISSING",
+    "FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH",
     "FAIL_SIGNED_RECEIPT_CHAIN_MISSING",
     "FAIL_SLICE_VERIFIER_PLAN_INVALID",
     "FAIL_SLICE_VERIFIER_PLAN_MISSING",

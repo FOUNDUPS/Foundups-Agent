@@ -12,6 +12,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifi
     FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH,
     FAIL_EXACT_SHA_COMMIT_MISSING,
     FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID,
+    FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH,
     FAIL_SIGNED_RECEIPT_CHAIN_MISSING,
     FAIL_SLICE_VERIFIER_PLAN_MISSING,
     SLICE_VERIFIER_REQUEST_BINDING_ACCEPT,
@@ -23,6 +24,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounde
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_slice_verifier_invoke import (
     ARTIFACT,
@@ -183,17 +187,20 @@ def _stage_results(
     work_order_digest = canonical_full_work_order_digest(
         bound_work_order or _work_order()
     )
+    work_authority = {
+        "authority_id": "authority-1",
+        "work_order_id": WORK_ORDER_ID,
+    }
     payload = {
         "authority_runtime": {
             "authority_result": {
                 "accepted": True,
-                "work_authority": {
-                    "authority_id": "authority-1",
-                    "work_order_id": WORK_ORDER_ID,
-                },
+                "work_authority": work_authority,
                 "receipt": {
                     "receipt_id": _digest("8"),
-                    "work_authority_digest": _digest("9"),
+                    "work_authority_digest": canonical_work_authority_digest(
+                        work_authority
+                    ),
                 },
             }
         },
@@ -252,7 +259,14 @@ def test_builds_evidence_producer_request_from_queue_chain_state(tmp_path: Path)
     assert request["work_order_id"] == WORK_ORDER_ID
     assert request["expected_changed_paths"] == [ARTIFACT]
     assert request["signed_authority"]["accepted"] is True
-    assert request["signed_authority"]["signature_gate_digest"] == _digest("9")
+    assert request["signed_authority"]["signature_gate_digest"] == (
+        canonical_work_authority_digest(
+            {
+                "authority_id": "authority-1",
+                "work_order_id": WORK_ORDER_ID,
+            }
+        )
+    )
     assert request["signed_receipt_chain"] == _signed_receipt_chain()
     assert request["worktree_receipt"]["receipt_id"] == "bounded_wt_pilot_1234"
     assert request["bounded_worker_pilot_receipt"]["written_artifacts"] == [ARTIFACT]
@@ -269,6 +283,24 @@ def test_builds_evidence_producer_request_from_queue_chain_state(tmp_path: Path)
     assert result.no_openclaw_enqueue_performed is True
     assert result.no_hermes_dispatch_performed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+def test_post_signing_memex_substitution_cannot_reach_verifier(tmp_path: Path) -> None:
+    stages = _stage_results(tmp_path)
+    work_authority = stages["authority_runtime"]["authority_result"]["work_authority"]
+    work_authority["memex_supply_receipt_id"] = "memex-supply-attacker"
+    work_authority["memex_supply_digest"] = _digest("7")
+
+    result = build_resident_queue_slice_verifier_request(
+        work_order=_work_order(),
+        stage_results=stages,
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH in result.rejection_reasons
+    assert result.evidence_producer_request == {}
 
 
 def test_renewed_lease_preserves_original_admission_digest(tmp_path: Path) -> None:

@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.29 requires signed Memex supply lineage to remain exact from the
+delegated authority through AgentDB execution and independent verification.
+Verifier admission recomputes the canonical work-authority digest and rejects
+post-signing substitution before any downstream evidence is accepted.
+
 Version 0.4.28 requires a process-local verified-envelope seal before a signed
 worker can enter execution, checks the durable execution lease in the same
 transaction as finalization, and atomically quarantines invalid assignments.

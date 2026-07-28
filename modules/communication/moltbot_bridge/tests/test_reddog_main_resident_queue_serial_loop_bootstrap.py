@@ -68,6 +68,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     GovernedExecutionValveEnvironment,
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
     AuthoritativeUseLease,
     GovernedValveUseTimeResolution,
@@ -821,6 +824,18 @@ def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
 
 
+def _signed_authority_fixture() -> dict[str, object]:
+    work_authority = {
+        "authority_id": "authority-test",
+        "work_order_id": WORK_ORDER_ID,
+    }
+    return {
+        **work_authority,
+        "accepted": True,
+        "signature_gate_digest": canonical_work_authority_digest(work_authority),
+    }
+
+
 def _slice_verifier_request() -> dict[str, object]:
     base_sha = "b" * 40
     head_sha = "a" * 40
@@ -854,10 +869,7 @@ def _slice_verifier_request() -> dict[str, object]:
                 {"name": "security", "head_sha": head_sha, "conclusion": "pass"},
             ],
         },
-        "signed_authority": {
-            "accepted": True,
-            "signature_gate_digest": _digest("9"),
-        },
+        "signed_authority": _signed_authority_fixture(),
         "signed_receipt_chain": {
             "accepted": True,
             "terminal_receipt_hash": _digest("a"),
@@ -941,10 +953,7 @@ def _artifact_generation_request(worktree: Path) -> dict[str, object]:
             "retrieval_quality": "HIGH",
             "holoindex_freshness_receipt_digest": _digest("b"),
         },
-        "signed_authority": {
-            "accepted": True,
-            "signature_gate_digest": _digest("9"),
-        },
+        "signed_authority": _signed_authority_fixture(),
         "signed_receipt_chain": {
             "accepted": True,
             "terminal_receipt_hash": _digest("a"),

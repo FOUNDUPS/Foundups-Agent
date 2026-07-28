@@ -5,6 +5,9 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 from modules.infrastructure.wre_core.src import wre_independent_evidence_producer_runtime as ep
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
@@ -118,6 +121,10 @@ def _request(tmp_path: Path, **overrides):
 
 
 def _verifier_request(produced):
+    work_authority = {
+        "authority_id": "authority-independent-evidence",
+        "work_order_id": WORK_ORDER_ID,
+    }
     return {
         "work_order_id": WORK_ORDER_ID,
         "slice_name": SLICE_NAME,
@@ -134,8 +141,9 @@ def _verifier_request(produced):
         "diff_evidence": produced.diff_evidence,
         "test_evidence": produced.test_evidence,
         "signed_authority": {
+            **work_authority,
             "accepted": True,
-            "signature_gate_digest": "sha256:" + "2" * 64,
+            "signature_gate_digest": canonical_work_authority_digest(work_authority),
         },
         "signed_receipt_chain": {
             "accepted": True,
