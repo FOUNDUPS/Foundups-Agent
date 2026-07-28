@@ -13,6 +13,8 @@ from modules.infrastructure.database.src.signed_worker_execution_binding import 
     assurance_request_matches,
     canonical_digest,
     finalization_binding,
+    finalization_status_matches,
+    result_context_matches_authenticated,
 )
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
     persist_result_history_ledger,
@@ -49,6 +51,8 @@ def finalize_signed_worker_execution(
     )
     status = target_status or ("completed" if accepted is True else "failed")
     if binding is None or status not in _TARGET_STATUSES:
+        return False
+    if not finalization_status_matches(accepted, status, assurance_completion):
         return False
     assigned_to, claim, use = binding
     return _commit_final_state(
@@ -100,15 +104,22 @@ def _apply_final_state(
         "FROM agents_autonomous_tasks WHERE task_id = ?",
         (task_id,),
     ).fetchone()
-    raw_context = _matching_context(
+    authenticated = _matching_context(
         row, assigned_to, claim, use, expected_status="executing"
     )
     final_context = dict(result_context)
     if (
-        raw_context is None
+        authenticated is None
         or final_context.get("signed_worker_execution_claim") != claim
         or final_context.get("signed_worker_execution_use") != use
-        or not assurance_request_matches(final_context, assurance_completion)
+    ):
+        return False
+    raw_context, authenticated_context = authenticated
+    if (
+        not result_context_matches_authenticated(authenticated_context, final_context)
+        or not assurance_request_matches(
+            authenticated_context, final_context, assurance_completion
+        )
     ):
         return False
     if not _update_final_row(
@@ -135,7 +146,7 @@ def _apply_final_state(
 def _matching_context(
     row: Any, assigned_to: str, claim: Mapping[str, Any],
     use: Mapping[str, Any], *, expected_status: str,
-) -> str | None:
+) -> tuple[str, dict[str, Any]] | None:
     if row is None:
         return None
     payload, raw_context = dict(row), str(dict(row).get("context") or "")
@@ -151,11 +162,13 @@ def _matching_context(
         or stored.get("signed_worker_execution_use") != use
     ):
         return None
-    stored.pop("signed_worker_execution_claim", None)
-    stored.pop("signed_worker_execution_use", None)
+    authenticated = dict(stored)
+    digest_context = dict(stored)
+    digest_context.pop("signed_worker_execution_claim", None)
+    digest_context.pop("signed_worker_execution_use", None)
     return (
-        raw_context
-        if claim.get("context_digest") == canonical_digest(stored)
+        (raw_context, authenticated)
+        if claim.get("context_digest") == canonical_digest(digest_context)
         else None
     )
 
@@ -182,8 +195,5 @@ def _update_final_row(
         ),
     ).rowcount
     return changed == 1
-__all__ = [
-    "SIGNED_WORKER_TASK_PREFIX",
-    "finalize_signed_worker_execution",
-    "is_signed_worker_task_id",
-]
+__all__ = ["SIGNED_WORKER_TASK_PREFIX", "finalize_signed_worker_execution",
+           "is_signed_worker_task_id"]

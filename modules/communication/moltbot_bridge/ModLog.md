@@ -19,8 +19,8 @@
   and complete attacker re-hashing therefore fail closed. Both execution paths
   append one shared result receipt in the same task-transition transaction;
   persistence failure leaves the exact task executing and never creates an
-  unreceipted terminal state. Verifier completion travels as a receipt-bound request and commits the durable assurance reservation in that same transaction;
-  detached completion is forbidden. The bounded database siblings avoid extending the `AgentDB` monolith. Publication recovery never creates the
+  unreceipted terminal state. Verifier completion preserves trusted timestamp
+  precision and atomically commits the durable reservation; detached completion is forbidden. The bounded database siblings avoid extending the `AgentDB` monolith. Publication recovery never creates the
   derived authority cache, even from internally self-consistent COMMITTED
   packets; only a fresh normal publish call that re-verifies proposal
   authorization may recreate that cache.

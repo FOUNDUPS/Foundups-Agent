@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from datetime import datetime, timezone
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
@@ -230,6 +231,7 @@ def _handler(
     slice_verifier_request_binding_enabled: bool = False,
     holoindex_evidence: dict[str, object] | None = None,
     assurance_reservation_store: object | None = None,
+    trusted_now: datetime | None = None,
 ):
     return build_reddog_resident_queue_slice_verifier_stage_handler(
         chain_results_store=chain_store,
@@ -243,6 +245,7 @@ def _handler(
         assurance_reservation_store=(
             assurance_reservation_store or _ReservationStore()
         ),
+        trusted_now=trusted_now,
     )
 
 
@@ -439,6 +442,9 @@ def test_dispatcher_records_slice_verifier_and_advances_to_draft_pr_publish() ->
 
 def test_renewed_verifier_binds_terminal_receipt_to_admission_digest() -> None:
     chain_store = _seeded_store()
+    precise_now = datetime(
+        2026, 7, 14, 0, 0, 0, 900000, tzinfo=timezone.utc
+    )
 
     result = invoke_reddog_resident_queue_next_stage_dispatch(
         explicit_resident_queue_stage_dispatch_requested=True,
@@ -448,6 +454,7 @@ def test_renewed_verifier_binds_terminal_receipt_to_admission_digest() -> None:
             SLICE_VERIFIER_STAGE_KEY: _handler(
                 chain_store=chain_store,
                 assurance_reservation_store=_RenewedReservationStore(),
+                trusted_now=precise_now,
             )
         },
         now_iso=NOW_ISO,
@@ -463,6 +470,7 @@ def test_renewed_verifier_binds_terminal_receipt_to_admission_digest() -> None:
     assert completion["verifier_task_id"] == _reservation()["verifier_task_id"]
     assert completion["terminal_receipt_id"] == receipt["receipt_id"]
     assert completion["terminal_status"] == "ACCEPT"
+    assert completion["completed_at"] == precise_now.isoformat()
 
 
 def test_missing_bounded_worker_stage_rejects_direct_handler_call() -> None:

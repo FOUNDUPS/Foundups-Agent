@@ -696,6 +696,88 @@ def test_attacker_recomputed_result_cannot_replace_staged_assurance(
     assert reservation["reservation"]["status"] == "RESERVED"
 
 
+def test_finalizer_rejects_authenticated_capability_reclassification(
+    agent_db: AgentDB,
+) -> None:
+    admitted, _legitimate_context = _prepare_assurance_finalization(agent_db)
+    reclassified = {
+        **admitted,
+        "capability": "candidate_queue_review",
+    }
+    receipt = build_signed_worker_task_result_receipt(
+        base_context=reclassified,
+        claim_status="ACCEPT",
+        result={
+            "accepted": True,
+            "decision": "COMPLETE",
+            "receipt_id": "reclassified-result",
+            "capability": "candidate_queue_review",
+        },
+    )
+    result_context = append_signed_worker_result_history(
+        reclassified,
+        receipt,
+    )
+
+    assert finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+    ) is False
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "executing"
+    assert task["context"]["capability"] == "independent_slice_verification"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+    rows = agent_db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        ("verifier-task",),
+    )
+    assert rows == []
+
+
+@pytest.mark.parametrize(
+    ("accepted", "target_status", "terminal_status"),
+    (
+        (True, "pending", "VERIFIED"),
+        (False, "failed", "VERIFIED"),
+        (True, "completed", "REJECT"),
+    ),
+)
+def test_finalizer_rejects_contradictory_assurance_terminal_state(
+    agent_db: AgentDB,
+    accepted: bool,
+    target_status: str,
+    terminal_status: str,
+) -> None:
+    admitted, result_context = _prepare_assurance_finalization(agent_db)
+    completion = dict(
+        result_context["signed_worker_task_last_result"][
+            "assurance_completion_request"
+        ]
+    )
+    completion["terminal_status"] = terminal_status
+
+    assert finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=accepted,
+        result_context=result_context,
+        target_status=target_status,
+        assurance_completion=completion,
+    ) is False
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "executing"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+
+
 def test_revoked_reservation_is_terminal_and_verifier_is_cancelled(
     agent_db: AgentDB,
 ) -> None:
@@ -946,6 +1028,47 @@ def test_legacy_autonomous_tasks_gain_nullable_retry_not_before(
     assert task["retry_not_before"] is None
 
 
+def test_legacy_assurance_table_gains_staging_columns(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    db_path = tmp_path / "legacy-assurance-staging.db"
+    connection = sqlite3.connect(db_path)
+    connection.execute(
+        """
+        CREATE TABLE agents_independent_assurance_reservations (
+            reservation_id TEXT PRIMARY KEY,
+            status TEXT NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            reservation_digest TEXT NOT NULL,
+            reserved_at TIMESTAMP NOT NULL
+        )
+        """
+    )
+    connection.commit()
+    connection.close()
+
+    monkeypatch.setenv("FOUNDUPS_DB_ENGINE", "sqlite")
+    monkeypatch.setenv("FOUNDUPS_DB_PATH", str(db_path))
+    DatabaseManager.reset_for_tests()
+    migrated = AgentDB()
+
+    columns = {
+        row["name"]
+        for row in migrated.db.get_table_info(
+            "agents_independent_assurance_reservations"
+        )
+    }
+    assert {
+        "admission_reservation_digest",
+        "admission_reserved_at",
+        "renewal_count",
+        "staged_completion_json",
+        "staged_completion_digest",
+        "staged_at",
+    } <= columns
+
+
 def test_fresh_schema_contains_dedicated_assurance_table(agent_db: AgentDB) -> None:
     columns = {
         row["name"]
@@ -977,6 +1100,9 @@ def test_fresh_schema_contains_dedicated_assurance_table(agent_db: AgentDB) -> N
         "terminal_receipt_id",
         "terminal_receipt_digest",
         "terminal_status",
+        "staged_completion_json",
+        "staged_completion_digest",
+        "staged_at",
         "completed_at",
         "revoked_at",
         "revocation_reason",

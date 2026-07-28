@@ -277,7 +277,6 @@ class ResidentQueueSliceVerifierStageHandler:
                 ),
                 completed_at=(self.trusted_now or datetime.now(timezone.utc))
                 .astimezone(timezone.utc)
-                .replace(microsecond=0)
                 .isoformat(),
             )
             staged = _mapping(

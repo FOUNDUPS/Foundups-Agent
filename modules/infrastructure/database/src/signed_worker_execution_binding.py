@@ -8,6 +8,14 @@ from typing import Any, Mapping
 
 
 _ASSURANCE_CAPABILITY = "independent_slice_verification"
+_RESULT_CONTEXT_FIELDS = frozenset(
+    {
+        "signed_worker_task_last_result",
+        "signed_worker_task_result_receipts",
+    }
+)
+_POSITIVE_ASSURANCE_STATUSES = frozenset({"ACCEPT", "VERIFIED"})
+_NEGATIVE_ASSURANCE_STATUSES = frozenset({"REJECT", "FAILED", "CANCELLED"})
 
 
 def finalization_binding(
@@ -39,15 +47,18 @@ def finalization_binding(
 
 
 def assurance_request_matches(
+    authenticated_context: Mapping[str, Any],
     result_context: Mapping[str, Any],
     request: Mapping[str, Any] | None,
 ) -> bool:
     """Require verifier finalization to carry its receipt-bound request."""
 
-    intent = result_context.get("worker_dispatch_intent")
+    intent = authenticated_context.get("worker_dispatch_intent")
     intent = dict(intent) if isinstance(intent, Mapping) else {}
     capability = str(
-        result_context.get("capability") or intent.get("capability") or ""
+        authenticated_context.get("capability")
+        or intent.get("capability")
+        or ""
     )
     required = capability == _ASSURANCE_CAPABILITY
     if required != (request is not None):
@@ -57,6 +68,93 @@ def assurance_request_matches(
     receipt = result_context.get("signed_worker_task_last_result")
     receipt = dict(receipt) if isinstance(receipt, Mapping) else {}
     return receipt.get("assurance_completion_request") == dict(request)
+
+
+def result_context_matches_authenticated(
+    authenticated_context: Mapping[str, Any],
+    result_context: Mapping[str, Any],
+) -> bool:
+    """Allow only canonical identity repair and result-history extension."""
+
+    authenticated_base = _normalized_identity_context(authenticated_context)
+    result_base = _normalized_identity_context(result_context)
+    if _without_result_fields(result_base) != _without_result_fields(
+        authenticated_base
+    ):
+        return False
+    receipt = result_context.get("signed_worker_task_last_result")
+    if not isinstance(receipt, Mapping):
+        return False
+    identity = (
+        _authoritative_identity(authenticated_context)
+        if receipt.get("accepted") is True
+        else _top_level_identity(authenticated_context)
+    )
+    for field in ("worker_role", "worker_runtime", "capability"):
+        if str(receipt.get(field) or "") != identity[field]:
+            return False
+    return True
+
+
+def finalization_status_matches(
+    accepted: bool,
+    target_status: str,
+    assurance_completion: Mapping[str, Any] | None,
+) -> bool:
+    """Reject contradictory task and assurance terminal states."""
+
+    if target_status == "pending":
+        return accepted is True and assurance_completion is None
+    if target_status == "completed" and accepted is not True:
+        return False
+    if target_status == "failed" and accepted is not False:
+        return False
+    if assurance_completion is None:
+        return True
+    terminal = str(assurance_completion.get("terminal_status") or "").upper()
+    expected = (
+        _POSITIVE_ASSURANCE_STATUSES
+        if target_status == "completed"
+        else _NEGATIVE_ASSURANCE_STATUSES
+    )
+    return terminal in expected
+
+
+def _normalized_identity_context(context: Mapping[str, Any]) -> dict[str, Any]:
+    normalized = dict(context)
+    envelope = normalized.get("signed_worker_agentdb_envelope")
+    envelope = dict(envelope) if isinstance(envelope, Mapping) else {}
+    intent = envelope.get("worker_dispatch_intent")
+    if not isinstance(intent, Mapping):
+        return normalized
+    canonical_intent = dict(intent)
+    normalized["worker_dispatch_intent"] = canonical_intent
+    normalized["worker_role"] = str(canonical_intent.get("role") or "")
+    normalized["worker_runtime"] = str(
+        canonical_intent.get("worker_runtime") or ""
+    )
+    normalized["capability"] = str(canonical_intent.get("capability") or "")
+    return normalized
+
+
+def _authoritative_identity(context: Mapping[str, Any]) -> dict[str, str]:
+    normalized = _normalized_identity_context(context)
+    return _top_level_identity(normalized)
+
+
+def _top_level_identity(context: Mapping[str, Any]) -> dict[str, str]:
+    return {
+        field: str(context.get(field) or "")
+        for field in ("worker_role", "worker_runtime", "capability")
+    }
+
+
+def _without_result_fields(context: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in dict(context).items()
+        if key not in _RESULT_CONTEXT_FIELDS
+    }
 
 
 def _valid_receipt(receipt: Mapping[str, Any]) -> bool:
@@ -84,5 +182,7 @@ def _is_digest(value: Any) -> bool:
 __all__ = [
     "assurance_request_matches",
     "canonical_digest",
+    "finalization_status_matches",
     "finalization_binding",
+    "result_context_matches_authenticated",
 ]

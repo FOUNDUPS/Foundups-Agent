@@ -16,6 +16,10 @@ the admitted task quarantined in `executing`, and missing or unchanged result
 context cannot create an unreceipted terminal state through the public
 finalizer. Independent assurance completion now commits in that same
 transaction; the detached completion method always rejects.
+Finalization derives assurance from the authenticated claimed context and
+permits only canonical result-history fields to extend that context, so a
+result cannot reclassify its own capability. Task status, accepted state, and
+assurance terminal status must also agree before the transaction starts.
 **WSP References**: WSP 00, WSP 15, WSP 22, WSP 62, WSP 78, WSP 97
 
 ## Entry: Held Publication and Exact Signed-Worker Finalization
