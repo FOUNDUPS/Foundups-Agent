@@ -30,6 +30,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envel
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
     admit_signed_worker_execution_once,
+    bind_execution_admission,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
     append_signed_worker_result_history,
@@ -849,6 +850,38 @@ def test_direct_result_ledger_failure_rolls_back_terminal_state(
     stored = db.get_autonomous_task_by_id(task_id)
     assert result["ok"] is False
     assert result["detail"] == "reddog_signed_worker_finalization_conflict"
+    assert stored is not None and stored["status"] == "executing"
+    assert db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
+def test_public_finalizer_requires_exactly_one_new_result_entry() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
+    assert admission is not None
+    context = bind_execution_admission(admission.claimed_context, admission)
+
+    with pytest.raises(TypeError):
+        execution_store_module.finalize_signed_worker_execution(
+            db,
+            task_id,
+            context=context,
+            accepted=False,
+        )
+    assert execution_store_module.finalize_signed_worker_execution(
+        db,
+        task_id,
+        context=context,
+        accepted=False,
+        result_context=context,
+    ) is False
+
+    stored = db.get_autonomous_task_by_id(task_id)
     assert stored is not None and stored["status"] == "executing"
     assert db.db.execute_query(
         "SELECT task_id FROM agents_signed_worker_result_history "

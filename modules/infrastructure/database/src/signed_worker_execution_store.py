@@ -21,7 +21,7 @@ def finalize_signed_worker_execution(
     *,
     context: Mapping[str, Any],
     accepted: bool,
-    result_context: Mapping[str, Any] | None = None,
+    result_context: Mapping[str, Any],
     target_status: str | None = None,
     retry_not_before: str | None = None,
 ) -> bool:
@@ -73,7 +73,7 @@ def _finalization_binding(
 def _commit_final_state(
     database: Any, *, task_id: str, assigned_to: str,
     claim: Mapping[str, Any], use: Mapping[str, Any],
-    result_context: Mapping[str, Any] | None,
+    result_context: Mapping[str, Any],
     target_status: str, retry_not_before: str | None,
 ) -> bool:
     expected_status = "completed" if target_status == "completed_reserved" else "executing"
@@ -90,7 +90,7 @@ def _commit_final_state(
             )
             if raw_context is None:
                 return False
-            final_context = dict(result_context) if result_context is not None else json.loads(raw_context)
+            final_context = dict(result_context)
             if (
                 final_context.get("signed_worker_execution_claim") != claim
                 or final_context.get("signed_worker_execution_use") != use

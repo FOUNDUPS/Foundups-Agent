@@ -69,7 +69,8 @@ Every terminal or requeue attempt appends one chain-linked row to
 `agents_signed_worker_result_history` in the same transaction as the task
 transition. The durable ledger is not capped. Mutable task context carries
 only the exact latest ten-entry tail. Admission compares that canonical tail
-to the durable ledger before any runner call.
+to the durable ledger before any runner call. The public finalizer requires a
+result context containing exactly one new entry; unchanged history rejects.
 
 Malformed or gapped durable rows, shortened context tails, recomputed context
 history, and pre-ledger context history all fail closed. Legacy rows require a

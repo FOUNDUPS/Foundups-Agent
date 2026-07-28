@@ -66,8 +66,6 @@ def persist_result_history_ledger(
     stored = _read_entries(connection, task_id)
     if stored is None:
         return False
-    if history == stored[-RESULT_HISTORY_LIMIT:]:
-        return True
     if not _is_exact_next_tail(history, stored):
         return False
     return _insert_entry(

@@ -14,12 +14,15 @@ From `modules.infrastructure.database`:
 File: `modules/infrastructure/database/src/signed_worker_execution_store.py`
 
 ### Public Function
-- `finalize_signed_worker_execution(db, task_id, *, context, accepted, result_context=None, target_status=None, retry_not_before=None) -> bool`
+- `finalize_signed_worker_execution(db, task_id, *, context, accepted, result_context, target_status=None, retry_not_before=None) -> bool`
 
 The finalizer updates only the exact executing task row bound to the admitted
 assignee, claim receipt, one-use receipt and preclaim context digest. Requeue
 clears assignment ownership; terminal transitions retain it. Any concurrent
 row, context or receipt change fails closed.
+`result_context` is mandatory and must contain exactly one new canonical
+result-history entry. Missing or unchanged history never reaches a terminal
+or requeue state.
 
 ## Signed Worker Result Ledger
 File: `modules/infrastructure/database/src/signed_worker_result_ledger.py`
@@ -30,10 +33,10 @@ File: `modules/infrastructure/database/src/signed_worker_result_ledger.py`
 - `persist_result_history_ledger(connection, task_id, context, *, claim_receipt_id, use_receipt_id) -> bool`
 
 The ledger is independently durable from mutable autonomous-task context.
-Each bounded retry result is appended in the same transaction as exact-CAS
-task finalization. Both supervisor and direct task admission require the full
-context history to match the ledger before execution. Fully re-hashed,
-truncated, reordered, or substituted histories fail closed.
+Each result is appended in the same transaction as exact-CAS task
+finalization. Both supervisor and direct task admission require the canonical
+context tail to match the full ledger before execution. Fully re-hashed,
+truncated, reordered, substituted, or unchanged final histories fail closed.
 
 ## DatabaseManager
 File: `modules/infrastructure/database/src/db_manager.py`
