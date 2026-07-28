@@ -2,6 +2,34 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-28 - REDDOG_SIGNED_WORKER_ADMISSION_AND_LEASE_SECURITY_REPAIR_PHASE1 (0.4.28)
+
+- Required an opaque process-local verification seal before a serialized
+  signed-worker envelope can reach AgentDB execution admission.
+- Bound active-lease validation, task transition, assurance completion, and
+  durable result-ledger append in one database transaction.
+- Made invalid-assignment quarantine transactional and prevented forged local
+  quarantine markers from releasing or reconciling verifier capacity.
+- Regenerated and pinned the 1,060-file backend dependency manifest.
+- Preserved read-only editor authority; this release adds no editor-side shell,
+  repository, publication, or merge capability. Version 0.4.27 -> 0.4.28.
+
+## 2026-07-28 - REDDOG_SIGNED_QUEUE_LINEAGE_AND_STARTUP_VERIFIER_BINDING_PHASE1 (0.4.27)
+
+- Bound the canonical queue-consumer receipt digest and operational snapshot
+  through delegated authority, signature verification, AgentDB envelopes, and
+  use-time worker dispatch.
+- Preserved the configured Ed25519 verifier and confined authority paths as an
+  immutable process-local startup context instead of rebuilding trust from
+  mutable environment variables.
+- Regenerated and pinned the 1,055-file backend dependency manifest after
+  held-publication activation, protected assignment, bounded execution-lease
+  renewal, and atomic assurance/task/result quarantine/finalization. Raised
+  only the explicit runtime-file count cap from 1,024 to 1,100; per-file,
+  total-byte, digest, path, and schema checks remain unchanged.
+- Added no editor-side shell, worker, repository, publication, or merge
+  authority. Version 0.4.26 -> 0.4.27.
+
 ## 2026-07-27 - REDDOG_RESIDENT_QUEUE_EXACT_SHA_COMMIT_STAGE_PHASE1 (0.4.26)
 
 - Added the backend exact-SHA commit stage between bounded authoring and

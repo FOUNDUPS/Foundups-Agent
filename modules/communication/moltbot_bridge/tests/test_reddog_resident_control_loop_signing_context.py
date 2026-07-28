@@ -8,6 +8,12 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_publication_state_projection,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_public_key,
 )
@@ -105,7 +111,20 @@ def _build(
     *,
     expected_receipt: str | None = None,
     signer_socket_connector: object = None,
+    work_state: Path | None = None,
 ):
+    if work_state is None:
+        work_state = source.parent / "authoritative_work_state.json"
+        work_state.write_text(
+            json.dumps(
+                {
+                    "schema_version": "reddog_authoritative_work_state.v1",
+                    "architect_fix_promotions": [],
+                    "architect_fix_publications": [],
+                }
+            ),
+            encoding="utf-8",
+        )
     return build_control_loop_receipt_signing_context(
         repo_root=repo,
         authority_profile_path=profile,
@@ -114,8 +133,27 @@ def _build(
         expected_authority_profile_source_receipt_id=(
             expected_receipt or _source_receipt(source)
         ),
+        authoritative_work_state_path=work_state,
         signer_socket_connector=signer_socket_connector,
     )
+
+
+def test_context_rejects_missing_authoritative_work_state(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    source, profile = _write_profiles(tmp_path / "runtime")
+
+    with pytest.raises(ValueError, match="publication_state_required"):
+        build_control_loop_receipt_signing_context(
+            repo_root=repo,
+            authority_profile_path=profile,
+            authority_profile_source_path=source,
+            signer_socket_path=source.parent / "reddog.sock",
+            expected_authority_profile_source_receipt_id=_source_receipt(source),
+            signer_socket_connector=lambda *_args: b"{}",
+        )
 
 
 def test_context_binds_promoted_profile_source_and_existing_signer(tmp_path: Path) -> None:
@@ -135,6 +173,82 @@ def test_context_binds_promoted_profile_source_and_existing_signer(tmp_path: Pat
     assert context.authority_tier == "HIGH"
     assert context.consensus_receipt_digest == "sha256:" + "c" * 64
     assert context.authority_profile_digest.startswith("sha256:")
+
+
+@pytest.mark.parametrize("include_marker", (True, False))
+def test_context_rejects_prepared_architect_fix_publication(
+    tmp_path: Path,
+    include_marker: bool,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    publication_id = "sha256:" + "4" * 64
+    attestation_id = "reddog_architect_proposal_attestation_" + "5" * 32
+    queue_item_id = "sha256:" + "7" * 64
+    claim_id = "sha256:" + "8" * 64
+    profile_overrides = {
+        "proposal_authenticity_attestation_id": attestation_id,
+        "operational_context_binding": {
+            "queue_item_id": queue_item_id,
+            "claim_id": claim_id,
+            "architect_determination_receipt_id": "determination-1",
+            "wsp15_allocation_receipt": {
+                "receipt_id": "sha256:" + "3" * 64
+            },
+        },
+    }
+    if include_marker:
+        profile_overrides["promotion_publication_id"] = publication_id
+    source, profile_path = _write_profiles(
+        tmp_path / "runtime",
+        profile_overrides=profile_overrides,
+    )
+    profile = json.loads(profile_path.read_text(encoding="utf-8"))
+    binding = profile["operational_context_binding"]
+    promotion = {
+        "publication_id": publication_id,
+        "queue_item_id": binding["queue_item_id"],
+        "claim_id": binding["claim_id"],
+        "authority_profile_digest": canonical_digest(profile),
+        "proposal_authenticity_attestation_id": attestation_id,
+    }
+    state = {
+        "schema_version": "reddog_authoritative_work_state.v1",
+        "architect_fix_promotions": [promotion],
+        "wre_queue_items": [
+            {
+                "queue_item_id": binding["queue_item_id"],
+                "claim_id": binding["claim_id"],
+            }
+        ],
+        "worker_claims": [{"claim_id": binding["claim_id"]}],
+    }
+    projection = architect_fix_publication_state_projection(
+        state,
+        publication_id=publication_id,
+    )
+    state["architect_fix_publications"] = [
+        {
+            "schema_version": "reddog_architect_fix_promotion_publication.v1",
+            "publication_id": publication_id,
+            "state": "STATE_PREPARED",
+            "proposal_authenticity_attestation_id": attestation_id,
+            "authority_profile_digest": canonical_digest(profile),
+            "active_work_state_digest": canonical_digest(projection),
+            "base_work_state_digest": "sha256:" + "6" * 64,
+        }
+    ]
+    work_state = tmp_path / "runtime" / "authoritative_work_state.json"
+    work_state.write_text(json.dumps(state), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="publication_not_committed"):
+        _build(
+            repo,
+            source,
+            profile_path,
+            signer_socket_connector=lambda *_args: b"{}",
+            work_state=work_state,
+        )
 
 
 @pytest.mark.parametrize(

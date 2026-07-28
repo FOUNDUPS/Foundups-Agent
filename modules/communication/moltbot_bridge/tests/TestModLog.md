@@ -1,3 +1,11 @@
+## 2026-07-28: SIGNED_WORKER_NAMESPACE_QUARANTINE_ISOLATION
+- Added a real `run_task` regression proving forged signed-worker metadata on
+  an ordinary task cannot select quarantine or generic finalization; expired
+  signed execution without durable assurance must quarantine.
+- Generic rows remain byte-for-byte unchanged, and unknown-effect executions
+  never fabricate result-ledger history.
+- Full differential evidence remains mandatory before publication.
+
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1
 - Added adversarial regressions for self-minted principal keys, altered proposal
   and policy signatures, caller identity/path/operation/permission substitution,
@@ -7,13 +15,17 @@
   reach the claim, queue item, promotion record, receipt, authority profile,
   and operational context. Modernized authority-source fixtures to use valid
   Ed25519 identities and complete SHA-256 receipt digests.
-- Proved crash recovery, tamper/altered-retry rejection, exact retry,
-  confinement, secret rejection, history/replay preservation, and
-  non-activation of the inert profile in the resident authority chain.
+- Proved crash/tamper/altered-retry rejection, exact retry, confinement, secret
+  rejection, history/replay preservation, and inert-profile non-activation.
+- Proved attacker-recomputed receipts cannot advance authority; exact
+  allowlisted dispatch schemas reject caller-added identity or metadata before
+  nonce consumption, and AgentDB receives only canonical receipt/intent
+  projections plus principal identity from the reverified signed authority.
+  PREPARED rolls
+  back while preserving concurrent refresh data and requires a fresh retry.
+- Proved one-of-two concurrent commit, cache rehydration, immutable-orphan preservation, canonical locking, PREPARED rejection before authority-request persistence, signer invocation, AgentDB enqueue, valve, and signer effects, mandatory explicitly selected durable state at both signer consumers, serial and one-shot current-state reload, signed current-revision publication binding, and exact verified-work-authority digest and verification-receipt handoff through dry-run intents, runtime receipts, and AgentDB task context. AgentDB admission now binds work order, FoundUp, operation, and exact roles/capabilities to the signed authority and authoritative WSP 15 plan, consumes the durable nonce exactly once, preserves it on static rejection, and requires fresh authority after a post-admission writer failure. Missing recorded stages or verifier/clock dependencies, synthetic accepted dry-runs, altered proof fields, split-path/marker-and-binding removal, authority substitution, attacker-recomputed receipts around a forged signature or substituted operation, role substitution, replay, stale time after context construction, and stale injected state without a signer-config artifact all reject before effects; proposal test credentials are minted per test invocation so full-suite duration cannot expire them before use.
 - COMMITTED proves local integrity, not late-bound publication authentication.
-- Focused changed/startup suites: 185 passed; WSP 62: three passed. Full bridge
-  comparison: feature 4,276 vs parent 4,254 passes, with the same 45 failures
-  and 19 skips. Authenticated activation remains a later signer-owned slice.
+- Authenticated activation remains a later signer-owned slice.
 
 ## 2026-07-27: REDDOG_AUTHORITY_RUNTIME_STORE_CONFINEMENT_PHASE1
 - Added missing/outside-root, repository ancestry, mixed namespace, symlink,

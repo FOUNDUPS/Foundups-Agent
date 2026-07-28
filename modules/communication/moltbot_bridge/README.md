@@ -27,6 +27,18 @@ The durable resident architect cycle in `src/reddog_resident_architect_durable_a
 
 Fresh AgentDB cycle rows must be canonical `SUBMITTED` retry-zero records. `FAILED` and `TIMED_OUT` may retry through CAS; `CANCELLED` and `DETERMINED` never reopen. Legacy rows have a cancellation-only compatibility path and are otherwise rejected.
 
+Signed worker tasks carry a canonical AgentDB envelope. The OpenClaw claim
+path and direct task runner both reverify its signed authority, WSP 15
+allocation, dispatch receipt, intent, and task binding before runner
+selection. Unverified outer AgentDB metadata never widens role, capability,
+operation, or routing authority.
+
+Each signed-worker terminal or requeue result is appended to the durable
+AgentDB result ledger in the same transaction as its exact task transition.
+For independent verification, the verifier stage emits a receipt-bound
+completion request; only that transaction may complete the durable assurance
+reservation. Detached completion and generic task finalization reject.
+
 > **OpenClaw** (formerly Moltbot/Clawdbot), trained on WSP framework, operating on Foundups-Agent codebase
 
 ## Version Note

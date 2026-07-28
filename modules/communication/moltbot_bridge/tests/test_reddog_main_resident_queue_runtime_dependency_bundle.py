@@ -23,6 +23,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     RuntimeRejectCode,
     public_key_fingerprint,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_publication_admission import (
+    advance_signed_worker_publication_state,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     invoke_reddog_wre_queue_authority_runtime,
 )
@@ -73,6 +76,35 @@ def test_atomic_runtime_nonce_consume_allows_exactly_one_concurrent_winner(
         repo_root=repo,
     ).load()
     assert state["verified_work_authority_nonces"] == ["authoritative-use-nonce"]
+
+
+def test_runtime_publication_nonce_recovers_exact_digest_only(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    path = tmp_path / "runtime" / "authority_state.json"
+    store = AuthorityRuntimeWorkAuthorityNonceStore(
+        AtomicJsonAuthorityRuntimeStore(
+            path,
+            allowed_root=path.parent,
+            repo_root=repo,
+        )
+    )
+    digest = "sha256:" + ("a" * 64)
+
+    advance = advance_signed_worker_publication_state
+    assert advance(store, "nonce-1", digest, "RESERVED") == "RESERVED"
+    assert advance(store, "nonce-1", digest, "AUTHORIZED") == "AUTHORIZED"
+    assert advance(store, "nonce-1", digest, "RESERVED") == "AUTHORIZED"
+    assert (
+        advance(
+            store,
+            "nonce-1",
+            "sha256:" + ("b" * 64),
+            "RESERVED",
+        )
+        == ""
+    )
+    assert advance(store, "nonce-1", digest, "APPLIED") == "APPLIED"
+    assert store.consume("nonce-1") is False
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -137,6 +169,7 @@ def _authority_request_result() -> dict[str, object]:
             "denied_paths": [],
             "requested_operation": "create_foundup",
             "permission_snapshot_digest": "sha256:snap-1",
+            "queue_consumer_receipt_digest": "sha256:" + ("4" * 64),
             "identity_nonce": "identity-nonce-0001",
             "work_authority_nonce": "workauth-nonce-0001",
             "issued_at": NOW - 5,

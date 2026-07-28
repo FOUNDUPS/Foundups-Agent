@@ -25,6 +25,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from .db_manager import DatabaseManager
+from .signed_worker_execution_store import is_signed_worker_task_id
+from .signed_worker_assignment import assign_signed_worker_task as _assign_signed_worker_task
+from .signed_worker_execution_lease import ensure_execution_lease_schema
+from .signed_worker_result_ledger import ensure_result_history_schema
 
 
 _ASSURANCE_REQUIRED_FIELDS = (
@@ -79,13 +83,6 @@ def _postmerge_claim_binding_digest(
 _ASSURANCE_REQUEST_SCHEMA_VERSION = "reddog_assurance_capacity_request.v1"
 _ASSURANCE_MAX_LEASE = timedelta(hours=6)
 _ASSURANCE_MAX_RENEWALS = 3
-_ASSURANCE_TERMINAL_STATUSES = {
-    "ACCEPT",
-    "REJECT",
-    "VERIFIED",
-    "FAILED",
-    "CANCELLED",
-}
 _ASSURANCE_VERIFIER_ROLE = "independent_slice_verifier"
 
 
@@ -285,6 +282,9 @@ class AgentDB:
 
             ''')
 
+            ensure_result_history_schema(conn)
+            ensure_execution_lease_schema(conn)
+
             # Independent assurance capacity reservations.
             #
             # This is deliberately separate from collaboration signals. The
@@ -314,6 +314,9 @@ class AgentDB:
                     terminal_receipt_id TEXT,
                     terminal_receipt_digest TEXT,
                     terminal_status TEXT,
+                    staged_completion_json TEXT,
+                    staged_completion_digest TEXT,
+                    staged_at TIMESTAMP,
                     completed_at TIMESTAMP,
                     revoked_at TIMESTAMP,
                     revocation_reason TEXT,
@@ -504,6 +507,9 @@ class AgentDB:
                 "admission_reservation_digest": "TEXT",
                 "admission_reserved_at": "TEXT",
                 "renewal_count": "INTEGER DEFAULT 0",
+                "staged_completion_json": "TEXT",
+                "staged_completion_digest": "TEXT",
+                "staged_at": "TIMESTAMP",
             },
         )
 
@@ -1189,6 +1195,8 @@ class AgentDB:
             origin_continuity_id: Optional continuity ID from the work that discovered this task.
                                   Enables background correlation when task is executed later.
         """
+        if is_signed_worker_task_id(task_id):
+            return False
         try:
             self.db.execute_write('''
                 INSERT OR REPLACE INTO agents_autonomous_tasks
@@ -1216,6 +1224,8 @@ class AgentDB:
         origin_continuity_id: str = None,
     ) -> bool:
         """Insert a task without replacing concurrent or already-claimed state."""
+        if is_signed_worker_task_id(task_id):
+            return False
         try:
             return self.db.execute_write(
                 """
@@ -1277,12 +1287,23 @@ class AgentDB:
         return results
 
     def assign_autonomous_task(self, task_id: str, agent_id: str) -> bool:
-        """Assign autonomous task to agent."""
+        """Atomically claim one pending autonomous task for an agent."""
+        if is_signed_worker_task_id(task_id):
+            return False
         return self.db.execute_write('''
             UPDATE agents_autonomous_tasks
             SET assigned_to = ?, assigned_at = ?, status = 'assigned'
-            WHERE task_id = ?
+            WHERE task_id = ? AND status = 'pending'
         ''', (agent_id, datetime.now().isoformat(), task_id)) > 0
+
+    def assign_signed_worker_task(self, task_id: str) -> bool:
+        """Claim a protected task through its envelope-bound principal."""
+
+        try:
+            with self.db.get_connection() as connection:
+                return _assign_signed_worker_task(connection, task_id)
+        except Exception:
+            return False
 
     def claim_holoindex_postmerge_task(
         self,
@@ -1674,6 +1695,8 @@ class AgentDB:
 
     def complete_autonomous_task(self, task_id: str) -> bool:
         """Mark autonomous task as completed."""
+        if is_signed_worker_task_id(task_id):
+            return False
         return self.db.execute_write('''
             UPDATE agents_autonomous_tasks
             SET completed_at = ?, status = 'completed'
@@ -1688,6 +1711,8 @@ class AgentDB:
         retry_not_before: str,
     ) -> bool:
         """Move a failed task into a durable bounded retry wait state."""
+        if is_signed_worker_task_id(task_id):
+            return False
         return self.db.execute_write(
             """
             UPDATE agents_autonomous_tasks
@@ -1708,6 +1733,8 @@ class AgentDB:
         expected_status: str = "retry_wait",
     ) -> bool:
         """Requeue a task only from the caller's exact expected state."""
+        if is_signed_worker_task_id(task_id):
+            return False
         return self.db.execute_write(
             """
             UPDATE agents_autonomous_tasks
@@ -2053,14 +2080,14 @@ class AgentDB:
                 claim_count = conn.execute(
                     """
                     UPDATE agents_autonomous_tasks
-                    SET status = 'assigned', assigned_to = ?, assigned_at = ?
+                    SET status = 'assigned', assigned_to = ?,
+                        assigned_at = CURRENT_TIMESTAMP
                     WHERE task_id = ?
                       AND status = 'pending'
                       AND (assigned_to IS NULL OR assigned_to = '')
                     """,
                     (
                         normalized["verifier_principal_id"],
-                        normalized["reserved_at"],
                         normalized["verifier_task_id"],
                     ),
                 ).rowcount
@@ -2353,13 +2380,12 @@ class AgentDB:
                     UPDATE agents_autonomous_tasks
                     SET status = 'assigned',
                         assigned_to = ?,
-                        assigned_at = ?,
+                        assigned_at = CURRENT_TIMESTAMP,
                         completed_at = NULL
                     WHERE task_id = ? AND status = 'expired'
                     """,
                     (
                         normalized["verifier_principal_id"],
-                        normalized["reserved_at"],
                         normalized["verifier_task_id"],
                     ),
                 ).rowcount
@@ -2473,116 +2499,44 @@ class AgentDB:
         status: str,
         now_iso: str,
     ) -> Mapping[str, Any]:
-        """Bind a terminal verifier receipt and release its reservation once."""
-        normalized_id = str(reservation_id or "").strip()
-        admission_digest = _normalize_sha256_digest(
-            admission_reservation_digest
+        """Reject detached completion; signed-worker finalization owns the CAS."""
+        _ = (
+            reservation_id,
+            admission_reservation_digest,
+            terminal_receipt_id,
+            terminal_receipt_digest,
+            status,
+            now_iso,
         )
-        receipt_id = str(terminal_receipt_id or "").strip()
-        receipt_digest = _normalize_sha256_digest(terminal_receipt_digest)
-        terminal_status = str(status or "").strip().upper()
-        reasons = []
-        if not normalized_id:
-            reasons.append("missing_reservation_id")
-        if not _is_sha256_digest(admission_digest):
-            reasons.append("invalid_admission_reservation_digest")
-        if not receipt_id:
-            reasons.append("missing_terminal_receipt_id")
-        if not _is_sha256_digest(receipt_digest):
-            reasons.append("invalid_terminal_receipt_digest")
-        if terminal_status not in _ASSURANCE_TERMINAL_STATUSES:
-            reasons.append("invalid_terminal_status")
-        try:
-            now_utc, canonical_now = _parse_assurance_utc_timestamp(now_iso, "now_iso")
-        except _AssuranceReservationRejected as exc:
-            reasons.extend(exc.reasons)
-            now_utc = datetime.now(timezone.utc)
-            canonical_now = ""
-        if reasons:
-            return _assurance_result(
-                accepted=False,
-                status="REJECTED",
-                rejection_reasons=tuple(reasons),
-            )
+        return _assurance_result(
+            accepted=False,
+            status="REJECTED",
+            rejection_reasons=(
+                "completion_owned_by_signed_worker_finalizer",
+            ),
+        )
+
+    def stage_independent_assurance_completion(
+        self,
+        request: Mapping[str, Any],
+    ) -> Mapping[str, Any]:
+        """Durably bind verifier output without terminalizing its task."""
+
+        from modules.infrastructure.database.src.signed_worker_assurance_staging import (
+            stage_assurance_completion,
+        )
 
         try:
             with self.db.get_connection() as conn:
-                reservation = self._load_assurance_reservation(conn, normalized_id)
-                if reservation is None:
-                    raise _AssuranceReservationRejected("reservation_not_found")
-                if (
-                    str(
-                        reservation.get("admission_reservation_digest")
-                        or reservation.get("reservation_digest")
-                        or ""
-                    )
-                    != admission_digest
-                ):
-                    raise _AssuranceReservationRejected(
-                        "admission_reservation_digest_mismatch"
-                    )
-                reservation = self._expire_assurance_row(
-                    conn,
-                    reservation,
-                    now_utc=now_utc,
-                    now_iso=canonical_now,
-                )
-                if reservation["status"] != "RESERVED":
-                    raise _AssuranceReservationRejected("reservation_not_active")
-                updated = conn.execute(
-                    """
-                    UPDATE agents_independent_assurance_reservations
-                    SET status = ?,
-                        terminal_receipt_id = ?,
-                        terminal_receipt_digest = ?,
-                        terminal_status = ?,
-                        completed_at = ?
-                    WHERE reservation_id = ? AND status = 'RESERVED'
-                    """,
-                    (
-                        terminal_status,
-                        receipt_id,
-                        receipt_digest,
-                        terminal_status,
-                        canonical_now,
-                        normalized_id,
-                    ),
-                ).rowcount
-                if updated != 1:
-                    raise _AssuranceReservationRejected("reservation_not_active")
-                task_updated = conn.execute(
-                    """
-                    UPDATE agents_autonomous_tasks
-                    SET status = 'completed', completed_at = ?
-                    WHERE task_id = ? AND status = 'assigned' AND assigned_to = ?
-                    """,
-                    (
-                        canonical_now,
-                        reservation["verifier_task_id"],
-                        reservation["verifier_principal_id"],
-                    ),
-                ).rowcount
-                if task_updated != 1:
-                    raise _AssuranceReservationRejected(
-                        "verifier_task_terminal_transition_failed"
-                    )
-                completed = self._load_assurance_reservation(conn, normalized_id)
-        except _AssuranceReservationRejected as exc:
-            return _assurance_result(
-                accepted=False,
-                status="REJECTED",
-                rejection_reasons=exc.reasons,
-            )
+                accepted = stage_assurance_completion(conn, request=request)
         except Exception:
-            return _assurance_result(
-                accepted=False,
-                status="REJECTED",
-                rejection_reasons=("reservation_completion_database_error",),
-            )
+            accepted = False
         return _assurance_result(
-            accepted=True,
-            status=terminal_status,
-            reservation=completed,
+            accepted=accepted,
+            status="STAGED" if accepted else "REJECTED",
+            rejection_reasons=(
+                () if accepted else ("assurance_completion_stage_rejected",)
+            ),
         )
 
     def revoke_independent_assurance(
@@ -2644,7 +2598,9 @@ class AgentDB:
                     """
                     UPDATE agents_autonomous_tasks
                     SET status = 'cancelled', completed_at = ?
-                    WHERE task_id = ? AND status = 'assigned' AND assigned_to = ?
+                    WHERE task_id = ?
+                      AND status IN ('assigned', 'executing')
+                      AND assigned_to = ?
                     """,
                     (
                         canonical_now,

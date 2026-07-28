@@ -44,6 +44,13 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
     PrincipalAuthorityRecord,
     PrincipalAuthorityResolver,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_authority_store_commit import (
+    commit_issued_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    attach_optional_authority_bindings,
+    optional_authority_bindings_valid,
+)
 
 AUTHORITY_ISSUED = "DELEGATED_AUTHORITY_ISSUED"
 AUTHORITY_REJECTED = "DELEGATED_AUTHORITY_REJECTED"
@@ -207,6 +214,7 @@ class DelegatedAuthorityRuntimeRequest:
     denied_paths: Tuple[str, ...]
     requested_operation: str
     permission_snapshot_digest: str
+    queue_consumer_receipt_digest: str
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
     wsp15_priority: str
@@ -227,6 +235,8 @@ class DelegatedAuthorityRuntimeRequest:
     model_runtime_binding_digest: Optional[str] = None
     memex_supply_receipt_id: Optional[str] = None
     memex_supply_digest: Optional[str] = None
+    architect_fix_publication_receipt_id: Optional[str] = None
+    architect_fix_publication_binding_digest: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -361,71 +371,6 @@ def _validate_signing_response(
     return None
 
 
-def _append_unique(items: Sequence[str], item: str) -> Tuple[str, ...]:
-    seen = list(map(str, items))
-    if item not in seen:
-        seen.append(item)
-    return tuple(seen)
-
-
-def _commit_issued_authority(
-    store: AuthorityRuntimeStore,
-    *,
-    request: DelegatedAuthorityRuntimeRequest,
-    identity_digest: str,
-    work_authority_digest: str,
-    receipt_id: str,
-) -> str:
-    current = store.load()
-    expected_revision = current.get("revision")
-    nonces = current.get("nonces") if isinstance(current.get("nonces"), Mapping) else {}
-    identity_nonces = tuple(map(str, nonces.get("identity", [])))
-    work_nonces = tuple(map(str, nonces.get("work_authority", [])))
-    issued = current.get("issued_authorities") if isinstance(current.get("issued_authorities"), Mapping) else {}
-    if request.work_order_id in issued:
-        raise RuntimeError("duplicate_work_order")
-    next_state = json.loads(json.dumps(current, sort_keys=True))
-    next_state.setdefault("schema_version", AUTHORITY_SCHEMA_VERSION)
-    next_state["nonces"] = {
-        "identity": list(_append_unique(identity_nonces, request.identity_nonce)),
-        "work_authority": list(_append_unique(work_nonces, request.work_authority_nonce)),
-    }
-    issued_next = dict(issued)
-    issued_next[request.work_order_id] = {
-        "receipt_id": receipt_id,
-        "identity_digest": identity_digest,
-        "work_authority_digest": work_authority_digest,
-        "work_order_digest": request.work_order_digest,
-        "base_ref": request.base_ref,
-        "principal_id": request.principal_id,
-        "reddog_id": request.reddog_id,
-        "foundup_id": request.foundup_id,
-        "repo_full_name": request.repo_full_name,
-        "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
-        "wsp15_allocation_digest": request.wsp15_allocation_digest,
-        "status": AUTHORITY_ISSUED,
-    }
-    if request.model_runtime_binding_receipt_id or request.model_runtime_binding_digest:
-        issued_next[request.work_order_id]["model_runtime_binding_receipt_id"] = str(
-            request.model_runtime_binding_receipt_id or ""
-        )
-        issued_next[request.work_order_id]["model_runtime_binding_digest"] = str(
-            request.model_runtime_binding_digest or ""
-        )
-    for prefix in ("model_selection", "memex_supply"):
-        receipt_id = getattr(request, f"{prefix}_receipt_id")
-        digest = getattr(request, f"{prefix}_digest")
-        if receipt_id or digest:
-            issued_next[request.work_order_id][f"{prefix}_receipt_id"] = str(
-                receipt_id or ""
-            )
-            issued_next[request.work_order_id][f"{prefix}_digest"] = str(
-                digest or ""
-            )
-    next_state["issued_authorities"] = issued_next
-    return store.commit(next_state, expected_revision=expected_revision)
-
-
 def issue_delegated_authority_runtime(
     *,
     request: DelegatedAuthorityRuntimeRequest,
@@ -502,7 +447,13 @@ def issue_delegated_authority_runtime(
     if not snapshot.grants(request.requested_operation, request.repo_full_name):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_INSUFFICIENT])
     if (
-        not request.wsp15_allocation_receipt_id.startswith("sha256:")
+        not request.queue_consumer_receipt_digest.startswith("sha256:")
+        or len(request.queue_consumer_receipt_digest) != 71
+        or not all(
+            char in "0123456789abcdef"
+            for char in request.queue_consumer_receipt_digest.removeprefix("sha256:")
+        )
+        or not request.wsp15_allocation_receipt_id.startswith("sha256:")
         or not request.wsp15_allocation_digest.startswith("sha256:")
         or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
         or type(request.wsp15_mps_total) is not int
@@ -515,18 +466,12 @@ def issue_delegated_authority_runtime(
         and str(request.model_runtime_binding_digest or "").startswith("sha256:")
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
-    for receipt_id, digest in (
-        (request.model_selection_receipt_id, request.model_selection_digest),
-        (request.memex_supply_receipt_id, request.memex_supply_digest),
-    ):
-        if bool(receipt_id) != bool(digest) or (
-            digest and not str(digest).startswith("sha256:")
-        ):
-            return _rejection_result(
-                now=now,
-                request=request,
-                reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
-            )
+    if not optional_authority_bindings_valid(request):
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
+        )
 
     effective_paths = set(request.allowed_paths) - set(request.denied_paths)
     if not effective_paths or not all(_path_within_foundup(path, request.foundup_id) for path in effective_paths):
@@ -621,6 +566,7 @@ def issue_delegated_authority_runtime(
         "denied_paths": list(request.denied_paths),
         "requested_operation": request.requested_operation,
         "permission_snapshot_digest": request.permission_snapshot_digest,
+        "queue_consumer_receipt_digest": request.queue_consumer_receipt_digest,
         "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
         "wsp15_allocation_digest": request.wsp15_allocation_digest,
         "wsp15_priority": request.wsp15_priority,
@@ -640,12 +586,7 @@ def issue_delegated_authority_runtime(
     if has_runtime_binding:
         work_authority["model_runtime_binding_receipt_id"] = str(request.model_runtime_binding_receipt_id)
         work_authority["model_runtime_binding_digest"] = str(request.model_runtime_binding_digest)
-    for prefix in ("model_selection", "memex_supply"):
-        receipt_id = getattr(request, f"{prefix}_receipt_id")
-        digest = getattr(request, f"{prefix}_digest")
-        if receipt_id and digest:
-            work_authority[f"{prefix}_receipt_id"] = str(receipt_id)
-            work_authority[f"{prefix}_digest"] = str(digest)
+    attach_optional_authority_bindings(work_authority, request)
     workauth_input = canonical_signing_input(work_authority, PREFIX_WORKAUTH)
     workauth_sign = signer_client.sign(
         SigningRequest(
@@ -682,12 +623,12 @@ def issue_delegated_authority_runtime(
     }
     receipt_id = "authority-runtime-" + _canonical_digest(receipt_payload)[:16]
     try:
-        revision = _commit_issued_authority(
+        revision = commit_issued_authority(
             store,
             request=request,
             identity_digest=identity_digest,
             work_authority_digest=workauth_digest,
-            receipt_id=receipt_id,
+            receipt_id=receipt_id, schema_version=AUTHORITY_SCHEMA_VERSION, issued_status=AUTHORITY_ISSUED,
         )
     except Exception:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.STORE_COMMIT_FAILED])

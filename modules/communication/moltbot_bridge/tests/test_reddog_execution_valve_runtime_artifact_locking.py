@@ -12,7 +12,7 @@ from types import ModuleType
 import pytest
 
 from modules.communication.moltbot_bridge.src import (
-    reddog_authoritative_work_state_refresh_runtime as work_state_supply,
+    reddog_authoritative_work_state_store as work_state_supply,
 )
 from modules.communication.moltbot_bridge.src import (
     reddog_authority_profile_source_artifact_supply as profile_source_supply,
@@ -30,7 +30,7 @@ from modules.communication.moltbot_bridge.src import (
     reddog_github_principal_permission_snapshot_supply as github_artifact_supply,
 )
 from modules.communication.moltbot_bridge.src import (
-    reddog_main_architect_fix_promotion_bootstrap as promoted_profile_supply,
+    reddog_architect_fix_promotion_publication as promoted_profile_supply,
 )
 from modules.communication.moltbot_bridge.src import (
     reddog_main_resident_queue_runtime_dependency_bundle as dependency_bundle,
@@ -39,6 +39,7 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_au
     GovernedValveUseTimeAuthorityResolver,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    confined_runtime_operation_lock,
     runtime_operation_lock,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
@@ -64,7 +65,7 @@ _USE_TIME_ARTIFACTS = (
 _PRODUCTION_WRITERS = (
     ("work_state_store", work_state_supply, "authoritative_work_state.json", "store"),
     ("profile_source", profile_source_supply, "authority_profile.json", "helper"),
-    ("profile_promoted", promoted_profile_supply, "authority_profile.json", "helper"),
+    ("profile_promoted", promoted_profile_supply, "authority_profile.json", "profile"),
     ("github_permissions", github_artifact_supply, "permission_snapshots.json", "helper"),
     ("github_principals", github_artifact_supply, "principal_authority_records.json", "helper"),
     ("resolver_permissions", resolver_artifact_supply, "permission_snapshots.json", "helper"),
@@ -100,10 +101,26 @@ def _invoke_production_writer(
     payload: dict[str, str],
 ) -> None:
     if writer_kind == "store":
-        module.AtomicJsonAuthoritativeWorkStateStore(target).commit(
+        repo = target.parent.parent / f"{target.parent.name}-repo"
+        module.AtomicJsonAuthoritativeWorkStateStore(
+            target,
+            allowed_root=target.parent,
+            repo_root=repo,
+        ).commit(
             payload,
             expected_revision=None,
         )
+        return
+    if writer_kind == "profile":
+        repo = target.parent.parent / f"{target.parent.name}-repo"
+        (repo / ".git").mkdir(parents=True, exist_ok=True)
+        publisher = module.AtomicArchitectFixPromotionPublisher(
+            repo_root=repo,
+            runtime_root=target.parent,
+            authority_profile_path=target,
+            work_state_store=object(),
+        )
+        module._write_profile_mapping(publisher, target, payload)
         return
     module._write_json_atomic(target, payload)
 
@@ -129,18 +146,49 @@ def test_production_writer_cannot_replace_during_reader_operation_lock(
     )
     attempted = Event()
     lock_identity = str(target) + ".operation"
+    confined_writer = writer_kind in {"store", "profile"}
+    confined_lock_path = target.with_name(target.name + ".operation.lock")
+    repo = target.parent.parent / f"{target.parent.name}-repo"
 
     @contextmanager
-    def observed_lock(identity: Path | str):
-        if str(identity) == lock_identity:
+    def observed_lock(
+        identity: Path | str,
+        *,
+        repo_root: Path | str,
+        allowed_root: Path | str,
+    ):
+        if Path(identity) == confined_lock_path:
             attempted.set()
-        with runtime_operation_lock(identity):
+        with confined_runtime_operation_lock(
+            identity,
+            repo_root=repo_root,
+            allowed_root=allowed_root,
+        ):
             yield
 
-    monkeypatch.setattr(module, "runtime_operation_lock", observed_lock)
+    if confined_writer:
+        monkeypatch.setattr(module, "confined_runtime_operation_lock", observed_lock)
+    else:
+        @contextmanager
+        def observed_legacy_lock(identity: Path | str):
+            if str(identity) == lock_identity:
+                attempted.set()
+            with runtime_operation_lock(identity):
+                yield
+
+        monkeypatch.setattr(module, "runtime_operation_lock", observed_legacy_lock)
     executor = ThreadPoolExecutor(max_workers=1)
     try:
-        with runtime_operation_lock(lock_identity):
+        outer_lock = (
+            confined_runtime_operation_lock(
+                confined_lock_path,
+                repo_root=repo,
+                allowed_root=target.parent,
+            )
+            if confined_writer
+            else runtime_operation_lock(lock_identity)
+        )
+        with outer_lock:
             future = executor.submit(
                 _invoke_production_writer,
                 module,

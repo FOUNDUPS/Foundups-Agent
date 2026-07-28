@@ -10,6 +10,54 @@ From `modules.infrastructure.database`:
 - `audit_sqlite_file`
 - `run_sqlite_audit`
 
+## Signed Worker Execution Store
+File: `modules/infrastructure/database/src/signed_worker_execution_store.py`
+
+### Public Function
+- `finalize_signed_worker_execution(db, task_id, *, context, accepted, result_context, target_status=None, retry_not_before=None, assurance_completion=None) -> bool`
+- `finalize_expired_signed_worker_execution_recovery(db, task_id, *, context, result_context, target_status=None, retry_not_before=None, assurance_completion=None, now=None) -> bool`
+
+The finalizer updates only the exact executing task row bound to the admitted
+assignee, claim receipt, one-use receipt and preclaim context digest. Requeue
+clears assignment ownership; terminal transitions retain it. Any concurrent
+row, context or receipt change fails closed.
+`result_context` is mandatory and must contain exactly one new canonical
+result-history entry. Missing or unchanged history never reaches a terminal
+or requeue state.
+Normal finalization requires the exact claim/use execution lease to remain
+active at the transaction boundary. Expired recovery is a separate,
+failure-only API and rejects success-shaped results. Task state, assurance
+completion, result-ledger append, and lease validation commit together.
+
+Signed-worker execution claims begin with a 15-minute durable lease. A
+process-local heartbeat may renew the same claim/use binding up to a fixed
+four-hour horizon and renewal-count ceiling. The OpenClaw supervisor runs a
+bounded recovery scan before claiming more work. Stale assignments that
+crashed before execution admission requeue by exact CAS unless an active
+verifier reservation owns them. An expired execution is never retried
+automatically: exact durable negative assurance may roll forward through the
+same finalizer, while missing, positive-only, corrupt, or otherwise
+effect-unknown evidence is quarantined without a success result. Generic
+create, assignment, retry, requeue, and completion APIs reject the reserved
+`reddog-worker-dispatch-` namespace.
+First-time quarantine also transitions an independently reserved assurance row
+in the same transaction. A pre-existing local quarantine marker is insufficient
+unless the durable task, result ledger, and assurance state agree exactly.
+
+## Signed Worker Result Ledger
+File: `modules/infrastructure/database/src/signed_worker_result_ledger.py`
+
+### Public Functions
+- `validated_result_history(context) -> Mapping[str, Any]`
+- `validate_result_history_ledger(connection, task_id, context) -> bool`
+- `persist_result_history_ledger(connection, task_id, context, *, claim_receipt_id, use_receipt_id) -> bool`
+
+The ledger is independently durable from mutable autonomous-task context.
+Each result is appended in the same transaction as exact-CAS task
+finalization. Both supervisor and direct task admission require the canonical
+context tail to match the full ledger before execution. Fully re-hashed,
+truncated, reordered, substituted, or unchanged final histories fail closed.
+
 ## DatabaseManager
 File: `modules/infrastructure/database/src/db_manager.py`
 
@@ -65,6 +113,13 @@ File: `modules/infrastructure/database/src/agent_db.py`
 - `get_patterns(agent_id=None, pattern_type=None, limit=50) -> list[dict]`
 - `record_error(error_hash, error_type, solution)`
 - `get_error_solution(error_hash) -> dict | None`
+- `assign_signed_worker_task(task_id) -> bool`
+
+Protected signed-worker assignment validates the pending task namespace,
+source, schema, envelope task binding, runtime, role, capability, and exact
+required-skill set. It assigns only to the canonical task-bound principal.
+Malformed protected tasks are quarantined with a content-free digest-bound
+receipt and cannot fall through to generic WRE execution.
 
 ### Independent Assurance Reservations
 
@@ -72,20 +127,28 @@ File: `modules/infrastructure/database/src/agent_db.py`
 - `get_independent_assurance_reservation(reservation_id) -> dict`
 - `get_independent_assurance_reservation_for_task(task_id, task_kind=...) -> dict`
 - `renew_independent_assurance(request) -> dict`
-- `complete_independent_assurance(reservation_id, admission_reservation_digest=..., ...) -> dict`
+- `stage_independent_assurance_completion(request) -> dict`
+- `complete_independent_assurance(...) -> REJECTED` (detached completion is
+  forbidden)
 - `revoke_independent_assurance(reservation_id, ...) -> dict`
 - `expire_independent_assurance_reservations() -> dict`
+- `finalize_signed_worker_execution(..., assurance_completion=...) -> bool`
 
 Reservation admission atomically claims one pending verifier task and inserts
 one digest-bound lease. Author and verifier principals must differ. Snapshot,
 work order, queue item, WSP 15 allocation, runtime, capability, and task
-bindings are revalidated from the persisted task contexts. Completion,
-revocation, expiration, replay, and competing reservations fail closed.
+bindings are revalidated from the persisted task contexts. Verifier
+completion is accepted only inside the signed-worker task/result-ledger
+transaction; the detached AgentDB method always rejects. Revocation,
+expiration, replay, and competing reservations fail closed.
+The verifier may first stage one exact completion request while its task is
+`executing`; exact replay is idempotent and any altered second request rejects.
 Renewal preserves the immutable admission digest, is limited to three
 renewals and a six-hour total lease horizon, and requires the original author
 task to have completed successfully. Admission rejects any author already
-claimed by another worker, and terminal completion revalidates the immutable
-admission digest.
+claimed by another worker. Terminal completion revalidates the immutable
+admission digest, verifier task/principal, lease expiry, receipt-bound
+completion request, exact task row, and result ledger before one commit.
 
 ### Exact-SHA HoloIndex Maintenance Transactions
 
@@ -106,6 +169,19 @@ payload observed in that transaction.
 Competing claims and partial completion writes fail closed.
 Expired claims are reclaimed only by exact worker and assignment timestamp,
 then re-enter the coordinator's bounded retry path.
+
+### Signed-Worker Result Continuity
+
+- `ensure_result_history_schema(connection) -> None`
+- `validate_result_history_ledger(connection, task_id, context) -> bool`
+- `persist_result_history_ledger(connection, task_id, context, ...) -> bool`
+- `validated_result_history(context) -> Mapping[str, Any]`
+
+The AgentDB ledger retains every attempt. Task context retains the canonical
+latest ten attempts and must equal the ledger tail exactly. Supervisor and
+direct `run_task` completion both build the same result receipt and append the
+ledger row atomically with the task transition. Context history with no
+corresponding durable rows is quarantined rather than promoted.
 
 ## SQLite Audit API
 File: `modules/infrastructure/database/src/sqlite_audit.py`

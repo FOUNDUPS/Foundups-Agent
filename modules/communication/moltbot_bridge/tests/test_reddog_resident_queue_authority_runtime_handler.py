@@ -13,6 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_re
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_runtime_handler import (
     AUTHORITY_REQUEST_STAGE_KEY,
     AUTHORITY_RUNTIME_STAGE_KEY,
+    FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED,
     FAIL_AUTHORITY_REQUEST_STAGE_MISSING,
     FAIL_DISPATCH_NEXT_ACTION_MISMATCH,
     FAIL_DISPATCH_STAGE_MISMATCH,
@@ -51,6 +52,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    with_architect_fix_publication,
 )
 
 
@@ -270,6 +274,129 @@ def test_dispatcher_records_authority_runtime_result_and_advances_to_verificatio
     assert stage["no_worker_spawn_performed"] is True
     assert stage["no_openclaw_enqueue_performed"] is True
     assert state["no_repo_mutation_performed"] is True
+
+
+def test_runtime_revalidates_committed_publication_before_signing() -> None:
+    committed, profile, queue_id, _ = with_architect_fix_publication(
+        _snapshot(),
+        _profile(),
+    )
+    prepared, _, _, _ = with_architect_fix_publication(
+        _snapshot(),
+        _profile(),
+        state="STATE_PREPARED",
+    )
+    request_handler = build_reddog_resident_queue_authority_request_stage_handler(
+        work_state_snapshot=committed,
+        authority_profile=profile,
+        work_order_resolver=_WorkOrderResolver(),
+        now_iso=NOW_ISO,
+        work_state_supplier=lambda: committed,
+    )
+    request_result = request_handler(
+        ResidentQueueStageDispatchRequest(
+            stage_key=AUTHORITY_REQUEST_STAGE_KEY,
+            next_action="RUN_QUEUE_AUTHORITY_REQUEST_DRYRUN",
+            queue_item_id=queue_id,
+            selected_slice="REDDOG_TEST_SLICE_PHASE1",
+            plan_id="plan-1",
+            accepted_stages=(),
+        )
+    )
+    chain_store = InMemoryResidentQueueChainResultsStore({
+        "schema_version": "reddog_resident_queue_chain_results.v1",
+        "stage_results": {AUTHORITY_REQUEST_STAGE_KEY: request_result},
+    })
+    signer = _MockSigner()
+    handler = build_reddog_resident_queue_authority_runtime_stage_handler(
+        chain_results_store=chain_store,
+        authority_store=InMemoryAuthorityRuntimeStore(),
+        signer=signer,
+        principal_resolver=_PrincipalResolver(),
+        snapshot_resolver=_SnapshotResolver(),
+        now=NOW,
+        work_state_snapshot=committed,
+        authority_profile=profile,
+        work_state_supplier=lambda: prepared,
+    )
+
+    result = handler(
+        ResidentQueueStageDispatchRequest(
+            stage_key=AUTHORITY_RUNTIME_STAGE_KEY,
+            next_action=NEXT_QUEUE_AUTHORITY_RUNTIME_INVOKE,
+            queue_item_id=queue_id,
+            selected_slice="REDDOG_TEST_SLICE_PHASE1",
+            plan_id="plan-1",
+            accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY,),
+        )
+    )
+
+    assert result["decision"] == QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT
+    assert FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED in result[
+        "rejection_reasons"
+    ]
+    assert signer.requests == []
+
+
+def test_runtime_signs_current_committed_publication_binding() -> None:
+    committed, profile, queue_id, _ = with_architect_fix_publication(
+        _snapshot(),
+        _profile(),
+    )
+    request_handler = build_reddog_resident_queue_authority_request_stage_handler(
+        work_state_snapshot=committed,
+        authority_profile=profile,
+        work_order_resolver=_WorkOrderResolver(),
+        now_iso=NOW_ISO,
+        work_state_supplier=lambda: committed,
+    )
+    request_result = request_handler(
+        ResidentQueueStageDispatchRequest(
+            stage_key=AUTHORITY_REQUEST_STAGE_KEY,
+            next_action="RUN_QUEUE_AUTHORITY_REQUEST_DRYRUN",
+            queue_item_id=queue_id,
+            selected_slice="REDDOG_TEST_SLICE_PHASE1",
+            plan_id="plan-1",
+            accepted_stages=(),
+        )
+    )
+    chain_store = InMemoryResidentQueueChainResultsStore({
+        "schema_version": "reddog_resident_queue_chain_results.v1",
+        "stage_results": {AUTHORITY_REQUEST_STAGE_KEY: request_result},
+    })
+    signer = _MockSigner()
+    handler = build_reddog_resident_queue_authority_runtime_stage_handler(
+        chain_results_store=chain_store,
+        authority_store=InMemoryAuthorityRuntimeStore(),
+        signer=signer,
+        principal_resolver=_PrincipalResolver(),
+        snapshot_resolver=_SnapshotResolver(),
+        now=NOW,
+        work_state_snapshot=committed,
+        authority_profile=profile,
+        work_state_supplier=lambda: committed,
+    )
+
+    result = handler(
+        ResidentQueueStageDispatchRequest(
+            stage_key=AUTHORITY_RUNTIME_STAGE_KEY,
+            next_action=NEXT_QUEUE_AUTHORITY_RUNTIME_INVOKE,
+            queue_item_id=queue_id,
+            selected_slice="REDDOG_TEST_SLICE_PHASE1",
+            plan_id="plan-1",
+            accepted_stages=(AUTHORITY_REQUEST_STAGE_KEY,),
+        )
+    )
+
+    work_authority = result["authority_result"]["work_authority"]
+    assert result["decision"] == QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT
+    assert work_authority["architect_fix_publication_receipt_id"] == profile[
+        "promotion_publication_id"
+    ]
+    assert work_authority[
+        "architect_fix_publication_binding_digest"
+    ].startswith("sha256:")
+    assert len(signer.requests) == 2
 
 
 def test_missing_authority_request_stage_rejects_direct_handler_call() -> None:

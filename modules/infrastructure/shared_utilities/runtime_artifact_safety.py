@@ -9,7 +9,7 @@ import stat
 import sys
 import tempfile
 import unicodedata
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
@@ -274,40 +274,42 @@ def confined_runtime_operation_lock(
         repo_root=repo_root,
         allowed_root=allowed_root,
     )
-    descriptor, _ = _open_runtime_file(target)
-    try:
-        opened_stat = os.fstat(descriptor)
-        _require_private_regular_file(opened_stat)
-        final_path = _descriptor_final_path(descriptor)
-        _verify_descriptor_path(
-            final_path,
-            expected=target,
-            repo_root=repo_root,
-            allowed_root=allowed_root,
-        )
-        if opened_stat.st_size == 0:
-            os.write(descriptor, b"\0")
-            os.fsync(descriptor)
-        os.lseek(descriptor, 0, os.SEEK_SET)
-        if os.name == "nt":
-            import msvcrt
+    initialization_lock = _exclusive_lock(target) if os.name == "nt" else nullcontext()
+    with initialization_lock:
+        descriptor, _ = _open_runtime_file(target)
+        try:
+            opened_stat = os.fstat(descriptor)
+            _require_private_regular_file(opened_stat)
+            final_path = _descriptor_final_path(descriptor)
+            _verify_descriptor_path(
+                final_path,
+                expected=target,
+                repo_root=repo_root,
+                allowed_root=allowed_root,
+            )
+            if opened_stat.st_size == 0:
+                os.write(descriptor, b"\0")
+                os.fsync(descriptor)
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            if os.name == "nt":
+                import msvcrt
 
-            msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
-            try:
-                yield
-            finally:
-                os.lseek(descriptor, 0, os.SEEK_SET)
-                msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
-        else:
-            import fcntl
+                msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
+                try:
+                    yield
+                finally:
+                    os.lseek(descriptor, 0, os.SEEK_SET)
+                    msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
 
-            fcntl.flock(descriptor, fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(descriptor, fcntl.LOCK_UN)
-    finally:
-        os.close(descriptor)
+                fcntl.flock(descriptor, fcntl.LOCK_EX)
+                try:
+                    yield
+                finally:
+                    fcntl.flock(descriptor, fcntl.LOCK_UN)
+        finally:
+            os.close(descriptor)
 
 
 def redact_runtime_text(value: object, *, max_chars: int = 4096) -> RuntimeTextRedaction:
@@ -376,20 +378,18 @@ def secure_read_confined_bytes(
     ):
         raise ValueError("confined_read_path_link_rejected")
 
-    root = _without_windows_extended_prefix(root_candidate.resolve(strict=True))
-    expected = _without_windows_extended_prefix(
-        expected_candidate.resolve(strict=True)
-    )
+    root = _resolve_runtime_path(root_candidate, strict=True)
+    expected = _resolve_runtime_path(expected_candidate, strict=True)
     if not _is_relative_to(expected, root):
         raise ValueError("confined_read_path_outside_root")
 
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(expected, flags)
+    descriptor = os.open(_runtime_open_path(expected), flags)
     try:
         metadata = os.fstat(descriptor)
         _require_private_regular_file(metadata)
         final_path = _descriptor_final_path(descriptor)
-        final_resolved = _without_windows_extended_prefix(final_path.resolve(strict=True))
+        final_resolved = _resolve_runtime_path(final_path, strict=True)
         if not _is_relative_to(final_resolved, root):
             raise ValueError("confined_read_descriptor_outside_root")
         if os.path.normcase(str(final_resolved)) != os.path.normcase(str(expected)):
@@ -536,8 +536,14 @@ def _contains_secret_shape(text: str) -> bool:
 
 
 def _is_relative_to(path: Path, parent: Path) -> bool:
+    candidate = Path(
+        os.path.normcase(str(_without_windows_extended_prefix(path)))
+    )
+    root = Path(
+        os.path.normcase(str(_without_windows_extended_prefix(parent)))
+    )
     try:
-        path.relative_to(parent)
+        candidate.relative_to(root)
         return True
     except ValueError:
         return False
@@ -599,13 +605,34 @@ def _require_private_regular_file(metadata: os.stat_result) -> None:
 
 def _open_runtime_file(path: Path) -> tuple[int, bool]:
     common = os.O_RDWR | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    open_path = _runtime_open_path(path)
     try:
-        return os.open(path, common), False
+        return os.open(open_path, common), False
     except FileNotFoundError:
         try:
-            return os.open(path, common | os.O_CREAT | os.O_EXCL, 0o600), True
+            return os.open(
+                open_path,
+                common | os.O_CREAT | os.O_EXCL,
+                0o600,
+            ), True
         except FileExistsError:
-            return os.open(path, common), False
+            return os.open(open_path, common), False
+
+
+def _runtime_open_path(path: Path) -> Path | str:
+    if os.name != "nt":
+        return path
+    raw = os.path.abspath(path)
+    if raw.startswith("\\\\?\\"):
+        return raw
+    if raw.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + raw[2:]
+    return "\\\\?\\" + raw
+
+
+def _resolve_runtime_path(path: Path, *, strict: bool) -> Path:
+    candidate = Path(_runtime_open_path(path))
+    return _without_windows_extended_prefix(candidate.resolve(strict=strict))
 
 
 def _descriptor_final_path(descriptor: int) -> Path:
@@ -675,9 +702,10 @@ def _read_descriptor_text(descriptor: int, size: int) -> str:
 
 def _remove_created_file(path: Path, expected: os.stat_result) -> None:
     try:
-        current = path.stat()
+        open_path = _runtime_open_path(path)
+        current = os.stat(open_path, follow_symlinks=False)
         if (current.st_dev, current.st_ino) == (expected.st_dev, expected.st_ino):
-            path.unlink(missing_ok=True)
+            os.unlink(open_path)
     except OSError:
         pass
 

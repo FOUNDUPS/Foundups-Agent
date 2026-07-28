@@ -19,6 +19,15 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_committed_publication_reasons,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_mapping,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     atomic_replace_confined_mapping,
 )
@@ -62,6 +71,9 @@ SIGNER_SERVICE_CONFIG_SUPPLY_REJECT = "SIGNER_SERVICE_CONFIG_SUPPLY_REJECT"
 SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v2"
 
 FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID = "signer_config_authority_profile_invalid"
+FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID = (
+    "signer_config_architect_publication_invalid"
+)
 FAIL_SIGNER_CONFIG_OUTPUT_PATH_INVALID = "signer_config_output_path_invalid"
 FAIL_SIGNER_CONFIG_SOCKET_PATH_INVALID = "signer_config_socket_path_invalid"
 FAIL_SIGNER_CONFIG_CONTROL_ANCHOR_PATH_INVALID = (
@@ -135,6 +147,7 @@ def run_reddog_signer_socket_service_config_supply(
     runtime_root: Path | str,
     signer_runtime_root: Path | str,
     authority_profile: Mapping[str, Any] | None,
+    authoritative_work_state_path: Path | str | None,
     output_path: Path | str | None,
     socket_path: Path | str | None,
     principal_signing_key_ref: str,
@@ -159,6 +172,7 @@ def run_reddog_signer_socket_service_config_supply(
     proposal_replay_high_water_durability_receipt_id: str | None = None,
     now_epoch: int | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
+    authoritative_work_state: Mapping[str, Any] | None = None,
 ) -> SignerServiceConfigSupplyResult:
     """Write one signer CLI config from existing authority artifacts."""
 
@@ -182,6 +196,14 @@ def run_reddog_signer_socket_service_config_supply(
         control_loop_anchor_path,
     )
     reasons.extend(path_reasons)
+    reasons.extend(
+        _architect_publication_reasons(
+            profile,
+            authoritative_work_state,
+            runtime,
+            authoritative_work_state_path,
+        )
+    )
     op_refs = (
         (reddog_signing_key_ref, reddog_audit_mac_key_ref)
         if proposal_authority_policy is not None
@@ -762,6 +784,54 @@ def _authority_profile_reasons(
         if not _is_sha256_digest(profile.get(field)):
             return [FAIL_SIGNER_CONFIG_AUTHORITY_PROFILE_INVALID + ":" + field]
     return []
+
+
+def _architect_publication_reasons(
+    profile: Mapping[str, Any],
+    work_state: Mapping[str, Any] | None,
+    runtime_root: Path | None,
+    work_state_path: Path | str | None,
+) -> list[str]:
+    durable_state = _read_current_authoritative_work_state(
+        runtime_root,
+        work_state_path,
+    )
+    if durable_state is None:
+        return [FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID]
+    if (
+        isinstance(work_state, Mapping)
+        and canonical_digest(work_state) != canonical_digest(durable_state)
+    ):
+        return [FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID]
+    binding = profile.get("operational_context_binding")
+    if not isinstance(binding, Mapping):
+        binding = {}
+    reasons = architect_fix_committed_publication_reasons(
+        durable_state,
+        profile,
+        queue_item_id=str(binding.get("queue_item_id") or ""),
+        claim_id=str(binding.get("claim_id") or ""),
+    )
+    return (
+        []
+        if not reasons
+        else [FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID]
+    )
+
+
+def _read_current_authoritative_work_state(
+    runtime_root: Path | None,
+    work_state_path: Path | str | None,
+) -> Mapping[str, Any] | None:
+    if runtime_root is None or not work_state_path:
+        return None
+    try:
+        return read_reddog_runtime_json_mapping(
+            work_state_path,
+            allowed_root=runtime_root,
+        )
+    except Exception:
+        return None
 
 
 def _is_sha256_digest(value: object) -> bool:

@@ -42,6 +42,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_slice_
 from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
     produce_independent_slice_evidence,
 )
+from modules.infrastructure.database.src.signed_worker_assurance_completion import (
+    build_assurance_completion_request,
+)
 
 
 SLICE_VERIFIER_STAGE_KEY = "slice_verifier"
@@ -257,37 +260,33 @@ class ResidentQueueSliceVerifierStageHandler:
                 return _reject(
                     FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING
                 )
-            completed = _mapping(
-                self.assurance_reservation_store.complete_independent_assurance(
-                    str(reservation.get("reservation_id") or ""),
-                    admission_reservation_digest=str(
-                        reservation.get("admission_reservation_digest")
-                        or reservation.get("reservation_digest")
-                        or ""
-                    ),
-                    terminal_receipt_id=str(
-                        terminal_receipt.get("receipt_id") or ""
-                    ),
-                    terminal_receipt_digest=str(
-                        terminal_receipt.get("receipt_digest")
-                        or canonical_digest(terminal_receipt)
-                    ),
-                    status=(
-                        "ACCEPT"
-                        if terminal_receipt.get("accepted") is True
-                        else "REJECT"
-                    ),
-                    now_iso=(self.trusted_now or datetime.now(timezone.utc))
-                    .astimezone(timezone.utc)
-                    .replace(microsecond=0)
-                    .isoformat(),
-                )
+            normalized_receipt = {
+                **dict(terminal_receipt),
+                "receipt_digest": str(
+                    terminal_receipt.get("receipt_digest")
+                    or canonical_digest(terminal_receipt)
+                ),
+            }
+            completion_request = build_assurance_completion_request(
+                reservation=reservation,
+                terminal_receipt=normalized_receipt,
+                terminal_status=(
+                    "ACCEPT"
+                    if terminal_receipt.get("accepted") is True
+                    else "REJECT"
+                ),
+                completed_at=(self.trusted_now or datetime.now(timezone.utc))
+                .astimezone(timezone.utc)
+                .isoformat(),
             )
-            if completed.get("accepted") is not True:
-                return _reject(
-                    FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING
-                )
-            result["assurance_reservation_terminal_result"] = dict(completed)
+            staged = _mapping(
+                self.assurance_reservation_store
+                .stage_independent_assurance_completion(completion_request)
+            )
+            if staged.get("accepted") is not True:
+                return _reject(FAIL_ASSURANCE_RESERVATION_TERMINAL_BINDING)
+            result["assurance_completion_request"] = completion_request
+            result["assurance_completion_stage_result"] = staged
         if evidence_producer_result is not None:
             result["evidence_producer_result"] = evidence_producer_result
             command_results = evidence_producer_result.get("command_results")

@@ -364,6 +364,37 @@ def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch)
     assert calls == ["serial", "claim", "serial", "claim", "serial", "claim"]
 
 
+def test_reddog_queue_control_propagates_startup_verifier_config(monkeypatch):
+    verifier_config = object()
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE", "0")
+
+    with patch.object(
+        main, "run_reddog_resident_queue_serial_loop_preflight"
+    ) as serial, patch.object(
+        main, "run_reddog_openclaw_signed_worker_claim_loop_preflight"
+    ) as claim:
+
+        def serial_side_effect(_repo_root):
+            serial.authority_verification_config = verifier_config
+            serial.last_result = {"progress_count": 0, "status": "COMPLETE"}
+            return True
+
+        def claim_side_effect(
+            _repo_root, *, authority_verification_config=None
+        ):
+            assert authority_verification_config is verifier_config
+            claim.last_result = {"progress_count": 0, "status": "IDLE"}
+            return True
+
+        serial.side_effect = serial_side_effect
+        claim.side_effect = claim_side_effect
+        assert main.run_reddog_resident_queue_control_loop_preflight(
+            Path("O:/Foundups-Agent")
+        ) is True
+
+    assert claim.call_count == 1
+
+
 def test_reddog_queue_control_receipt_reports_observed_authority_and_worker_effects(
     monkeypatch, tmp_path
 ):

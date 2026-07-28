@@ -24,11 +24,18 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_run_task_support import (
+    complete_task as _complete_task,
+    fail_task as _fail_task,
+    no_executor_matched as _no_executor_matched,
+    no_executor_result as _no_executor_result,
+    start_runtime_emitter as _start_runtime_emitter,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
 logger = logging.getLogger(__name__)
-
 
 def execute_task(
     task_id: str,
@@ -37,152 +44,200 @@ def execute_task(
     signed_worker_runner: Any | None = None,
     execution_claim: Mapping[str, str] | None = None,
 ) -> Dict[str, Any]:
-    """
-    Execute a single autonomous task from AgentDB.
-
-    Returns:
-        Dict with keys: ok (bool), detail (str), executor (str),
-        execution_time_ms (int)
-    """
-    if repo_root is None:
-        repo_root = REPO_ROOT
-
+    """Execute a single assigned AgentDB task through its exact route."""
+    repo_root = repo_root or REPO_ROOT
     start = time.monotonic()
-
-    try:
-        from modules.infrastructure.database.src.agent_db import AgentDB
-    except ImportError as e:
-        return {"ok": False, "detail": f"AgentDB import failed: {e}", "executor": "none", "execution_time_ms": 0}
-
-    db = AgentDB()
-
-    # Fetch the task (supervisor sets it to "assigned" before calling us)
-    tasks = db.get_autonomous_tasks(status="assigned", limit=100)
-    task = next((t for t in tasks if t.get("task_id") == task_id), None)
-
-    if not task:
-        return {"ok": False, "detail": f"Task {task_id} not found in 'assigned' state", "executor": "none", "execution_time_ms": 0}
-
+    db, task, load_error = _load_assigned_task(task_id)
+    if load_error is not None:
+        return load_error
+    assert db is not None and task is not None
     required_skills = task.get("required_skills", [])
     context = task.get("context", {})
     source = context.get("source", "") if isinstance(context, dict) else ""
+    discovered_by = str(task.get("discovered_by") or "")
     description = task.get("description", "")
 
     logger.info("[RUN_TASK] Executing task %s: %s (skills=%s, source=%s)", task_id, description[:80], required_skills, source)
 
-    # Runtime emitter: structured event for troubleshooting/tuning
-    try:
-        from modules.infrastructure.dae_daemon.src.runtime_emitter import emit_start, emit_success, emit_failure
-        _emit_start = emit_start("run_task", "task_dispatch", task_id=task_id,
-                                 details={"source": source, "description": description[:80]})
-    except Exception:
-        _emit_start = None
-        emit_success = emit_failure = None  # type: ignore[assignment]
+    emitters = _start_runtime_emitter(task_id, source, description)
 
-    result: Dict[str, Any] = {"ok": False, "detail": "no_executor_matched", "executor": "none"}
-
-    # Dispatch path 1: exact RedDog read-only audit report execution.
-    if "reddog_readonly_audit" in required_skills and source == "reddog_openclaw_readonly_audit_swarm":
-        readonly_result = _try_reddog_readonly_audit_dispatch(repo_root, task_id, context)
-        if readonly_result is not None:
-            result = readonly_result
-
-    # Dispatch path 2: exact RedDog signed worker-dispatch task execution.
-    if not result["ok"] and result["detail"] == "no_executor_matched":
-        signed_worker_result = _try_reddog_signed_worker_dispatch(
-            repo_root,
-            task_id,
-            context,
-            required_skills,
-            source,
-            signed_worker_runner,
-        )
-        if signed_worker_result is not None:
-            result = signed_worker_result
-
-    # Dispatch path 3: exact host-owned startup maintenance.
-    if (
-        not result["ok"]
-        and result["detail"] == "no_executor_matched"
-        and source
-        in {
-            "startup_maintenance_gate",
-            "holoindex_postmerge_coordinator",
-        }
-    ):
-        startup_result = _try_startup_maintenance_dispatch(
-            repo_root,
-            task_id,
-            context,
-            execution_claim=execution_claim,
-        )
-        if startup_result is not None:
-            result = startup_result
+    result = _dispatch_exact_routes(
+        repo_root=repo_root,
+        db=db,
+        task_id=task_id,
+        context=context,
+        required_skills=required_skills,
+        source=source,
+        discovered_by=discovered_by,
+        signed_worker_runner=signed_worker_runner,
+        execution_claim=execution_claim,
+    )
 
     # Dispatch path 4: WRE skill execution.
-    if required_skills:
-        if not result["ok"] and result["detail"] == "no_executor_matched":
-            wre_result = _try_wre_dispatch(repo_root, task_id, required_skills, context, description)
-            if wre_result is not None:
-                result = wre_result
+    result = _dispatch_fallback_routes(
+        result=result,
+        repo_root=repo_root,
+        task_id=task_id,
+        context=context,
+        required_skills=required_skills,
+        source=source,
+        description=description,
+    )
 
     # ── Dispatch path 2: Self-audit policy fix ──
-    if not result["ok"] and result["detail"] == "no_executor_matched" and source == "self_audit":
+    # ── Dispatch path 3: Grant task dispatch (openclaw-grants) ──
+    # ── Finalize in AgentDB ──
+    return _finalize_task_result(
+        db=db,
+        task_id=task_id,
+        context=context,
+        result=result,
+        start=start,
+        emitters=emitters,
+    )
+
+
+def _load_assigned_task(
+    task_id: str,
+) -> tuple[Any | None, Mapping[str, Any] | None, Dict[str, Any] | None]:
+    try:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+    except ImportError as exc:
+        return None, None, {
+            "ok": False,
+            "detail": f"AgentDB import failed: {exc}",
+            "executor": "none",
+            "execution_time_ms": 0,
+        }
+    db = AgentDB()
+    tasks = db.get_autonomous_tasks(status="assigned", limit=100)
+    task = next((item for item in tasks if item.get("task_id") == task_id), None)
+    if task is None:
+        return db, None, {
+            "ok": False,
+            "detail": f"Task {task_id} not found in 'assigned' state",
+            "executor": "none",
+            "execution_time_ms": 0,
+        }
+    return db, task, None
+
+
+def _dispatch_exact_routes(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    required_skills: Any,
+    source: str,
+    discovered_by: str,
+    signed_worker_runner: Any | None,
+    execution_claim: Mapping[str, str] | None,
+) -> Dict[str, Any]:
+    result = _no_executor_result()
+    if "reddog_readonly_audit" in required_skills and source == "reddog_openclaw_readonly_audit_swarm":
+        readonly = _try_reddog_readonly_audit_dispatch(repo_root, task_id, context)
+        if readonly is not None:
+            result = readonly
+    if _no_executor_matched(result):
+        signed = _try_signed_worker_dispatch(
+            repo_root=repo_root, db=db, task_id=task_id, context=context,
+            required_skills=required_skills, source=source,
+            discovered_by=discovered_by, signed_worker_runner=signed_worker_runner,
+        )
+        if signed is not None:
+            result = signed
+    if _no_executor_matched(result) and source in {
+        "startup_maintenance_gate", "holoindex_postmerge_coordinator",
+    }:
+        startup = _try_startup_maintenance_dispatch(
+            repo_root, task_id, context, execution_claim=execution_claim,
+        )
+        if startup is not None:
+            result = startup
+    return result
+
+
+def _try_signed_worker_dispatch(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    required_skills: Any,
+    source: str,
+    discovered_by: str,
+    signed_worker_runner: Any | None,
+) -> Dict[str, Any] | None:
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_run_task_runtime import (
+        execute_signed_worker_from_agentdb,
+    )
+    result = execute_signed_worker_from_agentdb(
+        repo_root=repo_root, db=db, task_id=task_id, context=context,
+        required_skills=required_skills, source=source,
+        discovered_by=discovered_by, signed_worker_runner=signed_worker_runner,
+        env=os.environ,
+    )
+    return dict(result) if result is not None else None
+
+
+def _dispatch_fallback_routes(
+    *,
+    result: Dict[str, Any],
+    repo_root: Path,
+    task_id: str,
+    context: Mapping[str, Any],
+    required_skills: Any,
+    source: str,
+    description: str,
+) -> Dict[str, Any]:
+    if required_skills and _no_executor_matched(result):
+        wre_result = _try_wre_dispatch(
+            repo_root, task_id, required_skills, context, description
+        )
+        if wre_result is not None:
+            result = wre_result
+    if _no_executor_matched(result) and source == "self_audit":
         audit_result = _try_self_audit_dispatch(repo_root, context)
         if audit_result is not None:
             result = audit_result
+    if _no_executor_matched(result) and "openclaw-grants" in required_skills:
+        grant_result = _try_grant_dispatch(
+            repo_root, task_id, context, description
+        )
+        if grant_result is not None:
+            result = grant_result
+    return result
 
-    # ── Dispatch path 3: Grant task dispatch (openclaw-grants) ──
-    if not result["ok"] and result["detail"] == "no_executor_matched":
-        if "openclaw-grants" in required_skills:
-            grant_result = _try_grant_dispatch(repo_root, task_id, context, description)
-            if grant_result is not None:
-                result = grant_result
 
-    # ── Finalize in AgentDB ──
+def _finalize_task_result(
+    *,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    result: Dict[str, Any],
+    start: float,
+    emitters: tuple[Any, Any, Any],
+) -> Dict[str, Any]:
     elapsed_ms = int((time.monotonic() - start) * 1000)
     result["execution_time_ms"] = elapsed_ms
     if result["ok"] and result.get("executor") == "reddog:readonly_audit":
-        persist_result = _try_reddog_readonly_audit_report_persist(task_id, context, result)
-        result["readonly_audit_report_persist"] = persist_result
-        if not persist_result.get("accepted", False):
+        persist = _try_reddog_readonly_audit_report_persist(
+            task_id, context, result
+        )
+        result["readonly_audit_report_persist"] = persist
+        if not persist.get("accepted", False):
             result["ok"] = False
-            result["detail"] = json.dumps(persist_result, default=str)[:1000]
-
+            result["detail"] = json.dumps(persist, default=str)[:1000]
     if result.get("finalization_owned"):
         logger.info(
             "[RUN_TASK] Task %s finalization owned by executor=%s (%dms)",
-            task_id,
-            result["executor"],
-            elapsed_ms,
+            task_id, result["executor"], elapsed_ms,
         )
     elif result["ok"]:
-        db.complete_autonomous_task(task_id)
-        logger.info("[RUN_TASK] Task %s completed (executor=%s, %dms)", task_id, result["executor"], elapsed_ms)
-        if _emit_start is not None and emit_success:
-            try:
-                emit_success("run_task", "task_dispatch", _emit_start,
-                             task_id=task_id, details={"executor": result["executor"]})
-            except Exception:
-                pass
+        _complete_task(db, task_id, result, elapsed_ms, emitters)
     else:
-        # Mark as failed by updating status directly (no fail_autonomous_task method yet)
-        try:
-            db.db.execute_write(
-                "UPDATE agents_autonomous_tasks SET status = 'failed' WHERE task_id = ?",
-                (task_id,),
-            )
-        except Exception as fail_exc:
-            logger.warning("[RUN_TASK] Could not mark task %s as failed: %s", task_id, fail_exc)
-        logger.warning("[RUN_TASK] Task %s failed: %s (executor=%s)", task_id, result["detail"][:200], result["executor"])
-        if _emit_start is not None and emit_failure:
-            try:
-                emit_failure("run_task", "task_dispatch", _emit_start,
-                             result["detail"][:200], task_id=task_id,
-                             details={"executor": result["executor"]})
-            except Exception:
-                pass
-
+        _fail_task(db, task_id, result, emitters)
     return result
 
 
@@ -255,66 +310,6 @@ def _try_reddog_readonly_audit_report_persist(
         }
 
 
-def _try_reddog_signed_worker_dispatch(
-    repo_root: Path,
-    task_id: str,
-    context: dict,
-    required_skills: list,
-    source: str,
-    signed_worker_runner: Any | None,
-) -> Dict[str, Any] | None:
-    """Execute exact RedDog signed worker-dispatch tasks before WRE fallback."""
-
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
-            SIGNED_WORKER_DISPATCH_TASK_SKILL,
-            SIGNED_WORKER_DISPATCH_TASK_SOURCE,
-            execute_reddog_signed_worker_dispatch_task,
-        )
-    except ImportError as e:
-        logger.debug("[RUN_TASK] RedDog signed-worker executor unavailable: %s", e)
-        return None
-
-    if SIGNED_WORKER_DISPATCH_TASK_SKILL not in required_skills:
-        return None
-    if source != SIGNED_WORKER_DISPATCH_TASK_SOURCE:
-        return None
-
-    try:
-        effective_runner = signed_worker_runner
-        if effective_runner is None:
-            binding_result = _build_signed_worker_queue_loop_runner(repo_root)
-            if binding_result is not None:
-                if getattr(binding_result, "accepted", False) is True:
-                    effective_runner = getattr(binding_result, "runner", None)
-                elif getattr(binding_result, "requested", False) is True:
-                    return {
-                        "ok": False,
-                        "detail": json.dumps(binding_result.to_dict(), default=str)[:1000],
-                        "executor": "reddog:signed_worker_dispatch",
-                    }
-        execution = execute_reddog_signed_worker_dispatch_task(
-            task_context=context,
-            task_id=task_id,
-            repo_root=repo_root,
-            runner=effective_runner,
-        )
-        payload = execution.to_dict()
-        return {
-            "ok": bool(execution.accepted),
-            "detail": json.dumps(payload, default=str)[:1000],
-            "executor": "reddog:signed_worker_dispatch",
-            "structured_result": payload,
-        }
-    except Exception as e:
-        logger.warning("[RUN_TASK] RedDog signed-worker dispatch error: %s", e)
-        return {
-            "ok": False,
-            "detail": f"reddog_signed_worker_dispatch_error: {e}",
-            "executor": "reddog:signed_worker_dispatch",
-        }
-
-
 def _try_wre_dispatch(
     repo_root: Path,
     task_id: str,
@@ -381,23 +376,6 @@ def _try_wre_dispatch(
         return {"ok": False, "detail": f"wre_error: {e}", "executor": "wre"}
 
     return None
-
-
-def _build_signed_worker_queue_loop_runner(repo_root: Path) -> Any | None:
-    """Build an explicitly enabled OpenClaw signed-worker queue-loop runner."""
-
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
-            build_reddog_signed_worker_queue_loop_runner_from_env,
-        )
-    except ImportError as e:
-        logger.debug("[RUN_TASK] RedDog signed-worker queue-loop binding unavailable: %s", e)
-        return None
-    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
-        repo_root=repo_root,
-        env=os.environ,
-    )
-    return binding
 
 
 def _try_self_audit_dispatch(repo_root: Path, context: dict) -> Dict[str, Any] | None:

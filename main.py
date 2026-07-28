@@ -40,6 +40,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, Callable, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+    capture_worker_dispatch_authority_verification_config,
+)
+
 # Load environment variables for DAEs (API keys, ports, feature flags).
 # Managed mode builds `.env.managed` from `.env` (last duplicate wins) for
 # deterministic runtime behavior while preserving shell env precedence.
@@ -1430,15 +1434,21 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
 
         active_slice_ledger_path = os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", "")
         work_ledger_json_path = os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "")
-        github_pr_records_path = resident_queue_runtime_file_path(
-            os.environ,
-            repo_root,
-            "REDDOG_GITHUB_PR_RECORDS_PATH",
+        github_pr_records_path = (
+            os.getenv("REDDOG_GITHUB_PR_RECORDS_PATH", "").strip()
+            or resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_GITHUB_PR_RECORDS_PATH",
+            )
         )
-        w10_report_records_path = resident_queue_runtime_file_path(
-            os.environ,
-            repo_root,
-            "REDDOG_W10_REPORT_RECORDS_PATH",
+        w10_report_records_path = (
+            os.getenv("REDDOG_W10_REPORT_RECORDS_PATH", "").strip()
+            or resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_W10_REPORT_RECORDS_PATH",
+            )
         )
         source_supply_requested = resident_queue_runtime_flag_enabled(
             os.environ,
@@ -1493,15 +1503,21 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
                 repo_root=repo_root,
                 github_pr_records_path=github_pr_records_path,
                 w10_report_records_path=w10_report_records_path,
-                active_slice_ledger_output_path=resident_queue_runtime_file_path(
-                    os.environ,
-                    repo_root,
-                    "REDDOG_ACTIVE_SLICE_LEDGER_PATH",
+                active_slice_ledger_output_path=(
+                    os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", "").strip()
+                    or resident_queue_runtime_file_path(
+                        os.environ,
+                        repo_root,
+                        "REDDOG_ACTIVE_SLICE_LEDGER_PATH",
+                    )
                 ),
-                work_ledger_json_output_path=resident_queue_runtime_file_path(
-                    os.environ,
-                    repo_root,
-                    "REDDOG_WORK_LEDGER_JSON_PATH",
+                work_ledger_json_output_path=(
+                    os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "").strip()
+                    or resident_queue_runtime_file_path(
+                        os.environ,
+                        repo_root,
+                        "REDDOG_WORK_LEDGER_JSON_PATH",
+                    )
                 ),
             )
             projection_status = "PASS" if projection.accepted else "WARN"
@@ -3185,7 +3201,6 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission snapshot JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal authority JSON
         REDDOG_WORK_ORDERS_PATH                              Outside-repo canonical work-order JSON
-        REDDOG_RESIDENT_QUEUE_NOW_EPOCH                      Optional runtime epoch for authority checks
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
     """
 
@@ -3315,11 +3330,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_DRAFT_PR_RUNNER_MODE                          Optional `real` draft-PR runner mode
         REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S                     Optional draft-PR runner timeout
     """
-
     from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
         resident_queue_runtime_flag_enabled,
     )
-
     if not resident_queue_runtime_flag_enabled(os.environ, "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP"):
         logger.info("[REDDOG-QUEUE-LOOP] Startup serial loop disabled")
         run_reddog_resident_queue_serial_loop_preflight.last_result = {
@@ -3330,17 +3343,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             "rejection_reasons": (),
         }
         return True
-
     enforced = os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "0") != "0"
     try:
         max_steps = int(os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "1"))
     except ValueError:
         max_steps = 0
-    try:
-        now_epoch_value = os.getenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "")
-        now_epoch = int(now_epoch_value) if now_epoch_value else None
-    except ValueError:
-        now_epoch = None
     try:
         signer_socket_timeout_value = os.getenv("REDDOG_SIGNER_SOCKET_TIMEOUT_S", "")
         signer_socket_timeout_s = float(signer_socket_timeout_value) if signer_socket_timeout_value else 5.0
@@ -3361,7 +3368,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         draft_pr_runner_timeout_s = int(draft_pr_runner_timeout_value) if draft_pr_runner_timeout_value else 120
     except ValueError:
         draft_pr_runner_timeout_s = 0
-
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
             run_reddog_main_resident_queue_serial_loop_bootstrap,
@@ -3383,7 +3389,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
             build_reddog_verified_pattern_memory_sink,
         )
-
         pattern_memory_admission_sink = build_reddog_verified_pattern_memory_sink(
             repo_root=repo_root,
             db_path=resident_queue_pattern_memory_admission_db_path(os.environ, repo_root)
@@ -3397,7 +3402,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             if draft_pr_runner_timeout_s <= 0:
                 raise ValueError("invalid_draft_pr_runner_timeout")
             from modules.foundups.agent.src.worktree_pr_runner import RealWorktreeRunner
-
             draft_pr_runner = RealWorktreeRunner(
                 repo_root=repo_root,
                 timeout_s=draft_pr_runner_timeout_s,
@@ -3518,11 +3522,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 repo_root=repo_root,
                 runtime_root=resident_queue_runtime_root_path(os.environ, repo_root),
                 signer_runtime_root=resident_queue_signer_runtime_root_path(os.environ, repo_root),
-                authority_profile=(
-                    authority_profile_payload
-                    if isinstance(authority_profile_payload, Mapping)
-                    else None
-                ),
+                authority_profile=authority_profile_payload
+                if isinstance(authority_profile_payload, Mapping)
+                else None,
+                authoritative_work_state_path=resident_queue_runtime_file_path(os.environ, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or None,
                 output_path=config_output_path or None,
                 socket_path=config_socket_path or None,
                 principal_signing_key_ref=str(
@@ -3705,7 +3708,16 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
         if signer_socket_path and not signature_verifier_backend:
             signature_verifier_backend = "ed25519"
-
+        run_reddog_resident_queue_serial_loop_preflight.authority_verification_config = (
+            capture_worker_dispatch_authority_verification_config(
+                repo_root=repo_root,
+                runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
+                authority_state_path=authority_state_path,
+                permission_snapshots_path=permission_snapshots_path,
+                principal_authority_records_path=principal_authority_records_path,
+                signature_verifier_backend=signature_verifier_backend,
+            )
+        )
         worker_dispatch_writer = None
         if resident_queue_runtime_flag_enabled(
             os.environ,
@@ -3716,7 +3728,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
 
             worker_dispatch_writer = AgentDbSignedWorkerDispatchTaskWriter()
-
         explicit_valve_environment_path = str(
             os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH") or ""
         ).strip()
@@ -3731,6 +3742,8 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             if candidate_valve_path.exists():
                 valve_environment_path = profile_valve_environment_path
 
+        trusted_authority_clock = time.time
+        now_epoch = int(trusted_authority_clock()) if authority_state_path else None
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
@@ -3826,6 +3839,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             worker_dispatch_writer=worker_dispatch_writer,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
+            trusted_now_epoch=trusted_authority_clock,
             max_steps=max_steps,
         )
     except Exception as exc:
@@ -4072,6 +4086,9 @@ def _reddog_persist_queue_control_receipt(
         expected_authority_profile_source_receipt_id=os.getenv(
             "REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID", ""
         ),
+        authoritative_work_state_path=runtime_file_path(
+            os.environ, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH"
+        ),
         signer_socket_timeout_s=timeout_s,
         signer_socket_max_response_bytes=max_response_bytes,
     )
@@ -4224,13 +4241,25 @@ def _reddog_control_result(
 def _reddog_run_control_round(
     repo_root: Path, state: Dict[str, Any]
 ) -> tuple[bool, int, int, Callable[..., Any]]:
+    run_reddog_resident_queue_serial_loop_preflight.authority_verification_config = None
     serial_ok = run_reddog_resident_queue_serial_loop_preflight(repo_root)
     serial_progress = _reddog_control_add_serial(state, serial_ok)
     if not serial_ok or _reddog_queue_stage_rejected(
         run_reddog_resident_queue_serial_loop_preflight
     ):
         return False, serial_progress, 0, run_reddog_resident_queue_serial_loop_preflight
-    claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+    verification_config = getattr(
+        run_reddog_resident_queue_serial_loop_preflight,
+        "__dict__",
+        {},
+    ).get("authority_verification_config")
+    if verification_config is None:
+        claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+    else:
+        claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(
+            repo_root,
+            authority_verification_config=verification_config,
+        )
     claim_progress = _reddog_control_add_claim(state, claim_ok)
     if not claim_ok or _reddog_queue_stage_rejected(
         run_reddog_openclaw_signed_worker_claim_loop_preflight
@@ -4417,20 +4446,63 @@ def _reddog_signed_worker_max_claims() -> int:
 
 
 def _reddog_claim_signed_worker_tasks(
-    repo_root: Path, max_claims: int
+    repo_root: Path,
+    max_claims: int,
+    *,
+    authority_verification_config: Any | None = None,
 ) -> tuple[Mapping[str, Any] | None, Exception | None]:
     try:
         from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
             claim_reddog_signed_worker_dispatch_tasks_until_idle,
         )
+        claim_kwargs: Dict[str, Any] = {}
+        if authority_verification_config is not None:
+            from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+                build_worker_dispatch_authority_context,
+            )
+
+            claim_kwargs["authority_verification_context"] = (
+                build_worker_dispatch_authority_context(
+                    config=authority_verification_config
+                )
+            )
         return claim_reddog_signed_worker_dispatch_tasks_until_idle(
-            repo_root=repo_root, max_claims=max_claims
+            repo_root=repo_root,
+            max_claims=max_claims,
+            **claim_kwargs,
         ), None
     except Exception as exc:
         return None, exc
 
 
-def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> bool:
+def _reddog_claim_failure_allows_startup(
+    exc: Exception,
+    *,
+    enforced: bool,
+) -> bool:
+    logger.error(
+        f"[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop failed: {exc}"
+    )
+    run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
+        "accepted": False,
+        "status": "EXCEPTION",
+        "progress_count": 0,
+        "claimed_count": 0,
+        "rejection_reasons": (type(exc).__name__,),
+    }
+    status = "FAIL" if enforced else "WARN"
+    print(
+        f"[REDDOG-OPENCLAW-CLAIM-LOOP] "
+        f"preflight={status} error={type(exc).__name__}"
+    )
+    return not enforced
+
+
+def run_reddog_openclaw_signed_worker_claim_loop_preflight(
+    repo_root: Path,
+    *,
+    authority_verification_config: Any | None = None,
+) -> bool:
     """Run the optional bounded OpenClaw signed-worker claim loop."""
     if not _reddog_signed_worker_claim_loop_enabled():
         logger.info("[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop disabled")
@@ -4451,22 +4523,16 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
         }
         return not enforced
 
-    result, exc = _reddog_claim_signed_worker_tasks(repo_root, max_claims)
+    result, exc = _reddog_claim_signed_worker_tasks(
+        repo_root,
+        max_claims,
+        authority_verification_config=authority_verification_config,
+    )
     if exc is not None or result is None:
-        exc = exc or RuntimeError("empty_claim_result")
-        logger.error(f"[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop failed: {exc}")
-        run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
-            "accepted": False,
-            "status": "EXCEPTION",
-            "progress_count": 0,
-            "claimed_count": 0,
-            "rejection_reasons": (type(exc).__name__,),
-        }
-        if enforced:
-            print(f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=FAIL error={type(exc).__name__}")
-            return False
-        print(f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=WARN error={type(exc).__name__}")
-        return True
+        return _reddog_claim_failure_allows_startup(
+            exc or RuntimeError("empty_claim_result"),
+            enforced=enforced,
+        )
 
     run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = (
         _reddog_signed_worker_claim_state(result)

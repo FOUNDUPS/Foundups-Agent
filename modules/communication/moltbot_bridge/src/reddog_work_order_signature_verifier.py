@@ -50,6 +50,9 @@ from typing import Any, List, Mapping, Optional, Protocol, Sequence, runtime_che
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_work_order_base_ref,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_nonce_store import (
+    InMemoryNonceStore,
+)
 
 # Domain-separation prefixes (contract Section 2, frozen).
 PREFIX_IDENTITY = "reddog-identity.v1"
@@ -133,6 +136,15 @@ def constant_time_compare(a: str, b: str) -> bool:
     return hmac.compare_digest(a.encode("utf-8"), b.encode("utf-8"))
 
 
+def _is_sha256_digest(value: Any) -> bool:
+    candidate = str(value or "")
+    return (
+        candidate.startswith("sha256:")
+        and len(candidate) == 71
+        and all(char in "0123456789abcdef" for char in candidate[7:])
+    )
+
+
 def canonical_signing_input(record: Mapping[str, Any], prefix: str) -> str:
     """Contract Section 2 canonical form: <prefix-literal> + "." + canonical-json.
 
@@ -170,21 +182,6 @@ class NonceStore(Protocol):
     def consume(self, nonce: str) -> bool:
         """Atomically record `nonce`. Return True if newly consumed, False if already present (replay)."""
         ...
-
-
-class InMemoryNonceStore:
-    """Single-process durable-consume stand-in (contract Section 3). SQLite-backed reuse
-    is a later slice; this suffices for the verifier's atomic check-and-insert semantics."""
-
-    def __init__(self) -> None:
-        self._seen: set = set()
-
-    def consume(self, nonce: str) -> bool:
-        if not isinstance(nonce, str) or not nonce or nonce in self._seen:
-            return False
-        self._seen.add(nonce)
-        return True
-
 
 
 @runtime_checkable
@@ -298,6 +295,7 @@ def _path_within_foundup(path: str, foundup_id: str) -> bool:
 _REQUIRED_WORKAUTH_FIELDS = (
     "work_order_id", "work_order_digest", "base_ref", "principal_id", "reddog_id", "repo_full_name", "foundup_id",
     "allowed_paths", "denied_paths", "requested_operation", "permission_snapshot_digest",
+    "queue_consumer_receipt_digest",
     "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
     "wsp15_mps_total", "wsp15_reasoning_tier",
     "nonce", "issued_at", "expires_at", "valve_state_required", "key_epoch", "signature",
@@ -306,6 +304,280 @@ _REQUIRED_IDENTITY_FIELDS = (
     "principal_id", "principal_provider", "principal_public_key", "reddog_id",
     "reddog_public_key", "repo_scope", "foundup_scope", "issued_at", "expires_at", "signature",
 )
+
+
+def _validate_authority_structure(
+    work_authority: Mapping[str, Any],
+    identity: Mapping[str, Any],
+) -> str | None:
+    if not isinstance(work_authority, Mapping) or not isinstance(identity, Mapping):
+        return ReasonCode.MALFORMED_PAYLOAD
+    for field_name in _REQUIRED_WORKAUTH_FIELDS:
+        if work_authority.get(field_name) is None:
+            return (
+                ReasonCode.MISSING_SIGNATURE
+                if field_name == "signature"
+                else ReasonCode.MALFORMED_PAYLOAD
+            )
+    if any(identity.get(field_name) is None for field_name in _REQUIRED_IDENTITY_FIELDS):
+        return ReasonCode.IDENTITY_MISSING
+    if not (_assert_ascii_deep(work_authority) and _assert_ascii_deep(identity)):
+        return ReasonCode.NON_ASCII
+    if str(identity.get("principal_provider")) not in ALLOWED_PRINCIPAL_PROVIDERS:
+        return ReasonCode.IDENTITY_PROVIDER_INVALID
+    try:
+        canonical_work_order_base_ref(work_authority)
+    except ValueError:
+        return ReasonCode.MALFORMED_PAYLOAD
+    digest = str(work_authority.get("work_order_digest") or "")
+    if not _is_sha256_digest(digest):
+        return ReasonCode.MALFORMED_PAYLOAD
+    if not _valid_work_authority_receipt_fields(work_authority):
+        return ReasonCode.MALFORMED_PAYLOAD
+    return None
+
+
+def _valid_work_authority_receipt_fields(
+    work_authority: Mapping[str, Any],
+) -> bool:
+    runtime_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
+    runtime_digest = str(work_authority.get("model_runtime_binding_digest") or "")
+    required_valid = (
+        _is_sha256_digest(work_authority.get("queue_consumer_receipt_digest"))
+        and str(work_authority.get("wsp15_allocation_receipt_id") or "").startswith("sha256:")
+        and str(work_authority.get("wsp15_allocation_digest") or "").startswith("sha256:")
+        and str(work_authority.get("wsp15_priority") or "") in {"P0", "P1", "P2", "P3", "P4"}
+        and type(work_authority.get("wsp15_mps_total")) is int
+        and str(work_authority.get("wsp15_reasoning_tier") or "") in {"REGULAR", "HIGH", "ULTRA"}
+    )
+    runtime_valid = not (runtime_id or runtime_digest) or (
+        runtime_id.startswith("reddog_model_runtime_binding:")
+        and runtime_digest.startswith("sha256:")
+    )
+    return required_valid and runtime_valid
+
+
+def _verify_revocation_and_principal_trust(
+    *,
+    work_authority: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    principal_key_resolver: PrincipalKeyResolver,
+    revocation_oracle: RevocationOracle,
+    revoked_key_epochs: Sequence[str],
+) -> str | None:
+    principal_id = str(identity["principal_id"])
+    reddog_id = str(identity["reddog_id"])
+    fingerprint = str(identity.get("reddog_key_fingerprint", ""))
+    key_epoch = str(work_authority.get("key_epoch", ""))
+    if not key_epoch:
+        return ReasonCode.KEY_EPOCH_MISSING
+    try:
+        revoked = revocation_oracle.is_revoked(
+            reddog_id=reddog_id, fingerprint=fingerprint,
+            principal_id=principal_id, key_epoch=key_epoch,
+        )
+    except Exception:
+        return ReasonCode.REVOKED
+    if revoked:
+        return ReasonCode.REVOKED
+    if key_epoch in {str(epoch) for epoch in revoked_key_epochs}:
+        return ReasonCode.KEY_EPOCH_REVOKED
+    principal_key = str(identity["principal_public_key"])
+    reddog_key = str(identity["reddog_public_key"])
+    if constant_time_compare(principal_key, reddog_key):
+        return ReasonCode.SELF_MINT_KEY_REUSE
+    try:
+        trusted = principal_key_resolver.resolve(
+            principal_id, str(identity["principal_provider"])
+        )
+    except Exception:
+        trusted = None
+    if not trusted or not constant_time_compare(str(trusted), principal_key):
+        return ReasonCode.PRINCIPAL_KEY_UNTRUSTED
+    return None
+
+
+def _verify_authority_signatures_and_bindings(
+    *,
+    work_authority: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    signature_verifier: SignatureVerifier,
+) -> str | None:
+    principal_key = str(identity["principal_public_key"])
+    reddog_key = str(identity["reddog_public_key"])
+    try:
+        identity_ok = signature_verifier.verify(
+            principal_key,
+            canonical_signing_input(identity, PREFIX_IDENTITY),
+            str(identity["signature"]),
+        ) is True
+    except Exception:
+        identity_ok = False
+    if not identity_ok:
+        return ReasonCode.IDENTITY_SIGNATURE_INVALID
+    if not constant_time_compare(
+        str(work_authority["principal_id"]), str(identity["principal_id"])
+    ):
+        return ReasonCode.PRINCIPAL_MISMATCH
+    if not constant_time_compare(
+        str(work_authority["reddog_id"]), str(identity["reddog_id"])
+    ):
+        return ReasonCode.REDDOG_ID_MISMATCH
+    signer_key = work_authority.get("signer_public_key")
+    if signer_key is not None and not constant_time_compare(
+        str(signer_key), reddog_key
+    ):
+        return ReasonCode.REDDOG_KEY_MISMATCH
+    try:
+        authority_ok = signature_verifier.verify(
+            reddog_key,
+            canonical_signing_input(work_authority, PREFIX_WORKAUTH),
+            str(work_authority["signature"]),
+        ) is True
+    except Exception:
+        authority_ok = False
+    return None if authority_ok else ReasonCode.WORKAUTH_SIGNATURE_INVALID
+
+
+def _verify_authority_freshness_and_snapshot(
+    *,
+    work_authority: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    snapshot_resolver: PermissionSnapshotResolver,
+    now: int,
+    leeway_s: int,
+) -> str | None:
+    try:
+        identity_issued = int(identity["issued_at"])
+        identity_expires = int(identity["expires_at"])
+        authority_issued = int(work_authority["issued_at"])
+        authority_expires = int(work_authority["expires_at"])
+    except (TypeError, ValueError):
+        return ReasonCode.MALFORMED_PAYLOAD
+    if now + leeway_s < identity_issued or now + leeway_s < authority_issued:
+        return ReasonCode.ISSUED_IN_FUTURE
+    if now > identity_expires + leeway_s:
+        return ReasonCode.EXPIRED_IDENTITY
+    if now > authority_expires + leeway_s:
+        return ReasonCode.EXPIRED_WORKAUTH
+    digest = str(work_authority["permission_snapshot_digest"])
+    try:
+        snapshot = snapshot_resolver.resolve(digest)
+        fresh = snapshot is not None and snapshot.is_fresh(now, leeway_s)
+    except Exception:
+        snapshot, fresh = None, False
+    if not fresh:
+        return ReasonCode.SNAPSHOT_STALE
+    if not constant_time_compare(str(snapshot.evidence_digest), digest):
+        return ReasonCode.SNAPSHOT_DIGEST_MISMATCH
+    try:
+        granted = snapshot.grants(
+            str(work_authority["requested_operation"]),
+            str(work_authority["repo_full_name"]),
+        )
+    except Exception:
+        granted = False
+    return None if granted else ReasonCode.SNAPSHOT_INSUFFICIENT
+
+
+def _verify_authority_scope_and_effect(
+    *,
+    work_authority: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    required_valve_state: str,
+    forbidden_operations: Sequence[str],
+) -> str | None:
+    repo = str(work_authority["repo_full_name"])
+    foundup_id = str(work_authority["foundup_id"])
+    if repo not in {str(value) for value in identity["repo_scope"]}:
+        return ReasonCode.REPO_OUT_OF_SCOPE
+    if foundup_id not in {str(value) for value in identity["foundup_scope"]}:
+        return ReasonCode.FOUNDUP_OUT_OF_SCOPE
+    try:
+        allowed = {str(value) for value in work_authority["allowed_paths"]}
+        denied = {str(value) for value in work_authority["denied_paths"]}
+    except Exception:
+        return ReasonCode.MALFORMED_PAYLOAD
+    operation = str(work_authority["requested_operation"])
+    if operation in {str(value) for value in forbidden_operations}:
+        return ReasonCode.FORBIDDEN_OPERATION
+    effective = allowed - denied
+    if not effective:
+        return ReasonCode.EMPTY_EFFECTIVE_PATHS
+    if not all(_path_within_foundup(path, foundup_id) for path in effective):
+        return ReasonCode.PATH_OUT_OF_SCOPE
+    if not constant_time_compare(
+        str(work_authority["valve_state_required"]), str(required_valve_state)
+    ):
+        return ReasonCode.VALVE_STATE
+    return None
+
+
+def _consume_authority_nonce(
+    *,
+    work_authority: Mapping[str, Any],
+    nonce_store: NonceStore,
+    verification_phase: WorkAuthorityVerificationPhase,
+) -> str | None:
+    if verification_phase is WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING:
+        return None
+    if verification_phase is not WorkAuthorityVerificationPhase.AUTHORITATIVE_USE:
+        return ReasonCode.MALFORMED_PAYLOAD
+    try:
+        consumed = nonce_store.consume(str(work_authority["nonce"]))
+    except Exception:
+        consumed = False
+    return None if consumed else ReasonCode.NONCE_REPLAY
+
+
+def _first_authority_rejection(
+    *,
+    work_authority: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    signature_verifier: SignatureVerifier,
+    principal_key_resolver: PrincipalKeyResolver,
+    snapshot_resolver: PermissionSnapshotResolver,
+    revocation_oracle: RevocationOracle,
+    now: int,
+    required_valve_state: str,
+    forbidden_operations: Sequence[str],
+    revoked_key_epochs: Sequence[str],
+    leeway_s: int,
+) -> str | None:
+    reason = _validate_authority_structure(work_authority, identity)
+    if reason is not None:
+        return reason
+    reason = _verify_revocation_and_principal_trust(
+        work_authority=work_authority,
+        identity=identity,
+        principal_key_resolver=principal_key_resolver,
+        revocation_oracle=revocation_oracle,
+        revoked_key_epochs=revoked_key_epochs,
+    )
+    if reason is not None:
+        return reason
+    reason = _verify_authority_signatures_and_bindings(
+        work_authority=work_authority,
+        identity=identity,
+        signature_verifier=signature_verifier,
+    )
+    if reason is not None:
+        return reason
+    reason = _verify_authority_freshness_and_snapshot(
+        work_authority=work_authority,
+        identity=identity,
+        snapshot_resolver=snapshot_resolver,
+        now=now,
+        leeway_s=leeway_s,
+    )
+    if reason is not None:
+        return reason
+    return _verify_authority_scope_and_effect(
+        work_authority=work_authority,
+        identity=identity,
+        required_valve_state=required_valve_state,
+        forbidden_operations=forbidden_operations,
+    )
 
 
 def verify_delegated_work_authority(
@@ -331,197 +603,38 @@ def verify_delegated_work_authority(
     Order = contract Section 11 (revocation-first). No execution side effect; the only
     state change is the atomic nonce consume, performed AFTER signature success.
     """
-    wo_id = work_authority.get("work_order_id") if isinstance(work_authority, Mapping) else None
-    result = VerificationResult(accepted=False, work_order_id=wo_id if isinstance(wo_id, str) else None)
-
-    def reject(code: str) -> VerificationResult:
-        result.accepted = False
-        result.reason_codes.append(code)
+    work_order_id = (
+        work_authority.get("work_order_id")
+        if isinstance(work_authority, Mapping)
+        else None
+    )
+    result = VerificationResult(
+        accepted=False,
+        work_order_id=work_order_id if isinstance(work_order_id, str) else None,
+    )
+    reason = _first_authority_rejection(
+        work_authority=work_authority,
+        identity=identity,
+        signature_verifier=signature_verifier,
+        principal_key_resolver=principal_key_resolver,
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=revocation_oracle,
+        now=now,
+        required_valve_state=required_valve_state,
+        forbidden_operations=forbidden_operations,
+        revoked_key_epochs=revoked_key_epochs,
+        leeway_s=leeway_s,
+    )
+    if reason is not None:
+        result.reason_codes.append(reason)
         return result
-
-    # ---- Structural + ASCII (contract s2/s20) -------------------------------
-    if not isinstance(work_authority, Mapping) or not isinstance(identity, Mapping):
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-    for f in _REQUIRED_WORKAUTH_FIELDS:
-        if work_authority.get(f) is None:
-            return reject(ReasonCode.MISSING_SIGNATURE if f == "signature" else ReasonCode.MALFORMED_PAYLOAD)
-    for f in _REQUIRED_IDENTITY_FIELDS:
-        if identity.get(f) is None:
-            return reject(ReasonCode.IDENTITY_MISSING)
-    if not (_assert_ascii_deep(work_authority) and _assert_ascii_deep(identity)):
-        return reject(ReasonCode.NON_ASCII)
-    if str(identity.get("principal_provider")) not in ALLOWED_PRINCIPAL_PROVIDERS:
-        return reject(ReasonCode.IDENTITY_PROVIDER_INVALID)
-    try:
-        canonical_work_order_base_ref(work_authority)
-    except ValueError:
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-    work_order_digest = str(work_authority.get("work_order_digest") or "")
-    if not (
-        work_order_digest.startswith("sha256:")
-        and len(work_order_digest) == 71
-        and all(char in "0123456789abcdef" for char in work_order_digest[7:])
-    ):
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-    if (
-        not str(work_authority.get("wsp15_allocation_receipt_id") or "").startswith("sha256:")
-        or not str(work_authority.get("wsp15_allocation_digest") or "").startswith("sha256:")
-        or str(work_authority.get("wsp15_priority") or "") not in {"P0", "P1", "P2", "P3", "P4"}
-        or type(work_authority.get("wsp15_mps_total")) is not int
-        or str(work_authority.get("wsp15_reasoning_tier") or "") not in {"REGULAR", "HIGH", "ULTRA"}
-    ):
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-    runtime_binding_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
-    runtime_binding_digest = str(work_authority.get("model_runtime_binding_digest") or "")
-    if (runtime_binding_id or runtime_binding_digest) and not (
-        runtime_binding_id.startswith("reddog_model_runtime_binding:")
-        and runtime_binding_digest.startswith("sha256:")
-    ):
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-
-    principal_id = str(identity["principal_id"])
-    reddog_id = str(identity["reddog_id"])
-    reddog_public_key = str(identity["reddog_public_key"])
-    principal_public_key = str(identity["principal_public_key"])
-    fingerprint = str(identity.get("reddog_key_fingerprint", ""))
-    key_epoch = str(work_authority.get("key_epoch", ""))
-    if not key_epoch:
-        return reject(ReasonCode.KEY_EPOCH_MISSING)
-
-    # ---- 1. Revocation FIRST (contract s9/s11): wins over a valid signature --
-    try:
-        if revocation_oracle.is_revoked(
-            reddog_id=reddog_id, fingerprint=fingerprint,
-            principal_id=principal_id, key_epoch=key_epoch,
-        ):
-            return reject(ReasonCode.REVOKED)
-    except Exception:
-        return reject(ReasonCode.REVOKED)  # fail-closed
-    if key_epoch in set(str(e) for e in revoked_key_epochs):
-        return reject(ReasonCode.KEY_EPOCH_REVOKED)
-
-    # ---- 2 (pre): anti-self-mint trust anchors -------------------------------
-    # The principal key and the RedDog key MUST differ: the identity is signed by the
-    # PRINCIPAL and the work order by the RedDog; one key signing both is a self-grant.
-    if constant_time_compare(principal_public_key, reddog_public_key):
-        return reject(ReasonCode.SELF_MINT_KEY_REUSE)
-    # principal_public_key is trusted ONLY if it is the token-verified key on record for
-    # this principal_id (contract Section 5 issuance basis). Fail-closed if unknown.
-    try:
-        trusted_principal_key = principal_key_resolver.resolve(
-            principal_id, str(identity["principal_provider"])
-        )
-    except Exception:
-        trusted_principal_key = None
-    if not trusted_principal_key or not constant_time_compare(str(trusted_principal_key), principal_public_key):
-        return reject(ReasonCode.PRINCIPAL_KEY_UNTRUSTED)
-
-    # ---- 2a. Parent identity signature: PRINCIPAL-signed (anti-self-grant) ---
-    try:
-        id_input = canonical_signing_input(identity, PREFIX_IDENTITY)
-        # strict `is True`: a lax backend returning a truthy non-bool must NOT accept.
-        id_ok = signature_verifier.verify(principal_public_key, id_input, str(identity["signature"])) is True
-    except Exception:
-        id_ok = False
-    if not id_ok:
-        return reject(ReasonCode.IDENTITY_SIGNATURE_INVALID)
-
-    # ---- 2b. Binding: work order must match its parent identity --------------
-    if not constant_time_compare(str(work_authority["principal_id"]), principal_id):
-        return reject(ReasonCode.PRINCIPAL_MISMATCH)
-    if not constant_time_compare(str(work_authority["reddog_id"]), reddog_id):
-        return reject(ReasonCode.REDDOG_ID_MISMATCH)
-    wa_signer_key = work_authority.get("signer_public_key")
-    if wa_signer_key is not None and not constant_time_compare(str(wa_signer_key), reddog_public_key):
-        return reject(ReasonCode.REDDOG_KEY_MISMATCH)
-
-    # ---- 2c. Work-order signature: by the delegated reddog key ---------------
-    try:
-        wa_input = canonical_signing_input(work_authority, PREFIX_WORKAUTH)
-        wa_ok = signature_verifier.verify(reddog_public_key, wa_input, str(work_authority["signature"])) is True
-    except Exception:
-        wa_ok = False
-    if not wa_ok:
-        # covers payload tampering, non-canonical/field-reorder, changed allowed_paths /
-        # foundup_id / permission_snapshot_digest / valve_state_required, wrong signer key.
-        return reject(ReasonCode.WORKAUTH_SIGNATURE_INVALID)
-
-    # ---- 3. Freshness (single shared time gate, contract s3) -----------------
-    try:
-        id_iat, id_exp = int(identity["issued_at"]), int(identity["expires_at"])
-        wa_iat, wa_exp = int(work_authority["issued_at"]), int(work_authority["expires_at"])
-    except (TypeError, ValueError):
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-    if now + leeway_s < id_iat or now + leeway_s < wa_iat:
-        return reject(ReasonCode.ISSUED_IN_FUTURE)
-    if now > id_exp + leeway_s:
-        return reject(ReasonCode.EXPIRED_IDENTITY)
-    if now > wa_exp + leeway_s:
-        return reject(ReasonCode.EXPIRED_WORKAUTH)
-
-    # ---- 5. Permission snapshot: fresh + digest-bound + grants verb (s7) -----
-    #        (Nonce consume is DEFERRED to the terminal step 9 so a transient reject here
-    #         cannot permanently burn a legitimate order's single-use nonce.)
-    snap_digest = str(work_authority["permission_snapshot_digest"])
-    try:
-        snap = snapshot_resolver.resolve(snap_digest)
-    except Exception:
-        snap = None
-    try:
-        fresh = snap is not None and snap.is_fresh(now, leeway_s)
-    except Exception:
-        fresh = False
-    if not fresh:
-        return reject(ReasonCode.SNAPSHOT_STALE)
-    if not constant_time_compare(str(snap.evidence_digest), snap_digest):
-        return reject(ReasonCode.SNAPSHOT_DIGEST_MISMATCH)
-    try:
-        granted = snap.grants(str(work_authority["requested_operation"]), str(work_authority["repo_full_name"]))
-    except Exception:
-        granted = False
-    if not granted:
-        return reject(ReasonCode.SNAPSHOT_INSUFFICIENT)
-
-    # ---- 6. Scope: repo + foundup within the identity ceiling (s5/s6) --------
-    if str(work_authority["repo_full_name"]) not in set(map(str, identity["repo_scope"])):
-        return reject(ReasonCode.REPO_OUT_OF_SCOPE)
-    if str(work_authority["foundup_id"]) not in set(map(str, identity["foundup_scope"])):
-        return reject(ReasonCode.FOUNDUP_OUT_OF_SCOPE)
-
-    # ---- 7. Verb + path: forbidden ops; deny wins; effective set IN-SCOPE -----
-    try:
-        allowed = set(map(str, work_authority["allowed_paths"]))
-        denied = set(map(str, work_authority["denied_paths"]))
-    except Exception:
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-    if str(work_authority["requested_operation"]) in set(map(str, forbidden_operations)):
-        return reject(ReasonCode.FORBIDDEN_OPERATION)
-    effective = allowed - denied
-    if not effective:
-        return reject(ReasonCode.EMPTY_EFFECTIVE_PATHS)
-    # Bind every effective path to the FoundUp's canonical ceiling: an in-scope,
-    # validly-signed order still cannot target .github/workflows, secrets, or ../../.env.
-    foundup_id = str(work_authority["foundup_id"])
-    if not all(_path_within_foundup(p, foundup_id) for p in effective):
-        return reject(ReasonCode.PATH_OUT_OF_SCOPE)
-
-    # ---- 8. Valve: required state bound into the signed payload (s2/s7) ------
-    if not constant_time_compare(str(work_authority["valve_state_required"]), str(required_valve_state)):
-        return reject(ReasonCode.VALVE_STATE)
-
-    # ---- 9. Nonce consume LAST. A preflight caller may explicitly defer this
-    #         terminal mutation; the authoritative use-time caller must consume it.
-    if verification_phase is WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING:
-        result.accepted = True
+    nonce_reason = _consume_authority_nonce(
+        work_authority=work_authority,
+        nonce_store=nonce_store,
+        verification_phase=verification_phase,
+    )
+    if nonce_reason is not None:
+        result.reason_codes.append(nonce_reason)
         return result
-    if verification_phase is not WorkAuthorityVerificationPhase.AUTHORITATIVE_USE:
-        return reject(ReasonCode.MALFORMED_PAYLOAD)
-    try:
-        consumed = nonce_store.consume(str(work_authority["nonce"]))
-    except Exception:
-        consumed = False
-    if not consumed:
-        return reject(ReasonCode.NONCE_REPLAY)
-
     result.accepted = True
     return result

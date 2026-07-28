@@ -17,15 +17,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
-from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
-    read_reddog_runtime_json_mapping,
-)
-from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    runtime_operation_lock,
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_state_reader import (
+    read_assurance_completion_request,
+    read_current_queue_plan,
 )
 
 
@@ -53,6 +52,9 @@ class SignedWorkerQueueSerialLoopRunnerReason:
     BOOTSTRAP_UNSAFE = "REJECT_RESIDENT_QUEUE_BOOTSTRAP_UNSAFE"
     BOOTSTRAP_EXCEPTION = "REJECT_RESIDENT_QUEUE_BOOTSTRAP_EXCEPTION"
     BOOTSTRAP_KWARG_CONFLICT = "REJECT_RESIDENT_QUEUE_BOOTSTRAP_KWARG_CONFLICT"
+    ASSURANCE_COMPLETION_REQUEST_MISSING = (
+        "REJECT_ASSURANCE_COMPLETION_REQUEST_MISSING"
+    )
 
 
 BootstrapCallable = Callable[..., Any]
@@ -66,6 +68,7 @@ _RESERVED_BOOTSTRAP_KWARGS = frozenset(
         "requested_queue_item_id",
         "now_iso",
         "now_epoch",
+        "trusted_now_epoch",
         "max_steps",
     }
 )
@@ -95,7 +98,6 @@ _POST_BOUNDED_QUEUE_STAGES = frozenset(
 @dataclass(frozen=True)
 class SignedWorkerQueueSerialLoopRunnerConfig:
     """Configuration for invoking the resident queue serial-loop bootstrap."""
-
     work_state_path: Path | str
     chain_results_path: Path | str
     authority_profile_path: Path | str
@@ -103,13 +105,13 @@ class SignedWorkerQueueSerialLoopRunnerConfig:
     repo_root: Optional[Path | str] = None
     now_iso: Optional[str] = None
     now_epoch: Optional[int] = None
+    trusted_now_epoch: Callable[[], int] = time.time
     max_steps: int = 1
     bootstrap_kwargs: Mapping[str, Any] = field(default_factory=dict)
 
 
 class RedDogSignedWorkerQueueSerialLoopRunner:
     """OpenClaw candidate runner backed by the resident queue serial loop."""
-
     def __init__(
         self,
         config: SignedWorkerQueueSerialLoopRunnerConfig,
@@ -153,7 +155,7 @@ class RedDogSignedWorkerQueueSerialLoopRunner:
         payload = _mapping(result.to_dict() if hasattr(result, "to_dict") else result)
         rejection = _bootstrap_rejection(task_id, target_kind, payload)
         return rejection or _accepted_runner_result(
-            task_id, queue_item_id, target_kind, payload
+            self.config, task_id, queue_item_id, target_kind, payload
         )
 
 
@@ -191,8 +193,6 @@ def _validate_runner_request(
     if target_kind in stage_checks:
         reasons.extend(stage_checks[target_kind](config, queue_item_id=queue_item_id))
     return target_kind, queue_item_id, list(dict.fromkeys(reasons))
-
-
 def _invoke_bootstrap(
     config: SignedWorkerQueueSerialLoopRunnerConfig,
     *,
@@ -213,11 +213,10 @@ def _invoke_bootstrap(
         requested_queue_item_id=queue_item_id,
         now_iso=config.now_iso,
         now_epoch=config.now_epoch,
+        trusted_now_epoch=config.trusted_now_epoch,
         max_steps=assigned_max_steps,
         **dict(config.bootstrap_kwargs),
     )
-
-
 def _bootstrap_rejection(
     task_id: str,
     target_kind: str | None,
@@ -250,11 +249,29 @@ def _bootstrap_rejection(
 
 
 def _accepted_runner_result(
+    config: SignedWorkerQueueSerialLoopRunnerConfig,
     task_id: str,
     queue_item_id: str,
     target_kind: str | None,
     payload: Mapping[str, Any],
 ) -> Mapping[str, Any]:
+    bootstrap_payload = dict(payload)
+    if target_kind == "openclaw_independent_slice_verification":
+        completion = read_assurance_completion_request(
+            chain_results_path=config.chain_results_path,
+            allowed_root=config.runtime_allowed_root,
+        )
+        if not completion:
+            reason = (
+                SignedWorkerQueueSerialLoopRunnerReason
+                .ASSURANCE_COMPLETION_REQUEST_MISSING
+            )
+            return _reject(
+                task_id,
+                [reason],
+                bootstrap_result=payload,
+            )
+        bootstrap_payload["assurance_completion_request"] = completion
     chain_complete = str(payload.get("next_action") or "") == _QUEUE_CHAIN_COMPLETE_ACTION
     assigned_complete = target_kind in {
         "0102_bounded_code_change",
@@ -265,7 +282,7 @@ def _accepted_runner_result(
         "decision": SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT,
         "receipt_id": _receipt_id(task_id, queue_item_id, payload),
         "queue_item_id": queue_item_id,
-        "bootstrap_result": dict(payload),
+        "bootstrap_result": bootstrap_payload,
         "queue_chain_complete": chain_complete,
         "assigned_stage_complete": assigned_complete,
         "queue_chain_requeue_required": payload.get("queue_chain_requeue_required") is True
@@ -423,7 +440,13 @@ def _bounded_code_stage_reasons(
     ):
         reasons.append(SignedWorkerQueueSerialLoopRunnerReason.CODE_ARTIFACT_GENERATION_MISSING)
 
-    plan = _read_current_plan(config, queue_item_id=queue_item_id)
+    plan = read_current_queue_plan(
+        work_state_path=config.work_state_path,
+        chain_results_path=config.chain_results_path,
+        allowed_root=config.runtime_allowed_root,
+        queue_item_id=queue_item_id,
+        now_iso=config.now_iso,
+    )
     if (
         not plan
         or plan.get("accepted") is not True
@@ -478,49 +501,13 @@ def _read_current_plan(
     *,
     queue_item_id: str,
 ) -> Mapping[str, Any]:
-    try:
-        work_state = _read_json_mapping(
-            Path(config.work_state_path),
-            allowed_root=config.runtime_allowed_root,
-        )
-        chain = _read_json_mapping(
-            Path(config.chain_results_path),
-            allowed_root=config.runtime_allowed_root,
-        )
-    except Exception:
-        return {}
-    if not work_state:
-        return {}
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
-            plan_reddog_resident_queue_orchestration,
-        )
-
-        plan = plan_reddog_resident_queue_orchestration(
-            work_state,
-            chain_results=_stage_results(chain),
-            requested_queue_item_id=queue_item_id,
-            now_iso=config.now_iso,
-        )
-    except Exception:
-        return {}
-    return plan.to_dict()
-
-
-def _read_json_mapping(
-    path: Path,
-    *,
-    allowed_root: Path | str,
-) -> Mapping[str, Any]:
-    with runtime_operation_lock(str(path) + ".operation"):
-        return read_reddog_runtime_json_mapping(path, allowed_root=allowed_root)
-
-
-def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
-    raw = state.get("stage_results") if state.get("schema_version") == "reddog_resident_queue_chain_results.v1" else state
-    if not isinstance(raw, Mapping):
-        return {}
-    return {str(key): value for key, value in raw.items() if isinstance(value, Mapping)}
+    return read_current_queue_plan(
+        work_state_path=config.work_state_path,
+        chain_results_path=config.chain_results_path,
+        allowed_root=config.runtime_allowed_root,
+        queue_item_id=queue_item_id,
+        now_iso=config.now_iso,
+    )
 
 
 __all__ = [

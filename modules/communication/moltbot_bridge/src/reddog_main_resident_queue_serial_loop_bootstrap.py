@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from fnmatch import fnmatchcase
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional
 
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
@@ -34,6 +34,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import AtomicJsonAuthoritativeWorkStateStore
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
     REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED,
     load_reddog_main_resident_queue_runtime_dependency_bundle,
@@ -64,6 +65,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import build_work_order_materialization_binding
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
@@ -141,7 +143,6 @@ class JsonResidentQueueWorkOrderResolver:
         _ = (queue_item_id, selected_slice)
         return self._work_orders.get(str(work_order_id), {})
 
-
 def run_reddog_main_resident_queue_serial_loop_bootstrap(
     *,
     repo_root: Path | str,
@@ -198,11 +199,16 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
+    trusted_now_epoch: Optional[Callable[[], int]] = None,
     max_steps: int = 1,
 ) -> RedDogMainResidentQueueSerialLoopBootstrapResult:
     """Load runtime inputs and run the bounded resident queue serial loop."""
-
     root = Path(repo_root).resolve()
+    authority_clock = trusted_now_epoch or (lambda: int(datetime.now().timestamp()))
+    try:
+        fresh_now_epoch = int(authority_clock())
+    except (TypeError, ValueError, OverflowError):
+        return _not_ready(("trusted_now_epoch_invalid",), chain_results_path=None)
     if runtime_allowed_root is None:
         return _not_ready(("missing_runtime_artifact_root",), chain_results_path=None)
     runtime_root = Path(os.path.abspath(Path(runtime_allowed_root).expanduser()))
@@ -221,7 +227,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if snapshot_reasons:
         return _not_ready(snapshot_reasons, chain_results_path=None)
     assert snapshot is not None
-
     profile, profile_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -233,7 +238,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if profile_reasons:
         return _not_ready(profile_reasons, chain_results_path=None)
     assert profile is not None
-
     chain_path, chain_reasons = _resolve_output_outside_repo(
         root,
         runtime_root,
@@ -244,7 +248,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if chain_reasons:
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
-
     work_orders, work_order_reasons = _load_or_materialize_work_orders(
         root,
         runtime_root,
@@ -257,7 +260,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if work_order_reasons:
         return _not_ready(work_order_reasons, chain_results_path=None)
-
     valve_environment, valve_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -483,7 +485,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         signer_socket_max_response_bytes=signer_socket_max_response_bytes,
         signer_socket_connector=signer_socket_connector,
         signature_verifier_backend=signature_verifier_backend,
-        now_epoch=now_epoch,
+        now_epoch=(fresh_now_epoch if authority_state_path else None),
     )
     if dependency_bundle.accepted is not True:
         return _not_ready(
@@ -519,19 +521,17 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             revocation_oracle=dependency_bundle.revocation_oracle,
             now_epoch=int(dependency_bundle.now_epoch or 0),
             required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
-            trusted_now_epoch=lambda: int(datetime.now().timestamp()),
+            trusted_now_epoch=authority_clock,
         )
-
     store = AtomicJsonResidentQueueChainResultsStore(
         chain_path,
         allowed_root=runtime_root,
     )
     run_now = _parse_datetime(now_iso) if now_iso else None
     registry = build_reddog_resident_queue_stage_handler_registry(
-        work_state_snapshot=snapshot,
-        chain_results_store=store,
-        authority_profile=profile,
-        now_iso=now_iso or "",
+        work_state_snapshot=snapshot, chain_results_store=store,
+        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(_runtime_input_path(root, work_state_path), allowed_root=runtime_root, repo_root=root),
+        authority_profile=profile, now_iso=now_iso or "",
         authority_store=dependency_bundle.authority_store,
         signer=dependency_bundle.signer,
         principal_resolver=dependency_bundle.principal_resolver,
@@ -574,6 +574,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         admission_request=admission_request,
         pattern_memory_admission_sink=pattern_memory_admission_sink,
         worker_dispatch_writer=worker_dispatch_writer,
+        trusted_now_epoch=authority_clock,
         assurance_reservation_store=assurance_reservation_store,
         now_datetime=run_now,
         permission_expires_at=(
@@ -736,15 +737,14 @@ def _materialize_work_orders_from_authority_profile(
 
     queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
     queue_item_id = str(queue_receipt.get("queue_item_id") or "")
-    materialization_binding_seed = {
-        "schema_version": "reddog_work_order_materialization_binding_seed.v1",
-        "work_order_id": str(
+    materialization_binding_seed = build_work_order_materialization_binding(
+        work_order_id=str(
             authority_profile.get("work_order_id")
             or "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
         ),
-        "base_ref": authority_profile.get("base_ref"),
-        "queue_consumer_receipt_digest": _canonical_digest(queue_receipt),
-    }
+        base_ref=str(authority_profile.get("base_ref") or ""),
+        queue_consumer_receipt=queue_receipt,
+    )
     authority_request = plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=queue_result.to_dict(),
         authority_profile=authority_profile,

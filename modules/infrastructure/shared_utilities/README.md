@@ -68,6 +68,17 @@
   - [ ] Performance benchmarking
   - [ ] Comprehensive test coverage (>90%)
 
+### Runtime Artifact Safety Decomposition
+
+`runtime_artifact_safety.py` is an inherited compatibility host for path
+validation, descriptor-confined I/O, cross-process locking, and telemetry
+redaction. New consumers must reuse its public API rather than add parallel
+safety policies. A dedicated parity migration must separate redaction,
+confined reads/writes, and platform lock backends while preserving Windows
+extended-length paths, Linux descriptor verification, and the existing public
+imports. Its temporary exact WSP 62 no-growth ceiling is recorded in
+`wsp_62_exemptions.yaml`.
+
 ## [API] Public API & Usage
 
 ### Exported Functions/Classes

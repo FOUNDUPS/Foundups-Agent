@@ -14,8 +14,11 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional, Protocol
+from typing import Any, Callable, Dict, Mapping, Optional, Protocol
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_publication_effect_binding import (
+    committed_publication_effect_binding,
+)
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     ResidentQueueStageDispatchRequest,
 )
@@ -36,6 +39,9 @@ FAIL_DISPATCH_STAGE_MISMATCH = "FAIL_DISPATCH_STAGE_MISMATCH"
 FAIL_DISPATCH_NEXT_ACTION_MISMATCH = "FAIL_DISPATCH_NEXT_ACTION_MISMATCH"
 FAIL_QUEUE_SELECTION_MISMATCH = "FAIL_QUEUE_SELECTION_MISMATCH"
 FAIL_WORK_ORDER_MISSING = "FAIL_WORK_ORDER_MISSING"
+FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED = (
+    "FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED"
+)
 
 AUTHORITY_REQUEST_STAGE_KEY = "authority_request"
 
@@ -91,6 +97,7 @@ class ResidentQueueAuthorityRequestStageHandler:
     authority_profile: Mapping[str, Any]
     work_order_resolver: ResidentQueueAuthorityRequestWorkOrderResolver
     now_iso: str
+    work_state_supplier: Optional[Callable[[], Mapping[str, Any]]] = None
 
     def __call__(self, request: ResidentQueueStageDispatchRequest) -> Mapping[str, Any]:
         if request.stage_key != AUTHORITY_REQUEST_STAGE_KEY:
@@ -106,8 +113,16 @@ class ResidentQueueAuthorityRequestStageHandler:
                 f"actual:{request.next_action}",
             )
 
+        try:
+            current_state = (
+                self.work_state_supplier()
+                if self.work_state_supplier is not None
+                else self.work_state_snapshot
+            )
+        except Exception:
+            return _reject(FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED)
         queue_consumer = plan_reddog_wre_queue_consumer_dry_run(
-            self.work_state_snapshot,
+            current_state,
             now_iso=self.now_iso,
             requested_queue_item_id=request.queue_item_id,
         ).to_dict()
@@ -137,10 +152,30 @@ class ResidentQueueAuthorityRequestStageHandler:
         if not work_order:
             return _reject(FAIL_WORK_ORDER_MISSING, f"work_order_id:{work_order_id}")
 
+        queue_item = next(
+            (
+                item
+                for item in current_state.get("wre_queue_items") or ()
+                if isinstance(item, Mapping)
+                and str(item.get("queue_item_id") or "") == queue_item_id
+            ),
+            {},
+        )
+        claim_id = str(_mapping(queue_item).get("claim_id") or "")
+        try:
+            publication_binding = committed_publication_effect_binding(
+                current_state,
+                self.authority_profile,
+                queue_item_id=queue_item_id,
+                claim_id=claim_id,
+            )
+        except (RuntimeError, ValueError):
+            return _reject(FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED)
         result = plan_reddog_wre_queue_authority_request_dry_run(
             queue_consumer_result=queue_consumer,
             authority_profile=_mapping(self.authority_profile),
             work_order=work_order,
+            architect_fix_publication_binding=publication_binding,
         )
         return result.to_dict()
 
@@ -151,6 +186,9 @@ def build_reddog_resident_queue_authority_request_stage_handler(
     authority_profile: Mapping[str, Any],
     work_order_resolver: ResidentQueueAuthorityRequestWorkOrderResolver,
     now_iso: str,
+    work_state_supplier: Optional[
+        Callable[[], Mapping[str, Any]]
+    ] = None,
 ) -> ResidentQueueAuthorityRequestStageHandler:
     """Build the injected handler for the resident queue dispatcher."""
 
@@ -159,6 +197,7 @@ def build_reddog_resident_queue_authority_request_stage_handler(
         authority_profile=authority_profile,
         work_order_resolver=work_order_resolver,
         now_iso=now_iso,
+        work_state_supplier=work_state_supplier,
     )
 
 
@@ -166,6 +205,7 @@ __all__ = [
     "AUTHORITY_REQUEST_STAGE_KEY",
     "FAIL_DISPATCH_NEXT_ACTION_MISMATCH",
     "FAIL_DISPATCH_STAGE_MISMATCH",
+    "FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED",
     "FAIL_QUEUE_SELECTION_MISMATCH",
     "FAIL_WORK_ORDER_MISSING",
     "ResidentQueueAuthorityRequestStageHandler",

@@ -1,5 +1,12 @@
 # TestModLog
 
+## 2026-07-28 - Runtime Artifact Safety WSP 62 Gate
+
+- Added exact no-growth coverage for the inherited runtime-artifact safety
+  module and its oversized functions.
+- The remediation record expires on 2026-09-30 and names the parity-preserving
+  decomposition boundary.
+
 ## 2026-07-18 - Runtime Artifact Safety
 
 - Added adversarial path, symlink, hardlink, device-name, root-ancestry,
@@ -96,3 +103,10 @@
 
 - Proved bounded reads use one descriptor and reject oversized input.
 - Proved descriptor metadata changes and final-path escapes fail closed.
+## 2026-07-28 - Windows Confined Lock Initialization Race
+
+- Added mixed-case, not-yet-created runtime-root and extended-length prefix
+  coverage for Windows containment validation.
+- Repeated the spawned-process proposal nonce reservation regression 200
+  times to prove one accepted reservation and no initialization-write or
+  namespace-normalization race.

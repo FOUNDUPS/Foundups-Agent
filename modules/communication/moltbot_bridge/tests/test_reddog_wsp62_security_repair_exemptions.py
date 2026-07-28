@@ -11,6 +11,8 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 MODULE_ROOT = Path(__file__).resolve().parents[1]
+DATABASE_ROOT = REPO_ROOT / "modules/infrastructure/database"
+SHARED_UTILITIES_ROOT = REPO_ROOT / "modules/infrastructure/shared_utilities"
 SLICE_DATE = date(2026, 7, 18)
 EXPECTED_MODULE_FILES = {
     "src/foundup_job_contract.py",
@@ -18,6 +20,7 @@ EXPECTED_MODULE_FILES = {
     "src/reddog_main_resident_queue_next_stage_dispatch_bootstrap.py",
     "src/reddog_main_resident_queue_runtime_dependency_bundle.py",
     "src/reddog_main_resident_queue_serial_loop_bootstrap.py",
+    "src/openclaw_supervisor.py",
     "src/reddog_openclaw_live_enqueue.py",
     "src/reddog_resident_live_canary.py",
     "src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py",
@@ -61,6 +64,63 @@ PROVIDER_EVIDENCE_EXACT_FILES = {
     "tests/test_reddog_resident_architect_durable_agentdb_cycle.py",
     "wsp_62_exemptions.yaml",
 }
+PUBLICATION_MODULE_FILES = {
+    "src/reddog_architect_fix_promotion_publication.py",
+    "src/reddog_architect_fix_promotion_publication_validation.py",
+}
+BOUNDED_AUTHORITY_BINDING_FILES = {
+    "src/reddog_worker_dispatch_authority_binding.py",
+}
+CURRENT_SECURITY_RUNTIME_FILES = {
+    "scripts/run_task.py",
+    "src/reddog_run_task_support.py",
+    "src/reddog_work_authority_nonce_store.py",
+    "src/reddog_work_order_signature_verifier.py",
+}
+BOUNDED_DATABASE_SECURITY_FILES = {
+    "modules/infrastructure/database/src/signed_worker_assurance_completion.py",
+    "modules/infrastructure/database/src/signed_worker_assurance_request.py",
+    "modules/infrastructure/database/src/signed_worker_assurance_staging.py",
+    "modules/infrastructure/database/src/signed_worker_assignment.py",
+    "modules/infrastructure/database/src/signed_worker_execution_binding.py",
+    "modules/infrastructure/database/src/signed_worker_execution_commit.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease_fence.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease_schema.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease_time.py",
+    "modules/infrastructure/database/src/signed_worker_execution_quarantine.py",
+    "modules/infrastructure/database/src/signed_worker_execution_quarantine_receipt.py",
+    "modules/infrastructure/database/src/signed_worker_execution_row.py",
+    "modules/infrastructure/database/src/signed_worker_execution_store.py",
+    "modules/infrastructure/database/src/signed_worker_finalization_status.py",
+    "modules/infrastructure/database/src/signed_worker_result_history.py",
+    "modules/infrastructure/database/src/signed_worker_result_ledger.py",
+}
+BOUNDED_SIGNED_WORKER_RESULT_FILES = {
+    "src/reddog_signed_worker_execution_heartbeat.py",
+    "src/reddog_signed_worker_queue_state_reader.py",
+    "src/reddog_signed_worker_result_receipt.py",
+}
+TOUCHED_SIGNED_WORKER_RUNTIME_FILES = {
+    "src/reddog_signed_worker_execution_claim.py",
+    "src/reddog_signed_worker_execution_recovery.py",
+    "src/reddog_signed_worker_run_task_runtime.py",
+    "src/reddog_signed_worker_supervisor_admission.py",
+}
+BOUNDED_SECURITY_TEST_FILES = {
+    "modules/communication/moltbot_bridge/tests/reddog_signed_worker_agentdb_test_support.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_admission.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_authority.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_history.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_runtime.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_execution_security.py",
+    "modules/infrastructure/database/tests/signed_worker_assurance_test_support.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_finalization.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_lease_schema.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_recovery.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_reservation.py",
+    "modules/infrastructure/database/tests/test_signed_worker_quarantine_security.py",
+}
 
 
 def _exemptions(path: Path) -> list[dict]:
@@ -79,14 +139,18 @@ def _named_sizes(path: Path) -> dict[str, int]:
     }
 
 
-def _oversized_function_sizes(path: Path) -> dict[str, int]:
+def _oversized_function_sizes(
+    path: Path,
+    *,
+    threshold: int = 60,
+) -> dict[str, int]:
     tree = ast.parse(path.read_text(encoding="utf-8"))
     return {
         node.name: node.end_lineno - node.lineno + 1
         for node in ast.walk(tree)
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         and node.end_lineno is not None
-        and node.end_lineno - node.lineno + 1 > 60
+        and node.end_lineno - node.lineno + 1 > threshold
     }
 
 
@@ -142,3 +206,101 @@ def test_provider_evidence_exemptions_match_exact_touched_file_sizes() -> None:
             assert item["no_growth_ceiling"].get("functions", {}) == (
                 _oversized_function_sizes(target)
             )
+
+
+def test_architect_publication_modules_need_no_wsp62_exemption() -> None:
+    for relative_path in PUBLICATION_MODULE_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
+        for name, size in _named_sizes(target).items():
+            assert size <= (200 if name == "AtomicArchitectFixPromotionPublisher" else 50)
+
+
+def test_new_authority_binding_modules_are_bounded_without_exemption() -> None:
+    for relative_path in BOUNDED_AUTHORITY_BINDING_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
+        assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_current_security_runtime_files_stay_under_domain_limit() -> None:
+    for relative_path in CURRENT_SECURITY_RUNTIME_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
+        oversized = _oversized_function_sizes(target)
+        if relative_path == "scripts/run_task.py":
+            assert oversized == {"_try_wre_dispatch": 66}
+        else:
+            assert oversized == {}
+
+
+def test_new_database_security_files_are_bounded_without_exemption() -> None:
+    for relative_path in BOUNDED_DATABASE_SECURITY_FILES:
+        target = REPO_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
+        assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_inherited_agent_db_monolith_has_exact_no_growth_remediation() -> None:
+    items = _exemptions(DATABASE_ROOT / "wsp_62_exemptions.yaml")
+    assert len(items) == 1
+    item = items[0]
+    assert item["file"] == "src/agent_db.py"
+    assert item["temporary"] is True
+    assert item["architect_reviewer"] == "0102 Technical Architect"
+    assert date.fromisoformat(item["expires_on"]) == date(2026, 9, 30)
+    assert item["remediation"].endswith("#agentdb-decomposition-plan")
+    _assert_exact_temporary_exemption(item, DATABASE_ROOT)
+    target = DATABASE_ROOT / item["file"]
+    assert item["threshold_override"] == len(
+        target.read_text(encoding="utf-8").splitlines()
+    )
+    assert item["no_growth_ceiling"]["functions"] == (
+        _oversized_function_sizes(target, threshold=50)
+    )
+    assert item["no_growth_ceiling"]["classes"] == {
+        name: size
+        for name, size in _named_sizes(target).items()
+        if name in item["classes"]
+    }
+
+
+def test_runtime_artifact_safety_has_exact_no_growth_remediation() -> None:
+    items = _exemptions(SHARED_UTILITIES_ROOT / "wsp_62_exemptions.yaml")
+    assert len(items) == 1
+    item = items[0]
+    assert item["file"] == "runtime_artifact_safety.py"
+    assert item["temporary"] is True
+    assert item["architect_reviewer"] == "0102 Technical Architect"
+    assert date.fromisoformat(item["expires_on"]) == date(2026, 9, 30)
+    assert item["remediation"].endswith(
+        "#runtime-artifact-safety-decomposition"
+    )
+    _assert_exact_temporary_exemption(item, SHARED_UTILITIES_ROOT)
+    target = SHARED_UTILITIES_ROOT / item["file"]
+    assert item["threshold_override"] == len(
+        target.read_text(encoding="utf-8").splitlines()
+    )
+    assert item["no_growth_ceiling"]["functions"] == (
+        _oversized_function_sizes(target, threshold=50)
+    )
+
+
+def test_new_signed_worker_result_modules_are_bounded_without_exemption() -> None:
+    for relative_path in BOUNDED_SIGNED_WORKER_RESULT_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
+        assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_touched_signed_worker_runtime_stays_under_domain_limit() -> None:
+    for relative_path in TOUCHED_SIGNED_WORKER_RUNTIME_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
+        assert _oversized_function_sizes(target) == {}
+
+
+def test_signed_worker_security_suites_stay_bounded() -> None:
+    for relative_path in BOUNDED_SECURITY_TEST_FILES:
+        target = REPO_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 600

@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Mapping, MutableSet, Optional, Sequence
+from typing import Any, Callable, Dict, Mapping, MutableSet, Optional, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_request_handler import (
     AUTHORITY_REQUEST_STAGE_KEY,
@@ -104,6 +104,9 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_au
 from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
     InMemoryWorktreeAdmissionRegistry,
 )
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    WorkerDispatchAuthorityVerificationContext,
+)
 
 
 RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_READY = "RESIDENT_QUEUE_STAGE_HANDLER_REGISTRY_READY"
@@ -187,6 +190,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     work_state_snapshot: Mapping[str, Any],
     chain_results_store: ResidentQueueChainResultsStore,
     now_iso: str,
+    authoritative_work_state_store: Any = None,
     authority_profile: Optional[Mapping[str, Any]] = None,
     authority_store: Any = None,
     signer: Any = None,
@@ -244,6 +248,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     admission_request: Optional[Mapping[str, Any]] = None,
     pattern_memory_admission_sink: Any = None,
     worker_dispatch_writer: Any = None,
+    trusted_now_epoch: Optional[Callable[[], int]] = None,
     assurance_reservation_store: Any = None,
     worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
 ) -> ResidentQueueStageHandlerRegistry:
@@ -301,6 +306,8 @@ def build_reddog_resident_queue_stage_handler_registry(
             snapshot_resolver=snapshot_resolver,
             now=int(now_epoch or 0),
             leeway_s=leeway_s,
+            work_state_snapshot=work_state_snapshot,
+            authority_profile=authority_profile or {},
         ),
     )
     _add_if_ready(
@@ -343,11 +350,33 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers,
         missing,
         WORKER_DISPATCH_RUNTIME_STAGE_KEY,
-        _missing(("worker_dispatch_writer", worker_dispatch_writer)),
+        _missing(
+            ("worker_dispatch_writer", worker_dispatch_writer),
+            ("signature_verifier", signature_verifier),
+            ("principal_key_resolver", principal_key_resolver),
+            ("nonce_store", nonce_store),
+            ("snapshot_resolver", snapshot_resolver),
+            ("revocation_oracle", revocation_oracle),
+            ("trusted_now_epoch", trusted_now_epoch),
+        ),
         lambda: build_reddog_resident_queue_worker_dispatch_runtime_stage_handler(
             work_state_snapshot=work_state_snapshot,
             chain_results_store=chain_results_store,
             writer=worker_dispatch_writer,
+            authority_verification_context=WorkerDispatchAuthorityVerificationContext(
+                signature_verifier=signature_verifier,
+                principal_key_resolver=principal_key_resolver,
+                nonce_store=nonce_store,
+                snapshot_resolver=snapshot_resolver,
+                revocation_oracle=revocation_oracle,
+                trusted_now_epoch=trusted_now_epoch,
+                required_valve_state=required_valve_state,
+                forbidden_operations=tuple(forbidden_operations),
+                revoked_key_epochs=tuple(revoked_key_epochs),
+                leeway_s=leeway_s,
+            ),
+            work_state_store=authoritative_work_state_store,
+            now=now_datetime,
         ),
     )
     _add_if_ready(

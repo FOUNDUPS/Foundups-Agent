@@ -1328,6 +1328,13 @@ class _FakeWorkerDispatchTaskWriter:
             "receipt_id": receipt.receipt_id,
         }
 
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": self.accepted,
+            "created_task_ids": [task.task_id for task in tasks],
+            "receipt_id": receipt.receipt_id,
+        }
+
 
 def _ed25519_signing_material():
     from cryptography.hazmat.primitives import serialization
@@ -1443,11 +1450,15 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
         claim_reddog_signed_worker_dispatch_task_once,
     )
-    from modules.infrastructure.database.src.agent_db import AgentDB
-    from modules.infrastructure.database.src.db_manager import DatabaseManager
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+        WorkerDispatchAuthorityVerificationConfig,
+        build_worker_dispatch_authority_context,
+    )
+    from modules.infrastructure.database.src import agent_db as agent_db_module
 
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
-    DatabaseManager.reset_for_tests()
+    agent_db_module.DatabaseManager.reset_for_tests()
+    AgentDB = agent_db_module.AgentDB
     trusted_now = datetime.fromisoformat(NOW)
     assurance_store = lambda: AgentDB(  # noqa: E731 - compact test factory
         assurance_now_provider=lambda: trusted_now
@@ -1559,6 +1570,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -1587,6 +1599,16 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", NOW)
+    monkeypatch.setenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", str(authority_state))
+    monkeypatch.setenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", str(snapshots))
+    monkeypatch.setenv(
+        "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
+        str(principals),
+    )
+    monkeypatch.setenv(
+        "REDDOG_SIGNATURE_VERIFIER_BACKEND",
+        REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+    )
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
     monkeypatch.setattr(
         artifact_runtime,
@@ -1604,9 +1626,21 @@ def _run_bootstrap_to_verified_outcome_ratchet(
             "review_packet": {"receipt_id": "fusion-artifact-receipt"},
         },
     )
+    authority_context = build_worker_dispatch_authority_context(
+        config=WorkerDispatchAuthorityVerificationConfig(
+            repo_root=str(repo),
+            runtime_allowed_root=str(tmp_path / "runtime"),
+            authority_state_path=str(authority_state),
+            permission_snapshots_path=str(snapshots),
+            principal_authority_records_path=str(principals),
+            signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        ),
+        trusted_now_epoch=lambda: 1000,
+    )
     author_result = claim_reddog_signed_worker_dispatch_task_once(
         repo_root=repo,
         agent_db_factory=assurance_store,
+        authority_verification_context=authority_context,
     )
     assert author_result["accepted"] is True, json.dumps(
         author_result, sort_keys=True, default=str
@@ -1624,6 +1658,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     verifier_result = claim_reddog_signed_worker_dispatch_task_once(
         repo_root=repo,
         agent_db_factory=assurance_store,
+        authority_verification_context=authority_context,
     )
     assert verifier_result["accepted"] is True, json.dumps(
         verifier_result, sort_keys=True, default=str
@@ -1662,6 +1697,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
@@ -1790,6 +1826,7 @@ def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_
         principal_authority_records_path=principals,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
@@ -1833,6 +1870,7 @@ def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path
         signer_socket_connector=_accepted_socket_signer,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
@@ -1885,6 +1923,7 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=3,
     )
@@ -1961,6 +2000,7 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
         worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=3,
     )
@@ -2040,6 +2080,7 @@ def test_bootstrap_rejects_legacy_token_environment_before_execution_valve(
         worker_dispatch_writer=worker_dispatch_writer,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=8,
     )
@@ -2100,6 +2141,7 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=8,
     )
@@ -2177,6 +2219,7 @@ def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_p
         artifact_generator=artifact_generator,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2221,6 +2264,7 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=9,
     )
@@ -2336,6 +2380,7 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2419,6 +2464,7 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2506,6 +2552,7 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
         slice_verifier_request_binding_enabled=True,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -2594,6 +2641,7 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -2611,6 +2659,10 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
     snapshot = _snapshot()
     snapshot["wre_queue_items"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
     snapshot["wre_queue_items"][0]["model_runtime_binding_digest"] = _canonical_digest(runtime_binding)
+    snapshot["worker_claims"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
+    snapshot["wre_queue_items"][0]["evidence_refs"].append(
+        f"model_runtime_binding:{runtime_binding['receipt_id']}"
+    )
     state = _write_runtime_json(tmp_path, "work_state.json", snapshot)
     profile = _write_runtime_json(
         tmp_path,
@@ -2686,6 +2738,7 @@ def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
         artifact_generator=artifact_generator,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -2777,6 +2830,7 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -2874,6 +2928,7 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=13,
     )
@@ -2966,6 +3021,7 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
         draft_pr_publish_request_binding_enabled=True,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=13,
     )
@@ -3058,6 +3114,7 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -3263,6 +3320,7 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=11,
     )
@@ -3345,6 +3403,7 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -3439,6 +3498,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=13,
     )
@@ -3528,6 +3588,7 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=12,
     )
@@ -3570,6 +3631,7 @@ def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=9,
     )
@@ -3661,6 +3723,7 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=6,
     )
@@ -3811,6 +3874,7 @@ def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_i
             worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=7,
     )
@@ -4115,6 +4179,26 @@ def test_main_serial_loop_preflight_profile_materializes_authority_resolver_stor
         mocked.call_args.kwargs["signature_verifier_backend"]
         == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
     )
+    verifier_config = (
+        main.run_reddog_resident_queue_serial_loop_preflight
+        .authority_verification_config
+    )
+    assert (
+        verifier_config.signature_verifier_backend
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    assert verifier_config.runtime_allowed_root == str(runtime_root)
+    assert verifier_config.authority_state_path == str(
+        runtime_root / "authority_runtime_state.json"
+    )
+    assert verifier_config.principal_authority_records_path == str(
+        principal_records
+    )
+    assert verifier_config.permission_snapshots_path == str(permission_snapshots)
+    assert (
+        "authority_verification_config"
+        not in main.run_reddog_resident_queue_serial_loop_preflight.last_result
+    )
     principal_store = json.loads(principal_records.read_text(encoding="utf-8"))
     snapshot_store = json.loads(permission_snapshots.read_text(encoding="utf-8"))
     assert "github|github:mjtrout" in principal_store["principals"]
@@ -4292,7 +4376,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 88
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
-    assert mocked.call_args.kwargs["now_epoch"] == 1000
+    assert mocked.call_args.kwargs["now_epoch"] != 1000
+    assert callable(mocked.call_args.kwargs["trusted_now_epoch"])
+    assert mocked.call_args.kwargs["trusted_now_epoch"]() != 1000
     assert mocked.call_args.kwargs["max_steps"] == 1
 
 

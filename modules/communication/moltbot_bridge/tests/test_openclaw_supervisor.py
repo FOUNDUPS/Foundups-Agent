@@ -473,10 +473,24 @@ def test_author_failure_revokes_reserved_independent_assurance(monkeypatch) -> N
 def test_supervisor_renews_one_expired_verifier_only_when_stage_ready(
     monkeypatch,
 ) -> None:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_claim_admission as claim_admission,
+    )
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_openclaw_queue_loop_runtime_binding as queue_binding,
+    )
+
     db = MagicMock()
     conn = db.db.get_connection.return_value.__enter__.return_value
     context = {
         "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "queue_item_id": "attacker-queue",
+        "worker_runtime": "attacker-runtime",
+        "capability": "attacker-capability",
+    }
+    verified_context = {
+        "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "queue_item_id": "queue-1",
         "worker_runtime": "openclaw",
         "capability": "independent_slice_verification",
     }
@@ -506,18 +520,45 @@ def test_supervisor_renews_one_expired_verifier_only_when_stage_ready(
         },
     }
     db.renew_independent_assurance.return_value = {"accepted": True}
+    seen_stage_contexts = []
     monkeypatch.setattr(
         supervisor_module,
         "_openclaw_independent_verifier_ready_from_env",
-        lambda context, env, repo_root: True,
+        lambda verified, env, repo_root: (
+            seen_stage_contexts.append(dict(verified))
+            or verified.get("queue_item_id") == "queue-1"
+        ),
+    )
+    monkeypatch.setattr(
+        claim_admission,
+        "rehydrate_signed_worker_agentdb_context",
+        lambda **_kwargs: verified_context,
+    )
+    monkeypatch.setattr(
+        queue_binding,
+        "is_openclaw_independent_verifier_signed_worker_context",
+        lambda verified: verified == verified_context,
     )
     now_iso = datetime(2026, 7, 14, tzinfo=timezone.utc).isoformat()
 
-    supervisor_module._renew_expired_independent_verifier_for_ready_stage(
+    claim_admission.renew_expired_verified_assurance(
         db=db,
         source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
         env={"REDDOG_RESIDENT_QUEUE_NOW_ISO": now_iso},
         repo_root="O:/Foundups-Agent",
+        authority_verification_context=None,
+        rehydrate=lambda **kwargs: (
+            claim_admission.rehydrate_signed_worker_agentdb_context(
+                **kwargs,
+                env={"REDDOG_RESIDENT_QUEUE_NOW_ISO": now_iso},
+            )
+        ),
+        is_verifier_context=(
+            queue_binding.is_openclaw_independent_verifier_signed_worker_context
+        ),
+        is_stage_ready=(
+            supervisor_module._openclaw_independent_verifier_ready_from_env
+        ),
     )
 
     db.get_independent_assurance_reservation_for_task.assert_called_once_with(
@@ -530,6 +571,7 @@ def test_supervisor_renews_one_expired_verifier_only_when_stage_ready(
     assert renewal["renewal_count"] == 1
     assert renewal["reserved_at"] == now_iso
     assert str(renewal["reservation_digest"]).startswith("sha256:")
+    assert seen_stage_contexts == [verified_context]
 
 
 def test_run_cycle_does_not_claim_queue_stage_progress_for_bounded_worker_stage(
@@ -1052,6 +1094,46 @@ def test_plan_ai_analysis_exception_stores_error(tmp_path):
     assert "Holo unavailable" in ai_analysis["error"]
     # Plan should still complete even with AI analysis error
     assert result["plan"]["action"] == "execute_autonomous_task"
+
+
+def test_triage_never_routes_signed_origin_task_to_generic_executor(
+    tmp_path,
+    monkeypatch,
+):
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+    }
+    observer = MagicMock()
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda *_: None,
+    )
+    signed_origin = {
+        "task_id": "signed-task-with-stripped-context",
+        "status": "pending",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "required_skills": ["attacker_skill"],
+        "context": {},
+    }
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [signed_origin]
+    monkeypatch.setenv("OPENCLAW_AUTO_TASKS_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASKS_ENABLED", "0")
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result.get("action") != "execute_autonomous_task"
+    assert db.get_autonomous_tasks.called
 
 
 # --------------------------------------------------------------------------- #

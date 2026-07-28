@@ -25,10 +25,10 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
-
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import AtomicJsonAuthoritativeWorkStateStore
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
     invoke_reddog_resident_queue_next_stage_dispatch,
@@ -43,7 +43,6 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
 
 REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_APPLIED = "REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_APPLIED"
 REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_NOT_READY = "REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_NOT_READY"
-
 
 @dataclass(frozen=True)
 class RedDogMainResidentQueueNextStageDispatchBootstrapResult:
@@ -145,14 +144,14 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
     if chain_reasons:
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
-
     store = AtomicJsonResidentQueueChainResultsStore(
         chain_path,
         allowed_root=runtime_root,
     )
+    state_path = Path(work_state_path)
     registry = build_reddog_resident_queue_stage_handler_registry(
-        work_state_snapshot=snapshot,
-        chain_results_store=store,
+        work_state_snapshot=snapshot, chain_results_store=store,
+        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(state_path if state_path.is_absolute() else root / state_path, allowed_root=runtime_root, repo_root=root),
         authority_profile=profile,
         work_order_resolver=work_order_resolver,
         now_iso=now_iso or "",

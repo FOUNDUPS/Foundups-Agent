@@ -89,6 +89,17 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
+def _write_neutral_work_state(path: Path) -> Path:
+    return _write_json(
+        path,
+        {
+            "schema_version": "reddog_authoritative_work_state.v1",
+            "architect_fix_promotions": [],
+            "architect_fix_publications": [],
+        },
+    )
+
+
 def _signer_config(socket_path: Path) -> dict[str, object]:
     runtime_root = socket_path.parent.resolve()
     signer_runtime_root = (
@@ -194,6 +205,15 @@ def test_main_signer_config_supply_writes_outside_repo_config_without_socket_con
         resident_queue_runtime_file_path(profile_env, repo, "REDDOG_SIGNER_SOCKET_PATH")
     )
     _write_json(authority_profile_path, _authority_profile())
+    _write_neutral_work_state(
+        Path(
+            resident_queue_runtime_file_path(
+                profile_env,
+                repo,
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            )
+        )
+    )
 
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "1")
@@ -232,6 +252,49 @@ def test_main_signer_config_supply_writes_outside_repo_config_without_socket_con
     )
     assert payload["peer_policy"]["uid_to_principal"] == {"1001": "github:mjtrout"}
     assert mocked_bootstrap.call_args.kwargs["signer_socket_path"] is None
+
+
+def test_main_signer_config_missing_work_state_warns_and_continues_when_not_enforced(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    import main
+
+    repo = _repo(tmp_path)
+    runtime_root = tmp_path / "runtime"
+    profile_env = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": PROFILE_SIGNED_0102_BOUNDED_CODE,
+        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+    }
+    authority_profile_path = Path(
+        resident_queue_runtime_file_path(
+            profile_env,
+            repo,
+            "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
+        )
+    )
+    _write_json(authority_profile_path, _authority_profile())
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", PROFILE_SIGNED_0102_BOUNDED_CODE)
+    monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(runtime_root))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH", str(authority_profile_path))
+    monkeypatch.setenv("REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY", "1")
+    monkeypatch.setenv("REDDOG_SIGNER_PEER_UID_TO_PRINCIPAL", '{"1001":"github:mjtrout"}')
+
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_resident_queue_serial_loop_bootstrap."
+        "run_reddog_main_resident_queue_serial_loop_bootstrap",
+        return_value=_serial_loop_result(),
+    ) as mocked_bootstrap:
+        assert main.run_reddog_resident_queue_serial_loop_preflight(repo) is True
+
+    captured = capsys.readouterr().out
+    assert "[REDDOG-SIGNER-CONFIG] preflight=WARN" in captured
+    assert "signer_config_architect_publication_invalid" in captured
+    mocked_bootstrap.assert_called_once()
 
 
 def test_main_signer_config_supply_enforced_failure_blocks_before_serial_bootstrap(
@@ -400,6 +463,15 @@ def test_main_signer_config_supply_can_feed_run_packet_supply_in_same_preflight(
         )
     )
     _write_json(authority_profile_path, _authority_profile())
+    _write_neutral_work_state(
+        Path(
+            resident_queue_runtime_file_path(
+                profile_env,
+                repo,
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH",
+            )
+        )
+    )
 
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "1")

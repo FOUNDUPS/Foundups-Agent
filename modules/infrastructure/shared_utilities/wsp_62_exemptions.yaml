@@ -1,0 +1,30 @@
+exemptions:
+  - file: "runtime_artifact_safety.py"
+    reason: >-
+      Inherited cross-platform runtime-artifact safety boundary. This security
+      repair adds Windows extended-length path and lock-initialization
+      correctness to the existing descriptor, confinement, redaction, and
+      POSIX locking host. Splitting these coupled primitives requires a
+      dedicated parity migration across every runtime-artifact consumer.
+    threshold_override: 786
+    function_threshold_override: 76
+    functions:
+      - "secure_append_runtime_text"
+      - "secure_replace_runtime_text"
+      - "confined_runtime_operation_lock"
+      - "secure_read_confined_text"
+      - "_exclusive_lock"
+    temporary: true
+    owner: "SharedUtilities"
+    architect_reviewer: "0102 Technical Architect"
+    expires_on: "2026-09-30"
+    remediation: >-
+      modules/infrastructure/shared_utilities/README.md#runtime-artifact-safety-decomposition
+    no_growth_ceiling:
+      file_lines: 786
+      functions:
+        secure_append_runtime_text: 66
+        secure_replace_runtime_text: 57
+        confined_runtime_operation_lock: 55
+        secure_read_confined_text: 76
+        _exclusive_lock: 52

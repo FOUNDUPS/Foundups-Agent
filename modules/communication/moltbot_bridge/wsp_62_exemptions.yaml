@@ -9,6 +9,16 @@ x-reddog-security-repair: &reddog_security_repair
 
 exemptions:
   - <<: *reddog_security_repair
+    file: "src/openclaw_supervisor.py"
+    reason: >-
+      Inherited OpenClaw supervisor host. This slice removes growth while
+      routing signed-worker claim authentication through the bounded
+      claim-admission module; full supervisor decomposition is a separate
+      compatibility migration.
+    threshold_override: 3419
+    no_growth_ceiling: {file_lines: 3419, functions: {}}
+
+  - <<: *reddog_security_repair
     file: "src/foundup_job_contract.py"
     reason: >-
       Inherited typed job contract and serialization host. Create-scaffold
@@ -26,7 +36,7 @@ exemptions:
       revocation, bounded renewal, and proposal signer-policy runtime
       boundaries; splitting the historical registry remains separate
       documentation-maintenance work.
-    threshold_override: 1321
+    threshold_override: 1327
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -170,12 +180,12 @@ exemptions:
 
   - file: "scripts/run_task.py"
     reason: >-
-      Legacy multi-family task dispatcher. The newly added HoloIndex startup
-      maintenance branch and startup helpers are within the 60-line function
-      limit; unrelated dispatch families remain queued for decomposition.
+      The dispatcher and newly added signed-worker paths are decomposed below
+      the communication-domain limit. One inherited WRE adapter remains six
+      lines over the limit and is queued for separate interface cleanup.
     threshold_override: 675
-    function_threshold_override: 140
-    functions: ["execute_task", "_try_wre_dispatch"]
+    function_threshold_override: 66
+    functions: ["_try_wre_dispatch"]
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -210,7 +220,7 @@ exemptions:
       Module-local WSP 62 registry. Provider-evidence review adds exact,
       review-dated ceilings for the touched legacy surfaces; splitting the
       registry would break the canonical module-level exemption lookup.
-    threshold_override: 405
+    threshold_override: 415
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -384,7 +394,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9072
+    threshold_override: 9142
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -396,7 +406,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1719
+    threshold_override: 1731
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

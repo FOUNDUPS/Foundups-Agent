@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     InMemoryResidentQueueChainResultsStore,
 )
@@ -115,6 +117,7 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
         principal_key_resolver=dummy,
         nonce_store=dummy,
         revocation_oracle=dummy,
+        trusted_now_epoch=lambda: 1783984309,
         work_order_resolver=dummy,
         worker_dispatch_writer=dummy,
         assurance_reservation_store=dummy,
@@ -141,6 +144,47 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
     assert registry.registered_stage_keys == ALL_STAGE_KEYS
     assert registry.registered_stage_count == len(ALL_STAGE_KEYS)
     assert registry.missing_stage_reasons == {}
+
+
+@pytest.mark.parametrize(
+    "missing_name",
+    (
+        "worker_dispatch_writer",
+        "signature_verifier",
+        "principal_key_resolver",
+        "nonce_store",
+        "snapshot_resolver",
+        "revocation_oracle",
+        "trusted_now_epoch",
+    ),
+)
+def test_worker_dispatch_runtime_requires_use_time_authority_dependencies(
+    missing_name: str,
+) -> None:
+    dummy = Dummy()
+    dependencies = {
+        "worker_dispatch_writer": dummy,
+        "signature_verifier": dummy,
+        "principal_key_resolver": dummy,
+        "nonce_store": dummy,
+        "snapshot_resolver": dummy,
+        "revocation_oracle": dummy,
+        "trusted_now_epoch": lambda: 1783984309,
+    }
+    dependencies[missing_name] = None
+
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        now_iso=NOW_ISO,
+        **dependencies,
+    )
+
+    assert "worker_dispatch_runtime" not in registry.registered_stage_keys
+    assert f"missing_dependency:{missing_name}" in (
+        registry.missing_stage_reasons["worker_dispatch_runtime"]
+    )
 
 
 def test_registry_to_dict_omits_callable_handlers(tmp_path: Path) -> None:

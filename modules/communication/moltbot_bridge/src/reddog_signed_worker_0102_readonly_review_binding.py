@@ -16,7 +16,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
     SIGNED_WORKER_DISPATCH_TASK_SOURCE,
@@ -177,7 +177,7 @@ def build_readonly_0102_context_from_signed_worker(
     allocation_digest = canonical_reddog_wsp15_allocation_digest(allocation)
     work_order_id = str(signed_authority_receipt.get("work_order_id") or worker_dispatch_intent.get("work_order_id") or "")
     foundup_id = str(signed_authority_receipt.get("foundup_id") or worker_dispatch_intent.get("foundup_id") or "")
-    principal_id = str(signed_authority_receipt.get("principal_id") or worker_dispatch_intent.get("principal_id") or "")
+    principal_id = str(task_context.get("authorized_principal_id") or "")
     model_runtime_binding_receipt = _mapping(task_context.get("model_runtime_binding_receipt"))
     model_runtime_binding_receipt_id = str(
         task_context.get("model_runtime_binding_receipt_id")

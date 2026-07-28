@@ -106,6 +106,7 @@ def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRunti
         denied_paths=tuple(str(item) for item in payload.get("denied_paths") or ()),
         requested_operation=str(payload["requested_operation"]),
         permission_snapshot_digest=str(payload["permission_snapshot_digest"]),
+        queue_consumer_receipt_digest=str(payload["queue_consumer_receipt_digest"]),
         wsp15_allocation_receipt_id=str(payload["wsp15_allocation_receipt_id"]),
         wsp15_allocation_digest=str(payload["wsp15_allocation_digest"]),
         wsp15_priority=str(payload["wsp15_priority"]),
@@ -119,6 +120,12 @@ def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRunti
         model_runtime_binding_digest=_optional_text(payload, "model_runtime_binding_digest"),
         memex_supply_receipt_id=_optional_text(payload, "memex_supply_receipt_id"),
         memex_supply_digest=_optional_text(payload, "memex_supply_digest"),
+        architect_fix_publication_receipt_id=_optional_text(
+            payload, "architect_fix_publication_receipt_id"
+        ),
+        architect_fix_publication_binding_digest=_optional_text(
+            payload, "architect_fix_publication_binding_digest"
+        ),
         identity_nonce=str(payload["identity_nonce"]),
         work_authority_nonce=str(payload["work_authority_nonce"]),
         issued_at=int(payload["issued_at"]),

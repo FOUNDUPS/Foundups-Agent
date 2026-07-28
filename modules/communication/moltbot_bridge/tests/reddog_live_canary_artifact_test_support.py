@@ -176,6 +176,7 @@ def _write_signer(repo: Path, runtime: Path, profile: dict) -> None:
         runtime_root=runtime,
         signer_runtime_root=runtime.parent / f"{runtime.name}-signer-state",
         authority_profile=profile,
+        authoritative_work_state_path=runtime / "authoritative_work_state.json",
         output_path=runtime / "signer_service_config.json",
         socket_path=runtime / "reddog_signer.sock",
         principal_signing_key_ref="op://vault/principal/private",

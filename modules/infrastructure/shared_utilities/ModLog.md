@@ -1,6 +1,31 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-07-28 - Runtime Artifact Safety WSP 62 Remediation
+
+- Recorded the inherited runtime-artifact safety host under an exact temporary
+  no-growth ceiling with a bounded decomposition plan.
+- Kept the current Windows/POSIX security repair behavior unchanged; a later
+  parity slice will split redaction, confined I/O, and platform locking.
+
+## 2026-07-28 - Windows Extended-Length Runtime Artifacts
+
+- Routed confined descriptor opens and cleanup through Windows
+  extended-length paths while retaining final-descriptor confinement checks.
+- Extended the authority-store create, hard-link, stat, read, replace, rename,
+  recovery, and cleanup operations to the same path representation.
+- Added a publication regression where the configured target remains below
+  260 characters while internal atomic paths exceed it.
+
+## 2026-07-28 - Windows Confined Lock Initialization Race
+
+- Serialized first-byte initialization under the existing machine-global
+  runtime mutex before acquiring the Windows byte-range lock.
+- Made resolved-path containment comparisons honor Windows case-insensitive
+  filesystem semantics and normalize `\\?\` extended-length prefixes,
+  including runtime roots created by another process.
+- Preserved POSIX descriptor locking and the existing confinement checks.
+
 ## 2026-07-27 - Cross-Session Runtime Operation Lock
 
 - Moved the Windows runtime-operation mutex from the session-local namespace

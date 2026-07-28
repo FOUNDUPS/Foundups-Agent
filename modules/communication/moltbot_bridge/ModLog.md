@@ -1,5 +1,75 @@
 # ModLog - moltbot_bridge
-## 2026-07-27: REDDOG_ARCHITECT_FIX_PROMOTION_TWO_PHASE_PUBLICATION_PHASE1 - Replaced profile prewrite/rollback with confined PREPARED -> PROFILE_PUBLISHED -> COMMITTED recovery; bound journal, profile/state digests, attestation, and revision; preserved history and rejected secret fields. COMMITTED is local publication integrity, not authority authentication. `main.py` writes a distinct inert artifact and rejects aliasing with the active profile; activation awaits a signer-owned commitment over the late-bound tuple (WSP 00, 15, 22, 50, 62, 97).
+- Exact-SHA review follow-up rejects signed-looking metadata on ordinary
+  AgentDB tasks and quarantines expired signed executions without durable
+  assurance. The reserved namespace owns both effects; no generic row is
+  mutated and no unknown-effect result-ledger history is fabricated.
+- Exact-SHA review follow-up removed the importable process-local envelope
+  seal as an authority primitive. Signed-worker admission now re-verifies the
+  persisted AgentDB envelope against fresh authority inside the atomic claim
+  transaction, and returns verification evidence only after that transition.
+  Every direct signed-worker rejection owns finalization; the generic task
+  finalizer refuses the signed namespace so a completion race cannot be
+  overwritten. Windows publication also exercises valid runtime roots whose
+  internal temp, lock, and immutable-artifact paths exceed 260 characters.
+- Final exact-SHA repair requires a sealed canonical envelope at every
+  signed-worker claim boundary, rejects stale assignments before effect
+  admission, and reconstructs runner context only from signed authority plus
+  independently validated durable result history. Finalization now checks the
+  same claim/use lease inside the database transaction; expired recovery is a
+  separate negative-only path. Invalid assignments quarantine task and
+  verifier reservation atomically, and poisoned rows no longer block the next
+  valid OpenClaw claim.
+- Exact-SHA security review now requires recovery race winners to prove the
+  terminal task against the independently durable result-ledger tail and the
+  exact terminal assurance row. A self-hashed task-context marker alone can
+  no longer report a recovered execution.
+- Independent exact-SHA review hardening now reserves signed-worker assignment
+  for a task-bound principal, quarantines malformed pending tasks, requeues
+  stale pre-admission assignments by exact CAS, and keeps active verifier
+  reservations pinned. Executing workers use a durable, bounded-renewal
+  heartbeat; restart recovery honors the renewed lease and quarantines
+  positive, corrupt, missing, or otherwise unverifiable evidence without
+  creating a success result. Quarantined tasks no longer block unrelated valid
+  signed work.
+- Exact-SHA review hardening now protects the full signed-worker namespace
+  from generic creation/retry/requeue as well as completion. Result
+  finalization derives capability from the signed envelope, persists
+  canonical identity after verified execution, retains exact admitted
+  identity for pre-verification failure, and binds task/claim/assurance
+  terminal states. Independent verifier `REJECT` completion is rehydrated
+  from its durable AgentDB stage even when the chain-results writer rejects
+  the stage result. Claims now carry a 15-minute lease; supervisor recovery
+  never replays an unknown worker effect, rolls forward only exact negative
+  assurance, and refuses digest-only positive assurance.
+- Follow-up hardening accepts an exact all-pending batch only when durable
+  publication is already APPLIED, closing the post-activation return-crash
+  window. Mixed-status, partial, or field-mismatched recovery remains rejected.
+  Task finalization and nonce state now use bounded internal WSP_62 siblings.
+  The immutable reserved task namespace keeps stripped signed-worker tasks on
+  the signed path; admission now owns and exactly finalizes pre-verification
+  rejection, so mutable marker removal cannot fall through to arbitrary WRE
+  execution and a competing claimant cannot be overwritten. Admission returns
+  the exact context, skills, and discovery binding won by its database CAS;
+  neither the direct task runner nor the OpenClaw supervisor can execute an
+  earlier caller snapshot. Supervisor completion, failure, assurance
+  completion, and requeue persistence now use the same exact assignee/context
+  CAS; a concurrent owner is never overwritten. Requeue admission replaces only the
+  superseded claim/use pair while retaining a canonical ten-entry result tail.
+  The independently durable append-only AgentDB ledger retains every attempt,
+  and task context must match its exact tail before supervisor or direct
+  execution; malformed durable state, truncation, legacy context-only history,
+  and complete attacker re-hashing therefore fail closed. Both execution paths
+  append one shared result receipt in the same task-transition transaction;
+  persistence failure leaves the exact task executing and never creates an
+  unreceipted terminal state. Verifier completion preserves trusted timestamp
+  precision and atomically commits the durable reservation; detached completion is forbidden. Transactional execution logic was extracted from the touched `AgentDB` monolith into bounded database siblings, reducing the monolith while making the security boundary explicit. Publication recovery never creates the
+  derived authority cache, even from internally self-consistent COMMITTED
+  packets; only a fresh normal publish call that re-verifies proposal
+  authorization may recreate that cache.
+## 2026-07-27: REDDOG_ARCHITECT_FIX_PROMOTION_TWO_PHASE_PUBLICATION_PHASE1 - Replaced mutable profile-first publication with `PREPARED -> immutable content-addressed inert artifact -> COMMITTED state CAS -> derived fixed-path inert cache`. Recovery never advances PREPARED, never lets unanchored packets delete immutable artifacts, preserves concurrent refresh data, and requires an authenticated publish retry to rebuild the cache after a COMMITTED crash. Added forged-self-hash, crash/interleaving, concurrency, idempotency, runtime-lock, and valve/signer use-time COMMITTED gates. Both signer consumers now require the explicitly selected durable authoritative-work-state file; injected state can only corroborate it, and any durable architect promotion makes missing/ambiguous profile provenance fail closed. The resident queue now reloads current state in serial and one-shot paths, derives a current-revision publication-effect binding before authority-request persistence, revalidates it before signing, includes it in the signed work authority, and binds verification to the exact signed work-authority digest. A canonical verification receipt now persists through dry-run intents, runtime receipts, and AgentDB task context; immediately before the writer, dispatch reloads both recorded stages, obtains fresh time from a required production clock, binds the effective task to the signed work order and authoritative WSP 15 worker plan, and preflight-verifies the signed authority. AgentDB publication advances the existing durable nonce state through digest-bound `RESERVED -> AUTHORIZED -> APPLIED`; tasks remain `publication_held` and unclaimable until the exact APPLIED batch is activated by a field-complete CAS. Recovery handles both zero-row AUTHORIZED crashes and APPLIED-before-activation crashes, while partial, altered, prematurely assigned, or completed batches reject. Dispatch admission requires exact allowlisted receipt and intent schemas, persists only canonical projections, and derives principal and RedDog identities solely from the reverified signed authority; attacker-added identity or metadata fields reject before nonce reservation. Worker execution separately performs an atomic `assigned -> executing` CAS, stores receipt-linked claim/use digests, and finalizes through an exact assignee/context CAS. Post-claim runner exceptions become terminal failures, concurrent state changes are never overwritten, and the generic task finalizer cannot finalize signed-worker tasks. PREPARED state, missing verifier/clock dependencies, synthetic dry-runs, attacker-recomputed receipts around a forged signature or substituted operation, role/capability substitution, extra-field identity injection, replay, old environment epochs, and authority substitution cannot reach dispatch effects. Split publication validation, signer persistence, optional signed bindings, request materialization, worker-dispatch authority binding, publication admission, and execution admission into bounded sibling modules so affected files satisfy WSP 62. COMMITTED remains local publication integrity, not publication authentication; `main.py` keeps the inert cache separate from the active profile, and signer-owned publication activation remains unimplemented (WSP 00, 15, 22, 50, 62, 78, 97).
+- Security correction: recovery no longer rebuilds the derived cache from
+  serialized COMMITTED packets. A fresh normal publish call must reverify the
+  signed proposal authorization before a missing cache can be recreated.
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1
 - Added direct promotion-time verification of the principal signature over the
   exact signer policy and the RedDog signature over the exact proposal payload.

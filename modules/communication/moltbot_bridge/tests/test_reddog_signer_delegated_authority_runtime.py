@@ -159,6 +159,7 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "denied_paths": (),
         "requested_operation": "create_foundup",
         "permission_snapshot_digest": "sha256:snap-1",
+        "queue_consumer_receipt_digest": "sha256:" + ("b" * 64),
         "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
         "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
         "wsp15_priority": "P0",
@@ -269,10 +270,11 @@ def test_changed_signed_wsp15_allocation_digest_rejects() -> None:
     assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
 
 
-def test_changed_signed_base_ref_or_work_order_digest_rejects() -> None:
+def test_changed_signed_work_order_lineage_rejects() -> None:
     for field, value in (
         ("base_ref", "release"),
         ("work_order_digest", "sha256:" + ("f" * 64)),
+        ("queue_consumer_receipt_digest", "sha256:" + ("e" * 64)),
     ):
         result, signer, _, snapshot_resolver = _issue()
         assert result.identity and result.work_authority
@@ -294,12 +296,51 @@ def test_changed_signed_base_ref_or_work_order_digest_rejects() -> None:
         assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
 
 
+def test_malformed_queue_consumer_receipt_digest_rejects_before_signing() -> None:
+    result, _, _, _ = _issue(
+        queue_consumer_receipt_digest="sha256:not-a-canonical-digest"
+    )
+
+    assert result.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
+
+
 def test_changed_signed_runtime_binding_digest_rejects() -> None:
     result, signer, _, snapshot_resolver = _issue()
 
     assert result.accepted is True
     assert result.identity and result.work_authority
     result.work_authority["model_runtime_binding_digest"] = "sha256:changed-after-signing"
+
+    verified = verify_delegated_work_authority(
+        work_authority=result.work_authority,
+        identity=result.identity,
+        signature_verifier=signer,
+        principal_key_resolver=_PrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=_NoRevocation(),
+        now=_NOW,
+        required_valve_state=_VALVE,
+    )
+
+    assert verified.accepted is False
+    assert ReasonCode.WORKAUTH_SIGNATURE_INVALID in verified.reason_codes
+
+
+def test_changed_signed_architect_publication_binding_rejects() -> None:
+    result, signer, store, snapshot_resolver = _issue(
+        architect_fix_publication_receipt_id="sha256:" + "4" * 64,
+        architect_fix_publication_binding_digest="sha256:" + "5" * 64,
+    )
+
+    assert result.accepted is True
+    assert result.identity and result.work_authority
+    issued = store.load()["issued_authorities"][result.work_authority["work_order_id"]]
+    assert issued["architect_fix_publication_receipt_id"] == "sha256:" + "4" * 64
+    result.work_authority[
+        "architect_fix_publication_binding_digest"
+    ] = "sha256:" + "6" * 64
 
     verified = verify_delegated_work_authority(
         work_authority=result.work_authority,

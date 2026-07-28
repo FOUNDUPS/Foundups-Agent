@@ -52,5 +52,13 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_executio
 
 Focused architect-FIX two-phase publication:
 ```powershell
-python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py modules/communication/moltbot_bridge/tests/test_reddog_architect_proposal_verified_authority.py modules/communication/moltbot_bridge/tests/test_reddog_authoritative_work_state_refresh_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_authority_profile_source_artifact_supply.py modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py -q
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py modules/communication/moltbot_bridge/tests/test_reddog_architect_proposal_verified_authority.py modules/communication/moltbot_bridge/tests/test_reddog_authoritative_work_state_refresh_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_authority_profile_source_artifact_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_runtime_artifact_locking.py modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply.py modules/communication/moltbot_bridge/tests/test_reddog_resident_control_loop_signing_context.py modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py -q
 ```
+
+The publication suite proves the exact fail-closed sequence:
+`PREPARED -> immutable inert artifact -> COMMITTED state -> fixed inert cache`.
+Recovery never advances PREPARED and never emits signer, queue, claim, shell,
+worktree, OpenClaw, or execution-valve authority.
+Signer regressions also require the explicitly selected durable authoritative
+work state and reject missing state, split-path substitution, marker and
+queue/claim stripping, or injected state that differs from the durable payload.

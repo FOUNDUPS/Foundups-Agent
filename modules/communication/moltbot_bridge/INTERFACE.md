@@ -47,12 +47,18 @@ profile. There is no process-local authority registry or serializable promotion
 capability. Production startup remains fail closed until it receives the
 attestation, a current signer-runtime configuration, and an independently
 administered principal-key resolver.
-`reddog_architect_fix_promotion_transaction.py` isolates record construction
-and publication; `reddog_architect_fix_promotion_publication.py` confines all
-artifacts and runs `STATE_PREPARED -> PROFILE_PUBLISHED -> COMMITTED`. PREPARED
-contains no executable claim or queue item. Recovery binds every staged digest,
-revision, attestation, and record; tampering, drift, and altered retries fail.
-COMMITTED proves local integrity, not late-bound publication authentication. `main.py` writes the distinct `architect_fix_inert_profile.json` artifact, rejects aliasing with `authority_profile.json`, and never activates it for the resident authority chain.
+`reddog_architect_fix_promotion_transaction.py` isolates record construction and publication; `reddog_architect_fix_promotion_publication.py` confines all artifacts, while `reddog_architect_fix_publication_effect_binding.py` binds current COMMITTED lineage into signer and worker-dispatch admission. Queue authority verification derives a canonical receipt from the recorded signed authority and accepted verification result. The dry-run receipt, each intent, the runtime receipt, and each AgentDB task retain that receipt ID/digest and exact work-authority digest. Immediately before AgentDB publication, the runtime reloads both stages, recomputes the lineage, obtains fresh time from a required production clock, binds the effective work order, FoundUp, operation, and exact worker roles to the signed authority plus authoritative WSP 15 plan, and re-verifies the principal and work-authority signatures, revocation, permission snapshot, scope, paths, freshness, and valve binding. Final admission uses `AUTHORITATIVE_USE` and consumes the durable nonce once before the writer; any later writer failure requires freshly signed authority. Static validation failures do not consume the nonce. Missing verifier/clock dependencies, forged signatures or substituted operations with attacker-recomputed local receipts, role/capability substitution, replay, expired authority reopened with an old environment epoch, synthetic dry-runs, and substituted authority all reject before the writer.
+AgentDB publication persists a canonical `reddog_signed_worker_agentdb_envelope.v1` containing the complete signed authority runtime, authoritative WSP 15 allocation, exact dispatch receipt, and exact worker intent. Both `OpenClawSupervisor` and direct `scripts/run_task.py` execution independently rehydrate and reverify it before runner selection; runner context comes from verified evidence, outer metadata is not authority, and inconsistent routing cannot fall through to generic WRE. `AuthoritativeWorkStateStore.locked_snapshot()` is the shared mutation fence for refresh, promotion, and AgentDB publication; its file-backed implementation is confined to an explicit outside-repository runtime root and uses a sibling operation lock.
+Canonical rehydration returns an opaque process-local verification proof that
+cannot be reconstructed from a serialized mapping. Execution admission accepts
+only that proof, rejects stale assignments, validates the durable result
+history, and then performs the assigned-to-executing CAS. Invalid protected
+rows are quarantined transactionally with any verifier reservation, and a
+poisoned row does not prevent OpenClaw from considering the next valid task.
+Publication runs `STATE_PREPARED -> immutable content-addressed inert profile artifact -> COMMITTED authoritative state -> derived fixed-path inert cache`.
+PREPARED has no executable claim or queue item. Recovery never advances it: a compare-and-swap rollback preserves concurrent authoritative-state changes, removes exact staged artifacts, and requires a fresh authenticated publish attempt.
+Every staged digest, revision, attestation, and record remains bound; tampering, drift, altered retries, and attacker-recomputed internal receipts fail closed without granting unanchored stages immutable-artifact deletion authority.
+COMMITTED proves local publication integrity, not late-bound authentication. Both high-authority signer consumers require the explicitly selected, confined durable authoritative work state, even without removable publication or queue/claim markers; caller-injected state is corroborative only and must match that durable payload exactly. If durable state contains any architect promotion, absent or ambiguous profile provenance fails closed rather than being treated as generic. Architect-derived profiles must also prove current COMMITTED state at valve and signer use time; `main.py` keeps `architect_fix_inert_profile.json` separate and inactive.
 A signer-owned commitment and authenticated activation covering the immutable publication tuple remain SPECIFIED_NOT_IMPLEMENTED.
 
 The signer-service configuration and runtime wiring can provision one exact
@@ -153,13 +159,13 @@ slice-verifier stage is ready. Author failure revokes the reservation and
 cancels the verifier task. An expired verifier lease may be renewed only at
 that ready stage, with a bounded renewal count and maximum lease horizon.
 
-The slice-verifier request binds the reservation ID, immutable admission
-digest, verifier task, author principal, verifier principal, work order,
-operational snapshot, and WSP 15 allocation. Renewed leases cannot replace
+The request binds reservation ID/digest, verifier task, principals, work order, snapshot, and WSP 15 allocation. Renewed leases cannot replace
 that lineage. The verifier stage rehydrates the durable reservation and
-terminally completes it only when the receipt repeats the same bindings. CI,
-CodeQL, and red-team checks are additional evidence; they do not replace the
-independent verifier reservation.
+emits a receipt-bound completion request only when the receipt repeats the same
+bindings; it does not complete the task or reservation. The signed-worker
+AgentDB finalizer reauthenticates the durable staged request and atomically
+commits the task, assurance, and result ledger. CI, CodeQL, and red-team checks are
+additional evidence; they do not replace the independent reservation.
 
 ### Generic provider-call evidence
 

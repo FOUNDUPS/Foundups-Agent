@@ -74,6 +74,15 @@ class SignedWorkerOpenClawClaimReason:
         "REJECT_REDDOG_SIGNED_WORKER_TASK_STATE_TRANSITION_REJECTED"
     )
     AGENTDB_FAILURE = "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_FAILURE"
+    AGENTDB_ENVELOPE_REJECTED = (
+        "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_ENVELOPE_REJECTED"
+    )
+    EXECUTION_ALREADY_CLAIMED = (
+        "REJECT_REDDOG_SIGNED_WORKER_EXECUTION_ALREADY_CLAIMED"
+    )
+    EXECUTION_LEASE_RENEWAL_FAILED = (
+        "REJECT_REDDOG_SIGNED_WORKER_EXECUTION_LEASE_RENEWAL_FAILED"
+    )
     MAX_CLAIMS_INVALID = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
     CLAIM_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_CLAIM_REJECTED"
 
@@ -266,6 +275,7 @@ def claim_reddog_signed_worker_dispatch_task_once(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
 ) -> Dict[str, Any]:
     """Claim one signed task only while holding the shared resident lock."""
 
@@ -285,6 +295,7 @@ def claim_reddog_signed_worker_dispatch_task_once(
             agent_id=agent_id,
             agent_db_factory=agent_db_factory,
             signed_worker_runner=signed_worker_runner,
+            authority_verification_context=authority_verification_context,
         )
 
 
@@ -294,6 +305,7 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
 ) -> Dict[str, Any]:
     """Claim and execute one signed task under the resident lock."""
 
@@ -311,6 +323,7 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
     db, task, rejected = _signed_worker_claim_pending_task(
         repo_root=repo_root, agent_id=agent_id,
         agent_db_factory=agent_db_factory, signed_worker_runner=signed_worker_runner,
+        authority_verification_context=authority_verification_context,
     )
     if rejected is not None:
         return rejected
@@ -329,37 +342,120 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
         task_id=task_id,
         context=context,
         signed_worker_runner=signed_worker_runner,
+        authority_verification_context=authority_verification_context,
     )
 
 
 def _signed_worker_execute_claimed_task(
+    *,
+    repo_root: Path, db: Any, task_id: str, context: Mapping[str, Any],
+    signed_worker_runner: Any | None,
+    authority_verification_context: Any | None,
+) -> Dict[str, Any]:
+    """Admit and authenticate the exact claimed task before runner selection."""
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_supervisor_admission import (
+        admit_signed_worker_for_supervisor,
+    )
+    admission = admit_signed_worker_for_supervisor(
+        repo_root=repo_root, db=db, task_id=task_id, context=context,
+        env=os.environ,
+        authority_verification_context=authority_verification_context,
+    )
+    if admission.status == "ALREADY_CLAIMED":
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            rejection_reasons=(
+                SignedWorkerOpenClawClaimReason.EXECUTION_ALREADY_CLAIMED,
+            ),
+        )
+    admitted_context = admission.context
+    if admission.status != "ADMITTED":
+        return _signed_worker_reject_claimed_task(
+            db=db, task_id=task_id, context=admitted_context,
+            reasons=(
+                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED,
+                admission.error,
+            ),
+        )
+    try:
+        run_result, runner_reject, lease_healthy = (
+            _signed_worker_run_under_heartbeat(
+                repo_root=repo_root,
+                db=db,
+                task_id=task_id,
+                context=admitted_context,
+                signed_worker_runner=signed_worker_runner,
+            )
+        )
+        if runner_reject is not None:
+            return runner_reject
+        if not lease_healthy:
+            return _signed_worker_reject_claimed_task(
+                db=db,
+                task_id=task_id,
+                context=admitted_context,
+                reasons=(
+                    SignedWorkerOpenClawClaimReason.EXECUTION_LEASE_RENEWAL_FAILED,
+                ),
+                effect_source={
+                    "effect_commit_state": "INDETERMINATE",
+                },
+                runner_result={
+                    "status": "execution_lease_renewal_failed",
+                    "effect_commit_state": "INDETERMINATE",
+                },
+            )
+    except Exception as exc:
+        return _signed_worker_reject_claimed_task(
+            db=db, task_id=task_id, context=admitted_context,
+            reasons=(SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,),
+            runner_result={
+                "status": "execution_exception", "exception_type": type(exc).__name__,
+            },
+        )
+    return _signed_worker_finalize_claimed_task(
+        db=db, task_id=task_id, context=admitted_context, run_result=run_result
+    )
+
+
+def _signed_worker_run_under_heartbeat(
     *,
     repo_root: Path,
     db: Any,
     task_id: str,
     context: Mapping[str, Any],
     signed_worker_runner: Any | None,
-) -> Dict[str, Any]:
-    """Resolve the runner, execute the claimed task, and persist its result."""
-
-    effective_runner, runner_reject = _signed_worker_effective_runner(
-        repo_root=repo_root, db=db, task_id=task_id, context=context,
-        signed_worker_runner=signed_worker_runner,
-    )
-    if runner_reject is not None:
-        return runner_reject
+) -> tuple[Any, Mapping[str, Any] | None, bool]:
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
         execute_reddog_signed_worker_dispatch_task,
     )
-    run_result = execute_reddog_signed_worker_dispatch_task(
-        task_context=context,
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_heartbeat import (
+        signed_worker_execution_heartbeat,
+    )
+
+    with signed_worker_execution_heartbeat(
+        db=db,
         task_id=task_id,
-        repo_root=repo_root,
-        runner=effective_runner,
-    )
-    return _signed_worker_finalize_claimed_task(
-        db=db, task_id=task_id, context=context, run_result=run_result
-    )
+        context=context,
+    ) as heartbeat:
+        effective_runner, runner_reject = _signed_worker_effective_runner(
+            repo_root=repo_root,
+            db=db,
+            task_id=task_id,
+            context=context,
+            signed_worker_runner=signed_worker_runner,
+        )
+        run_result = None
+        if runner_reject is None:
+            run_result = execute_reddog_signed_worker_dispatch_task(
+                task_context=context,
+                task_id=task_id,
+                repo_root=repo_root,
+                runner=effective_runner,
+            )
+    return run_result, runner_reject, heartbeat.healthy
 
 
 def _signed_worker_claimed_task_context(
@@ -389,6 +485,7 @@ def _signed_worker_claimed_task_context(
 def _signed_worker_claim_pending_task(
     *, repo_root: Path, agent_id: str,
     agent_db_factory: Optional[Callable[[], Any]], signed_worker_runner: Any | None,
+    authority_verification_context: Any | None = None,
 ) -> tuple[Any | None, Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
     try:
         from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import SIGNED_WORKER_DISPATCH_TASK_SOURCE
@@ -402,11 +499,25 @@ def _signed_worker_claim_pending_task(
                 detail=str(healthcheck.get("status") or "")[:300],
             )
         db = (agent_db_factory or AgentDB)()
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_recovery import (
+            recover_expired_signed_worker_executions,
+        )
+        recovery = recover_expired_signed_worker_executions(db)
+        if recovery.get("accepted") is not True:
+            return db, None, _signed_worker_claim_result(
+                accepted=False,
+                status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+                rejection_reasons=(
+                    SignedWorkerOpenClawClaimReason.AGENTDB_FAILURE,
+                ),
+                detail="signed_worker_execution_recovery_rejected",
+            )
         task = _claim_reserved_independent_verifier_task(
             db=db,
             source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
             env=os.environ,
             repo_root=repo_root,
+            authority_verification_context=authority_verification_context,
         )
         if task is None:
             task = _claim_pending_reddog_signed_worker_dispatch_task(
@@ -469,12 +580,10 @@ def _signed_worker_reject_claimed_task(
             rejection_reasons=tuple(final_reasons),
             task_status="failed",
         ):
-            final_reasons.append(
-                SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED
-            )
-            final_reasons.append(
-                SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED
-            )
+            final_reasons.extend((
+                SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED,
+                SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED,
+            ))
         _revoke_author_assurance_after_failure(
             db=db,
             task_id=task_id,
@@ -544,12 +653,6 @@ def _signed_worker_finalize_claimed_task(
     requeue = runner_result.get("queue_chain_requeue_required") is True
     status = SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED if requeue else SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
     task_status = "pending" if requeue else "completed"
-    if (
-        not requeue
-        and str(run_result.capability or "")
-        == "independent_slice_verification"
-    ):
-        task_status = "completed_reserved"
     if not _persist_reddog_signed_worker_dispatch_task_result(
         db, task_id, context=context, claim_status=status, run_result=source,
         task_status=task_status,
@@ -576,6 +679,7 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
     max_claims: int = 1,
 ) -> Dict[str, Any]:
     """Claim a bounded task batch only while holding the shared resident lock."""
@@ -597,6 +701,7 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
             agent_id=agent_id,
             agent_db_factory=agent_db_factory,
             signed_worker_runner=signed_worker_runner,
+            authority_verification_context=authority_verification_context,
             max_claims=max_claims,
         )
 
@@ -607,6 +712,7 @@ def _claim_reddog_signed_worker_dispatch_tasks_until_idle_under_control_lock(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
     max_claims: int = 1,
 ) -> Dict[str, Any]:
     """Claim signed tasks until idle or max_claims under the resident lock."""
@@ -622,6 +728,7 @@ def _claim_reddog_signed_worker_dispatch_tasks_until_idle_under_control_lock(
             agent_id=agent_id,
             agent_db_factory=agent_db_factory,
             signed_worker_runner=signed_worker_runner,
+            authority_verification_context=authority_verification_context,
         )
         outcome = _signed_worker_record_batch_claim(state, claim)
         if outcome == "continue":
@@ -779,9 +886,7 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
         ).fetchall()
         if not rows:
             return None
-        row = None
-        context: Any = None
-        raw_context: Any = None
+        candidates: list[tuple[str, Any]] = []
         for candidate in rows:
             retry_not_before = (
                 candidate["retry_not_before"]
@@ -820,29 +925,35 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
                     )
                 )
             ):
-                row = candidate
-                raw_context = raw_candidate
-                context = candidate_context
-                break
-        if row is None:
-            return None
-        task_id = row["task_id"] if hasattr(row, "keys") else row[0]
-        updated = conn.execute(
-            """
-            UPDATE agents_autonomous_tasks
-            SET assigned_to = ?, assigned_at = CURRENT_TIMESTAMP, status = 'assigned'
-            WHERE task_id = ? AND status = 'pending' AND discovered_by = ?
-            """,
-            (agent_id, task_id, source),
-        ).rowcount
-        if updated != 1:
-            return {"task_id": task_id, "claim_race_lost": True}
-    if context is None:
-        try:
-            context = json.loads(raw_context) if isinstance(raw_context, str) else raw_context
-        except Exception:
-            context = None
-    return {"task_id": task_id, "context": context}
+                task_id = (
+                    candidate["task_id"]
+                    if hasattr(candidate, "keys")
+                    else candidate[0]
+                )
+                candidates.append((str(task_id), candidate_context))
+    return _assign_first_valid_signed_worker_candidate(db, candidates)
+
+
+def _assign_first_valid_signed_worker_candidate(
+    db: Any,
+    candidates: Sequence[tuple[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Skip atomically quarantined poison rows without hiding real races."""
+
+    last_quarantined = ""
+    for task_id, context in candidates:
+        if db.assign_signed_worker_task(task_id):
+            return {"task_id": task_id, "context": context}
+        current = db.get_autonomous_task_by_id(task_id)
+        if isinstance(current, Mapping) and current.get("status") == "quarantined":
+            last_quarantined = task_id
+            continue
+        return {"task_id": task_id, "claim_race_lost": True}
+    return (
+        {"task_id": last_quarantined, "claim_race_lost": True}
+        if last_quarantined
+        else None
+    )
 
 
 def _claim_reserved_independent_verifier_task(
@@ -851,18 +962,28 @@ def _claim_reserved_independent_verifier_task(
     source: str,
     env: Mapping[str, str],
     repo_root: Path | str | None,
+    authority_verification_context: Any | None = None,
 ) -> Optional[Dict[str, Any]]:
     """Return the already-reserved verifier task only at its exact queue stage."""
 
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
         is_openclaw_independent_verifier_signed_worker_context,
     )
-
-    _renew_expired_independent_verifier_for_ready_stage(
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+        rehydrate_signed_worker_agentdb_context,
+        renew_expired_verified_assurance,
+    )
+    renew_expired_verified_assurance(
         db=db,
         source=source,
         env=env,
         repo_root=repo_root,
+        authority_verification_context=authority_verification_context,
+        rehydrate=lambda **kwargs: rehydrate_signed_worker_agentdb_context(
+            **kwargs, env=env
+        ),
+        is_verifier_context=is_openclaw_independent_verifier_signed_worker_context,
+        is_stage_ready=_openclaw_independent_verifier_ready_from_env,
     )
     with db.db.get_connection() as conn:
         rows = conn.execute(
@@ -918,90 +1039,6 @@ def _claim_reserved_independent_verifier_task(
     return None
 
 
-def _renew_expired_independent_verifier_for_ready_stage(
-    *,
-    db: Any,
-    source: str,
-    env: Mapping[str, str],
-    repo_root: Path | str | None,
-) -> None:
-    """Renew one expired verifier lease only when its exact stage is ready."""
-
-    from modules.communication.moltbot_bridge.src.reddog_openclaw_assurance_capacity import (
-        build_assurance_renewal_request,
-    )
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
-        is_openclaw_independent_verifier_signed_worker_context,
-    )
-
-    with db.db.get_connection() as conn:
-        rows = conn.execute(
-            """
-            SELECT task_id, context
-            FROM agents_autonomous_tasks
-            WHERE status = 'expired' AND discovered_by = ?
-            ORDER BY priority_score DESC, discovered_at ASC
-            LIMIT 50
-            """,
-            (source,),
-        ).fetchall()
-    raw_now = str(env.get("REDDOG_RESIDENT_QUEUE_NOW_ISO") or "").strip()
-    try:
-        trusted_now = (
-            datetime.fromisoformat(raw_now.replace("Z", "+00:00"))
-            if raw_now
-            else datetime.now(timezone.utc)
-        )
-    except ValueError:
-        return
-    if trusted_now.tzinfo is None:
-        trusted_now = trusted_now.replace(tzinfo=timezone.utc)
-    for row in rows:
-        task_id = str(row["task_id"] if hasattr(row, "keys") else row[0])
-        raw_context = row["context"] if hasattr(row, "keys") else row[1]
-        try:
-            context = (
-                json.loads(raw_context)
-                if isinstance(raw_context, str)
-                else raw_context
-            )
-        except (TypeError, ValueError):
-            continue
-        if (
-            not is_openclaw_independent_verifier_signed_worker_context(
-                context
-            )
-            or not _openclaw_independent_verifier_ready_from_env(
-                context,
-                env,
-                repo_root=repo_root,
-            )
-        ):
-            continue
-        durable = db.get_independent_assurance_reservation_for_task(
-            task_id,
-            task_kind="verifier",
-        )
-        reservation = (
-            durable.get("reservation")
-            if isinstance(durable, Mapping)
-            else None
-        )
-        if (
-            not isinstance(reservation, Mapping)
-            or str(reservation.get("status") or "") != "EXPIRED"
-        ):
-            continue
-        renewal = db.renew_independent_assurance(
-            build_assurance_renewal_request(
-                reservation,
-                now=trusted_now,
-            )
-        )
-        if renewal.get("accepted") is True:
-            return
-
-
 def _mark_reddog_readonly_audit_task_failed(db: Any, task_id: str) -> None:
     if not task_id:
         return
@@ -1031,13 +1068,26 @@ def _persist_reddog_signed_worker_dispatch_task_result(
     try:
         base_context = dict(context) if isinstance(context, Mapping) else {}
         result = dict(run_result) if isinstance(run_result, Mapping) else {}
-        runner_payload = _signed_worker_runner_payload(result, runner_result)
-        receipt = _signed_worker_task_result_receipt(
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
+            build_signed_worker_task_result_receipt,
+        )
+        from modules.infrastructure.database.src.signed_worker_assurance_staging import (
+            rehydrate_staged_assurance_completion,
+        )
+        claim = base_context.get("signed_worker_execution_claim")
+        claim = dict(claim) if isinstance(claim, Mapping) else {}
+        durable_completion = rehydrate_staged_assurance_completion(
+            db.db,
+            task_id=task_id,
+            assigned_to=str(claim.get("assigned_to") or ""),
+        )
+        receipt = build_signed_worker_task_result_receipt(
             base_context=base_context,
             claim_status=claim_status,
             result=result,
-            runner_payload=runner_payload,
+            runner_result=runner_result,
             rejection_reasons=rejection_reasons,
+            assurance_completion=durable_completion,
         )
         return _commit_signed_worker_task_result(
             db, task_id, base_context, receipt, task_status=task_status
@@ -1050,143 +1100,44 @@ def _persist_reddog_signed_worker_dispatch_task_result(
         return False
 
 
-def _signed_worker_receipt_reasons(values: Sequence[Any]) -> list[str]:
-    return list(dict.fromkeys(str(value) for value in values if str(value or "").strip()))
-
-
-def _signed_worker_runner_result_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
-    if not isinstance(payload, Mapping) or not payload:
-        return {}
-    bootstrap = payload.get("bootstrap_result")
-    if not isinstance(bootstrap, Mapping):
-        bootstrap = {}
-    return {
-        "accepted": payload.get("accepted") is True,
-        "decision": str(payload.get("decision") or ""),
-        "receipt_id": str(payload.get("receipt_id") or ""),
-        "queue_item_id": str(payload.get("queue_item_id") or ""),
-        "queue_chain_complete": payload.get("queue_chain_complete") is True,
-        "assigned_stage_complete": payload.get("assigned_stage_complete") is True,
-        "queue_chain_requeue_required": payload.get("queue_chain_requeue_required") is True,
-        "retry_at": str(payload.get("retry_at") or ""),
-        "rejection_reasons": _signed_worker_receipt_reasons(
-            tuple(payload.get("rejection_reasons") or ())
-        ),
-        "bootstrap_status": str(bootstrap.get("status") or ""),
-        "bootstrap_next_action": str(bootstrap.get("next_action") or ""),
-        "bootstrap_dispatched_stages": _signed_worker_receipt_reasons(
-            tuple(bootstrap.get("dispatched_stages") or ())
-        ),
-    }
-
-
 def _stable_digest(payload: Any) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-
-def _signed_worker_runner_payload(
-    result: Mapping[str, Any], runner_result: Mapping[str, Any] | None
-) -> Dict[str, Any]:
-    if isinstance(runner_result, Mapping):
-        return dict(runner_result)
-    nested = result.get("runner_result")
-    return dict(nested) if isinstance(nested, Mapping) else {}
-
-
-def _signed_worker_task_result_receipt(
-    *, base_context: Mapping[str, Any], claim_status: str,
-    result: Mapping[str, Any], runner_payload: Mapping[str, Any],
-    rejection_reasons: Sequence[str],
-) -> Dict[str, Any]:
-    supplied = bool(result)
-    receipt = {
-        "schema_version": "reddog_signed_worker_task_result.v1",
-        "claim_status": str(claim_status or ""),
-        "accepted": result.get("accepted") is True if supplied else False,
-        "decision": str(result.get("decision") or ""),
-        "receipt_id": str(result.get("receipt_id") or ""),
-        "worker_role": str(result.get("worker_role") or base_context.get("worker_role") or ""),
-        "worker_runtime": str(result.get("worker_runtime") or base_context.get("worker_runtime") or ""),
-        "capability": str(result.get("capability") or base_context.get("capability") or ""),
-        "rejection_reasons": _signed_worker_receipt_reasons(
-            tuple(rejection_reasons) or tuple(result.get("rejection_reasons") or ())
-        ),
-        "runner_result_digest": _stable_digest(runner_payload) if runner_payload else "",
-        "run_result_digest": _stable_digest(result) if supplied else "",
-        "runner_result_summary": _signed_worker_runner_result_summary(runner_payload),
-        **_signed_worker_result_effect_fields(result, supplied=supplied),
-    }
-    receipt["receipt_digest"] = _stable_digest(receipt)
-    return receipt
-
-
-def _signed_worker_result_effect_fields(
-    result: Mapping[str, Any], *, supplied: bool
-) -> Dict[str, bool]:
-    source_fields = (
-        "no_shell_command_executed", "no_source_repo_mutation_performed",
-        "no_holoindex_reindex_performed", "no_hermes_dispatch_performed",
-        "no_worktree_operation_performed", "no_pr_created",
-        "no_live_foundup_enqueue_performed", "no_pattern_memory_write_performed",
-        "no_reward_settlement_performed",
-    )
-    return {
-        field: result.get(field) is True if supplied else True
-        for field in source_fields
-    }
 
 
 def _commit_signed_worker_task_result(
     db: Any, task_id: str, base_context: Dict[str, Any],
     receipt: Mapping[str, Any], *, task_status: str | None,
 ) -> bool:
-    history = base_context.get("signed_worker_task_result_receipts")
-    bounded = [item for item in history or [] if isinstance(item, Mapping)][-9:]
-    bounded.append({
-        "claim_status": receipt["claim_status"],
-        "receipt_id": receipt["receipt_id"],
-        "receipt_digest": receipt["receipt_digest"],
-    })
-    base_context["signed_worker_task_last_result"] = dict(receipt)
-    base_context["signed_worker_task_result_receipts"] = bounded
-    context_json = json.dumps(base_context, sort_keys=True)
-    if task_status == "pending":
-        runner_summary = receipt.get("runner_result_summary")
-        if not isinstance(runner_summary, Mapping):
-            runner_summary = {}
-        retry_at = str(
-            runner_summary.get("retry_at") or ""
-        ) or None
-        query = (
-            "UPDATE agents_autonomous_tasks SET context = ?, status = 'pending', "
-            "assigned_to = NULL, assigned_at = NULL, retry_not_before = ? "
-            "WHERE task_id = ? "
-            "AND status = 'assigned'"
-        )
-        updated = db.db.execute_write(
-            query, (context_json, retry_at, task_id)
-        )
-        return updated == 1
-    elif task_status in {"completed", "failed"}:
-        query = (
-            "UPDATE agents_autonomous_tasks SET context = ?, status = ?, "
-            "completed_at = CURRENT_TIMESTAMP, retry_not_before = NULL "
-            "WHERE task_id = ? AND status = 'assigned'"
-        )
-        updated = db.db.execute_write(query, (context_json, task_status, task_id))
-        return updated == 1
-    elif task_status == "completed_reserved":
-        query = (
-            "UPDATE agents_autonomous_tasks SET context = ?, "
-            "retry_not_before = NULL WHERE task_id = ? AND status = 'completed'"
-        )
-        updated = db.db.execute_write(query, (context_json, task_id))
-        return updated == 1
-    else:
-        query = "UPDATE agents_autonomous_tasks SET context = ? WHERE task_id = ?"
-    updated = db.db.execute_write(query, (context_json, task_id))
-    return updated == 1
+    from modules.infrastructure.database.src.signed_worker_execution_store import (
+        finalize_signed_worker_execution,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
+        append_signed_worker_result_history,
+    )
+    admitted_context = dict(base_context)
+    base_context = append_signed_worker_result_history(base_context, receipt)
+    runner_summary = receipt.get("runner_result_summary")
+    assurance_completion = receipt.get("assurance_completion_request")
+    assurance_completion = (
+        dict(assurance_completion)
+        if isinstance(assurance_completion, Mapping)
+        else None
+    )
+    retry_at = (
+        str(runner_summary.get("retry_at") or "") or None
+        if isinstance(runner_summary, Mapping)
+        else None
+    )
+    return finalize_signed_worker_execution(
+        db, task_id,
+        context=admitted_context,
+        accepted=task_status != "failed",
+        result_context=base_context,
+        target_status=task_status,
+        retry_not_before=retry_at,
+        assurance_completion=assurance_completion,
+    )
 
 
 def _readonly_assignment_id(context: Dict[str, Any]) -> str:
@@ -2500,9 +2451,14 @@ class OpenClawSupervisor:
         auto_tasks_enabled = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") == "1"
         if auto_tasks_enabled:
             try:
+                from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+                    exclude_signed_worker_origin,
+                )
                 from modules.infrastructure.database.src.agent_db import AgentDB
                 db = AgentDB()
-                tasks = db.get_autonomous_tasks(status="pending", limit=1)
+                tasks = exclude_signed_worker_origin(
+                    db.get_autonomous_tasks(status="pending", limit=10)
+                )
                 if tasks:
                     return {
                         "kind": "action",
@@ -2518,11 +2474,16 @@ class OpenClawSupervisor:
         maintenance_enabled = os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0") == "1"
         if maintenance_enabled:
             try:
+                from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+                    exclude_signed_worker_origin,
+                )
                 from modules.infrastructure.database.src.agent_db import AgentDB
                 from .openclaw_maintenance_selector import select_maintenance_task
 
                 db = AgentDB()
-                pending_tasks = db.get_autonomous_tasks(status="pending", limit=10)
+                pending_tasks = exclude_signed_worker_origin(
+                    db.get_autonomous_tasks(status="pending", limit=10)
+                )
                 selection = select_maintenance_task(
                     pending_tasks=pending_tasks,
                     observation=observation,

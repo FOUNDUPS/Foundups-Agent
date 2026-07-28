@@ -25,6 +25,14 @@ def test_windows_runtime_mutex_uses_machine_global_namespace() -> None:
     assert name == "Global\\FoundupsRuntime-" + "a" * 64
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows extended paths")
+def test_windows_containment_normalizes_extended_length_prefix() -> None:
+    extended = Path(r"\\?\C:\runtime-root\state.json")
+    ordinary = Path(r"C:\runtime-root")
+
+    assert runtime_artifact_safety._is_relative_to(extended, ordinary) is True
+
+
 def test_descriptor_final_path_rejects_unsupported_posix_platform(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -113,6 +121,26 @@ def test_runtime_artifact_path_rejects_source_and_runtime_root_escape(tmp_path: 
         repo_root=repo,
         allowed_root=runtime,
     ) == (runtime / "receipt.jsonl").resolve()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows paths are case-insensitive")
+def test_runtime_artifact_path_accepts_mixed_case_nonexistent_runtime_root(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    allowed_root = tmp_path / "RuntimeRoot"
+    candidate = tmp_path / "rUNTIMErOOT" / "state.json"
+
+    result = validate_runtime_artifact_path(
+        candidate,
+        repo_root=repo,
+        allowed_root=allowed_root,
+    )
+
+    assert os.path.normcase(str(result)) == os.path.normcase(
+        str(candidate.resolve())
+    )
 
 
 @pytest.mark.parametrize("path", [r"\\?\C:\repo\receipt.jsonl", r"\\.\C:\device"])
