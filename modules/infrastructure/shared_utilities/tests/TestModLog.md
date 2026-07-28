@@ -1,5 +1,12 @@
 # TestModLog
 
+## 2026-07-28 - Runtime Artifact Safety WSP 62 Gate
+
+- Added exact no-growth coverage for the inherited runtime-artifact safety
+  module and its oversized functions.
+- The remediation record expires on 2026-09-30 and names the parity-preserving
+  decomposition boundary.
+
 ## 2026-07-18 - Runtime Artifact Safety
 
 - Added adversarial path, symlink, hardlink, device-name, root-ancestry,

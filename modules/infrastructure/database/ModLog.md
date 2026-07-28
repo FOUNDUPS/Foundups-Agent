@@ -9,8 +9,9 @@ record for the shrinking inherited AgentDB compatibility monolith.
 a protected quarantine effect, and touched legacy files above the WSP 62 hard
 limit require an explicit bounded remediation plan.
 **Impact**: Suspicious generic tasks reject byte-for-byte unchanged while
-canonical signed tasks retain fail-closed quarantine; all new security modules
-remain within normal size limits.
+canonical signed tasks retain fail-closed, idempotent quarantine with or
+without an assurance reservation; all new security modules remain within
+normal size limits.
 **WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
 
 ## Entry: Signed-Worker Admission, Lease, and Quarantine Security Repair

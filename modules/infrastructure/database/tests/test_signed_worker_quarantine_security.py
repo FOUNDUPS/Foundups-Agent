@@ -93,6 +93,52 @@ def test_quarantine_rejects_generic_namespace_without_mutation(
     assert after == before
 
 
+def test_quarantine_without_reservation_replays_idempotently(
+    agent_db: AgentDB,
+) -> None:
+    task_id = "reddog-worker-dispatch-no-reservation"
+    raw_context = json.dumps({"source": "signed-worker"}, sort_keys=True)
+    assert agent_db.db.execute_write(
+        "INSERT INTO agents_autonomous_tasks "
+        "(task_id, description, required_skills, estimated_complexity, "
+        "priority_score, discovered_by, context, status, assigned_to) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, 'executing', ?)",
+        (
+            task_id,
+            "signed task without independent assurance",
+            json.dumps(["reddog_signed_worker_dispatch"]),
+            0.1,
+            1.0,
+            "reddog_signed_worker_dispatch_runtime",
+            raw_context,
+            "worker-1",
+        ),
+    ) == 1
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    first = quarantine_signed_worker_execution(
+        agent_db,
+        task_id=task_id,
+        raw_context=raw_context,
+        expected_status="executing",
+        reason="canonical_authority_rejected",
+        now_iso=now_iso,
+    )
+    after_first = agent_db.get_autonomous_task_by_id(task_id)
+    second = quarantine_signed_worker_execution(
+        agent_db,
+        task_id=task_id,
+        raw_context=raw_context,
+        expected_status="executing",
+        reason="canonical_authority_rejected",
+        now_iso=now_iso,
+    )
+
+    assert first == "QUARANTINED"
+    assert second == "QUARANTINED"
+    assert agent_db.get_autonomous_task_by_id(task_id) == after_first
+
+
 def test_invalid_stale_assignment_quarantines_before_reservation_skip(
     agent_db: AgentDB,
 ) -> None:

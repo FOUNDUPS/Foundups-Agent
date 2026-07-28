@@ -1,6 +1,13 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-07-28 - Runtime Artifact Safety WSP 62 Remediation
+
+- Recorded the inherited runtime-artifact safety host under an exact temporary
+  no-growth ceiling with a bounded decomposition plan.
+- Kept the current Windows/POSIX security repair behavior unchanged; a later
+  parity slice will split redaction, confined I/O, and platform locking.
+
 ## 2026-07-28 - Windows Extended-Length Runtime Artifacts
 
 - Routed confined descriptor opens and cleanup through Windows

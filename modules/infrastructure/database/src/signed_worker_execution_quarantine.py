@@ -154,7 +154,7 @@ def _reservation_is_quarantined(connection: Any, task_id: str) -> bool:
         "WHERE verifier_task_id = ?",
         (task_id,),
     ).fetchone()
-    return row is not None and dict(row).get("status") == "QUARANTINED"
+    return row is None or dict(row).get("status") == "QUARANTINED"
 
 
 def _no_result_history(connection: Any, task_id: str) -> bool:

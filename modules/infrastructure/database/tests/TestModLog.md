@@ -6,7 +6,8 @@
 **Coverage**:
 - Direct quarantine of an ordinary assigned task with forged signed metadata
   rejects before any database mutation.
-- Status, context, assignee, timestamps, and result history remain unchanged.
+- Status, context, assignee, timestamps, and result history remain unchanged;
+  exact replay without an assurance reservation is idempotent.
 **WSP References**: WSP 5, WSP 15, WSP 62, WSP 78, WSP 97
 
 ## Entry: Bounded Signed-Worker Assurance Security Suites

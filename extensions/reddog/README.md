@@ -6,7 +6,7 @@ Version 0.4.28 adds sealed signed-worker admission, transactional quarantine,
 and use-time execution-lease finalization fences. Version 0.4.27 pins the
 signed queue-consumer lineage and explicit startup
 verifier context through AgentDB admission. It also refreshes the canonical
-1,055-file backend manifest after signed-worker assignment, lease renewal, and
+1,059-file backend manifest after signed-worker assignment, lease renewal, and
 quarantine recovery hardening without granting new editor-side execution
 authority.
 
