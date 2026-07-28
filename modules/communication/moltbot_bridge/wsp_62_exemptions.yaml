@@ -394,7 +394,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9086
+    threshold_override: 9087
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

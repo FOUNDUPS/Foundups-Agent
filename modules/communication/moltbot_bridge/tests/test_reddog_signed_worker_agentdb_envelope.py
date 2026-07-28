@@ -490,6 +490,48 @@ def test_supervisor_finalization_conflict_never_overwrites_owner(
     assert stored["context"] == {"owner": "other-worker"}
 
 
+def test_supervisor_rejects_malformed_requeue_result_history(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+    first = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=True),
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+    assert first["accepted"] is True
+    second = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=True),
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+    assert second["accepted"] is True
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert len(stored["context"]["signed_worker_task_result_receipts"]) == 2
+    _rewrite_context(
+        task_id,
+        lambda context: context["signed_worker_task_last_result"].update(
+            receipt_digest="sha256:" + ("0" * 64)
+        ),
+    )
+    runner = _FakeRunner()
+    rejected = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert rejected["accepted"] is False
+    assert runner.calls == []
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+
+
 @pytest.mark.parametrize("authority_failure", ("expired", "revoked"))
 def test_claim_rejects_invalid_use_time_authority_before_runner_selection(
     tmp_path: Path,

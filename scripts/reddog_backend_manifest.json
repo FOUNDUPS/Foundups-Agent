@@ -1545,7 +1545,7 @@
     "modules/communication/moltbot_bridge/src/reddog_signed_worker_publication_admission.py": "5c51cb59d6657eb60c954a103a7c7fd8d965d37672a629afea6bf031a1d9395a",
     "modules/communication/moltbot_bridge/src/reddog_signed_worker_queue_serial_loop_runner.py": "c98a3c33a7a4e6d5d39716d84954fb99fc4cd04a6a025a8d95b4214cca5165ee",
     "modules/communication/moltbot_bridge/src/reddog_signed_worker_run_task_runtime.py": "96a382e006382c264d54bb5a63813667b2ef3c4e28af31d91d2f19e5f37791af",
-    "modules/communication/moltbot_bridge/src/reddog_signed_worker_supervisor_admission.py": "d2d4f2eaf78cac823a8548597b8114887415ac52ae9d20d24fa311e98cdfe380",
+    "modules/communication/moltbot_bridge/src/reddog_signed_worker_supervisor_admission.py": "275513bf81933a192bb93eeb2ed09456b1de93939a77266cfc97b92356037997",
     "modules/communication/moltbot_bridge/src/reddog_signer_authority_store_commit.py": "a68cc0df2f458d5aea85dd744d8451b4b05880a4f4b165ce03f16e34128459d9",
     "modules/communication/moltbot_bridge/src/reddog_signer_control_loop_anchor.py": "af1ef0e2ddd7b910ffaeedffa8cf128e686177803bcb3919f36fe1558b3500df",
     "modules/communication/moltbot_bridge/src/reddog_signer_delegated_authority_runtime.py": "e5772a9d09e0f49abdc975888574a35b7d54aa930d2bb9c2ec09642337aecffc",

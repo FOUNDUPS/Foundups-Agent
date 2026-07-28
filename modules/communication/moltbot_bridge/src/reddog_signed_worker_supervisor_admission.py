@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -60,9 +62,57 @@ def admit_signed_worker_for_supervisor(
     )
     if verified is None:
         return SignedWorkerSupervisorAdmission("REJECTED", admitted, error)
+    try:
+        verified = {
+            **dict(verified),
+            **_validated_result_history(claimed),
+        }
+    except ValueError as exc:
+        return SignedWorkerSupervisorAdmission("REJECTED", admitted, str(exc))
     return SignedWorkerSupervisorAdmission(
         "ADMITTED", bind_execution_admission(verified, admission)
     )
+
+
+def _validated_result_history(
+    context: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    last = context.get("signed_worker_task_last_result")
+    history = context.get("signed_worker_task_result_receipts")
+    if last is None and history is None:
+        return {}
+    if not isinstance(last, Mapping) or not isinstance(history, list):
+        raise ValueError("signed_worker_result_history_malformed")
+    last_body = dict(last)
+    supplied_digest = str(last_body.pop("receipt_digest", "") or "")
+    if supplied_digest != _digest(last_body):
+        raise ValueError("signed_worker_last_result_digest_mismatch")
+    if not 1 <= len(history) <= 10:
+        raise ValueError("signed_worker_result_history_count_invalid")
+    normalized = []
+    for item in history:
+        if not isinstance(item, Mapping) or set(item) != {
+            "claim_status", "receipt_id", "receipt_digest"
+        }:
+            raise ValueError("signed_worker_result_history_item_invalid")
+        entry = {key: str(item.get(key) or "") for key in item}
+        if not entry["claim_status"] or not entry["receipt_digest"].startswith("sha256:"):
+            raise ValueError("signed_worker_result_history_item_invalid")
+        normalized.append(entry)
+    if any(normalized[-1][key] != str(last.get(key) or "") for key in normalized[-1]):
+        raise ValueError("signed_worker_result_history_tail_mismatch")
+    return {
+        "signed_worker_task_last_result": dict(last),
+        "signed_worker_task_result_receipts": normalized,
+    }
+
+
+def _digest(payload: Mapping[str, Any]) -> str:
+    raw = json.dumps(
+        dict(payload), sort_keys=True, separators=(",", ":"),
+        ensure_ascii=True, default=str,
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 __all__ = [
