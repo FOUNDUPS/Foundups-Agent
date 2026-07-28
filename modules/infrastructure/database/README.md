@@ -14,7 +14,8 @@ This module provides:
 - `src/module_db.py`: prefixed table helper for module-owned tables
 - `src/agent_db.py`: agent memory/coordination schema and helpers
 - `src/signed_worker_execution_store.py`: exact-CAS signed-worker finalization
-- `src/signed_worker_result_ledger.py`: durable signed-worker retry continuity
+- `src/signed_worker_result_history.py`: pure result-chain validation
+- `src/signed_worker_result_ledger.py`: durable signed-worker result continuity
 - `src/sqlite_audit.py`: repeatable SQLite health/inventory report utility
 
 ## What This Module Is Not
@@ -61,4 +62,17 @@ python -m modules.infrastructure.database.src.sqlite_audit \
 1. Use this module (or documented adapter boundaries) for relational operational state.
 2. Do not treat derived UI/runtime state as accounting truth.
 3. Keep event/audit and settlement boundaries explicit (see `ARCHITECTURE.md`).
+
+## Signed-Worker Result Continuity
+
+Every terminal or requeue attempt appends one chain-linked row to
+`agents_signed_worker_result_history` in the same transaction as the task
+transition. The durable ledger is not capped. Mutable task context carries
+only the exact latest ten-entry tail. Admission compares that canonical tail
+to the durable ledger before any runner call.
+
+Malformed or gapped durable rows, shortened context tails, recomputed context
+history, and pre-ledger context history all fail closed. Legacy rows require a
+separate authenticated migration; runtime admission never infers or imports
+durable authority from task context.
 

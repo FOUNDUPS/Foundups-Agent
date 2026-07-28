@@ -132,6 +132,19 @@ Competing claims and partial completion writes fail closed.
 Expired claims are reclaimed only by exact worker and assignment timestamp,
 then re-enter the coordinator's bounded retry path.
 
+### Signed-Worker Result Continuity
+
+- `ensure_result_history_schema(connection) -> None`
+- `validate_result_history_ledger(connection, task_id, context) -> bool`
+- `persist_result_history_ledger(connection, task_id, context, ...) -> bool`
+- `validated_result_history(context) -> Mapping[str, Any]`
+
+The AgentDB ledger retains every attempt. Task context retains the canonical
+latest ten attempts and must equal the ledger tail exactly. Supervisor and
+direct `run_task` completion both build the same result receipt and append the
+ledger row atomically with the task transition. Context history with no
+corresponding durable rows is quarantined rather than promoted.
+
 ## SQLite Audit API
 File: `modules/infrastructure/database/src/sqlite_audit.py`
 

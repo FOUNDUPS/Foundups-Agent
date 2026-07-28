@@ -1,56 +1,52 @@
-"""Durable continuity validation for signed-worker execution results."""
+"""Durable AgentDB continuity ledger for signed-worker results."""
 
 from __future__ import annotations
 
-import hashlib
-import json
 from typing import Any, Mapping
 
-
-RESULT_HISTORY_LIMIT = 10
-_ENTRY_KEYS = {
-    "claim_status",
-    "receipt_id",
-    "receipt_digest",
-    "previous_history_digest",
-    "history_entry_digest",
-}
+from .signed_worker_result_history import (
+    RESULT_HISTORY_LIMIT,
+    history_entries,
+    valid_history_entry,
+    validated_result_history,
+)
 
 
-def validated_result_history(context: Mapping[str, Any]) -> Mapping[str, Any]:
-    """Return canonical result continuity or raise on malformed content."""
+def ensure_result_history_schema(connection: Any) -> None:
+    """Create the independently durable result-continuity ledger."""
 
-    last = context.get("signed_worker_task_last_result")
-    history = context.get("signed_worker_task_result_receipts")
-    if last is None and history is None:
-        return {}
-    if not isinstance(last, Mapping) or not isinstance(history, list):
-        raise ValueError("signed_worker_result_history_malformed")
-    if not 1 <= len(history) <= RESULT_HISTORY_LIMIT:
-        raise ValueError("signed_worker_result_history_count_invalid")
-    _validate_last_result(last)
-    normalized = _normalize_entries(history)
-    if any(
-        normalized[-1][key] != str(last.get(key) or "")
-        for key in ("claim_status", "receipt_id", "receipt_digest")
-    ):
-        raise ValueError("signed_worker_result_history_tail_mismatch")
-    return {
-        "signed_worker_task_last_result": dict(last),
-        "signed_worker_task_result_receipts": normalized,
-    }
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS agents_signed_worker_result_history (
+            task_id TEXT NOT NULL,
+            attempt_sequence INTEGER NOT NULL,
+            claim_receipt_id TEXT NOT NULL,
+            use_receipt_id TEXT NOT NULL,
+            claim_status TEXT NOT NULL,
+            result_receipt_id TEXT NOT NULL,
+            result_receipt_digest TEXT NOT NULL,
+            previous_history_digest TEXT NOT NULL,
+            history_entry_digest TEXT NOT NULL,
+            recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (task_id, attempt_sequence),
+            UNIQUE (task_id, claim_receipt_id),
+            UNIQUE (task_id, use_receipt_id)
+        )
+        """
+    )
 
 
 def validate_result_history_ledger(
     connection: Any, task_id: str, context: Mapping[str, Any]
 ) -> bool:
-    """Require mutable task context to match the independent AgentDB ledger."""
+    """Require context to equal the canonical durable ledger tail."""
 
     try:
-        history = _history_entries(validated_result_history(context))
+        history = history_entries(validated_result_history(context))
     except ValueError:
         return False
-    return history == _read_entries(connection, task_id)
+    stored = _read_entries(connection, task_id)
+    return stored is not None and history == stored[-RESULT_HISTORY_LIMIT:]
 
 
 def persist_result_history_ledger(
@@ -61,18 +57,44 @@ def persist_result_history_ledger(
     claim_receipt_id: str,
     use_receipt_id: str,
 ) -> bool:
-    """Validate unchanged history or append exactly one result atomically."""
+    """Validate an unchanged tail or append exactly one durable result."""
 
     try:
-        history = _history_entries(validated_result_history(context))
+        history = history_entries(validated_result_history(context))
     except ValueError:
         return False
     stored = _read_entries(connection, task_id)
-    if history == stored:
-        return True
-    if len(history) != len(stored) + 1 or history[:-1] != stored:
+    if stored is None:
         return False
-    entry = history[-1]
+    if history == stored[-RESULT_HISTORY_LIMIT:]:
+        return True
+    if not _is_exact_next_tail(history, stored):
+        return False
+    return _insert_entry(
+        connection,
+        task_id,
+        history[-1],
+        claim_receipt_id=claim_receipt_id,
+        use_receipt_id=use_receipt_id,
+    )
+
+
+def _is_exact_next_tail(
+    history: list[dict[str, Any]], stored: list[dict[str, Any]]
+) -> bool:
+    if not history or history[-1]["attempt_sequence"] != len(stored) + 1:
+        return False
+    return history == [*stored, history[-1]][-RESULT_HISTORY_LIMIT:]
+
+
+def _insert_entry(
+    connection: Any,
+    task_id: str,
+    entry: Mapping[str, Any],
+    *,
+    claim_receipt_id: str,
+    use_receipt_id: str,
+) -> bool:
     changed = connection.execute(
         "INSERT INTO agents_signed_worker_result_history ("
         "task_id, attempt_sequence, claim_receipt_id, use_receipt_id, "
@@ -81,7 +103,7 @@ def persist_result_history_ledger(
         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             task_id,
-            len(history),
+            entry["attempt_sequence"],
             claim_receipt_id,
             use_receipt_id,
             entry["claim_status"],
@@ -94,35 +116,9 @@ def persist_result_history_ledger(
     return changed == 1
 
 
-def _validate_last_result(last: Mapping[str, Any]) -> None:
-    body = dict(last)
-    supplied = str(body.pop("receipt_digest", "") or "")
-    if not _is_digest(supplied) or supplied != _digest(body):
-        raise ValueError("signed_worker_last_result_digest_mismatch")
-
-
-def _normalize_entries(history: list[Any]) -> list[dict[str, str]]:
-    normalized: list[dict[str, str]] = []
-    for item in history:
-        if not isinstance(item, Mapping) or set(item) != _ENTRY_KEYS:
-            raise ValueError("signed_worker_result_history_item_invalid")
-        entry = {key: str(item.get(key) or "") for key in item}
-        supplied = entry.pop("history_entry_digest")
-        if (
-            not entry["claim_status"]
-            or not _is_digest(entry["receipt_digest"])
-            or not _is_digest(entry["previous_history_digest"])
-            or not _is_digest(supplied)
-            or entry["previous_history_digest"] != _digest(normalized)
-            or supplied != _digest(entry)
-        ):
-            raise ValueError("signed_worker_result_history_item_invalid")
-        entry["history_entry_digest"] = supplied
-        normalized.append(entry)
-    return normalized
-
-
-def _read_entries(connection: Any, task_id: str) -> list[dict[str, str]]:
+def _read_entries(
+    connection: Any, task_id: str
+) -> list[dict[str, Any]] | None:
     rows = connection.execute(
         "SELECT attempt_sequence, claim_status, result_receipt_id, "
         "result_receipt_digest, previous_history_digest, history_entry_digest "
@@ -130,47 +126,39 @@ def _read_entries(connection: Any, task_id: str) -> list[dict[str, str]]:
         "WHERE task_id = ? ORDER BY attempt_sequence",
         (task_id,),
     ).fetchall()
-    entries: list[dict[str, str]] = []
-    for expected, row in enumerate(rows, 1):
-        payload = dict(row)
-        if int(payload.get("attempt_sequence") or 0) != expected:
-            return []
-        entries.append(
-            {
-                "claim_status": str(payload.get("claim_status") or ""),
-                "receipt_id": str(payload.get("result_receipt_id") or ""),
-                "receipt_digest": str(payload.get("result_receipt_digest") or ""),
-                "previous_history_digest": str(
-                    payload.get("previous_history_digest") or ""
-                ),
-                "history_entry_digest": str(
-                    payload.get("history_entry_digest") or ""
-                ),
-            }
-        )
+    entries = [_row_entry(row) for row in rows]
+    for expected, entry in enumerate(entries, 1):
+        prior = entries[expected - 2] if expected > 1 else None
+        supplied = str(entry.pop("history_entry_digest") or "")
+        if (
+            entry["attempt_sequence"] != expected
+            or not valid_history_entry(
+                entry,
+                supplied,
+                prior,
+                require_genesis=expected == 1,
+            )
+        ):
+            return None
+        entry["history_entry_digest"] = supplied
     return entries
 
 
-def _history_entries(history: Mapping[str, Any]) -> list[dict[str, str]]:
-    entries = history.get("signed_worker_task_result_receipts", [])
-    return [dict(item) for item in entries] if isinstance(entries, list) else []
-
-
-def _digest(payload: Any) -> str:
-    raw = json.dumps(
-        payload, sort_keys=True, separators=(",", ":"),
-        ensure_ascii=True, default=str,
-    )
-    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-
-def _is_digest(value: Any) -> bool:
-    text = str(value or "").removeprefix("sha256:")
-    return len(text) == 64 and all(char in "0123456789abcdef" for char in text)
+def _row_entry(row: Mapping[str, Any]) -> dict[str, Any]:
+    payload = dict(row)
+    return {
+        "attempt_sequence": int(payload.get("attempt_sequence") or 0),
+        "claim_status": str(payload.get("claim_status") or ""),
+        "receipt_id": str(payload.get("result_receipt_id") or ""),
+        "receipt_digest": str(payload.get("result_receipt_digest") or ""),
+        "previous_history_digest": str(payload.get("previous_history_digest") or ""),
+        "history_entry_digest": str(payload.get("history_entry_digest") or ""),
+    }
 
 
 __all__ = [
     "RESULT_HISTORY_LIMIT",
+    "ensure_result_history_schema",
     "persist_result_history_ledger",
     "validate_result_history_ledger",
     "validated_result_history",

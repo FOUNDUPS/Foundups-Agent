@@ -1020,12 +1020,14 @@ def _persist_reddog_signed_worker_dispatch_task_result(
     try:
         base_context = dict(context) if isinstance(context, Mapping) else {}
         result = dict(run_result) if isinstance(run_result, Mapping) else {}
-        runner_payload = _signed_worker_runner_payload(result, runner_result)
-        receipt = _signed_worker_task_result_receipt(
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
+            build_signed_worker_task_result_receipt,
+        )
+        receipt = build_signed_worker_task_result_receipt(
             base_context=base_context,
             claim_status=claim_status,
             result=result,
-            runner_payload=runner_payload,
+            runner_result=runner_result,
             rejection_reasons=rejection_reasons,
         )
         return _commit_signed_worker_task_result(
@@ -1039,91 +1041,9 @@ def _persist_reddog_signed_worker_dispatch_task_result(
         return False
 
 
-def _signed_worker_receipt_reasons(values: Sequence[Any]) -> list[str]:
-    return list(dict.fromkeys(str(value) for value in values if str(value or "").strip()))
-
-
-def _signed_worker_runner_result_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
-    if not isinstance(payload, Mapping) or not payload:
-        return {}
-    bootstrap = payload.get("bootstrap_result")
-    if not isinstance(bootstrap, Mapping):
-        bootstrap = {}
-    return {
-        "accepted": payload.get("accepted") is True,
-        "decision": str(payload.get("decision") or ""),
-        "receipt_id": str(payload.get("receipt_id") or ""),
-        "queue_item_id": str(payload.get("queue_item_id") or ""),
-        "queue_chain_complete": payload.get("queue_chain_complete") is True,
-        "assigned_stage_complete": payload.get("assigned_stage_complete") is True,
-        "queue_chain_requeue_required": payload.get("queue_chain_requeue_required") is True,
-        "retry_at": str(payload.get("retry_at") or ""),
-        "rejection_reasons": _signed_worker_receipt_reasons(
-            tuple(payload.get("rejection_reasons") or ())
-        ),
-        "bootstrap_status": str(bootstrap.get("status") or ""),
-        "bootstrap_next_action": str(bootstrap.get("next_action") or ""),
-        "bootstrap_dispatched_stages": _signed_worker_receipt_reasons(
-            tuple(bootstrap.get("dispatched_stages") or ())
-        ),
-    }
-
-
 def _stable_digest(payload: Any) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-
-def _signed_worker_runner_payload(
-    result: Mapping[str, Any], runner_result: Mapping[str, Any] | None
-) -> Dict[str, Any]:
-    if isinstance(runner_result, Mapping):
-        return dict(runner_result)
-    nested = result.get("runner_result")
-    return dict(nested) if isinstance(nested, Mapping) else {}
-
-
-def _signed_worker_task_result_receipt(
-    *, base_context: Mapping[str, Any], claim_status: str,
-    result: Mapping[str, Any], runner_payload: Mapping[str, Any],
-    rejection_reasons: Sequence[str],
-) -> Dict[str, Any]:
-    supplied = bool(result)
-    receipt = {
-        "schema_version": "reddog_signed_worker_task_result.v1",
-        "claim_status": str(claim_status or ""),
-        "accepted": result.get("accepted") is True if supplied else False,
-        "decision": str(result.get("decision") or ""),
-        "receipt_id": str(result.get("receipt_id") or ""),
-        "worker_role": str(result.get("worker_role") or base_context.get("worker_role") or ""),
-        "worker_runtime": str(result.get("worker_runtime") or base_context.get("worker_runtime") or ""),
-        "capability": str(result.get("capability") or base_context.get("capability") or ""),
-        "rejection_reasons": _signed_worker_receipt_reasons(
-            tuple(rejection_reasons) or tuple(result.get("rejection_reasons") or ())
-        ),
-        "runner_result_digest": _stable_digest(runner_payload) if runner_payload else "",
-        "run_result_digest": _stable_digest(result) if supplied else "",
-        "runner_result_summary": _signed_worker_runner_result_summary(runner_payload),
-        **_signed_worker_result_effect_fields(result, supplied=supplied),
-    }
-    receipt["receipt_digest"] = _stable_digest(receipt)
-    return receipt
-
-
-def _signed_worker_result_effect_fields(
-    result: Mapping[str, Any], *, supplied: bool
-) -> Dict[str, bool]:
-    source_fields = (
-        "no_shell_command_executed", "no_source_repo_mutation_performed",
-        "no_holoindex_reindex_performed", "no_hermes_dispatch_performed",
-        "no_worktree_operation_performed", "no_pr_created",
-        "no_live_foundup_enqueue_performed", "no_pattern_memory_write_performed",
-        "no_reward_settlement_performed",
-    )
-    return {
-        field: result.get(field) is True if supplied else True
-        for field in source_fields
-    }
 
 
 def _commit_signed_worker_task_result(
@@ -1133,26 +1053,11 @@ def _commit_signed_worker_task_result(
     from modules.infrastructure.database.src.signed_worker_execution_store import (
         finalize_signed_worker_execution,
     )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
+        append_signed_worker_result_history,
+    )
     admitted_context = dict(base_context)
-    history = base_context.get("signed_worker_task_result_receipts")
-    if history is not None and (
-        not isinstance(history, list)
-        or any(not isinstance(item, Mapping) for item in history)
-    ):
-        return False
-    bounded = [dict(item) for item in history or []]
-    if len(bounded) >= 10:
-        return False
-    entry = {
-        "claim_status": receipt["claim_status"],
-        "receipt_id": receipt["receipt_id"],
-        "receipt_digest": receipt["receipt_digest"],
-        "previous_history_digest": _stable_digest(bounded),
-    }
-    entry["history_entry_digest"] = _stable_digest(entry)
-    bounded.append(entry)
-    base_context["signed_worker_task_last_result"] = dict(receipt)
-    base_context["signed_worker_task_result_receipts"] = bounded
+    base_context = append_signed_worker_result_history(base_context, receipt)
     runner_summary = receipt.get("runner_result_summary")
     retry_at = (
         str(runner_summary.get("retry_at") or "") or None

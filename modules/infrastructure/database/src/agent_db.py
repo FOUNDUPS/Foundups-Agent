@@ -25,6 +25,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from .db_manager import DatabaseManager
+from .signed_worker_result_ledger import ensure_result_history_schema
 
 
 _ASSURANCE_REQUIRED_FIELDS = (
@@ -285,24 +286,7 @@ class AgentDB:
 
             ''')
 
-            # Independently durable signed-worker retry/result continuity.
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS agents_signed_worker_result_history (
-                    task_id TEXT NOT NULL,
-                    attempt_sequence INTEGER NOT NULL,
-                    claim_receipt_id TEXT NOT NULL,
-                    use_receipt_id TEXT NOT NULL,
-                    claim_status TEXT NOT NULL,
-                    result_receipt_id TEXT NOT NULL,
-                    result_receipt_digest TEXT NOT NULL,
-                    previous_history_digest TEXT NOT NULL,
-                    history_entry_digest TEXT NOT NULL,
-                    recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (task_id, attempt_sequence),
-                    UNIQUE (task_id, claim_receipt_id),
-                    UNIQUE (task_id, use_receipt_id)
-                )
-            ''')
+            ensure_result_history_schema(conn)
 
             # Independent assurance capacity reservations.
             #

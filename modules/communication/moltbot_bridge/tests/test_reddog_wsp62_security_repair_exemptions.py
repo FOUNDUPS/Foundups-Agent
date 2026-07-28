@@ -77,6 +77,16 @@ CURRENT_SECURITY_RUNTIME_FILES = {
 }
 BOUNDED_DATABASE_SECURITY_FILES = {
     "modules/infrastructure/database/src/signed_worker_execution_store.py",
+    "modules/infrastructure/database/src/signed_worker_result_history.py",
+    "modules/infrastructure/database/src/signed_worker_result_ledger.py",
+}
+BOUNDED_SIGNED_WORKER_RESULT_FILES = {
+    "src/reddog_signed_worker_result_receipt.py",
+}
+TOUCHED_SIGNED_WORKER_RUNTIME_FILES = {
+    "src/reddog_signed_worker_execution_claim.py",
+    "src/reddog_signed_worker_run_task_runtime.py",
+    "src/reddog_signed_worker_supervisor_admission.py",
 }
 
 
@@ -192,3 +202,17 @@ def test_new_database_security_files_are_bounded_without_exemption() -> None:
         target = REPO_ROOT / relative_path
         assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
         assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_new_signed_worker_result_modules_are_bounded_without_exemption() -> None:
+    for relative_path in BOUNDED_SIGNED_WORKER_RESULT_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
+        assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_touched_signed_worker_runtime_stays_under_domain_limit() -> None:
+    for relative_path in TOUCHED_SIGNED_WORKER_RUNTIME_FILES:
+        target = MODULE_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
+        assert _oversized_function_sizes(target) == {}

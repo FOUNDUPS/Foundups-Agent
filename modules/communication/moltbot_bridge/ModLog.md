@@ -12,12 +12,14 @@
   earlier caller snapshot. Supervisor completion, failure, reserved completion,
   and requeue persistence now use the same exact assignee/context CAS; a
   concurrent owner is never overwritten. Requeue admission replaces only the
-  superseded claim/use pair while retaining bounded result history. The full
-  task-context history must match an independently durable append-only AgentDB
-  ledger before either supervisor or direct execution; truncation and complete
-  attacker re-hashing therefore fail closed. Exact finalization and ledger
-  append share one transaction in bounded database siblings instead of
-  extending the `AgentDB` monolith. Publication recovery never creates the
+  superseded claim/use pair while retaining a canonical ten-entry result tail.
+  The independently durable append-only AgentDB ledger retains every attempt,
+  and task context must match its exact tail before supervisor or direct
+  execution; malformed durable state, truncation, legacy context-only history,
+  and complete attacker re-hashing therefore fail closed. Both execution paths
+  append one shared result receipt. Exact finalization and ledger append share
+  one transaction in bounded database siblings instead of extending the
+  `AgentDB` monolith. Publication recovery never creates the
   derived authority cache, even from internally self-consistent COMMITTED
   packets; only a fresh normal publish call that re-verifies proposal
   authorization may recreate that cache.

@@ -31,6 +31,10 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envel
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
     admit_signed_worker_execution_once,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
+    append_signed_worker_result_history,
+    build_signed_worker_task_result_receipt,
+)
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     worker_dispatch_authority_verification_context,
 )
@@ -40,6 +44,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispat
 )
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
+from modules.infrastructure.database.src import (
+    signed_worker_execution_store as execution_store_module,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -95,14 +102,24 @@ def _test_digest(value: object) -> str:
 def _rechain_context_history(context: dict[str, object]) -> None:
     history = context["signed_worker_task_result_receipts"]
     assert isinstance(history, list)
-    normalized: list[dict[str, str]] = []
+    normalized: list[dict[str, object]] = []
     for raw in history:
         assert isinstance(raw, dict)
+        sequence = int(raw.get("attempt_sequence") or 0)
         entry = {
+            "attempt_sequence": sequence,
             "claim_status": str(raw.get("claim_status") or ""),
             "receipt_id": str(raw.get("receipt_id") or ""),
             "receipt_digest": str(raw.get("receipt_digest") or ""),
-            "previous_history_digest": _test_digest(normalized),
+            "previous_history_digest": (
+                str(normalized[-1]["history_entry_digest"])
+                if normalized
+                else (
+                    _test_digest([])
+                    if sequence == 1
+                    else str(raw.get("previous_history_digest") or "")
+                )
+            ),
         }
         entry["history_entry_digest"] = _test_digest(entry)
         normalized.append(entry)
@@ -206,7 +223,9 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
     assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
     original = run_task_runtime.finalize_signed_worker_execution
 
-    def conflict(db, selected_task_id, *, context, accepted):
+    def conflict(
+        db, selected_task_id, *, context, accepted, result_context=None
+    ):
         assert db.db.execute_write(
             "UPDATE agents_autonomous_tasks SET status = 'cancelled' "
             "WHERE task_id = ? AND status = 'executing'",
@@ -217,6 +236,7 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
             selected_task_id,
             context=context,
             accepted=accepted,
+            result_context=result_context,
         )
 
     monkeypatch.setattr(
@@ -305,6 +325,12 @@ def test_concurrent_direct_run_task_executes_signed_worker_once(
     stored = AgentDB().get_autonomous_task_by_id(task_id)
     assert stored is not None and stored["status"] == "completed"
     assert stored["context"]["signed_worker_execution_use"]["status"] == "CONSUMED"
+    rows = db.db.execute_query(
+        "SELECT attempt_sequence FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    )
+    assert rows == [{"attempt_sequence": 1}]
 
 
 @pytest.mark.parametrize(
@@ -599,6 +625,103 @@ def test_supervisor_rejects_tampered_earlier_requeue_result_history(
     assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
 
 
+def test_supervisor_rejects_gapped_durable_result_ledger(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+    for _ in range(2):
+        assert claim_reddog_signed_worker_dispatch_task_once(
+            repo_root=tmp_path,
+            signed_worker_runner=_FakeRunner(requeue_required=True),
+            authority_verification_context=(
+                worker_dispatch_authority_verification_context()
+            ),
+        )["accepted"] is True
+    db = AgentDB()
+    assert db.db.execute_write(
+        "UPDATE agents_signed_worker_result_history "
+        "SET attempt_sequence = 3 WHERE task_id = ? AND attempt_sequence = 2",
+        (task_id,),
+    ) == 1
+    runner = _FakeRunner()
+
+    rejected = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert rejected["accepted"] is False
+    assert runner.calls == []
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+
+
+def test_supervisor_retains_ten_entry_tail_but_all_durable_attempts(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+    for _ in range(11):
+        assert claim_reddog_signed_worker_dispatch_task_once(
+            repo_root=tmp_path,
+            signed_worker_runner=_FakeRunner(requeue_required=True),
+            authority_verification_context=(
+                worker_dispatch_authority_verification_context()
+            ),
+        )["accepted"] is True
+    db = AgentDB()
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored is not None
+    history = stored["context"]["signed_worker_task_result_receipts"]
+    assert len(history) == 10
+    assert history[0]["attempt_sequence"] == 2
+    assert history[-1]["attempt_sequence"] == 11
+    rows = db.db.execute_query(
+        "SELECT attempt_sequence FROM agents_signed_worker_result_history "
+        "WHERE task_id = ? ORDER BY attempt_sequence",
+        (task_id,),
+    )
+    assert rows == [{"attempt_sequence": value} for value in range(1, 12)]
+
+
+def test_preledger_context_history_is_quarantined_before_execution(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    task = db.get_autonomous_task_by_id(task_id)
+    assert task is not None
+    receipt = build_signed_worker_task_result_receipt(
+        base_context=task["context"],
+        claim_status="LEGACY_CONTEXT",
+        result={"accepted": False, "decision": "legacy"},
+    )
+    forged = append_signed_worker_result_history(task["context"], receipt)
+    assert db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET context = ? WHERE task_id = ?",
+        (json.dumps(forged, sort_keys=True), task_id),
+    ) == 1
+    runner = _FakeRunner()
+
+    rejected = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert rejected["accepted"] is False
+    assert runner.calls == []
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "failed"
+    assert db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
 def test_supervisor_rejects_fully_rehashed_result_history(
     tmp_path: Path,
 ) -> None:
@@ -694,13 +817,44 @@ def test_direct_run_preserves_agentdb_anchored_result_history(
     stored = AgentDB().get_autonomous_task_by_id(task_id)
     assert result["ok"] is True
     assert stored is not None and stored["status"] == "completed"
-    assert len(stored["context"]["signed_worker_task_result_receipts"]) == 1
+    assert len(stored["context"]["signed_worker_task_result_receipts"]) == 2
     rows = db.db.execute_query(
         "SELECT attempt_sequence FROM agents_signed_worker_result_history "
         "WHERE task_id = ?",
         (task_id,),
     )
-    assert rows == [{"attempt_sequence": 1}]
+    assert rows == [{"attempt_sequence": 1}, {"attempt_sequence": 2}]
+
+
+def test_direct_result_ledger_failure_rolls_back_terminal_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+    monkeypatch.setattr(
+        execution_store_module,
+        "persist_result_history_ledger",
+        lambda *_args, **_kwargs: False,
+    )
+
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+    )
+
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert result["ok"] is False
+    assert result["detail"] == "reddog_signed_worker_finalization_conflict"
+    assert stored is not None and stored["status"] == "executing"
+    assert db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    ) == []
 
 
 @pytest.mark.parametrize("authority_failure", ("expired", "revoked"))
@@ -708,7 +862,7 @@ def test_claim_rejects_invalid_use_time_authority_before_runner_selection(
     tmp_path: Path,
     authority_failure: str,
 ) -> None:
-    task_id = _publish_agentdb_task()
+    _publish_agentdb_task()
     authority = worker_dispatch_authority_verification_context()
     if authority_failure == "expired":
         authority = replace(authority, trusted_now_epoch=lambda: 2000)

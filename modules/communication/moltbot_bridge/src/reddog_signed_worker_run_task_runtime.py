@@ -12,6 +12,12 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_cla
     admit_signed_worker_execution_once,
     bind_execution_admission,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
+    DIRECT_ACCEPT,
+    DIRECT_REJECT,
+    append_signed_worker_result_history,
+    build_signed_worker_task_result_receipt,
+)
 from modules.infrastructure.database.src.signed_worker_execution_store import (
     finalize_signed_worker_execution,
 )
@@ -129,11 +135,18 @@ def _finalize_owned_execution(
     final = dict(result)
     final["finalization_owned"] = True
     try:
+        receipt = build_signed_worker_task_result_receipt(
+            base_context=context,
+            claim_status=DIRECT_ACCEPT if final.get("ok") is True else DIRECT_REJECT,
+            result=final,
+        )
+        result_context = append_signed_worker_result_history(context, receipt)
         finalized = finalize_signed_worker_execution(
             db,
             task_id,
             context=context,
             accepted=final.get("ok") is True,
+            result_context=result_context,
         )
     except Exception:
         finalized = False

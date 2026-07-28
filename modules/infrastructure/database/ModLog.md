@@ -2,13 +2,16 @@
 
 ## Entry: Durable Signed-Worker Result Continuity
 **Date**: 2026-07-28
-**What Changed**: Added a bounded append-only AgentDB result ledger and bound
-signed-worker claim admission and exact finalization to it.
+**What Changed**: Added an unbounded append-only AgentDB result ledger, a
+canonical ten-entry task-context tail, and one shared receipt path for
+supervisor and direct execution.
 **Why**: A hash chain stored only inside mutable task context can be truncated
 or completely recomputed by the same writer. Retry continuity needs an
 independent durable comparison before either supervisor or direct execution.
-**Impact**: Result append and task transition commit atomically; forged,
-truncated or divergent context histories reject before a runner call.
+**Impact**: Result append and task transition commit atomically; malformed or
+gapped ledger state, forged or shortened context history, and pre-ledger
+context history reject before a runner call. Eleven-attempt and rollback
+regressions prove the durable/context boundary.
 **WSP References**: WSP 00, WSP 15, WSP 22, WSP 62, WSP 78, WSP 97
 
 ## Entry: Held Publication and Exact Signed-Worker Finalization
