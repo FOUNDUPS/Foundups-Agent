@@ -1,20 +1,13 @@
-"""Exact-CAS persistence for admitted RedDog signed-worker executions."""
+"""Validated entrypoints for signed-worker terminal persistence."""
 
 from __future__ import annotations
 
-import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Mapping
 
-from .signed_worker_assurance_completion import complete_assurance_reservation
-from modules.infrastructure.database.src.signed_worker_execution_binding import (
-    assurance_request_matches,
-    canonical_digest,
-    finalization_binding,
-    validated_result_context,
-)
+from .signed_worker_execution_binding import finalization_binding
+from .signed_worker_execution_commit import commit_signed_worker_final_state
 from .signed_worker_finalization_status import finalization_status_matches
-from .signed_worker_result_ledger import persist_result_history_ledger
 
 
 _TARGET_STATUSES = {"completed", "failed", "pending"}
@@ -38,21 +31,21 @@ def finalize_signed_worker_execution(
     retry_not_before: str | None = None,
     assurance_completion: Mapping[str, Any] | None = None,
 ) -> bool:
-    """Persist a result only for the exact admitted owner and context."""
+    """Persist a normal result only while the exact execution lease is active."""
 
-    binding = finalization_binding(
-        task_id, context.get("signed_worker_execution_claim"),
-        context.get("signed_worker_execution_use")
+    binding = _validated_binding(
+        task_id=task_id,
+        context=context,
+        accepted=accepted,
+        result_context=result_context,
+        target_status=target_status,
+        assurance_completion=assurance_completion,
+        reject_expired_recovery=True,
     )
-    status = target_status or ("completed" if accepted is True else "failed")
-    if binding is None or status not in _TARGET_STATUSES:
+    if binding is None:
         return False
-    if not finalization_status_matches(
-        accepted, status, assurance_completion, result_context
-    ):
-        return False
-    assigned_to, claim, use = binding
-    return _commit_final_state(
+    assigned_to, claim, use, status = binding
+    return commit_signed_worker_final_state(
         db.db,
         task_id=task_id,
         assigned_to=assigned_to,
@@ -62,136 +55,94 @@ def finalize_signed_worker_execution(
         target_status=status,
         retry_not_before=retry_not_before,
         assurance_completion=assurance_completion,
+        lease_now=datetime.now(timezone.utc),
+        allow_expired_recovery=False,
     )
 
 
-def _commit_final_state(
-    database: Any, *, task_id: str, assigned_to: str,
-    claim: Mapping[str, Any], use: Mapping[str, Any],
+def finalize_expired_signed_worker_execution_recovery(
+    db: Any,
+    task_id: str,
+    *,
+    context: Mapping[str, Any],
     result_context: Mapping[str, Any],
-    target_status: str, retry_not_before: str | None,
-    assurance_completion: Mapping[str, Any] | None,
+    recovery_now: datetime,
+    assurance_completion: Mapping[str, Any] | None = None,
 ) -> bool:
-    try:
-        with database.get_connection() as connection:
-            return _apply_final_state(
-                connection,
-                task_id=task_id,
-                assigned_to=assigned_to,
-                claim=claim,
-                use=use,
-                result_context=result_context,
-                target_status=target_status,
-                retry_not_before=retry_not_before,
-                assurance_completion=assurance_completion,
-            )
-    except Exception:
-        return False
+    """Persist only the canonical negative result for an expired execution."""
 
-
-def _apply_final_state(
-    connection: Any, *, task_id: str, assigned_to: str,
-    claim: Mapping[str, Any], use: Mapping[str, Any],
-    result_context: Mapping[str, Any], target_status: str,
-    retry_not_before: str | None,
-    assurance_completion: Mapping[str, Any] | None,
-) -> bool:
-    row = connection.execute(
-        "SELECT status, assigned_to, assigned_at, completed_at, context "
-        "FROM agents_autonomous_tasks WHERE task_id = ?",
-        (task_id,),
-    ).fetchone()
-    authenticated = _matching_context(
-        row, assigned_to, claim, use, expected_status="executing"
+    binding = _validated_binding(
+        task_id=task_id,
+        context=context,
+        accepted=False,
+        result_context=result_context,
+        target_status="failed",
+        assurance_completion=assurance_completion,
+        reject_expired_recovery=False,
     )
-    supplied_context = dict(result_context)
-    if (
-        authenticated is None
-        or supplied_context.get("signed_worker_execution_claim") != claim
-        or supplied_context.get("signed_worker_execution_use") != use
-    ):
+    if binding is None or not _is_expired_recovery(result_context):
         return False
-    raw_context, authenticated_context = authenticated
-    final_context = validated_result_context(authenticated_context, supplied_context)
+    assigned_to, claim, use, _ = binding
+    return commit_signed_worker_final_state(
+        db.db,
+        task_id=task_id,
+        assigned_to=assigned_to,
+        claim=claim,
+        use=use,
+        result_context=result_context,
+        target_status="failed",
+        retry_not_before=None,
+        assurance_completion=assurance_completion,
+        lease_now=recovery_now,
+        allow_expired_recovery=True,
+    )
+
+
+def _validated_binding(
+    *,
+    task_id: str,
+    context: Mapping[str, Any],
+    accepted: bool,
+    result_context: Mapping[str, Any],
+    target_status: str | None,
+    assurance_completion: Mapping[str, Any] | None,
+    reject_expired_recovery: bool,
+) -> tuple[str, Mapping[str, Any], Mapping[str, Any], str] | None:
+    binding = finalization_binding(
+        task_id,
+        context.get("signed_worker_execution_claim"),
+        context.get("signed_worker_execution_use"),
+    )
+    status = target_status or ("completed" if accepted is True else "failed")
     if (
-        final_context is None
-        or not assurance_request_matches(
-            authenticated_context, supplied_context, assurance_completion
+        binding is None
+        or status not in _TARGET_STATUSES
+        or not finalization_status_matches(
+            accepted, status, assurance_completion, result_context
         )
+        or (reject_expired_recovery and _is_expired_recovery(result_context))
     ):
-        return False
-    if not _update_final_row(
-        connection, row=dict(row), task_id=task_id,
-        assigned_to=assigned_to, raw_context=raw_context,
-        final_context=final_context, expected_status="executing",
-        persisted_status=target_status, retry_not_before=retry_not_before,
-    ):
-        return False
-    if assurance_completion is not None and not complete_assurance_reservation(
-        connection, task_id=task_id, assigned_to=assigned_to,
-        request=assurance_completion,
-    ):
-        raise RuntimeError("assurance_completion_rejected")
-    if not persist_result_history_ledger(
-        connection, task_id, final_context,
-        claim_receipt_id=str(claim.get("receipt_id") or ""),
-        use_receipt_id=str(use.get("receipt_id") or ""),
-    ):
-        raise RuntimeError("signed_worker_result_ledger_rejected")
-    return True
+        return None
+    return (*binding, status)
 
 
-def _matching_context(
-    row: Any, assigned_to: str, claim: Mapping[str, Any],
-    use: Mapping[str, Any], *, expected_status: str,
-) -> tuple[str, dict[str, Any]] | None:
-    if row is None:
-        return None
-    payload, raw_context = dict(row), str(dict(row).get("context") or "")
-    try:
-        stored = json.loads(raw_context)
-    except (TypeError, ValueError):
-        return None
-    if (
-        payload.get("status") != expected_status
-        or str(payload.get("assigned_to") or "") != assigned_to
-        or not isinstance(stored, dict)
-        or stored.get("signed_worker_execution_claim") != claim
-        or stored.get("signed_worker_execution_use") != use
-    ):
-        return None
-    authenticated = dict(stored)
-    digest_context = dict(stored)
-    digest_context.pop("signed_worker_execution_claim", None)
-    digest_context.pop("signed_worker_execution_use", None)
-    return (
-        (raw_context, authenticated)
-        if claim.get("context_digest") == canonical_digest(digest_context)
-        else None
+def _is_expired_recovery(context: Mapping[str, Any]) -> bool:
+    receipt = context.get("signed_worker_task_last_result")
+    if not isinstance(receipt, Mapping):
+        return False
+    reasons = receipt.get("rejection_reasons")
+    return bool(
+        receipt.get("accepted") is False
+        and receipt.get("decision") == "EXECUTION_LEASE_RECOVERED"
+        and receipt.get("effect_commit_state") == "INDETERMINATE"
+        and isinstance(reasons, list)
+        and "signed_worker_execution_lease_expired" in reasons
     )
 
 
-def _update_final_row(
-    connection: Any, *, row: Mapping[str, Any], task_id: str,
-    assigned_to: str, raw_context: str, final_context: Mapping[str, Any],
-    expected_status: str, persisted_status: str,
-    retry_not_before: str | None,
-) -> bool:
-    requeue = persisted_status == "pending"
-    changed = connection.execute(
-        "UPDATE agents_autonomous_tasks SET context = ?, status = ?, "
-        "completed_at = ?, retry_not_before = ?, assigned_to = ?, assigned_at = ? "
-        "WHERE task_id = ? AND status = ? AND assigned_to = ? AND context = ?",
-        (
-            json.dumps(dict(final_context), sort_keys=True),
-            persisted_status,
-            None if requeue else row.get("completed_at") or datetime.now().isoformat(),
-            retry_not_before if requeue else None,
-            None if requeue else assigned_to,
-            None if requeue else row.get("assigned_at"),
-            task_id, expected_status, assigned_to, raw_context,
-        ),
-    ).rowcount
-    return changed == 1
-__all__ = ["SIGNED_WORKER_TASK_PREFIX", "finalize_signed_worker_execution",
-           "is_signed_worker_task_id"]
+__all__ = [
+    "SIGNED_WORKER_TASK_PREFIX",
+    "finalize_expired_signed_worker_execution_recovery",
+    "finalize_signed_worker_execution",
+    "is_signed_worker_task_id",
+]

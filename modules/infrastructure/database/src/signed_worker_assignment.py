@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 
 SIGNED_WORKER_TASK_PREFIX = "reddog-worker-dispatch-"
+SIGNED_WORKER_ASSIGNMENT_LEASE_SECONDS = 300
 SIGNED_WORKER_SOURCE = "reddog_signed_worker_dispatch_runtime"
 SIGNED_WORKER_SCHEMA = "reddog_worker_dispatch_runtime.v1"
 SIGNED_WORKER_ENVELOPE_SCHEMA = "reddog_signed_worker_agentdb_envelope.v1"
@@ -191,8 +192,8 @@ def _digest(value: Mapping[str, Any]) -> str:
     ).encode("ascii")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
-
 __all__ = [
+    "SIGNED_WORKER_ASSIGNMENT_LEASE_SECONDS",
     "assign_signed_worker_task",
     "canonical_signed_worker_principal_id",
     "signed_worker_assignment_matches",

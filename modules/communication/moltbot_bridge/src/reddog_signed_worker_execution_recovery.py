@@ -19,7 +19,7 @@ from modules.infrastructure.database.src.signed_worker_execution_binding import 
 )
 from modules.infrastructure.database.src.signed_worker_execution_store import (
     SIGNED_WORKER_TASK_PREFIX,
-    finalize_signed_worker_execution,
+    finalize_expired_signed_worker_execution_recovery,
 )
 from modules.infrastructure.database.src.signed_worker_execution_lease import (
     execution_lease_state,
@@ -31,12 +31,13 @@ from modules.infrastructure.database.src.signed_worker_finalization_status impor
     durable_terminal_state_matches,
 )
 from modules.infrastructure.database.src.signed_worker_assignment import (
+    SIGNED_WORKER_ASSIGNMENT_LEASE_SECONDS,
     signed_worker_assignment_matches,
 )
 
 
 _POSITIVE_ASSURANCE = frozenset({"ACCEPT", "VERIFIED"})
-ASSIGNMENT_LEASE_SECONDS = 300
+ASSIGNMENT_LEASE_SECONDS = SIGNED_WORKER_ASSIGNMENT_LEASE_SECONDS
 
 
 def recover_expired_signed_worker_executions(
@@ -52,27 +53,18 @@ def recover_expired_signed_worker_executions(
         now = now.replace(tzinfo=timezone.utc)
     rows = _executing_rows(db, limit=max(1, min(int(limit), 50)))
     if rows is None:
-        return {
-            "accepted": False,
-            "recovered_task_ids": [],
-            "rejected_task_ids": ["database_scan_failed"],
-            "quarantined_task_ids": [],
-            "requeued_assigned_task_ids": [],
-            "no_worker_effect_replayed": True,
-        }
+        return _recovery_payload(rejected=["database_scan_failed"])
     recovered: list[str] = []
     rejected: list[str] = []
     quarantined: list[str] = []
-    requeued = _recover_stale_assignments(db, now=now.astimezone(timezone.utc))
-    if requeued is None:
-        return {
-            "accepted": False,
-            "recovered_task_ids": [],
-            "rejected_task_ids": ["assigned_task_scan_failed"],
-            "quarantined_task_ids": [],
-            "requeued_assigned_task_ids": [],
-            "no_worker_effect_replayed": True,
-        }
+    assignment_recovery = _recover_stale_assignments(
+        db, now=now.astimezone(timezone.utc)
+    )
+    if assignment_recovery is None:
+        return _recovery_payload(rejected=["assigned_task_scan_failed"])
+    requeued, assigned_quarantined, assigned_rejected = assignment_recovery
+    quarantined.extend(assigned_quarantined)
+    rejected.extend(assigned_rejected)
     for row in rows:
         task_id = str(row.get("task_id") or "")
         outcome = _recover_one(
@@ -87,12 +79,28 @@ def recover_expired_signed_worker_executions(
             quarantined.append(task_id)
         elif outcome == "REJECTED":
             rejected.append(task_id)
+    return _recovery_payload(
+        recovered=recovered,
+        rejected=rejected,
+        quarantined=quarantined,
+        requeued=requeued,
+    )
+
+
+def _recovery_payload(
+    *,
+    recovered: list[str] | None = None,
+    rejected: list[str] | None = None,
+    quarantined: list[str] | None = None,
+    requeued: list[str] | None = None,
+) -> Mapping[str, Any]:
+    rejected = rejected or []
     return {
         "accepted": not rejected,
-        "recovered_task_ids": recovered,
+        "recovered_task_ids": recovered or [],
         "rejected_task_ids": rejected,
-        "quarantined_task_ids": quarantined,
-        "requeued_assigned_task_ids": requeued,
+        "quarantined_task_ids": quarantined or [],
+        "requeued_assigned_task_ids": requeued or [],
         "no_worker_effect_replayed": True,
     }
 
@@ -154,12 +162,12 @@ def _recover_one(
         )
     receipt = _lease_expiry_receipt(context, completion=completion)
     final_context = append_signed_worker_result_history(context, receipt)
-    if finalize_signed_worker_execution(
+    if finalize_expired_signed_worker_execution_recovery(
         db,
         task_id,
         context=context,
-        accepted=False,
         result_context=final_context,
+        recovery_now=now,
         assurance_completion=completion,
     ):
         return "RECOVERED"
@@ -174,7 +182,7 @@ def _recover_stale_assignments(
     db: Any,
     *,
     now: datetime,
-) -> list[str] | None:
+) -> tuple[list[str], list[str], list[str]] | None:
     try:
         with db.db.get_connection() as connection:
             rows = connection.execute(
@@ -186,6 +194,8 @@ def _recover_stale_assignments(
     except Exception:
         return None
     requeued: list[str] = []
+    quarantined: list[str] = []
+    rejected: list[str] = []
     for row in rows:
         payload = dict(row)
         if _assigned_not_expired(payload, now=now):
@@ -193,10 +203,8 @@ def _recover_stale_assignments(
         task_id = str(payload.get("task_id") or "")
         context = _context(payload.get("context"))
         assigned_to = str(payload.get("assigned_to") or "")
-        if _active_verifier_reservation(db, task_id):
-            continue
         if not signed_worker_assignment_matches(task_id, assigned_to, context):
-            _quarantine_task(
+            outcome = _quarantine_task(
                 db,
                 task_id=task_id,
                 raw_context=payload.get("context"),
@@ -204,6 +212,12 @@ def _recover_stale_assignments(
                 reason="invalid_signed_assignment",
                 expected_status="assigned",
             )
+            if outcome == "QUARANTINED":
+                quarantined.append(task_id)
+            elif outcome == "REJECTED":
+                rejected.append(task_id)
+            continue
+        if _active_verifier_reservation(db, task_id):
             continue
         if _requeue_assignment(
             db,
@@ -212,7 +226,7 @@ def _recover_stale_assignments(
             raw_context=str(payload.get("context") or ""),
         ):
             requeued.append(task_id)
-    return requeued
+    return requeued, quarantined, rejected
 
 
 def _assigned_not_expired(
@@ -393,7 +407,7 @@ def _resolve_raced_finalization(
         if isinstance(receipt, Mapping)
         else ""
     )
-    if decision and _durable_terminal_row_matches(
+    if _durable_terminal_row_matches(
         db,
         task_id=task_id,
         row=row,

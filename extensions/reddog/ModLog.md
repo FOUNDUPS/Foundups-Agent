@@ -2,6 +2,18 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-28 - REDDOG_SIGNED_WORKER_ADMISSION_AND_LEASE_SECURITY_REPAIR_PHASE1 (0.4.28)
+
+- Required an opaque process-local verification seal before a serialized
+  signed-worker envelope can reach AgentDB execution admission.
+- Bound active-lease validation, task transition, assurance completion, and
+  durable result-ledger append in one database transaction.
+- Made invalid-assignment quarantine transactional and prevented forged local
+  quarantine markers from releasing or reconciling verifier capacity.
+- Regenerated and pinned the 1,059-file backend dependency manifest.
+- Preserved read-only editor authority; this release adds no editor-side shell,
+  repository, publication, or merge capability. Version 0.4.27 -> 0.4.28.
+
 ## 2026-07-28 - REDDOG_SIGNED_QUEUE_LINEAGE_AND_STARTUP_VERIFIER_BINDING_PHASE1 (0.4.27)
 
 - Bound the canonical queue-consumer receipt digest and operational snapshot

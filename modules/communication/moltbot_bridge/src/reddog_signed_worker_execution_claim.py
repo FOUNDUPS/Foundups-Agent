@@ -9,10 +9,16 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+    VerifiedSignedWorkerAgentDbEnvelope,
+    verified_signed_worker_agentdb_envelope_matches,
+)
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
     validate_result_history_ledger,
+    validated_result_history,
 )
 from modules.infrastructure.database.src.signed_worker_assignment import (
+    SIGNED_WORKER_ASSIGNMENT_LEASE_SECONDS,
     signed_worker_assignment_matches,
 )
 from modules.infrastructure.database.src.signed_worker_execution_lease import (
@@ -20,6 +26,9 @@ from modules.infrastructure.database.src.signed_worker_execution_lease import (
 )
 from modules.infrastructure.database.src.signed_worker_execution_store import (
     SIGNED_WORKER_TASK_PREFIX,
+)
+from modules.infrastructure.database.src.signed_worker_execution_quarantine import (
+    quarantine_signed_worker_execution_in_transaction,
 )
 
 
@@ -43,6 +52,7 @@ def admit_signed_worker_execution_once(
     *,
     db: Any,
     task_id: str,
+    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
     token_factory: Callable[[], str] | None = None,
     now_factory: Callable[[], datetime] | None = None,
 ) -> SignedWorkerExecutionAdmission | None:
@@ -58,6 +68,8 @@ def admit_signed_worker_execution_once(
         db=db,
         task_id=task_id,
         token=token,
+        verified_envelope=verified_envelope,
+        now=now.astimezone(timezone.utc),
         now_iso=now.astimezone(timezone.utc).isoformat(),
         lease_expires_at=(
             now.astimezone(timezone.utc)
@@ -71,6 +83,8 @@ def _commit_execution_admission(
     db: Any,
     task_id: str,
     token: str,
+    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
+    now: datetime,
     now_iso: str,
     lease_expires_at: str,
 ) -> SignedWorkerExecutionAdmission | None:
@@ -82,6 +96,8 @@ def _commit_execution_admission(
                 conn,
                 task_id=task_id,
                 token=token,
+                verified_envelope=verified_envelope,
+                now=now,
                 now_iso=now_iso,
                 lease_expires_at=lease_expires_at,
             )
@@ -94,38 +110,30 @@ def _admit_selected_row(
     *,
     task_id: str,
     token: str,
+    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
+    now: datetime,
     now_iso: str,
     lease_expires_at: str,
 ) -> SignedWorkerExecutionAdmission | None:
     row = connection.execute(
-        "SELECT status, assigned_to, context, required_skills, discovered_by "
+        "SELECT status, assigned_to, assigned_at, context, required_skills, discovered_by "
         "FROM agents_autonomous_tasks WHERE task_id = ?",
         (task_id,),
     ).fetchone()
-    inputs = _claim_inputs(
-        row,
+    prepared = _prepare_claim_admission(
+        connection,
+        row=row,
         task_id=task_id,
         token=token,
+        verified_envelope=verified_envelope,
+        now=now,
         now_iso=now_iso,
         lease_expires_at=lease_expires_at,
     )
-    if inputs is None:
-        _quarantine_invalid_assignment(
-            connection,
-            row=row,
-            task_id=task_id,
-            now_iso=now_iso,
-        )
+    if prepared is None:
         return None
-    raw_context, raw_skills, assigned_to, context = inputs[:4]
-    required_skills, discovered_by, claim, use = inputs[4:]
-    if not validate_result_history_ledger(connection, task_id, context):
-        _reject_invalid_history(
-            connection, task_id=task_id, assigned_to=assigned_to,
-            raw_context=raw_context, raw_skills=raw_skills,
-            discovered_by=discovered_by, now_iso=now_iso,
-        )
-        return None
+    raw_context, raw_skills, assigned_to, context = prepared[:4]
+    required_skills, discovered_by, claim, use = prepared[4:]
     if not _commit_claim_row(
         connection, task_id=task_id, assigned_to=assigned_to,
         raw_context=raw_context, raw_skills=raw_skills,
@@ -133,16 +141,73 @@ def _admit_selected_row(
     ):
         return None
     if not initialize_execution_lease(
-        connection,
-        task_id=task_id,
-        assigned_to=assigned_to,
-        claim=claim,
-        use=use,
+        connection, task_id=task_id, assigned_to=assigned_to, claim=claim, use=use
     ):
         raise RuntimeError("signed_worker_execution_lease_init_failed")
     return SignedWorkerExecutionAdmission(
         claim_receipt=claim, use_receipt=use, claimed_context=dict(context),
         required_skills=required_skills, discovered_by=discovered_by,
+    )
+
+
+def _prepare_claim_admission(
+    connection: Any,
+    *,
+    row: Any,
+    task_id: str,
+    token: str,
+    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
+    now: datetime,
+    now_iso: str,
+    lease_expires_at: str,
+) -> tuple[Any, ...] | None:
+    parsed = _parse_claim_row(row, task_id=task_id, verified_envelope=verified_envelope)
+    if parsed is None:
+        _quarantine_invalid_assignment(
+            connection,
+            row=row,
+            task_id=task_id,
+            now_iso=now_iso,
+        )
+        return None
+    if not _assignment_is_fresh(row, now=now):
+        return None
+    inputs = _claim_inputs(
+        parsed,
+        task_id=task_id,
+        token=token,
+        now_iso=now_iso,
+        lease_expires_at=lease_expires_at,
+    )
+    raw_context, raw_skills, assigned_to, context = inputs[:4]
+    required_skills, discovered_by = inputs[4:]
+    if not validate_result_history_ledger(connection, task_id, context):
+        _reject_invalid_history(
+            connection, task_id=task_id, assigned_to=assigned_to,
+            raw_context=raw_context, raw_skills=raw_skills,
+            discovered_by=discovered_by, now_iso=now_iso,
+        )
+        return None
+    try:
+        context = {
+            **dict(verified_envelope.canonical_context),
+            **validated_result_history(context),
+        }
+    except ValueError:
+        return None
+    claim, use = _execution_receipts(
+        task_id=task_id,
+        assigned_to=assigned_to,
+        context=context,
+        required_skills=required_skills,
+        discovered_by=discovered_by,
+        token=token,
+        now_iso=now_iso,
+        lease_expires_at=lease_expires_at,
+    )
+    return (
+        raw_context, raw_skills, assigned_to, context,
+        required_skills, discovered_by, claim, use,
     )
 
 
@@ -208,20 +273,13 @@ def _quarantine_invalid_assignment(
 
     if row is None:
         return
-    payload = dict(row)
-    connection.execute(
-        "UPDATE agents_autonomous_tasks SET status = 'quarantined', "
-        "completed_at = ? WHERE task_id = ? AND status = 'assigned' "
-        "AND assigned_to = ? AND context = ? AND required_skills = ? "
-        "AND discovered_by = ?",
-        (
-            now_iso,
-            task_id,
-            str(payload.get("assigned_to") or ""),
-            str(payload.get("context") or ""),
-            str(payload.get("required_skills") or ""),
-            str(payload.get("discovered_by") or ""),
-        ),
+    quarantine_signed_worker_execution_in_transaction(
+        connection,
+        task_id=task_id,
+        raw_context=dict(row).get("context"),
+        expected_status="assigned",
+        reason="invalid_signed_worker_execution_admission",
+        now_iso=now_iso,
     )
 
 
@@ -244,38 +302,23 @@ _ClaimInputs = tuple[
     Mapping[str, Any],
     tuple[str, ...],
     str,
-    Mapping[str, Any],
-    Mapping[str, Any],
 ] | None
 
 
 def _claim_inputs(
-    row: Any,
+    parsed: tuple[str, str, str, Mapping[str, Any], tuple[str, ...], str],
     *,
     task_id: str,
     token: str,
     now_iso: str,
     lease_expires_at: str,
 ) -> _ClaimInputs:
-    if row is None or not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
-        return None
-    parsed = _parse_claim_row(row, task_id=task_id)
-    if parsed is None:
+    if not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
         return None
     raw_context, raw_skills, assigned_to, context, required_skills, discovered_by = parsed
-    claim, use = _execution_receipts(
-        task_id=task_id,
-        assigned_to=assigned_to,
-        context=context,
-        required_skills=required_skills,
-        discovered_by=discovered_by,
-        token=token,
-        now_iso=now_iso,
-        lease_expires_at=lease_expires_at,
-    )
     return (
         raw_context, raw_skills, assigned_to, context, required_skills,
-        discovered_by, claim, use,
+        discovered_by,
     )
 
 
@@ -283,6 +326,7 @@ def _parse_claim_row(
     row: Any,
     *,
     task_id: str,
+    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
 ) -> tuple[str, str, str, Mapping[str, Any], tuple[str, ...], str] | None:
     payload = dict(row)
     assigned_to = str(payload.get("assigned_to") or "").strip()
@@ -307,6 +351,11 @@ def _parse_claim_row(
         or not isinstance(parsed_skills, list)
         or any(not isinstance(skill, str) or not skill for skill in parsed_skills)
         or not signed_worker_assignment_matches(task_id, assigned_to, context)
+        or not verified_signed_worker_agentdb_envelope_matches(
+            verified_envelope,
+            task_id=task_id,
+            context=context,
+        )
     ):
         return None
     context = dict(context)
@@ -315,6 +364,21 @@ def _parse_claim_row(
     return (
         raw_context, raw_skills, assigned_to, context,
         tuple(parsed_skills), discovered_by,
+    )
+
+
+def _assignment_is_fresh(row: Any, *, now: datetime) -> bool:
+    if row is None:
+        return False
+    raw = str(dict(row).get("assigned_at") or "").strip()
+    try:
+        assigned_at = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    if assigned_at.tzinfo is None:
+        assigned_at = assigned_at.replace(tzinfo=timezone.utc)
+    return now < assigned_at.astimezone(timezone.utc) + timedelta(
+        seconds=SIGNED_WORKER_ASSIGNMENT_LEASE_SECONDS
     )
 
 

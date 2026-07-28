@@ -1,5 +1,18 @@
 # Database Module - ModLog
 
+## Entry: Signed-Worker Admission, Lease, and Quarantine Security Repair
+**Date**: 2026-07-28
+**What Changed**: Extracted exact-row and transactional commit helpers, required
+an active durable lease inside normal finalization, added a negative-only
+expired-recovery finalizer, and made first-time invalid-assignment quarantine
+atomically transition both task and assurance reservation.
+**Why**: A process restart or attacker-recomputed local marker must not bypass
+use-time authority, finalize after lease expiry, or release verifier capacity
+without independently durable evidence.
+**Impact**: Task, assurance, result-ledger, lease, and quarantine state now
+advance under one transaction or remain byte-for-byte unchanged.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
 ## Entry: Durable Terminal-State Race Validation
 **Date**: 2026-07-28
 **What Changed**: Recovery idempotency now validates the durable result ledger

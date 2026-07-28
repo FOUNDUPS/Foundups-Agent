@@ -2080,14 +2080,14 @@ class AgentDB:
                 claim_count = conn.execute(
                     """
                     UPDATE agents_autonomous_tasks
-                    SET status = 'assigned', assigned_to = ?, assigned_at = ?
+                    SET status = 'assigned', assigned_to = ?,
+                        assigned_at = CURRENT_TIMESTAMP
                     WHERE task_id = ?
                       AND status = 'pending'
                       AND (assigned_to IS NULL OR assigned_to = '')
                     """,
                     (
                         normalized["verifier_principal_id"],
-                        normalized["reserved_at"],
                         normalized["verifier_task_id"],
                     ),
                 ).rowcount
@@ -2380,13 +2380,12 @@ class AgentDB:
                     UPDATE agents_autonomous_tasks
                     SET status = 'assigned',
                         assigned_to = ?,
-                        assigned_at = ?,
+                        assigned_at = CURRENT_TIMESTAMP,
                         completed_at = NULL
                     WHERE task_id = ? AND status = 'expired'
                     """,
                     (
                         normalized["verifier_principal_id"],
-                        normalized["reserved_at"],
                         normalized["verifier_task_id"],
                     ),
                 ).rowcount

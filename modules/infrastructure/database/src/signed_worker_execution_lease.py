@@ -13,6 +13,7 @@ from .signed_worker_execution_lease_schema import (
     initialize_execution_lease,
 )
 from .signed_worker_execution_lease_time import aware, parse_utc
+from .signed_worker_execution_lease_fence import matching_execution_lease
 
 
 MAX_EXECUTION_LEASE_RENEWALS = 60
@@ -80,7 +81,9 @@ def execution_lease_state(
             ).fetchone()
     except Exception:
         return "INVALID"
-    if not _matching_lease(row, assigned_to=assigned_to, claim=claim, use=use):
+    if not matching_execution_lease(
+        row, assigned_to=assigned_to, claim=claim, use=use
+    ):
         return "INVALID"
     expires_at = parse_utc(dict(row).get("lease_expires_at"))
     if expires_at is None:
@@ -101,7 +104,7 @@ def _renew(
     task, lease = _renewal_rows(connection, task_id)
     if not _live_task_matches(task, assigned_to, claim, use):
         return False
-    if not _matching_lease(lease, assigned_to=assigned_to, claim=claim, use=use):
+    if not matching_execution_lease(lease, assigned_to=assigned_to, claim=claim, use=use):
         return False
     payload = dict(lease)
     expires_at = parse_utc(payload.get("lease_expires_at"))
@@ -171,24 +174,6 @@ def _live_task_matches(
         and isinstance(context, Mapping)
         and context.get("signed_worker_execution_claim") == claim
         and context.get("signed_worker_execution_use") == use
-    )
-
-
-def _matching_lease(
-    row: Any,
-    *,
-    assigned_to: str,
-    claim: Mapping[str, Any],
-    use: Mapping[str, Any],
-) -> bool:
-    if row is None:
-        return False
-    payload = dict(row)
-    return (
-        payload.get("assigned_to") == assigned_to
-        and payload.get("claim_receipt_id") == claim.get("receipt_id")
-        and payload.get("use_receipt_id") == use.get("receipt_id")
-        and payload.get("initial_claimed_at") == claim.get("claimed_at")
     )
 
 

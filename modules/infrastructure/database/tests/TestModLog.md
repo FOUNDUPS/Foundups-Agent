@@ -1,8 +1,20 @@
 # Database Module - Test Evolution Log
 
+## Entry: Bounded Signed-Worker Assurance Security Suites
+**Date**: 2026-07-28
+**Test Files**: `test_signed_worker_assurance_*.py`,
+`test_signed_worker_quarantine_security.py`
+**Coverage**:
+- Process-local verification-proof forgery and stale-assignment rejection.
+- Active-lease finalization and failure-only expired recovery.
+- Atomic quarantine, assurance release, terminal ledger rollback, and restart
+  race behavior.
+- Concern-specific modules replace the former assurance test monolith.
+**WSP References**: WSP 5, WSP 15, WSP 62, WSP 78, WSP 97
+
 ## Entry: Independent Assurance Reservation Tests
 **Date**: 2026-07-25
-**Test File**: `test_agent_db_independent_assurance.py`
+**Test Files**: `test_signed_worker_assurance_*.py`
 **Coverage**:
 - Atomic concurrent claim with exactly one winner.
 - Separate author/work-order and verifier-task uniqueness paths.

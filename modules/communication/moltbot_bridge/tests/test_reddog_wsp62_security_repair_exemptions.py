@@ -81,10 +81,14 @@ BOUNDED_DATABASE_SECURITY_FILES = {
     "modules/infrastructure/database/src/signed_worker_assurance_staging.py",
     "modules/infrastructure/database/src/signed_worker_assignment.py",
     "modules/infrastructure/database/src/signed_worker_execution_binding.py",
+    "modules/infrastructure/database/src/signed_worker_execution_commit.py",
     "modules/infrastructure/database/src/signed_worker_execution_lease.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease_fence.py",
     "modules/infrastructure/database/src/signed_worker_execution_lease_schema.py",
     "modules/infrastructure/database/src/signed_worker_execution_lease_time.py",
     "modules/infrastructure/database/src/signed_worker_execution_quarantine.py",
+    "modules/infrastructure/database/src/signed_worker_execution_quarantine_receipt.py",
+    "modules/infrastructure/database/src/signed_worker_execution_row.py",
     "modules/infrastructure/database/src/signed_worker_execution_store.py",
     "modules/infrastructure/database/src/signed_worker_finalization_status.py",
     "modules/infrastructure/database/src/signed_worker_result_history.py",
@@ -100,6 +104,20 @@ TOUCHED_SIGNED_WORKER_RUNTIME_FILES = {
     "src/reddog_signed_worker_execution_recovery.py",
     "src/reddog_signed_worker_run_task_runtime.py",
     "src/reddog_signed_worker_supervisor_admission.py",
+}
+BOUNDED_SECURITY_TEST_FILES = {
+    "modules/communication/moltbot_bridge/tests/reddog_signed_worker_agentdb_test_support.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_admission.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_authority.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_history.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_runtime.py",
+    "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_execution_security.py",
+    "modules/infrastructure/database/tests/signed_worker_assurance_test_support.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_finalization.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_lease_schema.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_recovery.py",
+    "modules/infrastructure/database/tests/test_signed_worker_assurance_reservation.py",
+    "modules/infrastructure/database/tests/test_signed_worker_quarantine_security.py",
 }
 
 
@@ -229,3 +247,9 @@ def test_touched_signed_worker_runtime_stays_under_domain_limit() -> None:
         target = MODULE_ROOT / relative_path
         assert len(target.read_text(encoding="utf-8").splitlines()) <= 675
         assert _oversized_function_sizes(target) == {}
+
+
+def test_signed_worker_security_suites_stay_bounded() -> None:
+    for relative_path in BOUNDED_SECURITY_TEST_FILES:
+        target = REPO_ROOT / relative_path
+        assert len(target.read_text(encoding="utf-8").splitlines()) <= 600

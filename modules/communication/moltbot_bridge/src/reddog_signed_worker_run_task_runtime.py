@@ -12,6 +12,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_cla
     admit_signed_worker_execution_once,
     bind_execution_admission,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+    quarantine_unverified_signed_worker_assignment,
+)
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
     DIRECT_ACCEPT,
     DIRECT_REJECT,
@@ -59,33 +62,28 @@ def execute_signed_worker_from_agentdb(
         discovered_by=discovered_by,
     ):
         return None
-    admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
-    if admission is None:
-        result = _rejected("reddog_signed_worker_execution_already_claimed")
-        result["finalization_owned"] = True
-        return result
+    verified, admission, rejection = _verify_and_admit(
+        repo_root=repo_root, db=db, task_id=task_id, context=context,
+        required_skills=required_skills, source=source,
+        discovered_by=discovered_by, env=env,
+    )
+    if rejection is not None:
+        return rejection
+    if verified is None or admission is None:
+        return _rejected("reddog_signed_worker_admission_missing")
     claimed_context = admission.claimed_context
     admitted_context = bind_execution_admission(claimed_context, admission)
     try:
-        verified_context = _verify_context(
-            repo_root=repo_root,
-            task_id=task_id,
-            context=claimed_context,
-            required_skills=admission.required_skills,
-            source=str(claimed_context.get("source") or ""),
-            discovered_by=admission.discovered_by,
-            env=env,
-        )
         verified_context = {
-            **dict(verified_context),
+            **dict(verified.canonical_context),
             **validated_result_history(claimed_context),
         }
-    except (ImportError, TypeError, ValueError) as exc:
+    except ValueError as exc:
         return _finalize_owned_execution(
             db=db,
             task_id=task_id,
             context=admitted_context,
-            result=_rejected(f"reddog_signed_worker_authority_rejected: {exc}"),
+            result=_rejected(f"reddog_signed_worker_history_rejected: {exc}"),
         )
     return _claim_and_execute(
         repo_root=repo_root,
@@ -97,6 +95,41 @@ def execute_signed_worker_from_agentdb(
     )
 
 
+def _verify_and_admit(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    required_skills: Sequence[str],
+    source: str,
+    discovered_by: str,
+    env: Mapping[str, str],
+) -> tuple[Any | None, Any | None, Mapping[str, Any] | None]:
+    try:
+        verified = _verify_context(
+            repo_root=repo_root, task_id=task_id, context=context,
+            required_skills=required_skills, source=source,
+            discovered_by=discovered_by, env=env,
+        )
+    except (ImportError, TypeError, ValueError) as exc:
+        quarantine_unverified_signed_worker_assignment(
+            db=db, task_id=task_id,
+            reason="signed_worker_agentdb_envelope_rejected",
+        )
+        return None, None, _rejected(
+            f"reddog_signed_worker_authority_rejected: {exc}"
+        )
+    admission = admit_signed_worker_execution_once(
+        db=db, task_id=task_id, verified_envelope=verified
+    )
+    if admission is not None:
+        return verified, admission, None
+    result = _rejected("reddog_signed_worker_execution_already_claimed")
+    result["finalization_owned"] = True
+    return None, None, result
+
+
 def _claim_and_execute(
     *,
     repo_root: Path,
@@ -105,7 +138,7 @@ def _claim_and_execute(
     verified_context: Mapping[str, Any],
     signed_worker_runner: Any | None,
     env: Mapping[str, str],
-) -> Mapping[str, Any]:
+) -> Any:
     try:
         with signed_worker_execution_heartbeat(
             db=db,
@@ -258,7 +291,7 @@ def _verify_context(
         envelope=context["signed_worker_agentdb_envelope"],
         task_id=task_id,
         authority_context=authority,
-    ).canonical_context
+    )
 
 
 def _runner(

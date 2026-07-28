@@ -1,5 +1,8 @@
 # RedDog Interface
 
+Version 0.4.28 requires a process-local verified-envelope seal before a signed
+worker can enter execution, checks the durable execution lease in the same
+transaction as finalization, and atomically quarantines invalid assignments.
 Version 0.4.27 binds queue lineage and the configured verifier through signed
 AgentDB admission. The extension-pinned backend closure includes dedicated
 signed-worker assignment, bounded lease renewal, and atomic quarantine

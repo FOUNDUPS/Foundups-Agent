@@ -1,4 +1,12 @@
 # ModLog - moltbot_bridge
+- Final exact-SHA repair requires a sealed canonical envelope at every
+  signed-worker claim boundary, rejects stale assignments before effect
+  admission, and reconstructs runner context only from signed authority plus
+  independently validated durable result history. Finalization now checks the
+  same claim/use lease inside the database transaction; expired recovery is a
+  separate negative-only path. Invalid assignments quarantine task and
+  verifier reservation atomically, and poisoned rows no longer block the next
+  valid OpenClaw claim.
 - Exact-SHA security review now requires recovery race winners to prove the
   terminal task against the independently durable result-ledger tail and the
   exact terminal assurance row. A self-hashed task-context marker alone can
@@ -42,7 +50,7 @@
   append one shared result receipt in the same task-transition transaction;
   persistence failure leaves the exact task executing and never creates an
   unreceipted terminal state. Verifier completion preserves trusted timestamp
-  precision and atomically commits the durable reservation; detached completion is forbidden. The bounded database siblings avoid extending the `AgentDB` monolith. Publication recovery never creates the
+  precision and atomically commits the durable reservation; detached completion is forbidden. Transactional execution logic was extracted from the touched `AgentDB` monolith into bounded database siblings, reducing the monolith while making the security boundary explicit. Publication recovery never creates the
   derived authority cache, even from internally self-consistent COMMITTED
   packets; only a fresh normal publish call that re-verifies proposal
   authorization may recreate that cache.

@@ -8,15 +8,15 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
 
 
-def rehydrate_signed_worker_agentdb_context(
+def verify_signed_worker_agentdb_context(
     *,
     repo_root: Path | str,
     task_id: str,
     context: Mapping[str, Any],
     authority_verification_context: Any | None,
     env: Mapping[str, str],
-) -> Mapping[str, Any]:
-    """Authenticate one AgentDB envelope without performing a durable effect."""
+) -> Any:
+    """Return the sealed result of canonical signed-envelope verification."""
 
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
         build_worker_dispatch_authority_context_from_env,
@@ -29,10 +29,29 @@ def rehydrate_signed_worker_agentdb_context(
             repo_root=Path(repo_root),
             env=env,
         )
-    verified = verify_reddog_signed_worker_agentdb_envelope(
+    return verify_reddog_signed_worker_agentdb_envelope(
         envelope=context.get("signed_worker_agentdb_envelope", {}),
         task_id=task_id,
         authority_context=authority,
+    )
+
+
+def rehydrate_signed_worker_agentdb_context(
+    *,
+    repo_root: Path | str,
+    task_id: str,
+    context: Mapping[str, Any],
+    authority_verification_context: Any | None,
+    env: Mapping[str, str],
+) -> Mapping[str, Any]:
+    """Authenticate one AgentDB envelope without performing a durable effect."""
+
+    verified = verify_signed_worker_agentdb_context(
+        repo_root=repo_root,
+        task_id=task_id,
+        context=context,
+        authority_verification_context=authority_verification_context,
+        env=env,
     )
     return verified.canonical_context
 
@@ -58,6 +77,39 @@ def try_rehydrate_signed_worker_agentdb_context(
     except (TypeError, ValueError) as exc:
         return None, str(exc)[:160]
     return verified, ""
+
+
+def quarantine_unverified_signed_worker_assignment(
+    *,
+    db: Any,
+    task_id: str,
+    reason: str,
+) -> str:
+    """Atomically isolate an assigned task rejected by canonical verification."""
+
+    from modules.infrastructure.database.src.signed_worker_execution_quarantine import (
+        quarantine_signed_worker_execution_in_transaction,
+    )
+
+    try:
+        with db.db.get_connection() as connection:
+            row = connection.execute(
+                "SELECT status, context FROM agents_autonomous_tasks "
+                "WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            if row is None or dict(row).get("status") != "assigned":
+                return "REJECTED"
+            return quarantine_signed_worker_execution_in_transaction(
+                connection,
+                task_id=task_id,
+                raw_context=dict(row).get("context"),
+                expected_status="assigned",
+                reason=reason,
+                now_iso=datetime.now(timezone.utc).isoformat(),
+            )
+    except Exception:
+        return "REJECTED"
 
 
 def exclude_signed_worker_origin(
@@ -188,7 +240,9 @@ def _trusted_now(env: Mapping[str, str]) -> Optional[datetime]:
 
 __all__ = [
     "exclude_signed_worker_origin",
+    "quarantine_unverified_signed_worker_assignment",
     "rehydrate_signed_worker_agentdb_context",
     "renew_expired_verified_assurance",
     "try_rehydrate_signed_worker_agentdb_context",
+    "verify_signed_worker_agentdb_context",
 ]

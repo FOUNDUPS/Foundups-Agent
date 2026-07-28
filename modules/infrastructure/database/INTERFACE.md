@@ -15,6 +15,7 @@ File: `modules/infrastructure/database/src/signed_worker_execution_store.py`
 
 ### Public Function
 - `finalize_signed_worker_execution(db, task_id, *, context, accepted, result_context, target_status=None, retry_not_before=None, assurance_completion=None) -> bool`
+- `finalize_expired_signed_worker_execution_recovery(db, task_id, *, context, result_context, target_status=None, retry_not_before=None, assurance_completion=None, now=None) -> bool`
 
 The finalizer updates only the exact executing task row bound to the admitted
 assignee, claim receipt, one-use receipt and preclaim context digest. Requeue
@@ -23,6 +24,10 @@ row, context or receipt change fails closed.
 `result_context` is mandatory and must contain exactly one new canonical
 result-history entry. Missing or unchanged history never reaches a terminal
 or requeue state.
+Normal finalization requires the exact claim/use execution lease to remain
+active at the transaction boundary. Expired recovery is a separate,
+failure-only API and rejects success-shaped results. Task state, assurance
+completion, result-ledger append, and lease validation commit together.
 
 Signed-worker execution claims begin with a 15-minute durable lease. A
 process-local heartbeat may renew the same claim/use binding up to a fixed
@@ -35,6 +40,9 @@ same finalizer, while missing, positive-only, corrupt, or otherwise
 effect-unknown evidence is quarantined without a success result. Generic
 create, assignment, retry, requeue, and completion APIs reject the reserved
 `reddog-worker-dispatch-` namespace.
+First-time quarantine also transitions an independently reserved assurance row
+in the same transaction. A pre-existing local quarantine marker is insufficient
+unless the durable task, result ledger, and assurance state agree exactly.
 
 ## Signed Worker Result Ledger
 File: `modules/infrastructure/database/src/signed_worker_result_ledger.py`

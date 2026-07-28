@@ -6,7 +6,7 @@ import hashlib
 import hmac
 import json
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -90,6 +90,7 @@ _DOWNSTREAM_STAGES = (
     "bounded_worker_pilot",
     "slice_verifier",
 )
+_VERIFIED_ENVELOPE_SEAL = object()
 
 
 class SignedWorkerAgentDbEnvelopeError(ValueError):
@@ -105,6 +106,7 @@ class VerifiedSignedWorkerAgentDbEnvelope:
     dispatch_receipt: Mapping[str, Any]
     dispatch_intent: Mapping[str, Any]
     authority_verification_result: Mapping[str, Any]
+    _verification_seal: object = field(repr=False, compare=False)
 
 
 @dataclass(frozen=True)
@@ -244,6 +246,30 @@ def verify_reddog_signed_worker_agentdb_envelope(
         dispatch_receipt=planned_receipt,
         dispatch_intent=planned_intent,
         authority_verification_result=verification,
+        _verification_seal=_VERIFIED_ENVELOPE_SEAL,
+    )
+
+
+def verified_signed_worker_agentdb_envelope_matches(
+    value: Any,
+    *,
+    task_id: str,
+    context: Mapping[str, Any],
+) -> bool:
+    """Bind admission to a proof emitted by this module's canonical verifier."""
+
+    if (
+        not isinstance(value, VerifiedSignedWorkerAgentDbEnvelope)
+        or value._verification_seal is not _VERIFIED_ENVELOPE_SEAL
+        or not hmac.compare_digest(value.task_id, task_id)
+    ):
+        return False
+    expected = value.canonical_context.get("signed_worker_agentdb_envelope")
+    supplied = context.get("signed_worker_agentdb_envelope")
+    return bool(
+        isinstance(expected, Mapping)
+        and isinstance(supplied, Mapping)
+        and _constant_mapping_equal(expected, supplied)
     )
 
 
@@ -614,5 +640,6 @@ __all__ = [
     "build_worker_dispatch_authority_context_from_env",
     "capture_worker_dispatch_authority_verification_config",
     "canonical_reddog_signed_worker_task_id",
+    "verified_signed_worker_agentdb_envelope_matches",
     "verify_reddog_signed_worker_agentdb_envelope",
 ]

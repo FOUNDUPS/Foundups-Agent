@@ -92,7 +92,6 @@ from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_te
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     FakeAssuranceReservationStore,
-    install_signed_worker_envelope_test_authority,
 )
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
@@ -1442,7 +1441,6 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> dict[str, object]:
-    install_signed_worker_envelope_test_authority(monkeypatch)
     from modules.communication.moltbot_bridge.src import (
         reddog_bounded_artifact_generation_runtime as artifact_runtime,
         reddog_main_resident_queue_serial_loop_bootstrap as bootstrap_module,
@@ -1452,11 +1450,15 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
         claim_reddog_signed_worker_dispatch_task_once,
     )
-    from modules.infrastructure.database.src.agent_db import AgentDB
-    from modules.infrastructure.database.src.db_manager import DatabaseManager
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+        WorkerDispatchAuthorityVerificationConfig,
+        build_worker_dispatch_authority_context,
+    )
+    from modules.infrastructure.database.src import agent_db as agent_db_module
 
     monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
-    DatabaseManager.reset_for_tests()
+    agent_db_module.DatabaseManager.reset_for_tests()
+    AgentDB = agent_db_module.AgentDB
     trusted_now = datetime.fromisoformat(NOW)
     assurance_store = lambda: AgentDB(  # noqa: E731 - compact test factory
         assurance_now_provider=lambda: trusted_now
@@ -1624,9 +1626,21 @@ def _run_bootstrap_to_verified_outcome_ratchet(
             "review_packet": {"receipt_id": "fusion-artifact-receipt"},
         },
     )
+    authority_context = build_worker_dispatch_authority_context(
+        config=WorkerDispatchAuthorityVerificationConfig(
+            repo_root=str(repo),
+            runtime_allowed_root=str(tmp_path / "runtime"),
+            authority_state_path=str(authority_state),
+            permission_snapshots_path=str(snapshots),
+            principal_authority_records_path=str(principals),
+            signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+        ),
+        trusted_now_epoch=lambda: 1000,
+    )
     author_result = claim_reddog_signed_worker_dispatch_task_once(
         repo_root=repo,
         agent_db_factory=assurance_store,
+        authority_verification_context=authority_context,
     )
     assert author_result["accepted"] is True, json.dumps(
         author_result, sort_keys=True, default=str
@@ -1644,6 +1658,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     verifier_result = claim_reddog_signed_worker_dispatch_task_once(
         repo_root=repo,
         agent_db_factory=assurance_store,
+        authority_verification_context=authority_context,
     )
     assert verifier_result["accepted"] is True, json.dumps(
         verifier_result, sort_keys=True, default=str

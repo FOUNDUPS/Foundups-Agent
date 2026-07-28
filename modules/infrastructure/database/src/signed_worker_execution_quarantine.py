@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
-from typing import Any, Mapping
+from typing import Any
 
-
-QUARANTINE_SCHEMA = "reddog_signed_worker_execution_quarantine.v1"
+from .signed_worker_execution_quarantine_receipt import (
+    QUARANTINE_SCHEMA,
+    build_quarantine_receipt,
+    decoded_context,
+    quarantine_receipt_matches,
+)
 
 
 def quarantine_signed_worker_execution(
@@ -30,6 +33,27 @@ def quarantine_signed_worker_execution(
         return "REJECTED"
 
 
+def quarantine_signed_worker_execution_in_transaction(
+    connection: Any,
+    *,
+    task_id: str,
+    raw_context: Any,
+    expected_status: str,
+    reason: str,
+    now_iso: str,
+) -> str:
+    """Quarantine through an existing transaction without weakening checks."""
+
+    return _quarantine(
+        connection,
+        task_id=task_id,
+        raw_context=str(raw_context or ""),
+        expected_status=expected_status,
+        reason=reason,
+        now_iso=now_iso,
+    )
+
+
 def _quarantine(
     connection: Any, *, task_id: str, raw_context: str,
     expected_status: str, reason: str, now_iso: str,
@@ -38,21 +62,18 @@ def _quarantine(
         "SELECT status, context FROM agents_autonomous_tasks WHERE task_id = ?",
         (task_id,),
     ).fetchone()
-    if _already_quarantined(task, task_id=task_id):
-        if not _no_result_history(connection, task_id):
-            return "REJECTED"
-        if not _quarantine_reservation(
-            connection,
-            task_id=task_id,
-            reason=reason,
-            now_iso=now_iso,
+    if quarantine_receipt_matches(task, task_id=task_id):
+        if (
+            not _no_result_history(connection, task_id)
+            or not _reservation_is_quarantined(connection, task_id)
         ):
-            raise RuntimeError("assurance_quarantine_rejected")
+            return "REJECTED"
         return "QUARANTINED"
     if (
         task is None
         or dict(task).get("status") != expected_status
         or str(dict(task).get("context") or "") != raw_context
+        or not _no_result_history(connection, task_id)
     ):
         return "REJECTED"
     return _persist_quarantine(
@@ -64,8 +85,8 @@ def _persist_quarantine(
     connection: Any, task_id: str, raw_context: str,
     expected_status: str, reason: str, now_iso: str,
 ) -> str:
-    context = _context(raw_context)
-    context["signed_worker_execution_quarantine"] = _receipt(
+    context = decoded_context(raw_context)
+    context["signed_worker_execution_quarantine"] = build_quarantine_receipt(
         task_id=task_id,
         reason=reason,
         now_iso=now_iso,
@@ -124,19 +145,13 @@ def _quarantine_reservation(
     return changed == 1
 
 
-def _already_quarantined(row: Any, *, task_id: str) -> bool:
-    if row is None or dict(row).get("status") != "quarantined":
-        return False
-    context = _context(str(dict(row).get("context") or ""))
-    receipt = context.get("signed_worker_execution_quarantine")
-    return bool(
-        isinstance(receipt, Mapping)
-        and receipt.get("schema_version") == QUARANTINE_SCHEMA
-        and receipt.get("task_id") == task_id
-        and receipt.get("effect_commit_state") == "INDETERMINATE"
-        and receipt.get("no_worker_effect_replayed") is True
-        and _digest_without_receipt(receipt) == receipt.get("receipt_id")
-    )
+def _reservation_is_quarantined(connection: Any, task_id: str) -> bool:
+    row = connection.execute(
+        "SELECT status FROM agents_independent_assurance_reservations "
+        "WHERE verifier_task_id = ?",
+        (task_id,),
+    ).fetchone()
+    return row is not None and dict(row).get("status") == "QUARANTINED"
 
 
 def _no_result_history(connection: Any, task_id: str) -> bool:
@@ -148,48 +163,8 @@ def _no_result_history(connection: Any, task_id: str) -> bool:
     return row is not None and int(dict(row).get("count") or 0) == 0
 
 
-def _receipt(*, task_id: str, reason: str, now_iso: str) -> dict[str, Any]:
-    receipt = {
-        "schema_version": QUARANTINE_SCHEMA,
-        "task_id": task_id,
-        "reason": reason,
-        "quarantined_at": now_iso,
-        "effect_commit_state": "INDETERMINATE",
-        "no_worker_effect_replayed": True,
-    }
-    receipt["receipt_id"] = _digest(receipt)
-    return receipt
-
-
-def _context(raw_context: str) -> dict[str, Any]:
-    try:
-        parsed = json.loads(raw_context)
-    except (TypeError, ValueError):
-        return {}
-    return dict(parsed) if isinstance(parsed, Mapping) else {}
-
-
-def _digest_without_receipt(receipt: Mapping[str, Any]) -> str:
-    return _digest(
-        {
-            key: value
-            for key, value in receipt.items()
-            if key != "receipt_id"
-        }
-    )
-
-
-def _digest(value: Mapping[str, Any]) -> str:
-    encoded = json.dumps(
-        dict(value),
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode("ascii")
-    return "sha256:" + hashlib.sha256(encoded).hexdigest()
-
-
 __all__ = [
     "QUARANTINE_SCHEMA",
     "quarantine_signed_worker_execution",
+    "quarantine_signed_worker_execution_in_transaction",
 ]

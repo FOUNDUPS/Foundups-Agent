@@ -1,10 +1,20 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-28 - Signed-worker security repair compatibility (0.4.28)
+
+- Proved canonical envelope verification yields a process-local sealed proof
+  that cannot be reconstructed from a self-hashed mapping.
+- Proved invalid assignment quarantine, finalization, result-ledger append, and
+  assurance transitions are atomic and lease-fenced.
+- Split the signed-worker and assurance regression monoliths into bounded,
+  concern-specific suites without changing the collected test set.
+- Revalidated the generated 1,059-file backend manifest and its exact digest.
+
 ## 2026-07-28 - Signed queue-lineage compatibility (0.4.27)
 
 - Locked package, runtime, README, generated VSIX name, and context fixtures to
   0.4.27.
-- Revalidated the 1,047-file backend manifest and bounded 1,100-file client
+- Revalidated the 1,055-file backend manifest and bounded 1,100-file client
   capacity with unchanged integrity and byte limits.
 
 ## 2026-07-27 - Exact-SHA commit compatibility (0.4.26)

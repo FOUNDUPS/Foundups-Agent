@@ -357,7 +357,8 @@ def _signed_worker_execute_claimed_task(
         admit_signed_worker_for_supervisor,
     )
     admission = admit_signed_worker_for_supervisor(
-        repo_root=repo_root, db=db, task_id=task_id, env=os.environ,
+        repo_root=repo_root, db=db, task_id=task_id, context=context,
+        env=os.environ,
         authority_verification_context=authority_verification_context,
     )
     if admission.status == "ALREADY_CLAIMED":
@@ -885,9 +886,7 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
         ).fetchall()
         if not rows:
             return None
-        row = None
-        context: Any = None
-        raw_context: Any = None
+        candidates: list[tuple[str, Any]] = []
         for candidate in rows:
             retry_not_before = (
                 candidate["retry_not_before"]
@@ -926,21 +925,35 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
                     )
                 )
             ):
-                row = candidate
-                raw_context = raw_candidate
-                context = candidate_context
-                break
-        if row is None:
-            return None
-        task_id = row["task_id"] if hasattr(row, "keys") else row[0]
-    if not db.assign_signed_worker_task(task_id):
+                task_id = (
+                    candidate["task_id"]
+                    if hasattr(candidate, "keys")
+                    else candidate[0]
+                )
+                candidates.append((str(task_id), candidate_context))
+    return _assign_first_valid_signed_worker_candidate(db, candidates)
+
+
+def _assign_first_valid_signed_worker_candidate(
+    db: Any,
+    candidates: Sequence[tuple[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Skip atomically quarantined poison rows without hiding real races."""
+
+    last_quarantined = ""
+    for task_id, context in candidates:
+        if db.assign_signed_worker_task(task_id):
+            return {"task_id": task_id, "context": context}
+        current = db.get_autonomous_task_by_id(task_id)
+        if isinstance(current, Mapping) and current.get("status") == "quarantined":
+            last_quarantined = task_id
+            continue
         return {"task_id": task_id, "claim_race_lost": True}
-    if context is None:
-        try:
-            context = json.loads(raw_context) if isinstance(raw_context, str) else raw_context
-        except Exception:
-            context = None
-    return {"task_id": task_id, "context": context}
+    return (
+        {"task_id": last_quarantined, "claim_race_lost": True}
+        if last_quarantined
+        else None
+    )
 
 
 def _claim_reserved_independent_verifier_task(
