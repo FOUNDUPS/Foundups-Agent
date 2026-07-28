@@ -15,6 +15,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dis
     WORKER_DISPATCH_RECEIPT_FIELDS,
     derive_worker_dispatch_roles,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_runtime_types import (
     WorkerDispatchRuntimeReason,
     canonical_digest,
@@ -112,13 +115,24 @@ def _request(
     queue_item_id: str,
 ) -> ValidatedDispatchRequest:
     dryrun = mapping(dryrun_result)
-    receipt = mapping(dryrun.get("receipt"))
-    intents = tuple(mapping(intent) for intent in sequence(receipt.get("dispatch_intents")))
+    receipt = _with_optional_memex(mapping(dryrun.get("receipt")))
+    intents = tuple(
+        _with_optional_memex(mapping(intent))
+        for intent in sequence(receipt.get("dispatch_intents"))
+    )
+    receipt["dispatch_intents"] = list(intents)
     return ValidatedDispatchRequest(
         receipt=receipt,
         intents=intents,
         queue_item=_queue_item(snapshot, queue_item_id),
     )
+
+
+def _with_optional_memex(value: Mapping[str, Any]) -> dict[str, Any]:
+    normalized = dict(value)
+    normalized.setdefault("memex_supply_receipt_id", "")
+    normalized.setdefault("memex_supply_digest", "")
+    return normalized
 
 
 def _basic_reasons(
@@ -149,6 +163,8 @@ def _queue_binding_reasons(request: ValidatedDispatchRequest) -> tuple[str, ...]
         reasons.append(WorkerDispatchRuntimeReason.WSP15_BINDING_MISMATCH)
     if not _model_binding_matches(request.receipt, request.queue_item):
         reasons.append(WorkerDispatchRuntimeReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    if not _memex_binding_matches(request.receipt, request.queue_item):
+        reasons.append(WorkerDispatchRuntimeReason.MEMEX_SUPPLY_BINDING_MISMATCH)
     if not _worker_plan_matches(request.receipt, request.queue_item):
         reasons.append(WorkerDispatchRuntimeReason.WORKER_PLAN_BINDING_MISMATCH)
     return tuple(reasons)
@@ -208,6 +224,8 @@ def _intent_safe(intent: Mapping[str, Any], receipt: Mapping[str, Any]) -> bool:
         "wsp15_allocation_digest",
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
+        "memex_supply_receipt_id",
+        "memex_supply_digest",
         "architect_fix_publication_receipt_id",
         "architect_fix_publication_binding_digest",
         "verified_work_authority_digest",
@@ -271,6 +289,34 @@ def _model_binding_matches(
         and receipt_digest == queue_digest
         and receipt_id.startswith("reddog_model_runtime_binding:")
         and receipt_digest.startswith("sha256:")
+    )
+
+
+def _memex_binding_matches(
+    receipt: Mapping[str, Any],
+    queue_item: Mapping[str, Any],
+) -> bool:
+    raw_receipt_id = receipt.get("memex_supply_receipt_id")
+    raw_receipt_digest = receipt.get("memex_supply_digest")
+    raw_queue_id = queue_item.get("memex_supply_receipt_id")
+    raw_queue_digest = queue_item.get("memex_supply_digest")
+    if not optional_authority_binding_values_valid(
+        raw_receipt_id,
+        raw_receipt_digest,
+    ) or not optional_authority_binding_values_valid(
+        raw_queue_id,
+        raw_queue_digest,
+    ):
+        return False
+    receipt_id = str(raw_receipt_id or "")
+    receipt_digest = str(raw_receipt_digest or "")
+    queue_id = str(raw_queue_id or "")
+    queue_digest = str(raw_queue_digest or "")
+    if not receipt_id and not queue_id:
+        return True
+    return (
+        hmac.compare_digest(receipt_id, queue_id)
+        and hmac.compare_digest(receipt_digest, queue_digest)
     )
 
 

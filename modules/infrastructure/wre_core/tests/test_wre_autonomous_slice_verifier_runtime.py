@@ -115,6 +115,8 @@ def test_accepts_complete_machine_derived_slice_packet() -> None:
     assert result.receipt.holoindex_freshness_receipt_digest == _digest("6")
     assert result.receipt.model_runtime_binding_receipt_id is None
     assert result.receipt.model_runtime_binding_digest == ""
+    assert result.receipt.memex_supply_receipt_id is None
+    assert result.receipt.memex_supply_digest == ""
     assert result.receipt.no_command_execution_performed is True
     assert result.receipt.no_pr_publish_performed is True
     assert result.receipt.no_pattern_memory_write_performed is True
@@ -154,6 +156,40 @@ def test_rejects_conflicting_or_one_sided_model_runtime_binding() -> None:
         "model_runtime_binding_digest": _digest("8"),
     }
     assert_reject(req, verifier.FAIL_MODEL_RUNTIME_BINDING)
+
+
+def test_carries_memex_binding_and_binds_it_into_verifier_receipt() -> None:
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    req["signed_authority"]["memex_supply_digest"] = _digest("7")
+
+    result = verifier.verify_autonomous_slice_runtime(req)
+    without_memex = verifier.verify_autonomous_slice_runtime(valid_request())
+
+    assert result.accepted is True
+    assert result.receipt.memex_supply_receipt_id == "memex-supply-receipt-1"
+    assert result.receipt.memex_supply_digest == _digest("7")
+    assert result.receipt.receipt_id != without_memex.receipt.receipt_id
+
+
+def test_rejects_malformed_half_or_conflicting_memex_binding() -> None:
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    assert_reject(req, verifier.FAIL_MEMEX_SUPPLY_BINDING)
+
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    req["signed_authority"]["memex_supply_digest"] = "sha256:not-a-digest"
+    assert_reject(req, verifier.FAIL_MEMEX_SUPPLY_BINDING)
+
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    req["signed_authority"]["memex_supply_digest"] = _digest("7")
+    req["artifact_generation_receipt"] = {
+        "memex_supply_receipt_id": "memex-supply-receipt-1",
+        "memex_supply_digest": _digest("8"),
+    }
+    assert_reject(req, verifier.FAIL_MEMEX_SUPPLY_BINDING)
 
 
 def test_rejects_missing_identity_and_self_verification() -> None:

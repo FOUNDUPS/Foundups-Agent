@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
+
+_SHA256_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 _OPTIONAL_BINDING_FIELDS = (
     ("model_selection_receipt_id", "model_selection_digest"),
@@ -14,15 +17,35 @@ _OPTIONAL_BINDING_FIELDS = (
 )
 
 
+def is_sha256_digest(value: Any) -> bool:
+    """Return True only for a canonical lowercase SHA-256 digest."""
+
+    return isinstance(value, str) and _SHA256_DIGEST_RE.fullmatch(value) is not None
+
+
+def optional_authority_binding_values_valid(receipt_id: Any, digest: Any) -> bool:
+    """Require an absent pair or a non-empty receipt ID plus canonical digest."""
+
+    if receipt_id in (None, "") and digest in (None, ""):
+        return True
+    if not isinstance(receipt_id, str) or not receipt_id:
+        return False
+    return is_sha256_digest(digest)
+
+
 def optional_authority_bindings_valid(request: Any) -> bool:
     """Require paired receipt IDs and SHA-256 digests."""
 
     for receipt_field, digest_field in _OPTIONAL_BINDING_FIELDS:
         receipt_id = getattr(request, receipt_field)
         digest = getattr(request, digest_field)
-        if bool(receipt_id) != bool(digest):
-            return False
-        if digest and not str(digest).startswith("sha256:"):
+        if receipt_field == "memex_supply_receipt_id":
+            valid = optional_authority_binding_values_valid(receipt_id, digest)
+        else:
+            valid = bool(receipt_id) == bool(digest) and (
+                not digest or str(digest).startswith("sha256:")
+            )
+        if not valid:
             return False
     return True
 
@@ -43,5 +66,7 @@ def attach_optional_authority_bindings(
 
 __all__ = [
     "attach_optional_authority_bindings",
+    "is_sha256_digest",
+    "optional_authority_binding_values_valid",
     "optional_authority_bindings_valid",
 ]

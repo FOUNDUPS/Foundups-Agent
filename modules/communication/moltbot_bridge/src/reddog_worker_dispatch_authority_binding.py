@@ -24,7 +24,8 @@ _SIGNED_EFFECT_FIELDS = (
     "work_order_id", "foundup_id", "requested_operation",
     "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
     "wsp15_mps_total", "wsp15_reasoning_tier", "model_runtime_binding_receipt_id",
-    "model_runtime_binding_digest", "architect_fix_publication_receipt_id",
+    "model_runtime_binding_digest", "memex_supply_receipt_id",
+    "memex_supply_digest", "architect_fix_publication_receipt_id",
     "architect_fix_publication_binding_digest",
 )
 

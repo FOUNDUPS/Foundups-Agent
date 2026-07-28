@@ -1,9 +1,9 @@
-## 2026-07-28: SIGNED_WORKER_NAMESPACE_QUARANTINE_ISOLATION
-- Added a real `run_task` regression proving forged signed-worker metadata on
-  an ordinary task cannot select quarantine or generic finalization; expired
-  signed execution without durable assurance must quarantine.
-- Generic rows remain byte-for-byte unchanged, and unknown-effect executions
-  never fabricate result-ledger history.
+## 2026-07-28: REDDOG_FOUNDUP_MEMEX_AUTHORITY_DISPATCH_BINDING_PHASE1
+- Added end-to-end Memex authority regressions for pair propagation,
+  absent-pair compatibility, half-pair rejection, queue conflict rejection
+  before nonce/writer effects, AgentDB envelope tampering, executor tampering,
+  read-only 0102 assignment, and independent verifier receipt lineage.
+- The signer, dispatch, claim, executor, verifier, and serial matrices stay green.
 - Full differential evidence remains mandatory before publication.
 
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1

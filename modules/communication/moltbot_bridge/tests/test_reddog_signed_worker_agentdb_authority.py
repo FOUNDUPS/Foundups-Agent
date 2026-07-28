@@ -46,6 +46,24 @@ from modules.communication.moltbot_bridge.tests.reddog_signed_worker_agentdb_tes
         (
             (
                 "signed_worker_agentdb_envelope",
+                "signed_authority_worker_dispatch_receipt",
+                "memex_supply_digest",
+            ),
+            "sha256:attacker-memex",
+        ),
+        (
+            (
+                "signed_worker_agentdb_envelope",
+                "queue_authority_runtime_result",
+                "authority_result",
+                "work_authority",
+                "memex_supply_receipt_id",
+            ),
+            "sha256:attacker-memex",
+        ),
+        (
+            (
+                "signed_worker_agentdb_envelope",
                 "wsp15_allocation_receipt",
                 "mps_total",
             ),

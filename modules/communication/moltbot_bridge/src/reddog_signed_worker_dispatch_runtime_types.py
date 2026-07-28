@@ -28,6 +28,9 @@ class WorkerDispatchRuntimeReason:
     MODEL_RUNTIME_BINDING_MISMATCH = (
         "REJECT_WORKER_DISPATCH_MODEL_RUNTIME_BINDING_MISMATCH"
     )
+    MEMEX_SUPPLY_BINDING_MISMATCH = (
+        "REJECT_WORKER_DISPATCH_MEMEX_SUPPLY_BINDING_MISMATCH"
+    )
     WORKER_PLAN_BINDING_MISMATCH = (
         "REJECT_WORKER_DISPATCH_WORKER_PLAN_BINDING_MISMATCH"
     )
@@ -78,6 +81,8 @@ class SignedWorkerDispatchRuntimeReceipt:
     wsp15_allocation_digest: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
+    memex_supply_receipt_id: str
+    memex_supply_digest: str
     architect_fix_publication_receipt_id: str
     architect_fix_publication_binding_digest: str
     verified_work_authority_digest: str

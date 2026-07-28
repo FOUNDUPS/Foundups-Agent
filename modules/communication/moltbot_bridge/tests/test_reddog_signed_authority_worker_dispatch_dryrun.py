@@ -33,6 +33,8 @@ MODULE_PATH = (
     / "src"
     / "reddog_signed_authority_worker_dispatch_dryrun.py"
 )
+MEMEX_SUPPLY_ID = "sha256:memex-supply"
+MEMEX_SUPPLY_DIGEST = "sha256:" + ("7" * 64)
 
 
 def _digest(value: dict) -> str:
@@ -274,6 +276,70 @@ def test_rejects_one_sided_model_runtime_binding_in_signed_authority() -> None:
         dispatch.SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH
         in result.rejection_reasons
     )
+
+
+def test_carries_memex_binding_from_signed_authority() -> None:
+    allocation = _allocation()
+    runtime = _runtime_result(
+        allocation,
+        authority_result={
+            "accepted": True,
+            "receipt": {"status": AUTHORITY_ISSUED, "receipt_id": "auth-1"},
+            "work_authority": _work_authority(
+                allocation,
+                memex_supply_receipt_id=MEMEX_SUPPLY_ID,
+                memex_supply_digest=MEMEX_SUPPLY_DIGEST,
+            ),
+        },
+    )
+
+    result = _plan(allocation=allocation, queue_authority_runtime_result=runtime)
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.receipt.memex_supply_receipt_id == MEMEX_SUPPLY_ID
+    assert result.receipt.memex_supply_digest == MEMEX_SUPPLY_DIGEST
+    assert {
+        intent.memex_supply_receipt_id
+        for intent in result.receipt.dispatch_intents
+    } == {MEMEX_SUPPLY_ID}
+    assert {
+        intent.memex_supply_digest
+        for intent in result.receipt.dispatch_intents
+    } == {MEMEX_SUPPLY_DIGEST}
+
+
+def test_rejects_one_sided_memex_binding_in_signed_authority() -> None:
+    allocation = _allocation()
+    runtime = _runtime_result(
+        allocation,
+        authority_result={
+            "accepted": True,
+            "receipt": {"status": AUTHORITY_ISSUED, "receipt_id": "auth-1"},
+            "work_authority": _work_authority(
+                allocation,
+                memex_supply_receipt_id=MEMEX_SUPPLY_ID,
+                memex_supply_digest="",
+            ),
+        },
+    )
+
+    result = _plan(allocation=allocation, queue_authority_runtime_result=runtime)
+
+    assert result.accepted is False
+    assert (
+        dispatch.SignedAuthorityWorkerDispatchDryRunReason.MEMEX_SUPPLY_BINDING_MISMATCH
+        in result.rejection_reasons
+    )
+
+
+def test_preserves_absent_memex_binding_compatibility() -> None:
+    result = _plan()
+
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert result.receipt.memex_supply_receipt_id == ""
+    assert result.receipt.memex_supply_digest == ""
 
 
 def test_preserves_legacy_openclaw_candidate_for_non_code_worker_plan() -> None:

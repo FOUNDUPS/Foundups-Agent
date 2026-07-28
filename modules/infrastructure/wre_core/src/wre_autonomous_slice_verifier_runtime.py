@@ -17,6 +17,10 @@ import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+)
+
 AUTONOMOUS_SLICE_VERIFIER_ACCEPT = "AUTONOMOUS_SLICE_VERIFIER_ACCEPT"
 AUTONOMOUS_SLICE_VERIFIER_REJECT = "AUTONOMOUS_SLICE_VERIFIER_REJECT"
 
@@ -33,6 +37,7 @@ FAIL_RECEIPT_CHAIN = "FAIL_RECEIPT_CHAIN"
 FAIL_WORKTREE_RECEIPT = "FAIL_WORKTREE_RECEIPT"
 FAIL_HOLOINDEX_EVIDENCE = "FAIL_HOLOINDEX_EVIDENCE"
 FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
+FAIL_MEMEX_SUPPLY_BINDING = "FAIL_MEMEX_SUPPLY_BINDING"
 FAIL_PATTERN_MEMORY_WRITE = "FAIL_PATTERN_MEMORY_WRITE"
 FAIL_PR_OR_MERGE_ALREADY_PERFORMED = "FAIL_PR_OR_MERGE_ALREADY_PERFORMED"
 
@@ -93,6 +98,8 @@ class AutonomousSliceVerifierReceipt:
     holoindex_freshness_receipt_digest: str
     model_runtime_binding_receipt_id: Optional[str]
     model_runtime_binding_digest: str
+    memex_supply_receipt_id: Optional[str]
+    memex_supply_digest: str
     rejection_reasons: List[str]
     accepted: bool
     no_command_execution_performed: bool = True
@@ -343,6 +350,47 @@ def _runtime_binding_ok(req: Mapping[str, Any]) -> tuple[bool, Optional[str], st
     return True, first[0], first[1]
 
 
+def _memex_binding_pair(value: Mapping[str, Any]) -> tuple[Any, Any]:
+    return (
+        value.get("memex_supply_receipt_id"),
+        value.get("memex_supply_digest"),
+    )
+
+
+def _memex_binding_ok(req: Mapping[str, Any]) -> tuple[bool, Optional[str], str]:
+    signed_authority = _mapping(req.get("signed_authority"))
+    candidates = (
+        req,
+        signed_authority,
+        _mapping(signed_authority.get("work_authority")),
+        _mapping(signed_authority.get("authority")),
+        _mapping(signed_authority.get("payload")),
+        _mapping(req.get("artifact_generation_receipt")),
+        _mapping(_mapping(req.get("artifact_generation_result")).get("receipt")),
+        _mapping(req.get("bounded_worker_pilot_receipt")),
+    )
+    raw_pairs = tuple(
+        pair
+        for pair in (_memex_binding_pair(candidate) for candidate in candidates)
+        if pair[0] or pair[1]
+    )
+    if not raw_pairs:
+        return True, None, ""
+    if any(
+        not optional_authority_binding_values_valid(receipt_id, digest)
+        for receipt_id, digest in raw_pairs
+    ):
+        return False, None, ""
+    pairs = tuple(
+        (str(receipt_id), str(digest))
+        for receipt_id, digest in raw_pairs
+    )
+    first = pairs[0]
+    if any(pair != first for pair in pairs[1:]):
+        return False, first[0], first[1]
+    return True, first[0], first[1]
+
+
 def _all_paths_in_scope(paths: Sequence[str], req: Mapping[str, Any]) -> bool:
     allowed_patterns = [str(item) for item in _list(req.get("allowed_path_patterns"))]
     forbidden_patterns = [str(item) for item in _list(req.get("forbidden_path_patterns"))]
@@ -376,6 +424,7 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
     pilot_receipt = _mapping(req.get("bounded_worker_pilot_receipt"))
     holoindex_evidence = _mapping(req.get("holoindex_evidence"))
     runtime_binding_ok, runtime_binding_id, runtime_binding_digest = _runtime_binding_ok(req)
+    memex_binding_ok, memex_supply_id, memex_supply_digest = _memex_binding_ok(req)
 
     work_order_id = str(req.get("work_order_id") or "")
     slice_name = str(req.get("slice_name") or "")
@@ -437,6 +486,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         reasons.append(FAIL_HOLOINDEX_EVIDENCE)
     if not runtime_binding_ok:
         reasons.append(FAIL_MODEL_RUNTIME_BINDING)
+    if not memex_binding_ok:
+        reasons.append(FAIL_MEMEX_SUPPLY_BINDING)
     if req.get("pattern_memory_write_performed") is True:
         reasons.append(FAIL_PATTERN_MEMORY_WRITE)
     if req.get("draft_pr_published") is True or req.get("merge_performed") is True:
@@ -479,6 +530,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         ),
         "model_runtime_binding_receipt_id": runtime_binding_id or "",
         "model_runtime_binding_digest": runtime_binding_digest,
+        "memex_supply_receipt_id": memex_supply_id or "",
+        "memex_supply_digest": memex_supply_digest,
         "rejection_reasons": deduped,
     }
     receipt = AutonomousSliceVerifierReceipt(
@@ -503,6 +556,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         ),
         model_runtime_binding_receipt_id=runtime_binding_id,
         model_runtime_binding_digest=runtime_binding_digest,
+        memex_supply_receipt_id=memex_supply_id,
+        memex_supply_digest=memex_supply_digest,
         rejection_reasons=deduped,
         accepted=accepted,
     )
@@ -527,6 +582,7 @@ __all__ = [
     "FAIL_DIFF_EVIDENCE",
     "FAIL_HEAD_SHA",
     "FAIL_HOLOINDEX_EVIDENCE",
+    "FAIL_MEMEX_SUPPLY_BINDING",
     "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_PATTERN_MEMORY_WRITE",
     "FAIL_PR_OR_MERGE_ALREADY_PERFORMED",

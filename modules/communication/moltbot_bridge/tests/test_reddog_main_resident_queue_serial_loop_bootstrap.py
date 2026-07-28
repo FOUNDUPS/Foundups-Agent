@@ -345,7 +345,7 @@ def _snapshot() -> dict[str, object]:
                 "model_runtime_binding_receipt_id": "",
                 "model_runtime_binding_digest": "",
                 "memex_supply_receipt_id": memex_id,
-                "memex_supply_digest": "sha256:memex-digest",
+                "memex_supply_digest": "sha256:" + ("d" * 64),
                 "no_execution_performed": True,
             }
         ],
@@ -384,7 +384,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "model_selection_receipt_id": "sha256:model-selection-1",
         "model_selection_digest": "sha256:model-selection-digest",
         "memex_supply_receipt_id": "sha256:memex-1",
-        "memex_supply_digest": "sha256:memex-digest",
+        "memex_supply_digest": "sha256:" + ("d" * 64),
         "holoindex_evidence": {
             "holoindex_query": "RedDog resident queue materialized work order",
             "holoindex_status": "bundle_json_ok",
@@ -508,6 +508,21 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
     assert work_order["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     assert work_order["model_runtime_binding_digest"] == _canonical_digest(runtime_binding)
     assert work_order["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
+
+
+def test_authority_profile_materializer_carries_memex_supply_binding() -> None:
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    work_order = work_orders[WORK_ORDER_ID]
+    assert work_order["memex_supply_receipt_id"] == "sha256:memex-1"
+    assert work_order["memex_supply_digest"] == "sha256:" + ("d" * 64)
 
 
 def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> None:

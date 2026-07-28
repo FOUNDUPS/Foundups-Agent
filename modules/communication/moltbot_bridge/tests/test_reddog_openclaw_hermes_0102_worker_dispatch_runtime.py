@@ -53,6 +53,8 @@ RUNTIME_MODULE_PATHS = (
     MODULE_PATH.with_name("reddog_signed_worker_dispatch_agentdb_writer.py"),
     MODULE_PATH.with_name("reddog_signed_worker_publication_admission.py"),
 )
+MEMEX_SUPPLY_ID = "sha256:memex-supply"
+MEMEX_SUPPLY_DIGEST = "sha256:" + ("7" * 64)
 
 
 @pytest.fixture(autouse=True)
@@ -180,6 +182,8 @@ def _intent(role: str, runtime_name: str, capability: str, allocation=None, **ov
         "wsp15_allocation_digest": _digest(allocation),
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
+        "memex_supply_receipt_id": MEMEX_SUPPLY_ID,
+        "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "architect_fix_publication_receipt_id": "",
         "architect_fix_publication_binding_digest": "",
         **_authority_refs(allocation),
@@ -216,6 +220,8 @@ def _dryrun_result(allocation=None, intents=None, **overrides):
         "wsp15_reasoning_tier": allocation["reasoning_tier"],
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
+        "memex_supply_receipt_id": MEMEX_SUPPLY_ID,
+        "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "architect_fix_publication_receipt_id": "",
         "architect_fix_publication_binding_digest": "",
         **_authority_refs(allocation),
@@ -274,6 +280,13 @@ def _runtime_binding_refs():
     }
 
 
+def _memex_refs():
+    return {
+        "memex_supply_receipt_id": MEMEX_SUPPLY_ID,
+        "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
+    }
+
+
 def _snapshot(allocation=None, **queue_overrides):
     allocation = allocation or _allocation()
     queue_item = {
@@ -281,6 +294,7 @@ def _snapshot(allocation=None, **queue_overrides):
         "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
         "status": "QUEUED",
         "wsp15_allocation_receipt": allocation,
+        **_memex_refs(),
     }
     queue_item.update(queue_overrides)
     return governed_worker_dispatch_snapshot({
@@ -314,6 +328,21 @@ def test_publishes_signed_worker_dispatch_intents_as_pending_tasks() -> None:
     for task in result.tasks:
         assert task.context["authorized_principal_id"] == "github:mjtrout"
         assert task.context["authorized_reddog_id"] == "reddog:worker-dispatch"
+        assert task.context["memex_supply_receipt_id"] == MEMEX_SUPPLY_ID
+        assert task.context["memex_supply_digest"] == MEMEX_SUPPLY_DIGEST
+        envelope = task.context["signed_worker_agentdb_envelope"]
+        assert (
+            envelope["signed_authority_worker_dispatch_receipt"][
+                "memex_supply_receipt_id"
+            ]
+            == MEMEX_SUPPLY_ID
+        )
+        assert (
+            envelope["queue_authority_runtime_result"]["authority_result"][
+                "work_authority"
+            ]["memex_supply_digest"]
+            == MEMEX_SUPPLY_DIGEST
+        )
         assert "principal_id" not in task.context["signed_authority_worker_dispatch_receipt"]
         assert "principal_id" not in task.context["worker_dispatch_intent"]
 
@@ -1128,6 +1157,39 @@ def test_rejects_model_runtime_binding_conflict_between_signed_receipt_and_queue
 
     assert result.accepted is False
     assert runtime.WorkerDispatchRuntimeReason.MODEL_RUNTIME_BINDING_MISMATCH in result.rejection_reasons
+
+
+def test_rejects_memex_binding_conflict_before_nonce_or_writer_effect() -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    writer = _FakeWriter()
+
+    rejected = _publish(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation),
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(
+            allocation,
+            memex_supply_receipt_id="sha256:other-memex-supply",
+            memex_supply_digest="sha256:" + ("8" * 64),
+        ),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+    accepted = _publish(
+        worker_dispatch_dryrun_result=_dryrun_result(allocation),
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=_FakeWriter(),
+    )
+
+    assert rejected.accepted is False
+    assert (
+        runtime.WorkerDispatchRuntimeReason.MEMEX_SUPPLY_BINDING_MISMATCH
+        in rejected.rejection_reasons
+    )
+    assert writer.calls == []
+    assert accepted.accepted is True
 
 
 def test_agentdb_writer_publishes_tasks_atomically() -> None:

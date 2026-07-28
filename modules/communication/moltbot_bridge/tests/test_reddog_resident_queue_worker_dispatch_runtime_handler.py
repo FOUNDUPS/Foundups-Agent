@@ -103,6 +103,7 @@ def _snapshot():
 def _dryrun_stage():
     allocation = _allocation()
     _, verification = _authority_stages()
+    queue_item = _snapshot()["wre_queue_items"][0]
     refs = {
         key: verification[key]
         for key in (
@@ -124,6 +125,8 @@ def _dryrun_stage():
             "wsp15_allocation_digest": _digest(allocation),
             "model_runtime_binding_receipt_id": "",
             "model_runtime_binding_digest": "",
+            "memex_supply_receipt_id": queue_item["memex_supply_receipt_id"],
+            "memex_supply_digest": queue_item["memex_supply_digest"],
             "architect_fix_publication_receipt_id": "",
             "architect_fix_publication_binding_digest": "",
             **refs,
@@ -149,6 +152,8 @@ def _dryrun_stage():
             "wsp15_reasoning_tier": allocation["reasoning_tier"],
             "model_runtime_binding_receipt_id": "",
             "model_runtime_binding_digest": "",
+            "memex_supply_receipt_id": queue_item["memex_supply_receipt_id"],
+            "memex_supply_digest": queue_item["memex_supply_digest"],
             "architect_fix_publication_receipt_id": "",
             "architect_fix_publication_binding_digest": "",
             **refs,

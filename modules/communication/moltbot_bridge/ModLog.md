@@ -1,8 +1,8 @@
 # ModLog - moltbot_bridge
-- Exact-SHA review follow-up rejects signed-looking metadata on ordinary
-  AgentDB tasks and quarantines expired signed executions without durable
-  assurance. The reserved namespace owns both effects; no generic row is
-  mutated and no unknown-effect result-ledger history is fabricated.
+- Signed Memex supply lineage now survives delegated authority through worker
+  materialization, dispatch, AgentDB claim/execution, read-only assignment, and
+  independent verification. Absent pairs remain compatible; malformed pairs,
+  queue conflicts, and post-signing substitutions reject before worker effects.
 - Exact-SHA review follow-up removed the importable process-local envelope
   seal as an authority primitive. Signed-worker admission now re-verifies the
   persisted AgentDB envelope against fresh authority inside the atomic claim

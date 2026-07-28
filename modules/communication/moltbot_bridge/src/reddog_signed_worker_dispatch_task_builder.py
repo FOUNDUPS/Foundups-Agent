@@ -201,6 +201,8 @@ def _authority_context(receipt: Mapping[str, Any]) -> dict[str, Any]:
     fields = (
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
+        "memex_supply_receipt_id",
+        "memex_supply_digest",
         "architect_fix_publication_receipt_id",
         "architect_fix_publication_binding_digest",
         "verified_work_authority_digest",
@@ -257,6 +259,8 @@ def _receipt_digest_authority_context(
     receipt: Mapping[str, Any],
 ) -> dict[str, str]:
     fields = (
+        "memex_supply_receipt_id",
+        "memex_supply_digest",
         "architect_fix_publication_receipt_id",
         "architect_fix_publication_binding_digest",
         "verified_work_authority_digest",
@@ -278,6 +282,8 @@ def _receipt_identity_fields(
         "wsp15_allocation_digest",
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
+        "memex_supply_receipt_id",
+        "memex_supply_digest",
         "architect_fix_publication_receipt_id",
         "architect_fix_publication_binding_digest",
         "verified_work_authority_digest",

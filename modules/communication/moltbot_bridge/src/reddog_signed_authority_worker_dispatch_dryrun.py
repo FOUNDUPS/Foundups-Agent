@@ -20,6 +20,9 @@ from typing import Any, Dict, List, Mapping, Sequence, Tuple
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
 )
@@ -56,6 +59,7 @@ class SignedAuthorityWorkerDispatchDryRunReason:
     WSP15_MPS_TOTAL_MISMATCH = "REJECT_WSP15_MPS_TOTAL_MISMATCH"
     WSP15_REASONING_TIER_MISMATCH = "REJECT_WSP15_REASONING_TIER_MISMATCH"
     MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_MODEL_RUNTIME_BINDING_MISMATCH"
+    MEMEX_SUPPLY_BINDING_MISMATCH = "REJECT_MEMEX_SUPPLY_BINDING_MISMATCH"
     ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH = (
         "REJECT_ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH"
     )
@@ -79,6 +83,8 @@ class WorkerDispatchIntent:
     wsp15_allocation_digest: str
     model_runtime_binding_receipt_id: str = ""
     model_runtime_binding_digest: str = ""
+    memex_supply_receipt_id: str = ""
+    memex_supply_digest: str = ""
     architect_fix_publication_receipt_id: str = ""
     architect_fix_publication_binding_digest: str = ""
     verified_work_authority_digest: str = ""
@@ -106,6 +112,8 @@ class SignedAuthorityWorkerDispatchDryRunReceipt:
     wsp15_reasoning_tier: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
+    memex_supply_receipt_id: str
+    memex_supply_digest: str
     architect_fix_publication_receipt_id: str
     architect_fix_publication_binding_digest: str
     verified_work_authority_digest: str
@@ -239,6 +247,12 @@ def _build_intents(
         "wsp15_allocation_digest": _digest(allocation),
         "model_runtime_binding_receipt_id": str(work_authority.get("model_runtime_binding_receipt_id") or ""),
         "model_runtime_binding_digest": str(work_authority.get("model_runtime_binding_digest") or ""),
+        "memex_supply_receipt_id": str(
+            work_authority.get("memex_supply_receipt_id") or ""
+        ),
+        "memex_supply_digest": str(
+            work_authority.get("memex_supply_digest") or ""
+        ),
         "architect_fix_publication_receipt_id": str(
             work_authority.get("architect_fix_publication_receipt_id") or ""
         ),
@@ -394,6 +408,17 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         or not runtime_binding_digest.startswith("sha256:")
     ):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    raw_memex_supply_id = work_authority.get("memex_supply_receipt_id")
+    raw_memex_supply_digest = work_authority.get("memex_supply_digest")
+    if not optional_authority_binding_values_valid(
+        raw_memex_supply_id,
+        raw_memex_supply_digest,
+    ):
+        reasons.append(
+            SignedAuthorityWorkerDispatchDryRunReason.MEMEX_SUPPLY_BINDING_MISMATCH
+        )
+    memex_supply_id = str(raw_memex_supply_id or "")
+    memex_supply_digest = str(raw_memex_supply_digest or "")
     publication_id = str(
         work_authority.get("architect_fix_publication_receipt_id") or ""
     )
@@ -430,6 +455,8 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         "wsp15_allocation_digest": allocation_digest,
         "model_runtime_binding_receipt_id": runtime_binding_id,
         "model_runtime_binding_digest": runtime_binding_digest,
+        "memex_supply_receipt_id": memex_supply_id,
+        "memex_supply_digest": memex_supply_digest,
         "architect_fix_publication_receipt_id": publication_id,
         "architect_fix_publication_binding_digest": publication_digest,
         **authority_binding,
@@ -447,6 +474,8 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         wsp15_reasoning_tier=str(allocation["reasoning_tier"]),
         model_runtime_binding_receipt_id=runtime_binding_id,
         model_runtime_binding_digest=runtime_binding_digest,
+        memex_supply_receipt_id=memex_supply_id,
+        memex_supply_digest=memex_supply_digest,
         architect_fix_publication_receipt_id=publication_id,
         architect_fix_publication_binding_digest=publication_digest,
         verified_work_authority_digest=authority_binding[

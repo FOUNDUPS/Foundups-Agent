@@ -496,6 +496,8 @@ def _canonical_context(
             receipt["model_runtime_binding_receipt_id"]
         ),
         "model_runtime_binding_digest": str(receipt["model_runtime_binding_digest"]),
+        "memex_supply_receipt_id": str(receipt["memex_supply_receipt_id"]),
+        "memex_supply_digest": str(receipt["memex_supply_digest"]),
         "architect_fix_publication_receipt_id": str(
             receipt["architect_fix_publication_receipt_id"]
         ),

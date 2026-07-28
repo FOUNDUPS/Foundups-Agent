@@ -76,7 +76,10 @@ _TEST_WORKER_ID = "reddog-main-bootstrap"
 _TEST_SLICE_ID = "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
 _TEST_DETERMINATION_ID = "sha256:determination"
 _TEST_MODEL_SELECTION_ID = "sha256:model-selection"
-_TEST_MEMEX_SUPPLY_ID = "sha256:memex-supply"
+_TEST_MEMEX_SUPPLY_ID = "memex-supply-test-receipt"
+_TEST_MEMEX_SUPPLY_DIGEST = (
+    "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+)
 
 
 class _WorkerDispatchSignatureVerifier:
@@ -192,7 +195,7 @@ def governed_worker_dispatch_snapshot(
     queue.setdefault("model_selection_receipt_id", _TEST_MODEL_SELECTION_ID)
     queue.setdefault("model_selection_digest", "sha256:model-selection")
     queue.setdefault("memex_supply_receipt_id", _TEST_MEMEX_SUPPLY_ID)
-    queue.setdefault("memex_supply_digest", "sha256:memex-supply")
+    queue.setdefault("memex_supply_digest", _TEST_MEMEX_SUPPLY_DIGEST)
 
     allocation = queue.get("wsp15_allocation_receipt") or {}
     allocation_id = str(allocation.get("receipt_id") or "")
@@ -208,9 +211,11 @@ def governed_worker_dispatch_snapshot(
             f"wsp15_allocation:{allocation_id}",
             f"architect_determination:{queue['source_determination_receipt_id']}",
             f"model_selection:{queue['model_selection_receipt_id']}",
-            f"memex_supply:{queue['memex_supply_receipt_id']}",
         ]
     )
+    memex_id = str(queue.get("memex_supply_receipt_id") or "")
+    if memex_id:
+        refs.append(f"memex_supply:{memex_id}")
     if runtime_id:
         refs.append(f"model_runtime_binding:{runtime_id}")
     queue["evidence_refs"] = list(dict.fromkeys(refs))
@@ -238,7 +243,7 @@ def governed_worker_dispatch_snapshot(
                     queue["model_selection_receipt_id"]
                 ),
                 "model_runtime_binding_receipt_id": runtime_id,
-                "memex_supply_receipt_id": str(queue["memex_supply_receipt_id"]),
+                "memex_supply_receipt_id": memex_id,
             }
         ],
     )
@@ -295,6 +300,24 @@ def worker_dispatch_authority_stages(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build mutually bound authority/verification stages for runtime tests."""
 
+    if "memex_supply_receipt_id" not in work_authority_overrides:
+        work_authority_overrides["memex_supply_receipt_id"] = (
+            _queue_binding_value(
+                work_state_snapshot,
+                queue_item_id,
+                "memex_supply_receipt_id",
+            )
+            or ""
+        )
+    if "memex_supply_digest" not in work_authority_overrides:
+        work_authority_overrides["memex_supply_digest"] = (
+            _queue_binding_value(
+                work_state_snapshot,
+                queue_item_id,
+                "memex_supply_digest",
+            )
+            or ""
+        )
     identity = {
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
@@ -386,6 +409,19 @@ def worker_dispatch_authority_stages(
     return authority_runtime, authority_verification
 
 
+def _queue_binding_value(
+    snapshot: dict[str, Any] | None,
+    queue_item_id: str,
+    field: str,
+) -> str:
+    if snapshot is None:
+        return ""
+    for item in snapshot.get("wre_queue_items", ()):
+        if str(item.get("queue_item_id") or "") == queue_item_id:
+            return str(item.get(field) or "")
+    return ""
+
+
 def worker_dispatch_authority_verification_context():
     return WorkerDispatchAuthorityVerificationContext(
         signature_verifier=_WorkerDispatchSignatureVerifier(),
@@ -463,6 +499,8 @@ def worker_dispatch_dryrun_result(allocation: dict[str, Any]) -> dict[str, Any]:
         "model_runtime_binding_digest": str(
             allocation.get("model_runtime_binding_digest") or ""
         ),
+        "memex_supply_receipt_id": "",
+        "memex_supply_digest": "",
     }
     base = {
         "work_order_id": "wo-1",
@@ -540,6 +578,8 @@ def publish_bound_worker_dispatch(**kwargs: Any):
         for field in (
             "model_runtime_binding_receipt_id",
             "model_runtime_binding_digest",
+            "memex_supply_receipt_id",
+            "memex_supply_digest",
             "architect_fix_publication_receipt_id",
             "architect_fix_publication_binding_digest",
         )
