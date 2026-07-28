@@ -76,11 +76,16 @@ CURRENT_SECURITY_RUNTIME_FILES = {
     "src/reddog_work_order_signature_verifier.py",
 }
 BOUNDED_DATABASE_SECURITY_FILES = {
+    "modules/infrastructure/database/src/signed_worker_assurance_completion.py",
+    "modules/infrastructure/database/src/signed_worker_assurance_request.py",
+    "modules/infrastructure/database/src/signed_worker_assurance_staging.py",
+    "modules/infrastructure/database/src/signed_worker_execution_binding.py",
     "modules/infrastructure/database/src/signed_worker_execution_store.py",
     "modules/infrastructure/database/src/signed_worker_result_history.py",
     "modules/infrastructure/database/src/signed_worker_result_ledger.py",
 }
 BOUNDED_SIGNED_WORKER_RESULT_FILES = {
+    "src/reddog_signed_worker_queue_state_reader.py",
     "src/reddog_signed_worker_result_receipt.py",
 }
 TOUCHED_SIGNED_WORKER_RUNTIME_FILES = {

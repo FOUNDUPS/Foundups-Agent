@@ -4,7 +4,7 @@
 
 - Locked package, runtime, README, generated VSIX name, and context fixtures to
   0.4.27.
-- Revalidated the 1,026-file backend manifest and bounded 1,100-file client
+- Revalidated the 1,047-file backend manifest and bounded 1,100-file client
   capacity with unchanged integrity and byte limits.
 
 ## 2026-07-27 - Exact-SHA commit compatibility (0.4.26)

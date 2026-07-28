@@ -110,7 +110,12 @@ def _normalize_entries(history: list[Any]) -> list[dict[str, Any]]:
         }
         supplied = str(item.get("history_entry_digest") or "")
         prior = normalized[-1] if normalized else None
-        if not valid_history_entry(entry, supplied, prior):
+        if not valid_history_entry(
+            entry,
+            supplied,
+            prior,
+            require_genesis=not normalized and sequence == 1,
+        ):
             raise ValueError("signed_worker_result_history_item_invalid")
         entry["history_entry_digest"] = supplied
         normalized.append(entry)

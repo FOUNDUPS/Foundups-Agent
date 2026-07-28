@@ -15,6 +15,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_cla
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
     DIRECT_ACCEPT,
     DIRECT_REJECT,
+    DIRECT_REQUEUED,
     append_signed_worker_result_history,
     build_signed_worker_task_result_receipt,
 )
@@ -135,18 +136,40 @@ def _finalize_owned_execution(
     final = dict(result)
     final["finalization_owned"] = True
     try:
+        runner_payload = final.get("structured_result")
+        runner_payload = (
+            dict(runner_payload) if isinstance(runner_payload, Mapping) else {}
+        )
+        nested = runner_payload.get("runner_result")
+        nested = dict(nested) if isinstance(nested, Mapping) else {}
+        requeue = final.get("ok") is True and (
+            nested.get("queue_chain_requeue_required") is True
+        )
         receipt = build_signed_worker_task_result_receipt(
             base_context=context,
-            claim_status=DIRECT_ACCEPT if final.get("ok") is True else DIRECT_REJECT,
+            claim_status=(
+                DIRECT_REQUEUED
+                if requeue
+                else DIRECT_ACCEPT if final.get("ok") is True else DIRECT_REJECT
+            ),
             result=final,
         )
         result_context = append_signed_worker_result_history(context, receipt)
+        assurance_completion = receipt.get("assurance_completion_request")
+        assurance_completion = (
+            dict(assurance_completion)
+            if isinstance(assurance_completion, Mapping)
+            else None
+        )
         finalized = finalize_signed_worker_execution(
             db,
             task_id,
             context=context,
             accepted=final.get("ok") is True,
             result_context=result_context,
+            target_status="pending" if requeue else None,
+            retry_not_before=str(nested.get("retry_at") or "") or None,
+            assurance_completion=assurance_completion,
         )
     except Exception:
         finalized = False

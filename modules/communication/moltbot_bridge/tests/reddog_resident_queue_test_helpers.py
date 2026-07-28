@@ -141,13 +141,14 @@ class FakeAssuranceReservationStore:
         value = self.reservations.get(reservation_id)
         return dict(value) if value is not None else None
 
-    def complete_independent_assurance(self, reservation_id: str, **kwargs):
+    def stage_independent_assurance_completion(self, request):
+        reservation_id = str(request.get("reservation_id") or "")
         if (
             reservation_id not in self.reservations
-            or not kwargs.get("terminal_receipt_id")
+            or not request.get("terminal_receipt_id")
         ):
             return {"accepted": False, "status": "rejected"}
-        return {"accepted": True, "status": "completed"}
+        return {"accepted": True, "status": "STAGED"}
 
 
 def queue_wsp15_allocation_receipt(*, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:

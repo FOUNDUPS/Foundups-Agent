@@ -586,12 +586,6 @@ def _signed_worker_finalize_claimed_task(
     requeue = runner_result.get("queue_chain_requeue_required") is True
     status = SIGNED_WORKER_OPENCLAW_CLAIM_REQUEUED if requeue else SIGNED_WORKER_OPENCLAW_CLAIM_ACCEPT
     task_status = "pending" if requeue else "completed"
-    if (
-        not requeue
-        and str(run_result.capability or "")
-        == "independent_slice_verification"
-    ):
-        task_status = "completed_reserved"
     if not _persist_reddog_signed_worker_dispatch_task_result(
         db, task_id, context=context, claim_status=status, run_result=source,
         task_status=task_status,
@@ -1042,6 +1036,12 @@ def _commit_signed_worker_task_result(
     admitted_context = dict(base_context)
     base_context = append_signed_worker_result_history(base_context, receipt)
     runner_summary = receipt.get("runner_result_summary")
+    assurance_completion = receipt.get("assurance_completion_request")
+    assurance_completion = (
+        dict(assurance_completion)
+        if isinstance(assurance_completion, Mapping)
+        else None
+    )
     retry_at = (
         str(runner_summary.get("retry_at") or "") or None
         if isinstance(runner_summary, Mapping)
@@ -1054,6 +1054,7 @@ def _commit_signed_worker_task_result(
         result_context=base_context,
         target_status=task_status,
         retry_not_before=retry_at,
+        assurance_completion=assurance_completion,
     )
 
 

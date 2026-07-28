@@ -153,13 +153,13 @@ slice-verifier stage is ready. Author failure revokes the reservation and
 cancels the verifier task. An expired verifier lease may be renewed only at
 that ready stage, with a bounded renewal count and maximum lease horizon.
 
-The slice-verifier request binds the reservation ID, immutable admission
-digest, verifier task, author principal, verifier principal, work order,
-operational snapshot, and WSP 15 allocation. Renewed leases cannot replace
+The request binds reservation ID/digest, verifier task, principals, work order, snapshot, and WSP 15 allocation. Renewed leases cannot replace
 that lineage. The verifier stage rehydrates the durable reservation and
-terminally completes it only when the receipt repeats the same bindings. CI,
-CodeQL, and red-team checks are additional evidence; they do not replace the
-independent verifier reservation.
+emits a receipt-bound completion request only when the receipt repeats the same
+bindings; it does not complete the task or reservation. The signed-worker
+AgentDB finalizer reauthenticates the durable staged request and atomically
+commits the task, assurance, and result ledger. CI, CodeQL, and red-team checks are
+additional evidence; they do not replace the independent reservation.
 
 ### Generic provider-call evidence
 

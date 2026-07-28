@@ -12,6 +12,7 @@ from modules.infrastructure.database.src.signed_worker_result_history import (
 
 DIRECT_ACCEPT = "DIRECT_ACCEPT"
 DIRECT_REJECT = "DIRECT_REJECT"
+DIRECT_REQUEUED = "DIRECT_REQUEUED"
 
 
 def build_signed_worker_task_result_receipt(
@@ -35,21 +36,7 @@ def build_signed_worker_task_result_receipt(
         ),
         "decision": str(result_payload.get("decision") or ""),
         "receipt_id": str(result_payload.get("receipt_id") or ""),
-        "worker_role": str(
-            result_payload.get("worker_role")
-            or base_context.get("worker_role")
-            or ""
-        ),
-        "worker_runtime": str(
-            result_payload.get("worker_runtime")
-            or base_context.get("worker_runtime")
-            or ""
-        ),
-        "capability": str(
-            result_payload.get("capability")
-            or base_context.get("capability")
-            or ""
-        ),
+        **_identity_fields(base_context, result_payload),
         "rejection_reasons": _reasons(
             tuple(rejection_reasons)
             or tuple(result_payload.get("rejection_reasons") or ())
@@ -62,8 +49,23 @@ def build_signed_worker_task_result_receipt(
         "runner_result_summary": _runner_summary(runner_payload),
         **_effect_fields(result_payload, supplied=result_supplied),
     }
+    assurance_completion = assurance_completion_request_from_runner(
+        runner_payload
+    )
+    if assurance_completion:
+        receipt["assurance_completion_request"] = assurance_completion
     receipt["receipt_digest"] = canonical_digest(receipt)
     return receipt
+
+
+def _identity_fields(
+    base_context: Mapping[str, Any],
+    result: Mapping[str, Any],
+) -> dict[str, str]:
+    return {
+        field: str(result.get(field) or base_context.get(field) or "")
+        for field in ("worker_role", "worker_runtime", "capability")
+    }
 
 
 def append_signed_worker_result_history(
@@ -113,26 +115,43 @@ def _runner_payload(
 def _runner_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
     if not payload:
         return {}
-    bootstrap = payload.get("bootstrap_result")
+    nested = payload.get("runner_result")
+    effective = dict(nested) if isinstance(nested, Mapping) else dict(payload)
+    bootstrap = effective.get("bootstrap_result")
     bootstrap = dict(bootstrap) if isinstance(bootstrap, Mapping) else {}
     return {
-        "accepted": payload.get("accepted") is True,
-        "decision": str(payload.get("decision") or ""),
-        "receipt_id": str(payload.get("receipt_id") or ""),
-        "queue_item_id": str(payload.get("queue_item_id") or ""),
-        "queue_chain_complete": payload.get("queue_chain_complete") is True,
-        "assigned_stage_complete": payload.get("assigned_stage_complete") is True,
+        "accepted": payload.get("accepted") is True or effective.get("accepted") is True,
+        "decision": str(payload.get("decision") or effective.get("decision") or ""),
+        "receipt_id": str(payload.get("receipt_id") or effective.get("receipt_id") or ""),
+        "queue_item_id": str(effective.get("queue_item_id") or ""),
+        "queue_chain_complete": effective.get("queue_chain_complete") is True,
+        "assigned_stage_complete": effective.get("assigned_stage_complete") is True,
         "queue_chain_requeue_required": (
-            payload.get("queue_chain_requeue_required") is True
+            effective.get("queue_chain_requeue_required") is True
         ),
-        "retry_at": str(payload.get("retry_at") or ""),
-        "rejection_reasons": _reasons(payload.get("rejection_reasons") or ()),
+        "retry_at": str(effective.get("retry_at") or ""),
+        "rejection_reasons": _reasons(effective.get("rejection_reasons") or ()),
         "bootstrap_status": str(bootstrap.get("status") or ""),
         "bootstrap_next_action": str(bootstrap.get("next_action") or ""),
         "bootstrap_dispatched_stages": _reasons(
             bootstrap.get("dispatched_stages") or ()
         ),
     }
+
+
+def assurance_completion_request_from_runner(
+    payload: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Return the verifier terminalization request from the bounded runner path."""
+
+    if not isinstance(payload, Mapping):
+        return {}
+    nested = payload.get("runner_result")
+    effective = dict(nested) if isinstance(nested, Mapping) else dict(payload)
+    bootstrap = effective.get("bootstrap_result")
+    bootstrap = dict(bootstrap) if isinstance(bootstrap, Mapping) else {}
+    request = bootstrap.get("assurance_completion_request")
+    return dict(request) if isinstance(request, Mapping) else {}
 
 
 def _effect_fields(
@@ -162,6 +181,8 @@ def _reasons(values: Sequence[Any]) -> list[str]:
 __all__ = [
     "DIRECT_ACCEPT",
     "DIRECT_REJECT",
+    "DIRECT_REQUEUED",
     "append_signed_worker_result_history",
+    "assurance_completion_request_from_runner",
     "build_signed_worker_task_result_receipt",
 ]

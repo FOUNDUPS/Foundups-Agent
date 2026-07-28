@@ -13,6 +13,11 @@ This module provides:
 - `src/db_manager.py`: unified backend manager (WSP 78 runtime entrypoint)
 - `src/module_db.py`: prefixed table helper for module-owned tables
 - `src/agent_db.py`: agent memory/coordination schema and helpers
+- `src/signed_worker_assurance_completion.py`: assurance completion inside the
+  signed-worker result transaction
+- `src/signed_worker_assurance_request.py`: canonical completion request
+- `src/signed_worker_assurance_staging.py`: durable verifier-output staging
+- `src/signed_worker_execution_binding.py`: pure claim/use/result binding checks
 - `src/signed_worker_execution_store.py`: exact-CAS signed-worker finalization
 - `src/signed_worker_result_history.py`: pure result-chain validation
 - `src/signed_worker_result_ledger.py`: durable signed-worker result continuity
@@ -76,5 +81,7 @@ Malformed or gapped durable rows, shortened context tails, recomputed context
 history, and pre-ledger context history all fail closed. Legacy rows require a
 separate authenticated migration; runtime admission never infers or imports
 durable authority from task context. A ledger-insert failure rolls back the
-task transition and leaves the admitted task executing for governed recovery.
+task and assurance transitions and leaves the admitted task quarantined in
+`executing` for explicit reconciliation. No automatic restart recovery is
+claimed by this slice.
 

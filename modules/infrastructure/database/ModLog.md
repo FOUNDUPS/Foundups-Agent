@@ -12,8 +12,10 @@ independent durable comparison before either supervisor or direct execution.
 gapped ledger state, forged or shortened context history, and pre-ledger
 context history reject before a runner call. Eleven-attempt and rollback
 regressions prove the durable/context boundary; failed ledger inserts leave
-the admitted task executing, and missing or unchanged result context cannot
-create an unreceipted terminal state through the public finalizer.
+the admitted task quarantined in `executing`, and missing or unchanged result
+context cannot create an unreceipted terminal state through the public
+finalizer. Independent assurance completion now commits in that same
+transaction; the detached completion method always rejects.
 **WSP References**: WSP 00, WSP 15, WSP 22, WSP 62, WSP 78, WSP 97
 
 ## Entry: Held Publication and Exact Signed-Worker Finalization
@@ -32,15 +34,16 @@ conflicting state remains unchanged.
 
 ## Entry: Signed Worker Execution and Verifier Terminal CAS
 **Date**: 2026-07-28
-**What Changed**: Allowed independent-assurance completion to atomically
-transition its exact assigned verifier from either `assigned` or the
-single-execution `executing` state while retaining the reservation and
-assignee predicates.
+**What Changed**: Moved independent-assurance completion into the exact
+signed-worker task/result-ledger transaction and removed detached verifier
+task completion.
 **Why**: Signed workers now acquire an irreversible execution claim before
 calling a runner; verifier completion must finalize that authenticated state
 without reopening the task.
-**Impact**: Concurrent callers cannot both execute a signed task, and
-independent verifier completion remains one-use and fail closed.
+**Impact**: Task transition, assurance reservation completion, and result
+ledger append now commit or roll back together. Missing, expired, altered, or
+receipt-unbound completion requests reject; concurrent callers cannot both
+execute or terminalize the task.
 **WSP References**: WSP 00, WSP 15, WSP 22, WSP 78, WSP 97
 
 ## Entry: Exact-SHA HoloIndex Maintenance CAS and Atomic Completion

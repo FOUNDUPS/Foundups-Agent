@@ -193,6 +193,46 @@ def test_run_task_signed_success_uses_exact_finalization_cas(
     assert stored is not None and stored["status"] == "completed"
 
 
+def test_generic_completion_rejects_reserved_signed_worker_namespace() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+
+    assert db.complete_autonomous_task(task_id) is False
+
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "pending"
+    assert "signed_worker_execution_claim" not in stored["context"]
+
+
+def test_direct_run_preserves_requeue_lifecycle(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(requeue_required=True),
+    )
+
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert result["ok"] is True
+    assert stored is not None and stored["status"] == "pending"
+    assert stored["assigned_to"] is None
+    receipt = stored["context"]["signed_worker_task_last_result"]
+    assert receipt["claim_status"] == "DIRECT_REQUEUED"
+    assert receipt["runner_result_summary"]["queue_chain_requeue_required"] is True
+    assert db.db.execute_query(
+        "SELECT attempt_sequence FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    ) == [{"attempt_sequence": 1}]
+
+
 def test_run_task_post_claim_exception_fails_through_exact_cas(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -225,7 +265,7 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
     original = run_task_runtime.finalize_signed_worker_execution
 
     def conflict(
-        db, selected_task_id, *, context, accepted, result_context=None
+        db, selected_task_id, *, context, accepted, result_context, **kwargs
     ):
         assert db.db.execute_write(
             "UPDATE agents_autonomous_tasks SET status = 'cancelled' "
@@ -238,6 +278,7 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
             context=context,
             accepted=accepted,
             result_context=result_context,
+            **kwargs,
         )
 
     monkeypatch.setattr(
@@ -879,6 +920,44 @@ def test_public_finalizer_requires_exactly_one_new_result_entry() -> None:
         context=context,
         accepted=False,
         result_context=context,
+    ) is False
+
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "executing"
+    assert db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
+def test_public_finalizer_rejects_non_genesis_first_history_link() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
+    assert admission is not None
+    context = bind_execution_admission(admission.claimed_context, admission)
+    receipt = build_signed_worker_task_result_receipt(
+        base_context=context,
+        claim_status="FORGED_GENESIS",
+        result={"accepted": False, "decision": "reject"},
+    )
+    result_context = append_signed_worker_result_history(context, receipt)
+    entry = result_context["signed_worker_task_result_receipts"][0]
+    entry["previous_history_digest"] = "sha256:" + ("f" * 64)
+    entry_body = {
+        key: value for key, value in entry.items()
+        if key != "history_entry_digest"
+    }
+    entry["history_entry_digest"] = _test_digest(entry_body)
+
+    assert execution_store_module.finalize_signed_worker_execution(
+        db,
+        task_id,
+        context=context,
+        accepted=False,
+        result_context=result_context,
     ) is False
 
     stored = db.get_autonomous_task_by_id(task_id)

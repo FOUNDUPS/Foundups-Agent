@@ -100,20 +100,28 @@ File: `modules/infrastructure/database/src/agent_db.py`
 - `get_independent_assurance_reservation(reservation_id) -> dict`
 - `get_independent_assurance_reservation_for_task(task_id, task_kind=...) -> dict`
 - `renew_independent_assurance(request) -> dict`
-- `complete_independent_assurance(reservation_id, admission_reservation_digest=..., ...) -> dict`
+- `stage_independent_assurance_completion(request) -> dict`
+- `complete_independent_assurance(...) -> REJECTED` (detached completion is
+  forbidden)
 - `revoke_independent_assurance(reservation_id, ...) -> dict`
 - `expire_independent_assurance_reservations() -> dict`
+- `finalize_signed_worker_execution(..., assurance_completion=...) -> bool`
 
 Reservation admission atomically claims one pending verifier task and inserts
 one digest-bound lease. Author and verifier principals must differ. Snapshot,
 work order, queue item, WSP 15 allocation, runtime, capability, and task
-bindings are revalidated from the persisted task contexts. Completion,
-revocation, expiration, replay, and competing reservations fail closed.
+bindings are revalidated from the persisted task contexts. Verifier
+completion is accepted only inside the signed-worker task/result-ledger
+transaction; the detached AgentDB method always rejects. Revocation,
+expiration, replay, and competing reservations fail closed.
+The verifier may first stage one exact completion request while its task is
+`executing`; exact replay is idempotent and any altered second request rejects.
 Renewal preserves the immutable admission digest, is limited to three
 renewals and a six-hour total lease horizon, and requires the original author
 task to have completed successfully. Admission rejects any author already
-claimed by another worker, and terminal completion revalidates the immutable
-admission digest.
+claimed by another worker. Terminal completion revalidates the immutable
+admission digest, verifier task/principal, lease expiry, receipt-bound
+completion request, exact task row, and result ledger before one commit.
 
 ### Exact-SHA HoloIndex Maintenance Transactions
 

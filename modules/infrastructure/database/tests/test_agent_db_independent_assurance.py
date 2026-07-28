@@ -16,8 +16,18 @@ import pytest
 
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
+from modules.infrastructure.database.src.signed_worker_assurance_completion import (
+    build_assurance_completion_request,
+)
+from modules.infrastructure.database.src.signed_worker_execution_store import (
+    finalize_signed_worker_execution,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_assurance_capacity import (
     build_assurance_renewal_request,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
+    append_signed_worker_result_history,
+    build_signed_worker_task_result_receipt,
 )
 
 
@@ -134,6 +144,91 @@ def _request(**overrides: Any) -> dict[str, Any]:
             "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         )
     return request
+
+
+def _digest(payload: Any) -> str:
+    canonical = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _prepare_assurance_finalization(
+    database: AgentDB,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    capability = "independent_slice_verification"
+    _seed_tasks(database, capability=capability)
+    reserved = database.reserve_independent_assurance(
+        _request(capability=capability)
+    )
+    assert reserved["accepted"] is True
+    reservation = dict(reserved["reservation"])
+    task = database.get_autonomous_task_by_id("verifier-task")
+    assert task is not None
+    base_context = dict(task["context"])
+    token_digest = "sha256:" + "a" * 64
+    claim = {
+        "task_id": "verifier-task",
+        "assigned_to": "verifier-0201",
+        "status": "CLAIMED",
+        "token_digest": token_digest,
+        "context_digest": _digest(base_context),
+    }
+    claim["receipt_id"] = _digest(claim)
+    use = {
+        "task_id": "verifier-task",
+        "status": "CONSUMED",
+        "claim_receipt_id": claim["receipt_id"],
+        "token_digest": token_digest,
+    }
+    use["receipt_id"] = _digest(use)
+    admitted_context = {
+        **base_context,
+        "signed_worker_execution_claim": claim,
+        "signed_worker_execution_use": use,
+    }
+    assert database.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET context = ?, status = 'executing' "
+        "WHERE task_id = ? AND status = 'assigned'",
+        (json.dumps(admitted_context, sort_keys=True), "verifier-task"),
+    ) == 1
+    terminal_receipt = {
+        "receipt_id": "verification-1",
+        "receipt_digest": "sha256:" + "b" * 64,
+    }
+    completion = build_assurance_completion_request(
+        reservation=reservation,
+        terminal_receipt=terminal_receipt,
+        terminal_status="VERIFIED",
+        completed_at=_iso(),
+    )
+    staged = database.stage_independent_assurance_completion(completion)
+    assert staged["accepted"] is True
+    runner_result = {
+        "accepted": True,
+        "bootstrap_result": {
+            "assurance_completion_request": completion,
+        },
+    }
+    receipt = build_signed_worker_task_result_receipt(
+        base_context=admitted_context,
+        claim_status="ACCEPT",
+        result={
+            "accepted": True,
+            "decision": "VERIFIED",
+            "receipt_id": "signed-worker-result-1",
+            "capability": capability,
+        },
+        runner_result=runner_result,
+    )
+    result_context = append_signed_worker_result_history(
+        admitted_context,
+        receipt,
+    )
+    return admitted_context, result_context
 
 
 def test_reserve_claims_pending_verifier_and_rehydrates_after_restart(
@@ -383,7 +478,7 @@ def test_reserve_rejects_author_already_claimed_before_assurance(
     assert agent_db.get_autonomous_task_by_id("verifier-task")["status"] == "pending"
 
 
-def test_terminal_completion_binds_receipt_and_releases_exactly_once(
+def test_detached_terminal_completion_is_rejected_without_mutation(
     agent_db: AgentDB,
 ) -> None:
     _seed_tasks(agent_db)
@@ -402,26 +497,17 @@ def test_terminal_completion_binds_receipt_and_releases_exactly_once(
         status="VERIFIED",
         now_iso=_iso(),
     )
-    duplicate = agent_db.complete_independent_assurance(
-        "assurance-1",
-        admission_reservation_digest=reservation[
-            "admission_reservation_digest"
-        ],
-        terminal_receipt_id="verification-1",
-        terminal_receipt_digest="sha256:" + "a" * 64,
-        status="VERIFIED",
-        now_iso=_iso(),
-    )
-
-    assert completed["accepted"] is True
-    assert completed["status"] == "VERIFIED"
-    assert completed["reservation"]["terminal_receipt_id"] == "verification-1"
-    assert duplicate["accepted"] is False
-    assert duplicate["rejection_reasons"] == ["reservation_not_active"]
-    assert agent_db.get_autonomous_task_by_id("verifier-task")["status"] == "completed"
+    assert completed["accepted"] is False
+    assert completed["rejection_reasons"] == [
+        "completion_owned_by_signed_worker_finalizer"
+    ]
+    assert agent_db.get_autonomous_task_by_id("verifier-task")["status"] == "assigned"
+    persisted = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert persisted is not None
+    assert persisted["reservation"]["status"] == "RESERVED"
 
 
-def test_terminal_completion_rejects_wrong_admission_digest(
+def test_detached_completion_rejects_before_digest_interpretation(
     agent_db: AgentDB,
 ) -> None:
     _seed_tasks(agent_db)
@@ -438,9 +524,175 @@ def test_terminal_completion_rejects_wrong_admission_digest(
 
     assert completed["accepted"] is False
     assert completed["rejection_reasons"] == [
-        "admission_reservation_digest_mismatch"
+        "completion_owned_by_signed_worker_finalizer"
     ]
     reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation["reservation"]["status"] == "RESERVED"
+
+
+def test_signed_worker_finalization_atomically_completes_assurance_and_ledger(
+    agent_db: AgentDB,
+) -> None:
+    admitted, result_context = _prepare_assurance_finalization(agent_db)
+    completion = result_context["signed_worker_task_last_result"][
+        "assurance_completion_request"
+    ]
+
+    finalized = finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+        assurance_completion=completion,
+    )
+
+    assert finalized is True
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "completed"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "VERIFIED"
+    rows = agent_db.db.execute_query(
+        "SELECT attempt_sequence FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        ("verifier-task",),
+    )
+    assert [row["attempt_sequence"] for row in rows] == [1]
+
+
+def test_assurance_and_task_roll_back_when_result_ledger_rejects(
+    agent_db: AgentDB,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    admitted, result_context = _prepare_assurance_finalization(agent_db)
+    completion = result_context["signed_worker_task_last_result"][
+        "assurance_completion_request"
+    ]
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.signed_worker_execution_store."
+        "persist_result_history_ledger",
+        lambda *_args, **_kwargs: False,
+    )
+
+    finalized = finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+        assurance_completion=completion,
+    )
+
+    assert finalized is False
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "executing"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+    rows = agent_db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        ("verifier-task",),
+    )
+    assert rows == []
+
+
+def test_assurance_task_rejects_missing_or_tampered_completion_request(
+    agent_db: AgentDB,
+) -> None:
+    admitted, result_context = _prepare_assurance_finalization(agent_db)
+    completion = dict(
+        result_context["signed_worker_task_last_result"][
+            "assurance_completion_request"
+        ]
+    )
+
+    assert finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+    ) is False
+    completion["terminal_receipt_digest"] = "sha256:" + "f" * 64
+    assert finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+        assurance_completion=completion,
+    ) is False
+    exact = dict(
+        result_context["signed_worker_task_last_result"][
+            "assurance_completion_request"
+        ]
+    )
+    assert agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations "
+        "SET staged_completion_json = NULL, staged_completion_digest = NULL "
+        "WHERE reservation_id = ?",
+        ("assurance-1",),
+    ) == 1
+    assert finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=result_context,
+        assurance_completion=exact,
+    ) is False
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "RESERVED"
+
+
+def test_attacker_recomputed_result_cannot_replace_staged_assurance(
+    agent_db: AgentDB,
+) -> None:
+    admitted, legitimate_context = _prepare_assurance_finalization(agent_db)
+    forged = dict(
+        legitimate_context["signed_worker_task_last_result"][
+            "assurance_completion_request"
+        ]
+    )
+    forged["terminal_receipt_digest"] = "sha256:" + "f" * 64
+    forged_receipt = build_signed_worker_task_result_receipt(
+        base_context=admitted,
+        claim_status="ACCEPT",
+        result={
+            "accepted": True,
+            "decision": "VERIFIED",
+            "receipt_id": "attacker-recomputed-result",
+            "capability": "independent_slice_verification",
+        },
+        runner_result={
+            "accepted": True,
+            "bootstrap_result": {
+                "assurance_completion_request": forged,
+            },
+        },
+    )
+    forged_context = append_signed_worker_result_history(
+        admitted,
+        forged_receipt,
+    )
+
+    finalized = finalize_signed_worker_execution(
+        agent_db,
+        "verifier-task",
+        context=admitted,
+        accepted=True,
+        result_context=forged_context,
+        assurance_completion=forged,
+    )
+
+    assert finalized is False
+    task = agent_db.get_autonomous_task_by_id("verifier-task")
+    assert task is not None and task["status"] == "executing"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
     assert reservation["reservation"]["status"] == "RESERVED"
 
 

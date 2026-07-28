@@ -57,7 +57,7 @@ def persist_result_history_ledger(
     claim_receipt_id: str,
     use_receipt_id: str,
 ) -> bool:
-    """Validate an unchanged tail or append exactly one durable result."""
+    """Validate and append exactly one result beyond the durable ledger tail."""
 
     try:
         history = history_entries(validated_result_history(context))

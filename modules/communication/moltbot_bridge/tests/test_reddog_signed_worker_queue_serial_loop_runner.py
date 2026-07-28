@@ -1192,7 +1192,21 @@ def test_queue_serial_loop_runner_accepts_independent_verifier_after_bounded_sta
     tmp_path: Path,
 ) -> None:
     config = _write_queue_stage_files(tmp_path, through_stage="exact_sha_commit")
-    bootstrap = _FakeBootstrap(
+    class _AssuranceBootstrap(_FakeBootstrap):
+        def __call__(self, **kwargs):
+            result = super().__call__(**kwargs)
+            chain_path = Path(kwargs["chain_results_path"])
+            chain = json.loads(chain_path.read_text(encoding="utf-8"))
+            chain["stage_results"]["slice_verifier"] = {
+                "assurance_completion_request": {
+                    "schema_version": "reddog_signed_worker_assurance_completion.v1",
+                    "reservation_id": "assurance-1",
+                }
+            }
+            chain_path.write_text(json.dumps(chain), encoding="utf-8")
+            return result
+
+    bootstrap = _AssuranceBootstrap(
         _bootstrap_payload(
             dispatched_stages=("slice_verifier",),
             next_action="RUN_QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE",
@@ -1220,6 +1234,42 @@ def test_queue_serial_loop_runner_accepts_independent_verifier_after_bounded_sta
     assert result["assigned_stage_complete"] is True
     assert result["queue_chain_complete"] is False
     assert result["queue_chain_requeue_required"] is False
+    assert result["bootstrap_result"]["assurance_completion_request"][
+        "reservation_id"
+    ] == "assurance-1"
+
+
+def test_queue_serial_loop_runner_rejects_verifier_without_completion_request(
+    tmp_path: Path,
+) -> None:
+    config = _write_queue_stage_files(tmp_path, through_stage="exact_sha_commit")
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(
+        config,
+        bootstrap=_FakeBootstrap(
+            _bootstrap_payload(dispatched_stages=("slice_verifier",))
+        ),
+    )
+    context = _context(
+        intent_id="worker_dispatch_intent_independent_verifier",
+        role="independent_slice_verifier",
+        worker_runtime="openclaw",
+        capability="independent_slice_verification",
+    )
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-queue-stage",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is False
+    assert (
+        SignedWorkerQueueSerialLoopRunnerReason
+        .ASSURANCE_COMPLETION_REQUEST_MISSING
+        in result["rejection_reasons"]
+    )
 
 
 def test_queue_serial_loop_runner_rejects_bootstrap_kwarg_override(tmp_path: Path) -> None:

@@ -9,9 +9,9 @@
   execution and a competing claimant cannot be overwritten. Admission returns
   the exact context, skills, and discovery binding won by its database CAS;
   neither the direct task runner nor the OpenClaw supervisor can execute an
-  earlier caller snapshot. Supervisor completion, failure, reserved completion,
-  and requeue persistence now use the same exact assignee/context CAS; a
-  concurrent owner is never overwritten. Requeue admission replaces only the
+  earlier caller snapshot. Supervisor completion, failure, assurance
+  completion, and requeue persistence now use the same exact assignee/context
+  CAS; a concurrent owner is never overwritten. Requeue admission replaces only the
   superseded claim/use pair while retaining a canonical ten-entry result tail.
   The independently durable append-only AgentDB ledger retains every attempt,
   and task context must match its exact tail before supervisor or direct
@@ -19,8 +19,8 @@
   and complete attacker re-hashing therefore fail closed. Both execution paths
   append one shared result receipt in the same task-transition transaction;
   persistence failure leaves the exact task executing and never creates an
-  unreceipted terminal state. The bounded database siblings avoid extending the
-  `AgentDB` monolith. Publication recovery never creates the
+  unreceipted terminal state. Verifier completion travels as a receipt-bound request and commits the durable assurance reservation in that same transaction;
+  detached completion is forbidden. The bounded database siblings avoid extending the `AgentDB` monolith. Publication recovery never creates the
   derived authority cache, even from internally self-consistent COMMITTED
   packets; only a fresh normal publish call that re-verifies proposal
   authorization may recreate that cache.

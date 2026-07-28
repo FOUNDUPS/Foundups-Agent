@@ -12,13 +12,13 @@ from typing import Any, Callable, Mapping
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
     validate_result_history_ledger,
 )
+from modules.infrastructure.database.src.signed_worker_execution_store import (
+    SIGNED_WORKER_TASK_PREFIX,
+)
 
 
 CLAIM_SCHEMA = "reddog_signed_worker_execution_claim.v1"
 USE_SCHEMA = "reddog_signed_worker_execution_use.v1"
-SIGNED_WORKER_TASK_PREFIX = "reddog-worker-dispatch-"
-
-
 @dataclass(frozen=True)
 class SignedWorkerExecutionAdmission:
     """Receipts produced by the single winning execution CAS."""

@@ -33,17 +33,9 @@ class IndependentAssuranceReservationStore(Protocol):
         self, request: Mapping[str, Any]
     ) -> Mapping[str, Any]: ...
 
-    def complete_independent_assurance(
-        self,
-        reservation_id: str,
-        *,
-        admission_reservation_digest: str,
-        terminal_receipt_id: str,
-        terminal_receipt_digest: str,
-        status: str,
-        now_iso: str,
+    def stage_independent_assurance_completion(
+        self, request: Mapping[str, Any]
     ) -> Mapping[str, Any]: ...
-
 
 def canonical_digest(value: Any) -> str:
     raw = json.dumps(

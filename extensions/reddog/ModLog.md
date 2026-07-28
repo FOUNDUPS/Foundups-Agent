@@ -10,8 +10,8 @@
 - Preserved the configured Ed25519 verifier and confined authority paths as an
   immutable process-local startup context instead of rebuilding trust from
   mutable environment variables.
-- Regenerated and pinned the 1,037-file backend dependency manifest after
-  held-publication activation and exact execution-finalization hardening. Raised
+- Regenerated and pinned the 1,047-file backend dependency manifest after
+  held-publication activation and atomic assurance/task/result finalization. Raised
   only the explicit runtime-file count cap from 1,024 to 1,100; per-file,
   total-byte, digest, path, and schema checks remain unchanged.
 - Added no editor-side shell, worker, repository, publication, or merge
