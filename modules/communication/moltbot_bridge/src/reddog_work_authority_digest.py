@@ -26,7 +26,6 @@ def canonical_work_authority_digest(payload: Mapping[str, Any]) -> str:
         separators=(",", ":"),
         ensure_ascii=True,
         allow_nan=False,
-        default=str,
     ).encode("utf-8")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
 

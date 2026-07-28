@@ -3,6 +3,10 @@
   materialization, dispatch, AgentDB claim/execution, read-only assignment, and
   independent verification. Absent pairs remain compatible; malformed pairs,
   queue conflicts, and post-signing substitutions reject before worker effects.
+  The authoritative queue pair now overrides no source: populated profile or
+  work-order pairs must match it exactly before signing, materialization copies
+  only the queue pair, and signer, verifier, and use-time gates share one
+  canonical work-authority digest implementation.
 - Exact-SHA review follow-up removed the importable process-local envelope
   seal as an authority primitive. Signed-worker admission now re-verifies the
   persisted AgentDB envelope against fresh authority inside the atomic claim

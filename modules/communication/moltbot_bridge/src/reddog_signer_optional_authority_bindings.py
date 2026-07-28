@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hmac
 import re
 from typing import Any
 
@@ -31,6 +32,31 @@ def optional_authority_binding_values_valid(receipt_id: Any, digest: Any) -> boo
     if not isinstance(receipt_id, str) or not receipt_id:
         return False
     return is_sha256_digest(digest)
+
+
+def optional_authority_binding_values_match(
+    receipt_id: Any,
+    digest: Any,
+    authoritative_receipt_id: Any,
+    authoritative_digest: Any,
+    *,
+    allow_absent_source: bool = True,
+) -> bool:
+    """Require a valid source pair to equal the authoritative pair."""
+
+    if not optional_authority_binding_values_valid(
+        authoritative_receipt_id,
+        authoritative_digest,
+    ):
+        return False
+    if receipt_id in (None, "") and digest in (None, "") and allow_absent_source:
+        return True
+    if not optional_authority_binding_values_valid(receipt_id, digest):
+        return False
+    return hmac.compare_digest(receipt_id, authoritative_receipt_id) and hmac.compare_digest(
+        digest,
+        authoritative_digest,
+    )
 
 
 def optional_authority_bindings_valid(request: Any) -> bool:
@@ -67,6 +93,7 @@ def attach_optional_authority_bindings(
 __all__ = [
     "attach_optional_authority_bindings",
     "is_sha256_digest",
+    "optional_authority_binding_values_match",
     "optional_authority_binding_values_valid",
     "optional_authority_bindings_valid",
 ]

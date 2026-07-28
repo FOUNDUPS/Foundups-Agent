@@ -528,6 +528,31 @@ def test_authority_profile_materializer_carries_memex_supply_binding() -> None:
     assert work_order["memex_supply_digest"] == "sha256:" + ("d" * 64)
 
 
+def test_authority_profile_materializer_rejects_conflicting_memex_supply_binding() -> None:
+    snapshot = _snapshot()
+    profile = _profile(
+        memex_supply_receipt_id="sha256:attacker-memex",
+        memex_supply_digest="sha256:" + ("e" * 64),
+    )
+    snapshot_before = _canonical_digest(snapshot)
+    profile_before = _canonical_digest(profile)
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=snapshot,
+        authority_profile=profile,
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert (
+        "work_order_materializer_authority:FAIL_MEMEX_SUPPLY_BINDING"
+        in reasons
+    )
+    assert _canonical_digest(snapshot) == snapshot_before
+    assert _canonical_digest(profile) == profile_before
+
+
 def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> None:
     plan = _pilot_bounded_worker_plan()
     profile = _profile(

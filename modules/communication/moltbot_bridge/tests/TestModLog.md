@@ -3,6 +3,9 @@
   absent-pair compatibility, half-pair rejection, queue conflict rejection
   before nonce/writer effects, AgentDB envelope tampering, executor tampering,
   read-only 0102 assignment, and independent verifier receipt lineage.
+- Added exact pre-signing rejection for profile/work-order Memex conflicts and
+  malformed authoritative queue pairs, plus immutable-input assertions for the
+  materializer rejection path.
 - The signer, dispatch, claim, executor, verifier, and serial matrices stay green.
 - Full differential evidence remains mandatory before publication.
 

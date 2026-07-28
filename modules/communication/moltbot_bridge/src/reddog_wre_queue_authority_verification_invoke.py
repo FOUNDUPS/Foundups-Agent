@@ -12,8 +12,6 @@ publish PRs, settle rewards, or re-index HoloIndex.
 
 from __future__ import annotations
 
-import hashlib
-import json
 from dataclasses import asdict, dataclass, field, replace
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
@@ -35,6 +33,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 )
 from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
     recorded_authority_verification_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
 )
 
 
@@ -85,16 +86,6 @@ def _mapping(value: Any) -> Mapping[str, Any]:
     if isinstance(value, Mapping):
         return value
     return {}
-
-
-def _digest(value: Mapping[str, Any]) -> str:
-    encoded = json.dumps(
-        value,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode("utf-8")
-    return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
 def _reject(
@@ -154,7 +145,7 @@ def invoke_reddog_wre_queue_authority_verification(
             [QueueAuthorityVerificationInvokeReason.AUTHORITY_PAYLOAD_MISSING],
             explicit_requested=True,
         )
-    verified_work_authority_digest = _digest(work_authority)
+    verified_work_authority_digest = canonical_work_authority_digest(work_authority)
     if receipt.get("work_authority_digest") != verified_work_authority_digest:
         return _reject(
             [QueueAuthorityVerificationInvokeReason.AUTHORITY_DIGEST_MISMATCH],

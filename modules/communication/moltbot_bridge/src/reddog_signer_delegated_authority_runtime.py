@@ -51,6 +51,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_b
     attach_optional_authority_bindings,
     optional_authority_bindings_valid,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 
 AUTHORITY_ISSUED = "DELEGATED_AUTHORITY_ISSUED"
 AUTHORITY_REJECTED = "DELEGATED_AUTHORITY_REJECTED"
@@ -613,7 +616,7 @@ def issue_delegated_authority_runtime(
     work_authority["signature"] = workauth_sign.signature
 
     identity_digest = "sha256:" + _canonical_digest(identity)
-    workauth_digest = "sha256:" + _canonical_digest(work_authority)
+    workauth_digest = canonical_work_authority_digest(work_authority)
     receipt_payload = {
         "status": AUTHORITY_ISSUED,
         "work_order_id": request.work_order_id,

@@ -22,6 +22,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_materialization import materialize_delegated_authority_request
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import is_sha256
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_match,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
     canonical_work_order_base_ref,
@@ -45,6 +48,7 @@ FAIL_HIGH_AUTHORITY_COSIGN = "FAIL_HIGH_AUTHORITY_COSIGN"
 FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY = "FAIL_UNSUPPORTED_REPO_WIDE_AUTHORITY"
 FAIL_WSP15_ALLOCATION_BINDING = "FAIL_WSP15_ALLOCATION_BINDING"
 FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
+FAIL_MEMEX_SUPPLY_BINDING = "FAIL_MEMEX_SUPPLY_BINDING"
 FAIL_WORK_ORDER_BINDING = "FAIL_WORK_ORDER_BINDING"
 FAIL_ARCHITECT_FIX_PUBLICATION_BINDING = (
     "FAIL_ARCHITECT_FIX_PUBLICATION_BINDING"
@@ -309,8 +313,28 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         reasons.append(FAIL_WSP15_ALLOCATION_BINDING)
     if queue_receipt and profile and not _valid_model_runtime_binding(queue_receipt, profile):
         reasons.append(FAIL_MODEL_RUNTIME_BINDING)
+    queue_memex_id = queue_receipt.get("memex_supply_receipt_id")
+    queue_memex_digest = queue_receipt.get("memex_supply_digest")
+    if queue_receipt and profile and not optional_authority_binding_values_match(
+        profile.get("memex_supply_receipt_id"),
+        profile.get("memex_supply_digest"),
+        queue_memex_id,
+        queue_memex_digest,
+    ):
+        reasons.append(FAIL_MEMEX_SUPPLY_BINDING)
 
     bound_work_order = _mapping(work_order)
+    if bound_work_order and (
+        "memex_supply_receipt_id" in bound_work_order
+        or "memex_supply_digest" in bound_work_order
+    ) and not optional_authority_binding_values_match(
+        bound_work_order.get("memex_supply_receipt_id"),
+        bound_work_order.get("memex_supply_digest"),
+        queue_memex_id,
+        queue_memex_digest,
+        allow_absent_source=False,
+    ):
+        reasons.append(FAIL_MEMEX_SUPPLY_BINDING)
     try:
         work_order_digest = canonical_full_work_order_digest(bound_work_order)
         base_ref = canonical_work_order_base_ref(bound_work_order)
@@ -366,8 +390,8 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     model_selection_digest = str(queue_receipt.get("model_selection_digest") or "")
     model_runtime_binding_receipt_id = str(queue_receipt.get("model_runtime_binding_receipt_id") or "")
     model_runtime_binding_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
-    memex_supply_receipt_id = str(queue_receipt.get("memex_supply_receipt_id") or "")
-    memex_supply_digest = str(queue_receipt.get("memex_supply_digest") or "")
+    memex_supply_receipt_id = str(queue_memex_id or "")
+    memex_supply_digest = str(queue_memex_digest or "")
     work_order_id = str(
         profile.get("work_order_id") or _work_order_id(queue_item_id)
     )
