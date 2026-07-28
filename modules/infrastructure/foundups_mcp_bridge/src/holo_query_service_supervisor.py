@@ -348,7 +348,50 @@ def _owner_token() -> str:
     return token
 
 
-def _owner_environment(token: str, ssd_path: Path | None) -> dict[str, str]:
+def _owner_python_runtime(
+    python_executable: str,
+    *,
+    platform_name: str | None = None,
+    current_executable: str | None = None,
+    base_executable: str | None = None,
+    current_prefix: str | None = None,
+    base_prefix: str | None = None,
+    site_packages_path: str | None = None,
+) -> tuple[str, tuple[str, ...]]:
+    """Avoid the transient Windows venv launcher in the parent watchdog chain."""
+
+    platform = platform_name or os.name
+    current = current_executable or sys.executable
+    base = base_executable or str(getattr(sys, "_base_executable", "") or "")
+    prefix = current_prefix or sys.prefix
+    root_prefix = base_prefix or sys.base_prefix
+    requested = os.path.normcase(os.path.abspath(python_executable))
+    running = os.path.normcase(os.path.abspath(current))
+    if (
+        platform != "nt"
+        or requested != running
+        or os.path.normcase(prefix) == os.path.normcase(root_prefix)
+        or not base
+    ):
+        return python_executable, ()
+    prefix_path = Path(prefix).resolve(strict=False)
+    site_path = Path(
+        site_packages_path or (prefix_path / "Lib" / "site-packages")
+    ).resolve(strict=False)
+    if (
+        not Path(base).is_file()
+        or not site_path.is_dir()
+        or not site_path.is_relative_to(prefix_path)
+    ):
+        return python_executable, ()
+    return str(Path(base).resolve(strict=True)), (str(site_path),)
+
+
+def _owner_environment(
+    token: str,
+    ssd_path: Path | None,
+    pythonpath_entries: tuple[str, ...] = (),
+) -> dict[str, str]:
     environment = dict(os.environ)
     environment.update(
         {
@@ -360,6 +403,8 @@ def _owner_environment(token: str, ssd_path: Path | None) -> dict[str, str]:
     )
     if ssd_path is not None:
         environment[SSD_PATH_ENV] = str(ssd_path)
+    if pythonpath_entries:
+        environment["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
     return environment
 
 
@@ -418,7 +463,11 @@ class HoloQueryServiceSupervisor:
             self.probe_interval_seconds,
             self.shutdown_timeout_seconds,
         ) = limits
-        self.python_executable = str(python_executable or sys.executable)
+        requested_python = str(python_executable or sys.executable)
+        (
+            self.python_executable,
+            self._pythonpath_entries,
+        ) = _owner_python_runtime(requested_python)
         self._process: subprocess.Popen[bytes] | None = None
         self._token = ""
         self._ready = False
@@ -453,7 +502,11 @@ class HoloQueryServiceSupervisor:
         if not _owner_port_available(OWNER_HOST, self.port):
             raise HoloQueryServiceSupervisorError(PORT_IN_USE_ERROR)
         token = _owner_token()
-        owner_environment = _owner_environment(token, self.ssd_path)
+        owner_environment = _owner_environment(
+            token,
+            self.ssd_path,
+            self._pythonpath_entries,
+        )
         try:
             process = subprocess.Popen(
                 _owner_command(self.python_executable, self.port, os.getpid()),

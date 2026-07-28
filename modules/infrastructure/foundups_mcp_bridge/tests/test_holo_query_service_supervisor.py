@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import socket
 import subprocess
+import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -146,7 +148,7 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
 
     assert owner.is_ready is True
     assert launch["command"] == [
-        supervisor_module.sys.executable,
+        owner.python_executable,
         "-B",
         "-m",
         OWNER_MODULE,
@@ -173,6 +175,169 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
     assert process.terminated is True
     assert unregistered
     assert owner.is_ready is False
+
+
+def test_windows_venv_runtime_keeps_direct_parent_and_site_packages(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    venv = tmp_path / ".venv"
+    scripts = venv / "Scripts"
+    site_packages = venv / "Lib" / "site-packages"
+    scripts.mkdir(parents=True)
+    site_packages.mkdir(parents=True)
+    launcher = scripts / "python.exe"
+    base = tmp_path / "Python312" / "python.exe"
+    launcher.write_bytes(b"launcher")
+    base.parent.mkdir()
+    base.write_bytes(b"python")
+    monkeypatch.setenv("PYTHONPATH", str(tmp_path / "attacker-controlled"))
+
+    executable, pythonpath = supervisor_module._owner_python_runtime(
+        str(launcher),
+        platform_name="nt",
+        current_executable=str(launcher),
+        base_executable=str(base),
+        current_prefix=str(venv),
+        base_prefix=str(base.parent),
+    )
+
+    assert executable == str(base.resolve())
+    assert pythonpath == (str(site_packages.resolve()),)
+    environment = supervisor_module._owner_environment(
+        TOKEN,
+        None,
+        pythonpath,
+    )
+    assert environment["PYTHONPATH"].split(supervisor_module.os.pathsep)[0] == str(
+        site_packages.resolve()
+    )
+    assert environment["PYTHONPATH"] == str(site_packages.resolve())
+
+
+def test_non_current_or_non_windows_interpreter_is_not_rewritten(
+    tmp_path: Path,
+) -> None:
+    requested = tmp_path / "other" / "python"
+
+    assert supervisor_module._owner_python_runtime(
+        str(requested),
+        platform_name="posix",
+        current_executable=str(tmp_path / "venv" / "python"),
+        base_executable=str(tmp_path / "base" / "python"),
+        current_prefix=str(tmp_path / "venv"),
+        base_prefix=str(tmp_path / "base"),
+    ) == (str(requested), ())
+
+
+@pytest.mark.parametrize("missing", ["base", "site_packages"])
+def test_windows_venv_runtime_fails_closed_when_runtime_path_missing(
+    tmp_path: Path,
+    missing: str,
+) -> None:
+    venv = tmp_path / ".venv"
+    launcher = venv / "Scripts" / "python.exe"
+    site_packages = venv / "Lib" / "site-packages"
+    base = tmp_path / "Python312" / "python.exe"
+    launcher.parent.mkdir(parents=True)
+    launcher.write_bytes(b"launcher")
+    if missing != "site_packages":
+        site_packages.mkdir(parents=True)
+    if missing != "base":
+        base.parent.mkdir()
+        base.write_bytes(b"python")
+
+    assert supervisor_module._owner_python_runtime(
+        str(launcher),
+        platform_name="nt",
+        current_executable=str(launcher),
+        base_executable=str(base),
+        current_prefix=str(venv),
+        base_prefix=str(base.parent),
+    ) == (str(launcher), ())
+
+
+def test_windows_venv_runtime_rejects_out_of_prefix_site_packages(
+    tmp_path: Path,
+) -> None:
+    venv = tmp_path / ".venv"
+    launcher = venv / "Scripts" / "python.exe"
+    base = tmp_path / "Python312" / "python.exe"
+    outside = tmp_path / "outside" / "site-packages"
+    launcher.parent.mkdir(parents=True)
+    launcher.write_bytes(b"launcher")
+    base.parent.mkdir()
+    base.write_bytes(b"python")
+    outside.mkdir(parents=True)
+
+    assert supervisor_module._owner_python_runtime(
+        str(launcher),
+        platform_name="nt",
+        current_executable=str(launcher),
+        base_executable=str(base),
+        current_prefix=str(venv),
+        base_prefix=str(base.parent),
+        site_packages_path=str(outside),
+    ) == (str(launcher), ())
+
+
+def test_windows_venv_runtime_does_not_rewrite_other_interpreter(
+    tmp_path: Path,
+) -> None:
+    current = tmp_path / ".venv" / "Scripts" / "python.exe"
+    requested = tmp_path / "other" / "python.exe"
+    base = tmp_path / "Python312" / "python.exe"
+    site_packages = tmp_path / ".venv" / "Lib" / "site-packages"
+    current.parent.mkdir(parents=True)
+    current.write_bytes(b"launcher")
+    requested.parent.mkdir()
+    requested.write_bytes(b"other")
+    base.parent.mkdir()
+    base.write_bytes(b"python")
+    site_packages.mkdir(parents=True)
+
+    assert supervisor_module._owner_python_runtime(
+        str(requested),
+        platform_name="nt",
+        current_executable=str(current),
+        base_executable=str(base),
+        current_prefix=str(tmp_path / ".venv"),
+        base_prefix=str(base.parent),
+    ) == (str(requested), ())
+
+
+@pytest.mark.skipif(
+    os.name != "nt" or sys.prefix == sys.base_prefix,
+    reason="Windows virtualenv redirector regression",
+)
+def test_current_windows_venv_runtime_creates_direct_child() -> None:
+    executable, pythonpath = supervisor_module._owner_python_runtime(
+        sys.executable,
+    )
+    environment = supervisor_module._owner_environment(
+        TOKEN,
+        None,
+        pythonpath,
+    )
+    child = subprocess.Popen(
+        [
+            executable,
+            "-B",
+            "-c",
+            "import os; print(os.getppid(), flush=True)",
+        ],
+        env=environment,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        shell=False,
+    )
+    stdout, stderr = child.communicate(timeout=10)
+
+    assert child.returncode == 0, stderr
+    assert int(stdout.strip()) == os.getpid()
+    assert executable != sys.executable
+    assert pythonpath
 
 
 def test_start_proves_exact_binding_in_its_single_authoritative_health_loop(
