@@ -12,10 +12,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     WorkAuthorityVerificationPhase,
     verify_delegated_work_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import canonical_work_authority_digest, work_authority_digest_matches
 
-AUTHORITY_VERIFICATION_BINDING_SCHEMA = (
-    "reddog_worker_dispatch_authority_verification_binding.v1"
-)
+AUTHORITY_VERIFICATION_BINDING_SCHEMA = "reddog_worker_dispatch_authority_verification_binding.v1"
 
 _AUTHORITY_RUNTIME_ACCEPT = "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
 _AUTHORITY_VERIFICATION_ACCEPT = "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
@@ -24,7 +23,8 @@ _SIGNED_EFFECT_FIELDS = (
     "work_order_id", "foundup_id", "requested_operation",
     "wsp15_allocation_receipt_id", "wsp15_allocation_digest", "wsp15_priority",
     "wsp15_mps_total", "wsp15_reasoning_tier", "model_runtime_binding_receipt_id",
-    "model_runtime_binding_digest", "architect_fix_publication_receipt_id",
+    "model_runtime_binding_digest", "memex_supply_receipt_id", "memex_supply_digest",
+    "architect_fix_publication_receipt_id",
     "architect_fix_publication_binding_digest",
 )
 
@@ -65,10 +65,10 @@ def recorded_authority_verification_binding(
     ):
         return {}
 
-    authority_digest = _digest(work_authority)
+    authority_digest = canonical_work_authority_digest(work_authority)
     if (
-        signer_receipt.get("work_authority_digest") != authority_digest
-        or verification.get("verified_work_authority_digest") != authority_digest
+        not work_authority_digest_matches(work_authority, signer_receipt.get("work_authority_digest"))
+        or not work_authority_digest_matches(work_authority, verification.get("verified_work_authority_digest"))
     ):
         return {}
 
@@ -179,6 +179,8 @@ def _mapping(value: Any) -> Mapping[str, Any]:
         candidate = value.to_dict()
         return candidate if isinstance(candidate, Mapping) else {}
     return value if isinstance(value, Mapping) else {}
+
+
 def _digest(payload: Any) -> str:
     encoded = json.dumps(
         payload,

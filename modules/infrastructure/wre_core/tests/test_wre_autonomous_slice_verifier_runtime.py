@@ -6,6 +6,9 @@ import ast
 import json
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 from modules.infrastructure.wre_core.src import (
     wre_autonomous_slice_verifier_runtime as verifier,
 )
@@ -19,8 +22,37 @@ def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
 
 
+def _resign_authority(req: dict) -> dict:
+    authority = req["signed_authority"]
+    work_authority = {
+        key: value
+        for key, value in authority.items()
+        if key
+        not in {
+            "accepted",
+            "signature_gate_digest",
+            "signed_work_authority_digest",
+        }
+    }
+    authority["signature_gate_digest"] = canonical_work_authority_digest(
+        work_authority
+    )
+    return req
+
+
+def _verify(req: dict, trusted_digest: str | None = None):
+    return verifier.verify_autonomous_slice_runtime(
+        req,
+        trusted_work_authority_digest=(
+            trusted_digest
+            if trusted_digest is not None
+            else req["signed_authority"]["signature_gate_digest"]
+        ),
+    )
+
+
 def valid_request() -> dict:
-    return {
+    request = {
         "work_order_id": "wo-autonomous-verify-1",
         "slice_name": "WRE_AUTONOMOUS_SLICE_VERIFIER_RUNTIME_PHASE1",
         "worker_id": "worker:author-1",
@@ -62,7 +94,8 @@ def valid_request() -> dict:
         },
         "signed_authority": {
             "accepted": True,
-            "signature_gate_digest": _digest("3"),
+            "authority_id": "authority-1",
+            "work_order_id": "wo-autonomous-verify-1",
         },
         "signed_receipt_chain": {
             "accepted": True,
@@ -84,10 +117,16 @@ def valid_request() -> dict:
         "draft_pr_published": False,
         "merge_performed": False,
     }
+    return _resign_authority(request)
 
 
-def assert_reject(req: dict, code: str) -> None:
-    result = verifier.verify_autonomous_slice_runtime(req)
+def assert_reject(
+    req: dict,
+    code: str,
+    *,
+    trusted_digest: str | None = None,
+) -> None:
+    result = _verify(req, trusted_digest)
     assert result.accepted is False
     assert result.decision == verifier.AUTONOMOUS_SLICE_VERIFIER_REJECT
     assert code in result.rejection_reasons
@@ -101,7 +140,7 @@ def assert_reject(req: dict, code: str) -> None:
 
 
 def test_accepts_complete_machine_derived_slice_packet() -> None:
-    result = verifier.verify_autonomous_slice_runtime(valid_request())
+    result = _verify(valid_request())
 
     assert result.accepted is True
     assert result.decision == verifier.AUTONOMOUS_SLICE_VERIFIER_ACCEPT
@@ -109,12 +148,16 @@ def test_accepts_complete_machine_derived_slice_packet() -> None:
     assert result.receipt.changed_paths == [PATH]
     assert result.receipt.diff_digest == _digest("1")
     assert result.receipt.test_evidence_digest == _digest("2")
-    assert result.receipt.signed_authority_digest == _digest("3")
+    assert result.receipt.signed_authority_digest == (
+        valid_request()["signed_authority"]["signature_gate_digest"]
+    )
     assert result.receipt.receipt_chain_terminal_hash == _digest("4")
     assert result.receipt.worktree_receipt_digest == _digest("5")
     assert result.receipt.holoindex_freshness_receipt_digest == _digest("6")
     assert result.receipt.model_runtime_binding_receipt_id is None
     assert result.receipt.model_runtime_binding_digest == ""
+    assert result.receipt.memex_supply_receipt_id is None
+    assert result.receipt.memex_supply_digest == ""
     assert result.receipt.no_command_execution_performed is True
     assert result.receipt.no_pr_publish_performed is True
     assert result.receipt.no_pattern_memory_write_performed is True
@@ -126,8 +169,9 @@ def test_carries_model_runtime_binding_from_signed_authority() -> None:
         "reddog_model_runtime_binding:test"
     )
     req["signed_authority"]["model_runtime_binding_digest"] = _digest("7")
+    _resign_authority(req)
 
-    result = verifier.verify_autonomous_slice_runtime(req)
+    result = _verify(req)
 
     assert result.accepted is True
     assert (
@@ -142,6 +186,7 @@ def test_rejects_conflicting_or_one_sided_model_runtime_binding() -> None:
     req["signed_authority"]["model_runtime_binding_receipt_id"] = (
         "reddog_model_runtime_binding:test"
     )
+    _resign_authority(req)
     assert_reject(req, verifier.FAIL_MODEL_RUNTIME_BINDING)
 
     req = valid_request()
@@ -149,11 +194,88 @@ def test_rejects_conflicting_or_one_sided_model_runtime_binding() -> None:
         "reddog_model_runtime_binding:test"
     )
     req["signed_authority"]["model_runtime_binding_digest"] = _digest("7")
+    _resign_authority(req)
     req["artifact_generation_receipt"] = {
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:test",
         "model_runtime_binding_digest": _digest("8"),
     }
     assert_reject(req, verifier.FAIL_MODEL_RUNTIME_BINDING)
+
+
+def test_carries_memex_binding_and_binds_it_into_verifier_receipt() -> None:
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    req["signed_authority"]["memex_supply_digest"] = _digest("7")
+    _resign_authority(req)
+
+    result = _verify(req)
+    without_memex = _verify(valid_request())
+
+    assert result.accepted is True
+    assert result.receipt.memex_supply_receipt_id == "memex-supply-receipt-1"
+    assert result.receipt.memex_supply_digest == _digest("7")
+    assert result.receipt.receipt_id != without_memex.receipt.receipt_id
+
+
+def test_rejects_malformed_half_or_conflicting_memex_binding() -> None:
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    _resign_authority(req)
+    assert_reject(req, verifier.FAIL_MEMEX_SUPPLY_BINDING)
+
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    req["signed_authority"]["memex_supply_digest"] = "sha256:not-a-digest"
+    _resign_authority(req)
+    assert_reject(req, verifier.FAIL_MEMEX_SUPPLY_BINDING)
+
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    req["signed_authority"]["memex_supply_digest"] = _digest("7")
+    _resign_authority(req)
+    req["artifact_generation_receipt"] = {
+        "memex_supply_receipt_id": "memex-supply-receipt-1",
+        "memex_supply_digest": _digest("8"),
+    }
+    assert_reject(req, verifier.FAIL_MEMEX_SUPPLY_BINDING)
+
+
+def test_rejects_post_signing_memex_substitution() -> None:
+    req = valid_request()
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-attacker"
+    req["signed_authority"]["memex_supply_digest"] = _digest("7")
+
+    assert_reject(req, verifier.FAIL_SIGNED_AUTHORITY)
+
+
+def test_rejects_rehashed_authority_against_recorded_verification_digest() -> None:
+    req = valid_request()
+    trusted_digest = req["signed_authority"]["signature_gate_digest"]
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-attacker"
+    req["signed_authority"]["memex_supply_digest"] = _digest("7")
+    _resign_authority(req)
+
+    assert_reject(
+        req,
+        verifier.FAIL_SIGNED_AUTHORITY,
+        trusted_digest=trusted_digest,
+    )
+
+
+def test_rejects_falsy_non_string_memex_bindings() -> None:
+    for receipt_id, digest in (
+        (False, _digest("7")),
+        (0, _digest("7")),
+        ([], _digest("7")),
+        ("memex-supply-receipt-1", False),
+        ("memex-supply-receipt-1", 0),
+        ("memex-supply-receipt-1", []),
+    ):
+        req = valid_request()
+        req["signed_authority"]["memex_supply_receipt_id"] = receipt_id
+        req["signed_authority"]["memex_supply_digest"] = digest
+        _resign_authority(req)
+        assert_reject(req, verifier.FAIL_MEMEX_SUPPLY_BINDING)
 
 
 def test_rejects_missing_identity_and_self_verification() -> None:
@@ -217,7 +339,7 @@ def test_rejects_protected_surface_without_consensus_and_accepts_with_escalation
 
     req["protected_surface_authorization_digest"] = _digest("7")
     req["consensus_receipt_digest"] = _digest("8")
-    result = verifier.verify_autonomous_slice_runtime(req)
+    result = _verify(req)
     assert result.accepted is True
 
 
@@ -248,6 +370,10 @@ def test_rejects_unsigned_authority_or_receipt_chain() -> None:
 
     req = valid_request()
     req["signed_authority"]["signature_gate_digest"] = "bad"
+    assert_reject(req, verifier.FAIL_SIGNED_AUTHORITY)
+
+    req = valid_request()
+    req["signed_authority"]["signed_work_authority_digest"] = _digest("f")
     assert_reject(req, verifier.FAIL_SIGNED_AUTHORITY)
 
     req = valid_request()
@@ -302,8 +428,8 @@ def test_rejects_pattern_memory_write_or_pr_publish_before_acceptance() -> None:
 
 
 def test_receipt_is_deterministic_and_json_serializable() -> None:
-    first = verifier.verify_autonomous_slice_runtime(valid_request())
-    second = verifier.verify_autonomous_slice_runtime(valid_request())
+    first = _verify(valid_request())
+    second = _verify(valid_request())
 
     assert first.receipt.receipt_id == second.receipt.receipt_id
     dumped = json.dumps(first.to_dict(), sort_keys=True)

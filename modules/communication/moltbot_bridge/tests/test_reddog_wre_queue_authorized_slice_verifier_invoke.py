@@ -19,6 +19,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_slice_
     QueueAuthorizedSliceVerifierInvokeReason,
     invoke_reddog_wre_queue_authorized_slice_verifier,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
     AUTONOMOUS_SLICE_VERIFIER_REJECT,
@@ -88,7 +91,7 @@ def _queue_pilot_result(*, decision: str | None = None, pilot_decision: str | No
 
 
 def _verifier_request() -> dict:
-    return {
+    request = {
         "work_order_id": WORK_ORDER_ID,
         "slice_name": "REDDOG_WRE_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_PHASE1",
         "worker_id": "worker:author",
@@ -122,7 +125,8 @@ def _verifier_request() -> dict:
         },
         "signed_authority": {
             "accepted": True,
-            "signature_gate_digest": _digest("9"),
+            "authority_id": "authority-1",
+            "work_order_id": WORK_ORDER_ID,
         },
         "signed_receipt_chain": {
             "accepted": True,
@@ -136,13 +140,26 @@ def _verifier_request() -> dict:
         "draft_pr_published": False,
         "merge_performed": False,
     }
+    request["signed_authority"][
+        "signature_gate_digest"
+    ] = canonical_work_authority_digest(
+        {
+            "authority_id": "authority-1",
+            "work_order_id": WORK_ORDER_ID,
+        }
+    )
+    return request
 
 
 def _invoke(queue_pilot: dict | None = None, verifier_request: dict | None = None):
+    request = verifier_request or _verifier_request()
     return invoke_reddog_wre_queue_authorized_slice_verifier(
         explicit_queue_authorized_slice_verifier_requested=True,
         queue_bounded_worker_pilot_result=queue_pilot or _queue_pilot_result(),
-        verifier_request=verifier_request or _verifier_request(),
+        verifier_request=request,
+        trusted_work_authority_digest=request["signed_authority"][
+            "signature_gate_digest"
+        ],
     )
 
 
@@ -192,6 +209,9 @@ def test_explicit_invoke_missing_rejects_before_verifier() -> None:
         explicit_queue_authorized_slice_verifier_requested=False,
         queue_bounded_worker_pilot_result=_queue_pilot_result(),
         verifier_request=_verifier_request(),
+        trusted_work_authority_digest=_verifier_request()["signed_authority"][
+            "signature_gate_digest"
+        ],
     )
 
     assert result.decision == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT

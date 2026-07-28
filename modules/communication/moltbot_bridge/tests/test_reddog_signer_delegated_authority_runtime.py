@@ -38,6 +38,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 _NOW = 1000
 _REPO = "FOUNDUPS/Foundups-Agent"
 _FID = "paccess_001"
+_MEMEX_DIGEST = "sha256:" + ("d" * 64)
 _VALVE = "VALVE_OPEN_WORKTREE_CREATE"
 
 
@@ -170,7 +171,7 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
         "memex_supply_receipt_id": "sha256:memex-supply",
-        "memex_supply_digest": "sha256:memex-supply-digest",
+        "memex_supply_digest": _MEMEX_DIGEST,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
         "issued_at": _NOW - 5,
@@ -231,7 +232,7 @@ def test_runtime_issues_records_accepted_by_existing_verifier() -> None:
     assert result.work_authority["model_selection_receipt_id"] == "sha256:model-selection"
     assert result.work_authority["model_selection_digest"] == "sha256:model-selection-digest"
     assert result.work_authority["memex_supply_receipt_id"] == "sha256:memex-supply"
-    assert result.work_authority["memex_supply_digest"] == "sha256:memex-supply-digest"
+    assert result.work_authority["memex_supply_digest"] == _MEMEX_DIGEST
 
     verified = verify_delegated_work_authority(
         work_authority=result.work_authority,
@@ -363,6 +364,14 @@ def test_malformed_runtime_binding_field_rejects_before_signing() -> None:
 
     assert result.accepted is False
     assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
+
+
+def test_malformed_memex_binding_rejects_before_signing() -> None:
+    result, signer, _, _ = _issue(memex_supply_digest="sha256:not-canonical")
+
+    assert result.accepted is False
+    assert RuntimeRejectCode.MALFORMED_REQUEST in result.receipt.rejection_reasons
+    assert signer.requests == []
 
 
 def test_default_signer_fails_closed() -> None:

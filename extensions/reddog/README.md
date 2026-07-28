@@ -1,6 +1,10 @@
 # RedDog
 
-Version: 0.4.28
+Version: 0.4.29
+
+Version 0.4.29 pins signed Memex supply lineage through delegated worker
+dispatch and independently verifies the canonical signed-authority payload
+before author-output evidence is admitted.
 
 Version 0.4.28 adds sealed signed-worker admission, transactional quarantine,
 and use-time execution-lease finalization fences. Version 0.4.27 pins the
@@ -273,6 +277,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.28.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.29.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

@@ -11,7 +11,6 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
 )
 
-
 def materialize_delegated_authority_request(
     *,
     profile: Mapping[str, Any],

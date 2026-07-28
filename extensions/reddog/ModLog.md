@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-28 - REDDOG_FOUNDUP_MEMEX_AUTHORITY_DISPATCH_BINDING_PHASE1 (0.4.29)
+
+- Pinned optional signed Memex supply lineage through worker materialization,
+  dispatch, AgentDB execution, read-only assignment, and independent review.
+- Added canonical signed-authority digest revalidation at verifier admission;
+  post-signing substitution and malformed or legacy bindings fail closed.
+- Regenerated and pinned the 1,062-file backend dependency manifest.
+- Preserved read-only editor authority. Version 0.4.28 -> 0.4.29.
+
 ## 2026-07-28 - REDDOG_SIGNED_WORKER_ADMISSION_AND_LEASE_SECURITY_REPAIR_PHASE1 (0.4.28)
 
 - Required an opaque process-local verification seal before a serialized

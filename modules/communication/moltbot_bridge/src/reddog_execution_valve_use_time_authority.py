@@ -37,6 +37,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
     canonical_work_order_base_ref,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    work_authority_digest_matches,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     GovernedExecutionValveEnvironment,
 )
@@ -438,7 +441,7 @@ def _validate_recorded_authority(
         reasons.append("canonical_authority_receipt_work_order_mismatch")
     if identity and receipt.get("identity_digest") != _digest(identity):
         reasons.append("canonical_identity_receipt_digest_mismatch")
-    if work_authority and receipt.get("work_authority_digest") != _digest(work_authority):
+    if work_authority and not work_authority_digest_matches(work_authority, receipt.get("work_authority_digest")):
         reasons.append("canonical_work_authority_receipt_digest_mismatch")
     identity_bindings = {
         "principal_id": identity.get("principal_id"),

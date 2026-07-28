@@ -867,10 +867,10 @@ def _materialize_work_orders_from_authority_profile(
         "model_selection_receipt_id": str(authority_profile.get("model_selection_receipt_id") or ""),
         "model_selection_digest": str(authority_profile.get("model_selection_digest") or ""),
         "model_runtime_binding_receipt": _nested_mapping(authority_profile, "model_runtime_binding_receipt"),
-        "model_runtime_binding_receipt_id": str(
-            authority_profile.get("model_runtime_binding_receipt_id") or ""
-        ),
+        "model_runtime_binding_receipt_id": str(authority_profile.get("model_runtime_binding_receipt_id") or ""),
         "model_runtime_binding_digest": str(authority_profile.get("model_runtime_binding_digest") or ""),
+        "memex_supply_receipt_id": str(queue_receipt.get("memex_supply_receipt_id") or ""),
+        "memex_supply_digest": str(queue_receipt.get("memex_supply_digest") or ""),
     }
     if bounded_worker_plan:
         work_order["bounded_worker_plan"] = bounded_worker_plan

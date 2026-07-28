@@ -492,10 +492,9 @@ def _canonical_context(
         "authorized_principal_id": str(work_authority["principal_id"]),
         "authorized_reddog_id": str(work_authority["reddog_id"]),
         "wsp15_allocation_receipt": dict(allocation),
-        "model_runtime_binding_receipt_id": str(
-            receipt["model_runtime_binding_receipt_id"]
-        ),
+        "model_runtime_binding_receipt_id": str(receipt["model_runtime_binding_receipt_id"]),
         "model_runtime_binding_digest": str(receipt["model_runtime_binding_digest"]),
+        **_memex_context(receipt),
         "architect_fix_publication_receipt_id": str(
             receipt["architect_fix_publication_receipt_id"]
         ),
@@ -520,6 +519,13 @@ def _canonical_context(
             "hermes_execution_performed": False,
             "requires_signed_authority": True,
         },
+    }
+
+
+def _memex_context(receipt: Mapping[str, Any]) -> Mapping[str, str]:
+    return {
+        "memex_supply_receipt_id": str(receipt["memex_supply_receipt_id"]),
+        "memex_supply_digest": str(receipt["memex_supply_digest"]),
     }
 
 

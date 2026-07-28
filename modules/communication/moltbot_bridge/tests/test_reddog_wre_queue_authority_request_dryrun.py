@@ -22,6 +22,8 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+MEMEX_SUPPLY_RECEIPT_ID = "sha256:memex-supply"
+MEMEX_SUPPLY_DIGEST = "sha256:" + ("d" * 64)
 MODULE_PATH = (
     REPO_ROOT
     / "modules"
@@ -49,8 +51,8 @@ def _queue_result(**overrides):
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
-        "memex_supply_receipt_id": "sha256:memex-supply",
-        "memex_supply_digest": "sha256:memex-supply-digest",
+        "memex_supply_receipt_id": MEMEX_SUPPLY_RECEIPT_ID,
+        "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
         "no_queue_mutation_performed": True,
@@ -158,8 +160,8 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert request["model_selection_digest"] == "sha256:model-selection-digest"
     assert request["model_runtime_binding_receipt_id"] == "reddog_model_runtime_binding:abc123"
     assert request["model_runtime_binding_digest"] == "sha256:model-runtime-binding"
-    assert request["memex_supply_receipt_id"] == "sha256:memex-supply"
-    assert request["memex_supply_digest"] == "sha256:memex-supply-digest"
+    assert request["memex_supply_receipt_id"] == MEMEX_SUPPLY_RECEIPT_ID
+    assert request["memex_supply_digest"] == MEMEX_SUPPLY_DIGEST
     assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
     assert result.receipt.wsp15_allocation_digest == "sha256:wsp15-allocation-digest"
     assert result.receipt.wsp15_priority == "P0"
@@ -169,8 +171,8 @@ def test_builds_delegated_authority_runtime_request_without_signing() -> None:
     assert result.receipt.model_selection_digest == "sha256:model-selection-digest"
     assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
     assert result.receipt.model_runtime_binding_digest == "sha256:model-runtime-binding"
-    assert result.receipt.memex_supply_receipt_id == "sha256:memex-supply"
-    assert result.receipt.memex_supply_digest == "sha256:memex-supply-digest"
+    assert result.receipt.memex_supply_receipt_id == MEMEX_SUPPLY_RECEIPT_ID
+    assert result.receipt.memex_supply_digest == MEMEX_SUPPLY_DIGEST
     assert result.receipt.delegated_authority_request_digest.startswith("sha256:")
 
 
@@ -255,6 +257,26 @@ def test_allows_legacy_queue_without_model_runtime_binding() -> None:
     assert result.delegated_authority_request["model_runtime_binding_digest"] is None
 
 
+def test_accepts_mixed_absent_memex_encodings_without_exception() -> None:
+    queue = _queue_result()
+    queue["receipt"]["memex_supply_receipt_id"] = None
+    queue["receipt"]["memex_supply_digest"] = None
+
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=queue,
+        authority_profile=_profile(),
+        work_order=_work_order(
+            memex_supply_receipt_id="",
+            memex_supply_digest="",
+        ),
+    )
+
+    assert result.accepted is True
+    assert result.delegated_authority_request is not None
+    assert result.delegated_authority_request["memex_supply_receipt_id"] is None
+    assert result.delegated_authority_request["memex_supply_digest"] is None
+
+
 def test_rejects_base_ref_spliced_between_profile_and_full_work_order() -> None:
     result = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
@@ -264,6 +286,51 @@ def test_rejects_base_ref_spliced_between_profile_and_full_work_order() -> None:
 
     assert result.accepted is False
     assert planner.FAIL_WORK_ORDER_BINDING in result.rejection_reasons
+
+
+def test_rejects_profile_memex_binding_conflicting_with_queue_authority() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(
+            memex_supply_receipt_id="sha256:attacker-memex",
+            memex_supply_digest="sha256:" + ("e" * 64),
+        ),
+        work_order=_work_order(),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_MEMEX_SUPPLY_BINDING in result.rejection_reasons
+    assert result.delegated_authority_request is None
+
+
+def test_rejects_work_order_memex_binding_conflicting_with_queue_authority() -> None:
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=_queue_result(),
+        authority_profile=_profile(),
+        work_order=_work_order(
+            memex_supply_receipt_id="sha256:attacker-memex",
+            memex_supply_digest="sha256:" + ("e" * 64),
+        ),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_MEMEX_SUPPLY_BINDING in result.rejection_reasons
+    assert result.delegated_authority_request is None
+
+
+def test_rejects_malformed_queue_memex_authority_before_signing() -> None:
+    queue = _queue_result()
+    queue["receipt"]["memex_supply_digest"] = "sha256:not-canonical"
+
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=queue,
+        authority_profile=_profile(),
+        work_order=_work_order(),
+    )
+
+    assert result.accepted is False
+    assert planner.FAIL_MEMEX_SUPPLY_BINDING in result.rejection_reasons
+    assert result.delegated_authority_request is None
 
 
 def test_rejects_missing_required_profile_field() -> None:

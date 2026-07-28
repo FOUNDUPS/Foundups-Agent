@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_task_executo
     READONLY_AUDIT_TASK_SOURCE,
     execute_reddog_readonly_audit_task,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
@@ -52,6 +55,9 @@ class Signed0102ReadOnlyReviewBindingReason:
     UNSUPPORTED_CONTEXT = "REJECT_SIGNED_0102_READONLY_UNSUPPORTED_CONTEXT"
     ALLOCATION_MISSING_OR_INVALID = "REJECT_SIGNED_0102_READONLY_ALLOCATION_INVALID"
     TARGETS_MISSING = "REJECT_SIGNED_0102_READONLY_TARGETS_MISSING"
+    MEMEX_SUPPLY_BINDING_MISMATCH = (
+        "REJECT_SIGNED_0102_READONLY_MEMEX_SUPPLY_BINDING_MISMATCH"
+    )
     READONLY_WORKER_REJECTED = "REJECT_SIGNED_0102_READONLY_WORKER_REJECTED"
 
 
@@ -79,7 +85,6 @@ class Signed0102ReadOnlyReviewRunner:
                 task_id=task_id,
                 reasons=(Signed0102ReadOnlyReviewBindingReason.UNSUPPORTED_CONTEXT,),
             )
-
         allocation = _mapping(task_context.get("wsp15_allocation_receipt"))
         validation = validate_reddog_wsp15_allocation_receipt(allocation)
         if not validation.accepted:
@@ -90,22 +95,23 @@ class Signed0102ReadOnlyReviewRunner:
                     *validation.rejection_reasons,
                 ),
             )
-
         targets = _text_tuple(allocation.get("allowed_read_targets"))
         if not targets:
             return _runner_reject(
                 task_id=task_id,
                 reasons=(Signed0102ReadOnlyReviewBindingReason.TARGETS_MISSING,),
             )
-
-        readonly_context = build_readonly_0102_context_from_signed_worker(
-            task_id=task_id,
-            task_context=task_context,
-            worker_dispatch_intent=worker_dispatch_intent,
-            signed_authority_receipt=signed_authority_receipt,
-            allocation=allocation,
-            targets=targets,
+        readonly_context = _try_build_readonly_context(
+            task_id, task_context, worker_dispatch_intent,
+            signed_authority_receipt, allocation, targets,
         )
+        if readonly_context is None:
+            return _runner_reject(
+                task_id=task_id,
+                reasons=(
+                    Signed0102ReadOnlyReviewBindingReason.MEMEX_SUPPLY_BINDING_MISMATCH,
+                ),
+            )
         readonly_result = execute_reddog_readonly_audit_task(
             task_context=readonly_context,
             repo_root=repo_root,
@@ -150,6 +156,25 @@ class Signed0102ReadOnlyReviewRunner:
         }
 
 
+def _try_build_readonly_context(
+    task_id: str,
+    task_context: Mapping[str, Any],
+    worker_dispatch_intent: Mapping[str, Any],
+    signed_authority_receipt: Mapping[str, Any],
+    allocation: Mapping[str, Any],
+    targets: tuple[str, ...],
+) -> Mapping[str, Any] | None:
+    try:
+        return build_readonly_0102_context_from_signed_worker(
+            task_id=task_id, task_context=task_context,
+            worker_dispatch_intent=worker_dispatch_intent,
+            signed_authority_receipt=signed_authority_receipt,
+            allocation=allocation, targets=targets,
+        )
+    except ValueError:
+        return None
+
+
 def is_0102_readonly_signed_worker_context(context: Mapping[str, Any] | None) -> bool:
     """Return True only for signed 0102 review tasks that are read-only."""
 
@@ -172,7 +197,6 @@ def build_readonly_0102_context_from_signed_worker(
     targets: tuple[str, ...] | None = None,
 ) -> Mapping[str, Any]:
     """Build the read-only audit context consumed by the 0102 worker."""
-
     targets = targets or _text_tuple(allocation.get("allowed_read_targets"))
     allocation_digest = canonical_reddog_wsp15_allocation_digest(allocation)
     work_order_id = str(signed_authority_receipt.get("work_order_id") or worker_dispatch_intent.get("work_order_id") or "")
@@ -191,6 +215,7 @@ def build_readonly_0102_context_from_signed_worker(
         or signed_authority_receipt.get("model_runtime_binding_digest")
         or ""
     )
+    memex_binding = _matching_memex_binding(task_context, worker_dispatch_intent, signed_authority_receipt)
     assignment = {
         "assignment_id": "signed-0102-review-" + _digest(
             {
@@ -214,6 +239,7 @@ def build_readonly_0102_context_from_signed_worker(
         "wsp15_allocation_digest": allocation_digest,
         "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
         "model_runtime_binding_digest": model_runtime_binding_digest,
+        **memex_binding,
     }
     if model_runtime_binding_receipt:
         assignment["model_runtime_binding_receipt"] = dict(model_runtime_binding_receipt)
@@ -228,11 +254,8 @@ def build_readonly_0102_context_from_signed_worker(
         "wsp15_allocation_digest": allocation_digest,
         "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
         "model_runtime_binding_digest": model_runtime_binding_digest,
-        **(
-            {"model_runtime_binding_receipt": dict(model_runtime_binding_receipt)}
-            if model_runtime_binding_receipt
-            else {}
-        ),
+        **memex_binding,
+        **({"model_runtime_binding_receipt": dict(model_runtime_binding_receipt)} if model_runtime_binding_receipt else {}),
         "swarm_receipt": {
             "swarm_id": "signed-worker-dispatch",
             "signed_worker_task_id": str(task_id),
@@ -259,7 +282,35 @@ def build_readonly_0102_context_from_signed_worker(
             "signed_authority_receipt_id": str(signed_authority_receipt.get("receipt_id") or ""),
             "model_runtime_binding_receipt_id": model_runtime_binding_receipt_id,
             "model_runtime_binding_digest": model_runtime_binding_digest,
+            **memex_binding,
         },
+    }
+
+
+def _matching_memex_binding(*sources: Mapping[str, Any]) -> dict[str, str]:
+    raw_pairs = tuple(
+        (
+            source.get("memex_supply_receipt_id"),
+            source.get("memex_supply_digest"),
+        )
+        for source in sources
+    )
+    if any(
+        not optional_authority_binding_values_valid(receipt_id, digest)
+        for receipt_id, digest in raw_pairs
+    ):
+        raise ValueError("invalid Memex authority binding")
+    pairs = tuple(
+        (str(receipt_id or ""), str(digest or ""))
+        for receipt_id, digest in raw_pairs
+    )
+    populated = tuple(pair for pair in pairs if pair[0])
+    if populated and (len(populated) != len(pairs) or any(pair != populated[0] for pair in pairs)):
+        raise ValueError("conflicting Memex authority binding")
+    receipt_id, digest = populated[0] if populated else ("", "")
+    return {
+        "memex_supply_receipt_id": receipt_id,
+        "memex_supply_digest": digest,
     }
 
 

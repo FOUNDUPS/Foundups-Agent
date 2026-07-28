@@ -155,6 +155,29 @@ def _run(identity, workauth, ctx):
     return verify_delegated_work_authority(work_authority=workauth, identity=identity, **ctx)
 
 
+def test_memex_authority_binding_is_optional_but_must_be_canonical() -> None:
+    crypto, identity, workauth, ctx = _build()
+    workauth["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    workauth["memex_supply_digest"] = "sha256:" + ("d" * 64)
+    _resign_wa(crypto, identity, workauth)
+    assert _run(identity, workauth, ctx).accepted is True
+
+    crypto, identity, workauth, ctx = _build()
+    workauth["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    _resign_wa(crypto, identity, workauth)
+    result = _run(identity, workauth, ctx)
+    assert result.accepted is False
+    assert ReasonCode.MALFORMED_PAYLOAD in result.reason_codes
+
+    crypto, identity, workauth, ctx = _build()
+    workauth["memex_supply_receipt_id"] = "memex-supply-receipt-1"
+    workauth["memex_supply_digest"] = "sha256:not-a-digest"
+    _resign_wa(crypto, identity, workauth)
+    result = _run(identity, workauth, ctx)
+    assert result.accepted is False
+    assert ReasonCode.MALFORMED_PAYLOAD in result.reason_codes
+
+
 def _policy_order_from_workauth(workauth, now: int = 1000, **overrides):
     captured = datetime.fromtimestamp(now - 60, timezone.utc).replace(microsecond=0).isoformat()
     expiry = datetime.fromtimestamp(now + 3600, timezone.utc).replace(microsecond=0).isoformat()
@@ -574,7 +597,6 @@ def test_identity_reusable_but_work_authority_nonce_consume_once() -> None:
     """The SAME identity authorizes multiple work orders (reusable within TTL); each
     work-authority nonce is single-use; reusing a work-auth nonce replays."""
     crypto, identity, wa1, ctx = _build()
-    store = ctx["nonce_store"]  # one store shared across all submissions
 
     # wo-1 with its own nonce -> ACCEPT (identity used once)
     assert _run(identity, wa1, ctx).accepted is True

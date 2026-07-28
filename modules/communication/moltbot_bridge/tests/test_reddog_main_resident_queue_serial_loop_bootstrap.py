@@ -68,6 +68,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     GovernedExecutionValveEnvironment,
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
     AuthoritativeUseLease,
     GovernedValveUseTimeResolution,
@@ -345,7 +348,7 @@ def _snapshot() -> dict[str, object]:
                 "model_runtime_binding_receipt_id": "",
                 "model_runtime_binding_digest": "",
                 "memex_supply_receipt_id": memex_id,
-                "memex_supply_digest": "sha256:memex-digest",
+                "memex_supply_digest": "sha256:" + ("d" * 64),
                 "no_execution_performed": True,
             }
         ],
@@ -384,7 +387,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "model_selection_receipt_id": "sha256:model-selection-1",
         "model_selection_digest": "sha256:model-selection-digest",
         "memex_supply_receipt_id": "sha256:memex-1",
-        "memex_supply_digest": "sha256:memex-digest",
+        "memex_supply_digest": "sha256:" + ("d" * 64),
         "holoindex_evidence": {
             "holoindex_query": "RedDog resident queue materialized work order",
             "holoindex_status": "bundle_json_ok",
@@ -508,6 +511,46 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
     assert work_order["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     assert work_order["model_runtime_binding_digest"] == _canonical_digest(runtime_binding)
     assert work_order["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
+
+
+def test_authority_profile_materializer_carries_memex_supply_binding() -> None:
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    work_order = work_orders[WORK_ORDER_ID]
+    assert work_order["memex_supply_receipt_id"] == "sha256:memex-1"
+    assert work_order["memex_supply_digest"] == "sha256:" + ("d" * 64)
+
+
+def test_authority_profile_materializer_rejects_conflicting_memex_supply_binding() -> None:
+    snapshot = _snapshot()
+    profile = _profile(
+        memex_supply_receipt_id="sha256:attacker-memex",
+        memex_supply_digest="sha256:" + ("e" * 64),
+    )
+    snapshot_before = _canonical_digest(snapshot)
+    profile_before = _canonical_digest(profile)
+
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=snapshot,
+        authority_profile=profile,
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert work_orders is None
+    assert (
+        "work_order_materializer_authority:FAIL_MEMEX_SUPPLY_BINDING"
+        in reasons
+    )
+    assert _canonical_digest(snapshot) == snapshot_before
+    assert _canonical_digest(profile) == profile_before
 
 
 def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> None:
@@ -806,6 +849,18 @@ def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
 
 
+def _signed_authority_fixture() -> dict[str, object]:
+    work_authority = {
+        "authority_id": "authority-test",
+        "work_order_id": WORK_ORDER_ID,
+    }
+    return {
+        **work_authority,
+        "accepted": True,
+        "signature_gate_digest": canonical_work_authority_digest(work_authority),
+    }
+
+
 def _slice_verifier_request() -> dict[str, object]:
     base_sha = "b" * 40
     head_sha = "a" * 40
@@ -839,10 +894,7 @@ def _slice_verifier_request() -> dict[str, object]:
                 {"name": "security", "head_sha": head_sha, "conclusion": "pass"},
             ],
         },
-        "signed_authority": {
-            "accepted": True,
-            "signature_gate_digest": _digest("9"),
-        },
+        "signed_authority": _signed_authority_fixture(),
         "signed_receipt_chain": {
             "accepted": True,
             "terminal_receipt_hash": _digest("a"),
@@ -926,10 +978,7 @@ def _artifact_generation_request(worktree: Path) -> dict[str, object]:
             "retrieval_quality": "HIGH",
             "holoindex_freshness_receipt_digest": _digest("b"),
         },
-        "signed_authority": {
-            "accepted": True,
-            "signature_gate_digest": _digest("9"),
-        },
+        "signed_authority": _signed_authority_fixture(),
         "signed_receipt_chain": {
             "accepted": True,
             "terminal_receipt_hash": _digest("a"),
@@ -968,8 +1017,15 @@ def _draft_pr_publish_plan() -> dict[str, object]:
 def _outcome_ratchet_request(
     verification_result: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
     verifier_result = dict(
-        verification_result or verify_autonomous_slice_runtime(_slice_verifier_request()).to_dict()
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request[
+                "signed_authority"
+            ]["signature_gate_digest"],
+        ).to_dict()
     )
     verifier_receipt = verifier_result["receipt"]
     return {
@@ -1016,8 +1072,15 @@ def _outcome_ratchet_request(
 def _held_out_gate_request(
     verification_result: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
     verifier_result = dict(
-        verification_result or verify_autonomous_slice_runtime(_slice_verifier_request()).to_dict()
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request[
+                "signed_authority"
+            ]["signature_gate_digest"],
+        ).to_dict()
     )
     verifier_receipt = verifier_result["receipt"]
     head_sha = str(verifier_receipt["head_sha"])

@@ -47,11 +47,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, List, Mapping, Optional, Protocol, Sequence, runtime_checkable
 
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    is_sha256_digest,
+    optional_authority_binding_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_work_order_base_ref,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_authority_nonce_store import (
-    InMemoryNonceStore,
+    InMemoryNonceStore as InMemoryNonceStore,
 )
 
 # Domain-separation prefixes (contract Section 2, frozen).
@@ -134,15 +138,6 @@ def constant_time_compare(a: str, b: str) -> bool:
     if not isinstance(a, str) or not isinstance(b, str):
         return False
     return hmac.compare_digest(a.encode("utf-8"), b.encode("utf-8"))
-
-
-def _is_sha256_digest(value: Any) -> bool:
-    candidate = str(value or "")
-    return (
-        candidate.startswith("sha256:")
-        and len(candidate) == 71
-        and all(char in "0123456789abcdef" for char in candidate[7:])
-    )
 
 
 def canonical_signing_input(record: Mapping[str, Any], prefix: str) -> str:
@@ -330,7 +325,7 @@ def _validate_authority_structure(
     except ValueError:
         return ReasonCode.MALFORMED_PAYLOAD
     digest = str(work_authority.get("work_order_digest") or "")
-    if not _is_sha256_digest(digest):
+    if not is_sha256_digest(digest):
         return ReasonCode.MALFORMED_PAYLOAD
     if not _valid_work_authority_receipt_fields(work_authority):
         return ReasonCode.MALFORMED_PAYLOAD
@@ -342,8 +337,10 @@ def _valid_work_authority_receipt_fields(
 ) -> bool:
     runtime_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
     runtime_digest = str(work_authority.get("model_runtime_binding_digest") or "")
+    memex_id = work_authority.get("memex_supply_receipt_id")
+    memex_digest = work_authority.get("memex_supply_digest")
     required_valid = (
-        _is_sha256_digest(work_authority.get("queue_consumer_receipt_digest"))
+        is_sha256_digest(work_authority.get("queue_consumer_receipt_digest"))
         and str(work_authority.get("wsp15_allocation_receipt_id") or "").startswith("sha256:")
         and str(work_authority.get("wsp15_allocation_digest") or "").startswith("sha256:")
         and str(work_authority.get("wsp15_priority") or "") in {"P0", "P1", "P2", "P3", "P4"}
@@ -354,7 +351,8 @@ def _valid_work_authority_receipt_fields(
         runtime_id.startswith("reddog_model_runtime_binding:")
         and runtime_digest.startswith("sha256:")
     )
-    return required_valid and runtime_valid
+    memex_valid = optional_authority_binding_values_valid(memex_id, memex_digest)
+    return required_valid and runtime_valid and memex_valid
 
 
 def _verify_revocation_and_principal_trust(

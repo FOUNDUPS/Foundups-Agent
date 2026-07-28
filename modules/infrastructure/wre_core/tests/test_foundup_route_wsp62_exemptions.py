@@ -16,6 +16,10 @@ WRE_ROOT = Path(__file__).resolve().parents[1]
 MOLTBOT_ROOT = REPO_ROOT / "modules" / "communication" / "moltbot_bridge"
 SLICE_DATE = date(2026, 7, 23)
 EXPECTED = {
+    WRE_ROOT / "src/wre_autonomous_slice_verifier_runtime.py": (
+        586,
+        {"verify_autonomous_slice_runtime": 157},
+    ),
     WRE_ROOT / "src/foundup_job_router.py": (
         1193,
         {
@@ -33,7 +37,7 @@ EXPECTED = {
             "drain_openclaw_queue_with_retention": 94,
         },
     ),
-    WRE_ROOT / "INTERFACE.md": (1066, {}),
+    WRE_ROOT / "INTERFACE.md": (1069, {}),
     WRE_ROOT / "ModLog.md": (4268, {}),
     WRE_ROOT / "tests/TestModLog.md": (1380, {}),
     MOLTBOT_ROOT / "src/foundup_job_contract.py": (796, {}),

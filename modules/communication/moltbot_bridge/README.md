@@ -112,9 +112,11 @@ lineage is revalidated at use time.
 Worktree and OpenClaw effects report `COMMITTED`, `NOT_COMMITTED`, or
 `INDETERMINATE` with a stable attempt key. Exceptions after an effect attempt
 are never reported as false non-events; they require reconciliation by that
-key. Production remains `VALVE_CLOSED`: model-selection and Memex identifiers
-are now carried by signed work authority, but their independent signed-evidence
-verifiers and the other canonical trust anchors do not yet exist.
+key. Production remains `VALVE_CLOSED`. The optional Memex supply ID/digest
+pair is signed and now remains bound through dispatch, AgentDB restart, claim,
+executor, read-only 0102 assignment, and independent slice-verifier receipts.
+Malformed or conflicting pairs reject before effects. That lineage does not
+make Memex content current-code proof or replace projection/query verification.
 
 ### RedDog HoloIndex Query Boundary
 

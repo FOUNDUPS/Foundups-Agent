@@ -20,6 +20,9 @@ from typing import Any, Dict, List, Mapping, Sequence, Tuple
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
 )
@@ -56,6 +59,7 @@ class SignedAuthorityWorkerDispatchDryRunReason:
     WSP15_MPS_TOTAL_MISMATCH = "REJECT_WSP15_MPS_TOTAL_MISMATCH"
     WSP15_REASONING_TIER_MISMATCH = "REJECT_WSP15_REASONING_TIER_MISMATCH"
     MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_MODEL_RUNTIME_BINDING_MISMATCH"
+    MEMEX_SUPPLY_BINDING_MISMATCH = "REJECT_MEMEX_SUPPLY_BINDING_MISMATCH"
     ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH = (
         "REJECT_ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH"
     )
@@ -79,6 +83,8 @@ class WorkerDispatchIntent:
     wsp15_allocation_digest: str
     model_runtime_binding_receipt_id: str = ""
     model_runtime_binding_digest: str = ""
+    memex_supply_receipt_id: str = ""
+    memex_supply_digest: str = ""
     architect_fix_publication_receipt_id: str = ""
     architect_fix_publication_binding_digest: str = ""
     verified_work_authority_digest: str = ""
@@ -106,6 +112,8 @@ class SignedAuthorityWorkerDispatchDryRunReceipt:
     wsp15_reasoning_tier: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
+    memex_supply_receipt_id: str
+    memex_supply_digest: str
     architect_fix_publication_receipt_id: str
     architect_fix_publication_binding_digest: str
     verified_work_authority_digest: str
@@ -239,15 +247,12 @@ def _build_intents(
         "wsp15_allocation_digest": _digest(allocation),
         "model_runtime_binding_receipt_id": str(work_authority.get("model_runtime_binding_receipt_id") or ""),
         "model_runtime_binding_digest": str(work_authority.get("model_runtime_binding_digest") or ""),
+        "memex_supply_receipt_id": str(work_authority.get("memex_supply_receipt_id") or ""),
+        "memex_supply_digest": str(work_authority.get("memex_supply_digest") or ""),
         "architect_fix_publication_receipt_id": str(
             work_authority.get("architect_fix_publication_receipt_id") or ""
         ),
-        "architect_fix_publication_binding_digest": str(
-            work_authority.get(
-                "architect_fix_publication_binding_digest"
-            )
-            or ""
-        ),
+        "architect_fix_publication_binding_digest": str(work_authority.get("architect_fix_publication_binding_digest") or ""),
         "verified_work_authority_digest": authority_binding[
             "verified_work_authority_digest"
         ],
@@ -258,7 +263,6 @@ def _build_intents(
             "authority_verification_receipt_digest"
         ],
     }
-
     roles = derive_worker_dispatch_roles(allocation)
     for role, runtime, capability in roles:
         seed = {
@@ -277,6 +281,44 @@ def _build_intents(
             )
         )
     return tuple(intents)
+
+
+def _optional_authority_fields(
+    work_authority: Mapping[str, Any],
+    reasons: List[str],
+) -> Dict[str, str]:
+    runtime_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
+    runtime_digest = str(work_authority.get("model_runtime_binding_digest") or "")
+    if bool(runtime_id) != bool(runtime_digest) or (
+        runtime_id
+        and (
+            not runtime_id.startswith("reddog_model_runtime_binding:")
+            or not runtime_digest.startswith("sha256:")
+        )
+    ):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    memex_id = work_authority.get("memex_supply_receipt_id")
+    memex_digest = work_authority.get("memex_supply_digest")
+    if not optional_authority_binding_values_valid(memex_id, memex_digest):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MEMEX_SUPPLY_BINDING_MISMATCH)
+    publication_id = str(work_authority.get("architect_fix_publication_receipt_id") or "")
+    publication_digest = str(work_authority.get("architect_fix_publication_binding_digest") or "")
+    if bool(publication_id) != bool(publication_digest) or (
+        publication_id
+        and not (
+            publication_id.startswith("sha256:")
+            and publication_digest.startswith("sha256:")
+        )
+    ):
+        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH)
+    return {
+        "model_runtime_binding_receipt_id": runtime_id,
+        "model_runtime_binding_digest": runtime_digest,
+        "memex_supply_receipt_id": str(memex_id or ""),
+        "memex_supply_digest": str(memex_digest or ""),
+        "architect_fix_publication_receipt_id": publication_id,
+        "architect_fix_publication_binding_digest": publication_digest,
+    }
 
 
 def derive_worker_dispatch_roles(
@@ -385,31 +427,7 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_MPS_TOTAL_MISMATCH)
     if str(work_authority.get("wsp15_reasoning_tier") or "") != str(allocation["reasoning_tier"]):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.WSP15_REASONING_TIER_MISMATCH)
-    runtime_binding_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
-    runtime_binding_digest = str(work_authority.get("model_runtime_binding_digest") or "")
-    if bool(runtime_binding_id) != bool(runtime_binding_digest):
-        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
-    if runtime_binding_id and (
-        not runtime_binding_id.startswith("reddog_model_runtime_binding:")
-        or not runtime_binding_digest.startswith("sha256:")
-    ):
-        reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
-    publication_id = str(
-        work_authority.get("architect_fix_publication_receipt_id") or ""
-    )
-    publication_digest = str(
-        work_authority.get("architect_fix_publication_binding_digest") or ""
-    )
-    if bool(publication_id) != bool(publication_digest) or (
-        publication_id
-        and not (
-            publication_id.startswith("sha256:")
-            and publication_digest.startswith("sha256:")
-        )
-    ):
-        reasons.append(
-            SignedAuthorityWorkerDispatchDryRunReason.ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH
-        )
+    optional_fields = _optional_authority_fields(work_authority, reasons)
     if reasons:
         return _reject(reasons, explicit_requested=True)
 
@@ -428,10 +446,7 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         "work_order_id": work_authority["work_order_id"],
         "wsp15_allocation_receipt_id": allocation_receipt_id,
         "wsp15_allocation_digest": allocation_digest,
-        "model_runtime_binding_receipt_id": runtime_binding_id,
-        "model_runtime_binding_digest": runtime_binding_digest,
-        "architect_fix_publication_receipt_id": publication_id,
-        "architect_fix_publication_binding_digest": publication_digest,
+        **optional_fields,
         **authority_binding,
         "dispatch_intent_ids": [intent.intent_id for intent in intents],
     }
@@ -445,10 +460,7 @@ def plan_reddog_signed_authority_worker_dispatch_dry_run(
         wsp15_priority=str(allocation["priority"]),
         wsp15_mps_total=int(allocation["mps_total"]),
         wsp15_reasoning_tier=str(allocation["reasoning_tier"]),
-        model_runtime_binding_receipt_id=runtime_binding_id,
-        model_runtime_binding_digest=runtime_binding_digest,
-        architect_fix_publication_receipt_id=publication_id,
-        architect_fix_publication_binding_digest=publication_digest,
+        **optional_fields,
         verified_work_authority_digest=authority_binding[
             "verified_work_authority_digest"
         ],

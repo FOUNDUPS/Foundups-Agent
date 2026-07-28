@@ -33,11 +33,16 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     NEXT_QUEUE_SLICE_VERIFIER_INVOKE,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifier_request_binding import (
+    FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH,
     build_resident_queue_slice_verifier_request,
+    verified_signed_authority_from_stage_results,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_slice_verifier_invoke import (
     QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT,
     invoke_reddog_wre_queue_authorized_slice_verifier,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    recorded_authority_verification_binding,
 )
 from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
     produce_independent_slice_evidence,
@@ -151,6 +156,15 @@ class ResidentQueueSliceVerifierStageHandler:
             )
 
         stage_results = _stage_results(_mapping(self.chain_results_store.load()))
+        recorded_authority_binding = recorded_authority_verification_binding(
+            _mapping(stage_results.get("authority_runtime")),
+            _mapping(stage_results.get("authority_verification")),
+        )
+        recorded_signed_authority = (
+            verified_signed_authority_from_stage_results(stage_results)
+        )
+        if not recorded_authority_binding or not recorded_signed_authority:
+            return _reject(FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH)
         bounded_worker_pilot = _mapping(stage_results.get(BOUNDED_WORKER_PILOT_STAGE_KEY))
         if not bounded_worker_pilot:
             return _reject(FAIL_BOUNDED_WORKER_PILOT_STAGE_MISSING)
@@ -227,6 +241,7 @@ class ResidentQueueSliceVerifierStageHandler:
             )
         verifier_request = {
             **dict(verifier_request),
+            "signed_authority": recorded_signed_authority,
             "worker_id": str(reservation.get("author_principal_id") or ""),
             "verifier_id": str(
                 reservation.get("verifier_principal_id") or ""
@@ -248,6 +263,9 @@ class ResidentQueueSliceVerifierStageHandler:
             explicit_queue_authorized_slice_verifier_requested=True,
             queue_bounded_worker_pilot_result=bounded_worker_pilot,
             verifier_request=verifier_request,
+            trusted_work_authority_digest=str(
+                recorded_authority_binding["verified_work_authority_digest"]
+            ),
         ).to_dict()
         terminal_receipt = _mapping(
             _mapping(result.get("verifier_result")).get("receipt")

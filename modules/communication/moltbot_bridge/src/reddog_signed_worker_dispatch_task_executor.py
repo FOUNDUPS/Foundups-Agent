@@ -16,6 +16,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
     SIGNED_WORKER_DISPATCH_TASK_SKILL,
     SIGNED_WORKER_DISPATCH_TASK_SOURCE,
@@ -48,6 +51,7 @@ class SignedWorkerDispatchTaskExecutorReason:
     CONTEXT_INTENT_MISMATCH = "REJECT_SIGNED_WORKER_CONTEXT_INTENT_MISMATCH"
     WSP15_MISMATCH = "REJECT_SIGNED_WORKER_WSP15_MISMATCH"
     MODEL_RUNTIME_BINDING_MISMATCH = "REJECT_SIGNED_WORKER_MODEL_RUNTIME_BINDING_MISMATCH"
+    MEMEX_SUPPLY_BINDING_MISMATCH = "REJECT_SIGNED_WORKER_MEMEX_SUPPLY_BINDING_MISMATCH"
     REPORT_CONTRACT_MISMATCH = "REJECT_SIGNED_WORKER_REPORT_CONTRACT_MISMATCH"
     EXECUTION_FLAG_MISMATCH = "REJECT_SIGNED_WORKER_EXECUTION_FLAG_MISMATCH"
     RUNNER_MISSING = "REJECT_SIGNED_WORKER_RUNNER_MISSING"
@@ -147,6 +151,7 @@ def _validated_worker_context(
         reasons.append(SignedWorkerDispatchTaskExecutorReason.INTENT_NOT_IN_RECEIPT)
     reasons.extend(_intent_binding_reasons(context, intent, allocation))
     reasons.extend(_model_runtime_binding_reasons(context=context, intent=intent, receipt=receipt))
+    reasons.extend(_memex_binding_reasons(context=context, intent=intent, receipt=receipt))
     reasons.extend(_report_contract_reasons(context))
     return context, intent, receipt, reasons
 
@@ -461,6 +466,38 @@ def _model_runtime_binding_reasons(
         and receipt_digest.startswith("sha256:")
     ):
         return [SignedWorkerDispatchTaskExecutorReason.MODEL_RUNTIME_BINDING_MISMATCH]
+    return []
+
+
+def _memex_binding_reasons(
+    *,
+    context: Mapping[str, Any],
+    intent: Mapping[str, Any],
+    receipt: Mapping[str, Any],
+) -> list[str]:
+    raw_pairs = tuple(
+        (
+            source.get("memex_supply_receipt_id"),
+            source.get("memex_supply_digest"),
+        )
+        for source in (context, intent, receipt)
+    )
+    if any(
+        not optional_authority_binding_values_valid(item_id, item_digest)
+        for item_id, item_digest in raw_pairs
+    ):
+        return [SignedWorkerDispatchTaskExecutorReason.MEMEX_SUPPLY_BINDING_MISMATCH]
+    pairs = tuple(
+        (str(item_id or ""), str(item_digest or ""))
+        for item_id, item_digest in raw_pairs
+    )
+    if not any(item_id for item_id, _ in pairs):
+        return []
+    if (
+        len({item_id for item_id, _ in pairs}) != 1
+        or len({item_digest for _, item_digest in pairs}) != 1
+    ):
+        return [SignedWorkerDispatchTaskExecutorReason.MEMEX_SUPPLY_BINDING_MISMATCH]
     return []
 
 

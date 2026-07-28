@@ -243,6 +243,61 @@ def test_invalid_request_payload_rejects_before_signer_call() -> None:
     assert signer.requests == []
 
 
+def test_substituted_valid_request_rejects_before_signer_or_store_effect() -> None:
+    signer = _MockSigner()
+    store = InMemoryAuthorityRuntimeStore()
+    initial_state = store.load()
+    dryrun = _dryrun()
+    request = dryrun["delegated_authority_request"]
+    request["memex_supply_receipt_id"] = "memex-supply-attacker"
+    request["memex_supply_digest"] = "sha256:" + "7" * 64
+
+    result = invoke_reddog_wre_queue_authority_runtime(
+        explicit_queue_authority_runtime_requested=True,
+        queue_authority_request_dryrun=dryrun,
+        store=store,
+        signer=signer,
+        principal_resolver=_PrincipalResolver(),
+        snapshot_resolver=_SnapshotResolver(),
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT
+    assert (
+        QueueAuthorityRuntimeInvokeReason.REQUEST_DIGEST_MISMATCH
+        in result.rejection_reasons
+    )
+    assert signer.requests == []
+    assert store.load() == initial_state
+
+
+def test_falsy_non_string_request_substitution_rejects_without_effect() -> None:
+    for value in (0, False, [], {}):
+        signer = _MockSigner()
+        store = InMemoryAuthorityRuntimeStore()
+        initial_state = store.load()
+        dryrun = _dryrun()
+        dryrun["delegated_authority_request"]["memex_supply_receipt_id"] = value
+
+        result = invoke_reddog_wre_queue_authority_runtime(
+            explicit_queue_authority_runtime_requested=True,
+            queue_authority_request_dryrun=dryrun,
+            store=store,
+            signer=signer,
+            principal_resolver=_PrincipalResolver(),
+            snapshot_resolver=_SnapshotResolver(),
+            now=NOW,
+        )
+
+        assert result.decision == QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT
+        assert (
+            QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_INVALID
+            in result.rejection_reasons
+        )
+        assert signer.requests == []
+        assert store.load() == initial_state
+
+
 def test_default_signer_rejection_is_preserved() -> None:
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
