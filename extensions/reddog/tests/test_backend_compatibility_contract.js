@@ -131,7 +131,7 @@ function assertSafeBlockedProjection() {
   const client = {
     extensionId: 'foundups.reddog',
     legacyExtensionId: 'foundups.foundups-fusion-worker',
-    extensionVersion: '0.4.29',
+    extensionVersion: '0.4.30',
     buildInstallStateSection: () => ''
   };
   const result = preflight.buildBlockedResult({

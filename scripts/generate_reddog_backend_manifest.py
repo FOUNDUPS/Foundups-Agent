@@ -36,6 +36,7 @@ BRIDGE_FILES = (
     "scripts/reddog_operator_wardrobe_selection_once.py",
     "scripts/reddog_repair_guard_once.py",
     "scripts/reddog_resident_architect_session_once.py",
+    "scripts/reddog_start_operations_control_once.py",
 )
 EXECUTABLE_FILES = (*BRIDGE_FILES, "holo_index.py")
 STATIC_RUNTIME_FILES = (

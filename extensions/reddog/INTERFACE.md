@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.30 adds the exact `start operations` control family. The command
+selects a checked-in, read-only operational profile and never becomes a work
+prompt or authority token. Submission/resume require distinct receipt-bound
+audit and architect model assignments. Status and cancellation reconnect to
+the existing durable AgentDB intent.
+
 Version 0.4.29 requires signed Memex supply lineage to remain exact from the
 delegated authority through AgentDB execution and independent verification.
 Verifier admission recomputes the canonical work-authority digest and rejects

@@ -1,6 +1,12 @@
 # RedDog
 
-Version: 0.4.29
+Version: 0.4.30
+
+Version 0.4.30 adds an exact, asynchronous `start operations` control route
+that selects the checked-in read-only architect profile, bypasses the
+extension advisory Fusion call, and requires distinct receipt-bound audit and
+architect model assignments. The resident cycle remains read-only and exposes
+`operations status`, `stop operations`, and `resume operations` controls.
 
 Version 0.4.29 pins signed Memex supply lineage through delegated worker
 dispatch and independently verifies the canonical signed-authority payload
@@ -277,6 +283,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.29.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.30.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

@@ -1,5 +1,13 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - Start operations control (0.4.30)
+
+- Added exact-command, homoglyph/newline rejection, receipt integrity,
+  asynchronous bridge progress, model-binding, and no-effect boundary tests.
+- Added backend tests for profile/head/model/budget bindings, dirty-root
+  rejection, Holo deferral, resident controls, and WSP 62 module boundaries.
+- Revalidated the generated 1,070-file manifest and exact extension pin.
+
 ## 2026-07-28 - Signed Memex dispatch compatibility (0.4.29)
 
 - Proved exact Memex lineage survives signed dispatch and independent review.

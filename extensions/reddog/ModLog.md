@@ -2,6 +2,18 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-29 - START_OPERATIONS_CONTROL_ADAPTER_PHASE1 (0.4.30)
+
+- Added exact local controls for start, status, cancellation, and resume of
+  the canonical durable resident architect cycle.
+- Bound a checked-in read-only operations profile, clean repo HEAD, strict
+  budgets, authenticated FoundUp scope, and distinct signed audit/architect
+  model assignments before submission.
+- Bypassed extension advisory Fusion while preserving the resident cycle's
+  redaction-gated model calls. No source, shell, HoloIndex mutation, Hermes,
+  worktree, PR, or merge authority was added.
+- Regenerated and pinned the 1,070-file backend dependency manifest.
+
 ## 2026-07-28 - REDDOG_FOUNDUP_MEMEX_AUTHORITY_DISPATCH_BINDING_PHASE1 (0.4.29)
 
 - Pinned optional signed Memex supply lineage through worker materialization,

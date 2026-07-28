@@ -295,6 +295,9 @@ for (const relativePath of [
   'model_runtime_binding_query.js',
   'conversational_draft_policy.js',
   'continuation_prompt.js',
+  'start_operations_bridge.js',
+  'start_operations_control.js',
+  'start_operations_extension_adapter.js',
   'backend_compatibility_manifest.js',
   'backend_compatibility_filesystem.js',
   'backend_compatibility_render.js'

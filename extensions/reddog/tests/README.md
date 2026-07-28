@@ -16,6 +16,7 @@ node extensions/reddog/tests/test_backend_compatibility_preflight.js
 pytest -q scripts/tests/test_generate_reddog_backend_manifest.py
 node extensions/reddog/tests/verify_repo_audit_grounding.js
 node extensions/reddog/tests/verify_extension_contract.js
+node extensions/reddog/tests/test_start_operations_control.js
 git diff --check -- extensions/reddog
 ```
 

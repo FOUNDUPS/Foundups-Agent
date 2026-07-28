@@ -33,6 +33,11 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
     assert set(generator.EXECUTABLE_FILES).issubset(runtime)
     assert "holo_index.py" in runtime
     assert "scripts/reddog_authoritative_work_state_query_once.py" in runtime
+    assert "scripts/reddog_start_operations_control_once.py" in runtime
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_start_operations_control.py"
+    ) in runtime
     assert "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py" in runtime
     assert "modules/communication/moltbot_bridge/src/openclaw_dae.py" in runtime
     assert "modules/foundups/src/foundup_registry_loader.py" in runtime
@@ -64,5 +69,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         in generated["required_runtime_sha256"]
     )
     assert generator.canonical_manifest_digest(generated) == (
-        "1d949674440ed7da77609a430bc69f1ba67b5e33cdce7c9f930f777d554d95da"
+        "5372755f4d25c311e680310e1c3d30c053b62732508c03f017fef67c47f44784"
     )
