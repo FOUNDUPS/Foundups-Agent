@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+from dataclasses import replace
+from pathlib import Path
 from typing import Any
 
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
@@ -249,6 +251,61 @@ def worker_dispatch_authority_verification_context():
     )
 
 
+def install_signed_worker_envelope_test_authority(monkeypatch: Any) -> None:
+    """Use real runtime authority when configured, otherwise the HMAC fixture."""
+
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_agentdb_envelope as envelope_module,
+    )
+
+    original = envelope_module.build_worker_dispatch_authority_context_from_env
+
+    def _context(**kwargs: Any):
+        try:
+            return replace(original(**kwargs), trusted_now_epoch=lambda: _TEST_NOW)
+        except Exception:
+            return worker_dispatch_authority_verification_context()
+
+    monkeypatch.setattr(
+        envelope_module,
+        "build_worker_dispatch_authority_context_from_env",
+        _context,
+    )
+
+
+def configure_signed_worker_claim_authority_env(
+    monkeypatch: Any,
+    *,
+    chain_path: Path,
+    signature_backend: str,
+) -> None:
+    """Bind restart authority files co-located with the queue chain."""
+
+    root = chain_path.parent
+    values = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
+        "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(root / "authority_state.json"),
+        "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(root / "snapshots.json"),
+        "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(root / "principals.json"),
+        "REDDOG_SIGNATURE_VERIFIER_BACKEND": signature_backend,
+    }
+    for name, value in values.items():
+        monkeypatch.setenv(name, value)
+
+
+def configure_signed_worker_claim_test_authority(
+    monkeypatch: Any, *, chain_path: Path, signature_backend: str
+) -> None:
+    """Bind persisted authority files and a deterministic claim-time clock."""
+
+    configure_signed_worker_claim_authority_env(
+        monkeypatch,
+        chain_path=chain_path,
+        signature_backend=signature_backend,
+    )
+    install_signed_worker_envelope_test_authority(monkeypatch)
+
+
 def worker_dispatch_dryrun_result(allocation: dict[str, Any]) -> dict[str, Any]:
     """Build a canonical synthetic dry-run from the authoritative worker plan."""
 
@@ -329,8 +386,8 @@ def publish_bound_worker_dispatch(**kwargs: Any):
     queue_items = snapshot.get("wre_queue_items", [])
     allocation = queue_items[0]["wsp15_allocation_receipt"]
     call_args = dict(kwargs)
-    dryrun = dict(call_args.pop("worker_dispatch_dryrun_result"))
-    receipt = dict(dryrun["receipt"])
+    supplied_dryrun = dict(call_args.pop("worker_dispatch_dryrun_result"))
+    receipt = dict(supplied_dryrun["receipt"])
     signed_optional = {
         field: receipt[field]
         for field in (
@@ -345,18 +402,17 @@ def publish_bound_worker_dispatch(**kwargs: Any):
         allocation,
         **signed_optional,
     )
-    refs = {
-        key: authority_verification[key]
-        for key in (
-            "verified_work_authority_digest",
-            "authority_verification_receipt_id",
-            "authority_verification_receipt_digest",
-        )
-    }
-    receipt["dispatch_intents"] = [
-        {**dict(intent), **refs} for intent in receipt["dispatch_intents"]
-    ]
-    dryrun["receipt"] = {**receipt, **refs}
+    from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
+        plan_reddog_signed_authority_worker_dispatch_dry_run,
+    )
+
+    dryrun = plan_reddog_signed_authority_worker_dispatch_dry_run(
+        explicit_signed_authority_worker_dispatch_dryrun_requested=True,
+        queue_authority_verification_result=authority_verification,
+        queue_authority_runtime_result=authority_runtime,
+        wsp15_allocation_receipt=allocation,
+    ).to_dict()
+    assert dryrun["accepted"] is True
     return runtime.publish_reddog_signed_worker_dispatch_runtime(
         **call_args,
         worker_dispatch_dryrun_result=dryrun,
@@ -364,6 +420,95 @@ def publish_bound_worker_dispatch(**kwargs: Any):
         queue_authority_verification_result=authority_verification,
         authority_verification_context=worker_dispatch_authority_verification_context(),
     )
+
+
+def publish_agentdb_task_for_intent(
+    *,
+    allocation: dict[str, Any],
+    intent_overrides: dict[str, Any],
+    dryrun_builder: Any,
+    snapshot_builder: Any,
+    context_override_builder: Any,
+    digest_builder: Any,
+):
+    """Publish a real planned intent or a deliberately invalid outer fixture."""
+
+    from modules.communication.moltbot_bridge.src import (
+        reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
+    )
+
+    requested_role = str(intent_overrides.get("role") or "")
+    requested_intent_id = str(intent_overrides.get("intent_id") or "")
+    if requested_intent_id:
+        allocation = {
+            **allocation,
+            "receipt_id": digest_builder(
+                {
+                    "base_receipt_id": allocation["receipt_id"],
+                    "requested_intent_id": requested_intent_id,
+                }
+            ),
+        }
+    if requested_role == "openclaw_candidate":
+        allocation = {
+            **allocation,
+            "worker_plan": {
+                **dict(allocation["worker_plan"]),
+                "coding_worker_count": 0,
+                "independent_verifier_required": False,
+                "openclaw_candidate": True,
+            },
+        }
+    result = publish_bound_worker_dispatch(
+        worker_dispatch_dryrun_result=dryrun_builder(allocation=allocation),
+        work_state_snapshot=snapshot_builder(allocation),
+        queue_item_id="queue-1",
+        writer=_CollectingAgentDbSpecWriter(),
+    )
+    assert result.accepted is True and result.receipt is not None
+    matching = [
+        task
+        for task in result.tasks
+        if str(task.context.get("worker_role") or "") == requested_role
+    ]
+    base = matching[0] if matching else result.tasks[0]
+    if matching:
+        specs = (base,)
+    else:
+        context = context_override_builder(base.context, intent_overrides)
+        intent = context["worker_dispatch_intent"]
+        task_id = "reddog-worker-dispatch-" + digest_builder(
+            {"intent_id": intent["intent_id"], "context": context}
+        )[7:23]
+        specs = (
+            runtime.SignedWorkerDispatchTaskSpec(
+                task_id=task_id,
+                description=f"RedDog signed worker dispatch test fixture: {intent['role']}",
+                required_skills=(
+                    runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL,
+                    f"runtime:{intent['worker_runtime']}",
+                    f"capability:{intent['capability']}",
+                ),
+                estimated_complexity=base.estimated_complexity,
+                priority_score=base.priority_score,
+                context=context,
+                origin_continuity_id=base.origin_continuity_id,
+            ),
+        )
+    written = runtime.AgentDbSignedWorkerDispatchTaskWriter().enqueue_signed_worker_dispatch_tasks(
+        specs,
+        result.receipt,
+    )
+    assert written["ok"] is True
+    return specs[0].task_id
+
+
+class _CollectingAgentDbSpecWriter:
+    def enqueue_signed_worker_dispatch_tasks(self, tasks: Any, receipt: Any):
+        return {
+            "ok": True,
+            "created_task_ids": [task.task_id for task in tasks],
+        }
 
 
 def with_architect_fix_publication(

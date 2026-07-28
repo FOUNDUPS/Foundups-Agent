@@ -82,6 +82,11 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import publish_bound_worker_dispatch
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import worker_dispatch_dryrun_result
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    configure_signed_worker_claim_authority_env,
+    install_signed_worker_envelope_test_authority,
+    publish_agentdb_task_for_intent,
+)
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_receipt,
 )
@@ -112,6 +117,7 @@ def isolated_agent_db(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENCLAW_SIGNED_QUEUE_STAGE_TASKS_ENABLED", "1")
     DatabaseManager.reset_for_tests()
     _patch_assurance_store(monkeypatch)
+    install_signed_worker_envelope_test_authority(monkeypatch)
     yield
     DatabaseManager.reset_for_tests()
 
@@ -456,39 +462,14 @@ def _publish_agentdb_task(**intent_overrides) -> str:
 
 
 def _publish_agentdb_task_with_allocation(allocation, **intent_overrides) -> str:
-    result = publish_bound_worker_dispatch(
-        worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation),
-        work_state_snapshot=_snapshot(allocation),
-        queue_item_id="queue-1",
-        writer=_CollectingWriter(),
+    return publish_agentdb_task_for_intent(
+        allocation=allocation,
+        intent_overrides=intent_overrides,
+        dryrun_builder=_dryrun_result,
+        snapshot_builder=_snapshot,
+        context_override_builder=_context_with_intent_overrides,
+        digest_builder=_digest,
     )
-    assert result.accepted is True
-    assert result.receipt is not None
-    base = result.tasks[0]
-    context = _context_with_intent_overrides(base.context, intent_overrides)
-    intent = context["worker_dispatch_intent"]
-    task_id = "reddog-worker-dispatch-" + _digest(
-        {"intent_id": intent["intent_id"], "context": context}
-    )[7:23]
-    spec = runtime.SignedWorkerDispatchTaskSpec(
-        task_id=task_id,
-        description=f"RedDog signed worker dispatch test fixture: {intent['role']}",
-        required_skills=(
-            runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL,
-            f"runtime:{intent['worker_runtime']}",
-            f"capability:{intent['capability']}",
-        ),
-        estimated_complexity=base.estimated_complexity,
-        priority_score=base.priority_score,
-        context=context,
-        origin_continuity_id=base.origin_continuity_id,
-    )
-    writer_result = runtime.AgentDbSignedWorkerDispatchTaskWriter().enqueue_signed_worker_dispatch_tasks(
-        (spec,),
-        result.receipt,
-    )
-    assert writer_result["ok"] is True
-    return task_id
 
 
 def _pending_signed_task_id(capability: str) -> str:
@@ -568,6 +549,11 @@ def _claim_reserved_author_and_verifier(
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
+    configure_signed_worker_claim_authority_env(
+        monkeypatch,
+        chain_path=chain,
+        signature_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+    )
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
 
     from modules.communication.moltbot_bridge.src import (
@@ -826,7 +812,7 @@ def test_signed_0102_readonly_runner_receives_model_runtime_binding_receipt(
 
 def test_signed_0102_readonly_runner_rejects_bounded_code_change(tmp_path: Path) -> None:
     repo = _repo_with_readonly_target(tmp_path)
-    allocation = _valid_readonly_allocation()
+    allocation = _allocation()
     context = publish_bound_worker_dispatch(
         worker_dispatch_dryrun_result=_dryrun_result(allocation=allocation),
         work_state_snapshot=_snapshot(allocation),
@@ -994,6 +980,7 @@ def test_run_task_uses_env_bound_queue_loop_runner_when_enabled(
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_BINDING_PROFILE", "signed_0102_bounded_code_fusion")
 
     from modules.communication.moltbot_bridge.src import (
         reddog_signed_worker_openclaw_queue_loop_runtime_binding as binding_module,
@@ -1765,7 +1752,7 @@ def test_openclaw_claim_env_bound_queue_loop_runner_reaches_slice_verifier(
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
-
+    configure_signed_worker_claim_authority_env(monkeypatch, chain_path=chain, signature_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519)
     from modules.communication.moltbot_bridge.src import (
         reddog_bounded_artifact_generation_runtime as artifact_runtime,
     )
@@ -2479,8 +2466,8 @@ def test_openclaw_claim_uses_profile_paths_for_bounded_code_readiness(
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
         "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path / "resident-runtime"),
         "REDDOG_RESIDENT_QUEUE_NOW_ISO": BOOTSTRAP_NOW,
+        "REDDOG_SIGNATURE_VERIFIER_BACKEND": REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     }
-
     def _write_profile_file(env_name: str, payload: object) -> Path:
         path = Path(resident_queue_runtime_file_path(profile_env, repo, env_name))
         path.parent.mkdir(parents=True, exist_ok=True)

@@ -92,6 +92,7 @@ from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_te
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     FakeAssuranceReservationStore,
+    install_signed_worker_envelope_test_authority,
 )
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
@@ -1434,6 +1435,7 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> dict[str, object]:
+    install_signed_worker_envelope_test_authority(monkeypatch)
     from modules.communication.moltbot_bridge.src import (
         reddog_bounded_artifact_generation_runtime as artifact_runtime,
         reddog_main_resident_queue_serial_loop_bootstrap as bootstrap_module,
@@ -1588,6 +1590,16 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     monkeypatch.setenv("OPENCLAW_SIGNED_0102_BOUNDED_CODE_TASKS_ENABLED", "1")
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", NOW)
+    monkeypatch.setenv("REDDOG_AUTHORITY_RUNTIME_STATE_PATH", str(authority_state))
+    monkeypatch.setenv("REDDOG_PERMISSION_SNAPSHOTS_PATH", str(snapshots))
+    monkeypatch.setenv(
+        "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
+        str(principals),
+    )
+    monkeypatch.setenv(
+        "REDDOG_SIGNATURE_VERIFIER_BACKEND",
+        REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+    )
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
     monkeypatch.setattr(
         artifact_runtime,

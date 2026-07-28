@@ -284,6 +284,9 @@ def derive_worker_dispatch_roles(
 ) -> Tuple[tuple[str, str, str], ...]:
     """Derive the only worker roles authorized by a WSP 15 allocation."""
 
+    requested_operation = str(allocation.get("requested_operation") or "")
+    if requested_operation.startswith("signed_0102_readonly_review:"):
+        return (("fusion_lead", "0102", "architect_review"),)
     worker_plan = _mapping(allocation.get("worker_plan"))
     roles: List[tuple[str, str, str]] = []
     coding_count = int(worker_plan.get("coding_worker_count") or 0)

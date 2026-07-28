@@ -274,7 +274,11 @@ def test_commit_failure_is_fail_closed_and_returns_no_authority() -> None:
 
 def test_atomic_json_store_writes_single_authoritative_snapshot(tmp_path: Path) -> None:
     path = tmp_path / "authoritative_work_state.json"
-    store = AtomicJsonAuthoritativeWorkStateStore(path)
+    store = AtomicJsonAuthoritativeWorkStateStore(
+        path,
+        allowed_root=tmp_path,
+        repo_root=tmp_path.parent / f"{tmp_path.name}-repo",
+    )
 
     result = _refresh(store)
 

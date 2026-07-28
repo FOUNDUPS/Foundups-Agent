@@ -314,7 +314,11 @@ def test_replay_guard_survives_authoritative_store_restart(
         encoding="utf-8",
     )
     first, _ = _promote(
-        store=AtomicJsonAuthoritativeWorkStateStore(store_path),
+        store=AtomicJsonAuthoritativeWorkStateStore(
+            store_path,
+            allowed_root=store_path.parent,
+            repo_root=tmp_path / "repo",
+        ),
         architect_determination=determination,
         authority_profile=profile,
         proposal_authenticity_attestation=attestation,
@@ -322,7 +326,11 @@ def test_replay_guard_survives_authoritative_store_restart(
         principal_key_resolver=resolver,
     )
     restarted, restarted_store = _promote(
-        store=AtomicJsonAuthoritativeWorkStateStore(store_path),
+        store=AtomicJsonAuthoritativeWorkStateStore(
+            store_path,
+            allowed_root=store_path.parent,
+            repo_root=tmp_path / "repo",
+        ),
         architect_determination=determination,
         authority_profile=profile,
         proposal_authenticity_attestation=attestation,

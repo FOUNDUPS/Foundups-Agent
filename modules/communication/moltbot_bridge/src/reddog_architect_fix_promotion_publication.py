@@ -42,7 +42,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    runtime_operation_lock,
+    confined_runtime_operation_lock,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
@@ -82,18 +82,19 @@ class AtomicArchitectFixPromotionPublisher:
         self.work_state_store = work_state_store
         self.journal_path = self._sibling(".publication.json")
         self.stage_path = self._sibling(".staged.json")
+        self.operation_lock_path = self._sibling(".publication.operation.lock")
 
     def publish(
         self,
         request: ArchitectFixPromotionPublicationRequest,
     ) -> str:
-        with runtime_operation_lock(str(self.journal_path) + ".operation"):
+        with self._operation_lock(self.operation_lock_path):
             return _publish_unlocked(self, request)
 
     def recover(self) -> bool:
         """Rollback or clean one interruption without creating authority."""
 
-        with runtime_operation_lock(str(self.journal_path) + ".operation"):
+        with self._operation_lock(self.operation_lock_path):
             return _recover_unlocked(self)
 
     def _publish_profile(self, stage: Mapping[str, Any]) -> None:
@@ -131,6 +132,13 @@ class AtomicArchitectFixPromotionPublisher:
             allowed_root=self.runtime_root,
         )
         validated.unlink(missing_ok=True)
+
+    def _operation_lock(self, path: Path):
+        return confined_runtime_operation_lock(
+            path,
+            repo_root=self.repo_root,
+            allowed_root=self.runtime_root,
+        )
 
     def _sibling(self, suffix: str) -> Path:
         return validate_runtime_artifact_path(
@@ -459,7 +467,12 @@ def _write_profile_mapping(
     path: Path,
     payload: Mapping[str, Any],
 ) -> None:
-    with runtime_operation_lock(str(path) + ".operation"):
+    lock_path = validate_runtime_artifact_path(
+        path.with_name(path.name + ".operation.lock"),
+        repo_root=publisher.repo_root,
+        allowed_root=publisher.runtime_root,
+    )
+    with publisher._operation_lock(lock_path):
         atomic_replace_confined_mapping(
             path,
             payload,

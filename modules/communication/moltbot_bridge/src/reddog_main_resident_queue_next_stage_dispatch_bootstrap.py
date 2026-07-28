@@ -44,7 +44,6 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
 REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_APPLIED = "REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_APPLIED"
 REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_NOT_READY = "REDDOG_RESIDENT_QUEUE_DISPATCH_BOOTSTRAP_NOT_READY"
 
-
 @dataclass(frozen=True)
 class RedDogMainResidentQueueNextStageDispatchBootstrapResult:
     """Result emitted by the startup next-stage dispatch adapter."""
@@ -145,14 +144,14 @@ def run_reddog_main_resident_queue_next_stage_dispatch_bootstrap(
     if chain_reasons:
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
-
     store = AtomicJsonResidentQueueChainResultsStore(
         chain_path,
         allowed_root=runtime_root,
     )
+    state_path = Path(work_state_path)
     registry = build_reddog_resident_queue_stage_handler_registry(
         work_state_snapshot=snapshot, chain_results_store=store,
-        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(Path(work_state_path) if Path(work_state_path).is_absolute() else root / Path(work_state_path)),
+        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(state_path if state_path.is_absolute() else root / state_path, allowed_root=runtime_root, repo_root=root),
         authority_profile=profile,
         work_order_resolver=work_order_resolver,
         now_iso=now_iso or "",

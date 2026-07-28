@@ -5,6 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
+    InMemoryAuthoritativeWorkStateStore,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT,
     WorkerDispatchRuntimeReason,
@@ -196,6 +199,7 @@ def _handler(writer=None, store=None):
         ),
         writer=writer or _FakeWriter(),
         authority_verification_context=worker_dispatch_authority_verification_context(),
+        work_state_store=InMemoryAuthoritativeWorkStateStore(_snapshot()),
     )
 
 
@@ -236,6 +240,7 @@ def test_runtime_handler_rejects_missing_dryrun_or_writer() -> None:
         ),
         writer=None,
         authority_verification_context=worker_dispatch_authority_verification_context(),
+        work_state_store=InMemoryAuthoritativeWorkStateStore(_snapshot()),
     )(_request())
 
     assert missing_dryrun["accepted"] is False

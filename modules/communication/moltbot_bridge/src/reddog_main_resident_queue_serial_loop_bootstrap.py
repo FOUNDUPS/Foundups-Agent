@@ -529,7 +529,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     run_now = _parse_datetime(now_iso) if now_iso else None
     registry = build_reddog_resident_queue_stage_handler_registry(
         work_state_snapshot=snapshot, chain_results_store=store,
-        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(_runtime_input_path(root, work_state_path)),
+        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(_runtime_input_path(root, work_state_path), allowed_root=runtime_root, repo_root=root),
         authority_profile=profile, now_iso=now_iso or "",
         authority_store=dependency_bundle.authority_store,
         signer=dependency_bundle.signer,

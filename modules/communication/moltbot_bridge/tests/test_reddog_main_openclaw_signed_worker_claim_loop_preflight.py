@@ -66,12 +66,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
     build_reddog_signed_worker_queue_loop_runner_from_env,
 )
-from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispatch_task_executor import (
-    _FakeEnvDraftPrRunner,
-)
+from modules.communication.moltbot_bridge.tests.test_reddog_signed_worker_dispatch_task_executor import _FakeEnvDraftPrRunner
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import configure_signed_worker_claim_test_authority
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
-    PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE,
-    PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
+    PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE, PROFILE_SIGNED_0102_BOUNDED_CODE_FUSION_WORKTREE_DRAFT_PR_PATTERN_MEMORY,
     resident_queue_materializer_mode,
     resident_queue_runtime_file_path,
 )
@@ -849,7 +847,7 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_MODE", "real")
-
+    configure_signed_worker_claim_test_authority(monkeypatch, chain_path=chain, signature_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519)
     assert main.run_reddog_openclaw_signed_worker_claim_loop_preflight(repo) is True
 
     captured = capsys.readouterr().out
@@ -1067,7 +1065,7 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_MAX_STEPS", "2")
     monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_NOW_ISO", BOOTSTRAP_NOW)
-
+    configure_signed_worker_claim_test_authority(monkeypatch, chain_path=chain, signature_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519)
     with patch(
         "modules.infrastructure.database.src.agent_db.AgentDB",
         _assurance_store,

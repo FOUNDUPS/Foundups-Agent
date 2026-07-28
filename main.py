@@ -1430,15 +1430,21 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
 
         active_slice_ledger_path = os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", "")
         work_ledger_json_path = os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "")
-        github_pr_records_path = resident_queue_runtime_file_path(
-            os.environ,
-            repo_root,
-            "REDDOG_GITHUB_PR_RECORDS_PATH",
+        github_pr_records_path = (
+            os.getenv("REDDOG_GITHUB_PR_RECORDS_PATH", "").strip()
+            or resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_GITHUB_PR_RECORDS_PATH",
+            )
         )
-        w10_report_records_path = resident_queue_runtime_file_path(
-            os.environ,
-            repo_root,
-            "REDDOG_W10_REPORT_RECORDS_PATH",
+        w10_report_records_path = (
+            os.getenv("REDDOG_W10_REPORT_RECORDS_PATH", "").strip()
+            or resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_W10_REPORT_RECORDS_PATH",
+            )
         )
         source_supply_requested = resident_queue_runtime_flag_enabled(
             os.environ,
@@ -1493,15 +1499,21 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
                 repo_root=repo_root,
                 github_pr_records_path=github_pr_records_path,
                 w10_report_records_path=w10_report_records_path,
-                active_slice_ledger_output_path=resident_queue_runtime_file_path(
-                    os.environ,
-                    repo_root,
-                    "REDDOG_ACTIVE_SLICE_LEDGER_PATH",
+                active_slice_ledger_output_path=(
+                    os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", "").strip()
+                    or resident_queue_runtime_file_path(
+                        os.environ,
+                        repo_root,
+                        "REDDOG_ACTIVE_SLICE_LEDGER_PATH",
+                    )
                 ),
-                work_ledger_json_output_path=resident_queue_runtime_file_path(
-                    os.environ,
-                    repo_root,
-                    "REDDOG_WORK_LEDGER_JSON_PATH",
+                work_ledger_json_output_path=(
+                    os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "").strip()
+                    or resident_queue_runtime_file_path(
+                        os.environ,
+                        repo_root,
+                        "REDDOG_WORK_LEDGER_JSON_PATH",
+                    )
                 ),
             )
             projection_status = "PASS" if projection.accepted else "WARN"

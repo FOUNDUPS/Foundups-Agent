@@ -151,7 +151,11 @@ def run_reddog_main_authoritative_work_state_refresh_bootstrap(
 
     assert output_path is not None
     assert active_text is not None and ledger_text is not None
-    store = AtomicJsonAuthoritativeWorkStateStore(output_path)
+    store = AtomicJsonAuthoritativeWorkStateStore(
+        output_path,
+        allowed_root=output_path.parent,
+        repo_root=root,
+    )
     result = refresh_authoritative_work_state_runtime(
         active_slice_ledger_markdown=active_text,
         work_ledger_json=ledger_text,

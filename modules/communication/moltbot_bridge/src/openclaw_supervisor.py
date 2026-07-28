@@ -74,6 +74,9 @@ class SignedWorkerOpenClawClaimReason:
         "REJECT_REDDOG_SIGNED_WORKER_TASK_STATE_TRANSITION_REJECTED"
     )
     AGENTDB_FAILURE = "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_FAILURE"
+    AGENTDB_ENVELOPE_REJECTED = (
+        "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_ENVELOPE_REJECTED"
+    )
     MAX_CLAIMS_INVALID = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
     CLAIM_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_CLAIM_REJECTED"
 
@@ -266,6 +269,7 @@ def claim_reddog_signed_worker_dispatch_task_once(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
 ) -> Dict[str, Any]:
     """Claim one signed task only while holding the shared resident lock."""
 
@@ -285,6 +289,7 @@ def claim_reddog_signed_worker_dispatch_task_once(
             agent_id=agent_id,
             agent_db_factory=agent_db_factory,
             signed_worker_runner=signed_worker_runner,
+            authority_verification_context=authority_verification_context,
         )
 
 
@@ -294,6 +299,7 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
 ) -> Dict[str, Any]:
     """Claim and execute one signed task under the resident lock."""
 
@@ -329,6 +335,7 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
         task_id=task_id,
         context=context,
         signed_worker_runner=signed_worker_runner,
+        authority_verification_context=authority_verification_context,
     )
 
 
@@ -339,11 +346,21 @@ def _signed_worker_execute_claimed_task(
     task_id: str,
     context: Mapping[str, Any],
     signed_worker_runner: Any | None,
+    authority_verification_context: Any | None,
 ) -> Dict[str, Any]:
-    """Resolve the runner, execute the claimed task, and persist its result."""
+    """Authenticate the claimed task before selecting or invoking a runner."""
 
+    verified_context, envelope_reject = _signed_worker_verified_agentdb_context(
+        repo_root=repo_root,
+        db=db,
+        task_id=task_id,
+        context=context,
+        authority_verification_context=authority_verification_context,
+    )
+    if envelope_reject is not None:
+        return envelope_reject
     effective_runner, runner_reject = _signed_worker_effective_runner(
-        repo_root=repo_root, db=db, task_id=task_id, context=context,
+        repo_root=repo_root, db=db, task_id=task_id, context=verified_context,
         signed_worker_runner=signed_worker_runner,
     )
     if runner_reject is not None:
@@ -352,14 +369,54 @@ def _signed_worker_execute_claimed_task(
         execute_reddog_signed_worker_dispatch_task,
     )
     run_result = execute_reddog_signed_worker_dispatch_task(
-        task_context=context,
+        task_context=verified_context,
         task_id=task_id,
         repo_root=repo_root,
         runner=effective_runner,
     )
     return _signed_worker_finalize_claimed_task(
-        db=db, task_id=task_id, context=context, run_result=run_result
+        db=db, task_id=task_id, context=verified_context, run_result=run_result
     )
+
+
+def _signed_worker_verified_agentdb_context(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    authority_verification_context: Any | None,
+) -> tuple[Mapping[str, Any], Optional[Dict[str, Any]]]:
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+        SignedWorkerAgentDbEnvelopeError,
+        build_worker_dispatch_authority_context_from_env,
+        verify_reddog_signed_worker_agentdb_envelope,
+    )
+
+    try:
+        authority = authority_verification_context
+        if authority is None:
+            authority = build_worker_dispatch_authority_context_from_env(
+                repo_root=repo_root,
+                env=os.environ,
+            )
+        verified = verify_reddog_signed_worker_agentdb_envelope(
+            envelope=context.get("signed_worker_agentdb_envelope", {}),
+            task_id=task_id,
+            authority_context=authority,
+        )
+    except (SignedWorkerAgentDbEnvelopeError, TypeError, ValueError) as exc:
+        rejected = _signed_worker_reject_claimed_task(
+            db=db,
+            task_id=task_id,
+            context=context,
+            reasons=(
+                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED,
+                str(exc)[:160],
+            ),
+        )
+        return {}, rejected
+    return verified.canonical_context, None
 
 
 def _signed_worker_claimed_task_context(
@@ -576,6 +633,7 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
     max_claims: int = 1,
 ) -> Dict[str, Any]:
     """Claim a bounded task batch only while holding the shared resident lock."""
@@ -597,6 +655,7 @@ def claim_reddog_signed_worker_dispatch_tasks_until_idle(
             agent_id=agent_id,
             agent_db_factory=agent_db_factory,
             signed_worker_runner=signed_worker_runner,
+            authority_verification_context=authority_verification_context,
             max_claims=max_claims,
         )
 
@@ -607,6 +666,7 @@ def _claim_reddog_signed_worker_dispatch_tasks_until_idle_under_control_lock(
     agent_id: str = "openclaw_supervisor",
     agent_db_factory: Optional[Callable[[], Any]] = None,
     signed_worker_runner: Any | None = None,
+    authority_verification_context: Any | None = None,
     max_claims: int = 1,
 ) -> Dict[str, Any]:
     """Claim signed tasks until idle or max_claims under the resident lock."""
@@ -622,6 +682,7 @@ def _claim_reddog_signed_worker_dispatch_tasks_until_idle_under_control_lock(
             agent_id=agent_id,
             agent_db_factory=agent_db_factory,
             signed_worker_runner=signed_worker_runner,
+            authority_verification_context=authority_verification_context,
         )
         outcome = _signed_worker_record_batch_claim(state, claim)
         if outcome == "continue":

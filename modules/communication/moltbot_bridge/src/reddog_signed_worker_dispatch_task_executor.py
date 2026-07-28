@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol, Sequence
 
-from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
     SIGNED_WORKER_DISPATCH_TASK_SKILL,
     SIGNED_WORKER_DISPATCH_TASK_SOURCE,
     WORKER_DISPATCH_RUNTIME_SCHEMA_VERSION,

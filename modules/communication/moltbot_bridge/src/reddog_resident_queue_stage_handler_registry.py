@@ -285,11 +285,6 @@ def build_reddog_resident_queue_stage_handler_registry(
             authority_profile=authority_profile or {},
             work_order_resolver=work_order_resolver,
             now_iso=now_iso,
-            work_state_supplier=(
-                authoritative_work_state_store.load
-                if authoritative_work_state_store is not None
-                else None
-            ),
         ),
     )
     _add_if_ready(
@@ -313,11 +308,6 @@ def build_reddog_resident_queue_stage_handler_registry(
             leeway_s=leeway_s,
             work_state_snapshot=work_state_snapshot,
             authority_profile=authority_profile or {},
-            work_state_supplier=(
-                authoritative_work_state_store.load
-                if authoritative_work_state_store is not None
-                else None
-            ),
         ),
     )
     _add_if_ready(
@@ -385,11 +375,7 @@ def build_reddog_resident_queue_stage_handler_registry(
                 revoked_key_epochs=tuple(revoked_key_epochs),
                 leeway_s=leeway_s,
             ),
-            work_state_supplier=(
-                authoritative_work_state_store.load
-                if authoritative_work_state_store is not None
-                else None
-            ),
+            work_state_store=authoritative_work_state_store,
         ),
     )
     _add_if_ready(
