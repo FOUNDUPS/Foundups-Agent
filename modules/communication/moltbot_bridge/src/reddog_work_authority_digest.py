@@ -52,9 +52,19 @@ def signed_authority_envelope_digest_matches(
 
     if signed_authority.get("accepted") is not True:
         return False
-    expected_digest = signed_authority.get(
-        "signature_gate_digest"
-    ) or signed_authority.get("signed_work_authority_digest")
+    signature_digest = signed_authority.get("signature_gate_digest")
+    signed_digest = signed_authority.get("signed_work_authority_digest")
+    if (
+        signature_digest not in (None, "")
+        and signed_digest not in (None, "")
+        and (
+            not isinstance(signature_digest, str)
+            or not isinstance(signed_digest, str)
+            or not hmac.compare_digest(signature_digest, signed_digest)
+        )
+    ):
+        return False
+    expected_digest = signature_digest or signed_digest
     work_authority = {
         key: value
         for key, value in signed_authority.items()

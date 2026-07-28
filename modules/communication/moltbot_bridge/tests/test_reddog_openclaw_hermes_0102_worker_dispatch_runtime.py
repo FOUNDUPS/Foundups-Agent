@@ -15,6 +15,9 @@ from modules.communication.moltbot_bridge.src import (
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
 )
 from modules.communication.moltbot_bridge.src import (
+    reddog_signed_worker_dispatch_runtime_validation as runtime_validation,
+)
+from modules.communication.moltbot_bridge.src import (
     reddog_signed_worker_dispatch_agentdb_writer as writer_module,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_publication_effect_binding import (
@@ -1190,6 +1193,21 @@ def test_rejects_memex_binding_conflict_before_nonce_or_writer_effect() -> None:
     )
     assert writer.calls == []
     assert accepted.accepted is True
+
+
+def test_intent_validation_does_not_collapse_falsy_memex_values_to_absent() -> None:
+    dryrun = _dryrun_result(_allocation())
+    receipt = dict(dryrun["receipt"])
+    intent = dict(receipt["dispatch_intents"][0])
+    receipt["memex_supply_receipt_id"] = ""
+    receipt["memex_supply_digest"] = ""
+    intent["memex_supply_receipt_id"] = 0
+    intent["memex_supply_digest"] = False
+
+    assert runtime_validation._intent_safe(intent, receipt) is False
+    intent["memex_supply_receipt_id"] = ""
+    intent["memex_supply_digest"] = ""
+    assert runtime_validation._intent_safe(intent, receipt) is True
 
 
 def test_rejects_legacy_dispatch_without_explicit_memex_fields_before_effect() -> None:

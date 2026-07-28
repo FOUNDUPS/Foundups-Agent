@@ -1,8 +1,8 @@
 ## 2026-07-28: REDDOG_FOUNDUP_MEMEX_AUTHORITY_DISPATCH_BINDING_PHASE1
 - Added end-to-end Memex authority regressions for pair propagation, malformed
-  and profile/work-order conflict rejection before effects, AgentDB/executor
-  tampering, immutable materializer inputs, read-only 0102 assignment, and
-  independent verifier receipt lineage.
+  or falsy pairs, pre-signing conflicts, digest-alias and AgentDB/executor
+  tampering, immutable inputs, read-only 0102 assignment, and independent
+  verifier receipt lineage.
 - The signer, dispatch, claim, executor, verifier, and serial matrices stay green.
 - Full differential evidence remains mandatory before publication.
 

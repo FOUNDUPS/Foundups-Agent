@@ -220,7 +220,12 @@ def _intent_safe(intent: Mapping[str, Any], receipt: Mapping[str, Any]) -> bool:
         "authority_verification_receipt_id",
         "authority_verification_receipt_digest",
     )
-    return all(str(intent.get(key) or "") == str(receipt.get(key) or "") for key in binding_fields)
+    return all(
+        type(intent.get(key)) is str
+        and type(receipt.get(key)) is str
+        and hmac.compare_digest(intent[key], receipt[key])
+        for key in binding_fields
+    )
 
 
 def _exact_dispatch_schema(

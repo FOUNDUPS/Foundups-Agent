@@ -1,6 +1,6 @@
 # TestModLog - wre_core/tests
 ## 2026-07-28: Memex verifier lineage + checkout-local Skillz resolution
-- Proved Memex pair carry/rejection plus authoritative local Skillz resolution across escape, fallback, and linked-worktree cases.
+- Proved Memex/digest-alias rejection plus local Skillz resolution across escape, fallback, and linked-worktree cases.
 ## 2026-07-26: Independent assurance verifier lineage
 - Proved the autonomous verifier accepts only the immutable assurance
   admission digest and exact author/verifier reservation lineage.

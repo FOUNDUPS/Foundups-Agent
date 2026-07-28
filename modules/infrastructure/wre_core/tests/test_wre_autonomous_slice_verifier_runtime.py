@@ -343,6 +343,10 @@ def test_rejects_unsigned_authority_or_receipt_chain() -> None:
     assert_reject(req, verifier.FAIL_SIGNED_AUTHORITY)
 
     req = valid_request()
+    req["signed_authority"]["signed_work_authority_digest"] = _digest("f")
+    assert_reject(req, verifier.FAIL_SIGNED_AUTHORITY)
+
+    req = valid_request()
     req["signed_receipt_chain"]["accepted"] = False
     assert_reject(req, verifier.FAIL_RECEIPT_CHAIN)
 

@@ -12,7 +12,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     WorkAuthorityVerificationPhase,
     verify_delegated_work_authority,
 )
-from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import canonical_work_authority_digest
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import canonical_work_authority_digest, work_authority_digest_matches
 
 AUTHORITY_VERIFICATION_BINDING_SCHEMA = "reddog_worker_dispatch_authority_verification_binding.v1"
 
@@ -67,8 +67,8 @@ def recorded_authority_verification_binding(
 
     authority_digest = canonical_work_authority_digest(work_authority)
     if (
-        signer_receipt.get("work_authority_digest") != authority_digest
-        or verification.get("verified_work_authority_digest") != authority_digest
+        not work_authority_digest_matches(work_authority, signer_receipt.get("work_authority_digest"))
+        or not work_authority_digest_matches(work_authority, verification.get("verified_work_authority_digest"))
     ):
         return {}
 
