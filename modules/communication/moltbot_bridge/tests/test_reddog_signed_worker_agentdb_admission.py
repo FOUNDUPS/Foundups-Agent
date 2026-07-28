@@ -83,7 +83,8 @@ def test_competing_preverification_claim_is_never_overwritten(
     db = AgentDB()
     assert db.assign_signed_worker_task(task_id)
 
-    def competing_claim(*, db, task_id, verified_envelope):
+    def competing_claim(*, db, task_id, authority_context):
+        assert authority_context is not None
         assert db.db.execute_write(
             "UPDATE agents_autonomous_tasks SET status = 'executing' "
             "WHERE task_id = ? AND status = 'assigned'",
@@ -113,7 +114,7 @@ def test_successful_admission_verifies_exact_claimed_database_state(
     assert db.assign_signed_worker_task(task_id)
     original_admit = run_task_runtime.admit_signed_worker_execution_once
 
-    def replace_then_admit(*, db, task_id, verified_envelope):
+    def replace_then_admit(*, db, task_id, authority_context):
         assert db.db.execute_write(
             "UPDATE agents_autonomous_tasks "
             "SET context = ?, required_skills = ?, discovered_by = ? "
@@ -121,7 +122,7 @@ def test_successful_admission_verifies_exact_claimed_database_state(
             (json.dumps({}), json.dumps(["attacker_skill"]), "attacker", task_id),
         ) == 1
         return original_admit(
-            db=db, task_id=task_id, verified_envelope=verified_envelope
+            db=db, task_id=task_id, authority_context=authority_context
         )
 
     monkeypatch.setattr(

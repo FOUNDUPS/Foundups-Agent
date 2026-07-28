@@ -50,8 +50,8 @@ def windows_atomic_replace(
             check_revision=check_revision,
             expected_revision=expected_revision,
         )
-        if target.exists():
-            os.link(target, backup_path)
+        if _path_exists(target):
+            _create_backup_link(target, backup_path)
             backup_created = True
             _require_backup_identity(
                 target,
@@ -69,7 +69,7 @@ def windows_atomic_replace(
             expected_revision=expected_revision,
         )
         renamed = True
-        if not _same_path(_handle_path(handle), target.resolve(strict=True)):
+        if not _same_path(_handle_path(handle), target.absolute()):
             raise ValueError("authority_runtime_store_temp_identity_changed")
         _verify_or_scrub(handle, len(payload))
         verified = True
@@ -77,12 +77,12 @@ def windows_atomic_replace(
         close_windows_handle(handle)
         if renamed and not verified:
             if backup_created:
-                os.replace(backup_path, target)
+                _replace_path(backup_path, target)
             else:
-                target.unlink(missing_ok=True)
+                _unlink_path(target, missing_ok=True)
         else:
-            temp_path.unlink(missing_ok=True)
-            backup_path.unlink(missing_ok=True)
+            _unlink_path(temp_path, missing_ok=True)
+            _unlink_path(backup_path, missing_ok=True)
 
 
 def _recover_interrupted_files(
@@ -100,13 +100,13 @@ def _recover_interrupted_files(
         match = pattern.fullmatch(candidate.name)
         if match is None:
             continue
-        metadata = os.stat(candidate, follow_symlinks=False)
+        metadata = _stat_path(candidate)
         if not stat.S_ISREG(metadata.st_mode):
             raise ValueError("authority_runtime_store_recovery_artifact_invalid")
         if match.group(1) == "tmp":
             if int(getattr(metadata, "st_nlink", 1)) != 1:
                 raise ValueError("authority_runtime_store_recovery_artifact_linked")
-            candidate.unlink()
+            _unlink_path(candidate)
         else:
             backups.append(candidate)
     if len(backups) > 1:
@@ -114,9 +114,9 @@ def _recover_interrupted_files(
     if not backups:
         return
     backup = backups[0]
-    if target.exists():
-        target_metadata = os.stat(target, follow_symlinks=False)
-        backup_metadata = os.stat(backup, follow_symlinks=False)
+    if _path_exists(target):
+        target_metadata = _stat_path(target)
+        backup_metadata = _stat_path(backup)
         if (
             target_metadata.st_dev,
             target_metadata.st_ino,
@@ -124,22 +124,22 @@ def _recover_interrupted_files(
             backup_metadata.st_dev,
             backup_metadata.st_ino,
         ):
-            backup.unlink()
+            _unlink_path(backup)
             return
         _require_private_regular_path(backup_metadata)
-        backup.unlink()
+        _unlink_path(backup)
         return
     if not restore_missing:
-        backup.unlink()
+        _unlink_path(backup)
         return
     if not check_revision or not isinstance(expected_revision, str):
         raise ValueError("authority_runtime_store_recovery_revision_required")
-    _require_private_regular_path(os.stat(backup, follow_symlinks=False))
+    _require_private_regular_path(_stat_path(backup))
     if not _authority_snapshot_valid(backup):
         raise ValueError("authority_runtime_store_recovery_snapshot_invalid")
     if _read_revision(backup) != expected_revision:
         raise RuntimeError("revision_conflict")
-    os.replace(backup, target)
+    _replace_path(backup, target)
 
 
 def recover_windows_interrupted_files(
@@ -163,11 +163,11 @@ def _require_target_revision(
     check_revision: bool,
     expected_revision: object,
 ) -> None:
-    if not target.exists():
+    if not _path_exists(target):
         if check_revision and expected_revision is not None:
             raise RuntimeError("revision_conflict")
         return
-    metadata = os.stat(target, follow_symlinks=False)
+    metadata = _stat_path(target)
     _require_private_regular_path(metadata)
     if check_revision and _read_revision(target) != expected_revision:
         raise RuntimeError("revision_conflict")
@@ -180,8 +180,8 @@ def _require_backup_identity(
     check_revision: bool,
     expected_revision: object,
 ) -> None:
-    target_metadata = os.stat(target, follow_symlinks=False)
-    backup_metadata = os.stat(backup, follow_symlinks=False)
+    target_metadata = _stat_path(target)
+    backup_metadata = _stat_path(backup)
     if not stat.S_ISREG(target_metadata.st_mode):
         raise ValueError("authority_runtime_store_target_not_regular")
     if (
@@ -199,12 +199,12 @@ def _require_backup_identity(
 
 
 def _read_revision(path: Path) -> object:
-    metadata = os.stat(path, follow_symlinks=False)
+    metadata = _stat_path(path)
     if not stat.S_ISREG(metadata.st_mode):
         raise ValueError("authority_runtime_store_target_not_regular")
     if metadata.st_size > 8 * 1024 * 1024:
         raise ValueError("authority_runtime_store_target_too_large")
-    raw = path.read_bytes()
+    raw = _read_path_bytes(path)
     if len(raw) != metadata.st_size:
         raise ValueError("authority_runtime_store_target_read_incomplete")
     try:
@@ -217,14 +217,14 @@ def _read_revision(path: Path) -> object:
 
 
 def _authority_snapshot_valid(path: Path) -> bool:
-    metadata = os.stat(path, follow_symlinks=False)
+    metadata = _stat_path(path)
     if (
         not stat.S_ISREG(metadata.st_mode)
         or int(getattr(metadata, "st_nlink", 1)) != 1
         or metadata.st_size > 8 * 1024 * 1024
     ):
         return False
-    raw = path.read_bytes()
+    raw = _read_path_bytes(path)
     if len(raw) != metadata.st_size:
         return False
     try:
@@ -267,7 +267,7 @@ def _create_temp(path: Path) -> int:
     ]
     create_file.restype = wintypes.HANDLE
     handle = create_file(
-        str(path),
+        _windows_api_path(path),
         0x40000000 | 0x00010000 | 0x00100000,
         0,
         None,
@@ -280,8 +280,58 @@ def _create_temp(path: Path) -> int:
     return int(handle)
 
 
+def _create_backup_link(target: Path, backup: Path) -> None:
+    create_hard_link = ctypes.windll.kernel32.CreateHardLinkW
+    create_hard_link.argtypes = [
+        wintypes.LPCWSTR,
+        wintypes.LPCWSTR,
+        wintypes.LPVOID,
+    ]
+    create_hard_link.restype = wintypes.BOOL
+    if not create_hard_link(
+        _windows_api_path(backup),
+        _windows_api_path(target),
+        None,
+    ):
+        raise OSError("authority_runtime_store_backup_create_failed")
+
+
+def _windows_api_path(path: Path) -> str:
+    raw = str(path.resolve(strict=False))
+    if raw.startswith("\\\\?\\"):
+        return raw
+    if raw.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + raw[2:]
+    return "\\\\?\\" + raw
+
+
+def _stat_path(path: Path) -> os.stat_result:
+    return os.stat(_windows_api_path(path), follow_symlinks=False)
+
+
+def _read_path_bytes(path: Path) -> bytes:
+    with open(_windows_api_path(path), "rb") as handle:
+        return handle.read()
+
+
+def _path_exists(path: Path) -> bool:
+    return os.path.exists(_windows_api_path(path))
+
+
+def _unlink_path(path: Path, *, missing_ok: bool = False) -> None:
+    try:
+        os.unlink(_windows_api_path(path))
+    except FileNotFoundError:
+        if not missing_ok:
+            raise
+
+
+def _replace_path(source: Path, target: Path) -> None:
+    os.replace(_windows_api_path(source), _windows_api_path(target))
+
+
 def _require_private_regular(handle: int) -> None:
-    metadata = os.stat(_handle_path(handle), follow_symlinks=False)
+    metadata = _stat_path(_handle_path(handle))
     if not stat.S_ISREG(metadata.st_mode):
         raise ValueError("authority_runtime_store_temp_not_regular")
     if int(getattr(metadata, "st_nlink", 1)) != 1:
@@ -345,7 +395,7 @@ def _rename_handle(
     expected_revision: object,
 ) -> None:
     if backup is None:
-        if target.exists():
+        if _path_exists(target):
             raise RuntimeError("revision_conflict")
     else:
         _require_backup_identity(
@@ -364,7 +414,7 @@ def _rename_handle(
         ]
 
     target = _handle_path(parent_handle) / target_name
-    encoded = str(target).encode("utf-16-le")
+    encoded = _windows_api_path(target).encode("utf-16-le")
     size = ctypes.sizeof(_FileRenameInfo) + len(encoded)
     storage = ctypes.create_string_buffer(size)
     info = ctypes.cast(storage, ctypes.POINTER(_FileRenameInfo)).contents
@@ -404,7 +454,7 @@ def open_windows_directory_without_delete_share(path: Path) -> int:
     ]
     create_file.restype = wintypes.HANDLE
     handle = create_file(
-        str(path),
+        _windows_api_path(path),
         0x80000000,
         0x00000001 | 0x00000002,
         None,

@@ -378,20 +378,18 @@ def secure_read_confined_bytes(
     ):
         raise ValueError("confined_read_path_link_rejected")
 
-    root = _without_windows_extended_prefix(root_candidate.resolve(strict=True))
-    expected = _without_windows_extended_prefix(
-        expected_candidate.resolve(strict=True)
-    )
+    root = _resolve_runtime_path(root_candidate, strict=True)
+    expected = _resolve_runtime_path(expected_candidate, strict=True)
     if not _is_relative_to(expected, root):
         raise ValueError("confined_read_path_outside_root")
 
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(expected, flags)
+    descriptor = os.open(_runtime_open_path(expected), flags)
     try:
         metadata = os.fstat(descriptor)
         _require_private_regular_file(metadata)
         final_path = _descriptor_final_path(descriptor)
-        final_resolved = _without_windows_extended_prefix(final_path.resolve(strict=True))
+        final_resolved = _resolve_runtime_path(final_path, strict=True)
         if not _is_relative_to(final_resolved, root):
             raise ValueError("confined_read_descriptor_outside_root")
         if os.path.normcase(str(final_resolved)) != os.path.normcase(str(expected)):
@@ -607,13 +605,34 @@ def _require_private_regular_file(metadata: os.stat_result) -> None:
 
 def _open_runtime_file(path: Path) -> tuple[int, bool]:
     common = os.O_RDWR | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    open_path = _runtime_open_path(path)
     try:
-        return os.open(path, common), False
+        return os.open(open_path, common), False
     except FileNotFoundError:
         try:
-            return os.open(path, common | os.O_CREAT | os.O_EXCL, 0o600), True
+            return os.open(
+                open_path,
+                common | os.O_CREAT | os.O_EXCL,
+                0o600,
+            ), True
         except FileExistsError:
-            return os.open(path, common), False
+            return os.open(open_path, common), False
+
+
+def _runtime_open_path(path: Path) -> Path | str:
+    if os.name != "nt":
+        return path
+    raw = os.path.abspath(path)
+    if raw.startswith("\\\\?\\"):
+        return raw
+    if raw.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + raw[2:]
+    return "\\\\?\\" + raw
+
+
+def _resolve_runtime_path(path: Path, *, strict: bool) -> Path:
+    candidate = Path(_runtime_open_path(path))
+    return _without_windows_extended_prefix(candidate.resolve(strict=strict))
 
 
 def _descriptor_final_path(descriptor: int) -> Path:
@@ -683,9 +702,10 @@ def _read_descriptor_text(descriptor: int, size: int) -> str:
 
 def _remove_created_file(path: Path, expected: os.stat_result) -> None:
     try:
-        current = path.stat()
+        open_path = _runtime_open_path(path)
+        current = os.stat(open_path, follow_symlinks=False)
         if (current.st_dev, current.st_ino) == (expected.st_dev, expected.st_ino):
-            path.unlink(missing_ok=True)
+            os.unlink(open_path)
     except OSError:
         pass
 

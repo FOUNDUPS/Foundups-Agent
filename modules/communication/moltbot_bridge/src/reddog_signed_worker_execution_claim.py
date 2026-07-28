@@ -11,7 +11,8 @@ from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
     VerifiedSignedWorkerAgentDbEnvelope,
-    verified_signed_worker_agentdb_envelope_matches,
+    WorkerDispatchAuthorityVerificationContext,
+    verify_reddog_signed_worker_agentdb_envelope,
 )
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
     validate_result_history_ledger,
@@ -46,17 +47,18 @@ class SignedWorkerExecutionAdmission:
     claimed_context: Mapping[str, Any]
     required_skills: tuple[str, ...]
     discovered_by: str
+    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope
 
 
 def admit_signed_worker_execution_once(
     *,
     db: Any,
     task_id: str,
-    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
+    authority_context: WorkerDispatchAuthorityVerificationContext,
     token_factory: Callable[[], str] | None = None,
     now_factory: Callable[[], datetime] | None = None,
 ) -> SignedWorkerExecutionAdmission | None:
-    """Atomically consume one process-local token and enter executing state."""
+    """Reverify the durable row, then atomically enter executing state."""
 
     token = (token_factory or (lambda: secrets.token_urlsafe(32)))()
     if not task_id or not token:
@@ -68,7 +70,7 @@ def admit_signed_worker_execution_once(
         db=db,
         task_id=task_id,
         token=token,
-        verified_envelope=verified_envelope,
+        authority_context=authority_context,
         now=now.astimezone(timezone.utc),
         now_iso=now.astimezone(timezone.utc).isoformat(),
         lease_expires_at=(
@@ -83,7 +85,7 @@ def _commit_execution_admission(
     db: Any,
     task_id: str,
     token: str,
-    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
+    authority_context: WorkerDispatchAuthorityVerificationContext,
     now: datetime,
     now_iso: str,
     lease_expires_at: str,
@@ -96,7 +98,7 @@ def _commit_execution_admission(
                 conn,
                 task_id=task_id,
                 token=token,
-                verified_envelope=verified_envelope,
+                authority_context=authority_context,
                 now=now,
                 now_iso=now_iso,
                 lease_expires_at=lease_expires_at,
@@ -110,7 +112,7 @@ def _admit_selected_row(
     *,
     task_id: str,
     token: str,
-    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
+    authority_context: WorkerDispatchAuthorityVerificationContext,
     now: datetime,
     now_iso: str,
     lease_expires_at: str,
@@ -125,15 +127,15 @@ def _admit_selected_row(
         row=row,
         task_id=task_id,
         token=token,
-        verified_envelope=verified_envelope,
+        authority_context=authority_context,
         now=now,
         now_iso=now_iso,
         lease_expires_at=lease_expires_at,
     )
     if prepared is None:
         return None
-    raw_context, raw_skills, assigned_to, context = prepared[:4]
-    required_skills, discovered_by, claim, use = prepared[4:]
+    raw_context, raw_skills, assigned_to, context, verified = prepared[:5]
+    required_skills, discovered_by, claim, use = prepared[5:]
     if not _commit_claim_row(
         connection, task_id=task_id, assigned_to=assigned_to,
         raw_context=raw_context, raw_skills=raw_skills,
@@ -147,6 +149,7 @@ def _admit_selected_row(
     return SignedWorkerExecutionAdmission(
         claim_receipt=claim, use_receipt=use, claimed_context=dict(context),
         required_skills=required_skills, discovered_by=discovered_by,
+        verified_envelope=verified,
     )
 
 
@@ -156,17 +159,30 @@ def _prepare_claim_admission(
     row: Any,
     task_id: str,
     token: str,
-    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
+    authority_context: WorkerDispatchAuthorityVerificationContext,
     now: datetime,
     now_iso: str,
     lease_expires_at: str,
 ) -> tuple[Any, ...] | None:
-    parsed = _parse_claim_row(row, task_id=task_id, verified_envelope=verified_envelope)
+    parsed = _parse_claim_row(row, task_id=task_id)
     if parsed is None:
         _quarantine_invalid_assignment(
             connection,
             row=row,
             task_id=task_id,
+            reason="invalid_signed_worker_assignment",
+            now_iso=now_iso,
+        )
+        return None
+    verified = _verify_row_envelope(
+        parsed[3], task_id=task_id, authority_context=authority_context
+    )
+    if verified is None:
+        _quarantine_invalid_assignment(
+            connection,
+            row=row,
+            task_id=task_id,
+            reason="signed_worker_agentdb_envelope_rejected",
             now_iso=now_iso,
         )
         return None
@@ -179,6 +195,31 @@ def _prepare_claim_admission(
         now_iso=now_iso,
         lease_expires_at=lease_expires_at,
     )
+    if inputs is None:
+        return None
+    return _build_claim_admission(
+        connection,
+        task_id=task_id,
+        token=token,
+        now_iso=now_iso,
+        lease_expires_at=lease_expires_at,
+        verified=verified,
+        inputs=inputs,
+    )
+
+
+def _build_claim_admission(
+    connection: Any,
+    *,
+    task_id: str,
+    token: str,
+    now_iso: str,
+    lease_expires_at: str,
+    verified: VerifiedSignedWorkerAgentDbEnvelope,
+    inputs: tuple[str, str, str, Mapping[str, Any], tuple[str, ...], str],
+) -> tuple[Any, ...] | None:
+    """Validate history and derive receipts from one verified durable row."""
+
     raw_context, raw_skills, assigned_to, context = inputs[:4]
     required_skills, discovered_by = inputs[4:]
     if not validate_result_history_ledger(connection, task_id, context):
@@ -190,7 +231,7 @@ def _prepare_claim_admission(
         return None
     try:
         context = {
-            **dict(verified_envelope.canonical_context),
+            **dict(verified.canonical_context),
             **validated_result_history(context),
         }
     except ValueError:
@@ -206,7 +247,7 @@ def _prepare_claim_admission(
         lease_expires_at=lease_expires_at,
     )
     return (
-        raw_context, raw_skills, assigned_to, context,
+        raw_context, raw_skills, assigned_to, context, verified,
         required_skills, discovered_by, claim, use,
     )
 
@@ -267,6 +308,7 @@ def _quarantine_invalid_assignment(
     *,
     row: Any,
     task_id: str,
+    reason: str,
     now_iso: str,
 ) -> None:
     """Isolate a protected assignment that changed before admission."""
@@ -278,7 +320,7 @@ def _quarantine_invalid_assignment(
         task_id=task_id,
         raw_context=dict(row).get("context"),
         expected_status="assigned",
-        reason="invalid_signed_worker_execution_admission",
+        reason=reason,
         now_iso=now_iso,
     )
 
@@ -326,7 +368,6 @@ def _parse_claim_row(
     row: Any,
     *,
     task_id: str,
-    verified_envelope: VerifiedSignedWorkerAgentDbEnvelope,
 ) -> tuple[str, str, str, Mapping[str, Any], tuple[str, ...], str] | None:
     payload = dict(row)
     assigned_to = str(payload.get("assigned_to") or "").strip()
@@ -351,11 +392,6 @@ def _parse_claim_row(
         or not isinstance(parsed_skills, list)
         or any(not isinstance(skill, str) or not skill for skill in parsed_skills)
         or not signed_worker_assignment_matches(task_id, assigned_to, context)
-        or not verified_signed_worker_agentdb_envelope_matches(
-            verified_envelope,
-            task_id=task_id,
-            context=context,
-        )
     ):
         return None
     context = dict(context)
@@ -365,6 +401,25 @@ def _parse_claim_row(
         raw_context, raw_skills, assigned_to, context,
         tuple(parsed_skills), discovered_by,
     )
+
+
+def _verify_row_envelope(
+    context: Mapping[str, Any],
+    *,
+    task_id: str,
+    authority_context: WorkerDispatchAuthorityVerificationContext,
+) -> VerifiedSignedWorkerAgentDbEnvelope | None:
+    envelope = context.get("signed_worker_agentdb_envelope")
+    if not isinstance(envelope, Mapping):
+        return None
+    try:
+        return verify_reddog_signed_worker_agentdb_envelope(
+            envelope=envelope,
+            task_id=task_id,
+            authority_context=authority_context,
+        )
+    except (TypeError, ValueError):
+        return None
 
 
 def _assignment_is_fresh(row: Any, *, now: datetime) -> bool:

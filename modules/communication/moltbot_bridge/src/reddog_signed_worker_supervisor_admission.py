@@ -12,7 +12,9 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
     quarantine_unverified_signed_worker_assignment,
-    verify_signed_worker_agentdb_context,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_signed_worker_agentdb_envelope as envelope_module,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
     admit_signed_worker_execution_once,
@@ -43,25 +45,30 @@ def admit_signed_worker_for_supervisor(
 ) -> SignedWorkerSupervisorAdmission:
     """Verify authority, then CAS-admit only the exact verified task state."""
 
-    verified, rejection = _verify_supervisor_context(
+    authority, rejection = _resolve_supervisor_authority(
         repo_root=repo_root, db=db, task_id=task_id, context=context,
         env=env, authority_verification_context=authority_verification_context,
     )
     if rejection is not None:
         return rejection
-    if verified is None:
+    if authority is None:
         return SignedWorkerSupervisorAdmission(
             "REJECTED", context, "signed_worker_verification_missing"
         )
     admission = admit_signed_worker_execution_once(
-        db=db, task_id=task_id, verified_envelope=verified
+        db=db, task_id=task_id, authority_context=authority
     )
     if admission is None:
+        current = db.get_autonomous_task_by_id(task_id)
+        if isinstance(current, Mapping) and current.get("status") == "quarantined":
+            return SignedWorkerSupervisorAdmission(
+                "REJECTED", context, "signed_worker_admission_rejected"
+            )
         return SignedWorkerSupervisorAdmission("ALREADY_CLAIMED", {})
-    return _validate_supervisor_admission(verified, admission)
+    return _validate_supervisor_admission(admission)
 
 
-def _verify_supervisor_context(
+def _resolve_supervisor_authority(
     *,
     repo_root: Path,
     db: Any,
@@ -78,13 +85,11 @@ def _verify_supervisor_context(
             "REJECTED", context, "signed_worker_task_routing_binding_mismatch",
         )
     try:
-        verified = verify_signed_worker_agentdb_context(
-            repo_root=repo_root,
-            task_id=task_id,
-            context=context,
-            env=env,
-            authority_verification_context=authority_verification_context,
-        )
+        authority = authority_verification_context
+        if authority is None:
+            authority = envelope_module.build_worker_dispatch_authority_context_from_env(
+                repo_root=repo_root, env=env
+            )
     except (TypeError, ValueError) as exc:
         quarantine_unverified_signed_worker_assignment(
             db=db, task_id=task_id,
@@ -93,11 +98,10 @@ def _verify_supervisor_context(
         return None, SignedWorkerSupervisorAdmission(
             "REJECTED", context, str(exc)[:160]
         )
-    return verified, None
+    return authority, None
 
 
 def _validate_supervisor_admission(
-    verified: Any,
     admission: Any,
 ) -> SignedWorkerSupervisorAdmission:
     claimed = admission.claimed_context
@@ -112,7 +116,7 @@ def _validate_supervisor_admission(
         )
     try:
         canonical = {
-            **dict(verified.canonical_context),
+            **dict(admission.verified_envelope.canonical_context),
             **validated_result_history(claimed),
         }
     except ValueError as exc:

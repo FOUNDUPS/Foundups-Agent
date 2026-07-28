@@ -262,7 +262,7 @@ def test_supervisor_verifies_exact_claimed_database_state(
     task_id = _publish_agentdb_task()
     original_admit = execution_claim_module.admit_signed_worker_execution_once
 
-    def replace_then_admit(*, db, task_id, verified_envelope):
+    def replace_then_admit(*, db, task_id, authority_context):
         assert db.db.execute_write(
             "UPDATE agents_autonomous_tasks "
             "SET context = ?, required_skills = ?, discovered_by = ? "
@@ -270,7 +270,7 @@ def test_supervisor_verifies_exact_claimed_database_state(
             (json.dumps({}), json.dumps(["attacker_skill"]), "attacker", task_id),
         ) == 1
         return original_admit(
-            db=db, task_id=task_id, verified_envelope=verified_envelope
+            db=db, task_id=task_id, authority_context=authority_context
         )
 
     monkeypatch.setattr(

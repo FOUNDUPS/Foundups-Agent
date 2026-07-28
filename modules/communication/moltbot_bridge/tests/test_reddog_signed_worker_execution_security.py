@@ -10,7 +10,6 @@ import pytest
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
     VerifiedSignedWorkerAgentDbEnvelope,
-    verify_reddog_signed_worker_agentdb_envelope,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
     admit_signed_worker_execution_once,
@@ -19,6 +18,10 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_cla
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_recovery import (
     _resolve_raced_finalization,
     recover_expired_signed_worker_executions,
+)
+from modules.communication.moltbot_bridge.src.reddog_run_task_support import fail_task
+from modules.communication.moltbot_bridge.src import (
+    reddog_signed_worker_run_task_runtime as run_task_runtime,
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_result_receipt import (
     DIRECT_ACCEPT,
@@ -57,17 +60,10 @@ def isolated_agent_db(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
 
 def _verified_admission(db: AgentDB, task_id: str):
-    task = db.get_autonomous_task_by_id(task_id)
-    assert task is not None
-    verified = verify_reddog_signed_worker_agentdb_envelope(
-        envelope=task["context"]["signed_worker_agentdb_envelope"],
-        task_id=task_id,
-        authority_context=worker_dispatch_authority_verification_context(),
-    )
     admission = admit_signed_worker_execution_once(
         db=db,
         task_id=task_id,
-        verified_envelope=verified,
+        authority_context=worker_dispatch_authority_verification_context(),
     )
     assert admission is not None
     return admission
@@ -83,6 +79,27 @@ def _ledger_count(db: AgentDB, task_id: str) -> int:
     return int(dict(row).get("count") or 0)
 
 
+def _raw_task_state(db: AgentDB, task_id: str) -> tuple[object, ...]:
+    with db.db.get_connection() as connection:
+        row = connection.execute(
+            "SELECT status, context, assigned_to, assigned_at, completed_at "
+            "FROM agents_autonomous_tasks WHERE task_id = ?",
+            (task_id,),
+        ).fetchone()
+    assert row is not None
+    payload = dict(row)
+    return tuple(
+        payload[field]
+        for field in (
+            "status",
+            "context",
+            "assigned_to",
+            "assigned_at",
+            "completed_at",
+        )
+    )
+
+
 def test_forged_process_local_verification_proof_cannot_admit() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
@@ -95,17 +112,56 @@ def test_forged_process_local_verification_proof_cannot_admit() -> None:
         dispatch_receipt={},
         dispatch_intent={},
         authority_verification_result={},
-        _verification_seal=object(),
     )
 
-    admitted = admit_signed_worker_execution_once(
-        db=db,
-        task_id=task_id,
-        verified_envelope=forged,
+    with pytest.raises(TypeError):
+        admit_signed_worker_execution_once(
+            db=db,
+            task_id=task_id,
+            verified_envelope=forged,
+        )
+
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "assigned"
+    assert _ledger_count(db, task_id) == 0
+
+
+def test_run_task_verification_race_preserves_completed_signed_task(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_signed_worker_task(task_id)
+
+    def complete_before_admission(**_: object) -> None:
+        assert db.db.execute_write(
+            "UPDATE agents_autonomous_tasks "
+            "SET status = 'completed', completed_at = ? "
+            "WHERE task_id = ? AND status = 'assigned'",
+            ("2030-01-02T03:04:05+00:00", task_id),
+        ) == 1
+        return None
+
+    monkeypatch.setattr(
+        run_task_runtime,
+        "admit_signed_worker_execution_once",
+        complete_before_admission,
+    )
+    result = execute_task(task_id, repo_root=tmp_path)
+    completed_state = _raw_task_state(db, task_id)
+
+    fail_task(
+        db,
+        task_id,
+        {"ok": False, "detail": "late generic failure", "executor": "none"},
+        (None, None, None),
     )
 
-    assert admitted is None
-    assert db.get_autonomous_task_by_id(task_id)["status"] == "quarantined"
+    assert result["ok"] is False
+    assert result["finalization_owned"] is True
+    assert completed_state[0] == "completed"
+    assert completed_state[4] == "2030-01-02T03:04:05+00:00"
+    assert _raw_task_state(db, task_id) == completed_state
     assert _ledger_count(db, task_id) == 0
 
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 from pathlib import Path
 
@@ -240,6 +241,32 @@ def test_publication_commits_state_then_profile_and_cleans_journal(
     tmp_path: Path,
 ) -> None:
     runtime, store, publisher = _runtime(tmp_path)
+    request = _request(store)
+
+    revision = publisher.publish(request)
+
+    assert store.load()["revision"] == revision
+    assert json.loads(
+        (runtime / "authority_profile.json").read_text(encoding="utf-8")
+    ) == request.authority_profile
+    assert not publisher.journal_path.exists()
+    assert not publisher.stage_path.exists()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows long-path regression")
+def test_publication_supports_extended_length_runtime_root(
+    tmp_path: Path,
+) -> None:
+    long_root = tmp_path
+    for marker in ("a", "b"):
+        long_root /= marker * 54
+    long_root.mkdir(parents=True)
+
+    runtime, store, publisher = _runtime(long_root)
+    profile_path = runtime / "authority_profile.json"
+    temp_shape = runtime / f".{profile_path.name}.{'f' * 32}.tmp"
+    assert len(str(profile_path)) < 260
+    assert len(str(temp_shape)) > 260
     request = _request(store)
 
     revision = publisher.publish(request)

@@ -118,17 +118,10 @@ def _rewrite_context(task_id: str, mutate) -> dict[str, object]:
 def admit_signed_worker_execution_once(*, db: AgentDB, task_id: str, **kwargs):
     """Exercise admission only through the canonical signed-envelope verifier."""
 
-    task = db.get_autonomous_task_by_id(task_id)
-    assert task is not None
-    verified = verify_reddog_signed_worker_agentdb_envelope(
-        envelope=task["context"]["signed_worker_agentdb_envelope"],
-        task_id=task_id,
-        authority_context=worker_dispatch_authority_verification_context(),
-    )
     return _admit_signed_worker_execution_once(
         db=db,
         task_id=task_id,
-        verified_envelope=verified,
+        authority_context=worker_dispatch_authority_verification_context(),
         **kwargs,
     )
 

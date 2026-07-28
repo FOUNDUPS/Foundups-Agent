@@ -375,8 +375,9 @@ def _publish_profile_artifact(
     artifact = publisher._profile_artifact_path(
         stage["authority_profile_digest"]
     )
-    if artifact.exists():
-        if canonical_digest(publisher._read(artifact)) != stage[
+    existing = _read_optional_mapping(publisher, artifact)
+    if existing is not None:
+        if canonical_digest(existing) != stage[
             "authority_profile_digest"
         ]:
             raise RuntimeError(
@@ -405,11 +406,11 @@ def _publish_profile_cache_digest(
     expected_digest: Any,
 ) -> None:
     artifact = publisher._profile_artifact_path(expected_digest)
-    if not artifact.exists():
+    profile = _read_optional_mapping(publisher, artifact)
+    if profile is None:
         raise RuntimeError(
             "architect_fix_publication_profile_artifact_missing"
         )
-    profile = publisher._read(artifact)
     if canonical_digest(profile) != expected_digest:
         raise RuntimeError(
             "architect_fix_publication_profile_artifact_mismatch"
@@ -439,12 +440,23 @@ def _profile_matches(
     publisher: AtomicArchitectFixPromotionPublisher,
     expected_digest: Any,
 ) -> bool:
-    if not publisher.authority_profile_path.exists():
-        return False
-    return (
-        canonical_digest(publisher._read(publisher.authority_profile_path))
-        == expected_digest
+    profile = _read_optional_mapping(
+        publisher,
+        publisher.authority_profile_path,
     )
+    if profile is None:
+        return False
+    return canonical_digest(profile) == expected_digest
+
+
+def _read_optional_mapping(
+    publisher: AtomicArchitectFixPromotionPublisher,
+    path: Path,
+) -> Mapping[str, Any] | None:
+    try:
+        return publisher._read(path)
+    except FileNotFoundError:
+        return None
 
 
 def _profile_artifact_path(

@@ -1,4 +1,12 @@
 # ModLog - moltbot_bridge
+- Exact-SHA review follow-up removed the importable process-local envelope
+  seal as an authority primitive. Signed-worker admission now re-verifies the
+  persisted AgentDB envelope against fresh authority inside the atomic claim
+  transaction, and returns verification evidence only after that transition.
+  Every direct signed-worker rejection owns finalization; the generic task
+  finalizer refuses the signed namespace so a completion race cannot be
+  overwritten. Windows publication also exercises valid runtime roots whose
+  internal temp, lock, and immutable-artifact paths exceed 260 characters.
 - Final exact-SHA repair requires a sealed canonical envelope at every
   signed-worker claim boundary, rejects stale assignments before effect
   admission, and reconstructs runner context only from signed authority plus

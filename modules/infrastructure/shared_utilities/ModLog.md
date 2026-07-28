@@ -1,6 +1,15 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-07-28 - Windows Extended-Length Runtime Artifacts
+
+- Routed confined descriptor opens and cleanup through Windows
+  extended-length paths while retaining final-descriptor confinement checks.
+- Extended the authority-store create, hard-link, stat, read, replace, rename,
+  recovery, and cleanup operations to the same path representation.
+- Added a publication regression where the configured target remains below
+  260 characters while internal atomic paths exceed it.
+
 ## 2026-07-28 - Windows Confined Lock Initialization Race
 
 - Serialized first-byte initialization under the existing machine-global

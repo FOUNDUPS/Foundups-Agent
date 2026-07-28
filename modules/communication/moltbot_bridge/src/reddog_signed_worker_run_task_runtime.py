@@ -107,7 +107,7 @@ def _verify_and_admit(
     env: Mapping[str, str],
 ) -> tuple[Any | None, Any | None, Mapping[str, Any] | None]:
     try:
-        verified = _verify_context(
+        authority = _verify_context(
             repo_root=repo_root, task_id=task_id, context=context,
             required_skills=required_skills, source=source,
             discovered_by=discovered_by, env=env,
@@ -117,14 +117,16 @@ def _verify_and_admit(
             db=db, task_id=task_id,
             reason="signed_worker_agentdb_envelope_rejected",
         )
-        return None, None, _rejected(
+        rejection = _rejected(
             f"reddog_signed_worker_authority_rejected: {exc}"
         )
+        rejection["finalization_owned"] = True
+        return None, None, rejection
     admission = admit_signed_worker_execution_once(
-        db=db, task_id=task_id, verified_envelope=verified
+        db=db, task_id=task_id, authority_context=authority
     )
     if admission is not None:
-        return verified, admission, None
+        return admission.verified_envelope, admission, None
     result = _rejected("reddog_signed_worker_execution_already_claimed")
     result["finalization_owned"] = True
     return None, None, result
@@ -272,7 +274,6 @@ def _verify_context(
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
         SignedWorkerAgentDbEnvelopeError,
         build_worker_dispatch_authority_context_from_env,
-        verify_reddog_signed_worker_agentdb_envelope,
     )
 
     if (
@@ -284,13 +285,8 @@ def _verify_context(
         raise SignedWorkerAgentDbEnvelopeError(
             "signed_worker_task_routing_binding_mismatch"
         )
-    authority = build_worker_dispatch_authority_context_from_env(
+    return build_worker_dispatch_authority_context_from_env(
         repo_root=repo_root, env=env
-    )
-    return verify_reddog_signed_worker_agentdb_envelope(
-        envelope=context["signed_worker_agentdb_envelope"],
-        task_id=task_id,
-        authority_context=authority,
     )
 
 

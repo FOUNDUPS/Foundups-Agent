@@ -63,6 +63,16 @@ def fail_task(
     result: Mapping[str, Any],
     emitters: tuple[Any, Any, Any],
 ) -> None:
+    from modules.infrastructure.database.src.signed_worker_execution_store import (
+        is_signed_worker_task_id,
+    )
+
+    if is_signed_worker_task_id(task_id):
+        logger.warning(
+            "[RUN_TASK] Refused generic finalization for signed task %s",
+            task_id,
+        )
+        return
     try:
         db.db.execute_write(
             "UPDATE agents_autonomous_tasks SET status = 'failed' WHERE task_id = ?",
