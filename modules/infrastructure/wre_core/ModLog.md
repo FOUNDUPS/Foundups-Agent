@@ -1,7 +1,7 @@
 # WRE Core - ModLog
 ## Chronological Change Log
 ### [2026-07-28] - MEMEX_VERIFIER_LINEAGE + CHECKOUT_LOCAL_SKILL_RESOLUTION
-- Bound optional signed Memex lineage into independent verifier receipts; retained authoritative checkout-local Skillz resolution and cross-checkout rejection.
+- Bound Memex lineage to the independently recorded authority digest at verifier admission; retained checkout-local Skillz resolution and rejection.
 ### [2026-07-25] - WRE_INDEPENDENT_ASSURANCE_CAPACITY_ADMISSION_PHASE1
 
 - Required the autonomous slice verifier request to carry a durable,

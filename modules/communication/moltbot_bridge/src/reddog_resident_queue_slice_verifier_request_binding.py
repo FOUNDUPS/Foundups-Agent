@@ -19,8 +19,8 @@ from typing import Any, Dict, Mapping
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_exact_sha_commit_handler import (
     validate_exact_sha_commit_receipt,
 )
-from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
-    work_authority_digest_matches,
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    recorded_authority_verification_binding,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
@@ -86,21 +86,20 @@ def build_resident_queue_slice_verifier_request(
     authority_runtime = _mapping(stage_results.get("authority_runtime"))
     authority_result = _mapping(authority_runtime.get("authority_result"))
     work_authority = _mapping(authority_result.get("work_authority"))
-    authority_receipt = _mapping(authority_result.get("receipt"))
     if not authority_runtime or authority_result.get("accepted") is not True:
         reasons.append(FAIL_AUTHORITY_RUNTIME_MISSING)
     if not work_authority:
         reasons.append(FAIL_SIGNED_AUTHORITY_MISSING)
-    elif not work_authority_digest_matches(
-        work_authority,
-        authority_receipt.get("work_authority_digest"),
-    ):
-        reasons.append(FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH)
 
     authority_verification = _mapping(stage_results.get("authority_verification"))
     verification = _mapping(authority_verification.get("verification_result"))
     if not authority_verification or verification.get("accepted") is not True:
         reasons.append(FAIL_AUTHORITY_VERIFICATION_MISSING)
+    recorded_signed_authority = verified_signed_authority_from_stage_results(
+        stage_results
+    )
+    if work_authority and verification.get("accepted") is True and not recorded_signed_authority:
+        reasons.append(FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH)
 
     worktree_create_stage = _mapping(stage_results.get("worktree_create"))
     worktree_create = _mapping(worktree_create_stage.get("worktree_create_result"))
@@ -232,11 +231,7 @@ def build_resident_queue_slice_verifier_request(
     if reasons:
         return _reject(reasons)
 
-    signed_authority = {
-        **dict(work_authority),
-        "accepted": True,
-        "signature_gate_digest": str(authority_receipt["work_authority_digest"]),
-    }
+    signed_authority = recorded_signed_authority
     evidence = _mapping(holoindex_evidence) or _mapping(work_order.get("holoindex_evidence"))
     expected_paths = commit_paths
     request = {
@@ -289,6 +284,25 @@ def build_resident_queue_slice_verifier_request(
         evidence_producer_request=request,
         rejection_reasons=[],
     )
+
+
+def verified_signed_authority_from_stage_results(
+    stage_results: Mapping[str, Mapping[str, Any]],
+) -> Dict[str, Any]:
+    """Return only authority that matches signer and verification records."""
+
+    runtime = _mapping(stage_results.get("authority_runtime"))
+    verification = _mapping(stage_results.get("authority_verification"))
+    binding = recorded_authority_verification_binding(runtime, verification)
+    if not binding:
+        return {}
+    authority = _mapping(runtime.get("authority_result"))
+    work_authority = _mapping(authority.get("work_authority"))
+    return {
+        **dict(work_authority),
+        "accepted": True,
+        "signature_gate_digest": binding["verified_work_authority_digest"],
+    }
 
 
 def _reject(reasons: list[str]) -> ResidentQueueSliceVerifierRequestBindingResult:
@@ -350,4 +364,5 @@ __all__ = [
     "SLICE_VERIFIER_REQUEST_BINDING_ACCEPT",
     "SLICE_VERIFIER_REQUEST_BINDING_REJECT",
     "build_resident_queue_slice_verifier_request",
+    "verified_signed_authority_from_stage_results",
 ]

@@ -176,7 +176,13 @@ def test_produces_verifier_compatible_machine_evidence(tmp_path: Path) -> None:
     assert result.receipt.no_holoindex_reindex_performed is True
     assert ("git", "rev-parse", "HEAD") in runner.calls
 
-    verifier = verify_autonomous_slice_runtime(_verifier_request(result))
+    verifier_request = _verifier_request(result)
+    verifier = verify_autonomous_slice_runtime(
+        verifier_request,
+        trusted_work_authority_digest=verifier_request["signed_authority"][
+            "signature_gate_digest"
+        ],
+    )
     assert verifier.accepted is True
     assert verifier.decision == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
 

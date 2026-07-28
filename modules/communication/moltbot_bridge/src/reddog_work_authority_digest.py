@@ -47,10 +47,14 @@ def work_authority_digest_matches(
 
 def signed_authority_envelope_digest_matches(
     signed_authority: Mapping[str, Any],
+    trusted_work_authority_digest: Any,
 ) -> bool:
-    """Validate a verifier-facing authority envelope against its signed payload."""
+    """Validate an envelope against its payload and an independent digest."""
 
-    if signed_authority.get("accepted") is not True:
+    if (
+        signed_authority.get("accepted") is not True
+        or not isinstance(trusted_work_authority_digest, str)
+    ):
         return False
     signature_digest = signed_authority.get("signature_gate_digest")
     signed_digest = signed_authority.get("signed_work_authority_digest")
@@ -65,6 +69,11 @@ def signed_authority_envelope_digest_matches(
     ):
         return False
     expected_digest = signature_digest or signed_digest
+    if not isinstance(expected_digest, str) or not hmac.compare_digest(
+        expected_digest,
+        trusted_work_authority_digest,
+    ):
+        return False
     work_authority = {
         key: value
         for key, value in signed_authority.items()

@@ -1,4 +1,26 @@
 exemptions:
+  - file: "src/wre_autonomous_slice_verifier_runtime.py"
+    reason: >-
+      Inherited independent verifier coordinator remains intact while signed
+      Memex lineage and a separately recorded authority digest are enforced.
+      Its new validation helpers are bounded; orchestration decomposition is
+      tracked separately from this authority repair.
+    threshold_override: 586
+    function_threshold_override: 157
+    functions:
+      - "verify_autonomous_slice_runtime"
+    temporary: true
+    owner: "WRE Core Maintainers"
+    architect_reviewer: "0102 Technical Architect"
+    reviewer: "0102 Technical Architect"
+    review_date: "2026-Q3"
+    expires_on: "2026-09-30"
+    remediation: "ROADMAP.md#autonomous-slice-verifier-decomposition"
+    no_growth_ceiling:
+      file_lines: 586
+      functions:
+        verify_autonomous_slice_runtime: 157
+
   - file: "src/foundup_job_router.py"
     reason: >-
       Inherited multi-contract validation host. The create-route orchestration

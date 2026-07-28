@@ -119,6 +119,30 @@ exemptions:
     no_growth_ceiling: {file_lines: 737, functions: {issue_delegated_authority_runtime: 285}}
 
   - <<: *reddog_security_repair
+    file: "src/reddog_resident_queue_slice_verifier_request_binding.py"
+    reason: "Inherited queue evidence-request coordinator retained while signed authority is rebound to independently recorded verification state."
+    threshold_override: 371
+    function_threshold_override: 216
+    functions: ["build_resident_queue_slice_verifier_request"]
+    no_growth_ceiling: {file_lines: 371, functions: {build_resident_queue_slice_verifier_request: 216}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_signed_authority_worker_dispatch_dryrun.py"
+    reason: "Inherited dispatch planner retained while optional signed Memex lineage is propagated through bounded worker intents."
+    threshold_override: 496
+    function_threshold_override: 130
+    functions: ["plan_reddog_signed_authority_worker_dispatch_dry_run"]
+    no_growth_ceiling: {file_lines: 496, functions: {plan_reddog_signed_authority_worker_dispatch_dry_run: 130}}
+
+  - <<: *reddog_security_repair
+    file: "src/reddog_signed_worker_0102_readonly_review_binding.py"
+    reason: "Inherited read-only review adapter retained while exact signed Memex lineage is bound into worker evidence."
+    threshold_override: 380
+    function_threshold_override: 98
+    functions: ["run_signed_worker_dispatch_task", "build_readonly_0102_context_from_signed_worker"]
+    no_growth_ceiling: {file_lines: 380, functions: {run_signed_worker_dispatch_task: 83, build_readonly_0102_context_from_signed_worker: 98}}
+
+  - <<: *reddog_security_repair
     file: "src/reddog_resident_live_canary.py"
     reason: "Authenticated control-receipt preflight and governed artifact readiness remain adjacent during the focused valve reconciliation."
     threshold_override: 714
@@ -220,7 +244,7 @@ exemptions:
       Module-local WSP 62 registry. Provider-evidence review adds exact,
       review-dated ceilings for the touched legacy surfaces; splitting the
       registry would break the canonical module-level exemption lookup.
-    threshold_override: 415
+    threshold_override: 439
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

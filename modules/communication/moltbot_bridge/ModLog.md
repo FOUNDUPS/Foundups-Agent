@@ -1,8 +1,8 @@
 # ModLog - moltbot_bridge
-- Signed Memex supply lineage now uses the authoritative queue pair through
-  materialization, signing, dispatch, AgentDB execution, read-only review, and
-  independent verification. Conflicts, malformed/falsy pairs, digest aliases,
-  and substitutions reject before effects under one constant-time digest gate.
+- Signed Memex lineage now survives the full authority and dispatch chain.
+  Signer invocation validates the exact dry-run request digest before effects;
+  resident verification replaces packet authority with recorded chain truth.
+  Rehashed pre/post-signing substitutions now reject before worker evidence.
 - Exact-SHA review follow-up removed the importable process-local envelope
   seal as an authority primitive. Signed-worker admission now re-verifies the
   persisted AgentDB envelope against fresh authority inside the atomic claim

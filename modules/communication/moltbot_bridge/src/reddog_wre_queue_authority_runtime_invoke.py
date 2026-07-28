@@ -13,6 +13,7 @@ re-indexes HoloIndex.
 
 from __future__ import annotations
 
+import hmac
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
@@ -20,7 +21,6 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     AUTHORITY_ISSUED,
     AUTHORITY_REJECTED,
     AuthorityRuntimeStore,
-    DelegatedAuthorityRuntimeRequest,
     DelegatedAuthorityRuntimeResult,
     IsolatedSignerClient,
     PermissionSnapshotResolver,
@@ -29,6 +29,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    canonical_delegated_authority_request_digest,
+    rehydrate_delegated_authority_request,
 )
 
 
@@ -41,6 +45,7 @@ class QueueAuthorityRuntimeInvokeReason:
     REQUEST_DRYRUN_NOT_ACCEPTED = "REJECT_QUEUE_AUTHORITY_REQUEST_DRYRUN_NOT_ACCEPTED"
     REQUEST_PAYLOAD_MISSING = "REJECT_DELEGATED_AUTHORITY_REQUEST_MISSING"
     REQUEST_PAYLOAD_INVALID = "REJECT_DELEGATED_AUTHORITY_REQUEST_INVALID"
+    REQUEST_DIGEST_MISMATCH = "REJECT_DELEGATED_AUTHORITY_REQUEST_DIGEST_MISMATCH"
     AUTHORITY_RUNTIME_REJECTED = "REJECT_DELEGATED_AUTHORITY_RUNTIME_REJECTED"
 
 
@@ -90,61 +95,6 @@ def _reject(
     )
 
 
-def _request_from_payload(payload: Mapping[str, Any]) -> DelegatedAuthorityRuntimeRequest:
-    return DelegatedAuthorityRuntimeRequest(
-        work_order_id=str(payload["work_order_id"]),
-        work_order_digest=str(payload["work_order_digest"]),
-        base_ref=str(payload["base_ref"]),
-        principal_id=str(payload["principal_id"]),
-        principal_provider=str(payload["principal_provider"]),
-        principal_public_key=str(payload["principal_public_key"]),
-        reddog_id=str(payload["reddog_id"]),
-        reddog_public_key=str(payload["reddog_public_key"]),
-        repo_full_name=str(payload["repo_full_name"]),
-        foundup_id=str(payload["foundup_id"]),
-        allowed_paths=tuple(str(item) for item in payload["allowed_paths"]),
-        denied_paths=tuple(str(item) for item in payload.get("denied_paths") or ()),
-        requested_operation=str(payload["requested_operation"]),
-        permission_snapshot_digest=str(payload["permission_snapshot_digest"]),
-        queue_consumer_receipt_digest=str(payload["queue_consumer_receipt_digest"]),
-        wsp15_allocation_receipt_id=str(payload["wsp15_allocation_receipt_id"]),
-        wsp15_allocation_digest=str(payload["wsp15_allocation_digest"]),
-        wsp15_priority=str(payload["wsp15_priority"]),
-        wsp15_mps_total=int(payload["wsp15_mps_total"]),
-        wsp15_reasoning_tier=str(payload["wsp15_reasoning_tier"]),
-        model_selection_receipt_id=_optional_text(payload, "model_selection_receipt_id"),
-        model_selection_digest=_optional_text(payload, "model_selection_digest"),
-        model_runtime_binding_receipt_id=_optional_text(
-            payload, "model_runtime_binding_receipt_id"
-        ),
-        model_runtime_binding_digest=_optional_text(payload, "model_runtime_binding_digest"),
-        memex_supply_receipt_id=_optional_text(payload, "memex_supply_receipt_id"),
-        memex_supply_digest=_optional_text(payload, "memex_supply_digest"),
-        architect_fix_publication_receipt_id=_optional_text(
-            payload, "architect_fix_publication_receipt_id"
-        ),
-        architect_fix_publication_binding_digest=_optional_text(
-            payload, "architect_fix_publication_binding_digest"
-        ),
-        identity_nonce=str(payload["identity_nonce"]),
-        work_authority_nonce=str(payload["work_authority_nonce"]),
-        issued_at=int(payload["issued_at"]),
-        identity_expires_at=int(payload["identity_expires_at"]),
-        work_authority_expires_at=int(payload["work_authority_expires_at"]),
-        valve_state_required=str(payload["valve_state_required"]),
-        key_epoch=str(payload["key_epoch"]),
-        consensus_receipt_digest=_optional_text(payload, "consensus_receipt_digest"),
-        sovereign_authorization_digest=_optional_text(
-            payload, "sovereign_authorization_digest"
-        ),
-    )
-
-
-def _optional_text(payload: Mapping[str, Any], field: str) -> Optional[str]:
-    value = payload.get(field)
-    return str(value) if value else None
-
-
 def invoke_reddog_wre_queue_authority_runtime(
     *,
     explicit_queue_authority_runtime_requested: bool,
@@ -176,11 +126,24 @@ def invoke_reddog_wre_queue_authority_runtime(
             [QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_MISSING],
             explicit_requested=True,
         )
+    receipt = _mapping(dryrun.get("receipt"))
+    recorded_digest = receipt.get("delegated_authority_request_digest")
     try:
-        request = _request_from_payload(request_payload)
+        current_digest = canonical_delegated_authority_request_digest(
+            request_payload
+        )
+        request = rehydrate_delegated_authority_request(request_payload)
     except Exception:
         return _reject(
             [QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_INVALID],
+            explicit_requested=True,
+        )
+    if not isinstance(recorded_digest, str) or not hmac.compare_digest(
+        current_digest,
+        recorded_digest,
+    ):
+        return _reject(
+            [QueueAuthorityRuntimeInvokeReason.REQUEST_DIGEST_MISMATCH],
             explicit_requested=True,
         )
 

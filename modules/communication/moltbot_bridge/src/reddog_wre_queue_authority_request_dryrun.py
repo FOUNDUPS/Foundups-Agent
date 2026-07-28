@@ -19,6 +19,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import canonical_delegated_authority_request_digest
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_materialization import materialize_delegated_authority_request
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import is_sha256
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import optional_memex_authority_sources_match
@@ -30,7 +31,6 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
-
 
 QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT = "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
 QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT = "QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT"
@@ -387,7 +387,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         publication_binding_digest=publication_binding_digest,
     )
     request_dict = request.to_dict()
-    request_digest = _digest(request_dict)
+    request_digest = canonical_delegated_authority_request_digest(request_dict)
     receipt = QueueAuthorityRequestDryRunReceipt(
         receipt_id="queue_auth_req_" + _digest(
             {

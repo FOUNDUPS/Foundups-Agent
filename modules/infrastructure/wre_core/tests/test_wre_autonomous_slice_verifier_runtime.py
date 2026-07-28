@@ -40,6 +40,17 @@ def _resign_authority(req: dict) -> dict:
     return req
 
 
+def _verify(req: dict, trusted_digest: str | None = None):
+    return verifier.verify_autonomous_slice_runtime(
+        req,
+        trusted_work_authority_digest=(
+            trusted_digest
+            if trusted_digest is not None
+            else req["signed_authority"]["signature_gate_digest"]
+        ),
+    )
+
+
 def valid_request() -> dict:
     request = {
         "work_order_id": "wo-autonomous-verify-1",
@@ -109,8 +120,13 @@ def valid_request() -> dict:
     return _resign_authority(request)
 
 
-def assert_reject(req: dict, code: str) -> None:
-    result = verifier.verify_autonomous_slice_runtime(req)
+def assert_reject(
+    req: dict,
+    code: str,
+    *,
+    trusted_digest: str | None = None,
+) -> None:
+    result = _verify(req, trusted_digest)
     assert result.accepted is False
     assert result.decision == verifier.AUTONOMOUS_SLICE_VERIFIER_REJECT
     assert code in result.rejection_reasons
@@ -124,7 +140,7 @@ def assert_reject(req: dict, code: str) -> None:
 
 
 def test_accepts_complete_machine_derived_slice_packet() -> None:
-    result = verifier.verify_autonomous_slice_runtime(valid_request())
+    result = _verify(valid_request())
 
     assert result.accepted is True
     assert result.decision == verifier.AUTONOMOUS_SLICE_VERIFIER_ACCEPT
@@ -155,7 +171,7 @@ def test_carries_model_runtime_binding_from_signed_authority() -> None:
     req["signed_authority"]["model_runtime_binding_digest"] = _digest("7")
     _resign_authority(req)
 
-    result = verifier.verify_autonomous_slice_runtime(req)
+    result = _verify(req)
 
     assert result.accepted is True
     assert (
@@ -192,8 +208,8 @@ def test_carries_memex_binding_and_binds_it_into_verifier_receipt() -> None:
     req["signed_authority"]["memex_supply_digest"] = _digest("7")
     _resign_authority(req)
 
-    result = verifier.verify_autonomous_slice_runtime(req)
-    without_memex = verifier.verify_autonomous_slice_runtime(valid_request())
+    result = _verify(req)
+    without_memex = _verify(valid_request())
 
     assert result.accepted is True
     assert result.receipt.memex_supply_receipt_id == "memex-supply-receipt-1"
@@ -230,6 +246,20 @@ def test_rejects_post_signing_memex_substitution() -> None:
     req["signed_authority"]["memex_supply_digest"] = _digest("7")
 
     assert_reject(req, verifier.FAIL_SIGNED_AUTHORITY)
+
+
+def test_rejects_rehashed_authority_against_recorded_verification_digest() -> None:
+    req = valid_request()
+    trusted_digest = req["signed_authority"]["signature_gate_digest"]
+    req["signed_authority"]["memex_supply_receipt_id"] = "memex-supply-attacker"
+    req["signed_authority"]["memex_supply_digest"] = _digest("7")
+    _resign_authority(req)
+
+    assert_reject(
+        req,
+        verifier.FAIL_SIGNED_AUTHORITY,
+        trusted_digest=trusted_digest,
+    )
 
 
 def test_rejects_falsy_non_string_memex_bindings() -> None:
@@ -309,7 +339,7 @@ def test_rejects_protected_surface_without_consensus_and_accepts_with_escalation
 
     req["protected_surface_authorization_digest"] = _digest("7")
     req["consensus_receipt_digest"] = _digest("8")
-    result = verifier.verify_autonomous_slice_runtime(req)
+    result = _verify(req)
     assert result.accepted is True
 
 
@@ -398,8 +428,8 @@ def test_rejects_pattern_memory_write_or_pr_publish_before_acceptance() -> None:
 
 
 def test_receipt_is_deterministic_and_json_serializable() -> None:
-    first = verifier.verify_autonomous_slice_runtime(valid_request())
-    second = verifier.verify_autonomous_slice_runtime(valid_request())
+    first = _verify(valid_request())
+    second = _verify(valid_request())
 
     assert first.receipt.receipt_id == second.receipt.receipt_id
     dumped = json.dumps(first.to_dict(), sort_keys=True)

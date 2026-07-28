@@ -1017,8 +1017,15 @@ def _draft_pr_publish_plan() -> dict[str, object]:
 def _outcome_ratchet_request(
     verification_result: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
     verifier_result = dict(
-        verification_result or verify_autonomous_slice_runtime(_slice_verifier_request()).to_dict()
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request[
+                "signed_authority"
+            ]["signature_gate_digest"],
+        ).to_dict()
     )
     verifier_receipt = verifier_result["receipt"]
     return {
@@ -1065,8 +1072,15 @@ def _outcome_ratchet_request(
 def _held_out_gate_request(
     verification_result: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
     verifier_result = dict(
-        verification_result or verify_autonomous_slice_runtime(_slice_verifier_request()).to_dict()
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request[
+                "signed_authority"
+            ]["signature_gate_digest"],
+        ).to_dict()
     )
     verifier_receipt = verifier_result["receipt"]
     head_sha = str(verifier_receipt["head_sha"])

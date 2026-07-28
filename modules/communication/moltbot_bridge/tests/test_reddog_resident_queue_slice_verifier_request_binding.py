@@ -191,13 +191,18 @@ def _stage_results(
         "authority_id": "authority-1",
         "work_order_id": WORK_ORDER_ID,
     }
+    verified_work_authority_digest = canonical_work_authority_digest(
+        work_authority
+    )
     payload = {
         "authority_runtime": {
+            "decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT",
             "authority_result": {
                 "accepted": True,
                 "work_authority": work_authority,
                 "receipt": {
                     "receipt_id": _digest("8"),
+                    "status": "DELEGATED_AUTHORITY_ISSUED",
                     "work_authority_digest": canonical_work_authority_digest(
                         work_authority
                     ),
@@ -205,6 +210,8 @@ def _stage_results(
             }
         },
         "authority_verification": {
+            "decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT",
+            "verified_work_authority_digest": verified_work_authority_digest,
             "verification_result": {
                 "accepted": True,
                 "receipt_id": _digest("c"),
@@ -290,6 +297,30 @@ def test_post_signing_memex_substitution_cannot_reach_verifier(tmp_path: Path) -
     work_authority = stages["authority_runtime"]["authority_result"]["work_authority"]
     work_authority["memex_supply_receipt_id"] = "memex-supply-attacker"
     work_authority["memex_supply_digest"] = _digest("7")
+
+    result = build_resident_queue_slice_verifier_request(
+        work_order=_work_order(),
+        stage_results=stages,
+        repo_root=tmp_path / "repo",
+        assurance_reservation_store=_ReservationStore(),
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH in result.rejection_reasons
+    assert result.evidence_producer_request == {}
+
+
+def test_rehashed_signer_receipt_cannot_override_verified_authority(
+    tmp_path: Path,
+) -> None:
+    stages = _stage_results(tmp_path)
+    authority_result = stages["authority_runtime"]["authority_result"]
+    work_authority = authority_result["work_authority"]
+    work_authority["memex_supply_receipt_id"] = "memex-supply-attacker"
+    work_authority["memex_supply_digest"] = _digest("7")
+    authority_result["receipt"][
+        "work_authority_digest"
+    ] = canonical_work_authority_digest(work_authority)
 
     result = build_resident_queue_slice_verifier_request(
         work_order=_work_order(),
