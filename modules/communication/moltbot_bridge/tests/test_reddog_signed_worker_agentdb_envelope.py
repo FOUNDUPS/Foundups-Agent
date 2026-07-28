@@ -15,6 +15,7 @@ from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src import (
     openclaw_supervisor as supervisor_module,
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
+    reddog_signed_worker_run_task_runtime as run_task_runtime,
 )
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
@@ -118,6 +119,90 @@ def test_run_task_rebuilds_canonical_context_before_runner_selection(
     assert canonical["worker_runtime"] == "openclaw"
     assert canonical["worker_role"] == "openclaw_candidate"
     assert canonical["capability"] == "candidate_queue_review"
+
+
+def test_run_task_signed_success_uses_exact_finalization_cas(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setattr(
+        AgentDB,
+        "complete_autonomous_task",
+        lambda *_args, **_kwargs: pytest.fail("generic finalizer used"),
+    )
+    runner = _FakeRunner()
+
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+    )
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["ok"] is True
+    assert result["finalization_owned"] is True
+    assert stored is not None and stored["status"] == "completed"
+
+
+def test_run_task_post_claim_exception_fails_through_exact_cas(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setattr(
+        run_task_runtime,
+        "_runner",
+        lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("binding-failed")),
+    )
+
+    result = execute_task(task_id, repo_root=tmp_path)
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["ok"] is False
+    assert result["finalization_owned"] is True
+    assert "dispatch_error:RuntimeError" in result["detail"]
+    assert stored is not None and stored["status"] == "failed"
+
+
+def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    original = AgentDB.finalize_signed_worker_execution
+
+    def conflict(self, selected_task_id, *, context, accepted):
+        assert self.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET status = 'cancelled' "
+            "WHERE task_id = ? AND status = 'executing'",
+            (selected_task_id,),
+        ) == 1
+        return original(
+            self,
+            selected_task_id,
+            context=context,
+            accepted=accepted,
+        )
+
+    monkeypatch.setattr(AgentDB, "finalize_signed_worker_execution", conflict)
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+    )
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["ok"] is False
+    assert result["finalization_owned"] is True
+    assert result["detail"] == "reddog_signed_worker_finalization_conflict"
+    assert stored is not None and stored["status"] == "cancelled"
 
 
 def test_execution_claim_consumes_token_without_persisting_raw_value() -> None:

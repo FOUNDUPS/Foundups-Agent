@@ -345,34 +345,24 @@ def _claim_reddog_signed_worker_dispatch_task_once_under_control_lock(
 
 def _signed_worker_execute_claimed_task(
     *,
-    repo_root: Path,
-    db: Any,
-    task_id: str,
-    context: Mapping[str, Any],
+    repo_root: Path, db: Any, task_id: str, context: Mapping[str, Any],
     signed_worker_runner: Any | None,
     authority_verification_context: Any | None,
 ) -> Dict[str, Any]:
     """Authenticate the claimed task before selecting or invoking a runner."""
-
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
-        try_rehydrate_signed_worker_agentdb_context,
-    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import try_rehydrate_signed_worker_agentdb_context
     verified_context, error = try_rehydrate_signed_worker_agentdb_context(
-        repo_root=repo_root, task_id=task_id, context=context,
+        repo_root=repo_root, task_id=task_id, context=context, env=os.environ,
         authority_verification_context=authority_verification_context,
-        env=os.environ,
     )
     if verified_context is None:
         return _signed_worker_reject_claimed_task(
             db=db, task_id=task_id, context=context,
             reasons=(
-                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED,
-                error,
+                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED, error,
             ),
         )
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
-        admit_verified_signed_worker_context,
-    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import admit_verified_signed_worker_context
     admitted_context = admit_verified_signed_worker_context(
         db=db, task_id=task_id, verified_context=verified_context
     )
@@ -385,21 +375,30 @@ def _signed_worker_execute_claimed_task(
                 SignedWorkerOpenClawClaimReason.EXECUTION_ALREADY_CLAIMED,
             ),
         )
-    effective_runner, runner_reject = _signed_worker_effective_runner(
-        repo_root=repo_root, db=db, task_id=task_id, context=admitted_context,
-        signed_worker_runner=signed_worker_runner,
-    )
-    if runner_reject is not None:
-        return runner_reject
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
-        execute_reddog_signed_worker_dispatch_task,
-    )
-    run_result = execute_reddog_signed_worker_dispatch_task(
-        task_context=admitted_context,
-        task_id=task_id,
-        repo_root=repo_root,
-        runner=effective_runner,
-    )
+    try:
+        effective_runner, runner_reject = _signed_worker_effective_runner(
+            repo_root=repo_root, db=db, task_id=task_id, context=admitted_context,
+            signed_worker_runner=signed_worker_runner,
+        )
+        if runner_reject is not None:
+            return runner_reject
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
+            execute_reddog_signed_worker_dispatch_task,
+        )
+        run_result = execute_reddog_signed_worker_dispatch_task(
+            task_context=admitted_context,
+            task_id=task_id,
+            repo_root=repo_root,
+            runner=effective_runner,
+        )
+    except Exception as exc:
+        return _signed_worker_reject_claimed_task(
+            db=db, task_id=task_id, context=admitted_context,
+            reasons=(SignedWorkerOpenClawClaimReason.TASK_EXECUTION_REJECTED,),
+            runner_result={
+                "status": "execution_exception", "exception_type": type(exc).__name__,
+            },
+        )
     return _signed_worker_finalize_claimed_task(
         db=db, task_id=task_id, context=admitted_context, run_result=run_result
     )

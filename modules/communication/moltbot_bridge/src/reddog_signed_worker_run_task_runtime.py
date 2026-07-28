@@ -69,27 +69,57 @@ def _claim_and_execute(
         result = _rejected("reddog_signed_worker_execution_already_claimed")
         result["finalization_owned"] = True
         return result
+    admitted_context = bind_execution_admission(verified_context, admission)
     try:
         effective_runner, binding_reject = _runner(
             repo_root=repo_root,
             signed_worker_runner=signed_worker_runner,
             env=env,
         )
-    except ImportError as exc:
-        logger.warning("[RUN_TASK] RedDog runner binding import failed: %s", exc)
-        return _rejected(f"reddog_signed_worker_runner_binding_error: {exc}")
-    if binding_reject is not None:
-        return binding_reject
-    try:
-        return _execute(
-            repo_root=repo_root,
-            task_id=task_id,
-            context=bind_execution_admission(verified_context, admission),
-            runner=effective_runner,
+        result = (
+            dict(binding_reject)
+            if binding_reject is not None
+            else dict(_execute(
+                repo_root=repo_root,
+                task_id=task_id,
+                context=admitted_context,
+                runner=effective_runner,
+            ))
         )
     except Exception as exc:
         logger.warning("[RUN_TASK] RedDog signed-worker dispatch error: %s", exc)
-        return _rejected(f"reddog_signed_worker_dispatch_error: {exc}")
+        result = _rejected(
+            f"reddog_signed_worker_dispatch_error:{type(exc).__name__}"
+        )
+    return _finalize_owned_execution(
+        db=db, task_id=task_id, context=admitted_context, result=result
+    )
+
+
+def _finalize_owned_execution(
+    *,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    result: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    final = dict(result)
+    final["finalization_owned"] = True
+    operation = getattr(db, "finalize_signed_worker_execution", None)
+    try:
+        finalized = callable(operation) and operation(
+            task_id,
+            context=context,
+            accepted=final.get("ok") is True,
+        )
+    except Exception:
+        finalized = False
+    if finalized:
+        return final
+    return {
+        **_rejected("reddog_signed_worker_finalization_conflict"),
+        "finalization_owned": True,
+    }
 
 
 def _verify_context(

@@ -1329,6 +1329,13 @@ class _FakeWorkerDispatchTaskWriter:
             "receipt_id": receipt.receipt_id,
         }
 
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": self.accepted,
+            "created_task_ids": [task.task_id for task in tasks],
+            "receipt_id": receipt.receipt_id,
+        }
+
 
 def _ed25519_signing_material():
     from cryptography.hazmat.primitives import serialization

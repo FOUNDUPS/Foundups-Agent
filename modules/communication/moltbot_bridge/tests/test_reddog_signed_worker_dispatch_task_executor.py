@@ -1,6 +1,5 @@
 """Tests for REDDOG_SIGNED_WORKER_TASK_OPENCLAW_CLAIM_RUNTIME_PHASE1."""
 from __future__ import annotations
-
 import ast
 import hashlib
 import json
@@ -14,6 +13,7 @@ import pytest
 
 from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src import (
+    openclaw_supervisor as supervisor_module,
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
 )
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
@@ -324,11 +324,12 @@ class _CollectingWriter:
             "created_task_ids": [task.task_id for task in tasks],
         }
 
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):  # noqa: D102,E701
+        return self.enqueue_signed_worker_dispatch_tasks(tasks, receipt)
 
 def _digest(value: object) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
 
 def _allocation(**overrides):
     payload = {
@@ -1124,6 +1125,29 @@ def test_openclaw_signed_worker_claim_persists_failure_result_receipt(
     assert SignedWorkerDispatchTaskExecutorReason.RUNNER_MISSING in receipt[
         "rejection_reasons"
     ]
+
+
+def test_openclaw_signed_worker_claim_fails_terminally_on_binding_exception(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+
+    def _raise_binding_error(**_kwargs):
+        raise RuntimeError("binding failed")
+    monkeypatch.setattr(
+        supervisor_module,
+        "_signed_worker_effective_runner",
+        _raise_binding_error,
+    )
+    result = claim_reddog_signed_worker_dispatch_task_once(repo_root=tmp_path)
+
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+    receipt = _signed_worker_task_last_result(task_id)
+    assert receipt["claim_status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert str(receipt["runner_result_digest"]).startswith("sha256:")
 
 
 def test_openclaw_signed_worker_claim_persists_requeue_result_receipt(

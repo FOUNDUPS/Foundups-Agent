@@ -36,32 +36,13 @@ def execute_task(
     signed_worker_runner: Any | None = None,
     execution_claim: Mapping[str, str] | None = None,
 ) -> Dict[str, Any]:
-    """
-    Execute a single autonomous task from AgentDB.
-
-    Returns:
-        Dict with keys: ok (bool), detail (str), executor (str),
-        execution_time_ms (int)
-    """
-    if repo_root is None:
-        repo_root = REPO_ROOT
-
+    """Execute a single assigned AgentDB task through its exact route."""
+    repo_root = repo_root or REPO_ROOT
     start = time.monotonic()
-
-    try:
-        from modules.infrastructure.database.src.agent_db import AgentDB
-    except ImportError as e:
-        return {"ok": False, "detail": f"AgentDB import failed: {e}", "executor": "none", "execution_time_ms": 0}
-
-    db = AgentDB()
-
-    # Fetch the task (supervisor sets it to "assigned" before calling us)
-    tasks = db.get_autonomous_tasks(status="assigned", limit=100)
-    task = next((t for t in tasks if t.get("task_id") == task_id), None)
-
-    if not task:
-        return {"ok": False, "detail": f"Task {task_id} not found in 'assigned' state", "executor": "none", "execution_time_ms": 0}
-
+    db, task, load_error = _load_assigned_task(task_id)
+    if load_error is not None:
+        return load_error
+    assert db is not None and task is not None
     required_skills = task.get("required_skills", [])
     context = task.get("context", {})
     source = context.get("source", "") if isinstance(context, dict) else ""
@@ -70,127 +51,261 @@ def execute_task(
 
     logger.info("[RUN_TASK] Executing task %s: %s (skills=%s, source=%s)", task_id, description[:80], required_skills, source)
 
-    # Runtime emitter: structured event for troubleshooting/tuning
-    try:
-        from modules.infrastructure.dae_daemon.src.runtime_emitter import emit_start, emit_success, emit_failure
-        _emit_start = emit_start("run_task", "task_dispatch", task_id=task_id,
-                                 details={"source": source, "description": description[:80]})
-    except Exception:
-        _emit_start = None
-        emit_success = emit_failure = None  # type: ignore[assignment]
+    emitters = _start_runtime_emitter(task_id, source, description)
 
-    result: Dict[str, Any] = {"ok": False, "detail": "no_executor_matched", "executor": "none"}
-
-    # Dispatch path 1: exact RedDog read-only audit report execution.
-    if "reddog_readonly_audit" in required_skills and source == "reddog_openclaw_readonly_audit_swarm":
-        readonly_result = _try_reddog_readonly_audit_dispatch(repo_root, task_id, context)
-        if readonly_result is not None:
-            result = readonly_result
-
-    # Dispatch path 2: exact RedDog signed worker-dispatch task execution.
-    if not result["ok"] and result["detail"] == "no_executor_matched":
-        from modules.communication.moltbot_bridge.src.reddog_signed_worker_run_task_runtime import (
-            execute_signed_worker_from_agentdb,
-        )
-
-        signed_worker_result = execute_signed_worker_from_agentdb(
-            repo_root=repo_root,
-            db=db,
-            task_id=task_id,
-            context=context,
-            required_skills=required_skills,
-            source=source,
-            discovered_by=discovered_by,
-            signed_worker_runner=signed_worker_runner,
-            env=os.environ,
-        )
-        if signed_worker_result is not None:
-            result = dict(signed_worker_result)
-
-    # Dispatch path 3: exact host-owned startup maintenance.
-    if (
-        not result["ok"]
-        and result["detail"] == "no_executor_matched"
-        and source
-        in {
-            "startup_maintenance_gate",
-            "holoindex_postmerge_coordinator",
-        }
-    ):
-        startup_result = _try_startup_maintenance_dispatch(
-            repo_root,
-            task_id,
-            context,
-            execution_claim=execution_claim,
-        )
-        if startup_result is not None:
-            result = startup_result
+    result = _dispatch_exact_routes(
+        repo_root=repo_root,
+        db=db,
+        task_id=task_id,
+        context=context,
+        required_skills=required_skills,
+        source=source,
+        discovered_by=discovered_by,
+        signed_worker_runner=signed_worker_runner,
+        execution_claim=execution_claim,
+    )
 
     # Dispatch path 4: WRE skill execution.
-    if required_skills:
-        if not result["ok"] and result["detail"] == "no_executor_matched":
-            wre_result = _try_wre_dispatch(repo_root, task_id, required_skills, context, description)
-            if wre_result is not None:
-                result = wre_result
+    result = _dispatch_fallback_routes(
+        result=result,
+        repo_root=repo_root,
+        task_id=task_id,
+        context=context,
+        required_skills=required_skills,
+        source=source,
+        description=description,
+    )
 
     # ── Dispatch path 2: Self-audit policy fix ──
-    if not result["ok"] and result["detail"] == "no_executor_matched" and source == "self_audit":
+    # ── Dispatch path 3: Grant task dispatch (openclaw-grants) ──
+    # ── Finalize in AgentDB ──
+    return _finalize_task_result(
+        db=db,
+        task_id=task_id,
+        context=context,
+        result=result,
+        start=start,
+        emitters=emitters,
+    )
+
+
+def _load_assigned_task(
+    task_id: str,
+) -> tuple[Any | None, Mapping[str, Any] | None, Dict[str, Any] | None]:
+    try:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+    except ImportError as exc:
+        return None, None, {
+            "ok": False,
+            "detail": f"AgentDB import failed: {exc}",
+            "executor": "none",
+            "execution_time_ms": 0,
+        }
+    db = AgentDB()
+    tasks = db.get_autonomous_tasks(status="assigned", limit=100)
+    task = next((item for item in tasks if item.get("task_id") == task_id), None)
+    if task is None:
+        return db, None, {
+            "ok": False,
+            "detail": f"Task {task_id} not found in 'assigned' state",
+            "executor": "none",
+            "execution_time_ms": 0,
+        }
+    return db, task, None
+
+
+def _dispatch_exact_routes(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    required_skills: Any,
+    source: str,
+    discovered_by: str,
+    signed_worker_runner: Any | None,
+    execution_claim: Mapping[str, str] | None,
+) -> Dict[str, Any]:
+    result = _no_executor_result()
+    if "reddog_readonly_audit" in required_skills and source == "reddog_openclaw_readonly_audit_swarm":
+        readonly = _try_reddog_readonly_audit_dispatch(repo_root, task_id, context)
+        if readonly is not None:
+            result = readonly
+    if _no_executor_matched(result):
+        signed = _try_signed_worker_dispatch(
+            repo_root=repo_root, db=db, task_id=task_id, context=context,
+            required_skills=required_skills, source=source,
+            discovered_by=discovered_by, signed_worker_runner=signed_worker_runner,
+        )
+        if signed is not None:
+            result = signed
+    if _no_executor_matched(result) and source in {
+        "startup_maintenance_gate", "holoindex_postmerge_coordinator",
+    }:
+        startup = _try_startup_maintenance_dispatch(
+            repo_root, task_id, context, execution_claim=execution_claim,
+        )
+        if startup is not None:
+            result = startup
+    return result
+
+
+def _try_signed_worker_dispatch(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    required_skills: Any,
+    source: str,
+    discovered_by: str,
+    signed_worker_runner: Any | None,
+) -> Dict[str, Any] | None:
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_run_task_runtime import (
+        execute_signed_worker_from_agentdb,
+    )
+    result = execute_signed_worker_from_agentdb(
+        repo_root=repo_root, db=db, task_id=task_id, context=context,
+        required_skills=required_skills, source=source,
+        discovered_by=discovered_by, signed_worker_runner=signed_worker_runner,
+        env=os.environ,
+    )
+    return dict(result) if result is not None else None
+
+
+def _dispatch_fallback_routes(
+    *,
+    result: Dict[str, Any],
+    repo_root: Path,
+    task_id: str,
+    context: Mapping[str, Any],
+    required_skills: Any,
+    source: str,
+    description: str,
+) -> Dict[str, Any]:
+    if required_skills and _no_executor_matched(result):
+        wre_result = _try_wre_dispatch(
+            repo_root, task_id, required_skills, context, description
+        )
+        if wre_result is not None:
+            result = wre_result
+    if _no_executor_matched(result) and source == "self_audit":
         audit_result = _try_self_audit_dispatch(repo_root, context)
         if audit_result is not None:
             result = audit_result
+    if _no_executor_matched(result) and "openclaw-grants" in required_skills:
+        grant_result = _try_grant_dispatch(
+            repo_root, task_id, context, description
+        )
+        if grant_result is not None:
+            result = grant_result
+    return result
 
-    # ── Dispatch path 3: Grant task dispatch (openclaw-grants) ──
-    if not result["ok"] and result["detail"] == "no_executor_matched":
-        if "openclaw-grants" in required_skills:
-            grant_result = _try_grant_dispatch(repo_root, task_id, context, description)
-            if grant_result is not None:
-                result = grant_result
 
-    # ── Finalize in AgentDB ──
+def _finalize_task_result(
+    *,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    result: Dict[str, Any],
+    start: float,
+    emitters: tuple[Any, Any, Any],
+) -> Dict[str, Any]:
     elapsed_ms = int((time.monotonic() - start) * 1000)
     result["execution_time_ms"] = elapsed_ms
     if result["ok"] and result.get("executor") == "reddog:readonly_audit":
-        persist_result = _try_reddog_readonly_audit_report_persist(task_id, context, result)
-        result["readonly_audit_report_persist"] = persist_result
-        if not persist_result.get("accepted", False):
+        persist = _try_reddog_readonly_audit_report_persist(
+            task_id, context, result
+        )
+        result["readonly_audit_report_persist"] = persist
+        if not persist.get("accepted", False):
             result["ok"] = False
-            result["detail"] = json.dumps(persist_result, default=str)[:1000]
-
+            result["detail"] = json.dumps(persist, default=str)[:1000]
     if result.get("finalization_owned"):
         logger.info(
             "[RUN_TASK] Task %s finalization owned by executor=%s (%dms)",
-            task_id,
-            result["executor"],
-            elapsed_ms,
+            task_id, result["executor"], elapsed_ms,
         )
     elif result["ok"]:
-        db.complete_autonomous_task(task_id)
-        logger.info("[RUN_TASK] Task %s completed (executor=%s, %dms)", task_id, result["executor"], elapsed_ms)
-        if _emit_start is not None and emit_success:
-            try:
-                emit_success("run_task", "task_dispatch", _emit_start,
-                             task_id=task_id, details={"executor": result["executor"]})
-            except Exception:
-                pass
+        _complete_task(db, task_id, result, elapsed_ms, emitters)
     else:
-        # Mark as failed by updating status directly (no fail_autonomous_task method yet)
-        try:
-            db.db.execute_write(
-                "UPDATE agents_autonomous_tasks SET status = 'failed' WHERE task_id = ?",
-                (task_id,),
-            )
-        except Exception as fail_exc:
-            logger.warning("[RUN_TASK] Could not mark task %s as failed: %s", task_id, fail_exc)
-        logger.warning("[RUN_TASK] Task %s failed: %s (executor=%s)", task_id, result["detail"][:200], result["executor"])
-        if _emit_start is not None and emit_failure:
-            try:
-                emit_failure("run_task", "task_dispatch", _emit_start,
-                             result["detail"][:200], task_id=task_id,
-                             details={"executor": result["executor"]})
-            except Exception:
-                pass
-
+        _fail_task(db, task_id, result, emitters)
     return result
+
+
+def _start_runtime_emitter(
+    task_id: str, source: str, description: str
+) -> tuple[Any, Any, Any]:
+    try:
+        from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+            emit_failure, emit_start, emit_success,
+        )
+        started = emit_start(
+            "run_task", "task_dispatch", task_id=task_id,
+            details={"source": source, "description": description[:80]},
+        )
+        return started, emit_success, emit_failure
+    except Exception:
+        return None, None, None
+
+
+def _complete_task(
+    db: Any,
+    task_id: str,
+    result: Mapping[str, Any],
+    elapsed_ms: int,
+    emitters: tuple[Any, Any, Any],
+) -> None:
+    db.complete_autonomous_task(task_id)
+    logger.info(
+        "[RUN_TASK] Task %s completed (executor=%s, %dms)",
+        task_id, result["executor"], elapsed_ms,
+    )
+    started, emit_success, _ = emitters
+    if started is not None and emit_success:
+        try:
+            emit_success(
+                "run_task", "task_dispatch", started, task_id=task_id,
+                details={"executor": result["executor"]},
+            )
+        except Exception:
+            pass
+
+
+def _fail_task(
+    db: Any,
+    task_id: str,
+    result: Mapping[str, Any],
+    emitters: tuple[Any, Any, Any],
+) -> None:
+    try:
+        db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET status = 'failed' WHERE task_id = ?",
+            (task_id,),
+        )
+    except Exception as fail_exc:
+        logger.warning("[RUN_TASK] Could not mark task %s as failed: %s", task_id, fail_exc)
+    logger.warning(
+        "[RUN_TASK] Task %s failed: %s (executor=%s)",
+        task_id, str(result["detail"])[:200], result["executor"],
+    )
+    started, _, emit_failure = emitters
+    if started is not None and emit_failure:
+        try:
+            emit_failure(
+                "run_task", "task_dispatch", started, str(result["detail"])[:200],
+                task_id=task_id, details={"executor": result["executor"]},
+            )
+        except Exception:
+            pass
+
+
+def _no_executor_result() -> Dict[str, Any]:
+    return {"ok": False, "detail": "no_executor_matched", "executor": "none"}
+
+
+def _no_executor_matched(result: Mapping[str, Any]) -> bool:
+    return result.get("ok") is not True and result.get("detail") == "no_executor_matched"
 
 
 def _try_reddog_readonly_audit_dispatch(

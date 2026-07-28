@@ -129,6 +129,69 @@ def _is_sha256_digest(value: Any) -> bool:
     return len(text) == 64 and all(character in "0123456789abcdef" for character in text)
 
 
+def _signed_worker_finalization_binding(
+    task_id: str,
+    claim: Any,
+    use: Any,
+) -> Optional[tuple[str, Dict[str, Any], Dict[str, Any]]]:
+    if not isinstance(claim, Mapping) or not isinstance(use, Mapping):
+        return None
+    expected_claim = dict(claim)
+    expected_use = dict(use)
+    assigned_to = str(expected_claim.get("assigned_to") or "")
+    if (
+        str(expected_claim.get("task_id") or "") != task_id
+        or str(expected_use.get("task_id") or "") != task_id
+        or str(expected_claim.get("status") or "") != "CLAIMED"
+        or str(expected_use.get("status") or "") != "CONSUMED"
+        or str(expected_use.get("claim_receipt_id") or "")
+        != str(expected_claim.get("receipt_id") or "")
+        or str(expected_use.get("token_digest") or "")
+        != str(expected_claim.get("token_digest") or "")
+        or not assigned_to
+        or not _valid_embedded_receipt(expected_claim)
+        or not _valid_embedded_receipt(expected_use)
+    ):
+        return None
+    return assigned_to, expected_claim, expected_use
+
+
+def _valid_embedded_receipt(receipt: Mapping[str, Any]) -> bool:
+    body = dict(receipt)
+    receipt_id = str(body.pop("receipt_id", "") or "")
+    return _is_sha256_digest(receipt_id) and receipt_id == _assurance_digest(body)
+
+
+def _matching_signed_worker_execution_context(
+    row: Any,
+    assigned_to: str,
+    expected_claim: Mapping[str, Any],
+    expected_use: Mapping[str, Any],
+) -> Optional[str]:
+    if row is None:
+        return None
+    payload = dict(row)
+    raw_context = str(payload.get("context") or "")
+    try:
+        stored_context = json.loads(raw_context)
+    except (TypeError, ValueError):
+        return None
+    if (
+        payload.get("status") != "executing"
+        or str(payload.get("assigned_to") or "") != assigned_to
+        or not isinstance(stored_context, dict)
+        or stored_context.get("signed_worker_execution_claim") != expected_claim
+        or stored_context.get("signed_worker_execution_use") != expected_use
+    ):
+        return None
+    preclaim_context = dict(stored_context)
+    preclaim_context.pop("signed_worker_execution_claim", None)
+    preclaim_context.pop("signed_worker_execution_use", None)
+    if expected_claim.get("context_digest") != _assurance_digest(preclaim_context):
+        return None
+    return raw_context
+
+
 def _normalize_sha256_digest(value: Any) -> str:
     text = str(value or "").strip().lower()
     return text if text.startswith("sha256:") else f"sha256:{text}"
@@ -1277,11 +1340,11 @@ class AgentDB:
         return results
 
     def assign_autonomous_task(self, task_id: str, agent_id: str) -> bool:
-        """Assign autonomous task to agent."""
+        """Atomically claim one pending autonomous task for an agent."""
         return self.db.execute_write('''
             UPDATE agents_autonomous_tasks
             SET assigned_to = ?, assigned_at = ?, status = 'assigned'
-            WHERE task_id = ?
+            WHERE task_id = ? AND status = 'pending'
         ''', (agent_id, datetime.now().isoformat(), task_id)) > 0
 
     def claim_holoindex_postmerge_task(
@@ -1679,6 +1742,50 @@ class AgentDB:
             SET completed_at = ?, status = 'completed'
             WHERE task_id = ?
         ''', (datetime.now().isoformat(), task_id)) > 0
+
+    def finalize_signed_worker_execution(
+        self,
+        task_id: str,
+        *,
+        context: Mapping[str, Any],
+        accepted: bool,
+    ) -> bool:
+        """Finalize only the exact executing context admitted by the worker CAS."""
+        claim = context.get("signed_worker_execution_claim")
+        use = context.get("signed_worker_execution_use")
+        binding = _signed_worker_finalization_binding(task_id, claim, use)
+        if binding is None:
+            return False
+        assigned_to, expected_claim, expected_use = binding
+        status = "completed" if accepted is True else "failed"
+        try:
+            with self.db.get_connection() as connection:
+                row = connection.execute(
+                    "SELECT status, assigned_to, context "
+                    "FROM agents_autonomous_tasks WHERE task_id = ?",
+                    (task_id,),
+                ).fetchone()
+                raw_context = _matching_signed_worker_execution_context(
+                    row, assigned_to, expected_claim, expected_use
+                )
+                if raw_context is None:
+                    return False
+                changed = connection.execute(
+                    "UPDATE agents_autonomous_tasks "
+                    "SET completed_at = ?, status = ? "
+                    "WHERE task_id = ? AND status = 'executing' "
+                    "AND assigned_to = ? AND context = ?",
+                    (
+                        datetime.now().isoformat(),
+                        status,
+                        task_id,
+                        assigned_to,
+                        raw_context,
+                    ),
+                ).rowcount
+                return changed == 1
+        except Exception:
+            return False
 
     def schedule_autonomous_task_retry(
         self,

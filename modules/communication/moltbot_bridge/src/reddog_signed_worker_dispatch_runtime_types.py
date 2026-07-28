@@ -139,6 +139,24 @@ class SignedWorkerDispatchTaskWriter(Protocol):
         receipt: SignedWorkerDispatchRuntimeReceipt,
     ) -> Mapping[str, Any]: ...
 
+    def recover_signed_worker_dispatch_tasks(
+        self,
+        tasks: Sequence[SignedWorkerDispatchTaskSpec],
+        receipt: SignedWorkerDispatchRuntimeReceipt,
+    ) -> Mapping[str, Any]: ...
+
+    def recover_applied_signed_worker_dispatch_tasks(
+        self,
+        tasks: Sequence[SignedWorkerDispatchTaskSpec],
+        receipt: SignedWorkerDispatchRuntimeReceipt,
+    ) -> Mapping[str, Any]: ...
+
+    def activate_signed_worker_dispatch_tasks(
+        self,
+        tasks: Sequence[SignedWorkerDispatchTaskSpec],
+        receipt: SignedWorkerDispatchRuntimeReceipt,
+    ) -> Mapping[str, Any]: ...
+
 
 def reject_runtime(reasons: Sequence[str]) -> SignedWorkerDispatchRuntimeResult:
     return SignedWorkerDispatchRuntimeResult(

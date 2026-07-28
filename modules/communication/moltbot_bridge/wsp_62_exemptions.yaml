@@ -180,12 +180,12 @@ exemptions:
 
   - file: "scripts/run_task.py"
     reason: >-
-      Legacy multi-family task dispatcher. The newly added HoloIndex startup
-      maintenance branch and startup helpers are within the 60-line function
-      limit; unrelated dispatch families remain queued for decomposition.
+      The dispatcher and newly added signed-worker paths are decomposed below
+      the communication-domain limit. One inherited WRE adapter remains six
+      lines over the limit and is queued for separate interface cleanup.
     threshold_override: 675
-    function_threshold_override: 140
-    functions: ["execute_task", "_try_wre_dispatch"]
+    function_threshold_override: 66
+    functions: ["_try_wre_dispatch"]
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -394,7 +394,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9072
+    threshold_override: 9075
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

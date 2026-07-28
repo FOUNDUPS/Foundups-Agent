@@ -643,11 +643,11 @@ def publish_agentdb_task_for_intent(
                 origin_continuity_id=base.origin_continuity_id,
             ),
         )
-    written = runtime.AgentDbSignedWorkerDispatchTaskWriter().enqueue_signed_worker_dispatch_tasks(
-        specs,
-        result.receipt,
-    )
+    writer = runtime.AgentDbSignedWorkerDispatchTaskWriter()
+    written = writer.enqueue_signed_worker_dispatch_tasks(specs, result.receipt)
     assert written["ok"] is True
+    activated = writer.activate_signed_worker_dispatch_tasks(specs, result.receipt)
+    assert activated["ok"] is True
     return specs[0].task_id
 
 
@@ -657,6 +657,9 @@ class _CollectingAgentDbSpecWriter:
             "ok": True,
             "created_task_ids": [task.task_id for task in tasks],
         }
+
+    def activate_signed_worker_dispatch_tasks(self, tasks: Any, receipt: Any):
+        return self.enqueue_signed_worker_dispatch_tasks(tasks, receipt)
 
 
 def with_architect_fix_publication(

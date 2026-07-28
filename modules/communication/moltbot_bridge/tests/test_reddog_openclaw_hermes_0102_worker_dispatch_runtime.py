@@ -14,6 +14,9 @@ import pytest
 from modules.communication.moltbot_bridge.src import (
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
 )
+from modules.communication.moltbot_bridge.src import (
+    reddog_signed_worker_dispatch_agentdb_writer as writer_module,
+)
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_publication_effect_binding import (
     committed_publication_effect_binding,
 )
@@ -77,6 +80,26 @@ class _FakeWriter:
 
     def recover_signed_worker_dispatch_tasks(self, tasks, receipt):
         return self.enqueue_signed_worker_dispatch_tasks(tasks, receipt)
+
+    def recover_applied_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {"ok": False, "reason": "already_applied", "created_task_ids": []}
+
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": self.ok,
+            "created_task_ids": [task.task_id for task in tasks] if self.ok else [],
+        }
+
+
+class _FailBeforeInsertAgentDbWriter(
+    runtime.AgentDbSignedWorkerDispatchTaskWriter
+):
+    def enqueue_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": False,
+            "reason": "simulated_pre_insert_failure",
+            "created_task_ids": [],
+        }
 
 
 def _digest(value: object) -> str:
@@ -613,6 +636,63 @@ def test_writer_failure_allows_only_exact_publication_retry() -> None:
     assert len(retry_writer.calls) == 1
 
 
+def test_production_writer_recovers_zero_row_authorized_batch() -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    dryrun = _dryrun_result(allocation)
+    rejected = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=_FailBeforeInsertAgentDbWriter(),
+    )
+    assert AgentDB().get_autonomous_tasks(status="pending", limit=20) == []
+    recovered = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
+    )
+
+    assert rejected.accepted is False
+    assert recovered.accepted is True, recovered.rejection_reasons
+    assert len(AgentDB().get_autonomous_tasks(status="pending", limit=20)) == 3
+
+
+def test_production_writer_rejects_partial_authorized_batch() -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    dryrun = _dryrun_result(allocation)
+    capture = _FakeWriter(ok=False)
+    rejected = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=capture,
+    )
+    tasks, _receipt = capture.calls[0]
+    db = AgentDB()
+    with db.db.get_connection() as connection:
+        writer_module._insert_tasks(connection, tasks[:1])
+    recovered = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=runtime.AgentDbSignedWorkerDispatchTaskWriter(),
+    )
+
+    assert rejected.accepted is False
+    assert recovered.accepted is False
+    assert AgentDB().get_autonomous_tasks(status="pending", limit=20) == []
+    assert len(
+        AgentDB().get_autonomous_tasks(status="publication_held", limit=20)
+    ) == 1
+
+
 def test_writer_failure_rejects_altered_publication_retry() -> None:
     allocation = _allocation()
     context = worker_dispatch_authority_verification_context()
@@ -662,6 +742,18 @@ def test_agentdb_publication_recovers_after_post_write_crash(
         queue_item_id="queue-1",
         writer=writer,
     )
+    assert AgentDB().get_autonomous_tasks(status="pending", limit=20) == []
+    assert len(
+        AgentDB().get_autonomous_tasks(status="publication_held", limit=20)
+    ) == 3
+    held = AgentDB().get_autonomous_tasks(status="publication_held", limit=20)
+    assert all(
+        AgentDB().assign_autonomous_task(
+            task["task_id"], "openclaw_supervisor"
+        )
+        is False
+        for task in held
+    )
     monkeypatch.setattr(runtime, "complete_signed_worker_publication", complete)
     recovered = _publish(
         worker_dispatch_dryrun_result=dryrun,
@@ -674,6 +766,109 @@ def test_agentdb_publication_recovers_after_post_write_crash(
     assert interrupted.accepted is False
     assert recovered.accepted is True, recovered.rejection_reasons
     assert len(AgentDB().get_autonomous_tasks(status="pending", limit=20)) == 3
+
+
+def test_agentdb_publication_recovers_after_post_applied_crash(
+    monkeypatch,
+) -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    dryrun = _dryrun_result(allocation)
+    writer = runtime.AgentDbSignedWorkerDispatchTaskWriter()
+    activate = runtime._writer_activates
+    monkeypatch.setattr(runtime, "_writer_activates", lambda *_args: False)
+    interrupted = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+    assert AgentDB().get_autonomous_tasks(status="pending", limit=20) == []
+    monkeypatch.setattr(runtime, "_writer_activates", activate)
+    recovered = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert interrupted.accepted is False
+    assert recovered.accepted is True, recovered.rejection_reasons
+    assert len(AgentDB().get_autonomous_tasks(status="pending", limit=20)) == 3
+
+
+def test_agentdb_publication_recovers_after_post_activation_crash(
+    monkeypatch,
+) -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    dryrun = _dryrun_result(allocation)
+    writer = runtime.AgentDbSignedWorkerDispatchTaskWriter()
+    accepted_result = runtime._accepted_result
+
+    def _crash_after_activation(*_args, **_kwargs):
+        raise RuntimeError("post_activation_crash")
+
+    monkeypatch.setattr(runtime, "_accepted_result", _crash_after_activation)
+    with pytest.raises(RuntimeError, match="post_activation_crash"):
+        _publish(
+            worker_dispatch_dryrun_result=dryrun,
+            authority_verification_context=context,
+            work_state_snapshot=_snapshot(allocation),
+            queue_item_id="queue-1",
+            writer=writer,
+        )
+    assert len(AgentDB().get_autonomous_tasks(status="pending", limit=20)) == 3
+
+    monkeypatch.setattr(runtime, "_accepted_result", accepted_result)
+    recovered = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert recovered.accepted is True, recovered.rejection_reasons
+    assert len(AgentDB().get_autonomous_tasks(status="pending", limit=20)) == 3
+
+
+def test_applied_publication_rejects_tampered_held_batch(
+    monkeypatch,
+) -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    dryrun = _dryrun_result(allocation)
+    writer = runtime.AgentDbSignedWorkerDispatchTaskWriter()
+    activate = runtime._writer_activates
+    monkeypatch.setattr(runtime, "_writer_activates", lambda *_args: False)
+    interrupted = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+    held = AgentDB().get_autonomous_tasks(status="publication_held", limit=20)
+    assert interrupted.accepted is False and len(held) == 3
+    assert AgentDB().db.execute_write(
+        "UPDATE agents_autonomous_tasks SET description = ? WHERE task_id = ?",
+        ("attacker-selected-task", held[0]["task_id"]),
+    ) == 1
+    monkeypatch.setattr(runtime, "_writer_activates", activate)
+
+    recovered = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert recovered.accepted is False
+    assert AgentDB().get_autonomous_tasks(status="pending", limit=20) == []
 
 
 def test_rechecks_fresh_time_after_context_construction_before_writer() -> None:

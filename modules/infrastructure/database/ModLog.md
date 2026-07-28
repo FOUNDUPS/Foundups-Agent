@@ -1,5 +1,18 @@
 # Database Module - ModLog
 
+## Entry: Held Publication and Exact Signed-Worker Finalization
+**Date**: 2026-07-28
+**What Changed**: Restricted generic assignment to `pending -> assigned` and
+added an exact assignee, claim/use receipt, context-digest and stored-row CAS
+for signed-worker terminal completion.
+**Why**: Publication-held tasks must not become claimable before durable
+authority reaches APPLIED, and signed-worker results must not be finalized by
+the generic task update after a concurrent state change.
+**Impact**: Held task IDs cannot bypass publication admission; successful and
+failed signed executions finalize only the exact admitted row, while
+conflicting state remains unchanged.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 62, WSP 78, WSP 97
+
 ## Entry: Signed Worker Execution and Verifier Terminal CAS
 **Date**: 2026-07-28
 **What Changed**: Allowed independent-assurance completion to atomically

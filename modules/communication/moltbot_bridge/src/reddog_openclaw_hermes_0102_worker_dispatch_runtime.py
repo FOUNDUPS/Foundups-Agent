@@ -1,8 +1,9 @@
 """Publish signed RedDog worker-dispatch intents to AgentDB.
 
 This stable facade validates signed dispatch inputs, binds them to the
-authoritative queue-consumer lineage, builds pending tasks, and invokes an
-injected writer. It does not execute workers or mutate repository content.
+authoritative queue-consumer lineage, stages held tasks, commits publication
+authority, and activates the exact batch. It does not execute workers or
+mutate repository content.
 """
 
 from __future__ import annotations
@@ -60,7 +61,7 @@ def publish_reddog_signed_worker_dispatch_runtime(
     seen_intent_ids: Optional[set[str]] = None,
     now: Optional[datetime] = None,
 ) -> SignedWorkerDispatchRuntimeResult:
-    """Publish accepted signed worker intents as pending AgentDB tasks."""
+    """Stage accepted signed worker intents, commit authority, then activate."""
 
     created_at = iso8601(now)
     request, reasons = validate_dispatch_request(
@@ -126,13 +127,15 @@ def _publish_authenticated(
         writer,
         tasks,
         receipt,
-        recovering=admission.recovering,
+        recovery_status=admission.status if admission.recovering else "",
     ):
         return reject_runtime([WorkerDispatchRuntimeReason.WRITER_REJECTED])
     if not complete_signed_worker_publication(
         authority_verification_context.nonce_store,
         admission,
     ):
+        return reject_runtime([WorkerDispatchRuntimeReason.WRITER_REJECTED])
+    if not _writer_activates(writer, tasks, receipt):
         return reject_runtime([WorkerDispatchRuntimeReason.WRITER_REJECTED])
     return _accepted_result(request, tasks, receipt, seen_intent_ids)
 
@@ -182,14 +185,17 @@ def _writer_accepts(
     tasks: Sequence[SignedWorkerDispatchTaskSpec],
     receipt: SignedWorkerDispatchRuntimeReceipt,
     *,
-    recovering: bool = False,
+    recovery_status: str = "",
 ) -> bool:
     try:
         operation = writer.enqueue_signed_worker_dispatch_tasks
-        if recovering:
+        if recovery_status:
+            method_name = "recover_signed_worker_dispatch_tasks"
+            if recovery_status == "APPLIED":
+                method_name = "recover_applied_signed_worker_dispatch_tasks"
             operation = getattr(
                 writer,
-                "recover_signed_worker_dispatch_tasks",
+                method_name,
                 None,
             )
             if not callable(operation):
@@ -201,6 +207,24 @@ def _writer_accepts(
         return False
     created = tuple(str(value) for value in result.get("created_task_ids", ()))
     return created == tuple(task.task_id for task in tasks)
+
+
+def _writer_activates(
+    writer: SignedWorkerDispatchTaskWriter,
+    tasks: Sequence[SignedWorkerDispatchTaskSpec],
+    receipt: SignedWorkerDispatchRuntimeReceipt,
+) -> bool:
+    operation = getattr(writer, "activate_signed_worker_dispatch_tasks", None)
+    if not callable(operation):
+        return False
+    try:
+        result = operation(tasks, receipt)
+    except Exception:
+        return False
+    if not isinstance(result, Mapping) or result.get("ok") is not True:
+        return False
+    activated = tuple(str(value) for value in result.get("created_task_ids", ()))
+    return activated == tuple(task.task_id for task in tasks)
 
 
 __all__ = [

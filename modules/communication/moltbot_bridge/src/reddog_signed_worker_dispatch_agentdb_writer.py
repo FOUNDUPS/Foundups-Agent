@@ -15,7 +15,7 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_runt
 
 
 class AgentDbSignedWorkerDispatchTaskWriter:
-    """Atomically publish pending signed worker-dispatch tasks."""
+    """Atomically stage and activate signed worker-dispatch tasks."""
 
     def __init__(self, agent_db_factory: Optional[Any] = None) -> None:
         self._agent_db_factory = agent_db_factory
@@ -47,9 +47,14 @@ class AgentDbSignedWorkerDispatchTaskWriter:
         receipt: SignedWorkerDispatchRuntimeReceipt,
     ) -> Mapping[str, Any]:
         db = self._database()
+        inserted = False
         try:
             with db.db.get_connection() as connection:
-                if not _all_tasks_match(connection, tasks):
+                recovery_state = _task_batch_recovery_state(connection, tasks)
+                if recovery_state == "ABSENT":
+                    _insert_tasks(connection, tasks)
+                    inserted = True
+                elif recovery_state != "EXACT_HELD":
                     return _duplicate_result(tasks[0].task_id if tasks else "")
         except Exception as exc:
             return _write_failure(exc)
@@ -58,6 +63,61 @@ class AgentDbSignedWorkerDispatchTaskWriter:
             "created_task_ids": [task.task_id for task in tasks],
             "source_dispatch_receipt_id": receipt.source_dispatch_receipt_id,
             "idempotent_recovery": True,
+            "recovery_inserted": inserted,
+        }
+
+    def recover_applied_signed_worker_dispatch_tasks(
+        self,
+        tasks: Sequence[SignedWorkerDispatchTaskSpec],
+        receipt: SignedWorkerDispatchRuntimeReceipt,
+    ) -> Mapping[str, Any]:
+        db = self._database()
+        try:
+            with db.db.get_connection() as connection:
+                if _task_batch_recovery_state(connection, tasks) not in {
+                    "EXACT_HELD",
+                    "EXACT_ACTIVE",
+                }:
+                    return _duplicate_result(tasks[0].task_id if tasks else "")
+        except Exception as exc:
+            return _write_failure(exc)
+        return {
+            "ok": True,
+            "created_task_ids": [task.task_id for task in tasks],
+            "source_dispatch_receipt_id": receipt.source_dispatch_receipt_id,
+            "idempotent_recovery": True,
+        }
+
+    def activate_signed_worker_dispatch_tasks(
+        self,
+        tasks: Sequence[SignedWorkerDispatchTaskSpec],
+        receipt: SignedWorkerDispatchRuntimeReceipt,
+    ) -> Mapping[str, Any]:
+        db = self._database()
+        task_ids = tuple(task.task_id for task in tasks)
+        try:
+            with db.db.get_connection() as connection:
+                recovery_state = _task_batch_recovery_state(connection, tasks)
+                if recovery_state == "EXACT_ACTIVE":
+                    return {
+                        "ok": True,
+                        "created_task_ids": list(task_ids),
+                        "source_dispatch_receipt_id": (
+                            receipt.source_dispatch_receipt_id
+                        ),
+                        "idempotent_recovery": True,
+                    }
+                if recovery_state != "EXACT_HELD":
+                    return _duplicate_result(task_ids[0] if task_ids else "")
+                changed = _activate_exact_tasks(connection, tasks)
+                if changed != len(task_ids):
+                    raise RuntimeError("signed_worker_activation_conflict")
+        except Exception as exc:
+            return _write_failure(exc)
+        return {
+            "ok": True,
+            "created_task_ids": list(task_ids),
+            "source_dispatch_receipt_id": receipt.source_dispatch_receipt_id,
         }
 
     def _database(self) -> Any:
@@ -80,10 +140,10 @@ def _duplicate_task_id(connection: Any, task_ids: Sequence[str]) -> str:
     return ""
 
 
-def _all_tasks_match(
+def _task_batch_recovery_state(
     connection: Any,
     tasks: Sequence[SignedWorkerDispatchTaskSpec],
-) -> bool:
+) -> str:
     fields = (
         "description",
         "required_skills",
@@ -92,19 +152,33 @@ def _all_tasks_match(
         "discovered_by",
         "context",
         "origin_continuity_id",
+        "status",
     )
     query = """
         SELECT description, required_skills, estimated_complexity,
-               priority_score, discovered_by, context, origin_continuity_id
+               priority_score, discovered_by, context, origin_continuity_id,
+               status
         FROM agents_autonomous_tasks WHERE task_id = ?
     """
+    found = 0
+    statuses: set[str] = set()
     for task in tasks:
         row = connection.execute(query, (task.task_id,)).fetchone()
+        if row is None:
+            continue
+        found += 1
         expected = _task_row(task)[1:]
-        actual = tuple(row[field] for field in fields) if row is not None else ()
+        actual = tuple(row[field] for field in fields[:-1])
         if actual != expected:
-            return False
-    return True
+            return "CONFLICT"
+        statuses.add(str(row["status"] or ""))
+    if found == 0:
+        return "ABSENT"
+    if found == len(tasks) and statuses == {"publication_held"}:
+        return "EXACT_HELD"
+    if found == len(tasks) and statuses == {"pending"}:
+        return "EXACT_ACTIVE"
+    return "CONFLICT"
 
 
 def _insert_tasks(
@@ -117,10 +191,29 @@ def _insert_tasks(
             INSERT INTO agents_autonomous_tasks
             (task_id, description, required_skills, estimated_complexity,
              priority_score, discovered_by, context, origin_continuity_id, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'publication_held')
             """,
             _task_row(task),
         )
+
+
+def _activate_exact_tasks(
+    connection: Any,
+    tasks: Sequence[SignedWorkerDispatchTaskSpec],
+) -> int:
+    changed = 0
+    for task in tasks:
+        changed += connection.execute(
+            """
+            UPDATE agents_autonomous_tasks SET status = 'pending'
+            WHERE task_id = ? AND description = ? AND required_skills = ?
+              AND estimated_complexity = ? AND priority_score = ?
+              AND discovered_by = ? AND context = ?
+              AND origin_continuity_id = ? AND status = 'publication_held'
+            """,
+            _task_row(task),
+        ).rowcount
+    return changed
 
 
 def _task_row(task: SignedWorkerDispatchTaskSpec) -> tuple[Any, ...]:

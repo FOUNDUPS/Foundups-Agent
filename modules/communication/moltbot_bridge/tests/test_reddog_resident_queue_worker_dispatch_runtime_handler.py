@@ -53,6 +53,12 @@ class _FakeWriter:
             return {"ok": False, "created_task_ids": []}
         return {"ok": True, "created_task_ids": [task.task_id for task in tasks]}
 
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": self.ok,
+            "created_task_ids": [task.task_id for task in tasks] if self.ok else [],
+        }
+
 
 def _digest(value: object) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)

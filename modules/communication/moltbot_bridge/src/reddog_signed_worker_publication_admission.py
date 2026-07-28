@@ -18,6 +18,7 @@ class SignedWorkerPublicationAdmission:
 
     nonce: str
     binding_digest: str
+    status: str
     recovering: bool
 
 
@@ -46,17 +47,20 @@ def prepare_signed_worker_publication(
     reserved = advance_signed_worker_publication_state(
         nonce_store, nonce, binding_digest, "RESERVED"
     )
-    if reserved not in {"RESERVED", "AUTHORIZED"}:
+    if reserved not in {"RESERVED", "AUTHORIZED", "APPLIED"}:
         return None
-    authorized = advance_signed_worker_publication_state(
-        nonce_store, nonce, binding_digest, "AUTHORIZED"
-    )
-    if authorized != "AUTHORIZED":
-        return None
+    authorized = reserved
+    if reserved != "APPLIED":
+        authorized = advance_signed_worker_publication_state(
+            nonce_store, nonce, binding_digest, "AUTHORIZED"
+        )
+        if authorized != "AUTHORIZED":
+            return None
     return SignedWorkerPublicationAdmission(
         nonce=nonce,
         binding_digest=binding_digest,
-        recovering=reserved == "AUTHORIZED",
+        status=authorized,
+        recovering=reserved != "RESERVED",
     )
 
 
