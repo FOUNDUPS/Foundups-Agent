@@ -1,5 +1,18 @@
 # Database Module - ModLog
 
+## Entry: Cross-Object Signed-Worker Quarantine Completion
+**Date**: 2026-07-28
+**What Changed**: Quarantine now resolves one assurance reservation by either
+author or verifier task ID. Author-side quarantine atomically marks the
+reservation indeterminate and cancels the paired verifier assignment.
+**Why**: An effect-unknown author task must not leave reserved assurance
+capacity claimable, and a restart must not accept a task-only quarantine
+marker while the paired reservation remains active.
+**Impact**: Author, verifier, reservation, and task quarantine state commit
+together or roll back; replay verifies the complete cross-object terminal
+state.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
 ## Entry: Signed-Worker Quarantine Namespace Isolation
 **Date**: 2026-07-28
 **What Changed**: Required the reserved signed-worker task namespace at every

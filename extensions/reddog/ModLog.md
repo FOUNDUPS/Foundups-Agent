@@ -10,7 +10,7 @@
   durable result-ledger append in one database transaction.
 - Made invalid-assignment quarantine transactional and prevented forged local
   quarantine markers from releasing or reconciling verifier capacity.
-- Regenerated and pinned the 1,059-file backend dependency manifest.
+- Regenerated and pinned the 1,060-file backend dependency manifest.
 - Preserved read-only editor authority; this release adds no editor-side shell,
   repository, publication, or merge capability. Version 0.4.27 -> 0.4.28.
 

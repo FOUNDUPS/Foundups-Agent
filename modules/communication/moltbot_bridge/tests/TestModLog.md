@@ -1,10 +1,10 @@
 ## 2026-07-28: SIGNED_WORKER_NAMESPACE_QUARANTINE_ISOLATION
 - Added a real `run_task` regression proving forged signed-worker metadata on
-  an ordinary task cannot select quarantine or generic finalization.
-- The assigned row remains byte-for-byte unchanged, no result-ledger entry is
-  created, and the rejection owns finalization without invoking a worker.
-- Full bridge differential: 4428 passed, 19 skipped, with the same 35
-  environment/baseline failures and zero candidate-only failures.
+  an ordinary task cannot select quarantine or generic finalization; expired
+  signed execution without durable assurance must quarantine.
+- Generic rows remain byte-for-byte unchanged, and unknown-effect executions
+  never fabricate result-ledger history.
+- Full differential evidence remains mandatory before publication.
 
 ## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1
 - Added adversarial regressions for self-minted principal keys, altered proposal

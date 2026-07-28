@@ -202,7 +202,7 @@ def test_execution_claim_consumes_token_without_persisting_raw_value() -> None:
     )
     assert admit_signed_worker_execution_once(db=db, task_id=task_id) is None
 
-def test_restart_recovers_expired_execution_without_replaying_worker() -> None:
+def test_restart_quarantines_expired_execution_without_assurance() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
     assert db.assign_signed_worker_task(task_id)
@@ -228,21 +228,20 @@ def test_restart_recovers_expired_execution_without_replaying_worker() -> None:
     )
 
     assert recovered["accepted"] is True
-    assert recovered["recovered_task_ids"] == [task_id]
+    assert recovered["recovered_task_ids"] == []
+    assert recovered["quarantined_task_ids"] == [task_id]
     assert recovered["no_worker_effect_replayed"] is True
     stored = restarted.get_autonomous_task_by_id(task_id)
-    assert stored is not None and stored["status"] == "failed"
-    receipt = stored["context"]["signed_worker_task_last_result"]
-    assert receipt["decision"] == "EXECUTION_LEASE_RECOVERED"
-    assert receipt["accepted"] is False
+    assert stored is not None and stored["status"] == "quarantined"
+    receipt = stored["context"]["signed_worker_execution_quarantine"]
     assert receipt["effect_commit_state"] == "INDETERMINATE"
-    assert receipt["no_source_repo_mutation_performed"] is False
+    assert receipt["no_worker_effect_replayed"] is True
     rows = restarted.db.execute_query(
         "SELECT attempt_sequence FROM agents_signed_worker_result_history "
         "WHERE task_id = ?",
         (task_id,),
     )
-    assert rows == [{"attempt_sequence": 1}]
+    assert rows == []
 
     repeated = recover_expired_signed_worker_executions(
         restarted,
@@ -341,7 +340,7 @@ def test_stale_assignment_with_active_verifier_reservation_is_not_requeued(
     task = db.get_autonomous_task_by_id(task_id)
     assert task is not None and task["status"] == "assigned"
 
-def test_renewed_execution_lease_survives_initial_timeout_then_expires() -> None:
+def test_renewed_execution_without_assurance_quarantines_at_expiry() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
     assert db.assign_signed_worker_task(task_id)
@@ -373,8 +372,9 @@ def test_renewed_execution_lease_survives_initial_timeout_then_expires() -> None
         db,
         now_factory=lambda: claimed_at + timedelta(seconds=1501),
     )
-    assert renewed_expiry["recovered_task_ids"] == [task_id]
-    assert db.get_autonomous_task_by_id(task_id)["status"] == "failed"
+    assert renewed_expiry["recovered_task_ids"] == []
+    assert renewed_expiry["quarantined_task_ids"] == [task_id]
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "quarantined"
 
 def test_execution_lease_cannot_renew_past_maximum_horizon() -> None:
     task_id = _publish_agentdb_task()
@@ -416,7 +416,7 @@ def test_execution_recovery_database_scan_failure_rejects() -> None:
     assert result["rejected_task_ids"] == ["database_scan_failed"]
     assert result["no_worker_effect_replayed"] is True
 
-def test_concurrent_expired_execution_recovery_commits_one_result() -> None:
+def test_concurrent_expired_execution_without_assurance_quarantines_once() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
     assert db.assign_signed_worker_task(task_id)
@@ -443,13 +443,13 @@ def test_concurrent_expired_execution_recovery_commits_one_result() -> None:
 
     assert all(result["accepted"] is True for result in results)
     stored = db.get_autonomous_task_by_id(task_id)
-    assert stored is not None and stored["status"] == "failed"
+    assert stored is not None and stored["status"] == "quarantined"
     rows = db.db.execute_query(
         "SELECT attempt_sequence FROM agents_signed_worker_result_history "
         "WHERE task_id = ?",
         (task_id,),
     )
-    assert rows == [{"attempt_sequence": 1}]
+    assert rows == []
 
 def test_recovery_rejects_forged_terminal_marker_without_durable_ledger(
     monkeypatch: pytest.MonkeyPatch,

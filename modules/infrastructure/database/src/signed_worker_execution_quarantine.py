@@ -5,6 +5,10 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from .signed_worker_assurance_quarantine import (
+    linked_assurance_is_quarantined,
+    quarantine_linked_assurance,
+)
 from .signed_worker_execution_quarantine_receipt import (
     QUARANTINE_SCHEMA,
     build_quarantine_receipt,
@@ -68,7 +72,7 @@ def _quarantine(
     if quarantine_receipt_matches(task, task_id=task_id):
         if (
             not _no_result_history(connection, task_id)
-            or not _reservation_is_quarantined(connection, task_id)
+            or not linked_assurance_is_quarantined(connection, task_id)
         ):
             return "REJECTED"
         return "QUARANTINED"
@@ -94,7 +98,7 @@ def _persist_quarantine(
         reason=reason,
         now_iso=now_iso,
     )
-    if not _quarantine_reservation(
+    if not quarantine_linked_assurance(
         connection,
         task_id=task_id,
         reason=reason,
@@ -116,47 +120,6 @@ def _persist_quarantine(
     if changed != 1:
         raise RuntimeError("task_quarantine_rejected")
     return "QUARANTINED"
-
-
-def _quarantine_reservation(
-    connection: Any, *, task_id: str, reason: str, now_iso: str,
-) -> bool:
-    row = connection.execute(
-        "SELECT reservation_id, status FROM "
-        "agents_independent_assurance_reservations "
-        "WHERE verifier_task_id = ?",
-        (task_id,),
-    ).fetchone()
-    if row is None:
-        return True
-    payload = dict(row)
-    if payload.get("status") == "QUARANTINED":
-        return True
-    if payload.get("status") != "RESERVED":
-        return False
-    changed = connection.execute(
-        "UPDATE agents_independent_assurance_reservations "
-        "SET status = 'QUARANTINED', terminal_status = 'INDETERMINATE', "
-        "completed_at = ?, revocation_reason = ? "
-        "WHERE reservation_id = ? AND status = 'RESERVED'",
-        (
-            now_iso,
-            f"signed_worker_execution_quarantined:{reason}",
-            payload["reservation_id"],
-        ),
-    ).rowcount
-    return changed == 1
-
-
-def _reservation_is_quarantined(connection: Any, task_id: str) -> bool:
-    row = connection.execute(
-        "SELECT status FROM agents_independent_assurance_reservations "
-        "WHERE verifier_task_id = ?",
-        (task_id,),
-    ).fetchone()
-    return row is None or dict(row).get("status") == "QUARANTINED"
-
-
 def _no_result_history(connection: Any, task_id: str) -> bool:
     row = connection.execute(
         "SELECT COUNT(*) AS count FROM agents_signed_worker_result_history "

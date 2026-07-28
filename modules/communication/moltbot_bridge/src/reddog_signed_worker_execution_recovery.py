@@ -332,9 +332,10 @@ def _recovery_completion(
     assigned_to: str,
 ) -> tuple[dict[str, str] | None, str]:
     durable = _durable_verifier_reservation(db, task_id)
+    if durable is None:
+        return None, "MISSING"
     staged_present = bool(
-        durable
-        and (
+        (
             durable.get("staged_completion_json")
             or durable.get("staged_completion_digest")
         )

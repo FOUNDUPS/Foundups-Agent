@@ -8,7 +8,7 @@
   assurance transitions are atomic and lease-fenced.
 - Split the signed-worker and assurance regression monoliths into bounded,
   concern-specific suites without changing the collected test set.
-- Revalidated the generated 1,059-file backend manifest and its exact digest.
+- Revalidated the generated 1,060-file backend manifest and its exact digest.
 
 ## 2026-07-28 - Signed queue-lineage compatibility (0.4.27)
 
