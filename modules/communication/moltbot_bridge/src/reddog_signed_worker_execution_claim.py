@@ -21,6 +21,9 @@ class SignedWorkerExecutionAdmission:
 
     claim_receipt: Mapping[str, Any]
     use_receipt: Mapping[str, Any]
+    claimed_context: Mapping[str, Any]
+    required_skills: tuple[str, ...]
+    discovered_by: str
 
 
 def admit_signed_worker_execution_once(
@@ -59,7 +62,7 @@ def _commit_execution_admission(
         with db.db.get_connection() as conn:
             row = conn.execute(
                 """
-                SELECT status, assigned_to, context
+                SELECT status, assigned_to, context, required_skills, discovered_by
                 FROM agents_autonomous_tasks
                 WHERE task_id = ?
                 """,
@@ -68,7 +71,16 @@ def _commit_execution_admission(
             inputs = _claim_inputs(row, task_id=task_id, token=token, now_iso=now_iso)
             if inputs is None:
                 return None
-            raw_context, assigned_to, context, claim_receipt, use_receipt = inputs
+            (
+                raw_context,
+                raw_skills,
+                assigned_to,
+                context,
+                required_skills,
+                discovered_by,
+                claim_receipt,
+                use_receipt,
+            ) = inputs
             updated_context = dict(context)
             updated_context["signed_worker_execution_claim"] = claim_receipt
             updated_context["signed_worker_execution_use"] = use_receipt
@@ -78,12 +90,15 @@ def _commit_execution_admission(
                 SET status = 'executing', context = ?
                 WHERE task_id = ? AND status = 'assigned'
                   AND assigned_to = ? AND context = ?
+                  AND required_skills = ? AND discovered_by = ?
                 """,
                 (
                     _canonical_json(updated_context),
                     task_id,
                     assigned_to,
                     raw_context,
+                    raw_skills,
+                    discovered_by,
                 ),
             ).rowcount
             if changed != 1:
@@ -93,6 +108,9 @@ def _commit_execution_admission(
     return SignedWorkerExecutionAdmission(
         claim_receipt=claim_receipt,
         use_receipt=use_receipt,
+        claimed_context=dict(context),
+        required_skills=required_skills,
+        discovered_by=discovered_by,
     )
 
 
@@ -128,20 +146,43 @@ def _claim_inputs(
     task_id: str,
     token: str,
     now_iso: str,
-) -> tuple[str, str, Mapping[str, Any], Mapping[str, Any], Mapping[str, Any]] | None:
+) -> tuple[
+    str,
+    str,
+    str,
+    Mapping[str, Any],
+    tuple[str, ...],
+    str,
+    Mapping[str, Any],
+    Mapping[str, Any],
+] | None:
     if row is None or not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
         return None
     payload = dict(row)
     assigned_to = str(payload.get("assigned_to") or "").strip()
     raw_context = str(payload.get("context") or "")
-    if payload.get("status") != "assigned" or not assigned_to or not raw_context:
+    raw_skills = str(payload.get("required_skills") or "")
+    discovered_by = str(payload.get("discovered_by") or "").strip()
+    if (
+        payload.get("status") != "assigned"
+        or not assigned_to
+        or not raw_context
+        or not raw_skills
+        or not discovered_by
+    ):
         return None
     try:
         context = json.loads(raw_context)
+        parsed_skills = json.loads(raw_skills)
     except (TypeError, ValueError):
         return None
-    if not isinstance(context, Mapping):
+    if (
+        not isinstance(context, Mapping)
+        or not isinstance(parsed_skills, list)
+        or any(not isinstance(skill, str) or not skill for skill in parsed_skills)
+    ):
         return None
+    required_skills = tuple(parsed_skills)
     token_digest = _digest_text(token)
     claim = _receipt(
         {
@@ -149,6 +190,8 @@ def _claim_inputs(
             "task_id": task_id,
             "assigned_to": assigned_to,
             "context_digest": _digest(context),
+            "required_skills_digest": _digest(list(required_skills)),
+            "discovered_by": discovered_by,
             "token_digest": token_digest,
             "claimed_at": now_iso,
             "status": "CLAIMED",
@@ -164,7 +207,16 @@ def _claim_inputs(
             "status": "CONSUMED",
         }
     )
-    return raw_context, assigned_to, context, claim, use
+    return (
+        raw_context,
+        raw_skills,
+        assigned_to,
+        context,
+        required_skills,
+        discovered_by,
+        claim,
+        use,
+    )
 
 
 def _receipt(payload: Mapping[str, Any]) -> Mapping[str, Any]:

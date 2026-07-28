@@ -514,6 +514,44 @@ def test_competing_preverification_claim_is_never_overwritten(
     assert stored is not None and stored["status"] == "executing"
 
 
+def test_successful_admission_verifies_exact_claimed_database_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    original_admit = run_task_runtime.admit_signed_worker_execution_once
+
+    def replace_then_admit(*, db, task_id):
+        assert db.db.execute_write(
+            "UPDATE agents_autonomous_tasks "
+            "SET context = ?, required_skills = ?, discovered_by = ? "
+            "WHERE task_id = ? AND status = 'assigned'",
+            (json.dumps({}), json.dumps(["attacker_skill"]), "attacker", task_id),
+        ) == 1
+        return original_admit(db=db, task_id=task_id)
+
+    monkeypatch.setattr(
+        run_task_runtime,
+        "admit_signed_worker_execution_once",
+        replace_then_admit,
+    )
+    runner = _FakeRunner()
+    result = execute_task(
+        task_id,
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+    )
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["ok"] is False
+    assert result["finalization_owned"] is True
+    assert "routing_binding_mismatch" in result["detail"]
+    assert runner.calls == []
+    assert stored is not None and stored["status"] == "failed"
+
+
 def test_tampered_expired_verifier_never_renews_assurance(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

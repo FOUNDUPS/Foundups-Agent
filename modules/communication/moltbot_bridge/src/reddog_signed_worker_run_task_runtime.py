@@ -45,15 +45,16 @@ def execute_signed_worker_from_agentdb(
         result = _rejected("reddog_signed_worker_execution_already_claimed")
         result["finalization_owned"] = True
         return result
-    admitted_context = bind_execution_admission(context, admission)
+    claimed_context = admission.claimed_context
+    admitted_context = bind_execution_admission(claimed_context, admission)
     try:
         verified_context = _verify_context(
             repo_root=repo_root,
             task_id=task_id,
-            context=context,
-            required_skills=required_skills,
-            source=source,
-            discovered_by=discovered_by,
+            context=claimed_context,
+            required_skills=admission.required_skills,
+            source=str(claimed_context.get("source") or ""),
+            discovered_by=admission.discovered_by,
             env=env,
         )
     except (ImportError, TypeError, ValueError) as exc:
