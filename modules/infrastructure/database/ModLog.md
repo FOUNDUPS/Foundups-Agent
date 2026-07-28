@@ -11,7 +11,8 @@ independent durable comparison before either supervisor or direct execution.
 **Impact**: Result append and task transition commit atomically; malformed or
 gapped ledger state, forged or shortened context history, and pre-ledger
 context history reject before a runner call. Eleven-attempt and rollback
-regressions prove the durable/context boundary.
+regressions prove the durable/context boundary; failed ledger inserts leave
+the admitted task executing rather than creating an unreceipted terminal state.
 **WSP References**: WSP 00, WSP 15, WSP 22, WSP 62, WSP 78, WSP 97
 
 ## Entry: Held Publication and Exact Signed-Worker Finalization

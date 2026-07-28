@@ -1430,7 +1430,7 @@
     "modules/communication/moltbot_bridge/src/openclaw_skill_evolution.py": "6eb4444780fdb5773c4cfd9704b18f7705cb16b416e4771fcd1930986eaef0a8",
     "modules/communication/moltbot_bridge/src/openclaw_social_controller.py": "385d0e81d2780addd187529f2a1db0d1233a3735e2565b9519e64a8f916ce192",
     "modules/communication/moltbot_bridge/src/openclaw_status_surface.py": "97a52318b27ad5ae24375070462e350c4b2ca709063cf3b6ec2221abd3d5bd77",
-    "modules/communication/moltbot_bridge/src/openclaw_supervisor.py": "1f6dd74e6fa8252e314b17774ee1a174880a72131630a396a8562cc6458db438",
+    "modules/communication/moltbot_bridge/src/openclaw_supervisor.py": "131442fbe3da3641a06459287ad3ade196a5a3c0de9c82f5869abd7f945e22a9",
     "modules/communication/moltbot_bridge/src/openclaw_turn_state.py": "4463aae3bda2148783722d8d2a14f1c9e48bc3c668108f0222e6c0d577ba734f",
     "modules/communication/moltbot_bridge/src/pfmall_catalog.py": "1154047cdb8518ec226cea4a608b96c3629e5a43512e4e4e3f9ca319a3d09fa0",
     "modules/communication/moltbot_bridge/src/pqn_research_adapter.py": "ca1e8828b10f6b1ac53f0cd2bb1b6d9021c0988aec0cb9557d9082f47bb395fd",

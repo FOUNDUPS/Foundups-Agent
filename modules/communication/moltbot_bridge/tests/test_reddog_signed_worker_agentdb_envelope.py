@@ -857,6 +857,46 @@ def test_direct_result_ledger_failure_rolls_back_terminal_state(
     ) == []
 
 
+def test_supervisor_result_ledger_failure_rolls_back_terminal_state(
+    tmp_path: Path,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    with db.db.get_connection() as connection:
+        connection.execute(
+            """
+            CREATE TRIGGER reject_signed_worker_result_insert
+            BEFORE INSERT ON agents_signed_worker_result_history
+            BEGIN
+                SELECT RAISE(ABORT, 'injected ledger failure');
+            END
+            """
+        )
+    runner = _FakeRunner()
+
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert result["accepted"] is False
+    assert (
+        SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED
+        in result["rejection_reasons"]
+    )
+    assert len(runner.calls) == 1
+    assert stored is not None and stored["status"] == "executing"
+    assert db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history "
+        "WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
 @pytest.mark.parametrize("authority_failure", ("expired", "revoked"))
 def test_claim_rejects_invalid_use_time_authority_before_runner_selection(
     tmp_path: Path,

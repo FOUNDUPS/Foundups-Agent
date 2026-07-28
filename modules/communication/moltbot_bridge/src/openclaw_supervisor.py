@@ -513,9 +513,6 @@ def _signed_worker_reject_claimed_task(
             rejection_reasons=tuple(final_reasons),
             task_status="failed",
         ):
-            _fail_closed_executing_signed_worker_task(
-                db=db, task_id=task_id, context=context
-            )
             final_reasons.extend((
                 SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED,
                 SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED,
@@ -532,17 +529,6 @@ def _signed_worker_reject_claimed_task(
         worker_runtime=str(source.get("worker_runtime") or ""),
         capability=str(source.get("capability") or ""),
         rejection_reasons=tuple(final_reasons), effect_source=source or None,
-    )
-
-
-def _fail_closed_executing_signed_worker_task(
-    *, db: Any, task_id: str, context: Mapping[str, Any]
-) -> None:
-    from modules.infrastructure.database.src.signed_worker_execution_store import (
-        finalize_signed_worker_execution,
-    )
-    finalize_signed_worker_execution(
-        db, task_id, context=context, accepted=False
     )
 
 
@@ -610,9 +596,6 @@ def _signed_worker_finalize_claimed_task(
         db, task_id, context=context, claim_status=status, run_result=source,
         task_status=task_status,
     ):
-        _fail_closed_executing_signed_worker_task(
-            db=db, task_id=task_id, context=context
-        )
         return _signed_worker_reject_claimed_task(
             db=db, task_id=task_id, context=context, effect_source=source,
             reasons=(

@@ -17,8 +17,9 @@
   and task context must match its exact tail before supervisor or direct
   execution; malformed durable state, truncation, legacy context-only history,
   and complete attacker re-hashing therefore fail closed. Both execution paths
-  append one shared result receipt. Exact finalization and ledger append share
-  one transaction in bounded database siblings instead of extending the
+  append one shared result receipt in the same task-transition transaction;
+  persistence failure leaves the exact task executing and never creates an
+  unreceipted terminal state. The bounded database siblings avoid extending the
   `AgentDB` monolith. Publication recovery never creates the
   derived authority cache, even from internally self-consistent COMMITTED
   packets; only a fresh normal publish call that re-verifies proposal

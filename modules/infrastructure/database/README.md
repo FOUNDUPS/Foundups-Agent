@@ -74,5 +74,6 @@ to the durable ledger before any runner call.
 Malformed or gapped durable rows, shortened context tails, recomputed context
 history, and pre-ledger context history all fail closed. Legacy rows require a
 separate authenticated migration; runtime admission never infers or imports
-durable authority from task context.
+durable authority from task context. A ledger-insert failure rolls back the
+task transition and leaves the admitted task executing for governed recovery.
 
