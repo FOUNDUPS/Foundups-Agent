@@ -56,6 +56,43 @@ def test_first_quarantine_atomically_releases_reserved_verifier(
     assert reservation["reservation"]["status"] == "QUARANTINED"
 
 
+def test_quarantine_rejects_generic_namespace_without_mutation(
+    agent_db: AgentDB,
+) -> None:
+    task_id = "generic-forged-quarantine"
+    assert agent_db.create_autonomous_task(
+        task_id=task_id,
+        description="ordinary generic task",
+        required_skills=[],
+        estimated_complexity=0.1,
+        priority_score=1.0,
+        context={"signed_worker_agentdb_envelope": {"attacker_selected": True}},
+    )
+    assert agent_db.assign_autonomous_task(task_id, "generic-worker")
+    before = agent_db.db.execute_query(
+        "SELECT status, context, assigned_to, assigned_at, completed_at "
+        "FROM agents_autonomous_tasks WHERE task_id = ?",
+        (task_id,),
+    )[0]
+
+    outcome = quarantine_signed_worker_execution(
+        agent_db,
+        task_id=task_id,
+        raw_context=before["context"],
+        expected_status="assigned",
+        reason="forged_signed_metadata",
+        now_iso=datetime.now(timezone.utc).isoformat(),
+    )
+
+    after = agent_db.db.execute_query(
+        "SELECT status, context, assigned_to, assigned_at, completed_at "
+        "FROM agents_autonomous_tasks WHERE task_id = ?",
+        (task_id,),
+    )[0]
+    assert outcome == "REJECTED"
+    assert after == before
+
+
 def test_invalid_stale_assignment_quarantines_before_reservation_skip(
     agent_db: AgentDB,
 ) -> None:

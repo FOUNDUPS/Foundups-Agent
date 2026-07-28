@@ -1,5 +1,14 @@
 # Database Module - Test Evolution Log
 
+## Entry: Signed-Worker Quarantine Namespace Isolation
+**Date**: 2026-07-28
+**Test File**: `test_signed_worker_quarantine_security.py`
+**Coverage**:
+- Direct quarantine of an ordinary assigned task with forged signed metadata
+  rejects before any database mutation.
+- Status, context, assignee, timestamps, and result history remain unchanged.
+**WSP References**: WSP 5, WSP 15, WSP 62, WSP 78, WSP 97
+
 ## Entry: Bounded Signed-Worker Assurance Security Suites
 **Date**: 2026-07-28
 **Test Files**: `test_signed_worker_assurance_*.py`,

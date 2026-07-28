@@ -1,5 +1,18 @@
 # Database Module - ModLog
 
+## Entry: Signed-Worker Quarantine Namespace Isolation
+**Date**: 2026-07-28
+**What Changed**: Required the reserved signed-worker task namespace at every
+state-changing quarantine boundary and added an exact temporary no-growth
+record for the shrinking inherited AgentDB compatibility monolith.
+**Why**: Attacker-selected signed metadata on an ordinary task must not select
+a protected quarantine effect, and touched legacy files above the WSP 62 hard
+limit require an explicit bounded remediation plan.
+**Impact**: Suspicious generic tasks reject byte-for-byte unchanged while
+canonical signed tasks retain fail-closed quarantine; all new security modules
+remain within normal size limits.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
 ## Entry: Signed-Worker Admission, Lease, and Quarantine Security Repair
 **Date**: 2026-07-28
 **What Changed**: Extracted exact-row and transactional commit helpers, required

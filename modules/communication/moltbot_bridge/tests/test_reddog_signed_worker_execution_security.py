@@ -125,6 +125,34 @@ def test_forged_process_local_verification_proof_cannot_admit() -> None:
     assert _ledger_count(db, task_id) == 0
 
 
+def test_forged_signed_metadata_cannot_quarantine_generic_task(
+    tmp_path: Path,
+) -> None:
+    task_id = "generic-forged-signed-metadata"
+    db = AgentDB()
+    assert db.create_autonomous_task(
+        task_id=task_id,
+        description="ordinary generic task",
+        required_skills=[run_task_runtime.SIGNED_SKILL],
+        estimated_complexity=0.1,
+        priority_score=1.0,
+        context={
+            "source": run_task_runtime.SIGNED_SOURCE,
+            "signed_worker_agentdb_envelope": {"attacker_selected": True},
+        },
+    )
+    assert db.assign_autonomous_task(task_id, "generic-worker")
+    before = _raw_task_state(db, task_id)
+
+    result = execute_task(task_id, repo_root=tmp_path)
+
+    assert result["ok"] is False
+    assert result["finalization_owned"] is True
+    assert "namespace_mismatch" in result["detail"]
+    assert _raw_task_state(db, task_id) == before
+    assert _ledger_count(db, task_id) == 0
+
+
 def test_run_task_verification_race_preserves_completed_signed_task(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

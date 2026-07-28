@@ -54,14 +54,19 @@ def execute_signed_worker_from_agentdb(
     env: Mapping[str, str],
 ) -> Mapping[str, Any] | None:
     """Verify, claim once, and execute one signed-origin AgentDB task."""
-    if not _has_signed_marker(
+    has_signed_marker = _has_signed_marker(
         task_id,
         context,
         required_skills,
         source=source,
         discovered_by=discovered_by,
-    ):
+    )
+    if not has_signed_marker:
         return None
+    if not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
+        rejection = _rejected("reddog_signed_worker_namespace_mismatch")
+        rejection["finalization_owned"] = True
+        return rejection
     verified, admission, rejection = _verify_and_admit(
         repo_root=repo_root, db=db, task_id=task_id, context=context,
         required_skills=required_skills, source=source,

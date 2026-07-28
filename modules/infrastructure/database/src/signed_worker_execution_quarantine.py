@@ -11,6 +11,7 @@ from .signed_worker_execution_quarantine_receipt import (
     decoded_context,
     quarantine_receipt_matches,
 )
+from .signed_worker_execution_store import is_signed_worker_task_id
 
 
 def quarantine_signed_worker_execution(
@@ -58,6 +59,8 @@ def _quarantine(
     connection: Any, *, task_id: str, raw_context: str,
     expected_status: str, reason: str, now_iso: str,
 ) -> str:
+    if not is_signed_worker_task_id(task_id):
+        return "REJECTED"
     task = connection.execute(
         "SELECT status, context FROM agents_autonomous_tasks WHERE task_id = ?",
         (task_id,),

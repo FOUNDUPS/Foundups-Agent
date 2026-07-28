@@ -1,4 +1,8 @@
 # ModLog - moltbot_bridge
+- Exact-SHA review follow-up now rejects signed-looking metadata on an ordinary
+  AgentDB task without mutating it. Only the reserved signed-worker namespace
+  may enter canonical verification or state-changing quarantine; both the
+  run-task router and database quarantine boundary enforce that ownership.
 - Exact-SHA review follow-up removed the importable process-local envelope
   seal as an authority primitive. Signed-worker admission now re-verifies the
   persisted AgentDB envelope against fresh authority inside the atomic claim

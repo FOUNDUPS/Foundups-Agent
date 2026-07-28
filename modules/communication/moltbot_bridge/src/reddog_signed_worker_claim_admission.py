@@ -90,7 +90,12 @@ def quarantine_unverified_signed_worker_assignment(
     from modules.infrastructure.database.src.signed_worker_execution_quarantine import (
         quarantine_signed_worker_execution_in_transaction,
     )
+    from modules.infrastructure.database.src.signed_worker_execution_store import (
+        is_signed_worker_task_id,
+    )
 
+    if not is_signed_worker_task_id(task_id):
+        return "REJECTED"
     try:
         with db.db.get_connection() as connection:
             row = connection.execute(

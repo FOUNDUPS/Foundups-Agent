@@ -72,6 +72,17 @@ python -m modules.infrastructure.database.src.sqlite_audit \
 2. Do not treat derived UI/runtime state as accounting truth.
 3. Keep event/audit and settlement boundaries explicit (see `ARCHITECTURE.md`).
 
+## AgentDB Decomposition Plan
+
+`src/agent_db.py` is an inherited compatibility monolith. New signed-worker
+behavior must remain in bounded sibling modules; `AgentDB` may expose only
+thin compatibility entrypoints. A dedicated migration must split schema
+bootstrap, autonomous-task coordination, HoloIndex maintenance, and
+independent-assurance APIs while preserving SQLite/PostgreSQL behavior and
+the current public import surface. Until that migration lands, the exact
+temporary WSP 62 no-growth ceiling is recorded in
+`wsp_62_exemptions.yaml`.
+
 ## Signed-Worker Result Continuity
 
 Every terminal or requeue attempt appends one chain-linked row to

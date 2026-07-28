@@ -11,6 +11,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 MODULE_ROOT = Path(__file__).resolve().parents[1]
+DATABASE_ROOT = REPO_ROOT / "modules/infrastructure/database"
 SLICE_DATE = date(2026, 7, 18)
 EXPECTED_MODULE_FILES = {
     "src/foundup_job_contract.py",
@@ -233,6 +234,30 @@ def test_new_database_security_files_are_bounded_without_exemption() -> None:
         target = REPO_ROOT / relative_path
         assert len(target.read_text(encoding="utf-8").splitlines()) <= 200
         assert all(size <= 50 for size in _named_sizes(target).values())
+
+
+def test_inherited_agent_db_monolith_has_exact_no_growth_remediation() -> None:
+    items = _exemptions(DATABASE_ROOT / "wsp_62_exemptions.yaml")
+    assert len(items) == 1
+    item = items[0]
+    assert item["file"] == "src/agent_db.py"
+    assert item["temporary"] is True
+    assert item["architect_reviewer"] == "0102 Technical Architect"
+    assert date.fromisoformat(item["expires_on"]) == date(2026, 9, 30)
+    assert item["remediation"].endswith("#agentdb-decomposition-plan")
+    _assert_exact_temporary_exemption(item, DATABASE_ROOT)
+    target = DATABASE_ROOT / item["file"]
+    assert item["threshold_override"] == len(
+        target.read_text(encoding="utf-8").splitlines()
+    )
+    assert item["no_growth_ceiling"]["functions"] == _oversized_function_sizes(
+        target
+    )
+    assert item["no_growth_ceiling"]["classes"] == {
+        name: size
+        for name, size in _named_sizes(target).items()
+        if name in item["classes"]
+    }
 
 
 def test_new_signed_worker_result_modules_are_bounded_without_exemption() -> None:
