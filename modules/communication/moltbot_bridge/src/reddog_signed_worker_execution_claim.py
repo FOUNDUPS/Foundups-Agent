@@ -126,13 +126,7 @@ def bind_execution_admission(
     return bound
 
 
-def _claim_inputs(
-    row: Any,
-    *,
-    task_id: str,
-    token: str,
-    now_iso: str,
-) -> tuple[
+_ClaimInputs = tuple[
     str,
     str,
     str,
@@ -141,9 +135,36 @@ def _claim_inputs(
     str,
     Mapping[str, Any],
     Mapping[str, Any],
-] | None:
+] | None
+
+
+def _claim_inputs(
+    row: Any, *, task_id: str, token: str, now_iso: str
+) -> _ClaimInputs:
     if row is None or not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
         return None
+    parsed = _parse_claim_row(row)
+    if parsed is None:
+        return None
+    raw_context, raw_skills, assigned_to, context, required_skills, discovered_by = parsed
+    claim, use = _execution_receipts(
+        task_id=task_id,
+        assigned_to=assigned_to,
+        context=context,
+        required_skills=required_skills,
+        discovered_by=discovered_by,
+        token=token,
+        now_iso=now_iso,
+    )
+    return (
+        raw_context, raw_skills, assigned_to, context, required_skills,
+        discovered_by, claim, use,
+    )
+
+
+def _parse_claim_row(
+    row: Any,
+) -> tuple[str, str, str, Mapping[str, Any], tuple[str, ...], str] | None:
     payload = dict(row)
     assigned_to = str(payload.get("assigned_to") or "").strip()
     raw_context = str(payload.get("context") or "")
@@ -168,7 +189,25 @@ def _claim_inputs(
         or any(not isinstance(skill, str) or not skill for skill in parsed_skills)
     ):
         return None
-    required_skills = tuple(parsed_skills)
+    context = dict(context)
+    context.pop("signed_worker_execution_claim", None)
+    context.pop("signed_worker_execution_use", None)
+    return (
+        raw_context, raw_skills, assigned_to, context,
+        tuple(parsed_skills), discovered_by,
+    )
+
+
+def _execution_receipts(
+    *,
+    task_id: str,
+    assigned_to: str,
+    context: Mapping[str, Any],
+    required_skills: tuple[str, ...],
+    discovered_by: str,
+    token: str,
+    now_iso: str,
+) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
     token_digest = _digest_text(token)
     claim = _receipt(
         {
@@ -193,16 +232,7 @@ def _claim_inputs(
             "status": "CONSUMED",
         }
     )
-    return (
-        raw_context,
-        raw_skills,
-        assigned_to,
-        context,
-        required_skills,
-        discovered_by,
-        claim,
-        use,
-    )
+    return claim, use
 
 
 def _receipt(payload: Mapping[str, Any]) -> Mapping[str, Any]:

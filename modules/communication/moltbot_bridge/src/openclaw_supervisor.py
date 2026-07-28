@@ -513,7 +513,9 @@ def _signed_worker_reject_claimed_task(
             rejection_reasons=tuple(final_reasons),
             task_status="failed",
         ):
-            _fail_closed_executing_signed_worker_task(db=db, task_id=task_id)
+            _fail_closed_executing_signed_worker_task(
+                db=db, task_id=task_id, context=context
+            )
             final_reasons.extend((
                 SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED,
                 SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED,
@@ -533,12 +535,12 @@ def _signed_worker_reject_claimed_task(
     )
 
 
-def _fail_closed_executing_signed_worker_task(*, db: Any, task_id: str) -> None:
-    db.db.execute_write(
-        "UPDATE agents_autonomous_tasks SET status = 'failed', "
-        "completed_at = CURRENT_TIMESTAMP WHERE task_id = ? "
-        "AND status = 'executing'",
-        (task_id,))
+def _fail_closed_executing_signed_worker_task(
+    *, db: Any, task_id: str, context: Mapping[str, Any]
+) -> None:
+    db.finalize_signed_worker_execution(
+        task_id, context=context, accepted=False
+    )
 
 
 def _revoke_author_assurance_after_failure(
@@ -605,7 +607,9 @@ def _signed_worker_finalize_claimed_task(
         db, task_id, context=context, claim_status=status, run_result=source,
         task_status=task_status,
     ):
-        _fail_closed_executing_signed_worker_task(db=db, task_id=task_id)
+        _fail_closed_executing_signed_worker_task(
+            db=db, task_id=task_id, context=context
+        )
         return _signed_worker_reject_claimed_task(
             db=db, task_id=task_id, context=context, effect_source=source,
             reasons=(
@@ -1123,6 +1127,7 @@ def _commit_signed_worker_task_result(
     db: Any, task_id: str, base_context: Dict[str, Any],
     receipt: Mapping[str, Any], *, task_status: str | None,
 ) -> bool:
+    admitted_context = dict(base_context)
     history = base_context.get("signed_worker_task_result_receipts")
     bounded = [item for item in history or [] if isinstance(item, Mapping)][-9:]
     bounded.append({
@@ -1132,50 +1137,20 @@ def _commit_signed_worker_task_result(
     })
     base_context["signed_worker_task_last_result"] = dict(receipt)
     base_context["signed_worker_task_result_receipts"] = bounded
-    context_json = json.dumps(base_context, sort_keys=True)
-    expected_status = (
-        "executing"
-        if "signed_worker_execution_use" in base_context
-        else "assigned"
+    runner_summary = receipt.get("runner_result_summary")
+    retry_at = (
+        str(runner_summary.get("retry_at") or "") or None
+        if isinstance(runner_summary, Mapping)
+        else None
     )
-    if task_status == "pending":
-        runner_summary = receipt.get("runner_result_summary")
-        if not isinstance(runner_summary, Mapping):
-            runner_summary = {}
-        retry_at = str(
-            runner_summary.get("retry_at") or ""
-        ) or None
-        query = (
-            "UPDATE agents_autonomous_tasks SET context = ?, status = 'pending', "
-            "assigned_to = NULL, assigned_at = NULL, retry_not_before = ? "
-            "WHERE task_id = ? "
-            "AND status = ?"
-        )
-        updated = db.db.execute_write(
-            query, (context_json, retry_at, task_id, expected_status)
-        )
-        return updated == 1
-    elif task_status in {"completed", "failed"}:
-        query = (
-            "UPDATE agents_autonomous_tasks SET context = ?, status = ?, "
-            "completed_at = CURRENT_TIMESTAMP, retry_not_before = NULL "
-            "WHERE task_id = ? AND status = ?"
-        )
-        updated = db.db.execute_write(
-            query, (context_json, task_status, task_id, expected_status)
-        )
-        return updated == 1
-    elif task_status == "completed_reserved":
-        query = (
-            "UPDATE agents_autonomous_tasks SET context = ?, "
-            "retry_not_before = NULL WHERE task_id = ? AND status = 'completed'"
-        )
-        updated = db.db.execute_write(query, (context_json, task_id))
-        return updated == 1
-    else:
-        query = "UPDATE agents_autonomous_tasks SET context = ? WHERE task_id = ?"
-    updated = db.db.execute_write(query, (context_json, task_id))
-    return updated == 1
+    return db.finalize_signed_worker_execution(
+        task_id,
+        context=admitted_context,
+        accepted=task_status != "failed",
+        result_context=base_context,
+        target_status=task_status,
+        retry_not_before=retry_at,
+    )
 
 
 def _readonly_assignment_id(context: Dict[str, Any]) -> str:

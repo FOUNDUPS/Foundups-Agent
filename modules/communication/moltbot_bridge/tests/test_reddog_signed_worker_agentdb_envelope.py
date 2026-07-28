@@ -448,6 +448,48 @@ def test_supervisor_verifies_exact_claimed_database_state(
     assert stored is not None and stored["status"] == "failed"
 
 
+def test_supervisor_finalization_conflict_never_overwrites_owner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    original_persist = (
+        supervisor_module._persist_reddog_signed_worker_dispatch_task_result
+    )
+
+    def replace_owner_then_persist(db, selected_task_id, **kwargs):
+        assert db.db.execute_write(
+            "UPDATE agents_autonomous_tasks "
+            "SET assigned_to = ?, context = ? "
+            "WHERE task_id = ? AND status = 'executing'",
+            ("other-worker", json.dumps({"owner": "other-worker"}), selected_task_id),
+        ) == 1
+        return original_persist(db, selected_task_id, **kwargs)
+
+    monkeypatch.setattr(
+        supervisor_module,
+        "_persist_reddog_signed_worker_dispatch_task_result",
+        replace_owner_then_persist,
+    )
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["accepted"] is False
+    assert (
+        SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED
+        in result["rejection_reasons"]
+    )
+    assert stored is not None and stored["status"] == "executing"
+    assert stored["assigned_to"] == "other-worker"
+    assert stored["context"] == {"owner": "other-worker"}
+
+
 @pytest.mark.parametrize("authority_failure", ("expired", "revoked"))
 def test_claim_rejects_invalid_use_time_authority_before_runner_selection(
     tmp_path: Path,

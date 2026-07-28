@@ -167,6 +167,8 @@ def _matching_signed_worker_execution_context(
     assigned_to: str,
     expected_claim: Mapping[str, Any],
     expected_use: Mapping[str, Any],
+    *,
+    expected_status: str = "executing",
 ) -> Optional[str]:
     if row is None:
         return None
@@ -177,7 +179,7 @@ def _matching_signed_worker_execution_context(
     except (TypeError, ValueError):
         return None
     if (
-        payload.get("status") != "executing"
+        payload.get("status") != expected_status
         or str(payload.get("assigned_to") or "") != assigned_to
         or not isinstance(stored_context, dict)
         or stored_context.get("signed_worker_execution_claim") != expected_claim
@@ -190,6 +192,55 @@ def _matching_signed_worker_execution_context(
     if expected_claim.get("context_digest") != _assurance_digest(preclaim_context):
         return None
     return raw_context
+
+
+def _commit_signed_worker_final_state(
+    database: Any, *, task_id: str, assigned_to: str,
+    expected_claim: Mapping[str, Any],
+    expected_use: Mapping[str, Any],
+    result_context: Mapping[str, Any] | None,
+    target_status: str, retry_not_before: str | None,
+) -> bool:
+    expected_status = "completed" if target_status == "completed_reserved" else "executing"
+    persisted_status = "completed" if target_status == "completed_reserved" else target_status
+    try:
+        with database.get_connection() as connection:
+            row = connection.execute(
+                "SELECT status, assigned_to, assigned_at, completed_at, context "
+                "FROM agents_autonomous_tasks WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            raw_context = _matching_signed_worker_execution_context(
+                row, assigned_to, expected_claim, expected_use,
+                expected_status=expected_status,
+            )
+            if raw_context is None:
+                return False
+            final_context = dict(result_context) if result_context is not None else json.loads(raw_context)
+            if (
+                final_context.get("signed_worker_execution_claim") != expected_claim
+                or final_context.get("signed_worker_execution_use") != expected_use
+            ):
+                return False
+            payload = dict(row)
+            requeue = persisted_status == "pending"
+            changed = connection.execute(
+                "UPDATE agents_autonomous_tasks SET context = ?, status = ?, "
+                "completed_at = ?, retry_not_before = ?, assigned_to = ?, assigned_at = ? "
+                "WHERE task_id = ? AND status = ? AND assigned_to = ? AND context = ?",
+                (
+                    json.dumps(final_context, sort_keys=True),
+                    persisted_status,
+                    None if requeue else payload.get("completed_at") or datetime.now().isoformat(),
+                    retry_not_before if requeue else None,
+                    None if requeue else assigned_to,
+                    None if requeue else payload.get("assigned_at"),
+                    task_id, expected_status, assigned_to, raw_context,
+                ),
+            ).rowcount
+            return changed == 1
+    except Exception:
+        return False
 
 
 def _normalize_sha256_digest(value: Any) -> str:
@@ -1749,6 +1800,9 @@ class AgentDB:
         *,
         context: Mapping[str, Any],
         accepted: bool,
+        result_context: Mapping[str, Any] | None = None,
+        target_status: str | None = None,
+        retry_not_before: str | None = None,
     ) -> bool:
         """Finalize only the exact executing context admitted by the worker CAS."""
         claim = context.get("signed_worker_execution_claim")
@@ -1757,35 +1811,19 @@ class AgentDB:
         if binding is None:
             return False
         assigned_to, expected_claim, expected_use = binding
-        status = "completed" if accepted is True else "failed"
-        try:
-            with self.db.get_connection() as connection:
-                row = connection.execute(
-                    "SELECT status, assigned_to, context "
-                    "FROM agents_autonomous_tasks WHERE task_id = ?",
-                    (task_id,),
-                ).fetchone()
-                raw_context = _matching_signed_worker_execution_context(
-                    row, assigned_to, expected_claim, expected_use
-                )
-                if raw_context is None:
-                    return False
-                changed = connection.execute(
-                    "UPDATE agents_autonomous_tasks "
-                    "SET completed_at = ?, status = ? "
-                    "WHERE task_id = ? AND status = 'executing' "
-                    "AND assigned_to = ? AND context = ?",
-                    (
-                        datetime.now().isoformat(),
-                        status,
-                        task_id,
-                        assigned_to,
-                        raw_context,
-                    ),
-                ).rowcount
-                return changed == 1
-        except Exception:
+        status = target_status or ("completed" if accepted is True else "failed")
+        if status not in {"completed", "failed", "pending", "completed_reserved"}:
             return False
+        return _commit_signed_worker_final_state(
+            self.db,
+            task_id=task_id,
+            assigned_to=assigned_to,
+            expected_claim=expected_claim,
+            expected_use=expected_use,
+            result_context=result_context,
+            target_status=status,
+            retry_not_before=retry_not_before,
+        )
 
     def schedule_autonomous_task_retry(
         self,
