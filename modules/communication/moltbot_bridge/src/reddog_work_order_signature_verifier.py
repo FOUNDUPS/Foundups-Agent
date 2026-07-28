@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import hmac
 import json
+import threading
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, List, Mapping, Optional, Protocol, Sequence, runtime_checkable
@@ -187,12 +188,69 @@ class InMemoryNonceStore:
 
     def __init__(self) -> None:
         self._seen: set = set()
+        self._publications: dict[str, dict[str, str]] = {}
+        self._lock = threading.Lock()
 
     def consume(self, nonce: str) -> bool:
-        if not isinstance(nonce, str) or not nonce or nonce in self._seen:
-            return False
-        self._seen.add(nonce)
-        return True
+        with self._lock:
+            if not isinstance(nonce, str) or not nonce or nonce in self._seen:
+                return False
+            self._seen.add(nonce)
+            return True
+
+    def advance_publication(
+        self, nonce: str, binding_digest: str, target_status: str
+    ) -> str:
+        """Advance one digest-bound publication without reopening completed use."""
+
+        with self._lock:
+            return _advance_publication_state(
+                seen=self._seen,
+                publications=self._publications,
+                nonce=nonce,
+                binding_digest=binding_digest,
+                target_status=target_status,
+            )
+
+
+def _advance_publication_state(
+    *,
+    seen: set[str],
+    publications: dict[str, dict[str, str]],
+    nonce: str,
+    binding_digest: str,
+    target_status: str,
+) -> str:
+    order = {"RESERVED": 0, "AUTHORIZED": 1, "APPLIED": 2}
+    if (
+        not nonce
+        or not _is_sha256_digest(binding_digest)
+        or target_status not in order
+    ):
+        return ""
+    current = publications.get(nonce)
+    if current is None:
+        if nonce in seen or target_status != "RESERVED":
+            return ""
+        seen.add(nonce)
+        publications[nonce] = {
+            "binding_digest": binding_digest,
+            "status": target_status,
+        }
+        return target_status
+    if not constant_time_compare(
+        str(current.get("binding_digest") or ""), binding_digest
+    ):
+        return ""
+    current_status = str(current.get("status") or "")
+    if current_status not in order:
+        return ""
+    if order[target_status] > order[current_status] + 1:
+        return ""
+    if order[target_status] > order[current_status]:
+        current["status"] = target_status
+        current_status = target_status
+    return current_status
 
 
 

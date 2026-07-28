@@ -1170,7 +1170,7 @@ def test_openclaw_signed_worker_claim_rejects_when_result_persistence_fails(
     assert SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED in result[
         "rejection_reasons"
     ]
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "assigned"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
 
 
 @pytest.mark.parametrize(

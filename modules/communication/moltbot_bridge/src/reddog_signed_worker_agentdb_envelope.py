@@ -202,36 +202,16 @@ def verify_reddog_signed_worker_agentdb_envelope(
 ) -> VerifiedSignedWorkerAgentDbEnvelope:
     """Reverify persisted signed authority and regenerate the exact task plan."""
 
-    payload = _exact_mapping(envelope, _ENVELOPE_FIELDS, "envelope")
-    if payload.get("schema_version") != SIGNED_WORKER_AGENTDB_ENVELOPE_SCHEMA:
-        raise SignedWorkerAgentDbEnvelopeError("envelope_schema_mismatch")
-    runtime = _exact_runtime(payload.get("queue_authority_runtime_result"))
-    allocation = _mapping(payload.get("wsp15_allocation_receipt"))
-    recorded_receipt = _exact_mapping(
-        payload.get("signed_authority_worker_dispatch_receipt"),
-        WORKER_DISPATCH_RECEIPT_FIELDS,
-        "dispatch_receipt",
-    )
-    recorded_intent = _exact_mapping(
-        payload.get("worker_dispatch_intent"),
-        WORKER_DISPATCH_INTENT_FIELDS,
-        "dispatch_intent",
-    )
-    queue_receipt = _exact_mapping(
-        payload.get("queue_consumer_receipt"),
-        _QUEUE_CONSUMER_RECEIPT_FIELDS,
-        "queue_consumer_receipt",
-    )
-    work_order_binding = _exact_mapping(
-        payload.get("work_order_materialization_binding"),
-        WORK_ORDER_MATERIALIZATION_BINDING_FIELDS,
-        "work_order_materialization_binding",
-    )
-    binding = _exact_mapping(
-        payload.get("agentdb_task_binding"),
-        _TASK_BINDING_FIELDS,
-        "task_binding",
-    )
+    (
+        payload,
+        runtime,
+        allocation,
+        recorded_receipt,
+        recorded_intent,
+        queue_receipt,
+        work_order_binding,
+        binding,
+    ) = _envelope_components(envelope)
     verification = _fresh_verification(runtime, authority_context)
     planned_receipt = _regenerated_receipt(runtime, verification, allocation)
     if not _constant_mapping_equal(recorded_receipt, planned_receipt):
@@ -264,6 +244,44 @@ def verify_reddog_signed_worker_agentdb_envelope(
         dispatch_receipt=planned_receipt,
         dispatch_intent=planned_intent,
         authority_verification_result=verification,
+    )
+
+
+def _envelope_components(
+    envelope: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], ...]:
+    payload = _exact_mapping(envelope, _ENVELOPE_FIELDS, "envelope")
+    if payload.get("schema_version") != SIGNED_WORKER_AGENTDB_ENVELOPE_SCHEMA:
+        raise SignedWorkerAgentDbEnvelopeError("envelope_schema_mismatch")
+    return (
+        payload,
+        _exact_runtime(payload.get("queue_authority_runtime_result")),
+        _mapping(payload.get("wsp15_allocation_receipt")),
+        _exact_mapping(
+            payload.get("signed_authority_worker_dispatch_receipt"),
+            WORKER_DISPATCH_RECEIPT_FIELDS,
+            "dispatch_receipt",
+        ),
+        _exact_mapping(
+            payload.get("worker_dispatch_intent"),
+            WORKER_DISPATCH_INTENT_FIELDS,
+            "dispatch_intent",
+        ),
+        _exact_mapping(
+            payload.get("queue_consumer_receipt"),
+            _QUEUE_CONSUMER_RECEIPT_FIELDS,
+            "queue_consumer_receipt",
+        ),
+        _exact_mapping(
+            payload.get("work_order_materialization_binding"),
+            WORK_ORDER_MATERIALIZATION_BINDING_FIELDS,
+            "work_order_materialization_binding",
+        ),
+        _exact_mapping(
+            payload.get("agentdb_task_binding"),
+            _TASK_BINDING_FIELDS,
+            "task_binding",
+        ),
     )
 
 

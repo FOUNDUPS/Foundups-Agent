@@ -18,6 +18,7 @@ EXPECTED_MODULE_FILES = {
     "src/reddog_main_resident_queue_next_stage_dispatch_bootstrap.py",
     "src/reddog_main_resident_queue_runtime_dependency_bundle.py",
     "src/reddog_main_resident_queue_serial_loop_bootstrap.py",
+    "src/openclaw_supervisor.py",
     "src/reddog_openclaw_live_enqueue.py",
     "src/reddog_resident_live_canary.py",
     "src/reddog_signed_worker_openclaw_queue_loop_runtime_binding.py",

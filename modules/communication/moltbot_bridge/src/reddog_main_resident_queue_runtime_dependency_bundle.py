@@ -91,24 +91,24 @@ class AuthorityRuntimeWorkAuthorityNonceStore:
         if not isinstance(nonce, str) or not nonce.strip():
             return False
         atomic_consume = getattr(
-            self._store, "consume_verified_work_authority_nonce", None
-        )
-        if callable(atomic_consume):
-            return bool(atomic_consume(nonce))
-        state = self._store.load()
-        seen = state.get("verified_work_authority_nonces", [])
-        if not isinstance(seen, list):
+            self._store, "consume_verified_work_authority_nonce", None)
+        if not callable(atomic_consume):
             return False
-        if nonce in set(map(str, seen)):
-            return False
-        updated = dict(state)
-        updated["verified_work_authority_nonces"] = [*seen, nonce]
         try:
-            self._store.commit(updated, expected_revision=state.get("revision"))
-        except RuntimeError:
+            return bool(atomic_consume(nonce))
+        except Exception:
             return False
-        return True
 
+    def advance_publication(
+        self, nonce: str, binding_digest: str, target_status: str) -> str:
+        advance = getattr(
+            self._store, "advance_verified_work_authority_publication", None)
+        if not callable(advance):
+            return ""
+        try:
+            return str(advance(nonce, binding_digest, target_status) or "")
+        except Exception:
+            return ""
 
 class AuthorityRuntimeRevocationOracle:
     """Read revocation lists from the outside-repo authority runtime state."""

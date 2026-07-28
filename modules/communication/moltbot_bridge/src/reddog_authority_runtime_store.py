@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
 import threading
@@ -85,6 +86,10 @@ class AuthorityRuntimeStore(Protocol):
 
     def consume_verified_work_authority_nonce(self, nonce: str) -> bool: ...
 
+    def advance_verified_work_authority_publication(
+        self, nonce: str, binding_digest: str, target_status: str
+    ) -> str: ...
+
 
 class InMemoryAuthorityRuntimeStore:
     def __init__(
@@ -121,6 +126,22 @@ class InMemoryAuthorityRuntimeStore:
             committed["revision"] = _canonical_digest(committed)
             self._state = committed
             return True
+
+    def advance_verified_work_authority_publication(
+        self, nonce: str, binding_digest: str, target_status: str
+    ) -> str:
+        with self._lock:
+            updated, status = _advanced_publication_snapshot(
+                self._state,
+                nonce=nonce,
+                binding_digest=binding_digest,
+                target_status=target_status,
+            )
+            if not status:
+                return ""
+            updated["revision"] = _canonical_digest(updated)
+            self._state = updated
+            return status
 
 
 class AtomicJsonAuthorityRuntimeStore:
@@ -203,6 +224,26 @@ class AtomicJsonAuthorityRuntimeStore:
             )
             return True
 
+    def advance_verified_work_authority_publication(
+        self, nonce: str, binding_digest: str, target_status: str
+    ) -> str:
+        with self._operation_lock():
+            current = self._load_unlocked()
+            updated, status = _advanced_publication_snapshot(
+                current,
+                nonce=nonce,
+                binding_digest=binding_digest,
+                target_status=target_status,
+            )
+            if not status:
+                return ""
+            if updated != current:
+                self._write_snapshot(
+                    updated,
+                    expected_revision=current.get("revision"),
+                )
+            return status
+
     def _operation_lock(self) -> Iterator[None]:
         return confined_runtime_operation_lock(
             self.lock_path,
@@ -280,6 +321,78 @@ class AtomicJsonAuthorityRuntimeStore:
         if os.path.normcase(str(target)) != os.path.normcase(str(expected)):
             raise ValueError("authority_runtime_store_path_changed")
         return target
+
+
+def _advanced_publication_snapshot(
+    snapshot: Mapping[str, Any],
+    *,
+    nonce: str,
+    binding_digest: str,
+    target_status: str,
+) -> tuple[Dict[str, Any], str]:
+    order = {"RESERVED": 0, "AUTHORIZED": 1, "APPLIED": 2}
+    if (
+        not nonce
+        or not _valid_sha256(binding_digest)
+        or target_status not in order
+    ):
+        return dict(snapshot), ""
+    updated = json.loads(json.dumps(snapshot, sort_keys=True))
+    publications = updated.setdefault(
+        "verified_work_authority_publications", {}
+    )
+    seen = updated.setdefault("verified_work_authority_nonces", [])
+    if not isinstance(publications, dict) or not isinstance(seen, list):
+        return dict(snapshot), ""
+    current = publications.get(nonce)
+    if current is None:
+        if nonce in set(map(str, seen)) or target_status != "RESERVED":
+            return dict(snapshot), ""
+        seen.append(nonce)
+        publications[nonce] = {
+            "binding_digest": binding_digest,
+            "status": target_status,
+        }
+        return updated, target_status
+    return _advance_existing_publication(
+        snapshot=updated,
+        current=current,
+        binding_digest=binding_digest,
+        target_status=target_status,
+        order=order,
+    )
+
+
+def _advance_existing_publication(
+    *,
+    snapshot: Dict[str, Any],
+    current: Any,
+    binding_digest: str,
+    target_status: str,
+    order: Mapping[str, int],
+) -> tuple[Dict[str, Any], str]:
+    if not isinstance(current, dict) or not hmac.compare_digest(
+        str(current.get("binding_digest") or ""), binding_digest
+    ):
+        return snapshot, ""
+    current_status = str(current.get("status") or "")
+    if current_status not in order:
+        return snapshot, ""
+    if order[target_status] > order[current_status] + 1:
+        return snapshot, ""
+    if order[target_status] > order[current_status]:
+        current["status"] = target_status
+        current_status = target_status
+    return snapshot, current_status
+
+
+def _valid_sha256(value: str) -> bool:
+    return (
+        isinstance(value, str)
+        and value.startswith("sha256:")
+        and len(value) == 71
+        and all(char in "0123456789abcdef" for char in value[7:])
+    )
 
 
 def atomic_replace_confined_mapping(

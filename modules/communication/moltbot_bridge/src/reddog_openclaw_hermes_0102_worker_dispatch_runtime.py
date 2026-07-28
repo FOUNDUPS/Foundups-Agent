@@ -39,6 +39,10 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task
     build_signed_worker_dispatch_runtime_receipt,
     build_signed_worker_dispatch_task,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_publication_admission import (
+    complete_signed_worker_publication,
+    prepare_signed_worker_publication,
+)
 from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
     WorkerDispatchAuthorityVerificationContext,
 )
@@ -79,15 +83,56 @@ def publish_reddog_signed_worker_dispatch_runtime(
     )
     if binding is None:
         return reject_runtime([str(reason or "")])
-    tasks = _build_tasks(request, binding, queue_authority_runtime_result)
+    return _publish_authenticated(
+        request=request,
+        binding=binding,
+        authority_runtime_result=queue_authority_runtime_result,
+        authority_verification_context=authority_verification_context,
+        writer=writer,
+        seen_intent_ids=seen_intent_ids,
+        created_at=created_at,
+    )
+
+
+def _publish_authenticated(
+    *,
+    request: ValidatedDispatchRequest,
+    binding: AuthenticatedDispatchBinding,
+    authority_runtime_result: Mapping[str, Any],
+    authority_verification_context: WorkerDispatchAuthorityVerificationContext,
+    writer: Optional[SignedWorkerDispatchTaskWriter],
+    seen_intent_ids: Optional[set[str]],
+    created_at: str,
+) -> SignedWorkerDispatchRuntimeResult:
+    tasks = _build_tasks(request, binding, authority_runtime_result)
     receipt = build_signed_worker_dispatch_runtime_receipt(
         receipt=request.receipt,
         queue_item=request.queue_item,
         tasks=tasks,
         created_at=created_at,
     )
+    admission = prepare_signed_worker_publication(
+        nonce_store=authority_verification_context.nonce_store,
+        work_authority=binding.work_authority,
+        tasks=tasks,
+        receipt=receipt,
+    )
+    if admission is None:
+        return reject_runtime(
+            [WorkerDispatchRuntimeReason.AUTHORITY_VERIFICATION_BINDING_MISMATCH]
+        )
     assert writer is not None
-    if not _writer_accepts(writer, tasks, receipt):
+    if not _writer_accepts(
+        writer,
+        tasks,
+        receipt,
+        recovering=admission.recovering,
+    ):
+        return reject_runtime([WorkerDispatchRuntimeReason.WRITER_REJECTED])
+    if not complete_signed_worker_publication(
+        authority_verification_context.nonce_store,
+        admission,
+    ):
         return reject_runtime([WorkerDispatchRuntimeReason.WRITER_REJECTED])
     return _accepted_result(request, tasks, receipt, seen_intent_ids)
 
@@ -136,9 +181,20 @@ def _writer_accepts(
     writer: SignedWorkerDispatchTaskWriter,
     tasks: Sequence[SignedWorkerDispatchTaskSpec],
     receipt: SignedWorkerDispatchRuntimeReceipt,
+    *,
+    recovering: bool = False,
 ) -> bool:
     try:
-        result = writer.enqueue_signed_worker_dispatch_tasks(tasks, receipt)
+        operation = writer.enqueue_signed_worker_dispatch_tasks
+        if recovering:
+            operation = getattr(
+                writer,
+                "recover_signed_worker_dispatch_tasks",
+                None,
+            )
+            if not callable(operation):
+                return False
+        result = operation(tasks, receipt)
     except Exception:
         return False
     if not isinstance(result, Mapping) or result.get("ok") is not True:

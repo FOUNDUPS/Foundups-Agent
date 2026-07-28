@@ -2554,7 +2554,8 @@ class AgentDB:
                     """
                     UPDATE agents_autonomous_tasks
                     SET status = 'completed', completed_at = ?
-                    WHERE task_id = ? AND status = 'assigned' AND assigned_to = ?
+                    WHERE task_id = ? AND status IN ('assigned', 'executing')
+                      AND assigned_to = ?
                     """,
                     (
                         canonical_now,

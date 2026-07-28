@@ -29,10 +29,6 @@ sys.path.insert(0, str(REPO_ROOT))
 
 logger = logging.getLogger(__name__)
 
-_SIGNED_WORKER_DISPATCH_TASK_SOURCE = "reddog_signed_worker_dispatch_runtime"
-_SIGNED_WORKER_DISPATCH_TASK_SKILL = "reddog_signed_worker_dispatch"
-
-
 def execute_task(
     task_id: str,
     repo_root: Path | None = None,
@@ -93,17 +89,23 @@ def execute_task(
 
     # Dispatch path 2: exact RedDog signed worker-dispatch task execution.
     if not result["ok"] and result["detail"] == "no_executor_matched":
-        signed_worker_result = _try_reddog_signed_worker_dispatch(
-            repo_root,
-            task_id,
-            context,
-            required_skills,
-            source,
-            discovered_by,
-            signed_worker_runner,
+        from modules.communication.moltbot_bridge.src.reddog_signed_worker_run_task_runtime import (
+            execute_signed_worker_from_agentdb,
+        )
+
+        signed_worker_result = execute_signed_worker_from_agentdb(
+            repo_root=repo_root,
+            db=db,
+            task_id=task_id,
+            context=context,
+            required_skills=required_skills,
+            source=source,
+            discovered_by=discovered_by,
+            signed_worker_runner=signed_worker_runner,
+            env=os.environ,
         )
         if signed_worker_result is not None:
-            result = signed_worker_result
+            result = dict(signed_worker_result)
 
     # Dispatch path 3: exact host-owned startup maintenance.
     if (
@@ -260,109 +262,6 @@ def _try_reddog_readonly_audit_report_persist(
         }
 
 
-def _try_reddog_signed_worker_dispatch(
-    repo_root: Path,
-    task_id: str,
-    context: dict,
-    required_skills: list,
-    source: str,
-    discovered_by: str,
-    signed_worker_runner: Any | None,
-) -> Dict[str, Any] | None:
-    """Execute exact RedDog signed worker-dispatch tasks before WRE fallback."""
-
-    signed_origin = discovered_by == _SIGNED_WORKER_DISPATCH_TASK_SOURCE
-    signed_marker_present = (
-        signed_origin
-        or _SIGNED_WORKER_DISPATCH_TASK_SKILL in required_skills
-        or source == _SIGNED_WORKER_DISPATCH_TASK_SOURCE
-        or "signed_worker_agentdb_envelope" in context
-    )
-    if not signed_marker_present:
-        return None
-
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
-            SignedWorkerAgentDbEnvelopeError,
-            build_worker_dispatch_authority_context_from_env,
-            verify_reddog_signed_worker_agentdb_envelope,
-        )
-        from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
-            SIGNED_WORKER_DISPATCH_TASK_SKILL,
-            SIGNED_WORKER_DISPATCH_TASK_SOURCE,
-            execute_reddog_signed_worker_dispatch_task,
-        )
-    except ImportError as e:
-        logger.warning("[RUN_TASK] Signed-worker executor unavailable: %s", e)
-        return {
-            "ok": False,
-            "detail": f"signed_worker_executor_unavailable: {e}",
-            "executor": "reddog:signed_worker_dispatch",
-        }
-
-    try:
-        if (
-            SIGNED_WORKER_DISPATCH_TASK_SOURCE
-            != _SIGNED_WORKER_DISPATCH_TASK_SOURCE
-            or not signed_origin
-            or SIGNED_WORKER_DISPATCH_TASK_SKILL not in required_skills
-            or source != SIGNED_WORKER_DISPATCH_TASK_SOURCE
-            or "signed_worker_agentdb_envelope" not in context
-        ):
-            raise SignedWorkerAgentDbEnvelopeError(
-                "signed_worker_task_routing_binding_mismatch"
-            )
-        authority_context = build_worker_dispatch_authority_context_from_env(
-            repo_root=repo_root,
-            env=os.environ,
-        )
-        verified = verify_reddog_signed_worker_agentdb_envelope(
-            envelope=context.get("signed_worker_agentdb_envelope", {}),
-            task_id=task_id,
-            authority_context=authority_context,
-        )
-        verified_context = dict(verified.canonical_context)
-        effective_runner = signed_worker_runner
-        if effective_runner is None:
-            binding_result = _build_signed_worker_queue_loop_runner(repo_root)
-            if binding_result is not None:
-                if getattr(binding_result, "accepted", False) is True:
-                    effective_runner = getattr(binding_result, "runner", None)
-                elif getattr(binding_result, "requested", False) is True:
-                    return {
-                        "ok": False,
-                        "detail": json.dumps(binding_result.to_dict(), default=str)[:1000],
-                        "executor": "reddog:signed_worker_dispatch",
-                    }
-        execution = execute_reddog_signed_worker_dispatch_task(
-            task_context=verified_context,
-            task_id=task_id,
-            repo_root=repo_root,
-            runner=effective_runner,
-        )
-        payload = execution.to_dict()
-        return {
-            "ok": bool(execution.accepted),
-            "detail": json.dumps(payload, default=str)[:1000],
-            "executor": "reddog:signed_worker_dispatch",
-            "structured_result": payload,
-        }
-    except (SignedWorkerAgentDbEnvelopeError, TypeError, ValueError) as e:
-        logger.warning("[RUN_TASK] RedDog signed-worker authority rejected: %s", e)
-        return {
-            "ok": False,
-            "detail": f"reddog_signed_worker_authority_rejected: {e}",
-            "executor": "reddog:signed_worker_dispatch",
-        }
-    except Exception as e:
-        logger.warning("[RUN_TASK] RedDog signed-worker dispatch error: %s", e)
-        return {
-            "ok": False,
-            "detail": f"reddog_signed_worker_dispatch_error: {e}",
-            "executor": "reddog:signed_worker_dispatch",
-        }
-
-
 def _try_wre_dispatch(
     repo_root: Path,
     task_id: str,
@@ -429,23 +328,6 @@ def _try_wre_dispatch(
         return {"ok": False, "detail": f"wre_error: {e}", "executor": "wre"}
 
     return None
-
-
-def _build_signed_worker_queue_loop_runner(repo_root: Path) -> Any | None:
-    """Build an explicitly enabled OpenClaw signed-worker queue-loop runner."""
-
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
-            build_reddog_signed_worker_queue_loop_runner_from_env,
-        )
-    except ImportError as e:
-        logger.debug("[RUN_TASK] RedDog signed-worker queue-loop binding unavailable: %s", e)
-        return None
-    binding = build_reddog_signed_worker_queue_loop_runner_from_env(
-        repo_root=repo_root,
-        env=os.environ,
-    )
-    return binding
 
 
 def _try_self_audit_dispatch(repo_root: Path, context: dict) -> Dict[str, Any] | None:

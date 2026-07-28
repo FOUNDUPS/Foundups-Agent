@@ -37,6 +37,29 @@ def rehydrate_signed_worker_agentdb_context(
     return verified.canonical_context
 
 
+def try_rehydrate_signed_worker_agentdb_context(
+    *,
+    repo_root: Path | str,
+    task_id: str,
+    context: Mapping[str, Any],
+    authority_verification_context: Any | None,
+    env: Mapping[str, str],
+) -> tuple[Mapping[str, Any] | None, str]:
+    """Return canonical context or one bounded fail-closed reason."""
+
+    try:
+        verified = rehydrate_signed_worker_agentdb_context(
+            repo_root=repo_root,
+            task_id=task_id,
+            context=context,
+            authority_verification_context=authority_verification_context,
+            env=env,
+        )
+    except (TypeError, ValueError) as exc:
+        return None, str(exc)[:160]
+    return verified, ""
+
+
 def exclude_signed_worker_origin(
     tasks: Sequence[Mapping[str, Any]],
 ) -> list[Mapping[str, Any]]:
@@ -73,7 +96,7 @@ def renew_expired_verified_assurance(
         return
     for task_id, context in rows:
         try:
-            rehydrate(
+            verified_context = rehydrate(
                 repo_root=repo_root or Path.cwd(),
                 task_id=task_id,
                 context=context,
@@ -81,8 +104,8 @@ def renew_expired_verified_assurance(
             )
         except (TypeError, ValueError):
             continue
-        if not is_verifier_context(context) or not is_stage_ready(
-            context,
+        if not is_verifier_context(verified_context) or not is_stage_ready(
+            verified_context,
             env,
             repo_root=repo_root,
         ):
@@ -167,4 +190,5 @@ __all__ = [
     "exclude_signed_worker_origin",
     "rehydrate_signed_worker_agentdb_context",
     "renew_expired_verified_assurance",
+    "try_rehydrate_signed_worker_agentdb_context",
 ]

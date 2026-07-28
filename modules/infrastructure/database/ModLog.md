@@ -1,5 +1,18 @@
 # Database Module - ModLog
 
+## Entry: Signed Worker Execution and Verifier Terminal CAS
+**Date**: 2026-07-28
+**What Changed**: Allowed independent-assurance completion to atomically
+transition its exact assigned verifier from either `assigned` or the
+single-execution `executing` state while retaining the reservation and
+assignee predicates.
+**Why**: Signed workers now acquire an irreversible execution claim before
+calling a runner; verifier completion must finalize that authenticated state
+without reopening the task.
+**Impact**: Concurrent callers cannot both execute a signed task, and
+independent verifier completion remains one-use and fail closed.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 78, WSP 97
+
 ## Entry: Exact-SHA HoloIndex Maintenance CAS and Atomic Completion
 **Date**: 2026-07-26
 **What Changed**: Added insert-only task creation, an exact-binding CAS claim,

@@ -77,6 +77,9 @@ class SignedWorkerOpenClawClaimReason:
     AGENTDB_ENVELOPE_REJECTED = (
         "REJECT_REDDOG_SIGNED_WORKER_AGENTDB_ENVELOPE_REJECTED"
     )
+    EXECUTION_ALREADY_CLAIMED = (
+        "REJECT_REDDOG_SIGNED_WORKER_EXECUTION_ALREADY_CLAIMED"
+    )
     MAX_CLAIMS_INVALID = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
     CLAIM_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_CLAIM_REJECTED"
 
@@ -351,17 +354,39 @@ def _signed_worker_execute_claimed_task(
 ) -> Dict[str, Any]:
     """Authenticate the claimed task before selecting or invoking a runner."""
 
-    verified_context, envelope_reject = _signed_worker_verified_agentdb_context(
-        repo_root=repo_root,
-        db=db,
-        task_id=task_id,
-        context=context,
-        authority_verification_context=authority_verification_context,
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+        try_rehydrate_signed_worker_agentdb_context,
     )
-    if envelope_reject is not None:
-        return envelope_reject
+    verified_context, error = try_rehydrate_signed_worker_agentdb_context(
+        repo_root=repo_root, task_id=task_id, context=context,
+        authority_verification_context=authority_verification_context,
+        env=os.environ,
+    )
+    if verified_context is None:
+        return _signed_worker_reject_claimed_task(
+            db=db, task_id=task_id, context=context,
+            reasons=(
+                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED,
+                error,
+            ),
+        )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
+        admit_verified_signed_worker_context,
+    )
+    admitted_context = admit_verified_signed_worker_context(
+        db=db, task_id=task_id, verified_context=verified_context
+    )
+    if admitted_context is None:
+        return _signed_worker_claim_result(
+            accepted=False,
+            status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
+            task_id=task_id,
+            rejection_reasons=(
+                SignedWorkerOpenClawClaimReason.EXECUTION_ALREADY_CLAIMED,
+            ),
+        )
     effective_runner, runner_reject = _signed_worker_effective_runner(
-        repo_root=repo_root, db=db, task_id=task_id, context=verified_context,
+        repo_root=repo_root, db=db, task_id=task_id, context=admitted_context,
         signed_worker_runner=signed_worker_runner,
     )
     if runner_reject is not None:
@@ -370,64 +395,13 @@ def _signed_worker_execute_claimed_task(
         execute_reddog_signed_worker_dispatch_task,
     )
     run_result = execute_reddog_signed_worker_dispatch_task(
-        task_context=verified_context,
+        task_context=admitted_context,
         task_id=task_id,
         repo_root=repo_root,
         runner=effective_runner,
     )
     return _signed_worker_finalize_claimed_task(
-        db=db, task_id=task_id, context=verified_context, run_result=run_result
-    )
-
-
-def _signed_worker_verified_agentdb_context(
-    *,
-    repo_root: Path,
-    db: Any,
-    task_id: str,
-    context: Mapping[str, Any],
-    authority_verification_context: Any | None,
-) -> tuple[Mapping[str, Any], Optional[Dict[str, Any]]]:
-    try:
-        verified_context = _rehydrate_signed_worker_agentdb_context(
-            repo_root=repo_root,
-            task_id=task_id,
-            context=context,
-            authority_verification_context=authority_verification_context,
-        )
-    except (TypeError, ValueError) as exc:
-        rejected = _signed_worker_reject_claimed_task(
-            db=db,
-            task_id=task_id,
-            context=context,
-            reasons=(
-                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED,
-                str(exc)[:160],
-            ),
-        )
-        return {}, rejected
-    return verified_context, None
-
-
-def _rehydrate_signed_worker_agentdb_context(
-    *,
-    repo_root: Path | str,
-    task_id: str,
-    context: Mapping[str, Any],
-    authority_verification_context: Any | None,
-) -> Mapping[str, Any]:
-    """Authenticate one AgentDB envelope without performing any durable effect."""
-
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
-        rehydrate_signed_worker_agentdb_context,
-    )
-
-    return rehydrate_signed_worker_agentdb_context(
-        repo_root=repo_root,
-        task_id=task_id,
-        context=context,
-        authority_verification_context=authority_verification_context,
-        env=os.environ,
+        db=db, task_id=task_id, context=admitted_context, run_result=run_result
     )
 
 
@@ -540,12 +514,11 @@ def _signed_worker_reject_claimed_task(
             rejection_reasons=tuple(final_reasons),
             task_status="failed",
         ):
-            final_reasons.append(
-                SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED
-            )
-            final_reasons.append(
-                SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED
-            )
+            _fail_closed_executing_signed_worker_task(db=db, task_id=task_id)
+            final_reasons.extend((
+                SignedWorkerOpenClawClaimReason.RESULT_PERSISTENCE_REJECTED,
+                SignedWorkerOpenClawClaimReason.TASK_STATE_TRANSITION_REJECTED,
+            ))
         _revoke_author_assurance_after_failure(
             db=db,
             task_id=task_id,
@@ -559,6 +532,14 @@ def _signed_worker_reject_claimed_task(
         capability=str(source.get("capability") or ""),
         rejection_reasons=tuple(final_reasons), effect_source=source or None,
     )
+
+
+def _fail_closed_executing_signed_worker_task(*, db: Any, task_id: str) -> None:
+    db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET status = 'failed', "
+        "completed_at = CURRENT_TIMESTAMP WHERE task_id = ? "
+        "AND status = 'executing'",
+        (task_id,))
 
 
 def _revoke_author_assurance_after_failure(
@@ -625,6 +606,7 @@ def _signed_worker_finalize_claimed_task(
         db, task_id, context=context, claim_status=status, run_result=source,
         task_status=task_status,
     ):
+        _fail_closed_executing_signed_worker_task(db=db, task_id=task_id)
         return _signed_worker_reject_claimed_task(
             db=db, task_id=task_id, context=context, effect_source=source,
             reasons=(
@@ -933,13 +915,21 @@ def _claim_reserved_independent_verifier_task(
     from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
         is_openclaw_independent_verifier_signed_worker_context,
     )
-
-    _renew_expired_independent_verifier_for_ready_stage(
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+        rehydrate_signed_worker_agentdb_context,
+        renew_expired_verified_assurance,
+    )
+    renew_expired_verified_assurance(
         db=db,
         source=source,
         env=env,
         repo_root=repo_root,
         authority_verification_context=authority_verification_context,
+        rehydrate=lambda **kwargs: rehydrate_signed_worker_agentdb_context(
+            **kwargs, env=env
+        ),
+        is_verifier_context=is_openclaw_independent_verifier_signed_worker_context,
+        is_stage_ready=_openclaw_independent_verifier_ready_from_env,
     )
     with db.db.get_connection() as conn:
         rows = conn.execute(
@@ -993,37 +983,6 @@ def _claim_reserved_independent_verifier_task(
             continue
         return {"task_id": task_id, "context": context}
     return None
-
-
-def _renew_expired_independent_verifier_for_ready_stage(
-    *,
-    db: Any,
-    source: str,
-    env: Mapping[str, str],
-    repo_root: Path | str | None,
-    authority_verification_context: Any | None = None,
-) -> None:
-    """Renew one expired verifier lease only when its exact stage is ready."""
-
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
-        renew_expired_verified_assurance,
-    )
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
-        is_openclaw_independent_verifier_signed_worker_context,
-    )
-
-    renew_expired_verified_assurance(
-        db=db,
-        source=source,
-        env=env,
-        repo_root=repo_root,
-        authority_verification_context=authority_verification_context,
-        rehydrate=_rehydrate_signed_worker_agentdb_context,
-        is_verifier_context=(
-            is_openclaw_independent_verifier_signed_worker_context
-        ),
-        is_stage_ready=_openclaw_independent_verifier_ready_from_env,
-    )
 
 
 def _mark_reddog_readonly_audit_task_failed(db: Any, task_id: str) -> None:
@@ -1175,6 +1134,11 @@ def _commit_signed_worker_task_result(
     base_context["signed_worker_task_last_result"] = dict(receipt)
     base_context["signed_worker_task_result_receipts"] = bounded
     context_json = json.dumps(base_context, sort_keys=True)
+    expected_status = (
+        "executing"
+        if "signed_worker_execution_use" in base_context
+        else "assigned"
+    )
     if task_status == "pending":
         runner_summary = receipt.get("runner_result_summary")
         if not isinstance(runner_summary, Mapping):
@@ -1186,19 +1150,21 @@ def _commit_signed_worker_task_result(
             "UPDATE agents_autonomous_tasks SET context = ?, status = 'pending', "
             "assigned_to = NULL, assigned_at = NULL, retry_not_before = ? "
             "WHERE task_id = ? "
-            "AND status = 'assigned'"
+            "AND status = ?"
         )
         updated = db.db.execute_write(
-            query, (context_json, retry_at, task_id)
+            query, (context_json, retry_at, task_id, expected_status)
         )
         return updated == 1
     elif task_status in {"completed", "failed"}:
         query = (
             "UPDATE agents_autonomous_tasks SET context = ?, status = ?, "
             "completed_at = CURRENT_TIMESTAMP, retry_not_before = NULL "
-            "WHERE task_id = ? AND status = 'assigned'"
+            "WHERE task_id = ? AND status = ?"
         )
-        updated = db.db.execute_write(query, (context_json, task_status, task_id))
+        updated = db.db.execute_write(
+            query, (context_json, task_status, task_id, expected_status)
+        )
         return updated == 1
     elif task_status == "completed_reserved":
         query = (
@@ -1926,18 +1892,6 @@ def _has_pending_reddog_signed_worker_dispatch_task(
     return False
 
 
-def _exclude_signed_worker_origin(
-    tasks: Sequence[Mapping[str, Any]],
-) -> List[Mapping[str, Any]]:
-    """Keep signed-origin AgentDB rows out of every generic executor path."""
-
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
-        exclude_signed_worker_origin,
-    )
-
-    return list(exclude_signed_worker_origin(tasks))
-
-
 class OpenClawSupervisor:
     """
     Canonical 0102 supervisor for the resident OpenClaw runtime.
@@ -2536,9 +2490,12 @@ class OpenClawSupervisor:
         auto_tasks_enabled = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") == "1"
         if auto_tasks_enabled:
             try:
+                from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+                    exclude_signed_worker_origin,
+                )
                 from modules.infrastructure.database.src.agent_db import AgentDB
                 db = AgentDB()
-                tasks = _exclude_signed_worker_origin(
+                tasks = exclude_signed_worker_origin(
                     db.get_autonomous_tasks(status="pending", limit=10)
                 )
                 if tasks:
@@ -2556,11 +2513,14 @@ class OpenClawSupervisor:
         maintenance_enabled = os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0") == "1"
         if maintenance_enabled:
             try:
+                from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+                    exclude_signed_worker_origin,
+                )
                 from modules.infrastructure.database.src.agent_db import AgentDB
                 from .openclaw_maintenance_selector import select_maintenance_task
 
                 db = AgentDB()
-                pending_tasks = _exclude_signed_worker_origin(
+                pending_tasks = exclude_signed_worker_origin(
                     db.get_autonomous_tasks(status="pending", limit=10)
                 )
                 selection = select_maintenance_task(

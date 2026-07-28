@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -21,6 +23,9 @@ from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
     verify_reddog_signed_worker_agentdb_envelope,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import (
+    admit_signed_worker_execution_once,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     worker_dispatch_authority_verification_context,
@@ -113,6 +118,72 @@ def test_run_task_rebuilds_canonical_context_before_runner_selection(
     assert canonical["worker_runtime"] == "openclaw"
     assert canonical["worker_role"] == "openclaw_candidate"
     assert canonical["capability"] == "candidate_queue_review"
+
+
+def test_execution_claim_consumes_token_without_persisting_raw_value() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+
+    admission = admit_signed_worker_execution_once(
+        db=db,
+        task_id=task_id,
+        token_factory=lambda: "raw-use-token-must-not-persist",
+    )
+
+    assert admission is not None
+    task = db.get_autonomous_task_by_id(task_id)
+    assert task is not None and task["status"] == "executing"
+    serialized = json.dumps(task["context"], sort_keys=True)
+    assert "raw-use-token-must-not-persist" not in serialized
+    assert admission.claim_receipt["status"] == "CLAIMED"
+    assert admission.use_receipt["status"] == "CONSUMED"
+    assert admission.claim_receipt["token_digest"].startswith("sha256:")
+    assert admission.use_receipt["token_digest"] == (
+        admission.claim_receipt["token_digest"]
+    )
+    assert admit_signed_worker_execution_once(db=db, task_id=task_id) is None
+
+
+def test_concurrent_direct_run_task_executes_signed_worker_once(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
+    barrier = threading.Barrier(2)
+    original_get = AgentDB.get_autonomous_tasks
+
+    def synchronized_get(self, status="pending", limit=50):
+        tasks = original_get(self, status=status, limit=limit)
+        if status == "assigned":
+            barrier.wait(timeout=5)
+        return tasks
+
+    monkeypatch.setattr(AgentDB, "get_autonomous_tasks", synchronized_get)
+    runner = _FakeRunner()
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(
+            pool.map(
+                lambda _: execute_task(
+                    task_id,
+                    repo_root=tmp_path,
+                    signed_worker_runner=runner,
+                ),
+                range(2),
+            )
+        )
+
+    assert sum(result["ok"] is True for result in results) == 1
+    assert len(runner.calls) == 1
+    loser = next(result for result in results if result["ok"] is False)
+    assert loser["finalization_owned"] is True
+    assert "execution_already_claimed" in loser["detail"]
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "completed"
+    assert stored["context"]["signed_worker_execution_use"]["status"] == "CONSUMED"
 
 
 @pytest.mark.parametrize(
@@ -370,13 +441,32 @@ def test_tampered_expired_verifier_never_renews_assurance(
         lambda *_args, **_kwargs: True,
     )
 
-    supervisor_module._renew_expired_independent_verifier_for_ready_stage(
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
+        rehydrate_signed_worker_agentdb_context,
+        renew_expired_verified_assurance,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_openclaw_queue_loop_runtime_binding import (
+        is_openclaw_independent_verifier_signed_worker_context,
+    )
+
+    env = {"REDDOG_RESIDENT_QUEUE_NOW_ISO": "2026-07-16T00:00:00+00:00"}
+    renew_expired_verified_assurance(
         db=db,
         source=runtime.SIGNED_WORKER_DISPATCH_TASK_SOURCE,
-        env={"REDDOG_RESIDENT_QUEUE_NOW_ISO": "2026-07-16T00:00:00+00:00"},
+        env=env,
         repo_root=tmp_path,
         authority_verification_context=(
             worker_dispatch_authority_verification_context()
+        ),
+        rehydrate=lambda **kwargs: rehydrate_signed_worker_agentdb_context(
+            **kwargs,
+            env=env,
+        ),
+        is_verifier_context=(
+            is_openclaw_independent_verifier_signed_worker_context
+        ),
+        is_stage_ready=(
+            supervisor_module._openclaw_independent_verifier_ready_from_env
         ),
     )
 

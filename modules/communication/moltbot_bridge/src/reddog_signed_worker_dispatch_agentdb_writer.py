@@ -41,6 +41,25 @@ class AgentDbSignedWorkerDispatchTaskWriter:
             "source_dispatch_receipt_id": receipt.source_dispatch_receipt_id,
         }
 
+    def recover_signed_worker_dispatch_tasks(
+        self,
+        tasks: Sequence[SignedWorkerDispatchTaskSpec],
+        receipt: SignedWorkerDispatchRuntimeReceipt,
+    ) -> Mapping[str, Any]:
+        db = self._database()
+        try:
+            with db.db.get_connection() as connection:
+                if not _all_tasks_match(connection, tasks):
+                    return _duplicate_result(tasks[0].task_id if tasks else "")
+        except Exception as exc:
+            return _write_failure(exc)
+        return {
+            "ok": True,
+            "created_task_ids": [task.task_id for task in tasks],
+            "source_dispatch_receipt_id": receipt.source_dispatch_receipt_id,
+            "idempotent_recovery": True,
+        }
+
     def _database(self) -> Any:
         factory = self._agent_db_factory
         if factory is None:
@@ -59,6 +78,33 @@ def _duplicate_task_id(connection: Any, task_ids: Sequence[str]) -> str:
         if existing:
             return task_id
     return ""
+
+
+def _all_tasks_match(
+    connection: Any,
+    tasks: Sequence[SignedWorkerDispatchTaskSpec],
+) -> bool:
+    fields = (
+        "description",
+        "required_skills",
+        "estimated_complexity",
+        "priority_score",
+        "discovered_by",
+        "context",
+        "origin_continuity_id",
+    )
+    query = """
+        SELECT description, required_skills, estimated_complexity,
+               priority_score, discovered_by, context, origin_continuity_id
+        FROM agents_autonomous_tasks WHERE task_id = ?
+    """
+    for task in tasks:
+        row = connection.execute(query, (task.task_id,)).fetchone()
+        expected = _task_row(task)[1:]
+        actual = tuple(row[field] for field in fields) if row is not None else ()
+        if actual != expected:
+            return False
+    return True
 
 
 def _insert_tasks(

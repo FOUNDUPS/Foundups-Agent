@@ -9,6 +9,16 @@ x-reddog-security-repair: &reddog_security_repair
 
 exemptions:
   - <<: *reddog_security_repair
+    file: "src/openclaw_supervisor.py"
+    reason: >-
+      Inherited OpenClaw supervisor host. This slice removes growth while
+      routing signed-worker claim authentication through the bounded
+      claim-admission module; full supervisor decomposition is a separate
+      compatibility migration.
+    threshold_override: 3419
+    no_growth_ceiling: {file_lines: 3419, functions: {}}
+
+  - <<: *reddog_security_repair
     file: "src/foundup_job_contract.py"
     reason: >-
       Inherited typed job contract and serialization host. Create-scaffold
@@ -210,7 +220,7 @@ exemptions:
       Module-local WSP 62 registry. Provider-evidence review adds exact,
       review-dated ceilings for the touched legacy surfaces; splitting the
       registry would break the canonical module-level exemption lookup.
-    threshold_override: 405
+    threshold_override: 415
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

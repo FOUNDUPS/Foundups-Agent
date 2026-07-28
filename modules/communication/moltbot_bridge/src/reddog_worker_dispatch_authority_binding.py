@@ -132,7 +132,7 @@ def authenticated_recorded_authority_binding(
     work_authority = _mapping(authority.get("work_authority"))
     if not _signed_effect_matches(work_authority, dryrun_receipt):
         return {}
-    return expected if _authoritative_use_accepted(context, authority) else {}
+    return expected if _authoritative_preflight_accepted(context, authority) else {}
 
 
 def _signed_effect_matches(
@@ -148,7 +148,7 @@ def _signed_effect_matches(
     )
 
 
-def _authoritative_use_accepted(
+def _authoritative_preflight_accepted(
     context: WorkerDispatchAuthorityVerificationContext,
     authority: Mapping[str, Any],
 ) -> bool:
@@ -167,7 +167,7 @@ def _authoritative_use_accepted(
             forbidden_operations=context.forbidden_operations,
             revoked_key_epochs=context.revoked_key_epochs,
             leeway_s=context.leeway_s,
-            verification_phase=WorkAuthorityVerificationPhase.AUTHORITATIVE_USE,
+            verification_phase=WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING,
         )
     except Exception:
         return False

@@ -48,6 +48,7 @@ RUNTIME_MODULE_PATHS = (
     MODULE_PATH.with_name("reddog_signed_worker_dispatch_runtime_validation.py"),
     MODULE_PATH.with_name("reddog_signed_worker_dispatch_task_builder.py"),
     MODULE_PATH.with_name("reddog_signed_worker_dispatch_agentdb_writer.py"),
+    MODULE_PATH.with_name("reddog_signed_worker_publication_admission.py"),
 )
 
 
@@ -73,6 +74,9 @@ class _FakeWriter:
         if created is None:
             created = [task.task_id for task in tasks]
         return {"ok": True, "created_task_ids": created}
+
+    def recover_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return self.enqueue_signed_worker_dispatch_tasks(tasks, receipt)
 
 
 def _digest(value: object) -> str:
@@ -585,7 +589,7 @@ def test_authority_nonce_is_single_use_at_agentdb_admission() -> None:
     assert replay_writer.calls == []
 
 
-def test_writer_failure_burns_nonce_and_requires_fresh_authority() -> None:
+def test_writer_failure_allows_only_exact_publication_retry() -> None:
     allocation = _allocation()
     context = worker_dispatch_authority_verification_context()
     rejected = _publish(
@@ -605,8 +609,71 @@ def test_writer_failure_burns_nonce_and_requires_fresh_authority() -> None:
     )
 
     assert runtime.WorkerDispatchRuntimeReason.WRITER_REJECTED in rejected.rejection_reasons
+    assert retry.accepted is True
+    assert len(retry_writer.calls) == 1
+
+
+def test_writer_failure_rejects_altered_publication_retry() -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    original = _dryrun_result(allocation)
+    rejected = _publish(
+        worker_dispatch_dryrun_result=original,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=_FakeWriter(ok=False),
+    )
+    altered = json.loads(json.dumps(original))
+    altered["receipt"]["receipt_id"] = "signed_authority_worker_dispatch_altered"
+    retry_writer = _FakeWriter()
+    retry = _publish(
+        worker_dispatch_dryrun_result=altered,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=retry_writer,
+    )
+
+    assert runtime.WorkerDispatchRuntimeReason.WRITER_REJECTED in (
+        rejected.rejection_reasons
+    )
     assert retry.accepted is False
     assert retry_writer.calls == []
+
+
+def test_agentdb_publication_recovers_after_post_write_crash(
+    monkeypatch,
+) -> None:
+    allocation = _allocation()
+    context = worker_dispatch_authority_verification_context()
+    dryrun = _dryrun_result(allocation)
+    writer = runtime.AgentDbSignedWorkerDispatchTaskWriter()
+    complete = runtime.complete_signed_worker_publication
+    monkeypatch.setattr(
+        runtime,
+        "complete_signed_worker_publication",
+        lambda *_args, **_kwargs: False,
+    )
+    interrupted = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+    monkeypatch.setattr(runtime, "complete_signed_worker_publication", complete)
+    recovered = _publish(
+        worker_dispatch_dryrun_result=dryrun,
+        authority_verification_context=context,
+        work_state_snapshot=_snapshot(allocation),
+        queue_item_id="queue-1",
+        writer=writer,
+    )
+
+    assert interrupted.accepted is False
+    assert recovered.accepted is True, recovered.rejection_reasons
+    assert len(AgentDB().get_autonomous_tasks(status="pending", limit=20)) == 3
 
 
 def test_rechecks_fresh_time_after_context_construction_before_writer() -> None:
