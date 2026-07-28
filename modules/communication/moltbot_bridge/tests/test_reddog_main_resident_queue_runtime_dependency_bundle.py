@@ -29,6 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_publication_a
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime_invoke import (
     invoke_reddog_wre_queue_authority_runtime,
 )
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    canonical_delegated_authority_request_digest,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -151,39 +154,53 @@ def _principals(principal_public_key: str = "pub:principal") -> dict[str, object
 
 
 def _authority_request_result() -> dict[str, object]:
+    request = {
+        "work_order_id": "wre-queue-1",
+        "work_order_digest": "sha256:" + ("a" * 64),
+        "base_ref": "main",
+        "principal_id": "github:mjtrout",
+        "principal_provider": "github",
+        "principal_public_key": "pub:principal",
+        "reddog_id": "reddog:abc123",
+        "reddog_public_key": "pub:reddog",
+        "repo_full_name": REPO,
+        "foundup_id": FID,
+        "allowed_paths": [f"modules/foundups/{FID}/**"],
+        "denied_paths": [],
+        "requested_operation": "create_foundup",
+        "permission_snapshot_digest": "sha256:snap-1",
+        "queue_consumer_receipt_digest": "sha256:" + ("4" * 64),
+        "identity_nonce": "identity-nonce-0001",
+        "work_authority_nonce": "workauth-nonce-0001",
+        "issued_at": NOW - 5,
+        "identity_expires_at": NOW + 3600,
+        "work_authority_expires_at": NOW + 300,
+        "valve_state_required": "VALVE_OPEN_WORKTREE_CREATE",
+        "key_epoch": "epoch-1",
+        "consensus_receipt_digest": "sha256:consensus",
+        "sovereign_authorization_digest": "sha256:012-token",
+        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
+        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
+        "wsp15_priority": "P1",
+        "wsp15_mps_total": 10,
+        "wsp15_reasoning_tier": "HIGH",
+        "model_selection_receipt_id": None,
+        "model_selection_digest": None,
+        "model_runtime_binding_receipt_id": None,
+        "model_runtime_binding_digest": None,
+        "memex_supply_receipt_id": None,
+        "memex_supply_digest": None,
+        "architect_fix_publication_receipt_id": None,
+        "architect_fix_publication_binding_digest": None,
+    }
     return {
         "accepted": True,
         "status": "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT",
-        "delegated_authority_request": {
-            "work_order_id": "wre-queue-1",
-            "work_order_digest": "sha256:" + ("a" * 64),
-            "base_ref": "main",
-            "principal_id": "github:mjtrout",
-            "principal_provider": "github",
-            "principal_public_key": "pub:principal",
-            "reddog_id": "reddog:abc123",
-            "reddog_public_key": "pub:reddog",
-            "repo_full_name": REPO,
-            "foundup_id": FID,
-            "allowed_paths": [f"modules/foundups/{FID}/**"],
-            "denied_paths": [],
-            "requested_operation": "create_foundup",
-            "permission_snapshot_digest": "sha256:snap-1",
-            "queue_consumer_receipt_digest": "sha256:" + ("4" * 64),
-            "identity_nonce": "identity-nonce-0001",
-            "work_authority_nonce": "workauth-nonce-0001",
-            "issued_at": NOW - 5,
-            "identity_expires_at": NOW + 3600,
-            "work_authority_expires_at": NOW + 300,
-            "valve_state_required": "VALVE_OPEN_WORKTREE_CREATE",
-            "key_epoch": "epoch-1",
-            "consensus_receipt_digest": "sha256:consensus",
-            "sovereign_authorization_digest": "sha256:012-token",
-            "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
-            "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
-            "wsp15_priority": "P1",
-            "wsp15_mps_total": 10,
-            "wsp15_reasoning_tier": "HIGH",
+        "delegated_authority_request": request,
+        "receipt": {
+            "delegated_authority_request_digest": (
+                canonical_delegated_authority_request_digest(request)
+            ),
         },
     }
 
