@@ -4,8 +4,9 @@ Version: 0.4.27
 
 Version 0.4.27 pins the signed queue-consumer lineage and explicit startup
 verifier context through AgentDB admission. It also refreshes the canonical
-backend manifest after the publication/dispatch hardening without granting
-new editor-side execution authority.
+1,055-file backend manifest after signed-worker assignment, lease renewal, and
+quarantine recovery hardening without granting new editor-side execution
+authority.
 
 Version 0.4.26 pins the resident queue exact-SHA commit stage. A bounded
 author now writes and commits the authorized path set before a separately

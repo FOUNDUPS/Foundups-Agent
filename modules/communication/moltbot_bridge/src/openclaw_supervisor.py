@@ -80,6 +80,9 @@ class SignedWorkerOpenClawClaimReason:
     EXECUTION_ALREADY_CLAIMED = (
         "REJECT_REDDOG_SIGNED_WORKER_EXECUTION_ALREADY_CLAIMED"
     )
+    EXECUTION_LEASE_RENEWAL_FAILED = (
+        "REJECT_REDDOG_SIGNED_WORKER_EXECUTION_LEASE_RENEWAL_FAILED"
+    )
     MAX_CLAIMS_INVALID = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_MAX_CLAIMS_INVALID"
     CLAIM_REJECTED = "REJECT_REDDOG_SIGNED_WORKER_CLAIM_LOOP_CLAIM_REJECTED"
 
@@ -376,21 +379,33 @@ def _signed_worker_execute_claimed_task(
             ),
         )
     try:
-        effective_runner, runner_reject = _signed_worker_effective_runner(
-            repo_root=repo_root, db=db, task_id=task_id, context=admitted_context,
-            signed_worker_runner=signed_worker_runner,
+        run_result, runner_reject, lease_healthy = (
+            _signed_worker_run_under_heartbeat(
+                repo_root=repo_root,
+                db=db,
+                task_id=task_id,
+                context=admitted_context,
+                signed_worker_runner=signed_worker_runner,
+            )
         )
         if runner_reject is not None:
             return runner_reject
-        from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
-            execute_reddog_signed_worker_dispatch_task,
-        )
-        run_result = execute_reddog_signed_worker_dispatch_task(
-            task_context=admitted_context,
-            task_id=task_id,
-            repo_root=repo_root,
-            runner=effective_runner,
-        )
+        if not lease_healthy:
+            return _signed_worker_reject_claimed_task(
+                db=db,
+                task_id=task_id,
+                context=admitted_context,
+                reasons=(
+                    SignedWorkerOpenClawClaimReason.EXECUTION_LEASE_RENEWAL_FAILED,
+                ),
+                effect_source={
+                    "effect_commit_state": "INDETERMINATE",
+                },
+                runner_result={
+                    "status": "execution_lease_renewal_failed",
+                    "effect_commit_state": "INDETERMINATE",
+                },
+            )
     except Exception as exc:
         return _signed_worker_reject_claimed_task(
             db=db, task_id=task_id, context=admitted_context,
@@ -402,6 +417,44 @@ def _signed_worker_execute_claimed_task(
     return _signed_worker_finalize_claimed_task(
         db=db, task_id=task_id, context=admitted_context, run_result=run_result
     )
+
+
+def _signed_worker_run_under_heartbeat(
+    *,
+    repo_root: Path,
+    db: Any,
+    task_id: str,
+    context: Mapping[str, Any],
+    signed_worker_runner: Any | None,
+) -> tuple[Any, Mapping[str, Any] | None, bool]:
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_dispatch_task_executor import (
+        execute_reddog_signed_worker_dispatch_task,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_heartbeat import (
+        signed_worker_execution_heartbeat,
+    )
+
+    with signed_worker_execution_heartbeat(
+        db=db,
+        task_id=task_id,
+        context=context,
+    ) as heartbeat:
+        effective_runner, runner_reject = _signed_worker_effective_runner(
+            repo_root=repo_root,
+            db=db,
+            task_id=task_id,
+            context=context,
+            signed_worker_runner=signed_worker_runner,
+        )
+        run_result = None
+        if runner_reject is None:
+            run_result = execute_reddog_signed_worker_dispatch_task(
+                task_context=context,
+                task_id=task_id,
+                repo_root=repo_root,
+                runner=effective_runner,
+            )
+    return run_result, runner_reject, heartbeat.healthy
 
 
 def _signed_worker_claimed_task_context(
@@ -880,16 +933,8 @@ def _claim_pending_reddog_signed_worker_dispatch_task(
         if row is None:
             return None
         task_id = row["task_id"] if hasattr(row, "keys") else row[0]
-        updated = conn.execute(
-            """
-            UPDATE agents_autonomous_tasks
-            SET assigned_to = ?, assigned_at = CURRENT_TIMESTAMP, status = 'assigned'
-            WHERE task_id = ? AND status = 'pending' AND discovered_by = ?
-            """,
-            (agent_id, task_id, source),
-        ).rowcount
-        if updated != 1:
-            return {"task_id": task_id, "claim_race_lost": True}
+    if not db.assign_signed_worker_task(task_id):
+        return {"task_id": task_id, "claim_race_lost": True}
     if context is None:
         try:
             context = json.loads(raw_context) if isinstance(raw_context, str) else raw_context

@@ -24,12 +24,16 @@ row, context or receipt change fails closed.
 result-history entry. Missing or unchanged history never reaches a terminal
 or requeue state.
 
-Signed-worker execution claims include a fixed 15-minute lease. The OpenClaw
-supervisor runs a bounded recovery scan before claiming more work. An expired
-claim is never retried automatically: exact durable negative assurance may
-roll forward through the same finalizer, other effect-unknown executions
-become failed, and digest-only positive assurance remains blocked. Generic
-create, retry, requeue, and completion APIs reject the reserved
+Signed-worker execution claims begin with a 15-minute durable lease. A
+process-local heartbeat may renew the same claim/use binding up to a fixed
+four-hour horizon and renewal-count ceiling. The OpenClaw supervisor runs a
+bounded recovery scan before claiming more work. Stale assignments that
+crashed before execution admission requeue by exact CAS unless an active
+verifier reservation owns them. An expired execution is never retried
+automatically: exact durable negative assurance may roll forward through the
+same finalizer, while missing, positive-only, corrupt, or otherwise
+effect-unknown evidence is quarantined without a success result. Generic
+create, assignment, retry, requeue, and completion APIs reject the reserved
 `reddog-worker-dispatch-` namespace.
 
 ## Signed Worker Result Ledger
@@ -101,6 +105,13 @@ File: `modules/infrastructure/database/src/agent_db.py`
 - `get_patterns(agent_id=None, pattern_type=None, limit=50) -> list[dict]`
 - `record_error(error_hash, error_type, solution)`
 - `get_error_solution(error_hash) -> dict | None`
+- `assign_signed_worker_task(task_id) -> bool`
+
+Protected signed-worker assignment validates the pending task namespace,
+source, schema, envelope task binding, runtime, role, capability, and exact
+required-skill set. It assigns only to the canonical task-bound principal.
+Malformed protected tasks are quarantined with a content-free digest-bound
+receipt and cannot fall through to generic WRE execution.
 
 ### Independent Assurance Reservations
 

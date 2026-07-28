@@ -944,7 +944,7 @@ def test_signed_worker_executor_rejects_incomplete_or_inconsistent_effect_eviden
 def test_run_task_routes_signed_worker_before_wre_fallback(tmp_path: Path, monkeypatch) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
 
     result = execute_task(task_id, repo_root=tmp_path, signed_worker_runner=_FakeRunner())
@@ -961,7 +961,7 @@ def test_run_task_rejects_signed_worker_without_runner_instead_of_wre_fallback(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
 
     result = execute_task(task_id, repo_root=tmp_path)
@@ -978,7 +978,7 @@ def test_run_task_uses_env_bound_queue_loop_runner_when_enabled(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setenv("REDDOG_SIGNED_WORKER_QUEUE_LOOP_RUNNER", "1")
     monkeypatch.setenv("REDDOG_RESIDENT_RUNTIME_ROOT", str(tmp_path / "runtime"))

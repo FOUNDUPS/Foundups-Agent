@@ -26,6 +26,8 @@ from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from .db_manager import DatabaseManager
 from .signed_worker_execution_store import is_signed_worker_task_id
+from .signed_worker_assignment import assign_signed_worker_task as _assign_signed_worker_task
+from .signed_worker_execution_lease import ensure_execution_lease_schema
 from .signed_worker_result_ledger import ensure_result_history_schema
 
 
@@ -281,6 +283,7 @@ class AgentDB:
             ''')
 
             ensure_result_history_schema(conn)
+            ensure_execution_lease_schema(conn)
 
             # Independent assurance capacity reservations.
             #
@@ -1285,11 +1288,22 @@ class AgentDB:
 
     def assign_autonomous_task(self, task_id: str, agent_id: str) -> bool:
         """Atomically claim one pending autonomous task for an agent."""
+        if is_signed_worker_task_id(task_id):
+            return False
         return self.db.execute_write('''
             UPDATE agents_autonomous_tasks
             SET assigned_to = ?, assigned_at = ?, status = 'assigned'
             WHERE task_id = ? AND status = 'pending'
         ''', (agent_id, datetime.now().isoformat(), task_id)) > 0
+
+    def assign_signed_worker_task(self, task_id: str) -> bool:
+        """Claim a protected task through its envelope-bound principal."""
+
+        try:
+            with self.db.get_connection() as connection:
+                return _assign_signed_worker_task(connection, task_id)
+        except Exception:
+            return False
 
     def claim_holoindex_postmerge_task(
         self,

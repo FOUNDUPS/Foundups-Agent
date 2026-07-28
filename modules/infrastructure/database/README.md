@@ -18,6 +18,10 @@ This module provides:
 - `src/signed_worker_assurance_request.py`: canonical completion request
 - `src/signed_worker_assurance_staging.py`: durable verifier-output staging
 - `src/signed_worker_execution_binding.py`: pure claim/use/result binding checks
+- `src/signed_worker_assignment.py`: protected namespace assignment and
+  invalid-task quarantine
+- `src/signed_worker_execution_lease.py`: durable bounded execution lease
+  renewal
 - `src/signed_worker_execution_store.py`: exact-CAS signed-worker finalization
 - `src/signed_worker_result_history.py`: pure result-chain validation
 - `src/signed_worker_result_ledger.py`: durable signed-worker result continuity
@@ -82,6 +86,16 @@ history, and pre-ledger context history all fail closed. Legacy rows require a
 separate authenticated migration; runtime admission never infers or imports
 durable authority from task context. A ledger-insert failure rolls back the
 task and assurance transitions and leaves the admitted task quarantined in
-`executing` for explicit reconciliation. No automatic restart recovery is
-claimed by this slice.
+`executing` for explicit reconciliation.
+
+Protected assignment and restart recovery are separate from result
+finalization. Generic assignment rejects the `reddog-worker-dispatch-`
+namespace. Dedicated assignment derives a task-bound principal from the
+validated envelope and quarantines malformed pending tasks. A stale
+pre-admission assignment is requeued only by exact CAS and only when no active
+verifier reservation exists. Executing tasks hold a durable renewable lease
+with a bounded four-hour horizon. Expired negative verifier evidence may roll
+forward through the normal finalizer; missing, positive-only, corrupt, or
+otherwise effect-unknown evidence is quarantined and is never reported as a
+successful result.
 

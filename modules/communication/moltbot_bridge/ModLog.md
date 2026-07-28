@@ -1,4 +1,16 @@
 # ModLog - moltbot_bridge
+- Exact-SHA security review now requires recovery race winners to prove the
+  terminal task against the independently durable result-ledger tail and the
+  exact terminal assurance row. A self-hashed task-context marker alone can
+  no longer report a recovered execution.
+- Independent exact-SHA review hardening now reserves signed-worker assignment
+  for a task-bound principal, quarantines malformed pending tasks, requeues
+  stale pre-admission assignments by exact CAS, and keeps active verifier
+  reservations pinned. Executing workers use a durable, bounded-renewal
+  heartbeat; restart recovery honors the renewed lease and quarantines
+  positive, corrupt, missing, or otherwise unverifiable evidence without
+  creating a success result. Quarantined tasks no longer block unrelated valid
+  signed work.
 - Exact-SHA review hardening now protects the full signed-worker namespace
   from generic creation/retry/requeue as well as completion. Result
   finalization derives capability from the signed envelope, persists

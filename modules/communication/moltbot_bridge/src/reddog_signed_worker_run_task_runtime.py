@@ -28,6 +28,9 @@ from modules.infrastructure.database.src.signed_worker_assurance_staging import 
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
     validated_result_history,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_heartbeat import (
+    signed_worker_execution_heartbeat,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -104,21 +107,31 @@ def _claim_and_execute(
     env: Mapping[str, str],
 ) -> Mapping[str, Any]:
     try:
-        effective_runner, binding_reject = _runner(
-            repo_root=repo_root,
-            signed_worker_runner=signed_worker_runner,
-            env=env,
-        )
-        result = (
-            dict(binding_reject)
-            if binding_reject is not None
-            else dict(_execute(
+        with signed_worker_execution_heartbeat(
+            db=db,
+            task_id=task_id,
+            context=verified_context,
+        ) as heartbeat:
+            effective_runner, binding_reject = _runner(
                 repo_root=repo_root,
-                task_id=task_id,
-                context=verified_context,
-                runner=effective_runner,
-            ))
-        )
+                signed_worker_runner=signed_worker_runner,
+                env=env,
+            )
+            result = (
+                dict(binding_reject)
+                if binding_reject is not None
+                else dict(_execute(
+                    repo_root=repo_root,
+                    task_id=task_id,
+                    context=verified_context,
+                    runner=effective_runner,
+                ))
+            )
+        if not heartbeat.healthy:
+            result = {
+                **_rejected("reddog_signed_worker_execution_lease_renewal_failed"),
+                "effect_commit_state": "INDETERMINATE",
+            }
     except Exception as exc:
         logger.warning("[RUN_TASK] RedDog signed-worker dispatch error: %s", exc)
         result = _rejected(

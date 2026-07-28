@@ -12,6 +12,12 @@ from typing import Any, Callable, Mapping
 from modules.infrastructure.database.src.signed_worker_result_ledger import (
     validate_result_history_ledger,
 )
+from modules.infrastructure.database.src.signed_worker_assignment import (
+    signed_worker_assignment_matches,
+)
+from modules.infrastructure.database.src.signed_worker_execution_lease import (
+    initialize_execution_lease,
+)
 from modules.infrastructure.database.src.signed_worker_execution_store import (
     SIGNED_WORKER_TASK_PREFIX,
 )
@@ -104,6 +110,12 @@ def _admit_selected_row(
         lease_expires_at=lease_expires_at,
     )
     if inputs is None:
+        _quarantine_invalid_assignment(
+            connection,
+            row=row,
+            task_id=task_id,
+            now_iso=now_iso,
+        )
         return None
     raw_context, raw_skills, assigned_to, context = inputs[:4]
     required_skills, discovered_by, claim, use = inputs[4:]
@@ -120,6 +132,14 @@ def _admit_selected_row(
         discovered_by=discovered_by, context=context, claim=claim, use=use,
     ):
         return None
+    if not initialize_execution_lease(
+        connection,
+        task_id=task_id,
+        assigned_to=assigned_to,
+        claim=claim,
+        use=use,
+    ):
+        raise RuntimeError("signed_worker_execution_lease_init_failed")
     return SignedWorkerExecutionAdmission(
         claim_receipt=claim, use_receipt=use, claimed_context=dict(context),
         required_skills=required_skills, discovered_by=discovered_by,
@@ -177,6 +197,34 @@ def _reject_invalid_history(
     )
 
 
+def _quarantine_invalid_assignment(
+    connection: Any,
+    *,
+    row: Any,
+    task_id: str,
+    now_iso: str,
+) -> None:
+    """Isolate a protected assignment that changed before admission."""
+
+    if row is None:
+        return
+    payload = dict(row)
+    connection.execute(
+        "UPDATE agents_autonomous_tasks SET status = 'quarantined', "
+        "completed_at = ? WHERE task_id = ? AND status = 'assigned' "
+        "AND assigned_to = ? AND context = ? AND required_skills = ? "
+        "AND discovered_by = ?",
+        (
+            now_iso,
+            task_id,
+            str(payload.get("assigned_to") or ""),
+            str(payload.get("context") or ""),
+            str(payload.get("required_skills") or ""),
+            str(payload.get("discovered_by") or ""),
+        ),
+    )
+
+
 def bind_execution_admission(
     context: Mapping[str, Any],
     admission: SignedWorkerExecutionAdmission,
@@ -211,7 +259,7 @@ def _claim_inputs(
 ) -> _ClaimInputs:
     if row is None or not task_id.startswith(SIGNED_WORKER_TASK_PREFIX):
         return None
-    parsed = _parse_claim_row(row)
+    parsed = _parse_claim_row(row, task_id=task_id)
     if parsed is None:
         return None
     raw_context, raw_skills, assigned_to, context, required_skills, discovered_by = parsed
@@ -233,6 +281,8 @@ def _claim_inputs(
 
 def _parse_claim_row(
     row: Any,
+    *,
+    task_id: str,
 ) -> tuple[str, str, str, Mapping[str, Any], tuple[str, ...], str] | None:
     payload = dict(row)
     assigned_to = str(payload.get("assigned_to") or "").strip()
@@ -256,6 +306,7 @@ def _parse_claim_row(
         not isinstance(context, Mapping)
         or not isinstance(parsed_skills, list)
         or any(not isinstance(skill, str) or not skill for skill in parsed_skills)
+        or not signed_worker_assignment_matches(task_id, assigned_to, context)
     ):
         return None
     context = dict(context)

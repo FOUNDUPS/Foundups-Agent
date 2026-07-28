@@ -143,12 +143,12 @@ def test_generic_retry_and_requeue_leave_signed_task_byte_identical(
     assert _raw_task(agent_db, task_id) == before
 
 
-def test_signed_worker_assignment_path_remains_available(agent_db: AgentDB) -> None:
+def test_generic_assignment_cannot_claim_signed_worker_namespace(
+    agent_db: AgentDB,
+) -> None:
     task_id = _signed_task_id("assignment")
     _seed_signed_task(agent_db, task_id=task_id, status="pending")
+    before = _raw_task(agent_db, task_id)
 
-    assert agent_db.assign_autonomous_task(task_id, "openclaw")
-    assigned = _raw_task(agent_db, task_id)
-    assert assigned is not None
-    assert assigned["status"] == "assigned"
-    assert assigned["assigned_to"] == "openclaw"
+    assert not agent_db.assign_autonomous_task(task_id, "attacker")
+    assert _raw_task(agent_db, task_id) == before

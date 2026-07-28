@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.27 binds queue lineage and the configured verifier through signed
+AgentDB admission. The extension-pinned backend closure includes dedicated
+signed-worker assignment, bounded lease renewal, and atomic quarantine
+recovery; these backend changes do not grant the editor execution authority.
+
 Version 0.4.26 pins the exact-SHA commit stage between bounded authoring and
 independent verification. The backend requires an executor-bound work-order
 digest, an exact base SHA, a clean scoped index, and a canonically validated

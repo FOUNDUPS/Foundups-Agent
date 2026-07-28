@@ -1,5 +1,32 @@
 # Database Module - ModLog
 
+## Entry: Durable Terminal-State Race Validation
+**Date**: 2026-07-28
+**What Changed**: Recovery idempotency now validates the durable result ledger
+and terminal assurance row. Existing quarantine markers reconcile verifier
+reservations atomically and reject when any result ledger already exists.
+**Why**: A concurrent self-hashed task marker must not substitute for durable
+terminal evidence or leave verifier capacity reserved.
+**Impact**: Raced recovery cannot claim success without its ledger and
+assurance effects; quarantine remains fail-closed and idempotent.
+**WSP References**: WSP 00, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
+## Entry: Signed-Worker Assignment and Renewable Recovery Leases
+**Date**: 2026-07-28
+**What Changed**: Added a dedicated envelope-bound assignment CAS, blocked
+generic assignment from the protected task namespace, added durable bounded
+execution-lease renewal, and recovered stale pre-admission assignments without
+replaying worker effects. Invalid assignment or unverifiable recovery state is
+quarantined with a digest-bound receipt.
+**Why**: A generic claimant could otherwise steal a signed task, a crash after
+assignment could strand it, and a long-running worker could outlive the fixed
+lease while still active.
+**Impact**: Signed tasks use task-bound principals, live workers renew within a
+four-hour ceiling, exact negative verifier state may roll forward, and
+positive/corrupt/unknown state cannot be reported as success or block unrelated
+valid work.
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
 ## Entry: Reserved Namespace and Crash-Safe Signed-Worker Finalization
 **Date**: 2026-07-28
 **What Changed**: Generic task creation, insert-if-absent, retry, requeue, and

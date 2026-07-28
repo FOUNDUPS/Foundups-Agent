@@ -15,12 +15,19 @@ from typing import Any
 import pytest
 
 from modules.infrastructure.database.src.agent_db import AgentDB
+from modules.infrastructure.database.src.signed_worker_assignment import (
+    canonical_signed_worker_principal_id,
+)
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 from modules.infrastructure.database.src.signed_worker_assurance_completion import (
     build_assurance_completion_request,
 )
 from modules.infrastructure.database.src.signed_worker_execution_store import (
     finalize_signed_worker_execution,
+)
+from modules.infrastructure.database.src.signed_worker_execution_quarantine import (
+    QUARANTINE_SCHEMA,
+    quarantine_signed_worker_execution,
 )
 from modules.communication.moltbot_bridge.src.reddog_openclaw_assurance_capacity import (
     build_assurance_renewal_request,
@@ -129,9 +136,12 @@ def _seed_signed_verifier_task(
     *,
     task_id: str,
 ) -> None:
+    principal_id = canonical_signed_worker_principal_id(task_id)
     context = {
+        "source": "reddog_signed_worker_dispatch_runtime",
+        "schema_version": "reddog_worker_dispatch_runtime.v1",
         "worker_role": "independent_slice_verifier",
-        "worker_principal_id": "verifier-0201",
+        "worker_principal_id": principal_id,
         "queue_item_id": "queue-1",
         "capability": "independent_slice_verification",
         "worker_runtime": "openclaw",
@@ -141,6 +151,18 @@ def _seed_signed_verifier_task(
             "wsp15_allocation_receipt_id": "wsp15-1",
         },
         "wsp15_allocation_receipt": {"receipt_id": "wsp15-1"},
+        "signed_worker_agentdb_envelope": {
+            "schema_version": "reddog_signed_worker_agentdb_envelope.v1",
+            "agentdb_task_binding": {
+                "source": "reddog_signed_worker_dispatch_runtime",
+                "task_id": task_id,
+            },
+            "worker_dispatch_intent": {
+                "role": "independent_slice_verifier",
+                "worker_runtime": "openclaw",
+                "capability": "independent_slice_verification",
+            },
+        },
     }
     assert database.db.execute_write(
         "INSERT INTO agents_autonomous_tasks "
@@ -312,6 +334,9 @@ def _prepare_signed_verifier_recovery(
     reserved = database.reserve_independent_assurance(
         _request(
             verifier_task_id=task_id,
+            verifier_principal_id=canonical_signed_worker_principal_id(
+                task_id
+            ),
             capability="independent_slice_verification",
         )
     )
@@ -420,13 +445,30 @@ def test_restart_refuses_digest_only_positive_verifier_stage(
         ),
     )
 
-    assert recovery["accepted"] is False
-    assert recovery["rejected_task_ids"] == [task_id]
+    assert recovery["accepted"] is True
+    assert recovery["quarantined_task_ids"] == [task_id]
     task = restarted.get_autonomous_task_by_id(task_id)
-    assert task is not None and task["status"] == "executing"
+    assert task is not None and task["status"] == "quarantined"
     reservation = restarted.get_independent_assurance_reservation("assurance-1")
     assert reservation is not None
-    assert reservation["reservation"]["status"] == "RESERVED"
+    assert reservation["reservation"]["status"] == "QUARANTINED"
+    assert reservation["reservation"]["terminal_status"] == "INDETERMINATE"
+    assert restarted.db.execute_query(
+        "SELECT * FROM agents_signed_worker_result_history WHERE task_id = ?",
+        (task_id,),
+    ) == []
+    repeated = recover_expired_signed_worker_executions(
+        restarted,
+        now_factory=lambda: (
+            claimed_at + timedelta(seconds=EXECUTION_LEASE_SECONDS + 2)
+        ),
+    )
+    assert repeated["quarantined_task_ids"] == []
+    expiration = restarted.expire_independent_assurance_reservations(
+        now_iso=(claimed_at + timedelta(days=1)).isoformat(),
+    )
+    assert expiration["accepted"] is True
+    assert expiration["expired_reservation_ids"] == []
 
 
 def test_restart_rejects_corrupt_durable_verifier_stage(
@@ -452,13 +494,137 @@ def test_restart_rejects_corrupt_durable_verifier_stage(
         ),
     )
 
-    assert recovery["accepted"] is False
-    assert recovery["rejected_task_ids"] == [task_id]
+    assert recovery["accepted"] is True
+    assert recovery["quarantined_task_ids"] == [task_id]
     task = restarted.get_autonomous_task_by_id(task_id)
-    assert task is not None and task["status"] == "executing"
+    assert task is not None and task["status"] == "quarantined"
     reservation = restarted.get_independent_assurance_reservation("assurance-1")
     assert reservation is not None
-    assert reservation["reservation"]["status"] == "RESERVED"
+    assert reservation["reservation"]["status"] == "QUARANTINED"
+    assert reservation["reservation"]["terminal_status"] == "INDETERMINATE"
+    assert restarted.db.execute_query(
+        "SELECT * FROM agents_signed_worker_result_history WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
+def test_restart_quarantines_verifier_without_staged_completion(
+    agent_db: AgentDB,
+) -> None:
+    task_id, claimed_at = _prepare_signed_verifier_recovery(
+        agent_db,
+        terminal_status="REJECT",
+    )
+    assert agent_db.db.execute_write(
+        "UPDATE agents_independent_assurance_reservations "
+        "SET staged_completion_json = NULL, staged_completion_digest = NULL, "
+        "staged_at = NULL WHERE reservation_id = ?",
+        ("assurance-1",),
+    ) == 1
+
+    recovery = recover_expired_signed_worker_executions(
+        agent_db,
+        now_factory=lambda: (
+            claimed_at + timedelta(seconds=EXECUTION_LEASE_SECONDS + 1)
+        ),
+    )
+
+    assert recovery["accepted"] is True
+    assert recovery["quarantined_task_ids"] == [task_id]
+    assert agent_db.get_autonomous_task_by_id(task_id)["status"] == "quarantined"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "QUARANTINED"
+    assert reservation["reservation"]["terminal_status"] == "INDETERMINATE"
+    assert agent_db.db.execute_query(
+        "SELECT * FROM agents_signed_worker_result_history WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
+def test_concurrent_verifier_quarantine_is_idempotent(
+    agent_db: AgentDB,
+) -> None:
+    task_id, claimed_at = _prepare_signed_verifier_recovery(
+        agent_db,
+        terminal_status="VERIFIED",
+    )
+    recovered_at = claimed_at + timedelta(
+        seconds=EXECUTION_LEASE_SECONDS + 1
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(
+            pool.map(
+                lambda _: recover_expired_signed_worker_executions(
+                    AgentDB(),
+                    now_factory=lambda: recovered_at,
+                ),
+                range(2),
+            )
+        )
+
+    assert all(result["accepted"] is True for result in results)
+    assert agent_db.get_autonomous_task_by_id(task_id)["status"] == "quarantined"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "QUARANTINED"
+    assert agent_db.db.execute_query(
+        "SELECT * FROM agents_signed_worker_result_history WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
+def test_recomputed_quarantine_marker_reconciles_verifier_reservation(
+    agent_db: AgentDB,
+) -> None:
+    task_id, claimed_at = _prepare_signed_verifier_recovery(
+        agent_db,
+        terminal_status="VERIFIED",
+    )
+    task = agent_db.get_autonomous_task_by_id(task_id)
+    assert task is not None
+    forged = {
+        "schema_version": QUARANTINE_SCHEMA,
+        "task_id": task_id,
+        "reason": "attacker_selected",
+        "quarantined_at": claimed_at.isoformat(),
+        "effect_commit_state": "INDETERMINATE",
+        "no_worker_effect_replayed": True,
+    }
+    encoded = json.dumps(
+        forged,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    ).encode("ascii")
+    forged["receipt_id"] = "sha256:" + hashlib.sha256(encoded).hexdigest()
+    context = dict(task["context"])
+    context["signed_worker_execution_quarantine"] = forged
+    assert agent_db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET status = 'quarantined', context = ? "
+        "WHERE task_id = ? AND status = 'executing'",
+        (json.dumps(context, sort_keys=True), task_id),
+    ) == 1
+
+    outcome = quarantine_signed_worker_execution(
+        agent_db,
+        task_id=task_id,
+        raw_context=task["context"],
+        expected_status="executing",
+        reason="reconcile_existing_quarantine",
+        now_iso=(claimed_at + timedelta(seconds=1)).isoformat(),
+    )
+
+    assert outcome == "QUARANTINED"
+    reservation = agent_db.get_independent_assurance_reservation("assurance-1")
+    assert reservation is not None
+    assert reservation["reservation"]["status"] == "QUARANTINED"
+    assert reservation["reservation"]["terminal_status"] == "INDETERMINATE"
+    assert agent_db.db.execute_query(
+        "SELECT * FROM agents_signed_worker_result_history WHERE task_id = ?",
+        (task_id,),
+    ) == []
 
 
 def test_post_rehydration_runner_rejection_persists_canonical_identity(

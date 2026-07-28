@@ -6,6 +6,7 @@ import hashlib
 import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -18,6 +19,7 @@ from modules.communication.moltbot_bridge.src import (
     openclaw_supervisor as supervisor_module,
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
     reddog_signed_worker_execution_claim as execution_claim_module,
+    reddog_signed_worker_execution_recovery as execution_recovery_module,
     reddog_signed_worker_run_task_runtime as run_task_runtime,
     reddog_signed_worker_supervisor_admission as supervisor_admission_module,
 )
@@ -52,6 +54,13 @@ from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 from modules.infrastructure.database.src import (
     signed_worker_execution_store as execution_store_module,
+)
+from modules.infrastructure.database.src.signed_worker_assignment import (
+    canonical_signed_worker_principal_id,
+)
+from modules.infrastructure.database.src.signed_worker_execution_lease import (
+    MAX_EXECUTION_LEASE_SECONDS,
+    renew_signed_worker_execution_lease,
 )
 
 
@@ -154,7 +163,7 @@ def test_run_task_rebuilds_canonical_context_before_runner_selection(
         ),
     )
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     runner = _FakeRunner()
 
@@ -183,7 +192,7 @@ def test_run_task_signed_success_uses_exact_finalization_cas(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setattr(
         AgentDB,
         "complete_autonomous_task",
@@ -220,7 +229,7 @@ def test_direct_run_preserves_requeue_lifecycle(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
 
     result = execute_task(
@@ -249,7 +258,7 @@ def test_run_task_post_claim_exception_fails_through_exact_cas(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setattr(
         run_task_runtime,
         "_runner",
@@ -271,7 +280,7 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     original = run_task_runtime.finalize_signed_worker_execution
 
     def conflict(
@@ -316,7 +325,7 @@ def test_run_task_finalization_conflict_never_overwrites_concurrent_state(
 def test_execution_claim_consumes_token_without_persisting_raw_value() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
 
     admission = admit_signed_worker_execution_once(
         db=db,
@@ -341,7 +350,7 @@ def test_execution_claim_consumes_token_without_persisting_raw_value() -> None:
 def test_restart_recovers_expired_execution_without_replaying_worker() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
     admission = admit_signed_worker_execution_once(
         db=db,
@@ -394,7 +403,7 @@ def test_restart_recovers_expired_execution_without_replaying_worker() -> None:
 def test_unexpired_execution_is_not_recovered() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
     assert admit_signed_worker_execution_once(
         db=db,
@@ -411,6 +420,139 @@ def test_unexpired_execution_is_not_recovered() -> None:
     assert result["recovered_task_ids"] == []
     stored = db.get_autonomous_task_by_id(task_id)
     assert stored is not None and stored["status"] == "executing"
+
+
+def test_dedicated_assignment_uses_task_bound_principal() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    before = db.get_autonomous_task_by_id(task_id)
+
+    assert before is not None and before["status"] == "pending"
+    assert not db.assign_autonomous_task(task_id, "attacker")
+    assert db.get_autonomous_task_by_id(task_id) == before
+    assert db.assign_signed_worker_task(task_id)
+
+    assigned = db.get_autonomous_task_by_id(task_id)
+    assert assigned is not None and assigned["status"] == "assigned"
+    assert assigned["assigned_to"] == canonical_signed_worker_principal_id(
+        task_id
+    )
+
+
+def test_restart_requeues_stale_assignment_before_execution_admission() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_signed_worker_task(task_id)
+    assigned_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    assert db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET assigned_at = ? WHERE task_id = ?",
+        (assigned_at.isoformat(), task_id),
+    ) == 1
+
+    recovered = recover_expired_signed_worker_executions(
+        db,
+        now_factory=lambda: assigned_at + timedelta(seconds=301),
+    )
+
+    assert recovered["accepted"] is True
+    assert recovered["requeued_assigned_task_ids"] == [task_id]
+    task = db.get_autonomous_task_by_id(task_id)
+    assert task is not None and task["status"] == "pending"
+    assert task["assigned_to"] is None
+    assert db.assign_signed_worker_task(task_id)
+    assert admit_signed_worker_execution_once(db=db, task_id=task_id) is not None
+
+
+def test_stale_assignment_with_active_verifier_reservation_is_not_requeued(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_signed_worker_task(task_id)
+    assigned_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    assert db.db.execute_write(
+        "UPDATE agents_autonomous_tasks SET assigned_at = ? WHERE task_id = ?",
+        (assigned_at.isoformat(), task_id),
+    ) == 1
+    monkeypatch.setattr(
+        db,
+        "get_independent_assurance_reservation_for_task",
+        lambda *_, **__: {"reservation": {"status": "RESERVED"}},
+    )
+
+    recovered = recover_expired_signed_worker_executions(
+        db,
+        now_factory=lambda: assigned_at + timedelta(seconds=301),
+    )
+
+    assert recovered["accepted"] is True
+    assert recovered["requeued_assigned_task_ids"] == []
+    task = db.get_autonomous_task_by_id(task_id)
+    assert task is not None and task["status"] == "assigned"
+
+
+def test_renewed_execution_lease_survives_initial_timeout_then_expires() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_signed_worker_task(task_id)
+    claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    admission = admit_signed_worker_execution_once(
+        db=db,
+        task_id=task_id,
+        now_factory=lambda: claimed_at,
+    )
+    assert admission is not None
+    context = db.get_autonomous_task_by_id(task_id)["context"]
+    assert renew_signed_worker_execution_lease(
+        db,
+        task_id=task_id,
+        context=context,
+        now=claimed_at + timedelta(seconds=600),
+        extension_seconds=900,
+    )
+
+    initial_expiry = recover_expired_signed_worker_executions(
+        db,
+        now_factory=lambda: claimed_at
+        + timedelta(seconds=EXECUTION_LEASE_SECONDS + 1),
+    )
+    assert initial_expiry["recovered_task_ids"] == []
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "executing"
+
+    renewed_expiry = recover_expired_signed_worker_executions(
+        db,
+        now_factory=lambda: claimed_at + timedelta(seconds=1501),
+    )
+    assert renewed_expiry["recovered_task_ids"] == [task_id]
+    assert db.get_autonomous_task_by_id(task_id)["status"] == "failed"
+
+
+def test_execution_lease_cannot_renew_past_maximum_horizon() -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_signed_worker_task(task_id)
+    claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    admission = admit_signed_worker_execution_once(
+        db=db,
+        task_id=task_id,
+        now_factory=lambda: claimed_at,
+    )
+    assert admission is not None
+    context = db.get_autonomous_task_by_id(task_id)["context"]
+    assert renew_signed_worker_execution_lease(
+        db,
+        task_id=task_id,
+        context=context,
+        now=claimed_at + timedelta(seconds=1),
+        extension_seconds=MAX_EXECUTION_LEASE_SECONDS * 2,
+    )
+    assert not renew_signed_worker_execution_lease(
+        db,
+        task_id=task_id,
+        context=context,
+        now=claimed_at + timedelta(seconds=MAX_EXECUTION_LEASE_SECONDS),
+        extension_seconds=900,
+    )
 
 
 def test_execution_recovery_database_scan_failure_rejects() -> None:
@@ -430,7 +572,7 @@ def test_execution_recovery_database_scan_failure_rejects() -> None:
 def test_concurrent_expired_execution_recovery_commits_one_result() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
     assert admit_signed_worker_execution_once(
         db=db,
@@ -463,13 +605,72 @@ def test_concurrent_expired_execution_recovery_commits_one_result() -> None:
     assert rows == [{"attempt_sequence": 1}]
 
 
+def test_recovery_rejects_forged_terminal_marker_without_durable_ledger(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    db = AgentDB()
+    assert db.assign_signed_worker_task(task_id)
+    claimed_at = datetime(2026, 7, 28, tzinfo=timezone.utc)
+    assert admit_signed_worker_execution_once(
+        db=db,
+        task_id=task_id,
+        now_factory=lambda: claimed_at,
+    ) is not None
+
+    def forge_marker(
+        database,
+        selected_task_id,
+        *,
+        context,
+        assurance_completion,
+        **_kwargs,
+    ):
+        receipt = execution_recovery_module._lease_expiry_receipt(
+            context,
+            completion=assurance_completion,
+        )
+        forged = append_signed_worker_result_history(context, receipt)
+        assert database.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET status = 'failed', context = ? "
+            "WHERE task_id = ? AND status = 'executing'",
+            (json.dumps(forged, sort_keys=True), selected_task_id),
+        ) == 1
+        return False
+
+    monkeypatch.setattr(
+        execution_recovery_module,
+        "finalize_signed_worker_execution",
+        forge_marker,
+    )
+    result = recover_expired_signed_worker_executions(
+        db,
+        now_factory=lambda: (
+            claimed_at + timedelta(seconds=EXECUTION_LEASE_SECONDS + 1)
+        ),
+    )
+
+    assert result["accepted"] is True
+    assert result["recovered_task_ids"] == []
+    assert result["rejected_task_ids"] == []
+    assert result["quarantined_task_ids"] == [task_id]
+    stored = db.get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "quarantined"
+    quarantine = stored["context"]["signed_worker_execution_quarantine"]
+    assert quarantine["effect_commit_state"] == "INDETERMINATE"
+    assert db.db.execute_query(
+        "SELECT task_id FROM agents_signed_worker_result_history WHERE task_id = ?",
+        (task_id,),
+    ) == []
+
+
 def test_concurrent_direct_run_task_executes_signed_worker_once(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     barrier = threading.Barrier(2)
     original_get = AgentDB.get_autonomous_tasks
@@ -618,12 +819,50 @@ def test_claim_rejects_tampered_envelope_before_runner_selection(
 
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
-    assert (
-        SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED
-        in result["rejection_reasons"]
-    )
+    assert set(result["rejection_reasons"]) & {
+        SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED,
+        SignedWorkerOpenClawClaimReason.CLAIM_RACE_LOST,
+    }
     assert runner.calls == []
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert stored["status"] in {"failed", "quarantined"}
+    if stored["status"] == "quarantined":
+        quarantine = stored["context"]["signed_worker_assignment_quarantine"]
+        assert quarantine["reason"] == "invalid_signed_worker_assignment"
+        assert quarantine["no_worker_effect_performed"] is True
+        assert quarantine["receipt_id"].startswith("sha256:")
+
+
+def test_quarantined_invalid_task_does_not_block_next_valid_task(
+    tmp_path: Path,
+) -> None:
+    invalid_task_id = _publish_agentdb_task()
+    _rewrite_context(
+        invalid_task_id,
+        lambda context: context.update(source="attacker"),
+    )
+    valid_task_id = _publish_agentdb_task(
+        intent_id="worker_dispatch_intent_openclaw_candidate_2"
+    )
+    runner = _FakeRunner()
+    db = AgentDB()
+
+    assert not db.assign_signed_worker_task(invalid_task_id)
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert db.get_autonomous_task_by_id(invalid_task_id)[
+        "status"
+    ] == "quarantined"
+    assert result["accepted"] is True
+    assert db.get_autonomous_task_by_id(valid_task_id)[
+        "status"
+    ] == "completed"
 
 
 def test_claim_time_preflight_is_restart_safe_and_non_consuming() -> None:
@@ -646,6 +885,78 @@ def test_claim_time_preflight_is_restart_safe_and_non_consuming() -> None:
 
     assert first.task_id == task_id
     assert second.canonical_context == first.canonical_context
+
+
+def test_supervisor_execution_runs_inside_lease_heartbeat(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_execution_heartbeat as heartbeat_module,
+    )
+
+    task_id = _publish_agentdb_task()
+    calls: list[str] = []
+
+    @contextmanager
+    def observed_heartbeat(**kwargs):
+        calls.append(str(kwargs["task_id"]))
+        yield SimpleNamespace(healthy=True, renewal_count=1)
+
+    monkeypatch.setattr(
+        heartbeat_module,
+        "signed_worker_execution_heartbeat",
+        observed_heartbeat,
+    )
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert result["accepted"] is True
+    assert calls == [task_id]
+
+
+def test_supervisor_lease_renewal_failure_is_indeterminate_rejection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_execution_heartbeat as heartbeat_module,
+    )
+
+    task_id = _publish_agentdb_task()
+
+    @contextmanager
+    def failed_heartbeat(**_):
+        yield SimpleNamespace(healthy=False, renewal_count=0)
+
+    monkeypatch.setattr(
+        heartbeat_module,
+        "signed_worker_execution_heartbeat",
+        failed_heartbeat,
+    )
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=_FakeRunner(),
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    assert result["accepted"] is False
+    assert (
+        SignedWorkerOpenClawClaimReason.EXECUTION_LEASE_RENEWAL_FAILED
+        in result["rejection_reasons"]
+    )
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert stored is not None and stored["status"] == "failed"
+    assert stored["context"]["signed_worker_task_last_result"][
+        "effect_commit_state"
+    ] == "INDETERMINATE"
 
 
 def test_supervisor_verifies_exact_claimed_database_state(
@@ -682,7 +993,7 @@ def test_supervisor_verifies_exact_claimed_database_state(
     assert result["accepted"] is False
     assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
     assert runner.calls == []
-    assert stored is not None and stored["status"] == "failed"
+    assert stored is not None and stored["status"] == "quarantined"
 
 
 def test_supervisor_finalization_conflict_never_overwrites_owner(
@@ -799,7 +1110,10 @@ def test_supervisor_rejects_tampered_earlier_requeue_result_history(
 
     assert rejected["accepted"] is False
     assert runner.calls == []
-    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] == "failed"
+    assert AgentDB().get_autonomous_task_by_id(task_id)["status"] in {
+        "failed",
+        "pending",
+    }
 
 
 def test_supervisor_rejects_gapped_durable_result_ledger(
@@ -955,7 +1269,7 @@ def test_direct_run_rejects_rehashed_truncated_result_history(
 
     _rewrite_context(task_id, truncate)
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     runner = _FakeRunner()
     result = execute_task(
@@ -982,7 +1296,7 @@ def test_direct_run_preserves_agentdb_anchored_result_history(
         ),
     )["accepted"] is True
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
 
     result = execute_task(
@@ -1009,7 +1323,7 @@ def test_direct_result_ledger_failure_rolls_back_terminal_state(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     monkeypatch.setenv("WRE_MOCK_SKILLS", runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL)
     monkeypatch.setattr(
         execution_store_module,
@@ -1037,7 +1351,7 @@ def test_direct_result_ledger_failure_rolls_back_terminal_state(
 def test_public_finalizer_requires_exactly_one_new_result_entry() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
     assert admission is not None
     context = bind_execution_admission(admission.claimed_context, admission)
@@ -1069,7 +1383,7 @@ def test_public_finalizer_requires_exactly_one_new_result_entry() -> None:
 def test_public_finalizer_rejects_accepted_caller_selected_identity() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
     assert admission is not None
     authenticated = bind_execution_admission(
@@ -1115,7 +1429,7 @@ def test_public_finalizer_rejects_accepted_caller_selected_identity() -> None:
 def test_public_finalizer_rejects_non_genesis_first_history_link() -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
     assert admission is not None
     context = bind_execution_admission(admission.claimed_context, admission)
@@ -1245,7 +1559,7 @@ def test_run_task_signed_markers_never_fall_through_to_wre(
             "SET required_skills = ?, discovered_by = ? WHERE task_id = ?",
             (json.dumps(["attacker_skill"]), "attacker", task_id),
         ) == 1
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert not db.assign_signed_worker_task(task_id)
     monkeypatch.setenv(
         "WRE_MOCK_SKILLS",
         f"{runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL},attacker_skill",
@@ -1259,8 +1573,8 @@ def test_run_task_signed_markers_never_fall_through_to_wre(
     )
 
     assert result["ok"] is False
-    assert result["executor"] == "reddog:signed_worker_dispatch"
-    assert "routing_binding_mismatch" in result["detail"]
+    assert result["executor"] == "none"
+    assert "not found in 'assigned' state" in result["detail"]
     assert runner.calls == []
 
 
@@ -1269,9 +1583,9 @@ def test_competing_preverification_claim_is_never_overwritten(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     task_id = _publish_agentdb_task()
-    _rewrite_context(task_id, lambda context: context.update(source="attacker"))
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
+    _rewrite_context(task_id, lambda context: context.update(source="attacker"))
 
     def competing_claim(*, db, task_id):
         assert db.db.execute_write(
@@ -1301,7 +1615,7 @@ def test_successful_admission_verifies_exact_claimed_database_state(
 ) -> None:
     task_id = _publish_agentdb_task()
     db = AgentDB()
-    assert db.assign_autonomous_task(task_id, "openclaw_supervisor")
+    assert db.assign_signed_worker_task(task_id)
     original_admit = run_task_runtime.admit_signed_worker_execution_once
 
     def replace_then_admit(*, db, task_id):
@@ -1328,9 +1642,9 @@ def test_successful_admission_verifies_exact_claimed_database_state(
     stored = AgentDB().get_autonomous_task_by_id(task_id)
     assert result["ok"] is False
     assert result["finalization_owned"] is True
-    assert "routing_binding_mismatch" in result["detail"]
+    assert "execution_already_claimed" in result["detail"]
     assert runner.calls == []
-    assert stored is not None and stored["status"] == "failed"
+    assert stored is not None and stored["status"] == "quarantined"
 
 
 def test_tampered_expired_verifier_never_renews_assurance(

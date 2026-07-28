@@ -79,13 +79,19 @@ BOUNDED_DATABASE_SECURITY_FILES = {
     "modules/infrastructure/database/src/signed_worker_assurance_completion.py",
     "modules/infrastructure/database/src/signed_worker_assurance_request.py",
     "modules/infrastructure/database/src/signed_worker_assurance_staging.py",
+    "modules/infrastructure/database/src/signed_worker_assignment.py",
     "modules/infrastructure/database/src/signed_worker_execution_binding.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease_schema.py",
+    "modules/infrastructure/database/src/signed_worker_execution_lease_time.py",
+    "modules/infrastructure/database/src/signed_worker_execution_quarantine.py",
     "modules/infrastructure/database/src/signed_worker_execution_store.py",
     "modules/infrastructure/database/src/signed_worker_finalization_status.py",
     "modules/infrastructure/database/src/signed_worker_result_history.py",
     "modules/infrastructure/database/src/signed_worker_result_ledger.py",
 }
 BOUNDED_SIGNED_WORKER_RESULT_FILES = {
+    "src/reddog_signed_worker_execution_heartbeat.py",
     "src/reddog_signed_worker_queue_state_reader.py",
     "src/reddog_signed_worker_result_receipt.py",
 }
