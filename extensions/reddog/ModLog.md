@@ -8,7 +8,7 @@
   dispatch, AgentDB execution, read-only assignment, and independent review.
 - Added canonical signed-authority digest revalidation at verifier admission;
   post-signing substitution and malformed or legacy bindings fail closed.
-- Regenerated and pinned the 1,061-file backend dependency manifest.
+- Regenerated and pinned the 1,062-file backend dependency manifest.
 - Preserved read-only editor authority. Version 0.4.28 -> 0.4.29.
 
 ## 2026-07-28 - REDDOG_SIGNED_WORKER_ADMISSION_AND_LEASE_SECURITY_REPAIR_PHASE1 (0.4.28)

@@ -44,14 +44,21 @@ def optional_authority_binding_values_match(
 ) -> bool:
     """Require a valid source pair to equal the authoritative pair."""
 
+    source_absent = receipt_id in (None, "") and digest in (None, "")
+    authority_absent = (
+        authoritative_receipt_id in (None, "")
+        and authoritative_digest in (None, "")
+    )
     if not optional_authority_binding_values_valid(
         authoritative_receipt_id,
         authoritative_digest,
     ):
         return False
-    if receipt_id in (None, "") and digest in (None, "") and allow_absent_source:
-        return True
+    if source_absent:
+        return allow_absent_source or authority_absent
     if not optional_authority_binding_values_valid(receipt_id, digest):
+        return False
+    if authority_absent:
         return False
     return hmac.compare_digest(receipt_id, authoritative_receipt_id) and hmac.compare_digest(
         digest,

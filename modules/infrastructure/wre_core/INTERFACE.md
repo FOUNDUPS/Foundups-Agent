@@ -31,6 +31,9 @@ assurance reservation when a request declares assurance lineage. The request,
 the current reservation, and the terminal verifier receipt must agree on the
 reservation ID, immutable admission digest, verifier task and principal,
 author principal, work order, operational snapshot, and WSP 15 allocation.
+Callers must also provide the keyword-only `trusted_work_authority_digest`
+from the independently recorded authority-verification stage. A digest copied
+from the verifier request envelope is not an authority source.
 
 The verifier is not the bounded author and is not the resident queue-stage
 owner. It receives the already-produced worktree artifact only after the

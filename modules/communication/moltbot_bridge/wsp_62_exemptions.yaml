@@ -121,10 +121,10 @@ exemptions:
   - <<: *reddog_security_repair
     file: "src/reddog_resident_queue_slice_verifier_request_binding.py"
     reason: "Inherited queue evidence-request coordinator retained while signed authority is rebound to independently recorded verification state."
-    threshold_override: 371
+    threshold_override: 368
     function_threshold_override: 216
     functions: ["build_resident_queue_slice_verifier_request"]
-    no_growth_ceiling: {file_lines: 371, functions: {build_resident_queue_slice_verifier_request: 216}}
+    no_growth_ceiling: {file_lines: 368, functions: {build_resident_queue_slice_verifier_request: 216}}
 
   - <<: *reddog_security_repair
     file: "src/reddog_signed_authority_worker_dispatch_dryrun.py"
@@ -418,7 +418,7 @@ exemptions:
     reason: >-
       Legacy module WSP_22 reverse-chronological journal. This slice adds one
       bounded boundary record and preserves the historical audit sequence.
-    threshold_override: 9142
+    threshold_override: 9144
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"
@@ -430,7 +430,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1731
+    threshold_override: 1733
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

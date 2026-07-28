@@ -1,5 +1,12 @@
 # WRE Core Roadmap
 
+## Autonomous slice verifier decomposition
+
+Decompose `wre_autonomous_slice_verifier_runtime.py` without weakening its
+independent authority, evidence, exact-SHA, or receipt-chain checks. The
+temporary exact no-growth exemption remains a ceiling, not permission to add
+logic to the inherited coordinator.
+
 ## FoundUp job router and consumer WSP62 decomposition
 
 The create-route prerequisite now isolates its routing decision in

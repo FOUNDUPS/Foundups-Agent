@@ -3,6 +3,8 @@
   propagation, malformed/falsy values, conflicts, and digest-alias tampering.
 - Proved pre-signing request substitution and rehashed post-signing authority
   substitution reject before signer, store, evidence-runner, or worker effects.
+- Proved mixed current absent Memex encodings normalize to an unsigned
+  `None/None` request instead of raising during authority planning.
 - The signer, dispatch, claim, executor, verifier, and serial matrices stay green.
 - Full differential evidence remains mandatory before publication.
 

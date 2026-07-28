@@ -81,7 +81,7 @@ exemptions:
       The independent-assurance verifier boundary is now documented beside
       the existing model-capability contract; archival decomposition requires
       a separate documentation-retention review.
-    threshold_override: 1066
+    threshold_override: 1069
     function_threshold_override: 0
     functions: []
     temporary: true
@@ -92,7 +92,7 @@ exemptions:
     expires_on: "2026-09-30"
     remediation: "ROADMAP.md#wre-documentation-wsp62-decomposition"
     no_growth_ceiling:
-      file_lines: 1066
+      file_lines: 1069
       functions: {}
 
   - file: "ModLog.md"

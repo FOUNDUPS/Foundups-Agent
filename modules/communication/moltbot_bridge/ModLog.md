@@ -3,6 +3,8 @@
   Signer invocation validates the exact dry-run request digest before effects;
   resident verification replaces packet authority with recorded chain truth.
   Rehashed pre/post-signing substitutions now reject before worker evidence.
+  The two current absent encodings (`None` and empty text) normalize without
+  raising while malformed or half-populated bindings still fail closed.
 - Exact-SHA review follow-up removed the importable process-local envelope
   seal as an authority primitive. Signed-worker admission now re-verifies the
   persisted AgentDB envelope against fresh authority inside the atomic claim

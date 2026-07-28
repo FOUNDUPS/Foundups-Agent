@@ -257,6 +257,26 @@ def test_allows_legacy_queue_without_model_runtime_binding() -> None:
     assert result.delegated_authority_request["model_runtime_binding_digest"] is None
 
 
+def test_accepts_mixed_absent_memex_encodings_without_exception() -> None:
+    queue = _queue_result()
+    queue["receipt"]["memex_supply_receipt_id"] = None
+    queue["receipt"]["memex_supply_digest"] = None
+
+    result = planner.plan_reddog_wre_queue_authority_request_dry_run(
+        queue_consumer_result=queue,
+        authority_profile=_profile(),
+        work_order=_work_order(
+            memex_supply_receipt_id="",
+            memex_supply_digest="",
+        ),
+    )
+
+    assert result.accepted is True
+    assert result.delegated_authority_request is not None
+    assert result.delegated_authority_request["memex_supply_receipt_id"] is None
+    assert result.delegated_authority_request["memex_supply_digest"] is None
+
+
 def test_rejects_base_ref_spliced_between_profile_and_full_work_order() -> None:
     result = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=_queue_result(),
