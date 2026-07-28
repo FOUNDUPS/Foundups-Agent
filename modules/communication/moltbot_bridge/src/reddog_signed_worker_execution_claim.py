@@ -126,20 +126,6 @@ def bind_execution_admission(
     return bound
 
 
-def admit_verified_signed_worker_context(
-    *,
-    db: Any,
-    task_id: str,
-    verified_context: Mapping[str, Any],
-) -> Mapping[str, Any] | None:
-    """CAS-admit and bind one verified signed-worker context."""
-
-    admission = admit_signed_worker_execution_once(db=db, task_id=task_id)
-    if admission is None:
-        return None
-    return bind_execution_admission(verified_context, admission)
-
-
 def _claim_inputs(
     row: Any,
     *,
@@ -249,6 +235,5 @@ __all__ = [
     "USE_SCHEMA",
     "SignedWorkerExecutionAdmission",
     "admit_signed_worker_execution_once",
-    "admit_verified_signed_worker_context",
     "bind_execution_admission",
 ]

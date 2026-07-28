@@ -349,30 +349,30 @@ def _signed_worker_execute_claimed_task(
     signed_worker_runner: Any | None,
     authority_verification_context: Any | None,
 ) -> Dict[str, Any]:
-    """Authenticate the claimed task before selecting or invoking a runner."""
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import try_rehydrate_signed_worker_agentdb_context
-    verified_context, error = try_rehydrate_signed_worker_agentdb_context(
-        repo_root=repo_root, task_id=task_id, context=context, env=os.environ,
+    """Admit and authenticate the exact claimed task before runner selection."""
+    from modules.communication.moltbot_bridge.src.reddog_signed_worker_supervisor_admission import (
+        admit_signed_worker_for_supervisor,
+    )
+    admission = admit_signed_worker_for_supervisor(
+        repo_root=repo_root, db=db, task_id=task_id, env=os.environ,
         authority_verification_context=authority_verification_context,
     )
-    if verified_context is None:
-        return _signed_worker_reject_claimed_task(
-            db=db, task_id=task_id, context=context,
-            reasons=(
-                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED, error,
-            ),
-        )
-    from modules.communication.moltbot_bridge.src.reddog_signed_worker_execution_claim import admit_verified_signed_worker_context
-    admitted_context = admit_verified_signed_worker_context(
-        db=db, task_id=task_id, verified_context=verified_context
-    )
-    if admitted_context is None:
+    if admission.status == "ALREADY_CLAIMED":
         return _signed_worker_claim_result(
             accepted=False,
             status=SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
             task_id=task_id,
             rejection_reasons=(
                 SignedWorkerOpenClawClaimReason.EXECUTION_ALREADY_CLAIMED,
+            ),
+        )
+    admitted_context = admission.context
+    if admission.status != "ADMITTED":
+        return _signed_worker_reject_claimed_task(
+            db=db, task_id=task_id, context=admitted_context,
+            reasons=(
+                SignedWorkerOpenClawClaimReason.AGENTDB_ENVELOPE_REJECTED,
+                admission.error,
             ),
         )
     try:

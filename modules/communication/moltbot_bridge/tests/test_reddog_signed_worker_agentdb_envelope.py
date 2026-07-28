@@ -15,7 +15,9 @@ from modules.communication.moltbot_bridge.scripts.run_task import execute_task
 from modules.communication.moltbot_bridge.src import (
     openclaw_supervisor as supervisor_module,
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
+    reddog_signed_worker_execution_claim as execution_claim_module,
     reddog_signed_worker_run_task_runtime as run_task_runtime,
+    reddog_signed_worker_supervisor_admission as supervisor_admission_module,
 )
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     SIGNED_WORKER_OPENCLAW_CLAIM_REJECT,
@@ -407,6 +409,43 @@ def test_claim_time_preflight_is_restart_safe_and_non_consuming() -> None:
 
     assert first.task_id == task_id
     assert second.canonical_context == first.canonical_context
+
+
+def test_supervisor_verifies_exact_claimed_database_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task_id = _publish_agentdb_task()
+    original_admit = execution_claim_module.admit_signed_worker_execution_once
+
+    def replace_then_admit(*, db, task_id):
+        assert db.db.execute_write(
+            "UPDATE agents_autonomous_tasks "
+            "SET context = ?, required_skills = ?, discovered_by = ? "
+            "WHERE task_id = ? AND status = 'assigned'",
+            (json.dumps({}), json.dumps(["attacker_skill"]), "attacker", task_id),
+        ) == 1
+        return original_admit(db=db, task_id=task_id)
+
+    monkeypatch.setattr(
+        supervisor_admission_module,
+        "admit_signed_worker_execution_once",
+        replace_then_admit,
+    )
+    runner = _FakeRunner()
+    result = claim_reddog_signed_worker_dispatch_task_once(
+        repo_root=tmp_path,
+        signed_worker_runner=runner,
+        authority_verification_context=(
+            worker_dispatch_authority_verification_context()
+        ),
+    )
+
+    stored = AgentDB().get_autonomous_task_by_id(task_id)
+    assert result["accepted"] is False
+    assert result["status"] == SIGNED_WORKER_OPENCLAW_CLAIM_REJECT
+    assert runner.calls == []
+    assert stored is not None and stored["status"] == "failed"
 
 
 @pytest.mark.parametrize("authority_failure", ("expired", "revoked"))
