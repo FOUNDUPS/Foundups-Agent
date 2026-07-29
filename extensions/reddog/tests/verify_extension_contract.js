@@ -4480,6 +4480,41 @@ const imperativeHoloUnrelated = orchestrator.buildTypedGroundingPreflight(impera
 });
 assert.strictEqual(imperativeHoloUnrelated.passed, false,
   'TGP-008B: unrelated evidence cannot satisfy an imperative HoloIndex request');
+const coordinatedImperative = 'continue do the work needed to enhance HoloIndex and OpenClaw';
+const coordinatedPartial = orchestrator.buildTypedGroundingPreflight(coordinatedImperative, 'wsp_holo', {
+  semantic_evidence_hits: [{
+    location: 'holo_index/core/search_engine.py:1',
+    title: 'HoloIndex and semantic search engine'
+  }]
+});
+assert.strictEqual(coordinatedPartial.passed, false,
+  'TGP-008C: evidence for only one coordinated subject cannot ground the entire request');
+const coordinatedPass = orchestrator.buildTypedGroundingPreflight(coordinatedImperative, 'wsp_holo', {
+  semantic_evidence_hits: [{
+    location: 'docs/reddog_holo_openclaw.md',
+    title: 'HoloIndex and OpenClaw integration'
+  }]
+});
+assert.strictEqual(coordinatedPass.passed, true,
+  'TGP-008C: evidence naming every coordinated subject can ground the request');
+for (const explicitWord of ['Enhance', 'Continue']) {
+  const explicitPrompt = 'Semantic target: ' + explicitWord;
+  const explicitPreflight = orchestrator.buildTypedGroundingPreflight(explicitPrompt, 'wsp_holo', {
+    semantic_evidence_hits: [{
+      location: 'docs/' + explicitWord.toLowerCase() + '.md',
+      title: explicitWord + ' language concept'
+    }]
+  });
+  assert.strictEqual(explicitPreflight.passed, true,
+    'TGP-008D: explicit operator target preserves an inferred-command stopword: ' + explicitWord);
+}
+const quotedEnhance = orchestrator.buildTypedGroundingPreflight(
+  'What does the word "enhance" mean?', 'wsp_holo', {}
+);
+assert.strictEqual(quotedEnhance.grounding_target_universe_required, false,
+  'TGP-008E: a quoted action-word mention does not activate semantic work');
+assert.deepStrictEqual(quotedEnhance.typed_targets.semantic_targets, [],
+  'TGP-008E: a quoted action-word mention does not invent a semantic target');
 const ambiguousImperative = orchestrator.buildTypedGroundingPreflight(
   'continue do the work needed to fix enhance it', 'wsp_holo', {
     semantic_evidence_hits: [{
@@ -4489,9 +4524,9 @@ const ambiguousImperative = orchestrator.buildTypedGroundingPreflight(
   }
 );
 assert.strictEqual(ambiguousImperative.passed, false,
-  'TGP-008C: a subjectless imperative follow-up remains fail-closed without explicit continuation');
+  'TGP-008F: a subjectless imperative follow-up remains fail-closed');
 assert(ambiguousImperative.rejection_reasons.includes('grounding_target_universe_empty'),
-  'TGP-008C: subjectless follow-up reports an empty grounding universe');
+  'TGP-008F: subjectless follow-up reports an empty grounding universe');
 const emptyAuditPreflight = orchestrator.buildTypedGroundingPreflight('Audit it.', 'wsp_holo', {
   semantic_evidence_hits: []
 });

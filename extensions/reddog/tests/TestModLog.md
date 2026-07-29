@@ -4,8 +4,9 @@
 
 - Reproduced the `continue do the work needed to fix enhance holoindex`
   preflight failure and proved HoloIndex evidence now grounds the named subject.
-- Added unrelated-evidence and subjectless-pronoun regressions so the
-  normalization cannot weaken the fail-closed grounding boundary.
+- Added unrelated-evidence, coordinated-subject, explicit-target,
+  quoted-action, and subjectless-pronoun regressions so normalization cannot
+  weaken the fail-closed grounding boundary.
 
 ## 2026-07-29 - HoloIndex health timeout calibration (0.4.36)
 

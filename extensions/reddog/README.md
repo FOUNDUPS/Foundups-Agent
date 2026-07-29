@@ -5,8 +5,8 @@ Version: 0.4.37
 Version 0.4.37 normalizes imperative follow-up language before semantic
 evidence matching. A named subject such as HoloIndex remains mandatory, while
 command scaffolding such as `continue`, `needed`, and `enhance` no longer has
-to appear in retrieved evidence. Subjectless follow-ups remain fail-closed
-unless prior-packet continuation is explicitly enabled.
+to appear in retrieved evidence. Subjectless follow-ups remain fail-closed;
+sanitized continuation is advisory and does not supply missing target authority.
 
 Version 0.4.36 calibrates the asynchronous HoloIndex health deadline to 30
 seconds. Live exact-SHA validation measured the authenticated owner at

@@ -13,17 +13,18 @@ const BROAD_AUDIT_QUERY_TERMS = [
   'workflow'
 ];
 const SEMANTIC_GROUNDING_STOPWORDS = new Set([
-  'about', 'after', 'against', 'agent', 'all', 'analyze', 'analyse', 'assess', 'audit',
+  'about', 'after', 'against', 'agent', 'all', 'analyze', 'analyse', 'and', 'assess', 'audit',
   'based', 'before', 'bug', 'build', 'code', 'compare', 'complete', 'concept', 'create',
   'continue', 'current', 'debug', 'design', 'determine', 'does', 'enhance', 'evaluate',
   'everything', 'fix',
   'following', 'foundups', 'from', 'governance', 'grounding', 'harden', 'implement',
   'implementation', 'improve', 'inspect', 'into', 'investigate', 'issue', 'it', 'make',
-  'mapping', 'module', 'need', 'needed', 'needs', 'output', 'paper', 'pipeline', 'plan', 'please',
+  'mapping', 'module', 'need', 'needed', 'needs', 'output', 'paper', 'pipeline', 'plan', 'please', 'plus',
   'problem', 'question', 'read', 'refactor', 'repo', 'research', 'review', 'selection',
   'should', 'something', 'system', 'that', 'the', 'them', 'this', 'through', 'to',
   'topic', 'update', 'using', 'verify', 'whether', 'with', 'work', 'workflow', 'wsp'
 ]);
+const EXPLICIT_SEMANTIC_STOPWORDS = new Set(['and', 'for', 'plus', 'the', 'with']);
 
 function collapseWhitespace(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -41,8 +42,44 @@ function tokenizeSemanticQuery(value) {
   return Array.from(new Set(tokens.filter((token) => token.length >= 3 && !SEMANTIC_GROUNDING_STOPWORDS.has(token))));
 }
 
+function tokenizeExplicitSemanticQuery(value) {
+  const tokens = normalizeSemanticQuery(value).match(/[a-z0-9]+/g) || [];
+  return Array.from(new Set(tokens.filter((token) => token.length >= 3 && !EXPLICIT_SEMANTIC_STOPWORDS.has(token))));
+}
+
+function stripInlineQuotedText(value) {
+  return String(value || '').replace(/"[^"\r\n]*"|'[^'\r\n]*'|`[^`\r\n]*`/g, ' ');
+}
+
+function hasSemanticWorkAction(value) {
+  return SEMANTIC_WORK_ACTION_PATTERN.test(stripInlineQuotedText(value));
+}
+
 function hasSubstantiveSemanticSubject(value) {
   return tokenizeSemanticQuery(value).length > 0;
+}
+
+function splitSemanticParts(value) {
+  return String(value || '').split(/[,;]/).map((part) => part.trim()).filter(Boolean);
+}
+
+function semanticHeaderBody(value) {
+  const text = String(value || '');
+  const match = text.match(/^\s*(semantic\s+targets?|concepts?|research\s+topic|topic|question)\s*:(.*)$/i);
+  return match ? match[2] : null;
+}
+
+function explicitSemanticTargets(value) {
+  const targets = [];
+  for (const line of String(value || '').split(/\r?\n/)) {
+    const body = semanticHeaderBody(line);
+    if (body !== null) targets.push(...splitSemanticParts(body));
+  }
+  return targets;
+}
+
+function isCoordinatedSemanticQuery(value) {
+  return /(?:\band\b|\bplus\b|\+)/i.test(String(value || ''));
 }
 
 function semanticEvidenceText(hit) {
@@ -124,9 +161,15 @@ module.exports = {
   SEMANTIC_WORK_ACTION_PATTERN,
   assessBroadAuditEvidence,
   buildEffectiveHoloQuery,
+  explicitSemanticTargets,
+  hasSemanticWorkAction,
   hasSubstantiveSemanticSubject,
+  isCoordinatedSemanticQuery,
   normalizeSemanticQuery,
+  semanticHeaderBody,
   semanticEvidenceCategory,
   semanticEvidenceText,
+  splitSemanticParts,
+  tokenizeExplicitSemanticQuery,
   tokenizeSemanticQuery
 };

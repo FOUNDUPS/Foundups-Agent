@@ -10,8 +10,8 @@
 - Preserved the named subject as the grounding obligation, so requests such as
   `continue do the work needed to fix enhance holoindex` can use retrieved
   HoloIndex evidence instead of demanding that evidence repeat command filler.
-- Kept ambiguous pronoun-only follow-ups fail-closed unless 012 explicitly
-  enables the prior-packet continuation path.
+- Kept ambiguous pronoun-only follow-ups fail-closed; sanitized continuation
+  remains advisory and cannot supply missing target authority.
 
 ## 2026-07-29 - HoloIndex health timeout calibration (0.4.36)
 
