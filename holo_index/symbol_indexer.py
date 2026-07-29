@@ -48,6 +48,7 @@ PreparedSymbolRecords = tuple[
 ]
 DEFAULT_EMBED_BATCH_SIZE = 512
 PUBLISH_BATCH_SIZE = 1000
+SNAPSHOT_PAGE_SIZE = 500
 SYMBOL_DOCSTRING_MAX_CHARS = 8192
 
 
@@ -337,6 +338,32 @@ def _reconciliation_capable(collection: Any) -> bool:
     )
 
 
+def _existing_record_ids(collection: Any) -> set[str]:
+    """Read collection IDs in bounded pages for large persisted stores."""
+
+    total = int(collection.count())
+    existing: set[str] = set()
+    for offset in range(0, total, SNAPSHOT_PAGE_SIZE):
+        requested = min(SNAPSHOT_PAGE_SIZE, total - offset)
+        snapshot = collection.get(
+            include=[],
+            limit=requested,
+            offset=offset,
+        )
+        page_ids = [str(value) for value in _flat_list(snapshot, "ids")]
+        page_id_set = set(page_ids)
+        if len(page_ids) != requested:
+            raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_PAGE_INCOMPLETE")
+        if len(page_id_set) != len(page_ids):
+            raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_PAGE_DUPLICATE")
+        if existing.intersection(page_id_set):
+            raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_PAGE_OVERLAP")
+        existing.update(page_id_set)
+    if len(existing) != total:
+        raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_SNAPSHOT_MISMATCH")
+    return existing
+
+
 def _reconcile_records(
     holo: Any,
     collection: Any,
@@ -346,8 +373,7 @@ def _reconcile_records(
 ) -> int:
     """Retain embeddings only for exact documents in the same embedding space."""
 
-    snapshot = collection.get(include=["metadatas"])
-    existing_ids = {str(value) for value in _flat_list(snapshot, "ids")}
+    existing_ids = _existing_record_ids(collection)
     desired_ids = set(ids)
     reused = 0
     for start in range(0, len(ids), PUBLISH_BATCH_SIZE):

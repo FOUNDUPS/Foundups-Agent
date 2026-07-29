@@ -10,7 +10,9 @@ import pytest
 from holo_index.core.indexing_engine import index_skillz_entries
 from holo_index.symbol_indexer import (
     PUBLISH_BATCH_SIZE,
+    SNAPSHOT_PAGE_SIZE,
     SYMBOL_DOCSTRING_MAX_CHARS,
+    _existing_record_ids,
     index_symbol_entries,
 )
 
@@ -44,12 +46,16 @@ class _StatefulCollection:
         *,
         ids: list[str] | None = None,
         include: list[str] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> dict[str, Any]:
         selected = (
             list(self.records)
             if ids is None
             else [value for value in ids if value in self.records]
         )
+        if ids is None and limit is not None:
+            selected = selected[offset : offset + limit]
         return {
             "ids": selected,
             "documents": [self.records[value]["document"] for value in selected],
@@ -291,6 +297,92 @@ def test_stale_stable_record_is_deleted_after_reconciliation(tmp_path: Path) -> 
     assert result.indexed_count == 0
     assert stale_id not in holo.symbol_collection.records
     assert holo.symbol_collection.delete_calls == [[stale_id]]
+
+
+def test_symbol_reconciliation_pages_large_existing_snapshot(tmp_path: Path) -> None:
+    class _BoundedCollection(_StatefulCollection):
+        def __init__(self, metadata: dict[str, str]) -> None:
+            super().__init__(metadata)
+            self.snapshot_pages: list[tuple[int, int]] = []
+
+        def get(self, **kwargs: Any) -> dict[str, Any]:
+            if kwargs.get("ids") is None:
+                assert kwargs.get("include") == []
+                assert isinstance(kwargs.get("limit"), int)
+                self.snapshot_pages.append((kwargs["offset"], kwargs["limit"]))
+            return super().get(**kwargs)
+
+    source = tmp_path / "source.py"
+    source.write_text("def retained():\n    return True\n", encoding="utf-8")
+    holo = _StatefulHolo(tmp_path, _BatchModel())
+    collection = _BoundedCollection(holo.embedding_metadata)
+    for index in range(SNAPSHOT_PAGE_SIZE * 2 + 7):
+        collection.records[f"stale-{index:04d}"] = {
+            "document": "stale",
+            "metadata": {},
+            "embedding": [0.0],
+        }
+    holo.symbol_collection = collection
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.complete is True
+    assert collection.snapshot_pages == [
+        (0, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE * 2, 7),
+    ]
+    assert collection.count() == 1
+    assert all(
+        len(batch) <= PUBLISH_BATCH_SIZE for batch in collection.delete_calls
+    )
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_error"),
+    [
+        ("ignored_pagination", "PAGE_INCOMPLETE"),
+        ("oversized", "PAGE_INCOMPLETE"),
+        ("short", "PAGE_INCOMPLETE"),
+        ("duplicate", "PAGE_DUPLICATE"),
+        ("overlap", "PAGE_OVERLAP"),
+    ],
+)
+def test_symbol_reconciliation_rejects_unverified_page_boundaries(
+    mode: str,
+    expected_error: str,
+) -> None:
+    class _HostileCollection:
+        def count(self) -> int:
+            return SNAPSHOT_PAGE_SIZE + 1
+
+        def get(
+            self,
+            *,
+            include: list[str],
+            limit: int,
+            offset: int,
+        ) -> dict[str, list[str]]:
+            assert include == []
+            if mode == "ignored_pagination":
+                ids = [f"id-{index}" for index in range(self.count())]
+            elif mode == "oversized":
+                ids = [f"id-{offset + index}" for index in range(limit + 1)]
+            elif mode == "short":
+                ids = [f"id-{offset + index}" for index in range(max(0, limit - 1))]
+            elif mode == "duplicate":
+                ids = [f"id-{offset + index}" for index in range(limit)]
+                ids[-1] = ids[0]
+            else:
+                ids = (
+                    [f"id-{index}" for index in range(limit)]
+                    if offset == 0
+                    else ["id-0"]
+                )
+            return {"ids": ids}
+
+    with pytest.raises(ValueError, match=expected_error):
+        _existing_record_ids(_HostileCollection())
 
 
 def test_embedding_space_mismatch_forces_reset_and_reembedding(tmp_path: Path) -> None:

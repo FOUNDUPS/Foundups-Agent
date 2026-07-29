@@ -1,5 +1,16 @@
 # HoloIndex Package ModLog
 
+## [2026-07-29] Bounded symbol reconciliation
+
+- Replaced the unbounded persisted symbol-ID snapshot with deterministic
+  `limit`/`offset` pages before stale-record reconciliation.
+- Applied the same bounded paging to collection content/embedding snapshots
+  used by the canonical freshness proof.
+- Added a large-state regression that rejects unbounded collection reads and
+  verifies complete stale-record deletion and proof construction.
+- Fail closed when a collection ignores pagination or returns short,
+  oversized, duplicate, or overlapping symbol-ID pages.
+
 ## [2026-07-26] Exact-SHA post-merge authority primitives
 
 - Added a separate cross-process authority-update lease that can safely wrap
