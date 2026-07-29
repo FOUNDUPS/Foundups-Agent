@@ -83,6 +83,60 @@ def _ground(work_focus: str, **kwargs):
     )
 
 
+def test_default_owner_query_uses_process_private_handoff(
+    monkeypatch,
+) -> None:
+    calls: list[dict] = []
+    monkeypatch.setattr(
+        grounding_service,
+        "resolve_reddog_holoindex_owner_handoff",
+        lambda: ("http://127.0.0.1:8123", "process-private-token"),
+    )
+
+    def query_owner(**kwargs):
+        calls.append(kwargs)
+        return _owner_result(query=kwargs["query"])
+
+    monkeypatch.setattr(grounding_service, "query_holoindex_owner", query_owner)
+    query = grounding_service._owner_query(
+        repo_root=REPO_ROOT,
+        service_url=None,
+        service_token=None,
+        timeout_seconds=3.0,
+    )
+
+    assert query("RedDog resident architecture")["ok"] is True
+    assert calls[0]["service_url"] == "http://127.0.0.1:8123"
+    assert calls[0]["service_token"] == "process-private-token"
+
+
+def test_default_owner_query_fails_closed_when_handoff_is_invalid(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        grounding_service,
+        "resolve_reddog_holoindex_owner_handoff",
+        lambda: (_ for _ in ()).throw(ValueError("invalid handoff")),
+    )
+    calls: list[dict] = []
+
+    def query_owner(**kwargs):
+        calls.append(kwargs)
+        return {}
+
+    monkeypatch.setattr(grounding_service, "query_holoindex_owner", query_owner)
+    query = grounding_service._owner_query(
+        repo_root=REPO_ROOT,
+        service_url=None,
+        service_token=None,
+        timeout_seconds=3.0,
+    )
+
+    assert query("RedDog resident architecture") == {}
+    assert calls[0]["service_url"] is None
+    assert calls[0]["service_token"] is None
+
+
 def _seed_repo_audit_fixture(root: Path, *, include_test: bool = True) -> None:
     source = root / "modules" / "foundups" / "pfmall" / "src" / "pfmall_runtime.py"
     source.parent.mkdir(parents=True)

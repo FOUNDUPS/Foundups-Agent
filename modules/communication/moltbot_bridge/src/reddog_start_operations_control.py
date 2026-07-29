@@ -34,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_control_re
 from modules.communication.moltbot_bridge.src.reddog_start_operations_profile import (
     StartOperationsProfile,
 )
+from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair import (
+    repair_start_operations_holoindex,
+)
 from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
     ground_transport_work_focus,
 )
@@ -50,15 +53,13 @@ def run_start_operations_control(
     environ: Mapping[str, str] | None = None,
     client_factory: Callable[..., Any] = RedDogResidentArchitectClient,
     grounding_runner: Callable[..., Any] = ground_transport_work_focus,
+    holo_repair_runner: Callable[..., Any] = repair_start_operations_holoindex,
     progress_writer: ProgressWriter | None = None,
 ) -> StartOperationsControlResult:
     env = environ if environ is not None else os.environ
     root = Path(repo_root).resolve()
-    profile = StartOperationsProfile()
-    raw_action = str(request.get("action") or "").strip()
-    action = raw_action if raw_action in CONTROL_ACTIONS else "invalid"
+    profile, action, control_request_id = _initial_request_fields(request)
     intent_id = ""
-    control_request_id = str(request.get("control_request_id") or "").strip()
     try:
         repo_state = observe_repo_state(root)
     except (OSError, RuntimeError, ValueError):
@@ -91,7 +92,19 @@ def run_start_operations_control(
         env=env,
         client_factory=client_factory,
         grounding_runner=grounding_runner,
+        holo_repair_runner=holo_repair_runner,
         progress_writer=progress_writer,
+    )
+
+
+def _initial_request_fields(
+    request: Mapping[str, Any],
+) -> tuple[StartOperationsProfile, str, str]:
+    action = str(request.get("action") or "").strip()
+    return (
+        StartOperationsProfile(),
+        action if action in CONTROL_ACTIONS else "invalid",
+        str(request.get("control_request_id") or "").strip(),
     )
 
 
@@ -107,6 +120,7 @@ def _dispatch(
     env: Mapping[str, str],
     client_factory: Callable[..., Any],
     grounding_runner: Callable[..., Any],
+    holo_repair_runner: Callable[..., Any],
     progress_writer: ProgressWriter | None,
 ) -> StartOperationsControlResult:
     if action == "submit":
@@ -118,6 +132,7 @@ def _dispatch(
             env=env,
             client_factory=client_factory,
             grounding_runner=grounding_runner,
+            holo_repair_runner=holo_repair_runner,
             progress_writer=progress_writer,
             control_request_id=control_request_id,
         )

@@ -18,6 +18,9 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_profile im
     READ_TARGETS,
     WORK_FOCUS,
 )
+from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair import (
+    StartOperationsHoloRepairResult,
+)
 from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
     TransportGroundingResult,
 )
@@ -141,7 +144,13 @@ def _clear_clients():
     _Client.instances.clear()
 
 
-def _run(request=None, env=None, grounding=None, repo_state=None):
+def _run(
+    request=None,
+    env=None,
+    grounding=None,
+    repo_state=None,
+    holo_repair=None,
+):
     audit = {"receipt_id": "audit:receipt", "runtime_surface": "reddog_readonly_audit_worker"}
     architect = {"receipt_id": "architect:receipt", "runtime_surface": "reddog_backend_architect"}
     with (
@@ -156,12 +165,25 @@ def _run(request=None, env=None, grounding=None, repo_state=None):
             return_value=(audit, architect, ""),
         ),
     ):
+        grounding_runner = (
+            Mock(side_effect=grounding)
+            if isinstance(grounding, (list, tuple))
+            else Mock(return_value=grounding or _grounding())
+        )
         return run_start_operations_control(
             repo_root=REPO_ROOT,
             request=_request() if request is None else request,
             environ=_env() if env is None else env,
             client_factory=_Client,
-            grounding_runner=Mock(return_value=grounding or _grounding()),
+            grounding_runner=grounding_runner,
+            holo_repair_runner=Mock(
+                return_value=holo_repair
+                or StartOperationsHoloRepairResult(
+                    False,
+                    "DEFERRED",
+                    rejection_reasons=("holo_repair_not_available",),
+                )
+            ),
         )
 
 
@@ -298,16 +320,49 @@ def test_invalid_budget_fails_closed(key: str, value: str, reason: str) -> None:
     assert not _Client.instances
 
 
-def test_grounding_failure_is_deferred_without_maintenance() -> None:
-    grounding = TransportGroundingResult(
+def test_grounding_failure_repairs_then_retries_once() -> None:
+    failed = TransportGroundingResult(
         schema_version="reddog_transport_grounding_result.v1",
         accepted=False,
         rejection_reasons=("grounding_holoindex_owner_query_failed",),
     )
-    result = _run(grounding=grounding)
+    repair = StartOperationsHoloRepairResult(
+        True,
+        "REPAIRED",
+        task_id="reddog_start_operations_holo_repair:abc",
+        repair_request_id="sha256:" + "1" * 64,
+        repo_head_sha="a" * 40,
+        generation_id="sha256:" + "2" * 64,
+        freshness_receipt_digest="sha256:" + "3" * 64,
+        maintenance_performed=True,
+    )
+    result = _run(grounding=[failed, _grounding()], holo_repair=repair)
+    assert result.accepted is True
+    assert result.deferred_holo_maintenance is False
+    assert result.no_maintenance_performed is False
+    assert result.holo_repair_attempted is True
+    assert result.holo_repair_status == "REPAIRED"
+    assert result.grounding_retried_after_repair is True
+    assert len(_Client.instances) == 1
+
+
+def test_holo_repair_failure_defers_without_client() -> None:
+    failed = TransportGroundingResult(
+        schema_version="reddog_transport_grounding_result.v1",
+        accepted=False,
+        rejection_reasons=("grounding_holoindex_owner_query_failed",),
+    )
+    repair = StartOperationsHoloRepairResult(
+        False,
+        "DEFERRED",
+        task_id="reddog_start_operations_holo_repair:abc",
+        rejection_reasons=("holo_repair_task_claim_rejected",),
+    )
+    result = _run(grounding=failed, holo_repair=repair)
     assert result.accepted is False
     assert result.deferred_holo_maintenance is True
     assert result.no_maintenance_performed is True
+    assert result.holo_repair_status == "DEFERRED"
     assert not _Client.instances
 
 

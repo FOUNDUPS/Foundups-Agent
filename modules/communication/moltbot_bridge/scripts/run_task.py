@@ -148,6 +148,7 @@ def _dispatch_exact_routes(
         if signed is not None:
             result = signed
     if _no_executor_matched(result) and source in {
+        "reddog_start_operations_holo_repair",
         "startup_maintenance_gate", "holoindex_postmerge_coordinator",
     }:
         startup = _try_startup_maintenance_dispatch(
@@ -629,6 +630,30 @@ def _try_startup_maintenance_dispatch(
             context=context,
             execution_claim=execution_claim,
         )
+
+    if context.get("source") == "reddog_start_operations_holo_repair":
+        from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair import (
+            validate_holo_repair_task_binding,
+        )
+
+        reasons = validate_holo_repair_task_binding(
+            repo_root=repo_root,
+            task_id=task_id,
+            context=context,
+        )
+        if reasons:
+            return {
+                "ok": False,
+                "detail": ",".join(reasons),
+                "executor": "startup:holo_index",
+                "structured_result": {
+                    "ready": False,
+                    "status": "REJECTED",
+                    "rejection_reasons": list(reasons),
+                },
+            }
+        logger.info("[RUN_TASK] Start operations: HoloIndex repair")
+        return _dispatch_holoindex_maintenance(repo_root)
 
     if task_id == "startup_refresh_holo_index":
         logger.info("[RUN_TASK] Startup dispatch: HoloIndex maintenance handshake")

@@ -10,6 +10,9 @@ from modules.communication.moltbot_bridge.scripts.run_task import (
     _try_startup_maintenance_dispatch,
 )
 import modules.communication.moltbot_bridge.scripts.run_task as run_task
+from modules.communication.moltbot_bridge.src import (
+    reddog_start_operations_holo_repair_contract as repair_contract,
+)
 from modules.infrastructure.database.src import agent_db
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_maintenance_handshake as handshake,
@@ -181,3 +184,66 @@ def test_postmerge_task_routes_to_exact_sha_executor(
 
     assert result["ok"] is True
     assert result["executor"] == "wre:holoindex_postmerge"
+
+
+def test_start_operations_repair_uses_exact_holo_route(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    context = repair_contract.holo_repair_task_context(
+        repo_root=tmp_path,
+        repo_head_sha="a" * 40,
+        control_request_id="sha256:" + ("b" * 64),
+    )
+    task_id = repair_contract.holo_repair_task_id(context)
+    monkeypatch.setattr(
+        repair_contract,
+        "read_repository_state",
+        lambda _root: SimpleNamespace(proven_clean=True, head_sha="a" * 40),
+    )
+    monkeypatch.setattr(
+        run_task,
+        "_dispatch_holoindex_maintenance",
+        lambda _root: {
+            "ok": True,
+            "executor": "startup:holo_index",
+            "structured_result": {"ready": True},
+        },
+    )
+
+    result = _try_startup_maintenance_dispatch(tmp_path, task_id, context)
+
+    assert result is not None
+    assert result["ok"] is True
+    assert result["executor"] == "startup:holo_index"
+
+
+def test_start_operations_repair_rejects_tampered_context_without_maintenance(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    context = repair_contract.holo_repair_task_context(
+        repo_root=tmp_path,
+        repo_head_sha="a" * 40,
+        control_request_id="sha256:" + ("b" * 64),
+    )
+    task_id = repair_contract.holo_repair_task_id(context)
+    tampered = {**context, "target_repo_head_sha": "f" * 40}
+    monkeypatch.setattr(
+        repair_contract,
+        "read_repository_state",
+        lambda _root: SimpleNamespace(proven_clean=True, head_sha="a" * 40),
+    )
+    monkeypatch.setattr(
+        run_task,
+        "_dispatch_holoindex_maintenance",
+        lambda _root: (_ for _ in ()).throw(
+            AssertionError("tampered repair must not mutate HoloIndex")
+        ),
+    )
+
+    result = _try_startup_maintenance_dispatch(tmp_path, task_id, tampered)
+
+    assert result is not None
+    assert result["ok"] is False
+    assert result["structured_result"]["status"] == "REJECTED"

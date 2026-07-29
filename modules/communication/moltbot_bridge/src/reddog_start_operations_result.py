@@ -31,6 +31,12 @@ class StartOperationsControlResult:
     duplicate_intent_reused: bool
     recovered_existing_cycle: bool
     deferred_holo_maintenance: bool
+    holo_repair_attempted: bool
+    holo_repair_task_id: str
+    holo_repair_status: str
+    holo_repair_generation_id: str
+    holo_repair_freshness_receipt_digest: str
+    grounding_retried_after_repair: bool
     rejection_reasons: tuple[str, ...]
     effect_evidence_level: str = EFFECT_EVIDENCE_LEVEL
     no_extension_fusion_call_performed: bool = True
@@ -46,6 +52,27 @@ class StartOperationsControlResult:
         return asdict(self)
 
 
+def holo_repair_payload(repair: Any | None) -> dict[str, Any]:
+    attempted = repair is not None
+    return {
+        "holo_repair_attempted": attempted,
+        "holo_repair_task_id": str(getattr(repair, "task_id", "") or ""),
+        "holo_repair_status": str(getattr(repair, "status", "") or ""),
+        "holo_repair_generation_id": str(
+            getattr(repair, "generation_id", "") or ""
+        ),
+        "holo_repair_freshness_receipt_digest": str(
+            getattr(repair, "freshness_receipt_digest", "") or ""
+        ),
+        "grounding_retried_after_repair": bool(
+            attempted and getattr(repair, "accepted", False)
+        ),
+        "no_maintenance_performed": not bool(
+            getattr(repair, "maintenance_performed", False)
+        ),
+    }
+
+
 def result_json(result: StartOperationsControlResult) -> str:
     return json.dumps(result.to_dict(), sort_keys=True, separators=(",", ":"))
 
@@ -55,5 +82,6 @@ __all__ = [
     "PROGRESS_SCHEMA",
     "RESULT_SCHEMA",
     "StartOperationsControlResult",
+    "holo_repair_payload",
     "result_json",
 ]

@@ -266,6 +266,29 @@ async function main() {
   const terminal = signedResult(request);
   assert(protocol.validateProgress(progress, request));
   assert(protocol.validateResult(terminal, request));
+  const repaired = signedResult(request, {
+    no_maintenance_performed: false,
+    holo_repair_attempted: true,
+    holo_repair_task_id: 'reddog_start_operations_holo_repair:abc',
+    holo_repair_status: 'REPAIRED',
+    holo_repair_generation_id: 'sha256:' + 'e'.repeat(64),
+    holo_repair_freshness_receipt_digest: 'sha256:' + 'f'.repeat(64),
+    grounding_retried_after_repair: true
+  });
+  assert(protocol.validateResult(repaired, request));
+  assert.strictEqual(protocol.validateResult(signedResult(request, {
+    no_maintenance_performed: false,
+    holo_repair_attempted: true,
+    holo_repair_task_id: 'reddog_start_operations_holo_repair:abc',
+    holo_repair_status: 'REPAIRED',
+    holo_repair_generation_id: 'sha256:attacker',
+    holo_repair_freshness_receipt_digest: 'sha256:' + 'f'.repeat(64),
+    grounding_retried_after_repair: true
+  }), request), null);
+  assert.strictEqual(protocol.validateResult(signedResult(request, {
+    holo_repair_attempted: false,
+    holo_repair_status: 'REPAIRED'
+  }), request), null);
   assert(protocol.validateResult(pythonResult(request), request));
   const tampered = { ...terminal, status: 'ATTACKER' };
   assert.strictEqual(protocol.validateResult(tampered, request), null);

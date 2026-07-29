@@ -18,6 +18,9 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_control_re
     reject,
     write_progress,
 )
+from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair import (
+    repairable_grounding_failure,
+)
 
 
 def submit(
@@ -29,6 +32,7 @@ def submit(
     env: Mapping[str, str],
     client_factory: Callable[..., Any],
     grounding_runner: Callable[..., Any],
+    holo_repair_runner: Callable[..., Any],
     progress_writer: Callable[[Mapping[str, Any]], None] | None,
     control_request_id: str,
 ) -> StartOperationsControlResult:
@@ -40,22 +44,20 @@ def submit(
             ("start_operations_repo_dirty",),
             control_request_id=control_request_id,
         )
-    try:
-        prepared = prepare_submission(
-            repo_root=root,
-            profile=profile,
-            scope=scope,
-            repo_state=repo_state,
-            env=env,
-            grounding_runner=grounding_runner,
-        )
-    except StartOperationsRejected as exc:
+    prepared, repair, rejection = _prepare_with_holo_repair(
+        root=root,
+        profile=profile,
+        scope=scope,
+        repo_state=repo_state,
+        env=env,
+        grounding_runner=grounding_runner,
+        holo_repair_runner=holo_repair_runner,
+        control_request_id=control_request_id,
+    )
+    if prepared is None:
         return reject(
-            "submit",
-            profile,
-            repo_state,
-            exc.reasons,
-            control_request_id=control_request_id,
+            "submit", profile, repo_state, rejection,
+            control_request_id=control_request_id, holo_repair=repair,
         )
     write_progress(
         progress_writer, prepared.intent, repo_state, "submit", control_request_id
@@ -67,7 +69,51 @@ def submit(
         repo_state,
         client.submit(prepared.intent),
         control_request_id,
+        holo_repair=repair,
     )
+
+
+def _prepare_with_holo_repair(
+    *,
+    root: Path,
+    profile: Any,
+    scope: tuple[str, tuple[str, ...], str],
+    repo_state: Mapping[str, Any],
+    env: Mapping[str, str],
+    grounding_runner: Callable[..., Any],
+    holo_repair_runner: Callable[..., Any],
+    control_request_id: str,
+) -> tuple[Any | None, Any | None, tuple[str, ...]]:
+    try:
+        return (
+            prepare_submission(
+                repo_root=root, profile=profile, scope=scope,
+                repo_state=repo_state, env=env,
+                grounding_runner=grounding_runner,
+            ),
+            None,
+            (),
+        )
+    except StartOperationsRejected as exc:
+        if not repairable_grounding_failure(exc.reasons):
+            return None, None, exc.reasons
+        repair = holo_repair_runner(
+            repo_root=root,
+            repo_head_sha=str(repo_state.get("head_sha") or ""),
+            control_request_id=control_request_id,
+            environ=env,
+        )
+        if not repair.accepted:
+            return None, repair, (*exc.reasons, *repair.rejection_reasons)
+    try:
+        prepared = prepare_submission(
+            repo_root=root, profile=profile, scope=scope,
+            repo_state=repo_state, env=env,
+            grounding_runner=grounding_runner,
+        )
+    except StartOperationsRejected as exc:
+        return None, repair, exc.reasons
+    return prepared, repair, ()
 
 
 def control_existing(

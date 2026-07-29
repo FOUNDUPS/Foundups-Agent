@@ -1,5 +1,12 @@
 # RedDog Interface
 
+Version 0.4.31 adds one bounded HoloIndex recovery step to `start operations`.
+Only failed owner queries or stale generations are repairable. Recovery is a
+durable AgentDB task claimed by OpenClaw and dispatched through the canonical
+Holo maintenance handshake. Exact-HEAD owner proof is required before one
+grounding retry; a semantic miss does not trigger re-indexing. The editor has
+no direct Holo mutation authority.
+
 Version 0.4.30 adds the exact `start operations` control family. The command
 selects a checked-in, read-only operational profile and never becomes a work
 prompt or authority token. Submission/resume require distinct receipt-bound
