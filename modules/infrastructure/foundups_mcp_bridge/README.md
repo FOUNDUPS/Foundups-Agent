@@ -107,8 +107,9 @@ cleans up the process. Before expensive semantic startup it rejects an occupied
 fixed loopback port. Automatic startup binds the child to the exact supervisor
 process, so the child exits after an abruptly terminated parent without a
 blocking stdin reader.
-Authenticated semantic readiness probes may use up to 30 seconds within the
-unchanged 300-second total startup deadline.
+Ordinary authenticated semantic health probes use up to 30 seconds. During
+supervisor startup, the first cold semantic canary may use the owner's
+270-second warmup budget within the unchanged 300-second total deadline.
 Automatic in-process startup keeps the URL/token in a
 private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
 exports the generated secret to the parent environment. See

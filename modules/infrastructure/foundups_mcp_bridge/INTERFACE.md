@@ -137,8 +137,12 @@ invalidates the handoff, terminates the owner, and kills it after a bounded
 grace period. Startup failures raise HoloQueryServiceSupervisorError with a
 stable secret-free code. An occupied fixed port fails before process spawn,
 and a parent-process watcher exits an auto-owned child when its exact supervisor
-process dies without consuming stdin. Authenticated semantic startup probes have a bounded 30-second
-response window inside the 300-second total startup deadline. This supported
+process dies without consuming stdin. Ordinary authenticated health probes use
+a bounded 30-second response window. Supervisor startup permits the first cold
+semantic canary to use the owner's 270-second warmup budget inside the
+300-second total startup deadline. The readiness loop is isolated in
+`holo_query_owner_startup.py`; process ownership, authenticated validation,
+exact binding, and child handoff remain in the supervisor. This supported
 adapter boundary does not itself
 remove OS filesystem/process privileges from a child; the trusted host must
 configure those permissions separately.

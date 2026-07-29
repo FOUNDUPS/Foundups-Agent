@@ -1,5 +1,10 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - HoloIndex cold owner startup alignment (0.4.32)
+
+- Revalidated the generated backend manifest, exact extension pin, and complete
+  extension contract after the supervisor lifecycle correction.
+
 ## 2026-07-29 - Start operations Holo repair/resume (0.4.31)
 
 - Proved healthy-owner reuse performs no maintenance.

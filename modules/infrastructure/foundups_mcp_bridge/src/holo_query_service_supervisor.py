@@ -22,6 +22,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
+from .holo_query_service import DEFAULT_STARTUP_WARMUP_TIMEOUT_SECONDS
+from .holo_query_owner_startup import OwnerStartupSettings, await_owner_startup
 from .reddog_sealed_holo_runtime import (
     scrub_holo_child_environment,
     sealed_holo_command,
@@ -42,6 +44,9 @@ MAX_HEALTH_RESPONSE_BYTES = 65_536
 TOKEN_ENTROPY_BYTES = 48
 DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS = 300.0
 DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS = 30.0
+DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS = (
+    DEFAULT_STARTUP_WARMUP_TIMEOUT_SECONDS
+)
 DEFAULT_OWNER_PROBE_INTERVAL_SECONDS = 0.5
 PORT_IN_USE_ERROR = "HOLOINDEX_QUERY_SERVICE_PORT_IN_USE"
 BINDING_MISMATCH_ERROR = "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
@@ -482,10 +487,8 @@ class HoloQueryServiceSupervisor:
         )
         self.port = int(port)
         (
-            self.startup_timeout_seconds,
-            self.probe_timeout_seconds,
-            self.probe_interval_seconds,
-            self.shutdown_timeout_seconds,
+            self.startup_timeout_seconds, self.probe_timeout_seconds,
+            self.probe_interval_seconds, self.shutdown_timeout_seconds,
         ) = limits
         requested_python = str(python_executable or sys.executable)
         (
@@ -500,22 +503,17 @@ class HoloQueryServiceSupervisor:
 
     @property
     def service_url(self) -> str:
-        """Return the non-secret loopback endpoint."""
         return f"http://{OWNER_HOST}:{self.port}"
 
     @property
     def is_ready(self) -> bool:
-        """Report whether the verified owner process is still alive."""
         return bool(
-            self._ready
-            and self._process is not None
-            and self._process.poll() is None
-            and self._token
+            self._ready and self._process is not None
+            and self._process.poll() is None and self._token
         )
 
     @property
     def verified_binding(self) -> tuple[str, str, str, str]:
-        """Return the exact binding proven by the successful startup health check."""
         return self._verified_binding
 
     def _spawn(self) -> subprocess.Popen[bytes]:
@@ -571,11 +569,8 @@ class HoloQueryServiceSupervisor:
         expected_generation_id: str = "",
         expected_receipt_digest: str = "",
     ) -> "HoloQueryServiceSupervisor":
-        """Start, authenticate, and prove the owner ready or fail closed."""
         requested_binding = (
-            expected_repo_head_sha,
-            expected_repo_root_digest,
-            expected_generation_id,
+            expected_repo_head_sha, expected_repo_root_digest, expected_generation_id,
             expected_receipt_digest,
         )
         if self.is_ready and all(
@@ -588,40 +583,31 @@ class HoloQueryServiceSupervisor:
             return self
         self.stop()
         self._process = self._spawn()
-        deadline = time.monotonic() + self.startup_timeout_seconds
         try:
-            while True:
-                if self._process.poll() is not None:
-                    raise HoloQueryServiceSupervisorError(
-                        "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
-                    )
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    raise HoloQueryServiceSupervisorError(
-                        "HOLOINDEX_QUERY_SERVICE_STARTUP_TIMEOUT"
-                    )
-                proof = _authenticated_health_exchange(
+            result = await_owner_startup(
+                process=self._process,
+                settings=OwnerStartupSettings.from_binding(
                     host=OWNER_HOST,
                     port=self.port,
                     token=self._token,
-                    timeout_seconds=min(self.probe_timeout_seconds, remaining),
-                    expected_repo_head_sha=expected_repo_head_sha,
-                    expected_repo_root_digest=expected_repo_root_digest,
-                    expected_generation_id=expected_generation_id,
-                    expected_receipt_digest=expected_receipt_digest,
-                )
-                if proof.ready:
-                    if self._process.poll() is not None:
-                        raise HoloQueryServiceSupervisorError(
-                            "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP"
-                        )
-                    self._ready = True
-                    self._verified_binding = proof.binding
-                    self._register_cleanup()
-                    return self
-                if proof.rejection:
-                    raise HoloQueryServiceSupervisorError(proof.rejection)
-                time.sleep(min(self.probe_interval_seconds, remaining))
+                    timeouts=(
+                        self.startup_timeout_seconds,
+                        self.probe_timeout_seconds,
+                        DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS,
+                        self.probe_interval_seconds,
+                    ),
+                    binding=requested_binding,
+                ),
+                health_exchange=_authenticated_health_exchange,
+                clock=time.monotonic,
+                sleeper=time.sleep,
+            )
+            if result.error:
+                raise HoloQueryServiceSupervisorError(result.error)
+            self._ready = True
+            self._verified_binding = result.binding
+            self._register_cleanup()
+            return self
         except BaseException:
             self.stop()
             raise
@@ -677,6 +663,7 @@ __all__ = [
     "BINDING_MISMATCH_ERROR",
     "DEFAULT_OWNER_PORT",
     "DEFAULT_OWNER_PROBE_INTERVAL_SECONDS",
+    "DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS",
     "DEFAULT_OWNER_STARTUP_TIMEOUT_SECONDS",
     "HoloQueryServiceSupervisor",
     "HoloQueryServiceSupervisorError",

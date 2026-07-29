@@ -1,5 +1,13 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-29] Cold semantic owner startup probe alignment
+
+- Added a supervisor regression modeling a 35-second cold semantic canary and
+  proving startup grants it the bounded warmup window instead of repeatedly
+  abandoning it at the ordinary 30-second probe limit.
+- Retained ordinary probe, total startup deadline, exact-binding, process
+  cleanup, and secret-nondisclosure coverage.
+
 ## [2026-07-29] Sealed RedDog Holo process boundary
 
 - Proved required sealed commands select manifest-copied Holo entrypoints and
