@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.33 requires the manifest-authenticated `reddog_operations` Skillz
+before `start operations` can load model bindings or submit a resident intent.
+The intent binds the skill version and content/registry digests; submit and
+resume revalidate the complete receipt against the sealed use-time artifact.
+The runtime prompt receives that exact provider-neutral operating discipline.
+
 Version 0.4.32 aligns the owned-child startup health exchange with the
 existing cold semantic warmup budget. Version 0.4.31 adds one bounded
 HoloIndex recovery step to `start operations`.

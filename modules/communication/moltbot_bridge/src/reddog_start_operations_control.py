@@ -9,8 +9,8 @@ from typing import Any, Callable, Mapping
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     observe_repo_state,
 )
-from modules.communication.moltbot_bridge.src.reddog_resident_architect_client import (
-    RedDogResidentArchitectClient,
+from modules.communication.moltbot_bridge.src.reddog_start_operations_resident_client import (
+    StartOperationsResidentArchitectClient,
 )
 from modules.communication.moltbot_bridge.src.reddog_start_operations_control_binding import (
     CONTROL_SCHEMA,
@@ -48,16 +48,22 @@ ProgressWriter = Callable[[Mapping[str, Any]], None]
 
 def run_start_operations_control(
     *,
-    repo_root: Path | str,
-    request: Mapping[str, Any],
-    environ: Mapping[str, str] | None = None,
-    client_factory: Callable[..., Any] = RedDogResidentArchitectClient,
+    repo_root: Path | str, operations_skill_root: Path | str | None = None,
+    request: Mapping[str, Any], environ: Mapping[str, str] | None = None,
+    operations_skill_reader: Callable[[Path], str] | None = None,
+    client_factory: Callable[..., Any] = StartOperationsResidentArchitectClient,
     grounding_runner: Callable[..., Any] = ground_transport_work_focus,
     holo_repair_runner: Callable[..., Any] = repair_start_operations_holoindex,
     progress_writer: ProgressWriter | None = None,
 ) -> StartOperationsControlResult:
     env = environ if environ is not None else os.environ
     root = Path(repo_root).resolve()
+    skill_root = Path(operations_skill_root or root).resolve()
+    if operations_skill_root is not None and not callable(operations_skill_reader):
+        return reject(
+            "invalid", StartOperationsProfile(), {},
+            ("start_operations_skill_reader_missing",),
+        )
     profile, action, control_request_id = _initial_request_fields(request)
     intent_id = ""
     try:
@@ -74,19 +80,14 @@ def run_start_operations_control(
         scope = authorized_scope(env)
     except StartOperationsRejected as exc:
         return reject(
-            action,
-            profile,
-            repo_state,
-            exc.reasons,
-            intent_id=intent_id,
+            action, profile, repo_state, exc.reasons, intent_id=intent_id,
             control_request_id=control_request_id,
         )
     return _dispatch(
-        root=root,
-        action=action,
-        profile=profile,
-        intent_id=intent_id,
-        control_request_id=control_request_id,
+        root=root, skill_root=skill_root,
+        skill_reader=operations_skill_reader,
+        action=action, profile=profile,
+        intent_id=intent_id, control_request_id=control_request_id,
         scope=scope,
         repo_state=repo_state,
         env=env,
@@ -111,6 +112,8 @@ def _initial_request_fields(
 def _dispatch(
     *,
     root: Path,
+    skill_root: Path,
+    skill_reader: Callable[[Path], str] | None,
     action: str,
     profile: Any,
     intent_id: str,
@@ -126,6 +129,8 @@ def _dispatch(
     if action == "submit":
         return submit(
             root=root,
+            skill_root=skill_root,
+            skill_reader=skill_reader,
             profile=profile,
             scope=scope,
             repo_state=repo_state,
@@ -138,6 +143,8 @@ def _dispatch(
         )
     return control_existing(
         root=root,
+        skill_root=skill_root,
+        skill_reader=skill_reader,
         profile=profile,
         scope=scope,
         repo_state=repo_state,

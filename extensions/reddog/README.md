@@ -1,6 +1,11 @@
 # RedDog
 
-Version: 0.4.32
+Version: 0.4.33
+
+Version 0.4.33 binds the provider-neutral `reddog_operations` Skillz artifact
+to the exact `start operations` intent and runtime prompt. The Skillz defines
+logical roles and WSP operating discipline only; signed model-selection and
+runtime-binding receipts continue to select the actual models.
 
 Version 0.4.32 aligns cold HoloIndex owner startup supervision with the
 existing semantic warmup budget while retaining the ordinary probe limit.
@@ -314,6 +319,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.32.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.33.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

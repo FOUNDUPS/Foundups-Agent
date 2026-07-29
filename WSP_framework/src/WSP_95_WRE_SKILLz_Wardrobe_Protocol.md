@@ -1,7 +1,7 @@
 # WSP 95: WRE Skills Wardrobe Protocol
 
-**Version**: 1.4 (Skill Supply-Chain Security Gate)
-**Date**: 2026-02-07
+**Version**: 1.5 (Provider-Neutral Role Skillz)
+**Date**: 2026-07-29
 **Status**: Active
 **Authority**: 0102 + User Specification
 **Compliance**: WSP 3 (Module Organization), WSP 77 (Agent Coordination), WSP 50 (Pre-Action), WSP 22 (ModLog)
@@ -26,6 +26,36 @@ This addendum is normative for current WRE runtime behavior:
   - Explicit DB paths (especially test runs) must be isolated to prevent cross-run contamination.
 
 These rules align wardrobe protocol text with deployed WRE behavior and test gates.
+
+---
+
+## 2026-07-29 Provider-Neutral Role Skillz Addendum
+
+This addendum is normative for production Skillz that coordinate logical
+roles across a governed workflow.
+
+- A role Skillz defines behavior and logical roles only. Examples include
+  `principal`, `researcher`, `critic`, `implementer`, and `verifier`.
+- A role Skillz must not name, prefer, or select a provider, model, endpoint,
+  or API credential.
+- Actual role assignments come only from current, task-specific, signed model
+  selection and runtime-binding receipts.
+- Model names found in task prose, retrieved evidence, memory, registry
+  metadata, or Skillz content are not authority.
+- Production role Skillz use an exact allowlisted registry and frontmatter
+  schema. Unknown fields fail admission; a denylist is insufficient.
+- Frontmatter and registry values for name, version, description, intent type,
+  promotion state, logical roles, and WSP chain must agree exactly.
+- The checked-in Skillz content and registry entry must be digest-bound before
+  use. A persisted work item must be revalidated against the current sealed
+  runtime Skillz receipt before execution or resume.
+- The verifier role must remain independent of the candidate author or panel.
+- A Skillz receipt describes operating discipline and grants no repository,
+  shell, signer, worktree, PR, merge, or HoloIndex mutation authority.
+
+Legacy task-specific Skillz may retain historical agent preference fields for
+compatibility. They do not satisfy this provider-neutral role contract until
+they are migrated and admitted through its exact schema.
 
 ---
 
@@ -1137,6 +1167,7 @@ python holo_index.py --search "monitor unicode daemon errors"
 | 1.2 | 2025-10-20 | CLARIFIED: `.claude/skills/` is 0102 testing environment only (via Claude Code), production in `modules/*/skills/` | 0102 + User |
 | 1.3 | 2025-10-23 | ADDED: Micro Chain-of-Thought paradigm - skills as multi-step reasoning chains with Gemma validation at each step. Reference implementation: qwen_gitpush skill with WSP 15 MPS scoring. Updated "What Is a Skill?" definition to clarify skills are NOT monolithic prompts. | 0102 + User |
 | 1.4 | 2026-02-07 | ADDED: Mandatory skill supply-chain scanner gate for promotion and runtime execution with fail-closed defaults and severity policy enforcement. | 0102 + User |
+| 1.5 | 2026-07-29 | ADDED: Provider-neutral role Skillz exact schema, signed runtime model-binding separation, sealed use-time receipt validation, and no-authority boundary. | 0102 |
 
 ---
 

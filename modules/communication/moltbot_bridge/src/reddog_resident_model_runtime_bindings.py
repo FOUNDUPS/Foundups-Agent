@@ -6,14 +6,14 @@ import os
 from pathlib import Path
 from typing import Any, Mapping
 
-from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
-    ModelRuntimeBindingDecision,
-)
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_runtime_binding_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
+)
+from modules.communication.moltbot_bridge.src.reddog_model_runtime_binding_query import (
+    runtime_binding_rejections,
 )
 
 
@@ -49,10 +49,12 @@ def load_resident_model_runtime_bindings(
         architect_receipt = rehydrate_model_runtime_binding_receipt(architect)
     except Exception:
         return None, None, "model_runtime_binding_artifact_invalid"
-    if not _valid_binding(audit_receipt, AUDIT_SURFACE):
-        return None, None, "audit_model_runtime_binding_surface_invalid"
-    if not _valid_binding(architect_receipt, ARCHITECT_SURFACE):
-        return None, None, "architect_model_runtime_binding_surface_invalid"
+    reason = _binding_reason(audit_receipt, AUDIT_SURFACE, "audit")
+    if reason:
+        return None, None, reason
+    reason = _binding_reason(architect_receipt, ARCHITECT_SURFACE, "architect")
+    if reason:
+        return None, None, reason
     if audit_receipt.receipt_id != expected_ids[0]:
         return None, None, "audit_model_runtime_binding_receipt_id_mismatch"
     if architect_receipt.receipt_id != expected_ids[1]:
@@ -112,13 +114,13 @@ def _binding_paths(
     return (runtime, audit_path, architect_path), ""
 
 
-def _valid_binding(receipt: Any, surface: str) -> bool:
-    return bool(
-        receipt.decision == ModelRuntimeBindingDecision.BOUND
-        and receipt.principal_model
-        and receipt.runtime_surface == surface
-        and not receipt.rejection_reasons
-    )
+def _binding_reason(receipt: Any, surface: str, role: str) -> str:
+    reasons = runtime_binding_rejections(receipt, expected_surface=surface)
+    if not reasons:
+        return ""
+    if "model_runtime_binding_surface_invalid" in reasons:
+        return f"{role}_model_runtime_binding_surface_invalid"
+    return f"{role}_model_runtime_binding_evidence_invalid"
 
 
 def _inside(child: Path, parent: Path) -> bool:

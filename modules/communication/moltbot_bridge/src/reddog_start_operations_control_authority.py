@@ -82,13 +82,17 @@ def runtime_defaults(
     max_claims: int,
     timeout_seconds: int,
     profile: StartOperationsProfile,
+    *,
+    prompt_text: str | None = None,
+    operations_skill_receipt: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any]:
     return {
         "work_state_path": str(env.get("REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or ""),
         "holoindex_receipt_path": str(env.get("HOLOINDEX_FRESHNESS_RECEIPT") or ""),
         "holoindex_ssd_path": str(env.get("HOLOINDEX_SSD_PATH") or ""),
         "requested_operation": "start_operations_readonly_audit",
-        "prompt_text": profile.work_focus,
+        "prompt_text": prompt_text or profile.work_focus,
+        "operations_skill_receipt": dict(operations_skill_receipt or {}),
         "audit_lanes": profile.audit_lanes,
         "audit_model_runtime_binding_receipt": audit,
         "architect_model_runtime_binding_receipt": architect,

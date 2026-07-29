@@ -137,6 +137,8 @@ function assertStartupHooksExcluded() {
   fs.mkdirSync(dependencyPackage);
   fs.writeFileSync(path.join(sourcePackage, '__init__.py'), '');
   fs.writeFileSync(path.join(sourcePackage, 'probe.py'), 'VALUE="source"\n');
+  const policy = path.join(source, 'policy.txt');
+  fs.writeFileSync(policy, 'manifest-policy\n');
   fs.writeFileSync(path.join(dependencyPackage, '__init__.py'), attacker + '\n');
   fs.writeFileSync(path.join(dependencyPackage, 'probe.py'), attacker + '\n');
   fs.writeFileSync(path.join(target, 'json.py'), attacker + '\n');
@@ -146,9 +148,13 @@ function assertStartupHooksExcluded() {
     script,
     'import json,dep_probe,os\nfrom modules import probe\n'
       + 'print("sealed:"+dep_probe.VALUE+":"+probe.VALUE+":"'
-      + '+os.environ["REDDOG_SEALED_RUNTIME_TARGET_REPO_ROOT"])\n'
+      + '+os.environ["REDDOG_SEALED_RUNTIME_TARGET_REPO_ROOT"]+":"'
+      + '+REDDOG_VERIFIED_RUNTIME_READ_TEXT('
+      + '__file__.replace("probe.py","policy.txt")).strip())\n'
   );
-  const relativeFiles = ['probe.py', 'modules/__init__.py', 'modules/probe.py'];
+  const relativeFiles = [
+    'probe.py', 'policy.txt', 'modules/__init__.py', 'modules/probe.py'
+  ];
   const runtimeDigests = {};
   for (const relative of relativeFiles) {
     const raw = fs.readFileSync(path.join(source, relative));
@@ -165,8 +171,16 @@ function assertStartupHooksExcluded() {
   ];
   assert.strictEqual(cp.execFileSync(
     runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
-  ).trim(), `sealed:dependency:source:${target}`);
+  ).trim(), `sealed:dependency:source:${target}:manifest-policy`);
   assert.strictEqual(fs.existsSync(sentinel), false);
+  fs.writeFileSync(policy, 'attacker-policy\n');
+  assert.throws(
+    () => cp.execFileSync(runtime.interpreter, args, {
+      cwd: root, encoding: 'utf8'
+    }),
+    /runtime_source_digest_mismatch/
+  );
+  fs.writeFileSync(policy, 'manifest-policy\n');
   fs.rmSync(path.join(sourcePackage, '__init__.py'));
   assert.throws(
     () => cp.execFileSync(runtime.interpreter, args, {

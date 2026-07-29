@@ -25,13 +25,13 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repai
 
 def submit(
     *,
-    root: Path,
+    root: Path, skill_root: Path,
+    skill_reader: Callable[[Path], str] | None,
     profile: Any,
     scope: tuple[str, tuple[str, ...], str],
     repo_state: Mapping[str, Any],
     env: Mapping[str, str],
-    client_factory: Callable[..., Any],
-    grounding_runner: Callable[..., Any],
+    client_factory: Callable[..., Any], grounding_runner: Callable[..., Any],
     holo_repair_runner: Callable[..., Any],
     progress_writer: Callable[[Mapping[str, Any]], None] | None,
     control_request_id: str,
@@ -46,6 +46,8 @@ def submit(
         )
     prepared, repair, rejection = _prepare_with_holo_repair(
         root=root,
+        skill_root=skill_root,
+        skill_reader=skill_reader,
         profile=profile,
         scope=scope,
         repo_state=repo_state,
@@ -76,6 +78,8 @@ def submit(
 def _prepare_with_holo_repair(
     *,
     root: Path,
+    skill_root: Path,
+    skill_reader: Callable[[Path], str] | None,
     profile: Any,
     scope: tuple[str, tuple[str, ...], str],
     repo_state: Mapping[str, Any],
@@ -89,6 +93,8 @@ def _prepare_with_holo_repair(
             prepare_submission(
                 repo_root=root, profile=profile, scope=scope,
                 repo_state=repo_state, env=env,
+                operations_skill_root=skill_root,
+                operations_skill_reader=skill_reader,
                 grounding_runner=grounding_runner,
             ),
             None,
@@ -109,6 +115,8 @@ def _prepare_with_holo_repair(
         prepared = prepare_submission(
             repo_root=root, profile=profile, scope=scope,
             repo_state=repo_state, env=env,
+            operations_skill_root=skill_root,
+            operations_skill_reader=skill_reader,
             grounding_runner=grounding_runner,
         )
     except StartOperationsRejected as exc:
@@ -119,6 +127,8 @@ def _prepare_with_holo_repair(
 def control_existing(
     *,
     root: Path,
+    skill_root: Path,
+    skill_reader: Callable[[Path], str] | None,
     profile: Any,
     scope: tuple[str, tuple[str, ...], str],
     repo_state: Mapping[str, Any],
@@ -130,7 +140,9 @@ def control_existing(
 ) -> StartOperationsControlResult:
     try:
         defaults = (
-            runtime_defaults_for_resume(root, profile, env)
+            runtime_defaults_for_resume(
+                root, skill_root, skill_reader, profile, env
+            )
             if action == "resume"
             else {}
         )

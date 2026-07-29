@@ -13,6 +13,7 @@ if "REDDOG_TARGET_REPO_ROOT" not in globals() and str(SOURCE_ROOT) not in sys.pa
 TARGET_REPO_ROOT = Path(
     globals().get("REDDOG_TARGET_REPO_ROOT", SOURCE_ROOT)
 ).resolve()
+VERIFIED_RUNTIME_READ_TEXT = globals().get("REDDOG_VERIFIED_RUNTIME_READ_TEXT")
 
 from modules.communication.moltbot_bridge.src.reddog_start_operations_control import (  # noqa: E402
     result_json,
@@ -49,6 +50,8 @@ def main() -> int:
         payload = _read_payload()
         result = run_start_operations_control(
             repo_root=TARGET_REPO_ROOT,
+            operations_skill_root=SOURCE_ROOT,
+            operations_skill_reader=VERIFIED_RUNTIME_READ_TEXT,
             request=payload,
             progress_writer=_write,
         )

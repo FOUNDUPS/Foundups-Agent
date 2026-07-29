@@ -2,6 +2,21 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-29 - Provider-neutral RedDog Operations Skillz (0.4.33)
+
+- Bound the manifest-authenticated `reddog_operations` Skillz receipt and
+  content to `start operations` before model binding, grounding, or resident
+  submission; submit/resume revalidate the persisted receipt at use time.
+- Kept actual provider/model assignment exclusively in signed model-selection
+  and runtime-binding receipts.
+- Reused the canonical production binding validator for both resident roles;
+  host-pinned artifacts with empty signed evidence lineage or invalid role,
+  policy, and authority bindings now fail closed before Start Operations.
+- Clarified Brain, Breadcrumb, and Memex evidence classes: only authenticated
+  snapshot/assignment-bound inputs are consumed, and absence is reported rather
+  than inferred.
+- Regenerated the backend compatibility manifest. Version 0.4.32 -> 0.4.33.
+
 ## 2026-07-29 - HoloIndex cold owner startup alignment (0.4.32)
 
 - Aligned the manifest-sealed query-owner supervisor with the existing bounded

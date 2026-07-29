@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-03-07T12:00:00+00:00",
-  "total_skills": 28,
+  "last_updated": "2026-07-29T00:00:00+00:00",
+  "total_skills": 29,
   "skills": {
     "suno_stt_lyrics_extract": {
       "location": "modules/platform_integration/antifafm_broadcaster/skillz/suno_stt_extract.json",
@@ -403,6 +403,29 @@
       ],
       "invocation": "/audit-data",
       "description": "WSP 78 compliance auditing of FoundUps data architecture"
+    },
+    "reddog_operations": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_operations",
+      "logical_roles": [
+        "principal",
+        "researcher",
+        "critic",
+        "implementer",
+        "verifier"
+      ],
+      "intent_type": "DECISION",
+      "version": "1.0.0",
+      "promotion_state": "production",
+      "domain": "operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 50",
+        "WSP 77",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Provider-neutral operating discipline for bounded RedDog repository work."
     },
     "qwen_bulk_import_migration": {
       "location": "modules/infrastructure/wre_core/skillz/qwen_bulk_import_migration",

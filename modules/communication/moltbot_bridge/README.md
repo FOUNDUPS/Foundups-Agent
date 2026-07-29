@@ -1,5 +1,15 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+`start operations` binds the production `reddog_operations` Skillz from the
+manifest-authenticated runtime before model selection or grounding. The
+Skillz defines only logical roles and WSP_00/WSP_97/WSP_15 operating
+discipline; actual models are selected by the existing signed audit and
+architect runtime-binding receipts. Its content and registry-entry digests
+are carried on the durable intent and revalidated at submit/resume use time.
+A missing, retired, model-pinned, role-drifted, or otherwise unhealthy Skillz
+fails closed before a model or resident client is invoked. The read-only
+Start Operations authority boundary is unchanged.
+
 Governed read-only audit and backend-architect FoundUps Fusion calls now use
 `reddog_provider_call_evidence.v1`. The content-free receipt binds task/work
 lineage, the validated runtime-model binding, requested identity, a

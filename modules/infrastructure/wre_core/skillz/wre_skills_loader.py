@@ -8,7 +8,7 @@ WSP Compliance: WSP 77 (Agent Coordination), WSP 50 (Pre-Action Verification)
 import json
 import yaml
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Mapping, Optional, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import logging
@@ -30,6 +30,7 @@ class SkillMetadata:
     category: str = "workflow"  # workflow | capability-uplift
     retirement_date: str = ""  # ISO date string or empty
     has_evals: bool = False  # True if evals field is present and non-empty
+    logical_roles: tuple[str, ...] = ()
 
 
 @dataclass
@@ -115,6 +116,7 @@ class WRESkillsLoader:
         agent_type: Optional[str] = None,
         promotion_state: Optional[str] = None,
         domain: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[str]:
         """
         Return registered skill names with optional lightweight filtering.
@@ -148,6 +150,9 @@ class WRESkillsLoader:
             if domain and skill_info.get("domain") != domain:
                 continue
 
+            if logical_role and logical_role not in self._logical_roles(skill_info):
+                continue
+
             names.append(skill_name)
 
         return sorted(names)
@@ -161,7 +166,8 @@ class WRESkillsLoader:
         self,
         agent_type: Optional[str] = None,
         intent_type: Optional[str] = None,
-        promotion_state: Optional[str] = None
+        promotion_state: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[SkillMetadata]:
         """
         Discover available skills (progressive disclosure - metadata only)
@@ -178,9 +184,18 @@ class WRESkillsLoader:
 
         for skill_name, skill_info in self.registry["skills"].items():
             # Apply filters
-            if agent_type and skill_info.get("primary_agent") != agent_type:
-                if skill_info.get("fallback_agent") != agent_type:
+            if agent_type:
+                agents = skill_info.get("agents") or ()
+                if (
+                    agent_type not in agents
+                    and skill_info.get("primary_agent") != agent_type
+                    and skill_info.get("fallback_agent") != agent_type
+                ):
                     continue
+
+            logical_roles = self._logical_roles(skill_info)
+            if logical_role and logical_role not in logical_roles:
+                continue
 
             if intent_type and intent_type not in skill_info.get("intent_type", ""):
                 continue
@@ -210,6 +225,7 @@ class WRESkillsLoader:
                     category=category,  # Keep empty for hygiene filter to detect
                     retirement_date=str(retirement_date) if retirement_date and retirement_date != "null" else "",
                     has_evals=has_evals,
+                    logical_roles=logical_roles,
                 ))
             except Exception as e:
                 logger.error(
@@ -225,7 +241,8 @@ class WRESkillsLoader:
         self,
         agent_type: Optional[str] = None,
         intent_type: Optional[str] = None,
-        promotion_state: Optional[str] = None
+        promotion_state: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[SkillMetadata]:
         """
         Discover available skills filtered by hygiene status.
@@ -242,7 +259,9 @@ class WRESkillsLoader:
         Returns:
             List of healthy skill metadata (NOT full content)
         """
-        all_skills = self.discover_skills(agent_type, intent_type, promotion_state)
+        all_skills = self.discover_skills(
+            agent_type, intent_type, promotion_state, logical_role
+        )
         healthy_skills = []
 
         for skill in all_skills:
@@ -330,6 +349,14 @@ class WRESkillsLoader:
         logger.info(f"[WRE-LOADER] Loaded skill: {skill_name} for {agent_type} ({len(filtered_content)} chars)")
         return filtered_content
 
+    @staticmethod
+    def _logical_roles(value: Mapping[str, Any]) -> tuple[str, ...]:
+        raw = value.get("logical_roles") or ()
+        if isinstance(raw, (str, bytes)) or not isinstance(raw, Sequence):
+            return ()
+        roles = tuple(str(role).strip() for role in raw)
+        return roles if all(roles) and len(set(roles)) == len(roles) else ()
+
     def resolve_skill_file(self, skill_name: str) -> Path:
         """
         Resolve canonical skill file path (SKILLz.md preferred, SKILL.md fallback).
@@ -351,6 +378,10 @@ class WRESkillsLoader:
             f"Skill file not found for {skill_name}: "
             + ", ".join(str(candidate) for candidate in candidates[:6])
         )
+
+    def get_skill_metadata(self, skill_name: str) -> Dict[str, Any]:
+        """Return parsed frontmatter for one registered checkout-local Skillz."""
+        return self._extract_metadata(self.resolve_skill_file(skill_name))
 
     def _candidate_skill_files(
         self,
@@ -546,6 +577,7 @@ class WRESkillsLoader:
         agent_type: Optional[str] = None,
         promotion_state: Optional[str] = None,
         domain: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[str]:
         """
         Return registered skill names filtered by hygiene status.
@@ -562,7 +594,9 @@ class WRESkillsLoader:
         Returns:
             List of healthy skill names
         """
-        all_skills = self.list_skills(agent_type, promotion_state, domain)
+        all_skills = self.list_skills(
+            agent_type, promotion_state, domain, logical_role
+        )
         healthy = []
 
         for skill_name in all_skills:
