@@ -10,6 +10,8 @@
 - Preserved the named subject as the grounding obligation, so requests such as
   `continue do the work needed to fix enhance holoindex` can use retrieved
   HoloIndex evidence instead of demanding that evidence repeat command filler.
+- Required evidence to cover every substantive target token; connective words
+  can no longer substitute for a missing coordinated subject.
 - Kept ambiguous pronoun-only follow-ups fail-closed; sanitized continuation
   remains advisory and cannot supply missing target authority.
 

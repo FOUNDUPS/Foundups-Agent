@@ -1611,11 +1611,7 @@ function semanticHitSupportsTarget(hit, targetTokens, normalizedQuery) {
     };
   }
   const matched = targetTokens.filter((token) => normalizedText.includes(token));
-  const required = semanticGroundingPolicy.isCoordinatedSemanticQuery(normalizedQuery)
-    ? targetTokens.length
-    : targetTokens.length <= 2
-    ? targetTokens.length
-    : Math.max(2, Math.ceil(targetTokens.length * 0.6));
+  const required = targetTokens.length;
   const hasAnchor = matched.some((token) => token.length >= 6) || targetTokens.every((token) => token.length < 6);
   if (targetTokens.length && matched.length >= required && hasAnchor) {
     return {

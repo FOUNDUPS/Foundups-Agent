@@ -13,7 +13,7 @@ const BROAD_AUDIT_QUERY_TERMS = [
   'workflow'
 ];
 const SEMANTIC_GROUNDING_STOPWORDS = new Set([
-  'about', 'after', 'against', 'agent', 'all', 'analyze', 'analyse', 'and', 'assess', 'audit',
+  'about', 'after', 'against', 'agent', 'all', 'along', 'also', 'analyze', 'analyse', 'and', 'as', 'assess', 'audit',
   'based', 'before', 'bug', 'build', 'code', 'compare', 'complete', 'concept', 'create',
   'continue', 'current', 'debug', 'design', 'determine', 'does', 'enhance', 'evaluate',
   'everything', 'fix',
@@ -21,8 +21,8 @@ const SEMANTIC_GROUNDING_STOPWORDS = new Set([
   'implementation', 'improve', 'inspect', 'into', 'investigate', 'issue', 'it', 'make',
   'mapping', 'module', 'need', 'needed', 'needs', 'output', 'paper', 'pipeline', 'plan', 'please', 'plus',
   'problem', 'question', 'read', 'refactor', 'repo', 'research', 'review', 'selection',
-  'should', 'something', 'system', 'that', 'the', 'them', 'this', 'through', 'to',
-  'topic', 'update', 'using', 'verify', 'whether', 'with', 'work', 'workflow', 'wsp'
+  'should', 'something', 'system', 'that', 'the', 'them', 'then', 'this', 'through', 'to',
+  'together', 'topic', 'update', 'using', 'verify', 'well', 'whether', 'with', 'work', 'workflow', 'wsp'
 ]);
 const EXPLICIT_SEMANTIC_STOPWORDS = new Set(['and', 'for', 'plus', 'the', 'with']);
 
@@ -48,7 +48,10 @@ function tokenizeExplicitSemanticQuery(value) {
 }
 
 function stripInlineQuotedText(value) {
-  return String(value || '').replace(/"[^"\r\n]*"|'[^'\r\n]*'|`[^`\r\n]*`/g, ' ');
+  return String(value || '').replace(
+    /"[^"\r\n]*"|'[^'\r\n]*'|`[^`\r\n]*`|\u201c[^\u201d\r\n]*\u201d|\u2018[^\u2019\r\n]*\u2019/g,
+    ' '
+  );
 }
 
 function hasSemanticWorkAction(value) {
@@ -76,10 +79,6 @@ function explicitSemanticTargets(value) {
     if (body !== null) targets.push(...splitSemanticParts(body));
   }
   return targets;
-}
-
-function isCoordinatedSemanticQuery(value) {
-  return /(?:\band\b|\bplus\b|\+)/i.test(String(value || ''));
 }
 
 function semanticEvidenceText(hit) {
@@ -164,7 +163,6 @@ module.exports = {
   explicitSemanticTargets,
   hasSemanticWorkAction,
   hasSubstantiveSemanticSubject,
-  isCoordinatedSemanticQuery,
   normalizeSemanticQuery,
   semanticHeaderBody,
   semanticEvidenceCategory,

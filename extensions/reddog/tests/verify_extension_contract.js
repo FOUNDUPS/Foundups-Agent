@@ -4497,6 +4497,25 @@ const coordinatedPass = orchestrator.buildTypedGroundingPreflight(coordinatedImp
 });
 assert.strictEqual(coordinatedPass.passed, true,
   'TGP-008C: evidence naming every coordinated subject can ground the request');
+for (const connector of ['then', 'along with', 'as well as']) {
+  const alternateCoordinated = 'fix HoloIndex ' + connector + ' OpenClaw';
+  const alternatePartial = orchestrator.buildTypedGroundingPreflight(alternateCoordinated, 'wsp_holo', {
+    semantic_evidence_hits: [{
+      location: 'holo_index/core/search_engine.py:1',
+      title: 'HoloIndex ' + connector + ' semantic search'
+    }]
+  });
+  assert.strictEqual(alternatePartial.passed, false,
+    'TGP-008C: connector cannot substitute for missing OpenClaw evidence: ' + connector);
+  const alternatePass = orchestrator.buildTypedGroundingPreflight(alternateCoordinated, 'wsp_holo', {
+    semantic_evidence_hits: [{
+      location: 'docs/reddog_holo_openclaw.md',
+      title: 'HoloIndex OpenClaw integration'
+    }]
+  });
+  assert.strictEqual(alternatePass.passed, true,
+    'TGP-008C: every subject remains groundable across connector syntax: ' + connector);
+}
 for (const explicitWord of ['Enhance', 'Continue']) {
   const explicitPrompt = 'Semantic target: ' + explicitWord;
   const explicitPreflight = orchestrator.buildTypedGroundingPreflight(explicitPrompt, 'wsp_holo', {
@@ -4515,6 +4534,13 @@ assert.strictEqual(quotedEnhance.grounding_target_universe_required, false,
   'TGP-008E: a quoted action-word mention does not activate semantic work');
 assert.deepStrictEqual(quotedEnhance.typed_targets.semantic_targets, [],
   'TGP-008E: a quoted action-word mention does not invent a semantic target');
+const smartQuotedEnhance = orchestrator.buildTypedGroundingPreflight(
+  'What does the word \u201cenhance\u201d mean?', 'wsp_holo', {}
+);
+assert.strictEqual(smartQuotedEnhance.grounding_target_universe_required, false,
+  'TGP-008E: a smart-quoted action-word mention does not activate semantic work');
+assert.deepStrictEqual(smartQuotedEnhance.typed_targets.semantic_targets, [],
+  'TGP-008E: a smart-quoted action-word mention does not invent a semantic target');
 const ambiguousImperative = orchestrator.buildTypedGroundingPreflight(
   'continue do the work needed to fix enhance it', 'wsp_holo', {
     semantic_evidence_hits: [{

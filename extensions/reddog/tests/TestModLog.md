@@ -7,6 +7,8 @@
 - Added unrelated-evidence, coordinated-subject, explicit-target,
   quoted-action, and subjectless-pronoun regressions so normalization cannot
   weaken the fail-closed grounding boundary.
+- Proved alternate connectors and smart-quoted action mentions cannot produce
+  partial or accidental grounding.
 
 ## 2026-07-29 - HoloIndex health timeout calibration (0.4.36)
 
