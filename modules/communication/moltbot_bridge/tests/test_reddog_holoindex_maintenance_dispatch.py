@@ -311,6 +311,37 @@ def test_start_operations_repair_requires_one_shot_capability(
     assert forged["ok"] is False
 
 
+def test_forged_capability_does_not_consume_legitimate_admission(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    context = repair_contract.holo_repair_task_context(
+        repo_root=tmp_path,
+        repo_head_sha="a" * 40,
+        control_request_id="sha256:" + ("b" * 64),
+    )
+    task_id = repair_contract.holo_repair_task_id(context)
+    monkeypatch.setattr(
+        repair_contract,
+        "read_repository_state",
+        lambda _root: SimpleNamespace(proven_clean=True, head_sha="a" * 40),
+    )
+    db = _AssignedDB(task_id=task_id, context=context)
+    capability = REPAIR_REGISTRY.issue(task_id=task_id, context=context)
+
+    forged = dispatch_start_operations_holo_repair(
+        repo_root=tmp_path, db=db, task_id=task_id, context=context,
+        execution_claim=object(), maintenance_runner=_maintenance_ready,
+    )
+    accepted = dispatch_start_operations_holo_repair(
+        repo_root=tmp_path, db=db, task_id=task_id, context=context,
+        execution_claim=capability, maintenance_runner=_maintenance_ready,
+    )
+
+    assert forged["ok"] is False
+    assert accepted["ok"] is True
+
+
 def test_start_operations_repair_rejects_wrong_assignee_before_maintenance(
     tmp_path: Path,
     monkeypatch,

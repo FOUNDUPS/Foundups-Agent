@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from holo_index.freshness_receipt import read_git_head_sha
+from holo_index.core.introspection_engine import check_module_exists
 from holo_index.repository_state import (
     REPOSITORY_DIRTY_CODE,
     REPOSITORY_STATE_UNAVAILABLE_CODE,
@@ -127,3 +129,27 @@ def test_runtime_repository_root_rejects_missing_sealed_target(
             tmp_path,
             environ={"REDDOG_SEALED_RUNTIME_REQUIRED": "1"},
         )
+
+
+def test_module_introspection_reads_authorized_project_root(tmp_path: Path) -> None:
+    module = tmp_path / "modules" / "infrastructure" / "authorized_only"
+    module.mkdir(parents=True)
+    result = check_module_exists(
+        SimpleNamespace(project_root=tmp_path, need_to={}),
+        "authorized_only",
+    )
+
+    assert result["exists"] is True
+    assert Path(result["path"]) == module.resolve()
+
+
+def test_sealed_target_root_is_not_added_to_python_import_path() -> None:
+    source = (
+        Path(__file__).resolve().parents[1] / "_cli_main.py"
+    ).read_text(encoding="utf-8")
+    start = source.index(
+        "project_root = runtime_repository_root(Path(__file__).parent.parent)"
+    )
+    end = source.index("# Temporarily use regular print", start)
+
+    assert "sys.path.insert" not in source[start:end]

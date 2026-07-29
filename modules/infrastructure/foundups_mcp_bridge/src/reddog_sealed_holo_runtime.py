@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import re
 from pathlib import Path
@@ -110,12 +112,36 @@ def _runtime_values(
         or manifest.parent != source
         or bootstrap != expected_bootstrap
         or not bootstrap.is_file()
+        or not _bootstrap_authenticated(source, manifest, bootstrap, digest)
         or not entry.is_file()
         or not site_packages.is_dir()
         or _SHA256_RE.fullmatch(digest) is None
     ):
         return None
     return source, manifest, bootstrap, site_packages, entry, digest
+
+
+def _bootstrap_authenticated(
+    source: Path,
+    manifest: Path,
+    bootstrap: Path,
+    expected_manifest_digest: str,
+) -> bool:
+    try:
+        value = json.loads(manifest.read_text(encoding="utf-8"))
+        canonical = json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+        ).encode("utf-8")
+        if hashlib.sha256(canonical).hexdigest() != expected_manifest_digest:
+            return False
+        relative = bootstrap.relative_to(source).as_posix()
+        expected = value["required_runtime_sha256"][relative]
+        observed = hashlib.sha256(
+            bootstrap.read_bytes().replace(b"\r\n", b"\n")
+        ).hexdigest()
+        return observed == expected
+    except (KeyError, OSError, TypeError, ValueError):
+        return False
 
 
 __all__ = [

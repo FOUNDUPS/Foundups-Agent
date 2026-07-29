@@ -54,14 +54,18 @@ class InMemoryStartOperationsHoloRepairRegistry:
         capability: Any,
     ) -> bool:
         identifier = str(task_id or "").strip()
+        context_digest = _digest(context)
         with self._lock:
-            expected = self._capabilities.pop(identifier, None)
-        return bool(
-            expected is not None
-            and capability is expected
-            and expected._seal is self._seal
-            and expected.context_digest == _digest(context)
-        )
+            expected = self._capabilities.get(identifier)
+            accepted = bool(
+                expected is not None
+                and capability is expected
+                and expected._seal is self._seal
+                and expected.context_digest == context_digest
+            )
+            if accepted:
+                self._capabilities.pop(identifier, None)
+            return accepted
 
 
 REGISTRY = InMemoryStartOperationsHoloRepairRegistry()

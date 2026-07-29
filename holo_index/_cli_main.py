@@ -104,8 +104,6 @@ except ImportError:
 import sys
 from pathlib import Path
 project_root = runtime_repository_root(Path(__file__).parent.parent)
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
 
 # Temporarily use regular print - safe_print causing scoping issues
 # TODO: Fix safe_print scoping issue

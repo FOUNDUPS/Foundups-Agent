@@ -5,7 +5,7 @@
 - Proved required sealed commands select manifest-copied Holo entrypoints and
   never the live checkout scripts while repository reads resolve to the
   authorized target checkout rather than the sealed source copy.
-- Proved substituted bootstrap/runtime paths fail closed and provider,
+- Proved substituted or tampered bootstrap/runtime paths fail closed and provider,
   repository-authority, and Python import-override values do not enter Holo
   subprocess environments.
 - Revalidated maintenance and owner-supervisor lifecycle behavior.

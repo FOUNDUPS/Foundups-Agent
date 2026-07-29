@@ -127,7 +127,7 @@ function validReadyOwner(value) {
 }
 
 function validRepairedOwner(value) {
-  return value.no_maintenance_performed === false
+  return typeof value.no_maintenance_performed === 'boolean'
     && String(value.holo_repair_task_id || '')
       .startsWith('reddog_start_operations_holo_repair:')
     && value.grounding_retried_after_repair === true

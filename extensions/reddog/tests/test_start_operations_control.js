@@ -278,6 +278,16 @@ async function main() {
     grounding_retried_after_repair: true
   });
   assert(protocol.validateResult(repaired, request));
+  const noRefreshRepaired = signedResult(request, {
+    no_maintenance_performed: true,
+    holo_repair_attempted: true,
+    holo_repair_task_id: 'reddog_start_operations_holo_repair:abc',
+    holo_repair_status: 'REPAIRED',
+    holo_repair_generation_id: 'sha256:' + 'e'.repeat(64),
+    holo_repair_freshness_receipt_digest: 'sha256:' + 'f'.repeat(64),
+    grounding_retried_after_repair: true
+  });
+  assert(protocol.validateResult(noRefreshRepaired, request));
   assert.strictEqual(protocol.validateResult(signedResult(request, {
     no_maintenance_performed: false,
     holo_repair_attempted: true,

@@ -8,7 +8,7 @@
   remain bound to the separately validated exact-HEAD target checkout.
 - Child environments remove provider credentials, RedDog authority values, and
   Python import overrides. Legacy non-RedDog callers retain their prior command
-  path; an invalid required sealed runtime fails before process creation.
+  path; an invalid runtime or bootstrap digest fails before process creation.
 
 ## 2026-07-29 - Windows virtualenv owner launch correction
 

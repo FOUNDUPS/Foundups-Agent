@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -43,15 +45,26 @@ def _sealed_fixture(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
     owner_entry = source / "scripts" / "reddog_holoindex_owner_service_once.py"
     manifest = source / ".reddog-runtime-manifest.json"
     site = tmp_path / "site-packages"
-    for path in (trusted, bootstrap, entry, owner_entry, manifest):
+    for path in (trusted, bootstrap, entry, owner_entry):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("pass\n", encoding="utf-8")
+    runtime_files = {}
+    for path in (trusted, bootstrap, entry, owner_entry):
+        relative = path.relative_to(source).as_posix()
+        runtime_files[relative] = hashlib.sha256(
+            path.read_bytes().replace(b"\r\n", b"\n")
+        ).hexdigest()
+    value = {"required_runtime_sha256": runtime_files}
+    manifest.write_text(json.dumps(value), encoding="utf-8")
+    canonical = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("utf-8")
     site.mkdir()
     env = {
         SEALED_REQUIRED_ENV: "1",
         SEALED_ROOT_ENV: str(source),
         SEALED_MANIFEST_ENV: str(manifest),
-        SEALED_MANIFEST_DIGEST_ENV: "a" * 64,
+        SEALED_MANIFEST_DIGEST_ENV: hashlib.sha256(canonical).hexdigest(),
         SEALED_BOOTSTRAP_ENV: str(bootstrap),
         SEALED_SITE_PACKAGES_ENV: str(site),
     }
@@ -80,6 +93,22 @@ def test_sealed_command_uses_manifest_runtime_not_live_checkout(
 def test_sealed_command_rejects_live_or_substituted_paths(tmp_path: Path) -> None:
     trusted, _source, env = _sealed_fixture(tmp_path)
     env[SEALED_BOOTSTRAP_ENV] = str(tmp_path / "attacker.py")
+
+    assert sealed_holo_command(
+        environ=env,
+        trusted_module_path=trusted,
+        target_repo_root=tmp_path / "repo",
+        entry_relative_path="holo_index.py",
+        script_args=(),
+        python_executable="python",
+    ) == ()
+
+
+def test_sealed_command_rejects_tampered_bootstrap_before_spawn(
+    tmp_path: Path,
+) -> None:
+    trusted, _source, env = _sealed_fixture(tmp_path)
+    Path(env[SEALED_BOOTSTRAP_ENV]).write_text("attacker()\n", encoding="utf-8")
 
     assert sealed_holo_command(
         environ=env,

@@ -10,7 +10,7 @@
 - Proved the checked-in profile invokes owner health, semantic-evidence
   companions do not suppress a failed-owner repair, wrong assignees and replay
   reject, expired assignments recover once, and terminal tasks never requeue.
-- Proved maintenance and owner startup use the sealed manifest copy rather than
+- Proved refreshed and already-current repair receipts, and sealed startup rather than
   the live checkout and do not inherit provider or authority credentials.
 
 ## 2026-07-29 - Start operations control (0.4.30)

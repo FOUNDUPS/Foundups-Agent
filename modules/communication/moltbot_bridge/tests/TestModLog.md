@@ -1,7 +1,7 @@
 ## 2026-07-29: REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1
 - Proved the canonical operations profile performs a real semantic owner query,
   making failed/stale Holo evidence reachable by the repair state machine.
-- Proved one-shot process capability, exact OpenClaw assignee, context/HEAD
+- Proved one-shot process capability, non-consuming forgery rejection, exact assignee, context/HEAD
   binding, replay rejection, expired-assignment CAS recovery, terminal-task
   refusal, exact execution proof, and truthful refresh telemetry.
 - Proved repair failure and a failed second grounding attempt never construct

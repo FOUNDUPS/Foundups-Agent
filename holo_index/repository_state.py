@@ -58,7 +58,7 @@ def runtime_repository_root(
 
     environment = os.environ if environ is None else environ
     fallback = Path(default_root).resolve(strict=False)
-    if str(environment.get(SEALED_RUNTIME_REQUIRED_ENV, "")).strip() != "1":
+    if not sealed_runtime_required(environment):
         return fallback
     raw = str(environment.get(SEALED_TARGET_REPO_ROOT_ENV, "")).strip()
     candidate = Path(raw)
@@ -68,6 +68,13 @@ def runtime_repository_root(
     if not resolved.is_dir() or not (resolved / ".git").exists():
         raise RuntimeError("HOLOINDEX_SEALED_TARGET_REPO_ROOT_INVALID")
     return resolved
+
+
+def sealed_runtime_required(
+    environ: Mapping[str, str] | None = None,
+) -> bool:
+    environment = os.environ if environ is None else environ
+    return str(environment.get(SEALED_RUNTIME_REQUIRED_ENV, "")).strip() == "1"
 
 
 def _unavailable_state(head_sha: str) -> RepositoryState:
@@ -130,4 +137,5 @@ __all__ = [
     "read_repository_state",
     "repository_root_digest",
     "runtime_repository_root",
+    "sealed_runtime_required",
 ]
