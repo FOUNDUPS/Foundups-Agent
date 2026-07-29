@@ -21,6 +21,8 @@
 - Rejects runtime-materialization roots inside or above the audited repository.
 - Loads standard library, sealed source, then dependencies and reauthenticates
   copied source bytes at every import and entry-script execution.
+- Reserves manifest-derived module/package names to prevent deletion fallback
+  into identically named dependency packages.
 - Enforces the frame cap before parsing or dispatching an over-limit progress
   frame.
 - Labeled all no-effect fields as implementation-boundary attestations rather

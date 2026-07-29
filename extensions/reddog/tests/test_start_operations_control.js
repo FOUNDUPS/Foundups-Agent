@@ -165,6 +165,14 @@ function assertStartupHooksExcluded() {
     runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
   ).trim(), 'sealed:dependency:source');
   assert.strictEqual(fs.existsSync(sentinel), false);
+  fs.rmSync(path.join(sourcePackage, '__init__.py'));
+  assert.throws(
+    () => cp.execFileSync(runtime.interpreter, args, {
+      cwd: root, encoding: 'utf8'
+    }),
+    /reserved_runtime_module_missing/
+  );
+  assert.strictEqual(fs.existsSync(sentinel), false);
   fs.rmSync(root, { recursive: true, force: true });
 }
 

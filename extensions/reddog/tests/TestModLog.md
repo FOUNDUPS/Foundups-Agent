@@ -13,6 +13,7 @@
 - Proved a hostile temp-root selection cannot materialize inside the repository.
 - Proved a hostile dependency `modules` package loses to sealed source and
   post-copy source tampering fails before execution.
+- Proved deleting a sealed package cannot fall through to a dependency package.
 - Proved the frame cap rejects before dispatching an over-limit progress frame.
 - Added backend tests for profile/head/model/budget bindings, dirty-root
   rejection, Holo deferral, resident controls, and WSP 62 module boundaries.

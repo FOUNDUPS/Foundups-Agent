@@ -1,5 +1,4 @@
 """Execute RedDog control code from manifest-authenticated source bytes."""
-
 from __future__ import annotations
 
 import hashlib
@@ -10,8 +9,6 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Any
-
-
 def _canonical_digest(value: Any) -> str:
     payload = json.dumps(
         value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
@@ -60,9 +57,40 @@ class _VerifiedSourceLoader(importlib.machinery.SourceFileLoader):
 
 
 class _VerifiedSourceFinder(importlib.abc.MetaPathFinder):
-    def __init__(self, source_root: Path, digests: dict[str, str]) -> None:
+    def __init__(
+        self,
+        source_root: Path,
+        digests: dict[str, str],
+        reserved: set[str],
+        packages: set[str],
+        stdlib_paths: tuple[str, ...],
+    ) -> None:
         self._source_root = source_root
         self._digests = digests
+        self._reserved = reserved
+        self._packages = packages
+        self._stdlib_paths = stdlib_paths
+
+    def _sealed_spec(
+        self,
+        fullname: str,
+        target: ModuleType | None,
+    ) -> importlib.machinery.ModuleSpec:
+        parent = self._source_root.joinpath(*fullname.split(".")[:-1])
+        spec = importlib.machinery.PathFinder.find_spec(
+            fullname, [str(parent)], target
+        )
+        if not spec or (fullname in self._packages and not spec.origin):
+            raise ImportError("reserved_runtime_module_missing")
+        if spec.origin:
+            origin = Path(spec.origin).resolve()
+            _verified_bytes(origin, self._source_root, self._digests)
+            spec.loader = _VerifiedSourceLoader(
+                fullname, str(origin), self._source_root, self._digests
+            )
+        elif not _locations_within(spec, self._source_root):
+            raise ImportError("reserved_runtime_namespace_redirected")
+        return spec
 
     def find_spec(
         self,
@@ -70,6 +98,10 @@ class _VerifiedSourceFinder(importlib.abc.MetaPathFinder):
         path: list[str] | None = None,
         target: ModuleType | None = None,
     ) -> importlib.machinery.ModuleSpec | None:
+        if self._stdlib_spec(fullname, target):
+            return None
+        if fullname in self._reserved:
+            return self._sealed_spec(fullname, target)
         spec = importlib.machinery.PathFinder.find_spec(fullname, path, target)
         if not spec or not spec.origin:
             return spec
@@ -83,6 +115,47 @@ class _VerifiedSourceFinder(importlib.abc.MetaPathFinder):
             fullname, str(origin), self._source_root, self._digests
         )
         return spec
+
+    def _stdlib_spec(
+        self,
+        fullname: str,
+        target: ModuleType | None,
+    ) -> bool:
+        if "." in fullname:
+            return False
+        return bool(importlib.machinery.PathFinder.find_spec(
+            fullname, list(self._stdlib_paths), target
+        ))
+
+
+def _locations_within(
+    spec: importlib.machinery.ModuleSpec,
+    source_root: Path,
+) -> bool:
+    locations = list(spec.submodule_search_locations or ())
+    if not locations:
+        return False
+    for location in locations:
+        try:
+            Path(location).resolve().relative_to(source_root)
+        except ValueError:
+            return False
+    return True
+
+
+def _reserved_bindings(digests: dict[str, str]) -> tuple[set[str], set[str]]:
+    reserved: set[str] = set()
+    packages: set[str] = set()
+    for relative in digests:
+        if not relative.endswith(".py"):
+            continue
+        parts = relative[:-3].split("/")
+        if parts[-1] == "__init__":
+            parts = parts[:-1]
+            packages.add(".".join(parts))
+        for length in range(1, len(parts) + 1):
+            reserved.add(".".join(parts[:length]))
+    return reserved, packages
 
 
 def _load_manifest(path: Path, expected_digest: str) -> dict[str, str]:
@@ -105,8 +178,12 @@ def main(argv: list[str]) -> int:
     script, source, target, dependencies, manifest, expected = argv[1:]
     source_root = Path(source).resolve()
     digests = _load_manifest(Path(manifest), expected)
+    reserved, packages = _reserved_bindings(digests)
+    stdlib_paths = tuple(sys.path)
     sys.path.extend([str(source_root), str(Path(dependencies).resolve())])
-    sys.meta_path.insert(0, _VerifiedSourceFinder(source_root, digests))
+    sys.meta_path.insert(0, _VerifiedSourceFinder(
+        source_root, digests, reserved, packages, stdlib_paths
+    ))
     raw = _verified_bytes(Path(script), source_root, digests)
     namespace = {
         "__name__": "__main__",

@@ -250,6 +250,8 @@ includes(runtimeMaterializerJs, 'runtime_root_not_separated', 'runtime root guar
 includes(startOperationsBootstrapPy, 'sys.path.extend([str(source_root)', 'sealed source precedence missing');
 includes(startOperationsBootstrapPy, '_VerifiedSourceLoader', 'import-time source verifier missing');
 includes(startOperationsBootstrapPy, 'runtime_source_digest_mismatch', 'post-copy tamper gate missing');
+includes(startOperationsBootstrapPy, '_reserved_bindings', 'reserved module binding missing');
+includes(startOperationsBootstrapPy, 'reserved_runtime_module_missing', 'reserved module fail-close missing');
 assert(
   startOperationsBootstrapPy.split(/\r?\n/).length <= 200,
   'start operations Python bootstrap exceeds WSP_62 file limit'
