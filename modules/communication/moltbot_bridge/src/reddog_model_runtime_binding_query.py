@@ -91,7 +91,7 @@ def query_model_runtime_binding(
     except Exception:
         return _receipt(configured=True, status=STATUS_NOT_READY,
                         reasons=("model_runtime_binding_artifact_invalid",))
-    reasons = _binding_rejections(binding)
+    reasons = runtime_binding_rejections(binding, expected_surface=EXPECTED_SURFACE)
     if reasons:
         return _receipt(configured=True, status=STATUS_NOT_READY,
                         reasons=tuple(reasons))
@@ -163,11 +163,15 @@ def _path_rejections(
     return tuple(reasons)
 
 
-def _binding_rejections(binding: Any) -> list[str]:
+def runtime_binding_rejections(
+    binding: Any,
+    *,
+    expected_surface: str,
+) -> list[str]:
     reasons: list[str] = []
     if binding.decision != ModelRuntimeBindingDecision.BOUND:
         reasons.append("model_runtime_binding_not_bound")
-    if binding.runtime_surface != EXPECTED_SURFACE:
+    if binding.runtime_surface != expected_surface:
         reasons.append("model_runtime_binding_surface_invalid")
     if binding.rejection_reasons:
         reasons.append("model_runtime_binding_contains_rejections")
@@ -309,4 +313,5 @@ __all__ = [
     "STATUS_READY",
     "STATUS_UNCONFIGURED",
     "query_model_runtime_binding",
+    "runtime_binding_rejections",
 ]

@@ -1,4 +1,12 @@
 # ModLog - moltbot_bridge
+- `REDDOG_OPERATIONS_SKILLZ_PHASE1`: Start Operations now binds one
+  manifest-authenticated, provider-neutral Operations Skillz receipt and
+  revalidates it on submit/resume. Resident audit and architect model artifacts
+  reuse the canonical runtime-binding admission checks, so empty signed
+  promotion lineage, invalid role topology, missing authority, or weak policy
+  evidence cannot be made acceptable by recomputing and host-pinning a receipt.
+  Brain, Breadcrumb, and Memex context remain lower-authority, receipt-bound
+  planning inputs and are never claimed when absent.
 - `REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1`: start operations
   now reuses a current process-private Holo owner or creates one exact-HEAD,
   durable AgentDB repair task for OpenClaw. The exact task route invokes the

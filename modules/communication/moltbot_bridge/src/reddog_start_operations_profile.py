@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from modules.communication.moltbot_bridge.src.reddog_operations_skill import (
+    LOGICAL_ROLES,
+    SKILL_NAME,
+)
+
 
 PROFILE_SCHEMA = "reddog_start_operations_profile.v1"
 PROFILE_ID = "reddog_readonly_architect_operations.v1"
@@ -57,6 +62,8 @@ class StartOperationsProfile:
     default_timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
     max_timeout_seconds: int = MAX_TIMEOUT_SECONDS
     read_only_authority_only: bool = True
+    operations_skill_name: str = SKILL_NAME
+    operations_logical_roles: tuple[str, ...] = LOGICAL_ROLES
 
 
 def start_operations_profile(profile_id: str) -> StartOperationsProfile:

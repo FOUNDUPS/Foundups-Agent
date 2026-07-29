@@ -10,27 +10,24 @@ from typing import Any, Callable, Mapping, Sequence
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     canonical_digest,
 )
+from modules.communication.moltbot_bridge.src.reddog_operations_skill import (
+    RedDogOperationsSkill, load_reddog_operations_skill, skill_receipt_dict,
+)
 from modules.communication.moltbot_bridge.src.reddog_start_operations_control_authority import (
-    StartOperationsRejected,
-    budgets,
-    load_bindings,
-    runtime_defaults,
+    StartOperationsRejected, budgets, load_bindings, runtime_defaults,
 )
 from modules.communication.moltbot_bridge.src.reddog_start_operations_profile import (
     StartOperationsProfile,
     start_operations_profile,
 )
 
-
 CONTROL_SCHEMA = "reddog_start_operations_control.v1"
 CONTROL_REQUEST_ID_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
-
 
 @dataclass(frozen=True)
 class PreparedSubmission:
     intent: Mapping[str, Any]
     runtime_defaults: Mapping[str, Any]
-
 
 def validated_request(
     request: Mapping[str, Any], allowed_actions: frozenset[str]
@@ -54,20 +51,22 @@ def validated_request(
         raise StartOperationsRejected(("start_operations_control_request_id_invalid",))
     return action, profile, intent_id, control_request_id
 
-
 def prepare_submission(
     *,
-    repo_root: Path,
-    profile: StartOperationsProfile,
-    scope: tuple[str, tuple[str, ...], str],
-    repo_state: Mapping[str, Any],
-    env: Mapping[str, str],
+    repo_root: Path, profile: StartOperationsProfile,
+    scope: tuple[str, tuple[str, ...], str], repo_state: Mapping[str, Any],
+    env: Mapping[str, str], operations_skill_root: Path,
+    operations_skill_reader: Callable[[Path], str] | None,
     grounding_runner: Callable[..., Any],
 ) -> PreparedSubmission:
+    operations_skill = _operations_skill(
+        operations_skill_root, operations_skill_reader
+    )
     audit, architect = load_bindings(repo_root, env)
     max_claims, timeout = budgets(profile, env)
     request_id = _client_request_id(
-        profile, scope, repo_state, audit, architect, max_claims, timeout
+        profile, scope, repo_state, audit, architect, operations_skill,
+        max_claims, timeout
     )
     grounding = grounding_runner(
         repo_root=repo_root,
@@ -85,26 +84,45 @@ def prepare_submission(
         repo_state=repo_state,
         audit=audit,
         architect=architect,
+        operations_skill=operations_skill,
         max_claims=max_claims,
         timeout_seconds=timeout,
     )
     return PreparedSubmission(
         intent=intent,
         runtime_defaults=runtime_defaults(
-            env, audit, architect, max_claims, timeout, profile
+            env,
+            audit,
+            architect,
+            max_claims,
+            timeout,
+            profile,
+            prompt_text=operations_skill.prompt_for(profile.work_focus),
+            operations_skill_receipt=skill_receipt_dict(operations_skill),
         ),
     )
 
-
 def runtime_defaults_for_resume(
-    repo_root: Path,
+    repo_root: Path, operations_skill_root: Path,
+    operations_skill_reader: Callable[[Path], str] | None,
     profile: StartOperationsProfile,
     env: Mapping[str, str],
 ) -> Mapping[str, Any]:
+    operations_skill = _operations_skill(
+        operations_skill_root, operations_skill_reader
+    )
     audit, architect = load_bindings(repo_root, env)
     max_claims, timeout = budgets(profile, env)
-    return runtime_defaults(env, audit, architect, max_claims, timeout, profile)
-
+    return runtime_defaults(
+        env,
+        audit,
+        architect,
+        max_claims,
+        timeout,
+        profile,
+        prompt_text=operations_skill.prompt_for(profile.work_focus),
+        operations_skill_receipt=skill_receipt_dict(operations_skill),
+    )
 
 def _client_request_id(
     profile: StartOperationsProfile,
@@ -112,6 +130,7 @@ def _client_request_id(
     repo_state: Mapping[str, Any],
     audit: Mapping[str, Any],
     architect: Mapping[str, Any],
+    operations_skill: RedDogOperationsSkill,
     max_claims: int,
     timeout_seconds: int,
 ) -> str:
@@ -123,11 +142,11 @@ def _client_request_id(
             "foundup_id": scope[2],
             "audit_binding_digest": canonical_digest(audit),
             "architect_binding_digest": canonical_digest(architect),
+            "operations_skill_receipt_id": operations_skill.receipt["receipt_id"],
             "max_claims": max_claims,
             "timeout_seconds": timeout_seconds,
         }
     )
-
 
 def bound_intent(
     intent: Mapping[str, Any],
@@ -136,6 +155,7 @@ def bound_intent(
     repo_state: Mapping[str, Any],
     audit: Mapping[str, Any],
     architect: Mapping[str, Any],
+    operations_skill: RedDogOperationsSkill,
     max_claims: int,
     timeout_seconds: int,
 ) -> Mapping[str, Any]:
@@ -150,21 +170,29 @@ def bound_intent(
             architect.get("receipt_id") or ""
         ),
         "architect_model_runtime_binding_digest": canonical_digest(architect),
+        "operations_skill_receipt": skill_receipt_dict(operations_skill),
+        "operations_skill_receipt_id": operations_skill.receipt["receipt_id"],
+        "operations_skill_content_digest": operations_skill.receipt["content_digest"],
+        "operations_skill_registry_entry_digest": operations_skill.receipt[
+            "registry_entry_digest"
+        ],
         "max_claims": max_claims,
         "timeout_seconds": timeout_seconds,
     }
     value.pop("intent_id", None)
     return {**value, "intent_id": canonical_digest(value)}
 
+def _operations_skill(
+    repo_root: Path,
+    reader: Callable[[Path], str] | None,
+) -> RedDogOperationsSkill:
+    try:
+        return load_reddog_operations_skill(
+            repo_root, verified_text_reader=reader
+        )
+    except (ImportError, OSError, TypeError, ValueError) as exc:
+        raise StartOperationsRejected(
+            ("start_operations_skill_binding_invalid",)
+        ) from exc
 
-__all__ = [
-    "CONTROL_SCHEMA",
-    "PreparedSubmission",
-    "StartOperationsRejected",
-    "bound_intent",
-    "budgets",
-    "prepare_submission",
-    "runtime_defaults",
-    "runtime_defaults_for_resume",
-    "validated_request",
-]
+__all__ = ["CONTROL_SCHEMA", "PreparedSubmission", "StartOperationsRejected", "bound_intent", "budgets", "prepare_submission", "runtime_defaults", "runtime_defaults_for_resume", "validated_request"]

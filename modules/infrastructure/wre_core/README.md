@@ -30,8 +30,15 @@ that loaded the WRE runtime. Registry locations are portable, repository-relativ
 paths. Absolute paths, parent traversal, and resolved symlink or junction escapes
 fail closed before a skill can be loaded. This prevents an isolated worker from
 executing Skillz instructions from a shared or foreign checkout.
-Registered locations are authoritative; filesystem discovery cannot silently
-substitute another same-named implementation.
+
+Provider-neutral role workflows use `WRERoleSkillLoader`. It requires
+checkout-relative registered content, production hygiene/evals, and an exact
+allowlisted registry/frontmatter schema with matching roles and WSP chain.
+Unknown provider/model selector fields fail admission. `WRESkillsLoader` can
+filter by `logical_role` without assigning a model; signed runtime
+model-selection receipts remain the authority source. Registered locations
+are authoritative; filesystem discovery cannot silently substitute another
+same-named implementation.
 
 ## Architecture
 

@@ -38,6 +38,14 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels() -> None
         "modules/communication/moltbot_bridge/src/"
         "reddog_start_operations_control.py"
     ) in runtime
+    assert (
+        "modules/communication/moltbot_bridge/src/"
+        "reddog_start_operations_resident_client.py"
+    ) in runtime
+    assert (
+        "modules/communication/moltbot_bridge/skillz/"
+        "reddog_operations/SKILLz.md"
+    ) in runtime
     assert "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py" in runtime
     assert "modules/communication/moltbot_bridge/src/openclaw_dae.py" in runtime
     assert "modules/foundups/src/foundup_registry_loader.py" in runtime
@@ -81,5 +89,5 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         in generated["required_runtime_sha256"]
     )
     assert generator.canonical_manifest_digest(generated) == (
-        "e1f269e5bf36a38552ed43faa66b7b509f8050300ffb217d6c114cb77ee0b140"
+        "78c2c890147a9d80b43b6e3c75b6f7a0e2aac6836d1a2508188d2ad67616be98"
     )

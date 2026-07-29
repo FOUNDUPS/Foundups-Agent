@@ -13,6 +13,9 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_control im
     CONTROL_SCHEMA,
     run_start_operations_control,
 )
+from modules.communication.moltbot_bridge.src.reddog_operations_skill import (
+    load_reddog_operations_skill,
+)
 from modules.communication.moltbot_bridge.src.reddog_start_operations_profile import (
     PROFILE_ID,
     READ_TARGETS,
@@ -22,6 +25,10 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_profile im
 from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair import (
     StartOperationsHoloRepairResult,
     repairable_grounding_failure,
+)
+from modules.communication.moltbot_bridge.src.reddog_start_operations_resident_client import (
+    OPERATIONS_SKILL_MISMATCH,
+    StartOperationsResidentArchitectClient,
 )
 from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
     TransportGroundingResult,
@@ -39,6 +46,7 @@ MODULES = tuple(
     / name
     for name in (
         "reddog_resident_model_runtime_bindings.py",
+        "reddog_operations_skill.py",
         "reddog_start_operations_control.py",
         "reddog_start_operations_control_actions.py",
         "reddog_start_operations_control_authority.py",
@@ -46,6 +54,7 @@ MODULES = tuple(
         "reddog_start_operations_control_receipt.py",
         "reddog_start_operations_result.py",
         "reddog_start_operations_profile.py",
+        "reddog_start_operations_resident_client.py",
     )
 )
 SOURCE_FILES = (*MODULES, REPO_ROOT / "scripts" / "reddog_start_operations_control_once.py")
@@ -153,9 +162,14 @@ def _run(
     grounding=None,
     repo_state=None,
     holo_repair=None,
+    bindings=None,
+    skill_root=None,
+    skill_reader=None,
 ):
-    audit = {"receipt_id": "audit:receipt", "runtime_surface": "reddog_readonly_audit_worker"}
-    architect = {"receipt_id": "architect:receipt", "runtime_surface": "reddog_backend_architect"}
+    audit, architect = bindings or (
+        {"receipt_id": "audit:receipt", "runtime_surface": "reddog_readonly_audit_worker"},
+        {"receipt_id": "architect:receipt", "runtime_surface": "reddog_backend_architect"},
+    )
     with (
         patch(
             "modules.communication.moltbot_bridge.src.reddog_start_operations_control."
@@ -175,6 +189,8 @@ def _run(
         )
         return run_start_operations_control(
             repo_root=REPO_ROOT,
+            operations_skill_root=skill_root,
+            operations_skill_reader=skill_reader,
             request=_request() if request is None else request,
             environ=_env() if env is None else env,
             client_factory=_Client,
@@ -203,11 +219,127 @@ def test_submit_binds_profile_head_models_scope_and_budgets() -> None:
     assert intent["repo_head_sha"] == "a" * 40
     assert intent["audit_model_runtime_binding_receipt_id"] == "audit:receipt"
     assert intent["architect_model_runtime_binding_receipt_id"] == "architect:receipt"
+    assert intent["operations_skill_receipt_id"].startswith("sha256:")
+    assert intent["operations_skill_receipt"]["grants_authority"] is False
+    assert (
+        intent["operations_skill_content_digest"]
+        == intent["operations_skill_receipt"]["content_digest"]
+    )
     assert intent["max_claims"] == 5
     assert intent["timeout_seconds"] == 180
     assert client.kwargs["authenticated_principal_id"] == "principal-012"
     assert client.kwargs["authorized_foundup_ids"] == ("foundups_agent",)
     assert client.kwargs["runtime_defaults"]["audit_lanes"]
+    assert "# BOUND REDDOG OPERATIONS SKILLZ" in client.kwargs[
+        "runtime_defaults"
+    ]["prompt_text"]
+
+
+def test_missing_operations_skill_fails_before_model_or_client() -> None:
+    model_loader = Mock()
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src.reddog_start_operations_control."
+            "observe_repo_state",
+            return_value={"head_sha": "a" * 40, "dirty_paths": ()},
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_start_operations_control_binding.load_reddog_operations_skill",
+            side_effect=ValueError("missing"),
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_start_operations_control_authority."
+            "load_resident_model_runtime_bindings",
+            model_loader,
+        ),
+    ):
+        result = run_start_operations_control(
+            repo_root=REPO_ROOT,
+            request=_request(),
+            environ=_env(),
+            client_factory=_Client,
+            grounding_runner=Mock(return_value=_grounding()),
+        )
+
+    assert result.accepted is False
+    assert result.rejection_reasons == ("start_operations_skill_binding_invalid",)
+    assert model_loader.call_count == 0
+    assert _Client.instances == []
+
+
+def test_operations_skill_is_loaded_from_explicit_policy_root() -> None:
+    observed: list[Path] = []
+    canonical = load_reddog_operations_skill(REPO_ROOT)
+
+    def load(root, **_kwargs):
+        observed.append(Path(root))
+        return canonical
+
+    policy_root = Path("O:/manifest-authenticated-runtime")
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_start_operations_control_binding.load_reddog_operations_skill",
+        side_effect=load,
+    ):
+        result = _run(
+            skill_root=policy_root,
+            skill_reader=lambda path: Path(path).read_text(encoding="utf-8"),
+        )
+
+    assert result.accepted is True
+    assert observed == [policy_root]
+
+
+def test_explicit_policy_root_requires_verified_reader() -> None:
+    result = _run(skill_root=Path("O:/unverified-policy"))
+
+    assert result.accepted is False
+    assert result.rejection_reasons == ("start_operations_skill_reader_missing",)
+    assert _Client.instances == []
+
+
+def test_use_time_skill_receipt_mismatch_rejects_before_runner() -> None:
+    result = _run()
+    intent = _Client.instances[-1].calls[0][1]
+    defaults = _Client.instances[-1].kwargs["runtime_defaults"]
+    client = StartOperationsResidentArchitectClient(
+        repo_root=REPO_ROOT,
+        authenticated_principal_id="principal-012",
+        authorized_foundup_ids=("foundups_agent",),
+        transport="editor",
+        runtime_defaults=defaults,
+        cycle_store=Mock(),
+        cycle_runner=Mock(),
+    )
+    assert OPERATIONS_SKILL_MISMATCH not in client._validate_submitted_intent(intent)
+
+    tampered = {
+        **intent,
+        "operations_skill_content_digest": "sha256:" + "0" * 64,
+    }
+    assert OPERATIONS_SKILL_MISMATCH in client._validate_submitted_intent(tampered)
+    assert "operations_skill_receipt" not in client._runtime_defaults
+
+
+def test_skill_receipt_is_stable_while_signed_model_bindings_change() -> None:
+    first = _run()
+    first_intent = _Client.instances[-1].calls[0][1]
+    second = _run(
+        bindings=(
+            {"receipt_id": "audit:new", "runtime_surface": "reddog_readonly_audit_worker"},
+            {"receipt_id": "architect:new", "runtime_surface": "reddog_backend_architect"},
+        )
+    )
+    second_intent = _Client.instances[-1].calls[0][1]
+
+    assert first.accepted is True and second.accepted is True
+    assert (
+        first_intent["operations_skill_receipt_id"]
+        == second_intent["operations_skill_receipt_id"]
+    )
+    assert first_intent["intent_id"] != second_intent["intent_id"]
 
 
 def test_request_cannot_override_principal_model_or_budget() -> None:
@@ -433,6 +565,16 @@ def test_operations_profile_exercises_holo_owner_health() -> None:
     assert result.accepted is False
     assert "grounding_holoindex_owner_query_failed" in result.rejection_reasons
     assert repairable_grounding_failure(result.rejection_reasons) is True
+
+
+def test_bridge_uses_manifest_source_for_operations_skill_policy() -> None:
+    script = (REPO_ROOT / "scripts/reddog_start_operations_control_once.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "repo_root=TARGET_REPO_ROOT" in script
+    assert "operations_skill_root=SOURCE_ROOT" in script
+    assert "operations_skill_reader=VERIFIED_RUNTIME_READ_TEXT" in script
 
 
 def test_control_modules_have_no_execution_or_indexing_imports() -> None:

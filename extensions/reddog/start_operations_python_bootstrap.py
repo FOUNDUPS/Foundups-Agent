@@ -10,7 +10,6 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
-
 def _canonical_digest(value: Any) -> str:
     payload = json.dumps(
         value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
@@ -35,7 +34,10 @@ def _verified_bytes(
     if observed != expected:
         raise ImportError("runtime_source_digest_mismatch")
     return raw
-
+def _verified_text_reader(source_root: Path, digests: dict[str, str]) -> Any:
+    def read(path: Path | str) -> str:
+        return _verified_bytes(Path(path), source_root, digests).decode("utf-8")
+    return read
 
 class _VerifiedSourceLoader(importlib.machinery.SourceFileLoader):
     def __init__(
@@ -48,11 +50,9 @@ class _VerifiedSourceLoader(importlib.machinery.SourceFileLoader):
         super().__init__(name, path)
         self._source_root = source_root
         self._digests = digests
-
     def get_code(self, fullname: str) -> Any:
         raw = _verified_bytes(Path(self.path), self._source_root, self._digests)
         return compile(raw, self.path, "exec")
-
 
 class _VerifiedSourceFinder(importlib.abc.MetaPathFinder):
     def __init__(
@@ -68,7 +68,6 @@ class _VerifiedSourceFinder(importlib.abc.MetaPathFinder):
         self._reserved = reserved
         self._packages = packages
         self._stdlib_paths = stdlib_paths
-
     def _sealed_spec(
         self,
         fullname: str,
@@ -125,7 +124,6 @@ class _VerifiedSourceFinder(importlib.abc.MetaPathFinder):
             fullname, list(self._stdlib_paths), target
         ))
 
-
 def _locations_within(
     spec: importlib.machinery.ModuleSpec,
     source_root: Path,
@@ -140,7 +138,6 @@ def _locations_within(
             return False
     return True
 
-
 def _reserved_bindings(digests: dict[str, str]) -> tuple[set[str], set[str]]:
     reserved: set[str] = set()
     packages: set[str] = set()
@@ -154,7 +151,6 @@ def _reserved_bindings(digests: dict[str, str]) -> tuple[set[str], set[str]]:
         for length in range(1, len(parts) + 1):
             reserved.add(".".join(parts[:length]))
     return reserved, packages
-
 
 def _load_manifest(path: Path, expected_digest: str) -> dict[str, str]:
     value = json.loads(path.read_text(encoding="utf-8"))
@@ -191,6 +187,9 @@ def main(argv: list[str]) -> int:
         "__file__": str(Path(script).resolve()),
         "__builtins__": __builtins__,
         "REDDOG_TARGET_REPO_ROOT": str(target_root),
+        "REDDOG_VERIFIED_RUNTIME_READ_TEXT": _verified_text_reader(
+            source_root, digests
+        ),
     }
     sys.argv = [script, *argv[7:]]
     exec(compile(raw, namespace["__file__"], "exec"), namespace)
