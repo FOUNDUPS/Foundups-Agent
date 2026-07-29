@@ -25,6 +25,9 @@ const startOperationsControlJs = fs.readFileSync(path.join(extDir, 'start_operat
 const startOperationsBridgeJs = fs.readFileSync(path.join(extDir, 'start_operations_bridge.js'), 'utf8');
 const startOperationsEnvironmentJs = fs.readFileSync(path.join(extDir, 'start_operations_environment.js'), 'utf8');
 const startOperationsInterpreterJs = fs.readFileSync(path.join(extDir, 'start_operations_interpreter.js'), 'utf8');
+const runtimeMaterializerJs = fs.readFileSync(
+  path.join(extDir, 'backend_compatibility_runtime_materializer.js'), 'utf8'
+);
 const bridgePy = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_once.py'), 'utf8');
 const holoOwnerBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_holoindex_owner_query_once.py'), 'utf8');
 const residentArchitectBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_resident_architect_session_once.py'), 'utf8');
@@ -231,12 +234,15 @@ includes(startOperationsControlJs, 'receipt_bound_runtime', 'production model-bi
 includes(startOperationsBridgeJs, 'cp.spawn', 'asynchronous operations bridge missing');
 includes(startOperationsBridgeJs, "'-I', '-S', '-B'", 'sealed Python launch missing');
 includes(startOperationsBridgeJs, 'PYTHON_BOOTSTRAP', 'explicit dependency bootstrap missing');
+includes(startOperationsBridgeJs, 'runtimeMaterializer.materialize', 'sealed source materializer missing');
 includes(startOperationsBridgeJs, 'stdoutBytes', 'cumulative stdout cap missing');
 includes(startOperationsControlJs, 'control_request_id', 'request correlation missing');
 includes(startOperationsEnvironmentJs, 'ALLOWED_KEYS', 'operations env allowlist missing');
 includes(startOperationsEnvironmentJs, "PYTHONNOUSERSITE = '1'", 'user-site guard missing');
 includes(startOperationsInterpreterJs, "path.resolve(repo, '.venv')", 'workspace venv pin missing');
 includes(startOperationsInterpreterJs, 'contained(repo, root)', 'redirected venv guard missing');
+includes(runtimeMaterializerJs, 'required_runtime_files', 'manifest runtime copy missing');
+includes(runtimeMaterializerJs, 'verifiedSource', 'copy-time digest recheck missing');
 includes(extensionJs, "workspaceState.get('reddog.operationsIntentId'", 'durable operations intent missing');
 includes(extensionJs, 'startOperationsEnvironment.build(process.env)', 'ambient extension env exposed');
 assert(

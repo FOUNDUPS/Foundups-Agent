@@ -7,9 +7,12 @@ import sys
 from pathlib import Path
 from typing import Any, Mapping
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
+if "REDDOG_TARGET_REPO_ROOT" not in globals() and str(SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(SOURCE_ROOT))
+TARGET_REPO_ROOT = Path(
+    globals().get("REDDOG_TARGET_REPO_ROOT", SOURCE_ROOT)
+).resolve()
 
 from modules.communication.moltbot_bridge.src.reddog_start_operations_control import (  # noqa: E402
     result_json,
@@ -45,7 +48,7 @@ def main() -> int:
     try:
         payload = _read_payload()
         result = run_start_operations_control(
-            repo_root=REPO_ROOT,
+            repo_root=TARGET_REPO_ROOT,
             request=payload,
             progress_writer=_write,
         )

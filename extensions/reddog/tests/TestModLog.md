@@ -8,6 +8,8 @@
   stdout/frame caps, environment allowlist, and durable intent regressions.
 - Proved bare/redirected interpreters and Python startup injection are rejected;
   a malicious `.pth` sentinel cannot run under the sealed `-I -S -B` bootstrap.
+- Proved standard/dependency imports cannot be shadowed by the audited checkout
+  and the control script exists only in a manifest-materialized source tree.
 - Proved the frame cap rejects before dispatching an over-limit progress frame.
 - Added backend tests for profile/head/model/budget bindings, dirty-root
   rejection, Holo deferral, resident controls, and WSP 62 module boundaries.

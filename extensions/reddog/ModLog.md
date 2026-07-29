@@ -15,6 +15,9 @@
   non-redirected workspace `.venv`; `-I -S -B` plus an explicit bootstrap
   excludes `.pth`, `sitecustomize`, `PYTHONPATH`, `PYTHONHOME`, and user-site
   startup injection.
+- Executes control code from a copy-time reverified backend-manifest source tree
+  so untracked checkout modules cannot shadow standard, dependency, or runtime
+  imports.
 - Enforces the frame cap before parsing or dispatching an over-limit progress
   frame.
 - Labeled all no-effect fields as implementation-boundary attestations rather

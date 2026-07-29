@@ -3,6 +3,7 @@
 const cp = require('child_process');
 const protocol = require('./start_operations_control');
 const interpreterPolicy = require('./start_operations_interpreter');
+const runtimeMaterializer = require('./backend_compatibility_runtime_materializer');
 
 const MAX_STDOUT_BYTES = 2 * 1024 * 1024;
 const MAX_STDERR_BYTES = 64 * 1024;
@@ -10,59 +11,68 @@ const MAX_FRAMES = 256;
 const DEFAULT_DEADLINE_MS = 15 * 60 * 1000;
 const PYTHON_BOOTSTRAP = [
   'import runpy,sys',
-  'script,root,deps=sys.argv[1:4]',
-  'sys.path.insert(0,deps)',
-  'sys.path.insert(0,root)',
-  "runpy.run_path(script,run_name='__main__')"
+  'script,source,target,deps=sys.argv[1:5]',
+  'sys.path.extend([deps,source])',
+  "runpy.run_path(script,init_globals={'REDDOG_TARGET_REPO_ROOT':target},run_name='__main__')"
 ].join(';');
 
 function run(options) {
   const opts = options && typeof options === 'object' ? options : {};
   const action = opts.request && opts.request.action;
   return new Promise((resolve) => {
-    let child;
     try {
-      const runtime = interpreterPolicy.approved(opts.interpreter, opts.repoRoot);
-      if (!runtime) throw new Error('unapproved_interpreter');
-      child = (opts.spawn || cp.spawn)(
-        runtime.interpreter,
-        [
-          '-I', '-S', '-B', '-c', PYTHON_BOOTSTRAP,
-          opts.script, runtime.repoRoot, runtime.sitePackages
-        ],
-        {
-          cwd: runtime.repoRoot,
-          env: opts.env,
-          stdio: ['pipe', 'pipe', 'pipe'],
-          windowsHide: true
-        }
-      );
+      const launched = launch(opts);
+      collect(launched.child, opts, resolve, launched.cleanup);
     } catch (_err) {
       resolve(protocol.failureResult(
         action, 'start_operations_bridge_spawn_failed', opts.request
       ));
-      return;
     }
-    collect(child, opts, resolve);
   });
 }
 
-function collect(child, options, resolve) {
+function launch(options) {
+  const runtime = interpreterPolicy.approved(
+    options.interpreter, options.repoRoot
+  );
+  if (!runtime) throw new Error('unapproved_interpreter');
+  const source = (options.materialize || runtimeMaterializer.materialize)(
+    runtime.repoRoot, options.materializerOptions
+  );
+  try {
+    const args = [
+      '-I', '-S', '-B', '-c', PYTHON_BOOTSTRAP,
+      source.scriptPath(options.script), source.runtimeRoot,
+      source.targetRepoRoot, runtime.sitePackages
+    ];
+    const child = (options.spawn || cp.spawn)(runtime.interpreter, args, {
+      cwd: source.runtimeRoot, env: options.env,
+      stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true
+    });
+    return { child, cleanup: source.cleanup };
+  } catch (error) {
+    source.cleanup();
+    throw error;
+  }
+}
+
+function collect(child, options, resolve, cleanup) {
   const state = {
     stdout: '', stdoutBytes: 0, stderrBytes: 0, frameCount: 0, finalResult: null
   };
-  const controls = collectionControls(child, options, resolve, state);
+  const controls = collectionControls(child, options, resolve, state, cleanup);
   attachOutputListeners(child, options, state, controls);
   attachLifecycleListeners(child, options, state, controls);
   writeRequest(child, options, controls);
 }
 
-function collectionControls(child, options, resolve, state) {
+function collectionControls(child, options, resolve, state, cleanup) {
   let settled = false;
   const finish = (value) => {
     if (settled) return;
     settled = true;
     clearTimeout(timer);
+    if (typeof cleanup === 'function') cleanup();
     resolve(value);
   };
   const fail = (reason) => {
@@ -79,6 +89,7 @@ function collectionControls(child, options, resolve, state) {
 
 function attachOutputListeners(child, options, state, controls) {
   child.stdout.on('data', (chunk) => {
+    if (controls.isSettled()) return;
     const text = String(chunk || '');
     state.stdoutBytes += Buffer.byteLength(text, 'utf8');
     state.stdout += text;
@@ -98,6 +109,7 @@ function attachOutputListeners(child, options, state, controls) {
     if (parsed.result) state.finalResult = parsed.result;
   });
   child.stderr.on('data', (chunk) => {
+    if (controls.isSettled()) return;
     state.stderrBytes += Buffer.byteLength(String(chunk || ''), 'utf8');
     if (state.stderrBytes > MAX_STDERR_BYTES) {
       controls.fail('start_operations_bridge_stderr_too_large');

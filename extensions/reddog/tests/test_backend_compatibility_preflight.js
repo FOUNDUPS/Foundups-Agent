@@ -298,6 +298,7 @@ for (const relativePath of [
   'start_operations_bridge.js',
   'start_operations_control.js',
   'start_operations_extension_adapter.js',
+  'backend_compatibility_runtime_materializer.js',
   'backend_compatibility_manifest.js',
   'backend_compatibility_filesystem.js',
   'backend_compatibility_render.js'

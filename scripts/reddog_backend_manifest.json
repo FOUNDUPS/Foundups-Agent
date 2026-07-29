@@ -44,7 +44,7 @@
     "scripts/reddog_operator_wardrobe_selection_once.py": "46142fcf1f0db74a93fbcffb2c831c53fcd4c11035fab11b12afe1bd32b5448c",
     "scripts/reddog_repair_guard_once.py": "4fd4e8b4200363195bab7b9a65b8d1d81deac24340654ac04fc7d4ee12ca9bc8",
     "scripts/reddog_resident_architect_session_once.py": "68e07b17cc8463ac59a0f53be9cfcecd61dce19d3a495bff20cf4bc9d25a0175",
-    "scripts/reddog_start_operations_control_once.py": "804b38543dce6e6e85dcddbb494fc6301e43c4f87880659177420bcc04cb361e"
+    "scripts/reddog_start_operations_control_once.py": "9423afe16eb26f7390d984425146e04bafaff5e3bd4ecbe78f5c7296cfdce1ed"
   },
   "required_runtime_files": [
     "WSP_agentic/__init__.py",
@@ -2186,7 +2186,7 @@
     "scripts/reddog_operator_wardrobe_selection_once.py": "46142fcf1f0db74a93fbcffb2c831c53fcd4c11035fab11b12afe1bd32b5448c",
     "scripts/reddog_repair_guard_once.py": "4fd4e8b4200363195bab7b9a65b8d1d81deac24340654ac04fc7d4ee12ca9bc8",
     "scripts/reddog_resident_architect_session_once.py": "68e07b17cc8463ac59a0f53be9cfcecd61dce19d3a495bff20cf4bc9d25a0175",
-    "scripts/reddog_start_operations_control_once.py": "804b38543dce6e6e85dcddbb494fc6301e43c4f87880659177420bcc04cb361e",
+    "scripts/reddog_start_operations_control_once.py": "9423afe16eb26f7390d984425146e04bafaff5e3bd4ecbe78f5c7296cfdce1ed",
     "tools/shared/module_scoring_engine.py": "933c20ea0afa7ba4ccd83f666f275c96ae22533820ccc821a5685a8df9d3d382",
     "utils/env_loader.py": "b7eadd95cd156b6330369969ff7f35f496f9c8885a8317ef77ccf062f5211f45",
     "utils/json_sanitizer.py": "311def1c7bd5bdc484d58932abd13e9417d153573e6d3e1dbd97cd6c728a5256",

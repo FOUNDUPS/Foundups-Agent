@@ -9,6 +9,9 @@ const path = require('path');
 
 const protocol = require(path.join('..', 'start_operations_control.js'));
 const bridge = require(path.join('..', 'start_operations_bridge.js'));
+const runtimeMaterializer = require(
+  path.join('..', 'backend_compatibility_runtime_materializer.js')
+);
 const adapter = require(path.join('..', 'start_operations_extension_adapter.js'));
 const operationsEnvironment = require(path.join('..', 'start_operations_environment.js'));
 const interpreterPolicy = require(path.join('..', 'start_operations_interpreter.js'));
@@ -95,6 +98,15 @@ function approvedRuntime() {
   return { repoRoot, interpreter, sitePackages };
 }
 
+function fakeMaterializer(runtime) {
+  return () => ({
+    runtimeRoot: runtime.repoRoot,
+    targetRepoRoot: runtime.repoRoot,
+    scriptPath: (value) => value,
+    cleanup() {}
+  });
+}
+
 function assertStartupHooksExcluded() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-python-seal-'));
   const venv = path.join(root, '.venv');
@@ -102,22 +114,53 @@ function assertStartupHooksExcluded() {
   const interpreter = path.join(venv, 'Scripts', 'python.exe');
   const dependencies = path.join(venv, 'Lib', 'site-packages');
   const sentinel = path.join(root, 'startup-hook-ran');
+  const source = path.join(root, 'sealed-source');
+  const target = path.join(root, 'audited-target');
+  fs.mkdirSync(source);
+  fs.mkdirSync(target);
   fs.writeFileSync(
     path.join(dependencies, 'attacker.pth'),
     `import pathlib;pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")\n`
   );
-  const script = path.join(root, 'probe.py');
-  fs.writeFileSync(script, 'print("sealed")\n');
+  fs.writeFileSync(path.join(dependencies, 'dep_probe.py'), 'VALUE="dependency"\n');
+  const attacker = [
+    'import pathlib',
+    `pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")`
+  ].join(';');
+  fs.writeFileSync(path.join(target, 'json.py'), attacker + '\n');
+  fs.writeFileSync(path.join(target, 'dep_probe.py'), attacker + '\n');
+  const script = path.join(source, 'probe.py');
+  fs.writeFileSync(
+    script,
+    'import json,dep_probe\nprint("sealed:"+dep_probe.VALUE)\n'
+  );
   const runtime = interpreterPolicy.approved(interpreter, root);
   const args = [
     '-I', '-S', '-B', '-c', bridge.PYTHON_BOOTSTRAP,
-    script, runtime.repoRoot, runtime.sitePackages
+    script, source, target, runtime.sitePackages
   ];
   assert.strictEqual(cp.execFileSync(
     runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
-  ).trim(), 'sealed');
+  ).trim(), 'sealed:dependency');
   assert.strictEqual(fs.existsSync(sentinel), false);
   fs.rmSync(root, { recursive: true, force: true });
+}
+
+function assertRuntimeMaterialized() {
+  const repoRoot = path.resolve(__dirname, '..', '..', '..');
+  const runtime = runtimeMaterializer.materialize(repoRoot);
+  try {
+    assert.strictEqual(
+      fs.existsSync(runtime.scriptPath(
+        path.join(repoRoot, 'scripts', 'reddog_start_operations_control_once.py')
+      )),
+      true
+    );
+    const relative = path.relative(repoRoot, runtime.runtimeRoot);
+    assert(relative.startsWith('..') || path.isAbsolute(relative));
+  } finally {
+    runtime.cleanup();
+  }
 }
 
 function assertRedirectedVenvRejected() {
@@ -200,6 +243,7 @@ async function main() {
     script: 'bridge.py',
     repoRoot: runtime.repoRoot,
     env: {},
+    materialize: fakeMaterializer(runtime),
     request,
     spawn: () => fakeChild([JSON.stringify(progress), JSON.stringify(terminal)]),
     deadlineMs: 1000,
@@ -211,7 +255,8 @@ async function main() {
   const oversized = await bridge.run({
     interpreter: runtime.interpreter, script: 'bridge.py',
     repoRoot: runtime.repoRoot,
-    env: {}, request, spawn: () => chunkedChild([
+    env: {}, request, materialize: fakeMaterializer(runtime),
+    spawn: () => chunkedChild([
       line.repeat(125), line.repeat(125)
     ]), deadlineMs: 1000
   });
@@ -229,6 +274,7 @@ async function main() {
     repoRoot: runtime.repoRoot,
     env: {},
     request,
+    materialize: fakeMaterializer(runtime),
     spawn: () => fakeChild(overLimitFrames),
     deadlineMs: 1000,
     onProgress: () => { overLimitCallbacks += 1; }
@@ -289,6 +335,7 @@ async function main() {
   assert.strictEqual(filtered.PYTHONNOUSERSITE, '1');
   assert.strictEqual(filtered.GITHUB_TOKEN, undefined);
   assert.strictEqual(filtered.REDDOG_SOVEREIGN_TOKEN, undefined);
+  assertRuntimeMaterialized();
   fs.rmSync(runtime.repoRoot, { recursive: true, force: true });
   console.log('start operations control tests passed');
 }
