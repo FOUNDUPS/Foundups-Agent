@@ -5,8 +5,18 @@ Version: 0.4.30
 Version 0.4.30 adds an exact, asynchronous `start operations` control route
 that selects the checked-in read-only architect profile, bypasses the
 extension advisory Fusion call, and requires distinct receipt-bound audit and
-architect model assignments. The resident cycle remains read-only and exposes
-`operations status`, `stop operations`, and `resume operations` controls.
+architect model assignments whose receipt IDs are independently pinned by the
+host. Fresh request IDs prevent terminal replay, output is cumulatively
+bounded, only an explicit environment allowlist reaches the child process, and
+the durable intent ID survives editor reloads. The resident cycle remains
+read-only and exposes `operations status`, `stop operations`, and
+`resume operations` controls.
+
+Production submit/resume also require the host to pin the independently
+admitted model-binding IDs in
+`REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID` and
+`REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID`.
+The binding files cannot authorize themselves by recomputing their own IDs.
 
 Version 0.4.29 pins signed Memex supply lineage through delegated worker
 dispatch and independently verifies the canonical signed-authority payload

@@ -2,8 +2,11 @@
 - `START_OPERATIONS_CONTROL_ADAPTER_PHASE1`: extracted the main-host dual
   model-binding artifact loader into a shared fail-closed module and added a
   profile-bound resident-client control adapter. The adapter binds clean HEAD,
-  authenticated FoundUp scope, strict budgets, and both BOUND model receipts;
-  it emits typed progress/results and grants no execution authority.
+  authenticated FoundUp scope, strict budgets, and both BOUND model receipts
+  to independent host-pinned receipt IDs. Fresh control-request IDs prevent
+  replay across submit/status/cancel/resume calls; terminal hashes cover every
+  serialized field. The adapter emits typed progress/results and grants no
+  execution authority.
 - Signed Memex lineage now survives the full authority and dispatch chain.
   Signer invocation validates the exact dry-run request digest before effects;
   resident verification replaces packet authority with recorded chain truth.

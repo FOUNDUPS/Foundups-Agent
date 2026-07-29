@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 from typing import Any, Callable, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
@@ -22,6 +23,7 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_profile im
 
 
 CONTROL_SCHEMA = "reddog_start_operations_control.v1"
+CONTROL_REQUEST_ID_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 @dataclass(frozen=True)
@@ -32,7 +34,7 @@ class PreparedSubmission:
 
 def validated_request(
     request: Mapping[str, Any], allowed_actions: frozenset[str]
-) -> tuple[str, StartOperationsProfile, str]:
+) -> tuple[str, StartOperationsProfile, str, str]:
     if request.get("schema_version") != CONTROL_SCHEMA:
         raise StartOperationsRejected(("start_operations_control_schema_invalid",))
     action = str(request.get("action") or "").strip()
@@ -47,7 +49,10 @@ def validated_request(
     intent_id = str(request.get("intent_id") or "").strip()
     if action != "submit" and not intent_id.startswith("sha256:"):
         raise StartOperationsRejected(("start_operations_control_intent_id_invalid",))
-    return action, profile, intent_id
+    control_request_id = str(request.get("control_request_id") or "").strip()
+    if not CONTROL_REQUEST_ID_RE.fullmatch(control_request_id):
+        raise StartOperationsRejected(("start_operations_control_request_id_invalid",))
+    return action, profile, intent_id, control_request_id
 
 
 def prepare_submission(

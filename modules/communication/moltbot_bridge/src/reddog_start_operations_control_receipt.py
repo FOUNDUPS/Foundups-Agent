@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from dataclasses import asdict, dataclass
 from typing import Any, Callable, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
@@ -13,10 +11,13 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_profile im
     PROFILE_ID,
     StartOperationsProfile,
 )
-
-
-RESULT_SCHEMA = "reddog_start_operations_control_result.v1"
-PROGRESS_SCHEMA = "reddog_start_operations_progress.v1"
+from modules.communication.moltbot_bridge.src.reddog_start_operations_result import (
+    EFFECT_EVIDENCE_LEVEL,
+    PROGRESS_SCHEMA,
+    RESULT_SCHEMA,
+    StartOperationsControlResult,
+    result_json,
+)
 HOLO_REASON_TOKENS = ("holoindex", "grounding_holo")
 CLIENT_BOUNDARY_FIELDS = (
     ("no_maintenance_performed", "client_no_holoindex_reindex_performed"),
@@ -29,48 +30,20 @@ CLIENT_BOUNDARY_FIELDS = (
 )
 
 
-@dataclass(frozen=True)
-class StartOperationsControlResult:
-    schema_version: str
-    response_id: str
-    accepted: bool
-    action: str
-    operations_profile_id: str
-    intent_id: str
-    cycle_id: str
-    status: str
-    repo_head_sha: str
-    architect_action: str
-    architect_next_slice: str
-    determination_id: str
-    task_status_counts: Mapping[str, int]
-    duplicate_intent_reused: bool
-    recovered_existing_cycle: bool
-    deferred_holo_maintenance: bool
-    rejection_reasons: tuple[str, ...]
-    no_extension_fusion_call_performed: bool = True
-    no_maintenance_performed: bool = True
-    no_repo_mutation_performed: bool = True
-    no_shell_command_executed: bool = True
-    no_hermes_dispatch_performed: bool = True
-    no_worktree_operation_performed: bool = True
-    no_pr_created: bool = True
-    no_merge_performed: bool = True
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
 def write_progress(
     writer: Callable[[Mapping[str, Any]], None] | None,
     intent: Mapping[str, Any],
     repo_state: Mapping[str, Any],
+    action: str,
+    control_request_id: str,
 ) -> None:
     if writer is None:
         return
     payload = {
         "schema_version": PROGRESS_SCHEMA,
         "stage": "resident_cycle_submitting",
+        "action": action,
+        "control_request_id": control_request_id,
         "intent_id": str(intent.get("intent_id") or ""),
         "repo_head_sha": str(repo_state.get("head_sha") or ""),
         "operations_profile_id": PROFILE_ID,
@@ -83,10 +56,11 @@ def from_client(
     profile: StartOperationsProfile,
     repo_state: Mapping[str, Any],
     response: Any,
+    control_request_id: str,
 ) -> StartOperationsControlResult:
     reasons = tuple(str(item) for item in response.rejection_reasons if str(item))
     boundary_ok = _boundary_ok(response)
-    payload = _base_payload(action, profile, repo_state)
+    payload = _base_payload(action, profile, repo_state, control_request_id)
     payload.update(
         {
             "accepted": bool(response.accepted) and boundary_ok,
@@ -116,8 +90,9 @@ def reject(
     reasons: Sequence[str],
     *,
     intent_id: str = "",
+    control_request_id: str = "",
 ) -> StartOperationsControlResult:
-    payload = _base_payload(action, profile, repo_state)
+    payload = _base_payload(action, profile, repo_state, control_request_id)
     payload.update(
         {
             "accepted": False,
@@ -134,10 +109,12 @@ def _base_payload(
     action: str,
     profile: StartOperationsProfile,
     repo_state: Mapping[str, Any],
+    control_request_id: str,
 ) -> dict[str, Any]:
     return {
         "accepted": False,
         "action": action,
+        "control_request_id": control_request_id,
         "operations_profile_id": profile.profile_id,
         "intent_id": "",
         "cycle_id": "",
@@ -177,15 +154,23 @@ def _holo_deferred(reasons: Sequence[str]) -> bool:
 
 
 def _result(payload: Mapping[str, Any]) -> StartOperationsControlResult:
-    body = {"schema_version": RESULT_SCHEMA, **dict(payload)}
+    body = {
+        "schema_version": RESULT_SCHEMA,
+        "effect_evidence_level": EFFECT_EVIDENCE_LEVEL,
+        "no_extension_fusion_call_performed": True,
+        "no_maintenance_performed": True,
+        "no_repo_mutation_performed": True,
+        "no_shell_command_executed": True,
+        "no_hermes_dispatch_performed": True,
+        "no_worktree_operation_performed": True,
+        "no_pr_created": True,
+        "no_merge_performed": True,
+        **dict(payload),
+    }
     return StartOperationsControlResult(
         response_id=canonical_digest(body),
         **body,
     )
-
-
-def result_json(result: StartOperationsControlResult) -> str:
-    return json.dumps(result.to_dict(), sort_keys=True, separators=(",", ":"))
 
 
 __all__ = [

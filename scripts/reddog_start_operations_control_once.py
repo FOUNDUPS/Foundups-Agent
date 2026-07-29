@@ -44,9 +44,8 @@ def _write(value: Mapping[str, Any]) -> None:
 def main() -> int:
     try:
         payload = _read_payload()
-        repo_root = Path(str(payload.get("repo_root") or REPO_ROOT)).resolve()
         result = run_start_operations_control(
-            repo_root=repo_root,
+            repo_root=REPO_ROOT,
             request=payload,
             progress_writer=_write,
         )

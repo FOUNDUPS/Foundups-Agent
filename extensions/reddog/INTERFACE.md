@@ -3,8 +3,15 @@
 Version 0.4.30 adds the exact `start operations` control family. The command
 selects a checked-in, read-only operational profile and never becomes a work
 prompt or authority token. Submission/resume require distinct receipt-bound
-audit and architect model assignments. Status and cancellation reconnect to
-the existing durable AgentDB intent.
+audit and architect model assignments plus independent host-pinned receipt
+IDs. Every call carries a fresh request ID, child output is cumulatively
+bounded, ambient IDE credentials are excluded, and status/cancellation
+reconnect to the workspace-persisted durable AgentDB intent. No-effect fields
+are implementation-boundary attestations, not independent forensic evidence.
+The host pins the accepted audit and architect binding IDs through the
+`REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID` and
+`REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID`
+environment values; self-hashed artifacts do not choose those pins.
 
 Version 0.4.29 requires signed Memex supply lineage to remain exact from the
 delegated authority through AgentDB execution and independent verification.

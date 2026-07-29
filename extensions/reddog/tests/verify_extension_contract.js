@@ -23,6 +23,7 @@ const groundedTargetContinuity = require(path.join(extDir, 'grounded_target_cont
 const repoDeepDiveFocusPolicy = require(path.join(extDir, 'repo_deep_dive_focus_policy.js'));
 const startOperationsControlJs = fs.readFileSync(path.join(extDir, 'start_operations_control.js'), 'utf8');
 const startOperationsBridgeJs = fs.readFileSync(path.join(extDir, 'start_operations_bridge.js'), 'utf8');
+const startOperationsEnvironmentJs = fs.readFileSync(path.join(extDir, 'start_operations_environment.js'), 'utf8');
 const bridgePy = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_once.py'), 'utf8');
 const holoOwnerBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_holoindex_owner_query_once.py'), 'utf8');
 const residentArchitectBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_resident_architect_session_once.py'), 'utf8');
@@ -222,13 +223,18 @@ includes(JSON.stringify(pkg), 'foundupsFusion.open', 'legacy command alias must 
 includes(JSON.stringify(pkg), 'reddog.enableResidentArchitectSession', 'canonical resident session setting missing');
 includes(JSON.stringify(pkg), 'foundupsFusion.enableResidentArchitectSession', 'legacy resident session setting alias missing');
 includes(extensionJs, "title: 'RedDog'", 'webview title must use RedDog');
-includes(extensionJs, 'startOperationsAdapter.handleMessage({', 'exact operations control route missing');
+includes(extensionJs, 'startOperationsAdapter.handleMessage(', 'exact operations control route missing');
 includes(extensionJs, 'REDDOG_START_OPERATIONS_CONTROL_SCRIPT', 'operations control bridge missing');
 includes(startOperationsControlJs, "'start operations', 'submit'", 'exact start operations command missing');
 includes(startOperationsControlJs, 'receipt_bound_runtime', 'production model-binding gate missing');
 includes(startOperationsBridgeJs, 'cp.spawn', 'asynchronous operations bridge missing');
+includes(startOperationsBridgeJs, 'stdoutBytes', 'cumulative stdout cap missing');
+includes(startOperationsControlJs, 'control_request_id', 'request correlation missing');
+includes(startOperationsEnvironmentJs, 'ALLOWED_KEYS', 'operations env allowlist missing');
+includes(extensionJs, "workspaceState.get('reddog.operationsIntentId'", 'durable operations intent missing');
+includes(extensionJs, 'startOperationsEnvironment.build(process.env)', 'ambient extension env exposed');
 assert(
-  extensionJs.indexOf('startOperationsAdapter.handleMessage({')
+  extensionJs.indexOf('startOperationsAdapter.handleMessage(')
     < extensionJs.indexOf('const basePrompt = classification.conversationalDraft'),
   'operations control must intercept before WSP prompt/Fusion assembly'
 );

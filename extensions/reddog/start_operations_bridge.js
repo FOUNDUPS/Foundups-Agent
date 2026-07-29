@@ -5,6 +5,7 @@ const protocol = require('./start_operations_control');
 
 const MAX_STDOUT_BYTES = 2 * 1024 * 1024;
 const MAX_STDERR_BYTES = 64 * 1024;
+const MAX_FRAMES = 256;
 const DEFAULT_DEADLINE_MS = 15 * 60 * 1000;
 
 function run(options) {
@@ -24,7 +25,9 @@ function run(options) {
         }
       );
     } catch (_err) {
-      resolve(protocol.failureResult(action, 'start_operations_bridge_spawn_failed'));
+      resolve(protocol.failureResult(
+        action, 'start_operations_bridge_spawn_failed', opts.request
+      ));
       return;
     }
     collect(child, opts, resolve);
@@ -32,7 +35,9 @@ function run(options) {
 }
 
 function collect(child, options, resolve) {
-  const state = { stdout: '', stderrBytes: 0, finalResult: null };
+  const state = {
+    stdout: '', stdoutBytes: 0, stderrBytes: 0, frameCount: 0, finalResult: null
+  };
   const controls = collectionControls(child, options, resolve, state);
   attachOutputListeners(child, options, state, controls);
   attachLifecycleListeners(child, options, state, controls);
@@ -49,7 +54,7 @@ function collectionControls(child, options, resolve, state) {
   };
   const fail = (reason) => {
     if (child && typeof child.kill === 'function') child.kill();
-    finish(protocol.failureResult(action, reason));
+    finish(protocol.failureResult(action, reason, options.request));
   };
   const action = options.request && options.request.action;
   const timer = setTimeout(
@@ -61,13 +66,22 @@ function collectionControls(child, options, resolve, state) {
 
 function attachOutputListeners(child, options, state, controls) {
   child.stdout.on('data', (chunk) => {
-    state.stdout += String(chunk || '');
-    if (Buffer.byteLength(state.stdout, 'utf8') > MAX_STDOUT_BYTES) {
+    const text = String(chunk || '');
+    state.stdoutBytes += Buffer.byteLength(text, 'utf8');
+    state.stdout += text;
+    if (state.stdoutBytes > MAX_STDOUT_BYTES) {
       controls.fail('start_operations_bridge_output_too_large');
       return;
     }
-    const parsed = consumeLines(state.stdout, options.onProgress);
+    const parsed = consumeLines(
+      state.stdout, options.request, options.onProgress, state.frameCount
+    );
     state.stdout = parsed.remaining;
+    state.frameCount = parsed.frameCount;
+    if (state.frameCount > MAX_FRAMES) {
+      controls.fail('start_operations_bridge_frame_limit_exceeded');
+      return;
+    }
     if (parsed.result) state.finalResult = parsed.result;
   });
   child.stderr.on('data', (chunk) => {
@@ -83,11 +97,19 @@ function attachLifecycleListeners(child, options, state, controls) {
   child.once('error', () => controls.fail('start_operations_bridge_failed'));
   child.once('close', (code) => {
     if (controls.isSettled()) return;
-    const parsed = consumeLines(state.stdout + '\n', options.onProgress);
+    const parsed = consumeLines(
+      state.stdout + '\n', options.request, options.onProgress, state.frameCount
+    );
+    if (parsed.frameCount > MAX_FRAMES) {
+      controls.fail('start_operations_bridge_frame_limit_exceeded');
+      return;
+    }
     if (parsed.result) state.finalResult = parsed.result;
     controls.finish(code === 0 && state.finalResult
       ? state.finalResult
-      : protocol.failureResult(action, 'start_operations_bridge_failed'));
+      : protocol.failureResult(
+        action, 'start_operations_bridge_failed', options.request
+      ));
   });
 }
 
@@ -99,30 +121,33 @@ function writeRequest(child, options, controls) {
   }
 }
 
-function consumeLines(buffer, onProgress) {
+function consumeLines(buffer, request, onProgress, frameCount) {
   const lines = String(buffer || '').split(/\r?\n/);
   const remaining = lines.pop() || '';
   let result = null;
+  let count = Number(frameCount || 0);
   for (const line of lines) {
     if (!line.trim()) continue;
+    count += 1;
     let value;
     try {
       value = JSON.parse(line);
     } catch (_err) {
       continue;
     }
-    const progress = protocol.validateProgress(value);
+    const progress = protocol.validateProgress(value, request);
     if (progress && typeof onProgress === 'function') onProgress(progress);
-    const terminal = protocol.validateResult(value);
+    const terminal = protocol.validateResult(value, request);
     if (terminal) result = terminal;
   }
-  return { remaining, result };
+  return { remaining, result, frameCount: count };
 }
 
 module.exports = {
   DEFAULT_DEADLINE_MS,
   MAX_STDERR_BYTES,
   MAX_STDOUT_BYTES,
+  MAX_FRAMES,
   consumeLines,
   run
 };

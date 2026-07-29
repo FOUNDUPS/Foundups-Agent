@@ -8,7 +8,9 @@ async function execute(options) {
   const opts = options && typeof options === 'object' ? options : {};
   const command = opts.command;
   const bindingReason = protocol.bindingRejection(command, opts.worker);
-  if (bindingReason) return packet(protocol.failureResult(command.action, bindingReason), opts.worker);
+  if (bindingReason) {
+    return packet(protocol.failureResult(command.action, bindingReason), opts.worker);
+  }
   const intentId = command.action === 'submit' ? '' : String(opts.intentId || '');
   if (!intentId && command.action !== 'submit') {
     return packet(
@@ -16,12 +18,13 @@ async function execute(options) {
       opts.worker
     );
   }
+  const request = protocol.buildRequest(command, intentId, opts.repoRoot);
   const result = await bridge.run({
     interpreter: opts.interpreter,
     script: opts.script,
     repoRoot: opts.repoRoot,
     env: opts.env,
-    request: protocol.buildRequest(command, intentId, opts.repoRoot),
+    request,
     onProgress: opts.onProgress
   });
   return packet(result, opts.worker);
@@ -45,16 +48,24 @@ async function handleMessage(options) {
       'RedDog operations control: ' + command.action + ' requested.'
     ),
     onProgress: (progress) => {
-      if (opts.state) opts.state.operationsIntentId = progress.intent_id;
+      persistIntent(opts, progress.intent_id);
       opts.postStatus('Resident cycle submitted: ' + progress.intent_id);
     }
   });
   if (!outcome) return false;
-  if (opts.state && outcome.result.intent_id) {
-    opts.state.operationsIntentId = outcome.result.intent_id;
+  if (outcome.result.intent_id) {
+    persistIntent(opts, outcome.result.intent_id);
   }
   opts.postResult(outcome.packet);
   return true;
+}
+
+function persistIntent(options, intentId) {
+  const value = String(intentId || '');
+  if (!value) return;
+  if (options.state) options.state.operationsIntentId = value;
+  if (typeof options.persistIntentId !== 'function') return;
+  Promise.resolve(options.persistIntentId(value)).catch(() => {});
 }
 
 function packet(result, worker) {

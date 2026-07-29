@@ -18,7 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 
 
 class _Receipt:
-    def __init__(self, surface: str) -> None:
+    def __init__(self, surface: str, receipt_id: str) -> None:
         from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
             ModelRuntimeBindingDecision,
         )
@@ -27,6 +27,13 @@ class _Receipt:
         self.principal_model = "provider/model"
         self.runtime_surface = surface
         self.rejection_reasons = ()
+        self.receipt_id = receipt_id
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "receipt_id": self.receipt_id,
+            "runtime_surface": self.runtime_surface,
+        }
 
 
 def _env(runtime_root: Path, audit_path: Path, architect_path: Path) -> dict[str, str]:
@@ -36,6 +43,8 @@ def _env(runtime_root: Path, audit_path: Path, architect_path: Path) -> dict[str
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(
             architect_path
         ),
+        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": "audit:receipt",
+        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": "architect:receipt",
     }
 
 
@@ -45,7 +54,10 @@ def test_loads_distinct_bound_receipts_outside_repo(tmp_path: Path) -> None:
     audit_path.write_text("{}", encoding="utf-8")
     architect_path.write_text("{}", encoding="utf-8")
     raws = [{"runtime_surface": AUDIT_SURFACE}, {"runtime_surface": ARCHITECT_SURFACE}]
-    receipts = [_Receipt(AUDIT_SURFACE), _Receipt(ARCHITECT_SURFACE)]
+    receipts = [
+        _Receipt(AUDIT_SURFACE, "audit:receipt"),
+        _Receipt(ARCHITECT_SURFACE, "architect:receipt"),
+    ]
     with (
         patch(
             "modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings."
@@ -64,8 +76,8 @@ def test_loads_distinct_bound_receipts_outside_repo(tmp_path: Path) -> None:
         )
 
     assert reason == ""
-    assert audit == raws[0]
-    assert architect == raws[1]
+    assert audit == receipts[0].to_dict()
+    assert architect == receipts[1].to_dict()
 
 
 @pytest.mark.parametrize(
@@ -79,6 +91,18 @@ def test_loads_distinct_bound_receipts_outside_repo(tmp_path: Path) -> None:
         (
             {"REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": ""},
             "missing_architect_model_runtime_binding_path",
+        ),
+        (
+            {
+                "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": ""
+            },
+            "missing_audit_model_runtime_binding_expected_receipt_id",
+        ),
+        (
+            {
+                "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": ""
+            },
+            "missing_architect_model_runtime_binding_expected_receipt_id",
         ),
     ),
 )
@@ -116,7 +140,10 @@ def test_wrong_surface_is_rejected(tmp_path: Path) -> None:
         patch(
             "modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings."
             "rehydrate_model_runtime_binding_receipt",
-            side_effect=(_Receipt(ARCHITECT_SURFACE), _Receipt(ARCHITECT_SURFACE)),
+            side_effect=(
+                _Receipt(ARCHITECT_SURFACE, "audit:receipt"),
+                _Receipt(ARCHITECT_SURFACE, "architect:receipt"),
+            ),
         ),
     ):
         result = load_resident_model_runtime_bindings(
@@ -137,3 +164,31 @@ def test_artifact_inside_repo_is_rejected(tmp_path: Path) -> None:
         ),
     )
     assert result == (None, None, "model_runtime_binding_artifact_inside_repo")
+
+
+def test_recomputed_untrusted_binding_rejects_against_host_pin(
+    tmp_path: Path,
+) -> None:
+    audit_path = tmp_path / "audit.json"
+    architect_path = tmp_path / "architect.json"
+    audit_path.write_text("{}", encoding="utf-8")
+    architect_path.write_text("{}", encoding="utf-8")
+    forged = _Receipt(AUDIT_SURFACE, "sha256:attacker-recomputed")
+    architect = _Receipt(ARCHITECT_SURFACE, "architect:receipt")
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings."
+            "read_reddog_runtime_json_mapping",
+            side_effect=({}, {}),
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings."
+            "rehydrate_model_runtime_binding_receipt",
+            side_effect=(forged, architect),
+        ),
+    ):
+        result = load_resident_model_runtime_bindings(
+            REPO_ROOT,
+            environ=_env(tmp_path, audit_path, architect_path),
+        )
+    assert result == (None, None, "audit_model_runtime_binding_receipt_id_mismatch")

@@ -21,6 +21,7 @@ const conversationalDraftPolicy = require('./conversational_draft_policy');
 const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
 const startOperationsAdapter = require('./start_operations_extension_adapter');
+const startOperationsEnvironment = require('./start_operations_environment');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const EXTENSION_VERSION = '0.4.30';
@@ -5343,7 +5344,9 @@ async function openFusionEditor(context, installState) {
     bridgeChild: null,
     disposed: false,
     liveEnqueueKeys: new Set(),
-    operationsIntentId: ''
+    operationsIntentId: String(
+      context.workspaceState.get('reddog.operationsIntentId', '') || ''
+    )
   };
   state.installState = installState || detectRedDogInstallState(context);
   wireFusionWebview(context, panel.webview, worker, state);
@@ -5384,6 +5387,22 @@ function fusionWorkerFromConfig() {
     reddogConfigValue, DEFAULT_FUSION_WORKER, FUSION_PANEL_FORWARD_LIMIT
   );
 }
+function startOperationsOptions(context, message, worker, state, webview) {
+  return {
+    text: message.text, worker, state,
+    interpreter: resolvePythonInterpreter(
+      workspaceRoot(), reddogConfigValue('pythonPath', 'python')
+    ).path,
+    script: path.join(workspaceRoot(), REDDOG_START_OPERATIONS_CONTROL_SCRIPT),
+    repoRoot: workspaceRoot(),
+    env: startOperationsEnvironment.build(process.env),
+    persistIntentId: (value) => context.workspaceState.update(
+      'reddog.operationsIntentId', value
+    ),
+    postStatus: (text) => postStatusAndProgress(webview, null, text),
+    postResult: (result) => webview.postMessage({ command: 'result', result })
+  };
+}
 function wireFusionWebview(context, webview, worker, state) {
   webview.onDidReceiveMessage(async (message) => {
     if (!message || typeof message !== 'object') {
@@ -5410,12 +5429,9 @@ function wireFusionWebview(context, webview, worker, state) {
     if (await blockIncompatibleBackend(context, state, webview)) {
       return;
     }
-    if (await startOperationsAdapter.handleMessage({
-      text: message.text, worker, state,
-      interpreter: resolvePythonInterpreter(workspaceRoot(), reddogConfigValue('pythonPath', 'python')).path,
-      script: path.join(workspaceRoot(), REDDOG_START_OPERATIONS_CONTROL_SCRIPT), repoRoot: workspaceRoot(),
-      env: buildBridgePythonEnv(process.env), postStatus: (text) => postStatusAndProgress(webview, null, text), postResult: (result) => webview.postMessage({ command: 'result', result })
-    })) return;
+    if (await startOperationsAdapter.handleMessage(
+      startOperationsOptions(context, message, worker, state, webview)
+    )) return;
     const modelBindingBlock = modelRuntimeBindingQuery.blockedReason(worker);
     if (modelBindingBlock) {
       postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);

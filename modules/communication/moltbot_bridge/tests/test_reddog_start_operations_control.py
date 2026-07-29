@@ -34,9 +34,11 @@ MODULES = tuple(
     for name in (
         "reddog_resident_model_runtime_bindings.py",
         "reddog_start_operations_control.py",
+        "reddog_start_operations_control_actions.py",
         "reddog_start_operations_control_authority.py",
         "reddog_start_operations_control_binding.py",
         "reddog_start_operations_control_receipt.py",
+        "reddog_start_operations_result.py",
         "reddog_start_operations_profile.py",
     )
 )
@@ -47,6 +49,7 @@ def _request(action: str = "submit", intent_id: str = "") -> dict[str, str]:
     return {
         "schema_version": CONTROL_SCHEMA,
         "action": action,
+        "control_request_id": "sha256:" + "9" * 64,
         "operations_profile_id": PROFILE_ID,
         "intent_id": intent_id,
     }
@@ -60,6 +63,8 @@ def _env() -> dict[str, str]:
         "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": "O:/runtime",
         "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": "O:/runtime/audit.json",
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": "O:/runtime/architect.json",
+        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": "audit:receipt",
+        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": "architect:receipt",
     }
 
 
@@ -166,6 +171,8 @@ def test_submit_binds_profile_head_models_scope_and_budgets() -> None:
     intent = client.calls[0][1]
 
     assert result.accepted is True
+    assert result.control_request_id == _request()["control_request_id"]
+    assert result.effect_evidence_level == "IMPLEMENTATION_BOUNDARY_ATTESTATION"
     assert client.calls[0][0] == "submit"
     assert intent["operations_profile_id"] == PROFILE_ID
     assert intent["repo_head_sha"] == "a" * 40
@@ -216,6 +223,10 @@ def test_dirty_repo_rejects_before_grounding_or_client() -> None:
             "start_operations_profile_invalid",
         ),
         (_request("status"), "start_operations_control_intent_id_invalid"),
+        (
+            {**_request(), "control_request_id": "attacker"},
+            "start_operations_control_request_id_invalid",
+        ),
     ),
 )
 def test_invalid_control_request_returns_typed_rejection(payload, reason) -> None:

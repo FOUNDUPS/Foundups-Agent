@@ -19,6 +19,12 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
 
 AUDIT_SURFACE = "reddog_readonly_audit_worker"
 ARCHITECT_SURFACE = "reddog_backend_architect"
+AUDIT_EXPECTED_ID_ENV = (
+    "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID"
+)
+ARCHITECT_EXPECTED_ID_ENV = (
+    "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID"
+)
 
 
 def load_resident_model_runtime_bindings(
@@ -30,6 +36,9 @@ def load_resident_model_runtime_bindings(
 
     env = environ if environ is not None else os.environ
     paths, reason = _binding_paths(env, Path(repo_root))
+    if reason:
+        return None, None, reason
+    expected_ids, reason = _expected_receipt_ids(env)
     if reason:
         return None, None, reason
     runtime, audit_path, architect_path = paths
@@ -44,7 +53,23 @@ def load_resident_model_runtime_bindings(
         return None, None, "audit_model_runtime_binding_surface_invalid"
     if not _valid_binding(architect_receipt, ARCHITECT_SURFACE):
         return None, None, "architect_model_runtime_binding_surface_invalid"
-    return audit, architect, ""
+    if audit_receipt.receipt_id != expected_ids[0]:
+        return None, None, "audit_model_runtime_binding_receipt_id_mismatch"
+    if architect_receipt.receipt_id != expected_ids[1]:
+        return None, None, "architect_model_runtime_binding_receipt_id_mismatch"
+    return audit_receipt.to_dict(), architect_receipt.to_dict(), ""
+
+
+def _expected_receipt_ids(
+    env: Mapping[str, str],
+) -> tuple[tuple[str, str], str]:
+    audit = str(env.get(AUDIT_EXPECTED_ID_ENV) or "").strip()
+    architect = str(env.get(ARCHITECT_EXPECTED_ID_ENV) or "").strip()
+    if not audit:
+        return ("", ""), "missing_audit_model_runtime_binding_expected_receipt_id"
+    if not architect:
+        return ("", ""), "missing_architect_model_runtime_binding_expected_receipt_id"
+    return (audit, architect), ""
 
 
 def _binding_paths(
@@ -103,7 +128,9 @@ def _inside(child: Path, parent: Path) -> bool:
 
 
 __all__ = [
+    "ARCHITECT_EXPECTED_ID_ENV",
     "ARCHITECT_SURFACE",
+    "AUDIT_EXPECTED_ID_ENV",
     "AUDIT_SURFACE",
     "load_resident_model_runtime_bindings",
 ]
