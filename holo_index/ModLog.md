@@ -8,6 +8,8 @@
   used by the canonical freshness proof.
 - Added a large-state regression that rejects unbounded collection reads and
   verifies complete stale-record deletion and proof construction.
+- Fail closed when a collection ignores pagination or returns short,
+  oversized, duplicate, or overlapping symbol-ID pages.
 
 ## [2026-07-26] Exact-SHA post-merge authority primitives
 

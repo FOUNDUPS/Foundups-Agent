@@ -12,6 +12,7 @@ from holo_index.symbol_indexer import (
     PUBLISH_BATCH_SIZE,
     SNAPSHOT_PAGE_SIZE,
     SYMBOL_DOCSTRING_MAX_CHARS,
+    _existing_record_ids,
     index_symbol_entries,
 )
 
@@ -335,6 +336,53 @@ def test_symbol_reconciliation_pages_large_existing_snapshot(tmp_path: Path) -> 
     assert all(
         len(batch) <= PUBLISH_BATCH_SIZE for batch in collection.delete_calls
     )
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_error"),
+    [
+        ("ignored_pagination", "PAGE_INCOMPLETE"),
+        ("oversized", "PAGE_INCOMPLETE"),
+        ("short", "PAGE_INCOMPLETE"),
+        ("duplicate", "PAGE_DUPLICATE"),
+        ("overlap", "PAGE_OVERLAP"),
+    ],
+)
+def test_symbol_reconciliation_rejects_unverified_page_boundaries(
+    mode: str,
+    expected_error: str,
+) -> None:
+    class _HostileCollection:
+        def count(self) -> int:
+            return SNAPSHOT_PAGE_SIZE + 1
+
+        def get(
+            self,
+            *,
+            include: list[str],
+            limit: int,
+            offset: int,
+        ) -> dict[str, list[str]]:
+            assert include == []
+            if mode == "ignored_pagination":
+                ids = [f"id-{index}" for index in range(self.count())]
+            elif mode == "oversized":
+                ids = [f"id-{offset + index}" for index in range(limit + 1)]
+            elif mode == "short":
+                ids = [f"id-{offset + index}" for index in range(max(0, limit - 1))]
+            elif mode == "duplicate":
+                ids = [f"id-{offset + index}" for index in range(limit)]
+                ids[-1] = ids[0]
+            else:
+                ids = (
+                    [f"id-{index}" for index in range(limit)]
+                    if offset == 0
+                    else ["id-0"]
+                )
+            return {"ids": ids}
+
+    with pytest.raises(ValueError, match=expected_error):
+        _existing_record_ids(_HostileCollection())
 
 
 def test_embedding_space_mismatch_forces_reset_and_reembedding(tmp_path: Path) -> None:

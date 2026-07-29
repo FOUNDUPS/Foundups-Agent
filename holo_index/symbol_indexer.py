@@ -344,15 +344,21 @@ def _existing_record_ids(collection: Any) -> set[str]:
     total = int(collection.count())
     existing: set[str] = set()
     for offset in range(0, total, SNAPSHOT_PAGE_SIZE):
+        requested = min(SNAPSHOT_PAGE_SIZE, total - offset)
         snapshot = collection.get(
             include=[],
-            limit=min(SNAPSHOT_PAGE_SIZE, total - offset),
+            limit=requested,
             offset=offset,
         )
         page_ids = [str(value) for value in _flat_list(snapshot, "ids")]
-        if not page_ids:
+        page_id_set = set(page_ids)
+        if len(page_ids) != requested:
             raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_PAGE_INCOMPLETE")
-        existing.update(page_ids)
+        if len(page_id_set) != len(page_ids):
+            raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_PAGE_DUPLICATE")
+        if existing.intersection(page_id_set):
+            raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_PAGE_OVERLAP")
+        existing.update(page_id_set)
     if len(existing) != total:
         raise ValueError("HOLOINDEX_SYMBOL_RECONCILIATION_SNAPSHOT_MISMATCH")
     return existing
