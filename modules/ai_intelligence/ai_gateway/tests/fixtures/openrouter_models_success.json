@@ -2,6 +2,8 @@
   "data": [
     {
       "id": "zeta/model-b",
+      "canonical_slug": "zeta/model-b-20260729",
+      "created": 1785283200,
       "name": "discard me",
       "description": "provider prose is outside the allowlist",
       "context_length": 131072,
@@ -17,6 +19,8 @@
     },
     {
       "id": "alpha/model-a:free",
+      "canonical_slug": "alpha/model-a-20260701",
+      "created": 1782864000,
       "context_length": 32768,
       "pricing": {"prompt": "0", "completion": "0"},
       "architecture": {

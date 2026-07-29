@@ -1,5 +1,14 @@
 # AI Gateway TestModLog
 
+## [2026-07-29] - Live provider header normalization and chronology
+
+- Reproduced aiohttp multidict header-name subclasses and proved the transport
+  projects them to exact strings before strict validation.
+- Proved canonical slug and creation chronology remain allowlisted,
+  deterministic candidate evidence.
+- Revalidated discovery, candidate rehydration, protected surfaces, and
+  no-growth limits.
+
 ## 2026-07-24 - OpenRouter endpoint-route single-call admission phase B2A
 
 Scope: offline adversarial verification of externally supplied endpoint

@@ -1,5 +1,17 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - Receipt-bound health and model freshness routing (0.4.35)
+
+- Proved simple HoloIndex health questions route locally with no model call,
+  Fusion panel, re-index, or execution authority, with a bounded worker timeout.
+- Proved audit/repair/re-index and compound prompts cannot enter the fast path.
+- Proved explicit freshness questions consume digest-validated provider
+  receipts through a secret-free environment and cannot change model selection
+  or runtime bindings.
+- Added forged/extra/stale/future receipt, spawn/timeout/output-bound,
+  missing-chronology, provider-recency, exact-header normalization, and live
+  official-catalog coverage.
+
 ## 2026-07-29 - Generation-bound owner fallback preservation (0.4.34)
 
 - Proved accepted owner evidence survives a non-JSON legacy bundle fallback.

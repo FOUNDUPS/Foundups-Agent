@@ -77,8 +77,8 @@ def test_success_fixture_is_allowlisted_canonical_and_sorted() -> None:
     assert zeta["supported_parameters"] == ["response_format", "tools"]
     assert zeta["top_provider"] == {"context_length": 131072}
     assert set(zeta) == {
-        "id", "context_length", "pricing", "architecture", "supported_parameters",
-        "top_provider",
+        "id", "canonical_slug", "created", "context_length", "pricing",
+        "architecture", "supported_parameters", "top_provider",
     }
     assert "name" not in json.dumps(payload)
 

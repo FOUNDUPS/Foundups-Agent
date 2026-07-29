@@ -1,5 +1,20 @@
 # AI Gateway Module Change Log
 
+## [2026-07-29] - Provider Catalog Runtime Header and Chronology Hardening
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_HEALTH_AND_MODEL_FRESHNESS_ROUTING_PHASE1`
+
+**What:** Normalized aiohttp header-name subclasses to exact strings before
+the strict transport validator, fixing real HTTP 200 catalog discovery that
+previously failed as `transport_failed`. Added allowlisted `canonical_slug`
+and `created` provider fields so a freshness receipt can distinguish exact
+availability from provider chronology.
+
+**Truth boundary:** Provider chronology is candidate metadata only. It does
+not prove task fitness, promotion, availability at execution time, or
+production authority.
+
 ## [2026-07-24] - OpenRouter Endpoint Route Single-Call Admission Phase B2A
 
 **Who/Type/Slice:** 0102 RedDog Architect isolated worker / Defensive
