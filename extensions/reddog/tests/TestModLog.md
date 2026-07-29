@@ -1,5 +1,15 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - Imperative semantic grounding normalization (0.4.37)
+
+- Reproduced the `continue do the work needed to fix enhance holoindex`
+  preflight failure and proved HoloIndex evidence now grounds the named subject.
+- Added unrelated-evidence, coordinated-subject, explicit-target,
+  quoted-action, and subjectless-pronoun regressions so normalization cannot
+  weaken the fail-closed grounding boundary.
+- Proved alternate connectors and smart-quoted action mentions cannot produce
+  partial or accidental grounding.
+
 ## 2026-07-29 - HoloIndex health timeout calibration (0.4.36)
 
 - Bound the production asynchronous health deadline to 30 seconds and retained

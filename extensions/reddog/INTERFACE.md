@@ -1,5 +1,11 @@
 # RedDog Interface
 
+Version 0.4.37 keeps the full imperative work focus as the HoloIndex query but
+matches grounding evidence against its substantive subject tokens. Action
+verbs and continuation scaffolding cannot create impossible evidence
+obligations. An unnamed `it` remains insufficient; sanitized continuation is
+advisory context and cannot authorize a missing target.
+
 Version 0.4.36 gives the asynchronous HoloIndex health worker a 30-second
 deadline, calibrated from live post-merge owner-query evidence. Timeout remains
 fail-closed and never falls back to a model, synchronous host-thread query, or

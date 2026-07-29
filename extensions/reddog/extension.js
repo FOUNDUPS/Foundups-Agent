@@ -25,7 +25,7 @@ const startOperationsEnvironment = require('./start_operations_environment');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
-const EXTENSION_VERSION = '0.4.36';
+const EXTENSION_VERSION = '0.4.37';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -1320,40 +1320,6 @@ function lineHasAnyLowerPhrase(line, phrases) {
   return false;
 }
 
-function splitSemanticParts(text) {
-  const parts = [];
-  const s = String(text || '');
-  let current = '';
-  for (let i = 0; i < s.length; i++) {
-    const ch = s.charAt(i);
-    if (ch === ',' || ch === ';') {
-      if (current.trim()) {
-        parts.push(current.trim());
-      }
-      current = '';
-      continue;
-    }
-    current += ch;
-  }
-  if (current.trim()) {
-    parts.push(current.trim());
-  }
-  return parts;
-}
-
-function semanticHeaderBody(line) {
-  const s = String(line || '');
-  const colon = s.indexOf(':');
-  if (colon === -1) {
-    return null;
-  }
-  const key = collapseAsciiWhitespace(s.slice(0, colon)).toLowerCase();
-  if (['semantic target', 'semantic targets', 'concept', 'concepts', 'research topic', 'topic', 'question'].indexOf(key) === -1) {
-    return null;
-  }
-  return s.slice(colon + 1);
-}
-
 function extractQuotedReferenceBlocks(taskText) {
   const text = String(taskText || '');
   const blocks = [];
@@ -1423,7 +1389,7 @@ function removeQuotedReferenceBlocks(taskText) {
 
 function isSubstantiveGroundingRequest(taskText) {
   const text = removeQuotedReferenceBlocks(taskText);
-  return semanticGroundingPolicy.SEMANTIC_WORK_ACTION_PATTERN.test(text)
+  return semanticGroundingPolicy.hasSemanticWorkAction(text)
     && !isRunTraceAssessmentRequest(taskText) && !isDaemonOutputAssessmentRequest(taskText);
 }
 
@@ -1447,7 +1413,7 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
     targets.push(value);
   };
   const lines = text.split(/\r?\n/);
-  const hasExplicitSemanticTarget = lines.some((line) => semanticHeaderBody(line.trim()) !== null);
+  const hasExplicitSemanticTarget = semanticGroundingPolicy.explicitSemanticTargets(text).length > 0;
   const allowBroadActionFallback = repoSet.size === 0 && externalSet.size === 0 && !hasExplicitSemanticTarget;
   for (const line of lines) {
     const stripped = line.trim();
@@ -1457,16 +1423,16 @@ function extractSemanticTargets(taskText, repoTargets, externalTargets) {
     if (/^https?:\/\//i.test(stripped) || extractInlinePathTokens(stripped).some((token) => repoSet.has(token.toLowerCase()))) {
       continue;
     }
-    const conceptBody = semanticHeaderBody(stripped);
+    const conceptBody = semanticGroundingPolicy.semanticHeaderBody(stripped);
     if (conceptBody !== null) {
-      for (const part of splitSemanticParts(conceptBody)) {
+      for (const part of semanticGroundingPolicy.splitSemanticParts(conceptBody)) {
         add(part);
       }
       continue;
     }
     const legacyActionTarget = lineHasAnyLowerPhrase(stripped, ['audit', 'evaluate', 'assess', 'compare', 'research', 'investigate'])
       && lineHasAnyLowerPhrase(stripped, ['architecture', 'workflow', 'orchestration', 'grounding', 'authority', 'selection', 'pipeline', 'concept', 'paper', 'repo']);
-    if ((legacyActionTarget || allowBroadActionFallback) && semanticGroundingPolicy.SEMANTIC_WORK_ACTION_PATTERN.test(stripped)
+    if ((legacyActionTarget || allowBroadActionFallback) && semanticGroundingPolicy.hasSemanticWorkAction(stripped)
         && semanticGroundingPolicy.hasSubstantiveSemanticSubject(stripped)) {
       add(stripped);
     }
@@ -1645,9 +1611,7 @@ function semanticHitSupportsTarget(hit, targetTokens, normalizedQuery) {
     };
   }
   const matched = targetTokens.filter((token) => normalizedText.includes(token));
-  const required = targetTokens.length <= 2
-    ? targetTokens.length
-    : Math.max(2, Math.ceil(targetTokens.length * 0.6));
+  const required = targetTokens.length;
   const hasAnchor = matched.some((token) => token.length >= 6) || targetTokens.every((token) => token.length < 6);
   if (targetTokens.length && matched.length >= required && hasAnchor) {
     return {
@@ -1658,13 +1622,16 @@ function semanticHitSupportsTarget(hit, targetTokens, normalizedQuery) {
   return null;
 }
 
-function buildSemanticTargetCoverage(targets, contextMode, contextPacket, scorecard) {
+function buildSemanticTargetCoverage(targets, contextMode, contextPacket, scorecard, explicitTargets) {
   const semanticTargets = Array.isArray(targets) ? targets : [];
+  const explicitSet = new Set((explicitTargets || []).map(semanticGroundingPolicy.normalizeSemanticQuery));
   const hasHolo = !!(contextMode && String(contextMode).includes('holo'));
   const evidenceHits = collectSemanticEvidenceHits(contextPacket, scorecard);
   return semanticTargets.map((target) => {
     const normalizedQuery = semanticGroundingPolicy.normalizeSemanticQuery(target);
-    const tokens = semanticGroundingPolicy.tokenizeSemanticQuery(target);
+    const tokens = explicitSet.has(normalizedQuery)
+      ? semanticGroundingPolicy.tokenizeExplicitSemanticQuery(target)
+      : semanticGroundingPolicy.tokenizeSemanticQuery(target);
     const rejectionReasons = [];
     const contentBearingHits = [];
     const evidenceRefs = [];
@@ -1740,9 +1707,8 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
   const repoFiles = repoAuditCoverage.applied
     ? repoAuditCoverage.effective_repo_file_targets
     : uniqueStrings(typedTargets.repo_file_targets.concat(discoveredRepoFiles));
-  const explicitSemanticTarget = removeQuotedReferenceBlocks(taskText)
-    .split(/\r?\n/)
-    .some((line) => semanticHeaderBody(line.trim()) !== null);
+  const explicitSemanticTargets = semanticGroundingPolicy.explicitSemanticTargets(removeQuotedReferenceBlocks(taskText));
+  const explicitSemanticTarget = explicitSemanticTargets.length > 0;
   const repoDeepDiveGrounded = isRepoDeepDiveRequest(taskText)
     && scorecard
     && scorecard.repo_deep_dive_gate_passed === true
@@ -1789,7 +1755,7 @@ function buildTypedGroundingPreflight(taskText, contextMode, contextPacket) {
     }
   }
 
-  const semanticCoverage = buildSemanticTargetCoverage(semantic, contextMode, contextPacket, scorecard);
+  const semanticCoverage = buildSemanticTargetCoverage(semantic, contextMode, contextPacket, scorecard, explicitSemanticTargets);
   const semanticMissing = semanticCoverage
     .filter((record) => record.verdict !== 'SUFFICIENT')
     .map((record) => record.target);

@@ -1,6 +1,12 @@
 # RedDog
 
-Version: 0.4.36
+Version: 0.4.37
+
+Version 0.4.37 normalizes imperative follow-up language before semantic
+evidence matching. A named subject such as HoloIndex remains mandatory, while
+command scaffolding such as `continue`, `needed`, and `enhance` no longer has
+to appear in retrieved evidence. Subjectless follow-ups remain fail-closed;
+sanitized continuation is advisory and does not supply missing target authority.
 
 Version 0.4.36 calibrates the asynchronous HoloIndex health deadline to 30
 seconds. Live exact-SHA validation measured the authenticated owner at
@@ -341,6 +347,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.36.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.37.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

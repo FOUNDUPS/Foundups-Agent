@@ -222,8 +222,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.36', 'package version must be 0.4.36');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.36'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.37', 'package version must be 0.4.37');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.37'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
 assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
@@ -366,7 +366,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.4.36', 'README version mismatch');
+includes(readme, 'Version: 0.4.37', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -2096,7 +2096,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.36', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.4.37', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -3602,7 +3602,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.36'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.4.37'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -3616,7 +3616,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.4.36'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.4.37'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -3628,7 +3628,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.36'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.4.37'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -4458,6 +4458,119 @@ const broadAuditUnrelated = orchestrator.buildTypedGroundingPreflight(broadAudit
 });
 assert.strictEqual(broadAuditUnrelated.passed, false, 'TGP-008: unrelated HoloIndex evidence cannot ground the audit');
 assert(broadAuditUnrelated.rejection_reasons.includes('semantic_target_grounding_incomplete'), 'TGP-008: unrelated evidence reports semantic grounding failure');
+const imperativeHoloPrompt = 'continue do the work needed to fix enhance holoindex';
+const imperativeHoloTargets = orchestrator.extractTypedTargets(imperativeHoloPrompt);
+assert.deepStrictEqual(imperativeHoloTargets.semantic_targets, [imperativeHoloPrompt],
+  'TGP-008A: imperative follow-up retains its named semantic target');
+const imperativeHoloPass = orchestrator.buildTypedGroundingPreflight(imperativeHoloPrompt, 'wsp_holo', {
+  semantic_evidence_hits: [{
+    location: 'holo_index/core/search_engine.py:1',
+    title: 'HoloIndex semantic search engine'
+  }]
+});
+assert.strictEqual(imperativeHoloPass.passed, true,
+  'TGP-008A: action scaffolding cannot prevent evidence from grounding the named HoloIndex subject');
+assert.deepStrictEqual(imperativeHoloPass.semantic_target_coverage[0].content_bearing_hits[0].matched_tokens, ['holoindex'],
+  'TGP-008A: semantic coverage matches the named subject rather than imperative filler');
+const imperativeHoloUnrelated = orchestrator.buildTypedGroundingPreflight(imperativeHoloPrompt, 'wsp_holo', {
+  semantic_evidence_hits: [{
+    location: 'modules/foundups/pfmall/src/pfmall_dae.py:1',
+    title: 'PFMall runtime'
+  }]
+});
+assert.strictEqual(imperativeHoloUnrelated.passed, false,
+  'TGP-008B: unrelated evidence cannot satisfy an imperative HoloIndex request');
+const coordinatedImperative = 'continue do the work needed to enhance HoloIndex and OpenClaw';
+const coordinatedPartial = orchestrator.buildTypedGroundingPreflight(coordinatedImperative, 'wsp_holo', {
+  semantic_evidence_hits: [{
+    location: 'holo_index/core/search_engine.py:1',
+    title: 'HoloIndex and semantic search engine'
+  }]
+});
+assert.strictEqual(coordinatedPartial.passed, false,
+  'TGP-008C: evidence for only one coordinated subject cannot ground the entire request');
+const coordinatedPass = orchestrator.buildTypedGroundingPreflight(coordinatedImperative, 'wsp_holo', {
+  semantic_evidence_hits: [{
+    location: 'docs/reddog_holo_openclaw.md',
+    title: 'HoloIndex and OpenClaw integration'
+  }]
+});
+assert.strictEqual(coordinatedPass.passed, true,
+  'TGP-008C: evidence naming every coordinated subject can ground the request');
+for (const connector of ['then', 'along with', 'as well as']) {
+  const alternateCoordinated = 'fix HoloIndex ' + connector + ' OpenClaw';
+  const alternatePartial = orchestrator.buildTypedGroundingPreflight(alternateCoordinated, 'wsp_holo', {
+    semantic_evidence_hits: [{
+      location: 'holo_index/core/search_engine.py:1',
+      title: 'HoloIndex ' + connector + ' semantic search'
+    }]
+  });
+  assert.strictEqual(alternatePartial.passed, false,
+    'TGP-008C: connector cannot substitute for missing OpenClaw evidence: ' + connector);
+  const alternatePass = orchestrator.buildTypedGroundingPreflight(alternateCoordinated, 'wsp_holo', {
+    semantic_evidence_hits: [{
+      location: 'docs/reddog_holo_openclaw.md',
+      title: 'HoloIndex OpenClaw integration'
+    }]
+  });
+  assert.strictEqual(alternatePass.passed, true,
+    'TGP-008C: every subject remains groundable across connector syntax: ' + connector);
+}
+for (const explicitWord of ['Enhance', 'Continue']) {
+  const explicitPrompt = 'Semantic target: ' + explicitWord;
+  const explicitPreflight = orchestrator.buildTypedGroundingPreflight(explicitPrompt, 'wsp_holo', {
+    semantic_evidence_hits: [{
+      location: 'docs/' + explicitWord.toLowerCase() + '.md',
+      title: explicitWord + ' language concept'
+    }]
+  });
+  assert.strictEqual(explicitPreflight.passed, true,
+    'TGP-008D: explicit operator target preserves an inferred-command stopword: ' + explicitWord);
+}
+const quotedEnhance = orchestrator.buildTypedGroundingPreflight(
+  'What does the word "enhance" mean?', 'wsp_holo', {}
+);
+assert.strictEqual(quotedEnhance.grounding_target_universe_required, false,
+  'TGP-008E: a quoted action-word mention does not activate semantic work');
+assert.deepStrictEqual(quotedEnhance.typed_targets.semantic_targets, [],
+  'TGP-008E: a quoted action-word mention does not invent a semantic target');
+const smartQuotedEnhance = orchestrator.buildTypedGroundingPreflight(
+  'What does the word \u201cenhance\u201d mean?', 'wsp_holo', {}
+);
+assert.strictEqual(smartQuotedEnhance.grounding_target_universe_required, false,
+  'TGP-008E: a smart-quoted action-word mention does not activate semantic work');
+assert.deepStrictEqual(smartQuotedEnhance.typed_targets.semantic_targets, [],
+  'TGP-008E: a smart-quoted action-word mention does not invent a semantic target');
+const escapedQuotedEnhance = orchestrator.extractTypedTargets(
+  String.raw`{"message":"please \"enhance\" output"}`
+);
+assert.deepStrictEqual(escapedQuotedEnhance.semantic_targets, [],
+  'TGP-008E: escaped nested quotes cannot leak quoted action words');
+assert.strictEqual(
+  semanticGroundingPolicy.hasSemanticWorkAction(String.raw`"quoted \\" enhance HoloIndex`),
+  true,
+  'TGP-008E: an even backslash run leaves the quote delimiter active'
+);
+const quoteStressStarted = Date.now();
+const quoteStressTargets = orchestrator.extractTypedTargets(
+  '\u201c'.repeat(100000) + '\\'.repeat(100000) + '"enhance"'
+);
+assert(Date.now() - quoteStressStarted < 1000,
+  'TGP-008E: pathological quote/escape input remains bounded under the single-pass scanner');
+assert.deepStrictEqual(quoteStressTargets.semantic_targets, [],
+  'TGP-008E: pathological quote/escape input cannot activate semantic work');
+const ambiguousImperative = orchestrator.buildTypedGroundingPreflight(
+  'continue do the work needed to fix enhance it', 'wsp_holo', {
+    semantic_evidence_hits: [{
+      location: 'holo_index/core/search_engine.py:1',
+      title: 'HoloIndex semantic search engine'
+    }]
+  }
+);
+assert.strictEqual(ambiguousImperative.passed, false,
+  'TGP-008F: a subjectless imperative follow-up remains fail-closed');
+assert(ambiguousImperative.rejection_reasons.includes('grounding_target_universe_empty'),
+  'TGP-008F: subjectless follow-up reports an empty grounding universe');
 const emptyAuditPreflight = orchestrator.buildTypedGroundingPreflight('Audit it.', 'wsp_holo', {
   semantic_evidence_hits: []
 });
@@ -4679,7 +4792,7 @@ vscodeMock.extensions.getExtension = (id) => (
   id === 'foundups.foundups-fusion-worker'
     ? { id, packageJSON: { version: '0.3.68' } }
     : id === 'foundups.reddog'
-      ? { id, packageJSON: { version: '0.4.36' } }
+      ? { id, packageJSON: { version: '0.4.37' } }
       : undefined
 );
 const duplicateDetectedState = orchestrator.detectRedDogInstallState({
