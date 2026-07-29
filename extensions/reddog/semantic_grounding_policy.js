@@ -1,6 +1,6 @@
 'use strict';
 
-const SEMANTIC_WORK_ACTION_PATTERN = /\b(?:analy[sz]e|assess|audit|build|compare|complete|create|debug|design|determine|evaluate|fix|harden|implement|improve|inspect|investigate|plan|refactor|research|review|update|verify)\b/i;
+const SEMANTIC_WORK_ACTION_PATTERN = /\b(?:analy[sz]e|assess|audit|build|compare|complete|create|debug|design|determine|enhance|evaluate|fix|harden|implement|improve|inspect|investigate|plan|refactor|research|review|update|verify)\b/i;
 const BROAD_AUDIT_ACTION_PATTERN = /\b(?:analy[sz]e|assess|audit|evaluate|inspect|investigate|review|verify)\b/i;
 const BROAD_AUDIT_QUERY_TERMS = [
   'architecture',
@@ -15,10 +15,11 @@ const BROAD_AUDIT_QUERY_TERMS = [
 const SEMANTIC_GROUNDING_STOPWORDS = new Set([
   'about', 'after', 'against', 'agent', 'all', 'analyze', 'analyse', 'assess', 'audit',
   'based', 'before', 'bug', 'build', 'code', 'compare', 'complete', 'concept', 'create',
-  'current', 'debug', 'design', 'determine', 'does', 'evaluate', 'everything', 'fix',
+  'continue', 'current', 'debug', 'design', 'determine', 'does', 'enhance', 'evaluate',
+  'everything', 'fix',
   'following', 'foundups', 'from', 'governance', 'grounding', 'harden', 'implement',
   'implementation', 'improve', 'inspect', 'into', 'investigate', 'issue', 'it', 'make',
-  'mapping', 'module', 'need', 'needs', 'output', 'paper', 'pipeline', 'plan', 'please',
+  'mapping', 'module', 'need', 'needed', 'needs', 'output', 'paper', 'pipeline', 'plan', 'please',
   'problem', 'question', 'read', 'refactor', 'repo', 'research', 'review', 'selection',
   'should', 'something', 'system', 'that', 'the', 'them', 'this', 'through', 'to',
   'topic', 'update', 'using', 'verify', 'whether', 'with', 'work', 'workflow', 'wsp'
