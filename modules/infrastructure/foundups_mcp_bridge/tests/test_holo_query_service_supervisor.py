@@ -20,6 +20,7 @@ from modules.infrastructure.foundups_mcp_bridge.src import (
 )
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (
     DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS,
+    DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS,
     HEALTH_SCHEMA_VERSION,
     OWNER_HOST,
     OWNER_MODULE,
@@ -143,9 +144,7 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
         "unregister",
         lambda callback: unregistered.append(callback),
     )
-
     owner = HoloQueryServiceSupervisor(repo_root=tmp_path, port=9137).start()
-
     assert owner.is_ready is True
     assert launch["command"] == [
         owner.python_executable,
@@ -167,7 +166,9 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
     assert options["stderr"] is subprocess.DEVNULL
     assert options["env"][SERVICE_TOKEN_ENV] == TOKEN
     assert SERVICE_URL_ENV not in options["env"]
-    assert launch["probe_timeouts"] == [DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS]
+    assert launch["probe_timeouts"] == [
+        DEFAULT_OWNER_STARTUP_PROBE_TIMEOUT_SECONDS
+    ]
     assert launch["probe_bindings"] == [("", "", "", "")]
     assert registered
 

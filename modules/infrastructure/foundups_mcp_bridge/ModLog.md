@@ -1,5 +1,24 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-29 - Cold semantic owner startup probe alignment
+
+- OBSERVED: one automatic startup exhausted its 300-second lifecycle deadline;
+  a subsequent in-process exact-generation owner returned semantic `CURRENT`
+  in about 35 seconds. The owner contract allowed 270 seconds for that cold
+  canary while the supervisor abandoned each exchange after 30 seconds. This
+  mismatch is corrected without claiming it was the only factor in the earlier
+  startup failure.
+- Startup health exchanges now inherit the owner's existing 270-second cold
+  warmup allowance while remaining bounded by the unchanged total startup
+  deadline. Ordinary post-start health probes remain capped at 30 seconds.
+- The readiness loop is isolated from process ownership. A real authenticated
+  HTTP regression proves a scaled cold response succeeds only under the
+  startup budget, while the ordinary probe times out; one process is spawned
+  and cleanup is bounded. The touched supervisor class and `start()` now meet
+  WSP 62 limits, and inherited module debt is reduced from 688 to 675 lines.
+- Authentication, exact repository/generation binding, no-reindex authority,
+  owner poisoning, and cleanup behavior are unchanged.
+
 ## 2026-07-29 - Sealed RedDog Holo process boundary
 
 - RedDog-owned Holo maintenance and query-owner processes now execute from the

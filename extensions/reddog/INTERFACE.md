@@ -1,6 +1,8 @@
 # RedDog Interface
 
-Version 0.4.31 adds one bounded HoloIndex recovery step to `start operations`.
+Version 0.4.32 aligns the owned-child startup health exchange with the
+existing cold semantic warmup budget. Version 0.4.31 adds one bounded
+HoloIndex recovery step to `start operations`.
 Only failed owner queries or stale generations are repairable. Recovery is a
 durable AgentDB task claimed by OpenClaw and dispatched through the canonical
 Holo maintenance handshake. Exact-HEAD owner proof is required before one

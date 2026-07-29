@@ -2,6 +2,12 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-29 - HoloIndex cold owner startup alignment (0.4.32)
+
+- Aligned the manifest-sealed query-owner supervisor with the existing bounded
+  cold semantic warmup contract while preserving ordinary health limits.
+- Regenerated the backend compatibility manifest. Version 0.4.31 -> 0.4.32.
+
 ## 2026-07-29 - REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1 (0.4.31)
 
 - Added a durable, exact-HEAD Holo repair task for failed/stale start-operations
