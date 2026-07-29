@@ -28,6 +28,9 @@ const startOperationsInterpreterJs = fs.readFileSync(path.join(extDir, 'start_op
 const runtimeMaterializerJs = fs.readFileSync(
   path.join(extDir, 'backend_compatibility_runtime_materializer.js'), 'utf8'
 );
+const startOperationsBootstrapPy = fs.readFileSync(
+  path.join(extDir, 'start_operations_python_bootstrap.py'), 'utf8'
+);
 const bridgePy = fs.readFileSync(path.join(root, 'scripts', 'advisory_model_once.py'), 'utf8');
 const holoOwnerBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_holoindex_owner_query_once.py'), 'utf8');
 const residentArchitectBridgePy = fs.readFileSync(path.join(root, 'scripts', 'reddog_resident_architect_session_once.py'), 'utf8');
@@ -244,6 +247,17 @@ includes(startOperationsInterpreterJs, 'contained(repo, root)', 'redirected venv
 includes(runtimeMaterializerJs, 'required_runtime_files', 'manifest runtime copy missing');
 includes(runtimeMaterializerJs, 'verifiedSource', 'copy-time digest recheck missing');
 includes(runtimeMaterializerJs, 'runtime_root_not_separated', 'runtime root guard missing');
+includes(startOperationsBootstrapPy, 'sys.path.extend([str(source_root)', 'sealed source precedence missing');
+includes(startOperationsBootstrapPy, '_VerifiedSourceLoader', 'import-time source verifier missing');
+includes(startOperationsBootstrapPy, 'runtime_source_digest_mismatch', 'post-copy tamper gate missing');
+assert(
+  startOperationsBootstrapPy.split(/\r?\n/).length <= 200,
+  'start operations Python bootstrap exceeds WSP_62 file limit'
+);
+assert(
+  !startOperationsBootstrapPy.includes('subprocess'),
+  'Python bootstrap may not execute commands'
+);
 includes(extensionJs, "workspaceState.get('reddog.operationsIntentId'", 'durable operations intent missing');
 includes(extensionJs, 'startOperationsEnvironment.build(process.env)', 'ambient extension env exposed');
 assert(

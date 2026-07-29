@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const cp = require('child_process');
+const crypto = require('crypto');
 const EventEmitter = require('events');
 const fs = require('fs');
 const os = require('os');
@@ -102,6 +103,8 @@ function fakeMaterializer(runtime) {
   return () => ({
     runtimeRoot: runtime.repoRoot,
     targetRepoRoot: runtime.repoRoot,
+    manifestPath: path.join(runtime.repoRoot, 'runtime-manifest.json'),
+    manifestDigest: '0'.repeat(64),
     scriptPath: (value) => value,
     cleanup() {}
   });
@@ -123,25 +126,44 @@ function assertStartupHooksExcluded() {
     `import pathlib;pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")\n`
   );
   fs.writeFileSync(path.join(dependencies, 'dep_probe.py'), 'VALUE="dependency"\n');
+  const sourcePackage = path.join(source, 'modules');
+  const dependencyPackage = path.join(dependencies, 'modules');
   const attacker = [
     'import pathlib',
     `pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")`
   ].join(';');
+  fs.mkdirSync(sourcePackage);
+  fs.mkdirSync(dependencyPackage);
+  fs.writeFileSync(path.join(sourcePackage, '__init__.py'), '');
+  fs.writeFileSync(path.join(sourcePackage, 'probe.py'), 'VALUE="source"\n');
+  fs.writeFileSync(path.join(dependencyPackage, '__init__.py'), attacker + '\n');
+  fs.writeFileSync(path.join(dependencyPackage, 'probe.py'), attacker + '\n');
   fs.writeFileSync(path.join(target, 'json.py'), attacker + '\n');
   fs.writeFileSync(path.join(target, 'dep_probe.py'), attacker + '\n');
   const script = path.join(source, 'probe.py');
   fs.writeFileSync(
     script,
-    'import json,dep_probe\nprint("sealed:"+dep_probe.VALUE)\n'
+    'import json,dep_probe\nfrom modules import probe\n'
+      + 'print("sealed:"+dep_probe.VALUE+":"+probe.VALUE)\n'
   );
+  const relativeFiles = ['probe.py', 'modules/__init__.py', 'modules/probe.py'];
+  const runtimeDigests = {};
+  for (const relative of relativeFiles) {
+    const raw = fs.readFileSync(path.join(source, relative));
+    runtimeDigests[relative] = crypto.createHash('sha256').update(raw).digest('hex');
+  }
+  const manifest = { required_runtime_sha256: runtimeDigests };
+  const manifestPath = path.join(source, '.reddog-runtime-manifest.json');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+  const manifestDigest = grounding.canonicalDigest(manifest).slice(7);
   const runtime = interpreterPolicy.approved(interpreter, root);
   const args = [
-    '-I', '-S', '-B', '-c', bridge.PYTHON_BOOTSTRAP,
-    script, source, target, runtime.sitePackages
+    '-I', '-S', '-B', bridge.PYTHON_BOOTSTRAP,
+    script, source, target, runtime.sitePackages, manifestPath, manifestDigest
   ];
   assert.strictEqual(cp.execFileSync(
     runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
-  ).trim(), 'sealed:dependency');
+  ).trim(), 'sealed:dependency:source');
   assert.strictEqual(fs.existsSync(sentinel), false);
   fs.rmSync(root, { recursive: true, force: true });
 }
@@ -154,14 +176,28 @@ function assertRuntimeMaterialized() {
   );
   const runtime = runtimeMaterializer.materialize(repoRoot);
   try {
-    assert.strictEqual(
-      fs.existsSync(runtime.scriptPath(
-        path.join(repoRoot, 'scripts', 'reddog_start_operations_control_once.py')
-      )),
-      true
+    const script = runtime.scriptPath(
+      path.join(repoRoot, 'scripts', 'reddog_start_operations_control_once.py')
     );
+    assert.strictEqual(fs.existsSync(script), true);
+    assert.strictEqual(fs.existsSync(runtime.manifestPath), true);
     const relative = path.relative(repoRoot, runtime.runtimeRoot);
     assert(relative.startsWith('..') || path.isAbsolute(relative));
+    const sentinel = path.join(runtime.runtimeRoot, 'post-copy-tamper-ran');
+    fs.writeFileSync(
+      script,
+      `import pathlib;pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")\n`
+    );
+    const args = [
+      '-I', '-S', '-B', bridge.PYTHON_BOOTSTRAP,
+      script, runtime.runtimeRoot, repoRoot,
+      path.dirname(process.execPath), runtime.manifestPath, runtime.manifestDigest
+    ];
+    assert.throws(
+      () => cp.execFileSync(process.env.PYTHON || 'python', args),
+      /runtime_source_digest_mismatch/
+    );
+    assert.strictEqual(fs.existsSync(sentinel), false);
   } finally {
     runtime.cleanup();
   }

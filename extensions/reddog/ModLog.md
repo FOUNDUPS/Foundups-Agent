@@ -19,6 +19,8 @@
   so untracked checkout modules cannot shadow standard, dependency, or runtime
   imports.
 - Rejects runtime-materialization roots inside or above the audited repository.
+- Loads standard library, sealed source, then dependencies and reauthenticates
+  copied source bytes at every import and entry-script execution.
 - Enforces the frame cap before parsing or dispatching an over-limit progress
   frame.
 - Labeled all no-effect fields as implementation-boundary attestations rather

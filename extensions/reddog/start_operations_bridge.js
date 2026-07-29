@@ -1,6 +1,7 @@
 'use strict';
 
 const cp = require('child_process');
+const path = require('path');
 const protocol = require('./start_operations_control');
 const interpreterPolicy = require('./start_operations_interpreter');
 const runtimeMaterializer = require('./backend_compatibility_runtime_materializer');
@@ -9,12 +10,9 @@ const MAX_STDOUT_BYTES = 2 * 1024 * 1024;
 const MAX_STDERR_BYTES = 64 * 1024;
 const MAX_FRAMES = 256;
 const DEFAULT_DEADLINE_MS = 15 * 60 * 1000;
-const PYTHON_BOOTSTRAP = [
-  'import runpy,sys',
-  'script,source,target,deps=sys.argv[1:5]',
-  'sys.path.extend([deps,source])',
-  "runpy.run_path(script,init_globals={'REDDOG_TARGET_REPO_ROOT':target},run_name='__main__')"
-].join(';');
+const PYTHON_BOOTSTRAP = path.join(
+  __dirname, 'start_operations_python_bootstrap.py'
+);
 
 function run(options) {
   const opts = options && typeof options === 'object' ? options : {};
@@ -41,9 +39,10 @@ function launch(options) {
   );
   try {
     const args = [
-      '-I', '-S', '-B', '-c', PYTHON_BOOTSTRAP,
+      '-I', '-S', '-B', PYTHON_BOOTSTRAP,
       source.scriptPath(options.script), source.runtimeRoot,
-      source.targetRepoRoot, runtime.sitePackages
+      source.targetRepoRoot, runtime.sitePackages,
+      source.manifestPath, source.manifestDigest
     ];
     const child = (options.spawn || cp.spawn)(runtime.interpreter, args, {
       cwd: source.runtimeRoot, env: options.env,

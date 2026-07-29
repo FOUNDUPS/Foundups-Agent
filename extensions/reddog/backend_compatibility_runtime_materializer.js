@@ -5,6 +5,7 @@ const os = require('os');
 const path = require('path');
 const filesystem = require('./backend_compatibility_filesystem');
 const manifestContract = require('./backend_compatibility_manifest');
+const RUNTIME_MANIFEST = '.reddog-runtime-manifest.json';
 
 function materializationError(reasons) {
   const detail = Array.from(new Set(reasons)).join(',');
@@ -90,12 +91,19 @@ function populate(rootState, manifest, runtimeRoot, deps) {
     );
     writeSource(runtimeRoot, relativePath, raw, deps);
   }
+  deps.fs.writeFileSync(
+    deps.path.join(runtimeRoot, RUNTIME_MANIFEST),
+    JSON.stringify(manifest),
+    { flag: 'wx', mode: 0o600 }
+  );
 }
 
-function materializedResult(rootState, runtimeRoot, deps) {
+function materializedResult(rootState, runtimeRoot, manifestDigest, deps) {
   return Object.freeze({
     runtimeRoot: deps.fs.realpathSync(runtimeRoot),
     targetRepoRoot: rootState.canonicalRoot,
+    manifestPath: deps.path.join(runtimeRoot, RUNTIME_MANIFEST),
+    manifestDigest,
     scriptPath: (sourcePath) => runtimeScript(
       runtimeRoot, rootState.canonicalRoot, sourcePath, deps
     ),
@@ -118,7 +126,7 @@ function materialize(repoRoot, options) {
   );
   try {
     populate(rootState, read.manifest, runtimeRoot, deps);
-    return materializedResult(rootState, runtimeRoot, deps);
+    return materializedResult(rootState, runtimeRoot, read.manifestDigest, deps);
   } catch (error) {
     cleanup(runtimeRoot, deps);
     throw error;

@@ -11,9 +11,9 @@ bounded, only an explicit environment allowlist reaches the child process, and
 the durable intent ID survives editor reloads. The bridge accepts only a real
 interpreter inside the workspace `.venv`, uses sealed `-I -S` Python startup
 with one explicitly admitted dependency directory, executes only a manifest-
-materialized source tree, and treats the checkout as data. Startup-path
 injection, untracked import shadowing, and redirected virtual environments are
-rejected. The resident cycle remains read-only and
+rejected. A packaged stdlib-only loader revalidates every copied source at
+import time. The resident cycle remains read-only and
 exposes `operations status`, `stop operations`, and `resume operations`
 controls.
 

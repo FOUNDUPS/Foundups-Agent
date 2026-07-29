@@ -11,6 +11,8 @@
 - Proved standard/dependency imports cannot be shadowed by the audited checkout
   and the control script exists only in a manifest-materialized source tree.
 - Proved a hostile temp-root selection cannot materialize inside the repository.
+- Proved a hostile dependency `modules` package loses to sealed source and
+  post-copy source tampering fails before execution.
 - Proved the frame cap rejects before dispatching an over-limit progress frame.
 - Added backend tests for profile/head/model/budget bindings, dirty-root
   rejection, Holo deferral, resident controls, and WSP 62 module boundaries.
