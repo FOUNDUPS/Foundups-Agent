@@ -174,6 +174,25 @@ async function main() {
   assert(oversized.rejection_reasons.includes(
     'start_operations_bridge_output_too_large'
   ));
+  let overLimitCallbacks = 0;
+  const overLimitFrames = Array.from(
+    { length: bridge.MAX_FRAMES + 1 },
+    () => JSON.stringify(progress)
+  );
+  const overLimit = await bridge.run({
+    interpreter: runtime.interpreter,
+    script: 'bridge.py',
+    repoRoot: runtime.repoRoot,
+    env: {},
+    request,
+    spawn: () => fakeChild(overLimitFrames),
+    deadlineMs: 1000,
+    onProgress: () => { overLimitCallbacks += 1; }
+  });
+  assert(overLimit.rejection_reasons.includes(
+    'start_operations_bridge_frame_limit_exceeded'
+  ));
+  assert.strictEqual(overLimitCallbacks, bridge.MAX_FRAMES);
 
   const originalRun = bridge.run;
   const state = {};

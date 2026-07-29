@@ -81,7 +81,7 @@ function attachOutputListeners(child, options, state, controls) {
     );
     state.stdout = parsed.remaining;
     state.frameCount = parsed.frameCount;
-    if (state.frameCount > MAX_FRAMES) {
+    if (parsed.frameLimitExceeded) {
       controls.fail('start_operations_bridge_frame_limit_exceeded');
       return;
     }
@@ -103,7 +103,7 @@ function attachLifecycleListeners(child, options, state, controls) {
     const parsed = consumeLines(
       state.stdout + '\n', options.request, options.onProgress, state.frameCount
     );
-    if (parsed.frameCount > MAX_FRAMES) {
+    if (parsed.frameLimitExceeded) {
       controls.fail('start_operations_bridge_frame_limit_exceeded');
       return;
     }
@@ -131,6 +131,14 @@ function consumeLines(buffer, request, onProgress, frameCount) {
   let count = Number(frameCount || 0);
   for (const line of lines) {
     if (!line.trim()) continue;
+    if (count >= MAX_FRAMES) {
+      return {
+        remaining: '',
+        result: null,
+        frameCount: count,
+        frameLimitExceeded: true
+      };
+    }
     count += 1;
     let value;
     try {
@@ -143,7 +151,12 @@ function consumeLines(buffer, request, onProgress, frameCount) {
     const terminal = protocol.validateResult(value, request);
     if (terminal) result = terminal;
   }
-  return { remaining, result, frameCount: count };
+  return {
+    remaining,
+    result,
+    frameCount: count,
+    frameLimitExceeded: false
+  };
 }
 
 module.exports = {

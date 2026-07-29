@@ -14,6 +14,8 @@
 - Launches only a real interpreter inside the workspace `.venv` using isolated
   Python mode; `PYTHONPATH`, `PYTHONHOME`, and user-site startup injection are
   excluded.
+- Enforces the frame cap before parsing or dispatching an over-limit progress
+  frame.
 - Labeled all no-effect fields as implementation-boundary attestations rather
   than independent forensic evidence.
 - Bypassed extension advisory Fusion while preserving the resident cycle's

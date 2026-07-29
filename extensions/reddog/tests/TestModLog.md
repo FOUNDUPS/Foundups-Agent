@@ -8,6 +8,7 @@
   stdout/frame caps, environment allowlist, and durable intent regressions.
 - Proved bare interpreters and environment-driven Python startup injection are
   rejected; the bridge accepts only the workspace `.venv` under `-I -B`.
+- Proved the frame cap rejects before dispatching an over-limit progress frame.
 - Added backend tests for profile/head/model/budget bindings, dirty-root
   rejection, Holo deferral, resident controls, and WSP 62 module boundaries.
 - Revalidated the generated 1,072-file manifest and exact extension pin.
