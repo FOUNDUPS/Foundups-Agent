@@ -8,6 +8,13 @@ const MAX_STDOUT_BYTES = 2 * 1024 * 1024;
 const MAX_STDERR_BYTES = 64 * 1024;
 const MAX_FRAMES = 256;
 const DEFAULT_DEADLINE_MS = 15 * 60 * 1000;
+const PYTHON_BOOTSTRAP = [
+  'import runpy,sys',
+  'script,root,deps=sys.argv[1:4]',
+  'sys.path.insert(0,deps)',
+  'sys.path.insert(0,root)',
+  "runpy.run_path(script,run_name='__main__')"
+].join(';');
 
 function run(options) {
   const opts = options && typeof options === 'object' ? options : {};
@@ -15,13 +22,16 @@ function run(options) {
   return new Promise((resolve) => {
     let child;
     try {
-      const interpreter = interpreterPolicy.approved(opts.interpreter, opts.repoRoot);
-      if (!interpreter) throw new Error('unapproved_interpreter');
+      const runtime = interpreterPolicy.approved(opts.interpreter, opts.repoRoot);
+      if (!runtime) throw new Error('unapproved_interpreter');
       child = (opts.spawn || cp.spawn)(
-        interpreter,
-        ['-I', '-B', opts.script],
+        runtime.interpreter,
+        [
+          '-I', '-S', '-B', '-c', PYTHON_BOOTSTRAP,
+          opts.script, runtime.repoRoot, runtime.sitePackages
+        ],
         {
-          cwd: opts.repoRoot,
+          cwd: runtime.repoRoot,
           env: opts.env,
           stdio: ['pipe', 'pipe', 'pipe'],
           windowsHide: true
@@ -124,6 +134,18 @@ function writeRequest(child, options, controls) {
   }
 }
 
+function consumeFrame(line, request, onProgress) {
+  let value;
+  try {
+    value = JSON.parse(line);
+  } catch (_err) {
+    return null;
+  }
+  const progress = protocol.validateProgress(value, request);
+  if (progress && typeof onProgress === 'function') onProgress(progress);
+  return protocol.validateResult(value, request);
+}
+
 function consumeLines(buffer, request, onProgress, frameCount) {
   const lines = String(buffer || '').split(/\r?\n/);
   const remaining = lines.pop() || '';
@@ -133,29 +155,15 @@ function consumeLines(buffer, request, onProgress, frameCount) {
     if (!line.trim()) continue;
     if (count >= MAX_FRAMES) {
       return {
-        remaining: '',
-        result: null,
-        frameCount: count,
-        frameLimitExceeded: true
+        remaining: '', result: null, frameCount: count, frameLimitExceeded: true
       };
     }
     count += 1;
-    let value;
-    try {
-      value = JSON.parse(line);
-    } catch (_err) {
-      continue;
-    }
-    const progress = protocol.validateProgress(value, request);
-    if (progress && typeof onProgress === 'function') onProgress(progress);
-    const terminal = protocol.validateResult(value, request);
+    const terminal = consumeFrame(line, request, onProgress);
     if (terminal) result = terminal;
   }
   return {
-    remaining,
-    result,
-    frameCount: count,
-    frameLimitExceeded: false
+    remaining, result, frameCount: count, frameLimitExceeded: false
   };
 }
 
@@ -164,6 +172,7 @@ module.exports = {
   MAX_STDERR_BYTES,
   MAX_STDOUT_BYTES,
   MAX_FRAMES,
+  PYTHON_BOOTSTRAP,
   consumeLines,
   run
 };

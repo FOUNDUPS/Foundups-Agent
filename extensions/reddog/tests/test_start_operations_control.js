@@ -87,10 +87,51 @@ function chunkedChild(chunks) {
 function approvedRuntime() {
   const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-operations-'));
   const bin = path.join(repoRoot, '.venv', 'Scripts');
+  const sitePackages = path.join(repoRoot, '.venv', 'Lib', 'site-packages');
   fs.mkdirSync(bin, { recursive: true });
+  fs.mkdirSync(sitePackages, { recursive: true });
   const interpreter = path.join(bin, 'python.exe');
   fs.writeFileSync(interpreter, '');
-  return { repoRoot, interpreter };
+  return { repoRoot, interpreter, sitePackages };
+}
+
+function assertStartupHooksExcluded() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-python-seal-'));
+  const venv = path.join(root, '.venv');
+  cp.execFileSync(process.env.PYTHON || 'python', ['-m', 'venv', venv]);
+  const interpreter = path.join(venv, 'Scripts', 'python.exe');
+  const dependencies = path.join(venv, 'Lib', 'site-packages');
+  const sentinel = path.join(root, 'startup-hook-ran');
+  fs.writeFileSync(
+    path.join(dependencies, 'attacker.pth'),
+    `import pathlib;pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")\n`
+  );
+  const script = path.join(root, 'probe.py');
+  fs.writeFileSync(script, 'print("sealed")\n');
+  const runtime = interpreterPolicy.approved(interpreter, root);
+  const args = [
+    '-I', '-S', '-B', '-c', bridge.PYTHON_BOOTSTRAP,
+    script, runtime.repoRoot, runtime.sitePackages
+  ];
+  assert.strictEqual(cp.execFileSync(
+    runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
+  ).trim(), 'sealed');
+  assert.strictEqual(fs.existsSync(sentinel), false);
+  fs.rmSync(root, { recursive: true, force: true });
+}
+
+function assertRedirectedVenvRejected() {
+  const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-repo-'));
+  const external = fs.mkdtempSync(path.join(os.tmpdir(), 'reddog-venv-'));
+  const bin = path.join(external, 'Scripts');
+  fs.mkdirSync(bin, { recursive: true });
+  fs.mkdirSync(path.join(external, 'Lib', 'site-packages'), { recursive: true });
+  const interpreter = path.join(bin, 'python.exe');
+  fs.writeFileSync(interpreter, '');
+  fs.symlinkSync(external, path.join(repoRoot, '.venv'), 'junction');
+  assert.strictEqual(interpreterPolicy.approved(interpreter, repoRoot), '');
+  fs.rmSync(repoRoot, { recursive: true, force: true });
+  fs.rmSync(external, { recursive: true, force: true });
 }
 
 async function main() {
@@ -146,11 +187,14 @@ async function main() {
 
   let observedProgress = null;
   const runtime = approvedRuntime();
-  assert.strictEqual(
-    interpreterPolicy.approved(runtime.interpreter, runtime.repoRoot),
-    fs.realpathSync(runtime.interpreter)
+  const approved = interpreterPolicy.approved(
+    runtime.interpreter, runtime.repoRoot
   );
+  assert.strictEqual(approved.interpreter, fs.realpathSync(runtime.interpreter));
+  assert.strictEqual(approved.sitePackages, fs.realpathSync(runtime.sitePackages));
   assert.strictEqual(interpreterPolicy.approved('python', runtime.repoRoot), '');
+  assertStartupHooksExcluded();
+  assertRedirectedVenvRejected();
   const result = await bridge.run({
     interpreter: runtime.interpreter,
     script: 'bridge.py',

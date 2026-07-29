@@ -8,9 +8,10 @@ IDs. Every call carries a fresh request ID, child output is cumulatively
 bounded, ambient IDE credentials are excluded, and status/cancellation
 reconnect to the workspace-persisted durable AgentDB intent. No-effect fields
 are implementation-boundary attestations, not independent forensic evidence.
-The bridge requires an interpreter contained by the workspace `.venv`, starts
-it with `-I -B`, disables user-site loading, and does not forward
-`PYTHONPATH` or `PYTHONHOME`.
+The bridge requires an interpreter and dependency directory contained by a
+non-redirected workspace `.venv`, starts it with `-I -S -B`, explicitly admits
+that dependency directory without processing `.pth` or `sitecustomize`, disables
+user-site loading, and does not forward `PYTHONPATH` or `PYTHONHOME`.
 The host pins the accepted audit and architect binding IDs through the
 `REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID` and
 `REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID`

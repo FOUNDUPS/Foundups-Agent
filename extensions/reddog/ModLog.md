@@ -11,9 +11,10 @@
   audit/architect model-binding receipt IDs before submission.
 - Added fresh request correlation, cumulative output/frame caps, a dedicated
   child-process environment allowlist, and workspace-persisted intent IDs.
-- Launches only a real interpreter inside the workspace `.venv` using isolated
-  Python mode; `PYTHONPATH`, `PYTHONHOME`, and user-site startup injection are
-  excluded.
+- Launches only a real interpreter and dependency directory inside a
+  non-redirected workspace `.venv`; `-I -S -B` plus an explicit bootstrap
+  excludes `.pth`, `sitecustomize`, `PYTHONPATH`, `PYTHONHOME`, and user-site
+  startup injection.
 - Enforces the frame cap before parsing or dispatching an over-limit progress
   frame.
 - Labeled all no-effect fields as implementation-boundary attestations rather

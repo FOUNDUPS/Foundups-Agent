@@ -6,8 +6,8 @@
   asynchronous bridge progress, model-binding, and no-effect boundary tests.
 - Added Python-to-JavaScript receipt parity, stale request replay, cumulative
   stdout/frame caps, environment allowlist, and durable intent regressions.
-- Proved bare interpreters and environment-driven Python startup injection are
-  rejected; the bridge accepts only the workspace `.venv` under `-I -B`.
+- Proved bare/redirected interpreters and Python startup injection are rejected;
+  a malicious `.pth` sentinel cannot run under the sealed `-I -S -B` bootstrap.
 - Proved the frame cap rejects before dispatching an over-limit progress frame.
 - Added backend tests for profile/head/model/budget bindings, dirty-root
   rejection, Holo deferral, resident controls, and WSP 62 module boundaries.
