@@ -69,6 +69,19 @@ function cleanup(runtimeRoot, deps) {
   }
 }
 
+function separatedRuntimeRoot(candidate, repoRoot, deps) {
+  const stats = deps.fs.lstatSync(candidate);
+  if (!stats.isDirectory() || stats.isSymbolicLink()) return '';
+  const root = deps.fs.realpathSync(candidate);
+  const fromRepo = deps.path.relative(repoRoot, root);
+  const fromRuntime = deps.path.relative(root, repoRoot);
+  const separated = (
+    (fromRepo.startsWith('..') || deps.path.isAbsolute(fromRepo))
+    && (fromRuntime.startsWith('..') || deps.path.isAbsolute(fromRuntime))
+  );
+  return separated ? root : '';
+}
+
 function populate(rootState, manifest, runtimeRoot, deps) {
   for (const relativePath of manifest.required_runtime_files) {
     const raw = verifiedSource(
@@ -96,7 +109,10 @@ function materialize(repoRoot, options) {
   const rootState = filesystem.safeRoot(repoRoot, deps);
   if (rootState.reason) throw materializationError([rootState.reason]);
   const read = verifiedManifest(rootState, deps);
-  const tempRoot = opts.tempRoot || os.tmpdir();
+  const tempRoot = separatedRuntimeRoot(
+    opts.tempRoot || os.tmpdir(), rootState.canonicalRoot, deps
+  );
+  if (!tempRoot) throw materializationError(['runtime_root_not_separated']);
   const runtimeRoot = deps.fs.mkdtempSync(
     deps.path.join(tempRoot, 'reddog-runtime-')
   );

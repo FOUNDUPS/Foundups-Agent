@@ -148,6 +148,10 @@ function assertStartupHooksExcluded() {
 
 function assertRuntimeMaterialized() {
   const repoRoot = path.resolve(__dirname, '..', '..', '..');
+  assert.throws(
+    () => runtimeMaterializer.materialize(repoRoot, { tempRoot: repoRoot }),
+    /runtime_root_not_separated/
+  );
   const runtime = runtimeMaterializer.materialize(repoRoot);
   try {
     assert.strictEqual(

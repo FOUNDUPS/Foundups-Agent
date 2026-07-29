@@ -18,6 +18,7 @@
 - Executes control code from a copy-time reverified backend-manifest source tree
   so untracked checkout modules cannot shadow standard, dependency, or runtime
   imports.
+- Rejects runtime-materialization roots inside or above the audited repository.
 - Enforces the frame cap before parsing or dispatching an over-limit progress
   frame.
 - Labeled all no-effect fields as implementation-boundary attestations rather

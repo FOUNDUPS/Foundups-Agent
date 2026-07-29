@@ -13,7 +13,8 @@ non-redirected workspace `.venv`, starts it with `-I -S -B`, explicitly admits
 that dependency directory without processing `.pth` or `sitecustomize`, disables
 user-site loading, and does not forward `PYTHONPATH` or `PYTHONHOME`. Control
 code runs from a temporary source tree populated only by copy-time reverified
-backend-manifest files; the audited checkout is passed separately as data.
+backend-manifest files under a root disjoint from the repository; the audited
+checkout is passed separately as data.
 The host pins the accepted audit and architect binding IDs through the
 `REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID` and
 `REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID`

@@ -243,6 +243,7 @@ includes(startOperationsInterpreterJs, "path.resolve(repo, '.venv')", 'workspace
 includes(startOperationsInterpreterJs, 'contained(repo, root)', 'redirected venv guard missing');
 includes(runtimeMaterializerJs, 'required_runtime_files', 'manifest runtime copy missing');
 includes(runtimeMaterializerJs, 'verifiedSource', 'copy-time digest recheck missing');
+includes(runtimeMaterializerJs, 'runtime_root_not_separated', 'runtime root guard missing');
 includes(extensionJs, "workspaceState.get('reddog.operationsIntentId'", 'durable operations intent missing');
 includes(extensionJs, 'startOperationsEnvironment.build(process.env)', 'ambient extension env exposed');
 assert(
