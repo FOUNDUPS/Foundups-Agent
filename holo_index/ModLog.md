@@ -1,5 +1,12 @@
 # HoloIndex Package ModLog
 
+## [2026-07-29] Bounded symbol reconciliation
+
+- Replaced the unbounded persisted symbol-ID snapshot with deterministic
+  `limit`/`offset` pages before stale-record reconciliation.
+- Added a large-state regression that rejects unbounded collection reads and
+  verifies complete stale-record deletion without exceeding publish batches.
+
 ## [2026-07-26] Exact-SHA post-merge authority primitives
 
 - Added a separate cross-process authority-update lease that can safely wrap
