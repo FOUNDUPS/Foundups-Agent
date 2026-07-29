@@ -5,7 +5,7 @@ const { Worker } = require('worker_threads');
 
 const LOCAL_FAST_PATH = 'runtime_health';
 const HEALTH_QUERY = 'HoloIndex current generation semantic query health';
-const HEALTH_TIMEOUT_MS = 15000;
+const HEALTH_TIMEOUT_MS = 30000;
 
 function isRuntimeHealthQuestion(value) {
   const text = String(value || '').trim();

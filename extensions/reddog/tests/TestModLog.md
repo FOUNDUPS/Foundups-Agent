@@ -1,5 +1,12 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - HoloIndex health timeout calibration (0.4.36)
+
+- Bound the production asynchronous health deadline to 30 seconds and retained
+  the injected one-millisecond timeout regression.
+- Live exact-SHA smoke proves the calibrated worker returns `CURRENT` without
+  blocking the extension host thread.
+
 ## 2026-07-29 - Receipt-bound health and model freshness routing (0.4.35)
 
 - Proved simple HoloIndex health questions route locally with no model call,
