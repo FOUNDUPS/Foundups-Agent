@@ -121,6 +121,7 @@ function assertStartupHooksExcluded() {
   const target = path.join(root, 'audited-target');
   fs.mkdirSync(source);
   fs.mkdirSync(target);
+  fs.mkdirSync(path.join(target, '.git'));
   fs.writeFileSync(
     path.join(dependencies, 'attacker.pth'),
     `import pathlib;pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")\n`
@@ -143,8 +144,9 @@ function assertStartupHooksExcluded() {
   const script = path.join(source, 'probe.py');
   fs.writeFileSync(
     script,
-    'import json,dep_probe\nfrom modules import probe\n'
-      + 'print("sealed:"+dep_probe.VALUE+":"+probe.VALUE)\n'
+    'import json,dep_probe,os\nfrom modules import probe\n'
+      + 'print("sealed:"+dep_probe.VALUE+":"+probe.VALUE+":"'
+      + '+os.environ["REDDOG_SEALED_RUNTIME_TARGET_REPO_ROOT"])\n'
   );
   const relativeFiles = ['probe.py', 'modules/__init__.py', 'modules/probe.py'];
   const runtimeDigests = {};
@@ -163,7 +165,7 @@ function assertStartupHooksExcluded() {
   ];
   assert.strictEqual(cp.execFileSync(
     runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
-  ).trim(), 'sealed:dependency:source');
+  ).trim(), `sealed:dependency:source:${target}`);
   assert.strictEqual(fs.existsSync(sentinel), false);
   fs.rmSync(path.join(sourcePackage, '__init__.py'));
   assert.throws(

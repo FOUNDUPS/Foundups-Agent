@@ -61,6 +61,7 @@ from holo_index.storage_contract import (
     resolve_holoindex_ssd_path,
 )
 from holo_index.query_admission import evaluate_readonly_query_admission  # noqa: E402
+from holo_index.repository_state import runtime_repository_root
 # WSP 97: Lazy import codeindex_reporter (4s+ startup cost) - only needed for --code-index-report
 CodeIndexReporter = None  # Lazy loaded
 resolve_module_paths = None  # Lazy loaded
@@ -102,7 +103,7 @@ except ImportError:
 # Import extracted modules with proper path handling
 import sys
 from pathlib import Path
-project_root = Path(__file__).parent.parent
+project_root = runtime_repository_root(Path(__file__).parent.parent)
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 

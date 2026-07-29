@@ -9,20 +9,18 @@ import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Any
+
+
 def _canonical_digest(value: Any) -> str:
     payload = json.dumps(
         value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
     ).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
-
-
 def _relative_source(path: Path, source_root: Path) -> str:
     try:
         return path.resolve().relative_to(source_root).as_posix()
     except ValueError as exc:
         raise ImportError("runtime_source_outside_sealed_root") from exc
-
-
 def _verified_bytes(
     path: Path,
     source_root: Path,
@@ -171,12 +169,15 @@ def _load_manifest(path: Path, expected_digest: str) -> dict[str, str]:
         if isinstance(key, str) and isinstance(digest, str)
     }
 
-
 def main(argv: list[str]) -> int:
     if len(argv) < 7:
         raise ValueError("runtime_bootstrap_argument_count")
     script, source, target, dependencies, manifest, expected = argv[1:7]
     source_root = Path(source).resolve()
+    target_root = Path(target).resolve()
+    if not target_root.is_dir() or not (target_root / ".git").exists():
+        raise ImportError("runtime_target_repository_invalid")
+    __import__("os").environ["REDDOG_SEALED_RUNTIME_TARGET_REPO_ROOT"] = str(target_root)
     digests = _load_manifest(Path(manifest), expected)
     reserved, packages = _reserved_bindings(digests)
     stdlib_paths = tuple(sys.path)
@@ -189,7 +190,7 @@ def main(argv: list[str]) -> int:
         "__name__": "__main__",
         "__file__": str(Path(script).resolve()),
         "__builtins__": __builtins__,
-        "REDDOG_TARGET_REPO_ROOT": str(Path(target).resolve()),
+        "REDDOG_TARGET_REPO_ROOT": str(target_root),
     }
     sys.argv = [script, *argv[7:]]
     exec(compile(raw, namespace["__file__"], "exec"), namespace)

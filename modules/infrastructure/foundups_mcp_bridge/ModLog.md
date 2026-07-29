@@ -4,7 +4,8 @@
 
 - RedDog-owned Holo maintenance and query-owner processes now execute from the
   backend-manifest source copy through the verified Python bootstrap instead of
-  importing executable code from the audited live checkout.
+  importing executable code from the audited live checkout; repository reads
+  remain bound to the separately validated exact-HEAD target checkout.
 - Child environments remove provider credentials, RedDog authority values, and
   Python import overrides. Legacy non-RedDog callers retain their prior command
   path; an invalid required sealed runtime fails before process creation.
