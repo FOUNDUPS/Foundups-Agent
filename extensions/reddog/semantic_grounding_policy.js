@@ -47,11 +47,36 @@ function tokenizeExplicitSemanticQuery(value) {
   return Array.from(new Set(tokens.filter((token) => token.length >= 3 && !EXPLICIT_SEMANTIC_STOPWORDS.has(token))));
 }
 
+function openingQuoteEnd(text, index) {
+  const ch = text.charAt(index);
+  const prior = index > 0 ? text.charAt(index - 1) : '';
+  const priorIsWord = /[A-Za-z0-9]/.test(prior);
+  if (ch === '"') return '"';
+  if (ch === '`') return '`';
+  if (ch === '\u201c') return '\u201d';
+  if (ch === "'" && !priorIsWord) return "'";
+  if (ch === '\u2018' && !priorIsWord) return '\u2019';
+  return '';
+}
+
 function stripInlineQuotedText(value) {
-  return String(value || '').replace(
-    /"[^"\r\n]*"|'[^'\r\n]*'|`[^`\r\n]*`|\u201c[^\u201d\r\n]*\u201d|\u2018[^\u2019\r\n]*\u2019/g,
-    ' '
-  );
+  const text = String(value || '');
+  let output = '';
+  let closing = '';
+  for (let index = 0; index < text.length; index++) {
+    const ch = text.charAt(index);
+    if (closing) {
+      if (ch === closing) closing = '';
+      else if (ch === '\r' || ch === '\n') {
+        closing = '';
+        output += ch;
+      }
+      continue;
+    }
+    closing = openingQuoteEnd(text, index);
+    output += closing ? ' ' : ch;
+  }
+  return output;
 }
 
 function hasSemanticWorkAction(value) {
