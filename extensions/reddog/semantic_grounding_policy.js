@@ -63,17 +63,25 @@ function stripInlineQuotedText(value) {
   const text = String(value || '');
   let output = '';
   let closing = '';
+  let backslashRun = 0;
   for (let index = 0; index < text.length; index++) {
     const ch = text.charAt(index);
+    if (ch === '\\') {
+      backslashRun += 1;
+      if (!closing) output += ch;
+      continue;
+    }
+    const escaped = backslashRun % 2 === 1;
+    backslashRun = 0;
     if (closing) {
-      if (ch === closing) closing = '';
+      if (ch === closing && !escaped) closing = '';
       else if (ch === '\r' || ch === '\n') {
         closing = '';
         output += ch;
       }
       continue;
     }
-    closing = openingQuoteEnd(text, index);
+    closing = escaped ? '' : openingQuoteEnd(text, index);
     output += closing ? ' ' : ch;
   }
   return output;

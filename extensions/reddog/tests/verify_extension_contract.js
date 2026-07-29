@@ -4541,14 +4541,24 @@ assert.strictEqual(smartQuotedEnhance.grounding_target_universe_required, false,
   'TGP-008E: a smart-quoted action-word mention does not activate semantic work');
 assert.deepStrictEqual(smartQuotedEnhance.typed_targets.semantic_targets, [],
   'TGP-008E: a smart-quoted action-word mention does not invent a semantic target');
+const escapedQuotedEnhance = orchestrator.extractTypedTargets(
+  String.raw`{"message":"please \"enhance\" output"}`
+);
+assert.deepStrictEqual(escapedQuotedEnhance.semantic_targets, [],
+  'TGP-008E: escaped nested quotes cannot leak quoted action words');
+assert.strictEqual(
+  semanticGroundingPolicy.hasSemanticWorkAction(String.raw`"quoted \\" enhance HoloIndex`),
+  true,
+  'TGP-008E: an even backslash run leaves the quote delimiter active'
+);
 const quoteStressStarted = Date.now();
 const quoteStressTargets = orchestrator.extractTypedTargets(
-  '\u201c'.repeat(200000) + ' "enhance"'
+  '\u201c'.repeat(100000) + '\\'.repeat(100000) + '"enhance"'
 );
 assert(Date.now() - quoteStressStarted < 1000,
-  'TGP-008E: pathological quote input remains bounded under the single-pass scanner');
+  'TGP-008E: pathological quote/escape input remains bounded under the single-pass scanner');
 assert.deepStrictEqual(quoteStressTargets.semantic_targets, [],
-  'TGP-008E: pathological quote input cannot activate semantic work');
+  'TGP-008E: pathological quote/escape input cannot activate semantic work');
 const ambiguousImperative = orchestrator.buildTypedGroundingPreflight(
   'continue do the work needed to fix enhance it', 'wsp_holo', {
     semantic_evidence_hits: [{
