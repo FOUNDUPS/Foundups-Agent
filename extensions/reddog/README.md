@@ -8,9 +8,11 @@ extension advisory Fusion call, and requires distinct receipt-bound audit and
 architect model assignments whose receipt IDs are independently pinned by the
 host. Fresh request IDs prevent terminal replay, output is cumulatively
 bounded, only an explicit environment allowlist reaches the child process, and
-the durable intent ID survives editor reloads. The resident cycle remains
-read-only and exposes `operations status`, `stop operations`, and
-`resume operations` controls.
+the durable intent ID survives editor reloads. The bridge accepts only a real
+interpreter inside the workspace `.venv`, uses isolated Python mode, and
+rejects startup-path injection. The resident cycle remains read-only and
+exposes `operations status`, `stop operations`, and `resume operations`
+controls.
 
 Production submit/resume also require the host to pin the independently
 admitted model-binding IDs in

@@ -2,6 +2,7 @@
 
 const cp = require('child_process');
 const protocol = require('./start_operations_control');
+const interpreterPolicy = require('./start_operations_interpreter');
 
 const MAX_STDOUT_BYTES = 2 * 1024 * 1024;
 const MAX_STDERR_BYTES = 64 * 1024;
@@ -14,9 +15,11 @@ function run(options) {
   return new Promise((resolve) => {
     let child;
     try {
+      const interpreter = interpreterPolicy.approved(opts.interpreter, opts.repoRoot);
+      if (!interpreter) throw new Error('unapproved_interpreter');
       child = (opts.spawn || cp.spawn)(
-        opts.interpreter,
-        ['-B', opts.script],
+        interpreter,
+        ['-I', '-B', opts.script],
         {
           cwd: opts.repoRoot,
           env: opts.env,
