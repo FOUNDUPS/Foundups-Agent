@@ -246,6 +246,20 @@ def test_missing_authenticated_scope_returns_typed_rejection() -> None:
     assert not _Client.instances
 
 
+@pytest.mark.parametrize("action", ("status", "cancel", "resume"))
+def test_existing_cycle_scope_rejection_preserves_intent(action: str) -> None:
+    result = _run(
+        request=_request(action, "sha256:existing"),
+        env={},
+    )
+    assert result.accepted is False
+    assert result.intent_id == "sha256:existing"
+    assert result.rejection_reasons == (
+        "start_operations_authenticated_scope_missing",
+    )
+    assert not _Client.instances
+
+
 def test_repository_observation_failure_returns_typed_rejection() -> None:
     with patch(
         "modules.communication.moltbot_bridge.src.reddog_start_operations_control."

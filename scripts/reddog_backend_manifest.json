@@ -1599,7 +1599,7 @@
     "modules/communication/moltbot_bridge/src/reddog_signer_socket_service_run_packet_supply.py": "ca45d7c93529980faba7713018860d5265e9d78d37b50780694d15ff25e0e8da",
     "modules/communication/moltbot_bridge/src/reddog_signer_socket_service_runtime_bootstrap.py": "4d9c454624ddbbba7991aab3fa598db223880dcefa0025ff7b8cdcf3b2f35dea",
     "modules/communication/moltbot_bridge/src/reddog_signer_socket_service_runtime_wiring.py": "605a4f81107156304263ce8f4df192c9f0eac1b3ae9f2f9681bfb885bc485353",
-    "modules/communication/moltbot_bridge/src/reddog_start_operations_control.py": "152fb8009a08d11ac40862ebbd10a433561f2eadc6266f1143974725535aa1da",
+    "modules/communication/moltbot_bridge/src/reddog_start_operations_control.py": "adec27fdec6236e3ee68c65e899bb80d9ad9ba5382c2fafae3fc02c4182e50b4",
     "modules/communication/moltbot_bridge/src/reddog_start_operations_control_actions.py": "e07b2989f704c1a17dc9e01100a962c4279cd2145d45b24515377d425164ff0c",
     "modules/communication/moltbot_bridge/src/reddog_start_operations_control_authority.py": "f9b9bc7a463d7d4ec959de424b699c68c3327fea03380ac051a66cf6bd063a70",
     "modules/communication/moltbot_bridge/src/reddog_start_operations_control_binding.py": "9d3bdf15179c77038d73518b8d2bfe87467f5973e7c459e82d219730625ab403",

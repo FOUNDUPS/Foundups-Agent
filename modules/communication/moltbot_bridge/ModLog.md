@@ -1,4 +1,6 @@
 # ModLog - moltbot_bridge
+- Start-operations authorization rejection now preserves validated resident
+  intent IDs for status, cancel, and resume response correlation.
 - `START_OPERATIONS_CONTROL_ADAPTER_PHASE1`: extracted the main-host dual
   model-binding artifact loader into a shared fail-closed module and added a
   profile-bound resident-client control adapter. The adapter binds clean HEAD,

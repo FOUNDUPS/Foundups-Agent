@@ -57,6 +57,7 @@ def run_start_operations_control(
     profile = StartOperationsProfile()
     raw_action = str(request.get("action") or "").strip()
     action = raw_action if raw_action in CONTROL_ACTIONS else "invalid"
+    intent_id = ""
     control_request_id = str(request.get("control_request_id") or "").strip()
     try:
         repo_state = observe_repo_state(root)
@@ -76,6 +77,7 @@ def run_start_operations_control(
             profile,
             repo_state,
             exc.reasons,
+            intent_id=intent_id,
             control_request_id=control_request_id,
         )
     return _dispatch(
