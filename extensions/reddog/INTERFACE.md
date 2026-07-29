@@ -1,5 +1,27 @@
 # RedDog Interface
 
+Version 0.4.30 adds the exact `start operations` control family. The command
+selects a checked-in, read-only operational profile and never becomes a work
+prompt or authority token. Submission/resume require distinct receipt-bound
+audit and architect model assignments plus independent host-pinned receipt
+IDs. Every call carries a fresh request ID, child output is cumulatively
+bounded, ambient IDE credentials are excluded, and status/cancellation
+reconnect to the workspace-persisted durable AgentDB intent. No-effect fields
+are implementation-boundary attestations, not independent forensic evidence.
+The bridge requires an interpreter and dependency directory contained by a
+non-redirected workspace `.venv`, starts it with `-I -S -B`, explicitly admits
+that dependency directory without processing `.pth` or `sitecustomize`, disables
+user-site loading, and does not forward `PYTHONPATH` or `PYTHONHOME`. Control
+code runs from a temporary source tree populated only by copy-time reverified
+backend-manifest files under a root disjoint from the repository; the audited
+checkout is passed separately as data. Import order is standard library, sealed
+source, then dependencies; copied source bytes are reauthenticated when loaded,
+and manifest-reserved module names cannot fall through to dependencies.
+The host pins the accepted audit and architect binding IDs through the
+`REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID` and
+`REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID`
+environment values; self-hashed artifacts do not choose those pins.
+
 Version 0.4.29 requires signed Memex supply lineage to remain exact from the
 delegated authority through AgentDB execution and independent verification.
 Verifier admission recomputes the canonical work-authority digest and rejects

@@ -2,6 +2,36 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-29 - START_OPERATIONS_CONTROL_ADAPTER_PHASE1 (0.4.30)
+
+- Added exact local controls for start, status, cancellation, and resume of
+  the canonical durable resident architect cycle.
+- Bound a checked-in read-only operations profile, clean repo HEAD, strict
+  budgets, authenticated FoundUp scope, and distinct host-pinned
+  audit/architect model-binding receipt IDs before submission.
+- Added fresh request correlation, cumulative output/frame caps, a dedicated
+  child-process environment allowlist, and workspace-persisted intent IDs.
+- Launches only a real interpreter and dependency directory inside a
+  non-redirected workspace `.venv`; `-I -S -B` plus an explicit bootstrap
+  excludes `.pth`, `sitecustomize`, `PYTHONPATH`, `PYTHONHOME`, and user-site
+  startup injection.
+- Executes control code from a copy-time reverified backend-manifest source tree
+  so untracked checkout modules cannot shadow standard, dependency, or runtime
+  imports.
+- Rejects runtime-materialization roots inside or above the audited repository.
+- Loads standard library, sealed source, then dependencies and reauthenticates
+  copied source bytes at every import and entry-script execution.
+- Reserves manifest-derived module/package names to prevent deletion fallback
+  into identically named dependency packages.
+- Enforces the frame cap before parsing or dispatching an over-limit progress
+  frame.
+- Labeled all no-effect fields as implementation-boundary attestations rather
+  than independent forensic evidence.
+- Bypassed extension advisory Fusion while preserving the resident cycle's
+  redaction-gated model calls. No source, shell, HoloIndex mutation, Hermes,
+  worktree, PR, or merge authority was added.
+- Regenerated and pinned the 1,072-file backend dependency manifest.
+
 ## 2026-07-28 - REDDOG_FOUNDUP_MEMEX_AUTHORITY_DISPATCH_BINDING_PHASE1 (0.4.29)
 
 - Pinned optional signed Memex supply lineage through worker materialization,

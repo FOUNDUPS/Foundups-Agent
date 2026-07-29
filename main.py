@@ -1978,75 +1978,11 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
 def _reddog_resident_model_runtime_bindings_from_env(
     repo_root: Path,
 ) -> tuple[Mapping[str, Any] | None, Mapping[str, Any] | None, str]:
-    runtime_root_value = os.getenv("REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT", "").strip()
-    audit_path_value = os.getenv(
-        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH", ""
-    ).strip()
-    architect_path_value = os.getenv(
-        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH", ""
-    ).strip()
-    if not runtime_root_value:
-        return None, None, "missing_model_runtime_binding_root"
-    if not audit_path_value:
-        return None, None, "missing_audit_model_runtime_binding_path"
-    if not architect_path_value:
-        return None, None, "missing_architect_model_runtime_binding_path"
-    runtime_root = Path(runtime_root_value)
-    audit_path = Path(audit_path_value)
-    architect_path = Path(architect_path_value)
-    if not runtime_root.is_absolute() or not audit_path.is_absolute() or not architect_path.is_absolute():
-        return None, None, "model_runtime_binding_path_not_absolute"
-    root = repo_root.resolve()
-    runtime_root = runtime_root.resolve()
-    try:
-        runtime_root.relative_to(root)
-        return None, None, "model_runtime_binding_root_inside_repo"
-    except ValueError:
-        pass
-    audit_identity = Path(os.path.abspath(audit_path))
-    architect_identity = Path(os.path.abspath(architect_path))
-    try:
-        audit_identity.relative_to(root)
-        return None, None, "model_runtime_binding_artifact_inside_repo"
-    except ValueError:
-        pass
-    try:
-        architect_identity.relative_to(root)
-        return None, None, "model_runtime_binding_artifact_inside_repo"
-    except ValueError:
-        pass
-    if os.path.normcase(str(audit_identity)) == os.path.normcase(str(architect_identity)):
-        return None, None, "model_runtime_binding_artifacts_not_distinct"
-    try:
-        from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
-            ModelRuntimeBindingDecision,
-        )
-        from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
-            rehydrate_model_runtime_binding_receipt,
-        )
-        from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
-            read_reddog_runtime_json_mapping,
-        )
+    from modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings import (
+        load_resident_model_runtime_bindings,
+    )
 
-        audit = read_reddog_runtime_json_mapping(audit_path, allowed_root=runtime_root)
-        architect = read_reddog_runtime_json_mapping(architect_path, allowed_root=runtime_root)
-        audit_receipt = rehydrate_model_runtime_binding_receipt(audit)
-        architect_receipt = rehydrate_model_runtime_binding_receipt(architect)
-    except Exception:
-        return None, None, "model_runtime_binding_artifact_invalid"
-    if (
-        audit_receipt.decision != ModelRuntimeBindingDecision.BOUND
-        or not audit_receipt.principal_model
-        or audit_receipt.runtime_surface != "reddog_readonly_audit_worker"
-    ):
-        return None, None, "audit_model_runtime_binding_surface_invalid"
-    if (
-        architect_receipt.decision != ModelRuntimeBindingDecision.BOUND
-        or not architect_receipt.principal_model
-        or architect_receipt.runtime_surface != "reddog_backend_architect"
-    ):
-        return None, None, "architect_model_runtime_binding_surface_invalid"
-    return audit, architect, ""
+    return load_resident_model_runtime_bindings(repo_root)
 
 
 def _reddog_startup_blocker_token(value: str) -> str:

@@ -1051,7 +1051,7 @@ def _resident_cycle_result(
         ("same_artifact", "model_runtime_binding_artifacts_not_distinct"),
         ("oversized", "model_runtime_binding_artifact_invalid"),
         ("directory", "model_runtime_binding_artifact_invalid"),
-        ("outside_root", "model_runtime_binding_artifact_invalid"),
+        ("outside_root", "model_runtime_binding_artifact_outside_runtime_root"),
         ("inside_repo", "model_runtime_binding_artifact_inside_repo"),
     ),
 )
@@ -1069,18 +1069,18 @@ def test_main_resident_runtime_artifact_preflight_rejects_before_cycle(
     runtime_root.mkdir()
     audit_path = runtime_root / "audit.json"
     architect_path = runtime_root / "architect.json"
-    audit_path.write_text(
-        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_readonly_audit_worker")),
-        encoding="utf-8",
+    audit_receipt = model_runtime_binding_receipt(
+        runtime_surface="reddog_readonly_audit_worker"
     )
-    architect_path.write_text(
-        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")),
-        encoding="utf-8",
-    )
+    architect_receipt = model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")
+    audit_path.write_text(json.dumps(audit_receipt), encoding="utf-8")
+    architect_path.write_text(json.dumps(architect_receipt), encoding="utf-8")
     env = {
         "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": str(runtime_root),
         "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(audit_path),
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(architect_path),
+        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": str(audit_receipt["receipt_id"]),
+        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": str(architect_receipt["receipt_id"]),
         "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
     }
     if case == "absent":

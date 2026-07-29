@@ -1,5 +1,26 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - Start operations control (0.4.30)
+
+- Added exact-command, homoglyph/newline rejection, receipt integrity,
+  asynchronous bridge progress, model-binding, and no-effect boundary tests.
+- Added Python-to-JavaScript receipt parity, stale request replay, cumulative
+  stdout/frame caps, environment allowlist, and durable intent regressions.
+- Proved bare/redirected interpreters and Python startup injection are rejected;
+  a malicious `.pth` sentinel cannot run under the sealed `-I -S -B` bootstrap.
+- Proved standard/dependency imports cannot be shadowed by the audited checkout
+  and the control script exists only in a manifest-materialized source tree.
+- Proved a hostile temp-root selection cannot materialize inside the repository.
+- Proved a hostile dependency `modules` package loses to sealed source and
+  post-copy source tampering fails before execution.
+- Proved deleting a sealed package cannot fall through to a dependency package.
+- Proved status, cancel, and resume authorization rejections preserve their
+  validated resident intent IDs at the Python control boundary.
+- Proved the frame cap rejects before dispatching an over-limit progress frame.
+- Added backend tests for profile/head/model/budget bindings, dirty-root
+  rejection, Holo deferral, resident controls, and WSP 62 module boundaries.
+- Revalidated the generated 1,072-file manifest and exact extension pin.
+
 ## 2026-07-28 - Signed Memex dispatch compatibility (0.4.29)
 
 - Proved exact Memex lineage survives signed dispatch and independent review.

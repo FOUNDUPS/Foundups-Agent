@@ -20,9 +20,11 @@ const authoritativeWorkStateQuery = require('./authoritative_work_state_query');
 const conversationalDraftPolicy = require('./conversational_draft_policy');
 const modelRuntimeBindingQuery = require('./model_runtime_binding_query');
 const groundedTargetContinuity = require('./grounded_target_continuity');
+const startOperationsAdapter = require('./start_operations_extension_adapter');
+const startOperationsEnvironment = require('./start_operations_environment');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.29';
+const EXTENSION_VERSION = '0.4.30';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -62,6 +64,7 @@ const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/red
 const WRE_OPERATIONAL_SPINE_INVOKE_SCRIPT = 'scripts/reddog_extension_wre_spine_invoke_once.py';
 const REDDOG_EXTENSION_LIVE_ENQUEUE_INVOKE_SCRIPT = 'scripts/reddog_extension_live_enqueue_invoke_once.py';
 const REDDOG_RESIDENT_ARCHITECT_SESSION_SCRIPT = 'scripts/reddog_resident_architect_session_once.py';
+const REDDOG_START_OPERATIONS_CONTROL_SCRIPT = 'scripts/reddog_start_operations_control_once.py';
 const REDDOG_OPERATOR_WARDROBE_SELECTION_SCRIPT = 'scripts/reddog_operator_wardrobe_selection_once.py';
 const REDDOG_GITHUB_PERMISSION_PROBE_SCRIPT = 'scripts/reddog_github_permission_probe_once.py';
 const REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT = 'scripts/reddog_authoritative_work_state_query_once.py';
@@ -506,46 +509,21 @@ function resolveProviderReasoningReport(resolvedEffort) {
   };
 }
 
-// Self-file guard: retrieving RedDog itself (or the module-under-audit shell)
-// must never count toward required-target recall. This was the false-positive
-// source in REDDOG_HOLOINDEX_INDEX_GAP_ARCHITECT_REVIEW_PHASE1 where retrieving
-// extension.js falsely satisfied the recall check.
 const TARGET_RECALL_SELF_FILE_BASENAMES = ['extension.js'];
 const TARGET_RECALL_SELF_FILE_PATHS = ['extensions/reddog/extension.js'];
-
-// Header lines that introduce an explicit required-direct-read-target list in a
-// 012 work focus / prompt. Matched case-insensitively; list items follow until a
-// blank line or a non-list line.
 const REQUIRED_TARGET_HEADER_PATTERNS = [
   /required\s+direct[\s_-]?read\s+targets?/i,
   /required\s+read\s+targets?/i,
   /direct[\s_-]?read\s+targets?\s*(?:\(required\))?/i
 ];
 
-// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: when a prompt carries an explicit
-// "Required direct-read targets" list AND the governed direct-read fetch succeeded,
-// the FINAL 42K model-visible context MUST preserve a readable excerpt from EVERY
-// required target. The prior packing joined all sections then tail-sliced to 42K, so
-// the fetched required-target content (mid/tail of the section list) was guillotined
-// while the HoloIndex raw JSON blob, git diff, and the self-file extension.js snippet
-// consumed the head budget. These constants govern the protected required-target
-// budget that survives the final cut. Numbers are adjustable; the contract test proves
-// all golden required files survive inside the 42K cap.
 const BOUNDED_CONTEXT_MAX_CHARS = 42000;
 const REQUIRED_TARGET_MARKER_PREFIX = '### Required direct-read target: ';
 const REQUIRED_TARGET_MIN_CHARS = 1800;   // guaranteed minimum excerpt per required target
 const REQUIRED_TARGET_MAX_CHARS = 6000;   // max excerpt per required target before spreading extra
-// Total protected budget for ALL required targets combined. Capped separately from the
-// 42K whole-context budget so a large required file cannot starve later required files,
-// and lower-priority sections (HoloIndex JSON, git diff, self-file snippet) yield first.
 const REQUIRED_TARGET_PROTECTED_TOTAL_CHARS = 30000;
 
 function normalizeTargetPath(raw) {
-  // Backslash -> forward slash, then strip wrapper/punctuation chars from each end via
-  // a linear scan. The prior regex form (/^[`'"(\[]+/ and /[`'")\].,;:]+$/) was flagged
-  // by CodeQL js/polynomial-redos: the end-anchored `[...]+$` backtracks quadratically on
-  // uncontrolled input with many repeated quote chars. This O(n) trim preserves the exact
-  // leading/trailing character sets and ordering.
   const s = String(raw || '').replace(/\\/g, '/');
   const LEAD = ['`', "'", '"', '(', '['];
   // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix C): a prose path can end
@@ -5365,7 +5343,10 @@ async function openFusionEditor(context, installState) {
     lastContinuationSummary: null,
     bridgeChild: null,
     disposed: false,
-    liveEnqueueKeys: new Set()
+    liveEnqueueKeys: new Set(),
+    operationsIntentId: String(
+      context.workspaceState.get('reddog.operationsIntentId', '') || ''
+    )
   };
   state.installState = installState || detectRedDogInstallState(context);
   wireFusionWebview(context, panel.webview, worker, state);
@@ -5406,6 +5387,22 @@ function fusionWorkerFromConfig() {
     reddogConfigValue, DEFAULT_FUSION_WORKER, FUSION_PANEL_FORWARD_LIMIT
   );
 }
+function startOperationsOptions(context, message, worker, state, webview) {
+  return {
+    text: message.text, worker, state,
+    interpreter: resolvePythonInterpreter(
+      workspaceRoot(), reddogConfigValue('pythonPath', 'python')
+    ).path,
+    script: path.join(workspaceRoot(), REDDOG_START_OPERATIONS_CONTROL_SCRIPT),
+    repoRoot: workspaceRoot(),
+    env: startOperationsEnvironment.build(process.env),
+    persistIntentId: (value) => context.workspaceState.update(
+      'reddog.operationsIntentId', value
+    ),
+    postStatus: (text) => postStatusAndProgress(webview, null, text),
+    postResult: (result) => webview.postMessage({ command: 'result', result })
+  };
+}
 function wireFusionWebview(context, webview, worker, state) {
   webview.onDidReceiveMessage(async (message) => {
     if (!message || typeof message !== 'object') {
@@ -5432,6 +5429,9 @@ function wireFusionWebview(context, webview, worker, state) {
     if (await blockIncompatibleBackend(context, state, webview)) {
       return;
     }
+    if (await startOperationsAdapter.handleMessage(
+      startOperationsOptions(context, message, worker, state, webview)
+    )) return;
     const modelBindingBlock = modelRuntimeBindingQuery.blockedReason(worker);
     if (modelBindingBlock) {
       postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);

@@ -4,7 +4,7 @@ const BACKEND_MANIFEST_SCHEMA = 'reddog_backend_manifest.v3';
 const BACKEND_PRODUCT = 'foundups-agent-reddog-backend';
 const BACKEND_API_VERSION = 2;
 const BACKEND_MANIFEST_PATH = 'scripts/reddog_backend_manifest.json';
-const EXPECTED_MANIFEST_SHA256 = '1d949674440ed7da77609a430bc69f1ba67b5e33cdce7c9f930f777d554d95da';
+const EXPECTED_MANIFEST_SHA256 = '647296ede03475f09b08966a02f434d2133f25cd0df6ef36ea5c91a787fffaf4';
 const RUNTIME_DEPENDENCY_GRAPH_VERSION = 2;
 const MAX_MANIFEST_BYTES = 256 * 1024;
 const MAX_RUNTIME_FILE_BYTES = 2 * 1024 * 1024;
@@ -21,7 +21,8 @@ const REQUIRED_BRIDGE_FILES = Object.freeze([
   'scripts/reddog_model_runtime_binding_query_once.py',
   'scripts/reddog_operator_wardrobe_selection_once.py',
   'scripts/reddog_repair_guard_once.py',
-  'scripts/reddog_resident_architect_session_once.py'
+  'scripts/reddog_resident_architect_session_once.py',
+  'scripts/reddog_start_operations_control_once.py'
 ]);
 const REQUIRED_EXECUTABLE_FILES = Object.freeze([
   ...REQUIRED_BRIDGE_FILES,
