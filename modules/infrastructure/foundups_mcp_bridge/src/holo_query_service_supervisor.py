@@ -22,6 +22,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
+from .reddog_sealed_holo_runtime import (
+    scrub_holo_child_environment,
+    sealed_holo_command,
+    sealed_runtime_required,
+)
 
 OWNER_MODULE = (
     "modules.infrastructure.foundups_mcp_bridge.src.holo_query_service"
@@ -40,6 +45,7 @@ DEFAULT_OWNER_PROBE_TIMEOUT_SECONDS = 30.0
 DEFAULT_OWNER_PROBE_INTERVAL_SECONDS = 0.5
 PORT_IN_USE_ERROR = "HOLOINDEX_QUERY_SERVICE_PORT_IN_USE"
 BINDING_MISMATCH_ERROR = "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH"
+SEALED_RUNTIME_INVALID_ERROR = "HOLOINDEX_QUERY_SERVICE_SEALED_RUNTIME_INVALID"
 
 
 class HoloQueryServiceSupervisorError(RuntimeError):
@@ -392,7 +398,7 @@ def _owner_environment(
     ssd_path: Path | None,
     pythonpath_entries: tuple[str, ...] = (),
 ) -> dict[str, str]:
-    environment = dict(os.environ)
+    environment = scrub_holo_child_environment(os.environ)
     environment.update(
         {
             SERVICE_TOKEN_ENV: token,
@@ -412,7 +418,25 @@ def _owner_command(
     python_executable: str,
     port: int,
     parent_pid: int,
+    *,
+    repo_root: Path | str | None = None,
+    environ: Mapping[str, str] | None = None,
 ) -> list[str]:
+    env = os.environ if environ is None else environ
+    if repo_root is not None:
+        sealed = sealed_holo_command(
+            environ=env,
+            trusted_module_path=Path(__file__),
+            target_repo_root=repo_root,
+            entry_relative_path="scripts/reddog_holoindex_owner_service_once.py",
+            script_args=(
+                "--host", OWNER_HOST, "--port", str(port),
+                "--parent-pid", str(parent_pid),
+            ),
+            python_executable=python_executable,
+        )
+        if sealed_runtime_required(env):
+            return list(sealed or ())
     return [
         python_executable,
         "-B",
@@ -508,8 +532,19 @@ class HoloQueryServiceSupervisor:
             self._pythonpath_entries,
         )
         try:
+            command = _owner_command(
+                self.python_executable,
+                self.port,
+                os.getpid(),
+                repo_root=self.repo_root,
+                environ=os.environ,
+            )
+            if not command:
+                raise HoloQueryServiceSupervisorError(
+                    SEALED_RUNTIME_INVALID_ERROR
+                )
             process = subprocess.Popen(
-                _owner_command(self.python_executable, self.port, os.getpid()),
+                command,
                 cwd=str(self.repo_root),
                 env=owner_environment,
                 stdin=subprocess.DEVNULL,

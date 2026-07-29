@@ -37,6 +37,9 @@ from modules.communication.moltbot_bridge.src.reddog_repo_audit_fallback_groundi
     RepoAuditFallbackReason,
     build_bound_repo_audit_fallback,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_bootstrap import (
+    resolve_reddog_holoindex_owner_handoff,
+)
 
 
 GROUNDING_RESULT_SCHEMA = "reddog_transport_grounding_result.v1"
@@ -530,6 +533,13 @@ def _owner_query(
     service_token: str | None,
     timeout_seconds: float,
 ) -> OwnerQuery:
+    if service_url is None and service_token is None:
+        try:
+            handoff = resolve_reddog_holoindex_owner_handoff()
+        except Exception:
+            handoff = None
+        if handoff is not None:
+            service_url, service_token = handoff
     return lambda query: query_holoindex_owner(
         repo_root=repo_root,
         query=query,

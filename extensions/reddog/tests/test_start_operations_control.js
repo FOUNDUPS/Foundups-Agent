@@ -121,6 +121,7 @@ function assertStartupHooksExcluded() {
   const target = path.join(root, 'audited-target');
   fs.mkdirSync(source);
   fs.mkdirSync(target);
+  fs.mkdirSync(path.join(target, '.git'));
   fs.writeFileSync(
     path.join(dependencies, 'attacker.pth'),
     `import pathlib;pathlib.Path(${JSON.stringify(sentinel)}).write_text("x")\n`
@@ -143,8 +144,9 @@ function assertStartupHooksExcluded() {
   const script = path.join(source, 'probe.py');
   fs.writeFileSync(
     script,
-    'import json,dep_probe\nfrom modules import probe\n'
-      + 'print("sealed:"+dep_probe.VALUE+":"+probe.VALUE)\n'
+    'import json,dep_probe,os\nfrom modules import probe\n'
+      + 'print("sealed:"+dep_probe.VALUE+":"+probe.VALUE+":"'
+      + '+os.environ["REDDOG_SEALED_RUNTIME_TARGET_REPO_ROOT"])\n'
   );
   const relativeFiles = ['probe.py', 'modules/__init__.py', 'modules/probe.py'];
   const runtimeDigests = {};
@@ -163,7 +165,7 @@ function assertStartupHooksExcluded() {
   ];
   assert.strictEqual(cp.execFileSync(
     runtime.interpreter, args, { cwd: root, encoding: 'utf8' }
-  ).trim(), 'sealed:dependency:source');
+  ).trim(), `sealed:dependency:source:${target}`);
   assert.strictEqual(fs.existsSync(sentinel), false);
   fs.rmSync(path.join(sourcePackage, '__init__.py'));
   assert.throws(
@@ -266,6 +268,39 @@ async function main() {
   const terminal = signedResult(request);
   assert(protocol.validateProgress(progress, request));
   assert(protocol.validateResult(terminal, request));
+  const repaired = signedResult(request, {
+    no_maintenance_performed: false,
+    holo_repair_attempted: true,
+    holo_repair_task_id: 'reddog_start_operations_holo_repair:abc',
+    holo_repair_status: 'REPAIRED',
+    holo_repair_generation_id: 'sha256:' + 'e'.repeat(64),
+    holo_repair_freshness_receipt_digest: 'sha256:' + 'f'.repeat(64),
+    grounding_retried_after_repair: true
+  });
+  assert(protocol.validateResult(repaired, request));
+  const noRefreshRepaired = signedResult(request, {
+    no_maintenance_performed: true,
+    holo_repair_attempted: true,
+    holo_repair_task_id: 'reddog_start_operations_holo_repair:abc',
+    holo_repair_status: 'REPAIRED',
+    holo_repair_generation_id: 'sha256:' + 'e'.repeat(64),
+    holo_repair_freshness_receipt_digest: 'sha256:' + 'f'.repeat(64),
+    grounding_retried_after_repair: true
+  });
+  assert(protocol.validateResult(noRefreshRepaired, request));
+  assert.strictEqual(protocol.validateResult(signedResult(request, {
+    no_maintenance_performed: false,
+    holo_repair_attempted: true,
+    holo_repair_task_id: 'reddog_start_operations_holo_repair:abc',
+    holo_repair_status: 'REPAIRED',
+    holo_repair_generation_id: 'sha256:attacker',
+    holo_repair_freshness_receipt_digest: 'sha256:' + 'f'.repeat(64),
+    grounding_retried_after_repair: true
+  }), request), null);
+  assert.strictEqual(protocol.validateResult(signedResult(request, {
+    holo_repair_attempted: false,
+    holo_repair_status: 'REPAIRED'
+  }), request), null);
   assert(protocol.validateResult(pythonResult(request), request));
   const tampered = { ...terminal, status: 'ATTACKER' };
   assert.strictEqual(protocol.validateResult(tampered, request), null);
@@ -277,6 +312,7 @@ async function main() {
   assert.strictEqual(protocol.validateResult(terminal, staleRequest), null);
 
   let observedProgress = null;
+  let spawnedEnvironment = null;
   const runtime = approvedRuntime();
   const approved = interpreterPolicy.approved(
     runtime.interpreter, runtime.repoRoot
@@ -293,12 +329,20 @@ async function main() {
     env: {},
     materialize: fakeMaterializer(runtime),
     request,
-    spawn: () => fakeChild([JSON.stringify(progress), JSON.stringify(terminal)]),
+    spawn: (_command, _args, options) => {
+      spawnedEnvironment = options.env;
+      return fakeChild([JSON.stringify(progress), JSON.stringify(terminal)]);
+    },
     deadlineMs: 1000,
     onProgress: (value) => { observedProgress = value; }
   });
   assert.strictEqual(result.accepted, true);
   assert.strictEqual(observedProgress.intent_id, progress.intent_id);
+  assert.strictEqual(spawnedEnvironment.REDDOG_SEALED_RUNTIME_REQUIRED, '1');
+  assert.strictEqual(spawnedEnvironment.REDDOG_SEALED_RUNTIME_ROOT, runtime.repoRoot);
+  assert(spawnedEnvironment.REDDOG_SEALED_RUNTIME_BOOTSTRAP_PATH.endsWith(
+    path.join('extensions', 'reddog', 'start_operations_python_bootstrap.py')
+  ));
   const line = JSON.stringify({ ignored: 'x'.repeat(9000) }) + '\n';
   const oversized = await bridge.run({
     interpreter: runtime.interpreter, script: 'bridge.py',

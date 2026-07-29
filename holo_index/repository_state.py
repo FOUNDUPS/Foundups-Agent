@@ -12,13 +12,15 @@ import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Sequence
+from typing import Callable, Mapping, Sequence
 
 from holo_index.freshness_receipt import read_git_head_sha
 
 
 REPOSITORY_DIRTY_CODE = "HOLOINDEX_REPOSITORY_DIRTY"
 REPOSITORY_STATE_UNAVAILABLE_CODE = "HOLOINDEX_REPOSITORY_STATE_UNAVAILABLE"
+SEALED_TARGET_REPO_ROOT_ENV = "REDDOG_SEALED_RUNTIME_TARGET_REPO_ROOT"
+SEALED_RUNTIME_REQUIRED_ENV = "REDDOG_SEALED_RUNTIME_REQUIRED"
 
 
 @dataclass(frozen=True)
@@ -45,6 +47,34 @@ def repository_root_digest(repo_root: Path | str) -> str:
 
     root = os.path.normcase(str(Path(repo_root).resolve(strict=False)))
     return "sha256:" + hashlib.sha256(root.encode("utf-8")).hexdigest()
+
+
+def runtime_repository_root(
+    default_root: Path | str,
+    *,
+    environ: Mapping[str, str] | None = None,
+) -> Path:
+    """Resolve the authorized checkout while code executes from a sealed copy."""
+
+    environment = os.environ if environ is None else environ
+    fallback = Path(default_root).resolve(strict=False)
+    if not sealed_runtime_required(environment):
+        return fallback
+    raw = str(environment.get(SEALED_TARGET_REPO_ROOT_ENV, "")).strip()
+    candidate = Path(raw)
+    if not raw or not candidate.is_absolute():
+        raise RuntimeError("HOLOINDEX_SEALED_TARGET_REPO_ROOT_INVALID")
+    resolved = candidate.resolve(strict=False)
+    if not resolved.is_dir() or not (resolved / ".git").exists():
+        raise RuntimeError("HOLOINDEX_SEALED_TARGET_REPO_ROOT_INVALID")
+    return resolved
+
+
+def sealed_runtime_required(
+    environ: Mapping[str, str] | None = None,
+) -> bool:
+    environment = os.environ if environ is None else environ
+    return str(environment.get(SEALED_RUNTIME_REQUIRED_ENV, "")).strip() == "1"
 
 
 def _unavailable_state(head_sha: str) -> RepositoryState:
@@ -106,4 +136,6 @@ __all__ = [
     "RepositoryState",
     "read_repository_state",
     "repository_root_digest",
+    "runtime_repository_root",
+    "sealed_runtime_required",
 ]

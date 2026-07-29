@@ -16,11 +16,11 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_result imp
     PROGRESS_SCHEMA,
     RESULT_SCHEMA,
     StartOperationsControlResult,
+    holo_repair_payload,
     result_json,
 )
 HOLO_REASON_TOKENS = ("holoindex", "grounding_holo")
 CLIENT_BOUNDARY_FIELDS = (
-    ("no_maintenance_performed", "client_no_holoindex_reindex_performed"),
     ("no_repo_mutation_performed", "client_no_repo_mutation_performed"),
     ("no_shell_command_executed", "client_no_shell_command_executed"),
     ("no_hermes_dispatch_performed", "client_no_hermes_execution_performed"),
@@ -57,6 +57,8 @@ def from_client(
     repo_state: Mapping[str, Any],
     response: Any,
     control_request_id: str,
+    *,
+    holo_repair: Any | None = None,
 ) -> StartOperationsControlResult:
     reasons = tuple(str(item) for item in response.rejection_reasons if str(item))
     boundary_ok = _boundary_ok(response)
@@ -77,6 +79,7 @@ def from_client(
             "rejection_reasons": reasons
             if boundary_ok
             else (*reasons, "runtime_boundary_invalid"),
+            **holo_repair_payload(holo_repair),
             **_client_boundary_payload(response),
         }
     )
@@ -91,6 +94,7 @@ def reject(
     *,
     intent_id: str = "",
     control_request_id: str = "",
+    holo_repair: Any | None = None,
 ) -> StartOperationsControlResult:
     payload = _base_payload(action, profile, repo_state, control_request_id)
     payload.update(
@@ -100,6 +104,7 @@ def reject(
             "status": "DEFERRED" if _holo_deferred(reasons) else "REJECTED",
             "deferred_holo_maintenance": _holo_deferred(reasons),
             "rejection_reasons": tuple(reasons),
+            **holo_repair_payload(holo_repair),
         }
     )
     return _result(payload)
@@ -127,12 +132,20 @@ def _base_payload(
         "duplicate_intent_reused": False,
         "recovered_existing_cycle": False,
         "deferred_holo_maintenance": False,
+        "holo_repair_attempted": False,
+        "holo_repair_task_id": "",
+        "holo_repair_status": "",
+        "holo_repair_generation_id": "",
+        "holo_repair_freshness_receipt_digest": "",
+        "grounding_retried_after_repair": False,
         "rejection_reasons": (),
     }
 
 
 def _boundary_ok(response: Any) -> bool:
-    return all(
+    return bool(
+        getattr(response, "client_no_holoindex_reindex_performed", False)
+    ) and all(
         bool(getattr(response, source, False))
         for _, source in CLIENT_BOUNDARY_FIELDS
     )

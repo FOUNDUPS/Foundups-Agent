@@ -217,6 +217,8 @@ def test_refresh_environment_strips_secrets_and_casefolded_scope_overrides(
         environ={
             "HOLOINDEX_QUERY_SERVICE_URL": "http://127.0.0.1:8127",
             "HOLOINDEX_QUERY_SERVICE_TOKEN": "x" * 32,
+            "OPENROUTER_API_KEY": "provider-secret",
+            "GITHUB_TOKEN": "github-secret",
             "holo_symbol_max_files": "1",
             "holo_web_index_roots": "public/partial",
             "holoindex_wsp_roots": "WSP_framework/src/partial",
@@ -226,6 +228,8 @@ def test_refresh_environment_strips_secrets_and_casefolded_scope_overrides(
     )
     assert "HOLOINDEX_QUERY_SERVICE_URL" not in child
     assert "HOLOINDEX_QUERY_SERVICE_TOKEN" not in child
+    assert "OPENROUTER_API_KEY" not in child
+    assert "GITHUB_TOKEN" not in child
     assert "holo_symbol_max_files" not in child
     assert "holo_web_index_roots" not in child
     assert "holoindex_wsp_roots" not in child

@@ -263,7 +263,8 @@ class HoloIndex:
         self._log_agent_action(f"Initializing HoloIndex on SSD: {resolved_ssd_path}", "INIT")
 
         # Persistent storage layout (mirrors pre-rebuild behaviour)
-        self.project_root = Path(__file__).parent.parent.parent
+        from holo_index.repository_state import runtime_repository_root
+        self.project_root = runtime_repository_root(Path(__file__).parent.parent.parent)
         self.ssd_path = resolved_ssd_path
         self.vector_path = self.ssd_path / "vectors"
         self.cache_path = self.ssd_path / "cache"

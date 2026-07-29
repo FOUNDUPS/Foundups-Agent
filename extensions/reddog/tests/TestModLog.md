@@ -1,5 +1,18 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - Start operations Holo repair/resume (0.4.31)
+
+- Proved healthy-owner reuse performs no maintenance.
+- Proved failed/stale grounding creates one bound AgentDB task, OpenClaw claims
+  it, the exact route repairs Holo, and grounding retries once.
+- Added tamper, stale-repository, execution-proof, handoff-failure, and forged
+  extension-telemetry regressions.
+- Proved the checked-in profile invokes owner health, semantic-evidence
+  companions do not suppress a failed-owner repair, wrong assignees and replay
+  reject, expired assignments recover once, and terminal tasks never requeue.
+- Proved refreshed and already-current repair receipts, and sealed startup rather than
+  the live checkout and do not inherit provider or authority credentials.
+
 ## 2026-07-29 - Start operations control (0.4.30)
 
 - Added exact-command, homoglyph/newline rejection, receipt integrity,

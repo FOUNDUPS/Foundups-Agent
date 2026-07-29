@@ -1,4 +1,16 @@
 # ModLog - moltbot_bridge
+- `REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1`: start operations
+  now reuses a current process-private Holo owner or creates one exact-HEAD,
+  durable AgentDB repair task for OpenClaw. The exact task route invokes the
+  canonical maintenance handshake, re-proves generation/freshness, and permits
+  one grounding retry. Semantic misses do not trigger re-indexing; malformed
+  handoffs, task substitutions, repository changes, and proof mismatches fail
+  closed.
+- The canonical operations profile now makes owner health reachable through an
+  explicit semantic readiness target. Dispatch requires an opaque process-local
+  capability after the exact OpenClaw assignment, rejects replay and wrong
+  assignees, and uses the existing exact-assignment CAS for bounded crash
+  recovery. Reported maintenance reflects the handshake's actual refresh flag.
 - Start-operations authorization rejection now preserves validated resident
   intent IDs for status, cancel, and resume response correlation.
 - `START_OPERATIONS_CONTROL_ADAPTER_PHASE1`: extracted the main-host dual

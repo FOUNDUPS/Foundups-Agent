@@ -13,6 +13,9 @@ const DEFAULT_DEADLINE_MS = 15 * 60 * 1000;
 const PYTHON_BOOTSTRAP = path.join(
   __dirname, 'start_operations_python_bootstrap.py'
 );
+const SEALED_BOOTSTRAP_RELATIVE = path.join(
+  'extensions', 'reddog', 'start_operations_python_bootstrap.py'
+);
 
 function run(options) {
   const opts = options && typeof options === 'object' ? options : {};
@@ -44,8 +47,11 @@ function launch(options) {
       source.targetRepoRoot, runtime.sitePackages,
       source.manifestPath, source.manifestDigest
     ];
+    const childEnvironment = sealedEnvironment(
+      options.env, source, runtime
+    );
     const child = (options.spawn || cp.spawn)(runtime.interpreter, args, {
-      cwd: source.runtimeRoot, env: options.env,
+      cwd: source.runtimeRoot, env: childEnvironment,
       stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true
     });
     return { child, cleanup: source.cleanup };
@@ -53,6 +59,20 @@ function launch(options) {
     source.cleanup();
     throw error;
   }
+}
+
+function sealedEnvironment(base, source, runtime) {
+  return {
+    ...(base || {}),
+    REDDOG_SEALED_RUNTIME_REQUIRED: '1',
+    REDDOG_SEALED_RUNTIME_ROOT: source.runtimeRoot,
+    REDDOG_SEALED_RUNTIME_MANIFEST_PATH: source.manifestPath,
+    REDDOG_SEALED_RUNTIME_MANIFEST_DIGEST: source.manifestDigest,
+    REDDOG_SEALED_RUNTIME_BOOTSTRAP_PATH: path.join(
+      source.runtimeRoot, SEALED_BOOTSTRAP_RELATIVE
+    ),
+    REDDOG_SEALED_RUNTIME_SITE_PACKAGES: runtime.sitePackages
+  };
 }
 
 function collect(child, options, resolve, cleanup) {

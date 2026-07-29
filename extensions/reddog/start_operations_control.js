@@ -16,7 +16,6 @@ const COMMANDS = new Map([
 ]);
 const REQUIRED_BOUNDARY_FIELDS = [
   'no_extension_fusion_call_performed',
-  'no_maintenance_performed',
   'no_repo_mutation_performed',
   'no_shell_command_executed',
   'no_hermes_dispatch_performed',
@@ -39,7 +38,11 @@ const EMPTY_RESULT_FIELDS = Object.freeze({
   intent_id: '', cycle_id: '', repo_head_sha: '',
   architect_action: '', architect_next_slice: '', determination_id: '',
   task_status_counts: Object.freeze({}), duplicate_intent_reused: false,
-  recovered_existing_cycle: false, deferred_holo_maintenance: false
+  recovered_existing_cycle: false, deferred_holo_maintenance: false,
+  holo_repair_attempted: false, holo_repair_task_id: '',
+  holo_repair_status: '', holo_repair_generation_id: '',
+  holo_repair_freshness_receipt_digest: '',
+  grounding_retried_after_repair: false
 });
 
 function classify(text) {
@@ -85,9 +88,58 @@ function validateResult(value, request) {
   if (!['submit', 'status', 'cancel', 'resume'].includes(value.action)) return null;
   if (!Array.isArray(value.rejection_reasons)) return null;
   if (!REQUIRED_BOUNDARY_FIELDS.every((field) => value[field] === true)) return null;
+  if (!validHoloRepairEvidence(value)) return null;
   if (value.effect_evidence_level !== EFFECT_EVIDENCE_LEVEL) return null;
   if (!matchesRequest(value, request)) return null;
   return value;
+}
+
+function validHoloRepairEvidence(value) {
+  if (typeof value.no_maintenance_performed !== 'boolean') return false;
+  if (value.holo_repair_attempted !== true) return validNoRepair(value);
+  if (!['OWNER_READY', 'REPAIRED', 'DEFERRED', 'FAILED', 'REJECTED']
+    .includes(value.holo_repair_status)) return false;
+  if (value.holo_repair_status === 'OWNER_READY') return validReadyOwner(value);
+  if (value.holo_repair_status === 'REPAIRED') return validRepairedOwner(value);
+  if (value.grounding_retried_after_repair !== false) return false;
+  if (value.holo_repair_generation_id !== ''
+    || value.holo_repair_freshness_receipt_digest !== '') return false;
+  if (value.no_maintenance_performed === false
+    && !String(value.holo_repair_task_id || '')
+      .startsWith('reddog_start_operations_holo_repair:')) return false;
+  return true;
+}
+
+function validNoRepair(value) {
+  return value.no_maintenance_performed === true
+    && value.holo_repair_task_id === ''
+    && value.holo_repair_status === ''
+    && value.holo_repair_generation_id === ''
+    && value.holo_repair_freshness_receipt_digest === ''
+    && value.grounding_retried_after_repair === false;
+}
+
+function validReadyOwner(value) {
+  return value.no_maintenance_performed === true
+    && value.holo_repair_task_id === ''
+    && value.grounding_retried_after_repair === true
+    && validRepairDigests(value);
+}
+
+function validRepairedOwner(value) {
+  return typeof value.no_maintenance_performed === 'boolean'
+    && String(value.holo_repair_task_id || '')
+      .startsWith('reddog_start_operations_holo_repair:')
+    && value.grounding_retried_after_repair === true
+    && validRepairDigests(value);
+}
+
+function validRepairDigests(value) {
+  return /^sha256:[a-f0-9]{64}$/.test(
+    String(value.holo_repair_generation_id || '')
+  ) && /^sha256:[a-f0-9]{64}$/.test(
+    String(value.holo_repair_freshness_receipt_digest || '')
+  );
 }
 
 function matchesRequest(value, request) {
@@ -136,6 +188,8 @@ function render(result) {
     '- architect_action: ' + (value.architect_action || '(none)') + ' [OBSERVED]',
     '- architect_next_slice: ' + (value.architect_next_slice || '(none)') + ' [OBSERVED]',
     '- deferred_holo_maintenance: ' + (value.deferred_holo_maintenance === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- holo_repair_status: ' + (value.holo_repair_status || '(none)') + ' [OBSERVED]',
+    '- grounding_retried_after_repair: ' + (value.grounding_retried_after_repair === true ? 'true' : 'false') + ' [OBSERVED]',
     '- rejection_reasons: ' + JSON.stringify(value.rejection_reasons || []) + ' [OBSERVED]',
     '- effect_evidence_level: ' + (value.effect_evidence_level || '(none)') + ' [OBSERVED]',
     '',

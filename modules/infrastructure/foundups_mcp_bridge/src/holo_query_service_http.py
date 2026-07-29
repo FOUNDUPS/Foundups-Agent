@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
 
+from holo_index.repository_state import runtime_repository_root
+
 from .holo_query_service import (
     DEFAULT_BIND_HOST,
     DEFAULT_PORT,
@@ -66,7 +68,7 @@ def _new_fastapi_owner(
     if FastAPI is None or JSONResponse is None:
         raise RuntimeError("FASTAPI_DEPENDENCY_UNAVAILABLE_USE_STDLIB_RUNTIME")
     owner = service or HoloIndexQueryOwnerService(
-        repo_root=Path(__file__).resolve().parents[4]
+        repo_root=runtime_repository_root(Path(__file__).resolve().parents[4])
     )
     application = FastAPI(
         title="Private HoloIndex Query Owner",
@@ -305,7 +307,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.parent_pid:
         _start_parent_process_watchdog(int(args.parent_pid))
     owner = HoloIndexQueryOwnerService(
-        repo_root=Path(__file__).resolve().parents[4],
+        repo_root=runtime_repository_root(Path(__file__).resolve().parents[4]),
         bearer_token=token,
     )
     if FastAPI is not None:
