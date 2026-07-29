@@ -14,6 +14,7 @@ import pytest
 from holo_index.freshness_receipt import (
     ALL_COLLECTIONS,
     SCHEMA_VERSION,
+    SNAPSHOT_PAGE_SIZE,
     build_freshness_receipt,
     build_maintenance_invalidation,
     collections_for_changed_paths,
@@ -149,6 +150,47 @@ def test_receipt_contains_all_expected_collections(tmp_path: Path) -> None:
         _assert_sha256_digest(entry.source_manifest_digest)
         _assert_sha256_digest(entry.indexed_paths_digest)
         _assert_sha256_digest(entry.removed_paths_digest)
+
+
+def test_large_snapshot_manifest_reads_bounded_pages(tmp_path: Path) -> None:
+    class PagedSnapshotCollection(SnapshotCollection):
+        def __init__(self, name: str, count: int):
+            super().__init__(name, count)
+            self.pages: list[tuple[int, int]] = []
+
+        def get(self, *, include=None, limit=None, offset=0):
+            assert include == ["documents", "metadatas", "embeddings"]
+            assert isinstance(limit, int)
+            self.pages.append((offset, limit))
+            snapshot = super().get(include=include)
+            return {
+                key: value[offset : offset + limit]
+                for key, value in snapshot.items()
+            }
+
+    count = SNAPSHOT_PAGE_SIZE * 2 + 3
+    collection = PagedSnapshotCollection("navigation_code", count)
+    holo = _holo()
+    holo.code_collection = collection
+
+    receipt = build_freshness_receipt(
+        holo,
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="manual_index",
+        repo_head_sha="abc123",
+    )
+
+    entry = next(
+        value for value in receipt.collections if value.name == "navigation_code"
+    )
+    assert entry.verification == "PASS"
+    assert entry.count == count
+    assert collection.pages == [
+        (0, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE * 2, 3),
+    ]
 
 
 def test_snapshot_verification_uses_fresh_client_collection_handle(

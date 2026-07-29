@@ -25,6 +25,7 @@ from holo_index.verified_collection_carry_forward import (
 
 SCHEMA_VERSION = "holoindex_freshness_receipt.v2"
 COLLECTION_SCHEMA_VERSION = "holoindex_collection_freshness.v2"
+SNAPSHOT_PAGE_SIZE = 500
 FRESHNESS_RECEIPT_FILENAME = "holoindex_freshness_receipt.json"
 
 COLLECTION_ATTRS: dict[str, str] = {
@@ -235,6 +236,30 @@ def _canonical_snapshot_value(value: Any) -> Any:
     raise TypeError(f"unsupported_snapshot_value:{type(value).__name__}")
 
 
+def _paged_collection_snapshot(collection: Any, *, count: int) -> dict[str, list[Any]]:
+    combined = {
+        "ids": [],
+        "documents": [],
+        "metadatas": [],
+        "embeddings": [],
+    }
+    include = ["documents", "metadatas", "embeddings"]
+    for offset in range(0, count, SNAPSHOT_PAGE_SIZE):
+        try:
+            page = collection.get(
+                include=include,
+                limit=min(SNAPSHOT_PAGE_SIZE, count - offset),
+                offset=offset,
+            )
+        except TypeError:
+            if count > SNAPSHOT_PAGE_SIZE or offset:
+                raise
+            page = collection.get(include=include)
+        for key in combined:
+            combined[key].extend(_snapshot_list(page, key))
+    return combined
+
+
 def _collection_snapshot_manifest(
     collection: Any,
     *,
@@ -253,7 +278,7 @@ def _collection_snapshot_manifest(
         return _empty_snapshot_manifest(name)
 
     try:
-        snapshot = collection.get(include=["documents", "metadatas", "embeddings"])
+        snapshot = _paged_collection_snapshot(collection, count=count)
     except Exception:
         return _unavailable_snapshot_manifest("UNVERIFIED")
 

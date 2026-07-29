@@ -4,8 +4,10 @@
 
 - Replaced the unbounded persisted symbol-ID snapshot with deterministic
   `limit`/`offset` pages before stale-record reconciliation.
+- Applied the same bounded paging to collection content/embedding snapshots
+  used by the canonical freshness proof.
 - Added a large-state regression that rejects unbounded collection reads and
-  verifies complete stale-record deletion without exceeding publish batches.
+  verifies complete stale-record deletion and proof construction.
 
 ## [2026-07-26] Exact-SHA post-merge authority primitives
 
