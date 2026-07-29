@@ -1,7 +1,11 @@
 'use strict';
 
 const crypto = require('crypto');
-const fs = require('fs');
+const execFileSync = require('child_process').execFileSync;
+const existsSync = require('fs').existsSync;
+const joinPath = require('path').join;
+const ownerFallback = require('./holoindex_owner_fallback_bundle');
+const { createOwnerProof } = require('./holoindex_owner_proof');
 
 const HOLOINDEX_SEMANTIC_BUCKETS = [
   'code_hits',
@@ -144,12 +148,18 @@ function receiptMatchesResult(receipt, value) {
     && receipt.receipt_id === queryReceiptId(receipt);
 }
 
-function isAccepted(result) {
+function ownerResultMatchesReceipt(result) {
   const value = result && typeof result === 'object' ? result : {};
   const receipt = value.query_receipt && typeof value.query_receipt === 'object'
     ? value.query_receipt
     : {};
   return hasCurrentOwnerResult(value) && receiptMatchesResult(receipt, value);
+}
+
+const OWNER_PROOF = createOwnerProof(ownerResultMatchesReceipt);
+
+function isAccepted(result) {
+  return OWNER_PROOF.isAccepted(result);
 }
 
 function parseBridgeResult(stdout) {
@@ -177,12 +187,11 @@ function classifyOwnerBridgeError(err) {
 function runOwnerQuery(options) {
   const opts = options && typeof options === 'object' ? options : {};
   try {
-    const script = opts.path.join(opts.root, 'scripts', 'reddog_holoindex_owner_query_once.py');
-    const fsImpl = opts.fs && typeof opts.fs.existsSync === 'function' ? opts.fs : fs;
-    if (!fsImpl.existsSync(script)) {
-      return failureResult('owner_query_bridge_missing', opts.query);
+    const script = joinPath(opts.root, 'scripts', 'reddog_holoindex_owner_query_once.py');
+    if (!existsSync(script)) {
+      return OWNER_PROOF.observe(failureResult('owner_query_bridge_missing', opts.query));
     }
-    const stdout = opts.cp.execFileSync(opts.interpreterPath, ['-B', script], {
+    const stdout = execFileSync(opts.interpreterPath, ['-B', script], {
       input: JSON.stringify({ query: String(opts.query || ''), limit: Number(opts.limit || 5) }),
       cwd: opts.root,
       env: opts.env,
@@ -193,9 +202,9 @@ function runOwnerQuery(options) {
     });
     const result = parseBridgeResult(stdout);
     result.requested_query = String(opts.query || '');
-    return result;
+    return OWNER_PROOF.observe(result);
   } catch (err) {
-    return failureResult(classifyOwnerBridgeError(err), opts.query);
+    return OWNER_PROOF.observe(failureResult(classifyOwnerBridgeError(err), opts.query));
   }
 }
 
@@ -238,6 +247,19 @@ function appendDirectHits(task, directHits) {
 }
 
 function ownerMetadata(task, priorMeta, ownerResult, raw, accepted) {
+  if (!accepted) {
+    const observed = OWNER_PROOF.isObserved(ownerResult) ? ownerResult : {};
+    return Object.assign({}, priorMeta, ownerFallback.rejectedOwnerMetadata(observed), {
+      code_count: task.code_hits.length,
+      wsp_count: task.wsp_hits.length,
+      test_count: task.test_hits.length,
+      skill_count: task.skill_hits.length,
+      symbol_count: task.symbol_hits.length,
+      docs_count: task.docs_hits.length,
+      knowledge_count: task.knowledge_hits.length,
+      work_ledger_count: task.work_ledger_hits.length
+    });
+  }
   const rawMeta = raw.metadata && typeof raw.metadata === 'object' ? raw.metadata : {};
   const receipt = ownerResult && ownerResult.query_receipt && typeof ownerResult.query_receipt === 'object'
     ? ownerResult.query_receipt
@@ -294,10 +316,7 @@ function ownerQuerySummary(metadata, accepted) {
 }
 
 function mergeBundle(bundleOutput, ownerResult) {
-  const data = parseBundle(bundleOutput);
-  if (!data) {
-    return String(bundleOutput || '');
-  }
+  const data = parseBundle(bundleOutput) || ownerFallback.buildOwnerFallbackBundle();
   const task = data.task_retrieval && typeof data.task_retrieval === 'object'
     ? Object.assign({}, data.task_retrieval)
     : {};
@@ -438,28 +457,28 @@ function buildMetaFromBundle(output, usedOfflineFallback, taskText, dependencies
 }
 
 function applyRejectedOwnerMeta(meta, ownerResult) {
-  const value = ownerResult && typeof ownerResult === 'object' ? ownerResult : {};
-  const receipt = value.query_receipt && typeof value.query_receipt === 'object' ? value.query_receipt : {};
+  const observed = OWNER_PROOF.isObserved(ownerResult) ? ownerResult : {};
+  const safe = ownerFallback.rejectedOwnerMetadata(observed);
   Object.assign(meta, {
     holoindex_status: 'generation_bound_query_failed',
     holoindex_owner_query_required: true,
     holoindex_owner_query_ok: false,
-    holoindex_owner_query_error: String(value.error || 'unknown'),
-    holoindex_owner_attempts: Number(value.owner_attempts || 0),
-    holoindex_owner_retry_performed: value.owner_retry_performed === true,
-    holoindex_owner_retry_reason: String(value.owner_retry_reason || ''),
-    holoindex_query_source: String(value.source || 'holoindex_owner_service'),
-    holoindex_freshness: String(value.freshness || 'UNKNOWN'),
-    holoindex_generation_id: String(value.freshness_generation_id || ''),
-    holoindex_freshness_receipt_digest: String(value.freshness_receipt_digest || ''),
-    holoindex_repo_head_sha: String(value.repo_head_sha || ''),
-    holoindex_repo_root_digest: String(value.repo_root_digest || ''),
-    holoindex_authority_repo_root_digest: String(value.authority_repo_root_digest || ''),
-    holoindex_workspace_overlay_present: value.workspace_overlay_present === true,
-    holoindex_semantic_evidence_authority: String(value.semantic_evidence_authority || 'unknown'),
-    no_authority_worktree_mutation_performed: value.no_authority_worktree_mutation_performed === true,
-    holoindex_query_receipt_id: String(receipt.receipt_id || ''),
-    no_holoindex_reindex_performed: value.no_holoindex_reindex_performed === true,
+    holoindex_owner_query_error: safe.owner_query_error,
+    holoindex_owner_attempts: safe.owner_query_attempts,
+    holoindex_owner_retry_performed: safe.owner_query_retry_performed,
+    holoindex_owner_retry_reason: safe.owner_query_retry_reason,
+    holoindex_query_source: safe.owner_query_source,
+    holoindex_freshness: safe.freshness,
+    holoindex_generation_id: safe.freshness_generation_id,
+    holoindex_freshness_receipt_digest: safe.freshness_receipt_digest,
+    holoindex_repo_head_sha: safe.repo_head_sha,
+    holoindex_repo_root_digest: safe.repo_root_digest,
+    holoindex_authority_repo_root_digest: safe.authority_repo_root_digest,
+    holoindex_workspace_overlay_present: safe.workspace_overlay_present,
+    holoindex_semantic_evidence_authority: safe.semantic_evidence_authority,
+    no_authority_worktree_mutation_performed: safe.no_authority_worktree_mutation_performed,
+    holoindex_query_receipt_id: safe.query_receipt_id,
+    no_holoindex_reindex_performed: safe.no_holoindex_reindex_performed,
     index_gap_detected: true
   });
   return meta;

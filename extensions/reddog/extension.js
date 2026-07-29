@@ -24,7 +24,7 @@ const startOperationsAdapter = require('./start_operations_extension_adapter');
 const startOperationsEnvironment = require('./start_operations_environment');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.33';
+const EXTENSION_VERSION = '0.4.34';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -7514,8 +7514,6 @@ function runHoloIndexOwnerQuery(root, query, limit) {
     const configuredPython = reddogConfigValue('pythonPath', 'python');
     const interpreter = resolvePythonInterpreter(root, configuredPython);
     return holoGenerationBoundQuery.runOwnerQuery({
-      cp,
-      path,
       root,
       query,
       limit,

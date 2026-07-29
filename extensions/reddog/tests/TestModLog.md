@@ -1,5 +1,19 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-29 - Generation-bound owner fallback preservation (0.4.34)
+
+- Proved accepted owner evidence survives a non-JSON legacy bundle fallback.
+- Proved untrusted fallback text is discarded and rejected owner results
+  cannot manufacture a semantic bundle.
+- Proved attacker-recomputed receipt hashes lack the process-local owner proof
+  and admitted owner objects are deeply immutable.
+- Proved caller dependency injection and shared-module monkeypatching cannot
+  manufacture an admitted owner result.
+- Proved the alternate rejected-owner scorecard path drops forged multiline
+  errors plus unverified generation, freshness, and receipt claims.
+- Proved telemetry no longer degrades to `parse_error` when the owner receipt
+  is valid.
+
 ## 2026-07-29 - Provider-neutral RedDog Operations Skillz (0.4.33)
 
 - Proved checkout confinement, role-only metadata, deterministic integrity
