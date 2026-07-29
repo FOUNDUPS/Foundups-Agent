@@ -2,6 +2,21 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-29 - Generation-bound owner fallback preservation (0.4.34)
+
+- Preserved accepted, receipt-bound HoloIndex owner evidence when legacy
+  bundle assembly falls back to non-JSON output.
+- Required an immutable process-local owner proof in addition to deterministic
+  receipt validation, closing attacker-recomputed receipt acceptance.
+- Captured the bridge process and filesystem primitives inside the owner module;
+  caller-supplied or later monkeypatched dependencies cannot mint that proof.
+- Added a typed owner-only bundle that discards untrusted fallback text while
+  retaining semantic hits, generation binding, and retry telemetry.
+- Replaced rejected-owner fallback text with a typed empty bundle and added
+  regressions for the exact `0.4.33` broad-audit failure.
+- Consolidated every rejected-owner scorecard projection onto the same bounded
+  sanitizer so forged error, retry, generation, and receipt fields are dropped.
+
 ## 2026-07-29 - Provider-neutral RedDog Operations Skillz (0.4.33)
 
 - Bound the manifest-authenticated `reddog_operations` Skillz receipt and

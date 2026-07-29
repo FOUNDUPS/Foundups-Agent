@@ -1,6 +1,12 @@
 # RedDog
 
-Version: 0.4.33
+Version: 0.4.34
+
+Version 0.4.34 preserves accepted generation-bound HoloIndex evidence when the
+legacy structured bundle falls back to non-JSON text. RedDog builds a minimal
+receipt-bound bundle from an immutable process-local verified owner result,
+discards all untrusted fallback text, and retains exact generation, retry, and
+evidence telemetry.
 
 Version 0.4.33 binds the provider-neutral `reddog_operations` Skillz artifact
 to the exact `start operations` intent and runtime prompt. The Skillz defines
@@ -319,6 +325,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.33.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.34.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

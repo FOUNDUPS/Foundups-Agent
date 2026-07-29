@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.34 converts an accepted HoloIndex owner result into a minimal
+structured bundle when the legacy bundle is non-JSON. Only receipt-verified
+semantic evidence carrying the process-local owner proof is retained; fallback
+text is always discarded. Rejected owner results produce a typed empty bundle.
+
 Version 0.4.33 requires the manifest-authenticated `reddog_operations` Skillz
 before `start operations` can load model bindings or submit a resident intent.
 The intent binds the skill version and content/registry digests; submit and
