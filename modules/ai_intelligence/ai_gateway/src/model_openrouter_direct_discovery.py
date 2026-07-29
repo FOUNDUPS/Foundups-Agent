@@ -84,7 +84,10 @@ class AioHTTPTransport:
                     body.extend(chunk)
                 return HTTPResponse(
                     status=response.status,
-                    headers=dict(response.headers),
+                    headers={
+                        str(key): str(value)
+                        for key, value in response.headers.items()
+                    },
                     body=bytes(body),
                     redirected=bool(response.history),
                 )

@@ -2,6 +2,18 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-29 - Receipt-bound health and model freshness routing (0.4.35)
+
+- Added a local HoloIndex health route backed by the existing authenticated,
+  generation-bound semantic owner proof in a bounded worker thread.
+- Added an explicit provider-catalog freshness route that reports configured
+  model availability, chronology completeness, and provider-latest status
+  without model inference or production binding changes.
+- Restricted both routes to exact single-purpose grammars, blocked compound
+  requests, and scrubbed credentials from public-catalog subprocess egress.
+- Reused model-intelligence provider receipts and kept benchmark/promotion
+  gates authoritative for production model selection.
+
 ## 2026-07-29 - Generation-bound owner fallback preservation (0.4.34)
 
 - Preserved accepted, receipt-bound HoloIndex owner evidence when legacy

@@ -43,6 +43,11 @@ jobs:
         run: |
           python -m pytest modules/foundups/agent_market/tests/ -v --tb=short
 
+      - name: Run RedDog local diagnostic security gates
+        run: |
+          node extensions/reddog/tests/test_backend_compatibility_preflight.js
+          python -m pytest tests/test_reddog_model_freshness_query_once.py -v --tb=short
+
   lint:
     runs-on: ubuntu-latest
     steps:

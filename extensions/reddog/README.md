@@ -1,6 +1,14 @@
 # RedDog
 
-Version: 0.4.34
+Version: 0.4.35
+
+Version 0.4.35 routes exact, single-purpose HoloIndex health questions to the
+existing authenticated generation-bound owner in a bounded worker thread,
+without model inference or Fusion. It also answers exact model-freshness
+questions from a credential-free, sanitized OpenRouter catalog receipt.
+Availability, chronology completeness, and provider recency remain separate
+facts. Provider recency can nominate challengers but cannot change production
+bindings without benchmark, verifier, promotion, and runtime-binding evidence.
 
 Version 0.4.34 preserves accepted generation-bound HoloIndex evidence when the
 legacy structured bundle falls back to non-JSON text. RedDog builds a minimal
@@ -181,7 +189,8 @@ Current editor behavior is resident thin-client only:
 - no automatic PR creation, merge, deployment, or repository creation
 - no CABR, payout, source-authority, or verification claims
 - no direct Skillz/OpenClaw/Hermes/WRE execution from the webview
-- redaction gate runs before any OpenRouter egress
+- Fusion redaction runs before every model/prompt egress; the fixed public
+  catalog diagnostic uses a separate credential-free, no-prompt metadata gate
 - WRE operational spine preview is dry-run metadata only; the extension does not call the spine, create a worktree, run tests, enqueue OpenClaw, dispatch Hermes, create a PR, or merge.
 
 External repositories can be assessed for FoundUps integration through advisory WSP intake, not automatic execution. The future path is FoundUps Agent Intake Mode: WSP readiness audit, FoundUps intake packet, Skillz map, integration risk report, and governed WRE handoff recommendation.
@@ -325,6 +334,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.34.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.35.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

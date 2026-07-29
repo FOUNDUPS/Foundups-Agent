@@ -293,6 +293,10 @@ for (const relativePath of [
   'backend_compatibility_worker.js',
   'authoritative_work_state_query.js',
   'model_runtime_binding_query.js',
+  'local_diagnostic_router.js',
+  'model_freshness_query.js',
+  'runtime_health_query.js',
+  'runtime_health_worker.js',
   'conversational_draft_policy.js',
   'continuation_prompt.js',
   'start_operations_bridge.js',
@@ -315,5 +319,6 @@ require('./test_backend_compatibility_async');
 require('./test_authoritative_work_state_query');
 require('./test_model_runtime_binding_query');
 require('./test_conversational_draft_policy');
+require('./test_health_and_model_freshness_query');
 
 console.log('backend compatibility preflight tests passed');

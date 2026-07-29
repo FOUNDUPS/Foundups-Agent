@@ -1,5 +1,17 @@
 # RedDog Interface
 
+Version 0.4.35 adds two deterministic routing boundaries:
+
+- Exact HoloIndex health questions use `runtime_health_query.js`, a bounded
+  worker thread, and the existing process-local owner proof. They make no
+  OpenRouter call and never re-index.
+- Explicit model freshness questions use `model_freshness_query.js` and
+  `scripts/reddog_model_freshness_query_once.py` to obtain one bounded official
+  provider-catalog receipt through a credential-free environment. The receipt
+  separates catalog freshness, availability, chronology completeness, and
+  provider-latest status. This metadata-only route cannot select, promote, or
+  bind a production model.
+
 Version 0.4.34 converts an accepted HoloIndex owner result into a minimal
 structured bundle when the legacy bundle is non-JSON. Only receipt-verified
 semantic evidence carrying the process-local owner proof is retained; fallback

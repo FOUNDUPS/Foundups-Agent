@@ -24,7 +24,8 @@ const startOperationsAdapter = require('./start_operations_extension_adapter');
 const startOperationsEnvironment = require('./start_operations_environment');
 const repoDeepDiveFocusPolicy = require('./repo_deep_dive_focus_policy');
 const repoAuditGrounding = require('./repo_audit_grounding');
-const EXTENSION_VERSION = '0.4.34';
+const localDiagnosticRouter = require('./local_diagnostic_router');
+const EXTENSION_VERSION = '0.4.35';
 const REDDOG_EXTENSION_ID = 'foundups.reddog';
 const REDDOG_LEGACY_EXTENSION_ID = 'foundups.foundups-fusion-worker';
 const REDDOG_CONFIG_NAMESPACE = 'reddog';
@@ -4553,6 +4554,7 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
   let reasons = [];
   let localFastPath = null;
   let conversationalDraft = false;
+  const localDiagnostic = localDiagnosticRouter.classify(text);
 
   if (isSimpleIdentityQuestion(text)) {
     tier = 'REGULAR';
@@ -4566,6 +4568,8 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
     tier = 'REGULAR';
     reasons.push('daemon_output_assessment_fast_path');
     localFastPath = 'daemon_output_assessment';
+  } else if (localDiagnostic) {
+    tier = 'REGULAR'; reasons.push(localDiagnostic.reason); localFastPath = localDiagnostic.path;
   } else if (authoritativeWorkStateQuery.isAuthoritativeWorkStateQuestion(text)) {
     tier = 'REGULAR';
     reasons.push('authoritative_work_state_fast_path');
@@ -4742,18 +4746,8 @@ function validateRedDogOutput(markdown, options) {
 
 function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode) {
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
-  if (resolvedMode === 'local_identity_fast_path') {
-    return 'Local RedDog identity fast path: short identity/status question; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
-  }
-  if (resolvedMode === 'local_run_trace_assessment') {
-    return 'Local RedDog Run Trace assessment fast path: pasted Run Trace diagnostics; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
-  }
-  if (resolvedMode === 'local_daemon_output_assessment') {
-    return 'Local RedDog DAEmon/log assessment fast path: pasted operational diagnostics are treated as data; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
-  }
-  if (resolvedMode === 'local_authoritative_work_state') {
-    return 'Local authoritative work-state path: validates the configured queue snapshot and governed lineage without HoloIndex, model, mutation, or execution; context=' + resolvedContextMode + '.';
-  }
+  const localReason = authoritativeWorkStateQuery.modeReason(resolvedMode, resolvedContextMode);
+  if (localReason) return localReason;
   if (resolvedMode === 'openrouter_single') {
     if (classification && classification.conversationalDraft) return 'Conversational drafting: redaction-gated single model; no repository grounding, Fusion panel, or action planning.';
     if (tier === 'REGULAR') {
@@ -5381,6 +5375,7 @@ const runAuthoritativeWorkStateQueryBridge = () => authoritativeWorkStateQuery.r
   workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_AUTHORITATIVE_WORK_STATE_QUERY_SCRIPT)
 });
 const runModelRuntimeBindingQueryBridge = () => modelRuntimeBindingQuery.runConfiguredQuery({ workspaceRoot, configValue: reddogConfigValue, resolveInterpreter: resolvePythonInterpreter, bridgeEnv: buildBridgePythonEnv, scriptPath: (root) => path.join(root, REDDOG_MODEL_RUNTIME_BINDING_QUERY_SCRIPT) });
+const runLocalDiagnosticQuery = (name, worker) => { const root = workspaceRoot(); return localDiagnosticRouter.run(name, { root, worker, interpreterPath: resolvePythonInterpreter(root, reddogConfigValue('pythonPath', 'python')).path, env: buildBridgePythonEnv(process.env) }); };
 
 function fusionWorkerFromConfig() {
   return backendCompatibilityRender.resolveFusionWorker(
@@ -5432,12 +5427,6 @@ function wireFusionWebview(context, webview, worker, state) {
     if (await startOperationsAdapter.handleMessage(
       startOperationsOptions(context, message, worker, state, webview)
     )) return;
-    const modelBindingBlock = modelRuntimeBindingQuery.blockedReason(worker);
-    if (modelBindingBlock) {
-      postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);
-      return;
-    }
-
     const workFocus = message.text;
     const promptHasDetermineList = /^\s*determine\s*:/im.test(workFocus);
     const selectedContextMode = cleanContextMode(message.contextMode);
@@ -5449,6 +5438,11 @@ function wireFusionWebview(context, webview, worker, state) {
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
     const continuationEnabled = message.useLastPacket === true && !classification.conversationalDraft;
     const localFastPath = authoritativeWorkStateQuery.isLocalFastPath(classification.localFastPath);
+    const modelBindingBlock = modelRuntimeBindingQuery.blockedReason(worker);
+    if (modelBindingBlock && !localFastPath) {
+      postStatusAndProgress(webview, 'error', 'Blocked before OpenRouter: model runtime binding invalid: ' + modelBindingBlock);
+      return;
+    }
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
@@ -5571,6 +5565,8 @@ function wireFusionWebview(context, webview, worker, state) {
         identity: () => buildSimpleIdentityFastPathResult(workFocus, workerType, worker),
         runTrace: () => buildRunTraceAssessmentFastPathResult(workFocus),
         daemon: () => buildDaemonOutputLocalAssessmentResult(workFocus),
+        health: () => runLocalDiagnosticQuery('runtime_health', worker),
+        modelFreshness: () => runLocalDiagnosticQuery('model_freshness', worker),
         workState: runAuthoritativeWorkStateQueryBridge
       });
     } else if (!groundingPreflight.passed) {
