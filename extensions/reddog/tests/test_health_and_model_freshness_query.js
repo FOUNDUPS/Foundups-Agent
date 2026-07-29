@@ -72,6 +72,10 @@ async function main() {
   const wireSource = require('fs').readFileSync(
     path.join(__dirname, '..', 'extension.js'), 'utf8'
   );
+  const healthSource = require('fs').readFileSync(
+    path.join(__dirname, '..', 'runtime_health_query.js'), 'utf8'
+  );
+  assert(healthSource.includes('const HEALTH_TIMEOUT_MS = 30000;'));
   assert(
     wireSource.indexOf('const localFastPath = authoritativeWorkStateQuery.isLocalFastPath')
       < wireSource.indexOf('if (modelBindingBlock && !localFastPath)'),

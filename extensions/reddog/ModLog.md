@@ -2,6 +2,13 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-29 - HoloIndex health timeout calibration (0.4.36)
+
+- Raised the asynchronous health-worker deadline from 15 to 30 seconds after
+  live exact-SHA owner queries measured 14.5-18.5 seconds.
+- Preserved worker-thread isolation, timeout failure, no model fallback, and
+  the authenticated generation-bound owner proof.
+
 ## 2026-07-29 - Receipt-bound health and model freshness routing (0.4.35)
 
 - Added a local HoloIndex health route backed by the existing authenticated,

@@ -1,6 +1,13 @@
 # RedDog
 
-Version: 0.4.35
+Version: 0.4.36
+
+Version 0.4.36 calibrates the asynchronous HoloIndex health deadline to 30
+seconds. Live exact-SHA validation measured the authenticated owner at
+14.5-18.5 seconds after a post-merge generation refresh; the original
+15-second diagnostic budget therefore produced false `NOT_READY` results.
+The query remains off the extension host thread and retains a bounded deadline
+well below the legacy 90-second synchronous owner ceiling.
 
 Version 0.4.35 routes exact, single-purpose HoloIndex health questions to the
 existing authenticated generation-bound owner in a bounded worker thread,
@@ -334,6 +341,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.35.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `reddog-0.4.36.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `RedDog: Open` from Command Palette or the three-dot command list.

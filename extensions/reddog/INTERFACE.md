@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.36 gives the asynchronous HoloIndex health worker a 30-second
+deadline, calibrated from live post-merge owner-query evidence. Timeout remains
+fail-closed and never falls back to a model, synchronous host-thread query, or
+unverified freshness claim.
+
 Version 0.4.35 adds two deterministic routing boundaries:
 
 - Exact HoloIndex health questions use `runtime_health_query.js`, a bounded
