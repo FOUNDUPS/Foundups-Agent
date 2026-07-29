@@ -40,6 +40,8 @@ BRIDGE_FILES = (
 )
 EXECUTABLE_FILES = (*BRIDGE_FILES, "holo_index.py")
 STATIC_RUNTIME_FILES = (
+    "extensions/reddog/start_operations_python_bootstrap.py",
+    "scripts/reddog_holoindex_owner_service_once.py",
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
 )
 REPOSITORY_MARKERS = (

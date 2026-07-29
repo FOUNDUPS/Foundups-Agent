@@ -6,6 +6,12 @@ durable AgentDB task claimed by OpenClaw and dispatched through the canonical
 Holo maintenance handshake. Exact-HEAD owner proof is required before one
 grounding retry; a semantic miss does not trigger re-indexing. The editor has
 no direct Holo mutation authority.
+The canonical profile includes one semantic readiness target; therefore a
+failed/stale owner query is observed before the resident cycle is submitted.
+The OpenClaw repair route requires an opaque one-shot process capability,
+rejects task/assignee/context replay, and reclaims only an expired exact
+assignment. Inner Holo processes run from the sealed backend source tree with
+provider credentials and Python import overrides stripped.
 
 Version 0.4.30 adds the exact `start operations` control family. The command
 selects a checked-in, read-only operational profile and never becomes a work

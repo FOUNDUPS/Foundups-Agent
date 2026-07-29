@@ -31,6 +31,10 @@ from modules.communication.moltbot_bridge.src.reddog_run_task_support import (
     no_executor_result as _no_executor_result,
     start_runtime_emitter as _start_runtime_emitter,
 )
+from modules.communication.moltbot_bridge.src.reddog_holoindex_task_dispatch import (
+    dispatch_holoindex_maintenance as _dispatch_holoindex_maintenance,
+    dispatch_start_operations_holo_repair as _dispatch_start_operations_holo_repair,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
@@ -147,8 +151,13 @@ def _dispatch_exact_routes(
         )
         if signed is not None:
             result = signed
+    if _no_executor_matched(result) and source == "reddog_start_operations_holo_repair":
+        result = _dispatch_start_operations_holo_repair(
+            repo_root=repo_root, db=db, task_id=task_id, context=context,
+            execution_claim=execution_claim,
+            maintenance_runner=_dispatch_holoindex_maintenance,
+        )
     if _no_executor_matched(result) and source in {
-        "reddog_start_operations_holo_repair",
         "startup_maintenance_gate", "holoindex_postmerge_coordinator",
     }:
         startup = _try_startup_maintenance_dispatch(
@@ -463,42 +472,6 @@ def _try_grant_dispatch(
         return None
 
 
-def _dispatch_holoindex_maintenance(repo_root: Path) -> Dict[str, Any]:
-    """Run the trusted exact-HEAD HoloIndex maintenance handshake."""
-    try:
-        from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_handshake import (
-            ensure_reddog_holoindex_operational,
-        )
-
-        result = ensure_reddog_holoindex_operational(
-            repo_root=repo_root,
-            requested=True,
-            auto_maintenance=True,
-        )
-        structured = {
-            "ready": result.ready,
-            "status": result.status,
-            "refreshed": result.refreshed,
-            "error": result.error,
-            "repo_head_sha": result.repo_head_sha,
-            "generation_id": result.generation_id,
-            "freshness_receipt_digest": result.freshness_receipt_digest,
-            "freshness_reasons": list(result.freshness_reasons),
-        }
-        return {
-            "ok": result.ready,
-            "detail": json.dumps(structured, default=str)[:1000],
-            "executor": "startup:holo_index",
-            "structured_result": structured,
-        }
-    except Exception as exc:
-        return {
-            "ok": False,
-            "detail": f"holo_index_error: {type(exc).__name__}",
-            "executor": "startup:holo_index",
-        }
-
-
 def _run_self_research_refresh(refresher: Any) -> Dict[str, Any]:
     """Run the bounded startup self-research refresh."""
     try:
@@ -630,30 +603,6 @@ def _try_startup_maintenance_dispatch(
             context=context,
             execution_claim=execution_claim,
         )
-
-    if context.get("source") == "reddog_start_operations_holo_repair":
-        from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair import (
-            validate_holo_repair_task_binding,
-        )
-
-        reasons = validate_holo_repair_task_binding(
-            repo_root=repo_root,
-            task_id=task_id,
-            context=context,
-        )
-        if reasons:
-            return {
-                "ok": False,
-                "detail": ",".join(reasons),
-                "executor": "startup:holo_index",
-                "structured_result": {
-                    "ready": False,
-                    "status": "REJECTED",
-                    "rejection_reasons": list(reasons),
-                },
-            }
-        logger.info("[RUN_TASK] Start operations: HoloIndex repair")
-        return _dispatch_holoindex_maintenance(repo_root)
 
     if task_id == "startup_refresh_holo_index":
         logger.info("[RUN_TASK] Startup dispatch: HoloIndex maintenance handshake")

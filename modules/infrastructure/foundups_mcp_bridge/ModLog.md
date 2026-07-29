@@ -1,5 +1,14 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-29 - Sealed RedDog Holo process boundary
+
+- RedDog-owned Holo maintenance and query-owner processes now execute from the
+  backend-manifest source copy through the verified Python bootstrap instead of
+  importing executable code from the audited live checkout.
+- Child environments remove provider credentials, RedDog authority values, and
+  Python import overrides. Legacy non-RedDog callers retain their prior command
+  path; an invalid required sealed runtime fails before process creation.
+
 ## 2026-07-29 - Windows virtualenv owner launch correction
 
 - OBSERVED: RedDog's repository virtualenv launched the HoloIndex owner through

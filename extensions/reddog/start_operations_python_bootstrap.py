@@ -173,9 +173,9 @@ def _load_manifest(path: Path, expected_digest: str) -> dict[str, str]:
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 7:
+    if len(argv) < 7:
         raise ValueError("runtime_bootstrap_argument_count")
-    script, source, target, dependencies, manifest, expected = argv[1:]
+    script, source, target, dependencies, manifest, expected = argv[1:7]
     source_root = Path(source).resolve()
     digests = _load_manifest(Path(manifest), expected)
     reserved, packages = _reserved_bindings(digests)
@@ -191,9 +191,8 @@ def main(argv: list[str]) -> int:
         "__builtins__": __builtins__,
         "REDDOG_TARGET_REPO_ROOT": str(Path(target).resolve()),
     }
+    sys.argv = [script, *argv[7:]]
     exec(compile(raw, namespace["__file__"], "exec"), namespace)
     return 0
-
-
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))

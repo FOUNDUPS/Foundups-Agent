@@ -62,17 +62,30 @@ def _verified_execution(
     *,
     owner: Any,
     repo_head_sha: str,
+    task_id: str,
+    repair_request_id: str,
 ) -> bool:
     structured = execution.get("structured_result")
     proof = structured if isinstance(structured, Mapping) else {}
     return bool(
         execution.get("ok") is True
+        and execution.get("executor") == "startup:holo_index"
         and proof.get("ready") is True
         and proof.get("repo_head_sha") == repo_head_sha
+        and proof.get("repair_task_id") == task_id
+        and proof.get("repair_request_id") == repair_request_id
         and owner is not None
         and proof.get("generation_id") == owner.generation_id
         and proof.get("freshness_receipt_digest")
         == owner.freshness_receipt_digest
+    )
+
+
+def _execution_refreshed(execution: Mapping[str, Any]) -> bool:
+    structured = execution.get("structured_result")
+    return bool(
+        isinstance(structured, Mapping)
+        and structured.get("refreshed") is True
     )
 
 
@@ -96,6 +109,23 @@ def repair_start_operations_holoindex(
     owner = _current_owner(root, repo_head_sha, environ, ensure_operational)
     if owner is not None:
         return _result_from_owner(owner, status="OWNER_READY", maintenance=False)
+    return _run_repair(
+        root=root, repo_head_sha=repo_head_sha,
+        control_request_id=control_request_id, environ=environ, db=db,
+        ensure_operational=ensure_operational, task_executor=task_executor,
+    )
+
+
+def _run_repair(
+    *,
+    root: Path,
+    repo_head_sha: str,
+    control_request_id: str,
+    environ: Mapping[str, str],
+    db: Any,
+    ensure_operational: Callable[..., Any],
+    task_executor: Callable[..., Mapping[str, Any]] | None,
+) -> StartOperationsHoloRepairResult:
     task_id, context, task_error = prepare_task(
         root=root, repo_head_sha=repo_head_sha,
         control_request_id=control_request_id, db=db,
@@ -110,19 +140,25 @@ def repair_start_operations_holoindex(
         )
     owner = _current_owner(root, repo_head_sha, environ, ensure_operational)
     repair_id = str(context["repair_request_id"])
-    if not _verified_execution(execution, owner=owner, repo_head_sha=repo_head_sha):
+    if not _verified_execution(
+        execution,
+        owner=owner,
+        repo_head_sha=repo_head_sha,
+        task_id=task_id,
+        repair_request_id=repair_id,
+    ):
         return _rejected(
             "holo_repair_operational_proof_invalid",
             status="FAILED",
             task_id=task_id,
             repair_request_id=repair_id,
             repo_head_sha=repo_head_sha,
-            maintenance_performed=True,
+            maintenance_performed=_execution_refreshed(execution),
         )
     return _result_from_owner(
         owner,
         status="REPAIRED",
-        maintenance=True,
+        maintenance=_execution_refreshed(execution),
         task_id=task_id,
         repair_request_id=repair_id,
     )

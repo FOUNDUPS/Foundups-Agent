@@ -300,6 +300,7 @@ async function main() {
   assert.strictEqual(protocol.validateResult(terminal, staleRequest), null);
 
   let observedProgress = null;
+  let spawnedEnvironment = null;
   const runtime = approvedRuntime();
   const approved = interpreterPolicy.approved(
     runtime.interpreter, runtime.repoRoot
@@ -316,12 +317,20 @@ async function main() {
     env: {},
     materialize: fakeMaterializer(runtime),
     request,
-    spawn: () => fakeChild([JSON.stringify(progress), JSON.stringify(terminal)]),
+    spawn: (_command, _args, options) => {
+      spawnedEnvironment = options.env;
+      return fakeChild([JSON.stringify(progress), JSON.stringify(terminal)]);
+    },
     deadlineMs: 1000,
     onProgress: (value) => { observedProgress = value; }
   });
   assert.strictEqual(result.accepted, true);
   assert.strictEqual(observedProgress.intent_id, progress.intent_id);
+  assert.strictEqual(spawnedEnvironment.REDDOG_SEALED_RUNTIME_REQUIRED, '1');
+  assert.strictEqual(spawnedEnvironment.REDDOG_SEALED_RUNTIME_ROOT, runtime.repoRoot);
+  assert(spawnedEnvironment.REDDOG_SEALED_RUNTIME_BOOTSTRAP_PATH.endsWith(
+    path.join('extensions', 'reddog', 'start_operations_python_bootstrap.py')
+  ));
   const line = JSON.stringify({ ignored: 'x'.repeat(9000) }) + '\n';
   const oversized = await bridge.run({
     interpreter: runtime.interpreter, script: 'bridge.py',

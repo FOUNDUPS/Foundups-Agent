@@ -11,6 +11,9 @@ DEFAULT_MAX_CLAIMS = 5
 MAX_MAX_CLAIMS = 5
 DEFAULT_TIMEOUT_SECONDS = 180
 MAX_TIMEOUT_SECONDS = 600
+SEMANTIC_READINESS_TARGET = (
+    "RedDog resident operations current implementation and HoloIndex owner readiness"
+)
 
 READ_TARGETS = (
     "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
@@ -29,6 +32,7 @@ WORK_FOCUS = "\n".join(
         "Operate under WSP_00, retrieve and verify under WSP_97, then apply WSP_15.",
         "Read first:",
         *(f"- {path}" for path in READ_TARGETS),
+        f"Semantic target: {SEMANTIC_READINESS_TARGET}",
         "Determine the highest-priority bounded next task.",
         "This cycle is read-only and grants no source, shell, worktree, PR, merge, or reindex authority.",
     )
@@ -69,6 +73,7 @@ __all__ = [
     "PROFILE_ID",
     "PROFILE_SCHEMA",
     "READ_TARGETS",
+    "SEMANTIC_READINESS_TARGET",
     "StartOperationsProfile",
     "WORK_FOCUS",
     "start_operations_profile",

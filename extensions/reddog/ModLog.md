@@ -9,6 +9,11 @@
   handshake; the extension never re-indexes directly.
 - Added process-private owner handoff consumption, one bounded grounding retry,
   strict repair telemetry validation, and fail-closed task/context checks.
+- The canonical operations profile now exercises one explicit semantic
+  readiness target, so failed/stale owner evidence reaches the repair path in
+  production. Expired OpenClaw assignments recover by exact timestamp CAS.
+- Holo maintenance and owner startup execute only manifest-authenticated
+  runtime copies with provider credentials and Python import overrides removed.
 - Regenerated the sealed backend runtime manifest. Version 0.4.30 -> 0.4.31.
 
 ## 2026-07-29 - START_OPERATIONS_CONTROL_ADAPTER_PHASE1 (0.4.30)

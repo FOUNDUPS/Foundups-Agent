@@ -17,10 +17,17 @@ SOURCE = "reddog_start_operations_holo_repair"
 TASK_PREFIX = "reddog_start_operations_holo_repair:"
 CLAIM_AGENT_ID = "openclaw_supervisor"
 REQUIRED_SKILLS = ["holo-search"]
-REPAIRABLE_REASONS = frozenset(
+ASSIGNMENT_LEASE_SECONDS = 7500
+REPAIR_TRIGGER_REASONS = frozenset(
     {
         "grounding_holoindex_owner_query_failed",
         "grounding_holoindex_generation_not_current",
+    }
+)
+REPAIRABLE_REASONS = frozenset(
+    {
+        *REPAIR_TRIGGER_REASONS,
+        "grounding_semantic_evidence_insufficient",
     }
 )
 
@@ -47,7 +54,7 @@ def repairable_grounding_failure(reasons: tuple[str, ...]) -> bool:
     """Return true only for a Holo-only grounding failure."""
 
     normalized = {str(reason) for reason in reasons if str(reason)}
-    return bool(normalized.intersection(REPAIRABLE_REASONS)) and normalized.issubset(
+    return bool(normalized.intersection(REPAIR_TRIGGER_REASONS)) and normalized.issubset(
         REPAIRABLE_REASONS
     )
 
@@ -96,6 +103,7 @@ def validate_holo_repair_task_binding(
 
 
 __all__ = [
+    "ASSIGNMENT_LEASE_SECONDS",
     "CLAIM_AGENT_ID",
     "REQUIRED_SKILLS",
     "SCHEMA_VERSION",

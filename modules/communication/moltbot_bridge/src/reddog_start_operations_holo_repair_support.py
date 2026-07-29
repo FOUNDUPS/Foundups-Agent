@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair_contract import (
+    ASSIGNMENT_LEASE_SECONDS,
     CLAIM_AGENT_ID,
     REQUIRED_SKILLS,
     holo_repair_task_context,
     holo_repair_task_id,
     validate_holo_repair_task_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair_capability import (
+    REGISTRY,
 )
 
 
@@ -31,6 +36,38 @@ def runtime_dependencies(
     return db, ensure_operational
 
 
+def _assigned_expired(task: Mapping[str, Any]) -> bool:
+    raw = str(task.get("assigned_at") or "")
+    try:
+        assigned = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return True
+    if assigned.tzinfo is None:
+        assigned = assigned.replace(tzinfo=UTC)
+    return datetime.now(UTC) >= assigned + timedelta(
+        seconds=ASSIGNMENT_LEASE_SECONDS
+    )
+
+
+def _recover_stale_assignment(db: Any, task_id: str, task: Mapping[str, Any]) -> bool:
+    if (
+        str(task.get("status") or "") != "assigned"
+        or str(task.get("assigned_to") or "") != CLAIM_AGENT_ID
+        or not _assigned_expired(task)
+    ):
+        return False
+    assigned_at = str(task.get("assigned_at") or "")
+    reclaimed = db.reclaim_expired_holoindex_postmerge_task(
+        task_id,
+        CLAIM_AGENT_ID,
+        expected_assigned_at=assigned_at,
+    )
+    return bool(
+        reclaimed
+        and db.requeue_autonomous_task(task_id, expected_status="failed")
+    )
+
+
 def _load_task(db: Any, *, task_id: str, context: Mapping[str, Any]) -> bool:
     created = db.create_autonomous_task_if_absent(
         task_id=task_id,
@@ -47,9 +84,9 @@ def _load_task(db: Any, *, task_id: str, context: Mapping[str, Any]) -> bool:
     if not isinstance(persisted, Mapping) or persisted.get("context") != context:
         return False
     status = str(persisted.get("status") or "")
-    if not created and status in {"failed", "completed"}:
-        return bool(db.requeue_autonomous_task(task_id, expected_status=status))
-    return created or status == "pending"
+    return created or status == "pending" or _recover_stale_assignment(
+        db, task_id, persisted
+    )
 
 
 def prepare_task(
@@ -85,13 +122,27 @@ def execute_repair(
     try:
         if not db.assign_autonomous_task(task_id, CLAIM_AGENT_ID):
             return None
+        persisted = db.get_autonomous_task_by_id(task_id)
+        context = (
+            persisted.get("context")
+            if isinstance(persisted, Mapping)
+            else None
+        )
+        capability = (
+            REGISTRY.issue(task_id=task_id, context=context)
+            if isinstance(context, Mapping)
+            else None
+        )
+        if capability is None:
+            return {"ok": False, "error_class": "repair_capability_issue_failed"}
         if task_executor is None:
             from modules.communication.moltbot_bridge.scripts.run_task import (
                 execute_task,
             )
 
             task_executor = execute_task
-        return task_executor(task_id, repo_root=root)
+        return task_executor(
+            task_id, repo_root=root, execution_claim=capability)
     except Exception as exc:
         return {"ok": False, "error_class": type(exc).__name__}
 

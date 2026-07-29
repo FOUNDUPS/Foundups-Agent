@@ -68,6 +68,18 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
         in generated["required_runtime_sha256"]
     )
+    assert (
+        "extensions/reddog/start_operations_python_bootstrap.py"
+        in generated["required_runtime_sha256"]
+    )
+    assert (
+        "scripts/reddog_holoindex_owner_service_once.py"
+        in generated["required_runtime_sha256"]
+    )
+    assert (
+        "modules/communication/moltbot_bridge/src/reddog_holoindex_task_dispatch.py"
+        in generated["required_runtime_sha256"]
+    )
     assert generator.canonical_manifest_digest(generated) == (
-        "b4cb25e70915e13734c4c2af7915a13bcf50d124762ed6499d8995cec7b65937"
+        "257388ea16dbf0f6d814bfbd5e7e9aa1e580f892aad675dcf49c057ea8f55743"
     )

@@ -34,6 +34,11 @@ from holo_index.storage_contract import (
 
 from . import reddog_holoindex_owner_bootstrap as owner_bootstrap
 from .holo_query_service_supervisor import SERVICE_TOKEN_ENV, SERVICE_URL_ENV
+from .reddog_sealed_holo_runtime import (
+    scrub_holo_child_environment,
+    sealed_holo_command,
+    sealed_runtime_required,
+)
 
 
 AUTO_MAINTENANCE_ENV = "REDDOG_HOLOINDEX_AUTO_MAINTENANCE"
@@ -152,7 +157,7 @@ def _refresh_environment(
     *, environ: Mapping[str, str], ssd_path: Path
 ) -> dict[str, str]:
     """Return a canonical maintenance environment without scope overrides."""
-    child_environment = dict(environ)
+    child_environment = scrub_holo_child_environment(environ)
     for name in tuple(child_environment):
         normalized = name.upper()
         if normalized in _REFRESH_ENV_EXACT_DENY or normalized.startswith(
@@ -169,13 +174,19 @@ def _run_full_refresh(
     *, repo_root: Path, ssd_path: Path, environ: Mapping[str, str], timeout: float, runner
 ) -> str:
     child_environment = _refresh_environment(environ=environ, ssd_path=ssd_path)
-    command = [
-        sys.executable,
-        "-B",
-        str(repo_root / "holo_index.py"),
-        "--index-all",
-        "--ssd",
-        str(ssd_path),
+    sealed = sealed_holo_command(
+        environ=environ,
+        trusted_module_path=Path(__file__),
+        target_repo_root=repo_root,
+        entry_relative_path="holo_index.py",
+        script_args=("--index-all", "--ssd", str(ssd_path)),
+        python_executable=sys.executable,
+    )
+    if sealed_runtime_required(environ) and not sealed:
+        return REFRESH_FAILED_ERROR
+    command = list(sealed) if sealed else [
+        sys.executable, "-B", str(repo_root / "holo_index.py"),
+        "--index-all", "--ssd", str(ssd_path),
     ]
     try:
         completed = runner(

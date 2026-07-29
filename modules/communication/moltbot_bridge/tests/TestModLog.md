@@ -1,3 +1,12 @@
+## 2026-07-29: REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1
+- Proved the canonical operations profile performs a real semantic owner query,
+  making failed/stale Holo evidence reachable by the repair state machine.
+- Proved one-shot process capability, exact OpenClaw assignee, context/HEAD
+  binding, replay rejection, expired-assignment CAS recovery, terminal-task
+  refusal, exact execution proof, and truthful refresh telemetry.
+- Proved repair failure and a failed second grounding attempt never construct
+  the resident model client.
+
 ## 2026-07-28: REDDOG_FOUNDUP_MEMEX_AUTHORITY_DISPATCH_BINDING_PHASE1
 - Added end-to-end Memex authority and request-integrity regressions for pair
   propagation, malformed/falsy values, conflicts, and digest-alias tampering.

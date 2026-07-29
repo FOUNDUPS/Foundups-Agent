@@ -8,6 +8,12 @@ OpenClaw. The worker reuses the canonical Holo maintenance handshake, proves
 the exact repository HEAD and generation, and returns a bounded receipt before
 grounding is retried once. A weak semantic match alone never triggers
 maintenance, and the editor remains unable to re-index HoloIndex directly.
+The operations profile always includes a semantic readiness target so the
+owner check is reachable in the real control path. Repair dispatch consumes a
+one-shot process capability after the exact OpenClaw assignment, recovers only
+expired assignments by compare-and-swap, and runs both Holo maintenance and
+owner startup from the manifest-authenticated runtime copy with provider
+credentials removed.
 
 Version 0.4.30 adds an exact, asynchronous `start operations` control route
 that selects the checked-in read-only architect profile, bypasses the

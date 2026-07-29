@@ -16,13 +16,16 @@ from modules.communication.moltbot_bridge.src.reddog_start_operations_control im
 from modules.communication.moltbot_bridge.src.reddog_start_operations_profile import (
     PROFILE_ID,
     READ_TARGETS,
+    SEMANTIC_READINESS_TARGET,
     WORK_FOCUS,
 )
 from modules.communication.moltbot_bridge.src.reddog_start_operations_holo_repair import (
     StartOperationsHoloRepairResult,
+    repairable_grounding_failure,
 )
 from modules.communication.moltbot_bridge.src.reddog_transport_neutral_grounding_service import (
     TransportGroundingResult,
+    ground_transport_work_focus,
 )
 
 
@@ -406,6 +409,30 @@ def test_operations_profile_targets_exist_and_are_not_empty_grounding() -> None:
     assert READ_TARGETS
     assert all((REPO_ROOT / target).is_file() for target in READ_TARGETS)
     assert all(target in WORK_FOCUS for target in READ_TARGETS)
+    assert f"Semantic target: {SEMANTIC_READINESS_TARGET}" in WORK_FOCUS
+
+
+def test_operations_profile_exercises_holo_owner_health() -> None:
+    calls: list[str] = []
+
+    def unavailable_owner(query: str):
+        calls.append(query)
+        return {}
+
+    result = ground_transport_work_focus(
+        repo_root=REPO_ROOT,
+        work_focus=WORK_FOCUS,
+        foundup_id="foundups_agent",
+        authenticated_principal_id="principal-012",
+        source_surface="editor_thin_client",
+        client_request_id="start-operations-owner-health",
+        owner_query=unavailable_owner,
+    )
+
+    assert calls == [SEMANTIC_READINESS_TARGET]
+    assert result.accepted is False
+    assert "grounding_holoindex_owner_query_failed" in result.rejection_reasons
+    assert repairable_grounding_failure(result.rejection_reasons) is True
 
 
 def test_control_modules_have_no_execution_or_indexing_imports() -> None:
