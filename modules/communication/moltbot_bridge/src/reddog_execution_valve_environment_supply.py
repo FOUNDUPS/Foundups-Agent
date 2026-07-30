@@ -32,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_LIVE_ENQUEUE,
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
 )
@@ -104,11 +107,14 @@ def run_reddog_execution_valve_environment_supply(
     expires_epoch = min(epoch + ttl, int(lineage["permission_expires_at_epoch"]))
     if expires_epoch <= epoch:
         return _reject(("permission_snapshot_expired",))
-    return _materialize_environment(target, state, lineage, ttl, expires_epoch)
+    return _materialize_environment(
+        target, state, lineage, ttl, expires_epoch, repo_root=root
+    )
 
 
 def _materialize_environment(
-    target: Path, state: str, lineage: Mapping[str, Any], ttl: int, expires_epoch: int,
+    target: Path, state: str, lineage: Mapping[str, Any], ttl: int,
+    expires_epoch: int, *, repo_root: Path,
 ) -> ExecutionValveEnvironmentSupplyResult:
     core = _environment_core(state, lineage, ttl, expires_epoch)
     environment_digest = _digest(core)
@@ -117,7 +123,9 @@ def _materialize_environment(
     payload["supply_provenance"] = receipt
     try:
         governed = GovernedExecutionValveEnvironment.from_mapping(payload)
-        _write_json_atomic(target, governed.to_dict())
+        _write_json_atomic(
+            target, governed.to_dict(), repo_root=repo_root
+        )
     except Exception:
         return _reject(("execution_valve_environment_write_failed",))
     return ExecutionValveEnvironmentSupplyResult(
@@ -403,9 +411,17 @@ def _output_path(value: Path | str | None, repo_root: Path) -> tuple[Path | None
     return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
     with runtime_operation_lock(str(path) + ".operation"):
-        _write_json_atomic_unlocked(path, payload)
+        with reddog_runtime_artifact_generation_lock(
+            path.parent, repo_root=repo_root
+        ):
+            _write_json_atomic_unlocked(path, payload)
 
 
 def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:

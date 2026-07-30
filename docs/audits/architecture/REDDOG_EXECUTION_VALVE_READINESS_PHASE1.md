@@ -91,11 +91,12 @@ order is never consulted for `base_ref` after authoritative admission. Terminal
 identity or permission snapshot that expires after preflight still fails closed
 before nonce consumption and before the runner.
 
-The canonical evaluator is invoked, then forced closed with exact missing-anchor
-reasons. In particular,
-`canonical_signed_runtime_artifact_manifest_producer_missing` is always present
-until an independent descriptor-derived immutable manifest is signed and
-verified. Consensus, sovereign, principal-key, model-evidence, signer-handshake,
-and nonce-store anchors must also land before the blocker can be removed. No
-READY result, worktree creation, signer start, model call, or live canary was
-produced by this slice.
+Historical note: this audit originally recorded
+`canonical_signed_runtime_artifact_manifest_producer_missing`. That condition
+was superseded when the descriptor-derived immutable manifest producer landed.
+Current runtime remains forced closed on three independent manifest controls:
+authenticated selection, durable replay high-water, and use-time
+current-generation verification. Consensus, sovereign, principal-key,
+model-evidence, signer-handshake, and nonce-store anchors also remain required.
+No READY result, worktree creation, signer start, model call, or live canary was
+produced by this audit slice.

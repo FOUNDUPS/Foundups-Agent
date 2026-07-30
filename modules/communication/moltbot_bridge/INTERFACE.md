@@ -246,12 +246,16 @@ keys or freshness controls. `GovernedExecutionValveEnvironment` enforces the
 exact allowlist; a trusted caller explicitly selects canonical evaluation and
 provides independently reconstructed bindings and freshness bounds.
 
-`validate_reddog_resident_runtime_artifacts` semantically cross-validates the
-seven live-canary artifacts but never treats the unsigned pack as execution
-authority. It reports the missing signed immutable-manifest producer and signer
-client-handshake verifier. The resident use-time stage now reconstructs the
-binding and re-verifies signed authority, then invokes the canonical evaluator
-and forces it closed while any required trust anchor is absent.
+`validate_reddog_resident_runtime_artifacts` cross-validates the seven live
+artifacts but never treats the pack as authority. A content-addressed Ed25519
+manifest can be produced only from verified delegated authority; the signer
+rereads the artifacts and reserves a transactional nonce. Canonical artifact
+writers and manifest publication share one runtime-generation fence; the
+manifest binds the exact generation digest and is finalized with OS-level
+no-replace semantics. Activation remains blocked pending durable replay
+high-water, authenticated selection, use-time current-generation verification,
+and mutual peer handshake; use-time execution remains forced closed until they
+exist.
 
 Production bootstrap and the resident registry accept only
 `GovernedExecutionValveEnvironment`; legacy token mappings are rejected before

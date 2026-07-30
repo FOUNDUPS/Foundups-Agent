@@ -12,7 +12,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_runtime_artifact_r
     validate_reddog_resident_runtime_artifacts,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+    CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING,
+    DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
     NOW, QUEUE_ID, _roots,
@@ -57,7 +59,18 @@ def test_unsigned_seven_artifact_pack_is_not_execution_authority(tmp_path: Path)
     assert len(result.checks) == 7
     valve = next(item for item in result.checks if item.filename == "execution_valve_env.json")
     signer = next(item for item in result.checks if item.filename == "signer_service_config.json")
-    assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in valve.rejection_reasons
+    assert (
+        AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING
+        in valve.rejection_reasons
+    )
+    assert (
+        DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING
+        in valve.rejection_reasons
+    )
+    assert (
+        CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING
+        in valve.rejection_reasons
+    )
     assert "signer_client_peer_handshake_verifier_missing" in signer.rejection_reasons
     assert "signer_config_schema_invalid" not in signer.rejection_reasons
     assert result.authorization_mode == "signed_work_authority_consensus"

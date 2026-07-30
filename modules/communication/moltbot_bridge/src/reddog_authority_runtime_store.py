@@ -25,6 +25,10 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store_win
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    CANONICAL_REDDOG_RUNTIME_ARTIFACTS,
+    reddog_runtime_artifact_generation_lock,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
     validate_runtime_artifact_path,
@@ -32,8 +36,6 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 _NO_REVISION_CHECK = object()
-
-
 def _canonical_digest(payload: Mapping[str, Any]) -> str:
     unsigned = dict(payload)
     unsigned.pop("revision", None)
@@ -405,6 +407,27 @@ def atomic_replace_confined_mapping(
 ) -> Path:
     """Atomically replace one JSON mapping under an explicit runtime root."""
 
+    return _atomic_confined_mapping(
+        path,
+        payload,
+        allowed_root=allowed_root,
+        repo_root=repo_root,
+        expected_revision=expected_revision,
+        check_revision=expected_revision is not _NO_REVISION_CHECK,
+        require_absent=False,
+    )
+
+
+def _atomic_confined_mapping(
+    path: Path | str,
+    payload: Mapping[str, Any],
+    *,
+    allowed_root: Path | str,
+    repo_root: Path | str,
+    expected_revision: object,
+    check_revision: bool,
+    require_absent: bool,
+) -> Path:
     root = validate_runtime_root_path(allowed_root, repo_root=repo_root)
     target = validate_runtime_artifact_path(
         path,
@@ -418,7 +441,53 @@ def atomic_replace_confined_mapping(
         allowed_root=root,
     )
     encoded = (json.dumps(payload, sort_keys=True, indent=2) + "\n").encode("utf-8")
-    check_revision = expected_revision is not _NO_REVISION_CHECK
+    lock_path = target.with_name(f".{target.name}.atomic-operation.lock")
+    with confined_runtime_operation_lock(
+        lock_path, repo_root=repo_root, allowed_root=root
+    ):
+        return _write_generation_confined_mapping(
+            target, encoded, root=root, repo_root=repo_root,
+            expected_revision=expected_revision,
+            check_revision=check_revision, require_absent=require_absent,
+        )
+
+
+def _write_generation_confined_mapping(
+    target: Path,
+    encoded: bytes,
+    *,
+    root: Path,
+    repo_root: Path | str,
+    expected_revision: object,
+    check_revision: bool,
+    require_absent: bool,
+) -> Path:
+    if target.name in CANONICAL_REDDOG_RUNTIME_ARTIFACTS:
+        with reddog_runtime_artifact_generation_lock(
+            root, repo_root=repo_root
+        ):
+            return _write_confined_mapping(
+                target, encoded, root=root, repo_root=repo_root,
+                expected_revision=expected_revision,
+                check_revision=check_revision, require_absent=require_absent,
+            )
+    return _write_confined_mapping(
+        target, encoded, root=root, repo_root=repo_root,
+        expected_revision=expected_revision,
+        check_revision=check_revision, require_absent=require_absent,
+    )
+
+
+def _write_confined_mapping(
+    target: Path,
+    encoded: bytes,
+    *,
+    root: Path,
+    repo_root: Path | str,
+    expected_revision: object,
+    check_revision: bool,
+    require_absent: bool,
+) -> Path:
     with _stable_parent_directory(target.parent) as parent_handle:
         if os.name == "nt":
             windows_atomic_replace(
@@ -430,6 +499,7 @@ def atomic_replace_confined_mapping(
                     None if expected_revision is _NO_REVISION_CHECK
                     else expected_revision
                 ),
+                require_absent=require_absent,
             )
         else:
             posix_atomic_replace(
@@ -442,6 +512,7 @@ def atomic_replace_confined_mapping(
                     None if expected_revision is _NO_REVISION_CHECK
                     else expected_revision
                 ),
+                require_absent=require_absent,
             )
         if os.name == "nt":
             validate_runtime_artifact_path(
@@ -451,6 +522,26 @@ def atomic_replace_confined_mapping(
             )
             _fsync_parent_directory(target.parent)
     return target
+
+
+def atomic_create_confined_mapping(
+    path: Path | str,
+    payload: Mapping[str, Any],
+    *,
+    allowed_root: Path | str,
+    repo_root: Path | str,
+) -> Path:
+    """Atomically create one JSON mapping and reject any existing target."""
+
+    return _atomic_confined_mapping(
+        path,
+        payload,
+        allowed_root=allowed_root,
+        repo_root=repo_root,
+        expected_revision=None,
+        check_revision=False,
+        require_absent=True,
+    )
 
 
 @contextmanager
@@ -494,5 +585,6 @@ __all__ = [
     "InMemoryAuthorityRuntimeStore",
     "PrincipalAuthorityRecord",
     "PrincipalAuthorityResolver",
+    "atomic_create_confined_mapping",
     "atomic_replace_confined_mapping",
 ]

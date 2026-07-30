@@ -32,7 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     validate_governed_execution_valve_environment,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+    CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING,
+    DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
@@ -109,8 +111,12 @@ def validate_reddog_resident_runtime_artifacts(
         _validate_governed_lineage(payloads, queue_item_id, now_epoch, reasons)
         _validate_model_bindings(payloads, reasons)
         _validate_signer_artifacts(root, runtime, payloads, reasons)
-        reasons["execution_valve_env.json"].append(
-            SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING
+        reasons["execution_valve_env.json"].extend(
+            (
+                AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+                DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING,
+                CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING,
+            )
         )
     checks = tuple(
         RuntimeArtifactSemanticCheck(name, not reasons[name], tuple(dict.fromkeys(reasons[name])))

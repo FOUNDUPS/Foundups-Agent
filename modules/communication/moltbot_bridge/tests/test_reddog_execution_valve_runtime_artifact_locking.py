@@ -18,6 +18,9 @@ from modules.communication.moltbot_bridge.src import (
     reddog_authority_profile_source_artifact_supply as profile_source_supply,
 )
 from modules.communication.moltbot_bridge.src import (
+    reddog_authority_profile_seed_supply as profile_seed_supply,
+)
+from modules.communication.moltbot_bridge.src import (
     reddog_authority_runtime_resolver_artifact_supply as resolver_artifact_supply,
 )
 from modules.communication.moltbot_bridge.src import (
@@ -64,13 +67,14 @@ _USE_TIME_ARTIFACTS = (
 
 _PRODUCTION_WRITERS = (
     ("work_state_store", work_state_supply, "authoritative_work_state.json", "store"),
-    ("profile_source", profile_source_supply, "authority_profile.json", "helper"),
+    ("profile_source", profile_source_supply, "authority_profile.json", "profile_source"),
+    ("profile_seed", profile_seed_supply, "authority_profile.json", "profile_seed"),
     ("profile_promoted", promoted_profile_supply, "authority_profile.json", "profile"),
-    ("github_permissions", github_artifact_supply, "permission_snapshots.json", "helper"),
-    ("github_principals", github_artifact_supply, "principal_authority_records.json", "helper"),
-    ("resolver_permissions", resolver_artifact_supply, "permission_snapshots.json", "helper"),
-    ("resolver_principals", resolver_artifact_supply, "principal_authority_records.json", "helper"),
-    ("valve_environment", valve_environment_supply, "execution_valve_env.json", "helper"),
+    ("github_permissions", github_artifact_supply, "permission_snapshots.json", "github"),
+    ("github_principals", github_artifact_supply, "principal_authority_records.json", "github"),
+    ("resolver_permissions", resolver_artifact_supply, "permission_snapshots.json", "resolver"),
+    ("resolver_principals", resolver_artifact_supply, "principal_authority_records.json", "resolver"),
+    ("valve_environment", valve_environment_supply, "execution_valve_env.json", "valve"),
 )
 
 
@@ -100,8 +104,27 @@ def _invoke_production_writer(
     target: Path,
     payload: dict[str, str],
 ) -> None:
+    repo = target.parent.parent / f"{target.parent.name}-repo"
+    if writer_kind in {"store", "profile"}:
+        _invoke_confined_writer(module, writer_kind, target, payload, repo)
+        return
+    if writer_kind in {"resolver", "github"}:
+        _invoke_paired_writer(module, writer_kind, target, payload, repo)
+        return
+    if writer_kind in {"valve", "profile_source", "profile_seed"}:
+        module._write_json_atomic(target, payload, repo_root=repo)
+        return
+    module._write_json_atomic(target, payload)
+
+
+def _invoke_confined_writer(
+    module: ModuleType,
+    writer_kind: str,
+    target: Path,
+    payload: dict[str, str],
+    repo: Path,
+) -> None:
     if writer_kind == "store":
-        repo = target.parent.parent / f"{target.parent.name}-repo"
         module.AtomicJsonAuthoritativeWorkStateStore(
             target,
             allowed_root=target.parent,
@@ -111,18 +134,43 @@ def _invoke_production_writer(
             expected_revision=None,
         )
         return
-    if writer_kind == "profile":
-        repo = target.parent.parent / f"{target.parent.name}-repo"
-        (repo / ".git").mkdir(parents=True, exist_ok=True)
-        publisher = module.AtomicArchitectFixPromotionPublisher(
+    (repo / ".git").mkdir(parents=True, exist_ok=True)
+    publisher = module.AtomicArchitectFixPromotionPublisher(
+        repo_root=repo,
+        runtime_root=target.parent,
+        authority_profile_path=target,
+        work_state_store=object(),
+    )
+    module._write_profile_mapping(publisher, target, payload)
+
+
+def _invoke_paired_writer(
+    module: ModuleType,
+    writer_kind: str,
+    target: Path,
+    payload: dict[str, str],
+    repo: Path,
+) -> None:
+    if writer_kind == "resolver":
+        principal = target.parent / "principal_authority_records.json"
+        snapshot = target.parent / "permission_snapshots.json"
+        module._write_resolver_artifacts(
+            principal,
+            payload,
+            snapshot,
+            payload,
             repo_root=repo,
-            runtime_root=target.parent,
-            authority_profile_path=target,
-            work_state_store=object(),
         )
-        module._write_profile_mapping(publisher, target, payload)
         return
-    module._write_json_atomic(target, payload)
+    principal = target.parent / "principal_authority_records.json"
+    permission = target.parent / "permission_snapshots.json"
+    module._write_authority_artifacts(
+        principal,
+        payload,
+        permission,
+        payload,
+        repo_root=repo,
+    )
 
 
 @pytest.mark.parametrize(
@@ -266,7 +314,9 @@ def test_use_time_reload_replacement_fails_closed_without_mixed_snapshot(
         assert first_read.wait(timeout=5)
         payload = json.loads(profile_path.read_text(encoding="utf-8"))
         payload["work_order_id"] = "attacker-mixed-generation"
-        profile_source_supply._write_json_atomic(profile_path, payload)
+        profile_source_supply._write_json_atomic(
+            profile_path, payload, repo_root=repo
+        )
         replacement_done.set()
 
     monkeypatch.setattr(use_time, "_read_json_no_follow", observed_read)

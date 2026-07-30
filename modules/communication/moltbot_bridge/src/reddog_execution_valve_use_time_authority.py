@@ -2,9 +2,9 @@
 
 The resolver re-reads caller-owned runtime artifacts, re-verifies the signed
 delegated work authority, and reconstructs canonical valve bindings immediately
-before evaluation.  It deliberately fails closed until a signed immutable
-runtime-artifact manifest producer exists; unsigned JSON files never authorize
-execution by attesting to one another.
+before evaluation. The immutable manifest producer exists, but execution remains
+closed until selection, replay, current-generation, and peer-handshake controls
+are independently verified.
 """
 
 from __future__ import annotations
@@ -54,13 +54,21 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
 )
 
 
-SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING = (
-    "canonical_signed_runtime_artifact_manifest_producer_missing"
+AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING = (
+    "canonical_signed_runtime_artifact_manifest_selection_verifier_missing"
+)
+DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING = (
+    "canonical_runtime_artifact_manifest_replay_high_water_missing"
+)
+CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING = (
+    "canonical_runtime_artifact_manifest_current_generation_verifier_missing"
 )
 AUTHORITY_RUNTIME_STAGE_KEY = "authority_runtime"
 AUTHORITY_VERIFICATION_STAGE_KEY = "authority_verification"
 INCOMPLETE_TRUST_ANCHOR_REASONS = (
-    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+    DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING,
+    CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING,
     "canonical_consensus_receipt_verifier_missing",
     "canonical_sovereign_authorization_verifier_missing",
     "canonical_principal_subject_key_attestation_missing",
@@ -160,9 +168,10 @@ class GovernedValveUseTimeAuthorityResolver:
             reasons=reasons,
         )
 
-        # No producer for this trust anchor exists in the current codebase.  This
-        # hard blocker must remain until an independently signed immutable manifest
-        # and trusted peer-handshake receipt can be verified here.
+        # The manifest producer is not an activation authority. This hard blocker
+        # remains until authenticated manifest selection, replay state, current
+        # generation verification, and a trusted peer-handshake receipt are
+        # verified here.
         reasons.extend(INCOMPLETE_TRUST_ANCHOR_REASONS)
 
         authoritative_use_lease = None
@@ -640,8 +649,10 @@ def _dedupe(values: list[str]) -> list[str]:
 
 
 __all__ = [
+    "AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING",
     "AuthoritativeUseLease",
+    "CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING",
+    "DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING",
     "GovernedValveUseTimeAuthorityResolver",
     "GovernedValveUseTimeResolution",
-    "SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING",
 ]

@@ -1,3 +1,23 @@
+## 2026-07-31: REDDOG_SIGNED_RUNTIME_ARTIFACT_MANIFEST_PHASE1
+- Added real Ed25519 identity, delegated-work-authority, manifest-signing, and
+  signer audit-attestation coverage for the seven canonical runtime artifacts.
+- Proved content-addressed create-only publication, including rejection of a
+  pre-seeded malformed target, artifact/state drift rejection, signer-side
+  rereads, nonce replay and rollback behavior, closure-confined authority
+  capability immutability, arbitrary-domain rejection, and attacker replacement
+  plus self-signing rejection.
+- Proved OS-level no-replace publication under concurrent create attempts and
+  proved that the shared runtime-generation fence prevents a canonical writer
+  from crossing manifest publication.
+- Kept resident readiness fail closed pending durable replay high-water,
+  authenticated manifest activation, use-time current-generation verification,
+  and mutual signer peer handshake.
+- Focused validation: 29 manifest tests; 229 affected bridge tests passed with
+  8 platform skips; 80 canonical-producer tests; 15 WSP 62 tests; and 21 shared
+  safety tests passed with 1 platform skip.
+- Full bridge differential: branch 4619 passed, 40 failed, 19 skipped; exact
+  parent 4589 passed, 40 failed, 19 skipped, with the same 40 failing test IDs.
+
 ## 2026-07-30: ARTIFACT MODEL AUTHORITY WSP 62 DECOMPOSITION
 - Moved model-runtime, provider-capability, and bounded-worker adversarial cases
   into focused test modules without dropping assertions.

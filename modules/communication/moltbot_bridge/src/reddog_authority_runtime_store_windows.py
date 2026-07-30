@@ -9,7 +9,15 @@ import os
 import re
 import stat
 from ctypes import wintypes
+from dataclasses import dataclass
 from pathlib import Path
+
+
+@dataclass
+class _WindowsReplaceState:
+    backup_created: bool = False
+    renamed: bool = False
+    verified: bool = False
 
 
 def windows_atomic_replace(
@@ -19,6 +27,7 @@ def windows_atomic_replace(
     *,
     check_revision: bool,
     expected_revision: object,
+    require_absent: bool = False,
 ) -> None:
     """Replace one target while the verified parent and temp handles stay open."""
 
@@ -34,55 +43,77 @@ def windows_atomic_replace(
         target,
         check_revision=check_revision,
         expected_revision=expected_revision,
+        require_absent=require_absent,
     )
     temp_path = target.parent / f".{target.name}.{secrets.token_hex(16)}.tmp"
     backup_path = target.parent / f".{target.name}.{secrets.token_hex(16)}.bak"
-    backup_created = False
     handle = _create_temp(temp_path)
-    renamed = False
-    verified = False
+    state = _WindowsReplaceState()
     try:
-        _require_private_regular(handle)
-        _write_handle(handle, payload)
-        _verify_or_scrub(handle, len(payload))
-        _require_target_revision(
-            target,
+        _replace_windows_handle(
+            handle, parent_handle, target, payload, backup_path, state,
             check_revision=check_revision,
             expected_revision=expected_revision,
+            require_absent=require_absent,
         )
-        if _path_exists(target):
-            _create_backup_link(target, backup_path)
-            backup_created = True
-            _require_backup_identity(
-                target,
-                backup_path,
-                check_revision=check_revision,
-                expected_revision=expected_revision,
-            )
-        _rename_handle(
-            handle,
-            parent_handle,
-            target.name,
-            target=target,
-            backup=backup_path if backup_created else None,
-            check_revision=check_revision,
-            expected_revision=expected_revision,
-        )
-        renamed = True
-        if not _same_path(_handle_path(handle), target.absolute()):
-            raise ValueError("authority_runtime_store_temp_identity_changed")
-        _verify_or_scrub(handle, len(payload))
-        verified = True
     finally:
         close_windows_handle(handle)
-        if renamed and not verified:
-            if backup_created:
-                _replace_path(backup_path, target)
-            else:
-                _unlink_path(target, missing_ok=True)
+        _cleanup_windows_replace(target, temp_path, backup_path, state)
+
+
+def _replace_windows_handle(
+    handle: int,
+    parent_handle: int,
+    target: Path,
+    payload: bytes,
+    backup_path: Path,
+    state: _WindowsReplaceState,
+    *,
+    check_revision: bool,
+    expected_revision: object,
+    require_absent: bool,
+) -> None:
+    _require_private_regular(handle)
+    _write_handle(handle, payload)
+    _verify_or_scrub(handle, len(payload))
+    _require_target_revision(
+        target, check_revision=check_revision,
+        expected_revision=expected_revision, require_absent=require_absent,
+    )
+    if _path_exists(target):
+        _create_backup_link(target, backup_path)
+        state.backup_created = True
+        _require_backup_identity(
+            target, backup_path, check_revision=check_revision,
+            expected_revision=expected_revision,
+        )
+    _rename_handle(
+        handle, parent_handle, target.name, target=target,
+        backup=backup_path if state.backup_created else None,
+        check_revision=check_revision,
+        expected_revision=expected_revision, require_absent=require_absent,
+    )
+    state.renamed = True
+    if not _same_path(_handle_path(handle), target.absolute()):
+        raise ValueError("authority_runtime_store_temp_identity_changed")
+    _verify_or_scrub(handle, len(payload))
+    state.verified = True
+
+
+def _cleanup_windows_replace(
+    target: Path,
+    temp_path: Path,
+    backup_path: Path,
+    state: _WindowsReplaceState,
+) -> None:
+    if state.renamed and not state.verified:
+        if state.backup_created:
+            _replace_path(backup_path, target)
         else:
-            _unlink_path(temp_path, missing_ok=True)
-            _unlink_path(backup_path, missing_ok=True)
+            _unlink_path(target, missing_ok=True)
+        return
+    _unlink_path(temp_path, missing_ok=True)
+    _unlink_path(backup_path, missing_ok=True)
 
 
 def _recover_interrupted_files(
@@ -162,6 +193,7 @@ def _require_target_revision(
     *,
     check_revision: bool,
     expected_revision: object,
+    require_absent: bool = False,
 ) -> None:
     if not _path_exists(target):
         if check_revision and expected_revision is not None:
@@ -169,6 +201,8 @@ def _require_target_revision(
         return
     metadata = _stat_path(target)
     _require_private_regular_path(metadata)
+    if require_absent:
+        raise RuntimeError("revision_conflict")
     if check_revision and _read_revision(target) != expected_revision:
         raise RuntimeError("revision_conflict")
 
@@ -393,6 +427,32 @@ def _rename_handle(
     backup: Path | None,
     check_revision: bool,
     expected_revision: object,
+    require_absent: bool,
+) -> None:
+    _require_windows_replace_precondition(
+        target,
+        backup,
+        check_revision=check_revision,
+        expected_revision=expected_revision,
+    )
+    storage, size = _windows_rename_info(
+        parent_handle, target_name, replace_if_exists=not require_absent
+    )
+    _set_windows_rename(
+        handle,
+        storage,
+        size,
+        target=_handle_path(parent_handle) / target_name,
+        require_absent=require_absent,
+    )
+
+
+def _require_windows_replace_precondition(
+    target: Path,
+    backup: Path | None,
+    *,
+    check_revision: bool,
+    expected_revision: object,
 ) -> None:
     if backup is None:
         if _path_exists(target):
@@ -405,6 +465,10 @@ def _rename_handle(
             expected_revision=expected_revision,
         )
 
+
+def _windows_rename_info(
+    parent_handle: int, target_name: str, *, replace_if_exists: bool
+) -> tuple[ctypes.Array[ctypes.c_char], int]:
     class _FileRenameInfo(ctypes.Structure):
         _fields_ = [
             ("ReplaceIfExists", wintypes.BOOL),
@@ -418,7 +482,7 @@ def _rename_handle(
     size = ctypes.sizeof(_FileRenameInfo) + len(encoded)
     storage = ctypes.create_string_buffer(size)
     info = ctypes.cast(storage, ctypes.POINTER(_FileRenameInfo)).contents
-    info.ReplaceIfExists = True
+    info.ReplaceIfExists = replace_if_exists
     info.RootDirectory = None
     info.FileNameLength = len(encoded)
     ctypes.memmove(
@@ -426,6 +490,17 @@ def _rename_handle(
         encoded,
         len(encoded),
     )
+    return storage, size
+
+
+def _set_windows_rename(
+    handle: int,
+    storage: ctypes.Array[ctypes.c_char],
+    size: int,
+    *,
+    target: Path,
+    require_absent: bool,
+) -> None:
     set_info = ctypes.windll.kernel32.SetFileInformationByHandle
     set_info.argtypes = [
         wintypes.HANDLE,
@@ -436,6 +511,8 @@ def _rename_handle(
     set_info.restype = wintypes.BOOL
     if not set_info(handle, 3, storage, size):
         error = ctypes.windll.kernel32.GetLastError()
+        if require_absent and _path_exists(target):
+            raise RuntimeError("revision_conflict")
         raise OSError(int(error), "authority_runtime_store_atomic_replace_failed")
 
 

@@ -11,9 +11,9 @@ from modules.communication.moltbot_bridge.src import (
     reddog_main_resident_queue_serial_loop_bootstrap as bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
     AuthoritativeUseLease,
     GovernedValveUseTimeAuthorityResolver,
-    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
     _digest,
     _signed_binding_reasons,
 )
@@ -360,7 +360,7 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
     )
     assert result.signed_authority_reverified is True
     assert result.authoritative_use_lease is None
-    assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in result.rejection_reasons
+    assert AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING in result.rejection_reasons
     assert "canonical_consensus_receipt_verifier_missing" in result.rejection_reasons
     assert "canonical_sovereign_authorization_verifier_missing" in result.rejection_reasons
     assert "canonical_model_selection_signed_evidence_verifier_missing" in result.rejection_reasons

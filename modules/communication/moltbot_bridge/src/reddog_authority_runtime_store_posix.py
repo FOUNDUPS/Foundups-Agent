@@ -13,10 +13,21 @@ import json
 import os
 import secrets
 import stat
+from dataclasses import dataclass
 from pathlib import Path
 
 
 _AT_EMPTY_PATH = 0x1000
+
+
+@dataclass
+class _PosixReplaceState:
+    temp_name: str
+    backup_name: str
+    linked: bool = False
+    backup_created: bool = False
+    renamed: bool = False
+    verified: bool = False
 
 
 def posix_atomic_replace(
@@ -27,6 +38,7 @@ def posix_atomic_replace(
     *,
     check_revision: bool,
     expected_revision: object,
+    require_absent: bool = False,
 ) -> None:
     """Replace one target from an unnamed inode with descriptor rollback."""
 
@@ -41,83 +53,155 @@ def posix_atomic_replace(
         target_name,
         check_revision=check_revision,
         expected_revision=expected_revision,
+        require_absent=require_absent,
     )
     descriptor = _open_unnamed_temp(parent_fd)
-    temp_name = f".{target_name}.{secrets.token_hex(16)}.tmp"
-    backup_name = f".{target_name}.{secrets.token_hex(16)}.bak"
-    linked = False
-    backup_created = False
-    renamed = False
-    verified = False
+    state = _PosixReplaceState(
+        temp_name=f".{target_name}.{secrets.token_hex(16)}.tmp",
+        backup_name=f".{target_name}.{secrets.token_hex(16)}.bak",
+    )
     try:
-        _write_descriptor(descriptor, payload)
-        _require_unnamed_private_regular(os.fstat(descriptor))
-        os.fchmod(descriptor, 0)
-        _require_parent_identity(parent_fd, parent_path)
-        _link_descriptor(descriptor, parent_fd, temp_name)
-        linked = True
-        expected_temp = os.fstat(descriptor)
-        _require_entry_identity(parent_fd, temp_name, expected_temp, mode=0)
-        _require_target_witness(
-            parent_fd,
-            target_name,
-            old_fd,
+        _replace_posix_descriptor(
+            parent_fd, parent_path, target_name, payload,
+            descriptor=descriptor, old_fd=old_fd, state=state,
             check_revision=check_revision,
             expected_revision=expected_revision,
+            require_absent=require_absent,
         )
-        if old_fd is not None:
-            _link_descriptor(old_fd, parent_fd, backup_name)
-            backup_created = True
-            os.fchmod(old_fd, 0)
-            _require_backup_identity(
-                parent_fd,
-                target_name,
-                backup_name,
-                old_fd,
-                check_revision=check_revision,
-                expected_revision=expected_revision,
-            )
-        _require_parent_identity(parent_fd, parent_path)
-        _replace_entry(
-            parent_fd,
-            temp_name,
-            target_name,
-            old_fd=old_fd,
-            backup_name=backup_name if backup_created else None,
-            check_revision=check_revision,
-            expected_revision=expected_revision,
-        )
-        linked = False
-        renamed = True
-        _require_entry_identity(parent_fd, target_name, expected_temp, mode=0)
-        _require_parent_identity(parent_fd, parent_path)
-        os.fsync(parent_fd)
-        _require_parent_identity(parent_fd, parent_path)
-        os.fchmod(descriptor, 0o600)
-        os.fsync(descriptor)
-        _require_entry_identity(parent_fd, target_name, os.fstat(descriptor), mode=0o600)
-        _require_parent_identity(parent_fd, parent_path)
-        verified = True
     finally:
-        if renamed and not verified:
-            _restore_previous(
-                parent_fd,
-                target_name,
-                old_fd=old_fd,
-                old_mode=old_mode,
-                backup_name=backup_name,
-                backup_created=backup_created,
-            )
-        else:
-            if linked:
-                _unlink(parent_fd, temp_name)
-            if backup_created:
-                if old_fd is not None:
-                    os.fchmod(old_fd, old_mode)
-                _unlink(parent_fd, backup_name)
+        _cleanup_posix_replace(
+            parent_fd, target_name, old_fd, old_mode, state
+        )
         os.close(descriptor)
         if old_fd is not None:
             os.close(old_fd)
+
+
+def _replace_posix_descriptor(
+    parent_fd: int,
+    parent_path: Path,
+    target_name: str,
+    payload: bytes,
+    *,
+    descriptor: int,
+    old_fd: int | None,
+    state: _PosixReplaceState,
+    check_revision: bool,
+    expected_revision: object,
+    require_absent: bool,
+) -> None:
+    expected_temp = _prepare_posix_temp(
+        parent_fd, parent_path, descriptor, payload, state
+    )
+    _install_posix_temp(
+        parent_fd, parent_path, target_name,
+        descriptor=descriptor, old_fd=old_fd, state=state,
+        expected_temp=expected_temp, check_revision=check_revision,
+        expected_revision=expected_revision, require_absent=require_absent,
+    )
+    _verify_posix_install(
+        parent_fd, parent_path, target_name, descriptor, expected_temp
+    )
+    state.verified = True
+
+
+def _prepare_posix_temp(
+    parent_fd: int,
+    parent_path: Path,
+    descriptor: int,
+    payload: bytes,
+    state: _PosixReplaceState,
+) -> os.stat_result:
+    _write_descriptor(descriptor, payload)
+    _require_unnamed_private_regular(os.fstat(descriptor))
+    os.fchmod(descriptor, 0)
+    _require_parent_identity(parent_fd, parent_path)
+    _link_descriptor(descriptor, parent_fd, state.temp_name)
+    state.linked = True
+    expected_temp = os.fstat(descriptor)
+    _require_entry_identity(
+        parent_fd, state.temp_name, expected_temp, mode=0
+    )
+    return expected_temp
+
+
+def _install_posix_temp(
+    parent_fd: int,
+    parent_path: Path,
+    target_name: str,
+    *,
+    descriptor: int,
+    old_fd: int | None,
+    state: _PosixReplaceState,
+    expected_temp: os.stat_result,
+    check_revision: bool,
+    expected_revision: object,
+    require_absent: bool,
+) -> None:
+    _require_target_witness(
+        parent_fd, target_name, old_fd, check_revision=check_revision,
+        expected_revision=expected_revision, require_absent=require_absent,
+    )
+    if old_fd is not None:
+        _link_descriptor(old_fd, parent_fd, state.backup_name)
+        state.backup_created = True
+        os.fchmod(old_fd, 0)
+        _require_backup_identity(
+            parent_fd, target_name, state.backup_name, old_fd,
+            check_revision=check_revision,
+            expected_revision=expected_revision,
+        )
+    _require_parent_identity(parent_fd, parent_path)
+    _replace_entry(
+        parent_fd, state.temp_name, target_name, old_fd=old_fd,
+        backup_name=state.backup_name if state.backup_created else None,
+        check_revision=check_revision,
+        expected_revision=expected_revision, require_absent=require_absent,
+    )
+    state.linked = False
+    state.renamed = True
+    _require_entry_identity(parent_fd, target_name, expected_temp, mode=0)
+
+
+def _verify_posix_install(
+    parent_fd: int,
+    parent_path: Path,
+    target_name: str,
+    descriptor: int,
+    expected_temp: os.stat_result,
+) -> None:
+    _require_entry_identity(parent_fd, target_name, expected_temp, mode=0)
+    _require_parent_identity(parent_fd, parent_path)
+    os.fsync(parent_fd)
+    _require_parent_identity(parent_fd, parent_path)
+    os.fchmod(descriptor, 0o600)
+    os.fsync(descriptor)
+    _require_entry_identity(
+        parent_fd, target_name, os.fstat(descriptor), mode=0o600
+    )
+    _require_parent_identity(parent_fd, parent_path)
+
+
+def _cleanup_posix_replace(
+    parent_fd: int,
+    target_name: str,
+    old_fd: int | None,
+    old_mode: int,
+    state: _PosixReplaceState,
+) -> None:
+    if state.renamed and not state.verified:
+        _restore_previous(
+            parent_fd, target_name, old_fd=old_fd, old_mode=old_mode,
+            backup_name=state.backup_name,
+            backup_created=state.backup_created,
+        )
+        return
+    if state.linked:
+        _unlink(parent_fd, state.temp_name)
+    if state.backup_created:
+        if old_fd is not None:
+            os.fchmod(old_fd, old_mode)
+        _unlink(parent_fd, state.backup_name)
 
 
 def _open_unnamed_temp(parent_fd: int) -> int:
@@ -136,6 +220,7 @@ def _open_target_witness(
     *,
     check_revision: bool,
     expected_revision: object,
+    require_absent: bool,
 ) -> tuple[int | None, int]:
     try:
         descriptor = os.open(
@@ -150,6 +235,8 @@ def _open_target_witness(
     try:
         metadata = os.fstat(descriptor)
         _require_private_regular(metadata)
+        if require_absent:
+            raise RuntimeError("revision_conflict")
         if check_revision and _read_revision(descriptor) != expected_revision:
             raise RuntimeError("revision_conflict")
         return descriptor, stat.S_IMODE(metadata.st_mode)
@@ -165,6 +252,7 @@ def _require_target_witness(
     *,
     check_revision: bool,
     expected_revision: object,
+    require_absent: bool,
 ) -> None:
     try:
         observed = os.stat(target_name, dir_fd=parent_fd, follow_symlinks=False)
@@ -173,6 +261,8 @@ def _require_target_witness(
             raise RuntimeError("revision_conflict")
         return
     if old_fd is None:
+        raise RuntimeError("revision_conflict")
+    if require_absent:
         raise RuntimeError("revision_conflict")
     opened = os.fstat(old_fd)
     if (observed.st_dev, observed.st_ino) != (opened.st_dev, opened.st_ino):
@@ -431,6 +521,30 @@ def _replace_entry(
     backup_name: str | None,
     check_revision: bool,
     expected_revision: object,
+    require_absent: bool,
+) -> None:
+    _require_replace_precondition(
+        parent_fd,
+        target_name,
+        old_fd=old_fd,
+        backup_name=backup_name,
+        check_revision=check_revision,
+        expected_revision=expected_revision,
+    )
+    if require_absent:
+        _install_absent_entry(parent_fd, source_name, target_name)
+        return
+    _rename_entry(parent_fd, source_name, target_name)
+
+
+def _require_replace_precondition(
+    parent_fd: int,
+    target_name: str,
+    *,
+    old_fd: int | None,
+    backup_name: str | None,
+    check_revision: bool,
+    expected_revision: object,
 ) -> None:
     if old_fd is None:
         try:
@@ -450,6 +564,25 @@ def _replace_entry(
             check_revision=check_revision,
             expected_revision=expected_revision,
         )
+
+
+def _install_absent_entry(
+    parent_fd: int, source_name: str, target_name: str
+) -> None:
+    try:
+        os.link(
+            source_name,
+            target_name,
+            src_dir_fd=parent_fd,
+            dst_dir_fd=parent_fd,
+            follow_symlinks=False,
+        )
+        os.unlink(source_name, dir_fd=parent_fd)
+    except FileExistsError as exc:
+        raise RuntimeError("revision_conflict") from exc
+
+
+def _rename_entry(parent_fd: int, source_name: str, target_name: str) -> None:
     libc = ctypes.CDLL(None, use_errno=True)
     renameat = libc.renameat
     renameat.argtypes = [
