@@ -1,7 +1,6 @@
 """Tests for REDDOG_MAIN_OPENCLAW_SIGNED_WORKER_CLAIM_LOOP_PREFLIGHT_PHASE1."""
 
 from __future__ import annotations
-
 import base64
 import json
 import os
@@ -14,7 +13,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from modules.communication.moltbot_bridge.src import (
     reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
 )
@@ -27,6 +25,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _ed25519_signing_material,
     _ed25519_signing_material_with_socket_backend,
     _FakeExactShaEvidenceRunner,
+    _FakeModelRuntimeBindingVerifier,
     _FakeWorktreeRunner,
     _pilot_bounded_worker_plan,
     _pilot_allowed_paths,
@@ -44,6 +43,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _work_order,
     _write_runtime_json,
     run_reddog_main_resident_queue_serial_loop_bootstrap,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_queue_test_helpers import (
+    model_bound_queue_inputs,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
     SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
@@ -296,7 +298,9 @@ def _patch_fusion_artifact_generator(monkeypatch) -> list[dict[str, object]]:
     from modules.communication.moltbot_bridge.src import (
         reddog_bounded_artifact_generation_runtime as artifact_runtime,
     )
-
+    from modules.communication.moltbot_bridge.src import (
+        reddog_main_resident_queue_serial_loop_bootstrap as bootstrap_runtime,
+    )
     calls: list[dict[str, object]] = []
 
     def _fake_fusion(api_key, user_payload, messages, payload):
@@ -328,6 +332,11 @@ def _patch_fusion_artifact_generator(monkeypatch) -> list[dict[str, object]]:
         artifact_runtime,
         "_load_foundups_fusion_runner",
         lambda: _fake_fusion,
+    )
+    monkeypatch.setattr(
+        bootstrap_runtime,
+        "build_model_runtime_verifier",
+        lambda **_kwargs: (_FakeModelRuntimeBindingVerifier(), ()),
     )
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
     return calls
@@ -579,24 +588,19 @@ def test_main_openclaw_signed_worker_claim_loop_runs_real_agentdb_queue_stage(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _bootstrap_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
+    snapshot, profile_payload, work_order = model_bound_queue_inputs(
+        principal_public,
+        reddog_public,
+        pilot_overrides,
     )
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        snapshot,
+    )
+    profile = _write_runtime_json(tmp_path, "profile.json", profile_payload)
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
     principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
     work_order["holoindex_evidence"] = {
         **dict(work_order["holoindex_evidence"]),
         "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
@@ -724,24 +728,19 @@ def test_main_openclaw_signed_0102_bounded_code_uses_fusion_artifact_generation(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _bootstrap_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
+    snapshot, profile_payload, work_order = model_bound_queue_inputs(
+        principal_public,
+        reddog_public,
+        pilot_overrides,
     )
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        snapshot,
+    )
+    profile = _write_runtime_json(tmp_path, "profile.json", profile_payload)
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
     principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
     work_order["holoindex_evidence"] = {
         **dict(work_order["holoindex_evidence"]),
         "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
@@ -900,24 +899,19 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _bootstrap_snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _bootstrap_profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
+    snapshot, profile_payload, work_order = model_bound_queue_inputs(
+        principal_public,
+        reddog_public,
+        pilot_overrides,
     )
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        snapshot,
+    )
+    profile = _write_runtime_json(tmp_path, "profile.json", profile_payload)
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
     principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-    )
     work_order["holoindex_evidence"] = {
         **dict(work_order["holoindex_evidence"]),
         "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
@@ -1060,6 +1054,10 @@ def test_main_openclaw_signed_worker_claim_loop_completes_env_bound_chain(
     monkeypatch.setenv("REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S", "88")
     monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", str(outcome_store))
+    monkeypatch.setenv(
+        "REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH",
+        str(tmp_path / "runtime" / "model_feedback" / "model_feedback.jsonl"),
+    )
     monkeypatch.setenv("REDDOG_HELD_OUT_GATE_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING", "1")
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
@@ -1343,6 +1341,10 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     monkeypatch.setenv("REDDOG_SLICE_VERIFIER_REQUEST_PATH", str(verifier_request))
     monkeypatch.setenv("REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH", str(publish_request))
     monkeypatch.setenv("REDDOG_OUTCOME_RATCHET_STORE_PATH", str(outcome_store))
+    monkeypatch.setenv(
+        "REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH",
+        str(runtime_root / "model_feedback" / "model_feedback.jsonl"),
+    )
     monkeypatch.setenv("REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH", str(pattern_memory_db))
     monkeypatch.delenv("REDDOG_WORK_ORDERS_PATH", raising=False)
     assert "REDDOG_WORK_ORDERS_PATH" not in os.environ

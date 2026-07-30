@@ -86,6 +86,8 @@ class ArchitectFixPromotionReceipt:
     committed_revision: Optional[str]
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    model_runtime_binding_verification_receipt_id: Optional[str] = None
+    model_runtime_binding_verification_digest: Optional[str] = None
     agentdb_fix_promotion_claim_id: Optional[str] = None
     agentdb_fix_promotion_claim_revision: Optional[int] = None
     agentdb_fix_promotion_claim_fence_digest: Optional[str] = None
@@ -245,6 +247,9 @@ def _evidence_receipt_ids(
         "model_runtime_binding_receipt_id": str(
             inputs.model_runtime_binding.get("receipt_id", "")
         ),
+        "model_runtime_binding_verification_receipt_id": str(
+            inputs.model_runtime_binding.get("verification_receipt_id", "")
+        ),
         "memex_supply_receipt_id": str(inputs.memex_supply["receipt_id"]),
         "proposal_admission_receipt_id": inputs.proposal_admission_receipt_id,
     }
@@ -298,7 +303,13 @@ def _evidence_refs(
     claim_id: str,
 ) -> tuple[str, ...]:
     runtime_refs = (
-        [f"model_runtime_binding:{inputs.model_runtime_binding['receipt_id']}"]
+        [
+            f"model_runtime_binding:{inputs.model_runtime_binding['receipt_id']}",
+            (
+                "model_runtime_binding_verification:"
+                f"{inputs.model_runtime_binding['verification_receipt_id']}"
+            ),
+        ]
         if inputs.model_runtime_binding
         else []
     )
@@ -354,6 +365,12 @@ def _queue_item(
             "receipt_id", ""
         ),
         "model_runtime_binding_digest": inputs.model_runtime_binding_digest,
+        "model_runtime_binding_verification_receipt_id": (
+            inputs.model_runtime_binding.get("verification_receipt_id", "")
+        ),
+        "model_runtime_binding_verification_digest": (
+            inputs.model_runtime_binding.get("verification_receipt_digest", "")
+        ),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "memex_supply_digest": inputs.memex_supply_digest,
         "no_execution_performed": True,

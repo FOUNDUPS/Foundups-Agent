@@ -17,6 +17,10 @@ import json
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Sequence, Tuple
 
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+    model_runtime_authority_values_valid,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
 )
@@ -83,6 +87,8 @@ class WorkerDispatchIntent:
     wsp15_allocation_digest: str
     model_runtime_binding_receipt_id: str = ""
     model_runtime_binding_digest: str = ""
+    model_runtime_binding_verification_receipt_id: str = ""
+    model_runtime_binding_verification_digest: str = ""
     memex_supply_receipt_id: str = ""
     memex_supply_digest: str = ""
     architect_fix_publication_receipt_id: str = ""
@@ -112,6 +118,8 @@ class SignedAuthorityWorkerDispatchDryRunReceipt:
     wsp15_reasoning_tier: str
     model_runtime_binding_receipt_id: str
     model_runtime_binding_digest: str
+    model_runtime_binding_verification_receipt_id: str
+    model_runtime_binding_verification_digest: str
     memex_supply_receipt_id: str
     memex_supply_digest: str
     architect_fix_publication_receipt_id: str
@@ -245,8 +253,7 @@ def _build_intents(
         "requested_operation": str(work_authority["requested_operation"]),
         "wsp15_allocation_receipt_id": str(allocation["receipt_id"]),
         "wsp15_allocation_digest": _digest(allocation),
-        "model_runtime_binding_receipt_id": str(work_authority.get("model_runtime_binding_receipt_id") or ""),
-        "model_runtime_binding_digest": str(work_authority.get("model_runtime_binding_digest") or ""),
+        **model_runtime_authority_fields(work_authority),
         "memex_supply_receipt_id": str(work_authority.get("memex_supply_receipt_id") or ""),
         "memex_supply_digest": str(work_authority.get("memex_supply_digest") or ""),
         "architect_fix_publication_receipt_id": str(
@@ -287,15 +294,8 @@ def _optional_authority_fields(
     work_authority: Mapping[str, Any],
     reasons: List[str],
 ) -> Dict[str, str]:
-    runtime_id = str(work_authority.get("model_runtime_binding_receipt_id") or "")
-    runtime_digest = str(work_authority.get("model_runtime_binding_digest") or "")
-    if bool(runtime_id) != bool(runtime_digest) or (
-        runtime_id
-        and (
-            not runtime_id.startswith("reddog_model_runtime_binding:")
-            or not runtime_digest.startswith("sha256:")
-        )
-    ):
+    model_fields = model_runtime_authority_fields(work_authority)
+    if not model_runtime_authority_values_valid(work_authority):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.MODEL_RUNTIME_BINDING_MISMATCH)
     memex_id = work_authority.get("memex_supply_receipt_id")
     memex_digest = work_authority.get("memex_supply_digest")
@@ -312,8 +312,7 @@ def _optional_authority_fields(
     ):
         reasons.append(SignedAuthorityWorkerDispatchDryRunReason.ARCHITECT_FIX_PUBLICATION_BINDING_MISMATCH)
     return {
-        "model_runtime_binding_receipt_id": runtime_id,
-        "model_runtime_binding_digest": runtime_digest,
+        **model_fields,
         "memex_supply_receipt_id": str(memex_id or ""),
         "memex_supply_digest": str(memex_digest or ""),
         "architect_fix_publication_receipt_id": publication_id,

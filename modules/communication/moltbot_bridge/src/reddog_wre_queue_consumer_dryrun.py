@@ -272,6 +272,12 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "model_selection_digest": str(selected.get("model_selection_digest") or ""),
         "model_runtime_binding_receipt_id": str(selected.get("model_runtime_binding_receipt_id") or ""),
         "model_runtime_binding_digest": str(selected.get("model_runtime_binding_digest") or ""),
+        "model_runtime_binding_verification_receipt_id": str(
+            selected.get("model_runtime_binding_verification_receipt_id") or ""
+        ),
+        "model_runtime_binding_verification_digest": str(
+            selected.get("model_runtime_binding_verification_digest") or ""
+        ),
         "memex_supply_receipt_id": str(selected.get("memex_supply_receipt_id") or ""),
         "memex_supply_digest": str(selected.get("memex_supply_digest") or ""),
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
@@ -310,12 +316,40 @@ def _governed_lineage_reasons(
         refs.add(f"{evidence_kind}:{queue_value}")
     runtime_id = str(queue.get("model_runtime_binding_receipt_id") or "")
     runtime_digest = str(queue.get("model_runtime_binding_digest") or "")
-    if bool(runtime_id) != bool(runtime_digest):
+    verification_id = str(
+        queue.get("model_runtime_binding_verification_receipt_id") or ""
+    )
+    verification_digest = str(
+        queue.get("model_runtime_binding_verification_digest") or ""
+    )
+    binding_presence = tuple(
+        bool(value)
+        for value in (
+            runtime_id,
+            runtime_digest,
+            verification_id,
+            verification_digest,
+        )
+    )
+    if any(binding_presence) and not all(binding_presence):
         reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:model_runtime_binding_pair")
     if runtime_id:
         if runtime_id != str(claim.get("model_runtime_binding_receipt_id") or ""):
             reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:model_runtime_binding_receipt_id")
+        if verification_id != str(
+            claim.get("model_runtime_binding_verification_receipt_id") or ""
+        ):
+            reasons.append(
+                f"{FAIL_QUEUE_GOVERNED_LINEAGE}:"
+                "model_runtime_binding_verification_receipt_id"
+            )
+        if not verification_digest.startswith("sha256:"):
+            reasons.append(
+                f"{FAIL_QUEUE_GOVERNED_LINEAGE}:"
+                "model_runtime_binding_verification_digest"
+            )
         refs.add(f"model_runtime_binding:{runtime_id}")
+        refs.add(f"model_runtime_binding_verification:{verification_id}")
     for field in ("model_selection_digest", "memex_supply_digest"):
         if not str(queue.get(field) or "").startswith("sha256:"):
             reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:{field}")

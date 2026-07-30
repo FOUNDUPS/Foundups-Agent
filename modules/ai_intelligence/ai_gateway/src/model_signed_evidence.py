@@ -199,14 +199,21 @@ class ModelEvidenceKeyResolver(Protocol):
 class StaticModelEvidenceKeyResolver:
     """Deterministic test/runtime adapter for trusted public model-evidence keys."""
 
-    def __init__(self, trusted_public_keys: Mapping[tuple[str, str, str], str] | Mapping[str, str]):
-        self._trusted_public_keys = dict(trusted_public_keys)
+    def __init__(self, trusted_public_keys: Mapping[tuple[str, str, str], str]):
+        keys = dict(trusted_public_keys)
+        if any(
+            not isinstance(key, tuple)
+            or len(key) != 3
+            or not all(isinstance(part, str) and part for part in key)
+            for key in keys
+        ):
+            raise ValueError("trusted_model_evidence_key_tuple_required")
+        self._trusted_public_keys = keys
 
     def resolve(self, signer_role: str, signer_key_fingerprint: str, key_epoch: str) -> str | None:
-        exact = self._trusted_public_keys.get((signer_role, signer_key_fingerprint, key_epoch))
-        if exact:
-            return exact
-        return self._trusted_public_keys.get(signer_role)
+        return self._trusted_public_keys.get(
+            (signer_role, signer_key_fingerprint, key_epoch)
+        )
 
 
 class InMemoryEvidenceNonceStore:
@@ -605,6 +612,12 @@ def build_verified_model_production_evidence(
         benchmark_sig=benchmark_sig,
         promotion_sig=promotion_sig,
     )
+    if (
+        benchmark_sig.signer_public_key == promotion_sig.signer_public_key
+        or benchmark_sig.signer_key_fingerprint
+        == promotion_sig.signer_key_fingerprint
+    ):
+        raise ValueError("benchmark_and_promotion_signers_not_independent")
     benchmark_result = verify_model_signed_evidence_receipt(
         benchmark_sig,
         expected_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,

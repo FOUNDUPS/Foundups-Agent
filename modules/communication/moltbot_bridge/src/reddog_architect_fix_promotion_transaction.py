@@ -33,6 +33,9 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_re
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    canonical_model_runtime_binding_digest,
+)
 
 
 @dataclass(frozen=True)
@@ -328,7 +331,9 @@ def _digests(
     inputs: ArchitectFixPromotionTransactionInputs,
 ) -> _PromotionDigests:
     runtime_digest = (
-        canonical_digest(inputs.model_runtime_binding_receipt)
+        canonical_model_runtime_binding_digest(
+            inputs.model_runtime_binding_receipt
+        )
         if inputs.model_runtime_binding
         else None
     )
@@ -447,6 +452,9 @@ def _updated_state(
         "model_runtime_binding_receipt_id": (
             inputs.model_runtime_binding.get("receipt_id", "")
         ),
+        "model_runtime_binding_verification_receipt_id": (
+            inputs.model_runtime_binding.get("verification_receipt_id", "")
+        ),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "proposal_admission_receipt_id": inputs.proposal_admission["receipt_id"],
         "proposal_admission_digest": digests.proposal_admission,
@@ -555,6 +563,12 @@ def _receipt_evidence_fields(inputs, digests) -> dict[str, Any]:
             inputs.model_runtime_binding.get("receipt_id") or None
         ),
         "model_runtime_binding_digest": digests.model_runtime_binding,
+        "model_runtime_binding_verification_receipt_id": (
+            inputs.model_runtime_binding.get("verification_receipt_id") or None
+        ),
+        "model_runtime_binding_verification_digest": (
+            inputs.model_runtime_binding.get("verification_receipt_digest") or None
+        ),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "memex_supply_digest": digests.memex_supply,
     }
@@ -602,6 +616,9 @@ def _receipt_seed(
         "model_selection_receipt_id": inputs.model_selection["receipt_id"],
         "model_runtime_binding_receipt_id": (
             inputs.model_runtime_binding.get("receipt_id", "")
+        ),
+        "model_runtime_binding_verification_receipt_id": (
+            inputs.model_runtime_binding.get("verification_receipt_id", "")
         ),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "proposal_admission_receipt_id": inputs.proposal_admission["receipt_id"],

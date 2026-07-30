@@ -29,6 +29,8 @@ class WREQueueConsumerDryRunReceipt:
     model_selection_digest: Optional[str] = None
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    model_runtime_binding_verification_receipt_id: Optional[str] = None
+    model_runtime_binding_verification_digest: Optional[str] = None
     memex_supply_receipt_id: Optional[str] = None
     memex_supply_digest: Optional[str] = None
     execution_ready: bool = False
@@ -57,6 +59,8 @@ def build_queue_consumer_receipt(
         "model_selection_digest",
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
+        "model_runtime_binding_verification_receipt_id",
+        "model_runtime_binding_verification_digest",
         "memex_supply_receipt_id",
         "memex_supply_digest",
     )

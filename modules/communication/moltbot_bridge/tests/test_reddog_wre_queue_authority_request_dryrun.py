@@ -51,6 +51,12 @@ def _queue_result(**overrides):
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:abc123"
+        ),
+        "model_runtime_binding_verification_digest": (
+            "sha256:model-runtime-binding-verification"
+        ),
         "memex_supply_receipt_id": MEMEX_SUPPLY_RECEIPT_ID,
         "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
@@ -103,6 +109,12 @@ def _profile(**overrides):
         },
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:abc123"
+        ),
+        "model_runtime_binding_verification_digest": (
+            "sha256:model-runtime-binding-verification"
+        ),
     }
     profile.update(overrides)
     return profile
@@ -241,9 +253,13 @@ def test_allows_legacy_queue_without_model_runtime_binding() -> None:
     queue = _queue_result()
     queue["receipt"].pop("model_runtime_binding_receipt_id")
     queue["receipt"].pop("model_runtime_binding_digest")
+    queue["receipt"].pop("model_runtime_binding_verification_receipt_id")
+    queue["receipt"].pop("model_runtime_binding_verification_digest")
     profile = _profile()
     profile.pop("model_runtime_binding_receipt_id")
     profile.pop("model_runtime_binding_digest")
+    profile.pop("model_runtime_binding_verification_receipt_id")
+    profile.pop("model_runtime_binding_verification_digest")
 
     result = planner.plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=queue,

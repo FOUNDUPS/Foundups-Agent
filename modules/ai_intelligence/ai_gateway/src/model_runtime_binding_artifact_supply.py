@@ -28,12 +28,10 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_outcomes import (
     ModelPromotionEvidenceReceipt,
 )
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
-    ModelRuntimeBindingDecision,
     ModelRuntimeBindingPolicy,
-    bind_reddog_runtime_models,
 )
-from modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply import (
-    _rehydrate_verified_evidence_bundle,
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_evidence_verifier import (
+    verify_model_runtime_binding_artifact,
 )
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     ModelEvidenceKeyResolver,
@@ -102,6 +100,7 @@ def run_reddog_model_runtime_binding_artifact_supply(
     benchmark_evidence_receipts: Sequence[Mapping[str, Any] | ModelBenchmarkEvidenceReceipt] | None,
     promotion_evidence_receipts: Sequence[Mapping[str, Any] | ModelPromotionEvidenceReceipt] | None,
     verified_evidence_bundle: Mapping[str, Any] | VerifiedModelProductionEvidence | None,
+    trusted_keys_payload: Mapping[str, Any] | None,
     runtime_policy: Mapping[str, Any] | ModelRuntimeBindingPolicy | None,
     output_path: Path | str | None,
     key_resolver: ModelEvidenceKeyResolver | None = None,
@@ -143,38 +142,30 @@ def run_reddog_model_runtime_binding_artifact_supply(
             benchmark_reasons.append(ModelRuntimeBindingArtifactSupplyReason.BENCHMARKS_INVALID)
     reasons.extend(benchmark_reasons)
 
-    promotions: tuple[ModelPromotionEvidenceReceipt, ...] = ()
     promotion_reasons: list[str] = []
     if not promotion_evidence_receipts:
         promotion_reasons.append(ModelRuntimeBindingArtifactSupplyReason.PROMOTIONS_MISSING)
     else:
         try:
-            promotions = tuple(_promotion_receipts(promotion_evidence_receipts, benchmarks))
+            tuple(_promotion_receipts(promotion_evidence_receipts, benchmarks))
         except Exception:
             promotion_reasons.append(ModelRuntimeBindingArtifactSupplyReason.PROMOTIONS_INVALID)
     reasons.extend(promotion_reasons)
 
-    evidence = None
+    serialized_evidence: Mapping[str, Any] | None = None
     if verified_evidence_bundle is None:
         reasons.append(ModelRuntimeBindingArtifactSupplyReason.EVIDENCE_MISSING)
     elif isinstance(verified_evidence_bundle, VerifiedModelProductionEvidence):
-        evidence = verified_evidence_bundle
+        reasons.append(ModelRuntimeBindingArtifactSupplyReason.EVIDENCE_INVALID)
     else:
+        serialized_evidence = verified_evidence_bundle
         if key_resolver is None:
             reasons.append(ModelRuntimeBindingArtifactSupplyReason.KEY_RESOLVER_MISSING)
         if signature_verifier is None:
             reasons.append(ModelRuntimeBindingArtifactSupplyReason.SIGNATURE_VERIFIER_MISSING)
-        if key_resolver is not None and signature_verifier is not None:
-            try:
-                evidence = _rehydrate_verified_evidence_bundle(
-                    verified_evidence_bundle,
-                    key_resolver=key_resolver,
-                    signature_verifier=signature_verifier,
-                    now=now,
-                    consume_nonces=consume_nonces,
-                )
-            except Exception:
-                reasons.append(ModelRuntimeBindingArtifactSupplyReason.EVIDENCE_INVALID)
+
+    if not isinstance(trusted_keys_payload, Mapping) or not trusted_keys_payload:
+        reasons.append(ModelRuntimeBindingArtifactSupplyReason.KEY_RESOLVER_MISSING)
 
     policy = None
     if runtime_policy is None:
@@ -197,34 +188,54 @@ def run_reddog_model_runtime_binding_artifact_supply(
 
     assert snapshot is not None
     assert selection is not None
-    assert evidence is not None
     assert policy is not None
     assert resolved_output is not None
-    receipt = bind_reddog_runtime_models(
-        catalog_snapshot=snapshot,
-        selection_receipt=selection,
-        benchmark_evidence_receipts=benchmarks,
-        promotion_evidence_receipts=promotions,
-        policy=policy,
-        verified_production_evidence=evidence,
-    )
-    if receipt.decision != ModelRuntimeBindingDecision.BOUND:
-        return _reject((ModelRuntimeBindingArtifactSupplyReason.RUNTIME_BINDING_REJECTED, *receipt.rejection_reasons))
+    assert serialized_evidence is not None
+    assert trusted_keys_payload is not None
+    try:
+        verified = verify_model_runtime_binding_artifact(
+            catalog_snapshot=dict(catalog_snapshot or {}),
+            model_selection_receipt=dict(model_selection_receipt or {}),
+            benchmark_evidence_receipts=tuple(
+                item.to_dict() if hasattr(item, "to_dict") else dict(item)
+                for item in benchmark_evidence_receipts or ()
+            ),
+            promotion_evidence_receipts=tuple(
+                item.to_dict() if hasattr(item, "to_dict") else dict(item)
+                for item in promotion_evidence_receipts or ()
+            ),
+            verified_evidence_bundle=serialized_evidence,
+            runtime_policy=dict(runtime_policy or {}),
+            trusted_keys_payload=trusted_keys_payload,
+            key_resolver=key_resolver,
+            signature_verifier=signature_verifier,
+            now=int(now or 0),
+        )
+    except ValueError as exc:
+        detail = str(exc)
+        if detail.startswith("model_runtime_binding_rejected:"):
+            return _reject(
+                (
+                    ModelRuntimeBindingArtifactSupplyReason.RUNTIME_BINDING_REJECTED,
+                    *detail.partition(":")[2].split(","),
+                )
+            )
+        return _reject((ModelRuntimeBindingArtifactSupplyReason.EVIDENCE_INVALID,))
 
     try:
-        _write_json_atomic(resolved_output, receipt.to_dict())
+        _write_json_atomic(resolved_output, verified.to_artifact())
     except Exception:
         return _reject((ModelRuntimeBindingArtifactSupplyReason.OUTPUT_WRITE_FAILED,))
 
     return ModelRuntimeBindingArtifactSupplyResult(
         accepted=True,
         status=MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY_ACCEPT,
-        runtime_binding_receipt_id=receipt.receipt_id,
-        catalog_snapshot_id=receipt.catalog_snapshot_id,
-        selection_receipt_id=receipt.selection_receipt_id,
-        runtime_surface=receipt.runtime_surface,
-        principal_model=receipt.principal_model,
-        panel_models=receipt.panel_models,
+        runtime_binding_receipt_id=verified.binding.receipt_id,
+        catalog_snapshot_id=verified.binding.catalog_snapshot_id,
+        selection_receipt_id=verified.binding.selection_receipt_id,
+        runtime_surface=verified.binding.runtime_surface,
+        principal_model=verified.binding.principal_model,
+        panel_models=verified.binding.panel_models,
         output_path=str(resolved_output),
         rejection_reasons=(),
     )

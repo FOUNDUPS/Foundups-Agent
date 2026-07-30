@@ -226,16 +226,19 @@ def _policy_rejections(binding: Any) -> list[str]:
 
 def _evidence_rejections(binding: Any) -> list[str]:
     model_count = 1 + len(binding.panel_models)
-    evidence_counts = (
-        len(binding.benchmark_evidence_receipt_ids),
-        len(binding.promotion_evidence_receipt_ids),
-        len(binding.signed_promotion_receipt_ids),
+    evidence_sets = (
+        tuple(binding.benchmark_evidence_receipt_ids),
+        tuple(binding.promotion_evidence_receipt_ids),
+        tuple(binding.signed_promotion_receipt_ids),
     )
-    return (
-        ["model_runtime_binding_evidence_count_mismatch"]
-        if any(count != model_count for count in evidence_counts)
-        else []
-    )
+    reasons: list[str] = []
+    if any(len(values) != model_count for values in evidence_sets):
+        reasons.append("model_runtime_binding_evidence_count_mismatch")
+    if any(not all(str(value or "").strip() for value in values) for values in evidence_sets):
+        reasons.append("model_runtime_binding_evidence_id_invalid")
+    if any(len(set(values)) != len(values) for values in evidence_sets):
+        reasons.append("model_runtime_binding_duplicate_evidence_id")
+    return reasons
 
 
 def _receipt(

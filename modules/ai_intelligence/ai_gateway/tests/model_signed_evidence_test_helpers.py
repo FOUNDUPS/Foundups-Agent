@@ -148,8 +148,16 @@ def make_verified_production_evidence(
         promotion_signature_receipt=promotion_signature,
         key_resolver=StaticModelEvidenceKeyResolver(
             {
-                ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY,
-                ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value: PROMOTION_PUBLIC_KEY,
+                (
+                    ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value,
+                    BENCHMARK_FINGERPRINT,
+                    KEY_EPOCH,
+                ): BENCHMARK_PUBLIC_KEY,
+                (
+                    ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value,
+                    PROMOTION_FINGERPRINT,
+                    KEY_EPOCH,
+                ): PROMOTION_PUBLIC_KEY,
             }
         ),
         signature_verifier=DeterministicSignatureVerifier(),

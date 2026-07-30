@@ -161,6 +161,7 @@ def run_reddog_model_runtime_binding_artifact_supply_bootstrap(
         benchmark_evidence_receipts=benchmarks,
         promotion_evidence_receipts=promotions,
         verified_evidence_bundle=evidence,
+        trusted_keys_payload=trusted_keys,
         runtime_policy=policy,
         output_path=output_path,
         key_resolver=key_resolver,

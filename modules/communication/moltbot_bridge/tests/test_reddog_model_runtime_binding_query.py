@@ -33,12 +33,17 @@ def _valid_receipt() -> dict:
 
 
 def _resign(receipt: dict) -> dict:
-    body = {key: value for key, value in receipt.items() if key != "receipt_id"}
+    body = {
+        key: value
+        for key, value in receipt.items()
+        if key not in {"receipt_id", "verification_receipt"}
+    }
     encoded = json.dumps(
         body, sort_keys=True, separators=(",", ":"), default=str
     ).encode("utf-8")
     receipt["receipt_id"] = (
-        "reddog_model_runtime_binding:" + hashlib.sha256(encoded).hexdigest()
+        "reddog_model_runtime_binding:"
+        + hashlib.sha256(encoded).hexdigest()
     )
     return receipt
 

@@ -253,6 +253,7 @@ def test_registry_registers_bounded_worker_pilot_from_artifact_generation_depend
         governed_shell_dryrun_result={"accepted": True},
         artifact_generation_request={"explicit_artifact_generation_requested": True},
         artifact_generator=dummy,
+        model_runtime_binding_verifier=dummy,
         now_iso=NOW_ISO,
     )
 
@@ -294,6 +295,7 @@ def test_registry_registers_bounded_worker_pilot_from_artifact_generation_bindin
         governed_shell_dryrun_result={"accepted": True},
         artifact_generation_request_binding_enabled=True,
         artifact_generator=dummy,
+        model_runtime_binding_verifier=dummy,
         now_iso=NOW_ISO,
     )
 
@@ -318,6 +320,9 @@ def test_registry_artifact_generation_binding_still_requires_generator(tmp_path:
 
     assert "bounded_worker_pilot" not in registry.registered_stage_keys
     assert "missing_dependency:artifact_generator" in (
+        registry.missing_stage_reasons["bounded_worker_pilot"]
+    )
+    assert "missing_dependency:model_runtime_binding_verifier" in (
         registry.missing_stage_reasons["bounded_worker_pilot"]
     )
 

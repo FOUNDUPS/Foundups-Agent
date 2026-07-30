@@ -7,6 +7,9 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
+    canonical_model_runtime_binding_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_resolver_artifact_supply import (
     run_reddog_authority_runtime_resolver_artifact_supply,
 )
@@ -71,7 +74,8 @@ def _governed_lineage(
     claim = work["worker_claims"][0]
     queue["queue_item_id"] = queue_id
     determination_id = "sha256:canary-determination"
-    selection_digest, runtime_digest = _digest(selection), _digest(runtime_binding)
+    selection_digest = _digest(selection)
+    runtime_digest = canonical_model_runtime_binding_digest(runtime_binding)
     memex_id, memex_digest = "sha256:canary-memex", _digest({"receipt_id": "sha256:canary-memex"})
     queue.update({
         "source_determination_receipt_id": determination_id,

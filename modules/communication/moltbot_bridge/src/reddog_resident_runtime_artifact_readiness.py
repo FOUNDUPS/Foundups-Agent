@@ -15,6 +15,9 @@ from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
+    canonical_model_runtime_binding_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     RUNTIME_SURFACE_ARTIFACT_GENERATION,
 )
@@ -203,7 +206,9 @@ def _validate_model_bindings(
             raise ValueError("runtime_surface")
         if profile.get("model_runtime_binding_receipt_id") != binding.receipt_id:
             raise ValueError("runtime_id")
-        if profile.get("model_runtime_binding_digest") != _digest(
+        if profile.get(
+            "model_runtime_binding_digest"
+        ) != canonical_model_runtime_binding_digest(
             profile["model_runtime_binding_receipt"]
         ):
             raise ValueError("runtime_digest")

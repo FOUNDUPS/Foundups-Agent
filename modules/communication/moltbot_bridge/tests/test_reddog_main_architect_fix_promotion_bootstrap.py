@@ -40,6 +40,13 @@ from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers 
     ready_proposal_policy,
 )
 from modules.infrastructure.database.src.db_manager import DatabaseManager
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    verified_runtime_binding_receipt,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_test_capability,
+    model_selection_and_runtime_binding_receipts,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -507,6 +514,19 @@ def test_crash_after_publication_reclaims_and_reconstructs_exact_promotion(
 def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     files = _runtime_files(tmp_path)
+    selection, binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface="reddog_artifact_generation",
+        task_family="reddog_architect_fix_promotion",
+    )
+    files["model_selection"].write_text(
+        json.dumps(selection, sort_keys=True), encoding="utf-8"
+    )
+    files["model_runtime_binding"].write_text(
+        json.dumps(binding, sort_keys=True), encoding="utf-8"
+    )
+    verification = verified_runtime_binding_receipt(binding)
+    assert verification is not None
+    capability = model_runtime_binding_test_capability(selection, binding)
 
     with (
         patch(
@@ -528,6 +548,7 @@ def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Pat
             architect_determination_path=files["determination"],
             model_selection_receipt_path=files["model_selection"],
             model_runtime_binding_receipt_path=files["model_runtime_binding"],
+            model_runtime_binding_verification_capability=capability,
             memex_supply_receipt_path=files["memex_supply"],
             authority_profile_source_path=files["authority_profile_source"],
             authority_profile_output_path=files["authority_profile_output"],
@@ -536,7 +557,7 @@ def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Pat
             now_iso=NOW,
         )
 
-    assert result.accepted is True
+    assert result.accepted is True, result.rejection_reasons
     promoted_profile = json.loads(files["authority_profile_output"].read_text(encoding="utf-8"))
     runtime_binding = json.loads(files["model_runtime_binding"].read_text(encoding="utf-8"))
     assert promoted_profile["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]

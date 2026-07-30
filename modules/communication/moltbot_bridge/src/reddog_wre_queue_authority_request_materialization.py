@@ -108,6 +108,12 @@ def _receipt_fields(
         "model_runtime_binding_digest": _optional(
             queue_receipt, "model_runtime_binding_digest"
         ),
+        "model_runtime_binding_verification_receipt_id": _optional(
+            queue_receipt, "model_runtime_binding_verification_receipt_id"
+        ),
+        "model_runtime_binding_verification_digest": _optional(
+            queue_receipt, "model_runtime_binding_verification_digest"
+        ),
         "memex_supply_receipt_id": _optional(
             queue_receipt, "memex_supply_receipt_id"
         ),

@@ -69,7 +69,7 @@ from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
-
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import canonical_model_runtime_binding_digest
 
 ARCHITECT_DETERMINATION_ACCEPT = "ARCHITECT_DETERMINATION_ACCEPT"
 ARCHITECT_DETERMINATION_REJECT = "ARCHITECT_DETERMINATION_REJECT"
@@ -1074,7 +1074,7 @@ def _model_runtime_binding(
         "lead_model": str(payload.get("lead_model") or ""),
         "panel_models": [str(item) for item in payload.get("panel_models") or ()],
         "model_runtime_binding_receipt_id": receipt.receipt_id,
-        "model_runtime_binding_digest": _digest(binding),
+        "model_runtime_binding_digest": canonical_model_runtime_binding_digest(binding),
         "runtime_surface": receipt.runtime_surface,
     }
 

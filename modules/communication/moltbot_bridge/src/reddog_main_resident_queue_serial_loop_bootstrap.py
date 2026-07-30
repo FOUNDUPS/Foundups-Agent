@@ -66,7 +66,12 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     plan_reddog_wre_queue_consumer_dry_run,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import build_work_order_materialization_binding
+from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_bootstrap import (
+    ModelRuntimeVerifierConfig,
+    build_model_runtime_verifier,
+)
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_runtime_json_outside_repo as _read_json_outside_repo,
     read_reddog_runtime_json_mapping,
 )
 from modules.ai_intelligence.ai_gateway.src.model_feedback_ledger import (
@@ -181,6 +186,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     worktree_runner_timeout_s: int = 120,
     artifact_generator: Any = None,
     artifact_generator_mode: str | None = None,
+    model_runtime_binding_verifier: Any = None,
+    model_runtime_verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None = None,
     evidence_command_runner: Any = None,
     slice_verifier_request_binding_enabled: bool = False,
     evidence_command_runner_mode: str | None = None,
@@ -450,7 +457,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if model_feedback_store_reasons:
         return _not_ready(model_feedback_store_reasons, chain_results_path=None)
-
     resolved_worktree_runner, runner_reasons = _build_worktree_runner(
         root,
         injected_runner=worktree_runner,
@@ -459,14 +465,12 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if runner_reasons:
         return _not_ready(runner_reasons, chain_results_path=None)
-
-    resolved_artifact_generator, artifact_generator_reasons = _build_artifact_generator(
-        injected_runner=artifact_generator,
-        mode=artifact_generator_mode,
-    )
-    if artifact_generator_reasons:
-        return _not_ready(artifact_generator_reasons, chain_results_path=None)
-
+    generation = _build_generation_dependencies(
+        root, runtime_root, artifact_generator, artifact_generator_mode,
+        model_runtime_binding_verifier, model_runtime_verifier_config, authority_clock)
+    resolved_artifact_generator, resolved_model_verifier, generation_reasons = generation
+    if generation_reasons:
+        return _not_ready(generation_reasons, chain_results_path=None)
     resolved_evidence_command_runner, evidence_runner_reasons = _build_evidence_command_runner(
         injected_runner=evidence_command_runner,
         mode=evidence_command_runner_mode,
@@ -555,6 +559,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         artifact_generation_request=artifact_generation_request,
         artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
         artifact_generator=resolved_artifact_generator,
+        model_runtime_binding_verifier=resolved_model_verifier,
         commit_runner=draft_pr_runner,
         commit_evidence_runner=resolved_evidence_command_runner,
         holoindex_evidence=holoindex_evidence,
@@ -610,42 +615,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         runtime_dependency_bundle_status=dependency_bundle.status,
         runtime_dependency_bundle_requested=dependency_bundle.requested,
     )
-
-
-def _read_json_outside_repo(
-    repo_root: Path,
-    allowed_root: Path,
-    value: Path | str | None,
-    *,
-    missing_reason: str,
-    inside_reason: str,
-    unreadable_reason: str,
-    required: bool = True,
-) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
-    if not value:
-        return None, (missing_reason,) if required else ()
-    raw_path = Path(value)
-    candidate = raw_path if raw_path.is_absolute() else repo_root / raw_path
-    candidate = Path(os.path.abspath(candidate.expanduser()))
-    if _is_inside(candidate, repo_root):
-        return None, (inside_reason,)
-    if not candidate.exists() or not candidate.is_file():
-        return None, (missing_reason,)
-    try:
-        validate_runtime_artifact_path(
-            candidate,
-            repo_root=repo_root,
-            allowed_root=allowed_root,
-        )
-        payload = read_reddog_runtime_json_mapping(
-            candidate,
-            allowed_root=allowed_root,
-        )
-    except Exception:
-        return None, (unreadable_reason,)
-    if not isinstance(payload, Mapping):
-        return None, (unreadable_reason,)
-    return payload, ()
 
 
 def _runtime_input_path(repo_root: Path, value: Path | str | None) -> Optional[Path]:
@@ -1605,6 +1574,32 @@ def _build_artifact_generator(
     )
 
     return FoundupsFusionArtifactGenerationRunner(runtime_mode=RUNTIME_MODE_FOUNDUPS_FUSION), ()
+
+
+def _build_generation_dependencies(
+    root: Path,
+    runtime_root: Path,
+    artifact_generator: Any,
+    artifact_generator_mode: str | None,
+    model_verifier: Any,
+    verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None,
+    trusted_now: Callable[[], int],
+) -> tuple[Any, Any, tuple[str, ...]]:
+    generator, reasons = _build_artifact_generator(
+        injected_runner=artifact_generator,
+        mode=artifact_generator_mode,
+    )
+    if reasons:
+        return None, None, reasons
+    verifier, reasons = build_model_runtime_verifier(
+        repo_root=root,
+        runtime_root=runtime_root,
+        config=verifier_config,
+        trusted_now=trusted_now,
+        injected=model_verifier,
+        artifact_generator=generator,
+    )
+    return generator, verifier, reasons
 
 
 def _build_outcome_ratchet_store(

@@ -185,6 +185,8 @@ def _intent(role: str, runtime_name: str, capability: str, allocation=None, **ov
         "wsp15_allocation_digest": _digest(allocation),
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
+        "model_runtime_binding_verification_receipt_id": "",
+        "model_runtime_binding_verification_digest": "",
         "memex_supply_receipt_id": MEMEX_SUPPLY_ID,
         "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "architect_fix_publication_receipt_id": "",
@@ -223,6 +225,8 @@ def _dryrun_result(allocation=None, intents=None, **overrides):
         "wsp15_reasoning_tier": allocation["reasoning_tier"],
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
+        "model_runtime_binding_verification_receipt_id": "",
+        "model_runtime_binding_verification_digest": "",
         "memex_supply_receipt_id": MEMEX_SUPPLY_ID,
         "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "architect_fix_publication_receipt_id": "",
@@ -279,7 +283,11 @@ def _publish(**kwargs):
 def _runtime_binding_refs():
     return {
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
-        "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_digest": "sha256:" + "a" * 64,
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:" + "b" * 64
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + "c" * 64,
     }
 
 
@@ -1151,8 +1159,12 @@ def test_rejects_model_runtime_binding_conflict_between_signed_receipt_and_queue
         worker_dispatch_dryrun_result=dryrun,
         work_state_snapshot=_snapshot(
             allocation,
-            model_runtime_binding_receipt_id="reddog_model_runtime_binding:other",
-            model_runtime_binding_digest=refs["model_runtime_binding_digest"],
+            **{
+                **refs,
+                "model_runtime_binding_receipt_id": (
+                    "reddog_model_runtime_binding:other"
+                ),
+            },
         ),
         queue_item_id="queue-1",
         writer=_FakeWriter(),

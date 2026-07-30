@@ -399,7 +399,6 @@ def _verify_model_panel_evidence_inputs(
     revoked_member_key_epochs: Sequence[str] = (), revoked_panel_key_epochs: Sequence[str] = (),
     leeway_s: int = 60,
 ) -> tuple[ModelPanelSignedEvidenceReceipt, tuple[VerifiedModelEvidenceEntry, ...]]:
-    """Verify member chains first, then the aggregate envelope and nonce last."""
     aggregate_record, benchmark_run_receipt_id = _aggregate_record_and_run(aggregate_receipt)
     entries, bindings = _verify_member_inputs(
         catalog_snapshot_id=catalog_snapshot.snapshot_id,
@@ -413,6 +412,7 @@ def _verify_model_panel_evidence_inputs(
         leeway_s=leeway_s,
     )
     receipt = rehydrate_model_panel_signed_evidence_receipt(aggregate_record)
+    _assert_panel_signer_independence(receipt, entries)
     _assert_panel_context(
         catalog_snapshot=catalog_snapshot,
         selection_receipt=selection_receipt,
@@ -435,6 +435,33 @@ def _verify_model_panel_evidence_inputs(
     )
     _consume_panel_nonce(receipt, nonce_store=nonce_store, consume_nonce=consume_nonce)
     return receipt, entries
+
+
+def _assert_panel_signer_independence(
+    receipt: ModelPanelSignedEvidenceReceipt,
+    entries: tuple[VerifiedModelEvidenceEntry, ...],
+) -> None:
+    member_keys = {
+        signature.signer_public_key
+        for entry in entries
+        for signature in (
+            entry.benchmark_signature_receipt,
+            entry.promotion_signature_receipt,
+        )
+    }
+    member_fingerprints = {
+        signature.signer_key_fingerprint
+        for entry in entries
+        for signature in (
+            entry.benchmark_signature_receipt,
+            entry.promotion_signature_receipt,
+        )
+    }
+    if (
+        receipt.signer_public_key in member_keys
+        or receipt.signer_key_fingerprint in member_fingerprints
+    ):
+        raise ValueError("panel_authority_signer_not_independent")
 
 
 build_verified_model_panel_evidence, _verified_panel_seal = _build_verified_panel_registry(

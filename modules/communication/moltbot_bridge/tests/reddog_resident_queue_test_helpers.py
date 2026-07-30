@@ -200,6 +200,13 @@ def governed_worker_dispatch_snapshot(
     allocation = queue.get("wsp15_allocation_receipt") or {}
     allocation_id = str(allocation.get("receipt_id") or "")
     runtime_id = str(queue.get("model_runtime_binding_receipt_id") or "")
+    runtime_digest = str(queue.get("model_runtime_binding_digest") or "")
+    runtime_verification_id = str(
+        queue.get("model_runtime_binding_verification_receipt_id") or ""
+    )
+    runtime_verification_digest = str(
+        queue.get("model_runtime_binding_verification_digest") or ""
+    )
     refs = [
         str(ref)
         for ref in queue.get("evidence_refs") or ()
@@ -218,6 +225,10 @@ def governed_worker_dispatch_snapshot(
         refs.append(f"memex_supply:{memex_id}")
     if runtime_id:
         refs.append(f"model_runtime_binding:{runtime_id}")
+    if runtime_verification_id:
+        refs.append(
+            f"model_runtime_binding_verification:{runtime_verification_id}"
+        )
     queue["evidence_refs"] = list(dict.fromkeys(refs))
 
     governed.setdefault(
@@ -243,6 +254,13 @@ def governed_worker_dispatch_snapshot(
                     queue["model_selection_receipt_id"]
                 ),
                 "model_runtime_binding_receipt_id": runtime_id,
+                "model_runtime_binding_digest": runtime_digest,
+                "model_runtime_binding_verification_receipt_id": (
+                    runtime_verification_id
+                ),
+                "model_runtime_binding_verification_digest": (
+                    runtime_verification_digest
+                ),
                 "memex_supply_receipt_id": memex_id,
             }
         ],
@@ -499,6 +517,13 @@ def worker_dispatch_dryrun_result(allocation: dict[str, Any]) -> dict[str, Any]:
         "model_runtime_binding_digest": str(
             allocation.get("model_runtime_binding_digest") or ""
         ),
+        "model_runtime_binding_verification_receipt_id": str(
+            allocation.get("model_runtime_binding_verification_receipt_id")
+            or ""
+        ),
+        "model_runtime_binding_verification_digest": str(
+            allocation.get("model_runtime_binding_verification_digest") or ""
+        ),
         "memex_supply_receipt_id": "",
         "memex_supply_digest": "",
     }
@@ -578,6 +603,8 @@ def publish_bound_worker_dispatch(**kwargs: Any):
         for field in (
             "model_runtime_binding_receipt_id",
             "model_runtime_binding_digest",
+            "model_runtime_binding_verification_receipt_id",
+            "model_runtime_binding_verification_digest",
             "memex_supply_receipt_id",
             "memex_supply_digest",
             "architect_fix_publication_receipt_id",

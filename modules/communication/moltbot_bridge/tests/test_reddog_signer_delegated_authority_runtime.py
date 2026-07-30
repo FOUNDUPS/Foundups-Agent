@@ -170,6 +170,12 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:abc123"
+        ),
+        "model_runtime_binding_verification_digest": (
+            "sha256:model-runtime-binding-verification"
+        ),
         "memex_supply_receipt_id": "sha256:memex-supply",
         "memex_supply_digest": _MEMEX_DIGEST,
         "identity_nonce": "identity-nonce-0001",

@@ -159,6 +159,15 @@ def _runtime_binding_fields(
 ) -> dict[str, Any]:
     return {
         "model_runtime_binding_receipt": dict(receipt or {}),
+        "model_runtime_binding_verification_receipt": dict(
+            runtime.get("verification_receipt") or {}
+        ),
+        "model_runtime_binding_verification_receipt_id": str(
+            runtime.get("verification_receipt_id") or ""
+        ),
+        "model_runtime_binding_verification_digest": str(
+            runtime.get("verification_receipt_digest") or ""
+        ),
         "model_runtime_binding_runtime_surface": runtime["runtime_surface"],
         "model_runtime_binding_principal_model": runtime["principal_model"],
         "model_runtime_binding_panel_models": list(runtime["panel_models"]),

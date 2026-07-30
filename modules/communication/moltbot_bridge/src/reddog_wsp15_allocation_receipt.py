@@ -13,6 +13,10 @@ import json
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping, Sequence
 
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
+    canonical_model_runtime_binding_digest,
+)
+
 
 SCHEMA_VERSION = "reddog_wsp15_allocation_receipt.v1"
 
@@ -162,14 +166,22 @@ def allocate_reddog_wsp15_receipt(
         else {}
     )
     runtime_binding_id = str(runtime_binding.get("receipt_id") or "")
-    runtime_binding_digest = _digest(runtime_binding) if runtime_binding else ""
+    runtime_binding_digest = (
+        canonical_model_runtime_binding_digest(runtime_binding)
+        if runtime_binding
+        else ""
+    )
     architect_runtime_binding = (
         json.loads(json.dumps(architect_model_runtime_binding_receipt, sort_keys=True, default=str))
         if isinstance(architect_model_runtime_binding_receipt, Mapping)
         else {}
     )
     architect_runtime_binding_id = str(architect_runtime_binding.get("receipt_id") or "")
-    architect_runtime_binding_digest = _digest(architect_runtime_binding) if architect_runtime_binding else ""
+    architect_runtime_binding_digest = (
+        canonical_model_runtime_binding_digest(architect_runtime_binding)
+        if architect_runtime_binding
+        else ""
+    )
     input_payload = {
         "schema_version": SCHEMA_VERSION,
         "requested_operation": str(requested_operation or ""),

@@ -10,6 +10,10 @@ _SHA256_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 _OPTIONAL_BINDING_FIELDS = (
     ("model_selection_receipt_id", "model_selection_digest"),
+    (
+        "model_runtime_binding_verification_receipt_id",
+        "model_runtime_binding_verification_digest",
+    ),
     ("memex_supply_receipt_id", "memex_supply_digest"),
     (
         "architect_fix_publication_receipt_id",

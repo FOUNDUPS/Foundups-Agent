@@ -317,4 +317,4 @@ def test_recomputed_empty_signed_lineage_rejects_even_when_host_pinned(
 
     result = load_resident_model_runtime_bindings(REPO_ROOT, environ=env)
 
-    assert result == (None, None, "audit_model_runtime_binding_evidence_invalid")
+    assert result == (None, None, "model_runtime_binding_artifact_invalid")

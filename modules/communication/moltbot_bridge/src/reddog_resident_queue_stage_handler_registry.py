@@ -228,6 +228,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     artifact_generation_request: Optional[Mapping[str, Any]] = None,
     artifact_generation_request_binding_enabled: bool = False,
     artifact_generator: Any = None,
+    model_runtime_binding_verifier: Any = None,
     commit_runner: Any = None,
     commit_evidence_runner: Any = None,
     operation_cwd: Optional[Path] = None,
@@ -469,6 +470,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             artifact_generation_request=artifact_generation_request,
             artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
             artifact_generator=artifact_generator,
+            model_runtime_binding_verifier=model_runtime_binding_verifier,
             pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
             repo_root=root,
         ),
@@ -484,6 +486,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             artifact_generation_request=artifact_generation_request,
             artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
             artifact_generator=artifact_generator,
+            model_runtime_binding_verifier=model_runtime_binding_verifier,
         ),
     )
     _add_if_ready(
@@ -608,6 +611,7 @@ def _bounded_worker_pilot_missing(
     artifact_generation_request: Optional[Mapping[str, Any]],
     artifact_generation_request_binding_enabled: bool,
     artifact_generator: Any,
+    model_runtime_binding_verifier: Any,
     pilot_dryrun_binding_enabled: bool,
     repo_root: Optional[Path],
 ) -> tuple[str, ...]:
@@ -626,9 +630,17 @@ def _bounded_worker_pilot_missing(
         )
     if artifact_contents:
         return tuple(reasons)
-    if artifact_generation_request and artifact_generator is not None:
+    if (
+        artifact_generation_request
+        and artifact_generator is not None
+        and model_runtime_binding_verifier is not None
+    ):
         return tuple(reasons)
-    if artifact_generation_request_binding_enabled and artifact_generator is not None:
+    if (
+        artifact_generation_request_binding_enabled
+        and artifact_generator is not None
+        and model_runtime_binding_verifier is not None
+    ):
         return tuple(reasons)
     if not artifact_contents:
         reasons.append("missing_dependency:artifact_contents")
@@ -636,6 +648,8 @@ def _bounded_worker_pilot_missing(
         reasons.append("missing_dependency:artifact_generation_request")
     if artifact_generator is None:
         reasons.append("missing_dependency:artifact_generator")
+    if model_runtime_binding_verifier is None:
+        reasons.append("missing_dependency:model_runtime_binding_verifier")
     return tuple(reasons)
 
 

@@ -236,6 +236,8 @@ class DelegatedAuthorityRuntimeRequest:
     model_selection_digest: Optional[str] = None
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    model_runtime_binding_verification_receipt_id: Optional[str] = None
+    model_runtime_binding_verification_digest: Optional[str] = None
     memex_supply_receipt_id: Optional[str] = None
     memex_supply_digest: Optional[str] = None
     architect_fix_publication_receipt_id: Optional[str] = None
@@ -463,11 +465,8 @@ def issue_delegated_authority_runtime(
         or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
-    has_runtime_binding = bool(request.model_runtime_binding_receipt_id or request.model_runtime_binding_digest)
-    if has_runtime_binding and not (
-        str(request.model_runtime_binding_receipt_id or "").startswith("reddog_model_runtime_binding:")
-        and str(request.model_runtime_binding_digest or "").startswith("sha256:")
-    ):
+    has_runtime_binding = _runtime_binding_request_valid(request)
+    if has_runtime_binding is None:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
     if not optional_authority_bindings_valid(request):
         return _rejection_result(
@@ -655,6 +654,32 @@ def issue_delegated_authority_runtime(
         identity=identity,
         work_authority=work_authority,
     )
+
+
+def _runtime_binding_request_valid(
+    request: DelegatedAuthorityRuntimeRequest,
+) -> bool | None:
+    runtime = (
+        request.model_runtime_binding_receipt_id,
+        request.model_runtime_binding_digest,
+    )
+    verification = (
+        request.model_runtime_binding_verification_receipt_id,
+        request.model_runtime_binding_verification_digest,
+    )
+    if not any((*runtime, *verification)):
+        return False
+    valid = (
+        all(runtime)
+        and all(verification)
+        and str(runtime[0]).startswith("reddog_model_runtime_binding:")
+        and str(runtime[1]).startswith("sha256:")
+        and str(verification[0]).startswith(
+            "model_runtime_binding_verification:"
+        )
+        and str(verification[1]).startswith("sha256:")
+    )
+    return True if valid else None
 
 
 __all__ = [

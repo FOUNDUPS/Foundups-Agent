@@ -212,6 +212,8 @@ def _intent_safe(intent: Mapping[str, Any], receipt: Mapping[str, Any]) -> bool:
         "wsp15_allocation_digest",
         "model_runtime_binding_receipt_id",
         "model_runtime_binding_digest",
+        "model_runtime_binding_verification_receipt_id",
+        "model_runtime_binding_verification_digest",
         "memex_supply_receipt_id",
         "memex_supply_digest",
         "architect_fix_publication_receipt_id",
@@ -271,17 +273,47 @@ def _model_binding_matches(
 ) -> bool:
     receipt_id = str(receipt.get("model_runtime_binding_receipt_id") or "")
     receipt_digest = str(receipt.get("model_runtime_binding_digest") or "")
+    receipt_verification_id = str(
+        receipt.get("model_runtime_binding_verification_receipt_id") or ""
+    )
+    receipt_verification_digest = str(
+        receipt.get("model_runtime_binding_verification_digest") or ""
+    )
     queue_id = str(queue_item.get("model_runtime_binding_receipt_id") or "")
     queue_digest = str(queue_item.get("model_runtime_binding_digest") or "")
-    if bool(receipt_id) != bool(receipt_digest) or bool(queue_id) != bool(queue_digest):
+    queue_verification_id = str(
+        queue_item.get("model_runtime_binding_verification_receipt_id") or ""
+    )
+    queue_verification_digest = str(
+        queue_item.get("model_runtime_binding_verification_digest") or ""
+    )
+    receipt_values = (
+        receipt_id,
+        receipt_digest,
+        receipt_verification_id,
+        receipt_verification_digest,
+    )
+    queue_values = (
+        queue_id,
+        queue_digest,
+        queue_verification_id,
+        queue_verification_digest,
+    )
+    if any(receipt_values) != all(receipt_values) or any(queue_values) != all(queue_values):
         return False
     if not receipt_id and not queue_id:
         return True
     return (
         receipt_id == queue_id
         and receipt_digest == queue_digest
+        and receipt_verification_id == queue_verification_id
+        and receipt_verification_digest == queue_verification_digest
         and receipt_id.startswith("reddog_model_runtime_binding:")
         and receipt_digest.startswith("sha256:")
+        and receipt_verification_id.startswith(
+            "model_runtime_binding_verification:"
+        )
+        and receipt_verification_digest.startswith("sha256:")
     )
 
 
