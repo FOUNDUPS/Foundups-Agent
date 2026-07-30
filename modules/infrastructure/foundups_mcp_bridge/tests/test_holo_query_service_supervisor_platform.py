@@ -63,6 +63,21 @@ def test_windows_process_options_hide_owner_window(
     assert options["startupinfo"].wShowWindow == 0
 
 
+def test_windows_nonsealed_owner_disables_system_site(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(supervisor_module.os, "name", "nt")
+
+    command = supervisor_module._owner_command(
+        "python.exe",
+        8127,
+        123,
+        environ={},
+    )
+
+    assert command[:4] == ["python.exe", "-S", "-B", "-m"]
+
+
 @pytest.mark.parametrize(
     ("kwargs", "message"),
     [

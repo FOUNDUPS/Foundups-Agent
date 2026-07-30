@@ -1,6 +1,7 @@
 # RedDog Interface
 
-Version 0.4.43 publishes the current canonical resident thin client and
+Version 0.4.44 pins the canonical HoloIndex owner-runtime dependency binding
+and fail-fast health contract. It retains the current resident thin client and
 supersedes the quarantined 0.4.42 Codex-intercept artifact. RedDog remains the
 architect; signed OpenClaw/WRE/Hermes receipts remain the worker-action
 boundary.

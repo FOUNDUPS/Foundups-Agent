@@ -28,6 +28,7 @@ from .reddog_sealed_holo_runtime import (
     scrub_holo_child_environment,
     sealed_holo_command,
     sealed_runtime_required,
+    trusted_holo_site_packages,
 )
 
 OWNER_MODULE = (
@@ -93,7 +94,7 @@ def _read_health_payload(
     )
     response = connection.getresponse()
     body = response.read(MAX_HEALTH_RESPONSE_BYTES + 1)
-    if response.status not in {200, 409} or len(body) > MAX_HEALTH_RESPONSE_BYTES:
+    if response.status not in {200, 400, 409, 503, 504} or len(body) > MAX_HEALTH_RESPONSE_BYTES:
         return None
     payload = json.loads(body.decode("utf-8"))
     return payload if isinstance(payload, Mapping) else None
@@ -219,6 +220,10 @@ def _health_rejection_code(payload: Mapping[str, object] | None) -> str:
     value = payload if isinstance(payload, Mapping) else {}
     error = str(value.get("error") or "")
     terminal = {
+        "QUERY_OWNER_POISONED",
+        "QUERY_TIMEOUT",
+        "SEMANTIC_BACKEND_UNAVAILABLE",
+        "SEMANTIC_CANARY_EMPTY",
         "MISSING_GENERATION_BINDING",
         "REPO_HEAD_MISMATCH",
         "STALE_INDEX",
@@ -419,6 +424,13 @@ def _owner_environment(
     return environment
 
 
+def _resolved_owner_runtime(
+    python_executable: str, runtime_root: Path
+) -> tuple[str, tuple[str, ...]]:
+    executable, entries = _owner_python_runtime(python_executable)
+    if sealed_runtime_required(os.environ) or os.name != "nt":
+        return executable, entries
+    return executable, trusted_holo_site_packages(runtime_root, base_executable=executable)
 def _owner_command(
     python_executable: str,
     port: int,
@@ -444,6 +456,7 @@ def _owner_command(
             return list(sealed or ())
     return [
         python_executable,
+        *(("-S",) if os.name == "nt" else ()),
         "-B",
         "-m",
         OWNER_MODULE,
@@ -470,6 +483,7 @@ class HoloQueryServiceSupervisor:
         probe_interval_seconds: float = DEFAULT_OWNER_PROBE_INTERVAL_SECONDS,
         shutdown_timeout_seconds: float = 3.0,
         python_executable: Path | str | None = None,
+        runtime_root: Path | str | None = None,
     ) -> None:
         if not 1 <= int(port) <= 65_535:
             raise ValueError("port must be between 1 and 65535")
@@ -482,6 +496,7 @@ class HoloQueryServiceSupervisor:
         if any(not math.isfinite(value) or value <= 0 for value in limits):
             raise ValueError("lifecycle timeouts must be positive")
         self.repo_root = Path(repo_root).resolve(strict=False)
+        self.runtime_root = Path(runtime_root or repo_root).resolve(strict=False)
         self.ssd_path = (
             Path(ssd_path).resolve(strict=False) if ssd_path is not None else None
         )
@@ -491,13 +506,11 @@ class HoloQueryServiceSupervisor:
             self.probe_interval_seconds, self.shutdown_timeout_seconds,
         ) = limits
         requested_python = str(python_executable or sys.executable)
-        (
-            self.python_executable,
-            self._pythonpath_entries,
-        ) = _owner_python_runtime(requested_python)
+        self.python_executable, self._pythonpath_entries = _resolved_owner_runtime(
+            requested_python, self.runtime_root
+        )
         self._process: subprocess.Popen[bytes] | None = None
-        self._token = ""
-        self._ready = False
+        self._token, self._ready = "", False
         self._verified_binding: tuple[str, str, str, str] = ("", "", "", "")
         self._atexit_registered = False
 

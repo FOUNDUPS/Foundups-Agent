@@ -247,6 +247,7 @@ def restart_reddog_holoindex_owner(
         if _OWNER_HANDOFF != failed_handoff:
             return _OWNER_HANDOFF if supervisor.is_ready else None
         repo_root = supervisor.repo_root
+        runtime_root = getattr(supervisor, "runtime_root", None)
         expected = _OWNER_EXPECTED_BINDING
         supervisor.stop()
         _OWNER_SUPERVISOR = None
@@ -254,6 +255,7 @@ def restart_reddog_holoindex_owner(
         _OWNER_EXPECTED_BINDING = ("", "", "", "")
         restarted = ensure_reddog_holoindex_owner(
             repo_root=repo_root,
+            runtime_root=runtime_root,
             requested=True,
             expected_repo_head_sha=expected[0],
             expected_generation_id=expected[2],
@@ -290,12 +292,16 @@ def _stop_owned_owner() -> None:
 def _reuse_owned_owner(
     *,
     expected_binding: tuple[str, str, str, str],
+    expected_runtime_root: Path,
 ) -> RedDogHoloIndexOwnerBootstrapResult | None:
     """Return REUSED only after the live owner matches and reproves binding."""
     global _OWNER_HANDOFF
     supervisor = _OWNER_SUPERVISOR
     if supervisor is None:
         return None
+    runtime_matches = Path(
+        getattr(supervisor, "runtime_root", supervisor.repo_root)
+    ).resolve(strict=False) == expected_runtime_root
     matches = all(
         not requested_value or requested_value == stored_value
         for requested_value, stored_value in zip(
@@ -303,7 +309,12 @@ def _reuse_owned_owner(
             _OWNER_EXPECTED_BINDING,
         )
     )
-    if not supervisor.is_ready or not matches or _OWNER_HANDOFF is None:
+    if (
+        not supervisor.is_ready
+        or not runtime_matches
+        or not matches
+        or _OWNER_HANDOFF is None
+    ):
         _stop_owned_owner()
         return None
     try:
@@ -323,6 +334,7 @@ def _reuse_owned_owner(
 def _start_owned_owner(
     *,
     repo_root: Path | str,
+    runtime_root: Path | str | None,
     expected_binding: tuple[str, str, str, str],
 ) -> RedDogHoloIndexOwnerBootstrapResult:
     """Start, authenticate, and retain one process-private owner."""
@@ -330,10 +342,10 @@ def _start_owned_owner(
     supervisor: HoloQueryServiceSupervisor | None = None
     try:
         ssd_path = resolve_holoindex_ssd_path(environ=os.environ)
-        supervisor = HoloQueryServiceSupervisor(
-            repo_root=repo_root,
-            ssd_path=ssd_path,
-        )
+        supervisor_args = {"repo_root": repo_root, "ssd_path": ssd_path}
+        if runtime_root is not None:
+            supervisor_args["runtime_root"] = runtime_root
+        supervisor = HoloQueryServiceSupervisor(**supervisor_args)
         supervisor.start(
             expected_repo_head_sha=expected_binding[0],
             expected_repo_root_digest=expected_binding[1],
@@ -372,6 +384,7 @@ def _start_owned_owner(
 def ensure_reddog_holoindex_owner(
     *,
     repo_root: Path | str,
+    runtime_root: Path | str | None = None,
     requested: bool,
     expected_repo_head_sha: str = "",
     expected_generation_id: str = "",
@@ -389,8 +402,12 @@ def ensure_reddog_holoindex_owner(
         expected_generation_id,
         expected_receipt_digest,
     )
+    expected_runtime_root = Path(runtime_root or repo_root).resolve(strict=False)
     with _OWNER_LOCK:
-        reused = _reuse_owned_owner(expected_binding=expected_binding)
+        reused = _reuse_owned_owner(
+            expected_binding=expected_binding,
+            expected_runtime_root=expected_runtime_root,
+        )
         if reused is not None:
             return reused
         configured_result = _configured_service_result(
@@ -409,6 +426,7 @@ def ensure_reddog_holoindex_owner(
             )
         return _start_owned_owner(
             repo_root=repo_root,
+            runtime_root=runtime_root,
             expected_binding=expected_binding,
         )
 

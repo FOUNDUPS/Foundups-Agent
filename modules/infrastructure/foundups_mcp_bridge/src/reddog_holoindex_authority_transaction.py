@@ -359,6 +359,7 @@ def advance_reddog_holoindex_authority(
                 )
             operational: RedDogHoloIndexOperationalResult = ensure_operational(
                 repo_root=root,
+                owner_runtime_root=workspace,
                 requested=True,
                 auto_maintenance=True,
                 environ=env,

@@ -1,5 +1,17 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-07-30] Canonical Holo runtime dependency binding
+
+- Proved nonsealed owner and maintenance children accept only the canonical
+  checkout-local virtualenv after interpreter, version, containment, and
+  system-site validation.
+- Proved sealed refresh ignores the workspace dependency path, attacker
+  `PYTHONPATH` is replaced, and owner reuse is bound to the runtime root.
+- Proved authenticated HTTP 503 backend failures terminate startup immediately
+  while transient connection failures retain bounded retry behavior.
+- Revalidated exact-SHA authority transaction propagation, owner lifecycle,
+  startup preflight, and post-merge coordination.
+
 ## [2026-07-29] Cold semantic owner startup probe alignment
 
 - Added a supervisor regression modeling a 35-second cold semantic canary and

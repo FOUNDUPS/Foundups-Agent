@@ -1,5 +1,26 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-07-30 - Canonical Holo runtime dependency binding
+
+- OBSERVED: the auto-owned query service stayed alive but returned authenticated
+  `SEMANTIC_BACKEND_UNAVAILABLE`; its sanitized base-interpreter child could not
+  import dependencies installed only in the canonical workspace virtualenv.
+  The supervisor discarded HTTP 503 and retried until its 300-second deadline.
+- Nonsealed trusted-host maintenance and owner startup now share one validated
+  checkout-local `.venv/Lib/site-packages` binding. Validation covers
+  containment, `pyvenv.cfg`, base interpreter, Python major/minor, and disabled
+  system-site packages. User-site and inherited Python import overrides remain
+  disabled.
+- Sealed runtime startup remains bound to its separately bridge-validated
+  dependency path and does not trust the workspace virtualenv. The manifest
+  authenticates runtime source/bootstrap bytes, not every dependency file.
+- Authenticated terminal health failures, including semantic backend
+  unavailability, now fail immediately. Owner reuse also binds the runtime root
+  so a changed dependency authority replaces the retained owner.
+- Real-process validation produced exact-generation `READY` in about 14
+  seconds; the same child without the dependency binding returned
+  `SEMANTIC_BACKEND_UNAVAILABLE` in about one second instead of timing out.
+
 ## 2026-07-29 - Cold semantic owner startup probe alignment
 
 - OBSERVED: one automatic startup exhausted its 300-second lifecycle deadline;

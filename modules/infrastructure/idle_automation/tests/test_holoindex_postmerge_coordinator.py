@@ -807,6 +807,20 @@ def test_authority_transaction_holds_lease_through_switch_and_refresh(
     git = FakeGit((HEAD, HEAD))
     _patch_state(monkeypatch, authority, git)
     effects: list[str] = []
+    operational_args: dict[str, object] = {}
+
+    def ensure_operational(**kwargs):
+        operational_args.update(kwargs)
+        effects.append("refresh")
+        return SimpleNamespace(
+            ready=True,
+            status="REFRESHED",
+            refreshed=True,
+            error="",
+            repo_head_sha=HEAD,
+            generation_id="sha256:" + ("1" * 64),
+            freshness_receipt_digest="sha256:" + ("2" * 64),
+        )
 
     result = authority_transaction.advance_reddog_holoindex_authority(
         workspace_root=workspace,
@@ -818,22 +832,13 @@ def test_authority_transaction_holds_lease_through_switch_and_refresh(
         environ={"HOLOINDEX_SSD_PATH": str(tmp_path / "ssd")},
         git_runner=git,
         cleanup_owner=lambda: effects.append("cleanup"),
-        ensure_operational=lambda **_kwargs: (
-            effects.append("refresh") or SimpleNamespace(
-                ready=True,
-                status="REFRESHED",
-                refreshed=True,
-                error="",
-                repo_head_sha=HEAD,
-                generation_id="sha256:" + ("1" * 64),
-                freshness_receipt_digest="sha256:" + ("2" * 64),
-            )
-        ),
+        ensure_operational=ensure_operational,
         lease_factory=lambda _path: _Lease(effects),
     )
 
     assert result.ready is True
     assert effects == ["lease_enter", "cleanup", "refresh", "lease_exit"]
+    assert operational_args["owner_runtime_root"] == workspace
     assert git.switch_target == HEAD
 
 

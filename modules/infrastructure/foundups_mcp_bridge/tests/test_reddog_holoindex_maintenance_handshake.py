@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+
+import pytest
 
 from holo_index.freshness_receipt import (
     ALL_COLLECTIONS,
@@ -139,7 +142,9 @@ _PARTIAL_REFRESH_ENV = {
 
 def _publishing_refresh_runner(repo_root: Path, ssd_path: Path):
     def runner(command, **kwargs):
-        assert command[1:3] == ["-B", str(repo_root / "holo_index.py")]
+        expected_flags = ["-S", "-B"] if os.name == "nt" else ["-B"]
+        assert command[1:1 + len(expected_flags)] == expected_flags
+        assert command[1 + len(expected_flags)] == str(repo_root / "holo_index.py")
         assert command[-3:] == ["--index-all", "--ssd", str(ssd_path)]
         assert kwargs["shell"] is False
         assert "HOLOINDEX_QUERY_SERVICE_TOKEN" not in kwargs["env"]
@@ -209,6 +214,51 @@ def test_missing_receipt_runs_bounded_secret_free_refresh_and_restarts_owner(
     assert cleanup_calls == [True]
 
 
+def test_omitted_runtime_root_binds_repo_to_refresh_and_owner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root, ssd_path = tmp_path / "repo", tmp_path / "ssd"
+    repo_root.mkdir()
+    trusted = str(repo_root / ".venv" / "Lib" / "site-packages")
+    owner_calls: list[dict] = []
+    monkeypatch.setattr(handshake, "read_repository_state", lambda _root: _state())
+    monkeypatch.setattr(
+        handshake,
+        "trusted_holo_site_packages",
+        lambda root: (trusted,) if root == repo_root.resolve() else (),
+    )
+    monkeypatch.setattr(
+        handshake.owner_bootstrap,
+        "cleanup_reddog_holoindex_owner",
+        lambda: None,
+    )
+
+    def ready_owner(**kwargs):
+        owner_calls.append(kwargs)
+        return _ready_owner(**kwargs)
+
+    def runner(_command, **kwargs):
+        assert kwargs["env"]["PYTHONPATH"] == trusted
+        _publish(repo_root, ssd_path)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(
+        handshake.owner_bootstrap,
+        "ensure_reddog_holoindex_owner",
+        ready_owner,
+    )
+    result = handshake.ensure_reddog_holoindex_operational(
+        repo_root=repo_root,
+        requested=True,
+        environ={"HOLOINDEX_SSD_PATH": str(ssd_path)},
+        runner=runner,
+    )
+
+    assert result.ready is True
+    assert owner_calls[0]["runtime_root"] == repo_root.resolve()
+
+
 def test_refresh_environment_strips_secrets_and_casefolded_scope_overrides(
     tmp_path: Path,
 ) -> None:
@@ -225,6 +275,7 @@ def test_refresh_environment_strips_secrets_and_casefolded_scope_overrides(
             "HOLO_OFFLINE": "1",
         },
         ssd_path=ssd_path,
+        runtime_root=None,
     )
     assert "HOLOINDEX_QUERY_SERVICE_URL" not in child
     assert "HOLOINDEX_QUERY_SERVICE_TOKEN" not in child
@@ -236,6 +287,24 @@ def test_refresh_environment_strips_secrets_and_casefolded_scope_overrides(
     assert child["HOLO_OFFLINE"] == "1"
     assert child["HOLOINDEX_SSD_PATH"] == str(ssd_path)
     assert child["HOLO_USE_TURBOQUANT"] == "0"
+
+
+def test_refresh_environment_restores_only_validated_runtime_packages(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    trusted = str(tmp_path / "workspace" / ".venv" / "Lib" / "site-packages")
+    resolver = Mock(return_value=(trusted,))
+    monkeypatch.setattr(handshake, "trusted_holo_site_packages", resolver)
+
+    child = handshake._refresh_environment(
+        environ={"PYTHONPATH": "attacker-controlled"},
+        ssd_path=tmp_path / "ssd",
+        runtime_root=tmp_path / "workspace",
+    )
+
+    assert child["PYTHONPATH"] == trusted
+    resolver.assert_called_once_with(tmp_path / "workspace")
 
 
 def test_legacy_receipt_without_embedding_space_triggers_refresh(

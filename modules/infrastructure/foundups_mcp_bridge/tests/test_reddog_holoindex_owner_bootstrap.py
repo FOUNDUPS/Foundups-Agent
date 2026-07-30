@@ -6,7 +6,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -29,8 +28,15 @@ REAL_CONFIGURED_HEALTH = bootstrap._configured_owner_health_ready
 class _FakeSupervisor:
     instances: list["_FakeSupervisor"] = []
 
-    def __init__(self, *, repo_root: Path | str, ssd_path: Path | str) -> None:
+    def __init__(
+        self,
+        *,
+        repo_root: Path | str,
+        ssd_path: Path | str,
+        runtime_root: Path | str | None = None,
+    ) -> None:
         self.repo_root = Path(repo_root)
+        self.runtime_root = Path(runtime_root or repo_root)
         self.ssd_path = Path(ssd_path)
         self.started = False
         self.stopped = False
@@ -403,6 +409,27 @@ def test_auto_start_uses_canonical_store_and_keeps_handoff_process_private(
         SAFE_TOKEN,
     )
     assert os.environ["UNRELATED_VALUE"] == "preserved"
+
+
+def test_auto_start_forwards_explicit_trusted_runtime_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    runtime_root = tmp_path / "workspace"
+    authority.mkdir()
+    runtime_root.mkdir()
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+
+    result = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=authority,
+        runtime_root=runtime_root,
+        requested=True,
+    )
+
+    assert result.ready is True
+    assert _FakeSupervisor.instances[0].repo_root == authority
+    assert _FakeSupervisor.instances[0].runtime_root == runtime_root
     assert SAFE_TOKEN not in repr(result)
 
 
@@ -468,6 +495,36 @@ def test_changed_exact_binding_replaces_owned_process_instead_of_reusing_it(
     assert first_owner.stopped is True
     assert len(_FakeSupervisor.instances) == 2
     assert _FakeSupervisor.instances[-1].verified_binding == second_binding
+
+
+def test_changed_runtime_root_replaces_owned_process(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    authority = tmp_path / "authority"
+    runtime_a = tmp_path / "runtime-a"
+    runtime_b = tmp_path / "runtime-b"
+    for path in (authority, runtime_a, runtime_b):
+        path.mkdir()
+    monkeypatch.setattr(bootstrap, "HoloQueryServiceSupervisor", _FakeSupervisor)
+
+    first = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=authority,
+        runtime_root=runtime_a,
+        requested=True,
+    )
+    first_owner = _FakeSupervisor.instances[0]
+    second = bootstrap.ensure_reddog_holoindex_owner(
+        repo_root=authority,
+        runtime_root=runtime_b,
+        requested=True,
+    )
+
+    assert first.status == bootstrap.OWNER_STARTED
+    assert second.status == bootstrap.OWNER_STARTED
+    assert first_owner.stopped is True
+    assert len(_FakeSupervisor.instances) == 2
+    assert _FakeSupervisor.instances[1].runtime_root == runtime_b
 
 
 def test_auto_owner_secret_is_not_inherited_by_unrelated_subprocess(

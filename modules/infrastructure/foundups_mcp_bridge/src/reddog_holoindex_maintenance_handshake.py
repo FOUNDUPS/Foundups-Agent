@@ -38,6 +38,7 @@ from .reddog_sealed_holo_runtime import (
     scrub_holo_child_environment,
     sealed_holo_command,
     sealed_runtime_required,
+    trusted_holo_site_packages,
 )
 
 
@@ -154,7 +155,10 @@ def _timeout_seconds(
 
 
 def _refresh_environment(
-    *, environ: Mapping[str, str], ssd_path: Path
+    *,
+    environ: Mapping[str, str],
+    ssd_path: Path,
+    runtime_root: Path | str | None,
 ) -> dict[str, str]:
     """Return a canonical maintenance environment without scope overrides."""
     child_environment = scrub_holo_child_environment(environ)
@@ -167,13 +171,27 @@ def _refresh_environment(
     child_environment[HOLOINDEX_SSD_PATH_ENV] = str(ssd_path)
     child_environment["HOLO_USE_TURBOQUANT"] = "0"
     child_environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    if runtime_root is not None and not sealed_runtime_required(environ):
+        entries = trusted_holo_site_packages(runtime_root)
+        if entries:
+            child_environment["PYTHONPATH"] = os.pathsep.join(entries)
     return child_environment
 
 
 def _run_full_refresh(
-    *, repo_root: Path, ssd_path: Path, environ: Mapping[str, str], timeout: float, runner
+    *,
+    repo_root: Path,
+    runtime_root: Path | str | None,
+    ssd_path: Path,
+    environ: Mapping[str, str],
+    timeout: float,
+    runner,
 ) -> str:
-    child_environment = _refresh_environment(environ=environ, ssd_path=ssd_path)
+    child_environment = _refresh_environment(
+        environ=environ,
+        ssd_path=ssd_path,
+        runtime_root=runtime_root,
+    )
     sealed = sealed_holo_command(
         environ=environ,
         trusted_module_path=Path(__file__),
@@ -185,7 +203,8 @@ def _run_full_refresh(
     if sealed_runtime_required(environ) and not sealed:
         return REFRESH_FAILED_ERROR
     command = list(sealed) if sealed else [
-        sys.executable, "-B", str(repo_root / "holo_index.py"),
+        sys.executable, *(("-S",) if os.name == "nt" else ()),
+        "-B", str(repo_root / "holo_index.py"),
         "--index-all", "--ssd", str(ssd_path),
     ]
     try:
@@ -242,6 +261,7 @@ def _failure(
 def _start_owner(
     *,
     repo_root: Path,
+    owner_runtime_root: Path | str | None,
     ssd_path: Path,
     refreshed: bool,
     state: RepositoryState,
@@ -253,6 +273,7 @@ def _start_owner(
     )
     owner = owner_bootstrap.ensure_reddog_holoindex_owner(
         repo_root=repo_root,
+        runtime_root=owner_runtime_root,
         requested=True,
         expected_repo_head_sha=state.head_sha,
         expected_generation_id=receipt.generation_id,
@@ -266,6 +287,7 @@ def _start_owner(
 def _refresh_and_start_owner(
     *,
     repo_root: Path,
+    owner_runtime_root: Path | str | None,
     ssd_path: Path,
     environ: Mapping[str, str],
     timeout: float,
@@ -276,6 +298,7 @@ def _refresh_and_start_owner(
     owner_bootstrap.cleanup_reddog_holoindex_owner()
     refresh_error = _run_full_refresh(
         repo_root=repo_root,
+        runtime_root=owner_runtime_root,
         ssd_path=ssd_path,
         environ=environ,
         timeout=timeout,
@@ -299,6 +322,7 @@ def _refresh_and_start_owner(
         )
     return _start_owner(
         repo_root=repo_root,
+        owner_runtime_root=owner_runtime_root,
         ssd_path=ssd_path,
         refreshed=True,
         state=final_state,
@@ -309,6 +333,7 @@ def _refresh_and_start_owner(
 def _ensure_locked(
     *,
     repo_root: Path,
+    owner_runtime_root: Path | str | None,
     environ: Mapping[str, str],
     auto_maintenance: bool,
     timeout_seconds: float | None,
@@ -326,6 +351,7 @@ def _ensure_locked(
     if receipt is not None and not reasons:
         return _start_owner(
             repo_root=repo_root,
+            owner_runtime_root=owner_runtime_root,
             ssd_path=ssd_path,
             refreshed=False,
             state=state,
@@ -340,6 +366,7 @@ def _ensure_locked(
         return _failure(timeout_error, state=state, reasons=reasons)
     return _refresh_and_start_owner(
         repo_root=repo_root,
+        owner_runtime_root=owner_runtime_root,
         ssd_path=ssd_path,
         environ=environ,
         timeout=timeout,
@@ -352,6 +379,7 @@ def _ensure_locked(
 def ensure_reddog_holoindex_operational(
     *,
     repo_root: Path | str,
+    owner_runtime_root: Path | str | None = None,
     requested: bool,
     auto_maintenance: bool | None = None,
     timeout_seconds: float | None = None,
@@ -368,9 +396,11 @@ def ensure_reddog_holoindex_operational(
         else bool(auto_maintenance)
     )
     root = Path(repo_root).resolve(strict=False)
+    runtime_root = Path(owner_runtime_root or root).resolve(strict=False)
     with _HANDSHAKE_LOCK:
         return _ensure_locked(
             repo_root=root,
+            owner_runtime_root=runtime_root,
             environ=env,
             auto_maintenance=maintenance_enabled,
             timeout_seconds=timeout_seconds,
