@@ -50,6 +50,9 @@ class ArchitectFixPromotionReason:
     )
     DUPLICATE_QUEUE_ITEM = "REJECT_ARCHITECT_FIX_PROMOTION_DUPLICATE_QUEUE_ITEM"
     STORE_REJECTED = "REJECT_ARCHITECT_FIX_PROMOTION_STORE_REJECTED"
+    FIX_PROMOTION_CLAIM_FENCE_INVALID = (
+        "REJECT_ARCHITECT_FIX_PROMOTION_CLAIM_FENCE_INVALID"
+    )
 
 
 @dataclass(frozen=True)
@@ -83,6 +86,9 @@ class ArchitectFixPromotionReceipt:
     committed_revision: Optional[str]
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    agentdb_fix_promotion_claim_id: Optional[str] = None
+    agentdb_fix_promotion_claim_revision: Optional[int] = None
+    agentdb_fix_promotion_claim_fence_digest: Optional[str] = None
     no_signing_performed: bool = True
     no_worker_spawn_performed: bool = True
     no_worktree_created: bool = True

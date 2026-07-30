@@ -20,7 +20,7 @@ import tempfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional
 
 from holo_index.freshness_receipt import load_freshness_receipt, read_git_head_sha
 from holo_index.query_receipt import generation_binding_from_receipt
@@ -52,6 +52,15 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
 
 REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED = (
     "REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED"
+)
+_CONSUMED_ARTIFACT_PATH_ARGUMENTS = (
+    "work_state_path",
+    "architect_determination_path",
+    "model_selection_receipt_path",
+    "model_runtime_binding_receipt_path",
+    "memex_supply_receipt_path",
+    "authority_profile_source_path",
+    "holoindex_receipt_path",
 )
 REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY = (
     "REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY"
@@ -105,6 +114,7 @@ class _PromotionBootstrapInputs:
     revoked_key_epochs: frozenset[str]
     worker_id: str
     now_iso: str
+    promotion_claim_fence_executor: Callable | None
 
 
 def run_reddog_main_architect_fix_promotion_bootstrap(
@@ -123,6 +133,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     signer_runtime_config: SignerSocketServiceRuntimeWiringConfig | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
     current_proposal_revoked_key_epochs: frozenset[str] = frozenset(),
+    promotion_claim_fence_executor: Callable | None = None,
     worker_id: str = "reddog-main-architect-fix-promotion",
     now_iso: str | None = None,
 ) -> RedDogMainArchitectFixPromotionBootstrapResult:
@@ -198,12 +209,9 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
         inside_reason="authority_profile_output_path_inside_repo",
     )
     reasons.extend(output_reasons)
-    for label, path in (
-        ("work_state", work_state_file),
-        ("authority_profile_output", output_path),
-    ):
-        if path is not None and not _is_inside(path, trusted_runtime_root):
-            reasons.append(f"{label}_path_outside_resident_runtime_root")
+    reasons.extend(_bootstrap_path_reasons(
+        root, trusted_runtime_root, work_state_file, output_path, locals()
+    ))
 
     if reasons:
         return _not_ready(reasons)
@@ -237,6 +245,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
             revoked_key_epochs=frozenset(current_proposal_revoked_key_epochs),
             worker_id=worker_id,
             now_iso=now_iso or datetime.now(timezone.utc).isoformat(),
+            promotion_claim_fence_executor=promotion_claim_fence_executor,
         )
     )
 
@@ -277,13 +286,53 @@ def _run_profile_transaction(inputs, repo_head, holoindex_receipt):
         authority_profile_path=inputs.output_path,
         work_state_store=store,
     )
+    operation = lambda fence=None: _recover_and_promote(
+        inputs,
+        store,
+        publisher,
+        repo_head,
+        holoindex_receipt,
+        fence,
+    )
+    try:
+        result = (
+            inputs.promotion_claim_fence_executor(operation)
+            if inputs.promotion_claim_fence_executor
+            else operation()
+        )
+    except Exception as exc:
+        return _not_ready(
+            ("architect_fix_promotion_claim_fence_rejected", exc.__class__.__name__)
+        )
+    if not result.accepted:
+        return _not_ready(
+            list(
+                result.rejection_reasons
+                or ("architect_fix_promotion_rejected",)
+            )
+        )
+    return _applied_result(result, inputs.output_path)
+
+
+def _recover_and_promote(inputs, store, publisher, repo_head, holo_receipt, fence):
     try:
         publisher.recover()
     except Exception as exc:
         return _not_ready(
             ("architect_fix_publication_recovery_failed", exc.__class__.__name__)
         )
-    result = promote_reddog_architect_fix_to_signed_wsp15_work_order(
+    return _promote_with_fence(
+        inputs,
+        store,
+        publisher,
+        repo_head,
+        holo_receipt,
+        fence,
+    )
+
+
+def _promote_with_fence(inputs, store, publisher, repo_head, holo_receipt, fence):
+    return promote_reddog_architect_fix_to_signed_wsp15_work_order(
         architect_determination=inputs.determination,
         work_state_store=store,
         authority_profile=inputs.authority_profile,
@@ -297,17 +346,10 @@ def _run_profile_transaction(inputs, repo_head, holoindex_receipt):
         worker_id=inputs.worker_id,
         now_iso=inputs.now_iso,
         current_repo_head_sha=repo_head,
-        current_holoindex_receipt=holoindex_receipt,
+        current_holoindex_receipt=holo_receipt,
         authority_profile_publication_publisher=publisher.publish,
+        agentdb_fix_promotion_claim_fence=fence,
     )
-    if not result.accepted:
-        return _not_ready(
-            list(
-                result.rejection_reasons
-                or ("architect_fix_promotion_rejected",)
-            )
-        )
-    return _applied_result(result, inputs.output_path)
 
 
 def _applied_result(result, output_path):
@@ -421,6 +463,47 @@ def _resolve_output_outside_repo(
     if _is_inside(path, repo_root):
         return None, [inside_reason]
     return path, []
+
+
+def _output_alias_reasons(
+    repo_root: Path,
+    output_path: Path | None,
+    consumed_paths: tuple[Path | str | None, ...],
+) -> list[str]:
+    if output_path is None:
+        return []
+    for value in consumed_paths:
+        if not value:
+            continue
+        path = Path(value)
+        resolved = (
+            (repo_root / path).resolve()
+            if not path.is_absolute()
+            else path.resolve()
+        )
+        if resolved == output_path:
+            return ["authority_profile_output_aliases_consumed_artifact"]
+    return []
+
+
+def _bootstrap_path_reasons(
+    repo_root: Path,
+    runtime_root: Path,
+    work_state_path: Path | None,
+    output_path: Path | None,
+    arguments: Mapping[str, Any],
+) -> list[str]:
+    consumed = tuple(
+        arguments.get(name) for name in _CONSUMED_ARTIFACT_PATH_ARGUMENTS
+    )
+    reasons = _output_alias_reasons(repo_root, output_path, consumed)
+    for label, path in (
+        ("work_state", work_state_path),
+        ("authority_profile_output", output_path),
+    ):
+        if path is not None and not _is_inside(path, runtime_root):
+            reasons.append(f"{label}_path_outside_resident_runtime_root")
+    return reasons
 
 
 def _probe_atomic_output(path: Path) -> list[str]:

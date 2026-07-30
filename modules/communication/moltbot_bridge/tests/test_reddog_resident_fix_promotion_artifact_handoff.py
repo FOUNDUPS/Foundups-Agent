@@ -183,6 +183,30 @@ def test_handoff_rejects_outputs_inside_repo(tmp_path: Path) -> None:
     assert ResidentFixHandoffReason.DETERMINATION_OUTPUT_INVALID in result.rejection_reasons
 
 
+def test_handoff_rejects_aliased_output_paths_before_writing(tmp_path: Path) -> None:
+    output_path = tmp_path / "runtime" / "shared.json"
+    output_path.parent.mkdir(parents=True)
+    original = b"existing-artifact\n"
+    output_path.write_bytes(original)
+
+    result = run_reddog_resident_fix_promotion_artifact_handoff(
+        repo_root=REPO_ROOT,
+        intent_id=INTENT_ID,
+        architect_determination_output_path=output_path,
+        memex_supply_receipt_output_path=output_path.parent / "." / output_path.name,
+        cycle_store=_CycleStore(_cycle()),
+        architect_store=_architect_store(),
+    )
+
+    assert result.accepted is False
+    assert result.status == RESIDENT_FIX_HANDOFF_NOT_READY
+    assert ResidentFixHandoffReason.OUTPUT_PATHS_ALIAS in result.rejection_reasons
+    assert result.architect_determination_path is None
+    assert result.memex_supply_receipt_path is None
+    assert output_path.read_bytes() == original
+    assert tuple(output_path.parent.iterdir()) == (output_path,)
+
+
 def test_handoff_module_has_no_execution_network_or_reindex_imports() -> None:
     tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
     banned_import_roots = {

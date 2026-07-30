@@ -131,6 +131,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         Callable[[ArchitectFixPromotionPublicationRequest], str] | None
     ) = None,
     current_proposal_revoked_key_epochs: frozenset[str] = frozenset(),
+    agentdb_fix_promotion_claim_fence: Mapping[str, Any] | None = None,
 ) -> ArchitectFixPromotionResult:
     """Commit one architect FIX queue item and return its signer authority profile."""
 
@@ -196,16 +197,12 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         reasons.append(
             ArchitectFixPromotionReason.PUBLICATION_COORDINATOR_MISSING
         )
-    allocation = _mapping(candidate.get("wsp15_allocation_receipt"))
-    allocation_validation = validate_reddog_wsp15_allocation_receipt(allocation)
-    if not allocation_validation.accepted:
-        reasons.append(ArchitectFixPromotionReason.WSP15_ALLOCATION_INVALID)
-    elif (
-        str(determination.get("wsp15_allocation_receipt_id") or "") != str(allocation.get("receipt_id") or "")
-        or str(determination.get("wsp15_allocation_digest") or "")
-        != canonical_reddog_wsp15_allocation_digest(allocation)
-    ):
-        reasons.append(ArchitectFixPromotionReason.WSP15_ALLOCATION_MISMATCH)
+    allocation, claim_fence = _allocation_and_claim_fence(
+        determination,
+        candidate,
+        agentdb_fix_promotion_claim_fence,
+        reasons,
+    )
 
     selection_payload = _validate_model_selection(model_selection_receipt, reasons)
     runtime_binding_payload = _validate_model_runtime_binding(
@@ -288,8 +285,62 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
             expires_at=expires_at,
             freshness_receipt_id=freshness_id,
             holoindex_evidence=holoindex_evidence,
+            agentdb_fix_promotion_claim_fence=claim_fence,
         )
     )
+
+
+def _valid_claim_fence(
+    fence: Mapping[str, Any],
+    *,
+    determination_id: str,
+    candidate: Mapping[str, Any],
+    allocation: Mapping[str, Any],
+) -> bool:
+    return bool(
+        fence.get("schema_version") == "reddog_fix_promotion_claim_fence.v1"
+        and str(fence.get("agentdb_claim_id") or "")
+        and str(fence.get("lease_id") or "")
+        and str(fence.get("lease_owner") or "")
+        and isinstance(fence.get("claim_revision"), int)
+        and not isinstance(fence.get("claim_revision"), bool)
+        and int(fence["claim_revision"]) > 0
+        and fence.get("determination_id") == determination_id
+        and fence.get("queue_candidate_id") == candidate.get("queue_candidate_id")
+        and fence.get("wsp15_allocation_receipt_id") == allocation.get("receipt_id")
+    )
+
+
+def _allocation_and_claim_fence(
+    determination: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    raw_fence: Mapping[str, Any] | None,
+    reasons: list[str],
+) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
+    allocation = _mapping(candidate.get("wsp15_allocation_receipt"))
+    validation = validate_reddog_wsp15_allocation_receipt(allocation)
+    if not validation.accepted:
+        reasons.append(ArchitectFixPromotionReason.WSP15_ALLOCATION_INVALID)
+    elif (
+        determination.get("wsp15_allocation_receipt_id")
+        != allocation.get("receipt_id")
+        or determination.get("wsp15_allocation_digest")
+        != canonical_reddog_wsp15_allocation_digest(allocation)
+    ):
+        reasons.append(ArchitectFixPromotionReason.WSP15_ALLOCATION_MISMATCH)
+    fence = _mapping(raw_fence)
+    if raw_fence is not None and not _valid_claim_fence(
+        fence,
+        determination_id=str(
+            determination.get("determination_receipt_id") or ""
+        ),
+        candidate=candidate,
+        allocation=allocation,
+    ):
+        reasons.append(
+            ArchitectFixPromotionReason.FIX_PROMOTION_CLAIM_FENCE_INVALID
+        )
+    return allocation, fence
 
 
 def _reject(reasons: list[str]) -> ArchitectFixPromotionResult:

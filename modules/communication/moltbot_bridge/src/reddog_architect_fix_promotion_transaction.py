@@ -62,6 +62,7 @@ class ArchitectFixPromotionTransactionInputs:
     expires_at: str
     freshness_receipt_id: str
     holoindex_evidence: Mapping[str, Any]
+    agentdb_fix_promotion_claim_fence: Mapping[str, Any]
 
 
 @dataclass(frozen=True)
@@ -71,6 +72,7 @@ class _PromotionDigests:
     memex_supply: str
     allocation: str
     proposal_admission: str
+    claim_fence: str | None
 
 
 def execute_architect_fix_promotion_transaction(
@@ -149,60 +151,31 @@ def _reconstruct_committed_result(
         )
     promotion = promotions[0]
     publication_id = str(promotion.get("publication_id") or "")
-    claim_id = str(promotion.get("claim_id") or "")
-    queue_item_id = str(promotion.get("queue_item_id") or "")
-    publications = _matching_records(
-        inputs.current,
-        "architect_fix_publications",
-        "publication_id",
-        publication_id,
-    )
-    claims = _matching_records(
-        inputs.current,
-        "worker_claims",
-        "claim_id",
-        claim_id,
-    )
-    queues = _matching_records(
-        inputs.current,
-        "wre_queue_items",
-        "queue_item_id",
-        queue_item_id,
-    )
-    sync_receipts = [
-        item
-        for item in inputs.current.get("queue_sync_receipts") or ()
-        if isinstance(item, Mapping)
-        and queue_item_id in {
-            str(value) for value in item.get("queue_item_ids") or ()
-        }
-    ]
-    if (
-        len(publications) != 1
-        or len(claims) != 1
-        or len(queues) != 1
-        or len(sync_receipts) != 1
-    ):
+    records = _committed_records(inputs.current, promotion)
+    if records is None:
         return _reject(
             inputs, ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
         )
-    records = ArchitectFixPromotionRecords(
-        claim_id=claim_id,
-        queue_item_id=queue_item_id,
-        claim=dict(claims[0]),
-        queue_item=dict(queues[0]),
-        sync_receipt=dict(sync_receipts[0]),
-        evidence_refs=tuple(
-            str(item) for item in queues[0].get("evidence_refs") or ()
-        ),
-    )
+    claim_id = records.claim_id
+    queue_item_id = records.queue_item_id
     profile = _build_profile(inputs, digests, records)
     profile = {
         **profile,
         "promotion_publication_id": publication_id,
     }
     profile_digest = canonical_digest(profile)
-    expected_publication_id = _publication_id(inputs, records)
+    committed_fence_digest = str(
+        promotion.get("agentdb_fix_promotion_claim_fence_digest") or ""
+    )
+    if not _replay_claim_fence_matches(inputs, promotion):
+        return _reject(
+            inputs, ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
+        )
+    expected_publication_id = _publication_id(
+        inputs,
+        records,
+        claim_fence_digest=committed_fence_digest or None,
+    )
     regenerated = _build_records(inputs, digests)
     if (
         publication_id != expected_publication_id
@@ -211,9 +184,9 @@ def _reconstruct_committed_result(
             and regenerated.queue_item_id == queue_item_id
             and (
                 canonical_digest(regenerated.claim)
-                != canonical_digest(claims[0])
+                != canonical_digest(records.claim)
                 or canonical_digest(regenerated.queue_item)
-                != canonical_digest(queues[0])
+                != canonical_digest(records.queue_item)
             )
         )
     ):
@@ -284,6 +257,14 @@ def _reconstruct_committed_result(
             revision,
             publication_id=publication_id,
             profile_digest=profile_digest,
+            claim_fence_digest=committed_fence_digest or None,
+            claim_fence_id=str(
+                promotion.get("agentdb_fix_promotion_claim_id") or ""
+            )
+            or None,
+            claim_fence_revision=promotion.get(
+                "agentdb_fix_promotion_claim_revision"
+            ),
         ),
         rejection_reasons=(),
         authority_profile=profile,
@@ -304,6 +285,45 @@ def _matching_records(
     ]
 
 
+def _committed_records(
+    snapshot: Mapping[str, Any],
+    promotion: Mapping[str, Any],
+) -> ArchitectFixPromotionRecords | None:
+    publication_id = str(promotion.get("publication_id") or "")
+    claim_id = str(promotion.get("claim_id") or "")
+    queue_item_id = str(promotion.get("queue_item_id") or "")
+    collections = (
+        _matching_records(
+            snapshot, "architect_fix_publications", "publication_id", publication_id
+        ),
+        _matching_records(snapshot, "worker_claims", "claim_id", claim_id),
+        _matching_records(
+            snapshot, "wre_queue_items", "queue_item_id", queue_item_id
+        ),
+    )
+    sync_receipts = [
+        item
+        for item in snapshot.get("queue_sync_receipts") or ()
+        if isinstance(item, Mapping)
+        and queue_item_id in {
+            str(value) for value in item.get("queue_item_ids") or ()
+        }
+    ]
+    publications, claims, queues = collections
+    if any(len(items) != 1 for items in (*collections, sync_receipts)):
+        return None
+    return ArchitectFixPromotionRecords(
+        claim_id=claim_id,
+        queue_item_id=queue_item_id,
+        claim=dict(claims[0]),
+        queue_item=dict(queues[0]),
+        sync_receipt=dict(sync_receipts[0]),
+        evidence_refs=tuple(
+            str(item) for item in queues[0].get("evidence_refs") or ()
+        ),
+    )
+
+
 def _digests(
     inputs: ArchitectFixPromotionTransactionInputs,
 ) -> _PromotionDigests:
@@ -320,6 +340,11 @@ def _digests(
             inputs.allocation
         ),
         proposal_admission=canonical_digest(inputs.proposal_admission),
+        claim_fence=(
+            canonical_digest(inputs.agentdb_fix_promotion_claim_fence)
+            if inputs.agentdb_fix_promotion_claim_fence
+            else None
+        ),
     )
 
 
@@ -434,6 +459,18 @@ def _updated_state(
         "authority_profile_digest": profile_digest,
         "created_at": inputs.now_iso,
     }
+    if digests.claim_fence:
+        promotion_record.update(
+            {
+                "agentdb_fix_promotion_claim_id": inputs.agentdb_fix_promotion_claim_fence[
+                    "agentdb_claim_id"
+                ],
+                "agentdb_fix_promotion_claim_revision": inputs.agentdb_fix_promotion_claim_fence[
+                    "claim_revision"
+                ],
+                "agentdb_fix_promotion_claim_fence_digest": digests.claim_fence,
+            }
+        )
     return _append_queue_state(
         inputs.current,
         claim=records.claim,
@@ -451,6 +488,9 @@ def _build_receipt(
     *,
     publication_id: str,
     profile_digest: str,
+    claim_fence_digest: str | None = None,
+    claim_fence_id: str | None = None,
+    claim_fence_revision: int | None = None,
 ):
     authority = inputs.proposal_authority
     seed = _receipt_seed(
@@ -459,13 +499,11 @@ def _build_receipt(
         revision,
         publication_id=publication_id,
         profile_digest=profile_digest,
+        claim_fence_digest=claim_fence_digest or digests.claim_fence,
     )
     return ArchitectFixPromotionReceipt(
         schema_version=inputs.schema_version,
-        promotion_receipt_id=(
-            "architect_fix_promotion_"
-            + canonical_digest(seed).removeprefix("sha256:")[:16]
-        ),
+        promotion_receipt_id=_promotion_receipt_id(seed),
         status=inputs.accept_status,
         architect_determination_receipt_id=inputs.determination_id,
         source_queue_candidate_id=str(
@@ -485,19 +523,66 @@ def _build_receipt(
         proposal_policy_authorization_id=authority.policy_authorization_id,
         proposal_policy_authorization_digest=authority.policy_authorization_digest,
         proposal_signer_runtime_context_digest=authority.signer_runtime_context_digest,
-        model_catalog_snapshot_id=inputs.model_selection["catalog_snapshot_id"],
-        model_selection_receipt_id=inputs.model_selection["receipt_id"],
-        model_selection_digest=digests.model_selection,
-        model_runtime_binding_receipt_id=(
-            inputs.model_runtime_binding.get("receipt_id") or None
-        ),
-        model_runtime_binding_digest=digests.model_runtime_binding,
-        memex_supply_receipt_id=inputs.memex_supply["receipt_id"],
-        memex_supply_digest=digests.memex_supply,
+        **_receipt_evidence_fields(inputs, digests),
         publication_id=publication_id,
         authority_profile_digest=profile_digest,
         committed_revision=revision,
+        **_receipt_claim_fence_fields(
+            inputs,
+            digests,
+            claim_fence_id=claim_fence_id,
+            claim_fence_revision=claim_fence_revision,
+            claim_fence_digest=claim_fence_digest,
+        ),
     )
+
+
+def _promotion_receipt_id(seed: Mapping[str, Any]) -> str:
+    return (
+        "architect_fix_promotion_"
+        + canonical_digest(seed).removeprefix("sha256:")[:16]
+    )
+
+
+def _receipt_evidence_fields(inputs, digests) -> dict[str, Any]:
+    return {
+        "model_catalog_snapshot_id": inputs.model_selection[
+            "catalog_snapshot_id"
+        ],
+        "model_selection_receipt_id": inputs.model_selection["receipt_id"],
+        "model_selection_digest": digests.model_selection,
+        "model_runtime_binding_receipt_id": (
+            inputs.model_runtime_binding.get("receipt_id") or None
+        ),
+        "model_runtime_binding_digest": digests.model_runtime_binding,
+        "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
+        "memex_supply_digest": digests.memex_supply,
+    }
+
+
+def _receipt_claim_fence_fields(
+    inputs,
+    digests,
+    *,
+    claim_fence_id,
+    claim_fence_revision,
+    claim_fence_digest,
+) -> dict[str, Any]:
+    fence = inputs.agentdb_fix_promotion_claim_fence
+    return {
+        "agentdb_fix_promotion_claim_id": (
+            claim_fence_id
+            or (str(fence.get("agentdb_claim_id")) if fence else None)
+        ),
+        "agentdb_fix_promotion_claim_revision": (
+            claim_fence_revision
+            if claim_fence_revision is not None
+            else (int(fence["claim_revision"]) if fence else None)
+        ),
+        "agentdb_fix_promotion_claim_fence_digest": (
+            claim_fence_digest or digests.claim_fence
+        ),
+    }
 
 
 def _receipt_seed(
@@ -507,9 +592,10 @@ def _receipt_seed(
     *,
     publication_id: str,
     profile_digest: str,
+    claim_fence_digest: str | None = None,
 ):
     authority = inputs.proposal_authority
-    return {
+    seed = {
         "determination_receipt_id": inputs.determination_id,
         "queue_item_id": records.queue_item_id,
         "claim_id": records.claim_id,
@@ -528,11 +614,18 @@ def _receipt_seed(
         "authority_profile_digest": profile_digest,
         "committed_revision": revision,
     }
+    if claim_fence_digest:
+        seed["agentdb_fix_promotion_claim_fence_digest"] = claim_fence_digest
+    return seed
 
 
-def _publication_id(inputs, records) -> str:
-    return canonical_digest(
-        {
+def _publication_id(
+    inputs,
+    records,
+    *,
+    claim_fence_digest: str | None = None,
+) -> str:
+    seed = {
             "proposal_authenticity_attestation_id": (
                 inputs.proposal_authority.attestation_id
             ),
@@ -542,6 +635,24 @@ def _publication_id(inputs, records) -> str:
                 "work_state_revision"
             ),
         }
+    effective_fence_digest = claim_fence_digest or _digests(inputs).claim_fence
+    if effective_fence_digest:
+        seed["agentdb_fix_promotion_claim_fence_digest"] = effective_fence_digest
+    return canonical_digest(seed)
+
+
+def _replay_claim_fence_matches(inputs, promotion) -> bool:
+    fence = inputs.agentdb_fix_promotion_claim_fence
+    stored_claim_id = str(promotion.get("agentdb_fix_promotion_claim_id") or "")
+    stored_digest = str(
+        promotion.get("agentdb_fix_promotion_claim_fence_digest") or ""
+    )
+    if not fence:
+        return not stored_claim_id and not stored_digest
+    return bool(
+        stored_claim_id
+        and stored_digest
+        and stored_claim_id == str(fence.get("agentdb_claim_id") or "")
     )
 
 
