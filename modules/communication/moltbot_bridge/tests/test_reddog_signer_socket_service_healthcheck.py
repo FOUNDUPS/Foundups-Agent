@@ -6,11 +6,20 @@ import ast
 import json
 from pathlib import Path
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_public_key,
+    encode_ed25519_signature,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    SigningRequest,
+    SigningResponse,
     public_key_fingerprint,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
+    canonical_signer_peer_response_attestation_input,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
@@ -42,8 +51,21 @@ MODULE_PATH = (
     / "src"
     / "reddog_signer_socket_service_healthcheck.py"
 )
-_PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
-_REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
+_PRINCIPAL_PRIVATE_KEY = Ed25519PrivateKey.from_private_bytes(bytes(range(32)))
+_REDDOG_PRIVATE_KEY = Ed25519PrivateKey.from_private_bytes(bytes(range(1, 33)))
+
+
+def _public_key(private_key: Ed25519PrivateKey) -> str:
+    return encode_ed25519_public_key(
+        private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+
+
+_PRINCIPAL_PUBLIC_KEY = _public_key(_PRINCIPAL_PRIVATE_KEY)
+_REDDOG_PUBLIC_KEY = _public_key(_REDDOG_PRIVATE_KEY)
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -143,23 +165,39 @@ def _packet(repo: Path, runtime: Path, *, config_payload: dict[str, object] | No
 
 def _accepted_connector(_path: Path, request: bytes, _timeout: float, _max_bytes: int) -> bytes:
     decoded = json.loads(request.decode("utf-8"))
-    public_key = decoded["request"]["signer_public_key"]
-    return (
-        json.dumps(
-            {
-                "accepted": True,
-                "signature": "sig:healthcheck",
-                "signer_public_key": public_key,
-                "key_fingerprint": "sha256:fingerprint",
-                "key_epoch": "epoch-1",
-                "audit_mac": "audit:healthcheck",
-                "boundary_attested": True,
-                "requester_identity_attested": True,
-                "signer_loads_no_untrusted_code": True,
-                "no_secret_material_returned": True,
-            },
-            sort_keys=True,
+    signing_request = SigningRequest(**decoded["request"])
+    public_key = signing_request.signer_public_key
+    signature = encode_ed25519_signature(
+        _REDDOG_PRIVATE_KEY.sign(
+            signing_request.signing_input.encode("utf-8")
         )
+    )
+    response = SigningResponse(
+        accepted=True,
+        signature=signature,
+        signer_public_key=public_key,
+        key_fingerprint=public_key_fingerprint(public_key),
+        key_epoch="epoch-1",
+        audit_mac="audit:healthcheck",
+        boundary_attested=True,
+        requester_identity_attested=True,
+        signer_loads_no_untrusted_code=True,
+        no_secret_material_returned=True,
+    )
+    response = SigningResponse(
+        **{
+            **response.to_dict(),
+            "audit_attestation_signature": encode_ed25519_signature(
+                _REDDOG_PRIVATE_KEY.sign(
+                    canonical_signer_peer_response_attestation_input(
+                        signing_request, response
+                    ).encode("utf-8")
+                )
+            ),
+        }
+    )
+    return (
+        json.dumps(response.to_dict(), sort_keys=True)
         + "\n"
     ).encode("utf-8")
 
@@ -186,6 +224,8 @@ def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_pa
     assert result.requester_principal_id == "github:mjtrout"
     assert result.request_digest and result.request_digest.startswith("sha256:")
     assert result.response_digest and result.response_digest.startswith("sha256:")
+    assert result.peer_handshake_verified is True
+    assert result.peer_handshake_expires_at is not None
     assert result.no_signature_value_returned is True
     serialized = json.dumps(result.to_dict(), sort_keys=True)
     assert "sig:healthcheck" not in serialized

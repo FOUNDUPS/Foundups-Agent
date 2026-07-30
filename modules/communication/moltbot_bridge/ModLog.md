@@ -1,4 +1,26 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
+  signer healthcheck with a fresh, short-lived, domain-separated Ed25519
+  challenge verified against the configured signer key, fingerprint, epoch,
+  requester attestations, and exact request bytes.
+  The production signer CLI now requires a process-local, non-copyable,
+  non-serializable, one-shot selection minted by the existing signed
+  runtime-manifest verifier. The signer validates exact config/run-packet
+  bytes, roots, generation, packet ID, session, socket, profile/key/epoch
+  tuples, CLI bindings, and fixed safety fields before reading caller-selected
+  artifacts, constructing the secret resolver, resolving keys, or exposing a
+  handshake-capable backend. Production bootstrap rejects all provider modes
+  except `WSP71_PERMISSIONED`; test-only key material cannot bypass launch
+  admission.
+  Kernel peer credentials continue to authenticate client -> signer; the
+  signed challenge authenticates signer -> client. Rehashed packet
+  substitution, copied responses, expired/future requests, fake acceptance
+  flags, key/epoch/profile substitution, unsigned audit metadata, and
+  malformed domains fail closed. A second domain-separated signer signature
+  covers the response audit metadata and attestations.
+  The healthcheck result is audit evidence only. External signer lifecycle,
+  current-generation/replay selection, and per-signing-call use-time
+  capability consumption remain separately gated.
 - `REDDOG_SIGNED_RUNTIME_ARTIFACT_MANIFEST_PHASE1`: added the
   content-addressed signed-manifest foundation for the seven canonical
   resident runtime artifacts.

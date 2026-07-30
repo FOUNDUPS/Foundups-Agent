@@ -23,7 +23,6 @@ from typing import Any, Callable, Protocol
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     ControlLoopAnchorStore,
 )
-
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     encode_ed25519_public_key,
     encode_ed25519_signature,
@@ -57,6 +56,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation im
     RUNTIME_ARTIFACT_MANIFEST_AUDIT_ATTESTATION_PREFIX,
     canonical_signer_audit_attestation_input,
 )
+from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as peer_handshake
 
 
 REJECT_ED25519_SIGNER_REQUEST_INVALID = "REJECT_ED25519_SIGNER_REQUEST_INVALID"
@@ -174,6 +174,7 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     runtime_artifact_manifest_nonce_store: (
         ProposalAuthenticityNonceStore | None
     ) = None
+    signer_peer_instance_binding: peer_handshake.SignerPeerInstanceBinding | None = None
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         reason = _signer_request_rejection(self, request, peer)
@@ -241,10 +242,7 @@ def _signer_request_rejection(
         return REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH
     if not request.signing_input:
         return REJECT_ED25519_SIGNER_REQUEST_INVALID
-    if any(
-        operation is not prefix
-        for operation, prefix in _signing_domain_pairs(request)
-    ):
+    if any(operation is not prefix for operation, prefix in _signing_domain_pairs(request)):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
     configured = (
         backend.proposal_authority_policy is not None
@@ -252,21 +250,22 @@ def _signer_request_rejection(
         or backend.runtime_artifact_manifest_authority_boundary is not None
     )
     if configured:
-        allowed_operations: set[str] = set()
+        allowed_operations = {peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION}
         if backend.proposal_authority_policy is not None:
             allowed_operations.add(PROPOSAL_AUTHENTICITY_SIGNING_OPERATION)
         if backend.control_loop_authority_policy is not None:
             allowed_operations.add(CONTROL_LOOP_SIGNING_OPERATION)
-        if (
-            backend.runtime_artifact_manifest_authority is not None
-            and backend.runtime_artifact_manifest_authority_boundary
-            is not None
-        ):
-            allowed_operations.add(
-                RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION
-            )
+        if (backend.runtime_artifact_manifest_authority is not None
+                and backend.runtime_artifact_manifest_authority_boundary is not None):
+            allowed_operations.add(RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION)
         if request.requested_operation not in allowed_operations:
             return REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY
+    if request.requested_operation == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION:
+        if not peer_handshake.signer_handshake_request_matches_instance(
+            request, backend.signer_peer_instance_binding,
+            now_epoch=int(backend.proposal_clock()),
+        ):
+            return REJECT_ED25519_SIGNER_REQUEST_INVALID
     try:
         derived = encode_ed25519_public_key(_public_bytes_from_private_key(backend.private_key))
     except Exception:
@@ -294,6 +293,13 @@ def _signing_domain_pairs(
             == RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
             request.signing_input.startswith(
                 RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX
+            ),
+        ),
+        (
+            request.requested_operation
+            == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION,
+            request.signing_input.startswith(
+                peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_PREFIX
             ),
         ),
     )
@@ -459,7 +465,7 @@ def _sign_response(
     if not _is_ascii(audit_mac) or not audit_mac:
         return SigningResponse(accepted=False), REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING
     attestation, reason = _signer_audit_attestation(
-        backend, request, signature, audit_mac, is_control
+        backend, request, signature, audit_mac, peer, is_control
     )
     if reason:
         return SigningResponse(accepted=False), reason
@@ -476,8 +482,16 @@ def _sign_response(
 
 def _signer_audit_attestation(
     backend: Ed25519SignerBackend, request: SigningRequest,
-    signature: str, audit_mac: str, is_control: bool,
+    signature: str, audit_mac: str, peer: SignerPeerAttestation,
+    is_control: bool,
 ) -> tuple[str, str]:
+    if (
+        request.requested_operation
+        == peer_handshake.SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION
+    ):
+        return _sign_peer_response_attestation(
+            backend, request, signature, audit_mac, peer
+        )
     if not is_control:
         return "", ""
     domain_prefix = CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX
@@ -499,6 +513,37 @@ def _signer_audit_attestation(
         return encode_ed25519_signature(
             backend.private_key.sign(value.encode("utf-8"))
         ), ""
+    except Exception:
+        return "", REJECT_ED25519_SIGNER_SIGN_FAILED
+
+
+def _sign_peer_response_attestation(
+    backend: Ed25519SignerBackend,
+    request: SigningRequest,
+    signature: str,
+    audit_mac: str,
+    peer: SignerPeerAttestation,
+) -> tuple[str, str]:
+    response = SigningResponse(
+        accepted=True,
+        signature=signature,
+        signer_public_key=backend.public_key,
+        key_fingerprint=public_key_fingerprint(backend.public_key),
+        key_epoch=backend.key_epoch,
+        audit_mac=audit_mac,
+        boundary_attested=peer.boundary_attested,
+        requester_identity_attested=True,
+        signer_loads_no_untrusted_code=True,
+        no_secret_material_returned=True,
+    )
+    try:
+        signing_input = (
+            peer_handshake.canonical_signer_peer_response_attestation_input(
+                request, response
+            )
+        )
+        signed = backend.private_key.sign(signing_input.encode("utf-8"))
+        return encode_ed25519_signature(signed), ""
     except Exception:
         return "", REJECT_ED25519_SIGNER_SIGN_FAILED
 

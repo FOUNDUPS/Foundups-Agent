@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import ast
 import base64
+import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -31,6 +33,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING,
     FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE,
     FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE,
+    FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
     FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
@@ -38,6 +41,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
+    run_reddog_signer_socket_service_run_packet_supply,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import ResolveResult, hash_reference
 
@@ -89,6 +95,22 @@ class CapturingBoundedService:
             response_digests=("sha256:response",),
             socket_removed=True,
         )
+
+
+class _ManifestSelection:
+    pass
+
+
+class _ManifestSelectionBoundary:
+    def __init__(self, capability: object, values: dict[str, object]) -> None:
+        self._capability = capability
+        self._values = values
+
+    def consume(self, value: object) -> dict[str, object]:
+        if value is not self._capability:
+            raise ValueError("manifest_selection_unverified")
+        self._capability = None
+        return dict(self._values)
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -190,6 +212,75 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
+def _launch_binding(
+    repo: Path,
+    config_path: Path,
+    *,
+    session_id: str = "bootstrap-test",
+) -> dict[str, object]:
+    payload = json.loads(config_path.read_text(encoding="utf-8"))
+    single = payload.pop("key_provider_profile", None)
+    if single is not None:
+        payload["key_provider_profiles"] = [single]
+        _write_json(config_path, payload)
+    packet_path = config_path.parent / f"{config_path.stem}-run-packet.json"
+    supplied = run_reddog_signer_socket_service_run_packet_supply(
+        repo_root=repo,
+        config_path=config_path,
+        output_path=packet_path,
+        session_id=session_id,
+        python_executable=sys.executable,
+    )
+    assert supplied.accepted is True
+    capability = _ManifestSelection()
+    selection = {
+        "manifest_id": "sha256:" + ("a" * 64),
+        "artifact_generation_digest": "sha256:" + ("b" * 64),
+        "config_digest": supplied.config_digest,
+        "config_raw_digest": _raw_digest(config_path),
+        "run_packet_digest": _raw_digest(packet_path),
+        "repo_root": str(repo.resolve()),
+        "runtime_root": str(config_path.parent.resolve()),
+        "config_path": str(config_path.resolve()),
+        "run_packet_path": str(packet_path.resolve()),
+    }
+    return {
+        "expected_config_digest": supplied.config_digest,
+        "run_packet_path": packet_path,
+        "expected_session_id": session_id,
+        "manifest_selection": capability,
+        "manifest_selection_boundary": _ManifestSelectionBoundary(
+            capability, selection
+        ),
+    }
+
+
+def _payload_digest(value: object) -> str:
+    raw = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _raw_digest(path: Path) -> str:
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _rehash_packet(payload: dict[str, object]) -> None:
+    without_id = {
+        key: value for key, value in payload.items() if key != "run_packet_id"
+    }
+    raw = json.dumps(
+        without_id,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    payload["run_packet_id"] = (
+        "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    )
+
+
 def test_bootstrap_reads_outside_repo_config_and_runs_runtime_wiring(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
@@ -207,6 +298,7 @@ def test_bootstrap_reads_outside_repo_config_and_runs_runtime_wiring(tmp_path: P
         config_path=config_path,
         resolver=resolver,
         serve_bounded=service,
+        **_launch_binding(repo, config_path),
     )
 
     assert result.accepted is True
@@ -223,6 +315,127 @@ def test_bootstrap_reads_outside_repo_config_and_runs_runtime_wiring(tmp_path: P
     ]
     assert result.no_env_parsed is True
     assert result.no_holoindex_reindex_performed is True
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        "session",
+        "socket",
+        "config",
+        "argv",
+        "python_executable",
+        "python_module",
+        "profile_count",
+        "unknown_field",
+    ),
+)
+def test_bootstrap_rejects_attacker_rehashed_run_packet(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config_path = _write_json(
+        runtime / "signer-service.json",
+        _config(_public_text(private_key), socket_path=runtime / "signer.sock"),
+    )
+    launch = _launch_binding(repo, config_path)
+    packet_path = Path(str(launch["run_packet_path"]))
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    if mutation == "session":
+        packet["session_id"] = "attacker-session"
+        packet["argv"][-1] = "attacker-session"
+        launch["expected_session_id"] = "attacker-session"
+    elif mutation == "socket":
+        packet["socket_path"] = str(runtime / "attacker.sock")
+    elif mutation == "config":
+        packet["config_digest"] = "sha256:" + "9" * 64
+        index = packet["argv"].index("--expected-config-digest")
+        packet["argv"][index + 1] = packet["config_digest"]
+    elif mutation == "argv":
+        packet["argv"].extend(["--attacker", "value"])
+    elif mutation == "python_executable":
+        packet["argv"][0] = str(tmp_path / "attacker-python.exe")
+    elif mutation == "python_module":
+        packet["python_module"] = "attacker.module"
+        packet["argv"][2] = "attacker.module"
+    elif mutation == "profile_count":
+        packet["profile_count"] = 99
+    else:
+        packet["attacker_field"] = "value"
+    _rehash_packet(packet)
+    _write_json(packet_path, packet)
+    resolver = _resolver(private_key)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=config_path,
+        resolver=resolver,
+        serve_bounded=service,
+        **launch,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert resolver.calls == []
+    assert service.calls == []
+
+
+def test_bootstrap_rejects_test_provider_after_signed_launch_admission(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    private_key = _private_key()
+    config_path = _write_json(
+        runtime / "signer-service.json",
+        _config(
+            _public_text(private_key),
+            socket_path=runtime / "signer.sock",
+        ),
+    )
+    launch = _launch_binding(repo, config_path)
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    config["provider_mode"] = "TEST_ONLY_DRYRUN"
+    config["allow_test_only_key_material"] = True
+    _write_json(config_path, config)
+    config_digest = _payload_digest(config)
+    packet_path = Path(str(launch["run_packet_path"]))
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    packet["provider_mode"] = "TEST_ONLY_DRYRUN"
+    packet["config_digest"] = config_digest
+    digest_index = packet["argv"].index("--expected-config-digest")
+    packet["argv"][digest_index + 1] = config_digest
+    _rehash_packet(packet)
+    _write_json(packet_path, packet)
+    boundary = launch["manifest_selection_boundary"]
+    assert isinstance(boundary, _ManifestSelectionBoundary)
+    boundary._values.update(
+        {
+            "config_digest": config_digest,
+            "config_raw_digest": _raw_digest(config_path),
+            "run_packet_digest": _raw_digest(packet_path),
+        }
+    )
+    launch["expected_config_digest"] = config_digest
+    resolver = _resolver(private_key)
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo,
+        config_path=config_path,
+        resolver=resolver,
+        serve_bounded=service,
+        **launch,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert resolver.calls == []
+    assert service.calls == []
 
 
 def test_bootstrap_accepts_multi_profile_config_without_secret_return(tmp_path: Path) -> None:
@@ -273,6 +486,7 @@ def test_bootstrap_accepts_multi_profile_config_without_secret_return(tmp_path: 
         config_path=config_path,
         resolver=resolver,
         serve_bounded=service,
+        **_launch_binding(repo, config_path),
     )
 
     assert result.accepted is True
@@ -324,10 +538,10 @@ def test_bootstrap_rejects_missing_relative_inside_and_unreadable_config(tmp_pat
     )
 
     assert missing.status == SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_MISSING in missing.rejection_reasons
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_RELATIVE in relative.rejection_reasons
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO in inside_repo.rejection_reasons
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE in unreadable.rejection_reasons
+    for result in (missing, relative, inside_repo, unreadable):
+        assert result.rejection_reasons == (
+            FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+        )
 
 
 def test_bootstrap_rejects_hard_linked_config_before_runtime_call(
@@ -356,7 +570,9 @@ def test_bootstrap_rejects_hard_linked_config_before_runtime_call(
         serve_bounded=service,
     )
 
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE in result.rejection_reasons
+    assert result.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+    )
     assert service.calls == []
 
 
@@ -379,7 +595,9 @@ def test_bootstrap_rejects_config_runtime_root_mismatch(
         serve_bounded=service,
     )
 
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert result.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+    )
     assert service.calls == []
 
 
@@ -406,7 +624,9 @@ def test_bootstrap_rejects_runtime_artifact_outside_declared_root(
         serve_bounded=service,
     )
 
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert result.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+    )
     assert service.calls == []
 
 
@@ -432,7 +652,9 @@ def test_bootstrap_rejects_nested_control_anchor(tmp_path: Path) -> None:
         serve_bounded=service,
     )
 
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert result.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+    )
     assert service.calls == []
 
 
@@ -462,7 +684,9 @@ def test_bootstrap_rejects_v2_config_without_control_authority_binding(
         serve_bounded=service,
     )
 
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert result.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+    )
     assert service.calls == []
 
 
@@ -488,7 +712,9 @@ def test_bootstrap_rejects_overlapping_resident_and_signer_roots(
         serve_bounded=service,
     )
 
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in result.rejection_reasons
+    assert result.rejection_reasons == (
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+    )
     assert service.calls == []
 
 
@@ -534,11 +760,10 @@ def test_bootstrap_rejects_malformed_runtime_shape_and_preserves_runtime_reject(
         serve_bounded=CapturingBoundedService(),
     )
 
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in malformed_result.rejection_reasons
-    assert FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED in wrong_schema_result.rejection_reasons
-    assert FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED in rejected_result.rejection_reasons
-    assert rejected_result.runtime_result is not None
-    assert rejected_result.runtime_result["accepted"] is False
+    for result in (malformed_result, wrong_schema_result, rejected_result):
+        assert result.rejection_reasons == (
+            FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+        )
 
 
 def test_bootstrap_module_has_no_env_shell_repo_openclaw_hermes_or_holoindex_surface() -> None:

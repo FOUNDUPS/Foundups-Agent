@@ -16,7 +16,7 @@ import hashlib
 import hmac
 import json
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
 
@@ -65,6 +65,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
+    Ed25519SignerBackend,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
+    SignerPeerInstanceBinding,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     AtomicSignerControlLoopAnchorStore,
@@ -145,6 +149,7 @@ class SignerSocketServiceRuntimeWiringConfig:
     proposal_replay_high_water_store_id: str | None = None
     proposal_replay_high_water_durability_receipt_id: str | None = None
     proposal_security_context_digest: str | None = None
+    signer_peer_instance_binding: SignerPeerInstanceBinding | None = None
 
 
 @dataclass(frozen=True)
@@ -413,6 +418,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
             config.signer_runtime_root,
             repo_root=Path(config.repo_root).resolve(),
         ),
+        signer_peer_instance_binding=config.signer_peer_instance_binding,
     )
     if key_reasons:
         return _reject(
@@ -701,6 +707,7 @@ def _build_backend(
     proposal_replay_high_water_durability_receipt_id: str,
     repo_root: Path,
     signer_runtime_root: Path,
+    signer_peer_instance_binding: SignerPeerInstanceBinding | None,
 ) -> tuple[
     Optional[IsolatedSignerBackend],
     ProposalAuthenticityNonceStore | None,
@@ -709,6 +716,16 @@ def _build_backend(
 ]:
     receipts: list[dict[str, Any]] = []
     backends: dict[str, IsolatedSignerBackend] = {}
+    public_keys = [item.expected_public_key for item in profiles]
+    if len(public_keys) != len(set(public_keys)):
+        return None, None, _key_provider_receipt(False, receipts), (
+            FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,
+        )
+    profile_ids = [item.signer_profile_id for item in profiles]
+    if len(profile_ids) != len(set(profile_ids)):
+        return None, None, _key_provider_receipt(False, receipts), (
+            FAIL_SIGNER_RUNTIME_PROFILE_INVALID,
+        )
     for profile in profiles:
         if _is_proposal_signer_profile(
             profile,
@@ -769,11 +786,15 @@ def _build_backend(
                 FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
             )
         public_key = str(key_result.public_key or "")
-        if public_key in backends:
+        bound_backend = _bind_peer_instance(
+            key_result.backend,
+            signer_peer_instance_binding,
+        )
+        if bound_backend is None:
             return None, None, _key_provider_receipt(False, receipts), (
-                FAIL_SIGNER_RUNTIME_KEY_PROVIDER_DUPLICATE,
+                FAIL_SIGNER_RUNTIME_KEY_PROVIDER_REJECTED,
             )
-        backends[public_key] = key_result.backend
+        backends[public_key] = bound_backend
 
     if len(backends) == 1:
         backend = next(iter(backends.values()))
@@ -785,6 +806,15 @@ def _build_backend(
         else None
     )
     return backend, nonce_store, _key_provider_receipt(True, receipts), ()
+
+
+def _bind_peer_instance(
+    backend: IsolatedSignerBackend,
+    binding: SignerPeerInstanceBinding | None,
+) -> IsolatedSignerBackend | None:
+    if not isinstance(backend, Ed25519SignerBackend):
+        return None if binding is not None else backend
+    return replace(backend, signer_peer_instance_binding=binding)
 
 
 def _control_loop_anchor_store(

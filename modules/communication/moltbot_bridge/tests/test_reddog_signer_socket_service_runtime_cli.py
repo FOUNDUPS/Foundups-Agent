@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import ast
 import base64
+import hashlib
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -31,6 +33,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT,
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT,
     run_reddog_signer_socket_service_runtime_cli,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
+    FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
+    run_reddog_signer_socket_service_run_packet_supply,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import ResolveResult, hash_reference
 
@@ -93,6 +101,55 @@ class CapturingBoundedService:
             response_digests=("sha256:response",),
             socket_removed=True,
         )
+
+
+class _ManifestSelection:
+    pass
+
+
+class _ManifestSelectionBoundary:
+    def __init__(self, capability: object, values: dict[str, object]) -> None:
+        self._capability = capability
+        self._values = values
+
+    def consume(self, value: object) -> dict[str, object]:
+        if value is not self._capability:
+            raise ValueError("manifest_selection_unverified")
+        self._capability = None
+        return dict(self._values)
+
+
+def _manifest_selection_loader(
+    *,
+    repo_root: Path,
+    config_path: Path,
+    run_packet_path: Path,
+) -> tuple[object, _ManifestSelectionBoundary]:
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    capability = _ManifestSelection()
+    values = {
+        "manifest_id": "sha256:" + ("a" * 64),
+        "artifact_generation_digest": "sha256:" + ("b" * 64),
+        "config_digest": _payload_digest(config),
+        "config_raw_digest": _raw_digest(config_path),
+        "run_packet_digest": _raw_digest(run_packet_path),
+        "repo_root": str(repo_root.resolve()),
+        "runtime_root": str(config_path.parent.resolve()),
+        "config_path": str(config_path.resolve()),
+        "run_packet_path": str(run_packet_path.resolve()),
+    }
+    return capability, _ManifestSelectionBoundary(capability, values)
+
+
+def _payload_digest(value: object) -> str:
+    raw = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _raw_digest(path: Path) -> str:
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _private_key():
@@ -201,6 +258,21 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tm
     resolver_factory = CapturingResolverFactory(resolver)
     service = CapturingBoundedService()
     emitted: list[str] = []
+    payload = json.loads(config.read_text(encoding="utf-8"))
+    payload["key_provider_profiles"] = [payload.pop("key_provider_profile")]
+    _write_json(config, payload)
+    packet = runtime / "signer-run-packet.json"
+    supplied = run_reddog_signer_socket_service_run_packet_supply(
+        repo_root=repo,
+        config_path=config,
+        output_path=packet,
+        op_executable="C:/Program Files/1Password/op.exe",
+        op_timeout_s=7,
+        ttl_seconds=61,
+        session_id="session-prod",
+        python_executable=sys.executable,
+    )
+    assert supplied.accepted is True
 
     code = run_reddog_signer_socket_service_runtime_cli(
         [
@@ -208,6 +280,10 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tm
             str(repo),
             "--config",
             str(config),
+            "--expected-config-digest",
+            str(supplied.config_digest),
+            "--run-packet",
+            str(packet),
             "--op-executable",
             "C:/Program Files/1Password/op.exe",
             "--op-timeout-s",
@@ -220,6 +296,7 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tm
         resolver_factory=resolver_factory,
         serve_bounded=service,
         emit=emitted.append,
+        manifest_selection_loader=_manifest_selection_loader,
     )
 
     assert code == 0
@@ -265,7 +342,10 @@ def test_cli_rejects_unsafe_config_before_service_call(tmp_path: Path) -> None:
     payload = json.loads(emitted[0])
     assert payload["status"] == SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT
     assert payload["result"]["accepted"] is False
-    assert "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO" in payload["result"]["rejection_reasons"]
+    assert payload["result"]["rejection_reasons"] == [
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION
+    ]
+    assert resolver_factory.calls == []
     assert service.calls == []
 
 

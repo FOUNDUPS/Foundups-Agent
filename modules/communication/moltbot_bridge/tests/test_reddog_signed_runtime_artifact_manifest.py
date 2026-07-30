@@ -56,6 +56,9 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_io import (
     MANIFEST_DIRECTORY_NAME,
 )
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_launch_selection import (
+    create_runtime_artifact_manifest_launch_selection_boundary,
+)
 from modules.communication.moltbot_bridge.src import (
     reddog_runtime_artifact_manifest_io as manifest_io,
 )
@@ -792,6 +795,38 @@ def test_manifest_configured_signer_rejects_arbitrary_domain(
     )
 
 
+def test_verified_manifest_mints_one_shot_process_local_launch_selection(
+    harness: ManifestHarness,
+) -> None:
+    result = harness.produce()
+    assert result.accepted is True
+    boundary = create_runtime_artifact_manifest_launch_selection_boundary(
+        authority=harness.authority,
+        authority_boundary=harness.authority_boundary,
+        signature_verifier=Ed25519SignatureVerifier(),
+    )
+    capability = boundary.select(harness.read_manifest(), now_epoch=NOW)
+
+    for copier in (copy.copy, copy.deepcopy, pickle.dumps):
+        with pytest.raises(TypeError):
+            copier(capability)
+
+    values = boundary.consume(capability)
+    assert values["repo_root"] == str(harness.repo_root.resolve())
+    assert values["runtime_root"] == str(harness.runtime_root.resolve())
+    assert values["config_path"] == str(
+        (harness.runtime_root / "signer_service_config.json").resolve()
+    )
+    assert values["run_packet_path"] == str(
+        (harness.runtime_root / "signer_service_run_packet.json").resolve()
+    )
+    with pytest.raises(
+        RuntimeArtifactManifestError,
+        match="manifest_launch_selection_unverified",
+    ):
+        boundary.consume(capability)
+
+
 def test_manifest_signing_requires_boundary_and_nonce_store(
     harness: ManifestHarness,
 ) -> None:
@@ -856,6 +891,7 @@ def test_manifest_modules_follow_wsp62_function_bounds() -> None:
         "reddog_runtime_artifact_manifest_authority.py",
         "reddog_runtime_artifact_manifest_contract.py",
         "reddog_runtime_artifact_manifest_io.py",
+        "reddog_runtime_artifact_manifest_launch_selection.py",
         "reddog_signed_runtime_artifact_manifest.py",
         "reddog_signer_audit_attestation.py",
     )

@@ -98,6 +98,27 @@ every negative side-effect attestation that the runtime cannot directly
 observe is false; the receipt does not infer purity from the dependency
 interface.
 
+The production signer CLI accepts the exact outside-repository run packet
+named by `--run-packet` only after a process-local one-shot launch selection
+has been minted by the existing signed runtime-manifest verifier. The
+selection binds the exact config/run-packet bytes, repository/runtime roots,
+and generation; copied, serialized, replayed, or caller-created values reject
+before any caller-selected file read, key-resolver construction, or socket
+startup. The production bootstrap accepts only `WSP71_PERMISSIONED`;
+`TEST_ONLY_DRYRUN` remains confined to lower-level test APIs. The signer then
+derives an immutable
+instance binding covering the recomputed packet ID, config digest, session,
+socket, exact `(profile_id, public_key, key_epoch)` tuples, CLI arguments, and
+fixed no-spawn/no-shell safety fields. `reddog_signer_mutual_peer_handshake.py`
+provides a fresh short-lived challenge whose Ed25519 response is checked
+against that signer-owned binding, configured key, fingerprint, epoch, and
+kernel-attested requester. The response carries a second, domain-separated
+signature covering its audit metadata and acceptance attestations. A matching
+public-key string or serialized `peer_handshake_verified` flag is not
+authority. The CLI intentionally has no default manifest-selection loader:
+external signer lifecycle supervision, current-generation/replay selection,
+and use-time consumption at every authority call remain fail closed.
+
 The public generic key-provider API has no architect-proposal policy or nonce
 parameters. Proposal backend construction is an internal runtime-only path
 reached after principal authorization, replay-authority, durability-receipt,
@@ -252,9 +273,11 @@ manifest can be produced only from verified delegated authority; the signer
 rereads the artifacts and reserves a transactional nonce. Canonical artifact
 writers and manifest publication share one runtime-generation fence; the
 manifest binds the exact generation digest and is finalized with OS-level
-no-replace semantics. Activation remains blocked pending durable replay
-high-water, authenticated selection, use-time current-generation verification,
-and mutual peer handshake; use-time execution remains forced closed until they
+no-replace semantics. Verified manifests now mint a signer-process-local,
+immutable, one-shot launch selection. Activation remains blocked pending
+external lifecycle composition with durable replay high-water and
+current-generation verification, plus per-signing-call consumption of the
+mutual peer handshake; use-time execution remains forced closed until they
 exist.
 
 Production bootstrap and the resident registry accept only

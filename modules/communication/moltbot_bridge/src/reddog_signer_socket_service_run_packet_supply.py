@@ -30,6 +30,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
     rehydrate_signer_socket_service_runtime_config,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_schema import (
+    SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
+)
 from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
     reddog_runtime_artifact_generation_lock,
 )
@@ -41,7 +44,6 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 
 SIGNER_SERVICE_RUN_PACKET_SUPPLY_ACCEPT = "SIGNER_SERVICE_RUN_PACKET_SUPPLY_ACCEPT"
 SIGNER_SERVICE_RUN_PACKET_SUPPLY_REJECT = "SIGNER_SERVICE_RUN_PACKET_SUPPLY_REJECT"
-SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION = "reddog_signer_service_run_packet.v1"
 
 FAIL_SIGNER_RUN_PACKET_CONFIG_PATH_INVALID = "signer_run_packet_config_path_invalid"
 FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED = "signer_run_packet_config_malformed"
@@ -141,6 +143,8 @@ def run_reddog_signer_socket_service_run_packet_supply(
         str(config_resolved),
         "--expected-config-digest",
         config_digest,
+        "--run-packet",
+        str(output_resolved),
         "--op-executable",
         str(op_executable),
         "--op-timeout-s",
