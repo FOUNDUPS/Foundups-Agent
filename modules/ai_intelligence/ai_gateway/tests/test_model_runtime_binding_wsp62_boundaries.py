@@ -8,6 +8,7 @@ from pathlib import Path
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 BOUNDED_MODULES = (
+    "model_evidence_authority_validation.py",
     "model_runtime_binding_capability.py",
     "model_runtime_binding_digest.py",
     "model_runtime_binding_evidence_dispatch.py",

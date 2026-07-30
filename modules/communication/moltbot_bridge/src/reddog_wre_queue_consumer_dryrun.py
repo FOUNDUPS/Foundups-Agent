@@ -21,6 +21,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_receipt 
     WREQueueConsumerDryRunReceipt,
     build_queue_consumer_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+)
 
 
 WRE_QUEUE_CONSUMER_DRYRUN_READY = "WRE_QUEUE_CONSUMER_DRYRUN_READY"
@@ -270,14 +273,7 @@ def plan_reddog_wre_queue_consumer_dry_run(
         "reasoning_tier": allocation_tier,
         "model_selection_receipt_id": str(selected.get("model_selection_receipt_id") or ""),
         "model_selection_digest": str(selected.get("model_selection_digest") or ""),
-        "model_runtime_binding_receipt_id": str(selected.get("model_runtime_binding_receipt_id") or ""),
-        "model_runtime_binding_digest": str(selected.get("model_runtime_binding_digest") or ""),
-        "model_runtime_binding_verification_receipt_id": str(
-            selected.get("model_runtime_binding_verification_receipt_id") or ""
-        ),
-        "model_runtime_binding_verification_digest": str(
-            selected.get("model_runtime_binding_verification_digest") or ""
-        ),
+        **model_runtime_authority_fields(selected),
         "memex_supply_receipt_id": str(selected.get("memex_supply_receipt_id") or ""),
         "memex_supply_digest": str(selected.get("memex_supply_digest") or ""),
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
@@ -314,6 +310,20 @@ def _governed_lineage_reasons(
         if not queue_value or queue_value != str(claim.get(field) or ""):
             reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:{field}")
         refs.add(f"{evidence_kind}:{queue_value}")
+    runtime_reasons, runtime_refs = _runtime_lineage_reasons(queue, claim)
+    reasons.extend(runtime_reasons)
+    refs.update(runtime_refs)
+    for field in ("model_selection_digest", "memex_supply_digest"):
+        if not str(queue.get(field) or "").startswith("sha256:"):
+            reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:{field}")
+    return reasons, refs
+
+
+def _runtime_lineage_reasons(
+    queue: Mapping[str, Any], claim: Mapping[str, Any]
+) -> tuple[list[str], set[str]]:
+    reasons: list[str] = []
+    refs: set[str] = set()
     runtime_id = str(queue.get("model_runtime_binding_receipt_id") or "")
     runtime_digest = str(queue.get("model_runtime_binding_digest") or "")
     verification_id = str(
@@ -350,9 +360,6 @@ def _governed_lineage_reasons(
             )
         refs.add(f"model_runtime_binding:{runtime_id}")
         refs.add(f"model_runtime_binding_verification:{verification_id}")
-    for field in ("model_selection_digest", "memex_supply_digest"):
-        if not str(queue.get(field) or "").startswith("sha256:"):
-            reasons.append(f"{FAIL_QUEUE_GOVERNED_LINEAGE}:{field}")
     return reasons, refs
 
 

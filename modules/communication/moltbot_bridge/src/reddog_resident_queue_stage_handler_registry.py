@@ -254,13 +254,10 @@ def build_reddog_resident_queue_stage_handler_registry(
     worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
 ) -> ResidentQueueStageHandlerRegistry:
     """Build a handler map from explicitly injected dependencies."""
-
     handlers: Dict[str, ResidentQueueStageHandler] = {}
     missing: Dict[str, tuple[str, ...]] = {}
     root = Path(repo_root) if repo_root is not None else None
-    admission_registry = (
-        worktree_admission_registry or InMemoryWorktreeAdmissionRegistry()
-    )
+    admission_registry = worktree_admission_registry or InMemoryWorktreeAdmissionRegistry()
     if valve_environment is not None and not isinstance(
         valve_environment, GovernedExecutionValveEnvironment
     ):
@@ -272,7 +269,6 @@ def build_reddog_resident_queue_stage_handler_registry(
                 )
             },
         )
-
     _add_if_ready(
         handlers,
         missing,
@@ -595,11 +591,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             sink=pattern_memory_admission_sink,
         ),
     )
-
-    return ResidentQueueStageHandlerRegistry(
-        handlers=handlers,
-        missing_stage_reasons=missing,
-    )
+    return ResidentQueueStageHandlerRegistry(handlers=handlers, missing_stage_reasons=missing)
 
 
 def _bounded_worker_pilot_missing(
@@ -631,15 +623,8 @@ def _bounded_worker_pilot_missing(
     if artifact_contents:
         return tuple(reasons)
     if (
-        artifact_generation_request
-        and artifact_generator is not None
-        and model_runtime_binding_verifier is not None
-    ):
-        return tuple(reasons)
-    if (
-        artifact_generation_request_binding_enabled
-        and artifact_generator is not None
-        and model_runtime_binding_verifier is not None
+        artifact_generator is not None and model_runtime_binding_verifier is not None
+        and (artifact_generation_request or artifact_generation_request_binding_enabled)
     ):
         return tuple(reasons)
     if not artifact_contents:

@@ -41,7 +41,6 @@ _FID = "paccess_001"
 _MEMEX_DIGEST = "sha256:" + ("d" * 64)
 _VALVE = "VALVE_OPEN_WORKTREE_CREATE"
 
-
 class _MockSigner(SignatureVerifier):
     """Test-only signer/verifier. Production module never signs or imports crypto."""
 
@@ -81,7 +80,6 @@ class _MockSigner(SignatureVerifier):
             return False
         expected = hmac.new(secret, signing_input.encode("utf-8"), hashlib.sha256).hexdigest()
         return hmac.compare_digest(expected, signature)
-
 
 class _BoundarylessSigner(_MockSigner):
     def sign(self, request):
@@ -170,12 +168,8 @@ def _request(**overrides) -> DelegatedAuthorityRuntimeRequest:
         "model_selection_digest": "sha256:model-selection-digest",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
         "model_runtime_binding_digest": "sha256:model-runtime-binding",
-        "model_runtime_binding_verification_receipt_id": (
-            "model_runtime_binding_verification:abc123"
-        ),
-        "model_runtime_binding_verification_digest": (
-            "sha256:model-runtime-binding-verification"
-        ),
+        "model_runtime_binding_verification_receipt_id": "model_runtime_binding_verification:abc123",
+        "model_runtime_binding_verification_digest": "sha256:model-runtime-binding-verification",
         "memex_supply_receipt_id": "sha256:memex-supply",
         "memex_supply_digest": _MEMEX_DIGEST,
         "identity_nonce": "identity-nonce-0001",

@@ -113,6 +113,30 @@ def optional_authority_bindings_valid(request: Any) -> bool:
     return True
 
 
+def runtime_binding_request_valid(request: Any) -> bool | None:
+    """Return False when absent, True when complete, and None when malformed."""
+
+    runtime = (
+        request.model_runtime_binding_receipt_id,
+        request.model_runtime_binding_digest,
+    )
+    verification = (
+        request.model_runtime_binding_verification_receipt_id,
+        request.model_runtime_binding_verification_digest,
+    )
+    if not any((*runtime, *verification)):
+        return False
+    valid = (
+        all(runtime)
+        and all(verification)
+        and str(runtime[0]).startswith("reddog_model_runtime_binding:")
+        and str(runtime[1]).startswith("sha256:")
+        and str(verification[0]).startswith("model_runtime_binding_verification:")
+        and str(verification[1]).startswith("sha256:")
+    )
+    return True if valid else None
+
+
 def attach_optional_authority_bindings(
     work_authority: dict[str, Any],
     request: Any,
@@ -134,4 +158,5 @@ __all__ = [
     "optional_authority_binding_values_match",
     "optional_authority_binding_values_valid",
     "optional_authority_bindings_valid",
+    "runtime_binding_request_valid",
 ]

@@ -65,12 +65,10 @@ from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test
     build_fresh_holoindex_receipt,
 )
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
-    canonical_model_runtime_binding_digest,
     verified_runtime_binding_receipt,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_test_capability,
-    model_selection_and_runtime_binding_receipts,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
@@ -668,91 +666,6 @@ def test_promotion_rejects_caller_supplied_work_order_id() -> None:
         "unknown_field:work_order_id" in reason
         for reason in result.rejection_reasons
     )
-
-
-def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> None:
-    model_selection, runtime_binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface="reddog_artifact_generation",
-        task_family="reddog_architect_fix_promotion",
-    )
-
-    result, store = _promote(
-        model_selection_receipt=model_selection,
-        model_runtime_binding_receipt=runtime_binding,
-    )
-
-    assert result.accepted is True, result.rejection_reasons
-    assert result.receipt is not None
-    assert result.receipt.model_runtime_binding_receipt_id == runtime_binding["receipt_id"]
-    assert (
-        result.receipt.model_runtime_binding_digest
-        == canonical_model_runtime_binding_digest(runtime_binding)
-    )
-    verification_id = (
-        result.receipt.model_runtime_binding_verification_receipt_id
-    )
-    verification_digest = (
-        result.receipt.model_runtime_binding_verification_digest
-    )
-    assert verification_id and verification_id.startswith(
-        "model_runtime_binding_verification:"
-    )
-    assert verification_digest and verification_digest.startswith("sha256:")
-    assert result.authority_profile is not None
-    assert result.authority_profile["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert result.authority_profile["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
-    assert result.authority_profile["model_runtime_binding_principal_model"] == runtime_binding["principal_model"]
-    assert (
-        result.authority_profile[
-            "model_runtime_binding_verification_receipt_id"
-        ]
-        == verification_id
-    )
-    assert result.authority_profile["operational_context_binding"]["model_runtime_binding_receipt_id"] == (
-        runtime_binding["receipt_id"]
-    )
-    assert result.authority_profile["operational_context_binding"]["model_runtime_binding_receipt"][
-        "receipt_id"
-    ] == runtime_binding["receipt_id"]
-
-    snapshot = store.load()
-    claim = snapshot["worker_claims"][0]
-    queue_item = snapshot["wre_queue_items"][0]
-    promotion_record = snapshot["architect_fix_promotions"][0]
-    assert claim["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert queue_item["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert queue_item[
-        "model_runtime_binding_digest"
-    ] == canonical_model_runtime_binding_digest(runtime_binding)
-    assert (
-        queue_item["model_runtime_binding_verification_receipt_id"]
-        == verification_id
-    )
-    assert (
-        queue_item["model_runtime_binding_verification_digest"]
-        == verification_digest
-    )
-    assert f"model_runtime_binding:{runtime_binding['receipt_id']}" in queue_item["evidence_refs"]
-    assert promotion_record["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-
-
-def test_rejects_non_artifact_generation_runtime_surface() -> None:
-    model_selection, runtime_binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface="reddog_fusion",
-        task_family="reddog_architect_fix_promotion",
-    )
-
-    result, store = _promote(
-        model_selection_receipt=model_selection,
-        model_runtime_binding_receipt=runtime_binding,
-    )
-
-    assert result.accepted is False
-    assert (
-        promotion.ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID
-        in result.rejection_reasons
-    )
-    assert store.load()["wre_queue_items"] == []
 
 
 def test_rejects_runtime_binding_for_different_model_selection_without_store_mutation() -> None:

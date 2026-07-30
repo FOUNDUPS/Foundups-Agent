@@ -247,6 +247,28 @@ def test_nonce_consumed_only_when_admission_requests_it():
 def test_benchmark_and_promotion_signers_must_be_independent() -> None:
     benchmark = _benchmark()
     promotion = _promotion(benchmark)
+    benchmark_signature, promotion_signature, resolver = _shared_signer_chain(
+        benchmark, promotion
+    )
+
+    with pytest.raises(
+        ValueError, match="benchmark_and_promotion_signers_not_independent"
+    ):
+        build_verified_model_production_evidence(
+            catalog_snapshot_id=CATALOG,
+            selection_receipt_id=SELECTION,
+            benchmark_run_receipt_id=BENCHMARK_RUN,
+            benchmark_receipt=benchmark,
+            promotion_receipt=promotion,
+            benchmark_signature_receipt=benchmark_signature,
+            promotion_signature_receipt=promotion_signature,
+            key_resolver=resolver,
+            signature_verifier=DeterministicSignatureVerifier(),
+            now=NOW,
+        )
+
+
+def _shared_signer_chain(benchmark, promotion):
     benchmark_signature = make_signed_evidence_receipt(
         signer_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,
         public_key=BENCHMARK_PUBLIC_KEY,
@@ -285,22 +307,7 @@ def test_benchmark_and_promotion_signers_must_be_independent() -> None:
             ): BENCHMARK_PUBLIC_KEY,
         }
     )
-
-    with pytest.raises(
-        ValueError, match="benchmark_and_promotion_signers_not_independent"
-    ):
-        build_verified_model_production_evidence(
-            catalog_snapshot_id=CATALOG,
-            selection_receipt_id=SELECTION,
-            benchmark_run_receipt_id=BENCHMARK_RUN,
-            benchmark_receipt=benchmark,
-            promotion_receipt=promotion,
-            benchmark_signature_receipt=benchmark_signature,
-            promotion_signature_receipt=promotion_signature,
-            key_resolver=resolver,
-            signature_verifier=DeterministicSignatureVerifier(),
-            now=NOW,
-        )
+    return benchmark_signature, promotion_signature, resolver
 
 
 def test_build_verified_production_evidence_rejects_panel_and_tampered_bindings():

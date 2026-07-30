@@ -118,9 +118,21 @@ def _model_lineage(selection, binding, verification) -> dict[str, str]:
     }
 
 
+def runtime_binding_refs() -> dict[str, str]:
+    return {
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
+        "model_runtime_binding_digest": "sha256:" + "a" * 64,
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:" + "b" * 64
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + "c" * 64,
+    }
+
+
 __all__ = [
     "model_bound_profile",
     "model_bound_queue_inputs",
     "model_bound_snapshot",
     "model_bound_work_order",
+    "runtime_binding_refs",
 ]

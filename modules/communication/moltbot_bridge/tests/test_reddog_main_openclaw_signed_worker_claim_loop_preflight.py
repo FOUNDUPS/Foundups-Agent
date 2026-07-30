@@ -1215,7 +1215,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
 ) -> None:
     import main
     from modules.foundups.agent.src import worktree_pr_runner
-
     _FakeProfileWorktreeRunner.instances.clear()
     monkeypatch.setattr(worktree_pr_runner, "RealWorktreeRunner", _FakeProfileWorktreeRunner)
     repo = _repo(tmp_path)
@@ -1296,10 +1295,8 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     outcome_store = runtime_root / "outcomes" / "signed-worker-ratchet.jsonl"
     pattern_memory_db = runtime_root / "pattern_memory.db"
     assert not socket_path.exists()
-
     ready = threading.Event()
     service_result: dict[str, object] = {}
-
     def _serve_signer() -> None:
         service_result["result"] = serve_reddog_isolated_signer_socket_bounded(
             repo_root=repo,
@@ -1314,7 +1311,6 @@ def test_main_resident_control_loop_profile_runtime_completes_socket_signed_queu
     signer_thread = threading.Thread(target=_serve_signer, daemon=True)
     signer_thread.start()
     assert ready.wait(5)
-
     calls = _patch_fusion_artifact_generator(monkeypatch)
     monkeypatch.setenv(
         "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE",

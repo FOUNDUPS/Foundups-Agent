@@ -1,5 +1,15 @@
 # AI Gateway Module Change Log
 
+## [2026-07-30] - Shared Model-Evidence Authority Validation
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`
+
+**What:** Consolidated exact trusted-key validation, signer independence, and
+panel-authority independence into one bounded helper used by both SINGLE and
+PANEL evidence paths. This removes duplicate policy islands without weakening
+freshness, revocation, topology, or signer-role checks.
+
 ## [2026-07-30] - Runtime-Binding Evidence Admission Hardening
 
 **Who/Type/Slice:** 0102 architect / Defensive /

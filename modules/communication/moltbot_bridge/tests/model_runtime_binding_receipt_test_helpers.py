@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import hashlib
 from dataclasses import dataclass, replace
-from typing import Any
+from typing import Any, Mapping
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
     ModelCapabilityCard,
@@ -369,24 +369,7 @@ def _runtime_verifier_inputs(
     runtime_policy = policy.to_dict()
     if selection.requirements.selection_mode == SelectionMode.PANEL:
         aggregate = runtime_evidence.aggregate_receipt
-        bundle = {
-            "schema_version": PANEL_EVIDENCE_BUNDLE_SCHEMA_VERSION,
-            "catalog_snapshot_id": seed.snapshot.snapshot_id,
-            "selection_receipt_id": selection.receipt_id,
-            "benchmark_run_receipt_id": aggregate.benchmark_run_receipt_id,
-            "aggregate_receipt": aggregate.to_dict(),
-            "entries": [
-                {
-                    "role": member.role,
-                    "model_id": member.model_id,
-                    "provider": member.provider,
-                    **_entry_records(entry),
-                }
-                for member, entry in zip(
-                    aggregate.members, runtime_evidence.member_entries
-                )
-            ],
-        }
+        bundle = _panel_verifier_bundle(seed, selection, runtime_evidence)
         runtime_policy["panel_context_receipt_ids"] = {
             "task_receipt_id": aggregate.task_receipt_id,
             "topology_receipt_id": aggregate.topology_receipt_id,
@@ -401,27 +384,8 @@ def _runtime_verifier_inputs(
             )
         ] = aggregate.signer_public_key
     else:
-        entry = runtime_evidence.entries[0]
-        bundle = {
-            "schema_version": EVIDENCE_BUNDLE_SCHEMA_VERSION,
-            "catalog_snapshot_id": seed.snapshot.snapshot_id,
-            "selection_receipt_id": selection.receipt_id,
-            "benchmark_run_receipt_id": (
-                entry.benchmark_signature_receipt.benchmark_run_receipt_id
-            ),
-            "entries": [_entry_records(entry)],
-        }
-    trusted_keys_payload = {
-        "trusted_public_keys": [
-            {
-                "signer_role": role,
-                "signer_key_fingerprint": fingerprint,
-                "key_epoch": epoch,
-                "public_key": public_key,
-            }
-            for (role, fingerprint, epoch), public_key in trusted_keys.items()
-        ]
-    }
+        bundle = _single_verifier_bundle(seed, selection, runtime_evidence)
+    trusted_keys_payload = _trusted_keys_payload(trusted_keys)
     resolver = StaticModelEvidenceKeyResolver(trusted_keys)
     verifier = DeterministicSignatureVerifier()
     return {
@@ -437,6 +401,55 @@ def _runtime_verifier_inputs(
         "trusted_keys_payload": _json_normalized(trusted_keys_payload),
         "key_resolver": resolver,
         "signature_verifier": verifier,
+    }
+
+
+def _trusted_keys_payload(trusted_keys: Mapping[Any, str]) -> dict[str, Any]:
+    return {
+        "trusted_public_keys": [
+            {
+                "signer_role": role,
+                "signer_key_fingerprint": fingerprint,
+                "key_epoch": epoch,
+                "public_key": public_key,
+            }
+            for (role, fingerprint, epoch), public_key in trusted_keys.items()
+        ]
+    }
+
+
+def _single_verifier_bundle(seed, selection, runtime_evidence):
+    entry = runtime_evidence.entries[0]
+    return {
+        "schema_version": EVIDENCE_BUNDLE_SCHEMA_VERSION,
+        "catalog_snapshot_id": seed.snapshot.snapshot_id,
+        "selection_receipt_id": selection.receipt_id,
+        "benchmark_run_receipt_id": (
+            entry.benchmark_signature_receipt.benchmark_run_receipt_id
+        ),
+        "entries": [_entry_records(entry)],
+    }
+
+
+def _panel_verifier_bundle(seed, selection, runtime_evidence):
+    aggregate = runtime_evidence.aggregate_receipt
+    return {
+        "schema_version": PANEL_EVIDENCE_BUNDLE_SCHEMA_VERSION,
+        "catalog_snapshot_id": seed.snapshot.snapshot_id,
+        "selection_receipt_id": selection.receipt_id,
+        "benchmark_run_receipt_id": aggregate.benchmark_run_receipt_id,
+        "aggregate_receipt": aggregate.to_dict(),
+        "entries": [
+            {
+                "role": member.role,
+                "model_id": member.model_id,
+                "provider": member.provider,
+                **_entry_records(entry),
+            }
+            for member, entry in zip(
+                aggregate.members, runtime_evidence.member_entries
+            )
+        ],
     }
 
 

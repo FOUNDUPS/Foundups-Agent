@@ -9,17 +9,22 @@ from pathlib import Path
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 BOUNDED_MODULES = (
     "reddog_artifact_generation_admission_capability.py",
+    "reddog_artifact_generation_authority_lineage.py",
     "reddog_artifact_generation_authority_capability.py",
     "reddog_artifact_generation_model_binding.py",
     "reddog_artifact_generation_model_capability.py",
+    "reddog_artifact_generation_provider_contract.py",
+    "reddog_artifact_generation_result.py",
+    "reddog_foundups_fusion_artifact_provider.py",
     "reddog_model_runtime_verifier_bootstrap.py",
     "reddog_queue_model_runtime_authority.py",
     "reddog_runtime_json_read.py",
 )
 TOUCHED_FUNCTIONS = {
     "reddog_bounded_artifact_generation_runtime.py": (
-        "_build_generation_result",
-        "_generation_receipt_id",
+        "_model_runtime_binding",
+        "_run_bounded_artifact_model",
+        "_validate_generation_request",
     ),
 }
 

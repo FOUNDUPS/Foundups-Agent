@@ -23,7 +23,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_materialization import materialize_delegated_authority_request
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import is_sha256
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import optional_memex_authority_sources_match
-from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import validate_queue_model_runtime_authority
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+    validate_queue_model_runtime_authority,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
     canonical_work_order_base_ref,
@@ -339,10 +342,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     queue_item_id = str(queue_receipt.get("queue_item_id") or queue.get("selected_queue_item_id") or "")
     model_selection_receipt_id = str(queue_receipt.get("model_selection_receipt_id") or "")
     model_selection_digest = str(queue_receipt.get("model_selection_digest") or "")
-    model_runtime_binding_receipt_id = str(queue_receipt.get("model_runtime_binding_receipt_id") or "")
-    model_runtime_binding_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
-    model_runtime_binding_verification_receipt_id = str(queue_receipt.get("model_runtime_binding_verification_receipt_id") or "")
-    model_runtime_binding_verification_digest = str(queue_receipt.get("model_runtime_binding_verification_digest") or "")
+    runtime_fields = model_runtime_authority_fields(queue_receipt)
     memex_supply_receipt_id = str(queue_memex_id or "")
     memex_supply_digest = str(queue_memex_digest or "")
     work_order_id = str(
@@ -387,10 +387,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
         model_selection_receipt_id=model_selection_receipt_id or None,
         model_selection_digest=model_selection_digest or None,
-        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or None,
-        model_runtime_binding_digest=model_runtime_binding_digest or None,
-        model_runtime_binding_verification_receipt_id=model_runtime_binding_verification_receipt_id or None,
-        model_runtime_binding_verification_digest=model_runtime_binding_verification_digest or None,
+        **{field: value or None for field, value in runtime_fields.items()},
         memex_supply_receipt_id=memex_supply_receipt_id or None,
         memex_supply_digest=memex_supply_digest or None,
         architect_fix_publication_receipt_id=publication_id or None,

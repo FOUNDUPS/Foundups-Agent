@@ -69,7 +69,6 @@ def run_reddog_model_runtime_binding_artifact_supply_bootstrap(
     now_epoch: int | None = None,
 ) -> ModelRuntimeBindingArtifactBootstrapResult:
     """Materialize the runtime-binding artifact from configured runtime files."""
-
     root = Path(repo_root).resolve()
     catalog, catalog_reasons = _read_json_outside_repo(
         root,

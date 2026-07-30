@@ -146,7 +146,6 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     agentdb_fix_promotion_claim_fence: Mapping[str, Any] | None = None,
 ) -> ArchitectFixPromotionResult:
     """Commit one architect FIX queue item and return its signer authority profile."""
-
     current = work_state_store.load()
     reasons: list[str] = []
     if current.get("schema_version") != WORK_STATE_SCHEMA_VERSION:
@@ -165,7 +164,6 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         reasons.append(ArchitectFixPromotionReason.DETERMINATION_NOT_FIX)
     if not candidate:
         reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MISSING)
-
     if CANDIDATE_MALFORMED in validate_architect_fix_candidate(
         candidate, determination,
         schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,

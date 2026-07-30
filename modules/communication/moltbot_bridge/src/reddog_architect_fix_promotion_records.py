@@ -193,6 +193,27 @@ def canonical_digest(payload: Any) -> str:
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def model_runtime_promotion_fields(
+    payload: Mapping[str, Any],
+    *,
+    binding_digest: str | None = None,
+    optional: bool = False,
+) -> dict[str, Any]:
+    empty = None if optional else ""
+    fields = {
+        "model_runtime_binding_receipt_id": payload.get("receipt_id") or empty,
+        "model_runtime_binding_verification_receipt_id": (
+            payload.get("verification_receipt_id") or empty
+        ),
+    }
+    if binding_digest is not None:
+        fields["model_runtime_binding_digest"] = binding_digest
+        fields["model_runtime_binding_verification_digest"] = (
+            payload.get("verification_receipt_digest") or empty
+        )
+    return fields
+
+
 def build_architect_fix_promotion_records(
     inputs: ArchitectFixPromotionRecordInputs,
 ) -> ArchitectFixPromotionRecords:
@@ -244,11 +265,16 @@ def _evidence_receipt_ids(
 ) -> dict[str, str]:
     return {
         "model_selection_receipt_id": str(inputs.model_selection["receipt_id"]),
+        "model_selection_digest": inputs.model_selection_digest,
         "model_runtime_binding_receipt_id": str(
             inputs.model_runtime_binding.get("receipt_id", "")
         ),
+        "model_runtime_binding_digest": inputs.model_runtime_binding_digest,
         "model_runtime_binding_verification_receipt_id": str(
             inputs.model_runtime_binding.get("verification_receipt_id", "")
+        ),
+        "model_runtime_binding_verification_digest": str(
+            inputs.model_runtime_binding.get("verification_receipt_digest", "")
         ),
         "memex_supply_receipt_id": str(inputs.memex_supply["receipt_id"]),
         "proposal_admission_receipt_id": inputs.proposal_admission_receipt_id,
@@ -403,4 +429,5 @@ __all__ = [
     "ArchitectFixPromotionRecords",
     "build_architect_fix_promotion_records",
     "canonical_digest",
+    "model_runtime_promotion_fields",
 ]

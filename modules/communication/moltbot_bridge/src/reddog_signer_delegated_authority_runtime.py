@@ -50,6 +50,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_authority_store_comm
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
     attach_optional_authority_bindings,
     optional_authority_bindings_valid,
+    runtime_binding_request_valid,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
     canonical_work_authority_digest,
@@ -465,7 +466,7 @@ def issue_delegated_authority_runtime(
         or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
-    has_runtime_binding = _runtime_binding_request_valid(request)
+    has_runtime_binding = runtime_binding_request_valid(request)
     if has_runtime_binding is None:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
     if not optional_authority_bindings_valid(request):
@@ -654,32 +655,6 @@ def issue_delegated_authority_runtime(
         identity=identity,
         work_authority=work_authority,
     )
-
-
-def _runtime_binding_request_valid(
-    request: DelegatedAuthorityRuntimeRequest,
-) -> bool | None:
-    runtime = (
-        request.model_runtime_binding_receipt_id,
-        request.model_runtime_binding_digest,
-    )
-    verification = (
-        request.model_runtime_binding_verification_receipt_id,
-        request.model_runtime_binding_verification_digest,
-    )
-    if not any((*runtime, *verification)):
-        return False
-    valid = (
-        all(runtime)
-        and all(verification)
-        and str(runtime[0]).startswith("reddog_model_runtime_binding:")
-        and str(runtime[1]).startswith("sha256:")
-        and str(verification[0]).startswith(
-            "model_runtime_binding_verification:"
-        )
-        and str(verification[1]).startswith("sha256:")
-    )
-    return True if valid else None
 
 
 __all__ = [

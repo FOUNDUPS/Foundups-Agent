@@ -25,9 +25,6 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
     _operational_context_binding,
     run_reddog_main_resident_queue_serial_loop_bootstrap as _run_bootstrap,
 )
-from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
-    RUNTIME_SURFACE_READONLY_AUDIT,
-)
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
     REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY,
@@ -234,7 +231,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
             )
             if orders and not reasons:
                 work_order = next(iter(orders.values()))
-        payload, expected = _test_governed_environment(work_order)
+        payload, expected = _test_governed_environment(
+            work_order,
+            queue_item_id=str(kwargs.get("requested_queue_item_id") or "queue-1"),
+        )
         Path(valve_path).write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
         governed = GovernedExecutionValveEnvironment.from_mapping(payload)
         injected_resolver = _InjectedUseTimeResolver(
@@ -485,72 +485,6 @@ def _work_order(**overrides: object) -> dict[str, object]:
     }
     payload.update(overrides)
     return payload
-
-
-def test_authority_profile_materializer_carries_model_runtime_binding_receipt() -> None:
-    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT
-    )
-    verification = verified_runtime_binding_receipt(runtime_binding)
-    assert verification is not None
-    snapshot = _snapshot()
-    queue_item = snapshot["wre_queue_items"][0]
-    queue_item["model_selection_receipt_id"] = selection["receipt_id"]
-    queue_item["model_selection_digest"] = _mapping_digest(selection)
-    queue_item["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    queue_item["model_runtime_binding_digest"] = canonical_model_runtime_binding_digest(runtime_binding)
-    queue_item["model_runtime_binding_verification_receipt_id"] = verification.receipt_id
-    queue_item["model_runtime_binding_verification_digest"] = verification_receipt_digest(
-        verification
-    )
-    snapshot["worker_claims"][0]["model_selection_receipt_id"] = selection["receipt_id"]
-    snapshot["worker_claims"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    snapshot["worker_claims"][0]["model_runtime_binding_verification_receipt_id"] = (
-        verification.receipt_id
-    )
-    queue_item["evidence_refs"].extend(
-        (
-            f"model_selection:{selection['receipt_id']}",
-            f"model_runtime_binding:{runtime_binding['receipt_id']}",
-            f"model_runtime_binding_verification:{verification.receipt_id}",
-        )
-    )
-    profile = _profile(
-        model_selection_receipt=selection,
-        model_selection_receipt_id=selection["receipt_id"],
-        model_selection_digest=_mapping_digest(selection),
-        model_runtime_binding_receipt=runtime_binding,
-        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-        model_runtime_binding_digest=canonical_model_runtime_binding_digest(runtime_binding),
-        model_runtime_binding_verification_receipt=verification.to_dict(),
-        model_runtime_binding_verification_receipt_id=verification.receipt_id,
-        model_runtime_binding_verification_digest=verification_receipt_digest(
-            verification
-        ),
-    )
-
-    work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=snapshot,
-        authority_profile=profile,
-        requested_queue_item_id="queue-1",
-        now_iso=NOW,
-    )
-
-    assert reasons == ()
-    assert work_orders is not None
-    work_order = work_orders[WORK_ORDER_ID]
-    assert work_order["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert work_order["model_runtime_binding_digest"] == canonical_model_runtime_binding_digest(runtime_binding)
-    assert work_order["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
-    assert work_order["model_runtime_binding_verification_receipt_id"] == (
-        verification.receipt_id
-    )
-    assert work_order["model_runtime_binding_verification_digest"] == (
-        verification_receipt_digest(verification)
-    )
-    assert work_order["model_runtime_binding_verification_receipt"][
-        "receipt_id"
-    ] == verification.receipt_id
 
 
 def test_authority_profile_materializer_carries_memex_supply_binding() -> None:
@@ -1475,12 +1409,12 @@ class _FakeWorkerDispatchTaskWriter:
         }
 
 
-def _ed25519_signing_material():
+def _ed25519_signing_material(*, principal_key=None, reddog_key=None):
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-    principal_key = Ed25519PrivateKey.generate()
-    reddog_key = Ed25519PrivateKey.generate()
+    principal_key = principal_key or Ed25519PrivateKey.generate()
+    reddog_key = reddog_key or Ed25519PrivateKey.generate()
     principal_public = encode_ed25519_public_key(
         principal_key.public_key().public_bytes(
             encoding=serialization.Encoding.Raw,
@@ -1570,6 +1504,63 @@ def _outside_repo_socket_path() -> Path:
     return Path(tempfile.gettempdir()) / f"rdog-{uuid.uuid4().hex}.sock"
 
 
+def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
+    selection, binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+    )
+    verification = verified_runtime_binding_receipt(binding)
+    assert verification is not None
+    lineage = {
+        "model_selection_receipt_id": selection["receipt_id"],
+        "model_selection_digest": _mapping_digest(selection),
+        "model_runtime_binding_receipt_id": binding["receipt_id"],
+        "model_runtime_binding_digest": canonical_model_runtime_binding_digest(
+            binding
+        ),
+        "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        "model_runtime_binding_verification_digest": verification_receipt_digest(
+            verification
+        ),
+    }
+    snapshot = _snapshot()
+    queue = snapshot["wre_queue_items"][0]
+    queue.update(lineage)
+    snapshot["worker_claims"][0].update(
+        {
+            "model_selection_receipt_id": selection["receipt_id"],
+            "model_runtime_binding_receipt_id": binding["receipt_id"],
+            "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        }
+    )
+    queue["evidence_refs"].extend(
+        f"{kind}:{value}"
+        for kind, value in (
+            ("model_selection", selection["receipt_id"]),
+            ("model_runtime_binding", binding["receipt_id"]),
+            ("model_runtime_binding_verification", verification.receipt_id),
+        )
+    )
+    common = {
+        "model_selection_receipt": selection,
+        "model_runtime_binding_receipt": binding,
+        **lineage,
+    }
+    profile = _profile(
+        principal_public_key=principal_public,
+        reddog_public_key=reddog_public,
+        requested_operation=PILOT_OPERATION,
+        allowed_paths=_pilot_allowed_paths(),
+        denied_paths=overrides["denied_paths"],
+        **common,
+    )
+    work_order = _work_order(
+        **overrides,
+        bounded_worker_plan=_pilot_bounded_worker_plan(),
+        **common,
+    )
+    return snapshot, profile, work_order
+
+
 def _repo(tmp_path: Path) -> Path:
     path = tmp_path / "repo"
     path.mkdir()
@@ -1610,70 +1601,19 @@ def _run_bootstrap_to_verified_outcome_ratchet(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
-    )
-    verification = verified_runtime_binding_receipt(runtime_binding)
-    assert verification is not None
-    snapshot = _snapshot()
-    queue_item = snapshot["wre_queue_items"][0]
-    worker_claim = snapshot["worker_claims"][0]
-    queue_item["model_selection_receipt_id"] = selection["receipt_id"]
-    queue_item["model_selection_digest"] = _mapping_digest(selection)
-    queue_item["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    queue_item["model_runtime_binding_digest"] = canonical_model_runtime_binding_digest(runtime_binding)
-    queue_item["model_runtime_binding_verification_receipt_id"] = verification.receipt_id
-    queue_item["model_runtime_binding_verification_digest"] = (
-        verification_receipt_digest(verification)
-    )
-    worker_claim["model_selection_receipt_id"] = selection["receipt_id"]
-    worker_claim["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    worker_claim["model_runtime_binding_verification_receipt_id"] = verification.receipt_id
-    queue_item["evidence_refs"].extend(
-        (
-            f"model_selection:{selection['receipt_id']}",
-            f"model_runtime_binding:{runtime_binding['receipt_id']}",
-            f"model_runtime_binding_verification:{verification.receipt_id}",
-        )
+    snapshot, profile_payload, work_order = _ratchet_model_runtime_inputs(
+        principal_public,
+        reddog_public,
+        pilot_overrides,
     )
     state = _write_runtime_json(tmp_path, "work_state.json", snapshot)
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-            model_selection_receipt=selection,
-            model_selection_receipt_id=selection["receipt_id"],
-            model_selection_digest=_mapping_digest(selection),
-            model_runtime_binding_receipt=runtime_binding,
-            model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-            model_runtime_binding_digest=canonical_model_runtime_binding_digest(runtime_binding),
-            model_runtime_binding_verification_receipt_id=verification.receipt_id,
-            model_runtime_binding_verification_digest=verification_receipt_digest(
-                verification
-            ),
-        ),
+        profile_payload,
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
     principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-        model_selection_receipt=selection,
-        model_selection_receipt_id=selection["receipt_id"],
-        model_selection_digest=_mapping_digest(selection),
-        model_runtime_binding_receipt=runtime_binding,
-        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-        model_runtime_binding_digest=canonical_model_runtime_binding_digest(runtime_binding),
-        model_runtime_binding_verification_receipt_id=verification.receipt_id,
-        model_runtime_binding_verification_digest=verification_receipt_digest(
-            verification
-        ),
-    )
     work_orders = _write_runtime_json(
         tmp_path,
         "work_orders.json",

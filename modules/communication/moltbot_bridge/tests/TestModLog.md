@@ -1,3 +1,10 @@
+## 2026-07-30: ARTIFACT MODEL AUTHORITY WSP 62 DECOMPOSITION
+- Moved model-runtime, provider-capability, and bounded-worker adversarial cases
+  into focused test modules without dropping assertions.
+- Legacy matrices now remain below their prior line counts or the 675-line
+  module boundary; new test functions remain within WSP 62 limits.
+- Focused authority and AI Gateway integration matrix: 996 passed, 5 skipped.
+
 ## 2026-07-30: REDDOG_EXACT_SHA_AND_ARTIFACT_MODEL_AUTHORITY_REPAIR
 - Restored `exact_sha_commit` and required verified production model evidence, exact topology, and signed authority at artifact-generation use time.
 - Added fail-closed regressions for missing exact-SHA state, self-rehashed evidence, authority substitution, capability forgery, replay, and bypass.

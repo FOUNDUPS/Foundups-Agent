@@ -192,35 +192,21 @@ def run_reddog_model_runtime_binding_artifact_supply(
     assert resolved_output is not None
     assert serialized_evidence is not None
     assert trusted_keys_payload is not None
-    try:
-        verified = verify_model_runtime_binding_artifact(
-            catalog_snapshot=dict(catalog_snapshot or {}),
-            model_selection_receipt=dict(model_selection_receipt or {}),
-            benchmark_evidence_receipts=tuple(
-                item.to_dict() if hasattr(item, "to_dict") else dict(item)
-                for item in benchmark_evidence_receipts or ()
-            ),
-            promotion_evidence_receipts=tuple(
-                item.to_dict() if hasattr(item, "to_dict") else dict(item)
-                for item in promotion_evidence_receipts or ()
-            ),
-            verified_evidence_bundle=serialized_evidence,
-            runtime_policy=dict(runtime_policy or {}),
-            trusted_keys_payload=trusted_keys_payload,
-            key_resolver=key_resolver,
-            signature_verifier=signature_verifier,
-            now=int(now or 0),
-        )
-    except ValueError as exc:
-        detail = str(exc)
-        if detail.startswith("model_runtime_binding_rejected:"):
-            return _reject(
-                (
-                    ModelRuntimeBindingArtifactSupplyReason.RUNTIME_BINDING_REJECTED,
-                    *detail.partition(":")[2].split(","),
-                )
-            )
-        return _reject((ModelRuntimeBindingArtifactSupplyReason.EVIDENCE_INVALID,))
+    verified, verification_reasons = _verify_artifact(
+        catalog_snapshot=catalog_snapshot,
+        model_selection_receipt=model_selection_receipt,
+        benchmark_evidence_receipts=benchmark_evidence_receipts,
+        promotion_evidence_receipts=promotion_evidence_receipts,
+        verified_evidence_bundle=serialized_evidence,
+        runtime_policy=runtime_policy,
+        trusted_keys_payload=trusted_keys_payload,
+        key_resolver=key_resolver,
+        signature_verifier=signature_verifier,
+        now=now,
+    )
+    if verification_reasons:
+        return _reject(verification_reasons)
+    assert verified is not None
 
     try:
         _write_json_atomic(resolved_output, verified.to_artifact())
@@ -238,6 +224,42 @@ def run_reddog_model_runtime_binding_artifact_supply(
         panel_models=verified.binding.panel_models,
         output_path=str(resolved_output),
         rejection_reasons=(),
+    )
+
+
+def _verify_artifact(**inputs: Any) -> tuple[Any | None, tuple[str, ...]]:
+    try:
+        verified = verify_model_runtime_binding_artifact(
+            catalog_snapshot=dict(inputs["catalog_snapshot"] or {}),
+            model_selection_receipt=dict(inputs["model_selection_receipt"] or {}),
+            benchmark_evidence_receipts=_receipt_mappings(
+                inputs["benchmark_evidence_receipts"]
+            ),
+            promotion_evidence_receipts=_receipt_mappings(
+                inputs["promotion_evidence_receipts"]
+            ),
+            verified_evidence_bundle=inputs["verified_evidence_bundle"],
+            runtime_policy=dict(inputs["runtime_policy"] or {}),
+            trusted_keys_payload=inputs["trusted_keys_payload"],
+            key_resolver=inputs["key_resolver"],
+            signature_verifier=inputs["signature_verifier"],
+            now=int(inputs["now"] or 0),
+        )
+        return verified, ()
+    except ValueError as exc:
+        detail = str(exc)
+        if detail.startswith("model_runtime_binding_rejected:"):
+            return None, (
+                ModelRuntimeBindingArtifactSupplyReason.RUNTIME_BINDING_REJECTED,
+                *detail.partition(":")[2].split(","),
+            )
+        return None, (ModelRuntimeBindingArtifactSupplyReason.EVIDENCE_INVALID,)
+
+
+def _receipt_mappings(values: Any) -> tuple[dict[str, Any], ...]:
+    return tuple(
+        item.to_dict() if hasattr(item, "to_dict") else dict(item)
+        for item in values or ()
     )
 
 

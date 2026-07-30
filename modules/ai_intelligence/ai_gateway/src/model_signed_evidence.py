@@ -56,8 +56,7 @@ from .model_runtime_binding import (
     RedDogModelRuntimeBindingReceipt,
     RuntimeModelRoleBinding,
 )
-
-
+from . import model_evidence_authority_validation as authority
 SIGNED_EVIDENCE_SCHEMA_VERSION = "model_signed_evidence_receipt.v1"
 VERIFIED_PRODUCTION_EVIDENCE_SCHEMA_VERSION = "verified_model_production_evidence.v1"
 PREFIX_MODEL_SIGNED_EVIDENCE = "reddog-model-evidence.v1"
@@ -200,15 +199,9 @@ class StaticModelEvidenceKeyResolver:
     """Deterministic test/runtime adapter for trusted public model-evidence keys."""
 
     def __init__(self, trusted_public_keys: Mapping[tuple[str, str, str], str]):
-        keys = dict(trusted_public_keys)
-        if any(
-            not isinstance(key, tuple)
-            or len(key) != 3
-            or not all(isinstance(part, str) and part for part in key)
-            for key in keys
-        ):
-            raise ValueError("trusted_model_evidence_key_tuple_required")
-        self._trusted_public_keys = keys
+        self._trusted_public_keys = authority.validated_trusted_model_evidence_keys(
+            trusted_public_keys
+        )
 
     def resolve(self, signer_role: str, signer_key_fingerprint: str, key_epoch: str) -> str | None:
         return self._trusted_public_keys.get(
@@ -582,7 +575,6 @@ def build_verified_model_production_evidence(
     leeway_s: int = 60,
 ) -> VerifiedModelProductionEvidence:
     """Verify one single-model production evidence chain and return typed evidence."""
-
     benchmark = (
         benchmark_receipt
         if isinstance(benchmark_receipt, ModelBenchmarkEvidenceReceipt)
@@ -612,12 +604,7 @@ def build_verified_model_production_evidence(
         benchmark_sig=benchmark_sig,
         promotion_sig=promotion_sig,
     )
-    if (
-        benchmark_sig.signer_public_key == promotion_sig.signer_public_key
-        or benchmark_sig.signer_key_fingerprint
-        == promotion_sig.signer_key_fingerprint
-    ):
-        raise ValueError("benchmark_and_promotion_signers_not_independent")
+    authority.assert_independent_model_evidence_signers(benchmark_sig, promotion_sig)
     benchmark_result = verify_model_signed_evidence_receipt(
         benchmark_sig,
         expected_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,

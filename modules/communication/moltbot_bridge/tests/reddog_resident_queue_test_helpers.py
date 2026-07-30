@@ -30,6 +30,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
     derive_worker_dispatch_roles,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     build_work_order_materialization_binding,
     canonical_full_work_order_digest,
@@ -181,7 +184,6 @@ def governed_worker_dispatch_snapshot(
     snapshot: dict[str, Any],
 ) -> dict[str, Any]:
     """Add the minimum real queue lineage required by the signed worker path."""
-
     governed = deepcopy(snapshot)
     queue_items = governed.get("wre_queue_items")
     if not isinstance(queue_items, list) or not queue_items:
@@ -196,21 +198,12 @@ def governed_worker_dispatch_snapshot(
     queue.setdefault("model_selection_digest", "sha256:model-selection")
     queue.setdefault("memex_supply_receipt_id", _TEST_MEMEX_SUPPLY_ID)
     queue.setdefault("memex_supply_digest", _TEST_MEMEX_SUPPLY_DIGEST)
-
     allocation = queue.get("wsp15_allocation_receipt") or {}
     allocation_id = str(allocation.get("receipt_id") or "")
-    runtime_id = str(queue.get("model_runtime_binding_receipt_id") or "")
-    runtime_digest = str(queue.get("model_runtime_binding_digest") or "")
-    runtime_verification_id = str(
-        queue.get("model_runtime_binding_verification_receipt_id") or ""
-    )
-    runtime_verification_digest = str(
-        queue.get("model_runtime_binding_verification_digest") or ""
-    )
-    refs = [
-        str(ref)
-        for ref in queue.get("evidence_refs") or ()
-    ]
+    runtime = model_runtime_authority_fields(queue)
+    runtime_id = runtime["model_runtime_binding_receipt_id"]
+    runtime_verification_id = runtime["model_runtime_binding_verification_receipt_id"]
+    refs = [str(ref) for ref in queue.get("evidence_refs") or ()]
     refs.extend(
         [
             f"claim:{queue['claim_id']}",
@@ -226,11 +219,8 @@ def governed_worker_dispatch_snapshot(
     if runtime_id:
         refs.append(f"model_runtime_binding:{runtime_id}")
     if runtime_verification_id:
-        refs.append(
-            f"model_runtime_binding_verification:{runtime_verification_id}"
-        )
+        refs.append(f"model_runtime_binding_verification:{runtime_verification_id}")
     queue["evidence_refs"] = list(dict.fromkeys(refs))
-
     governed.setdefault(
         "freshness_receipts",
         [{"receipt_id": _TEST_FRESHNESS_RECEIPT_ID, "fresh": True}],
@@ -253,14 +243,7 @@ def governed_worker_dispatch_snapshot(
                 "model_selection_receipt_id": str(
                     queue["model_selection_receipt_id"]
                 ),
-                "model_runtime_binding_receipt_id": runtime_id,
-                "model_runtime_binding_digest": runtime_digest,
-                "model_runtime_binding_verification_receipt_id": (
-                    runtime_verification_id
-                ),
-                "model_runtime_binding_verification_digest": (
-                    runtime_verification_digest
-                ),
+                **runtime,
                 "memex_supply_receipt_id": memex_id,
             }
         ],
@@ -511,19 +494,7 @@ def worker_dispatch_dryrun_result(allocation: dict[str, Any]) -> dict[str, Any]:
     """Build a canonical synthetic dry-run from the authoritative worker plan."""
 
     model_refs = {
-        "model_runtime_binding_receipt_id": str(
-            allocation.get("model_runtime_binding_receipt_id") or ""
-        ),
-        "model_runtime_binding_digest": str(
-            allocation.get("model_runtime_binding_digest") or ""
-        ),
-        "model_runtime_binding_verification_receipt_id": str(
-            allocation.get("model_runtime_binding_verification_receipt_id")
-            or ""
-        ),
-        "model_runtime_binding_verification_digest": str(
-            allocation.get("model_runtime_binding_verification_digest") or ""
-        ),
+        **model_runtime_authority_fields(allocation),
         "memex_supply_receipt_id": "",
         "memex_supply_digest": "",
     }

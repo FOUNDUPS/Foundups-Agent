@@ -430,7 +430,7 @@ exemptions:
     reason: >-
       Legacy WSP_22 test journal. Current entries record focused validation;
       historical test evidence is not split during a runtime-security slice.
-    threshold_override: 1742
+    threshold_override: 1749
     temporary: true
     review_date: "2026-Q3"
     reviewer: "0102 Technical Architect"

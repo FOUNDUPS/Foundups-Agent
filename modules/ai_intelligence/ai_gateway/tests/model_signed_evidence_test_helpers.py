@@ -146,22 +146,26 @@ def make_verified_production_evidence(
         promotion_receipt=promotion,
         benchmark_signature_receipt=benchmark_signature,
         promotion_signature_receipt=promotion_signature,
-        key_resolver=StaticModelEvidenceKeyResolver(
-            {
-                (
-                    ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value,
-                    BENCHMARK_FINGERPRINT,
-                    KEY_EPOCH,
-                ): BENCHMARK_PUBLIC_KEY,
-                (
-                    ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value,
-                    PROMOTION_FINGERPRINT,
-                    KEY_EPOCH,
-                ): PROMOTION_PUBLIC_KEY,
-            }
-        ),
+        key_resolver=_test_key_resolver(),
         signature_verifier=DeterministicSignatureVerifier(),
         now=NOW,
         nonce_store=InMemoryEvidenceNonceStore(),
         consume_nonces=consume_nonces,
+    )
+
+
+def _test_key_resolver() -> StaticModelEvidenceKeyResolver:
+    return StaticModelEvidenceKeyResolver(
+        {
+            (
+                ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value,
+                BENCHMARK_FINGERPRINT,
+                KEY_EPOCH,
+            ): BENCHMARK_PUBLIC_KEY,
+            (
+                ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value,
+                PROMOTION_FINGERPRINT,
+                KEY_EPOCH,
+            ): PROMOTION_PUBLIC_KEY,
+        }
     )

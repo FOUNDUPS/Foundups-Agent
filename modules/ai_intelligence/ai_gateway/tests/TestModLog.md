@@ -1,5 +1,12 @@
 # AI Gateway TestModLog
 
+## [2026-07-30] - Model-runtime security test decomposition
+
+- Split serialized-evidence, capability-identity, replay, revocation, and
+  bootstrap regressions into a focused bounded module.
+- Preserved every assertion while keeping the legacy artifact-supply matrix
+  below the WSP 62 file limit.
+
 ## [2026-07-29] - Live provider header normalization and chronology
 
 - Reproduced aiohttp multidict header-name subclasses and proved the transport
