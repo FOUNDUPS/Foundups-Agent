@@ -7,9 +7,6 @@ from pathlib import Path
 
 import pytest
 
-from modules.communication.moltbot_bridge.src.reddog_resident_live_canary import (
-    LIVE_CANARY_PROOF_COMPLETE,
-)
 from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
     build_reddog_verified_pattern_memory_sink,
 )
@@ -26,7 +23,10 @@ from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
 
 def _assert_missing_anchor_block(receipt) -> None:
     assert receipt.live_proof_complete is False
-    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
+    assert (
+        "canonical_signed_runtime_artifact_manifest_selection_verifier_missing"
+        in receipt.blockers
+    )
 
 
 def test_live_proof_uses_canonical_store_git_and_pattern_memory(tmp_path: Path) -> None:

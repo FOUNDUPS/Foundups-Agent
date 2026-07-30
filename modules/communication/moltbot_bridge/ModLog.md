@@ -1,4 +1,26 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNED_RUNTIME_ARTIFACT_MANIFEST_PHASE1`: added the
+  content-addressed signed-manifest foundation for the seven canonical
+  resident runtime artifacts.
+  Manifest authority is a closure-confined process-local proof minted only
+  after the existing delegated work-authority verifier confirms principal trust,
+  signatures, revocation, permission freshness, FoundUp/path scope, queue
+  state, independently recomputed committed-publication binding, and signer
+  policy.
+  The isolated signer rereads the artifact bytes, enforces an exact signing
+  domain plus a manifest-specific audit-attestation domain, and reserves the
+  manifest nonce through the existing transactional replay store before
+  returning a signature.
+  Manifests are create-only under the outside-repository runtime root; final
+  publication uses OS-level no-replace semantics, so a concurrent or
+  pre-seeded target is never overwritten.
+  All seven canonical artifact producers and manifest publication share one
+  runtime-generation fence. The signed manifest binds that generation digest,
+  and publication re-derives it while fenced before creating the immutable
+  content-addressed artifact.
+  Runtime activation remains fail closed until a production durable replay
+  high-water provider, authenticated manifest selection, use-time current
+  generation verification, and mutual signer peer handshake are wired.
 - `REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`: provider effects require canonical SINGLE or signed PANEL evidence rehydrated against current keys, revocation, topology, policy, and trusted time.
   Exact `(role, fingerprint, key_epoch)` resolution and independent benchmark, promotion, panel-authority, and panel-member signers prevent identity substitution.
   Opaque capabilities retain no caller-mutable binding state; registry admission binds the exact issued object identity.

@@ -38,8 +38,8 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     GovernedExecutionValveEnvironment,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
     GovernedValveUseTimeResolution,
-    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
     QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT,
@@ -334,7 +334,9 @@ def _handler(
                 expected_bindings={},
                 permission_ttl_seconds=300,
                 permission_expires_at=_future_expiry(),
-                rejection_reasons=(SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,),
+                rejection_reasons=(
+                    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+                ),
                 signed_authority_reverified=True,
             )
         )
@@ -375,7 +377,9 @@ def test_governed_production_handler_invokes_canonical_gate_and_fails_closed(
             expected_bindings=expected,
             permission_ttl_seconds=300,
             permission_expires_at=_future_expiry(),
-            rejection_reasons=(SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,),
+            rejection_reasons=(
+                AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+            ),
             signed_authority_reverified=True,
         )
     )
@@ -404,7 +408,10 @@ def test_governed_production_handler_invokes_canonical_gate_and_fails_closed(
     assert result["decision"] == QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_REJECT
     assert result["valve_decision"]["valve_state"] == VALVE_CLOSED
     assert result["valve_decision"]["authorization_mode"] == "signed_work_authority_consensus"
-    assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in result["rejection_reasons"]
+    assert (
+        AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING
+        in result["rejection_reasons"]
+    )
 
 
 def test_legacy_token_environment_cannot_advance_dispatcher_to_worktree_create() -> None:

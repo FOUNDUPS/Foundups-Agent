@@ -23,6 +23,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
 )
@@ -81,54 +84,33 @@ def run_reddog_authority_runtime_resolver_artifact_supply(
     """Materialize plural resolver stores from singular authority artifacts."""
 
     root = Path(repo_root).resolve()
-    principal = _mapping(principal_authority_record)
-    snapshot = _mapping(permission_snapshot)
-    reasons: list[str] = []
-    if not _valid_principal(principal):
-        reasons.append(AuthorityRuntimeResolverSupplyReason.PRINCIPAL_INVALID)
-    if not _valid_snapshot(snapshot):
-        reasons.append(AuthorityRuntimeResolverSupplyReason.PERMISSION_SNAPSHOT_INVALID)
-    if principal and snapshot and not _principal_snapshot_match(principal, snapshot):
-        reasons.append(AuthorityRuntimeResolverSupplyReason.PRINCIPAL_SNAPSHOT_MISMATCH)
-    if not _ascii_deep({"principal": principal, "snapshot": snapshot}):
-        reasons.append(AuthorityRuntimeResolverSupplyReason.NON_ASCII_INPUT)
-
-    principal_path, principal_path_reasons = _runtime_output_path(principal_records_output_path, root)
-    snapshot_path, snapshot_path_reasons = _runtime_output_path(permission_snapshots_output_path, root)
-    reasons.extend(principal_path_reasons)
-    reasons.extend(snapshot_path_reasons)
+    principal, snapshot, reasons = _validated_resolver_inputs(
+        principal_authority_record, permission_snapshot
+    )
+    principal_path, principal_path_reasons = _runtime_output_path(
+        principal_records_output_path, root
+    )
+    snapshot_path, snapshot_path_reasons = _runtime_output_path(
+        permission_snapshots_output_path, root
+    )
+    reasons.extend((*principal_path_reasons, *snapshot_path_reasons))
     if reasons:
         return _reject(reasons)
 
     assert principal_path is not None
     assert snapshot_path is not None
-    principal_key = _principal_key(str(principal["principal_id"]), str(principal["principal_provider"]))
-    snapshot_digest = str(snapshot["evidence_digest"])
-    principal_store = {
-        "schema_version": AUTHORITY_RUNTIME_RESOLVER_SUPPLY_SCHEMA_VERSION,
-        "principals": {principal_key: dict(principal)},
-        "principal_count": 1,
-        "no_holoindex_reindex_performed": True,
-    }
-    snapshot_store = {
-        "schema_version": AUTHORITY_RUNTIME_RESOLVER_SUPPLY_SCHEMA_VERSION,
-        "snapshots": {snapshot_digest: dict(snapshot)},
-        "snapshot_count": 1,
-        "no_holoindex_reindex_performed": True,
-    }
-    receipt_payload = {
-        "principal_store": principal_store,
-        "snapshot_store": snapshot_store,
-        "principal_records_path": str(principal_path),
-        "permission_snapshots_path": str(snapshot_path),
-    }
-    receipt_id = _digest(receipt_payload)
-    principal_store["resolver_supply_receipt_id"] = receipt_id
-    snapshot_store["resolver_supply_receipt_id"] = receipt_id
+    principal_store, snapshot_store, receipt_id = _resolver_store_payloads(
+        principal, snapshot, principal_path, snapshot_path
+    )
 
     try:
-        _write_json_atomic(principal_path, principal_store)
-        _write_json_atomic(snapshot_path, snapshot_store)
+        _write_resolver_artifacts(
+            principal_path,
+            principal_store,
+            snapshot_path,
+            snapshot_store,
+            repo_root=root,
+        )
     except Exception:
         return _reject((AuthorityRuntimeResolverSupplyReason.OUTPUT_WRITE_FAILED,))
     return AuthorityRuntimeResolverSupplyResult(
@@ -141,6 +123,62 @@ def run_reddog_authority_runtime_resolver_artifact_supply(
         permission_snapshots_loaded=1,
         rejection_reasons=(),
     )
+
+
+def _validated_resolver_inputs(
+    principal_authority_record: Mapping[str, Any] | None,
+    permission_snapshot: Mapping[str, Any] | None,
+) -> tuple[Mapping[str, Any], Mapping[str, Any], list[str]]:
+    principal = _mapping(principal_authority_record)
+    snapshot = _mapping(permission_snapshot)
+    reasons: list[str] = []
+    if not _valid_principal(principal):
+        reasons.append(AuthorityRuntimeResolverSupplyReason.PRINCIPAL_INVALID)
+    if not _valid_snapshot(snapshot):
+        reasons.append(AuthorityRuntimeResolverSupplyReason.PERMISSION_SNAPSHOT_INVALID)
+    if principal and snapshot and not _principal_snapshot_match(principal, snapshot):
+        reasons.append(AuthorityRuntimeResolverSupplyReason.PRINCIPAL_SNAPSHOT_MISMATCH)
+    if not _ascii_deep({"principal": principal, "snapshot": snapshot}):
+        reasons.append(AuthorityRuntimeResolverSupplyReason.NON_ASCII_INPUT)
+    return principal, snapshot, reasons
+
+
+def _resolver_store_payloads(
+    principal: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    principal_path: Path,
+    snapshot_path: Path,
+) -> tuple[dict[str, Any], dict[str, Any], str]:
+    principal_key = _principal_key(
+        str(principal["principal_id"]), str(principal["principal_provider"])
+    )
+    principal_store = _resolver_store("principals", principal_key, principal)
+    snapshot_store = _resolver_store(
+        "snapshots", str(snapshot["evidence_digest"]), snapshot
+    )
+    receipt_id = _digest(
+        {
+            "principal_store": principal_store,
+            "snapshot_store": snapshot_store,
+            "principal_records_path": str(principal_path),
+            "permission_snapshots_path": str(snapshot_path),
+        }
+    )
+    principal_store["resolver_supply_receipt_id"] = receipt_id
+    snapshot_store["resolver_supply_receipt_id"] = receipt_id
+    return principal_store, snapshot_store, receipt_id
+
+
+def _resolver_store(
+    collection: str, key: str, value: Mapping[str, Any]
+) -> dict[str, Any]:
+    singular = collection.removesuffix("s")
+    return {
+        "schema_version": AUTHORITY_RUNTIME_RESOLVER_SUPPLY_SCHEMA_VERSION,
+        collection: {key: dict(value)},
+        f"{singular}_count": 1,
+        "no_holoindex_reindex_performed": True,
+    }
 
 
 def _valid_principal(principal: Mapping[str, Any]) -> bool:
@@ -188,9 +226,21 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
     return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
-    with runtime_operation_lock(str(path) + ".operation"):
-        _write_json_atomic_unlocked(path, payload)
+def _write_resolver_artifacts(
+    principal_path: Path,
+    principal_store: Mapping[str, Any],
+    snapshot_path: Path,
+    snapshot_store: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
+    with runtime_operation_lock(str(principal_path) + ".operation"):
+        with runtime_operation_lock(str(snapshot_path) + ".operation"):
+            with reddog_runtime_artifact_generation_lock(
+                principal_path.parent, repo_root=repo_root
+            ):
+                _write_json_atomic_unlocked(principal_path, principal_store)
+                _write_json_atomic_unlocked(snapshot_path, snapshot_store)
 
 
 def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:

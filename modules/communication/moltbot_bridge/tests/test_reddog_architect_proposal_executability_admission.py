@@ -14,8 +14,6 @@ from modules.communication.moltbot_bridge.src import (
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executability_admission import (
     ArchitectProposalAdmissionPolicy,
     EFFECT_LIVE_WORKTREE_CANARY,
-    EFFECT_REPOSITORY_CODE_CHANGE,
-    EXTEND_EXISTING,
     LIVE_EXECUTION_CAPABILITIES,
     READINESS_EVIDENCE_BLOCKED,
     READINESS_IMPLEMENTATION_BLOCKED,
@@ -97,6 +95,24 @@ def test_production_policy_keeps_sha_only_proposal_receipts_blocked() -> None:
     assert policy.missing_capability_reasons[
         proposal_admission.CAP_PROPOSAL_AUTHENTICITY
     ] == proposal_admission.PROPOSAL_AUTHENTICITY_VERIFIER_MISSING
+
+
+def test_manifest_trust_controls_are_independent_capabilities() -> None:
+    policy = proposal_admission.current_architect_proposal_admission_policy()
+    expected = {
+        proposal_admission.CAP_MANIFEST_AUTHENTICATED_SELECTION:
+            "canonical_signed_runtime_artifact_manifest_selection_verifier_missing",
+        proposal_admission.CAP_MANIFEST_DURABLE_REPLAY:
+            "canonical_runtime_artifact_manifest_replay_high_water_missing",
+        proposal_admission.CAP_MANIFEST_CURRENT_GENERATION:
+            "canonical_runtime_artifact_manifest_current_generation_verifier_missing",
+    }
+
+    assert {
+        capability: policy.missing_capability_reasons[capability]
+        for capability in expected
+    } == expected
+    assert len(expected) == 3
 
 
 def test_missing_trust_anchor_keeps_proposal_valid_but_blocks_promotion() -> None:

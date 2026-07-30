@@ -1,6 +1,13 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-07-31 - RedDog Runtime Artifact Generation Fence
+
+- Added a bounded shared generation fence for canonical RedDog runtime
+  artifact producers and signed-manifest publication.
+- Kept the inherited runtime-artifact safety host at its exact no-growth
+  ceiling; the new primitive reuses its confined lock and root validation.
+
 ## 2026-07-28 - Runtime Artifact Safety WSP 62 Remediation
 
 - Recorded the inherited runtime-artifact safety host under an exact temporary

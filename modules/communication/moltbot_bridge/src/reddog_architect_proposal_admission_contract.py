@@ -70,7 +70,9 @@ TARGET_EFFECT_PLANES = frozenset(
     }
 )
 
-CAP_SIGNED_ARTIFACT_MANIFEST = "signed_runtime_artifact_manifest"
+CAP_MANIFEST_AUTHENTICATED_SELECTION = "runtime_artifact_manifest_authenticated_selection"
+CAP_MANIFEST_DURABLE_REPLAY = "runtime_artifact_manifest_durable_replay"
+CAP_MANIFEST_CURRENT_GENERATION = "runtime_artifact_manifest_current_generation"
 CAP_CONSENSUS_RECEIPT = "verified_consensus_receipt"
 CAP_SOVEREIGN_AUTHORIZATION = "verified_sovereign_authorization"
 CAP_PRINCIPAL_KEY_ATTESTATION = "principal_subject_key_attestation"
@@ -86,8 +88,14 @@ PROPOSAL_AUTHENTICITY_VERIFIER_MISSING = (
 )
 
 _TRUST_REASON_CAPABILITY = {
-    "canonical_signed_runtime_artifact_manifest_producer_missing": (
-        CAP_SIGNED_ARTIFACT_MANIFEST
+    "canonical_signed_runtime_artifact_manifest_selection_verifier_missing": (
+        CAP_MANIFEST_AUTHENTICATED_SELECTION
+    ),
+    "canonical_runtime_artifact_manifest_replay_high_water_missing": (
+        CAP_MANIFEST_DURABLE_REPLAY
+    ),
+    "canonical_runtime_artifact_manifest_current_generation_verifier_missing": (
+        CAP_MANIFEST_CURRENT_GENERATION
     ),
     "canonical_consensus_receipt_verifier_missing": CAP_CONSENSUS_RECEIPT,
     "canonical_sovereign_authorization_verifier_missing": (

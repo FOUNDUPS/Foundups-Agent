@@ -39,6 +39,12 @@ from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt im
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
 )
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
+)
 
 
 AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT = "AUTHORITY_PROFILE_SEED_SUPPLY_ACCEPT"
@@ -241,7 +247,7 @@ def run_reddog_authority_profile_seed_supply(
     if not _ascii_deep(seed):
         return _reject((AuthorityProfileSeedSupplyReason.NON_ASCII_INPUT,))
     try:
-        _write_json_atomic(output, seed)
+        _write_json_atomic(output, seed, repo_root=root)
     except Exception:
         return _reject((AuthorityProfileSeedSupplyReason.OUTPUT_WRITE_FAILED,))
     return AuthorityProfileSeedSupplyResult(
@@ -518,17 +524,30 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
     return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-            json.dump(payload, handle, sort_keys=True, indent=2)
-            handle.write("\n")
-        os.replace(tmp_name, path)
-    finally:
-        if os.path.exists(tmp_name):
-            os.unlink(tmp_name)
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
+    with runtime_operation_lock(str(path) + ".operation"):
+        with reddog_runtime_artifact_generation_lock(
+            path.parent, repo_root=repo_root
+        ):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            fd, tmp_name = tempfile.mkstemp(
+                prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent)
+            )
+            try:
+                with os.fdopen(
+                    fd, "w", encoding="utf-8", newline="\n"
+                ) as handle:
+                    json.dump(payload, handle, sort_keys=True, indent=2)
+                    handle.write("\n")
+                os.replace(tmp_name, path)
+            finally:
+                if os.path.exists(tmp_name):
+                    os.unlink(tmp_name)
 
 
 def _path_within_foundup(path: str, foundup_id: str) -> bool:

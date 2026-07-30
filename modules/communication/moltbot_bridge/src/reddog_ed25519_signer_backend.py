@@ -44,6 +44,19 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenti
     ProposalAuthenticityNonceStore,
     validate_proposal_signing_request,
 )
+from modules.communication.moltbot_bridge.src.reddog_signed_runtime_artifact_manifest import (
+    RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
+    RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX,
+    RuntimeArtifactManifestAuthority,
+    validate_runtime_artifact_manifest_signing_request,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_authority import (
+    RuntimeArtifactManifestAuthorityBoundary,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
+    RUNTIME_ARTIFACT_MANIFEST_AUDIT_ATTESTATION_PREFIX,
+    canonical_signer_audit_attestation_input,
+)
 
 
 REJECT_ED25519_SIGNER_REQUEST_INVALID = "REJECT_ED25519_SIGNER_REQUEST_INVALID"
@@ -79,6 +92,12 @@ REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY = (
 )
 REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY = (
     "REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY"
+)
+REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING = (
+    "REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING"
+)
+REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY = (
+    "REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY"
 )
 
 CONTROL_LOOP_SIGNING_OPERATION = "attest_control_loop_receipt"
@@ -146,6 +165,15 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
     proposal_authority_policy: ArchitectProposalSignerPolicy | None = None
     proposal_nonce_store: ProposalAuthenticityNonceStore | None = None
     proposal_clock: Callable[[], float] = time.time
+    runtime_artifact_manifest_authority: (
+        RuntimeArtifactManifestAuthority | None
+    ) = None
+    runtime_artifact_manifest_authority_boundary: (
+        RuntimeArtifactManifestAuthorityBoundary | None
+    ) = None
+    runtime_artifact_manifest_nonce_store: (
+        ProposalAuthenticityNonceStore | None
+    ) = None
 
     def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
         reason = _signer_request_rejection(self, request, peer)
@@ -159,11 +187,21 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
         proposal_reservation, reason = _prepare_proposal_signing(self, request)
         if reason:
             return _reject(reason)
-        response, reason = _sign_response(
-            self, request, peer, control_payload is not None
+        manifest_payload, manifest_reservation, reason = (
+            _prepare_manifest_signing(self, request)
         )
         if reason:
             _rollback_proposal_reservation(self, proposal_reservation)
+            return _reject(reason)
+        response, reason = _sign_response(
+            self,
+            request,
+            peer,
+            control_payload is not None or manifest_payload is not None,
+        )
+        if reason:
+            _rollback_proposal_reservation(self, proposal_reservation)
+            _rollback_manifest_reservation(self, manifest_reservation)
             return _reject(reason)
         if proposal_reservation is not None:
             try:
@@ -171,7 +209,10 @@ class Ed25519SignerBackend(IsolatedSignerBackend):
                 self.proposal_nonce_store.commit(proposal_reservation)
             except Exception:
                 _rollback_proposal_reservation(self, proposal_reservation)
+                _rollback_manifest_reservation(self, manifest_reservation)
                 return _reject(REJECT_ED25519_SIGNER_PROPOSAL_NONCE_REPLAY)
+        if not _commit_manifest_reservation(self, manifest_reservation):
+            return _reject(REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY)
         if control_payload is not None and preparation is not None:
             try:
                 self.control_loop_anchor_store.commit(
@@ -200,22 +241,30 @@ def _signer_request_rejection(
         return REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH
     if not request.signing_input:
         return REJECT_ED25519_SIGNER_REQUEST_INVALID
-    domain_pairs = (
-        (
-            request.requested_operation == CONTROL_LOOP_SIGNING_OPERATION,
-            request.signing_input.startswith(CONTROL_LOOP_SIGNING_PREFIX),
-        ),
-        (
-            request.requested_operation == PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
-            request.signing_input.startswith(PROPOSAL_AUTHENTICITY_SIGNING_PREFIX),
-        ),
-    )
-    if any(operation is not prefix for operation, prefix in domain_pairs):
+    if any(
+        operation is not prefix
+        for operation, prefix in _signing_domain_pairs(request)
+    ):
         return REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
-    if backend.proposal_authority_policy is not None:
-        allowed_operations = {PROPOSAL_AUTHENTICITY_SIGNING_OPERATION}
+    configured = (
+        backend.proposal_authority_policy is not None
+        or backend.runtime_artifact_manifest_authority is not None
+        or backend.runtime_artifact_manifest_authority_boundary is not None
+    )
+    if configured:
+        allowed_operations: set[str] = set()
+        if backend.proposal_authority_policy is not None:
+            allowed_operations.add(PROPOSAL_AUTHENTICITY_SIGNING_OPERATION)
         if backend.control_loop_authority_policy is not None:
             allowed_operations.add(CONTROL_LOOP_SIGNING_OPERATION)
+        if (
+            backend.runtime_artifact_manifest_authority is not None
+            and backend.runtime_artifact_manifest_authority_boundary
+            is not None
+        ):
+            allowed_operations.add(
+                RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION
+            )
         if request.requested_operation not in allowed_operations:
             return REJECT_ED25519_SIGNER_PROPOSAL_DOMAIN_ONLY
     try:
@@ -223,6 +272,81 @@ def _signer_request_rejection(
     except Exception:
         return REJECT_ED25519_SIGNER_KEY_INVALID
     return "" if derived == backend.public_key else REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH
+
+
+def _signing_domain_pairs(
+    request: SigningRequest,
+) -> tuple[tuple[bool, bool], ...]:
+    return (
+        (
+            request.requested_operation == CONTROL_LOOP_SIGNING_OPERATION,
+            request.signing_input.startswith(CONTROL_LOOP_SIGNING_PREFIX),
+        ),
+        (
+            request.requested_operation
+            == PROPOSAL_AUTHENTICITY_SIGNING_OPERATION,
+            request.signing_input.startswith(
+                PROPOSAL_AUTHENTICITY_SIGNING_PREFIX
+            ),
+        ),
+        (
+            request.requested_operation
+            == RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION,
+            request.signing_input.startswith(
+                RUNTIME_ARTIFACT_MANIFEST_SIGNING_PREFIX
+            ),
+        ),
+    )
+
+
+def _prepare_manifest_signing(
+    backend: Ed25519SignerBackend,
+    request: SigningRequest,
+) -> tuple[dict[str, Any] | None, str | None, str]:
+    if (
+        request.requested_operation
+        != RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION
+    ):
+        return None, None, ""
+    if (
+        backend.runtime_artifact_manifest_authority is None
+        or backend.runtime_artifact_manifest_authority_boundary is None
+    ):
+        return None, None, REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
+    payload = validate_runtime_artifact_manifest_signing_request(
+        request,
+        backend.runtime_artifact_manifest_authority,
+        backend.runtime_artifact_manifest_authority_boundary,
+        now_epoch=int(backend.proposal_clock()),
+    )
+    if payload is None:
+        return None, None, REJECT_ED25519_SIGNER_REQUEST_INVALID
+    store = backend.runtime_artifact_manifest_nonce_store
+    if store is None:
+        return (
+            None,
+            None,
+            REJECT_ED25519_SIGNER_MANIFEST_NONCE_STORE_MISSING,
+        )
+    try:
+        reservation = store.reserve(
+            str(payload["nonce"]),
+            expires_at=int(payload["expires_at"]),
+            subject=":".join(
+                (
+                    "runtime-artifact-manifest",
+                    public_key_fingerprint(backend.public_key),
+                    str(payload["issuer_principal_id"]),
+                    str(payload["queue_item_id"]),
+                    str(payload["work_state_revision"]),
+                )
+            ),
+        )
+    except Exception:
+        reservation = None
+    if not reservation:
+        return None, None, REJECT_ED25519_SIGNER_MANIFEST_NONCE_REPLAY
+    return payload, reservation, ""
 
 
 def _prepare_control_signing(
@@ -288,6 +412,36 @@ def _rollback_proposal_reservation(
         pass
 
 
+def _rollback_manifest_reservation(
+    backend: Ed25519SignerBackend,
+    reservation: str | None,
+) -> None:
+    store = backend.runtime_artifact_manifest_nonce_store
+    if reservation is None or store is None:
+        return
+    try:
+        store.rollback(reservation)
+    except Exception:
+        pass
+
+
+def _commit_manifest_reservation(
+    backend: Ed25519SignerBackend,
+    reservation: str | None,
+) -> bool:
+    if reservation is None:
+        return True
+    store = backend.runtime_artifact_manifest_nonce_store
+    if store is None:
+        return False
+    try:
+        store.commit(reservation)
+        return True
+    except Exception:
+        _rollback_manifest_reservation(backend, reservation)
+        return False
+
+
 def _sign_response(
     backend: Ed25519SignerBackend, request: SigningRequest,
     peer: SignerPeerAttestation, is_control: bool,
@@ -304,7 +458,7 @@ def _sign_response(
         return SigningResponse(accepted=False), REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING
     if not _is_ascii(audit_mac) or not audit_mac:
         return SigningResponse(accepted=False), REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING
-    attestation, reason = _control_audit_attestation(
+    attestation, reason = _signer_audit_attestation(
         backend, request, signature, audit_mac, is_control
     )
     if reason:
@@ -320,18 +474,27 @@ def _sign_response(
     ), ""
 
 
-def _control_audit_attestation(
+def _signer_audit_attestation(
     backend: Ed25519SignerBackend, request: SigningRequest,
     signature: str, audit_mac: str, is_control: bool,
 ) -> tuple[str, str]:
     if not is_control:
         return "", ""
+    domain_prefix = CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX
+    if (
+        request.requested_operation
+        == RUNTIME_ARTIFACT_MANIFEST_SIGNING_OPERATION
+    ):
+        domain_prefix = (
+            RUNTIME_ARTIFACT_MANIFEST_AUDIT_ATTESTATION_PREFIX
+        )
     try:
-        value = canonical_control_audit_attestation_input(
+        value = canonical_signer_audit_attestation_input(
             signing_input=request.signing_input, signature=signature,
             audit_mac=audit_mac, signer_public_key=backend.public_key,
             key_epoch=backend.key_epoch,
             requester_principal_id=request.requester_principal_id,
+            domain_prefix=domain_prefix,
         )
         return encode_ed25519_signature(
             backend.private_key.sign(value.encode("utf-8"))
@@ -424,21 +587,13 @@ def canonical_control_audit_attestation_input(
 ) -> str:
     """Return the public, deterministic attestation input for a signer audit MAC."""
 
-    payload = {
-        "audit_mac": audit_mac,
-        "key_epoch": key_epoch,
-        "requester_principal_id": requester_principal_id,
-        "signature": signature,
-        "signer_public_key": signer_public_key,
-        "signing_input_digest": "sha256:" + hashlib.sha256(
-            signing_input.encode("utf-8")
-        ).hexdigest(),
-    }
-    return CONTROL_LOOP_AUDIT_ATTESTATION_PREFIX + json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
+    return canonical_signer_audit_attestation_input(
+        signing_input=signing_input,
+        signature=signature,
+        audit_mac=audit_mac,
+        signer_public_key=signer_public_key,
+        key_epoch=key_epoch,
+        requester_principal_id=requester_principal_id,
     )
 
 

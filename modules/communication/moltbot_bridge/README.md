@@ -358,6 +358,12 @@ REDDOG_RESIDENT_LIVE_CANARY_PHASE1`. The runtime root must be outside the
 repository and already contain the authority, permission, execution-valve,
 signer config/run-packet, and live signer socket artifacts named by the CLI
 receipt. The harness never starts the signer or resolves secret values.
+The signed runtime-artifact manifest producer is available as a
+content-addressed foundation. Canonical artifact writers and publication share
+a runtime-generation fence, and final publication uses OS-level no-replace
+semantics. The canary remains blocked until production durable replay
+high-water, authenticated manifest selection, use-time current-generation
+verification, and mutual signer peer-handshake dependencies are supplied.
 
 `READY_FOR_EXECUTION` is only static readiness. Every main control-loop caller
 uses one shared OS advisory lock. `LIVE_PROOF_COMPLETE` requires the matching

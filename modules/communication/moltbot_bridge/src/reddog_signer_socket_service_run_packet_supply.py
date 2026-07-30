@@ -30,7 +30,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
     rehydrate_signer_socket_service_runtime_config,
 )
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
     secure_read_confined_text,
     validate_runtime_root_path,
 )
@@ -172,7 +176,7 @@ def run_reddog_signer_socket_service_run_packet_supply(
     packet["run_packet_id"] = _digest(packet)
     packet_digest = _digest(packet)
     try:
-        _write_json_atomic(output_resolved, packet)
+        _write_json_atomic(output_resolved, packet, repo_root=root)
     except Exception:
         return _reject((FAIL_SIGNER_RUN_PACKET_WRITE_FAILED,))
     return SignerServiceRunPacketSupplyResult(
@@ -339,17 +343,28 @@ def _session_reasons(session_id: str, python_executable: str) -> tuple[str, ...]
     return ()
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-            json.dump(payload, handle, sort_keys=True, indent=2)
-            handle.write("\n")
-        os.replace(tmp_name, path)
-    finally:
-        if os.path.exists(tmp_name):
-            os.unlink(tmp_name)
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
+    with runtime_operation_lock(str(path) + ".operation"):
+        with reddog_runtime_artifact_generation_lock(
+            path.parent, repo_root=repo_root
+        ):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            fd, tmp_name = tempfile.mkstemp(
+                prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent)
+            )
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+                    json.dump(payload, handle, sort_keys=True, indent=2)
+                    handle.write("\n")
+                os.replace(tmp_name, path)
+            finally:
+                if os.path.exists(tmp_name):
+                    os.unlink(tmp_name)
 
 
 def _reject(reasons: tuple[str, ...]) -> SignerServiceRunPacketSupplyResult:

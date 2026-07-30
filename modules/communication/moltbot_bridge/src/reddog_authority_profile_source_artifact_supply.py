@@ -36,6 +36,9 @@ from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety im
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
 )
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
 )
@@ -186,7 +189,7 @@ def run_reddog_authority_profile_source_artifact_supply(
     assert output is not None
     profile = _profile(seed, principal, snapshot)
     try:
-        _write_json_atomic(output, profile)
+        _write_json_atomic(output, profile, repo_root=root)
     except Exception:
         return _reject((AuthorityProfileSourceSupplyReason.OUTPUT_WRITE_FAILED,))
     return AuthorityProfileSourceSupplyResult(
@@ -375,9 +378,17 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
         return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
     with runtime_operation_lock(str(path) + ".operation"):
-        _write_json_atomic_unlocked(path, payload)
+        with reddog_runtime_artifact_generation_lock(
+            path.parent, repo_root=repo_root
+        ):
+            _write_json_atomic_unlocked(path, payload)
 
 
 def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:
