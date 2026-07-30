@@ -146,8 +146,10 @@ def test_start_uses_argv_loopback_secret_and_authenticated_health(
     )
     owner = HoloQueryServiceSupervisor(repo_root=tmp_path, port=9137).start()
     assert owner.is_ready is True
+    site_flags = ["-S"] if os.name == "nt" else []
     assert launch["command"] == [
         owner.python_executable,
+        *site_flags,
         "-B",
         "-m",
         OWNER_MODULE,
@@ -512,9 +514,81 @@ def test_health_rejection_accepts_only_terminal_authenticated_contract() -> None
         "error": "STALE_INDEX",
     }
     assert supervisor_module._health_rejection_code(base) == "STALE_INDEX"
+    assert supervisor_module._health_rejection_code(
+        {**base, "error": "SEMANTIC_BACKEND_UNAVAILABLE"}
+    ) == "SEMANTIC_BACKEND_UNAVAILABLE"
+    assert supervisor_module._health_rejection_code(
+        {**base, "error": "QUERY_TIMEOUT"}
+    ) == "QUERY_TIMEOUT"
     assert supervisor_module._health_rejection_code({**base, "error": "UNAUTHORIZED"}) == ""
     assert supervisor_module._health_rejection_code({**base, "loopback_only": False}) == ""
     assert supervisor_module._health_rejection_code({**base, "schema_version": "wrong"}) == ""
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows checkout-local venv contract")
+def test_supervisor_prefers_checkout_local_runtime_packages(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "authority"
+    runtime_root = tmp_path / "workspace"
+    site_packages = runtime_root / ".venv" / "Lib" / "site-packages"
+    repo_root.mkdir()
+    site_packages.mkdir(parents=True)
+    (runtime_root / ".venv" / "pyvenv.cfg").write_text(
+        "\n".join(
+            (
+                f"home = {Path(sys._base_executable).parent}",
+                "include-system-site-packages = false",
+                f"version = {sys.version_info.major}.{sys.version_info.minor}.0",
+                f"executable = {sys._base_executable}",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    owner = HoloQueryServiceSupervisor(
+        repo_root=repo_root,
+        runtime_root=runtime_root,
+        python_executable=sys.executable,
+    )
+
+    assert owner.runtime_root == runtime_root.resolve()
+    assert owner._pythonpath_entries == (str(site_packages.resolve()),)
+
+    alternate = tmp_path / "different-python.exe"
+    alternate_owner = HoloQueryServiceSupervisor(
+        repo_root=repo_root,
+        runtime_root=runtime_root,
+        python_executable=alternate,
+    )
+    assert alternate_owner.python_executable == str(alternate)
+    assert alternate_owner._pythonpath_entries == ()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows checkout-local venv contract")
+def test_supervisor_rejects_unbound_virtualenv_package_fallback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        supervisor_module,
+        "_owner_python_runtime",
+        lambda _executable: ("python.exe", ("C:/attacker/site-packages",)),
+    )
+    monkeypatch.setattr(
+        supervisor_module,
+        "trusted_holo_site_packages",
+        lambda _root, **_kwargs: (),
+    )
+
+    owner = HoloQueryServiceSupervisor(
+        repo_root=tmp_path / "authority",
+        runtime_root=tmp_path / "missing-runtime",
+        python_executable=sys.executable,
+    )
+
+    assert owner.python_executable == "python.exe"
+    assert owner._pythonpath_entries == ()
 
 
 def test_health_rejection_treats_authenticated_ready_binding_mismatch_as_terminal(
@@ -983,3 +1057,56 @@ def test_health_probe_rejects_error_and_malformed_responses(
         )
         is False
     )
+
+
+@pytest.mark.parametrize(
+    ("status", "error"),
+    (
+        (400, "QUERY_OWNER_POISONED"),
+        (503, "SEMANTIC_BACKEND_UNAVAILABLE"),
+        (504, "QUERY_TIMEOUT"),
+    ),
+)
+def test_health_exchange_reads_authenticated_terminal_error(
+    monkeypatch: pytest.MonkeyPatch,
+    status: int,
+    error: str,
+) -> None:
+    payload = {
+        "schema_version": HEALTH_SCHEMA_VERSION,
+        "ok": False,
+        "source": "holoindex",
+        "loopback_only": True,
+        "no_holoindex_reindex_performed": True,
+        "error": error,
+    }
+
+    class Response:
+        def __init__(self) -> None:
+            self.status = status
+
+        def read(self, _limit: int) -> bytes:
+            return json.dumps(payload).encode("utf-8")
+
+    class Connection:
+        def __init__(self, *_args: Any, **_kwargs: Any) -> None:
+            pass
+
+        def request(self, *_args: Any, **_kwargs: Any) -> None:
+            pass
+
+        def getresponse(self) -> Response:
+            return Response()
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr(
+        supervisor_module.http.client, "HTTPConnection", Connection
+    )
+    assert supervisor_module._authenticated_health_rejection(
+        host=OWNER_HOST,
+        port=8127,
+        token=TOKEN,
+        timeout_seconds=1.0,
+    ) == error

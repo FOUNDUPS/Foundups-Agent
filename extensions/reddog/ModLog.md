@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-30 - HoloIndex owner runtime compatibility release (0.4.44)
+
+- Regenerated the backend runtime manifest after binding nonsealed HoloIndex
+  maintenance and owner startup to the validated canonical workspace
+  virtualenv.
+- Pinned authenticated terminal health failure handling so backend
+  unavailability fails quickly instead of consuming the startup deadline.
+- No editor-side execution authority or query-time indexing was added.
+
 ## 2026-07-30 - Canonical thin-client release (0.4.43)
 
 - Published current `main` as the canonical RedDog thin client after the

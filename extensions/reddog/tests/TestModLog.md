@@ -1,5 +1,11 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-30 - HoloIndex owner runtime compatibility release (0.4.44)
+
+- Revalidated the generated backend manifest and exact extension pin after the
+  HoloIndex owner-runtime dependency fix.
+- Retained the canonical thin-client and authority-bound worker contracts.
+
 ## 2026-07-30 - Canonical thin-client release (0.4.43)
 
 - Updated package, runtime banner, governed-work-order identity, README, and

@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Mapping, Sequence
 
@@ -56,6 +57,50 @@ def scrub_holo_child_environment(
     child["PYTHONNOUSERSITE"] = "1"
     child["PYTHONUTF8"] = "1"
     return child
+
+
+def trusted_holo_site_packages(
+    runtime_root: Path | str,
+    *,
+    platform_name: str | None = None,
+    python_version: tuple[int, int] | None = None,
+    base_executable: Path | str | None = None,
+) -> tuple[str, ...]:
+    """Return only the canonical checkout-local Windows virtualenv packages."""
+    root = Path(runtime_root).resolve(strict=False)
+    if (platform_name or os.name) != "nt" or not root.is_dir():
+        return ()
+    venv_root = root / ".venv"
+    try:
+        config_path = (venv_root / "pyvenv.cfg").resolve(strict=True)
+        candidate = (venv_root / "Lib" / "site-packages").resolve(strict=True)
+        values = dict(
+            tuple(part.strip() for part in line.split("=", 1))
+            for line in config_path.read_text(encoding="utf-8").splitlines()
+            if "=" in line
+        )
+    except OSError:
+        return ()
+    version = python_version or sys.version_info[:2]
+    configured_version = values.get("version", "").strip()
+    configured_base = Path(
+        values.get("executable", "").strip()
+    ).resolve(strict=False)
+    expected_base = Path(
+        base_executable or getattr(sys, "_base_executable", sys.executable)
+    ).resolve(strict=False)
+    if (
+        not config_path.is_file()
+        or not config_path.is_relative_to(root)
+        or not candidate.is_dir()
+        or not candidate.is_relative_to(venv_root.resolve(strict=False))
+        or values.get("include-system-site-packages", "").strip().lower()
+        != "false"
+        or not configured_version.startswith(f"{version[0]}.{version[1]}.")
+        or configured_base != expected_base
+    ):
+        return ()
+    return (str(candidate),)
 
 
 def sealed_holo_command(
@@ -149,4 +194,5 @@ __all__ = [
     "scrub_holo_child_environment",
     "sealed_holo_command",
     "sealed_runtime_required",
+    "trusted_holo_site_packages",
 ]

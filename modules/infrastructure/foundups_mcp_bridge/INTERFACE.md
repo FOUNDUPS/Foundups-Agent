@@ -78,10 +78,16 @@ Requests are size-, query-, result-, and
 timeout-bounded. The service serializes one cached semantic backend and has no
 indexing API.
 
-On Windows, a supervisor running inside the current repository virtualenv
-launches the base Python interpreter as its direct child and prepends only that
-virtualenv's resolved site-packages directory. This avoids the transient venv
-redirector without weakening the exact-parent lifecycle watchdog.
+On Windows, a nonsealed trusted-host supervisor launches the base Python
+interpreter as its direct child and prepends only the canonical checkout-local
+`.venv/Lib/site-packages` directory. The supervisor validates `pyvenv.cfg`,
+the configured base interpreter, Python major/minor compatibility, disabled
+system-site packages, and containment under the runtime root before accepting
+that dependency path. This avoids the transient venv redirector without
+weakening the exact-parent lifecycle watchdog or enabling the user site.
+Sealed runtime startup does not use the workspace virtualenv; it remains bound
+to the separately bridge-validated dependency path. The sealed manifest
+authenticates runtime source and bootstrap bytes, not every dependency file.
 
 The first authenticated health canary has a separate 270-second cold-model
 warmup budget. Once warm, health and query work use the ordinary owner budget
@@ -147,6 +153,10 @@ adapter boundary does not itself
 remove OS filesystem/process privileges from a child; the trusted host must
 configure those permissions separately.
 
+Authenticated health responses that prove a terminal semantic backend error
+fail immediately with that stable error code. They are not retried until the
+startup deadline. Transient connection failures remain bounded retries.
+
 The host bootstrap must retain the supervisor for the RedDog consumer's
 lifetime. A private-adapter QUERY_OWNER_POISONED response replaces the owned
 process and retries once; explicitly configured external owners are never
@@ -207,6 +217,7 @@ use:
 
     result = ensure_reddog_holoindex_operational(
         repo_root=repo_root,
+        owner_runtime_root=canonical_workspace_root,
         requested=holo_dependent_work_requested,
     )
 
@@ -218,6 +229,14 @@ scope for all seven baseline collections, rechecks HEAD, and then starts the
 owner bound to the resulting generation. Startup may route the maintenance
 request through governed WRE dispatch, but the trusted host remains the
 maintenance authority.
+
+The optional `owner_runtime_root` identifies the trusted canonical workspace
+whose `.venv` supplies dependencies to nonsealed refresh and owner children;
+it defaults to the already trusted `repo_root`. The same resolved and validated
+path is used on both sides of the refresh/start boundary.
+Arbitrary inherited `PYTHONPATH` and user-site packages remain disabled.
+Sealed refresh continues to use only its separately bridge-validated
+dependency path.
 
 Phase 1 requires an exclusive repository-writer window during full refresh.
 The canonical lease coordinates migrated writers; it does not constrain an

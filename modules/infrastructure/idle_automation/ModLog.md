@@ -12,6 +12,18 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-07-30 - Post-merge Holo owner runtime binding
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 87, WSP 97
+
+- The exact-SHA authority transaction now forwards the canonical workspace as
+  the nonsealed Holo maintenance and query-owner runtime root.
+- This keeps the detached authority checkout as the indexed repository while
+  using only the separately validated canonical `.venv` for Python
+  dependencies.
+- No query-time indexing, new maintenance authority, or sealed-runtime trust
+  expansion was introduced.
+
 ### 2026-07-26 - Exact-SHA HoloIndex Post-Merge WRE Coordinator
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 87, WSP 97

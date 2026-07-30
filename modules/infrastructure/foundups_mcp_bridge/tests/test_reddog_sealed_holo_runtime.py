@@ -22,6 +22,7 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_sealed_holo_runtime i
     SEALED_SITE_PACKAGES_ENV,
     scrub_holo_child_environment,
     sealed_holo_command,
+    trusted_holo_site_packages,
 )
 
 
@@ -142,6 +143,46 @@ def test_holo_child_environment_drops_provider_and_authority_secrets() -> None:
     assert "PYTHONPATH" not in child
 
 
+def test_trusted_holo_site_packages_accepts_only_checkout_local_windows_venv(
+    tmp_path: Path,
+) -> None:
+    base = tmp_path / "Python312" / "python.exe"
+    base.parent.mkdir()
+    base.write_bytes(b"python")
+    site_packages = tmp_path / ".venv" / "Lib" / "site-packages"
+    site_packages.mkdir(parents=True)
+    (tmp_path / ".venv" / "pyvenv.cfg").write_text(
+        "\n".join(
+            (
+                f"home = {base.parent}",
+                "include-system-site-packages = false",
+                "version = 3.12.2",
+                f"executable = {base}",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    assert trusted_holo_site_packages(
+        tmp_path,
+        platform_name="nt",
+        python_version=(3, 12),
+        base_executable=base,
+    ) == (str(site_packages.resolve()),)
+    assert trusted_holo_site_packages(
+        tmp_path,
+        platform_name="nt",
+        python_version=(3, 11),
+        base_executable=base,
+    ) == ()
+    assert trusted_holo_site_packages(
+        tmp_path, platform_name="posix"
+    ) == ()
+    assert trusted_holo_site_packages(
+        tmp_path / "missing", platform_name="nt"
+    ) == ()
+
+
 def test_maintenance_runner_uses_sealed_holo_index_copy(
     tmp_path: Path,
     monkeypatch,
@@ -160,6 +201,7 @@ def test_maintenance_runner_uses_sealed_holo_index_copy(
 
     error = handshake._run_full_refresh(
         repo_root=repo,
+        runtime_root=tmp_path,
         ssd_path=ssd,
         environ=env,
         timeout=30.0,
@@ -170,6 +212,7 @@ def test_maintenance_runner_uses_sealed_holo_index_copy(
     assert calls[0][0][5] == str(source / "holo_index.py")
     assert str(repo / "holo_index.py") not in calls[0][0]
     assert calls[0][1]["env"][SEALED_REQUIRED_ENV] == "1"
+    assert "PYTHONPATH" not in calls[0][1]["env"]
 
 
 def test_owner_runner_uses_sealed_wrapper_copy(
