@@ -1,5 +1,10 @@
 # RedDog Interface
 
+Version 0.4.43 publishes the current canonical resident thin client and
+supersedes the quarantined 0.4.42 Codex-intercept artifact. RedDog remains the
+architect; signed OpenClaw/WRE/Hermes receipts remain the worker-action
+boundary.
+
 Version 0.4.37 keeps the full imperative work focus as the HoloIndex query but
 matches grounding evidence against its substantive subject tokens. Action
 verbs and continuation scaffolding cannot create impossible evidence
