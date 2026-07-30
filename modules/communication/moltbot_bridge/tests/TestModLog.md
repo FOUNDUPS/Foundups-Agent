@@ -1,3 +1,10 @@
+## 2026-07-30: REDDOG_DRAFT_PR_EXACT_SHA_FIXTURE_REPAIR
+- Restored the mandatory `exact_sha_commit` result in the verified draft-PR
+  handler test chain after the exact-SHA stage was inserted before independent
+  verification.
+- Added a fail-closed regression proving a future verifier result cannot skip
+  the missing exact-SHA stage or reach the draft-PR runner.
+
 ## 2026-07-29: REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1
 - Proved the canonical operations profile performs a real semantic owner query,
   making failed/stale Holo evidence reachable by the repair state machine.
