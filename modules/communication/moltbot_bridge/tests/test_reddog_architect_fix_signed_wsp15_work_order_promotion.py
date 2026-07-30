@@ -57,6 +57,7 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executab
 from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_test_helpers import (
     PRINCIPAL_PUBLIC_KEY as _PRINCIPAL_PUBLIC_KEY,
     REDDOG_PUBLIC_KEY as _REDDOG_PUBLIC_KEY,
+    build_proposal_runtime_inputs,
     invoke_promotion_with_test_authority,
     seal_authority_profile,
 )
@@ -771,7 +772,7 @@ def test_rejects_conflicting_wsp15_allocation_before_store_mutation() -> None:
     assert store.load()["wre_queue_items"] == []
 
 
-def test_rejects_valid_but_execution_blocked_candidate_before_store_mutation() -> None:
+def test_authenticates_then_promotes_valid_execution_blocked_candidate() -> None:
     store = InMemoryAuthoritativeWorkStateStore(_work_state())
 
     result, _ = _promote(
@@ -779,9 +780,35 @@ def test_rejects_valid_but_execution_blocked_candidate_before_store_mutation() -
         architect_determination=_determination(proposal_ready=False),
     )
 
+    assert result.accepted is True
+    assert result.receipt is not None
+    assert len(store.load()["wre_queue_items"]) == 1
+
+
+def test_blocked_candidate_with_forged_authenticity_still_rejects() -> None:
+    store = InMemoryAuthoritativeWorkStateStore(_work_state())
+    determination = _determination(proposal_ready=False)
+    profile = _authority_profile()
+    attestation, runtime_config, resolver = build_proposal_runtime_inputs(
+        determination,
+        profile,
+        now_epoch=NOW_EPOCH,
+    )
+    forged = dict(attestation)
+    forged["signature"] = "forged"
+
+    result, _ = _promote(
+        store=store,
+        architect_determination=determination,
+        authority_profile=profile,
+        proposal_authenticity_attestation=forged,
+        signer_runtime_config=runtime_config,
+        principal_key_resolver=resolver,
+    )
+
     assert result.accepted is False
     assert (
-        promotion.ArchitectFixPromotionReason.PROPOSAL_ADMISSION_INVALID
+        promotion.ArchitectFixPromotionReason.PROPOSAL_AUTHENTICITY_INVALID
         in result.rejection_reasons
     )
     assert store.load()["wre_queue_items"] == []

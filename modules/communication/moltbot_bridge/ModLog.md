@@ -18,9 +18,9 @@
   flags, key/epoch/profile substitution, unsigned audit metadata, and
   malformed domains fail closed. A second domain-separated signer signature
   covers the response audit metadata and attestations.
-  The healthcheck result is audit evidence only. External signer lifecycle,
-  current-generation/replay selection, and per-signing-call use-time
-  capability consumption remain separately gated.
+  The healthcheck is evidence only. Stage-policy reconciliation permits a valid
+  `BLOCKED_CANDIDATE` to reach cryptographic promotion without claiming
+  readiness; stale, forged, or unresolved use-time anchors remain gated.
 - `REDDOG_SIGNED_RUNTIME_ARTIFACT_MANIFEST_PHASE1`: added the
   content-addressed signed-manifest foundation for the seven canonical
   resident runtime artifacts.

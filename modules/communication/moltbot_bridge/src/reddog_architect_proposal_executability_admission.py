@@ -39,6 +39,7 @@ from modules.communication.moltbot_bridge.src.reddog_architect_proposal_admissio
     current_architect_proposal_admission_policy,
     proposal_admission_prompt_policy,
     reevaluate_architect_proposal_execution_readiness,
+    reevaluate_architect_proposal_promotion_preconditions,
     required_capabilities_for_effect,
     validate_architect_proposal_executability_receipt,
 )
@@ -627,5 +628,6 @@ __all__ = [
     "evaluate_architect_proposal_executability",
     "proposal_admission_prompt_policy",
     "reevaluate_architect_proposal_execution_readiness",
+    "reevaluate_architect_proposal_promotion_preconditions",
     "validate_architect_proposal_executability_receipt",
 ]
