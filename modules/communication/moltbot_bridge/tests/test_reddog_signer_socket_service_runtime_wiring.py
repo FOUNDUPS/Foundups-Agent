@@ -423,6 +423,34 @@ def test_runtime_wiring_rejects_duplicate_multi_profile_public_key() -> None:
     assert service.calls == []
 
 
+def test_runtime_wiring_rejects_duplicate_profile_id_across_keys() -> None:
+    first_key = _private_key()
+    second_key = _private_key()
+    first = _profile(
+        _public_text(first_key),
+        signer_profile_id="duplicate-profile",
+    )
+    second = _profile(
+        _public_text(second_key),
+        signer_profile_id="duplicate-profile",
+    )
+    service = CapturingBoundedService()
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        _config(
+            _public_text(first_key),
+            key_provider_profile=None,
+            key_provider_profiles=(first, second),
+        ),
+        _resolver(first_key),
+        serve_bounded=service,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_RUNTIME_PROFILE_INVALID in result.rejection_reasons
+    assert service.calls == []
+
+
 def test_mapping_config_normalizes_profile_and_peer_policy() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)

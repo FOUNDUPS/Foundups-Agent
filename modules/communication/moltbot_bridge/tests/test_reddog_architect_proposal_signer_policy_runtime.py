@@ -10,6 +10,7 @@ import inspect
 import json
 import multiprocessing
 import sqlite3
+import sys
 import tempfile
 import threading
 import time
@@ -78,6 +79,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
     FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
     FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,
+    FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
     rehydrate_signer_socket_service_runtime_config,
     run_reddog_signer_socket_service_runtime_bootstrap,
 )
@@ -93,6 +95,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
     FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
     run_reddog_signer_socket_service_run_packet_supply,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_schema import (
+    SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
 )
 from modules.infrastructure.secrets_mcp.src.vault_resolver import (
     ResolveResult,
@@ -351,6 +356,22 @@ class _PrincipalKeyResolver:
         ):
             return self._public_key
         return None
+
+
+class _ManifestSelection:
+    pass
+
+
+class _ManifestSelectionBoundary:
+    def __init__(self, capability: object, values: dict[str, object]) -> None:
+        self._capability = capability
+        self._values = values
+
+    def consume(self, value: object) -> dict[str, object]:
+        if value is not self._capability:
+            raise ValueError("manifest_selection_unverified")
+        self._capability = None
+        return dict(self._values)
 
 
 def _policy_authorization(
@@ -648,6 +669,109 @@ def _config_kwargs(
     }
     values.update(overrides)
     return values
+
+
+def _write_proposal_launch_packet(
+    *,
+    repo: Path,
+    config_path: Path,
+    config_digest: str,
+    output_path: Path,
+    session_id: str = "proposal-bootstrap-test",
+) -> dict[str, object]:
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    argv = _proposal_launch_argv(
+        repo=repo,
+        config_path=config_path,
+        config_digest=config_digest,
+        output_path=output_path,
+        session_id=session_id,
+    )
+    packet: dict[str, object] = {
+        "schema_version": SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
+        "run_mode": "signer_owned_cli_sidecar",
+        "repo_root": str(repo.resolve()),
+        "working_directory": str(repo.resolve()),
+        "python_module": argv[2],
+        "argv": argv,
+        "config_path": str(config_path.resolve()),
+        "config_digest": config_digest,
+        "socket_path": str(Path(config["socket_path"]).resolve()),
+        "profile_count": len(config["key_provider_profiles"]),
+        "provider_mode": config["provider_mode"],
+        "op_executable": "op",
+        "op_timeout_s": 10.0,
+        "ttl_seconds": 300,
+        "session_id": session_id,
+        "process_owner_requirement": "distinct_signer_os_principal",
+        "redDog_must_not_spawn": True,
+        "main_py_must_not_spawn": True,
+        "shell_required": False,
+        "shell_command": None,
+        "no_secret_values_in_packet": True,
+    }
+    canonical = json.dumps(
+        packet, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
+    packet["run_packet_id"] = (
+        "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    )
+    output_path.write_text(json.dumps(packet, sort_keys=True), encoding="utf-8")
+    capability = _ManifestSelection()
+    selection = {
+        "manifest_id": "sha256:" + ("a" * 64),
+        "artifact_generation_digest": "sha256:" + ("b" * 64),
+        "config_digest": config_digest,
+        "config_raw_digest": _raw_digest(config_path),
+        "run_packet_digest": _raw_digest(output_path),
+        "repo_root": str(repo.resolve()),
+        "runtime_root": str(output_path.parent.resolve()),
+        "config_path": str(config_path.resolve()),
+        "run_packet_path": str(output_path.resolve()),
+    }
+    return {
+        "run_packet_path": output_path,
+        "expected_session_id": session_id,
+        "manifest_selection": capability,
+        "manifest_selection_boundary": _ManifestSelectionBoundary(
+            capability, selection
+        ),
+    }
+
+
+def _raw_digest(path: Path) -> str:
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _proposal_launch_argv(
+    *,
+    repo: Path,
+    config_path: Path,
+    config_digest: str,
+    output_path: Path,
+    session_id: str,
+) -> list[str]:
+    return [
+        sys.executable,
+        "-m",
+        "modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli",
+        "--repo-root",
+        str(repo.resolve()),
+        "--config",
+        str(config_path.resolve()),
+        "--expected-config-digest",
+        config_digest,
+        "--run-packet",
+        str(output_path.resolve()),
+        "--op-executable",
+        "op",
+        "--op-timeout-s",
+        "10",
+        "--ttl-seconds",
+        "300",
+        "--session-id",
+        session_id,
+    ]
 
 
 def _runtime_proposal_config(
@@ -1160,6 +1284,12 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     assert run_packet.rejection_reasons == (
         FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
     )
+    launch_binding = _write_proposal_launch_packet(
+        repo=repo,
+        config_path=runtime / "signer-service.json",
+        config_digest=result.config_digest,
+        output_path=runtime / "proposal-launch-packet.json",
+    )
 
     rehydrated = rehydrate_signer_socket_service_runtime_config(
         repo,
@@ -1194,6 +1324,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
                     HIGH_WATER_STORE_ID
                 )
             ),
+            **launch_binding,
         )
     )
     assert rejected_in_memory.accepted is False
@@ -1202,6 +1333,12 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
         in rejected_in_memory.rejection_reasons
     )
 
+    launch_binding = _write_proposal_launch_packet(
+        repo=repo,
+        config_path=runtime / "signer-service.json",
+        config_digest=result.config_digest,
+        output_path=runtime / "proposal-launch-packet.json",
+    )
     bootstrap = run_reddog_signer_socket_service_runtime_bootstrap(
         repo_root=repo,
         config_path=runtime / "signer-service.json",
@@ -1226,6 +1363,7 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
                 tmp_path / "production-high-water.sqlite3"
             )
         ),
+        **launch_binding,
     )
     assert bootstrap.rejection_reasons == ()
     assert bootstrap.accepted is True
@@ -1861,7 +1999,7 @@ def test_bootstrap_rejects_tampered_serialized_proposal_policy(
     )
     assert malformed_digest.accepted is False
     assert malformed_digest.rejection_reasons == (
-        FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
     )
     replacement_proposal = {
         **{
@@ -1917,7 +2055,7 @@ def test_bootstrap_rejects_tampered_serialized_proposal_policy(
     )
     assert bootstrap.accepted is False
     assert bootstrap.rejection_reasons == (
-        FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
     )
     replacement_digest = "sha256:" + hashlib.sha256(
         json.dumps(
@@ -1938,7 +2076,7 @@ def test_bootstrap_rejects_tampered_serialized_proposal_policy(
     )
     assert self_consistent.accepted is False
     assert self_consistent.rejection_reasons == (
-        FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,
+        FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
     )
 
 

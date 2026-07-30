@@ -88,6 +88,14 @@ def test_checked_in_manifest_matches_independent_generation() -> None:
         "modules/communication/moltbot_bridge/src/reddog_holoindex_task_dispatch.py"
         in generated["required_runtime_sha256"]
     )
+    assert (
+        "modules/communication/moltbot_bridge/src/reddog_signer_mutual_peer_handshake.py"
+        in generated["required_runtime_sha256"]
+    )
+    assert (
+        "modules/communication/moltbot_bridge/src/reddog_signer_socket_schema.py"
+        in generated["required_runtime_sha256"]
+    )
     assert generator.canonical_manifest_digest(generated) == (
-        "377646e8069ce6814e873bb4fc52768a442866f14b37e2a19e6a2e80dde504bd"
+        "0183e27946380cd9442e3e9c9f563e06abf9d95c7a251753020cc8226a221e07"
     )

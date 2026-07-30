@@ -14,11 +14,13 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import sys
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
+    PROVIDER_MODE_WSP71_PERMISSIONED,
     SignerKeyResolver,
 )
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
@@ -36,6 +38,13 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PrincipalKeyResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_launch_selection import (
+    RuntimeArtifactManifestLaunchSelectionBoundary,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
+    SignerPeerProfileBinding,
+    load_signer_peer_instance_binding,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_text,
@@ -56,6 +65,17 @@ FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH = (
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH"
 )
 FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED = "FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED"
+FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION = (
+    "FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION"
+)
+
+ResolverAfterAdmission = Callable[[], SignerKeyResolver]
+BootstrapLoadResult = tuple[
+    Any | None,
+    Path | None,
+    str | None,
+    "SignerSocketServiceRuntimeBootstrapResult | None",
+]
 
 
 @dataclass(frozen=True)
@@ -87,73 +107,58 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     *,
     repo_root: Path | str,
     config_path: Path | str | None,
-    resolver: SignerKeyResolver,
+    resolver: SignerKeyResolver | None = None,
+    resolver_factory: ResolverAfterAdmission | None = None,
     serve_bounded: ServeSignerSocketBounded,
     ready_callback: Optional[Callable[[], None]] = None,
     expected_config_digest: str | None = None,
+    run_packet_path: Path | str | None = None,
+    expected_session_id: str | None = None,
+    manifest_selection: object | None = None,
+    manifest_selection_boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
     root = Path(repo_root).resolve()
-    path, path_reasons = _resolve_config_path(root, config_path)
-    if path_reasons:
-        return _reject(*path_reasons)
-    assert path is not None
-
-    payload, digest, read_reasons = _read_config(path, path.parent)
-    if read_reasons:
-        return _reject(*read_reasons, config_path=str(path))
-    assert payload is not None
-    assert digest is not None
-    if expected_config_digest is not None and not _is_sha256_digest(
-        expected_config_digest
-    ):
-        return _reject(
-            FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
-            config_path=str(path),
-            config_digest=digest,
-        )
-    if (
-        expected_config_digest is not None
-        and not hmac.compare_digest(expected_config_digest, digest)
-    ) or (
-        payload.get("proposal_authority_policy") is not None
-        and (
-            expected_config_digest is None
-            or not hmac.compare_digest(expected_config_digest, digest)
-        )
-    ):
-        return _reject(
-            FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
-            config_path=str(path),
-            config_digest=digest,
-        )
-
-    config = rehydrate_signer_socket_service_runtime_config(
+    config, path, digest, rejected = _load_bound_runtime_config(
         root,
-        path.parent,
-        payload,
-        expected_config_digest=expected_config_digest,
+        config_path,
+        expected_config_digest,
+        run_packet_path,
+        expected_session_id,
+        manifest_selection,
+        manifest_selection_boundary,
     )
-    if config is None:
+    if rejected is not None:
+        return rejected
+    assert config is not None and path is not None and digest is not None
+    admitted_resolver = _resolver_after_admission(resolver, resolver_factory)
+    if admitted_resolver is None:
         return _reject(
-            FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,
+            FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED,
             config_path=str(path),
             config_digest=digest,
         )
 
     runtime = run_reddog_signer_socket_service_runtime_wiring(
         config,
-        resolver,
+        admitted_resolver,
         serve_bounded=serve_bounded,
         ready_callback=ready_callback,
         principal_key_resolver=principal_key_resolver,
-        proposal_replay_high_water_store=(
-            proposal_replay_high_water_store
-        ),
+        proposal_replay_high_water_store=proposal_replay_high_water_store,
     )
+    return _bootstrap_runtime_result(runtime, path=path, digest=digest)
+
+
+def _bootstrap_runtime_result(
+    runtime: Any,
+    *,
+    path: Path,
+    digest: str,
+) -> SignerSocketServiceRuntimeBootstrapResult:
     runtime_receipt = runtime.to_dict()
     if runtime.accepted is not True:
         return _reject(
@@ -171,6 +176,268 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         config_path=str(path),
         config_digest=digest,
         runtime_result=runtime_receipt,
+    )
+
+
+def _consume_manifest_selection(
+    root: Path,
+    value: object | None,
+    boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None,
+) -> Mapping[str, Any] | None:
+    if value is None or boundary is None:
+        return None
+    try:
+        selected = boundary.consume(value)
+        runtime_root = validate_runtime_root_path(
+            selected["runtime_root"],
+            repo_root=root,
+        )
+        config_path = Path(str(selected["config_path"])).resolve()
+        packet_path = Path(str(selected["run_packet_path"])).resolve()
+    except Exception:
+        return None
+    if Path(str(selected.get("repo_root") or "")).resolve() != root:
+        return None
+    if config_path.parent != runtime_root or packet_path.parent != runtime_root:
+        return None
+    return selected
+
+
+def _caller_paths_match_selection(
+    config_path: Path | str | None,
+    run_packet_path: Path | str | None,
+    selected_config: Path,
+    selected_packet: Path,
+) -> bool:
+    return bool(
+        config_path
+        and run_packet_path
+        and Path(config_path).resolve() == selected_config.resolve()
+        and Path(run_packet_path).resolve() == selected_packet.resolve()
+    )
+
+
+def _resolver_after_admission(
+    resolver: SignerKeyResolver | None,
+    factory: ResolverAfterAdmission | None,
+) -> SignerKeyResolver | None:
+    if resolver is not None:
+        return resolver
+    if factory is None:
+        return None
+    try:
+        return factory()
+    except Exception:
+        return None
+
+
+def _load_bound_runtime_config(
+    root: Path, config_path: Path | str | None,
+    expected_digest: str | None, run_packet_path: Path | str | None,
+    session_id: str | None,
+    manifest_selection: object | None,
+    manifest_selection_boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None,
+) -> BootstrapLoadResult:
+    launch = _selected_launch_paths(
+        root,
+        config_path,
+        run_packet_path,
+        manifest_selection,
+        manifest_selection_boundary,
+    )
+    if launch is None:
+        return None, None, None, _reject(
+            FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION
+        )
+    selection, selected_config, selected_packet = launch
+    path, reasons = _resolve_config_path(root, selected_config)
+    if reasons:
+        return None, None, None, _reject(*reasons)
+    assert path is not None
+    payload, digest, raw_digest, reasons = _read_config(path, path.parent)
+    if reasons:
+        return None, path, None, _reject(*reasons, config_path=str(path))
+    assert payload is not None and digest is not None and raw_digest is not None
+    selected_digest = str(selection["config_digest"])
+    if expected_digest != selected_digest or _config_digest_rejected(
+        payload, digest, selected_digest
+    ):
+        rejected = _reject(
+            FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH,
+            config_path=str(path),
+            config_digest=digest,
+        )
+        return None, path, digest, rejected
+    config = _rehydrate_selected_config(
+        root,
+        path,
+        payload,
+        raw_digest,
+        selected_digest,
+        selected_packet,
+        session_id,
+        selection,
+    )
+    if config is None:
+        return None, path, digest, _malformed_config(path, digest)
+    return config, path, digest, None
+
+
+def _selected_launch_paths(
+    root: Path,
+    config_path: Path | str | None,
+    run_packet_path: Path | str | None,
+    manifest_selection: object | None,
+    boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None,
+) -> tuple[Mapping[str, Any], Path, Path] | None:
+    selection = _consume_manifest_selection(
+        root,
+        manifest_selection,
+        boundary,
+    )
+    if selection is None:
+        return None
+    selected_config = Path(str(selection["config_path"]))
+    selected_packet = Path(str(selection["run_packet_path"]))
+    if not _caller_paths_match_selection(
+        config_path,
+        run_packet_path,
+        selected_config,
+        selected_packet,
+    ):
+        return None
+    return selection, selected_config, selected_packet
+
+
+def _rehydrate_selected_config(
+    root: Path,
+    path: Path,
+    payload: dict[str, Any],
+    raw_digest: str,
+    selected_digest: str,
+    selected_packet: Path,
+    session_id: str | None,
+    selection: Mapping[str, Any],
+) -> Any | None:
+    config = rehydrate_signer_socket_service_runtime_config(
+        root,
+        path.parent,
+        payload,
+        expected_config_digest=selected_digest,
+    )
+    if config is None:
+        return None
+    return _attach_peer_binding(
+        config,
+        root,
+        path,
+        selected_digest,
+        selected_packet,
+        session_id,
+        selection,
+        raw_digest,
+    )
+
+
+def _config_digest_rejected(
+    payload: Mapping[str, Any],
+    actual: str,
+    expected: str | None,
+) -> bool:
+    if expected is not None and not _is_sha256_digest(expected):
+        return True
+    matches = expected is not None and hmac.compare_digest(expected, actual)
+    return (expected is not None and not matches) or (
+        payload.get("proposal_authority_policy") is not None and not matches
+    )
+
+
+def _attach_peer_binding(
+    config: Any,
+    root: Path,
+    config_path: Path,
+    expected_digest: str | None,
+    run_packet_path: Path | str | None,
+    session_id: str | None,
+    manifest_selection: Mapping[str, Any],
+    config_raw_digest: str,
+) -> Any | None:
+    if config.provider_mode != PROVIDER_MODE_WSP71_PERMISSIONED:
+        return None
+    if (
+        expected_digest is None
+        or not session_id
+        or not run_packet_path
+    ):
+        return None
+    profiles = tuple(config.key_provider_profiles) or (
+        (config.key_provider_profile,) if config.key_provider_profile else ()
+    )
+    if not _selection_config_binding_valid(
+        manifest_selection,
+        root=root,
+        config_path=config_path,
+        config_digest=expected_digest,
+        config_raw_digest=config_raw_digest,
+    ):
+        return None
+    binding = load_signer_peer_instance_binding(
+        repo_root=root,
+        config_path=config_path,
+        expected_config_digest=expected_digest,
+        run_packet_path=run_packet_path,
+        expected_session_id=session_id,
+        expected_socket_path=config.socket_path,
+        signer_profiles=tuple(_profile_peer_binding(item) for item in profiles),
+        manifest_selection=manifest_selection,
+        python_executable=sys.executable,
+    )
+    return replace(config, signer_peer_instance_binding=binding) if binding else None
+
+
+def _profile_peer_binding(value: Any) -> SignerPeerProfileBinding:
+    return SignerPeerProfileBinding(
+        signer_profile_id=_profile_id(value),
+        signer_public_key=_profile_value(value, "expected_public_key"),
+        key_epoch=_profile_value(value, "expected_key_epoch"),
+    )
+
+
+def _selection_config_binding_valid(
+    value: object,
+    *,
+    root: Path,
+    config_path: Path,
+    config_digest: str,
+    config_raw_digest: str,
+) -> bool:
+    return isinstance(value, Mapping) and all(
+        (
+            Path(str(value.get("repo_root") or "")).resolve() == root,
+            Path(str(value.get("config_path") or "")).resolve() == config_path,
+            value.get("config_digest") == config_digest,
+            value.get("config_raw_digest") == config_raw_digest,
+        )
+    )
+
+
+def _profile_value(value: Any, name: str) -> str:
+    candidate = (
+        value.get(name)
+        if isinstance(value, Mapping)
+        else getattr(value, name, "")
+    )
+    return str(candidate or "")
+
+
+def _malformed_config(
+    path: Path,
+    digest: str,
+) -> SignerSocketServiceRuntimeBootstrapResult:
+    return _reject(
+        FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,
+        config_path=str(path),
+        config_digest=digest,
     )
 
 
@@ -199,10 +466,23 @@ def _resolve_config_path(
     return resolved, ()
 
 
+def _profile_id(value: object) -> str:
+    if hasattr(value, "signer_profile_id"):
+        return str(getattr(value, "signer_profile_id"))
+    if isinstance(value, dict):
+        return str(value.get("signer_profile_id") or "")
+    return ""
+
+
 def _read_config(
     path: Path,
     runtime_root: Path,
-) -> tuple[Optional[dict[str, Any]], Optional[str], tuple[str, ...]]:
+) -> tuple[
+    Optional[dict[str, Any]],
+    Optional[str],
+    Optional[str],
+    tuple[str, ...],
+]:
     try:
         text = secure_read_confined_text(
             path,
@@ -211,12 +491,13 @@ def _read_config(
         )
         payload = json.loads(text, parse_constant=_reject_json_constant)
     except Exception:
-        return None, None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE,)
+        return None, None, None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE,)
     if not isinstance(payload, dict):
-        return None, None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,)
+        return None, None, None, (FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED,)
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     digest = "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-    return payload, digest, ()
+    raw_digest = "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return payload, digest, raw_digest, ()
 
 
 def rehydrate_signer_socket_service_runtime_config(

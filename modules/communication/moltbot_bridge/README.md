@@ -361,9 +361,15 @@ receipt. The harness never starts the signer or resolves secret values.
 The signed runtime-artifact manifest producer is available as a
 content-addressed foundation. Canonical artifact writers and publication share
 a runtime-generation fence, and final publication uses OS-level no-replace
-semantics. The canary remains blocked until production durable replay
-high-water, authenticated manifest selection, use-time current-generation
-verification, and mutual signer peer-handshake dependencies are supplied.
+semantics. A verified manifest can now mint one opaque, non-serializable,
+one-shot launch selection inside the signer process. The selection binds the
+exact config and run-packet bytes, repository/runtime roots, and generation.
+The canary remains blocked until the external signer lifecycle supplies that
+selector from current-generation and durable replay authority, and until the
+mutual peer proof is consumed at each authoritative signing boundary. The
+explicit signer healthcheck proves a fresh Ed25519 response from the signer
+instance bound to the exact production run packet; it does not by itself
+authorize a later signing call or execution effect.
 
 `READY_FOR_EXECUTION` is only static readiness. Every main control-loop caller
 uses one shared OS advisory lock. `LIVE_PROOF_COMPLETE` requires the matching
