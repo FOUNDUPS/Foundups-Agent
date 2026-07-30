@@ -184,13 +184,15 @@ def _invoke_foundups_fusion(
             "timeout": timeout_seconds,
             "response_contract": "strict_json_bounded_artifact_contents.v1",
             "_redacted_evidence_context": redacted_context,
-            "bridge_meta": {
-                "artifact_generation_binding": verified_binding,
-                "model_selection_receipt_id": model_topology["model_selection_receipt_id"],
-                "model_runtime_binding_receipt_id": model_topology["model_runtime_binding_receipt_id"],
-                "model_runtime_binding_verification_receipt_id": model_topology[
-                    "model_runtime_binding_verification_receipt_id"
-                ],
+             "bridge_meta": {
+                 "artifact_generation_binding": verified_binding,
+                 "model_selection_receipt_id": model_topology["model_selection_receipt_id"],
+                 "model_selection_digest": model_topology["model_selection_digest"],
+                 "model_runtime_binding_receipt_id": model_topology["model_runtime_binding_receipt_id"],
+                 "model_runtime_binding_digest": model_topology["model_runtime_binding_digest"],
+                 "model_runtime_binding_verification_receipt_id": model_topology[
+                     "model_runtime_binding_verification_receipt_id"
+                 ],
                 "model_runtime_binding_verification_digest": model_topology[
                     "model_runtime_binding_verification_digest"
                 ],
@@ -733,7 +735,13 @@ def _runtime_model_topology(
         "lead_model": lead,
         "panel_models": tuple(item for item in panel if item),
         "model_selection_receipt_id": str(selection.get("receipt_id") or ""),
-        "model_runtime_binding_receipt_id": str(selection.get("model_runtime_binding_receipt_id") or ""),
+        "model_selection_digest": str(selection.get("digest") or ""),
+        "model_runtime_binding_receipt_id": str(
+            selection.get("model_runtime_binding_receipt_id") or ""
+        ),
+        "model_runtime_binding_digest": str(
+            selection.get("model_runtime_binding_digest") or ""
+        ),
         "model_runtime_binding_verification_receipt_id": str(
             selection.get("model_runtime_binding_verification_receipt_id") or ""
         ),
@@ -743,7 +751,9 @@ def _runtime_model_topology(
     }
     required = (
         "model_selection_receipt_id",
+        "model_selection_digest",
         "model_runtime_binding_receipt_id",
+        "model_runtime_binding_digest",
         "model_runtime_binding_verification_receipt_id",
         "model_runtime_binding_verification_digest",
     )

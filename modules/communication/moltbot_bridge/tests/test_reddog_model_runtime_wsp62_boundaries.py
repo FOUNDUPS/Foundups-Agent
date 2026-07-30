@@ -9,7 +9,9 @@ from pathlib import Path
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 BOUNDED_MODULES = (
     "reddog_artifact_generation_admission_capability.py",
+    "reddog_artifact_generation_authority_capability.py",
     "reddog_artifact_generation_model_binding.py",
+    "reddog_artifact_generation_model_capability.py",
     "reddog_model_runtime_verifier_bootstrap.py",
     "reddog_queue_model_runtime_authority.py",
     "reddog_runtime_json_read.py",

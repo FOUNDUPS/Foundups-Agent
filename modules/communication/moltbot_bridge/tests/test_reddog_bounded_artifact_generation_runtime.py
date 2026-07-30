@@ -7,7 +7,6 @@ import copy
 import hashlib
 import json
 import pickle
-from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -66,6 +65,8 @@ from modules.communication.moltbot_bridge.src.reddog_artifact_generation_admissi
     ArtifactGenerationAuthorityCapability,
     ArtifactGenerationModelCapability,
     _issue_artifact_generation_authority,
+    consume_artifact_generation_authority,
+    consume_artifact_generation_model,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_runtime_binding_test_capability,
@@ -108,11 +109,12 @@ class FakeRunner:
         binding: ArtifactGenerationModelCapability,
         timeout_seconds: int,
     ) -> ArtifactGenerationModelResult:
+        verified_binding = consume_artifact_generation_model(binding)
         self.calls.append(
             {
                 "prompt": prompt,
                 "context": context,
-                "binding": binding.to_dict(),
+                "binding": verified_binding or {},
                 "timeout_seconds": timeout_seconds,
             }
         )
@@ -459,11 +461,7 @@ def test_artifact_generation_requires_one_shot_authority_capability() -> None:
     runner = FakeRunner()
 
     missing = generate_bounded_artifact_contents(request, runner=runner)
-    forged = ArtifactGenerationAuthorityCapability(
-        work_order_id=str(request["work_order_id"]),
-        request_digest=_mapping_digest(request),
-        _seal=object(),
-    )
+    forged = ArtifactGenerationAuthorityCapability("attacker-token")
     forged_result = generate_bounded_artifact_contents(
         request,
         runner=runner,
@@ -475,14 +473,14 @@ def test_artifact_generation_requires_one_shot_authority_capability() -> None:
     assert runner.calls == []
 
 
-@pytest.mark.parametrize("transform", (copy.copy, lambda value: replace(value), pickle.loads))
-def test_copied_replaced_or_unpickled_authority_capability_rejects(
-    transform,
-) -> None:
+def test_copied_authority_token_cannot_replace_original_identity() -> None:
     request = _request()
     original = _issue_artifact_generation_authority(request)
     assert original is not None
-    candidate = transform(pickle.dumps(original)) if transform is pickle.loads else transform(original)
+    token = object.__getattribute__(
+        original, "_ArtifactGenerationAuthorityCapability__token"
+    )
+    candidate = ArtifactGenerationAuthorityCapability(token)
     runner = FakeRunner()
 
     rejected = generate_bounded_artifact_contents(
@@ -517,6 +515,14 @@ def test_copied_replaced_or_unpickled_authority_capability_rejects(
     assert accepted.accepted is True
     assert FAIL_AUTHORITY in replayed.rejection_reasons
     assert len(runner.calls) == 1
+
+
+@pytest.mark.parametrize("transform", (copy.copy, copy.deepcopy, pickle.dumps))
+def test_authority_capability_copy_and_pickle_are_forbidden(transform) -> None:
+    capability = _issue_artifact_generation_authority(_request())
+    assert capability is not None
+    with pytest.raises(TypeError):
+        transform(capability)
 
 
 def test_foundups_fusion_runner_loader_resolves_repo_bridge() -> None:
@@ -712,7 +718,11 @@ def test_model_capability_is_one_shot_and_cannot_be_copied(
             runner = reddog_bounded_artifact_generation_runtime.FoundupsFusionArtifactGenerationRunner(
                 runtime_mode="foundups_fusion",
             )
-            for candidate in (copy.copy(binding), binding, binding):
+            token = object.__getattribute__(
+                binding, "_ArtifactGenerationModelCapability__token"
+            )
+            copied = ArtifactGenerationModelCapability(token)
+            for candidate in (copied, binding, binding):
                 self.results.append(
                     runner.generate_artifacts(
                         prompt=prompt,
@@ -732,6 +742,63 @@ def test_model_capability_is_one_shot_and_cannot_be_copied(
     assert accepted.ok is True
     assert replayed.ok is False
     assert len(network_calls) == 1
+
+
+def test_artifact_capabilities_keep_trusted_state_in_registry() -> None:
+    request = _request()
+    authority = _issue_artifact_generation_authority(request)
+    assert authority is not None
+    assert not hasattr(authority, "request_digest")
+    with pytest.raises(AttributeError):
+        object.__setattr__(authority, "request_digest", "sha256:changed")
+    assert consume_artifact_generation_authority(authority, request) is True
+
+
+def test_model_handle_has_no_mutable_provider_binding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider_calls: list[dict[str, object]] = []
+
+    class ForwardingRunner:
+        def generate_artifacts(self, *, prompt, context, binding, timeout_seconds):
+            assert not hasattr(binding, "binding_json")
+            with pytest.raises(AttributeError):
+                object.__setattr__(binding, "binding_json", '{"model_selection":{}}')
+            return reddog_bounded_artifact_generation_runtime.FoundupsFusionArtifactGenerationRunner(
+                runtime_mode="foundups_fusion"
+            ).generate_artifacts(
+                prompt=prompt,
+                context=context,
+                binding=binding,
+                timeout_seconds=timeout_seconds,
+            )
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(
+        reddog_bounded_artifact_generation_runtime,
+        "_load_foundups_fusion_runner",
+        lambda: _successful_fusion(provider_calls),
+    )
+    result = _generate(_request(), runner=ForwardingRunner())
+    assert result.accepted is True, result.rejection_reasons
+    assert len(provider_calls) == 1
+    assert provider_calls[0]["lead_model"] == "openai/gpt-5.6-code"
+
+
+def _successful_fusion(calls):
+    def run(_api_key, _payload, _messages, options):
+        calls.append(dict(options))
+        return {
+            "ok": True,
+            "content": (
+                '{"artifact_contents":{'
+                f'"{ARTIFACT}":"# generated\\n"'
+                "}}"
+            ),
+            "review_packet": {"receipt_id": "review:identity"},
+        }
+
+    return run
 
 
 def test_missing_explicit_request_rejects_before_runner() -> None:

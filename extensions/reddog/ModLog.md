@@ -7,6 +7,9 @@
 - Regenerated the backend runtime manifest after binding nonsealed HoloIndex
   maintenance and owner startup to the validated canonical workspace
   virtualenv.
+- Regenerated and re-pinned the manifest for the signed model-runtime
+  artifact-generation boundary; the 1,106-file dependency closure remains
+  below the explicit 1,150-file fail-closed limit.
 - Pinned authenticated terminal health failure handling so backend
   unavailability fails quickly instead of consuming the startup deadline.
 - No editor-side execution authority or query-time indexing was added.

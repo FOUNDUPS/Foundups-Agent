@@ -1,5 +1,6 @@
 """Focused resident-queue model runtime artifact integration coverage."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -9,19 +10,21 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admis
     verified_runtime_binding_receipt,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
-    model_runtime_binding_test_capability,
     model_runtime_binding_test_verifier,
     model_selection_and_runtime_binding_receipts,
 )
-from modules.communication.moltbot_bridge.src.reddog_artifact_generation_admission_capability import (
-    _issue_artifact_generation_authority,
-)
 from modules.communication.moltbot_bridge.src import (
+    reddog_architect_fix_promotion_transaction,
     reddog_bounded_artifact_generation_runtime,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
+    authority_profile_unknown_field_paths,
 )
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     FoundupsFusionArtifactGenerationRunner,
-    generate_bounded_artifact_contents,
+)
+from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
+    _materialize_work_orders_from_authority_profile,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_worker_pilot_handler import (
     BOUNDED_WORKER_PILOT_STAGE_KEY,
@@ -41,6 +44,10 @@ from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_boot
 from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_serial_loop_bootstrap import (
     NOW,
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
+    PILOT_ARTIFACT,
+    PILOT_DOMAIN_ID,
+    PILOT_OPERATION,
+    PERMISSION_DIGEST,
     RUNTIME_SURFACE_ARTIFACT_GENERATION,
     WORK_ORDER_ID,
     _FakeArtifactGenerator,
@@ -50,6 +57,9 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
     _assert_bootstrap_yielded_at_assurance,
     _ed25519_signing_material,
     _pilot_path_overrides,
+    _pilot_bounded_worker_plan,
+    _pilot_allowed_paths,
+    _pilot_signed_authority_for_bootstrap,
     _pilot_payloads,
     _pilot_worktree_path,
     _principals,
@@ -62,13 +72,20 @@ from modules.communication.moltbot_bridge.tests.test_reddog_main_resident_queue_
 from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_bounded_worker_pilot_handler import (
     _Resolver,
     _binding_stage_overrides,
+    _mapping_digest as _handler_mapping_digest,
     _seeded_store,
     _snapshot as _handler_snapshot,
     _valid_bundle,
     _work_order_with_plan,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
+    _authority_profile,
+    _determination,
     _promote,
+    _rebind_determination_admission,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
+    ARTIFACT as HANDLER_ARTIFACT,
 )
 
 
@@ -117,6 +134,19 @@ def test_malformed_model_runtime_verifier_config_fails_closed(
 
     assert verifier is None
     assert reasons == ("malformed_model_runtime_verifier_config",)
+
+
+def test_bounded_plan_authority_schema_rejects_shadow_model_receipts() -> None:
+    profile = _authority_profile(
+        bounded_worker_plan={
+            "operation": "bounded",
+            "model_runtime_binding_receipt": {"receipt_id": "attacker"},
+        }
+    )
+
+    assert authority_profile_unknown_field_paths(profile, seed=False) == (
+        "bounded_worker_plan.model_runtime_binding_receipt",
+    )
 
 
 def test_assigned_worker_reverifies_signed_model_evidence_before_provider(
@@ -180,99 +210,189 @@ def test_assigned_worker_reverifies_signed_model_evidence_before_provider(
     )
 
 
-def test_promoted_artifact_runtime_lineage_reaches_exact_provider(
+def test_promoted_queue_claim_materialization_reaches_exact_provider(
+    tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    selection, binding = model_selection_and_runtime_binding_receipts(
-        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
-        task_family="reddog_architect_fix_promotion",
+    binding, snapshot, queue_item, worker_claim, work_order = (
+        _promote_claimed_work_order(monkeypatch)
     )
-    promoted, store = _promote(
-        model_selection_receipt=selection,
-        model_runtime_binding_receipt=binding,
+    bundle = _valid_bundle(tmp_path)
+    chain_store = _promoted_chain_store(
+        bundle,
+        queue_item=queue_item,
+        work_order=work_order,
     )
-    assert promoted.accepted is True, promoted.rejection_reasons
-    assert store.load()["wre_queue_items"][0]["model_runtime_binding_receipt_id"] == (
-        binding["receipt_id"]
-    )
-    request = _promotion_artifact_request(promoted.authority_profile)
     provider_calls: list[dict[str, object]] = []
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     monkeypatch.setattr(
         reddog_bounded_artifact_generation_runtime,
         "_load_foundups_fusion_runner",
-        lambda: _provider_stub(provider_calls),
+        lambda: _provider_stub(provider_calls, PILOT_ARTIFACT),
     )
-    result = generate_bounded_artifact_contents(
-        request,
-        runner=FoundupsFusionArtifactGenerationRunner(
+    handler = build_reddog_resident_queue_bounded_worker_pilot_stage_handler(
+        chain_results_store=chain_store,
+        work_order_resolver=_Resolver(work_order),
+        artifact_contents={},
+        artifact_generation_request_binding_enabled=True,
+        artifact_generator=FoundupsFusionArtifactGenerationRunner(
             runtime_mode="foundups_fusion"
         ),
-        authority_capability=_issue_artifact_generation_authority(request),
-        model_runtime_binding_capability=model_runtime_binding_test_capability(
-            selection, binding
-        ),
+        model_runtime_binding_verifier=model_runtime_binding_test_verifier(binding),
+        repo_root=bundle["repo_root"],
+    )
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=snapshot,
+        store=chain_store,
+        handlers={BOUNDED_WORKER_PILOT_STAGE_KEY: handler},
+        now_iso=NOW,
     )
     assert result.accepted is True, result.rejection_reasons
     assert len(provider_calls) == 1
-    assert provider_calls[0]["lead_model"] == binding["principal_model"]
-
-
-def _promotion_artifact_request(profile):
-    planned = (
-        "modules/communication/moltbot_bridge/tests/fixtures/"
-        "reddog_queue_pilot/README.md"
+    _assert_continuous_lineage(
+        queue_item,
+        worker_claim,
+        work_order,
+        provider_calls[0],
+        chain_store.load(),
     )
-    return {
-        "explicit_artifact_generation_requested": True,
-        "work_order_id": profile["work_order_id"],
-        "slice_name": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-        "task_summary": profile["task_summary"],
-        "planned_artifacts": [planned],
-        "evidence_context": "Promotion-derived bounded artifact generation.",
-        "holoindex_evidence": {
+
+
+def _promote_claimed_work_order(monkeypatch):
+    selection, binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+        task_family="reddog_architect_fix_promotion",
+    )
+    determination = _rebind_determination_admission(
+        _determination(),
+        {
+            "allowed_paths": _pilot_allowed_paths(),
+            "denied_paths": [f"modules/foundups/{PILOT_DOMAIN_ID}/secrets/**"],
+            "requested_operation": PILOT_OPERATION,
+        },
+    )
+    monkeypatch.setattr(
+        reddog_architect_fix_promotion_transaction,
+        "_work_order_id",
+        lambda _queue_item_id: WORK_ORDER_ID,
+    )
+    promoted, store = _promote(
+        model_selection_receipt=selection,
+        model_runtime_binding_receipt=binding,
+        authority_profile=_promoted_authority_profile(_promoted_bounded_worker_plan()),
+        architect_determination=determination,
+    )
+    assert promoted.accepted is True, promoted.rejection_reasons
+    snapshot = store.load()
+    queue_item = snapshot["wre_queue_items"][0]
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=snapshot,
+        authority_profile=promoted.authority_profile,
+        requested_queue_item_id=queue_item["queue_item_id"],
+        now_iso=NOW,
+    )
+    assert reasons == ()
+    assert work_orders is not None
+    return binding, snapshot, queue_item, snapshot["worker_claims"][0], work_orders[WORK_ORDER_ID]
+
+
+def _promoted_bounded_worker_plan():
+    plan = _pilot_bounded_worker_plan()
+    plan["shell_profile"].pop("secret_env_refs", None)
+    return plan
+
+
+def _promoted_authority_profile(plan):
+    path_overrides = _pilot_path_overrides()
+    path_overrides.pop("task_summary", None)
+    path_overrides.pop("rollback_plan", None)
+    return _authority_profile(
+        foundup_id=PILOT_DOMAIN_ID,
+        permission_snapshot_digest=PERMISSION_DIGEST,
+        holoindex_evidence={
+            "holoindex_query": "Promoted pAccess bounded artifact generation",
+            "holoindex_status": "bundle_json_ok",
             "index_gap_detected": False,
             "retrieval_quality": "HIGH",
+            "applicable_wsps": ["WSP_15", "WSP_50", "WSP_97"],
+            "evidence_refs": [
+                "modules/communication/moltbot_bridge/src/"
+                "reddog_bounded_artifact_generation_runtime.py"
+            ],
+            "holoindex_freshness_receipt_digest": "sha256:" + ("f" * 64),
         },
-        "signed_authority": _promotion_model_lineage(profile),
-        "signed_receipt_chain": {"accepted": True},
-        "model_selection_receipt": profile["model_selection_receipt"],
-        "model_runtime_binding_receipt": profile["model_runtime_binding_receipt"],
-    }
+        **path_overrides,
+        bounded_worker_plan=plan,
+    )
 
 
-def _promotion_model_lineage(profile):
-    return {
-        "accepted": True,
-        "model_selection_receipt_id": profile["model_selection_receipt_id"],
-        "model_selection_digest": profile["model_selection_digest"],
-        "model_runtime_binding_receipt_id": profile[
-            "model_runtime_binding_receipt_id"
-        ],
-        "model_runtime_binding_digest": profile["model_runtime_binding_digest"],
-        "model_runtime_binding_verification_receipt_id": profile[
-            "model_runtime_binding_verification_receipt_id"
-        ],
-        "model_runtime_binding_verification_digest": profile[
-            "model_runtime_binding_verification_digest"
-        ],
-    }
+def _promoted_chain_store(bundle, *, queue_item, work_order):
+    overrides = _binding_stage_overrides()
+    authority_result = overrides["authority_runtime"]["authority_result"]
+    authority = authority_result["work_authority"]
+    authority.clear()
+    authority.update(_pilot_signed_authority_for_bootstrap())
+    for field in _LINEAGE_FIELDS:
+        authority[field] = work_order[field]
+    authority_digest = _handler_mapping_digest(authority)
+    authority_result["receipt"]["work_authority_digest"] = authority_digest
+    overrides["authority_verification"][
+        "verified_work_authority_digest"
+    ] = authority_digest
+    seeded = _seeded_store(bundle, **overrides)
+    payload = seeded.load()
+    payload["queue_item_id"] = queue_item["queue_item_id"]
+    payload["selected_slice"] = queue_item["slice_id"]
+    worktree = payload["stage_results"]["worktree_create"][
+        "worktree_create_result"
+    ]
+    worktree["work_order_id"] = work_order["work_order_id"]
+    worktree["branch_name"] = work_order["branch_name"]
+    return seeded.__class__(payload)
 
 
-def _provider_stub(calls):
+def _assert_continuous_lineage(queue_item, worker_claim, work_order, call, chain):
+    expected = {field: work_order[field] for field in _LINEAGE_FIELDS}
+    assert {field: queue_item[field] for field in _LINEAGE_FIELDS} == expected
+    for field in _CLAIM_LINEAGE_FIELDS:
+        assert worker_claim[field] == expected[field]
+    bridge_meta = call["bridge_meta"]
+    assert {field: bridge_meta[field] for field in _LINEAGE_FIELDS} == expected
+    generation = chain["stage_results"][BOUNDED_WORKER_PILOT_STAGE_KEY][
+        "artifact_generation_result"
+    ]["receipt"]
+    assert {field: generation[field] for field in _LINEAGE_FIELDS} == expected
+
+
+def _provider_stub(calls, artifact_path=HANDLER_ARTIFACT):
     def run(_api_key, _prompt, _messages, payload):
         calls.append(dict(payload))
         return {
             "ok": True,
-            "content": (
-                '{"artifact_contents":{'
-                '"modules/communication/moltbot_bridge/tests/fixtures/'
-                'reddog_queue_pilot/README.md":"# generated\\n"}}'
+            "content": json.dumps(
+                {"artifact_contents": {artifact_path: "# generated\n"}},
+                sort_keys=True,
             ),
             "review_packet": {"receipt_id": "fusion-review:integration"},
         }
 
     return run
+
+
+_LINEAGE_FIELDS = (
+    "model_selection_receipt_id",
+    "model_selection_digest",
+    "model_runtime_binding_receipt_id",
+    "model_runtime_binding_digest",
+    "model_runtime_binding_verification_receipt_id",
+    "model_runtime_binding_verification_digest",
+)
+_CLAIM_LINEAGE_FIELDS = (
+    "model_selection_receipt_id",
+    "model_runtime_binding_receipt_id",
+    "model_runtime_binding_verification_receipt_id",
+)
 
 
 def _run_bootstrap(repo, state, profile, paths, connector, artifact_generator):

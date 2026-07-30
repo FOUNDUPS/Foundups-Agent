@@ -53,7 +53,9 @@ def build_verified_runtime_binding_capability_api(
     """Bind one capability registry to one canonical evidence verifier."""
 
     lock = threading.Lock()
-    admissions: dict[str, _CapabilityAdmission] = {}
+    admissions: dict[
+        str, tuple[VerifiedRuntimeBindingCapability, _CapabilityAdmission]
+    ] = {}
     return (
         _issue_closure(verified_inputs, lock, admissions),
         _consume_closure(lock, admissions),
@@ -71,9 +73,9 @@ def _issue_closure(verified_inputs: Any, lock: Any, admissions: Any) -> Any:
             verification_receipt_digest(receipt),
             receipt,
         )
-        with lock:
-            admissions[token] = admission
         capability = VerifiedRuntimeBindingCapability(token)
+        with lock:
+            admissions[token] = (capability, admission)
         return binding, selection, receipt, capability
 
     return verify_and_issue
@@ -93,9 +95,11 @@ def _consume_closure(lock: Any, admissions: Any) -> Any:
             capability, "_VerifiedRuntimeBindingCapability__token"
         )
         with lock:
-            admission = admissions.pop(token, None)
-        if admission is None:
-            return None
+            record = admissions.get(token)
+            if record is None or record[0] is not capability:
+                return None
+            admissions.pop(token, None)
+        admission = record[1]
         actual = (
             canonical_digest(binding),
             canonical_digest(selection),
@@ -119,7 +123,9 @@ def _discard_closure(lock: Any, admissions: Any) -> Any:
             capability, "_VerifiedRuntimeBindingCapability__token"
         )
         with lock:
-            admissions.pop(token, None)
+            record = admissions.get(token)
+            if record is not None and record[0] is capability:
+                admissions.pop(token, None)
 
     return discard
 

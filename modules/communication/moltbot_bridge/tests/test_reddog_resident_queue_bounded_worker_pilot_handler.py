@@ -147,7 +147,7 @@ class _ArtifactGenerator:
             {
                 "prompt": prompt,
                 "context": context,
-                "binding": binding.to_dict(),
+                "binding": binding,
                 "timeout_seconds": timeout_seconds,
             }
         )
@@ -530,6 +530,9 @@ def test_dispatcher_generates_artifacts_before_bounded_worker_pilot(tmp_path: Pa
 
     assert result.accepted is True
     assert generator.calls
+    capability = generator.calls[0]["binding"]
+    assert isinstance(capability, ArtifactGenerationModelCapability)
+    assert not hasattr(capability, "to_dict")
     stage = chain_store.load()["stage_results"][BOUNDED_WORKER_PILOT_STAGE_KEY]
     assert stage["decision"] == QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT
     assert stage["artifact_generation_result"]["decision"] != ARTIFACT_GENERATION_REJECT

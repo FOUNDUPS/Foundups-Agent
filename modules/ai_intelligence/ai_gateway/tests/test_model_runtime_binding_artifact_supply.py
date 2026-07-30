@@ -20,6 +20,7 @@ from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_artifact_suppl
     run_reddog_model_runtime_binding_artifact_supply,
 )
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    VerifiedRuntimeBindingCapability,
     consume_verified_runtime_binding_capability,
     rehydrate_runtime_binding_verification_receipt,
     verification_receipt_digest,
@@ -528,6 +529,39 @@ def test_foreign_capability_registry_cannot_mint_production_authority() -> None:
             receipt=verified.verification,
         )
         is None
+    )
+
+
+def test_copied_runtime_capability_token_does_not_replace_issued_identity() -> None:
+    snapshot, selection, benchmark, promotion, _verified = _selection_chain()
+    verified = verify_model_runtime_binding_artifact(
+        catalog_snapshot=_artifact(snapshot.to_dict()),
+        model_selection_receipt=_artifact(selection.to_dict()),
+        benchmark_evidence_receipts=(_artifact(benchmark.to_dict()),),
+        promotion_evidence_receipts=(_artifact(promotion.to_dict()),),
+        verified_evidence_bundle=_serialized_evidence_bundle(
+            snapshot, selection, benchmark, promotion
+        ),
+        runtime_policy=_policy(),
+        trusted_keys_payload=_trusted_keys_payload(),
+        key_resolver=_key_resolver(),
+        signature_verifier=DeterministicSignatureVerifier(),
+        now=NOW,
+    )
+    token = object.__getattribute__(
+        verified.capability, "_VerifiedRuntimeBindingCapability__token"
+    )
+    copied = VerifiedRuntimeBindingCapability(token)
+    inputs = {
+        "binding": verified.to_artifact(),
+        "selection": selection.to_dict(),
+        "receipt": verified.verification,
+    }
+
+    assert consume_verified_runtime_binding_capability(copied, **inputs) is None
+    assert (
+        consume_verified_runtime_binding_capability(verified.capability, **inputs)
+        == verified.verification
     )
 
 

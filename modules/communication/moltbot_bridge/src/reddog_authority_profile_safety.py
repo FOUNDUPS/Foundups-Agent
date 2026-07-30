@@ -21,6 +21,7 @@ _SEED_FIELDS = frozenset(
     {
         "allowed_paths",
         "base_ref",
+        "bounded_worker_plan",
         "consensus_receipt_digest",
         "denied_paths",
         "foundup_id",
@@ -94,6 +95,7 @@ _HOLOINDEX_FIELDS = frozenset(
         "applicable_wsps",
         "evidence_refs",
         "holoindex_query",
+        "holoindex_freshness_receipt_digest",
         "holoindex_status",
         "index_gap_detected",
         "memex_supply_receipt_id",
@@ -111,6 +113,81 @@ _SOURCE_AUTHORITY_BASIS_FIELDS = frozenset(
         "principal_repo_scope",
         "principal_verified_subject_digest",
     }
+)
+_BOUNDED_WORKER_PLAN_FIELDS = frozenset(
+    {
+        "domain_id",
+        "domain_profile",
+        "env_policy",
+        "operation",
+        "planned_artifacts",
+        "requested_allowed_paths",
+        "selection_receipt",
+        "shell_argv",
+        "shell_profile",
+        "signed_receipt_chain",
+        "stdin_policy",
+    }
+)
+_DOMAIN_PROFILE_FIELDS = frozenset(
+    {
+        "allowed_path_patterns",
+        "artifact_contract_type",
+        "branch_prefix",
+        "canonical_root_template",
+        "consensus_required",
+        "denied_path_patterns",
+        "domain_id_pattern",
+        "draft_pr_only",
+        "operation",
+        "profile_id",
+        "required_tests",
+    }
+)
+_SHELL_PROFILE_FIELDS = frozenset(
+    {
+        "allowed_arg_patterns",
+        "argv_prefix",
+        "command_kind",
+        "consensus_required",
+        "denied_arg_patterns",
+        "draft_pr_only",
+        "max_stderr_bytes",
+        "max_stdout_bytes",
+        "output_redaction_policy",
+        "profile_id",
+        "repo_sensitive",
+        "requires_cwd_guard",
+        "requires_worktree",
+        "timeout_seconds",
+    }
+)
+_PLAN_SELECTION_FIELDS = frozenset(
+    {
+        "decision",
+        "execution_plane",
+        "no_execution_performed",
+        "selected_wardrobe",
+    }
+)
+_PLAN_RECEIPT_CHAIN_FIELDS = frozenset(
+    {
+        "accepted",
+        "decision",
+        "no_execution_performed",
+        "no_reward_settlement_performed",
+        "terminal_receipt_hash",
+    }
+)
+_NESTED_FIELD_SCHEMAS = (
+    ("holoindex_evidence", _HOLOINDEX_FIELDS),
+    ("source_authority_basis", _SOURCE_AUTHORITY_BASIS_FIELDS),
+    ("bounded_worker_plan", _BOUNDED_WORKER_PLAN_FIELDS),
+    ("bounded_worker_plan.domain_profile", _DOMAIN_PROFILE_FIELDS),
+    ("bounded_worker_plan.shell_profile", _SHELL_PROFILE_FIELDS),
+    ("bounded_worker_plan.selection_receipt", _PLAN_SELECTION_FIELDS),
+    ("bounded_worker_plan.signed_receipt_chain", _PLAN_RECEIPT_CHAIN_FIELDS),
+    ("bounded_worker_plan.env_policy", frozenset({"scrubbed"})),
 )
 
 
@@ -153,12 +230,8 @@ def authority_profile_unknown_field_paths(
         return ("$",)
     allowed = _SEED_FIELDS if seed else _SOURCE_FIELDS
     found = [str(key) for key in value if str(key) not in allowed]
-    nested = (
-        ("holoindex_evidence", _HOLOINDEX_FIELDS),
-        ("source_authority_basis", _SOURCE_AUTHORITY_BASIS_FIELDS),
-    )
-    for field, nested_allowed in nested:
-        child = value.get(field)
+    for field, nested_allowed in _NESTED_FIELD_SCHEMAS:
+        child = _mapping_at_path(value, field)
         if child is None:
             continue
         if not isinstance(child, Mapping):
@@ -170,6 +243,15 @@ def authority_profile_unknown_field_paths(
             if str(key) not in nested_allowed
         )
     return tuple(dict.fromkeys(found))
+
+
+def _mapping_at_path(value: Mapping[str, Any], path: str) -> Any:
+    current: Any = value
+    for part in path.split("."):
+        if not isinstance(current, Mapping) or part not in current:
+            return None
+        current = current[part]
+    return current
 
 
 def authority_profile_malformed_digest_paths(value: Any) -> tuple[str, ...]:

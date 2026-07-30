@@ -1,14 +1,14 @@
 # ModLog - moltbot_bridge
 - `REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`: provider effects require canonical SINGLE or signed PANEL evidence rehydrated against current keys, revocation, topology, policy, and trusted time.
   Exact `(role, fingerprint, key_epoch)` resolution and independent benchmark, promotion, panel-authority, and panel-member signers prevent identity substitution.
-  Closure-confined capability issuance has no importable production issuer, seal, or registry; foreign registries cannot mint accepted authority.
+  Opaque capabilities retain no caller-mutable binding state; registry admission binds the exact issued object identity.
   Promotion requires the exact artifact-generation runtime surface and binds the canonical selection, runtime, and verification lineage.
   Provider topology is re-derived from that verified lineage; substituted invocation topology rejects before network effects.
-  The provider consumes the capability once, and the durable generation receipt retains the verification receipt ID and digest.
+  Provider metadata and the durable receipt retain all six selection, runtime-binding, and verification IDs/digests.
   Missing, stale, revoked, tampered, replayed, copied, or caller-minted evidence fails closed.
   Persisted verification mappings remain audit lineage only; no second signature trust model was introduced.
-  Adversarial regressions cover genuine-capability topology retargeting and foreign-registry capability minting.
-  Promotion-derived queue/profile lineage reaches one exact provider call and persists verification lineage.
+  Adversarial regressions cover copied-token substitution, topology retargeting, replay, and mutable-state probing.
+  Signed bounded-plan promotion reaches one queue claim, materialized order, assigned stage, exact provider call, and receipt.
 - `REDDOG_OPERATIONS_SKILLZ_PHASE1`: Start Operations binds a manifest-authenticated, provider-neutral Operations Skillz receipt and revalidates it on submit/resume.
   Resident audit, architect, and artifact-generation paths reuse canonical runtime-binding admission, so weak or recomputed evidence cannot become authority.
   Brain, Breadcrumb, and Memex remain lower-authority receipt-bound planning inputs and are never claimed when absent.

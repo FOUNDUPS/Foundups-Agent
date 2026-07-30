@@ -18,6 +18,24 @@ def model_runtime_authority_fields(
     }
 
 
+def materialized_model_runtime_authority_fields(
+    source: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Project the signed model lineage into a materialized work order."""
+
+    fields: dict[str, Any] = {}
+    for prefix in (
+        "model_selection",
+        "model_runtime_binding",
+        "model_runtime_binding_verification",
+    ):
+        receipt = source.get(f"{prefix}_receipt")
+        fields[f"{prefix}_receipt"] = dict(receipt) if isinstance(receipt, Mapping) else {}
+        fields[f"{prefix}_receipt_id"] = str(source.get(f"{prefix}_receipt_id") or "")
+        fields[f"{prefix}_digest"] = str(source.get(f"{prefix}_digest") or "")
+    return fields
+
+
 def model_runtime_authority_values_valid(source: Mapping[str, Any]) -> bool:
     fields = model_runtime_authority_fields(source)
     binding = _fields_pair(fields, "model_runtime_binding")
@@ -98,6 +116,7 @@ def _profile_pair(
 
 
 __all__ = [
+    "materialized_model_runtime_authority_fields",
     "model_runtime_authority_fields",
     "model_runtime_authority_values_valid",
     "validate_queue_model_runtime_authority",

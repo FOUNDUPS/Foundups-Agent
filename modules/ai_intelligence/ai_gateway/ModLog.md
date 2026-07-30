@@ -19,9 +19,9 @@ authority. Only fresh re-verification against host-pinned keys, revocation,
 policy, topology, and time can issue the one-shot capability consumed at the
 provider boundary.
 
-**Validation:** Full AI Gateway `731 passed, 2 skipped`; changed cross-module
-surface `524 passed, 5 skipped`; Ruff, compileall, WSP 62, diff, NUL, and ASCII
-checks passed.
+**Validation:** Full AI Gateway `732 passed, 2 skipped`; focused authority
+surface `336 passed, 1 skipped`; compileall, WSP 62, diff, NUL, and added-line
+ASCII checks passed.
 
 **WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
 

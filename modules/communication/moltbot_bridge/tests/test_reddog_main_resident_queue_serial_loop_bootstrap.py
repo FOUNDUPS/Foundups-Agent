@@ -522,6 +522,7 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
         model_runtime_binding_receipt=runtime_binding,
         model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
         model_runtime_binding_digest=canonical_model_runtime_binding_digest(runtime_binding),
+        model_runtime_binding_verification_receipt=verification.to_dict(),
         model_runtime_binding_verification_receipt_id=verification.receipt_id,
         model_runtime_binding_verification_digest=verification_receipt_digest(
             verification
@@ -541,6 +542,15 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
     assert work_order["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
     assert work_order["model_runtime_binding_digest"] == canonical_model_runtime_binding_digest(runtime_binding)
     assert work_order["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
+    assert work_order["model_runtime_binding_verification_receipt_id"] == (
+        verification.receipt_id
+    )
+    assert work_order["model_runtime_binding_verification_digest"] == (
+        verification_receipt_digest(verification)
+    )
+    assert work_order["model_runtime_binding_verification_receipt"][
+        "receipt_id"
+    ] == verification.receipt_id
 
 
 def test_authority_profile_materializer_carries_memex_supply_binding() -> None:

@@ -70,6 +70,9 @@ from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_boot
     ModelRuntimeVerifierConfig,
     build_model_runtime_verifier,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    materialized_model_runtime_authority_fields,
+)
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_outside_repo as _read_json_outside_repo,
     read_reddog_runtime_json_mapping,
@@ -832,12 +835,7 @@ def _materialize_work_orders_from_authority_profile(
         "wsp15_priority": str(queue_receipt.get("wsp15_priority") or ""),
         "wsp15_mps_total": queue_receipt.get("wsp15_mps_total"),
         "wsp15_reasoning_tier": str(queue_receipt.get("reasoning_tier") or ""),
-        "model_selection_receipt": _nested_mapping(authority_profile, "model_selection_receipt"),
-        "model_selection_receipt_id": str(authority_profile.get("model_selection_receipt_id") or ""),
-        "model_selection_digest": str(authority_profile.get("model_selection_digest") or ""),
-        "model_runtime_binding_receipt": _nested_mapping(authority_profile, "model_runtime_binding_receipt"),
-        "model_runtime_binding_receipt_id": str(authority_profile.get("model_runtime_binding_receipt_id") or ""),
-        "model_runtime_binding_digest": str(authority_profile.get("model_runtime_binding_digest") or ""),
+        **materialized_model_runtime_authority_fields(authority_profile),
         "memex_supply_receipt_id": str(queue_receipt.get("memex_supply_receipt_id") or ""),
         "memex_supply_digest": str(queue_receipt.get("memex_supply_digest") or ""),
     }
