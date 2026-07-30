@@ -35,6 +35,9 @@ from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dis
     SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
     derive_worker_dispatch_roles,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+)
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
     governed_worker_dispatch_snapshot,
     worker_dispatch_authority_verification_context,
@@ -112,6 +115,7 @@ def _dryrun_stage():
             "authority_verification_receipt_digest",
         )
     }
+    model_runtime = model_runtime_authority_fields({})
     intents = [
         {
             "intent_id": f"worker_dispatch_intent_{role}",
@@ -123,8 +127,7 @@ def _dryrun_stage():
             "requested_operation": "create_foundup",
             "wsp15_allocation_receipt_id": allocation["receipt_id"],
             "wsp15_allocation_digest": _digest(allocation),
-            "model_runtime_binding_receipt_id": "",
-            "model_runtime_binding_digest": "",
+            **model_runtime,
             "memex_supply_receipt_id": queue_item["memex_supply_receipt_id"],
             "memex_supply_digest": queue_item["memex_supply_digest"],
             "architect_fix_publication_receipt_id": "",
@@ -150,8 +153,7 @@ def _dryrun_stage():
             "wsp15_priority": allocation["priority"],
             "wsp15_mps_total": allocation["mps_total"],
             "wsp15_reasoning_tier": allocation["reasoning_tier"],
-            "model_runtime_binding_receipt_id": "",
-            "model_runtime_binding_digest": "",
+            **model_runtime,
             "memex_supply_receipt_id": queue_item["memex_supply_receipt_id"],
             "memex_supply_digest": queue_item["memex_supply_digest"],
             "architect_fix_publication_receipt_id": "",

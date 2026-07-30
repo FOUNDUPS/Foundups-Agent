@@ -1,18 +1,18 @@
-## 2026-07-30: REDDOG_DRAFT_PR_EXACT_SHA_FIXTURE_REPAIR
-- Restored the mandatory `exact_sha_commit` result in the verified draft-PR
-  handler test chain after the exact-SHA stage was inserted before independent
-  verification.
-- Added a fail-closed regression proving a future verifier result cannot skip
-  the missing exact-SHA stage or reach the draft-PR runner.
+## 2026-07-30: ARTIFACT MODEL AUTHORITY WSP 62 DECOMPOSITION
+- Moved model-runtime, provider-capability, and bounded-worker adversarial cases
+  into focused test modules without dropping assertions.
+- Legacy matrices now remain below their prior line counts or the 675-line
+  module boundary; new test functions remain within WSP 62 limits.
+- Focused authority and AI Gateway integration matrix: 996 passed, 5 skipped.
+
+## 2026-07-30: REDDOG_EXACT_SHA_AND_ARTIFACT_MODEL_AUTHORITY_REPAIR
+- Restored `exact_sha_commit` and required verified production model evidence, exact topology, and signed authority at artifact-generation use time.
+- Added fail-closed regressions for missing exact-SHA state, self-rehashed evidence, authority substitution, capability forgery, replay, and bypass.
 
 ## 2026-07-29: REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1
-- Proved the canonical operations profile performs a real semantic owner query,
-  making failed/stale Holo evidence reachable by the repair state machine.
-- Proved one-shot process capability, non-consuming forgery rejection, exact assignee, context/HEAD
-  binding, replay rejection, expired-assignment CAS recovery, terminal-task
-  refusal, exact execution proof, and truthful refresh telemetry.
-- Proved repair failure and a failed second grounding attempt never construct
-  the resident model client.
+- Proved the canonical operations profile performs a semantic owner query, making failed/stale Holo evidence reachable by repair.
+- Proved one-shot capability, forgery/replay rejection, exact assignee/context/HEAD binding, expired-assignment CAS recovery, execution proof, and truthful refresh telemetry.
+- Proved repair failure and a failed second grounding attempt never construct the resident model client.
 
 ## 2026-07-28: REDDOG_FOUNDUP_MEMEX_AUTHORITY_DISPATCH_BINDING_PHASE1
 - Added end-to-end Memex authority and request-integrity regressions for pair
@@ -228,8 +228,8 @@
   inside-repository paths, and no-follow symlinks where the platform permits.
   Every rejection occurs before the cycle mock and emits no configured path.
 - Focused affected runtime suite: 205 passed / 1 platform skip. The skip is
-  Windows symlink creation when unavailable; the no-follow behavior remains
-  covered by the shared confined-reader contract.
+Windows symlink creation when unavailable; the no-follow behavior remains
+covered by the shared confined-reader contract.
 
 ## 2026-07-20: REDDOG_REQUIRED_RUNTIME_MODEL_BINDING_PHASE1
 

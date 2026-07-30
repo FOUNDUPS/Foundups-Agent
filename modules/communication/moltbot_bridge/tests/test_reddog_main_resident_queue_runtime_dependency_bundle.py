@@ -188,6 +188,8 @@ def _authority_request_result() -> dict[str, object]:
         "model_selection_digest": None,
         "model_runtime_binding_receipt_id": None,
         "model_runtime_binding_digest": None,
+        "model_runtime_binding_verification_receipt_id": None,
+        "model_runtime_binding_verification_digest": None,
         "memex_supply_receipt_id": None,
         "memex_supply_digest": None,
         "architect_fix_publication_receipt_id": None,

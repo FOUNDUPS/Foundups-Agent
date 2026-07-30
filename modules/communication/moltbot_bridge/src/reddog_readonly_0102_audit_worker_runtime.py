@@ -77,6 +77,7 @@ from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_runtime_binding_receipt,
     rehydrate_model_selection_receipt,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import canonical_model_runtime_binding_digest
 from holo_index.query_receipt import (
     SOURCE_CLASS_CODEINDEX,
     SOURCE_CLASS_HOLOINDEX,
@@ -87,7 +88,6 @@ from holo_index.memex_access_policy_receipt import validate_memex_access_policy_
 from holo_index.memex_evidence_bundle import build_memex_content_evidence_bundle
 from holo_index.memex_query_routing import build_memex_projection_query_receipt
 from holo_index.memex_projection_integrity import verify_and_rehydrate_memex_projection
-
 
 READONLY_0102_AUDIT_WORKER_RECEIPT_SCHEMA = "readonly_0102_audit_worker_receipt.v1"
 REPO_CODE_AUDIT_LANE = "repo_code_audit"
@@ -1510,7 +1510,7 @@ def _model_runtime_binding(
         "lead_model": str(payload.get("lead_model") or ""),
         "panel_models": [str(item) for item in payload.get("panel_models") or ()],
         "model_runtime_binding_receipt_id": receipt.receipt_id,
-        "model_runtime_binding_digest": "sha256:" + _digest(binding),
+        "model_runtime_binding_digest": canonical_model_runtime_binding_digest(binding),
         "runtime_surface": receipt.runtime_surface,
     }
 

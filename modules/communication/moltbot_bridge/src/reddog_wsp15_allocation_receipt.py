@@ -13,6 +13,10 @@ import json
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping, Sequence
 
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
+    canonical_model_runtime_binding_digest,
+)
+
 
 SCHEMA_VERSION = "reddog_wsp15_allocation_receipt.v1"
 
@@ -128,7 +132,6 @@ def allocate_reddog_wsp15_receipt(
     architect_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
 ) -> RedDogWSP15AllocationReceipt:
     """Allocate a deterministic WSP 15 receipt for a RedDog work focus."""
-
     paths = _normalize_paths(changed_paths)
     targets = _normalize_paths(allowed_read_targets)
     corpus = _corpus(
@@ -141,7 +144,6 @@ def allocate_reddog_wsp15_receipt(
     ultra_hit = _contains_any(corpus, _ULTRA_KEYWORDS)
     urgency_hit = _contains_any(corpus, _URGENCY_KEYWORDS)
     system_hit = _contains_any(corpus, _SYSTEM_KEYWORDS)
-
     complexity = _score_complexity(path_count=path_count, corpus=corpus, ultra_hit=ultra_hit)
     importance = _score_importance(ultra_hit=ultra_hit, system_hit=system_hit, path_count=path_count)
     deferability = _score_deferability(ultra_hit=ultra_hit, urgency_hit=urgency_hit)
@@ -161,15 +163,17 @@ def allocate_reddog_wsp15_receipt(
         if isinstance(model_runtime_binding_receipt, Mapping)
         else {}
     )
-    runtime_binding_id = str(runtime_binding.get("receipt_id") or "")
-    runtime_binding_digest = _digest(runtime_binding) if runtime_binding else ""
+    runtime_binding_id, runtime_binding_digest = _runtime_binding_identity(
+        runtime_binding
+    )
     architect_runtime_binding = (
         json.loads(json.dumps(architect_model_runtime_binding_receipt, sort_keys=True, default=str))
         if isinstance(architect_model_runtime_binding_receipt, Mapping)
         else {}
     )
-    architect_runtime_binding_id = str(architect_runtime_binding.get("receipt_id") or "")
-    architect_runtime_binding_digest = _digest(architect_runtime_binding) if architect_runtime_binding else ""
+    architect_runtime_binding_id, architect_runtime_binding_digest = (
+        _runtime_binding_identity(architect_runtime_binding)
+    )
     input_payload = {
         "schema_version": SCHEMA_VERSION,
         "requested_operation": str(requested_operation or ""),
@@ -214,6 +218,17 @@ def allocate_reddog_wsp15_receipt(
         model_runtime_binding_digest=runtime_binding_digest,
         architect_model_runtime_binding_receipt_id=architect_runtime_binding_id,
         architect_model_runtime_binding_digest=architect_runtime_binding_digest,
+    )
+
+
+def _runtime_binding_identity(
+    runtime_binding: Mapping[str, Any],
+) -> tuple[str, str]:
+    if not runtime_binding:
+        return "", ""
+    return (
+        str(runtime_binding.get("receipt_id") or ""),
+        canonical_model_runtime_binding_digest(runtime_binding),
     )
 
 

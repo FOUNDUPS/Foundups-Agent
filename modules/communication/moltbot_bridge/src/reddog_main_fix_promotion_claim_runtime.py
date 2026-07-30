@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_agentdb_fix_promotion_claim_fence import (
     execute_with_fix_promotion_claim_fence,
@@ -86,12 +86,16 @@ def _run_promotion(repo_root, environment, inputs, claim, store):
     from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
         run_reddog_main_architect_fix_promotion_bootstrap,
     )
+    from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_bootstrap import (
+        ModelRuntimeVerifierConfig,
+    )
 
     fence_executor = None
     if claim is not None and store is not None:
-        fence_executor = lambda operation: execute_with_fix_promotion_claim_fence(
-            store, claim, operation
-        )
+        def fence_executor(operation):
+            return execute_with_fix_promotion_claim_fence(
+                store, claim, operation
+            )
     return run_reddog_main_architect_fix_promotion_bootstrap(
         repo_root=repo_root,
         runtime_root=resident_queue_runtime_root_path(environment, repo_root),
@@ -102,6 +106,14 @@ def _run_promotion(repo_root, environment, inputs, claim, store):
             inputs.model_runtime_binding_receipt_path
             if inputs.model_runtime_binding_receipt_path_supplied
             else None
+        ),
+        model_runtime_verifier_config=ModelRuntimeVerifierConfig(
+            catalog_path=environment.get("REDDOG_MODEL_CATALOG_SNAPSHOT_PATH"),
+            benchmarks_path=environment.get("REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH"),
+            promotions_path=environment.get("REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH"),
+            evidence_path=environment.get("REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH"),
+            policy_path=environment.get("REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH"),
+            trusted_keys_path=environment.get("REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH"),
         ),
         memex_supply_receipt_path=inputs.memex_supply_receipt_path,
         authority_profile_source_path=inputs.authority_profile_source_path,

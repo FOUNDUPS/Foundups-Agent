@@ -33,6 +33,15 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_re
     AuthoritativeWorkStateStore,
     WORK_STATE_SCHEMA_VERSION,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    VerifiedRuntimeBindingCapability,
+    consume_verified_runtime_binding_capability,
+    verification_receipt_digest,
+    verified_runtime_binding_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_model_runtime_binding_query import (
+    runtime_binding_rejections,
+)
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ACTION_FIX,
     ARCHITECT_DETERMINATION_ACCEPT,
@@ -50,6 +59,7 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_rec
     ArchitectFixPromotionReason,
     ArchitectFixPromotionReceipt,
     ArchitectFixPromotionResult,
+    canonical_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_transaction import (
     ArchitectFixPromotionTransactionInputs,
@@ -83,6 +93,7 @@ ARCHITECT_FIX_WSP15_PROMOTION_REJECT = "ARCHITECT_FIX_WSP15_PROMOTION_REJECT"
 ARCHITECT_FIX_WSP15_PROMOTION_SCHEMA_VERSION = (
     "reddog_architect_fix_wsp15_work_order_promotion.v1"
 )
+ARTIFACT_GENERATION_RUNTIME_SURFACE = "reddog_artifact_generation"
 
 
 _AUTHORITY_PROFILE_REQUIRED = (
@@ -122,6 +133,7 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     signer_runtime_config: SignerSocketServiceRuntimeWiringConfig,
     principal_key_resolver: PrincipalKeyResolver,
     model_runtime_binding_receipt: Mapping[str, Any] | None = None,
+    model_runtime_binding_verification_capability: VerifiedRuntimeBindingCapability | None = None,
     worker_id: str,
     now_iso: str,
     claim_ttl_seconds: int = 3600,
@@ -134,7 +146,6 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     agentdb_fix_promotion_claim_fence: Mapping[str, Any] | None = None,
 ) -> ArchitectFixPromotionResult:
     """Commit one architect FIX queue item and return its signer authority profile."""
-
     current = work_state_store.load()
     reasons: list[str] = []
     if current.get("schema_version") != WORK_STATE_SCHEMA_VERSION:
@@ -142,7 +153,6 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     freshness_id = _freshness_receipt_id(current)
     if not freshness_id:
         reasons.append(ArchitectFixPromotionReason.WORK_STATE_FRESHNESS)
-
     determination = _determination_receipt(architect_determination)
     candidate = _mapping(determination.get("queue_candidate"))
     determination_id = str(determination.get("determination_receipt_id") or "")
@@ -154,7 +164,6 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
         reasons.append(ArchitectFixPromotionReason.DETERMINATION_NOT_FIX)
     if not candidate:
         reasons.append(ArchitectFixPromotionReason.QUEUE_CANDIDATE_MISSING)
-
     if CANDIDATE_MALFORMED in validate_architect_fix_candidate(
         candidate, determination,
         schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
@@ -208,6 +217,8 @@ def promote_reddog_architect_fix_to_signed_wsp15_work_order(
     runtime_binding_payload = _validate_model_runtime_binding(
         model_runtime_binding_receipt,
         selection_payload,
+        model_selection_receipt,
+        model_runtime_binding_verification_capability,
         reasons,
     )
     memex_payload = _validate_memex_supply(memex_supply_receipt, determination, reasons)
@@ -411,6 +422,8 @@ def _validate_model_selection(selection: Mapping[str, Any], reasons: list[str]) 
 def _validate_model_runtime_binding(
     binding: Mapping[str, Any] | None,
     model_selection: Mapping[str, Any],
+    model_selection_receipt: Mapping[str, Any],
+    verification_capability: VerifiedRuntimeBindingCapability | None,
     reasons: list[str],
 ) -> Mapping[str, Any]:
     if not binding:
@@ -422,6 +435,19 @@ def _validate_model_runtime_binding(
         return {}
     if receipt.decision != ModelRuntimeBindingDecision.BOUND:
         reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_NOT_BOUND)
+    if runtime_binding_rejections(
+        receipt,
+        expected_surface=ARTIFACT_GENERATION_RUNTIME_SURFACE,
+    ):
+        reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID)
+    verification = _verified_runtime_evidence(
+        receipt,
+        binding,
+        model_selection,
+        model_selection_receipt,
+        verification_capability,
+        reasons,
+    )
     if not model_selection:
         reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_MISMATCH)
     elif (
@@ -430,6 +456,14 @@ def _validate_model_runtime_binding(
         or receipt.task_family != str(model_selection.get("task_family") or "")
     ):
         reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_MISMATCH)
+    return _runtime_binding_payload(receipt, binding, verification)
+
+
+def _runtime_binding_payload(
+    receipt: Any,
+    binding: Mapping[str, Any],
+    verification: Any,
+) -> Mapping[str, Any]:
     return {
         "receipt_id": receipt.receipt_id,
         "selection_receipt_id": receipt.selection_receipt_id,
@@ -439,7 +473,46 @@ def _validate_model_runtime_binding(
         "principal_model": receipt.principal_model or "",
         "panel_models": tuple(receipt.panel_models),
         "role_bindings": tuple(binding.to_dict() for binding in receipt.role_bindings),
+        "verification_receipt": (
+            verification.to_dict() if verification is not None else {}
+        ),
+        "verification_receipt_id": (
+            verification.receipt_id if verification is not None else ""
+        ),
+        "verification_receipt_digest": (
+            verification_receipt_digest(verification)
+            if verification is not None
+            else ""
+        ),
     }
+
+
+def _verified_runtime_evidence(
+    receipt: Any,
+    binding: Mapping[str, Any],
+    model_selection: Mapping[str, Any],
+    model_selection_receipt: Mapping[str, Any],
+    capability: VerifiedRuntimeBindingCapability | None,
+    reasons: list[str],
+) -> Any:
+    verification = verified_runtime_binding_receipt(binding)
+    valid = (
+        verification is not None
+        and consume_verified_runtime_binding_capability(
+            capability,
+            binding=binding,
+            selection=model_selection_receipt,
+            receipt=verification,
+        )
+        is not None
+        and verification.selection_receipt_id
+        == str(model_selection.get("receipt_id") or "")
+        and verification.selection_receipt_digest
+        == canonical_digest(model_selection_receipt)
+    )
+    if not valid:
+        reasons.append(ArchitectFixPromotionReason.MODEL_RUNTIME_BINDING_INVALID)
+    return verification
 
 
 def _validate_memex_supply(

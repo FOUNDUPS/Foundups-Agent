@@ -66,6 +66,9 @@ DYNAMIC_IMPORT_MODULES = {
     "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py": (
         "scripts.advisory_model_once",
     ),
+    "modules/communication/moltbot_bridge/src/reddog_foundups_fusion_artifact_provider.py": (
+        "scripts.advisory_model_once",
+    ),
     "modules/communication/moltbot_bridge/src/reddog_readonly_0102_audit_worker_runtime.py": (
         "scripts.advisory_model_once",
     ),

@@ -125,7 +125,11 @@ def _queue_result():
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
-        "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_digest": "sha256:" + "a" * 64,
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:" + "b" * 64
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + "c" * 64,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
         "no_queue_mutation_performed": True,
@@ -166,7 +170,11 @@ def _profile(**overrides):
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
-        "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_digest": "sha256:" + "a" * 64,
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:" + "b" * 64
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + "c" * 64,
     }
     profile.update(overrides)
     return profile
@@ -381,8 +389,14 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         wsp15_priority=str(request["wsp15_priority"]),
         wsp15_mps_total=int(request["wsp15_mps_total"]),
         wsp15_reasoning_tier=str(request["wsp15_reasoning_tier"]),
-        model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
-        model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),
+            model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
+            model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),
+            model_runtime_binding_verification_receipt_id=str(
+                request["model_runtime_binding_verification_receipt_id"]
+            ),
+            model_runtime_binding_verification_digest=str(
+                request["model_runtime_binding_verification_digest"]
+            ),
         identity_nonce=str(request["identity_nonce"]),
         work_authority_nonce=str(request["work_authority_nonce"]),
         issued_at=int(request["issued_at"]),

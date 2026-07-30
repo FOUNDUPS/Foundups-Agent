@@ -15,7 +15,6 @@ those effects remain downstream of their own queue-stage gates.
 """
 
 from __future__ import annotations
-
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -41,7 +40,6 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_
     RedDogSignedWorkerQueueSerialLoopRunner,
     SignedWorkerQueueSerialLoopRunnerConfig,
 )
-
 
 SIGNED_WORKER_QUEUE_LOOP_BINDING_READY = "SIGNED_WORKER_QUEUE_LOOP_BINDING_READY"
 SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED = "SIGNED_WORKER_QUEUE_LOOP_BINDING_NOT_REQUESTED"
@@ -264,6 +262,45 @@ def build_reddog_signed_worker_queue_loop_runner_from_env(
     )
 
 
+_BOOTSTRAP_PATH_PAIRS = {
+    "work_orders_path": "REDDOG_WORK_ORDERS_PATH",
+    "valve_environment_path": "REDDOG_EXECUTION_VALVE_ENV_PATH",
+    "generic_writer_dryrun_result_path": "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH",
+    "governed_shell_dryrun_result_path": "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH",
+    "artifact_contents_path": "REDDOG_ARTIFACT_CONTENTS_PATH",
+    "artifact_generation_request_path": "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH",
+    "model_verifier.catalog_path": "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH",
+    "model_verifier.benchmarks_path": "REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH",
+    "model_verifier.promotions_path": "REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH",
+    "model_verifier.evidence_path": "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH",
+    "model_verifier.policy_path": "REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH",
+    "model_verifier.trusted_keys_path": "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH",
+    "holoindex_evidence_path": "REDDOG_HOLOINDEX_EVIDENCE_PATH",
+    "verifier_request_path": "REDDOG_SLICE_VERIFIER_REQUEST_PATH",
+    "evidence_producer_request_path": "REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH",
+    "publish_request_path": "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH",
+    "ratchet_request_path": "REDDOG_OUTCOME_RATCHET_REQUEST_PATH",
+    "outcome_ratchet_store_path": "REDDOG_OUTCOME_RATCHET_STORE_PATH",
+    "held_out_gate_request_path": "REDDOG_HELD_OUT_GATE_REQUEST_PATH",
+    "admission_request_path": "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH",
+    "authority_state_path": "REDDOG_AUTHORITY_RUNTIME_STATE_PATH",
+    "permission_snapshots_path": "REDDOG_PERMISSION_SNAPSHOTS_PATH",
+    "principal_authority_records_path": "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
+    "signer_socket_path": "REDDOG_SIGNER_SOCKET_PATH",
+    "signature_verifier_backend": "REDDOG_SIGNATURE_VERIFIER_BACKEND",
+}
+
+_BOOTSTRAP_FLAG_PAIRS = (
+    ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
+    ("artifact_generation_request_binding_enabled", "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING"),
+    ("slice_verifier_request_binding_enabled", "REDDOG_SLICE_VERIFIER_REQUEST_BINDING"),
+    ("draft_pr_publish_request_binding_enabled", "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING"),
+    ("outcome_ratchet_request_binding_enabled", "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING"),
+    ("held_out_gate_request_binding_enabled", "REDDOG_HELD_OUT_GATE_REQUEST_BINDING"),
+    ("pattern_memory_admission_request_binding_enabled", "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING"),
+)
+
+
 def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[str, Any]:
     materializer_mode = resident_queue_materializer_mode(env)
     artifact_generator_mode = resident_queue_artifact_generator_mode(env)
@@ -277,34 +314,10 @@ def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[
         env,
         repo_root,
     )
-    pairs = {
-        "work_orders_path": "REDDOG_WORK_ORDERS_PATH",
-        "valve_environment_path": "REDDOG_EXECUTION_VALVE_ENV_PATH",
-        "generic_writer_dryrun_result_path": "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH",
-        "governed_shell_dryrun_result_path": "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH",
-        "artifact_contents_path": "REDDOG_ARTIFACT_CONTENTS_PATH",
-        "artifact_generation_request_path": "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH",
-        "holoindex_evidence_path": "REDDOG_HOLOINDEX_EVIDENCE_PATH",
-        "verifier_request_path": "REDDOG_SLICE_VERIFIER_REQUEST_PATH",
-        "evidence_producer_request_path": "REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH",
-        "publish_request_path": "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH",
-        "ratchet_request_path": "REDDOG_OUTCOME_RATCHET_REQUEST_PATH",
-        "outcome_ratchet_store_path": "REDDOG_OUTCOME_RATCHET_STORE_PATH",
-        "held_out_gate_request_path": "REDDOG_HELD_OUT_GATE_REQUEST_PATH",
-        "admission_request_path": "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH",
-        "authority_state_path": "REDDOG_AUTHORITY_RUNTIME_STATE_PATH",
-        "permission_snapshots_path": "REDDOG_PERMISSION_SNAPSHOTS_PATH",
-        "principal_authority_records_path": "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH",
-        "signer_socket_path": "REDDOG_SIGNER_SOCKET_PATH",
-        "signature_verifier_backend": "REDDOG_SIGNATURE_VERIFIER_BACKEND",
-        "worktree_runner_mode": "REDDOG_RESIDENT_QUEUE_WORKTREE_RUNNER_MODE",
-        "artifact_generator_mode": "REDDOG_ARTIFACT_GENERATOR_MODE",
-        "evidence_command_runner_mode": "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE",
-    }
     payload: dict[str, Any] = {}
     if materializer_mode:
         payload["work_order_materializer_mode"] = materializer_mode
-    for key, env_name in pairs.items():
+    for key, env_name in _BOOTSTRAP_PATH_PAIRS.items():
         value = _optional_runtime_file_path(env, repo_root=repo_root, env_name=env_name)
         if value:
             payload[key] = value
@@ -318,21 +331,16 @@ def _bootstrap_kwargs(env: Mapping[str, str], *, repo_root: Path | str) -> dict[
         payload["outcome_ratchet_store_path"] = outcome_ratchet_store_path
     if model_feedback_ledger_store_path:
         payload["model_feedback_ledger_store_path"] = model_feedback_ledger_store_path
-    for key, env_name in (
-        ("pilot_dryrun_binding_enabled", "REDDOG_PILOT_DRYRUN_BINDING"),
-        (
-            "artifact_generation_request_binding_enabled",
-            "REDDOG_ARTIFACT_GENERATION_REQUEST_BINDING",
-        ),
-        ("slice_verifier_request_binding_enabled", "REDDOG_SLICE_VERIFIER_REQUEST_BINDING"),
-        ("draft_pr_publish_request_binding_enabled", "REDDOG_DRAFT_PR_PUBLISH_REQUEST_BINDING"),
-        ("outcome_ratchet_request_binding_enabled", "REDDOG_OUTCOME_RATCHET_REQUEST_BINDING"),
-        ("held_out_gate_request_binding_enabled", "REDDOG_HELD_OUT_GATE_REQUEST_BINDING"),
-        (
-            "pattern_memory_admission_request_binding_enabled",
-            "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_BINDING",
-        ),
-    ):
+    model_config = {
+        key.split(".", 1)[1]: payload.pop(key)
+        for key in tuple(payload)
+        if key.startswith("model_verifier.")
+    }
+    model_config["verifier_backend"] = _stripped(
+        env.get("REDDOG_MODEL_EVIDENCE_SIGNATURE_VERIFIER_BACKEND")
+    ) or "ed25519"
+    payload["model_runtime_verifier_config"] = model_config
+    for key, env_name in _BOOTSTRAP_FLAG_PAIRS:
         if resident_queue_binding_enabled(env, env_name):
             payload[key] = True
     return payload

@@ -234,6 +234,12 @@ def test_carries_model_runtime_binding_from_signed_authority() -> None:
                 allocation,
                 model_runtime_binding_receipt_id="reddog_model_runtime_binding:abc123",
                 model_runtime_binding_digest="sha256:model-runtime-binding",
+                model_runtime_binding_verification_receipt_id=(
+                    "model_runtime_binding_verification:abc123"
+                ),
+                model_runtime_binding_verification_digest=(
+                    "sha256:model-runtime-verification"
+                ),
             ),
         },
     )
@@ -244,6 +250,14 @@ def test_carries_model_runtime_binding_from_signed_authority() -> None:
     assert result.receipt is not None
     assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
     assert result.receipt.model_runtime_binding_digest == "sha256:model-runtime-binding"
+    assert (
+        result.receipt.model_runtime_binding_verification_receipt_id
+        == "model_runtime_binding_verification:abc123"
+    )
+    assert (
+        result.receipt.model_runtime_binding_verification_digest
+        == "sha256:model-runtime-verification"
+    )
     assert {
         intent.model_runtime_binding_receipt_id
         for intent in result.receipt.dispatch_intents

@@ -1,5 +1,40 @@
 # AI Gateway Module Change Log
 
+## [2026-07-30] - Shared Model-Evidence Authority Validation
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`
+
+**What:** Consolidated exact trusted-key validation, signer independence, and
+panel-authority independence into one bounded helper used by both SINGLE and
+PANEL evidence paths. This removes duplicate policy islands without weakening
+freshness, revocation, topology, or signer-role checks.
+
+## [2026-07-30] - Runtime-Binding Evidence Admission Hardening
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`
+
+**What:** Replaced mapping-presence trust with canonical signed-evidence
+rehydration and closure-confined one-shot capability issuance. The production
+consumer shares no importable issuer, seal, or registry; capabilities created
+by another factory instance are rejected. Runtime-binding capabilities bind
+the full persisted artifact and verification receipt. Trusted keys resolve
+only by exact `(role, fingerprint, key_epoch)` identity; role-only fallback is
+rejected. Benchmark, promotion, panel-authority, and panel-member signers must
+be independent.
+
+**Truth boundary:** A serialized verification mapping is audit evidence, not
+authority. Only fresh re-verification against host-pinned keys, revocation,
+policy, topology, and time can issue the one-shot capability consumed at the
+provider boundary.
+
+**Validation:** Full AI Gateway `732 passed, 2 skipped`; focused authority
+surface `336 passed, 1 skipped`; compileall, WSP 62, diff, NUL, and added-line
+ASCII checks passed.
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
 ## [2026-07-29] - Provider Catalog Runtime Header and Chronology Hardening
 
 **Who/Type/Slice:** 0102 architect / Defensive /

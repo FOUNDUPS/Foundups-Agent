@@ -23,6 +23,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_materialization import materialize_delegated_authority_request
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import is_sha256
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import optional_memex_authority_sources_match
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+    validate_queue_model_runtime_authority,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
     canonical_work_order_base_ref,
@@ -93,6 +97,8 @@ class QueueAuthorityRequestDryRunReceipt:
     model_selection_digest: Optional[str]
     model_runtime_binding_receipt_id: Optional[str]
     model_runtime_binding_digest: Optional[str]
+    model_runtime_binding_verification_receipt_id: Optional[str]
+    model_runtime_binding_verification_digest: Optional[str]
     memex_supply_receipt_id: Optional[str]
     memex_supply_digest: Optional[str]
     architect_fix_publication_receipt_id: Optional[str]
@@ -218,38 +224,6 @@ def _valid_queue_wsp15_binding(queue_receipt: Mapping[str, Any], profile: Mappin
     return True
 
 
-def _profile_runtime_binding(profile: Mapping[str, Any]) -> tuple[str, str]:
-    binding = _mapping(profile.get("operational_context_binding"))
-    receipt_id = str(
-        profile.get("model_runtime_binding_receipt_id")
-        or binding.get("model_runtime_binding_receipt_id")
-        or ""
-    )
-    digest = str(
-        profile.get("model_runtime_binding_digest")
-        or binding.get("model_runtime_binding_digest")
-        or ""
-    )
-    return receipt_id, digest
-
-
-def _valid_model_runtime_binding(queue_receipt: Mapping[str, Any], profile: Mapping[str, Any]) -> bool:
-    queue_receipt_id = str(queue_receipt.get("model_runtime_binding_receipt_id") or "")
-    queue_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
-    profile_receipt_id, profile_digest = _profile_runtime_binding(profile)
-    any_binding = any((queue_receipt_id, queue_digest, profile_receipt_id, profile_digest))
-    if not any_binding:
-        return True
-    if not (
-        queue_receipt_id.startswith("reddog_model_runtime_binding:")
-        and queue_digest.startswith("sha256:")
-        and profile_receipt_id == queue_receipt_id
-        and profile_digest == queue_digest
-    ):
-        return False
-    return True
-
-
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
     if not path or "\\" in path or ":" in path or path.startswith("/") or "\x00" in path:
         return False
@@ -306,7 +280,9 @@ def plan_reddog_wre_queue_authority_request_dry_run(
 
     if queue_receipt and profile and not _valid_queue_wsp15_binding(queue_receipt, profile):
         reasons.append(FAIL_WSP15_ALLOCATION_BINDING)
-    if queue_receipt and profile and not _valid_model_runtime_binding(queue_receipt, profile):
+    if queue_receipt and profile and not validate_queue_model_runtime_authority(
+        queue_receipt, profile
+    ):
         reasons.append(FAIL_MODEL_RUNTIME_BINDING)
     bound_work_order = _mapping(work_order)
     if queue_receipt and profile and not optional_memex_authority_sources_match(queue_receipt, profile, bound_work_order):
@@ -366,8 +342,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     queue_item_id = str(queue_receipt.get("queue_item_id") or queue.get("selected_queue_item_id") or "")
     model_selection_receipt_id = str(queue_receipt.get("model_selection_receipt_id") or "")
     model_selection_digest = str(queue_receipt.get("model_selection_digest") or "")
-    model_runtime_binding_receipt_id = str(queue_receipt.get("model_runtime_binding_receipt_id") or "")
-    model_runtime_binding_digest = str(queue_receipt.get("model_runtime_binding_digest") or "")
+    runtime_fields = model_runtime_authority_fields(queue_receipt)
     memex_supply_receipt_id = str(queue_memex_id or "")
     memex_supply_digest = str(queue_memex_digest or "")
     work_order_id = str(
@@ -412,8 +387,7 @@ def plan_reddog_wre_queue_authority_request_dry_run(
         reasoning_tier=str(queue_receipt.get("reasoning_tier") or ""),
         model_selection_receipt_id=model_selection_receipt_id or None,
         model_selection_digest=model_selection_digest or None,
-        model_runtime_binding_receipt_id=model_runtime_binding_receipt_id or None,
-        model_runtime_binding_digest=model_runtime_binding_digest or None,
+        **{field: value or None for field, value in runtime_fields.items()},
         memex_supply_receipt_id=memex_supply_receipt_id or None,
         memex_supply_digest=memex_supply_digest or None,
         architect_fix_publication_receipt_id=publication_id or None,

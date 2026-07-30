@@ -1,34 +1,26 @@
 # ModLog - moltbot_bridge
-- `REDDOG_OPERATIONS_SKILLZ_PHASE1`: Start Operations now binds one
-  manifest-authenticated, provider-neutral Operations Skillz receipt and
-  revalidates it on submit/resume. Resident audit and architect model artifacts
-  reuse the canonical runtime-binding admission checks, so empty signed
-  promotion lineage, invalid role topology, missing authority, or weak policy
-  evidence cannot be made acceptable by recomputing and host-pinning a receipt.
-  Brain, Breadcrumb, and Memex context remain lower-authority, receipt-bound
-  planning inputs and are never claimed when absent.
-- `REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1`: start operations
-  now reuses a current process-private Holo owner or creates one exact-HEAD,
-  durable AgentDB repair task for OpenClaw. The exact task route invokes the
-  canonical maintenance handshake, re-proves generation/freshness, and permits
-  one grounding retry. Semantic misses do not trigger re-indexing; malformed
-  handoffs, task substitutions, repository changes, and proof mismatches fail
-  closed.
-- The canonical operations profile now makes owner health reachable through an
-  explicit semantic readiness target. Dispatch requires an opaque process-local
-  capability after the exact OpenClaw assignment, rejects replay and wrong
-  assignees, and uses the existing exact-assignment CAS for bounded crash
-  recovery. Reported maintenance reflects the handshake's actual refresh flag.
-- Start-operations authorization rejection now preserves validated resident
-  intent IDs for status, cancel, and resume response correlation.
-- `START_OPERATIONS_CONTROL_ADAPTER_PHASE1`: extracted the main-host dual
-  model-binding artifact loader into a shared fail-closed module and added a
-  profile-bound resident-client control adapter. The adapter binds clean HEAD,
-  authenticated FoundUp scope, strict budgets, and both BOUND model receipts
-  to independent host-pinned receipt IDs. Fresh control-request IDs prevent
-  replay across submit/status/cancel/resume calls; terminal hashes cover every
-  serialized field. The adapter emits typed progress/results and grants no
-  execution authority.
+- `REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`: provider effects require canonical SINGLE or signed PANEL evidence rehydrated against current keys, revocation, topology, policy, and trusted time.
+  Exact `(role, fingerprint, key_epoch)` resolution and independent benchmark, promotion, panel-authority, and panel-member signers prevent identity substitution.
+  Opaque capabilities retain no caller-mutable binding state; registry admission binds the exact issued object identity.
+  Promotion requires the exact artifact-generation runtime surface and binds the canonical selection, runtime, and verification lineage.
+  Provider topology is re-derived from that verified lineage; substituted invocation topology rejects before network effects.
+  Provider metadata and the durable receipt retain all six selection, runtime-binding, and verification IDs/digests.
+  Missing, stale, revoked, tampered, replayed, copied, or caller-minted evidence fails closed.
+  Persisted verification mappings remain audit lineage only; no second signature trust model was introduced.
+  Adversarial regressions cover copied-token substitution, topology retargeting, replay, and mutable-state probing.
+  Signed bounded-plan promotion reaches one queue claim, materialized order, assigned stage, exact provider call, and receipt.
+- `REDDOG_OPERATIONS_SKILLZ_PHASE1`: Start Operations binds a manifest-authenticated, provider-neutral Operations Skillz receipt and revalidates it on submit/resume.
+  Resident audit, architect, and artifact-generation paths reuse canonical runtime-binding admission, so weak or recomputed evidence cannot become authority.
+  Brain, Breadcrumb, and Memex remain lower-authority receipt-bound planning inputs and are never claimed when absent.
+- `REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1`: start operations reuses a process-private Holo owner or creates one exact-HEAD durable AgentDB repair task for OpenClaw.
+  The task invokes the canonical maintenance handshake, re-proves generation/freshness, and permits one grounding retry.
+  Semantic misses do not trigger re-indexing; malformed handoffs, substitutions, repository changes, and proof mismatches fail closed.
+- The canonical operations profile exposes owner health through a semantic readiness target.
+  Dispatch uses a one-shot capability after exact assignment, rejects replay/wrong assignees, and retains exact-assignment CAS recovery plus truthful refresh reporting.
+- Start-operations authorization rejection preserves validated intent IDs for status, cancel, and resume correlation.
+- `START_OPERATIONS_CONTROL_ADAPTER_PHASE1`: extracted the main-host dual model-binding loader into a shared fail-closed module and added a profile-bound resident-client adapter.
+  It binds clean HEAD, authenticated FoundUp scope, strict budgets, and both BOUND model receipts to independent host-pinned IDs.
+  Fresh control IDs prevent replay; terminal hashes cover every field, typed progress/results are emitted, and no execution authority is granted.
 - Signed Memex lineage now survives the full authority and dispatch chain.
   Signer invocation validates the exact dry-run request digest before effects;
   resident verification replaces packet authority with recorded chain truth.

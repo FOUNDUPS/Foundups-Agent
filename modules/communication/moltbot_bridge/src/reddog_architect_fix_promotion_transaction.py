@@ -23,6 +23,7 @@ from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_rec
     ArchitectFixPromotionResult,
     build_architect_fix_promotion_records,
     canonical_digest,
+    model_runtime_promotion_fields,
 )
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified_authority import (
     ArchitectProposalAuthorityBinding,
@@ -32,6 +33,9 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_re
 )
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
+)
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    canonical_model_runtime_binding_digest,
 )
 
 
@@ -328,7 +332,7 @@ def _digests(
     inputs: ArchitectFixPromotionTransactionInputs,
 ) -> _PromotionDigests:
     runtime_digest = (
-        canonical_digest(inputs.model_runtime_binding_receipt)
+        canonical_model_runtime_binding_digest(inputs.model_runtime_binding_receipt)
         if inputs.model_runtime_binding
         else None
     )
@@ -444,9 +448,7 @@ def _updated_state(
         "queue_item_id": records.queue_item_id,
         "claim_id": records.claim_id,
         "model_selection_receipt_id": inputs.model_selection["receipt_id"],
-        "model_runtime_binding_receipt_id": (
-            inputs.model_runtime_binding.get("receipt_id", "")
-        ),
+        **model_runtime_promotion_fields(inputs.model_runtime_binding),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "proposal_admission_receipt_id": inputs.proposal_admission["receipt_id"],
         "proposal_admission_digest": digests.proposal_admission,
@@ -551,10 +553,8 @@ def _receipt_evidence_fields(inputs, digests) -> dict[str, Any]:
         ],
         "model_selection_receipt_id": inputs.model_selection["receipt_id"],
         "model_selection_digest": digests.model_selection,
-        "model_runtime_binding_receipt_id": (
-            inputs.model_runtime_binding.get("receipt_id") or None
-        ),
-        "model_runtime_binding_digest": digests.model_runtime_binding,
+        **model_runtime_promotion_fields(inputs.model_runtime_binding,
+            binding_digest=digests.model_runtime_binding, optional=True),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "memex_supply_digest": digests.memex_supply,
     }
@@ -600,9 +600,7 @@ def _receipt_seed(
         "queue_item_id": records.queue_item_id,
         "claim_id": records.claim_id,
         "model_selection_receipt_id": inputs.model_selection["receipt_id"],
-        "model_runtime_binding_receipt_id": (
-            inputs.model_runtime_binding.get("receipt_id", "")
-        ),
+        **model_runtime_promotion_fields(inputs.model_runtime_binding),
         "memex_supply_receipt_id": inputs.memex_supply["receipt_id"],
         "proposal_admission_receipt_id": inputs.proposal_admission["receipt_id"],
         "proposal_authenticity_attestation_id": authority.attestation_id,

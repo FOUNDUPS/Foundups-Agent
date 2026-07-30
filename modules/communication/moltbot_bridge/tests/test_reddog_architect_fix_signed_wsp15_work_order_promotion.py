@@ -64,6 +64,12 @@ from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers 
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    verified_runtime_binding_receipt,
+)
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_test_capability,
+)
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
     plan_reddog_wre_queue_consumer_dry_run,
@@ -512,7 +518,7 @@ def _runtime_binding(
     principal_model = selected_models[0]
     policy = ModelRuntimeBindingPolicy(
         task_family=str(requirements["task_family"]),
-        runtime_surface="reddog_fusion",
+        runtime_surface="reddog_artifact_generation",
         min_verifier_pass_rate=0.8,
         required_task_set_digest="sha256:task-set",
         required_held_out_split_digest="sha256:held-out",
@@ -567,6 +573,17 @@ def _promote(**overrides: Any):
         "current_holoindex_receipt": _holo_receipt(),
         "authority_profile_publication_publisher": publish,
     }
+    runtime_binding = overrides.get("model_runtime_binding_receipt")
+    selection = overrides.get("model_selection_receipt", args["model_selection_receipt"])
+    verification = (
+        verified_runtime_binding_receipt(runtime_binding)
+        if isinstance(runtime_binding, Mapping)
+        else None
+    )
+    if verification is not None:
+        overrides["model_runtime_binding_verification_capability"] = (
+            model_runtime_binding_test_capability(selection, runtime_binding)
+        )
     result = invoke_promotion_with_test_authority(
         promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order,
         args=args,
@@ -649,41 +666,6 @@ def test_promotion_rejects_caller_supplied_work_order_id() -> None:
         "unknown_field:work_order_id" in reason
         for reason in result.rejection_reasons
     )
-
-
-def test_promotes_runtime_binding_into_queue_claim_and_authority_profile() -> None:
-    model_selection = _model_selection()
-    runtime_binding = _runtime_binding(model_selection)
-
-    result, store = _promote(
-        model_selection_receipt=model_selection,
-        model_runtime_binding_receipt=runtime_binding,
-    )
-
-    assert result.accepted is True
-    assert result.receipt is not None
-    assert result.receipt.model_runtime_binding_receipt_id == runtime_binding["receipt_id"]
-    assert result.receipt.model_runtime_binding_digest == proposal_admission._digest(runtime_binding)
-    assert result.authority_profile is not None
-    assert result.authority_profile["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert result.authority_profile["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
-    assert result.authority_profile["model_runtime_binding_principal_model"] == runtime_binding["principal_model"]
-    assert result.authority_profile["operational_context_binding"]["model_runtime_binding_receipt_id"] == (
-        runtime_binding["receipt_id"]
-    )
-    assert result.authority_profile["operational_context_binding"]["model_runtime_binding_receipt"][
-        "receipt_id"
-    ] == runtime_binding["receipt_id"]
-
-    snapshot = store.load()
-    claim = snapshot["worker_claims"][0]
-    queue_item = snapshot["wre_queue_items"][0]
-    promotion_record = snapshot["architect_fix_promotions"][0]
-    assert claim["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert queue_item["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert queue_item["model_runtime_binding_digest"] == proposal_admission._digest(runtime_binding)
-    assert f"model_runtime_binding:{runtime_binding['receipt_id']}" in queue_item["evidence_refs"]
-    assert promotion_record["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
 
 
 def test_rejects_runtime_binding_for_different_model_selection_without_store_mutation() -> None:

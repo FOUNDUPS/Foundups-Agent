@@ -25,6 +25,13 @@ from typing import Any, Callable, Mapping, Optional
 from holo_index.freshness_receipt import load_freshness_receipt, read_git_head_sha
 from holo_index.query_receipt import generation_binding_from_receipt
 
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    VerifiedRuntimeBindingCapability,
+)
+from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_bootstrap import (
+    ModelRuntimeVerifierConfig,
+    build_model_runtime_verifier,
+)
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_signed_wsp15_work_order_promotion import (
     ARCHITECT_FIX_WSP15_PROMOTION_ACCEPT,
     promote_reddog_architect_fix_to_signed_wsp15_work_order,
@@ -105,6 +112,9 @@ class _PromotionBootstrapInputs:
     determination: Mapping[str, Any]
     model_selection: Mapping[str, Any]
     model_runtime_binding: Mapping[str, Any] | None
+    model_runtime_binding_verification_capability: (
+        VerifiedRuntimeBindingCapability | None
+    )
     memex_supply: Mapping[str, Any]
     authority_profile: Mapping[str, Any]
     holoindex_file: Path
@@ -129,6 +139,8 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     authority_profile_output_path: Path | str | None,
     holoindex_receipt_path: Path | str | None,
     model_runtime_binding_receipt_path: Path | str | None = None,
+    model_runtime_verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None = None,
+    model_runtime_binding_verification_capability: VerifiedRuntimeBindingCapability | None = None,
     proposal_authenticity_attestation: Mapping[str, Any] | None = None,
     signer_runtime_config: SignerSocketServiceRuntimeWiringConfig | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
@@ -138,7 +150,6 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
     now_iso: str | None = None,
 ) -> RedDogMainArchitectFixPromotionBootstrapResult:
     """Promote one backend architect FIX determination into the resident queue."""
-
     root = Path(repo_root).resolve()
     reasons: list[str] = []
     try:
@@ -148,7 +159,6 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
         )
     except Exception:
         return _not_ready(("resident_runtime_root_invalid",))
-
     work_state_file, work_state_reasons = _resolve_existing_file_outside_repo(
         root,
         work_state_path,
@@ -164,21 +174,14 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
         unreadable_reason="malformed_architect_determination",
     )
     reasons.extend(determination_reasons)
-    model_selection, model_reasons = _read_json_outside_repo(
-        root,
-        model_selection_receipt_path,
-        missing_reason="missing_model_selection_receipt_path",
-        inside_reason="model_selection_receipt_path_inside_repo",
-        unreadable_reason="malformed_model_selection_receipt",
+    model_selection, model_runtime_binding, runtime_capability, model_reasons = (
+        _promotion_model_runtime_inputs(
+            root, trusted_runtime_root, model_selection_receipt_path,
+            model_runtime_binding_receipt_path, model_runtime_verifier_config,
+            model_runtime_binding_verification_capability, now_iso,
+        )
     )
     reasons.extend(model_reasons)
-    model_runtime_binding, runtime_binding_reasons = _read_optional_json_outside_repo(
-        root,
-        model_runtime_binding_receipt_path,
-        inside_reason="model_runtime_binding_receipt_path_inside_repo",
-        unreadable_reason="malformed_model_runtime_binding_receipt",
-    )
-    reasons.extend(runtime_binding_reasons)
     memex_supply, memex_reasons = _read_json_outside_repo(
         root,
         memex_supply_receipt_path,
@@ -215,6 +218,12 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
 
     if reasons:
         return _not_ready(reasons)
+    runtime_capability, found = _resolve_runtime_capability(
+        root, trusted_runtime_root, model_runtime_binding, model_selection,
+        runtime_capability, model_runtime_verifier_config, now_iso,
+    )
+    if found:
+        return _not_ready(found)
 
     assert work_state_file is not None
     assert output_path is not None
@@ -236,6 +245,7 @@ def run_reddog_main_architect_fix_promotion_bootstrap(
             determination=determination,
             model_selection=model_selection,
             model_runtime_binding=model_runtime_binding,
+            model_runtime_binding_verification_capability=runtime_capability,
             memex_supply=memex_supply,
             authority_profile=authority_profile,
             holoindex_file=holoindex_file,
@@ -286,14 +296,15 @@ def _run_profile_transaction(inputs, repo_head, holoindex_receipt):
         authority_profile_path=inputs.output_path,
         work_state_store=store,
     )
-    operation = lambda fence=None: _recover_and_promote(
-        inputs,
-        store,
-        publisher,
-        repo_head,
-        holoindex_receipt,
-        fence,
-    )
+    def operation(fence=None):
+        return _recover_and_promote(
+            inputs,
+            store,
+            publisher,
+            repo_head,
+            holoindex_receipt,
+            fence,
+        )
     try:
         result = (
             inputs.promotion_claim_fence_executor(operation)
@@ -338,6 +349,9 @@ def _promote_with_fence(inputs, store, publisher, repo_head, holo_receipt, fence
         authority_profile=inputs.authority_profile,
         model_selection_receipt=inputs.model_selection,
         model_runtime_binding_receipt=inputs.model_runtime_binding,
+        model_runtime_binding_verification_capability=(
+            inputs.model_runtime_binding_verification_capability
+        ),
         memex_supply_receipt=inputs.memex_supply,
         proposal_authenticity_attestation=inputs.proposal_attestation,
         signer_runtime_config=inputs.signer_runtime_config,
@@ -370,6 +384,73 @@ def _applied_result(result, output_path):
         committed_revision=result.receipt.committed_revision,
         rejection_reasons=(),
     )
+
+
+def _promotion_model_runtime_inputs(
+    root: Path,
+    runtime_root: Path,
+    selection_path: Path | str | None,
+    binding_path: Path | str | None,
+    config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None,
+    injected: VerifiedRuntimeBindingCapability | None,
+    now_iso: str | None,
+) -> tuple[
+    Mapping[str, Any] | None,
+    Mapping[str, Any] | None,
+    VerifiedRuntimeBindingCapability | None,
+    list[str],
+]:
+    selection, reasons = _read_json_outside_repo(
+        root,
+        selection_path,
+        missing_reason="missing_model_selection_receipt_path",
+        inside_reason="model_selection_receipt_path_inside_repo",
+        unreadable_reason="malformed_model_selection_receipt",
+    )
+    binding, found = _read_optional_json_outside_repo(
+        root,
+        binding_path,
+        inside_reason="model_runtime_binding_receipt_path_inside_repo",
+        unreadable_reason="malformed_model_runtime_binding_receipt",
+    )
+    reasons.extend(found)
+    return selection, binding, injected, list(dict.fromkeys(reasons))
+
+
+def _resolve_runtime_capability(
+    root: Path,
+    runtime_root: Path,
+    binding: Mapping[str, Any] | None,
+    selection: Mapping[str, Any] | None,
+    injected: VerifiedRuntimeBindingCapability | None,
+    config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None,
+    now_iso: str | None,
+) -> tuple[VerifiedRuntimeBindingCapability | None, tuple[str, ...]]:
+    if binding is None or injected is not None:
+        return injected, ()
+    verifier, found = build_model_runtime_verifier(
+        repo_root=root,
+        runtime_root=runtime_root,
+        config=config,
+        trusted_now=lambda: int(
+            datetime.fromisoformat(
+                (now_iso or datetime.now(timezone.utc).isoformat()).replace(
+                    "Z", "+00:00"
+                )
+            ).timestamp()
+        ),
+        artifact_generator=True,
+    )
+    reasons = list(found)
+    if verifier is None or selection is None:
+        reasons.append("model_runtime_binding_signed_evidence_invalid")
+        return None, tuple(dict.fromkeys(reasons))
+    try:
+        capability = verifier.verify(binding=binding, selection=selection)
+    except Exception:
+        reasons.append("model_runtime_binding_signed_evidence_invalid")
+        capability = None
+    return capability, tuple(dict.fromkeys(reasons))
 
 
 def _read_json_outside_repo(

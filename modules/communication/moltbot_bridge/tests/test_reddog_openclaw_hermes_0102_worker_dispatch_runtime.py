@@ -37,6 +37,9 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpe
     worker_dispatch_authority_stages,
     with_architect_fix_publication,
 )
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_queue_test_helpers import (
+    runtime_binding_refs as _runtime_binding_refs,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -185,6 +188,8 @@ def _intent(role: str, runtime_name: str, capability: str, allocation=None, **ov
         "wsp15_allocation_digest": _digest(allocation),
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
+        "model_runtime_binding_verification_receipt_id": "",
+        "model_runtime_binding_verification_digest": "",
         "memex_supply_receipt_id": MEMEX_SUPPLY_ID,
         "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "architect_fix_publication_receipt_id": "",
@@ -223,6 +228,8 @@ def _dryrun_result(allocation=None, intents=None, **overrides):
         "wsp15_reasoning_tier": allocation["reasoning_tier"],
         "model_runtime_binding_receipt_id": "",
         "model_runtime_binding_digest": "",
+        "model_runtime_binding_verification_receipt_id": "",
+        "model_runtime_binding_verification_digest": "",
         "memex_supply_receipt_id": MEMEX_SUPPLY_ID,
         "memex_supply_digest": MEMEX_SUPPLY_DIGEST,
         "architect_fix_publication_receipt_id": "",
@@ -274,13 +281,6 @@ def _publish(**kwargs):
         worker_dispatch_authority_verification_context(),
     )
     return runtime.publish_reddog_signed_worker_dispatch_runtime(**kwargs)
-
-
-def _runtime_binding_refs():
-    return {
-        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
-        "model_runtime_binding_digest": "sha256:model-runtime-binding",
-    }
 
 
 def _memex_refs():
@@ -1151,8 +1151,7 @@ def test_rejects_model_runtime_binding_conflict_between_signed_receipt_and_queue
         worker_dispatch_dryrun_result=dryrun,
         work_state_snapshot=_snapshot(
             allocation,
-            model_runtime_binding_receipt_id="reddog_model_runtime_binding:other",
-            model_runtime_binding_digest=refs["model_runtime_binding_digest"],
+            **{**refs, "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:other"},
         ),
         queue_item_id="queue-1",
         writer=_FakeWriter(),

@@ -50,6 +50,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_authority_store_comm
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
     attach_optional_authority_bindings,
     optional_authority_bindings_valid,
+    runtime_binding_request_valid,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
     canonical_work_authority_digest,
@@ -236,6 +237,8 @@ class DelegatedAuthorityRuntimeRequest:
     model_selection_digest: Optional[str] = None
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    model_runtime_binding_verification_receipt_id: Optional[str] = None
+    model_runtime_binding_verification_digest: Optional[str] = None
     memex_supply_receipt_id: Optional[str] = None
     memex_supply_digest: Optional[str] = None
     architect_fix_publication_receipt_id: Optional[str] = None
@@ -463,11 +466,8 @@ def issue_delegated_authority_runtime(
         or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
-    has_runtime_binding = bool(request.model_runtime_binding_receipt_id or request.model_runtime_binding_digest)
-    if has_runtime_binding and not (
-        str(request.model_runtime_binding_receipt_id or "").startswith("reddog_model_runtime_binding:")
-        and str(request.model_runtime_binding_digest or "").startswith("sha256:")
-    ):
+    has_runtime_binding = runtime_binding_request_valid(request)
+    if has_runtime_binding is None:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
     if not optional_authority_bindings_valid(request):
         return _rejection_result(

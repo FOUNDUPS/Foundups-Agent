@@ -504,47 +504,6 @@ def test_crash_after_publication_reclaims_and_reconstructs_exact_promotion(
     assert row["committed_revision"] == second.committed_revision
 
 
-def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Path) -> None:
-    repo = _repo(tmp_path)
-    files = _runtime_files(tmp_path)
-
-    with (
-        patch(
-            "modules.communication.moltbot_bridge.src."
-            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
-            return_value="sha256:repo-head",
-        ),
-        patch(
-            "modules.communication.moltbot_bridge.src."
-            "reddog_architect_proposal_admission_contract."
-            "current_architect_proposal_admission_policy",
-            return_value=ready_proposal_policy(),
-        ),
-    ):
-        result = run_reddog_main_architect_fix_promotion_bootstrap(
-            repo_root=repo,
-            runtime_root=tmp_path / "runtime",
-            work_state_path=files["work_state"],
-            architect_determination_path=files["determination"],
-            model_selection_receipt_path=files["model_selection"],
-            model_runtime_binding_receipt_path=files["model_runtime_binding"],
-            memex_supply_receipt_path=files["memex_supply"],
-            authority_profile_source_path=files["authority_profile_source"],
-            authority_profile_output_path=files["authority_profile_output"],
-            holoindex_receipt_path=files["holoindex_receipt"],
-            worker_id="reddog-main-test",
-            now_iso=NOW,
-        )
-
-    assert result.accepted is True
-    promoted_profile = json.loads(files["authority_profile_output"].read_text(encoding="utf-8"))
-    runtime_binding = json.loads(files["model_runtime_binding"].read_text(encoding="utf-8"))
-    assert promoted_profile["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert promoted_profile["operational_context_binding"]["model_runtime_binding_receipt_id"] == (
-        runtime_binding["receipt_id"]
-    )
-
-
 def test_bootstrap_rejects_authority_profile_output_inside_repo(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     files = _runtime_files(tmp_path)

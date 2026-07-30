@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import ast
+import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -26,6 +28,11 @@ from modules.ai_intelligence.ai_gateway.src.model_intelligence_selection import 
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     VerifiedModelProductionEvidence,
 )
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    canonical_model_runtime_binding_digest,
+    verification_receipt_digest,
+    verified_runtime_binding_receipt,
+)
 from modules.ai_intelligence.ai_gateway.tests.model_signed_evidence_test_helpers import (
     make_verified_production_evidence,
 )
@@ -38,7 +45,6 @@ from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation
     FAIL_EXPLICIT_REQUEST,
     FAIL_HOLOINDEX_EVIDENCE,
     FAIL_MODEL_RUNTIME_BINDING_RECEIPT,
-    FAIL_MODEL_SELECTION_RECEIPT,
     FAIL_PLANNED_ARTIFACTS,
     FAIL_RECEIPT_CHAIN,
     FAIL_RUNNER_MISSING,
@@ -49,7 +55,14 @@ from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation
     generate_bounded_artifact_contents,
 )
 from modules.communication.moltbot_bridge.src import reddog_bounded_artifact_generation_runtime
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_admission_capability import (
+    ArtifactGenerationModelCapability,
+    _issue_artifact_generation_authority,
+    consume_artifact_generation_model,
+)
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_test_capability,
+    model_selection_and_runtime_binding_receipts,
     model_runtime_binding_receipt,
 )
 
@@ -85,14 +98,15 @@ class FakeRunner:
         *,
         prompt: str,
         context: str,
-        binding: dict[str, object],
+        binding: ArtifactGenerationModelCapability,
         timeout_seconds: int,
     ) -> ArtifactGenerationModelResult:
+        verified_binding = consume_artifact_generation_model(binding)
         self.calls.append(
             {
                 "prompt": prompt,
                 "context": context,
-                "binding": binding,
+                "binding": verified_binding or {},
                 "timeout_seconds": timeout_seconds,
             }
         )
@@ -108,6 +122,12 @@ class FakeRunner:
 
 
 def _request(**overrides: object) -> dict[str, object]:
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+        task_family=TASK_FAMILY,
+    )
+    verification = verified_runtime_binding_receipt(runtime_binding)
+    assert verification is not None
     payload = {
         "explicit_artifact_generation_requested": True,
         "work_order_id": "work-order-1",
@@ -120,12 +140,74 @@ def _request(**overrides: object) -> dict[str, object]:
             "retrieval_quality": "HIGH",
             "holoindex_freshness_receipt_digest": "sha256:holo-fresh",
         },
-        "signed_authority": {"accepted": True, "signature_gate_digest": "sha256:auth"},
+        "signed_authority": {
+            "accepted": True,
+            "signature_gate_digest": "sha256:auth",
+            "model_selection_receipt_id": selection["receipt_id"],
+            "model_selection_digest": _mapping_digest(selection),
+            "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+            "model_runtime_binding_digest": canonical_model_runtime_binding_digest(
+                runtime_binding
+            ),
+            "model_runtime_binding_verification_receipt_id": (
+                verification.receipt_id
+            ),
+            "model_runtime_binding_verification_digest": (
+                verification_receipt_digest(verification)
+            ),
+        },
         "signed_receipt_chain": {"accepted": True, "terminal_receipt_hash": "sha256:chain"},
+        "model_selection_receipt": selection,
+        "model_runtime_binding_receipt": runtime_binding,
         "timeout_seconds": 30,
     }
     payload.update(overrides)
     return payload
+
+
+def _mapping_digest(value: dict[str, object]) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        default=str,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _generate(
+    request: dict[str, object],
+    *,
+    runner: FakeRunner | None,
+):
+    authority = _issue_artifact_generation_authority(request)
+    capability = model_runtime_binding_test_capability(
+        request.get("model_selection_receipt") or {},
+        request.get("model_runtime_binding_receipt") or {},
+    )
+    return generate_bounded_artifact_contents(
+        request,
+        runner=runner,
+        authority_capability=authority,
+        model_runtime_binding_capability=capability,
+    )
+
+
+def _runtime_receipt_id(value: dict[str, object]) -> str:
+    body = {
+        key: item
+        for key, item in value.items()
+        if key not in {"receipt_id", "verification_receipt"}
+    }
+    encoded = json.dumps(
+        body,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        default=str,
+    ).encode("utf-8")
+    return "reddog_model_runtime_binding:" + hashlib.sha256(encoded).hexdigest()
 
 
 def _model_selection_receipt(
@@ -199,8 +281,9 @@ def _model_selection_receipt(
 
 def test_valid_generation_returns_exact_bounded_artifacts() -> None:
     runner = FakeRunner()
+    request = _request()
 
-    result = generate_bounded_artifact_contents(_request(), runner=runner)
+    result = _generate(request, runner=runner)
 
     assert result.decision == ARTIFACT_GENERATION_ACCEPT
     assert result.accepted is True
@@ -210,33 +293,40 @@ def test_valid_generation_returns_exact_bounded_artifacts() -> None:
     assert result.receipt.planned_artifacts == [ARTIFACT]
     assert result.receipt.no_file_write_performed is True
     assert result.no_shell_command_executed is True
+    assert result.receipt.model_selection_digest == _mapping_digest(
+        request["model_selection_receipt"]
+    )
+    assert result.receipt.model_runtime_binding_digest == canonical_model_runtime_binding_digest(
+        request["model_runtime_binding_receipt"]
+    )
     assert runner.calls
     assert runner.calls[0]["binding"]["work_order_id"] == "work-order-1"
 
 
-def test_model_selection_receipt_is_bound_into_runner_call() -> None:
+def test_raw_model_selection_without_runtime_binding_rejects_before_runner() -> None:
     selection = _model_selection_receipt()
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
-        _request(model_selection_receipt=selection),
+    result = _generate(
+        _request(
+            model_runtime_binding_receipt=None,
+            model_selection_receipt=selection,
+        ),
         runner=runner,
     )
 
-    assert result.accepted is True
-    assert result.receipt.model_selection_receipt_id == selection["receipt_id"]
-    binding = runner.calls[0]["binding"]["model_selection"]
-    assert binding["receipt_id"] == selection["receipt_id"]
-    assert binding["lead_model"] == "openai/gpt-5.6-code"
-    assert binding["purpose"] == "production"
+    assert result.accepted is False
+    assert FAIL_MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
+    assert runner.calls == []
 
 
 def test_model_runtime_binding_receipt_is_bound_into_artifact_runner_call() -> None:
-    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION)
+    request = _request()
+    runtime_binding = request["model_runtime_binding_receipt"]
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
-        _request(model_runtime_binding_receipt=runtime_binding),
+    result = _generate(
+        request,
         runner=runner,
     )
 
@@ -252,7 +342,7 @@ def test_mismatched_model_runtime_binding_receipt_rejects_before_artifact_runner
     runtime_binding = model_runtime_binding_receipt(runtime_surface="wrong_surface")
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(model_runtime_binding_receipt=runtime_binding),
         runner=runner,
     )
@@ -262,18 +352,18 @@ def test_mismatched_model_runtime_binding_receipt_rejects_before_artifact_runner
     assert runner.calls == []
 
 
-def test_tampered_model_selection_receipt_rejects_before_runner() -> None:
-    selection = _model_selection_receipt()
+def test_tampered_model_selection_lineage_rejects_before_runner() -> None:
+    selection = dict(_request()["model_selection_receipt"])
     selection["selected_model_ids"] = ["attacker/model"]
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(model_selection_receipt=selection),
         runner=runner,
     )
 
     assert result.decision == ARTIFACT_GENERATION_REJECT
-    assert FAIL_MODEL_SELECTION_RECEIPT in result.rejection_reasons
+    assert FAIL_MODEL_RUNTIME_BINDING_RECEIPT in result.rejection_reasons
     assert runner.calls == []
 
 
@@ -285,16 +375,29 @@ def test_foundups_fusion_runner_loader_resolves_repo_bridge() -> None:
 
 
 def test_foundups_fusion_runner_uses_model_selection_topology(monkeypatch: pytest.MonkeyPatch) -> None:
-    selection = _model_selection_receipt(
-        selection_mode=SelectionMode.PANEL,
-        model_ids=("openai/gpt-5.6-code", "anthropic/claude-opus-5"),
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+        task_family=TASK_FAMILY,
+        panel_model_ids=("anthropic/claude-opus-5",),
     )
-    runner = FakeRunner()
-    gate = generate_bounded_artifact_contents(
-        _request(model_selection_receipt=selection),
-        runner=runner,
-    )
-    binding = runner.calls[0]["binding"]
+    request = _request()
+    verification = verified_runtime_binding_receipt(runtime_binding)
+    assert verification is not None
+    request["model_selection_receipt"] = selection
+    request["model_runtime_binding_receipt"] = runtime_binding
+    request["signed_authority"] = {
+        **dict(request["signed_authority"]),
+        "model_selection_receipt_id": selection["receipt_id"],
+        "model_selection_digest": _mapping_digest(selection),
+            "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+            "model_runtime_binding_digest": canonical_model_runtime_binding_digest(
+                runtime_binding
+            ),
+            "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+            "model_runtime_binding_verification_digest": (
+                verification_receipt_digest(verification)
+            ),
+        }
     calls: list[dict[str, object]] = []
 
     def fake_fusion(api_key, user_payload, messages, payload):
@@ -308,28 +411,34 @@ def test_foundups_fusion_runner_uses_model_selection_topology(monkeypatch: pytes
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_load_foundups_fusion_runner", lambda: fake_fusion)
 
-    model_result = reddog_bounded_artifact_generation_runtime.FoundupsFusionArtifactGenerationRunner(
-        runtime_mode="foundups_fusion",
-        lead_model="legacy/lead",
-        panel_models=("legacy/panel",),
-    ).generate_artifacts(
-        prompt="Produce the requested artifact.",
-        context="governance evidence",
-        binding=binding,
-        timeout_seconds=30,
+    gate = _generate(
+        request,
+        runner=reddog_bounded_artifact_generation_runtime.FoundupsFusionArtifactGenerationRunner(
+            runtime_mode="foundups_fusion",
+        ),
     )
 
     assert gate.accepted is True
-    assert model_result.ok is True
+    assert gate.model_result is not None and gate.model_result.ok is True
     assert calls[0]["lead_model"] == "openai/gpt-5.6-code"
     assert calls[0]["panel_models"] == ["anthropic/claude-opus-5"]
     assert calls[0]["bridge_meta"]["model_selection_receipt_id"] == selection["receipt_id"]
+    assert (
+        calls[0]["bridge_meta"][
+            "model_runtime_binding_verification_receipt_id"
+        ]
+        == verification.receipt_id
+    )
+    assert (
+        gate.receipt.model_runtime_binding_verification_receipt_id
+        == verification.receipt_id
+    )
 
 
 def test_missing_explicit_request_rejects_before_runner() -> None:
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(explicit_artifact_generation_requested=False),
         runner=runner,
     )
@@ -340,7 +449,7 @@ def test_missing_explicit_request_rejects_before_runner() -> None:
 
 
 def test_missing_runner_rejects_fail_closed() -> None:
-    result = generate_bounded_artifact_contents(_request(), runner=None)
+    result = _generate(_request(), runner=None)
 
     assert result.decision == ARTIFACT_GENERATION_REJECT
     assert FAIL_RUNNER_MISSING in result.rejection_reasons
@@ -349,7 +458,7 @@ def test_missing_runner_rejects_fail_closed() -> None:
 def test_holoindex_index_gap_blocks_generation_before_runner() -> None:
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(holoindex_evidence={"index_gap_detected": True, "retrieval_quality": "INDEX_GAP"}),
         runner=runner,
     )
@@ -361,7 +470,7 @@ def test_holoindex_index_gap_blocks_generation_before_runner() -> None:
 def test_authority_and_receipt_chain_are_required_before_runner() -> None:
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(signed_authority={"accepted": False}, signed_receipt_chain={}),
         runner=runner,
     )
@@ -372,7 +481,7 @@ def test_authority_and_receipt_chain_are_required_before_runner() -> None:
 
 
 def test_runner_rejection_blocks_artifacts() -> None:
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(),
         runner=FakeRunner(ok=False, rejection_reasons=("model_quorum_failed",)),
     )
@@ -384,7 +493,7 @@ def test_runner_rejection_blocks_artifacts() -> None:
 
 
 def test_extra_or_missing_artifact_path_rejects() -> None:
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(),
         runner=FakeRunner(artifact_contents={ARTIFACT: "ok", "modules/foundups/paccess_001/EXTRA.md": "bad"}),
     )
@@ -396,7 +505,7 @@ def test_extra_or_missing_artifact_path_rejects() -> None:
 def test_invalid_planned_artifact_path_rejects_before_runner() -> None:
     runner = FakeRunner()
 
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(planned_artifacts=[ARTIFACT, "../escape.md"]),
         runner=runner,
     )
@@ -406,7 +515,7 @@ def test_invalid_planned_artifact_path_rejects_before_runner() -> None:
 
 
 def test_secret_marker_and_nul_content_reject() -> None:
-    result = generate_bounded_artifact_contents(
+    result = _generate(
         _request(),
         runner=FakeRunner(artifact_contents={ARTIFACT: "token=abc\x00"}),
     )

@@ -1,7 +1,6 @@
 # OpenClaw Bridge Interface
 
 ## Public API
-
 ### Architect proposal validity and execution readiness
 
 `evaluate_architect_proposal_executability()` runs after backend Fusion output
@@ -129,11 +128,12 @@ steps in one claim; the reserved independent verifier remains a separate
 AgentDB assignment.
 
 `ResidentQueueExactShaCommitStageHandler` accepts only the worktree, branch,
-work order, and exact artifact set already bound by the worktree and bounded
-worker receipts. It rejects a pre-staged index, undeclared dirty or untracked
-paths, changed artifact content, a protected or mismatched branch, and a
-mismatched base. It invokes only the injected `commit_all()` operation, then
-verifies the exact parent/head/tree/path set and clean state.
+work order, and exact artifact set already bound by worktree and bounded-worker
+receipts. Artifact generation first requires one canonical production model
+selection plus a verification-admitted runtime binding whose exact topology
+and proof digest match signed authority at use time; self-rehashed evidence and
+model substitution fail before the provider. The commit handler then rejects
+pre-staged, undeclared, changed, protected, or base-mismatched state.
 
 The resulting `reddog_resident_queue_exact_sha_commit_receipt.v1` is
 canonically revalidated before the verifier request is built. The stage does
@@ -263,10 +263,10 @@ does the resolver issue an opaque process-local lease; the final effect boundary
 invokes `AUTHORITATIVE_USE` and transactionally consumes the nonce exactly once.
 That boundary reads a fresh trusted clock first; expiry or clock failure returns
 without consuming the nonce or invoking the effect.
-Persisted stage mappings are audit evidence and cannot recreate that lease.
-Use-time validation reuses the strict queue consumer and binds the promoted
-claim, determination/model/Memex receipts, signed identity/work authority,
-FoundUp scope, and complete WSP 15 allocation lineage.
+Persisted stage and model-runtime verification mappings are audit evidence and
+cannot recreate either lease. Use-time validation rehydrates signed SINGLE or
+PANEL evidence and binds current revocation plus promoted claim, model, Memex,
+identity, FoundUp, and WSP 15 lineage before issuing a one-shot capability.
 
 Delegated authority additionally signs the exact explicit `base_ref` and the
 canonical digest of the complete work order. The executor plan carries those
