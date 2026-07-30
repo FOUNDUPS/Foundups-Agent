@@ -18,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
     NEXT_QUEUE_VERIFIED_DRAFT_PR_PUBLISH_INVOKE,
     NEXT_QUEUE_VERIFIED_OUTCOME_RATCHET_INVOKE,
+    RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_verified_draft_pr_publish_handler import (
     FAIL_DRAFT_PR_PUBLISH_REQUEST_BINDING_REJECTED,
@@ -136,6 +137,7 @@ def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResult
         "worktree_create": {"decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT},
         "assurance_capacity_admission": ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT,
         "bounded_worker_pilot": _queue_pilot_result(),
+        "exact_sha_commit": {"decision": RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT},
         SLICE_VERIFIER_STAGE_KEY: _queue_verifier_result(),
     }
     stage_results.update(stage_overrides)
@@ -445,6 +447,30 @@ def test_publish_rejection_is_not_recorded_by_dispatcher() -> None:
     assert FAIL_RECORD_REJECTED in result.rejection_reasons
     assert QueueAuthorizedVerifiedDraftPrPublishInvokeReason.PUBLISH_NOT_ACCEPTED in result.rejection_reasons
     assert "FAIL_HEAD_MISMATCH" in result.rejection_reasons
+    assert VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY not in chain_store.load()["stage_results"]
+
+
+def test_dispatcher_rejects_slice_verifier_that_skips_exact_sha_commit() -> None:
+    chain_store = _seeded_store(exact_sha_commit={})
+    runner = FakeDraftPrRunner()
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                runner=runner,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is False
+    assert "FAIL_OUT_OF_ORDER_STAGE_RESULT:exact_sha_commit" in result.rejection_reasons
+    assert "future_stage_present:slice_verifier" in result.rejection_reasons
+    assert runner.calls == []
     assert VERIFIED_DRAFT_PR_PUBLISH_STAGE_KEY not in chain_store.load()["stage_results"]
 
 
