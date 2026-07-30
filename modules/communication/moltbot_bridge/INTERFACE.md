@@ -17,14 +17,14 @@ Model-supplied readiness booleans and capabilities produced by the proposed
 slice are never current authority.
 
 `promote_reddog_architect_fix_to_signed_wsp15_work_order()` canonically
-rehydrates the receipt and rechecks current trust anchors, platform, repository
-HEAD, HoloIndex generation/freshness receipt, authoritative work-state
-revision, snapshot, audit bundle, canonical candidate identity, and WSP 15
-lineage. Only `CANDIDATE` plus `READY` may enter the queue. The authorized base
-is the immutable repository SHA from the admission receipt, not a moving branch
-name. INDEX_GAP blocks ordinary code work; the only phase-one exception is a
-HoloIndex maintenance slice whose exact non-wildcard paths equal the supporting
-direct-read paths.
+rehydrates the receipt and rechecks platform, repository HEAD, HoloIndex freshness,
+work-state revision, snapshot, audit bundle, candidate identity, future capabilities,
+and WSP 15 lineage. A valid `BLOCKED_CANDIDATE` may reach promotion because proposal
+authenticity cannot exist before that stage. Promotion rebuilds and verifies the proposal
+before queue mutation. Missing execution capabilities remain fail-closed at
+the use-time valve; promotion grants no ambient authority. The authorized base
+is the immutable admission SHA, not a branch. INDEX_GAP blocks ordinary work;
+the maintenance exception requires exact supporting direct-read paths.
 
 The receipt's SHA is integrity evidence, not authentication.
 `reddog_architect_proposal_authenticity.py` defines a domain-separated Ed25519

@@ -291,6 +291,54 @@ def reevaluate_architect_proposal_execution_readiness(
     return tuple(dict.fromkeys(reasons))
 
 
+def reevaluate_architect_proposal_promotion_preconditions(
+    receipt: ArchitectProposalExecutabilityReceipt,
+    *,
+    policy: ArchitectProposalAdmissionPolicy | None = None,
+) -> tuple[str, ...]:
+    """Recheck proposal truth before its authority can be signed.
+
+    Missing execution capabilities remain recorded on the receipt, but they
+    cannot be required before the proposal-authenticity signature exists.
+    The execution valve independently re-verifies every capability at use time.
+    """
+
+    current = policy or current_architect_proposal_admission_policy()
+    required = required_capabilities_for_effect(
+        receipt.target_effect_plane
+    )
+    reasons: list[str] = []
+    if (
+        receipt.accepted is not True
+        or receipt.proposal_validity != VALIDITY_VALID
+    ):
+        reasons.append("proposal_not_valid_for_promotion")
+    if not required.issubset(set(receipt.required_capabilities)):
+        reasons.append("effect_capability_requirements_underdeclared")
+    if receipt.policy_digest != _digest(current.to_dict()):
+        reasons.append("proposal_admission_policy_binding_stale")
+    if (
+        receipt.index_gap_detected
+        and not receipt.holoindex_maintenance_exception_applied
+    ):
+        reasons.append("proposal_was_grounded_against_index_gap")
+    if _unsupported_live_canary(receipt, current):
+        reasons.append(
+            f"live_canary_platform_unsupported:{current.platform}"
+        )
+    if (
+        receipt.target_effect_plane == EFFECT_MERGE
+        and not current.merge_authority_available
+    ):
+        reasons.append("merge_authority_unavailable")
+    if (
+        receipt.target_effect_plane == EFFECT_EXTERNAL
+        and not current.external_effect_authority_available
+    ):
+        reasons.append("external_effect_authority_unavailable")
+    return tuple(dict.fromkeys(reasons))
+
+
 _TUPLE_FIELDS = (
     "allowed_paths",
     "denied_paths",
@@ -453,5 +501,6 @@ __all__ = [
     "proposal_admission_prompt_policy",
     "required_capabilities_for_effect",
     "reevaluate_architect_proposal_execution_readiness",
+    "reevaluate_architect_proposal_promotion_preconditions",
     "validate_architect_proposal_executability_receipt",
 ]

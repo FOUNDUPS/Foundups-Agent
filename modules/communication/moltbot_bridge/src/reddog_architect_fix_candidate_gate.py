@@ -14,7 +14,7 @@ from holo_index.freshness_receipt import (
 from modules.communication.moltbot_bridge.src.reddog_architect_proposal_executability_admission import (
     ArchitectProposalExecutabilityReceipt,
     EFFECT_REPOSITORY_CODE_CHANGE,
-    reevaluate_architect_proposal_execution_readiness,
+    reevaluate_architect_proposal_promotion_preconditions,
     validate_architect_proposal_executability_receipt,
 )
 
@@ -91,7 +91,7 @@ def validate_architect_fix_proposal_admission(
         current_holoindex_receipt=current_holoindex_receipt,
         committed_retry_attestation_id=committed_retry_attestation_id,
     )
-    if reevaluate_architect_proposal_execution_readiness(receipt):
+    if reevaluate_architect_proposal_promotion_preconditions(receipt):
         reasons.append(PROPOSAL_ADMISSION_INVALID)
     return (
         receipt if not reasons else None,
@@ -120,9 +120,35 @@ def _lineage_reasons(
             attestation_id=committed_retry_attestation_id,
         )
     )
-    expected = (
+    expected = _receipt_candidate_lineage_matches(
+        receipt, determination, candidate, work_state_revision_matches
+    )
+    reasons = [] if expected else [PROPOSAL_ADMISSION_INVALID]
+    if not current_repo_head_sha or receipt.repo_head_sha != current_repo_head_sha:
+        reasons.append(REPO_HEAD_MISMATCH)
+    if not _current_holoindex_binding_matches(
+        receipt,
+        current_holoindex_receipt=current_holoindex_receipt,
+        current_repo_head_sha=current_repo_head_sha,
+    ):
+        reasons.append(HOLOINDEX_BINDING_MISMATCH)
+    return reasons
+
+
+def _receipt_candidate_lineage_matches(
+    receipt: ArchitectProposalExecutabilityReceipt,
+    determination: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    work_state_revision_matches: bool,
+) -> bool:
+    expected_status = (
+        "CANDIDATE"
+        if receipt.admissible_to_authoritative_queue
+        else "BLOCKED_CANDIDATE"
+    )
+    return bool(
         receipt.accepted is True
-        and receipt.admissible_to_authoritative_queue is True
+        and receipt.proposal_validity == "VALID"
         and receipt.action == "FIX"
         and receipt.target_effect_plane == EFFECT_REPOSITORY_CODE_CHANGE
         and receipt.slice_id == determination.get("next_slice_name")
@@ -138,22 +164,12 @@ def _lineage_reasons(
         and receipt.wsp15_allocation_digest
         == str(determination.get("wsp15_allocation_digest") or "")
         and work_state_revision_matches
-        and str(candidate.get("status") or "").upper() == "CANDIDATE"
+        and str(candidate.get("status") or "").upper() == expected_status
         and receipt.receipt_id
         == str(candidate.get("proposal_admission_receipt_id") or "")
         and _digest(receipt.to_dict())
         == str(candidate.get("proposal_admission_digest") or "")
     )
-    reasons = [] if expected else [PROPOSAL_ADMISSION_INVALID]
-    if not current_repo_head_sha or receipt.repo_head_sha != current_repo_head_sha:
-        reasons.append(REPO_HEAD_MISMATCH)
-    if not _current_holoindex_binding_matches(
-        receipt,
-        current_holoindex_receipt=current_holoindex_receipt,
-        current_repo_head_sha=current_repo_head_sha,
-    ):
-        reasons.append(HOLOINDEX_BINDING_MISMATCH)
-    return reasons
 
 
 def _is_exact_publication_retry(
