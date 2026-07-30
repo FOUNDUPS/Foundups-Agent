@@ -35,6 +35,20 @@ RedDog Fusion progress observability is implemented by `src/reddog_fusion_progre
 
 The durable resident architect cycle in `src/reddog_resident_architect_durable_agentdb_cycle.py` is intent-digest-bound and revision-CAS protected. Its nine process-local read-only self-attestations are persisted and enforced at this code boundary; they are not externally observed or signer-authenticated effect receipts. Cancellation is terminal against stale workers, and retries retain monotonic attempt history. Transition receipts are recomputed internal-integrity telemetry only, not execution authority or external authentication.
 
+Terminal resident `FIX` determinations cross the editor/main process boundary
+through `reddog_fix_promotion_claims`. The coordination row is derived from the
+integrity-checked terminal cycle, canonical architect determination, exact
+queue candidate, and validated WSP 15 receipt. A bounded CAS lease permits one
+main process to materialize the existing handoff artifacts. The row grants no
+execution authority; signed promotion revalidates all authoritative inputs.
+Expired claims recover, lease renewal is bounded, and successful promotion
+completes exactly once. A monotonic claim revision is revalidated under an
+AgentDB writer fence across the authoritative publication CAS; the applied row
+binds the resulting promotion receipt and committed work-state revision before
+the fence is released. Restart recovery re-enters the existing authenticated,
+idempotent promotion path; claim coordination never infers completion from an
+unsigned work-state mapping.
+
 Fresh AgentDB cycle rows must be canonical `SUBMITTED` retry-zero records. `FAILED` and `TIMED_OUT` may retry through CAS; `CANCELLED` and `DETERMINED` never reopen. Legacy rows have a cancellation-only compatibility path and are otherwise rejected.
 
 Signed worker tasks carry a canonical AgentDB envelope. The OpenClaw claim

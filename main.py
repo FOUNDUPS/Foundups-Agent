@@ -2062,90 +2062,7 @@ def _handle_startup_blocker(repo_root: Path, *, component: str, stage: str) -> N
 
 
 def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
-    """
-    Optionally promote a backend architect FIX determination into the resident queue.
-
-    Env:
-        REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME=0             Enable promotion bridge
-        REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED=0            Block startup if rejected
-        REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
-        REDDOG_ARCHITECT_FIX_DETERMINATION_PATH              Outside-repo determination JSON
-        REDDOG_MODEL_SELECTION_RECEIPT_PATH                  Outside-repo model receipt JSON
-        REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH            Outside-repo runtime binding receipt JSON
-        REDDOG_MEMEX_SUPPLY_RECEIPT_PATH                     Outside-repo Memex supply JSON
-        REDDOG_AUTHORITY_PROFILE_SOURCE_PATH                 Outside-repo authority seed JSON
-        REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH              Outside-repo inert promoted profile JSON
-        REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo active authority profile JSON
-        HOLOINDEX_FRESHNESS_RECEIPT                          Current HoloIndex freshness receipt
-        REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
-        REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
-        REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=0             Materialize model selection receipt from signed evidence
-        REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY=0       Materialize runtime binding receipt from signed evidence
-        REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY=0     Materialize model AutoResearch plan from verified receipts
-        REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY=0 Execute campaign fixture or configured gateway
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN=0 Run gate->cycle->feedback chain
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_ENFORCED=0 Block startup if chain rejected
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY=0 Materialize campaign promotion-gate receipts
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY=0 Materialize campaign cycle receipt
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION=0 Admit cycle receipt to feedback ledger
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_CATALOG_SNAPSHOT_PATH                   Outside-repo model catalog snapshot JSON
-        REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
-        REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
-        REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH        Outside-repo benchmark evidence receipts JSON
-        REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH        Outside-repo promotion evidence receipts JSON
-        REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH             Outside-repo runtime binding policy JSON
-        REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH Outside-repo promotion gate receipts JSON
-        REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH        Outside-repo benchmark candidate pool JSON
-        REDDOG_MODEL_AUTORESEARCH_POLICY_PATH                Outside-repo AutoResearch policy JSON
-        REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH      Optional outside-repo feedback JSON/JSONL
-        REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH          Outside-repo AutoResearch plan output JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_TASKS_PATH        Outside-repo held-out campaign tasks JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMPTS_PATH      Outside-repo held-out prompt records JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_PATH Outside-repo raw output evidence JSONL for configured_gateway
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_PATH Outside-repo campaign execution output JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST   Verifier digest required by plan policy
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID Held-out split ID for benchmark receipt
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE       deterministic_fixture or configured_gateway
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE     deterministic_fixture, exact_output_digest, or output_evidence_semantic
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_ALLOWED_PROVIDERS ; or , separated allowlist
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS Optional positive int
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE Optional positive int
-        REDDOG_MODEL_AUTORESEARCH_RUNNER_MAX_TOTAL_CALLS       Required configured campaign call cap
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE Canonical positive decimal string
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_POLICIES_PATH Outside-repo promotion policies JSON
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH         Outside-repo AutoResearch cycle receipt JSON
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_PATH Outside-repo AutoResearch cycle feedback JSONL
-        REDDOG_MODEL_AUTORESEARCH_PROMOTION_AUTHORITY_RECEIPT_ID Optional promotion authority receipt ID
-        REDDOG_MODEL_AUTORESEARCH_SIGNED_PROMOTION_RECEIPT_ID Optional signed promotion receipt ID
-        REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
-        REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY=0 Materialize principal/snapshot from GitHub probe
-        REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_GITHUB_REPO_FULL_NAME                         GitHub repo full name for permission probe
-        REDDOG_AUTHORITY_FOUNDUP_ID                          FoundUp scope for principal authority record
-        REDDOG_PRINCIPAL_PUBLIC_KEY                          Principal public key, required; never inferred
-        REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY=0               Materialize authority seed from resident receipts
-        REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_ENFORCED=0      Block startup if seed supply fails
-        REDDOG_REDDOG_ID                                     Delegated RedDog id for authority seed
-        REDDOG_REDDOG_PUBLIC_KEY                             RedDog public key for authority seed
-        REDDOG_AUTHORITY_REQUESTED_OPERATION                  Authority operation, default feature_slice
-        REDDOG_AUTHORITY_ALLOWED_PATHS                        ; or , separated path allowlist
-        REDDOG_AUTHORITY_DENIED_PATHS                         ; or , separated path denylist
-        REDDOG_AUTHORITY_REQUIRED_TESTS                       ; or , separated required tests
-        REDDOG_AUTHORITY_REQUIRED_POLICY_GATES                ; or , separated policy gates
-        REDDOG_AUTHORITY_CONSENSUS_RECEIPT_DIGEST             Required for high-authority operations
-        REDDOG_AUTHORITY_SOVEREIGN_AUTHORIZATION_DIGEST       Required for high-authority operations
-        REDDOG_AUTHORITY_PROFILE_SEED_NOW_EPOCH               Deterministic seed issue time for tests
-        REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY=0    Materialize authority source from seed/principal/snapshot
-        REDDOG_AUTHORITY_PROFILE_SEED_PATH                   Outside-repo authority seed input JSON
-        REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH               Outside-repo principal authority record JSON
-        REDDOG_PERMISSION_SNAPSHOT_PATH                      Outside-repo permission snapshot JSON
-        REDDOG_RESIDENT_ARCHITECT_INTENT_ID                  Intent ID for the determined resident cycle
-    """
+    """Run the documented RedDog FIX artifact and promotion preflight chain."""
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
@@ -2233,7 +2150,24 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
     )
     handoff_requested = resident_queue_runtime_flag_enabled(os.environ, "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF")
     handoff_enforced = os.getenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_ENFORCED", "0") != "0"
-    if handoff_requested:
+    from modules.communication.moltbot_bridge.src.reddog_main_fix_promotion_claim_preparation import (
+        prepare_reddog_main_fix_promotion_claim,
+    )
+
+    claim_preparation = prepare_reddog_main_fix_promotion_claim(
+        repo_root=repo_root,
+        environment=os.environ,
+        architect_determination_path=architect_determination_path,
+        memex_supply_receipt_path=memex_supply_receipt_path,
+    )
+    if not claim_preparation.continue_pipeline:
+        return claim_preparation.startup_result
+    durable_claim = claim_preparation.claim
+    durable_claim_store = claim_preparation.store
+    if durable_claim is not None:
+        architect_determination_path = claim_preparation.architect_determination_path
+        memex_supply_receipt_path = claim_preparation.memex_supply_receipt_path
+    elif handoff_requested:
         try:
             from modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff import (
                 run_reddog_resident_fix_promotion_artifact_handoff,
@@ -2273,6 +2207,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
 
     model_supply_requested = resident_queue_runtime_flag_enabled(os.environ, "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY")
     model_supply_enforced = os.getenv("REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
+    if durable_claim is not None and not durable_claim_store.renew(durable_claim):
+        print("[REDDOG-FIX-CLAIM] preflight=WARN reason=promotion_claim_lease_lost")
+        return os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") == "0"
     if model_supply_requested:
         try:
             from modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply_bootstrap import (
@@ -2452,6 +2389,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
     autoresearch_campaign_enforced = (
         os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
     )
+    if durable_claim is not None and not durable_claim_store.renew(durable_claim):
+        print("[REDDOG-FIX-CLAIM] preflight=WARN reason=promotion_claim_lease_lost")
+        return os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") == "0"
     if autoresearch_campaign_requested:
         try:
             from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution_artifact_supply_bootstrap import (
@@ -2782,6 +2722,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
     principal_snapshot_supply_enforced = (
         os.getenv("REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED", "0") != "0"
     )
+    if durable_claim is not None and not durable_claim_store.renew(durable_claim):
+        print("[REDDOG-FIX-CLAIM] preflight=WARN reason=promotion_claim_lease_lost")
+        return os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") == "0"
     if principal_snapshot_supply_requested:
         try:
             from modules.communication.moltbot_bridge.src.reddog_github_principal_permission_snapshot_supply_bootstrap import (
@@ -2957,94 +2900,29 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             )
             return False
 
-    required_inputs_present = all(
-        str(value or "").strip()
-        for value in (
+    from modules.communication.moltbot_bridge.src.reddog_main_fix_promotion_claim_runtime import (
+        MainFixPromotionRuntimeInputs,
+        run_claim_bound_fix_promotion_preflight,
+    )
+
+    return run_claim_bound_fix_promotion_preflight(
+        repo_root=repo_root,
+        environment=os.environ,
+        inputs=MainFixPromotionRuntimeInputs(
             work_state_path,
             architect_determination_path,
             model_selection_receipt_path,
+            model_runtime_binding_receipt_path,
+            model_runtime_binding_receipt_path_supplied,
             memex_supply_receipt_path,
             authority_profile_source_path,
+            authority_profile_path,
+            active_authority_profile_path,
             holoindex_receipt_path,
-        )
-    ) and bool(authority_profile_path)
-    raw_requested = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME")
-    requested = raw_requested == "1" or (raw_requested is None and required_inputs_present)
-    if not requested:
-        logger.info("[REDDOG-FIX-PROMOTION] Startup promotion bridge disabled")
-        return True
-
-    enforced = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") != "0"
-    if (
-        authority_profile_path
-        and active_authority_profile_path
-        and Path(authority_profile_path).resolve()
-        == Path(active_authority_profile_path).resolve()
-    ):
-        print(
-            "[REDDOG-FIX-PROMOTION] preflight="
-            f"{'FAIL' if enforced else 'WARN'} "
-            "reason=inert_profile_aliases_active_authority_profile"
-        )
-        return not enforced
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
-            run_reddog_main_architect_fix_promotion_bootstrap,
-        )
-        from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
-            resident_queue_runtime_root_path,
-        )
-
-        result = run_reddog_main_architect_fix_promotion_bootstrap(
-            repo_root=repo_root,
-            runtime_root=resident_queue_runtime_root_path(
-                os.environ,
-                repo_root,
-            ),
-            work_state_path=work_state_path,
-            architect_determination_path=architect_determination_path,
-            model_selection_receipt_path=model_selection_receipt_path,
-            model_runtime_binding_receipt_path=(
-                model_runtime_binding_receipt_path if model_runtime_binding_receipt_path_supplied else None
-            ),
-            memex_supply_receipt_path=memex_supply_receipt_path,
-            authority_profile_source_path=authority_profile_source_path,
-            authority_profile_output_path=authority_profile_path,
-            holoindex_receipt_path=holoindex_receipt_path,
-            worker_id=os.getenv(
-                "REDDOG_ARCHITECT_FIX_PROMOTION_WORKER_ID",
-                "reddog-main-architect-fix-promotion",
-            ),
-        )
-    except Exception as exc:
-        logger.error(f"[REDDOG-FIX-PROMOTION] Startup promotion bridge failed: {exc}")
-        if enforced:
-            print(f"[REDDOG-FIX-PROMOTION] preflight=FAIL error={type(exc).__name__}")
-            return False
-        print(f"[REDDOG-FIX-PROMOTION] preflight=WARN error={type(exc).__name__}")
-        return True
-
-    status = "PASS" if result.accepted else "WARN"
-    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
-    print(
-        f"[REDDOG-FIX-PROMOTION] preflight={status} status={result.status} "
-        f"queue_item={result.queue_item_id or '(none)'} "
-        f"selected_slice={result.selected_slice or '(none)'} reasons={reasons}"
+        ),
+        durable_claim=durable_claim,
+        durable_claim_store=durable_claim_store,
     )
-    if result.accepted and result.authority_profile_path:
-        os.environ["REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH"] = (
-            result.authority_profile_path
-        )
-        print(
-            f"[REDDOG-FIX-PROMOTION] receipt={result.promotion_receipt_id} "
-            f"revision={result.committed_revision} authority=INERT"
-        )
-        return True
-
-    if enforced:
-        print("[REDDOG-FIX-PROMOTION] Startup blocked by REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED=1")
-        return False
-    return True
 
 
 def run_reddog_resident_queue_orchestration_plan_preflight(repo_root: Path) -> bool:

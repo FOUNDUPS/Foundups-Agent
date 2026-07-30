@@ -4,15 +4,23 @@ from __future__ import annotations
 
 import ast
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
+import modules.communication.moltbot_bridge.src.reddog_agentdb_fix_promotion_claim_fence as claim_fence_runtime
 from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_APPLIED,
     REDDOG_ARCHITECT_FIX_PROMOTION_BOOTSTRAP_NOT_READY,
+)
+from modules.communication.moltbot_bridge.src.reddog_agentdb_fix_promotion_claim_fence import (
+    FixPromotionClaimFenceLost,
+    execute_with_fix_promotion_claim_fence,
+)
+from modules.communication.moltbot_bridge.src.reddog_agentdb_fix_promotion_claim_store import (
+    AgentDbFixPromotionClaimStore,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _determination,
@@ -31,6 +39,7 @@ from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_tes
 from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
     ready_proposal_policy,
 )
+from modules.infrastructure.database.src.db_manager import DatabaseManager
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -155,6 +164,66 @@ def test_bootstrap_promotes_fix_and_writes_authority_profile(tmp_path: Path) -> 
     assert not (repo / ".reddog").exists()
 
 
+@pytest.mark.parametrize(
+    "alias_name",
+    (
+        "work_state",
+        "determination",
+        "model_selection",
+        "model_runtime_binding",
+        "memex_supply",
+        "authority_profile_source",
+        "holoindex_receipt",
+    ),
+)
+def test_bootstrap_rejects_output_alias_before_any_artifact_write(
+    tmp_path: Path,
+    alias_name: str,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    before = {
+        name: path.read_bytes()
+        for name, path in files.items()
+        if path.exists()
+    }
+
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_architect_proposal_admission_contract."
+            "current_architect_proposal_admission_policy",
+            return_value=ready_proposal_policy(),
+        ),
+    ):
+        result = run_reddog_main_architect_fix_promotion_bootstrap(
+            repo_root=repo,
+            runtime_root=tmp_path / "runtime",
+            work_state_path=files["work_state"],
+            architect_determination_path=files["determination"],
+            model_selection_receipt_path=files["model_selection"],
+            model_runtime_binding_receipt_path=files["model_runtime_binding"],
+            memex_supply_receipt_path=files["memex_supply"],
+            authority_profile_source_path=files["authority_profile_source"],
+            authority_profile_output_path=files[alias_name],
+            holoindex_receipt_path=files["holoindex_receipt"],
+            worker_id="reddog-alias-test",
+            now_iso=NOW,
+        )
+
+    assert result.accepted is False
+    assert result.rejection_reasons == (
+        "authority_profile_output_aliases_consumed_artifact",
+    )
+    for name, content in before.items():
+        assert files[name].read_bytes() == content
+
+
 def test_bootstrap_exact_retry_reconstructs_committed_promotion(
     tmp_path: Path,
 ) -> None:
@@ -174,6 +243,18 @@ def test_bootstrap_exact_retry_reconstructs_committed_promotion(
         nonce="proposal-promotion-retry-0001",
     )
     assert isinstance(resolver, StaticPrincipalKeyResolver)
+    candidate = determination["queue_candidate"]
+    allocation = candidate["wsp15_allocation_receipt"]
+    fence = {
+        "schema_version": "reddog_fix_promotion_claim_fence.v1",
+        "agentdb_claim_id": "sha256:agentdb-claim",
+        "lease_id": "lease:one",
+        "lease_owner": "reddog-main-a",
+        "claim_revision": 1,
+        "determination_id": determination["determination_receipt_id"],
+        "queue_candidate_id": candidate["queue_candidate_id"],
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+    }
     kwargs = {
         "repo_root": repo,
         "runtime_root": tmp_path / "runtime",
@@ -189,6 +270,7 @@ def test_bootstrap_exact_retry_reconstructs_committed_promotion(
         "principal_key_resolver": resolver,
         "worker_id": "reddog-main-test",
         "now_iso": NOW,
+        "promotion_claim_fence_executor": lambda operation: operation(fence),
     }
     with (
         patch(
@@ -209,6 +291,14 @@ def test_bootstrap_exact_retry_reconstructs_committed_promotion(
             "now_iso": (
                 datetime.fromisoformat(NOW) + timedelta(seconds=1)
             ).isoformat(),
+            "promotion_claim_fence_executor": lambda operation: operation(
+                {
+                    **fence,
+                    "lease_id": "lease:two",
+                    "lease_owner": "reddog-main-b",
+                    "claim_revision": 2,
+                }
+            ),
         }
         second = run_reddog_main_architect_fix_promotion_bootstrap(
             **retry_kwargs
@@ -222,6 +312,196 @@ def test_bootstrap_exact_retry_reconstructs_committed_promotion(
     assert len(state["worker_claims"]) == 1
     assert len(state["architect_fix_promotions"]) == 1
     assert len(state["architect_fix_publications"]) == 1
+    assert state["architect_fix_promotions"][0][
+        "agentdb_fix_promotion_claim_revision"
+    ] == 1
+
+
+def test_claim_fence_rejects_before_publication_recovery(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    work_state_before = files["work_state"].read_bytes()
+
+    def reject_stale_claim(_operation):
+        raise FixPromotionClaimFenceLost("promotion_claim_fence_lost")
+
+    with (
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+            return_value="sha256:repo-head",
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_architect_proposal_admission_contract."
+            "current_architect_proposal_admission_policy",
+            return_value=ready_proposal_policy(),
+        ),
+        patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_architect_fix_promotion_publication."
+            "AtomicArchitectFixPromotionPublisher.recover"
+        ) as recover,
+    ):
+        result = run_reddog_main_architect_fix_promotion_bootstrap(
+            repo_root=repo,
+            runtime_root=tmp_path / "runtime",
+            work_state_path=files["work_state"],
+            architect_determination_path=files["determination"],
+            model_selection_receipt_path=files["model_selection"],
+            memex_supply_receipt_path=files["memex_supply"],
+            authority_profile_source_path=files["authority_profile_source"],
+            authority_profile_output_path=files["authority_profile_output"],
+            holoindex_receipt_path=files["holoindex_receipt"],
+            worker_id="reddog-stale-worker",
+            now_iso=NOW,
+            promotion_claim_fence_executor=reject_stale_claim,
+        )
+
+    assert result.accepted is False
+    assert "architect_fix_promotion_claim_fence_rejected" in result.rejection_reasons
+    recover.assert_not_called()
+    assert files["work_state"].read_bytes() == work_state_before
+    assert not files["authority_profile_output"].exists()
+
+
+def test_crash_after_publication_reclaims_and_reconstructs_exact_promotion(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = _repo(tmp_path)
+    files = _runtime_files(tmp_path)
+    monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "claims.db"))
+    DatabaseManager.reset_for_tests()
+    determination = json.loads(files["determination"].read_text(encoding="utf-8"))
+    profile = json.loads(
+        files["authority_profile_source"].read_text(encoding="utf-8")
+    )
+    candidate = determination["queue_candidate"]
+    allocation = candidate["wsp15_allocation_receipt"]
+    binding = {
+        "intent_id": "intent:promotion-crash-reclaim",
+        "cycle_id": determination["cycle_id"],
+        "snapshot_id": determination["snapshot_receipt_id"],
+        "determination_id": determination["determination_receipt_id"],
+        "queue_candidate_id": candidate["queue_candidate_id"],
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+    }
+    store = AgentDbFixPromotionClaimStore()
+    claim_time = datetime(2026, 7, 30, tzinfo=timezone.utc)
+    stale = store.claim(
+        binding,
+        worker_id="reddog-stale",
+        now=claim_time,
+        lease_seconds=30,
+    )
+    attestation, config, resolver = build_proposal_runtime_inputs(
+        determination,
+        profile,
+        now_epoch=int(datetime.fromisoformat(NOW).timestamp()),
+        nonce="proposal-promotion-crash-reclaim-0001",
+    )
+    kwargs = {
+        "repo_root": repo,
+        "runtime_root": tmp_path / "runtime",
+        "work_state_path": files["work_state"],
+        "architect_determination_path": files["determination"],
+        "model_selection_receipt_path": files["model_selection"],
+        "memex_supply_receipt_path": files["memex_supply"],
+        "authority_profile_source_path": files["authority_profile_source"],
+        "authority_profile_output_path": files["authority_profile_output"],
+        "holoindex_receipt_path": files["holoindex_receipt"],
+        "proposal_authenticity_attestation": attestation,
+        "signer_runtime_config": config,
+        "principal_key_resolver": resolver,
+        "worker_id": "reddog-main-test",
+        "now_iso": NOW,
+    }
+    try:
+        with (
+            patch(
+                "modules.communication.moltbot_bridge.src."
+                "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+                return_value="sha256:repo-head",
+            ),
+            patch(
+                "modules.communication.moltbot_bridge.src."
+                "reddog_architect_proposal_admission_contract."
+                "current_architect_proposal_admission_policy",
+                return_value=ready_proposal_policy(),
+            ),
+            patch.object(
+                claim_fence_runtime,
+                "_mark_applied",
+                side_effect=RuntimeError("injected_after_publication"),
+            ),
+        ):
+            first = run_reddog_main_architect_fix_promotion_bootstrap(
+                **kwargs,
+                promotion_claim_fence_executor=lambda operation: (
+                    execute_with_fix_promotion_claim_fence(
+                        store,
+                        stale,
+                        operation,
+                        now=claim_time + timedelta(seconds=1),
+                    )
+                ),
+            )
+        current = store.claim(
+            binding,
+            worker_id="reddog-current",
+            now=claim_time + timedelta(seconds=31),
+        )
+        with (
+            patch(
+                "modules.communication.moltbot_bridge.src."
+                "reddog_main_architect_fix_promotion_bootstrap.read_git_head_sha",
+                return_value="sha256:repo-head",
+            ),
+            patch(
+                "modules.communication.moltbot_bridge.src."
+                "reddog_architect_proposal_admission_contract."
+                "current_architect_proposal_admission_policy",
+                return_value=ready_proposal_policy(),
+            ),
+        ):
+            second = run_reddog_main_architect_fix_promotion_bootstrap(
+                **kwargs,
+                promotion_claim_fence_executor=lambda operation: (
+                    execute_with_fix_promotion_claim_fence(
+                        store,
+                        current,
+                        operation,
+                        now=claim_time + timedelta(seconds=32),
+                    )
+                ),
+            )
+    finally:
+        DatabaseManager.reset_for_tests()
+
+    assert first.accepted is False
+    assert current.accepted is True
+    assert current.claim_revision > stale.claim_revision
+    assert second.accepted is True
+    state = json.loads(files["work_state"].read_text(encoding="utf-8"))
+    assert len(state["wre_queue_items"]) == 1
+    assert len(state["worker_claims"]) == 1
+    assert len(state["architect_fix_promotions"]) == 1
+    assert len(state["architect_fix_publications"]) == 1
+    assert state["architect_fix_promotions"][0][
+        "agentdb_fix_promotion_claim_revision"
+    ] == stale.claim_revision
+    with store._db().db.get_connection() as conn:
+        row = conn.execute(
+            "SELECT status, promotion_receipt_id, committed_revision "
+            "FROM reddog_fix_promotion_claims WHERE claim_id = ?",
+            (current.claim_id,),
+        ).fetchone()
+    assert row["status"] == "APPLIED"
+    assert row["promotion_receipt_id"] == second.promotion_receipt_id
+    assert row["committed_revision"] == second.committed_revision
 
 
 def test_bootstrap_forwards_runtime_binding_receipt_into_promotion(tmp_path: Path) -> None:
@@ -1105,6 +1385,7 @@ def test_main_preflight_enforced_model_autoresearch_plan_supply_blocks_startup(
         with patch.dict(
             "os.environ",
             {
+                "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM": "0",
                 "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY": "1",
                 "REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED": "1",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1255,6 +1536,7 @@ def test_main_preflight_enforced_model_autoresearch_campaign_execution_blocks_st
         with patch.dict(
             "os.environ",
             {
+                "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM": "0",
                 "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY": "1",
                 "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED": "1",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1493,6 +1775,7 @@ def test_main_preflight_enforced_model_autoresearch_cycle_feedback_chain_blocks_
         with patch.dict(
             "os.environ",
             {
+                "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM": "0",
                 "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN": "1",
                 "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_ENFORCED": "1",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1531,6 +1814,7 @@ def test_main_preflight_enforced_model_autoresearch_campaign_gate_supply_blocks_
         with patch.dict(
             "os.environ",
             {
+                "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM": "0",
                 "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY": "1",
                 "REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED": "1",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1659,6 +1943,7 @@ def test_main_preflight_enforced_model_autoresearch_cycle_receipt_supply_blocks_
         with patch.dict(
             "os.environ",
             {
+                "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM": "0",
                 "REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY": "1",
                 "REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY_ENFORCED": "1",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -1785,6 +2070,7 @@ def test_main_preflight_enforced_model_autoresearch_cycle_feedback_admission_blo
         with patch.dict(
             "os.environ",
             {
+                "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM": "0",
                 "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION": "1",
                 "REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_ENFORCED": "1",
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
@@ -2042,9 +2328,10 @@ def test_main_preflight_profile_runs_artifact_supply_chain_before_promotion(tmp_
                         ) as promote:
                             with patch.dict(
                                 "os.environ",
-                                {
-                                    "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
-                                    "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
+                                    {
+                                        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
+                                        "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF": "1",
+                                        "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
                                     "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state),
                                     "HOLOINDEX_FRESHNESS_RECEIPT": str(
                                         _holo_receipt_file(tmp_path)

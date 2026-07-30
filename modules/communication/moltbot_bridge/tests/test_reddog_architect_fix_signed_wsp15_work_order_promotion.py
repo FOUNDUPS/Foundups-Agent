@@ -611,6 +611,36 @@ def test_promotes_fix_determination_to_queue_item_and_authority_profile() -> Non
     assert queue_result.selected_slice == "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
 
 
+def test_promotion_receipt_and_state_bind_agentdb_claim_fence() -> None:
+    determination = _determination()
+    fence = {
+        "schema_version": "reddog_fix_promotion_claim_fence.v1",
+        "agentdb_claim_id": "sha256:agentdb-claim",
+        "lease_id": "lease:one",
+        "lease_owner": "reddog-main",
+        "claim_revision": 3,
+        "determination_id": determination["determination_receipt_id"],
+        "queue_candidate_id": determination["queue_candidate"]["queue_candidate_id"],
+        "wsp15_allocation_receipt_id": _allocation()["receipt_id"],
+    }
+
+    result, store = _promote(
+        architect_determination=determination,
+        agentdb_fix_promotion_claim_fence=fence,
+    )
+
+    assert result.accepted is True
+    assert result.receipt.agentdb_fix_promotion_claim_id == fence["agentdb_claim_id"]
+    assert result.receipt.agentdb_fix_promotion_claim_revision == 3
+    assert result.receipt.agentdb_fix_promotion_claim_fence_digest.startswith("sha256:")
+    record = store.load()["architect_fix_promotions"][0]
+    assert record["agentdb_fix_promotion_claim_id"] == fence["agentdb_claim_id"]
+    assert (
+        record["agentdb_fix_promotion_claim_fence_digest"]
+        == result.receipt.agentdb_fix_promotion_claim_fence_digest
+    )
+
+
 def test_promotion_rejects_caller_supplied_work_order_id() -> None:
     result, _ = _promote(authority_profile=_authority_profile(work_order_id="caller-controlled"))
 

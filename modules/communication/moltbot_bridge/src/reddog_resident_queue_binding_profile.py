@@ -79,7 +79,7 @@ PROFILE_RUNTIME_FLAGS = frozenset(
     {
         "REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY",
         "REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY",
-        "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF",
+        "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM",
         "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY",
         "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY",
         "REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY",
@@ -180,6 +180,11 @@ def resident_queue_runtime_flag_enabled(env: Mapping[str, str], env_name: str) -
     raw = str(env.get(env_name) or "").strip()
     if raw:
         return raw == "1"
+    if (
+        env_name == "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM"
+        and "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" in env
+    ):
+        return False
     return (
         env_name in PROFILE_RUNTIME_FLAGS
         and resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES
