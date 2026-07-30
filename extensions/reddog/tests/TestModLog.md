@@ -1,5 +1,14 @@
 # Foundups(R)Agent TestModLog
 
+## 2026-07-30 - Canonical thin-client release (0.4.43)
+
+- Updated package, runtime banner, governed-work-order identity, README, and
+  contract assertions to one canonical 0.4.43 version.
+- Added packaging verification against current tracked source and generated
+  backend compatibility constants.
+- Confirmed the quarantined 0.4.42 Codex-intercept draft is not the packaged
+  source.
+
 ## 2026-07-29 - Imperative semantic grounding normalization (0.4.37)
 
 - Reproduced the `continue do the work needed to fix enhance holoindex`

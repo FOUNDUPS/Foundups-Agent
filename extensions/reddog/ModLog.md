@@ -2,6 +2,15 @@
 
 # ModLog - RedDog Extension
 
+## 2026-07-30 - Canonical thin-client release (0.4.43)
+
+- Published current `main` as the canonical RedDog thin client after the
+  0.4.42 Codex-intercept draft was quarantined.
+- Preserved RedDog as the architect and retained signed
+  OpenClaw/WRE/Hermes receipts as the worker-action boundary.
+- Included the current generated backend compatibility constants so the VSIX
+  verifies the merged runtime before opening operational paths.
+
 ## 2026-07-29 - Imperative semantic grounding normalization (0.4.37)
 
 - Added `enhance` to substantive semantic-work detection and removed imperative
