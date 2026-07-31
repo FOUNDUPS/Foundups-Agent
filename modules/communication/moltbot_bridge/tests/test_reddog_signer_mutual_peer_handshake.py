@@ -50,17 +50,21 @@ CHALLENGE = "a" * 64
 WSP62_SLICE_FILES = (
     "src/reddog_external_signer_lifecycle_admission.py",
     "src/reddog_external_signer_os_observer.py",
+    "src/reddog_atomic_signer_runtime_generation_high_water.py",
     "src/reddog_isolated_signer_socket_resident_service.py",
     "src/reddog_runtime_artifact_manifest_launch_selection.py",
     "src/reddog_signer_mutual_peer_handshake.py",
     "src/reddog_signer_peer_instance_packet_validator.py",
     "src/reddog_signer_runtime_generation_anchor.py",
+    "src/reddog_signer_runtime_generation_reader.py",
     "src/reddog_signer_socket_service_healthcheck.py",
     "tests/test_reddog_external_signer_lifecycle_admission.py",
     "tests/test_reddog_external_signer_os_observer.py",
+    "tests/test_reddog_atomic_signer_runtime_generation_high_water.py",
     "tests/test_reddog_isolated_signer_socket_resident_service.py",
     "tests/test_reddog_signer_mutual_peer_handshake.py",
     "tests/test_reddog_signer_runtime_generation_anchor.py",
+    "tests/test_reddog_signer_runtime_generation_reader.py",
     "tests/test_reddog_signer_socket_service_healthcheck.py",
 )
 

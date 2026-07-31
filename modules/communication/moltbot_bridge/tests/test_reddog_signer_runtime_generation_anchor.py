@@ -45,6 +45,20 @@ class RejectingAuthenticator(HmacAuthenticator):
         return False
 
 
+class SignerOnly:
+    authenticator_id = "test-hmac:v1"
+
+    def authenticate(self, payload: bytes) -> str:
+        return HmacAuthenticator().authenticate(payload)
+
+
+class VerifierOnly:
+    authenticator_id = "test-hmac:v1"
+
+    def verify(self, payload: bytes, authentication_tag: str) -> bool:
+        return HmacAuthenticator().verify(payload, authentication_tag)
+
+
 class DurableHighWaterStore:
     def __init__(self) -> None:
         self._values: dict[str, SignerRuntimeGenerationHighWater] = {}
@@ -73,13 +87,22 @@ class FailingHighWaterStore(DurableHighWaterStore):
         raise RuntimeError("test_high_water_unavailable")
 
 
+class NoOpHighWaterStore(DurableHighWaterStore):
+    def advance(self, *args, **kwargs) -> None:
+        del args, kwargs
+
+
 class HighWaterAuthorityBoundary:
-    def __init__(self, store: DurableHighWaterStore) -> None:
+    def __init__(
+        self, store: DurableHighWaterStore, rollback_domain_root: Path
+    ) -> None:
+        rollback_domain_root.mkdir(exist_ok=True)
         self.capability = object()
         self.verified = VerifiedSignerRuntimeGenerationHighWater(
             store=store,
             store_id="test-high-water:durable",
             durability_receipt_id="sha256:" + "e" * 64,
+            rollback_domain_root=rollback_domain_root,
         )
 
     def require(self, value: object) -> VerifiedSignerRuntimeGenerationHighWater:
@@ -122,15 +145,18 @@ def _anchor(
     anchor_id: str = "reddog-signer:production",
 ) -> DurableSignerRuntimeGenerationAnchor:
     repo, runtime, default_path = roots
+    signing_capability = authenticator or HmacAuthenticator()
     boundary = HighWaterAuthorityBoundary(
-        high_water_store or DurableHighWaterStore()
+        high_water_store or DurableHighWaterStore(),
+        runtime.parent / "high-water-authority",
     )
     return DurableSignerRuntimeGenerationAnchor(
         path or default_path,
         allowed_root=runtime,
         repo_root=repo,
         anchor_id=anchor_id,
-        authenticator=authenticator or HmacAuthenticator(),
+        signer=signing_capability,
+        verifier=signing_capability,
         high_water_authority=boundary.capability,
         high_water_authority_boundary=boundary,
     )
@@ -291,18 +317,83 @@ def test_rejected_authenticator_never_creates_state(roots) -> None:
     assert not anchor.path.exists()
 
 
+def test_signer_and_verifier_are_separate_capabilities(roots) -> None:
+    repo, runtime, path = roots
+    boundary = HighWaterAuthorityBoundary(
+        DurableHighWaterStore(), runtime.parent / "high-water-authority"
+    )
+    anchor = DurableSignerRuntimeGenerationAnchor(
+        path,
+        allowed_root=runtime,
+        repo_root=repo,
+        anchor_id="reddog-signer:production",
+        signer=SignerOnly(),
+        verifier=VerifierOnly(),
+        high_water_authority=boundary.capability,
+        high_water_authority_boundary=boundary,
+    )
+
+    assert anchor.activate(_binding(), expected_revision=None).generation == 1
+    assert not hasattr(anchor._verifier, "authenticate")
+
+
+def test_mismatched_signer_and_verifier_reject_before_write(roots) -> None:
+    repo, runtime, path = roots
+    boundary = HighWaterAuthorityBoundary(
+        DurableHighWaterStore(), runtime.parent / "high-water-authority"
+    )
+    verifier = VerifierOnly()
+    verifier.authenticator_id = "other-hmac:v1"
+
+    with pytest.raises(ValueError, match="signer_verifier_mismatch"):
+        DurableSignerRuntimeGenerationAnchor(
+            path,
+            allowed_root=runtime,
+            repo_root=repo,
+            anchor_id="reddog-signer:production",
+            signer=SignerOnly(),
+            verifier=verifier,
+            high_water_authority=boundary.capability,
+            high_water_authority_boundary=boundary,
+        )
+
+    assert not path.exists()
+
+
+def test_high_water_rollback_domain_must_be_disjoint(roots) -> None:
+    repo, runtime, path = roots
+    boundary = HighWaterAuthorityBoundary(DurableHighWaterStore(), runtime)
+
+    with pytest.raises(ValueError, match="high_water_domain_overlap"):
+        DurableSignerRuntimeGenerationAnchor(
+            path,
+            allowed_root=runtime,
+            repo_root=repo,
+            anchor_id="reddog-signer:production",
+            signer=SignerOnly(),
+            verifier=VerifierOnly(),
+            high_water_authority=boundary.capability,
+            high_water_authority_boundary=boundary,
+        )
+
+    assert not path.exists()
+
+
 def test_out_of_root_and_repository_paths_reject(roots, tmp_path: Path) -> None:
     repo, runtime, _ = roots
     authenticator = HmacAuthenticator()
     for path in (repo / "anchor.json", tmp_path / "outside" / "anchor.json"):
-        boundary = HighWaterAuthorityBoundary(DurableHighWaterStore())
+        boundary = HighWaterAuthorityBoundary(
+            DurableHighWaterStore(), tmp_path / "high-water-authority"
+        )
         with pytest.raises(ValueError):
             DurableSignerRuntimeGenerationAnchor(
                 path,
                 allowed_root=runtime,
                 repo_root=repo,
                 anchor_id="reddog-signer:production",
-                authenticator=authenticator,
+                signer=authenticator,
+                verifier=authenticator,
                 high_water_authority=boundary.capability,
                 high_water_authority_boundary=boundary,
             )
@@ -398,16 +489,29 @@ def test_high_water_advance_failure_leaves_fail_closed_recovery_state(
         _anchor(roots, high_water_store=high_water).load()
 
 
+def test_noop_high_water_cannot_return_false_success(roots) -> None:
+    high_water = NoOpHighWaterStore()
+    anchor = _anchor(roots, high_water_store=high_water)
+
+    with pytest.raises(RuntimeError, match="high_water_unverified"):
+        anchor.activate(_binding(), expected_revision=None)
+    with pytest.raises(ValueError, match="rollback_detected"):
+        _anchor(roots, high_water_store=high_water).recover()
+
+
 def test_forged_high_water_authority_rejects(roots) -> None:
     repo, runtime, path = roots
-    boundary = HighWaterAuthorityBoundary(DurableHighWaterStore())
+    boundary = HighWaterAuthorityBoundary(
+        DurableHighWaterStore(), runtime.parent / "high-water-authority"
+    )
     with pytest.raises(ValueError, match="authority_unverified"):
         DurableSignerRuntimeGenerationAnchor(
             path,
             allowed_root=runtime,
             repo_root=repo,
             anchor_id="reddog-signer:production",
-            authenticator=HmacAuthenticator(),
+            signer=HmacAuthenticator(),
+            verifier=HmacAuthenticator(),
             high_water_authority=object(),
             high_water_authority_boundary=boundary,
         )

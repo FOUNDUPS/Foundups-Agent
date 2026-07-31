@@ -1,4 +1,15 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNER_RUNTIME_GENERATION_AUTHORITY_PHASE1`: hardened signer
+  generation activation with an authenticated, independently stored
+  high-water transaction journal. Prepare, commit, abort, and restart
+  recovery are atomic and cross-process serialized; recovery requires the
+  authenticated pending record and never infers authority from a missing
+  high-water value. Deleted or rolled-back high-water state therefore remains
+  fail closed. Signing and verification are separate capabilities. The
+  external lifecycle now consumes a verifier-only generation reader that
+  cannot mint activation authentication tags. This is generation-authority
+  infrastructure only: production authority issuance, immutable generation
+  bundle activation, service supervision, and effect authority remain blocked.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
   signer healthcheck with a fresh, short-lived, domain-separated Ed25519
   challenge verified against the configured signer key, fingerprint, epoch,

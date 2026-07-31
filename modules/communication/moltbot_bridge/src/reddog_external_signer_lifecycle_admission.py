@@ -25,8 +25,10 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     is_sha256,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
-    DurableSignerRuntimeGenerationAnchor,
     SignerRuntimeGenerationActivation,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_reader import (
+    SignerRuntimeGenerationReader,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
     SignerServiceHealthcheckResult,
@@ -109,7 +111,7 @@ def create_external_signer_lifecycle_admission_boundary(
     *,
     repo_root: Path | str,
     manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
-    generation_anchor: DurableSignerRuntimeGenerationAnchor,
+    generation_anchor: SignerRuntimeGenerationReader,
     os_policy_authority: object,
     os_policy_authority_boundary: ExternalSignerOsPolicyAuthorityBoundary,
     requester_principal_id: str,
