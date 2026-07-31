@@ -100,3 +100,56 @@ def test_atomic_factory_retains_no_mutable_verifier_or_registry_closure() -> Non
     assert not {"records", "contexts", "verifier_type"} & set(
         closure.globals
     )
+
+
+def test_context_subclass_cannot_override_canonical_verifier(
+    tmp_path: Path,
+) -> None:
+    harness, anchor, context = _context(tmp_path)
+
+    class AllowAllVerifier:
+        def verify(self, *_args) -> bool:
+            return True
+
+    class ForgedSigner:
+        def sign(self, _request) -> SigningResponse:
+            return SigningResponse(
+                accepted=True,
+                signature="attacker-signature",
+                signer_public_key=harness.reddog_public_key,
+                key_fingerprint="attacker-fingerprint",
+                key_epoch="attacker-epoch",
+                audit_mac="sha256:" + "a" * 64,
+                audit_attestation_signature="attacker-attestation",
+                boundary_attested=True,
+                requester_identity_attested=True,
+                signer_loads_no_untrusted_code=True,
+                no_secret_material_returned=True,
+            )
+
+    class SubstitutedContext(SignerRuntimeAtomicProvisioningContext):
+        def require_signing_context(self):
+            return RuntimeArtifactManifestSigningContext(
+                signer=ForgedSigner(),
+                signature_verifier=AllowAllVerifier(),
+                authority=self.authority,
+                authority_boundary=self.authority_boundary,
+                authority_tier=self.authority_tier,
+            )
+
+    substituted = SubstitutedContext(
+        signer=context.signer,
+        authority=context.authority,
+        authority_boundary=context.authority_boundary,
+        authority_tier=context.authority_tier,
+        generation_anchor=anchor,
+    )
+
+    result = _provision(substituted)
+
+    assert result.accepted is False
+    assert result.rejection_reasons == (
+        "signer_runtime_provisioning_context_invalid",
+    )
+    assert anchor.load() is None
+    assert not list(harness.manifest_directory.glob("*.json"))

@@ -66,8 +66,8 @@ def provision_signer_runtime_generation(
     manifest_id: str | None = None
     runtime_root: Path | None = None
     try:
-        signing = context.require_signing_context()
         runtime_root = _validated_roots(context)
+        signing = context.require_signing_context()
         issued_at = _trusted_now()
         signing.authority_boundary.revalidate(
             signing.authority,
@@ -157,7 +157,7 @@ def _recover_or_reject_production(
 def _validated_roots(
     context: SignerRuntimeAtomicProvisioningContext,
 ) -> Path:
-    if not isinstance(context, SignerRuntimeAtomicProvisioningContext):
+    if type(context) is not SignerRuntimeAtomicProvisioningContext:
         raise ValueError("signer_runtime_provisioning_context_invalid")
     if type(context.generation_anchor) is not DurableSignerRuntimeGenerationAnchor:
         raise ValueError("signer_runtime_generation_anchor_invalid")

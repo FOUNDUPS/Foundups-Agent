@@ -16,11 +16,11 @@
   two-process race. POSIX activation is an intentional fail-closed skip.
 - Manifest, generation anchor/reader/high-water, lifecycle admission and race
   matrix: 185 passed, 2 platform skips.
-- Complete `test_reddog_*signer*.py` plus activation-lease matrix: 425 passed,
+- Complete `test_reddog_*signer*.py` plus activation-lease matrix: 426 passed,
   13 platform skips.
 - Full bridge differential: untouched base `4778 passed, 33 failed, 23
-  skipped`; repaired branch `4842 passed, 33 failed, 24 skipped`. The
-  33-node failure set is identical, so the slice adds 64 passing tests, one
+  skipped`; repaired branch `4843 passed, 33 failed, 24 skipped`. The
+  33-node failure set is identical, so the slice adds 65 passing tests, one
   intentional POSIX fail-closed skip, and zero bridge regressions.
 
 ## 2026-07-31: REDDOG SIGNER MANIFEST AND LIFECYCLE FOUNDATIONS
