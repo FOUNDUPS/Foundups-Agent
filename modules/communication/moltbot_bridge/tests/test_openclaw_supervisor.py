@@ -2001,7 +2001,159 @@ def test_observe_polls_postmerge_coordinator_when_maintenance_enabled(
     supervisor._holoindex_postmerge_future.result(timeout=2)
     second = supervisor._observe()
 
-    assert "holoindex_postmerge" not in first
+    assert first["holoindex_postmerge"]["status"] == "MAINTENANCE_CHECK_SCHEDULED"
     assert second["holoindex_postmerge"]["status"] == "QUEUED"
     assert calls == [{"repo_root": tmp_path.resolve()}]
     supervisor.stop()
+
+
+def test_observe_polls_postmerge_coordinator_by_default(tmp_path, monkeypatch):
+    from modules.infrastructure.idle_automation.src import (
+        holoindex_postmerge_coordinator,
+    )
+
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
+    calls = []
+    monkeypatch.setattr(
+        holoindex_postmerge_coordinator,
+        "coordinate_holoindex_postmerge",
+        lambda **kwargs: calls.append(kwargs) or MagicMock(to_dict=lambda: {}),
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    observation = {}
+
+    supervisor._observe_holoindex_postmerge(observation)
+    supervisor._holoindex_postmerge_future.result(timeout=2)
+
+    assert observation["holoindex_postmerge"]["status"] == (
+        "MAINTENANCE_CHECK_SCHEDULED"
+    )
+    assert calls == [{"repo_root": tmp_path.resolve()}]
+    supervisor.stop()
+
+
+def test_postmerge_coordinator_explicit_disable_is_visible(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", "0")
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    observation = {}
+
+    supervisor._observe_holoindex_postmerge(observation)
+
+    assert observation["holoindex_postmerge"] == {
+        "accepted": False,
+        "status": "OWNER_DISABLED",
+        "rejection_reasons": ["postmerge_coordinator_disabled"],
+    }
+    assert supervisor._holoindex_postmerge_future is None
+
+
+def test_default_maintenance_candidates_include_only_postmerge():
+    from modules.communication.moltbot_bridge.src.holoindex_postmerge_supervisor_policy import (
+        maintenance_candidates,
+    )
+
+    tasks = [
+        {"task_id": "holo", "context": {"source": "holoindex_postmerge_coordinator"}},
+        {"task_id": "audit", "context": {"source": "self_audit"}},
+    ]
+
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=False,
+        postmerge_enabled=True,
+    ) == [tasks[0]]
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=False,
+        postmerge_enabled=False,
+    ) == []
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=True,
+        postmerge_enabled=True,
+    ) == tasks
+
+
+def test_triage_claims_only_postmerge_by_default(tmp_path, monkeypatch):
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [
+        {
+            "task_id": "unrelated",
+            "description": "Apply safe audit fix",
+            "context": {"source": "self_audit"},
+            "required_skills": [],
+        },
+        {
+            "task_id": "holo",
+            "description": "Refresh exact-SHA HoloIndex authority",
+            "context": {"source": "holoindex_postmerge_coordinator"},
+            "required_skills": ["holo-search"],
+        },
+    ]
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["action"] == "execute_maintenance_task"
+    assert result["task"]["task_id"] == "holo"
+    assert result["task"]["family"] == "holoindex_postmerge"
+
+
+def test_generic_autonomous_executor_cannot_claim_postmerge_task(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("OPENCLAW_AUTO_TASKS_ENABLED", "1")
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
+    postmerge_task = {
+        "task_id": "holo",
+        "description": "Refresh exact-SHA HoloIndex authority",
+        "context": {"source": "holoindex_postmerge_coordinator"},
+        "required_skills": ["holo-search"],
+    }
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [postmerge_task]
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["action"] == "execute_maintenance_task"
+    assert result["task"]["family"] == "holoindex_postmerge"
+    assert result["reason"] == "bounded_maintenance_task"
+
+
+def test_triage_postmerge_explicit_disable_keeps_general_maintenance_off(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.setenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", "0")
+    db = MagicMock()
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["kind"] == "idle"
+    db.get_autonomous_tasks.assert_not_called()

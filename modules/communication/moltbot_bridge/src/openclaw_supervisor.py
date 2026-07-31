@@ -39,6 +39,11 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     redact_runtime_text,
     redact_runtime_value,
 )
+from .holoindex_postmerge_supervisor_policy import (
+    exclude_holoindex_postmerge_tasks,
+    holoindex_postmerge_enabled,
+    maintenance_candidates,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -2312,11 +2317,15 @@ class OpenClawSupervisor:
             finally:
                 self._holoindex_postmerge_future = None
 
-        postmerge_enabled = os.getenv(
-            "HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED",
-            os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0"),
-        ) == "1"
-        if not postmerge_enabled or self._holoindex_postmerge_future is not None:
+        postmerge_enabled = holoindex_postmerge_enabled()
+        if not postmerge_enabled:
+            obs["holoindex_postmerge"] = {
+                "accepted": False,
+                "status": "OWNER_DISABLED",
+                "rejection_reasons": ["postmerge_coordinator_disabled"],
+            }
+            return
+        if self._holoindex_postmerge_future is not None:
             return
         try:
             interval = max(
@@ -2353,6 +2362,11 @@ class OpenClawSupervisor:
                 repo_root=self.repo_root,
             )
         )
+        obs["holoindex_postmerge"] = {
+            "accepted": True,
+            "status": "MAINTENANCE_CHECK_SCHEDULED",
+            "rejection_reasons": [],
+        }
 
     def _observe(self) -> Dict[str, Any]:
         broker = self._get_broker()
@@ -2456,8 +2470,10 @@ class OpenClawSupervisor:
                 )
                 from modules.infrastructure.database.src.agent_db import AgentDB
                 db = AgentDB()
-                tasks = exclude_signed_worker_origin(
-                    db.get_autonomous_tasks(status="pending", limit=10)
+                tasks = exclude_holoindex_postmerge_tasks(
+                    exclude_signed_worker_origin(
+                        db.get_autonomous_tasks(status="pending", limit=10)
+                    )
                 )
                 if tasks:
                     return {
@@ -2472,7 +2488,8 @@ class OpenClawSupervisor:
         # Bounded maintenance task selection (WSP 77/87/97)
         # Uses maintenance selector to find safe, low-risk tasks with HoloIndex direction
         maintenance_enabled = os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0") == "1"
-        if maintenance_enabled:
+        postmerge_enabled = holoindex_postmerge_enabled()
+        if maintenance_enabled or postmerge_enabled:
             try:
                 from modules.communication.moltbot_bridge.src.reddog_signed_worker_claim_admission import (
                     exclude_signed_worker_origin,
@@ -2483,6 +2500,11 @@ class OpenClawSupervisor:
                 db = AgentDB()
                 pending_tasks = exclude_signed_worker_origin(
                     db.get_autonomous_tasks(status="pending", limit=10)
+                )
+                pending_tasks = maintenance_candidates(
+                    pending_tasks,
+                    general_maintenance_enabled=maintenance_enabled,
+                    postmerge_enabled=postmerge_enabled,
                 )
                 selection = select_maintenance_task(
                     pending_tasks=pending_tasks,

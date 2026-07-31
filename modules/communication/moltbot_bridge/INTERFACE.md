@@ -927,7 +927,7 @@ Current operational rule:
 
 Post-merge HoloIndex configuration:
 
-- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED=1` enables the observer.
+- `HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED` defaults to `1`; set `0` to disable.
 - `HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC` sets its bounded polling
   interval (minimum 30 seconds).
 - `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` selects the absolute dedicated clean
