@@ -167,7 +167,15 @@ def create_external_signer_lifecycle_admission_boundary(
 
 
 def _require_read_only_generation_reader(value: object) -> None:
-    forbidden = ("activate", "authenticate", "recover")
+    forbidden = (
+        "activate",
+        "advance",
+        "authenticate",
+        "commit",
+        "prepare",
+        "recover",
+        "sign",
+    )
     if (
         not callable(getattr(value, "load", None))
         or any(callable(getattr(value, name, None)) for name in forbidden)

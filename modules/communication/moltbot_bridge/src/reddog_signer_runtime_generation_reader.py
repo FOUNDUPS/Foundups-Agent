@@ -6,8 +6,8 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Protocol
 
-from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
-    AtomicJsonAuthorityRuntimeStore,
+from modules.communication.moltbot_bridge.src.reddog_read_only_runtime_json_store import (
+    ReadOnlyRuntimeJsonStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     is_sha256,
@@ -18,6 +18,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
     SignerRuntimeGenerationPendingAdvance,
     SignerRuntimeGenerationVerifier,
     decode_signer_runtime_generation_state,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
+    SignerRuntimeGenerationVerifierAuthorityBoundary,
+    require_signer_runtime_generation_verifier_authority,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
@@ -90,15 +94,23 @@ class DurableSignerRuntimeGenerationReader:
         allowed_root: Path | str,
         repo_root: Path | str,
         anchor_id: str,
-        verifier: SignerRuntimeGenerationVerifier,
+        verifier_authority: object,
+        verifier_authority_boundary: (
+            SignerRuntimeGenerationVerifierAuthorityBoundary
+        ),
         high_water_authority: object,
         high_water_authority_boundary: (
             SignerRuntimeGenerationHighWaterReaderAuthorityBoundary
         ),
     ) -> None:
         self._anchor_id = _text(anchor_id, "anchor_id")
-        self._verifier = _verifier(verifier)
-        self._store = AtomicJsonAuthorityRuntimeStore(
+        self._verifier = _verifier(
+            require_signer_runtime_generation_verifier_authority(
+                verifier_authority,
+                verifier_authority_boundary,
+            )
+        )
+        self._store = ReadOnlyRuntimeJsonStore(
             path,
             allowed_root=allowed_root,
             repo_root=repo_root,

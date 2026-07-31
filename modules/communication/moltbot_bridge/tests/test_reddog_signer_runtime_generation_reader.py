@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
-import hashlib
-import hmac
 from pathlib import Path
 
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water import (
     AtomicSignerRuntimeGenerationHighWaterReader,
     AtomicSignerRuntimeGenerationHighWaterStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+    encode_ed25519_signature,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
     DurableSignerRuntimeGenerationAnchor,
@@ -21,26 +25,32 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_reader import (
     DurableSignerRuntimeGenerationReader,
     VerifiedSignerRuntimeGenerationHighWaterReader,
+    create_signer_runtime_generation_reader_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
+    create_signer_runtime_generation_verifier_authority,
 )
 
 
-class HmacCapability:
-    authenticator_id = "test-hmac:v1"
+class Ed25519GenerationSigner:
+    def __init__(self) -> None:
+        self.private_key = Ed25519PrivateKey.generate()
+        public = self.private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+        self.public_key = encode_ed25519_public_key(public)
+        authority, boundary = (
+            create_signer_runtime_generation_verifier_authority(
+                self.public_key
+            )
+        )
+        self.verifier_authority = authority
+        self.verifier_boundary = boundary
+        self.authenticator_id = boundary.require(authority).authenticator_id
 
     def authenticate(self, payload: bytes) -> str:
-        return "hmac-sha256:" + hmac.new(
-            b"k" * 32, payload, hashlib.sha256
-        ).hexdigest()
-
-    def verify(self, payload: bytes, tag: str) -> bool:
-        return hmac.compare_digest(self.authenticate(payload), tag)
-
-
-class VerifierOnly:
-    authenticator_id = "test-hmac:v1"
-
-    def verify(self, payload: bytes, tag: str) -> bool:
-        return HmacCapability().verify(payload, tag)
+        return encode_ed25519_signature(self.private_key.sign(payload))
 
 
 class Boundary:
@@ -88,7 +98,7 @@ def _roots(tmp_path: Path) -> tuple[Path, Path, Path]:
 
 
 def _high_water(repo: Path, authority: Path):
-    signing = HmacCapability()
+    signing = Ed25519GenerationSigner()
     high_water = AtomicSignerRuntimeGenerationHighWaterStore(
         authority / "high-water.json",
         allowed_root=authority,
@@ -96,19 +106,28 @@ def _high_water(repo: Path, authority: Path):
         store_id="high-water:production",
         durability_receipt_id=_sha("e"),
         signer=signing,
-        verifier=VerifierOnly(),
+        verifier=signing.verifier_boundary.require(
+            signing.verifier_authority
+        ),
     )
     return signing, high_water
 
 
-def _reader(repo: Path, runtime: Path, authority: Path):
+def _reader(
+    repo: Path,
+    runtime: Path,
+    authority: Path,
+    signing: Ed25519GenerationSigner | None = None,
+):
+    verifier = signing or Ed25519GenerationSigner()
     high_water_reader = AtomicSignerRuntimeGenerationHighWaterReader(
         authority / "high-water.json",
         allowed_root=authority,
         repo_root=repo,
         store_id="high-water:production",
         durability_receipt_id=_sha("e"),
-        verifier=VerifierOnly(),
+        verifier_authority=verifier.verifier_authority,
+        verifier_authority_boundary=verifier.verifier_boundary,
     )
     reader_boundary = ReaderBoundary(high_water_reader)
     return DurableSignerRuntimeGenerationReader(
@@ -116,7 +135,8 @@ def _reader(repo: Path, runtime: Path, authority: Path):
         allowed_root=runtime,
         repo_root=repo,
         anchor_id="reddog-signer:production",
-        verifier=VerifierOnly(),
+        verifier_authority=verifier.verifier_authority,
+        verifier_authority_boundary=verifier.verifier_boundary,
         high_water_authority=reader_boundary.capability,
         high_water_authority_boundary=reader_boundary,
     )
@@ -135,7 +155,9 @@ def test_reader_holds_no_signing_capability_and_reads_active_generation(
         repo_root=repo,
         anchor_id="reddog-signer:production",
         signer=signing,
-        verifier=VerifierOnly(),
+        verifier=signing.verifier_boundary.require(
+            signing.verifier_authority
+        ),
         high_water_authority=boundary.capability,
         high_water_authority_boundary=boundary,
     )
@@ -150,16 +172,52 @@ def test_reader_holds_no_signing_capability_and_reads_active_generation(
         ),
         expected_revision=None,
     )
-    reader = _reader(repo, runtime, authority)
+    reader = _reader(repo, runtime, authority, signing)
 
     assert reader.load().generation == 1
     assert not hasattr(reader._verifier, "authenticate")
     assert not hasattr(reader._high_water, "_signer")
+    assert not hasattr(reader._store, "commit")
+
+
+def test_lifecycle_reader_authority_object_graph_has_no_effect_capability(
+    tmp_path: Path,
+) -> None:
+    repo, runtime, authority = _roots(tmp_path)
+    signing, _ = _high_water(repo, authority)
+    reader = _reader(repo, runtime, authority, signing)
+    _, boundary = create_signer_runtime_generation_reader_authority(reader)
+    forbidden = {
+        "activate",
+        "advance",
+        "authenticate",
+        "commit",
+        "commit_prepared",
+        "prepare",
+        "private_key",
+        "sign",
+    }
+
+    reachable = [
+        boundary,
+        reader,
+        reader._store,
+        reader._verifier,
+        reader._high_water,
+        reader._high_water._store,
+        reader._high_water._verifier,
+    ]
+    for value in reachable:
+        assert not any(
+            callable(getattr(value, name, None))
+            or getattr(value, name, None) is not None
+            for name in forbidden
+        )
 
 
 def test_reader_rejects_authenticated_pending_generation(tmp_path: Path) -> None:
     repo, runtime, authority = _roots(tmp_path)
-    _, high_water = _high_water(repo, authority)
+    signing, high_water = _high_water(repo, authority)
     high_water.prepare(
         "reddog-signer:production",
         expected=None,
@@ -169,18 +227,20 @@ def test_reader_rejects_authenticated_pending_generation(tmp_path: Path) -> None
     )
 
     with pytest.raises(ValueError, match="pending_transaction"):
-        _reader(repo, runtime, authority).load()
+        _reader(repo, runtime, authority, signing).load()
 
 
 def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
     repo, runtime, _ = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
     high_water_reader = AtomicSignerRuntimeGenerationHighWaterReader(
         runtime / "high-water.json",
         allowed_root=runtime,
         repo_root=repo,
         store_id="high-water:production",
         durability_receipt_id=_sha("e"),
-        verifier=VerifierOnly(),
+        verifier_authority=signing.verifier_authority,
+        verifier_authority_boundary=signing.verifier_boundary,
     )
     boundary = ReaderBoundary(high_water_reader)
 
@@ -190,7 +250,8 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
             allowed_root=runtime,
             repo_root=repo,
             anchor_id="reddog-signer:production",
-            verifier=VerifierOnly(),
+            verifier_authority=signing.verifier_authority,
+            verifier_authority_boundary=signing.verifier_boundary,
             high_water_authority=boundary.capability,
             high_water_authority_boundary=boundary,
         )
@@ -198,7 +259,7 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
 
 def test_reader_rejects_write_capable_high_water(tmp_path: Path) -> None:
     repo, runtime, authority = _roots(tmp_path)
-    _, high_water = _high_water(repo, authority)
+    signing, high_water = _high_water(repo, authority)
     boundary = ReaderBoundary(high_water)
 
     with pytest.raises(ValueError, match="write_capability"):
@@ -207,7 +268,8 @@ def test_reader_rejects_write_capable_high_water(tmp_path: Path) -> None:
             allowed_root=runtime,
             repo_root=repo,
             anchor_id="reddog-signer:production",
-            verifier=VerifierOnly(),
+            verifier_authority=signing.verifier_authority,
+            verifier_authority_boundary=signing.verifier_boundary,
             high_water_authority=boundary.capability,
             high_water_authority_boundary=boundary,
         )
@@ -215,23 +277,26 @@ def test_reader_rejects_write_capable_high_water(tmp_path: Path) -> None:
 
 def test_reader_rejects_verifier_with_signing_method(tmp_path: Path) -> None:
     repo, runtime, authority = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
     high_water_reader = AtomicSignerRuntimeGenerationHighWaterReader(
         authority / "high-water.json",
         allowed_root=authority,
         repo_root=repo,
         store_id="high-water:production",
         durability_receipt_id=_sha("e"),
-        verifier=VerifierOnly(),
+        verifier_authority=signing.verifier_authority,
+        verifier_authority_boundary=signing.verifier_boundary,
     )
     boundary = ReaderBoundary(high_water_reader)
 
-    with pytest.raises(ValueError, match="verifier_invalid"):
+    with pytest.raises(ValueError, match="authority_unverified"):
         DurableSignerRuntimeGenerationReader(
             runtime / "anchor.json",
             allowed_root=runtime,
             repo_root=repo,
             anchor_id="reddog-signer:production",
-            verifier=HmacCapability(),
+            verifier_authority=object(),
+            verifier_authority_boundary=signing.verifier_boundary,
             high_water_authority=boundary.capability,
             high_water_authority_boundary=boundary,
         )

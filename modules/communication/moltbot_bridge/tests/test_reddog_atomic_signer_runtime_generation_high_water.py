@@ -171,17 +171,18 @@ def _value(generation: int, char: str) -> SignerRuntimeGenerationHighWater:
     )
 
 
-def test_reader_rejects_combined_signing_verifier(roots) -> None:
+def test_reader_rejects_noncanonical_verifier_boundary(roots) -> None:
     repo, _, authority = roots
 
-    with pytest.raises(ValueError, match="verifier_invalid"):
+    with pytest.raises(ValueError, match="boundary_invalid"):
         AtomicSignerRuntimeGenerationHighWaterReader(
             authority / "generation-high-water.json",
             allowed_root=authority,
             repo_root=repo,
             store_id="signer-high-water:production",
             durability_receipt_id=DURABILITY_RECEIPT_ID,
-            verifier=HmacAuthenticator(),
+            verifier_authority=object(),
+            verifier_authority_boundary=HmacAuthenticator(),
         )
 
 
@@ -337,6 +338,27 @@ def test_anchor_restart_rolls_forward_exactly_one_generation(roots) -> None:
     recovered = _anchor(roots, recovered_store).recover()
     assert recovered is not None
     assert recovered.generation == 1
+    assert recovered_store.load(ANCHOR_ID) == SignerRuntimeGenerationHighWater(
+        generation=1,
+        revision=recovered.revision,
+    )
+
+
+def test_recovery_accepts_verified_post_high_water_commit_exception(
+    roots,
+) -> None:
+    failing = _store(roots, store_type=FailCommitOnceStore)
+    with pytest.raises(RuntimeError, match="high_water_interrupted"):
+        _anchor(roots, failing).activate(
+            _binding(),
+            expected_revision=None,
+        )
+
+    recovered_store = _store(roots, store_type=RaiseAfterCommitStore)
+    recovered = _anchor(roots, recovered_store).recover()
+
+    assert recovered is not None
+    assert recovered_store.pending(ANCHOR_ID) is None
     assert recovered_store.load(ANCHOR_ID) == SignerRuntimeGenerationHighWater(
         generation=1,
         revision=recovered.revision,

@@ -6,8 +6,10 @@
   authenticated pending record and never infers authority from a missing
   high-water value. Deleted or rolled-back high-water state therefore remains
   fail closed. Signing and verification are separate capabilities. The
-  external lifecycle now consumes a verifier-only generation reader that
-  cannot mint activation authentication tags. This is generation-authority
+  external lifecycle now consumes a factory-issued public-key verifier and
+  confined read-only generation stores; it cannot reach a signer or mutable
+  authority store. Nontransactional high-water implementations are rejected,
+  and post-commit recovery verifies durable state before returning. This is generation-authority
   infrastructure only: production authority issuance, immutable generation
   bundle activation, service supervision, and effect authority remain blocked.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable

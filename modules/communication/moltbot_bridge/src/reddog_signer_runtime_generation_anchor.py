@@ -70,6 +70,13 @@ class DurableSignerRuntimeGenerationAnchor:
             != verified.store.durability_receipt_id
         ):
             raise ValueError("generation_anchor_high_water_authority_mismatch")
+        if not isinstance(
+            verified.store,
+            TransactionalSignerRuntimeGenerationHighWaterStore,
+        ):
+            raise ValueError(
+                "generation_anchor_transactional_high_water_required"
+            )
         rollback_root = validate_runtime_root_path(
             verified.store.rollback_domain_root,
             repo_root=self._store.repo_root,
@@ -121,37 +128,18 @@ class DurableSignerRuntimeGenerationAnchor:
             state = _authenticated_state(
                 unsigned, self._signer, self._verifier
             )
-            if _is_transactional(self._high_water_store):
-                return _activate_transactional(
-                    self,
-                    state=state,
-                    current=current,
-                    expected_revision=expected_revision,
-                )
-            revision = self._store.commit(
-                state,
+            return _activate_transactional(
+                self,
+                state=state,
+                current=current,
                 expected_revision=expected_revision,
             )
-            activation = self._decode({**state, "revision": revision})
-            if activation is None:
-                raise RuntimeError("generation_anchor_commit_missing")
-            self._high_water_store.advance(
-                self._anchor_id,
-                expected=_high_water(current),
-                next_value=_high_water(activation),
-            )
-            if self._high_water_store.load(self._anchor_id) != _high_water(
-                activation
-            ):
-                raise RuntimeError("generation_anchor_high_water_unverified")
-            return activation
 
     def _recover_current(
         self,
     ) -> SignerRuntimeGenerationActivation | None:
         current = self._decode(self._store.load())
-        if _is_transactional(self._high_water_store):
-            current = _recover_transaction(self, current)
+        current = _recover_transaction(self, current)
         return self._reconcile_high_water(current)
 
     def _decode(
@@ -305,10 +293,7 @@ def _recover_transaction(
     )
     current_value = _high_water(current)
     if current_value == pending.next_value:
-        store.commit_prepared(anchor._anchor_id, pending.transaction_id)
-        _verify_transaction_cleared(
-            store, anchor._anchor_id, pending.next_value
-        )
+        _finish_pending(store, anchor._anchor_id, pending)
         return current
     if current_value == pending.expected:
         store.abort_prepared(anchor._anchor_id, pending.transaction_id)
@@ -342,15 +327,6 @@ def _verify_transaction_cleared(
 ) -> None:
     if store.pending(anchor_id) is not None or store.load(anchor_id) != expected:
         raise RuntimeError("generation_anchor_high_water_unverified")
-
-
-def _is_transactional(
-    value: SignerRuntimeGenerationHighWaterStore,
-) -> bool:
-    return isinstance(
-        value,
-        TransactionalSignerRuntimeGenerationHighWaterStore,
-    )
 
 
 def decode_signer_runtime_generation_state(

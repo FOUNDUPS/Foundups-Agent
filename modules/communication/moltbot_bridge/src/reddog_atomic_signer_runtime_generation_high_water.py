@@ -12,11 +12,18 @@ from typing import Any, Mapping
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_read_only_runtime_json_store import (
+    ReadOnlyRuntimeJsonStore,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
     SignerRuntimeGenerationHighWater,
     SignerRuntimeGenerationPendingAdvance,
     SignerRuntimeGenerationSigner,
     SignerRuntimeGenerationVerifier,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
+    SignerRuntimeGenerationVerifierAuthorityBoundary,
+    require_signer_runtime_generation_verifier_authority,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
@@ -218,14 +225,22 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
         repo_root: Path | str,
         store_id: str,
         durability_receipt_id: str,
-        verifier: SignerRuntimeGenerationVerifier,
+        verifier_authority: object,
+        verifier_authority_boundary: (
+            SignerRuntimeGenerationVerifierAuthorityBoundary
+        ),
     ) -> None:
         self.store_id = _ascii(store_id, "store_id")
         self.durability_receipt_id = _sha256(
             durability_receipt_id, "durability_receipt_id"
         )
-        self._verifier = _verifier(verifier)
-        self._store = AtomicJsonAuthorityRuntimeStore(
+        self._verifier = _verifier(
+            require_signer_runtime_generation_verifier_authority(
+                verifier_authority,
+                verifier_authority_boundary,
+            )
+        )
+        self._store = ReadOnlyRuntimeJsonStore(
             path,
             allowed_root=allowed_root,
             repo_root=repo_root,

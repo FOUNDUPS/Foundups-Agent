@@ -7,7 +7,7 @@ import hashlib
 import json
 import pickle
 import stat
-from dataclasses import asdict, replace
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -62,6 +62,11 @@ class _Anchor:
 
 class _WriterAnchor(_Anchor):
     def activate(self) -> None:
+        raise AssertionError("must not be called")
+
+
+class _SigningAnchor(_Anchor):
+    def sign(self) -> None:
         raise AssertionError("must not be called")
 
 
@@ -351,6 +356,23 @@ def test_writer_generation_anchor_cannot_be_smuggled_into_lifecycle(tmp_path) ->
             os_policy_authority_boundary=policy_boundary,
             requester_principal_id="github:mjtrout",
             trusted_clock=_Clocks().wall,
+        )
+
+
+def test_signing_reader_cannot_be_smuggled_into_lifecycle(tmp_path) -> None:
+    repo, _, values = _runtime(tmp_path)
+    reader_boundary = _ReaderBoundary(_SigningAnchor(_activation(values)))
+    policy_boundary = _PolicyBoundary()
+
+    with pytest.raises(ValueError, match="generation_reader_invalid"):
+        create_external_signer_lifecycle_admission_boundary(
+            repo_root=repo,
+            manifest_boundary=_SelectionBoundary(values),
+            generation_reader_authority=reader_boundary,
+            generation_reader_authority_boundary=reader_boundary,
+            os_policy_authority=policy_boundary,
+            os_policy_authority_boundary=policy_boundary,
+            requester_principal_id="reddog-host",
         )
 
 

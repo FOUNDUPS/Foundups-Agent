@@ -123,8 +123,11 @@ Signer generation persistence separates the signer-side authentication
 capability from the verifier supplied to RedDog. The concrete high-water store
 uses an authenticated pending transaction outside the anchor rollback domain;
 restart recovery may commit or abort only that exact pending transition.
-`DurableSignerRuntimeGenerationReader` is the lifecycle-facing API and retains
-no signing method. An authenticated store is not by itself production
+`DurableSignerRuntimeGenerationReader` is the lifecycle-facing API. It uses
+dedicated confined read-only JSON loaders and a factory-issued Ed25519
+public-key verifier authority; its reachable object graph retains no signer or
+mutable runtime store. Nontransactional high-water implementations are
+rejected. An authenticated store is not by itself production
 authority: an independently administered authority boundary and immutable
 generation-bundle activation are still required.
 
