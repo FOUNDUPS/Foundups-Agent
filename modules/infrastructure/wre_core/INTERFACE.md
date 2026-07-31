@@ -24,6 +24,26 @@
 
 ## Public API
 
+### Test impact differential verification
+
+`make_test_impact_plan(...)` binds impact, changed paths, WSP 15 allocation,
+suite scope, runner, environment, dependency lock, selection policy, selection
+arguments, and base-lineage receipt. It derives the minimum suite tier from
+impact and escalation signals; callers cannot lower a SYSTEMIC plan.
+
+`make_test_run_snapshot(...)` normalizes exact test node IDs into an immutable
+snapshot bound to a commit SHA, suite kind, exact collection-manifest digest,
+suite scope, runner, environment, selection, and lineage digests.
+
+`evaluate_test_differential(plan, base, candidate)` returns a deterministic
+`TestDifferentialReceipt`. It rejects binding drift, collection-manifest drift,
+removed tests, new non-passing/deselected states, malformed inputs, missing
+security/held-out closure, and evidence below the derived suite tier. Existing
+parent failures may remain unchanged or resolve by passing. The API analyzes
+integrity and differential semantics only. It never authenticates inputs or
+authorizes promotion; authenticated evidence integration is
+`SPECIFIED_NOT_IMPLEMENTED`.
+
 ### Independent autonomous slice verification
 
 `verify_autonomous_slice_runtime()` requires an accepted, durable independent

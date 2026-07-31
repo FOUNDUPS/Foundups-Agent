@@ -680,7 +680,7 @@ def test_canonical_contract_declares_repository_evidence_validator() -> None:
     contract = load_contract(DEFAULT_CONTRACT_PATH)
     validator = contract["wsp_97"]["validator"]
 
-    assert contract["wsp_97"]["version"] == "1.7"
+    assert contract["wsp_97"]["version"] == "1.8"
     assert validator["status"] == "active_repository_evidence_validation"
     assert validator["entrypoint"] == "tools/wsp97_execution_validator.py"
     assert validator["receipt_schema_version"] == SCHEMA_VERSION

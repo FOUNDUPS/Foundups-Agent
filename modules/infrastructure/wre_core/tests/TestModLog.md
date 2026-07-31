@@ -1,4 +1,15 @@
 # TestModLog - wre_core/tests
+## 2026-08-01: Test impact and differential receipt
+- Proved unchanged and resolved baseline failures accept while new failures,
+  errors, skips, removed tests, execution-binding drift, and insufficient full
+  suite evidence reject.
+- Proved added passing tests are retained by ID and parent baselines can be
+  reused only under exact scope/runner/environment bindings.
+- Locked WSP 6 tiered verification, WSP 15 economy questions in WSP 97, and
+  framework/knowledge mirror parity.
+- Repaired the pre-existing production-gate test so it validates canonical WRE
+  config and runbook files read-only instead of rewriting tracked source files.
+
 ## 2026-07-28: Memex verifier lineage + checkout-local Skillz resolution
 - Proved rehashed authority cannot replace the recorded verification digest; retained local Skillz escape, fallback, and linked-worktree checks.
 ## 2026-07-26: Independent assurance verifier lineage

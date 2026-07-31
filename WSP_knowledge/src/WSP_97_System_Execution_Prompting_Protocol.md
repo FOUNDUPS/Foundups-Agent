@@ -1,8 +1,8 @@
 # WSP 97: System Execution Prompting Protocol
 
 **Status**: ACTIVE
-**Version**: 1.7
-**Date**: 2026-03-29
+**Version**: 1.8
+**Date**: 2026-08-01
 **Author**: 0102 (System Execution Architect)
 
 ---
@@ -197,6 +197,34 @@ Use this sequence unless a narrower protocol overrides it:
 7. Run the dialectic sweep
 8. Reduce to first principles / simplest valid move
 9. Execute inside the correct plane
+
+### 1.2.1 WSP 15 Economy and Verification Binding
+
+Before an implementation or autonomous improvement enters execution, WSP 97
+MUST consume one canonical WSP 15 allocation receipt. The operator asks:
+
+1. **Do I need it?** -> Importance and Impact.
+2. **Can I afford it?** -> Complexity, compute, time, and verification cost.
+3. **Can I live without it now?** -> Deferability and current blockers.
+
+These questions are a plain-language projection of WSP 15, not a second
+scoring system. WSP 15 remains authoritative for the values and priority. WSP
+97 binds the resulting receipt to the work order, selected execution plane,
+and the tiered verification plan required by WSP 6.
+
+The verification plan MUST start with focused/module evidence and expand to
+dependency, security, held-out, or full-repository scope according to observed
+impact. A stale or incomplete dependency/retrieval result requires escalation,
+not optimistic test omission. Reusable parent-baseline evidence MUST be bound
+to the exact parent SHA and execution environment; differential acceptance is
+based on test identifiers rather than matching aggregate failure counts.
+
+**Implementation truth**: `SPECIFIED_NOT_IMPLEMENTED` for end-to-end runtime
+enforcement. The current WRE differential component performs pure integrity
+and exact-ID analysis only. It does not authenticate a WSP 15 allocation,
+prove Git ancestry or collection completeness, execute tests, or authorize
+promotion. Those claims require independently verified work-order, lineage,
+collection-manifest, and evidence receipts at the WRE integration boundary.
 
 ### 1.3 Scope Discipline
 
