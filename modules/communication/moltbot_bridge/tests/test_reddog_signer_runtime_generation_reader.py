@@ -29,9 +29,12 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_r
     VerifiedSignerRuntimeGenerationHighWaterReader,
     create_signer_runtime_generation_high_water_reader_authority,
     create_signer_runtime_generation_reader_authority,
+    require_signer_runtime_generation_high_water_reader_authority,
+    require_signer_runtime_generation_reader_authority,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
     create_signer_runtime_generation_verifier_authority,
+    require_signer_runtime_generation_verifier_authority,
 )
 
 
@@ -167,9 +170,10 @@ def test_reader_holds_no_signing_capability_and_reads_active_generation(
     reader = _reader(repo, runtime, authority, signing)
 
     assert reader.load().generation == 1
-    assert not hasattr(reader._verifier, "authenticate")
-    assert not hasattr(reader._high_water, "_signer")
-    assert not hasattr(reader._store, "commit")
+    assert not hasattr(reader, "__dict__")
+    assert not hasattr(reader, "_verifier")
+    assert not hasattr(reader, "_high_water")
+    assert not hasattr(reader, "_store")
 
 
 def test_lifecycle_reader_authority_object_graph_has_no_effect_capability(
@@ -196,6 +200,113 @@ def test_lifecycle_reader_authority_object_graph_has_no_effect_capability(
             or getattr(value, name, None) is not None
             for name in forbidden
         )
+
+
+def test_factory_authority_payloads_cannot_be_replaced_after_mint(
+    tmp_path: Path,
+) -> None:
+    repo, runtime, authority = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
+    reader = _reader(repo, runtime, authority, signing)
+    reader_authority, reader_boundary = (
+        create_signer_runtime_generation_reader_authority(reader)
+    )
+    high_water = AtomicSignerRuntimeGenerationHighWaterReader(
+        authority / "high-water.json",
+        allowed_root=authority,
+        repo_root=repo,
+        store_id="high-water:production",
+        durability_receipt_id=_sha("e"),
+        verifier_authority=signing.verifier_authority,
+        verifier_authority_boundary=signing.verifier_boundary,
+    )
+    high_authority, high_boundary = (
+        create_signer_runtime_generation_high_water_reader_authority(
+            high_water
+        )
+    )
+
+    for boundary, field in (
+        (reader_boundary, "_reader"),
+        (high_boundary, "_reader"),
+        (signing.verifier_boundary, "_verifier"),
+    ):
+        with pytest.raises(AttributeError):
+            setattr(boundary, field, object())
+        with pytest.raises(AttributeError):
+            object.__setattr__(boundary, field, object())
+
+    accepted_reader = require_signer_runtime_generation_reader_authority(
+        reader_authority, reader_boundary
+    )
+    accepted_high = (
+        require_signer_runtime_generation_high_water_reader_authority(
+            high_authority, high_boundary
+        ).reader
+    )
+    accepted_verifier = require_signer_runtime_generation_verifier_authority(
+        signing.verifier_authority, signing.verifier_boundary
+    )
+    with pytest.raises(AttributeError):
+        object.__setattr__(accepted_verifier, "_verifier", signing)
+    with pytest.raises(AttributeError):
+        object.__setattr__(accepted_verifier, "_hidden_signer", signing)
+    assert accepted_reader.load() is None
+    assert accepted_high.load("reddog-signer:production") is None
+    assert not hasattr(accepted_verifier, "sign")
+
+
+def test_reader_sources_cannot_be_retargeted_after_authority_mint(
+    tmp_path: Path,
+) -> None:
+    repo, runtime, authority = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
+    reader = _reader(repo, runtime, authority, signing)
+    reader_authority, reader_boundary = (
+        create_signer_runtime_generation_reader_authority(reader)
+    )
+    accepted = require_signer_runtime_generation_reader_authority(
+        reader_authority, reader_boundary
+    )
+
+    for target in (reader, accepted):
+        with pytest.raises(AttributeError):
+            object.__setattr__(target, "_hidden_signer", signing)
+        with pytest.raises(AttributeError):
+            object.__setattr__(target, "_verifier", signing)
+    assert accepted.load() is None
+    for value in _reachable_runtime_values(reader_boundary):
+        assert not hasattr(value, "private_key")
+        assert not callable(getattr(value, "authenticate", None))
+
+
+def test_high_water_reader_cannot_be_retargeted_after_authority_mint(
+    tmp_path: Path,
+) -> None:
+    repo, _, authority = _roots(tmp_path)
+    signing = Ed25519GenerationSigner()
+    reader = AtomicSignerRuntimeGenerationHighWaterReader(
+        authority / "high-water.json",
+        allowed_root=authority,
+        repo_root=repo,
+        store_id="high-water:production",
+        durability_receipt_id=_sha("e"),
+        verifier_authority=signing.verifier_authority,
+        verifier_authority_boundary=signing.verifier_boundary,
+    )
+    high_authority, boundary = (
+        create_signer_runtime_generation_high_water_reader_authority(reader)
+    )
+    accepted = require_signer_runtime_generation_high_water_reader_authority(
+        high_authority, boundary
+    ).reader
+
+    for target in (reader, accepted):
+        with pytest.raises(AttributeError):
+            object.__setattr__(target, "_hidden_signer", signing)
+        with pytest.raises(AttributeError):
+            object.__setattr__(target, "_verifier", signing)
+    assert accepted.load("reddog-signer:production") is None
 
 
 def _reachable_runtime_values(root: object) -> list[object]:

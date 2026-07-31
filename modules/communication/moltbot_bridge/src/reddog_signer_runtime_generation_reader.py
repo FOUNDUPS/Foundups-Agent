@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Protocol
+from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water import (
     AtomicSignerRuntimeGenerationHighWaterReader,
@@ -70,48 +71,100 @@ class SignerRuntimeGenerationReaderAuthorityBoundary(Protocol):
     def require(self, value: object) -> SignerRuntimeGenerationReader: ...
 
 
-class _ReaderAuthorityBoundary:
-    __slots__ = ("_authority", "_reader")
+class _ReaderHandle:
+    __slots__ = ("__weakref__",)
 
-    def __init__(
-        self,
-        authority: object,
-        reader: DurableSignerRuntimeGenerationReader,
-    ) -> None:
-        self._authority = authority
-        self._reader = reader
+    def load(self) -> SignerRuntimeGenerationActivation | None:
+        return _READER_TARGETS[self].load()
+
+
+class _HighWaterReaderHandle:
+    __slots__ = ("__weakref__",)
+
+    @property
+    def store_id(self) -> str:
+        return _HIGH_WATER_READER_TARGETS[self].store_id
+
+    @property
+    def durability_receipt_id(self) -> str:
+        return _HIGH_WATER_READER_TARGETS[self].durability_receipt_id
+
+    @property
+    def rollback_domain_root(self) -> Path:
+        return _HIGH_WATER_READER_TARGETS[self].rollback_domain_root
+
+    def load(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationHighWater | None:
+        return _HIGH_WATER_READER_TARGETS[self].load(anchor_id)
+
+    def pending(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationPendingAdvance | None:
+        return _HIGH_WATER_READER_TARGETS[self].pending(anchor_id)
+
+
+class _ReaderAuthorityBoundary:
+    __slots__ = ("__weakref__",)
 
     def require(self, value: object) -> SignerRuntimeGenerationReader:
-        if value is not self._authority:
+        authority, reader = _READER_AUTHORITIES[self]
+        if value is not authority:
             raise ValueError("generation_reader_authority_unverified")
-        return self._reader
+        return reader
 
 
 class _HighWaterReaderAuthorityBoundary:
-    __slots__ = ("_authority", "_reader")
-
-    def __init__(
-        self,
-        authority: object,
-        reader: AtomicSignerRuntimeGenerationHighWaterReader,
-    ) -> None:
-        self._authority = authority
-        self._reader = reader
+    __slots__ = ("__weakref__",)
 
     def require(
         self, value: object
     ) -> VerifiedSignerRuntimeGenerationHighWaterReader:
-        if value is not self._authority:
+        authority, reader = _HIGH_WATER_READER_AUTHORITIES[self]
+        if value is not authority:
             raise ValueError("generation_high_water_reader_unverified")
         return VerifiedSignerRuntimeGenerationHighWaterReader(
-            reader=self._reader,
-            store_id=self._reader.store_id,
-            durability_receipt_id=self._reader.durability_receipt_id,
+            reader=reader,
+            store_id=reader.store_id,
+            durability_receipt_id=reader.durability_receipt_id,
         )
+
+
+_READER_TARGETS: WeakKeyDictionary[
+    _ReaderHandle, DurableSignerRuntimeGenerationReader
+] = WeakKeyDictionary()
+_READER_AUTHORITIES: WeakKeyDictionary[
+    _ReaderAuthorityBoundary, tuple[object, _ReaderHandle]
+] = WeakKeyDictionary()
+_HIGH_WATER_READER_TARGETS: WeakKeyDictionary[
+    _HighWaterReaderHandle, AtomicSignerRuntimeGenerationHighWaterReader
+] = WeakKeyDictionary()
+_HIGH_WATER_READER_AUTHORITIES: WeakKeyDictionary[
+    _HighWaterReaderAuthorityBoundary,
+    tuple[object, _HighWaterReaderHandle],
+] = WeakKeyDictionary()
+
+
+@dataclass(frozen=True)
+class _DurableReaderState:
+    anchor_id: str
+    verifier: SignerRuntimeGenerationVerifier
+    store: ReadOnlyRuntimeJsonStore
+    high_water: SignerRuntimeGenerationHighWaterReader
+    high_water_store_id: str
+    durability_receipt_id: str
+    lock_path: Path
+
+
+_DURABLE_READER_STATES: WeakKeyDictionary[
+    DurableSignerRuntimeGenerationReader, _DurableReaderState
+] = WeakKeyDictionary()
 
 
 class DurableSignerRuntimeGenerationReader:
     """Read one authenticated generation without retaining signing capability."""
+
+    __slots__ = ("__weakref__",)
 
     def __init__(
         self,
@@ -129,14 +182,14 @@ class DurableSignerRuntimeGenerationReader:
             SignerRuntimeGenerationHighWaterReaderAuthorityBoundary
         ),
     ) -> None:
-        self._anchor_id = _text(anchor_id, "anchor_id")
-        self._verifier = _verifier(
+        resolved_anchor_id = _text(anchor_id, "anchor_id")
+        verifier = _verifier(
             require_signer_runtime_generation_verifier_authority(
                 verifier_authority,
                 verifier_authority_boundary,
             )
         )
-        self._store = ReadOnlyRuntimeJsonStore(
+        store = ReadOnlyRuntimeJsonStore(
             path,
             allowed_root=allowed_root,
             repo_root=repo_root,
@@ -154,37 +207,43 @@ class DurableSignerRuntimeGenerationReader:
             raise ValueError("generation_reader_high_water_authority_mismatch")
         rollback_root = validate_runtime_root_path(
             verified.reader.rollback_domain_root,
-            repo_root=self._store.repo_root,
+            repo_root=store.repo_root,
         )
-        if _paths_overlap(rollback_root, self._store.allowed_root):
+        if _paths_overlap(rollback_root, store.allowed_root):
             raise ValueError("generation_reader_high_water_domain_overlap")
         if not is_sha256(verified.durability_receipt_id):
             raise ValueError("generation_reader_high_water_receipt_invalid")
-        self._high_water = verified.reader
-        self._high_water_store_id = _text(verified.store_id, "store_id")
-        self._durability_receipt_id = verified.durability_receipt_id
-        self._lock_path = self._store.path.with_name(
-            self._store.path.name + ".generation-anchor.lock"
+        _DURABLE_READER_STATES[self] = _DurableReaderState(
+            anchor_id=resolved_anchor_id,
+            verifier=verifier,
+            store=store,
+            high_water=verified.reader,
+            high_water_store_id=_text(verified.store_id, "store_id"),
+            durability_receipt_id=verified.durability_receipt_id,
+            lock_path=store.path.with_name(
+                store.path.name + ".generation-anchor.lock"
+            ),
         )
 
     def load(self) -> SignerRuntimeGenerationActivation | None:
+        state = _DURABLE_READER_STATES[self]
         with confined_runtime_operation_lock(
-            self._lock_path,
-            repo_root=self._store.repo_root,
-            allowed_root=self._store.allowed_root,
+            state.lock_path,
+            repo_root=state.store.repo_root,
+            allowed_root=state.store.allowed_root,
         ):
-            if self._high_water.pending(self._anchor_id) is not None:
+            if state.high_water.pending(state.anchor_id) is not None:
                 raise ValueError("generation_reader_pending_transaction")
             activation = decode_signer_runtime_generation_state(
-                self._store.load(),
-                anchor_id=self._anchor_id,
-                verifier=self._verifier,
-                high_water_store_id=self._high_water_store_id,
+                state.store.load(),
+                anchor_id=state.anchor_id,
+                verifier=state.verifier,
+                high_water_store_id=state.high_water_store_id,
                 high_water_durability_receipt_id=(
-                    self._durability_receipt_id
+                    state.durability_receipt_id
                 ),
             )
-            current = self._high_water.load(self._anchor_id)
+            current = state.high_water.load(state.anchor_id)
             if activation is None:
                 if current is not None:
                     raise ValueError("generation_reader_rollback_detected")
@@ -203,8 +262,12 @@ def create_signer_runtime_generation_reader_authority(
 ) -> tuple[object, SignerRuntimeGenerationReaderAuthorityBoundary]:
     if type(reader) is not DurableSignerRuntimeGenerationReader:
         raise ValueError("generation_reader_authority_reader_invalid")
+    handle = _ReaderHandle()
+    _READER_TARGETS[handle] = reader
     authority = object()
-    return authority, _ReaderAuthorityBoundary(authority, reader)
+    boundary = _ReaderAuthorityBoundary()
+    _READER_AUTHORITIES[boundary] = (authority, handle)
+    return authority, boundary
 
 
 def require_signer_runtime_generation_reader_authority(
@@ -221,8 +284,12 @@ def create_signer_runtime_generation_high_water_reader_authority(
 ) -> tuple[object, SignerRuntimeGenerationHighWaterReaderAuthorityBoundary]:
     if type(reader) is not AtomicSignerRuntimeGenerationHighWaterReader:
         raise ValueError("generation_high_water_reader_invalid")
+    handle = _HighWaterReaderHandle()
+    _HIGH_WATER_READER_TARGETS[handle] = reader
     authority = object()
-    return authority, _HighWaterReaderAuthorityBoundary(authority, reader)
+    boundary = _HighWaterReaderAuthorityBoundary()
+    _HIGH_WATER_READER_AUTHORITIES[boundary] = (authority, handle)
+    return authority, boundary
 
 
 def require_signer_runtime_generation_high_water_reader_authority(

@@ -5,9 +5,10 @@ from __future__ import annotations
 import hashlib
 import json
 import secrets
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping
+from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
@@ -217,6 +218,8 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
 class AtomicSignerRuntimeGenerationHighWaterReader:
     """Verifier-only view of authenticated high-water state."""
 
+    __slots__ = ("__weakref__",)
+
     def __init__(
         self,
         path: Path | str,
@@ -230,28 +233,42 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
             SignerRuntimeGenerationVerifierAuthorityBoundary
         ),
     ) -> None:
-        self.store_id = _ascii(store_id, "store_id")
-        self.durability_receipt_id = _sha256(
+        resolved_store_id = _ascii(store_id, "store_id")
+        resolved_receipt_id = _sha256(
             durability_receipt_id, "durability_receipt_id"
         )
-        self._verifier = _verifier(
+        verifier = _verifier(
             require_signer_runtime_generation_verifier_authority(
                 verifier_authority,
                 verifier_authority_boundary,
             )
         )
-        self._store = ReadOnlyRuntimeJsonStore(
+        store = ReadOnlyRuntimeJsonStore(
             path,
             allowed_root=allowed_root,
             repo_root=repo_root,
         )
-        self._lock_path = self._store.path.with_name(
-            self._store.path.name + ".high-water-transaction.lock"
+        _HIGH_WATER_READER_STATES[self] = _HighWaterReaderState(
+            store_id=resolved_store_id,
+            durability_receipt_id=resolved_receipt_id,
+            verifier=verifier,
+            store=store,
+            lock_path=store.path.with_name(
+                store.path.name + ".high-water-transaction.lock"
+            ),
         )
 
     @property
+    def store_id(self) -> str:
+        return _HIGH_WATER_READER_STATES[self].store_id
+
+    @property
+    def durability_receipt_id(self) -> str:
+        return _HIGH_WATER_READER_STATES[self].durability_receipt_id
+
+    @property
     def rollback_domain_root(self) -> Path:
-        return self._store.allowed_root
+        return _HIGH_WATER_READER_STATES[self].store.allowed_root
 
     def load(
         self, anchor_id: str
@@ -264,21 +281,36 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
         return _pending(self._entry(anchor_id).get("pending"))
 
     def _entry(self, anchor_id: str) -> dict[str, Any]:
+        reader = _HIGH_WATER_READER_STATES[self]
         with confined_runtime_operation_lock(
-            self._lock_path,
-            repo_root=self._store.repo_root,
-            allowed_root=self._store.allowed_root,
+            reader.lock_path,
+            repo_root=reader.store.repo_root,
+            allowed_root=reader.store.allowed_root,
         ):
             state = _verified_state(
-                self._store.load(),
-                store_id=self.store_id,
-                durability_receipt_id=self.durability_receipt_id,
+                reader.store.load(),
+                store_id=reader.store_id,
+                durability_receipt_id=reader.durability_receipt_id,
                 rollback_domain_digest=_root_digest(
-                    self.rollback_domain_root
+                    reader.store.allowed_root
                 ),
-                verifier=self._verifier,
+                verifier=reader.verifier,
             )
             return _entry(state, _anchor_id(anchor_id))
+
+
+@dataclass(frozen=True)
+class _HighWaterReaderState:
+    store_id: str
+    durability_receipt_id: str
+    verifier: SignerRuntimeGenerationVerifier
+    store: ReadOnlyRuntimeJsonStore
+    lock_path: Path
+
+
+_HIGH_WATER_READER_STATES: WeakKeyDictionary[
+    AtomicSignerRuntimeGenerationHighWaterReader, _HighWaterReaderState
+] = WeakKeyDictionary()
 
 
 def _verified_state(

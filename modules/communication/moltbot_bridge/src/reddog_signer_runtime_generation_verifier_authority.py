@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from typing import Protocol
+from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -43,21 +44,33 @@ class _PublicGenerationVerifier:
         )
 
 
-class _VerifierAuthorityBoundary:
-    __slots__ = ("_authority", "_verifier")
+class _VerifierHandle:
+    __slots__ = ("__weakref__",)
 
-    def __init__(
-        self,
-        authority: object,
-        verifier: SignerRuntimeGenerationVerifier,
-    ) -> None:
-        self._authority = authority
-        self._verifier = verifier
+    @property
+    def authenticator_id(self) -> str:
+        return _VERIFIER_TARGETS[self].authenticator_id
+
+    def verify(self, payload: bytes, authentication_tag: str) -> bool:
+        return _VERIFIER_TARGETS[self].verify(payload, authentication_tag)
+
+
+class _VerifierAuthorityBoundary:
+    __slots__ = ("__weakref__",)
 
     def require(self, value: object) -> SignerRuntimeGenerationVerifier:
-        if value is not self._authority:
+        authority, verifier = _VERIFIER_AUTHORITIES[self]
+        if value is not authority:
             raise ValueError("generation_verifier_authority_unverified")
-        return self._verifier
+        return verifier
+
+
+_VERIFIER_TARGETS: WeakKeyDictionary[
+    _VerifierHandle, SignerRuntimeGenerationVerifier
+] = WeakKeyDictionary()
+_VERIFIER_AUTHORITIES: WeakKeyDictionary[
+    _VerifierAuthorityBoundary, tuple[object, _VerifierHandle]
+] = WeakKeyDictionary()
 
 
 def create_signer_runtime_generation_verifier_authority(
@@ -65,9 +78,13 @@ def create_signer_runtime_generation_verifier_authority(
 ) -> tuple[object, SignerRuntimeGenerationVerifierAuthorityBoundary]:
     """Mint one process-local authority around public verification material."""
 
-    verifier = _PublicGenerationVerifier(public_key)
+    target = _PublicGenerationVerifier(public_key)
+    verifier = _VerifierHandle()
+    _VERIFIER_TARGETS[verifier] = target
     authority = object()
-    return authority, _VerifierAuthorityBoundary(authority, verifier)
+    boundary = _VerifierAuthorityBoundary()
+    _VERIFIER_AUTHORITIES[boundary] = (authority, verifier)
+    return authority, boundary
 
 
 def require_signer_runtime_generation_verifier_authority(

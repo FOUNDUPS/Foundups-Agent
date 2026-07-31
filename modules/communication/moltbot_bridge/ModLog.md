@@ -14,6 +14,10 @@
   and post-commit recovery verifies durable state before returning. This is generation-authority
   infrastructure only: production authority issuance, immutable generation
   bundle activation, service supervision, and effect authority remain blocked.
+  Factory boundaries, verifier handles, generation readers, and high-water
+  readers retain no caller-mutable payload slots. Process-local weak registries
+  hold their validated dependencies, so post-mint attribute replacement cannot
+  attach a signer or retarget a lifecycle authority.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
   signer healthcheck with a fresh, short-lived, domain-separated Ed25519
   challenge verified against the configured signer key, fingerprint, epoch,

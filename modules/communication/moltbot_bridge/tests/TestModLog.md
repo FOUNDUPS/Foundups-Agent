@@ -12,6 +12,9 @@
 - Proved packet, config and observer tampering reject fail closed.
 - Proved protected-parent cleanup preserves an attacker-substituted
   socket path rather than deleting another lifecycle object.
+- Proved post-mint `setattr` and `object.__setattr__` attacks cannot replace
+  verifier, reader, high-water, or hidden-signer dependencies in any
+  lifecycle authority object.
 - Kept service provisioning, valve consumption and live
   execution fail closed behind separately owned follow-ons.
 - Focused signer, manifest, safety and WSP 62 matrices remain
