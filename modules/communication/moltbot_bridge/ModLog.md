@@ -6,7 +6,7 @@
   claim contract. Added explicit
   scheduled/disabled telemetry and preserved the query-side prohibition on
   re-indexing plus all freshness gates. A lock-owned poller waits during
-  shutdown; a source-specific reader prevents global queue starvation.
+  shutdown and binds selection to the coordinator's exact canonical task ID.
 - `REDDOG_SIGNER_E0_AUTHENTICATED_SECRET_LEASE_GATE_PHASE1`: added a
   verifier-only, process-local boundary for one signed signer secret-access
   grant. The grant binds the independently resolved issuer key, signer agent

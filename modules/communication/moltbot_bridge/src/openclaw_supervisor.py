@@ -2423,9 +2423,6 @@ class OpenClawSupervisor:
                     exclude_signed_worker_origin,
                 )
                 from modules.infrastructure.database.src.agent_db import AgentDB
-                from modules.infrastructure.database.src.holoindex_postmerge_task_reader import (
-                    read_holoindex_postmerge_tasks,
-                )
                 from .openclaw_maintenance_selector import select_maintenance_task
 
                 db = AgentDB()
@@ -2437,19 +2434,19 @@ class OpenClawSupervisor:
                     else []
                 )
                 if postmerge_enabled:
-                    postmerge_tasks = read_holoindex_postmerge_tasks(
-                        db,
-                        status="pending",
-                        limit=10,
+                    task_id = self._holoindex_postmerge_poller.task_id
+                    postmerge_task = (
+                        db.get_autonomous_task_by_id(task_id) if task_id else None
                     )
-                    known_ids = {
-                        str(task.get("task_id") or "") for task in postmerge_tasks
-                    }
-                    pending_tasks = list(postmerge_tasks) + [
-                        task
-                        for task in pending_tasks
-                        if str(task.get("task_id") or "") not in known_ids
-                    ]
+                    if (
+                        isinstance(postmerge_task, Mapping)
+                        and postmerge_task.get("status") == "pending"
+                    ):
+                        pending_tasks = [dict(postmerge_task)] + [
+                            task
+                            for task in pending_tasks
+                            if str(task.get("task_id") or "") != task_id
+                        ]
                 pending_tasks = maintenance_candidates(
                     pending_tasks,
                     general_maintenance_enabled=maintenance_enabled,

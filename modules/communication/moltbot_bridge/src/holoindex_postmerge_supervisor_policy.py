@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import threading
 import time
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -11,6 +12,8 @@ from typing import Any, Dict, List, Mapping, Sequence
 
 
 HOLOINDEX_POSTMERGE_SOURCE = "holoindex_postmerge_coordinator"
+HOLOINDEX_POSTMERGE_TASK_PREFIX = "holoindex_postmerge_refresh:"
+_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 class HoloIndexPostmergePoller:
@@ -23,11 +26,17 @@ class HoloIndexPostmergePoller:
         self._future: Future[Any] | None = None
         self._last_poll = 0.0
         self._stopped = False
+        self._task_id = ""
 
     @property
     def future(self) -> Future[Any] | None:
         with self._lock:
             return self._future
+
+    @property
+    def task_id(self) -> str:
+        with self._lock:
+            return self._task_id
 
     def poll(self) -> Dict[str, Any] | None:
         with self._lock:
@@ -57,7 +66,9 @@ class HoloIndexPostmergePoller:
         if self._future is None or not self._future.done():
             return None
         try:
-            return dict(self._future.result().to_dict())
+            result = dict(self._future.result().to_dict())
+            self._task_id = _canonical_task_id(result)
+            return result
         except Exception as exc:
             return _poll_status(False, "REJECTED", type(exc).__name__)
         finally:
@@ -100,6 +111,18 @@ def _poll_status(
         "status": status,
         "rejection_reasons": [rejection_reason] if rejection_reason else [],
     }
+
+
+def _canonical_task_id(result: Mapping[str, Any]) -> str:
+    target_sha = str(result.get("target_repo_head_sha") or "")
+    task_id = str(result.get("task_id") or "")
+    if (
+        result.get("accepted") is True
+        and _SHA_RE.fullmatch(target_sha)
+        and task_id == HOLOINDEX_POSTMERGE_TASK_PREFIX + target_sha
+    ):
+        return task_id
+    return ""
 
 
 def holoindex_postmerge_enabled(

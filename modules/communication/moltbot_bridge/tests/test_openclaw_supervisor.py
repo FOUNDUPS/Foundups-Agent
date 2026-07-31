@@ -2017,22 +2017,52 @@ def test_observe_polls_postmerge_coordinator_by_default(tmp_path, monkeypatch):
     monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
     monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
     calls = []
+    target_sha = "a" * 40
+    task_id = "holoindex_postmerge_refresh:" + target_sha
     monkeypatch.setattr(
         holoindex_postmerge_coordinator,
         "coordinate_holoindex_postmerge",
-        lambda **kwargs: calls.append(kwargs) or MagicMock(to_dict=lambda: {}),
+        lambda **kwargs: calls.append(kwargs)
+        or MagicMock(
+            to_dict=lambda: {
+                "accepted": True,
+                "status": "QUEUED",
+                "target_repo_head_sha": target_sha,
+                "task_id": task_id,
+            }
+        ),
     )
     supervisor = OpenClawSupervisor(repo_root=tmp_path)
     observation = {}
 
     supervisor._observe_holoindex_postmerge(observation)
     supervisor._holoindex_postmerge_poller.future.result(timeout=2)
+    supervisor._observe_holoindex_postmerge({})
 
     assert observation["holoindex_postmerge"]["status"] == (
         "MAINTENANCE_CHECK_SCHEDULED"
     )
     assert calls == [{"repo_root": tmp_path.resolve()}]
+    assert supervisor._holoindex_postmerge_poller.task_id == task_id
     supervisor.stop()
+
+
+def test_postmerge_poller_rejects_noncanonical_task_identity():
+    from modules.communication.moltbot_bridge.src.holoindex_postmerge_supervisor_policy import (
+        _canonical_task_id,
+    )
+
+    target_sha = "a" * 40
+    valid = {
+        "accepted": True,
+        "target_repo_head_sha": target_sha,
+        "task_id": "holoindex_postmerge_refresh:" + target_sha,
+    }
+
+    assert _canonical_task_id(valid) == valid["task_id"]
+    assert _canonical_task_id({**valid, "accepted": False}) == ""
+    assert _canonical_task_id({**valid, "target_repo_head_sha": "g" * 40}) == ""
+    assert _canonical_task_id({**valid, "task_id": "attacker:" + target_sha}) == ""
 
 
 def test_postmerge_coordinator_explicit_disable_is_visible(tmp_path, monkeypatch):
@@ -2086,22 +2116,23 @@ def test_triage_claims_only_postmerge_by_default(tmp_path, monkeypatch):
     monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
     monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
     db = MagicMock()
-    db.db.execute_query.return_value = [
-        {
-                "task_id": "holoindex_postmerge_refresh:" + ("a" * 40),
-                "description": "Refresh exact-SHA HoloIndex authority",
-                "context": {
-                    "schema_version": "holoindex_postmerge_coordination_v1",
-                    "source": "holoindex_postmerge_coordinator",
-                },
-            "required_skills": ["holo-search"],
+    task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+    db.get_autonomous_task_by_id.return_value = {
+        "task_id": task_id,
+        "status": "pending",
+        "description": "Refresh exact-SHA HoloIndex authority",
+        "context": {
+            "schema_version": "holoindex_postmerge_coordination_v1",
+            "source": "holoindex_postmerge_coordinator",
         },
-    ]
+        "required_skills": ["holo-search"],
+    }
     monkeypatch.setattr(
         "modules.infrastructure.database.src.agent_db.AgentDB",
         lambda: db,
     )
     supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    supervisor._holoindex_postmerge_poller._task_id = task_id
 
     result = supervisor._triage(
         {"openclaw_runtime": {"registered": True, "running": True}}
@@ -2123,6 +2154,7 @@ def test_generic_autonomous_executor_cannot_claim_postmerge_task(
     monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
     postmerge_task = {
         "task_id": "holoindex_postmerge_refresh:" + ("a" * 40),
+        "status": "pending",
         "description": "Refresh exact-SHA HoloIndex authority",
         "context": {
             "schema_version": "holoindex_postmerge_coordination_v1",
@@ -2132,12 +2164,13 @@ def test_generic_autonomous_executor_cannot_claim_postmerge_task(
     }
     db = MagicMock()
     db.get_autonomous_tasks.return_value = [postmerge_task]
-    db.db.execute_query.return_value = [postmerge_task]
+    db.get_autonomous_task_by_id.return_value = postmerge_task
     monkeypatch.setattr(
         "modules.infrastructure.database.src.agent_db.AgentDB",
         lambda: db,
     )
     supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    supervisor._holoindex_postmerge_poller._task_id = postmerge_task["task_id"]
 
     result = supervisor._triage(
         {"openclaw_runtime": {"registered": True, "running": True}}
