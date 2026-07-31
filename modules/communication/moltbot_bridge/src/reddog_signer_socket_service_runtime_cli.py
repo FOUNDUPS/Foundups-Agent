@@ -34,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     FailClosedPrincipalKeyResolver,
     PrincipalKeyResolver,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
+    load_system_service_manifest_selection,
+)
 
 
 SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT = "SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT"
@@ -84,6 +87,10 @@ def build_reddog_signer_socket_service_runtime_cli_parser() -> argparse.Argument
         "--run-packet",
         help="Exact outside-repo launch packet used for signer instance binding.",
     )
+    parser.add_argument(
+        "--owner-authority-config",
+        help="Root-owned Linux signer-generation authority configuration.",
+    )
     parser.add_argument("--op-executable", default="op", help="1Password CLI executable path/name.")
     parser.add_argument("--op-timeout-s", type=float, default=10.0, help="op read timeout in seconds.")
     parser.add_argument("--ttl-seconds", type=int, default=300, help="Credential TTL for resolver receipts.")
@@ -99,12 +106,36 @@ def run_reddog_signer_socket_service_runtime_cli(
     emit: Callable[[str], None] = print,
     principal_key_resolver: PrincipalKeyResolver | None = None,
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
-    manifest_selection_loader: ManifestSelectionLoader | None = None,
 ) -> int:
     """Run the signer service CLI and emit an audit-safe JSON receipt."""
 
     parser = build_reddog_signer_socket_service_runtime_cli_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
+    return _run_cli_args(
+        args,
+        resolver_factory=resolver_factory,
+        serve_bounded=serve_bounded,
+        emit=emit,
+        principal_key_resolver=principal_key_resolver,
+        proposal_replay_high_water_store=proposal_replay_high_water_store,
+        manifest_selection_loader=_resolve_manifest_selection_loader(
+            args.owner_authority_config
+        ),
+    )
+
+
+def _run_cli_args(
+    args: argparse.Namespace,
+    *,
+    resolver_factory: ResolverFactory,
+    serve_bounded: ServeSignerSocketBounded,
+    emit: Callable[[str], None],
+    principal_key_resolver: PrincipalKeyResolver | None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None,
+    manifest_selection_loader: ManifestSelectionLoader | None,
+) -> int:
+    """Run parsed CLI arguments; tests may inject only at this private seam."""
+
     selection, selection_boundary = _load_manifest_selection(
         manifest_selection_loader,
         repo_root=Path(args.repo_root),
@@ -136,6 +167,22 @@ def run_reddog_signer_socket_service_runtime_cli(
     )
     emit(_receipt_json(result))
     return 0 if result.accepted else 2
+
+
+def _resolve_manifest_selection_loader(
+    owner_config_path: str | None,
+) -> ManifestSelectionLoader | None:
+    if not owner_config_path:
+        return None
+    owner_path = Path(owner_config_path).resolve()
+
+    def load(**kwargs: Any) -> tuple[object, Any]:
+        return load_system_service_manifest_selection(
+            owner_config_path=owner_path,
+            **kwargs,
+        )
+
+    return load
 
 
 def _load_manifest_selection(

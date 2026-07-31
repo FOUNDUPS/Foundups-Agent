@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import base64
 import hashlib
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -33,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runti
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT,
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT,
     run_reddog_signer_socket_service_runtime_cli,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_signer_socket_service_runtime_cli as cli_module,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import (
     FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION,
@@ -137,6 +141,11 @@ def _manifest_selection_loader(
         "runtime_root": str(config_path.parent.resolve()),
         "config_path": str(config_path.resolve()),
         "run_packet_path": str(run_packet_path.resolve()),
+        "generation": 1,
+        "generation_revision": "a" * 64,
+        "selection_issued_at": 100,
+        "selection_expires_at": 130,
+        "owner_config_id": "sha256:" + ("c" * 64),
     }
     return capability, _ManifestSelectionBoundary(capability, values)
 
@@ -150,6 +159,14 @@ def _payload_digest(value: object) -> str:
 
 def _raw_digest(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_public_cli_has_no_manifest_loader_injection() -> None:
+    signature = inspect.signature(
+        run_reddog_signer_socket_service_runtime_cli
+    )
+
+    assert "manifest_selection_loader" not in signature.parameters
 
 
 def _private_key():
@@ -240,7 +257,9 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
-def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tmp_path: Path) -> None:
+def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
     private_key = _private_key()
@@ -273,6 +292,11 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tm
         python_executable=sys.executable,
     )
     assert supplied.accepted is True
+    monkeypatch.setattr(
+        cli_module,
+        "_resolve_manifest_selection_loader",
+        lambda _path: _manifest_selection_loader,
+    )
 
     code = run_reddog_signer_socket_service_runtime_cli(
         [
@@ -296,7 +320,6 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tm
         resolver_factory=resolver_factory,
         serve_bounded=service,
         emit=emitted.append,
-        manifest_selection_loader=_manifest_selection_loader,
     )
 
     assert code == 0

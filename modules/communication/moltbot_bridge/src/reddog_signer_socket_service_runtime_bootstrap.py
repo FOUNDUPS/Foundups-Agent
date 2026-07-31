@@ -46,6 +46,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
     SignerPeerProfileBinding,
     load_signer_peer_instance_binding,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_peer_instance_packet_validator import (
+    signer_generation_bound_selection_valid,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_text,
     validate_runtime_artifact_path,
@@ -411,7 +414,7 @@ def _selection_config_binding_valid(
     config_digest: str,
     config_raw_digest: str,
 ) -> bool:
-    return isinstance(value, Mapping) and all(
+    return signer_generation_bound_selection_valid(value) and all(
         (
             Path(str(value.get("repo_root") or "")).resolve() == root,
             Path(str(value.get("config_path") or "")).resolve() == config_path,
