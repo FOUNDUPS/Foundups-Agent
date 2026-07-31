@@ -42,6 +42,9 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_peer_instance_packet_validator import (
+    signer_run_packet_static_valid,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
     validate_runtime_root_path,
@@ -71,6 +74,7 @@ _PEER_POLICY_FIELDS = {
 _RUN_PACKET_FIELDS = {
     "schema_version", "run_mode", "repo_root", "working_directory", "python_module",
     "argv", "config_path", "config_digest", "socket_path", "profile_count",
+    "owner_authority_config_path",
     "provider_mode", "op_executable", "op_timeout_s", "ttl_seconds", "session_id",
     "process_owner_requirement", "redDog_must_not_spawn", "main_py_must_not_spawn",
     "shell_required", "shell_command", "no_secret_values_in_packet", "run_packet_id",
@@ -363,13 +367,15 @@ def _signer_packet_reasons(
     repo: Path, runtime: Path, config: Mapping[str, Any], packet: Mapping[str, Any],
 ) -> list[str]:
     reasons: list[str] = []
+    if not signer_run_packet_static_valid(packet, root=repo):
+        reasons.append("signer_run_packet_stable_launch_invalid")
     if set(packet) != _RUN_PACKET_FIELDS:
         reasons.append("signer_run_packet_field_set_invalid")
     if _forbidden_serialized_keys(packet):
         reasons.append("signer_run_packet_forbidden_key_present")
     checks = {
-        "schema_version": "reddog_signer_service_run_packet.v1",
-        "run_mode": "signer_owned_cli_sidecar",
+        "schema_version": "reddog_signer_service_run_packet.v2",
+        "run_mode": "signer_owned_system_service_entrypoint",
         "repo_root": str(repo),
         "working_directory": str(repo),
         "config_path": str((runtime / "signer_service_config.json").resolve()),

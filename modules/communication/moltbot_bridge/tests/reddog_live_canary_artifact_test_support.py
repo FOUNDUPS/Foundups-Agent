@@ -192,7 +192,11 @@ def _write_signer(repo: Path, runtime: Path, profile: dict) -> None:
     assert config.accepted
     packet = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo, config_path=runtime / "signer_service_config.json",
-        output_path=runtime / "signer_service_run_packet.json", python_executable="python",
+        output_path=runtime / "signer_service_run_packet.json",
+        owner_authority_config_path=(
+            runtime.parent / "signer-owner" / "owner.json"
+        ),
+        python_executable="python",
         session_id="canary-test",
     )
     assert packet.accepted

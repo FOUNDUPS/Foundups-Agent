@@ -80,8 +80,8 @@ def load_system_service_manifest_selection(
     *,
     owner_config_path: Path | str,
     repo_root: Path,
-    config_path: Path,
-    run_packet_path: Path,
+    config_path: Path | None = None,
+    run_packet_path: Path | None = None,
 ) -> tuple[object, Any]:
     """Load root-owned trust, reconstruct read-only readers, and select current."""
 
@@ -400,8 +400,16 @@ def _validate_owner_paths(
 
 
 def _require_cli_paths(
-    runtime: Path, config_path: Path, run_packet_path: Path
+    runtime: Path,
+    config_path: Path | None,
+    run_packet_path: Path | None,
 ) -> None:
+    if config_path is None and run_packet_path is None:
+        return
+    if config_path is None or run_packet_path is None:
+        raise RuntimeArtifactManifestError(
+            "signer_owner_cli_path_mismatch"
+        )
     expected = (
         (Path(config_path).resolve(), runtime / CONFIG_FILENAME),
         (Path(run_packet_path).resolve(), runtime / RUN_PACKET_FILENAME),

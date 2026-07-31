@@ -162,6 +162,9 @@ def _packet(repo: Path, runtime: Path, *, config_payload: dict[str, object] | No
         repo_root=repo,
         config_path=config_path,
         output_path=packet_path,
+        owner_authority_config_path=(
+            runtime.parent / "signer-owner" / "owner.json"
+        ),
         python_executable="python",
     )
     assert result.accepted is True

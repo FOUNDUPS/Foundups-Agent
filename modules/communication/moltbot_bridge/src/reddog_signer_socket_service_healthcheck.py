@@ -34,6 +34,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_schema import (
     SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_peer_instance_packet_validator import (
+    signer_run_packet_static_valid,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_read_confined_text,
     validate_runtime_root_path,
@@ -380,6 +383,8 @@ def _read_run_packet(
 
 
 def _packet_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, ...]:
+    if not signer_run_packet_static_valid(payload, root=repo_root):
+        return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
     if payload.get("schema_version") != SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION:
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
     if not _ascii_deep(payload):
@@ -390,7 +395,10 @@ def _packet_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, .
     without_id = {key: value for key, value in payload.items() if key != "run_packet_id"}
     if packet_id != _digest(without_id):
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
-    if payload.get("run_mode") != "signer_owned_cli_sidecar":
+    if (
+        payload.get("run_mode")
+        != "signer_owned_system_service_entrypoint"
+    ):
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
     if payload.get("redDog_must_not_spawn") is not True:
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
@@ -414,7 +422,11 @@ def _packet_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, .
             return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
         if Path(str(payload[key])).resolve() != repo_root:
             return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
-    for key in ("config_path", "socket_path"):
+    for key in (
+        "config_path",
+        "owner_authority_config_path",
+        "socket_path",
+    ):
         path_text = str(payload.get(key) or "")
         if "\x00" in path_text or path_text.startswith("\\\\?\\") or path_text.startswith("//?/"):
             return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)

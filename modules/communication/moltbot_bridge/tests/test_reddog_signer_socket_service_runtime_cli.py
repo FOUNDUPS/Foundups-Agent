@@ -281,10 +281,12 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(
     payload["key_provider_profiles"] = [payload.pop("key_provider_profile")]
     _write_json(config, payload)
     packet = runtime / "signer-run-packet.json"
+    owner_path = tmp_path / "signer-owner" / "owner.json"
     supplied = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo,
         config_path=config,
         output_path=packet,
+        owner_authority_config_path=owner_path,
         op_executable="C:/Program Files/1Password/op.exe",
         op_timeout_s=7,
         ttl_seconds=61,
@@ -308,6 +310,8 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(
             str(supplied.config_digest),
             "--run-packet",
             str(packet),
+            "--owner-authority-config",
+            str(owner_path),
             "--op-executable",
             "C:/Program Files/1Password/op.exe",
             "--op-timeout-s",

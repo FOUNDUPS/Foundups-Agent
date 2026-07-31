@@ -1,5 +1,15 @@
 # OpenClaw Bridge = 012's Digital Twin
 
+The external signer uses a stable signer-owned system-service command:
+`reddog_signer_system_service_entrypoint`. Its v2 run packet contains the
+rotating current-generation configuration, but the service manager receives
+only the fixed repository root and root-owned owner-authority configuration
+path. The entrypoint revalidates the authenticated current generation before
+service admission and never executes packet argv. Production secret resolution
+is deliberately unavailable until the E0 boundary lands; the stable entrypoint
+is currently a no-work-authority lifecycle foundation. RedDog and `main.py`
+remain clients and cannot spawn the signer.
+
 `start operations` binds the production `reddog_operations` Skillz from the
 manifest-authenticated runtime before model selection or grounding. The
 Skillz defines only logical roles and WSP_00/WSP_97/WSP_15 operating

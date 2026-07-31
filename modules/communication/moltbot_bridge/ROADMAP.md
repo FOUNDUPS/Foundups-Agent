@@ -1,5 +1,14 @@
 # moltbot_bridge Roadmap
 
+## Stable External Signer Lifecycle
+
+- COMPLETE: current authenticated signer generation selection.
+- COMPLETE: stable signer-owned system-service entrypoint and v2 packet
+  binding.
+- NEXT: E0-compliant resolve-per-sign secret isolation.
+- BLOCKED: durable system-service deployment and no-work-authority Linux
+  canary until secret and lifecycle supervision slices pass.
+
 ## RedDog provider-call evidence follow-ups
 
 - Phase 2a covers only the governed repo-audit and backend-architect in-process

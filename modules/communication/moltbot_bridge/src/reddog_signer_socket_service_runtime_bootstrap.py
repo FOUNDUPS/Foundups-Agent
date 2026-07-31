@@ -117,6 +117,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     expected_config_digest: str | None = None,
     run_packet_path: Path | str | None = None,
     expected_session_id: str | None = None,
+    expected_owner_authority_config_path: Path | str | None = None,
     manifest_selection: object | None = None,
     manifest_selection_boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None = None,
     principal_key_resolver: PrincipalKeyResolver | None = None,
@@ -131,6 +132,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
         expected_config_digest,
         run_packet_path,
         expected_session_id,
+        expected_owner_authority_config_path,
         manifest_selection,
         manifest_selection_boundary,
     )
@@ -212,6 +214,10 @@ def _caller_paths_match_selection(
     selected_config: Path,
     selected_packet: Path,
 ) -> bool:
+    if config_path is None and run_packet_path is None:
+        return True
+    if config_path is None or run_packet_path is None:
+        return False
     return bool(
         config_path
         and run_packet_path
@@ -238,6 +244,7 @@ def _load_bound_runtime_config(
     root: Path, config_path: Path | str | None,
     expected_digest: str | None, run_packet_path: Path | str | None,
     session_id: str | None,
+    owner_authority_config_path: Path | str | None,
     manifest_selection: object | None,
     manifest_selection_boundary: RuntimeArtifactManifestLaunchSelectionBoundary | None,
 ) -> BootstrapLoadResult:
@@ -262,7 +269,10 @@ def _load_bound_runtime_config(
         return None, path, None, _reject(*reasons, config_path=str(path))
     assert payload is not None and digest is not None and raw_digest is not None
     selected_digest = str(selection["config_digest"])
-    if expected_digest != selected_digest or _config_digest_rejected(
+    if (
+        expected_digest is not None
+        and expected_digest != selected_digest
+    ) or _config_digest_rejected(
         payload, digest, selected_digest
     ):
         rejected = _reject(
@@ -279,6 +289,7 @@ def _load_bound_runtime_config(
         selected_digest,
         selected_packet,
         session_id,
+        owner_authority_config_path,
         selection,
     )
     if config is None:
@@ -320,6 +331,7 @@ def _rehydrate_selected_config(
     selected_digest: str,
     selected_packet: Path,
     session_id: str | None,
+    owner_authority_config_path: Path | str | None,
     selection: Mapping[str, Any],
 ) -> Any | None:
     config = rehydrate_signer_socket_service_runtime_config(
@@ -337,6 +349,7 @@ def _rehydrate_selected_config(
         selected_digest,
         selected_packet,
         session_id,
+        owner_authority_config_path,
         selection,
         raw_digest,
     )
@@ -362,6 +375,7 @@ def _attach_peer_binding(
     expected_digest: str | None,
     run_packet_path: Path | str | None,
     session_id: str | None,
+    owner_authority_config_path: Path | str | None,
     manifest_selection: Mapping[str, Any],
     config_raw_digest: str,
 ) -> Any | None:
@@ -369,8 +383,8 @@ def _attach_peer_binding(
         return None
     if (
         expected_digest is None
-        or not session_id
         or not run_packet_path
+        or not owner_authority_config_path
     ):
         return None
     profiles = tuple(config.key_provider_profiles) or (
@@ -394,6 +408,7 @@ def _attach_peer_binding(
         signer_profiles=tuple(_profile_peer_binding(item) for item in profiles),
         manifest_selection=manifest_selection,
         python_executable=sys.executable,
+        owner_authority_config_path=owner_authority_config_path,
     )
     return replace(config, signer_peer_instance_binding=binding) if binding else None
 

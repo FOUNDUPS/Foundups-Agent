@@ -13,6 +13,8 @@ FILES = (
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_system_service_manifest_selection_loader.py",
     "modules/communication/moltbot_bridge/src/"
+    "reddog_signer_system_service_entrypoint.py",
+    "modules/communication/moltbot_bridge/src/"
     "reddog_signer_peer_instance_packet_validator.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_socket_service_runtime_cli.py",
@@ -58,6 +60,8 @@ FILES = (
     "test_reddog_signer_system_service_manifest_selection_loader.py",
     "modules/communication/moltbot_bridge/tests/"
     "test_reddog_signer_system_service_manifest_selection_loader_linux.py",
+    "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/tests/"
     "test_reddog_signer_peer_instance_packet_validator_generation.py",
     "modules/communication/moltbot_bridge/tests/"

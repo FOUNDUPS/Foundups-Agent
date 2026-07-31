@@ -1,4 +1,17 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNER_SYSTEM_SERVICE_STABLE_ENTRYPOINT_PHASE1`: replaced the
+  generation-specific signer launch command with a v2 run packet that binds a
+  stable signer-owned system-service entrypoint and the exact root-owned owner
+  configuration path. The entrypoint reconstructs and consumes the current
+  authenticated generation, validates the packet and its stable command,
+  and gives that single one-shot capability to the existing bootstrap.
+  Production secret resolution remains fail closed pending E0; injected test
+  resolvers prove only post-admission ordering. Rotating
+  config, packet, session, and resolver values remain signed packet data and
+  are not service-manager arguments. Serialized argv is never executed.
+  RedDog, `main.py`, OpenClaw, and Hermes still cannot spawn the signer.
+  Service installation, E0 secret resolution, durable resident
+  supervision, and live Linux activation remain separate fail-closed slices.
 - `REDDOG_CURRENT_GENERATION_MANIFEST_LAUNCH_SELECTION_PHASE1`: added a
   verifier-only external-signer launch selector that ignores caller-supplied
   manifest payloads, reads the authenticated durable current generation, opens

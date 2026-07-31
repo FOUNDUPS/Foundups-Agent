@@ -219,10 +219,12 @@ def _launch_binding(
         payload["key_provider_profiles"] = [single]
         _write_json(config_path, payload)
     packet_path = config_path.parent / f"{config_path.stem}-run-packet.json"
+    owner_path = config_path.parent.parent / "signer-owner" / "owner.json"
     supplied = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo,
         config_path=config_path,
         output_path=packet_path,
+        owner_authority_config_path=owner_path,
         session_id=session_id,
         python_executable=sys.executable,
     )
@@ -248,6 +250,7 @@ def _launch_binding(
         "expected_config_digest": supplied.config_digest,
         "run_packet_path": packet_path,
         "expected_session_id": session_id,
+        "expected_owner_authority_config_path": owner_path,
         "manifest_selection": capability,
         "manifest_selection_boundary": _ManifestSelectionBoundary(
             capability, selection
@@ -387,14 +390,11 @@ def test_bootstrap_rejects_attacker_rehashed_run_packet(
     packet = json.loads(packet_path.read_text(encoding="utf-8"))
     if mutation == "session":
         packet["session_id"] = "attacker-session"
-        packet["argv"][-1] = "attacker-session"
         launch["expected_session_id"] = "attacker-session"
     elif mutation == "socket":
         packet["socket_path"] = str(runtime / "attacker.sock")
     elif mutation == "config":
         packet["config_digest"] = "sha256:" + "9" * 64
-        index = packet["argv"].index("--expected-config-digest")
-        packet["argv"][index + 1] = packet["config_digest"]
     elif mutation == "argv":
         packet["argv"].extend(["--attacker", "value"])
     elif mutation == "python_executable":
@@ -448,8 +448,6 @@ def test_bootstrap_rejects_test_provider_after_signed_launch_admission(
     packet = json.loads(packet_path.read_text(encoding="utf-8"))
     packet["provider_mode"] = "TEST_ONLY_DRYRUN"
     packet["config_digest"] = config_digest
-    digest_index = packet["argv"].index("--expected-config-digest")
-    packet["argv"][digest_index + 1] = config_digest
     _rehash_packet(packet)
     _write_json(packet_path, packet)
     boundary = launch["manifest_selection_boundary"]
