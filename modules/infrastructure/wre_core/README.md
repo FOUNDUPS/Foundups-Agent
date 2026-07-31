@@ -42,6 +42,24 @@ same-named implementation.
 
 ## Architecture
 
+### Test Impact and Differential Gate
+
+`wre_test_impact_differential_gate.py` compares normalized parent and candidate
+test snapshots by exact collected test IDs. It accepts known parent failures
+only when the candidate introduces no new failed, errored, skipped, xfailed,
+xpassed, deselected, or removed IDs. Parent snapshots are reusable across
+branches only when the exact parent SHA, suite scope, runner, selection,
+lineage, dependency-lock, and environment bindings match.
+
+The analysis is pure: it does not run tests, authenticate evidence, prove Git
+ancestry or full-suite collection authority, mutate a repository, authorize
+promotion, or write PatternMemory. Its receipts always report
+`authority_verified=false` and `promotion_authorized=false`. WRE's independent
+evidence producer owns test execution; signed work-order and verifier stages
+own evidence provenance.
+Focused and module-closure tests remain the development loop, while systemic,
+uncertain, security-sensitive, and promotion work escalates to the full suite.
+
 ### create_foundup Dry-Run Routing
 
 `FoundUpJob(requested_action="create_foundup")` routes only to

@@ -1,5 +1,16 @@
 # WRE Core - ModLog
 ## Chronological Change Log
+### [2026-08-01] - TEST IMPACT AND DIFFERENTIAL RECEIPT
+- Added pure parent/candidate differential analysis that compares exact test IDs
+  instead of aggregate pass/fail counts.
+- Bound reusable parent baselines to commit, suite scope, runner, selection,
+  lineage, dependency lock, environment, and exact collection manifests;
+  rejected removed tests and newly non-passing or deselected IDs.
+- Kept authority and promotion false until a future independently authenticated
+  evidence integration consumes the analysis.
+- Kept execution and authentication in the existing independent evidence and
+  signed work-order planes. (WSP 5/6/15/22/48/50/62/97)
+
 ### [2026-07-28] - MEMEX_VERIFIER_LINEAGE + CHECKOUT_LOCAL_SKILL_RESOLUTION
 - Bound Memex lineage to the independently recorded authority digest at verifier admission; retained checkout-local Skillz resolution and rejection.
 ### [2026-07-25] - WRE_INDEPENDENT_ASSURANCE_CAPACITY_ADMISSION_PHASE1

@@ -30,6 +30,52 @@ The rigor of this audit should be scaled based on a module's LLME score, with fo
 -   **Command**: `pytest -ra modules/`
 -   **Goal**: A clean run with zero `F` (Failures), `E` (Errors), or unaddressed `W` (Warnings). Skips (`s`) and expected failures (`x`/`X`) should be reviewed to ensure they are still valid.
 
+#### C.1 Tiered Verification During Development
+
+The full sweep is the promotion/release audit boundary. It is not the default
+inner-loop command after every edit. WRE and builders MUST use the smallest
+test tier that proves the current claim, then escalate when impact or evidence
+requires it:
+
+1. **Focused inner loop**: tests for the changed function, file, or explicit
+   acceptance criterion.
+2. **Module closure**: all tests and public-interface contracts owned by the
+   changed module.
+3. **Dependency closure**: tests for known consumers and shared contracts
+   reached by the changed surface.
+4. **Security and held-out closure**: applicable adversarial, authority,
+   safety, and independently maintained regression suites.
+5. **Full repository promotion**: the complete suite for SYSTEMIC changes,
+   uncertain/stale dependency closure, protected authority surfaces, release
+   candidates, and periodic health audits.
+
+An impact plan MUST bind the changed-path digest, impact class, selected test
+scope, omitted-scope rationale, WSP 15 allocation receipt, runner digest, and
+environment digest. If the dependency graph or HoloIndex evidence is stale,
+the plan escalates; it does not guess a narrower scope.
+
+#### C.2 Parent Baseline Receipt Reuse
+
+When `main` has known failures, acceptance is differential rather than
+count-based. The independent evidence plane records outcomes by exact test
+identifiers, not aggregate counts. A candidate MUST introduce no new failure,
+error, skip, xfail, xpass, deselection, or removed test unless a separately
+authorized expectation change governs it. Exact collection manifests and
+selection arguments are evidence inputs; a caller-applied `FULL_REPOSITORY`
+label is not proof that the full repository was collected.
+
+Parent baseline receipt reuse is permitted only when all of these bindings are
+exactly equal: parent SHA, suite-scope digest, runner digest, dependency-lock
+digest, environment digest, and test-selection policy. One immutable parent
+receipt may therefore serve many branches from the same parent; engineers and
+workers MUST NOT rerun the parent full suite for every branch merely to restate
+the same baseline.
+
+Candidate tests still run against the exact candidate SHA. The differential
+receipt records unchanged failures, resolved failures, added passing tests,
+removed tests, and every newly non-passing or deselected state. A summary such as
+`4618 passed / 40 failed` is supporting telemetry, not sufficient evidence.
+
 ### D. Step 3: Interface Contract Testing (WSP 12)
 -   **Action**: For each module with a defined interface, run its specific contract tests. This verifies that the module adheres to its public-facing promises.
 -   **Goal**: Zero contract test failures. This is especially critical for modules with high local impact (`B=2`) or systemic importance (`C=2`).

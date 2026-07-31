@@ -1,7 +1,7 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.7",
+    "version": "1.8",
     "status": "active",
     "mantra_stage_count": 7,
     "operator_action_count": 9,
@@ -14,6 +14,18 @@
       "out_of_the_box_scope",
       "execute_after_gates_pass"
     ],
+    "wsp15_economy_binding": {
+      "authority": "WSP_15",
+      "required_before_execution": true,
+      "runtime_enforcement": "SPECIFIED_NOT_IMPLEMENTED",
+      "questions": [
+        "Do I need it?",
+        "Can I afford it?",
+        "Can I live without it now?"
+      ],
+      "verification_authority": "WSP_6",
+      "differential_rule": "exact test identifiers; aggregate counts are telemetry only"
+    },
     "mantra_stages": [
       "HoloIndex",
       "Research",
