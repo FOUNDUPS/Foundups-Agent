@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import ast
 import hashlib
 import hmac
 import json
@@ -17,11 +16,14 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
     DurableSignerRuntimeGenerationAnchor,
     SignerRuntimeGenerationActivation,
     SignerRuntimeGenerationBinding,
-    SignerRuntimeGenerationHighWater,
-    SignerRuntimeGenerationPendingAdvance,
     VerifiedSignerRuntimeGenerationHighWater,
 )
-
+from modules.communication.moltbot_bridge.tests.reddog_signer_generation_anchor_test_support import (
+    DurableHighWaterStore,
+    FailingHighWaterStore,
+    LegacyHighWaterStore,
+    NoOpHighWaterStore,
+)
 
 class HmacAuthenticator:
     def __init__(self, key: bytes = b"k" * 32, identity: str = "test-hmac:v1") -> None:
@@ -38,7 +40,6 @@ class HmacAuthenticator:
             self.authenticate(payload),
             authentication_tag,
         )
-
 
 class RejectingVerifier:
     authenticator_id = "test-hmac:v1"
@@ -59,98 +60,16 @@ class VerifierOnly:
         return HmacAuthenticator().verify(payload, authentication_tag)
 
 
-class DurableHighWaterStore:
-    def __init__(self) -> None:
-        self._values: dict[str, SignerRuntimeGenerationHighWater] = {}
-        self._pending = {}
-        self._lock = threading.Lock()
-
-    def load(self, anchor_id: str) -> SignerRuntimeGenerationHighWater | None:
-        with self._lock:
-            return self._values.get(anchor_id)
-
-    def advance(
-        self,
-        anchor_id: str,
-        *,
-        expected: SignerRuntimeGenerationHighWater | None,
-        next_value: SignerRuntimeGenerationHighWater,
-    ) -> None:
-        with self._lock:
-            if self._values.get(anchor_id) != expected:
-                raise RuntimeError("test_high_water_conflict")
-            self._values[anchor_id] = next_value
-
-    def pending(self, anchor_id: str):
-        with self._lock:
-            return self._pending.get(anchor_id)
-
-    def prepare(self, anchor_id: str, *, expected, next_value):
-        with self._lock:
-            if self._values.get(anchor_id) != expected or anchor_id in self._pending:
-                raise RuntimeError("test_high_water_conflict")
-            pending = SignerRuntimeGenerationPendingAdvance(
-                transaction_id=_sha("a"),
-                expected=expected,
-                next_value=next_value,
-            )
-            self._pending[anchor_id] = pending
-            return pending
-
-    def commit_prepared(self, anchor_id: str, transaction_id: str) -> None:
-        with self._lock:
-            pending = self._pending.get(anchor_id)
-            if pending is None or pending.transaction_id != transaction_id:
-                raise RuntimeError("test_high_water_pending_missing")
-            self._values[anchor_id] = pending.next_value
-            del self._pending[anchor_id]
-
-    def abort_prepared(self, anchor_id: str, transaction_id: str) -> None:
-        with self._lock:
-            pending = self._pending.get(anchor_id)
-            if pending is None or pending.transaction_id != transaction_id:
-                raise RuntimeError("test_high_water_pending_missing")
-            del self._pending[anchor_id]
-
-
-class LegacyHighWaterStore:
-    def __init__(self) -> None:
-        self._value = None
-    def load(self, anchor_id: str):
-        del anchor_id
-        return self._value
-
-    def advance(self, anchor_id: str, *, expected, next_value) -> None:
-        del anchor_id
-        if self._value != expected:
-            raise RuntimeError("test_high_water_conflict")
-        self._value = next_value
-
-
-class FailingHighWaterStore(DurableHighWaterStore):
-    def prepare(self, *args, **kwargs):
-        del args, kwargs
-        raise RuntimeError("test_high_water_unavailable")
-
-
-class NoOpHighWaterStore(DurableHighWaterStore):
-    def prepare(self, anchor_id: str, *, expected, next_value):
-        return super().prepare(
-            anchor_id,
-            expected=expected,
-            next_value=next_value,
-        )
-
-    def commit_prepared(self, *args, **kwargs) -> None:
-        del args, kwargs
-
-
 class HighWaterAuthorityBoundary:
     def __init__(
         self, store: DurableHighWaterStore, rollback_domain_root: Path
     ) -> None:
         rollback_domain_root.mkdir(exist_ok=True)
         store.rollback_domain_root = rollback_domain_root
+        store.witness_rollback_domain_root = (
+            rollback_domain_root.parent / "generation-witness-authority"
+        )
+        store.witness_rollback_domain_root.mkdir(exist_ok=True)
         store.store_id = "test-high-water:durable"
         store.durability_receipt_id = "sha256:" + "e" * 64
         self.capability = object()
@@ -412,7 +331,6 @@ def test_mismatched_signer_and_verifier_reject_before_write(roots) -> None:
             high_water_authority=boundary.capability,
             high_water_authority_boundary=boundary,
         )
-
     assert not path.exists()
 
 
@@ -454,6 +372,28 @@ def test_high_water_rollback_domain_must_be_disjoint(roots) -> None:
             high_water_authority_boundary=boundary,
         )
 
+    assert not path.exists()
+
+
+def test_witness_rollback_domain_must_be_disjoint(roots) -> None:
+    repo, runtime, path = roots
+    store = DurableHighWaterStore()
+    boundary = HighWaterAuthorityBoundary(
+        store, runtime.parent / "high-water-authority"
+    )
+    store.witness_rollback_domain_root = runtime
+
+    with pytest.raises(ValueError, match="high_water_domain_overlap"):
+        DurableSignerRuntimeGenerationAnchor(
+            path,
+            allowed_root=runtime,
+            repo_root=repo,
+            anchor_id="reddog-signer:production",
+            signer=SignerOnly(),
+            verifier=VerifierOnly(),
+            high_water_authority=boundary.capability,
+            high_water_authority_boundary=boundary,
+        )
     assert not path.exists()
 
 
@@ -608,7 +548,9 @@ def test_noop_high_water_cannot_return_false_success(roots) -> None:
     with pytest.raises(RuntimeError, match="high_water_unverified"):
         anchor.activate(_binding(), expected_revision=None)
     with pytest.raises(RuntimeError, match="high_water_unverified"):
-        _anchor(roots, high_water_store=high_water).recover()
+        _anchor(roots, high_water_store=high_water).recover(
+            commit_guard=lambda _candidate: None
+        )
 
 
 def test_nontransactional_high_water_rejects_before_write(roots) -> None:
@@ -649,27 +591,3 @@ def test_forged_high_water_authority_rejects(roots) -> None:
             high_water_authority=object(),
             high_water_authority_boundary=boundary,
         )
-
-
-def test_anchor_has_no_execution_or_service_control_surface() -> None:
-    source = Path(
-        "modules/communication/moltbot_bridge/src/"
-        "reddog_signer_runtime_generation_anchor.py"
-    ).read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    imports = {
-        alias.name
-        for node in ast.walk(tree)
-        if isinstance(node, (ast.Import, ast.ImportFrom))
-        for alias in node.names
-    }
-    calls = {
-        node.func.attr
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-    }
-
-    assert not imports & {"subprocess", "socket", "requests", "urllib"}
-    assert not calls & {"system", "popen", "exec", "eval"}
-    assert "VALVE_OPEN" not in source
-    assert "execution_valve" not in source

@@ -43,7 +43,9 @@ def describe_runtime_artifacts(
     values = boundary.require(authority)
     runtime = Path(values["runtime_root"]).resolve()
     with reddog_runtime_artifact_generation_lock(
-        runtime, repo_root=values["repo_root"]
+        runtime,
+        repo_root=values["repo_root"],
+        allow_sealed=True,
     ):
         return _describe_runtime_artifacts_unlocked(values)
 

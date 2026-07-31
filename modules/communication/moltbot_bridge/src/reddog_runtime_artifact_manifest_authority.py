@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import json
+import time
+from contextlib import contextmanager
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping, Protocol, Sequence
+from typing import Any, Iterator, Mapping, Protocol, Sequence
 from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_architect_fix_publication_effect_binding import (
@@ -15,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_st
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     DEFAULT_MAX_TTL_SECONDS,
+    canonical_json,
     digest,
     is_revision,
     is_sha256,
@@ -28,6 +32,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_authority_digest impor
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     WorkAuthorityVerificationPhase,
     verify_delegated_work_authority,
+)
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_root_path,
@@ -52,13 +59,35 @@ class RuntimeArtifactManifestAuthorityBoundary(Protocol):
         self, value: object
     ) -> Mapping[str, Any]: ...
 
+    def revalidate(
+        self,
+        value: object,
+        *,
+        now_epoch: int,
+    ) -> Mapping[str, Any]: ...
+
+    def revalidation_fence(
+        self,
+        value: object,
+        *,
+        now_epoch: int,
+    ) -> Iterator[Mapping[str, Any]]: ...
+
 
 class _ClosureBoundary:
-    __slots__ = ("_issue", "_require")
+    __slots__ = ("_issue", "_require", "_revalidate", "_fence")
 
-    def __init__(self, issue: Any, require: Any) -> None:
+    def __init__(
+        self,
+        issue: Any,
+        require: Any,
+        revalidate: Any,
+        fence: Any,
+    ) -> None:
         self._issue = issue
         self._require = require
+        self._revalidate = revalidate
+        self._fence = fence
 
     def issue(
         self,
@@ -78,6 +107,22 @@ class _ClosureBoundary:
     def require(self, value: object) -> Mapping[str, Any]:
         return self._require(value)
 
+    def revalidate(
+        self,
+        value: object,
+        *,
+        now_epoch: int,
+    ) -> Mapping[str, Any]:
+        return self._revalidate(value, now_epoch=now_epoch)
+
+    def revalidation_fence(
+        self,
+        value: object,
+        *,
+        now_epoch: int,
+    ) -> Iterator[Mapping[str, Any]]:
+        return self._fence(value, now_epoch=now_epoch)
+
 
 def create_runtime_artifact_manifest_authority_boundary(
     *,
@@ -90,6 +135,7 @@ def create_runtime_artifact_manifest_authority_boundary(
     forbidden_operations: Sequence[str] = (),
     revoked_key_epochs: Sequence[str] = (),
     leeway_s: int = 60,
+    trusted_clock: Any = time.time,
 ) -> RuntimeArtifactManifestAuthorityBoundary:
     """Build one authority boundary pinned to durable state and trust inputs."""
 
@@ -104,6 +150,7 @@ def create_runtime_artifact_manifest_authority_boundary(
         "required_valve_state": required_valve_state,
         "forbidden_operations": tuple(forbidden_operations),
         "revoked_key_epochs": tuple(revoked_key_epochs), "leeway_s": leeway_s,
+        "trusted_clock": trusted_clock,
     }
     return _make_capability_boundary(settings)
 
@@ -113,10 +160,24 @@ def _make_capability_boundary(
 ) -> RuntimeArtifactManifestAuthorityBoundary:
     seal = object()
     issued: WeakKeyDictionary[object, str] = WeakKeyDictionary()
+    sources: WeakKeyDictionary[object, tuple[str, str, str]] = (
+        WeakKeyDictionary()
+    )
     capability_type = _capability_type(seal)
     require = _capability_require(capability_type, seal, issued)
-    issue = _capability_issue(settings, capability_type, issued)
-    return _ClosureBoundary(issue, require)
+    issue = _capability_issue(
+        settings,
+        capability_type,
+        issued,
+        sources,
+    )
+    fence = _capability_revalidation_fence(
+        settings,
+        require,
+        sources,
+    )
+    revalidate = _capability_revalidate(fence)
+    return _ClosureBoundary(issue, require, revalidate, fence)
 
 
 def _capability_type(seal: object) -> type:
@@ -177,6 +238,7 @@ def _capability_issue(
     settings: Mapping[str, Any],
     capability_type: type,
     issued: WeakKeyDictionary[object, str],
+    sources: WeakKeyDictionary[object, tuple[str, str, str]],
 ) -> Any:
     def issue(
         *,
@@ -211,9 +273,158 @@ def _capability_issue(
         )
         capability = capability_type(values)
         issued[capability] = _fingerprint(values)
+        sources[capability] = (
+            canonical_json(identity),
+            canonical_json(work),
+            queue_id,
+        )
         return capability
 
     return issue
+
+
+def _capability_revalidate(
+    fence: Any,
+) -> Any:
+    def revalidate(
+        value: object,
+        *,
+        now_epoch: int,
+    ) -> Mapping[str, Any]:
+        with fence(value, now_epoch=now_epoch) as verified:
+            return verified
+
+    return revalidate
+
+
+def _capability_revalidation_fence(
+    settings: Mapping[str, Any],
+    require: Any,
+    sources: WeakKeyDictionary[object, tuple[str, str, str]],
+) -> Any:
+    @contextmanager
+    def revalidate(
+        value: object,
+        *,
+        now_epoch: int,
+    ) -> Iterator[Mapping[str, Any]]:
+        original = require(value)
+        source = sources.get(value)
+        if source is None or type(now_epoch) is not int:
+            raise ValueError("manifest_authority_revalidation_invalid")
+        identity = _mapping(json.loads(source[0]))
+        work = _mapping(json.loads(source[1]))
+        with settings["store"].locked_snapshot() as state:
+            with reddog_runtime_artifact_generation_lock(
+                settings["runtime"],
+                repo_root=settings["root"],
+                allow_sealed=True,
+            ):
+                _assert_fresh_authority(
+                    settings,
+                    state=state,
+                    original=original,
+                    identity=identity,
+                    work=work,
+                    queue_item_id=source[2],
+                    minimum_now=now_epoch,
+                )
+                yield original
+                _assert_fresh_authority(
+                    settings,
+                    state=state,
+                    original=original,
+                    identity=identity,
+                    work=work,
+                    queue_item_id=source[2],
+                    minimum_now=now_epoch,
+                )
+
+    return revalidate
+
+
+def _assert_fresh_authority(
+    settings: Mapping[str, Any],
+    *,
+    state: Mapping[str, Any],
+    original: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    work: Mapping[str, Any],
+    queue_item_id: str,
+    minimum_now: int,
+) -> None:
+    _verify_sources(
+        settings,
+        identity=identity,
+        work=work,
+        now_epoch=_locked_now(settings, minimum_now),
+    )
+    fresh = _fresh_authority_values(
+        settings,
+        state=state,
+        identity=identity,
+        work=work,
+        queue_item_id=queue_item_id,
+    )
+    if _fingerprint(fresh) != _fingerprint(original):
+        raise ValueError("manifest_authority_stale")
+
+
+def _locked_now(settings: Mapping[str, Any], minimum: int) -> int:
+    clock = settings.get("trusted_clock")
+    if not callable(clock):
+        raise ValueError("manifest_authority_clock_invalid")
+    current = clock()
+    if isinstance(current, bool) or not isinstance(current, (int, float)):
+        raise ValueError("manifest_authority_clock_invalid")
+    value = int(current)
+    if value <= 0:
+        raise ValueError("manifest_authority_clock_invalid")
+    return max(minimum, value)
+
+
+def _verify_sources(
+    settings: Mapping[str, Any],
+    *,
+    identity: Mapping[str, Any],
+    work: Mapping[str, Any],
+    now_epoch: int,
+) -> None:
+    _verify_work_authority(
+        work=work,
+        identity=identity,
+        now_epoch=now_epoch,
+        signature_verifier=settings["signature_verifier"],
+        principal_key_resolver=settings["principal_key_resolver"],
+        nonce_store=settings["nonce_store"],
+        snapshot_resolver=settings["snapshot_resolver"],
+        revocation_oracle=settings["revocation_oracle"],
+        required_valve_state=settings["required_valve_state"],
+        forbidden_operations=settings["forbidden_operations"],
+        revoked_key_epochs=settings["revoked_key_epochs"],
+        leeway_s=settings["leeway_s"],
+    )
+
+
+def _fresh_authority_values(
+    settings: Mapping[str, Any],
+    *,
+    state: Mapping[str, Any],
+    identity: Mapping[str, Any],
+    work: Mapping[str, Any],
+    queue_item_id: str,
+) -> Mapping[str, Any]:
+    runtime = settings["runtime"]
+    return _verified_values(
+        root=settings["root"],
+        runtime=runtime,
+        state=state,
+        profile=_read_runtime(runtime, "authority_profile.json"),
+        config=_read_runtime(runtime, "signer_service_config.json"),
+        identity=identity,
+        work=work,
+        queue_item_id=queue_item_id,
+    )
 
 
 def _verified_values(**values: Any) -> Mapping[str, Any]:

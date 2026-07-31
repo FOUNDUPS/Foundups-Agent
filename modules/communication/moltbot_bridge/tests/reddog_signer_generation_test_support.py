@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 from cryptography.hazmat.primitives import serialization
@@ -28,11 +29,17 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_r
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_verifier_authority import (
     create_signer_runtime_generation_verifier_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_witness_binding import (
+    SignerRuntimeGenerationWitnessBinding,
+)
+from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import (
+    SqliteMonotonicAuthorityStore,
+)
 
 
 class GenerationSigner:
-    def __init__(self) -> None:
-        self.private_key = Ed25519PrivateKey.generate()
+    def __init__(self, private_key=None) -> None:
+        self.private_key = private_key or Ed25519PrivateKey.generate()
         public = self.private_key.public_key().public_bytes(
             encoding=serialization.Encoding.Raw,
             format=serialization.PublicFormat.Raw,
@@ -66,6 +73,27 @@ class HighWaterBoundary:
         if value is not self.capability:
             raise ValueError("test_high_water_authority_invalid")
         return self.verified
+
+
+def generation_witness_binding(
+    *,
+    authenticator_id: str,
+    runtime_root: Path,
+    high_water_store_id: str,
+    high_water_durability_receipt_id: str,
+    witness_store_id: str,
+    witness_durability_receipt_id: str,
+) -> SignerRuntimeGenerationWitnessBinding:
+    return SignerRuntimeGenerationWitnessBinding(
+        authenticator_id=authenticator_id,
+        signer_public_key_fingerprint=_digest_text(authenticator_id),
+        key_epoch="test-key-epoch:v1",
+        runtime_root_digest=_digest_text(str(runtime_root.resolve())),
+        high_water_store_id=high_water_store_id,
+        high_water_durability_receipt_id=high_water_durability_receipt_id,
+        witness_store_id=witness_store_id,
+        witness_durability_receipt_id=witness_durability_receipt_id,
+    )
 
 
 def create_lifecycle_generation_authority(
@@ -103,6 +131,8 @@ def create_lifecycle_generation_authority(
         durability_receipt_id=high_water.durability_receipt_id,
         verifier_authority=signing.verifier_authority,
         verifier_authority_boundary=signing.verifier_boundary,
+        generation_witness_reader=high_water._witness.reader(),
+        generation_witness_binding=high_water._witness_binding,
     )
     high_authority, high_boundary = (
         create_signer_runtime_generation_high_water_reader_authority(
@@ -130,6 +160,15 @@ def _high_water_store(
     authority_root: Path,
     signing: GenerationSigner,
 ):
+    witness_root = authority_root.parent / "signer-generation-witness"
+    witness_root.mkdir(exist_ok=True)
+    witness = SqliteMonotonicAuthorityStore(
+        witness_root / "generation.sqlite3",
+        allowed_root=witness_root,
+        repo_root=repo,
+        store_id="signer-generation-witness:v1",
+        durability_receipt_id="sha256:" + "7" * 64,
+    )
     return AtomicSignerRuntimeGenerationHighWaterStore(
         authority_root / "high-water.json",
         allowed_root=authority_root,
@@ -138,7 +177,20 @@ def _high_water_store(
         durability_receipt_id="sha256:" + "8" * 64,
         signer=signing,
         verifier=signing.verifier,
+        generation_witness_store=witness,
+        generation_witness_binding=generation_witness_binding(
+            authenticator_id=signing.authenticator_id,
+            runtime_root=authority_root.parent / "signer-runtime",
+            high_water_store_id="signer-high-water:v1",
+            high_water_durability_receipt_id="sha256:" + "8" * 64,
+            witness_store_id=witness.store_id,
+            witness_durability_receipt_id=witness.durability_receipt_id,
+        ),
     )
+
+
+def _digest_text(value: str) -> str:
+    return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def _binding(
@@ -160,4 +212,5 @@ __all__ = [
     "GenerationSigner",
     "HighWaterBoundary",
     "create_lifecycle_generation_authority",
+    "generation_witness_binding",
 ]

@@ -122,7 +122,7 @@ def produce_signed_runtime_artifact_manifest(
             manifest_id=str(signed["manifest_id"]),
             rejection_reasons=(),
         )
-    except (OSError, TypeError, ValueError) as exc:
+    except (OSError, RuntimeError, TypeError, ValueError) as exc:
         return _reject(str(exc) or "runtime_artifact_manifest_rejected")
 
 

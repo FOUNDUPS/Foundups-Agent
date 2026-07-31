@@ -212,6 +212,20 @@ class AtomicJsonAuthorityRuntimeStore:
                 expected_revision=expected_revision,
             )
 
+    def remove(self, *, expected_revision: str) -> None:
+        """Remove one exact revision for transactional rollback only."""
+
+        with self._operation_lock():
+            current = self._load_unlocked(
+                expected_recovery_revision=expected_revision,
+            )
+            if current.get("revision") != expected_revision:
+                raise RuntimeError("revision_conflict")
+            target = self._validated_path(self.path)
+            target.unlink()
+            if target.exists():
+                raise RuntimeError("authority_runtime_store_remove_failed")
+
     def consume_verified_work_authority_nonce(self, nonce: str) -> bool:
         with self._operation_lock():
             current = self._load_unlocked()

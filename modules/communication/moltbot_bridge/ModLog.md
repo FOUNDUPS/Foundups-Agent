@@ -1,4 +1,38 @@
 # ModLog - moltbot_bridge
+- `REDDOG_SIGNER_RUNTIME_ATOMIC_PROVISIONING_PHASE1`: added one
+  generation-root-first coordinator that signs the seven canonical artifacts
+  in their final inactive runtime root and advances the independently stored
+  authenticated generation anchor only after manifest publication,
+  current-authority revalidation, a manifest-bound cooperative writer seal,
+  a Windows deny-write/delete activation lease, and a final byte/signature commit
+  guard before the high-water transaction can activate. Guard failure restores
+  the prior authenticated anchor and aborts the pending high-water advance.
+  A typed witness binding ties the signer key epoch, runtime root, anchor,
+  local high-water state, and signer-side monotonic witness into one canonical
+  namespace. Those three persistence roots must be pairwise disjoint. SQLite
+  initialization and compare-and-swap are transactional and tolerate bounded
+  first-open contention without accepting two winners. The coordinator
+  rejects copied/replayed artifact generations, fake or
+  overlapping anchor/high-water roots, stale work state, changed artifacts,
+  activation-window write attempts, expired system time, and generation
+  compare-and-swap conflicts. A signed
+  published-but-inactive manifest can complete after restart. An expired
+  manifest can roll forward only when the independent monotonic witness
+  already proves that exact generation committed; otherwise freshness remains
+  mandatory and recovery rolls back. Typed recovery distinguishes a committed witness when restart sees its anchor first. Canonical Ed25519 verification discards caller-selected verifiers, so forged signer/permissive-verifier pairs cannot activate. Python closure opacity is not claimed as hostile-code isolation. Malformed or ambiguous preseeds cannot
+  recover. Failed activation reports preservation only after manifest binding,
+  signatures, and all seven current bytes verify. Coordinator
+  receipts claim only coordinator-scoped no-service/no-work/no-repository
+  effects; they do not infer behavior of injected signers. Authenticated current-generation launch
+  selection and external lifecycle supervision remain separate fail-closed
+  follow-ons. The cooperative seal is not claimed as protection against a
+  privileged or same-principal adversary after the activation lease closes;
+  current bytes must still be verified at every use. POSIX/WSL activation now
+  fails closed until an externally owned signer lifecycle supplies a genuine
+  distinct-principal immutability boundary.
+  The SQLite witness proves persistence mechanics only. Independent production
+  freshness authority remains blocked until an externally supervised signer
+  principal owns and authenticates that witness.
 - `REDDOG_SIGNER_RUNTIME_GENERATION_AUTHORITY_PHASE1`: hardened signer
   generation activation with an authenticated, independently stored
   high-water transaction journal. Prepare, commit, abort, and restart
@@ -21,7 +55,9 @@
   retarget a lifecycle authority. Public constructors, factories, verifier
   calls, reader calls, and lifecycle calls expose no caller-supplied registry
   lookup or issuance hook; attempted injection fails at the API boundary.
-  Lifecycle admission and one-shot consumption each revalidate the current
+  Verifier-only high-water readers now retain a dedicated read-only SQLite
+  witness view with no `advance()` method; the mutable signer-side witness is
+  rejected at the reader boundary. Lifecycle admission and one-shot consumption each revalidate the current
   authenticated generation, closing concurrent generation-advance races.
 - `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
   signer healthcheck with a fresh, short-lived, domain-separated Ed25519
