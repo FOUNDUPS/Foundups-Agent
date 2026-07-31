@@ -4,15 +4,27 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Mapping, Protocol, runtime_checkable
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
     AtomicJsonAuthorityRuntimeStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     is_sha256,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
+    SignerRuntimeGenerationActivation,
+    SignerRuntimeGenerationBinding,
+    SignerRuntimeGenerationHighWater,
+    SignerRuntimeGenerationHighWaterAuthorityBoundary,
+    SignerRuntimeGenerationHighWaterStore,
+    SignerRuntimeGenerationPendingAdvance,
+    SignerRuntimeGenerationSigner,
+    SignerRuntimeGenerationVerifier,
+    TransactionalSignerRuntimeGenerationHighWaterStore,
+    VerifiedSignerRuntimeGenerationHighWater,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     confined_runtime_operation_lock,
@@ -22,121 +34,6 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 
 SCHEMA_VERSION = "reddog_signer_runtime_generation_anchor.v1"
 _MAX_AUTHENTICATION_TAG_LENGTH = 4096
-
-
-class SignerRuntimeGenerationSigner(Protocol):
-    """Signer-side capability; never supplied to RedDog consumers."""
-
-    @property
-    def authenticator_id(self) -> str: ...
-
-    def authenticate(self, payload: bytes) -> str: ...
-
-
-class SignerRuntimeGenerationVerifier(Protocol):
-    """Public verification capability safe for read-only consumers."""
-
-    @property
-    def authenticator_id(self) -> str: ...
-
-    def verify(self, payload: bytes, authentication_tag: str) -> bool: ...
-
-
-@dataclass(frozen=True)
-class SignerRuntimeGenerationHighWater:
-    generation: int
-    revision: str
-
-@dataclass(frozen=True)
-class SignerRuntimeGenerationPendingAdvance:
-    transaction_id: str
-    expected: SignerRuntimeGenerationHighWater | None
-    next_value: SignerRuntimeGenerationHighWater
-
-@runtime_checkable
-class SignerRuntimeGenerationHighWaterStore(Protocol):
-    """Independent monotonic authority outside the anchor-file rollback domain."""
-
-    def load(self, anchor_id: str) -> SignerRuntimeGenerationHighWater | None: ...
-
-    def advance(
-        self,
-        anchor_id: str,
-        *,
-        expected: SignerRuntimeGenerationHighWater | None,
-        next_value: SignerRuntimeGenerationHighWater,
-    ) -> None: ...
-
-@runtime_checkable
-class TransactionalSignerRuntimeGenerationHighWaterStore(
-    SignerRuntimeGenerationHighWaterStore,
-    Protocol,
-):
-    def pending(
-        self, anchor_id: str
-    ) -> SignerRuntimeGenerationPendingAdvance | None: ...
-
-    def prepare(
-        self,
-        anchor_id: str,
-        *,
-        expected: SignerRuntimeGenerationHighWater | None,
-        next_value: SignerRuntimeGenerationHighWater,
-    ) -> SignerRuntimeGenerationPendingAdvance: ...
-
-    def commit_prepared(self, anchor_id: str, transaction_id: str) -> None: ...
-
-    def abort_prepared(self, anchor_id: str, transaction_id: str) -> None: ...
-
-
-@dataclass(frozen=True)
-class VerifiedSignerRuntimeGenerationHighWater:
-    store: SignerRuntimeGenerationHighWaterStore
-    store_id: str
-    durability_receipt_id: str
-    rollback_domain_root: Path
-
-
-class SignerRuntimeGenerationHighWaterAuthorityBoundary(Protocol):
-    """Consume an opaque, independently verified high-water authority."""
-
-    def require(
-        self, value: object
-    ) -> VerifiedSignerRuntimeGenerationHighWater: ...
-
-
-@dataclass(frozen=True)
-class SignerRuntimeGenerationBinding:
-    """Exact verified-manifest bindings admitted as one runtime generation."""
-
-    generation: int
-    manifest_id: str
-    artifact_generation_digest: str
-    config_digest: str
-    config_raw_digest: str
-    run_packet_digest: str
-
-
-@dataclass(frozen=True)
-class SignerRuntimeGenerationActivation:
-    """Immutable authenticated current-generation record."""
-
-    anchor_id: str
-    generation: int
-    manifest_id: str
-    artifact_generation_digest: str
-    config_digest: str
-    config_raw_digest: str
-    run_packet_digest: str
-    previous_revision: str | None
-    authenticator_id: str
-    high_water_store_id: str
-    high_water_durability_receipt_id: str
-    authentication_tag: str
-    revision: str
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
 
 
 class DurableSignerRuntimeGenerationAnchor:
@@ -167,8 +64,14 @@ class DurableSignerRuntimeGenerationAnchor:
             repo_root=repo_root,
         )
         verified = high_water_authority_boundary.require(high_water_authority)
+        if (
+            verified.store_id != verified.store.store_id
+            or verified.durability_receipt_id
+            != verified.store.durability_receipt_id
+        ):
+            raise ValueError("generation_anchor_high_water_authority_mismatch")
         rollback_root = validate_runtime_root_path(
-            verified.rollback_domain_root,
+            verified.store.rollback_domain_root,
             repo_root=self._store.repo_root,
         )
         if _paths_overlap(rollback_root, self._store.allowed_root):
@@ -326,19 +229,62 @@ def _activate_transactional(
     _validate_pending(pending, expected=expected, next_value=next_value)
     if store.pending(anchor._anchor_id) != pending:
         raise RuntimeError("generation_anchor_prepare_unverified")
+    return _commit_transactional_activation(
+        anchor,
+        store=store,
+        pending=pending,
+        state=state,
+        activation=activation,
+        expected_revision=expected_revision,
+    )
+
+
+def _commit_transactional_activation(
+    anchor: DurableSignerRuntimeGenerationAnchor,
+    *,
+    store: TransactionalSignerRuntimeGenerationHighWaterStore,
+    pending: SignerRuntimeGenerationPendingAdvance,
+    state: Mapping[str, Any],
+    activation: SignerRuntimeGenerationActivation,
+    expected_revision: str | None,
+) -> SignerRuntimeGenerationActivation:
     try:
         revision = anchor._store.commit(
             state, expected_revision=expected_revision
         )
     except Exception:
+        persisted = anchor._decode(anchor._store.load())
+        if _high_water(persisted) == pending.next_value:
+            _finish_pending(store, anchor._anchor_id, pending)
+            return persisted
+        if _high_water(persisted) != pending.expected:
+            raise ValueError("generation_anchor_pending_state_mismatch")
         store.abort_prepared(anchor._anchor_id, pending.transaction_id)
-        _verify_transaction_cleared(store, anchor._anchor_id, expected)
+        _verify_transaction_cleared(
+            store, anchor._anchor_id, pending.expected
+        )
         raise
     if revision != activation.revision:
         raise RuntimeError("generation_anchor_revision_changed")
-    store.commit_prepared(anchor._anchor_id, pending.transaction_id)
-    _verify_transaction_cleared(store, anchor._anchor_id, next_value)
+    _finish_pending(store, anchor._anchor_id, pending)
     return activation
+
+
+def _finish_pending(
+    store: TransactionalSignerRuntimeGenerationHighWaterStore,
+    anchor_id: str,
+    pending: SignerRuntimeGenerationPendingAdvance,
+) -> None:
+    try:
+        store.commit_prepared(anchor_id, pending.transaction_id)
+    except Exception:
+        if (
+            store.pending(anchor_id) is None
+            and store.load(anchor_id) == pending.next_value
+        ):
+            return
+        raise
+    _verify_transaction_cleared(store, anchor_id, pending.next_value)
 
 
 def _recover_transaction(
@@ -584,7 +530,9 @@ def _require_signer(
 def _require_verifier(
     value: Any,
 ) -> SignerRuntimeGenerationVerifier:
-    if not callable(getattr(value, "verify", None)):
+    if not callable(getattr(value, "verify", None)) or callable(
+        getattr(value, "authenticate", None)
+    ):
         raise ValueError("generation_anchor_verifier_invalid")
     _require_ascii_text(
         getattr(value, "authenticator_id", None),

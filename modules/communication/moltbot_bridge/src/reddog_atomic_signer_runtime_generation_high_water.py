@@ -179,6 +179,7 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
             state,
             store_id=self._store_id,
             durability_receipt_id=self._durability_receipt_id,
+            rollback_domain_digest=_root_digest(self.rollback_domain_root),
             verifier=self._verifier,
         )
 
@@ -189,6 +190,7 @@ class AtomicSignerRuntimeGenerationHighWaterStore:
             state,
             store_id=self._store_id,
             durability_receipt_id=self._durability_receipt_id,
+            rollback_domain_digest=_root_digest(self.rollback_domain_root),
             signer=self._signer,
             verifier=self._verifier,
         )
@@ -256,6 +258,9 @@ class AtomicSignerRuntimeGenerationHighWaterReader:
                 self._store.load(),
                 store_id=self.store_id,
                 durability_receipt_id=self.durability_receipt_id,
+                rollback_domain_digest=_root_digest(
+                    self.rollback_domain_root
+                ),
                 verifier=self._verifier,
             )
             return _entry(state, _anchor_id(anchor_id))
@@ -266,6 +271,7 @@ def _verified_state(
     *,
     store_id: str,
     durability_receipt_id: str,
+    rollback_domain_digest: str,
     verifier: SignerRuntimeGenerationVerifier,
 ) -> dict[str, Any]:
     if not state:
@@ -274,6 +280,7 @@ def _verified_state(
         "schema_version",
         "store_id",
         "durability_receipt_id",
+        "rollback_domain_digest",
         "authenticator_id",
         "entries",
         "authentication_tag",
@@ -284,6 +291,7 @@ def _verified_state(
         or state.get("schema_version") != SCHEMA_VERSION
         or state.get("store_id") != store_id
         or state.get("durability_receipt_id") != durability_receipt_id
+        or state.get("rollback_domain_digest") != rollback_domain_digest
         or state.get("authenticator_id") != verifier.authenticator_id
         or not isinstance(state.get("entries"), Mapping)
         or len(state["entries"]) > _MAX_ANCHORS
@@ -308,6 +316,7 @@ def _sealed_state(
     *,
     store_id: str,
     durability_receipt_id: str,
+    rollback_domain_digest: str,
     signer: SignerRuntimeGenerationSigner,
     verifier: SignerRuntimeGenerationVerifier,
 ) -> dict[str, Any]:
@@ -316,6 +325,7 @@ def _sealed_state(
         "schema_version": SCHEMA_VERSION,
         "store_id": store_id,
         "durability_receipt_id": durability_receipt_id,
+        "rollback_domain_digest": rollback_domain_digest,
         "authenticator_id": verifier.authenticator_id,
         "entries": entries,
     }
@@ -492,7 +502,9 @@ def _signer(
 def _verifier(
     value: Any,
 ) -> SignerRuntimeGenerationVerifier:
-    if not callable(getattr(value, "verify", None)):
+    if not callable(getattr(value, "verify", None)) or callable(
+        getattr(value, "authenticate", None)
+    ):
         raise ValueError("generation_high_water_verifier_invalid")
     _ascii(getattr(value, "authenticator_id", None), "authenticator_id")
     return value
@@ -538,6 +550,12 @@ def _revision(state: Mapping[str, Any]) -> str:
     unsigned = dict(state)
     unsigned.pop("revision", None)
     return hashlib.sha256(_canonical(unsigned)).hexdigest()
+
+
+def _root_digest(value: Path) -> str:
+    return "sha256:" + hashlib.sha256(
+        str(value.resolve()).encode("utf-8")
+    ).hexdigest()
 
 
 def _canonical(value: Mapping[str, Any]) -> bytes:

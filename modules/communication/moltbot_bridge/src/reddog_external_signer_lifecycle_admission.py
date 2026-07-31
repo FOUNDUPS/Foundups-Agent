@@ -29,6 +29,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_a
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_reader import (
     SignerRuntimeGenerationReader,
+    SignerRuntimeGenerationReaderAuthorityBoundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
     SignerServiceHealthcheckResult,
@@ -111,7 +112,10 @@ def create_external_signer_lifecycle_admission_boundary(
     *,
     repo_root: Path | str,
     manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
-    generation_anchor: SignerRuntimeGenerationReader,
+    generation_reader_authority: object,
+    generation_reader_authority_boundary: (
+        SignerRuntimeGenerationReaderAuthorityBoundary
+    ),
     os_policy_authority: object,
     os_policy_authority_boundary: ExternalSignerOsPolicyAuthorityBoundary,
     requester_principal_id: str,
@@ -133,10 +137,14 @@ def create_external_signer_lifecycle_admission_boundary(
     seal = object()
     issued: WeakKeyDictionary[object, str] = WeakKeyDictionary()
     capability_type = _capability_type(seal)
+    generation_reader = generation_reader_authority_boundary.require(
+        generation_reader_authority
+    )
+    _require_read_only_generation_reader(generation_reader)
     dependencies = {
         "root": root,
         "manifest_boundary": manifest_boundary,
-        "generation_anchor": generation_anchor,
+        "generation_anchor": generation_reader,
         "requester": requester_principal_id,
         "profile": signer_profile_id,
         "observer": os_observer,
@@ -156,6 +164,16 @@ def create_external_signer_lifecycle_admission_boundary(
             dependencies["monotonic_clock"],
         ),
     )
+
+
+def _require_read_only_generation_reader(value: object) -> None:
+    forbidden = ("activate", "authenticate", "recover")
+    if (
+        not callable(getattr(value, "load", None))
+        or any(callable(getattr(value, name, None)) for name in forbidden)
+        or hasattr(value, "_signer")
+    ):
+        raise ValueError("external_signer_generation_reader_invalid")
 
 
 def _verified_os_policy(

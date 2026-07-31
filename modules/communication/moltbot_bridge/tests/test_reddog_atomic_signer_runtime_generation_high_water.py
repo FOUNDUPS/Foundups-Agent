@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water import (
+    AtomicSignerRuntimeGenerationHighWaterReader,
     AtomicSignerRuntimeGenerationHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_anchor import (
@@ -43,6 +44,20 @@ class HmacAuthenticator:
         )
 
 
+class VerifierOnly:
+    def __init__(
+        self, key: bytes = b"h" * 32, identity: str = "test-hmac:v1"
+    ) -> None:
+        self.key = key
+        self.authenticator_id = identity
+
+    def verify(self, payload: bytes, authentication_tag: str) -> bool:
+        expected = "hmac-sha256:" + hmac.new(
+            self.key, payload, hashlib.sha256
+        ).hexdigest()
+        return hmac.compare_digest(expected, authentication_tag)
+
+
 class HighWaterBoundary:
     def __init__(
         self, store: AtomicSignerRuntimeGenerationHighWaterStore
@@ -52,7 +67,6 @@ class HighWaterBoundary:
             store=store,
             store_id=store.store_id,
             durability_receipt_id=store.durability_receipt_id,
-            rollback_domain_root=store.rollback_domain_root,
         )
 
     def require(
@@ -73,6 +87,48 @@ class FailCommitOnceStore(AtomicSignerRuntimeGenerationHighWaterStore):
             self.fail_commit = False
             raise RuntimeError("test_high_water_interrupted")
         super().commit_prepared(anchor_id, transaction_id)
+
+
+class RaiseAfterCommitStore(AtomicSignerRuntimeGenerationHighWaterStore):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fail_commit = True
+
+    def commit_prepared(self, anchor_id: str, transaction_id: str) -> None:
+        super().commit_prepared(anchor_id, transaction_id)
+        if self.fail_commit:
+            self.fail_commit = False
+            raise RuntimeError("test_high_water_post_commit_interrupted")
+
+
+class RaiseAfterAnchorCommit:
+    def __init__(self, store) -> None:
+        self._store = store
+        self.failed = False
+
+    def load(self):
+        return self._store.load()
+
+    def commit(self, snapshot, *, expected_revision):
+        revision = self._store.commit(
+            snapshot, expected_revision=expected_revision
+        )
+        if not self.failed:
+            self.failed = True
+            raise RuntimeError("test_anchor_post_commit_interrupted")
+        return revision
+
+
+class RaiseBeforeAnchorCommit:
+    def __init__(self, store) -> None:
+        self._store = store
+
+    def load(self):
+        return self._store.load()
+
+    def commit(self, snapshot, *, expected_revision):
+        del snapshot, expected_revision
+        raise RuntimeError("test_anchor_pre_commit_interrupted")
 
 
 @pytest.fixture()
@@ -101,7 +157,10 @@ def _store(
         store_id="signer-high-water:production",
         durability_receipt_id=DURABILITY_RECEIPT_ID,
         signer=signing_capability,
-        verifier=signing_capability,
+        verifier=VerifierOnly(
+            key=signing_capability.key,
+            identity=signing_capability.authenticator_id,
+        ),
     )
 
 
@@ -110,6 +169,20 @@ def _value(generation: int, char: str) -> SignerRuntimeGenerationHighWater:
         generation=generation,
         revision=char * 64,
     )
+
+
+def test_reader_rejects_combined_signing_verifier(roots) -> None:
+    repo, _, authority = roots
+
+    with pytest.raises(ValueError, match="verifier_invalid"):
+        AtomicSignerRuntimeGenerationHighWaterReader(
+            authority / "generation-high-water.json",
+            allowed_root=authority,
+            repo_root=repo,
+            store_id="signer-high-water:production",
+            durability_receipt_id=DURABILITY_RECEIPT_ID,
+            verifier=HmacAuthenticator(),
+        )
 
 
 def _binding(generation: int = 1) -> SignerRuntimeGenerationBinding:
@@ -135,7 +208,7 @@ def _anchor(
         repo_root=repo,
         anchor_id=ANCHOR_ID,
         signer=HmacAuthenticator(),
-        verifier=HmacAuthenticator(),
+        verifier=VerifierOnly(),
         high_water_authority=boundary.capability,
         high_water_authority_boundary=boundary,
     )
@@ -249,7 +322,7 @@ def test_wrong_authenticator_and_placeholder_receipt_reject(roots) -> None:
             store_id="signer-high-water:production",
             durability_receipt_id="sha256:" + "0" * 64,
             signer=HmacAuthenticator(),
-            verifier=HmacAuthenticator(),
+            verifier=VerifierOnly(),
         )
 
 
@@ -270,6 +343,41 @@ def test_anchor_restart_rolls_forward_exactly_one_generation(roots) -> None:
     )
 
 
+def test_anchor_post_commit_exception_rolls_forward(roots) -> None:
+    store = _store(roots)
+    anchor = _anchor(roots, store)
+    anchor._store = RaiseAfterAnchorCommit(anchor._store)
+
+    activation = anchor.activate(_binding(), expected_revision=None)
+
+    assert activation.generation == 1
+    assert _anchor(roots, _store(roots)).load() == activation
+
+
+def test_anchor_pre_commit_exception_aborts_pending(roots) -> None:
+    store = _store(roots)
+    anchor = _anchor(roots, store)
+    anchor_path = anchor.path
+    anchor._store = RaiseBeforeAnchorCommit(anchor._store)
+
+    with pytest.raises(RuntimeError, match="pre_commit_interrupted"):
+        anchor.activate(_binding(), expected_revision=None)
+
+    assert store.load(ANCHOR_ID) is None
+    assert store.pending(ANCHOR_ID) is None
+    assert not anchor_path.exists()
+
+
+def test_high_water_post_commit_exception_is_verified_success(roots) -> None:
+    store = _store(roots, store_type=RaiseAfterCommitStore)
+    activation = _anchor(roots, store).activate(
+        _binding(), expected_revision=None
+    )
+
+    assert activation.generation == 1
+    assert _anchor(roots, _store(roots)).load() == activation
+
+
 def test_store_path_is_confined_outside_repository(roots) -> None:
     repo, _, authority = roots
     with pytest.raises(ValueError, match="inside_repo"):
@@ -280,7 +388,7 @@ def test_store_path_is_confined_outside_repository(roots) -> None:
             store_id="signer-high-water:production",
             durability_receipt_id=DURABILITY_RECEIPT_ID,
             signer=HmacAuthenticator(),
-            verifier=HmacAuthenticator(),
+            verifier=VerifierOnly(),
         )
     with pytest.raises(ValueError, match="outside_runtime_root"):
         AtomicSignerRuntimeGenerationHighWaterStore(
@@ -290,7 +398,7 @@ def test_store_path_is_confined_outside_repository(roots) -> None:
             store_id="signer-high-water:production",
             durability_receipt_id=DURABILITY_RECEIPT_ID,
             signer=HmacAuthenticator(),
-            verifier=HmacAuthenticator(),
+            verifier=VerifierOnly(),
         )
 
 

@@ -60,6 +60,21 @@ class _Anchor:
         return self.activation
 
 
+class _WriterAnchor(_Anchor):
+    def activate(self) -> None:
+        raise AssertionError("must not be called")
+
+
+class _ReaderBoundary:
+    def __init__(self, reader: _Anchor) -> None:
+        self.reader = reader
+
+    def require(self, value: object) -> _Anchor:
+        if value is not self:
+            raise ValueError("generation_reader_authority_unverified")
+        return self.reader
+
+
 class _Observer:
     def __init__(self, receipt: ExternalSignerOsObservationReceipt) -> None:
         self.receipt = receipt
@@ -253,12 +268,14 @@ def _boundary(tmp_path: Path, **changes):
     )
     healthcheck = changes.get("healthcheck", _Healthcheck(health_result))
     anchor = changes.get("anchor", _Anchor(_activation(values)))
+    reader_boundary = _ReaderBoundary(anchor)
     clocks = changes.get("clocks", _Clocks())
     policy_boundary = _PolicyBoundary()
     boundary = create_external_signer_lifecycle_admission_boundary(
         repo_root=repo,
         manifest_boundary=selection,
-        generation_anchor=anchor,
+        generation_reader_authority=reader_boundary,
+        generation_reader_authority_boundary=reader_boundary,
         os_policy_authority=policy_boundary,
         os_policy_authority_boundary=policy_boundary,
         requester_principal_id="github:mjtrout",
@@ -306,11 +323,31 @@ def test_caller_cannot_supply_an_unverified_os_policy(tmp_path) -> None:
     policy_boundary = _PolicyBoundary()
 
     with pytest.raises(ValueError, match="policy_authority_unverified"):
+        reader_boundary = _ReaderBoundary(_Anchor(_activation(values)))
         create_external_signer_lifecycle_admission_boundary(
             repo_root=repo,
             manifest_boundary=_SelectionBoundary(values),
-            generation_anchor=_Anchor(_activation(values)),
+            generation_reader_authority=reader_boundary,
+            generation_reader_authority_boundary=reader_boundary,
             os_policy_authority=object(),
+            os_policy_authority_boundary=policy_boundary,
+            requester_principal_id="github:mjtrout",
+            trusted_clock=_Clocks().wall,
+        )
+
+
+def test_writer_generation_anchor_cannot_be_smuggled_into_lifecycle(tmp_path) -> None:
+    repo, _, values = _runtime(tmp_path)
+    reader_boundary = _ReaderBoundary(_WriterAnchor(_activation(values)))
+    policy_boundary = _PolicyBoundary()
+
+    with pytest.raises(ValueError, match="generation_reader_invalid"):
+        create_external_signer_lifecycle_admission_boundary(
+            repo_root=repo,
+            manifest_boundary=_SelectionBoundary(values),
+            generation_reader_authority=reader_boundary,
+            generation_reader_authority_boundary=reader_boundary,
+            os_policy_authority=policy_boundary,
             os_policy_authority_boundary=policy_boundary,
             requester_principal_id="github:mjtrout",
             trusted_clock=_Clocks().wall,
@@ -323,11 +360,13 @@ def test_stale_generation_rejects_before_observation_or_handshake(tmp_path) -> N
     observer = _Observer(_observation())
     healthcheck = _Healthcheck(_health(packet_path))
     stale = replace(_activation(values), manifest_id=_sha("d"))
+    reader_boundary = _ReaderBoundary(_Anchor(stale))
     policy_boundary = _PolicyBoundary()
     boundary = create_external_signer_lifecycle_admission_boundary(
         repo_root=repo,
         manifest_boundary=selection,
-        generation_anchor=_Anchor(stale),
+        generation_reader_authority=reader_boundary,
+        generation_reader_authority_boundary=reader_boundary,
         os_policy_authority=policy_boundary,
         os_policy_authority_boundary=policy_boundary,
         requester_principal_id="github:mjtrout",

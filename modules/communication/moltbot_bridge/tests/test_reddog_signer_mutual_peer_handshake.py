@@ -56,6 +56,7 @@ WSP62_SLICE_FILES = (
     "src/reddog_signer_mutual_peer_handshake.py",
     "src/reddog_signer_peer_instance_packet_validator.py",
     "src/reddog_signer_runtime_generation_anchor.py",
+    "src/reddog_signer_runtime_generation_contract.py",
     "src/reddog_signer_runtime_generation_reader.py",
     "src/reddog_signer_socket_service_healthcheck.py",
     "tests/test_reddog_external_signer_lifecycle_admission.py",

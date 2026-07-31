@@ -50,7 +50,6 @@ class Boundary:
             store=store,
             store_id=store.store_id,
             durability_receipt_id=store.durability_receipt_id,
-            rollback_domain_root=store.rollback_domain_root,
         )
 
     def require(self, value: object):
@@ -66,7 +65,6 @@ class ReaderBoundary:
             reader=reader,
             store_id=reader.store_id,
             durability_receipt_id=reader.durability_receipt_id,
-            rollback_domain_root=reader.rollback_domain_root,
         )
 
     def require(self, value: object):
@@ -98,7 +96,7 @@ def _high_water(repo: Path, authority: Path):
         store_id="high-water:production",
         durability_receipt_id=_sha("e"),
         signer=signing,
-        verifier=signing,
+        verifier=VerifierOnly(),
     )
     return signing, high_water
 
@@ -137,7 +135,7 @@ def test_reader_holds_no_signing_capability_and_reads_active_generation(
         repo_root=repo,
         anchor_id="reddog-signer:production",
         signer=signing,
-        verifier=signing,
+        verifier=VerifierOnly(),
         high_water_authority=boundary.capability,
         high_water_authority_boundary=boundary,
     )
@@ -193,6 +191,47 @@ def test_reader_rejects_same_rollback_domain(tmp_path: Path) -> None:
             repo_root=repo,
             anchor_id="reddog-signer:production",
             verifier=VerifierOnly(),
+            high_water_authority=boundary.capability,
+            high_water_authority_boundary=boundary,
+        )
+
+
+def test_reader_rejects_write_capable_high_water(tmp_path: Path) -> None:
+    repo, runtime, authority = _roots(tmp_path)
+    _, high_water = _high_water(repo, authority)
+    boundary = ReaderBoundary(high_water)
+
+    with pytest.raises(ValueError, match="write_capability"):
+        DurableSignerRuntimeGenerationReader(
+            runtime / "anchor.json",
+            allowed_root=runtime,
+            repo_root=repo,
+            anchor_id="reddog-signer:production",
+            verifier=VerifierOnly(),
+            high_water_authority=boundary.capability,
+            high_water_authority_boundary=boundary,
+        )
+
+
+def test_reader_rejects_verifier_with_signing_method(tmp_path: Path) -> None:
+    repo, runtime, authority = _roots(tmp_path)
+    high_water_reader = AtomicSignerRuntimeGenerationHighWaterReader(
+        authority / "high-water.json",
+        allowed_root=authority,
+        repo_root=repo,
+        store_id="high-water:production",
+        durability_receipt_id=_sha("e"),
+        verifier=VerifierOnly(),
+    )
+    boundary = ReaderBoundary(high_water_reader)
+
+    with pytest.raises(ValueError, match="verifier_invalid"):
+        DurableSignerRuntimeGenerationReader(
+            runtime / "anchor.json",
+            allowed_root=runtime,
+            repo_root=repo,
+            anchor_id="reddog-signer:production",
+            verifier=HmacCapability(),
             high_water_authority=boundary.capability,
             high_water_authority_boundary=boundary,
         )

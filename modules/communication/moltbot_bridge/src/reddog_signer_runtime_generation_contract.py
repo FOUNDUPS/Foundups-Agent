@@ -1,0 +1,135 @@
+"""Typed capabilities and values for signer runtime generation authority."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Protocol, runtime_checkable
+
+
+class SignerRuntimeGenerationSigner(Protocol):
+    @property
+    def authenticator_id(self) -> str: ...
+
+    def authenticate(self, payload: bytes) -> str: ...
+
+
+class SignerRuntimeGenerationVerifier(Protocol):
+    @property
+    def authenticator_id(self) -> str: ...
+
+    def verify(self, payload: bytes, authentication_tag: str) -> bool: ...
+
+
+@dataclass(frozen=True)
+class SignerRuntimeGenerationHighWater:
+    generation: int
+    revision: str
+
+
+@dataclass(frozen=True)
+class SignerRuntimeGenerationPendingAdvance:
+    transaction_id: str
+    expected: SignerRuntimeGenerationHighWater | None
+    next_value: SignerRuntimeGenerationHighWater
+
+
+@runtime_checkable
+class SignerRuntimeGenerationHighWaterStore(Protocol):
+    @property
+    def store_id(self) -> str: ...
+
+    @property
+    def durability_receipt_id(self) -> str: ...
+
+    @property
+    def rollback_domain_root(self) -> Path: ...
+
+    def load(self, anchor_id: str) -> SignerRuntimeGenerationHighWater | None: ...
+
+    def advance(
+        self,
+        anchor_id: str,
+        *,
+        expected: SignerRuntimeGenerationHighWater | None,
+        next_value: SignerRuntimeGenerationHighWater,
+    ) -> None: ...
+
+
+@runtime_checkable
+class TransactionalSignerRuntimeGenerationHighWaterStore(
+    SignerRuntimeGenerationHighWaterStore,
+    Protocol,
+):
+    def pending(
+        self, anchor_id: str
+    ) -> SignerRuntimeGenerationPendingAdvance | None: ...
+
+    def prepare(
+        self,
+        anchor_id: str,
+        *,
+        expected: SignerRuntimeGenerationHighWater | None,
+        next_value: SignerRuntimeGenerationHighWater,
+    ) -> SignerRuntimeGenerationPendingAdvance: ...
+
+    def commit_prepared(self, anchor_id: str, transaction_id: str) -> None: ...
+
+    def abort_prepared(self, anchor_id: str, transaction_id: str) -> None: ...
+
+
+@dataclass(frozen=True)
+class VerifiedSignerRuntimeGenerationHighWater:
+    store: SignerRuntimeGenerationHighWaterStore
+    store_id: str
+    durability_receipt_id: str
+
+
+class SignerRuntimeGenerationHighWaterAuthorityBoundary(Protocol):
+    def require(
+        self, value: object
+    ) -> VerifiedSignerRuntimeGenerationHighWater: ...
+
+
+@dataclass(frozen=True)
+class SignerRuntimeGenerationBinding:
+    generation: int
+    manifest_id: str
+    artifact_generation_digest: str
+    config_digest: str
+    config_raw_digest: str
+    run_packet_digest: str
+
+
+@dataclass(frozen=True)
+class SignerRuntimeGenerationActivation:
+    anchor_id: str
+    generation: int
+    manifest_id: str
+    artifact_generation_digest: str
+    config_digest: str
+    config_raw_digest: str
+    run_packet_digest: str
+    previous_revision: str | None
+    authenticator_id: str
+    high_water_store_id: str
+    high_water_durability_receipt_id: str
+    authentication_tag: str
+    revision: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+__all__ = [
+    "SignerRuntimeGenerationActivation",
+    "SignerRuntimeGenerationBinding",
+    "SignerRuntimeGenerationHighWater",
+    "SignerRuntimeGenerationHighWaterAuthorityBoundary",
+    "SignerRuntimeGenerationHighWaterStore",
+    "SignerRuntimeGenerationPendingAdvance",
+    "SignerRuntimeGenerationSigner",
+    "SignerRuntimeGenerationVerifier",
+    "TransactionalSignerRuntimeGenerationHighWaterStore",
+    "VerifiedSignerRuntimeGenerationHighWater",
+]
