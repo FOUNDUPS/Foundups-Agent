@@ -1,5 +1,15 @@
 # Database Module - ModLog
 
+## Entry: HoloIndex Post-Merge Starvation-Safe Reader
+**Date**: 2026-08-01
+**What Changed**: Added a bounded companion query for the canonical
+`holoindex_postmerge_refresh:` task namespace without growing `AgentDB`.
+**Why**: Filtering the global top-N pending queue can indefinitely hide exact-SHA
+index maintenance behind unrelated higher-priority work.
+**Impact**: OpenClaw can retrieve the protected family directly; the existing
+claim, context, request-event, and authority-transaction checks still own effects.
+**WSP References**: WSP 15, WSP 22, WSP 50, WSP 62, WSP 97
+
 ## Entry: Cross-Object Signed-Worker Quarantine Completion
 **Date**: 2026-07-28
 **What Changed**: Quarantine now resolves one assurance reservation by either

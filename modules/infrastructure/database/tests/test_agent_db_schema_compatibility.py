@@ -300,6 +300,46 @@ def test_holoindex_postmerge_claim_and_completion_are_atomic() -> None:
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def test_holoindex_postmerge_reader_cannot_be_starved_by_global_top_ten() -> None:
+    from modules.infrastructure.database.src.holoindex_postmerge_task_reader import (
+        read_holoindex_postmerge_tasks,
+    )
+
+    temp_dir = Path(tempfile.mkdtemp())
+    db_path = temp_dir / "postmerge_reader.db"
+    try:
+        _reset_database(db_path)
+        agent_db = AgentDB()
+        for index in range(12):
+            assert agent_db.create_autonomous_task_if_absent(
+                task_id=f"unrelated-{index}",
+                description="higher priority unrelated work",
+                required_skills=[],
+                estimated_complexity=1.0,
+                priority_score=100.0,
+                context={"source": "self_audit"},
+            )
+        task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+        assert agent_db.create_autonomous_task_if_absent(
+            task_id=task_id,
+            description="exact SHA maintenance",
+            required_skills=["holo-search"],
+            estimated_complexity=3.0,
+            priority_score=19.0,
+            context={"source": "holoindex_postmerge_coordinator"},
+        )
+
+        assert all(
+            task["task_id"] != task_id
+            for task in agent_db.get_autonomous_tasks(status="pending", limit=10)
+        )
+        selected = read_holoindex_postmerge_tasks(agent_db, limit=10)
+        assert [task["task_id"] for task in selected] == [task_id]
+    finally:
+        DatabaseManager.reset_for_tests()
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 def test_holoindex_postmerge_assignment_reclaim_is_compare_and_swap() -> None:
     temp_dir = Path(tempfile.mkdtemp())
     db_path = temp_dir / "postmerge_reclaim.db"

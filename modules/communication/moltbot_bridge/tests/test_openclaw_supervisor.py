@@ -1,5 +1,7 @@
 import json
 import os
+import threading
+import time
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
@@ -1997,8 +1999,8 @@ def test_observe_polls_postmerge_coordinator_when_maintenance_enabled(
     )
 
     first = supervisor._observe()
-    assert supervisor._holoindex_postmerge_future is not None
-    supervisor._holoindex_postmerge_future.result(timeout=2)
+    assert supervisor._holoindex_postmerge_poller.future is not None
+    supervisor._holoindex_postmerge_poller.future.result(timeout=2)
     second = supervisor._observe()
 
     assert first["holoindex_postmerge"]["status"] == "MAINTENANCE_CHECK_SCHEDULED"
@@ -2024,7 +2026,7 @@ def test_observe_polls_postmerge_coordinator_by_default(tmp_path, monkeypatch):
     observation = {}
 
     supervisor._observe_holoindex_postmerge(observation)
-    supervisor._holoindex_postmerge_future.result(timeout=2)
+    supervisor._holoindex_postmerge_poller.future.result(timeout=2)
 
     assert observation["holoindex_postmerge"]["status"] == (
         "MAINTENANCE_CHECK_SCHEDULED"
@@ -2045,7 +2047,7 @@ def test_postmerge_coordinator_explicit_disable_is_visible(tmp_path, monkeypatch
         "status": "OWNER_DISABLED",
         "rejection_reasons": ["postmerge_coordinator_disabled"],
     }
-    assert supervisor._holoindex_postmerge_future is None
+    assert supervisor._holoindex_postmerge_poller.future is None
 
 
 def test_default_maintenance_candidates_include_only_postmerge():
@@ -2084,13 +2086,7 @@ def test_triage_claims_only_postmerge_by_default(tmp_path, monkeypatch):
     monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
     monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
     db = MagicMock()
-    db.get_autonomous_tasks.return_value = [
-        {
-            "task_id": "unrelated",
-            "description": "Apply safe audit fix",
-            "context": {"source": "self_audit"},
-            "required_skills": [],
-        },
+    db.db.execute_query.return_value = [
         {
             "task_id": "holo",
             "description": "Refresh exact-SHA HoloIndex authority",
@@ -2128,6 +2124,7 @@ def test_generic_autonomous_executor_cannot_claim_postmerge_task(
     }
     db = MagicMock()
     db.get_autonomous_tasks.return_value = [postmerge_task]
+    db.db.execute_query.return_value = [postmerge_task]
     monkeypatch.setattr(
         "modules.infrastructure.database.src.agent_db.AgentDB",
         lambda: db,
@@ -2198,3 +2195,41 @@ def test_triage_postmerge_disable_preserves_other_explicit_maintenance(
     assert result["action"] == "execute_maintenance_task"
     assert result["task"]["family"] == "self_audit_fix"
     assert result["task"]["task_id"] == "audit"
+
+
+def test_postmerge_shutdown_waits_and_prevents_reschedule(tmp_path, monkeypatch):
+    from modules.infrastructure.idle_automation.src import (
+        holoindex_postmerge_coordinator,
+    )
+
+    started = threading.Event()
+    release = threading.Event()
+    calls = []
+
+    def coordinate(**kwargs):
+        calls.append(kwargs)
+        started.set()
+        assert release.wait(timeout=2)
+        return MagicMock(to_dict=lambda: {"accepted": True, "status": "CURRENT"})
+
+    monkeypatch.setattr(
+        holoindex_postmerge_coordinator,
+        "coordinate_holoindex_postmerge",
+        coordinate,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    supervisor._observe_holoindex_postmerge({})
+    assert started.wait(timeout=2)
+    stopper = threading.Thread(target=supervisor.stop)
+    stopper.start()
+    time.sleep(0.05)
+    assert stopper.is_alive()
+
+    release.set()
+    stopper.join(timeout=2)
+    observation = {}
+    supervisor._observe_holoindex_postmerge(observation)
+
+    assert not stopper.is_alive()
+    assert calls == [{"repo_root": tmp_path.resolve()}]
+    assert observation["holoindex_postmerge"]["status"] == "OWNER_STOPPED"

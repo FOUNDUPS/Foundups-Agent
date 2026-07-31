@@ -10,6 +10,10 @@ From `modules.infrastructure.database`:
 - `audit_sqlite_file`
 - `run_sqlite_audit`
 
+Internal HoloIndex maintenance reader:
+- `read_holoindex_postmerge_tasks(agent_db, status="pending", limit=10)` reads
+  only canonical post-merge task IDs and performs no claim or state mutation.
+
 ## Signed Worker Execution Store
 File: `modules/infrastructure/database/src/signed_worker_execution_store.py`
 

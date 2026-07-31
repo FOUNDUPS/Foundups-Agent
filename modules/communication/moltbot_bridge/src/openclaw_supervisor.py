@@ -28,7 +28,6 @@ import threading
 import time
 import uuid
 from collections import deque
-from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -40,6 +39,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     redact_runtime_value,
 )
 from .holoindex_postmerge_supervisor_policy import (
+    HoloIndexPostmergePoller,
     exclude_holoindex_postmerge_tasks,
     holoindex_postmerge_enabled,
     maintenance_candidates,
@@ -1895,9 +1895,7 @@ class OpenClawSupervisor:
         self._self_audit_loop: Any | None = None
         self._event_cursor = 0
         self._restart_attempts: Deque[float] = deque()
-        self._holoindex_postmerge_last_poll = 0.0
-        self._holoindex_postmerge_executor: ThreadPoolExecutor | None = None
-        self._holoindex_postmerge_future: Future[Any] | None = None
+        self._holoindex_postmerge_poller = HoloIndexPostmergePoller(self.repo_root)
 
         # Unified from Supervisor24x7 (P1 2026-03-22)
         self.metrics = SupervisorMetrics()
@@ -1967,13 +1965,7 @@ class OpenClawSupervisor:
     def stop(self) -> None:
         self._stop_event.set()
         self._stop_self_audit()
-        if self._holoindex_postmerge_executor is not None:
-            self._holoindex_postmerge_executor.shutdown(
-                wait=False,
-                cancel_futures=True,
-            )
-            self._holoindex_postmerge_executor = None
-            self._holoindex_postmerge_future = None
+        self._holoindex_postmerge_poller.stop()
 
     def get_metrics(self) -> Dict[str, Any]:
         """Return telemetry metrics (WSP 91 observability)."""
@@ -2300,73 +2292,9 @@ class OpenClawSupervisor:
 
     def _observe_holoindex_postmerge(self, obs: Dict[str, Any]) -> None:
         """Collect or schedule one non-blocking post-merge coordination poll."""
-        future = self._holoindex_postmerge_future
-        if future is not None and future.done():
-            try:
-                obs["holoindex_postmerge"] = future.result().to_dict()
-            except Exception as exc:
-                logger.warning(
-                    "[SUPERVISOR] HoloIndex post-merge coordination failed: %s",
-                    type(exc).__name__,
-                )
-                obs["holoindex_postmerge"] = {
-                    "accepted": False,
-                    "status": "REJECTED",
-                    "rejection_reasons": ["coordinator_exception"],
-                }
-            finally:
-                self._holoindex_postmerge_future = None
-
-        postmerge_enabled = holoindex_postmerge_enabled()
-        if not postmerge_enabled:
-            obs["holoindex_postmerge"] = {
-                "accepted": False,
-                "status": "OWNER_DISABLED",
-                "rejection_reasons": ["postmerge_coordinator_disabled"],
-            }
-            return
-        if self._holoindex_postmerge_future is not None:
-            return
-        try:
-            interval = max(
-                float(
-                    os.getenv(
-                        "HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC",
-                        "300",
-                    )
-                ),
-                30.0,
-            )
-        except ValueError:
-            interval = 300.0
-        current = time.monotonic()
-        if (
-            self._holoindex_postmerge_last_poll > 0.0
-            and current - self._holoindex_postmerge_last_poll < interval
-        ):
-            return
-
-        from modules.infrastructure.idle_automation.src.holoindex_postmerge_coordinator import (
-            coordinate_holoindex_postmerge,
-        )
-
-        self._holoindex_postmerge_last_poll = current
-        if self._holoindex_postmerge_executor is None:
-            self._holoindex_postmerge_executor = ThreadPoolExecutor(
-                max_workers=1,
-                thread_name_prefix="holoindex-postmerge",
-            )
-        self._holoindex_postmerge_future = (
-            self._holoindex_postmerge_executor.submit(
-                coordinate_holoindex_postmerge,
-                repo_root=self.repo_root,
-            )
-        )
-        obs["holoindex_postmerge"] = {
-            "accepted": True,
-            "status": "MAINTENANCE_CHECK_SCHEDULED",
-            "rejection_reasons": [],
-        }
+        result = self._holoindex_postmerge_poller.poll()
+        if result is not None:
+            obs["holoindex_postmerge"] = result
 
     def _observe(self) -> Dict[str, Any]:
         broker = self._get_broker()
@@ -2495,12 +2423,33 @@ class OpenClawSupervisor:
                     exclude_signed_worker_origin,
                 )
                 from modules.infrastructure.database.src.agent_db import AgentDB
+                from modules.infrastructure.database.src.holoindex_postmerge_task_reader import (
+                    read_holoindex_postmerge_tasks,
+                )
                 from .openclaw_maintenance_selector import select_maintenance_task
 
                 db = AgentDB()
-                pending_tasks = exclude_signed_worker_origin(
-                    db.get_autonomous_tasks(status="pending", limit=10)
+                pending_tasks = (
+                    exclude_signed_worker_origin(
+                        db.get_autonomous_tasks(status="pending", limit=10)
+                    )
+                    if maintenance_enabled
+                    else []
                 )
+                if postmerge_enabled:
+                    postmerge_tasks = read_holoindex_postmerge_tasks(
+                        db,
+                        status="pending",
+                        limit=10,
+                    )
+                    known_ids = {
+                        str(task.get("task_id") or "") for task in postmerge_tasks
+                    }
+                    pending_tasks = list(postmerge_tasks) + [
+                        task
+                        for task in pending_tasks
+                        if str(task.get("task_id") or "") not in known_ids
+                    ]
                 pending_tasks = maintenance_candidates(
                     pending_tasks,
                     general_maintenance_enabled=maintenance_enabled,

@@ -3,10 +3,103 @@
 from __future__ import annotations
 
 import os
+import threading
+import time
+from concurrent.futures import Future, ThreadPoolExecutor
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence
 
 
 HOLOINDEX_POSTMERGE_SOURCE = "holoindex_postmerge_coordinator"
+
+
+class HoloIndexPostmergePoller:
+    """Own one bounded coordinator worker and its shutdown boundary."""
+
+    def __init__(self, repo_root: Path) -> None:
+        self._repo_root = repo_root.resolve()
+        self._lock = threading.Lock()
+        self._executor: ThreadPoolExecutor | None = None
+        self._future: Future[Any] | None = None
+        self._last_poll = 0.0
+        self._stopped = False
+
+    @property
+    def future(self) -> Future[Any] | None:
+        with self._lock:
+            return self._future
+
+    def poll(self) -> Dict[str, Any] | None:
+        with self._lock:
+            if self._stopped:
+                return _poll_status(False, "OWNER_STOPPED", "supervisor_stopped")
+            completed = self._completed_result()
+            if completed is not None:
+                return completed
+            if not holoindex_postmerge_enabled():
+                return _poll_status(False, "OWNER_DISABLED", "postmerge_coordinator_disabled")
+            if self._future is not None or not self._poll_due():
+                return None
+            self._schedule()
+            return _poll_status(True, "MAINTENANCE_CHECK_SCHEDULED")
+
+    def stop(self) -> None:
+        with self._lock:
+            self._stopped = True
+            executor = self._executor
+            self._executor = None
+        if executor is not None:
+            executor.shutdown(wait=True, cancel_futures=True)
+        with self._lock:
+            self._future = None
+
+    def _completed_result(self) -> Dict[str, Any] | None:
+        if self._future is None or not self._future.done():
+            return None
+        try:
+            return dict(self._future.result().to_dict())
+        except Exception as exc:
+            return _poll_status(False, "REJECTED", type(exc).__name__)
+        finally:
+            self._future = None
+
+    def _poll_due(self) -> bool:
+        try:
+            interval = max(
+                float(os.getenv("HOLOINDEX_POSTMERGE_COORDINATOR_INTERVAL_SEC", "300")),
+                30.0,
+            )
+        except ValueError:
+            interval = 300.0
+        return not self._last_poll or time.monotonic() - self._last_poll >= interval
+
+    def _schedule(self) -> None:
+        from modules.infrastructure.idle_automation.src.holoindex_postmerge_coordinator import (
+            coordinate_holoindex_postmerge,
+        )
+
+        if self._executor is None:
+            self._executor = ThreadPoolExecutor(
+                max_workers=1,
+                thread_name_prefix="holoindex-postmerge",
+            )
+        self._last_poll = time.monotonic()
+        self._future = self._executor.submit(
+            coordinate_holoindex_postmerge,
+            repo_root=self._repo_root,
+        )
+
+
+def _poll_status(
+    accepted: bool,
+    status: str,
+    rejection_reason: str = "",
+) -> Dict[str, Any]:
+    return {
+        "accepted": accepted,
+        "status": status,
+        "rejection_reasons": [rejection_reason] if rejection_reason else [],
+    }
 
 
 def holoindex_postmerge_enabled(
@@ -54,6 +147,7 @@ def exclude_holoindex_postmerge_tasks(
 
 
 __all__ = [
+    "HoloIndexPostmergePoller",
     "exclude_holoindex_postmerge_tasks",
     "holoindex_postmerge_enabled",
     "is_holoindex_postmerge_task",
